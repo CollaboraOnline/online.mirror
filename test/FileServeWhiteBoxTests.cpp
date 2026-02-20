@@ -11,6 +11,7 @@
 
 #include <config.h>
 
+#include <wsd/ContentSecurityPolicy.hpp>
 #include <wsd/FileServer.hpp>
 #include <common/FileUtil.hpp>
 #include <test/lokassert.hpp>
@@ -33,6 +34,7 @@ class FileServeTests : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(testPreProcessedFile);
     CPPUNIT_TEST(testPreProcessedFileRoundtrip);
     CPPUNIT_TEST(testPreProcessedFileSubstitution);
+    CPPUNIT_TEST(testCSPMergeNewlines);
     CPPUNIT_TEST_SUITE_END();
 
     void testUIDefaults();
@@ -40,6 +42,7 @@ class FileServeTests : public CPPUNIT_NS::TestFixture
     void testPreProcessedFile();
     void testPreProcessedFileRoundtrip();
     void testPreProcessedFileSubstitution();
+    void testCSPMergeNewlines();
 
     void preProcessedFileSubstitution(const std::string& testname,
                                       std::unordered_map<std::string, std::string> variables);
@@ -439,6 +442,43 @@ void FileServeTests::testPreProcessedFileSubstitution()
     preProcessedFileSubstitution(testname, std::move(variables));
     preProcessedFileSubstitution(std::string(testname) + "_empty",
                                  std::unordered_map<std::string, std::string>());
+}
+
+/// True when the generated header gives the directive exactly these sources. The header writes a
+/// space after the directive name and each source is stored with a leading space of its own.
+static bool policyHasSources(const ContentSecurityPolicy& csp, const std::string& directive,
+                             const std::string& sources)
+{
+    return csp.generate().find(directive + "  " + sources + "; ") != std::string::npos;
+}
+
+/// True when the generated header carries no sources for the directive at all.
+static bool policyHasNoSources(const ContentSecurityPolicy& csp, const std::string& directive)
+{
+    return csp.generate().find(directive + "  ") == std::string::npos;
+}
+
+void FileServeTests::testCSPMergeNewlines()
+{
+    constexpr std::string_view testname = __func__;
+
+    // Same line: the simple case.
+    {
+        ContentSecurityPolicy csp;
+        csp.merge("frame-ancestors https://example.com; img-src https://example.com");
+        LOK_ASSERT(policyHasSources(csp, "frame-ancestors", "https://example.com"));
+        LOK_ASSERT(policyHasSources(csp, "img-src", "https://example.com"));
+    }
+
+    // Value on new line, as Poco XMLConfiguration returns when the XML
+    // config value is on a separate line from the opening tag.
+    {
+        ContentSecurityPolicy csp;
+        csp.merge(
+            "\n        frame-ancestors https://example.com; img-src https://example.com\n    ");
+        LOK_ASSERT(policyHasSources(csp, "frame-ancestors", "https://example.com"));
+        LOK_ASSERT(policyHasSources(csp, "img-src", "https://example.com"));
+    }
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(FileServeTests);
