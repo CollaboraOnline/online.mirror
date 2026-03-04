@@ -2098,6 +2098,10 @@ void COOLWSD::innerInitialize(Poco::Util::Application& self)
     }
 
 #if !MOBILEAPP
+    setenv("LOK_ALLOWED_EXTREF_PATHS", "", true);
+#endif
+
+#if !MOBILEAPP
     SavedClipboards = std::make_unique<ClipboardCache>();
 
     LOG_TRC("Initialize FileServerRequestHandler");
