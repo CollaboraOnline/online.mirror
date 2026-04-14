@@ -1956,7 +1956,9 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 		if (section) {
 			const showCursor = obj.visible === 'true';
 			section.sectionProperties.showCursor = showCursor;
-			section.setShowSection(showCursor);
+			section.setShowSection(section.checkMyVisibility());
+			if (!section.showSection)
+				CursorHeaderSection.deletePopUpNow(viewId);
 		}
 	},
 
