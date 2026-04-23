@@ -1234,6 +1234,8 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public modify (annotation: any): void {
+		if (!annotation.isAuthor())
+			return;
 		if (cool.Comment.isAnyEdit()) {
 			this.navigateAndFocusComment(cool.Comment.isAnyEdit());
 			return;
@@ -1550,14 +1552,17 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public remove (id: any): void {
-		var comment = {
+		const removedComment = this.getComment(id);
+		if (removedComment && !removedComment.canRemove())
+			return;
+
+		const comment = {
 			Id: {
 				type: 'string',
 				value: id
 			}
 		};
 
-		var removedComment = this.getComment(id);
 		if (removedComment) {
 			removedComment.sectionProperties.selfRemoved = true;
 		}
@@ -1579,7 +1584,11 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public removeThread (id: any): void {
-		var comment = {
+		const rootComment = this.getComment(id);
+		if (rootComment && !rootComment.canRemove())
+			return;
+
+		const comment = {
 			Id: {
 				type: 'string',
 				value: id
@@ -1591,7 +1600,9 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public resolve (annotation: any): void {
-		var comment = {
+		if (!annotation.canModerate())
+			return;
+		const comment = {
 			Id: {
 				type: 'string',
 				value: annotation.sectionProperties.data.id
@@ -1601,7 +1612,9 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public resolveThread (annotation: any): void {
-		var comment = {
+		if (!annotation.canModerate())
+			return;
+		const comment = {
 			Id: {
 				type: 'string',
 				value: annotation.sectionProperties.data.id
@@ -1611,7 +1624,9 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public promote(annotation: any): void {
-		var comment = {
+		if (!annotation.isAuthor())
+			return;
+		const comment = {
 			Id: {
 				type: 'string',
 				value: annotation.sectionProperties.data.id
@@ -1651,8 +1666,11 @@ export class CommentSection extends CanvasSectionObject {
 			zIndex: 1500,
 			className: 'cool-font',
 			build: function ($trigger: any) {
-				const blockChangeFromDifferentAuthor = this.map.isReadOnlyMode() && docLayer._docType === 'text' && this.map.getViewName(docLayer._viewId) !== $trigger[0].annotation.sectionProperties.data.author;
-				const isShownBig = this.sectionProperties.showSelectedBigger && this.sectionProperties.selectedComment === this.sectionProperties.commentList[this.getRootIndexOf($trigger[0].annotation.sectionProperties.data.id)];
+				const annotation = $trigger[0].annotation;
+				const isAuthor = annotation.isAuthor();
+				const canRemove = annotation.canRemove();
+				const canModerate = annotation.canModerate();
+				const isShownBig = this.sectionProperties.showSelectedBigger && this.sectionProperties.selectedComment === this.sectionProperties.commentList[this.getRootIndexOf(annotation.sectionProperties.data.id)];
 				// Honor Hide_Command for entries that map to a UNO command, so a host
 				// can suppress comment-dialog actions the same way it suppresses
 				// menubar / toolbar items.
@@ -1664,7 +1682,7 @@ export class CommentSection extends CanvasSectionObject {
 				return {
 					autoHide: true,
 					items: {
-						modify: (blockChangeFromDifferentAuthor || !isShown('.uno:EditAnnotation')) ? undefined : {
+						modify: (!isAuthor || !isShown('.uno:EditAnnotation')) ? undefined : {
 							name: _('Modify'),
 							callback: function (key: any, options: any) {
 								this.modify.call(this, options.$trigger[0].annotation);
@@ -1676,31 +1694,31 @@ export class CommentSection extends CanvasSectionObject {
 								this.reply.call(this, options.$trigger[0].annotation);
 							}.bind(this)
 						},
-						remove: (blockChangeFromDifferentAuthor || !isShown(removeUno)) ? undefined : {
+						remove: (!canRemove || !isShown(removeUno)) ? undefined : {
 							name: _('Remove'),
 							callback: function (key: any, options: any) {
 								this.remove.call(this, options.$trigger[0].annotation.sectionProperties.data.id);
 							}.bind(this)
 						},
-						removeThread: (docLayer._docType !== 'text' || !$trigger[0].annotation.isRootComment() || blockChangeFromDifferentAuthor || !isShown('.uno:DeleteCommentThread')) ? undefined : {
+						removeThread: (docLayer._docType !== 'text' || !annotation.isRootComment() || !canRemove || !isShown('.uno:DeleteCommentThread')) ? undefined : {
 							name: _('Remove Thread'),
 							callback: function (key: any, options: any) {
 								this.removeThread.call(this, options.$trigger[0].annotation.sectionProperties.data.id);
 							}.bind(this)
 						},
-						resolve: (docLayer._docType !== 'text' && !(['spreadsheet', 'drawing', 'presentation'].includes(docLayer._docType) && $trigger[0].annotation.sectionProperties.data.threaded)) || !isShown('.uno:ResolveComment') ? undefined : {
-							name: $trigger[0].annotation.sectionProperties.data.resolved === 'false' ? _('Resolve') : _('Unresolve'),
+						resolve: !canModerate || (docLayer._docType !== 'text' && !(['spreadsheet', 'drawing', 'presentation'].includes(docLayer._docType) && annotation.sectionProperties.data.threaded)) || !isShown('.uno:ResolveComment') ? undefined : {
+							name: annotation.sectionProperties.data.resolved === 'false' ? _('Resolve') : _('Unresolve'),
 							callback: function (key: any, options: any) {
 								this.resolve.call(this, options.$trigger[0].annotation);
 							}.bind(this)
 						},
-						resolveThread: (docLayer._docType !== 'text' || !$trigger[0].annotation.isRootComment() || !isShown('.uno:ResolveCommentThread')) ? undefined : {
-							name: this.isThreadResolved($trigger[0].annotation) ? _('Unresolve Thread') : _('Resolve Thread'),
+						resolveThread: (docLayer._docType !== 'text' || !annotation.isRootComment() || !canModerate || !isShown('.uno:ResolveCommentThread')) ? undefined : {
+							name: this.isThreadResolved(annotation) ? _('Unresolve Thread') : _('Resolve Thread'),
 							callback: function (key: any, options: any) {
 								this.resolveThread.call(this, options.$trigger[0].annotation);
 							}.bind(this)
 						},
-						promote: (docLayer._docType !== 'text' || $trigger[0].annotation.isRootComment() || blockChangeFromDifferentAuthor || !isShown('.uno:PromoteComment')) ? undefined : {
+						promote: (docLayer._docType !== 'text' || annotation.isRootComment() || !isAuthor || !isShown('.uno:PromoteComment')) ? undefined : {
 							name: _('Promote to top comment'),
 							callback: function (key: any, options: any) {
 								this.promote.call(this, options.$trigger[0].annotation);
@@ -1726,8 +1744,9 @@ export class CommentSection extends CanvasSectionObject {
 					options.$trigger[0].annotation.sectionProperties.contextMenu = true;
 					setTimeout(function() {
 						// modify may be absent when Hide_Command suppressed
-						// .uno:EditAnnotation; fall back to the first visible
-						// item so the menu still gets initial focus.
+						// .uno:EditAnnotation or the current user is not the
+						// author; fall back to the first visible item so the
+						// menu still gets initial focus.
 						const target = options.items.modify
 							|| Object.values(options.items).find((it: any) => it && it.$node);
 						if (target) {

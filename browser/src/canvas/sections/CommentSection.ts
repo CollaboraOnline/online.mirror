@@ -366,17 +366,19 @@ export class Comment extends CanvasSectionObject {
 	private createMenu (): void {
 		var tdMenu = window.L.DomUtil.create('td', 'cool-annotation-menubar', this.sectionProperties.authorRow);
 		this.sectionProperties.menuBarCell = tdMenu;
-		const edit = window.L.DomUtil.create('div', 'cool-annotation-menu-edit', tdMenu);
-		edit.id = 'comment-annotation-menu-edit-' + this.sectionProperties.data.id;
-		// Honor an earlier Hide_Command for .uno:EditAnnotation; the class
-		// is toggled symmetrically by UIManager.showCommand later.
-		if (!app.map.uiManager.isCommandVisible('.uno:EditAnnotation'))
-			edit.classList.add('hidden-by-command');
-		edit.tabIndex = 0;
-		edit.onclick = this.onEditComment.bind(this);
-		edit.onkeypress = this.editOnKeyPress.bind(this);
-		edit.dataset.title = Comment.editCommentLabel;
-		edit.setAttribute('aria-label', Comment.editCommentLabel);
+		if (this.isAuthor()) {
+			const edit = window.L.DomUtil.create('div', 'cool-annotation-menu-edit', tdMenu);
+			edit.id = 'comment-annotation-menu-edit-' + this.sectionProperties.data.id;
+			// Honor an earlier Hide_Command for .uno:EditAnnotation; the class
+			// is toggled symmetrically by UIManager.showCommand later.
+			if (!app.map.uiManager.isCommandVisible('.uno:EditAnnotation'))
+				edit.classList.add('hidden-by-command');
+			edit.tabIndex = 0;
+			edit.onclick = this.onEditComment.bind(this);
+			edit.onkeypress = this.editOnKeyPress.bind(this);
+			edit.dataset.title = Comment.editCommentLabel;
+			edit.setAttribute('aria-label', Comment.editCommentLabel);
+		}
 
 		this.sectionProperties.menu = window.L.DomUtil.create('div', this.sectionProperties.data.trackchange ? 'cool-annotation-menu-redline' : 'cool-annotation-menu', tdMenu);
 		this.sectionProperties.menu.id = 'comment-annotation-menu-' + this.sectionProperties.data.id;
@@ -1073,6 +1075,18 @@ export class Comment extends CanvasSectionObject {
 		this.hidden = true;
 	}
 
+	public isAuthor(): boolean {
+		return this.map.getViewName(app.map._docLayer._viewId) === this.sectionProperties.data.author;
+	}
+
+	public canRemove(): boolean {
+		return this.isAuthor() || !this.map.isReadOnlyMode();
+	}
+
+	public canModerate(): boolean {
+		return this.isAuthor() || app.isCommentEditingAllowed();
+	}
+
 	// check if this is "our" autosaved comment
 	// core is not aware it's autosaved one so use this simplified detection based on content
 	public isAutoSaved (): boolean {
@@ -1080,8 +1094,7 @@ export class Comment extends CanvasSectionObject {
 		if (!autoSavedComment)
 			return false;
 
-		var authorMatch = this.sectionProperties.data.author === this.map.getViewName(app.map._docLayer._viewId);
-		return authorMatch;
+		return this.isAuthor();
 	}
 
 	public hide (): void {
