@@ -18,8 +18,8 @@
 	max-height: 512px;
 	justify-content: center;
 	align-items: center;
-	-webkit-box-shadow: 0 0 3px var(--color-box-shadow);
-	box-shadow: 0 0 3px var(--color-box-shadow);
+	-webkit-box-shadow: var(--shadow-subtle);
+	box-shadow: var(--shadow-subtle);
 	border-width: 0;
 	border-radius: var(--border-radius-large);
 	background-color: var(--color-background-lighter);
