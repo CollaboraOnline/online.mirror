@@ -110,8 +110,6 @@ JSDialog.Checkbox = function (
 	JSDialog.SynchronizeDisabledState(container, [checkbox]);
 
 	const toggleFunction = () => {
-		if (container.getAttribute('disabled') === 'true') return;
-
 		const items = app.map['stateChangeHandler'];
 		const state = data.command
 			? items.getItemValue(data.command) === 'true'
