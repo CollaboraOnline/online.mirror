@@ -1484,6 +1484,7 @@ static const std::string BUYPRODUCT_URL = "%BUYPRODUCT_URL%";
 static const std::string PERMISSION = "%PERMISSION%";
 static const std::string WOPI_SETTING_BASE_URL = "%WOPI_SETTING_BASE_URL%";
 static const std::string IFRAME_TYPE = "%IFRAME_TYPE%";
+static const std::string WOPI_HOST_ID = "%WOPI_HOST_ID%";
 
 /// Per user request variables.
 /// Holds access_token, css_variables, postmessage_origin, etc.
@@ -1583,6 +1584,8 @@ public:
 
         extractVariable(form, "iframe_type", IFRAME_TYPE);
 
+        extractVariable(form, "host_session_id", WOPI_HOST_ID);
+
         std::string buyProduct;
         {
             std::lock_guard<std::mutex> lock(COOLWSD::RemoteConfigMutex);
@@ -1675,7 +1678,7 @@ FileServerRequestHandler::ResourceAccessDetails FileServerRequestHandler::prepro
     Poco::replaceInPlace(preprocess, POSTMESSAGE_ORIGIN, urv[POSTMESSAGE_ORIGIN]);
     Poco::replaceInPlace(preprocess, CHECK_FILE_INFO_OVERRIDE,
                          checkFileInfoToJSON(urv[CHECK_FILE_INFO_OVERRIDE]));
-    Poco::replaceInPlace(preprocess, std::string("%WOPI_HOST_ID%"), form.get("host_session_id", ""));
+    Poco::replaceInPlace(preprocess, WOPI_HOST_ID, urv[WOPI_HOST_ID]);
 
     const auto& config = Application::instance().config();
 
