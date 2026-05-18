@@ -9,6 +9,8 @@ const allWriterDialogs = [
     '.uno:EditRegion',
     '.uno:EditStyle?Param:string=Example&Family:short=1',
     '.uno:EditStyle?Param:string=Heading&Family:short=2',
+    '.uno:EditStyle?Param:string=Frame&Family:short=4',
+    '.uno:EditStyle?Param:string=Some%20Numbering&Family:short=16',
     { command: '.uno:ExportToEPUB', args: { SynchronMode: { type: 'boolean', value: false } } },
     '.uno:FieldDialog',
     '.uno:FontDialog',
@@ -22,6 +24,7 @@ const allWriterDialogs = [
     '.uno:InsertIndexesEntry',
     '.uno:InsertMultiIndex',
     '.uno:InsertSection',
+    '.uno:InsertTable',
     '.uno:LineNumberingDialog',
     '.uno:OutlineBullet',
     '.uno:PageDialog',
@@ -40,11 +43,6 @@ const allWriterDialogs = [
 // 'common' dialogs that writer specifically does not support
 const excludedCommonDialogs = [
     '.uno:SpellDialog'
-];
-
-// don't pass yet
-const buggyWriterDialogs = [
-    '.uno:InsertSection',
 ];
 
 describe(['tagdesktop'], 'Accessibility Writer Dialog Tests', { testIsolation: false }, function () {
@@ -79,8 +77,8 @@ describe(['tagdesktop'], 'Accessibility Writer Dialog Tests', { testIsolation: f
 
         cy.get('@uicoverageResult').then(result => {
             expect(result.used, `used .ui files`).to.not.be.empty;
-            // TODO: make these true
-            // expect(result.CompleteWriterDialogCoverage, `complete writer dialog coverage`).to.be.true;
+            expect(result.CompleteWriterDialogCoverage, `complete writer dialog coverage`).to.be.true;
+            // TODO: make this true
             // expect(result.CompleteCommonDialogCoverage, `complete common dialog coverage`).to.be.true;
         });
     });
@@ -423,13 +421,9 @@ describe(['tagdesktop'], 'Accessibility Writer Dialog Tests', { testIsolation: f
 
     allWriterDialogs.forEach(function (commandSpec) {
         const command = typeof commandSpec === 'string' ? commandSpec : commandSpec.command;
-        if (buggyWriterDialogs.includes(command)) {
-            it.skip(`Dialog ${command} (buggy)`, function () {});
-        } else {
-            it(`Writer Dialog ${command}`, function () {
-                a11yHelper.testDialog(win, commandSpec);
-            });
-        }
+        it(`Writer Dialog ${command}`, function () {
+            a11yHelper.testDialog(win, commandSpec);
+        });
     });
 
     it('DropdownField dialog', function () {
