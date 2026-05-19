@@ -290,10 +290,13 @@ function traverseTabs(getContainer, win, level, command, isNested = false) {
 							} else if (command == '.uno:FontDialog' && tabAriaControls == 'font') {
 								cy.cGet('#btnWestFeatures-button').click();
 								handleDialog(win, level + 1);
-							} else if ((command == '.uno:PageDialog' || command == '.uno:PageFormatDialog') && tabAriaControls == 'Footer') {
-								cy.cGet('button.ui-pushbutton[aria-label="More..."]:visible').click();
+							} else if ((command == '.uno:PageDialog' || command == '.uno:PageFormatDialog') && (tabAriaControls == 'Header' || tabAriaControls == 'Footer')) {
+								// enable the header/footer to make the More... button sensitive
+								const toggleId = tabAriaControls == 'Header' ? '#checkHeaderOn-input' : '#checkFooterOn-input';
+								cy.cGet(toggleId).check({ force: true });
+								cy.cGet('[id^="buttonMore"][id$="-button"]').filter(':visible').first().should('be.enabled').click();
 								handleDialog(win, level + 1);
-							} else if (command == '.uno:FormatArea' && tabAriaControls == 'lbhatch') {
+							} else if ((command == '.uno:FormatArea' || command == '.uno:PageDialog' || command == '.uno:PageFormatDialog') && tabAriaControls == 'lbhatch') {
 								cy.cGet('button.ui-pushbutton[aria-label="Add"]:visible').click();
 								testNameDialog(win, level);
 							}
@@ -380,6 +383,25 @@ function handleDialog(win, level, command, isWarningDialog) {
 				cy.cGet('#similarity-input').check();
 				cy.cGet('#similaritybtn-button').should('be.enabled').click();
 				handleDialog(win, level + 1);
+				cy.cGet('#similarity-input').uncheck();
+				cy.cGet('#soundslike-input').check();
+				cy.cGet('#soundslikebtn-button').should('be.enabled').click();
+				handleDialog(win, level + 1);
+				cy.cGet('#soundslike-input').uncheck();
+				// Format and Attributes search are writer-only and the
+				// buttons are hidden in calc/draw.
+				cy.cGet('body').then($body => {
+					if ($body.find('#attributes-button:visible').length) {
+						cy.cGet('#attributes-button').should('be.enabled').click();
+						handleDialog(win, level + 1);
+					}
+				});
+				cy.cGet('body').then($body => {
+					if ($body.find('#format-button:visible').length) {
+						cy.cGet('#format-button').should('be.enabled').click();
+						handleDialog(win, level + 1);
+					}
+				});
 			} else if (command == '.uno:Signature') {
 				cy.cGet('#signatures .ui-treeview-entry > div:first-child').click();
 				cy.cGet('#view-button').should('be.enabled').click();
@@ -454,10 +476,6 @@ const needLinguisticDataDialogs = [
 	'.uno:ThesaurusDialog',
 ];
 
-const buggyCommonDialogs = [
-	'.uno:ThesaurusDialog',
-];
-
 /**
  * Generate test cases for all common dialogs.
  * @param {Object} options - Configuration options
@@ -472,15 +490,6 @@ const buggyCommonDialogs = [
  */
 function needsLinguisticData(command) {
 	return needLinguisticDataDialogs.includes(command);
-}
-
-/**
- * Check if a dialog command is known to be buggy.
- * @param {string} command - The uno command
- * @returns {boolean} - Whether the dialog is buggy
- */
-function isBuggyCommonDialog(command) {
-	return buggyCommonDialogs.includes(command);
 }
 
 /**
@@ -526,5 +535,4 @@ module.exports.handleDialog = handleDialog;
 module.exports.testDialog = testDialog;
 module.exports.allCommonDialogs = allCommonDialogs;
 module.exports.needsLinguisticData = needsLinguisticData;
-module.exports.isBuggyCommonDialog = isBuggyCommonDialog;
 module.exports.testPDFExportWarningDialog = testPDFExportWarningDialog;
