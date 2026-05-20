@@ -306,11 +306,10 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 						callback: function(key, options) {
 								if (!nPos)
 									nPos = that._findClickedPart(options.$trigger[0]);
-								that._setPart(that.copiedSlide);
-								that._map.duplicatePage(nPos);
+								that._pasteSlide(nPos);
 						},
 						visible: function() {
-							return that.copiedSlide;
+							return window.L.Browser.clipboardApiAvailable;
 						}
 					},
 					newslide: {
@@ -346,7 +345,6 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 						name: app.IconUtil.createMenuItemLink(_('Copy'), 'Copy'),
 						isHtmlName: true,
 						callback: function() {
-							that.copiedSlide = e;
 							that._map._clip.clearSelection();
 							that._map._clip.setTextSelectionType('slide');
 							that._map._clip._execCopyCutPaste('copy', '.uno:CopySlide');
@@ -359,7 +357,7 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 						name: app.IconUtil.createMenuItemLink(_('Paste'), 'Paste'),
 						isHtmlName: true,
 						callback: function() {
-							that._map._clip._execCopyCutPaste('paste', ".uno:Paste")
+							that._pasteSlide();
 						},
 					},
 					newslide: {
@@ -505,6 +503,55 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 		var currentScrollX = app.activeDocument.activeLayout.viewedRectangle.cX1;
 
 		app.sectionContainer.getSectionWithName(app.CSections.Scroll.name).onScrollBy({x: currentScrollX, y: buttonType === 'prev' ? -scrollBySize : scrollBySize});
+	},
+
+	// Paste a slide. Always read from the system clipboard and force-upload
+	// to the local Kit (skipping the same-tab pTransferClip shortcut),
+	// so that a copy from another tab/document wins over any stale local copy.
+	// nPos: insertion position for the frame context menu (may be undefined for img context menu).
+	_pasteSlide: async function(nPos) {
+		if (this._pastePending)
+			return;
+		this._pastePending = true;
+		try {
+			if (nPos !== undefined)
+				this._map.setPart(Math.max(0, nPos - 1));
+
+			const clip = this._map._clip;
+
+			if (window.L.Browser.clipboardApiAvailable) {
+				let html = '';
+				try {
+					let foundItem = null;
+					const items = await navigator.clipboard.read();
+					for (const item of items) {
+						if (item.types.includes('text/html')) {
+							foundItem = item;
+							break;
+						}
+					}
+
+					if (foundItem) {
+						const blob = await foundItem.getType('text/html');
+						html = await blob.text();
+					}
+				} catch (e) {
+					html = '';
+				}
+				if (html) {
+					// preferInternal=false skips the pTransferClip shortcut,
+					// so the most recent system-clipboard content wins.
+					clip.dataTransferToDocument(null, false, html, false);
+					return;
+				}
+			}
+
+			// Fallback when the Clipboard API is unavailable: let the
+			// browser's paste event drive things.
+			clip.filterExecCopyPaste('.uno:Paste');
+		} finally {
+			this._pastePending = false;
+		}
 	},
 
 	_isSelected: function (e) {
