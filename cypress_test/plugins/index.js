@@ -63,10 +63,6 @@ function plugin(on, config) {
 		return launchOptions;
 	});
 
-	if (process.env.CYPRESS_INTEGRATION === 'php-proxy') {
-		config.defaultCommandTimeout = 10000;
-	}
-
 	var options = {};
 	if (process.env.NODE_PATH) {
 		options.webpackOptions = {
