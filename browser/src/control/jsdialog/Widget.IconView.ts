@@ -228,6 +228,7 @@ function _iconViewEntry(
 				isInNotebookbar &&
 				['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)
 			) {
+				e.preventDefault();
 				// In a notebookbar, arrows navigate the toolbar — don't send to core.
 			} else {
 				parentContainer.builderCallback(
