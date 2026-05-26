@@ -287,7 +287,7 @@ function traverseTabs(getContainer, win, level, command, isNested = false) {
 							} else if (command == '.uno:HyperlinkDialog' && tabAriaControls == '~Document') {
 								cy.cGet('#browse-button').click();
 								handleDialog(win, level + 1);
-							} else if (command == '.uno:FontDialog' && tabAriaControls == 'font') {
+							} else if (command == '.uno:FontDialog' && (tabAriaControls == 'font' || tabAriaControls == 'RID_SVXPAGE_CHAR_NAME')) {
 								cy.cGet('#btnWestFeatures-button').click();
 								handleDialog(win, level + 1);
 							} else if ((command == '.uno:PageDialog' || command == '.uno:PageFormatDialog') && (tabAriaControls == 'Header' || tabAriaControls == 'Footer')) {
