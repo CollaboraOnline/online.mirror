@@ -21,6 +21,7 @@
 /// <reference path="../src/app/ViewLayout.ts" />
 /// <reference path="../src/app/ViewLayoutNewBase.ts" />
 /// <reference path="../src/app/ViewLayoutMultiPage.ts" />
+/// <reference path="../src/app/ViewLayoutFileBased.ts" />
 /// <reference path="../src/app/Util.ts"/>
 /// <reference path="../src/app/DocUtil.ts"/>
 /// <reference path="../src/app/LayoutingService.ts" />

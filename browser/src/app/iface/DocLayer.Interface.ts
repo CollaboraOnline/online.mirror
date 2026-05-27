@@ -59,4 +59,6 @@ interface DocLayerInterface {
 	options: {
 		tileWidthTwips: number;
 	};
+
+	_partDimensions?: cool.SimplePoint[];
 }

@@ -601,17 +601,20 @@ describe(['tagdesktop'], 'PDF Threaded Comments', function() {
 				.to.be.true;
 		});
 
-		// Off-page click. Compute an X past the page's right edge from
-		// _partWidthTwips so it's guaranteed off-page regardless of zoom or
-		// scroll. mousedown+mouseup at the same point keeps the gesture
-		// below DRAG_THRESHOLD_PX so finishCommentPlacement runs and
-		// rejects the off-page point.
+		// Off-page click. Use the layout's centered page rect
+		// (viewRectangles[0]) so the X stays past the page's right edge
+		// regardless of how the file-based view centers the stack within
+		// the canvas - anchoring on _partWidthTwips alone would land back
+		// inside the page once the canvas is wider than the page.
+		// mousedown+mouseup at the same point keeps the gesture below
+		// DRAG_THRESHOLD_PX so finishCommentPlacement runs and rejects the
+		// off-page point.
 		cy.getFrameWindow().then(function(win) {
 			const canvas = win.document.getElementById('document-canvas');
 			const rect = canvas.getBoundingClientRect();
-			const docLayer = win.app.map._docLayer;
-			const offPageCssX = (docLayer._partWidthTwips
-				* win.app.twipsToPixels) / win.app.dpiScale + 50;
+			const viewRect = win.app.activeDocument.activeLayout.viewRectangles[0];
+			const offPageCssX = (viewRect.pX1 + viewRect.pWidth)
+				/ win.app.dpiScale + 50;
 			const downEv = new win.MouseEvent('mousedown', {
 				clientX: rect.left + offPageCssX,
 				clientY: rect.top + 200,
