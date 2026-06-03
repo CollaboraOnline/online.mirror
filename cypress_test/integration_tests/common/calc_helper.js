@@ -433,6 +433,7 @@ module.exports.assertAddressInput = assertAddressInput;
 module.exports.columnNumberToLabel = columnNumberToLabel;
 module.exports.ensureViewContainsCellCursor = ensureViewContainsCellCursor;
 module.exports.assertSheetContents = assertSheetContents;
+module.exports.assertDataClipboardTable = assertDataClipboardTable;
 module.exports.selectCellsInRange = selectCellsInRange;
 module.exports.openAutoFilterMenu = openAutoFilterMenu;
 module.exports.assertNumberofSheets = assertNumberofSheets;
