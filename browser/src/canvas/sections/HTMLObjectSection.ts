@@ -60,17 +60,25 @@ class HTMLObjectSection extends CanvasSectionObject {
 	}
 
 	adjustHTMLObjectPosition() {
-		const left = Math.round(this.myTopLeft[0] / app.dpiScale) + 'px';
-		const top = Math.round(this.myTopLeft[1] / app.dpiScale) + 'px';
+		// getDrawTopLeft tracks the zoom frame for non-Calc (live vX/vY); equals
+		// myTopLeft outside zoom and for Calc.
+		const drawTopLeft = this.getDrawTopLeft();
+		const leftNumber = Math.round(drawTopLeft[0] / app.dpiScale);
+		const topNumber = Math.round(drawTopLeft[1] / app.dpiScale);
 
-		if (this.sectionProperties.objectDiv.style.left !== left)
-			this.sectionProperties.objectDiv.style.left = left;
+		if (this.sectionProperties.objectDiv.style.left !== leftNumber)
+			this.sectionProperties.objectDiv.style.left = leftNumber;
 
 		if (this.sectionProperties.objectDiv.style.top !== top)
 			this.sectionProperties.objectDiv.style.top = top;
 	}
 
 	onDraw(frameCount?: number, elapsedTime?: number): void {
+		// Calc HTML objects can't follow the zoom scale yet (no ViewLayoutCalc); hide while zooming.
+		if (app.map.getDocType() === 'spreadsheet' && this.containerObject.isInZoomAnimation()) {
+			this.sectionProperties.objectDiv.style.display = 'none';
+			return;
+		}
 		this.adjustHTMLObjectPosition();
 	}
 

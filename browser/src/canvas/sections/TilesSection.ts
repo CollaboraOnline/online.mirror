@@ -426,8 +426,12 @@ export class TilesSection extends CanvasSectionObject {
 	}
 
 	public onDraw (frameCount: number = null, elapsedTime: number = null): void {
-		if (this.containerObject.isInZoomAnimation())
+		if (this.containerObject.isInZoomAnimation()) {
+			// While a zoom animation runs the tiles are painted scaled from the
+			// zoom frame rather than at their normal positions.
+			this.drawZoomFrame();
 			return;
+		}
 
 		if (this.containerObject.testing) {
 			this.containerObject.createUpdateSingleDivElement(this);
@@ -765,7 +769,7 @@ export class TilesSection extends CanvasSectionObject {
 
 	// Called by tsManager to draw a zoom animation frame.
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-	public drawZoomFrame(ctx?: any): void {
+	public drawZoomFrame(): void {
 		var tsManager = this.sectionProperties.tsManager;
 		if (!tsManager._inZoomAnim)
 			return;
@@ -774,7 +778,7 @@ export class TilesSection extends CanvasSectionObject {
 		if (!scale || !tsManager._newCenter)
 			return;
 
-		ctx = ctx || this.sectionProperties.tsManager._paintContext();
+		var ctx = this.sectionProperties.tsManager._paintContext();
 		var docLayer = this.sectionProperties.docLayer;
 		var zoom = Math.round(this.map.getZoom());
 		var part = docLayer._selectedPart;
@@ -796,6 +800,11 @@ export class TilesSection extends CanvasSectionObject {
 			maxXBound = Math.max(maxXBound, paneBounds.min.x);
 			maxYBound = Math.max(maxYBound, paneBounds.min.y);
 		}
+
+		// The free (scrollable) pane's doc range, in base core-pixels. Used after
+		// the loop to drive the global scale and viewedRectangle so vector
+		// document sections follow this zoom frame.
+		var freeDocRange = null;
 
 		for (var k = 0; k < paneBoundsList.length ; ++k) {
 			var paneBounds = paneBoundsList[k];
@@ -849,6 +858,8 @@ export class TilesSection extends CanvasSectionObject {
 			}
 
 			var docRange = new cool.Bounds(docPos.topLeft, docPos.topLeft.add(docAreaSize));
+			if (!freezeX && !freezeY)
+				freeDocRange = docRange;
 			if (tsManager._calcGridSection) {
 				tsManager._calcGridSection.onDrawArea(docRange, docRange.min.subtract(destPos), this.context);
 			}
@@ -914,6 +925,29 @@ export class TilesSection extends CanvasSectionObject {
 
 		} // End of pane bounds list loop.
 
+		// Drive the global scale + viewedRectangle to this zoom frame so vector
+		// document sections (drawn after the tiles in this pass) scale and
+		// position in lockstep with the tiles. Skip for Calc: its sections are
+		// hidden during zoom, and mutating the globals there corrupts the
+		// pixel-cached Calc geometry (cell cursor, shape frame).
+		if (freeDocRange && tsManager._zoomBaseTwipsToPixels &&
+			app.map.getDocType() !== 'spreadsheet') {
+			const baseTwipsToPixels = tsManager._zoomBaseTwipsToPixels;
+			const basePixelsToTwips = 1 / baseTwipsToPixels;
+
+			app.twipsToPixels = baseTwipsToPixels * scale;
+			app.pixelsToTwips = 1 / app.twipsToPixels;
+
+			const size = freeDocRange.getSize();
+			app.activeDocument.activeLayout.setZoomFrameViewedRectangle(
+				new cool.SimpleRectangle(
+					Math.round(freeDocRange.min.x * basePixelsToTwips),
+					Math.round(freeDocRange.min.y * basePixelsToTwips),
+					Math.round(size.x * basePixelsToTwips),
+					Math.round(size.y * basePixelsToTwips),
+				),
+			);
+		}
 	}
 
 	private scalePosForZoom(pos: any, toZoom: number, fromZoom: number): any {
