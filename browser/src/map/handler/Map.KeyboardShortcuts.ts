@@ -61,6 +61,7 @@ class ShortcutDescriptor {
     viewType: ViewType;
     preventDefault: boolean;
     platform: Platform;
+    showViewModeAttention: boolean;
 
     constructor({
         docType = null,
@@ -74,6 +75,7 @@ class ShortcutDescriptor {
         viewType = null,
         preventDefault = true,
         platform = null,
+        showViewModeAttention = true,
     }: {
         /** The type of document to register this keybind in. If omitted, the keybind will be registered for all document types */
         docType?: 'text' | 'presentation' | 'drawing' | 'spreadsheet',
@@ -139,6 +141,14 @@ class ShortcutDescriptor {
         If ommitted, the keybind will be active on all platforms
         */
         platform?: Platform,
+        /** Whether pressing this shortcut in read-only (viewing) mode shows
+        the "you are in view mode" attention animation and is otherwise
+        swallowed. True for shortcuts that send a uno command which could
+        modify the document. Set it to false for read-only safe uno commands
+        (for example navigation) that should still run while viewing.
+
+        @default true */
+        showViewModeAttention?: boolean,
     }) {
         app.console.assert(keyCode !== null || key !== null, 'registering a keyboard shortcut without specifying either a key or a keyCode - this will result in an untriggerable shortcut');
 
@@ -165,6 +175,7 @@ class ShortcutDescriptor {
         this.viewType = viewType;
         this.preventDefault = preventDefault;
         this.platform = platform;
+        this.showViewModeAttention = showViewModeAttention;
     }
 }
 
@@ -234,7 +245,9 @@ class KeyboardShortcuts {
         if (shortcut) {
             // In read-only mode, block shortcuts that send uno commands
             // to core unless they are explicitly meant for read-only use.
+
             if (!this.map.isEditMode() && shortcut.unoAction &&
+                shortcut.showViewModeAttention &&
                 shortcut.viewType !== ViewType.ReadOnly) {
                 event.preventDefault();
                 return true;
@@ -332,6 +345,8 @@ keyboardShortcuts.definitions.set('default', new Array<ShortcutDescriptor>(
     new ShortcutDescriptor({ eventType: 'keydown', modifier: Mod.CTRL | Mod.SHIFT | Mod.ALT, key: 'V', unoAction: '.uno:PasteSpecial', platform: Platform.WINDOWS | Platform.LINUX | Platform.MAC | Platform.CHROMEOSAPP}),
 
     // Calc.
+    new ShortcutDescriptor({ docType: 'spreadsheet', eventType: 'keydown', key: 'PageUp', dispatchAction: 'scrollpageup', viewType: ViewType.ReadOnly }),
+    new ShortcutDescriptor({ docType: 'spreadsheet', eventType: 'keydown', key: 'PageDown', dispatchAction: 'scrollpagedown', viewType: ViewType.ReadOnly }),
     new ShortcutDescriptor({ docType: 'spreadsheet', eventType: 'keydown', modifier: Mod.CTRL | Mod.SHIFT, key: 'PageUp' }),
     new ShortcutDescriptor({ docType: 'spreadsheet', eventType: 'keydown', modifier: Mod.CTRL | Mod.SHIFT, key: 'PageDown' }),
     new ShortcutDescriptor({ docType: 'spreadsheet', eventType: 'keydown', key: 'F5' }),
@@ -339,6 +354,8 @@ keyboardShortcuts.definitions.set('default', new Array<ShortcutDescriptor>(
     new ShortcutDescriptor({ docType: 'spreadsheet', eventType: 'keydown', modifier: Mod.CTRL, key: ';', unoAction: '.uno:InsertCurrentDate' }),
 
     // Writer.
+    new ShortcutDescriptor({ docType: 'text', eventType: 'keydown', key: 'PageUp', dispatchAction: 'scrollpageup', viewType: ViewType.ReadOnly }),
+    new ShortcutDescriptor({ docType: 'text', eventType: 'keydown', key: 'PageDown', dispatchAction: 'scrollpagedown', viewType: ViewType.ReadOnly }),
     new ShortcutDescriptor({ docType: 'text', eventType: 'keydown', key: 'F2' }),
     new ShortcutDescriptor({ docType: 'text', eventType: 'keydown', key: 'F3', unoAction: '.uno:ExpandGlossary' }),
     new ShortcutDescriptor({ docType: 'text', eventType: 'keydown', modifier: Mod.CTRL, key: 'F3' }),
