@@ -141,6 +141,8 @@ const defaultBrowserSetting: Record<string, any> = {
 		ShowNavigator: false,
 		ShowSidebar: true,
 		StyleListDeck: false,
+		ShowFormattingMarks: false,
+		ShowAnnotations: true,
 	},
 	presentation: {
 		ShowRuler: false,
@@ -151,6 +153,7 @@ const defaultBrowserSetting: Record<string, any> = {
 		SdCustomAnimationDeck: false,
 		// SdMasterPagesDeck: false,
 		// SdSlideTransitionDeck: false,
+		ShowAnnotations: true,
 	},
 	drawing: {
 		ShowRuler: false,
@@ -158,6 +161,7 @@ const defaultBrowserSetting: Record<string, any> = {
 		A11yCheckDeck: false,
 		ShowNavigator: false,
 		ShowSidebar: true,
+		ShowAnnotations: true,
 	},
 };
 
@@ -180,6 +184,8 @@ class SettingIframe {
 		compactMode: _('Compact layout'),
 		ShowStatusbar: _('Show status bar'),
 		ShowRuler: _('Show Ruler'),
+		ShowFormattingMarks: _('Show Formatting Marks'),
+		ShowAnnotations: _('Show Comments'),
 		A11yCheckDeck: _('Accessibility Checker'),
 		ShowNavigator: _('Navigator'),
 		ShowSidebar: _('Show Sidebar'),
