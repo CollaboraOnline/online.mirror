@@ -325,6 +325,17 @@ export class SheetGeometry {
 		simpleRectangle.height = this._rows.getTileTwipsPosFromPrint(simpleRectangle.height);
 	}
 
+	public convertRectangleToTileTwipsWithoutGridSnap(simpleRectangle: cool.SimpleRectangle): void {
+		const x1PT = simpleRectangle.x1;
+		const y1PT = simpleRectangle.y1;
+
+		const x1TT = this._columns.getTileTwipsPosFromPrint(x1PT);
+		const y1TT = this._rows.getTileTwipsPosFromPrint(y1PT);
+
+		simpleRectangle.x1 = x1TT;
+		simpleRectangle.y1 = y1TT;
+	}
+
 	public convertRawRectangleToTileTwips(rectangle: number[]): void {
 		rectangle[0] = this._columns.getTileTwipsPosFromPrint(rectangle[0]);
 		rectangle[1] = this._rows.getTileTwipsPosFromPrint(rectangle[1]);
