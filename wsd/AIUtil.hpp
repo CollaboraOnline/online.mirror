@@ -16,6 +16,11 @@
 
 #pragma once
 
+// <typeinfo> before any Poco header: Poco/Types.h's demangle() helpers call
+// typeid(...).name(), but only include <typeinfo> when POCO_HAVE_CXXABI_H is
+// defined, which it is not on Windows.
+#include <typeinfo>
+
 #include <Poco/JSON/Object.h>
 
 #include <optional>
