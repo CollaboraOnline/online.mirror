@@ -218,6 +218,7 @@ COOL_ADMIN_JS =\
 	admin/src/AdminSocketSettings.js \
 	admin/src/AdminSocketHistory.js \
 	admin/src/AdminSocketLog.js \
+	admin/src/AdminSocketServerAudit.js \
 	admin/src/AdminClusterOverview.js \
 	admin/src/AdminClusterOverviewAbout.js
 
@@ -1292,6 +1293,7 @@ pot:
 		admin/src/AdminSocketAnalytics.js \
 		admin/src/AdminSocketBase.js \
 		admin/src/AdminSocketOverview.js \
+		admin/src/AdminSocketServerAudit.js \
 		admin/src/AdminSocketSettings.js \
 		admin/src/integrator/AdminIntegratorSettings.ts \
 		admin/src/integrator/WordBook.ts \
