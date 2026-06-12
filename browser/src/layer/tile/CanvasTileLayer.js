@@ -1605,7 +1605,7 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 			errorCode = command.errorCode;
 		}
 
-		this._map.fire('error', {cmd: command.errorCmd, kind: command.errorKind, id: errorId, code: errorCode});
+		this._map.fire('error', { cmd: command.errorCmd, kind: command.errorKind, id: errorId, code: errorCode, errorDetail: command.errorDetail });
 	},
 
 	_onGetChildIdMsg: function (textMsg) {

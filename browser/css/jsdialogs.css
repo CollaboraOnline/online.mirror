@@ -565,6 +565,18 @@ algned to the bottom */
 	display: contents;
 }
 
+.ui-expander-btn:focus:not(:focus-visible) {
+	outline: none;
+}
+
+#technical-details-text {
+	padding: 6px 8px;
+}
+
+#copy-error-details img {
+	width: var(--btn-img-size);
+}
+
 .ui-expander-label {
 	color: #666;
 }
@@ -640,7 +652,6 @@ algned to the bottom */
 }
 
 .ui-expander-label.expanded {
-	padding-left: 14px; /*adding extra padding to account for image absolute position*/
 	color: #444;
 }
 

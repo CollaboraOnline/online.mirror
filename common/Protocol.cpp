@@ -13,6 +13,8 @@
 
 #include "Protocol.hpp"
 
+#include <Poco/URI.h>
+
 #include <cstring>
 #include <map>
 #include <string>
@@ -23,6 +25,23 @@
 
 namespace COOLProtocol
 {
+    std::string buildErrorFrame(std::string_view cmd, std::string_view kind, std::string_view message)
+    {
+        std::string frame = "error: cmd=";
+        frame.append(cmd);
+        frame.append(" kind=");
+        frame.append(kind);
+        if (!message.empty())
+        {
+            // URL-encode so spaces and other special characters survive
+            std::string encoded;
+            Poco::URI::encode(std::string(message), " \t\r\n", encoded);
+            frame.append(" errordetail=");
+            frame.append(encoded);
+        }
+        return frame;
+    }
+
     std::tuple<int, int, std::string> ParseVersion(const std::string& version)
     {
         int major = -1;

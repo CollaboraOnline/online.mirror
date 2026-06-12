@@ -2110,7 +2110,10 @@ std::shared_ptr<lok::Document> Document::load(const std::shared_ptr<ChildSession
                 return nullptr;
             }
 
-            session->sendTextFrameAndLogError("error: cmd=load kind=faileddocloading");
+            const char* loError = _loKit->getError();
+            session->sendTextFrameAndLogError(
+                COOLProtocol::buildErrorFrame("load", "faileddocloading",
+                                              loError ? loError : ""));
             session->shutdownNormal();
 
             LOG_FTL("Failed to load the document. Setting TerminationFlag");
