@@ -60,11 +60,11 @@ class HTMLObjectSection extends CanvasSectionObject {
 	}
 
 	adjustHTMLObjectPosition() {
-		const leftNumber = Math.round(this.myTopLeft[0] / app.dpiScale);
-		const topNumber = Math.round(this.myTopLeft[1] / app.dpiScale);
+		const left = Math.round(this.myTopLeft[0] / app.dpiScale) + 'px';
+		const top = Math.round(this.myTopLeft[1] / app.dpiScale) + 'px';
 
-		if (this.sectionProperties.objectDiv.style.left !== leftNumber)
-			this.sectionProperties.objectDiv.style.left = leftNumber;
+		if (this.sectionProperties.objectDiv.style.left !== left)
+			this.sectionProperties.objectDiv.style.left = left;
 
 		if (this.sectionProperties.objectDiv.style.top !== top)
 			this.sectionProperties.objectDiv.style.top = top;
