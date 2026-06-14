@@ -3453,6 +3453,7 @@ dnl  Checks if ccache is available
 dnl ===================================================================
 CCACHE_BASEDIR=
 CCACHE_NOHASHDIR=
+CCACHE_COMPILERCHECK=
 CCACHE_DEPEND_MODE=
 if test "$enable_ccache" = "no"; then
     CCACHE=""
@@ -3544,6 +3545,8 @@ elif test -n "$enable_ccache" -o \( "$enable_ccache" = "" -a "$enable_icecream" 
        CCACHE_BASEDIR=${BUILDDIR}
        dnl don't include cwd into the hash
        CCACHE_NOHASHDIR=1
+       dnl hash the compiler content, not its mtime
+       CCACHE_COMPILERCHECK=content
     fi
 else
     CCACHE=""
@@ -3553,6 +3556,7 @@ if test "$enable_ccache" = "nodepend"; then
 fi
 AC_SUBST(CCACHE_BASEDIR)
 AC_SUBST(CCACHE_NOHASHDIR)
+AC_SUBST(CCACHE_COMPILERCHECK)
 AC_SUBST(CCACHE_DEPEND_MODE)
 
 # sccache defaults are good enough
