@@ -2799,6 +2799,9 @@ static void lo_registerAnyInputCallback(COKit* pThis,
 static void lo_registerFileSaveDialogCallback(COKit* pThis,
                        COKitFileSaveDialogCallback pFileSaveDialogCallback);
 
+static void lo_registerRevealInFileManagerCallback(COKit* pThis,
+                       COKitRevealInFileManagerCallback pRevealInFileManagerCallback);
+
 static void lo_sendDialogEvent(COKit* pThis,
                                unsigned long long int nKitWindowId,
                                const char* pArguments);
@@ -2856,6 +2859,7 @@ LibCO_Impl::LibCO_Impl()
         m_pOfficeClass->extractDocumentStructureRequest = lo_extractDocumentStructureRequest;
         m_pOfficeClass->registerAnyInputCallback = lo_registerAnyInputCallback;
         m_pOfficeClass->registerFileSaveDialogCallback = lo_registerFileSaveDialogCallback;
+        m_pOfficeClass->registerRevealInFileManagerCallback = lo_registerRevealInFileManagerCallback;
         m_pOfficeClass->getDocsCount = lo_getDocsCount;
         m_pOfficeClass->executeScript = lo_executeScript;
         m_pOfficeClass->deliverProxyResult = lo_deliverProxyResult;
@@ -8261,6 +8265,13 @@ static void lo_registerFileSaveDialogCallback(COKit* /*pThis*/,
 {
     SolarMutexGuard aGuard;
     comphelper::COKit::setFileSaveDialogCallback(pFileSaveDialogCallback);
+}
+
+static void lo_registerRevealInFileManagerCallback(COKit* /*pThis*/,
+                       COKitRevealInFileManagerCallback pRevealInFileManagerCallback)
+{
+    SolarMutexGuard aGuard;
+    comphelper::COKit::setRevealInFileManagerCallback(pRevealInFileManagerCallback);
 }
 
 static int lo_getDocsCount(COKit* /*pThis*/)
