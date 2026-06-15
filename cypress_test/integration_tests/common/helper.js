@@ -1391,6 +1391,15 @@ function waitForTimers(win, tag) {
 	}, { timeout: Cypress.config('defaultCommandTimeout'), interval: 50 });
 }
 
+// Waits for an explicit document Save to finish: core reports the
+// document unmodified (.uno:ModifiedStatus false). Call this between a
+// Save and a close or reload.
+function waitUntilDocumentSaved() {
+	cy.log('>> waitUntilDocumentSaved - start');
+	waitForMapState('.uno:ModifiedStatus', 'false');
+	cy.log('<< waitUntilDocumentSaved - end');
+}
+
 // cy.realPress('Enter') via CDP bypasses preventDefault on keydown,
 // which causes implicit form submission and spurious button clicks
 // that don't happen with real keyboard input. This helper blocks
@@ -1478,5 +1487,6 @@ module.exports.processToIdle = processToIdle;
 module.exports.retryUntil = retryUntil;
 module.exports.waitForMapState = waitForMapState;
 module.exports.waitForTimers = waitForTimers;
+module.exports.waitUntilDocumentSaved = waitUntilDocumentSaved;
 module.exports.maxScreenshotableViewportHeight = maxScreenshotableViewportHeight;
 module.exports.realPressInDialog = realPressInDialog;

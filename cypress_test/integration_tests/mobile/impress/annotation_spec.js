@@ -16,6 +16,7 @@ describe(['tagmobile'], 'Annotation tests.', function() {
 		mobileHelper.insertComment();
 
 		mobileHelper.selectHamburgerMenuItem(['File', 'Save']);
+		helper.waitUntilDocumentSaved();
 
 		helper.reloadDocument(newFilePath);
 
