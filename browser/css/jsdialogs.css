@@ -2858,6 +2858,10 @@ kbd,
 	grid-column-gap: 4px;
 }
 
+#DocumentPropertiesDialog #image-preferred-dpi-combobox + .ui-text {
+	margin-inline-start: var(--spacing-s);
+}
+
 #DocumentPropertiesDialog #customprops button {
 	line-height: 16px;
 	width: 100%;
