@@ -614,6 +614,10 @@ class PresenterConsole {
 			}.bind(this),
 		);
 
+		if (window.ThisIsAMobileApp) {
+			presentToAllBtn.style.display = 'none';
+		}
+
 		// By default hide the exchange monitors button
 		if (!window.mode.isCODesktop()) {
 			let exchangeMonitorsButton =
