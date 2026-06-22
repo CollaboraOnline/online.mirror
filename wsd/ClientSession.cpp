@@ -445,7 +445,12 @@ void ClientSession::handleClipboardRequest(DocumentBroker::ClipboardRequest     
                     if (UnitWSD::isUnitTesting())
                         UnitWSD::get().filterClipboardDownloadURL(url);
 
-                    const std::string pathAndQuery = Poco::URI(url).getPathAndQuery();
+                    std::string scheme, clipHost, clipPort, pathAndQuery;
+                    if (!net::parseUri(url, scheme, clipHost, clipPort, pathAndQuery))
+                    {
+                        LOG_ERR("Malformed clipboard download URL [" << url << ']');
+                        pathAndQuery.clear();
+                    }
                     if (pathAndQuery.find("/cool/clipboard") != std::string::npos)
                     {
                         std::shared_ptr<http::Session> httpSession = http::Session::create(url);
@@ -460,7 +465,7 @@ void ClientSession::handleClipboardRequest(DocumentBroker::ClipboardRequest     
                                     << url << ']');
                             };
                             httpSession->setConnectFailHandler(std::move(connectFailCallback));
-                            http::Request httpRequest(Poco::URI(url).getPathAndQuery());
+                            http::Request httpRequest(pathAndQuery);
                             httpSession->asyncRequest(httpRequest, docBroker->getPoll());
 
                             if (UnitWSD::isUnitTesting())
