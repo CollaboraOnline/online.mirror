@@ -1,4 +1,4 @@
-/* global describe it cy beforeEach require Cypress */
+/* global describe it cy beforeEach require Cypress expect */
 
 var helper = require('../../common/helper');
 var desktopHelper = require('../../common/desktop_helper');
@@ -650,5 +650,44 @@ describe(['tagdesktop'], 'Top toolbar tests.', function() {
 		helper.copy();
 		cy.cGet('#copy-paste-container p').should('exist');
 		cy.cGet('#copy-paste-container p b').should('not.exist');
+	});
+});
+
+describe(['tagdesktop'], 'Top toolbar styles combobox.', function() {
+	beforeEach(function() {
+		cy.viewport(1920,1080);
+		helper.setupAndLoadDocument('writer/top_toolbar.odt');
+		cy.getFrameWindow().then((win) => {
+			this.win = win;
+		});
+	});
+
+	it('Compact styles combobox applies the programmatic style name, not the displayed label.', function() {
+		desktopHelper.switchUIToCompact();
+
+		const capturedStyles = [];
+		cy.getFrameWindow().then((win) => {
+			const map = win.app.map;
+			const original = map.applyStyle.bind(map);
+			map.applyStyle = function(style, family) {
+				capturedStyles.push(style);
+				return original(style, family);
+			};
+		});
+
+		helper.typeIntoDocument('{ctrl+End}');
+		helper.processToIdle(this.win);
+
+		// 'Default Paragraph Style' is shown in the combobox, but its
+		// programmatic name is 'Standard'. Selecting it must send 'Standard'
+		// to core, not the displayed label. The two differ even with an
+		// en-US engine, so this does not need a localized build.
+		cy.cGet('#styles .ui-combobox-button').click();
+		cy.cGet('[id^="styles-dropdown"].modalpopup')
+			.contains('.ui-combobox-entry span', 'Default Paragraph Style').click();
+
+		cy.wrap(null).should(() => {
+			expect(capturedStyles).to.deep.equal(['Standard']);
+		});
 	});
 });
