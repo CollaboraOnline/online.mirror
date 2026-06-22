@@ -90,6 +90,7 @@ class IconUtil {
 		'InsertSheetAfter',
 		'Remove',
 		'Protect',
+		'Spreadsheet_protected',
 		'SetTabBgColor',
 		'ResetTabBgColor',
 		'Show',

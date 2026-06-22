@@ -82,10 +82,10 @@ window.L.Control.Tabs = window.L.Control.extend({
 				_image: 'Name',
 			},
 			'.uno:Protect': {
-				name: app.IconUtil.createMenuItemLink(_UNO('.uno:Protect', 'spreadsheet', true), 'Protect'),
+				name: app.IconUtil.createMenuItemLink(_UNO('.uno:Protect', 'spreadsheet', true), 'Spreadsheet_protected'),
 				isHtmlName: true,
 				callback: (this._protectSheet).bind(this),
-				_image: 'Protect',
+				_image: 'Spreadsheet_protected',
 			},
 			'.uno:SetTabBgColor': {
 				name: app.IconUtil.createMenuItemLink(_UNO('.uno:SetTabBgColor', 'spreadsheet', true), 'SetTabBgColor'),
@@ -317,7 +317,13 @@ window.L.Control.Tabs = window.L.Control.extend({
 						const g = parseInt(tabColor.slice(2, 4), 16);
 						const b = parseInt(tabColor.slice(4, 6), 16);
 						const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-						tab.style.setProperty('--tab-text-color', luminance < 0.5 ? '#ffffff' : '#1a1a1a');
+						if (luminance < 0.5) {
+							tab.style.setProperty('--tab-text-color', '#ffffff');
+							window.L.DomUtil.addClass(tab, 'spreadsheet-tab-lock-white');
+						} else {
+							tab.style.setProperty('--tab-text-color', '#1a1a1a');
+							window.L.DomUtil.addClass(tab, 'spreadsheet-tab-lock-black');
+						}
 					}
 
 					label.textContent = e.partNames[i];
@@ -574,6 +580,8 @@ window.L.Control.Tabs = window.L.Control.extend({
 		if (!tab) return;
 		if (!hexNoHash) {
 			window.L.DomUtil.removeClass(tab, 'spreadsheet-tab-colored');
+			window.L.DomUtil.removeClass(tab, 'spreadsheet-tab-lock-black');
+			window.L.DomUtil.removeClass(tab, 'spreadsheet-tab-lock-white');
 			tab.style.removeProperty('--tab-color');
 			tab.style.removeProperty('--tab-text-color');
 			return;
@@ -585,7 +593,15 @@ window.L.Control.Tabs = window.L.Control.extend({
 		const g = parseInt(c.slice(2, 4), 16);
 		const b = parseInt(c.slice(4, 6), 16);
 		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-		tab.style.setProperty('--tab-text-color', luminance < 0.5 ? '#ffffff' : '#1a1a1a');
+		if (luminance < 0.5) {
+			tab.style.setProperty('--tab-text-color', '#ffffff');
+			window.L.DomUtil.addClass(tab, 'spreadsheet-tab-lock-white');
+			window.L.DomUtil.removeClass(tab, 'spreadsheet-tab-lock-black');
+		} else {
+			tab.style.setProperty('--tab-text-color', '#1a1a1a');
+			window.L.DomUtil.addClass(tab, 'spreadsheet-tab-lock-black');
+			window.L.DomUtil.removeClass(tab, 'spreadsheet-tab-lock-white');
+		}
 	},
 
 	// Engine operates on the current tab, so switch first. Then open the same
