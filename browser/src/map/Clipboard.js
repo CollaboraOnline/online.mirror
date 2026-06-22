@@ -1144,7 +1144,12 @@ window.L.Clipboard = window.L.Class.extend({
 		}
 		let clipboardContents;
 		try {
-			if (window.ThisIsTheiOSApp || window.ThisIsTheMacOSApp)
+			if (window.ThisIsTheMacOSApp)
+				// The engine clipboard provider reads the pasteboard itself on
+				// .uno:Paste, so there is nothing to fetch here. Reporting null
+				// drops straight to an internal paste.
+				return null;
+			if (window.ThisIsTheiOSApp)
 				clipboardContents = await this._iOSReadClipboard();
 			else if (window.ThisIsTheWindowsApp)
 				clipboardContents = await this._WindowsReadClipboard();
