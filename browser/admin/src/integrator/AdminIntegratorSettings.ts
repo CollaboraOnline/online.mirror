@@ -322,7 +322,7 @@ class OnlineSettingsStorage extends SettingsStorage {
 		if (!response.ok) {
 			console.error(
 				'something went wrong shared config response',
-				response.text(),
+				await response.text(),
 			);
 			throw new Error(`Could not fetch shared config: ${response.statusText}`);
 		}
@@ -3509,13 +3509,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		(window as any).settingIframe.init();
 		const postHeight = () => {
 			window.parent.postMessage(
-				{
+				JSON.stringify({
 					MessageId: 'Iframe_Height',
 					SendTime: Date.now(),
 					Values: {
 						ContentHeight: document.documentElement.offsetHeight + 'px',
 					},
-				},
+				}),
 				getIntegratorOrigin(),
 			);
 		};
