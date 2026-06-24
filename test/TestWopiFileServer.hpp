@@ -447,7 +447,7 @@ enum class PresetType : std::uint8_t
 };
 
 // search for presets file in test/data/presets directory
-static std::vector<asset> getAssetVec(PresetType type, const std::string& userId = std::string())
+static std::vector<asset> getAssetVec(PresetType type)
 {
     std::string searchDir = "test/data/presets";
     std::vector<asset> assetVec;
@@ -464,7 +464,7 @@ static std::vector<asset> getAssetVec(PresetType type, const std::string& userId
     if (type == PresetType::Shared)
         searchDir.append("/shared");
     else if (type == PresetType::User)
-        searchDir = userPresetDir(userId);
+        searchDir.append("/user");
 
     auto searchInDir = [&assetVec](const std::string& directory)
     {
