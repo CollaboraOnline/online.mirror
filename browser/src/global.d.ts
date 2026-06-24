@@ -361,6 +361,7 @@ interface Window {
 	allowUpdateNotification: boolean;
 	autoShowWelcome: boolean;
 	bundlejsLoaded: boolean;
+	canvasSlideshowEnabled: boolean;
 	deeplEnabled: boolean;
 	documentSigningEnabled: boolean;
 	deviceFormFactor?: string;

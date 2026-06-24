@@ -565,12 +565,12 @@ class Dispatcher {
 		] = () => {
 			const isWelcomePresentation =
 				window.coolParams.get('welcome') === 'true' ? true : false;
-			if ((window as any).canvasSlideshowEnabled) {
+			if (window.canvasSlideshowEnabled) {
 				// The Presenter View toggle decides whether the start buttons open
 				// the presenter console. The welcome slideshow always plays plain.
 				if (
 					!isWelcomePresentation &&
-					app.map.uiManager.isPresenterConsoleEnabled()
+					app.map.uiManager.shouldShowPresenterConsole()
 				)
 					app.map.fire('newpresentinconsole', {});
 				else app.map.fire('newfullscreen', { isWelcomePresentation });
@@ -579,8 +579,8 @@ class Dispatcher {
 
 		this.actionsMap['presentation-currentslide'] = () => {
 			const startSlideNumber = app.map.getCurrentPartNumber();
-			if ((window as any).canvasSlideshowEnabled) {
-				if (app.map.uiManager.isPresenterConsoleEnabled())
+			if (window.canvasSlideshowEnabled) {
+				if (app.map.uiManager.shouldShowPresenterConsole())
 					app.map.fire('newpresentinconsole', { startSlideNumber });
 				else app.map.fire('newfullscreen', { startSlideNumber });
 			} else app.map.fire('fullscreen', { startSlideNumber });
@@ -590,7 +590,7 @@ class Dispatcher {
 			() => {
 				const welcomePresentation =
 					window.coolParams.get('welcome') === 'true' ? true : false;
-				if ((window as any).canvasSlideshowEnabled)
+				if (window.canvasSlideshowEnabled)
 					app.map.fire('newpresentinwindow', {
 						isWelcomePresentation: welcomePresentation,
 					});
@@ -617,7 +617,7 @@ class Dispatcher {
 		};
 
 		this.actionsMap['presenterconsole'] = () => {
-			if ((window as any).canvasSlideshowEnabled)
+			if (window.canvasSlideshowEnabled)
 				app.map.uiManager.togglePresenterConsole();
 		};
 
