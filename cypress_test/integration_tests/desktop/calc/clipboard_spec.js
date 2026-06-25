@@ -190,13 +190,16 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Calc clipboard tests.', fu
 	});
 
 	it('Copy Hyperlink from pop-up', function () {
+		cy.getFrameWindow().then(function(win) {
+			cy.stub(win.navigator.clipboard, 'writeText').as('writeText');
+		});
+
 		desktopHelper.selectZoomLevel('100', false);
-		helper.setDummyClipboardForCopy();
 
 		calcHelper.dblClickOnFirstCell();
 		cy.cGet('.ui-custom-textarea-text-layer').should('not.have.text', '');
 
-		let url = 'http://www.example.com/';
+		const url = 'http://www.example.com/';
 		helper.typeIntoDocument('{rightArrow}{backspace}' + url + '{enter}');
 		helper.processToIdle(this.win);
 
@@ -211,7 +214,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Calc clipboard tests.', fu
 		helper.processToIdle(this.win);
 		cy.cGet('#hyperlink-pop-up-copy').click();
 
-		cy.cGet('#copy-paste-container').should('contain.text', url); // TODO: There is an extra \n here.
+		cy.get('@writeText').should('have.been.calledOnceWith', url);
 	});
 
 	it('HTML paste falls back to HTML content when server-side clipboard fetch fails', function() {

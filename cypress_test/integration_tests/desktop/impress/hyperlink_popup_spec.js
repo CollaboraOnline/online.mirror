@@ -65,6 +65,24 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Impress hyperlink popup te
 		cy.cGet('.hyperlink-pop-up-container').should('be.visible');
 		cy.cGet('#hyperlink-pop-up').should('have.text', 'http://www.example.com/');
 	});
+	it('Copy button writes the URL directly to the clipboard.', function() {
+		cy.getFrameWindow().then(function(win) {
+			cy.stub(win.navigator.clipboard, 'writeText').as('writeText');
+		});
+
+		helper.typeIntoDocument('{home}');
+		cy.then(() => helper.processToIdle(this.win));
+
+		for (var i = 0; i < 7; i++) {
+			helper.typeIntoDocument('{rightArrow}');
+		}
+		cy.then(() => helper.processToIdle(this.win));
+
+		cy.cGet('.hyperlink-pop-up-container').should('be.visible');
+		cy.cGet('#hyperlink-pop-up-copy').click();
+
+		cy.get('@writeText').should('have.been.calledOnceWith', 'http://www.example.com/');
+	});
 	// TODO: fixme
 	it.skip('In readonly mode, edit and remove buttons are hidden and copy button is visible.', function() {
 		cy.getFrameWindow().its('app').then(function(app) {
