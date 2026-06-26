@@ -148,6 +148,7 @@ wsd_sources = \
 	../wsd/TileCache.cpp
 
 test_base_sources = \
+	ClientRequestDispatcherTests.cpp \
 	KitQueueTests.cpp \
 	RequestDetailsTests.cpp \
 	StringVectorTests.cpp \

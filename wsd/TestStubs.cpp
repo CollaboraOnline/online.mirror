@@ -15,9 +15,13 @@
 
 #include <config.h>
 
+#include "COOLWSD.hpp"
 #include "DocumentBroker.hpp"
 
 #include "ClientSession.hpp"
+
+std::string COOLWSD::ServerName;
+std::string COOLWSD::ServiceRoot;
 
 void DocumentBroker::assertCorrectThread(const char*, int) const {}
 
