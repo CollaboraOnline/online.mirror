@@ -93,6 +93,8 @@ public:
     static WebView* findStarterScreen();
     static const std::vector<WebView*>& getAllInstances() { return s_instances; }
     void activateWindow();
+    // Called when this document's window gains or loses the active state.
+    void onWindowActiveChanged(bool active);
     bool isStarterScreen() const { return _document._fakeClientFd == -1 && _document._appDocId == 0; }
     QMainWindow* getMainWindow() const { return _mainWindow; }
 
