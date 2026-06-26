@@ -420,7 +420,7 @@ uno::Sequence<datatransfer::DataFlavor> SAL_CALL KitProviderTransferable::getTra
     return m_aFlavors;
 }
 
-bool SAL_CALL
+sal_Bool SAL_CALL
 KitProviderTransferable::isDataFlavorSupported(const datatransfer::DataFlavor& rFlavor)
 {
     return std::any_of(std::cbegin(m_aFlavors), std::cend(m_aFlavors),
