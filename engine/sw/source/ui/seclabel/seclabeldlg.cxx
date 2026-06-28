@@ -24,6 +24,8 @@
 
 #include <rtl/ustrbuf.hxx>
 #include <rtl/uuid.h>
+#include <sfx2/watermarkitem.hxx>
+#include <tools/color.hxx>
 #include <tools/datetime.hxx>
 #include <rtl/bootstrap.hxx>
 #include <config_folders.h>
@@ -413,6 +415,17 @@ void SwSecurityLabelDlg::applyLabel(const OUString& rClassification,
     }
     sw::seclabel::applyMarking(xModel, m_pPolicy->buildMarking(rClassification, rSelected), nColor,
                                getCurrentPageStyle(xModel));
+
+    // Watermark is policy-driven: set it when the selection calls for one. A
+    // default-constructed item has empty text, which clears any prior watermark,
+    // so a re-label that drops the watermark can't leave a stale one behind.
+    SfxWatermarkItem aWatermark;
+    if (m_pPolicy->wantsWatermark(rClassification, rSelected))
+    {
+        aWatermark.SetText(m_pPolicy->buildMarking(rClassification, rSelected));
+        aWatermark.SetColor(Color(ColorTransparency, static_cast<sal_uInt32>(nColor)));
+    }
+    m_rSh.SetWatermark(aWatermark);
 }
 
 IMPL_LINK_NOARG(SwSecurityLabelDlg, PolicyHdl, weld::ComboBox&, void)
@@ -454,6 +467,10 @@ IMPL_LINK_NOARG(SwSecurityLabelDlg, RemoveHdl, weld::Button&, void)
     if (!xModel.is())
         return;
     sw::seclabel::removeLabel(xModel, getCurrentPageStyle(xModel));
+
+    // A default item has empty text, which clears any watermark the label set.
+    m_rSh.SetWatermark(SfxWatermarkItem());
+
     m_xDialog->response(RET_OK);
 }
 

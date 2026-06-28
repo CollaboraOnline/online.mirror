@@ -28,6 +28,7 @@ class SpifPolicyTest : public CppUnit::TestFixture
     void testBuildLabel();
     void testMatchesLabel();
     void testPolicySet();
+    void testWantsWatermark();
 
     CPPUNIT_TEST_SUITE(SpifPolicyTest);
     CPPUNIT_TEST(testParse);
@@ -36,6 +37,7 @@ class SpifPolicyTest : public CppUnit::TestFixture
     CPPUNIT_TEST(testBuildLabel);
     CPPUNIT_TEST(testMatchesLabel);
     CPPUNIT_TEST(testPolicySet);
+    CPPUNIT_TEST(testWantsWatermark);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -370,6 +372,50 @@ void SpifPolicyTest::testPolicySet()
     // An OID none of the policies declare is foreign.
     aLabel.aPolicyId = u"urn:oid:9.9.9"_ustr;
     CPPUNIT_ASSERT(!aSet.findByLabel(aLabel));
+}
+
+void SpifPolicyTest::testWantsWatermark()
+{
+    // One tag carries markingCode=waterMark; selecting its category triggers a
+    // watermark, selecting only the other tag's category does not.
+    static const OString aSpif(
+        R"xml(<?xml version="1.0" encoding="utf-8"?>
+<spif:SPIF xmlns:spif="http://www.xmlspif.org/spif" schemaVersion="1.0" version="1">
+  <spif:securityPolicyId name="T" id="1.2.3" />
+  <spif:securityClassifications>
+    <spif:securityClassification name="SECRET" color="red" lacv="4" hierarchy="4" />
+  </spif:securityClassifications>
+  <spif:securityCategoryTagSets>
+    <spif:securityCategoryTagSet name="Codeword" id="1.2.3.0">
+      <spif:securityCategoryTag name="CW" tagType="enumerated" enumType="permissive">
+        <spif:tagCategory name="TS" lacv="1" obsolete="false" />
+        <spif:markingQualifier markingCode="waterMark">
+          <spif:qualifier markingQualifier="//" qualifierCode="separator" />
+        </spif:markingQualifier>
+      </spif:securityCategoryTag>
+    </spif:securityCategoryTagSet>
+    <spif:securityCategoryTagSet name="Release" id="1.2.3.1">
+      <spif:securityCategoryTag name="Rel" tagType="enumerated" enumType="permissive">
+        <spif:tagCategory name="CANADA" lacv="2" obsolete="false" />
+        <spif:markingQualifier markingCode="pageTopBottom">
+          <spif:qualifier markingQualifier="//" qualifierCode="separator" />
+        </spif:markingQualifier>
+      </spif:securityCategoryTag>
+    </spif:securityCategoryTagSet>
+  </spif:securityCategoryTagSets>
+</spif:SPIF>)xml"_ostr);
+    SvMemoryStream aStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(), StreamMode::READ);
+    sw::seclabel::SpifPolicy aPolicy;
+    CPPUNIT_ASSERT(aPolicy.parse(aStream));
+
+    // The watermark flag is parsed only onto the tag that declares it.
+    CPPUNIT_ASSERT(aPolicy.aTagSets[0].aTags[0].bWatermark);
+    CPPUNIT_ASSERT(!aPolicy.aTagSets[1].aTags[0].bWatermark);
+
+    // Selectable order under SECRET: TS(0), CANADA(1).
+    CPPUNIT_ASSERT(aPolicy.wantsWatermark(u"SECRET"_ustr, { true, false })); // TS -> watermark
+    CPPUNIT_ASSERT(!aPolicy.wantsWatermark(u"SECRET"_ustr, { false, true })); // CANADA only
+    CPPUNIT_ASSERT(!aPolicy.wantsWatermark(u"SECRET"_ustr, { false, false }));
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SpifPolicyTest);

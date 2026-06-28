@@ -75,6 +75,7 @@ struct SpifCategoryTag
     OUString aMarkingPrefix; ///< markingQualifier qualifier @qualifierCode=prefix
     OUString aMarkingSeparator; ///< qualifierCode=separator (precedes the values)
     OUString aMarkingSuffix; ///< qualifierCode=suffix
+    bool bWatermark = false; ///< markingQualifier @markingCode=waterMark
     std::vector<SpifTagCategory> aCategories;
 };
 
@@ -124,6 +125,12 @@ public:
     /// the order categories appear across aTagSets).
     OUString buildMarking(const OUString& rClassification,
                           const std::vector<bool>& rSelected) const;
+
+    /// Whether the selection calls for a watermark: true if any selected category
+    /// belongs to a tag whose markingQualifier is markingCode=waterMark. rSelected
+    /// is indexed as in buildMarking. Watermarking is policy-driven only.
+    bool wantsWatermark(const OUString& rClassification,
+                        const std::vector<bool>& rSelected) const;
 
     /// Check selection-count constraints (minSelection/maxSelection per tag) for
     /// the given classification and selection. rSelected is indexed as in

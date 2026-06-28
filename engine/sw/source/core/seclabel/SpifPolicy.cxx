@@ -94,6 +94,8 @@ SpifCategoryTag parseCategoryTag(tools::XmlWalker& rWalker)
             aTag.aCategories.push_back(parseTagCategory(rWalker));
         else if (rWalker.name() == "markingQualifier")
         {
+            if (rWalker.attribute("markingCode"_ostr) == "waterMark")
+                aTag.bWatermark = true;
             rWalker.children();
             while (rWalker.isValid())
             {
@@ -257,6 +259,27 @@ OUString SpifPolicy::buildMarking(const OUString& rClassification,
         }
     }
     return aMarking;
+}
+
+bool SpifPolicy::wantsWatermark(const OUString& rClassification,
+                                const std::vector<bool>& rSelected) const
+{
+    size_t nIdx = 0;
+    for (const auto& rTagSet : aTagSets)
+    {
+        for (const auto& rTag : rTagSet.aTags)
+        {
+            for (const auto& rCategory : rTag.aCategories)
+            {
+                if (!rCategory.isSelectable(rClassification))
+                    continue;
+                if (rTag.bWatermark && nIdx < rSelected.size() && rSelected[nIdx])
+                    return true;
+                ++nIdx;
+            }
+        }
+    }
+    return false;
 }
 
 std::vector<SpifViolation> SpifPolicy::validate(const OUString& rClassification,
