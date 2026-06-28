@@ -53,8 +53,18 @@ SW_DLLPUBLIC void applyMarking(const css::uno::Reference<css::frame::XModel>& xM
 SW_DLLPUBLIC bool readLabel(const css::uno::Reference<css::frame::XModel>& xModel,
                             StanagLabel& rLabel);
 
-/// Remove the document's STANAG label: strip its customXml part and clear the
-/// marking from the page style's header and footer.
+/// Place the marking as a cover (bStart) and/or end-page (bEnd) paragraph in the
+/// document body, bookmarked so re-applying replaces rather than duplicates. A
+/// placement not requested is cleared, so a re-label leaves no stale body marking.
+SW_DLLPUBLIC void applyBodyMarkings(const css::uno::Reference<css::frame::XModel>& xModel,
+                                    const OUString& rMarking, sal_Int32 nColor, bool bStart,
+                                    bool bEnd);
+
+/// Remove both body (cover/end-page) markings, if present.
+SW_DLLPUBLIC void removeBodyMarkings(const css::uno::Reference<css::frame::XModel>& xModel);
+
+/// Remove the document's STANAG label: strip its customXml part, clear the body
+/// (cover/end-page) markings, and clear the page style's header and footer marking.
 SW_DLLPUBLIC void removeLabel(const css::uno::Reference<css::frame::XModel>& xModel,
                               const OUString& rPageStyleName);
 

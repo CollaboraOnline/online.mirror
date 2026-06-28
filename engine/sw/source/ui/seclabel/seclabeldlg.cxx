@@ -426,6 +426,11 @@ void SwSecurityLabelDlg::applyLabel(const OUString& rClassification,
         aWatermark.SetColor(Color(ColorTransparency, static_cast<sal_uInt32>(nColor)));
     }
     m_rSh.SetWatermark(aWatermark);
+
+    // Cover/end-page markings are policy-driven too (and self-clearing on re-label).
+    sw::seclabel::applyBodyMarkings(xModel, m_pPolicy->buildMarking(rClassification, rSelected),
+                                    nColor, m_pPolicy->wantsDocumentStart(rClassification, rSelected),
+                                    m_pPolicy->wantsDocumentEnd(rClassification, rSelected));
 }
 
 IMPL_LINK_NOARG(SwSecurityLabelDlg, PolicyHdl, weld::ComboBox&, void)

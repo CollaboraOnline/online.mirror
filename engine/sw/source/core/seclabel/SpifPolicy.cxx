@@ -94,8 +94,13 @@ SpifCategoryTag parseCategoryTag(tools::XmlWalker& rWalker)
             aTag.aCategories.push_back(parseTagCategory(rWalker));
         else if (rWalker.name() == "markingQualifier")
         {
-            if (rWalker.attribute("markingCode"_ostr) == "waterMark")
+            const OString aMarkingCode = rWalker.attribute("markingCode"_ostr);
+            if (aMarkingCode == "waterMark")
                 aTag.bWatermark = true;
+            else if (aMarkingCode == "documentStart")
+                aTag.bDocumentStart = true;
+            else if (aMarkingCode == "documentEnd")
+                aTag.bDocumentEnd = true;
             rWalker.children();
             while (rWalker.isValid())
             {
@@ -261,8 +266,9 @@ OUString SpifPolicy::buildMarking(const OUString& rClassification,
     return aMarking;
 }
 
-bool SpifPolicy::wantsWatermark(const OUString& rClassification,
-                                const std::vector<bool>& rSelected) const
+bool SpifPolicy::anySelectedTag(const OUString& rClassification,
+                                const std::vector<bool>& rSelected,
+                                bool SpifCategoryTag::*pFlag) const
 {
     size_t nIdx = 0;
     for (const auto& rTagSet : aTagSets)
@@ -273,13 +279,31 @@ bool SpifPolicy::wantsWatermark(const OUString& rClassification,
             {
                 if (!rCategory.isSelectable(rClassification))
                     continue;
-                if (rTag.bWatermark && nIdx < rSelected.size() && rSelected[nIdx])
+                if (rTag.*pFlag && nIdx < rSelected.size() && rSelected[nIdx])
                     return true;
                 ++nIdx;
             }
         }
     }
     return false;
+}
+
+bool SpifPolicy::wantsWatermark(const OUString& rClassification,
+                                const std::vector<bool>& rSelected) const
+{
+    return anySelectedTag(rClassification, rSelected, &SpifCategoryTag::bWatermark);
+}
+
+bool SpifPolicy::wantsDocumentStart(const OUString& rClassification,
+                                    const std::vector<bool>& rSelected) const
+{
+    return anySelectedTag(rClassification, rSelected, &SpifCategoryTag::bDocumentStart);
+}
+
+bool SpifPolicy::wantsDocumentEnd(const OUString& rClassification,
+                                  const std::vector<bool>& rSelected) const
+{
+    return anySelectedTag(rClassification, rSelected, &SpifCategoryTag::bDocumentEnd);
 }
 
 std::vector<SpifViolation> SpifPolicy::validate(const OUString& rClassification,

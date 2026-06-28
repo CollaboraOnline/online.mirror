@@ -402,20 +402,40 @@ void SpifPolicyTest::testWantsWatermark()
         </spif:markingQualifier>
       </spif:securityCategoryTag>
     </spif:securityCategoryTagSet>
+    <spif:securityCategoryTagSet name="Cover" id="1.2.3.2">
+      <spif:securityCategoryTag name="Cov" tagType="enumerated" enumType="permissive">
+        <spif:tagCategory name="COVER" lacv="3" obsolete="false" />
+        <spif:markingQualifier markingCode="documentStart" />
+      </spif:securityCategoryTag>
+    </spif:securityCategoryTagSet>
+    <spif:securityCategoryTagSet name="End" id="1.2.3.3">
+      <spif:securityCategoryTag name="EndTag" tagType="enumerated" enumType="permissive">
+        <spif:tagCategory name="ENDP" lacv="4" obsolete="false" />
+        <spif:markingQualifier markingCode="documentEnd" />
+      </spif:securityCategoryTag>
+    </spif:securityCategoryTagSet>
   </spif:securityCategoryTagSets>
 </spif:SPIF>)xml"_ostr);
     SvMemoryStream aStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(), StreamMode::READ);
     sw::seclabel::SpifPolicy aPolicy;
     CPPUNIT_ASSERT(aPolicy.parse(aStream));
 
-    // The watermark flag is parsed only onto the tag that declares it.
+    // Each placement flag is parsed only onto the tag that declares it.
     CPPUNIT_ASSERT(aPolicy.aTagSets[0].aTags[0].bWatermark);
     CPPUNIT_ASSERT(!aPolicy.aTagSets[1].aTags[0].bWatermark);
+    CPPUNIT_ASSERT(aPolicy.aTagSets[2].aTags[0].bDocumentStart);
+    CPPUNIT_ASSERT(aPolicy.aTagSets[3].aTags[0].bDocumentEnd);
 
-    // Selectable order under SECRET: TS(0), CANADA(1).
-    CPPUNIT_ASSERT(aPolicy.wantsWatermark(u"SECRET"_ustr, { true, false })); // TS -> watermark
-    CPPUNIT_ASSERT(!aPolicy.wantsWatermark(u"SECRET"_ustr, { false, true })); // CANADA only
-    CPPUNIT_ASSERT(!aPolicy.wantsWatermark(u"SECRET"_ustr, { false, false }));
+    // Selectable order under SECRET: TS(0), CANADA(1), COVER(2), ENDP(3).
+    CPPUNIT_ASSERT(aPolicy.wantsWatermark(u"SECRET"_ustr, { true, false, false, false })); // TS
+    CPPUNIT_ASSERT(!aPolicy.wantsWatermark(u"SECRET"_ustr, { false, true, false, false })); // CANADA
+    CPPUNIT_ASSERT(!aPolicy.wantsWatermark(u"SECRET"_ustr, { false, false, false, false }));
+
+    CPPUNIT_ASSERT(aPolicy.wantsDocumentStart(u"SECRET"_ustr, { false, false, true, false })); // COVER
+    CPPUNIT_ASSERT(!aPolicy.wantsDocumentStart(u"SECRET"_ustr, { true, true, false, true }));
+
+    CPPUNIT_ASSERT(aPolicy.wantsDocumentEnd(u"SECRET"_ustr, { false, false, false, true })); // ENDP
+    CPPUNIT_ASSERT(!aPolicy.wantsDocumentEnd(u"SECRET"_ustr, { true, true, true, false }));
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SpifPolicyTest);

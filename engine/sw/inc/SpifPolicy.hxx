@@ -76,6 +76,8 @@ struct SpifCategoryTag
     OUString aMarkingSeparator; ///< qualifierCode=separator (precedes the values)
     OUString aMarkingSuffix; ///< qualifierCode=suffix
     bool bWatermark = false; ///< markingQualifier @markingCode=waterMark
+    bool bDocumentStart = false; ///< @markingCode=documentStart (cover marking)
+    bool bDocumentEnd = false; ///< @markingCode=documentEnd (end-page marking)
     std::vector<SpifTagCategory> aCategories;
 };
 
@@ -126,11 +128,16 @@ public:
     OUString buildMarking(const OUString& rClassification,
                           const std::vector<bool>& rSelected) const;
 
-    /// Whether the selection calls for a watermark: true if any selected category
-    /// belongs to a tag whose markingQualifier is markingCode=waterMark. rSelected
-    /// is indexed as in buildMarking. Watermarking is policy-driven only.
+    /// Whether the selection calls for a watermark / a cover (documentStart) /
+    /// an end-page (documentEnd) marking: true if any selected category belongs to
+    /// a tag carrying that markingQualifier markingCode. rSelected is indexed as in
+    /// buildMarking. These placements are policy-driven only.
     bool wantsWatermark(const OUString& rClassification,
                         const std::vector<bool>& rSelected) const;
+    bool wantsDocumentStart(const OUString& rClassification,
+                            const std::vector<bool>& rSelected) const;
+    bool wantsDocumentEnd(const OUString& rClassification,
+                          const std::vector<bool>& rSelected) const;
 
     /// Check selection-count constraints (minSelection/maxSelection per tag) for
     /// the given classification and selection. rSelected is indexed as in
@@ -150,6 +157,12 @@ public:
     /// tolerating an optional "urn:oid:" prefix). Drives the choice between
     /// structured edit (match) and the foreign-policy read-only/re-label flow.
     bool matchesLabel(const StanagLabel& rLabel) const;
+
+private:
+    /// True if any selected category belongs to a tag whose pFlag member is set
+    /// (shared by the wants* placement queries). rSelected is indexed as in buildMarking.
+    bool anySelectedTag(const OUString& rClassification, const std::vector<bool>& rSelected,
+                        bool SpifCategoryTag::*pFlag) const;
 };
 
 /// The SPIF policies provisioned for this session (org + user). The label dialog

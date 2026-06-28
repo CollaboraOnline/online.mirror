@@ -14,13 +14,20 @@
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/beans/XPropertySetInfo.hpp>
 #include <com/sun/star/container/XNameAccess.hpp>
+#include <com/sun/star/container/XNamed.hpp>
 #include <com/sun/star/frame/XModel.hpp>
 #include <com/sun/star/io/XInputStream.hpp>
 #include <com/sun/star/io/XOutputStream.hpp>
+#include <com/sun/star/lang/XMultiServiceFactory.hpp>
 #include <com/sun/star/style/ParagraphAdjust.hpp>
 #include <com/sun/star/style/XStyleFamiliesSupplier.hpp>
+#include <com/sun/star/text/ControlCharacter.hpp>
+#include <com/sun/star/text/XBookmarksSupplier.hpp>
+#include <com/sun/star/text/XParagraphCursor.hpp>
 #include <com/sun/star/text/XText.hpp>
+#include <com/sun/star/text/XTextContent.hpp>
 #include <com/sun/star/text/XTextCursor.hpp>
+#include <com/sun/star/text/XTextDocument.hpp>
 #include <com/sun/star/xml/dom/DocumentBuilder.hpp>
 #include <com/sun/star/xml/dom/XDocument.hpp>
 #include <com/sun/star/xml/sax/Writer.hpp>
@@ -231,6 +238,105 @@ void eraseStanagPart(const uno::Reference<frame::XModel>& xModel)
     xModelProps->setPropertyValue(u"InteropGrabBag"_ustr,
                                   cpo::uno::Any(aGrabBag.getAsConstPropertyValueList()));
 }
+
+// Bookmarks naming the body markings, so they can be replaced or removed later.
+constexpr OUString BOOKMARK_DOC_START = u"__CplSecLabelDocStart"_ustr;
+constexpr OUString BOOKMARK_DOC_END = u"__CplSecLabelDocEnd"_ustr;
+
+// Format a cursor selection as a marking run (bold, coloured, centred).
+void formatMarkingSelection(const uno::Reference<text::XTextCursor>& xCursor, sal_Int32 nColor)
+{
+    uno::Reference<beans::XPropertySet> xProps(xCursor, uno::UNO_QUERY);
+    if (!xProps.is())
+        return;
+    xProps->setPropertyValue(u"CharWeight"_ustr, cpo::uno::Any(awt::FontWeight::BOLD));
+    xProps->setPropertyValue(u"CharColor"_ustr, cpo::uno::Any(nColor));
+    xProps->setPropertyValue(u"ParaAdjust"_ustr, cpo::uno::Any(style::ParagraphAdjust_CENTER));
+}
+
+// Remove a previously inserted body marking (the whole paragraph) by its bookmark.
+void removeBookmarkedMarking(const uno::Reference<frame::XModel>& xModel, const OUString& rName,
+                             bool bAtStart)
+{
+    uno::Reference<text::XBookmarksSupplier> xSupplier(xModel, uno::UNO_QUERY);
+    if (!xSupplier.is())
+        return;
+    uno::Reference<container::XNameAccess> xMarks = xSupplier->getBookmarks();
+    if (!xMarks.is() || !xMarks->hasByName(rName))
+        return;
+    uno::Reference<text::XTextContent> xMark(xMarks->getByName(rName), uno::UNO_QUERY);
+    if (!xMark.is())
+        return;
+    uno::Reference<text::XTextRange> xAnchor = xMark->getAnchor();
+    if (!xAnchor.is())
+        return;
+    uno::Reference<text::XText> xText = xAnchor->getText();
+
+    // Select the whole marking paragraph plus the break separating it from the
+    // body, so removal leaves no empty paragraph behind.
+    uno::Reference<text::XTextCursor> xCursor
+        = xText->createTextCursorByRange(bAtStart ? xAnchor->getStart() : xAnchor->getEnd());
+    uno::Reference<text::XParagraphCursor> xPara(xCursor, uno::UNO_QUERY);
+    if (!xPara.is())
+        return;
+    if (bAtStart)
+    {
+        xPara->gotoEndOfParagraph(true); // select marking (para start -> end)
+        xCursor->goRight(1, true); // absorb the trailing paragraph break
+    }
+    else
+    {
+        xPara->gotoStartOfParagraph(true); // select marking (para end -> start)
+        xCursor->goLeft(1, true); // absorb the leading paragraph break
+    }
+    xText->removeTextContent(xMark);
+    xText->insertString(xCursor, OUString(), true); // delete the selection
+}
+
+// Insert rMarking as its own paragraph at the start or end of the body, bookmarked
+// so it can be replaced or removed later.
+void insertBodyMarking(const uno::Reference<frame::XModel>& xModel, const OUString& rMarking,
+                       sal_Int32 nColor, bool bAtStart, const OUString& rName)
+{
+    uno::Reference<text::XTextDocument> xTextDoc(xModel, uno::UNO_QUERY);
+    if (!xTextDoc.is())
+        return;
+    uno::Reference<text::XText> xText = xTextDoc->getText();
+    if (!xText.is())
+        return;
+
+    uno::Reference<text::XTextCursor> xCursor = xText->createTextCursor();
+    if (bAtStart)
+    {
+        xCursor->gotoStart(false);
+        xText->insertControlCharacter(xCursor, text::ControlCharacter::PARAGRAPH_BREAK, false);
+        xCursor->gotoStart(false);
+        xText->insertString(xCursor, rMarking, false);
+    }
+    else
+    {
+        xCursor->gotoEnd(false);
+        xText->insertControlCharacter(xCursor, text::ControlCharacter::PARAGRAPH_BREAK, false);
+        xText->insertString(xCursor, rMarking, false);
+    }
+
+    // The marking is now the whole current paragraph: select it to format and bookmark.
+    uno::Reference<text::XParagraphCursor> xPara(xCursor, uno::UNO_QUERY);
+    if (xPara.is())
+        xPara->gotoStartOfParagraph(true);
+    formatMarkingSelection(xCursor, nColor);
+
+    uno::Reference<lang::XMultiServiceFactory> xFactory(xModel, uno::UNO_QUERY);
+    if (!xFactory.is())
+        return;
+    uno::Reference<text::XTextContent> xMark(
+        xFactory->createInstance(u"com.sun.star.text.Bookmark"_ustr), uno::UNO_QUERY);
+    uno::Reference<container::XNamed> xNamed(xMark, uno::UNO_QUERY);
+    if (!xMark.is() || !xNamed.is())
+        return;
+    xNamed->setName(rName);
+    xText->insertTextContent(xCursor, xMark, true);
+}
 }
 
 void storeLabelPart(const uno::Reference<frame::XModel>& xModel, std::u16string_view rBindingXml,
@@ -296,9 +402,30 @@ void applyMarking(const uno::Reference<frame::XModel>& xModel, const OUString& r
                    u"FooterTextLeft"_ustr, u"FooterTextFirst"_ustr, rMarking, nColor);
 }
 
+void applyBodyMarkings(const uno::Reference<frame::XModel>& xModel, const OUString& rMarking,
+                       sal_Int32 nColor, bool bStart, bool bEnd)
+{
+    // Always clear first, so a re-label that drops a placement removes its stale
+    // body marking; then (re)insert the ones the selection asks for.
+    removeBookmarkedMarking(xModel, BOOKMARK_DOC_START, true);
+    if (bStart)
+        insertBodyMarking(xModel, rMarking, nColor, true, BOOKMARK_DOC_START);
+
+    removeBookmarkedMarking(xModel, BOOKMARK_DOC_END, false);
+    if (bEnd)
+        insertBodyMarking(xModel, rMarking, nColor, false, BOOKMARK_DOC_END);
+}
+
+void removeBodyMarkings(const uno::Reference<frame::XModel>& xModel)
+{
+    removeBookmarkedMarking(xModel, BOOKMARK_DOC_START, true);
+    removeBookmarkedMarking(xModel, BOOKMARK_DOC_END, false);
+}
+
 void removeLabel(const uno::Reference<frame::XModel>& xModel, const OUString& rPageStyleName)
 {
     eraseStanagPart(xModel);
+    removeBodyMarkings(xModel);
 
     // Clear the marking the label wrote into the page style (v1 apply replaced the
     // header/footer content, so removal clears it); leave the areas enabled as-is.

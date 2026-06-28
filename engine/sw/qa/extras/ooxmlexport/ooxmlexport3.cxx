@@ -246,6 +246,39 @@ CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelRemove)
     CPPUNIT_ASSERT_EQUAL(OUString(), xHeader->getString());
 }
 
+CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelBodyMarking)
+{
+    // Cover (documentStart) and end-page (documentEnd) markings bracket the body,
+    // are idempotent on re-apply, and are removable.
+    createSwDoc();
+    uno::Reference<frame::XModel> xModel(mxComponent, uno::UNO_QUERY);
+    uno::Reference<text::XTextDocument> xTextDoc(mxComponent, uno::UNO_QUERY);
+    xTextDoc->getText()->setString(u"BODY"_ustr);
+
+    sw::seclabel::applyBodyMarkings(xModel, u"SECRET//X"_ustr, 0xC00000, /*bStart*/ true,
+                                    /*bEnd*/ true);
+    CPPUNIT_ASSERT_EQUAL(3, getParagraphs());
+    CPPUNIT_ASSERT_EQUAL(u"SECRET//X"_ustr, getParagraph(1)->getString());
+    CPPUNIT_ASSERT_EQUAL(u"BODY"_ustr, getParagraph(2)->getString());
+    CPPUNIT_ASSERT_EQUAL(u"SECRET//X"_ustr, getParagraph(3)->getString());
+
+    // Re-applying replaces, never duplicates.
+    sw::seclabel::applyBodyMarkings(xModel, u"SECRET//X"_ustr, 0xC00000, true, true);
+    CPPUNIT_ASSERT_EQUAL(3, getParagraphs());
+    CPPUNIT_ASSERT_EQUAL(u"BODY"_ustr, getParagraph(2)->getString());
+
+    // Dropping the end placement on re-label clears just that one.
+    sw::seclabel::applyBodyMarkings(xModel, u"SECRET//X"_ustr, 0xC00000, true, false);
+    CPPUNIT_ASSERT_EQUAL(2, getParagraphs());
+    CPPUNIT_ASSERT_EQUAL(u"SECRET//X"_ustr, getParagraph(1)->getString());
+    CPPUNIT_ASSERT_EQUAL(u"BODY"_ustr, getParagraph(2)->getString());
+
+    // Remove clears all body markings, leaving the body intact.
+    sw::seclabel::removeBodyMarkings(xModel);
+    CPPUNIT_ASSERT_EQUAL(1, getParagraphs());
+    CPPUNIT_ASSERT_EQUAL(u"BODY"_ustr, getParagraph(1)->getString());
+}
+
 DECLARE_OOXMLEXPORT_TEST(testA4AndBorders, "a4andborders.docx")
 {
     /*
