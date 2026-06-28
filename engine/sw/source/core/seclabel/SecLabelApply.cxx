@@ -183,6 +183,54 @@ void eraseDomAt(comphelper::SequenceAsHashMap& rGrabBag, const OUString& rKey, s
     }
     rGrabBag[rKey] <<= aOut;
 }
+
+// Clear the marking from every active variant of an area, without toggling the
+// area on/off (the inverse of setMarkingArea's text writes).
+void clearMarkingArea(const uno::Reference<beans::XPropertySet>& xPageStyle,
+                      const OUString& rIsShared, const OUString& rText, const OUString& rTextLeft,
+                      const OUString& rTextFirst)
+{
+    markText(xPageStyle, rText, OUString(), 0);
+    if (!getBool(xPageStyle, rIsShared))
+        markText(xPageStyle, rTextLeft, OUString(), 0);
+    if (!getBool(xPageStyle, u"FirstIsShared"_ustr))
+        markText(xPageStyle, rTextFirst, OUString(), 0);
+}
+
+// The named page style of the document, or an empty reference if not found.
+uno::Reference<beans::XPropertySet> getPageStyle(const uno::Reference<frame::XModel>& xModel,
+                                                 const OUString& rPageStyleName)
+{
+    uno::Reference<style::XStyleFamiliesSupplier> xSupplier(xModel, uno::UNO_QUERY);
+    if (!xSupplier.is())
+        return {};
+    uno::Reference<container::XNameAccess> xPageStyles;
+    xSupplier->getStyleFamilies()->getByName(u"PageStyles"_ustr) >>= xPageStyles;
+    if (!xPageStyles.is() || !xPageStyles->hasByName(rPageStyleName))
+        return {};
+    return uno::Reference<beans::XPropertySet>(xPageStyles->getByName(rPageStyleName),
+                                               uno::UNO_QUERY);
+}
+
+// Drop the STANAG customXml part (if any) from the document's grab-bag.
+void eraseStanagPart(const uno::Reference<frame::XModel>& xModel)
+{
+    uno::Reference<beans::XPropertySet> xModelProps(xModel, uno::UNO_QUERY);
+    if (!xModelProps.is())
+        return;
+    uno::Reference<beans::XPropertySetInfo> xInfo = xModelProps->getPropertySetInfo();
+    if (!xInfo.is() || !xInfo->hasPropertyByName(u"InteropGrabBag"_ustr))
+        return;
+
+    comphelper::SequenceAsHashMap aGrabBag(xModelProps->getPropertyValue(u"InteropGrabBag"_ustr));
+    const sal_Int32 nIndex = findStanagPart(aGrabBag);
+    if (nIndex < 0)
+        return;
+    eraseDomAt(aGrabBag, u"OOXCustomXml"_ustr, nIndex);
+    eraseDomAt(aGrabBag, u"OOXCustomXmlProps"_ustr, nIndex);
+    xModelProps->setPropertyValue(u"InteropGrabBag"_ustr,
+                                  cpo::uno::Any(aGrabBag.getAsConstPropertyValueList()));
+}
 }
 
 void storeLabelPart(const uno::Reference<frame::XModel>& xModel, std::u16string_view rBindingXml,
@@ -238,15 +286,7 @@ sal_Int32 resolveColor(const OUString& rColor)
 void applyMarking(const uno::Reference<frame::XModel>& xModel, const OUString& rMarking,
                   sal_Int32 nColor, const OUString& rPageStyleName)
 {
-    uno::Reference<style::XStyleFamiliesSupplier> xSupplier(xModel, uno::UNO_QUERY);
-    if (!xSupplier.is())
-        return;
-    uno::Reference<container::XNameAccess> xPageStyles;
-    xSupplier->getStyleFamilies()->getByName(u"PageStyles"_ustr) >>= xPageStyles;
-    if (!xPageStyles.is() || !xPageStyles->hasByName(rPageStyleName))
-        return;
-    uno::Reference<beans::XPropertySet> xPageStyle(xPageStyles->getByName(rPageStyleName),
-                                                   uno::UNO_QUERY);
+    uno::Reference<beans::XPropertySet> xPageStyle = getPageStyle(xModel, rPageStyleName);
     if (!xPageStyle.is())
         return;
 
@@ -254,6 +294,21 @@ void applyMarking(const uno::Reference<frame::XModel>& xModel, const OUString& r
                    u"HeaderTextLeft"_ustr, u"HeaderTextFirst"_ustr, rMarking, nColor);
     setMarkingArea(xPageStyle, u"FooterIsOn"_ustr, u"FooterIsShared"_ustr, u"FooterText"_ustr,
                    u"FooterTextLeft"_ustr, u"FooterTextFirst"_ustr, rMarking, nColor);
+}
+
+void removeLabel(const uno::Reference<frame::XModel>& xModel, const OUString& rPageStyleName)
+{
+    eraseStanagPart(xModel);
+
+    // Clear the marking the label wrote into the page style (v1 apply replaced the
+    // header/footer content, so removal clears it); leave the areas enabled as-is.
+    uno::Reference<beans::XPropertySet> xPageStyle = getPageStyle(xModel, rPageStyleName);
+    if (!xPageStyle.is())
+        return;
+    clearMarkingArea(xPageStyle, u"HeaderIsShared"_ustr, u"HeaderText"_ustr, u"HeaderTextLeft"_ustr,
+                     u"HeaderTextFirst"_ustr);
+    clearMarkingArea(xPageStyle, u"FooterIsShared"_ustr, u"FooterText"_ustr, u"FooterTextLeft"_ustr,
+                     u"FooterTextFirst"_ustr);
 }
 
 bool readLabel(const uno::Reference<frame::XModel>& xModel, StanagLabel& rLabel)

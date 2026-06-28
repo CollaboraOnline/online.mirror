@@ -53,6 +53,11 @@ SW_DLLPUBLIC void applyMarking(const css::uno::Reference<css::frame::XModel>& xM
 SW_DLLPUBLIC bool readLabel(const css::uno::Reference<css::frame::XModel>& xModel,
                             StanagLabel& rLabel);
 
+/// Remove the document's STANAG label: strip its customXml part and clear the
+/// marking from the page style's header and footer.
+SW_DLLPUBLIC void removeLabel(const css::uno::Reference<css::frame::XModel>& xModel,
+                              const OUString& rPageStyleName);
+
 } // namespace sw::seclabel
 
 #endif // INCLUDED_SW_INC_SECLABELAPPLY_HXX

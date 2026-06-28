@@ -118,6 +118,7 @@ SwSecurityLabelDlg::SwSecurityLabelDlg(weld::Window* pParent, SwWrtShell& rSh)
     , m_xWarning(m_xBuilder->weld_label(u"seclabelwarning"_ustr))
     , m_xOkBtn(m_xBuilder->weld_button(u"ok"_ustr))
     , m_xRelabelBtn(m_xBuilder->weld_button(u"relabel"_ustr))
+    , m_xRemoveBtn(m_xBuilder->weld_button(u"remove"_ustr))
 {
     m_xCategories->set_size_request(m_xCategories->get_approximate_digit_width() * 32,
                                     m_xCategories->get_height_rows(6));
@@ -132,11 +133,15 @@ SwSecurityLabelDlg::SwSecurityLabelDlg(weld::Window* pParent, SwWrtShell& rSh)
     PopulatePolicies();
     initFromExistingLabel();
 
+    // Removal is offered whenever the document already carries a label.
+    m_xRemoveBtn->set_visible(m_bHasLabel);
+
     m_xPolicy->connect_changed(LINK(this, SwSecurityLabelDlg, PolicyHdl));
     m_xClassification->connect_changed(LINK(this, SwSecurityLabelDlg, ClassificationHdl));
     m_xCategories->connect_toggled(LINK(this, SwSecurityLabelDlg, CategoryToggleHdl));
     m_xOkBtn->connect_clicked(LINK(this, SwSecurityLabelDlg, OkHdl));
     m_xRelabelBtn->connect_clicked(LINK(this, SwSecurityLabelDlg, RelabelHdl));
+    m_xRemoveBtn->connect_clicked(LINK(this, SwSecurityLabelDlg, RemoveHdl));
 
     m_xWarning->set_label_type(weld::LabelType::Warning);
 
@@ -250,6 +255,8 @@ void SwSecurityLabelDlg::initFromExistingLabel()
     sw::seclabel::StanagLabel aLabel;
     if (!sw::seclabel::readLabel(xModel, aLabel))
         return;
+
+    m_bHasLabel = true;
 
     // A label written under a policy we don't have can't be edited structurally;
     // show it read-only and offer re-labeling under an available policy.
@@ -436,6 +443,18 @@ IMPL_LINK_NOARG(SwSecurityLabelDlg, RelabelHdl, weld::Button&, void)
     m_xOkBtn->set_visible(true);
     setActivePolicy(m_xPolicy->get_active());
     UpdatePreview();
+}
+
+IMPL_LINK_NOARG(SwSecurityLabelDlg, RemoveHdl, weld::Button&, void)
+{
+    SwDocShell* pDocShell = m_rSh.GetDoc()->GetDocShell();
+    if (!pDocShell)
+        return;
+    uno::Reference<frame::XModel> xModel(pDocShell->GetModel());
+    if (!xModel.is())
+        return;
+    sw::seclabel::removeLabel(xModel, getCurrentPageStyle(xModel));
+    m_xDialog->response(RET_OK);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

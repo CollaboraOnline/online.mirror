@@ -46,6 +46,9 @@ class SwSecurityLabelDlg final : public weld::GenericDialogController
     // offers re-labeling. Cleared once the user chooses to re-label.
     bool m_bForeignPolicy = false;
 
+    // The document already carries a label (matching or foreign); enables Remove.
+    bool m_bHasLabel = false;
+
     std::unique_ptr<weld::Widget> m_xEditBox;
     std::unique_ptr<weld::ComboBox> m_xPolicy;
     std::unique_ptr<weld::ComboBox> m_xClassification;
@@ -54,12 +57,14 @@ class SwSecurityLabelDlg final : public weld::GenericDialogController
     std::unique_ptr<weld::Label> m_xWarning;
     std::unique_ptr<weld::Button> m_xOkBtn;
     std::unique_ptr<weld::Button> m_xRelabelBtn;
+    std::unique_ptr<weld::Button> m_xRemoveBtn;
 
     DECL_LINK(PolicyHdl, weld::ComboBox&, void);
     DECL_LINK(ClassificationHdl, weld::ComboBox&, void);
     DECL_LINK(CategoryToggleHdl, const weld::TreeView::iter_col&, void);
     DECL_LINK(OkHdl, weld::Button&, void);
     DECL_LINK(RelabelHdl, weld::Button&, void);
+    DECL_LINK(RemoveHdl, weld::Button&, void);
 
     std::vector<bool> collectSelection() const;
     void applyLabel(const OUString& rClassification, const std::vector<bool>& rSelected);

@@ -70,6 +70,19 @@
                 <property name="position">2</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkButton" id="remove">
+                <property name="label" translatable="yes" context="seclabeldialog|remove">Re_move</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="use-underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>

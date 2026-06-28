@@ -210,6 +210,42 @@ CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelHeaderVariants)
     CPPUNIT_ASSERT_EQUAL(u"SECRET//X"_ustr, areaText(u"FooterTextFirst"_ustr)); // footer first
 }
 
+CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelRemove)
+{
+    // Removing a label strips its customXml part and clears the header/footer marking.
+    createSwDoc();
+    uno::Reference<frame::XModel> xModel(mxComponent, uno::UNO_QUERY);
+
+    sw::seclabel::StanagLabel aLabel;
+    aLabel.aPolicyId = u"urn:oid:1.2.826.0.1310.1.2.0"_ustr;
+    aLabel.aClassification = u"SECRET"_ustr;
+    aLabel.aCreationDateTime = u"2026-06-21T10:00:00Z"_ustr;
+    sw::seclabel::storeLabelPart(
+        xModel, aLabel.toBindingXml(),
+        sw::seclabel::buildItemProps(u"{B6E4D8A1-1A35-4F0E-9B7A-71F4C0F5E0D3}"_ustr,
+                                     sw::seclabel::STANAG_BINDING_SCHEMA));
+    sw::seclabel::applyMarking(xModel, u"SECRET//X"_ustr, 0xC00000, u"Standard"_ustr);
+
+    // Sanity: the label is present before removal.
+    sw::seclabel::StanagLabel aBefore;
+    CPPUNIT_ASSERT(sw::seclabel::readLabel(xModel, aBefore));
+
+    sw::seclabel::removeLabel(xModel, u"Standard"_ustr);
+
+    // The STANAG part is gone and the header is cleared.
+    sw::seclabel::StanagLabel aAfter;
+    CPPUNIT_ASSERT(!sw::seclabel::readLabel(xModel, aAfter));
+    uno::Reference<beans::XPropertySet> xProps(xModel, uno::UNO_QUERY);
+    comphelper::SequenceAsHashMap aGrabBag(xProps->getPropertyValue(u"InteropGrabBag"_ustr));
+    cpo::uno::Sequence<uno::Reference<css::xml::dom::XDocument>> aParts;
+    aGrabBag[u"OOXCustomXml"_ustr] >>= aParts;
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(0), aParts.getLength());
+
+    uno::Reference<text::XText> xHeader = getProperty<uno::Reference<text::XText>>(
+        getStyles(u"PageStyles"_ustr)->getByName(u"Standard"_ustr), u"HeaderText"_ustr);
+    CPPUNIT_ASSERT_EQUAL(OUString(), xHeader->getString());
+}
+
 DECLARE_OOXMLEXPORT_TEST(testA4AndBorders, "a4andborders.docx")
 {
     /*
