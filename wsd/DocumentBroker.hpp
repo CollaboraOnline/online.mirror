@@ -359,6 +359,9 @@ public:
     /// and receives save notification. Otherwise, false.
     bool autoSave(bool force, bool dontSaveIfUnmodified, bool finalWrite = false);
 
+    /// True when a save that is allowed to background would do so.
+    bool isBackgroundSaveWorking(bool canBackground) const;
+
     /// Saves the document and stops if there was nothing to autosave.
     void autoSaveAndStop(const std::string& reason);
 
