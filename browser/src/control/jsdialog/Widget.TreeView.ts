@@ -80,10 +80,15 @@ class TreeViewControl {
 	_isNavigator: boolean;
 	_singleClickActivate: boolean;
 	_filterTimer: ReturnType<typeof setTimeout>;
+	// Type-ahead keystrokes accumulated since the last pause.
+	_typeAheadText: string = '';
+	_typeAheadTimer: ReturnType<typeof setTimeout>;
 	_rows: Map<string, HTMLElement>;
 	readonly PAGE_ENTRY_PREFIX = '-$#~';
 	readonly PAGE_ENTRY_SUFFIX = '~#$-';
 	readonly PAGE_DIVIDER_ROW_CLASS = 'page-divider-row';
+	// Idle time after which the accumulated type-ahead text is cleared, in milliseconds.
+	readonly TYPE_AHEAD_RESET_TIMEOUT = 1000;
 
 	constructor(data: TreeWidgetJSON, builder: JSBuilder) {
 		this._container = window.L.DomUtil.create(
@@ -1536,16 +1541,38 @@ class TreeViewControl {
 		builder: JSBuilder,
 		data: TreeWidgetJSON,
 	) {
-		const lowerChar = char.toLowerCase();
-		const startIndex = currIndex >= 0 ? currIndex + 1 : 0;
+		if (this._typeAheadTimer) clearTimeout(this._typeAheadTimer);
+		this._typeAheadTimer = setTimeout(() => {
+			this._typeAheadText = '';
+		}, this.TYPE_AHEAD_RESET_TIMEOUT);
+
+		this._typeAheadText += char.toLowerCase();
+		const search = this._typeAheadText;
+
+		// With a single character, begin after the current row so repeated
+		// presses of the same key step through the matches. With more, begin
+		// at the current row so refining the text keeps the row in place when
+		// it still matches instead of jumping to the next one.
+		const startIndex =
+			search.length > 1
+				? Math.max(currIndex, 0)
+				: currIndex >= 0
+					? currIndex + 1
+					: 0;
 		const total = listElements.length;
 
+		// A flat list matches the text anywhere in an entry, so values with
+		// shared endings or embedded digits stay reachable; a real tree keeps
+		// the usual jump to an entry that starts with the text.
 		for (let i = 0; i < total; i++) {
 			const index = (startIndex + i) % total;
 			const el = listElements[index];
 			if (el.clientHeight <= 0) continue;
 			const text = el.innerText.trim().toLowerCase();
-			if (text.startsWith(lowerChar)) {
+			const matches = this._isListbox
+				? text.indexOf(search) >= 0
+				: text.startsWith(search);
+			if (matches) {
 				this.changeFocusedRow(listElements, currIndex, index, builder, data);
 				return;
 			}
@@ -1672,10 +1699,11 @@ class TreeViewControl {
 			preventDef = true;
 		} else if (
 			event.key.length === 1 &&
-			event.key.match(/[a-zA-Z]/) &&
+			event.key !== ' ' &&
 			!event.ctrlKey &&
 			!event.altKey &&
-			!event.metaKey
+			!event.metaKey &&
+			!TreeViewControl.isEditableTarget(event.target)
 		) {
 			this.typeAheadSearch(listElements, currIndex, event.key, builder, data);
 			preventDef = true;
@@ -2032,6 +2060,15 @@ class TreeViewControl {
 	static isMenu(data: TreeWidgetJSON): boolean {
 		if (data.type === 'menu') return true;
 		return false;
+	}
+
+	// True when the key was typed into a text field, such as the tree's own
+	// search box, where it should edit that field rather than jump in the list.
+	static isEditableTarget(target: EventTarget | null): boolean {
+		const element = target as HTMLElement;
+		if (!element || !element.tagName) return false;
+		const tag = element.tagName.toLowerCase();
+		return tag === 'input' || tag === 'textarea' || element.isContentEditable;
 	}
 
 	static hasSearchField(data: TreeWidgetJSON): boolean {
