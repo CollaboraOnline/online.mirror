@@ -79,13 +79,14 @@
 	filter: invert(1) brightness(2);
 }
 
-
-#spreadsheet-tab-scroll button.spreadsheet-tab-selected:hover {
+#spreadsheet-tab-scroll button.spreadsheet-tab-selected:hover,
+#spreadsheet-tab-scroll button.spreadsheet-tab-selected:focus-visible {
 	background-color: rgba(var(--doc-type)) !important;
 	color: var(--color-primary-text) !important;
 }
 
-.spreadsheet-tab:hover {
+.spreadsheet-tab:hover,
+.spreadsheet-tab:focus-visible {
 	border: 1px solid var(--color-border-darker);
 	background: var(--color-background-darker) !important;
 	color: var(--color-text-darker) !important;
