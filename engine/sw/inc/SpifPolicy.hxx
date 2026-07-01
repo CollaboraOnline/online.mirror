@@ -27,6 +27,9 @@ struct SpifClassification
     sal_Int32 nLacv = 0; ///< @lacv (label and certificate value)
     sal_Int32 nHierarchy = 0; ///< @hierarchy (dominance ordering)
     bool bObsolete = false; ///< @obsolete: not for newly created labels
+    OUString aMarkingPhrase; ///< markingData @phrase (shown when noNameDisplay)
+    bool bNoNameDisplay = false; ///< markingData code: show phrase, not the name
+    bool bSuppressClassName = false; ///< markingData code: omit the class from the marking
 };
 
 /// A reference to a category in a tag set, by tag-set name + lacv (or all of them).
@@ -54,6 +57,8 @@ struct SW_DLLPUBLIC SpifTagCategory
     sal_Int64 nLacv = 0; ///< @lacv (may exceed 32 bits)
     bool bObsolete = false; ///< @obsolete: not for newly created labels
     OUString aRequiredClass; ///< @requiredClass: classification required when this category is used
+    OUString aMarkingPhrase; ///< markingData @phrase (shown when noNameDisplay)
+    bool bNoNameDisplay = false; ///< markingData code: show phrase, not the category name
     std::vector<OUString> aExcludedClasses; ///< excludedClass: classifications this category excludes
     std::vector<SpifCategoryRef> aExcludedCategories; ///< excludedCategory: categories this excludes
     std::vector<SpifRequiredCategory> aRequiredCategories; ///< requiredCategory groups

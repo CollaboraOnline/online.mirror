@@ -42,6 +42,37 @@ SpifCategoryRef parseCategoryRef(tools::XmlWalker& rWalker)
     return aRef;
 }
 
+// A parsed markingData element: its phrase and the display codes we honour.
+struct MarkingData
+{
+    OUString aPhrase;
+    bool bNoNameDisplay = false;
+    bool bSuppressClassName = false;
+};
+
+// Parse a markingData element (walker positioned on it): @phrase plus its <code>s.
+// noMarkingDisplay needs no flag: output uses the name, which is already the default.
+MarkingData parseMarkingData(tools::XmlWalker& rWalker)
+{
+    MarkingData aData;
+    aData.aPhrase = toOU(rWalker.attribute("phrase"_ostr));
+    rWalker.children();
+    while (rWalker.isValid())
+    {
+        if (rWalker.name() == "code")
+        {
+            const OString aCode = rWalker.content();
+            if (aCode == "noNameDisplay")
+                aData.bNoNameDisplay = true;
+            else if (aCode == "suppressClassName")
+                aData.bSuppressClassName = true;
+        }
+        rWalker.next();
+    }
+    rWalker.parent();
+    return aData;
+}
+
 SpifTagCategory parseTagCategory(tools::XmlWalker& rWalker)
 {
     SpifTagCategory aCategory;
@@ -53,7 +84,13 @@ SpifTagCategory parseTagCategory(tools::XmlWalker& rWalker)
     rWalker.children();
     while (rWalker.isValid())
     {
-        if (rWalker.name() == "excludedClass")
+        if (rWalker.name() == "markingData")
+        {
+            const MarkingData aData = parseMarkingData(rWalker);
+            aCategory.aMarkingPhrase = aData.aPhrase;
+            aCategory.bNoNameDisplay = aData.bNoNameDisplay;
+        }
+        else if (rWalker.name() == "excludedClass")
             aCategory.aExcludedClasses.push_back(toOU(rWalker.content()));
         else if (rWalker.name() == "excludedCategory")
             aCategory.aExcludedCategories.push_back(parseCategoryRef(rWalker));
@@ -207,6 +244,19 @@ bool SpifPolicy::parse(SvStream& rStream)
                     aClass.nLacv = aWalker.attribute("lacv"_ostr).toInt32();
                     aClass.nHierarchy = aWalker.attribute("hierarchy"_ostr).toInt32();
                     aClass.bObsolete = aWalker.attribute("obsolete"_ostr) == "true";
+                    aWalker.children();
+                    while (aWalker.isValid())
+                    {
+                        if (aWalker.name() == "markingData")
+                        {
+                            const MarkingData aData = parseMarkingData(aWalker);
+                            aClass.aMarkingPhrase = aData.aPhrase;
+                            aClass.bNoNameDisplay = aData.bNoNameDisplay;
+                            aClass.bSuppressClassName = aData.bSuppressClassName;
+                        }
+                        aWalker.next();
+                    }
+                    aWalker.parent();
                     aClassifications.push_back(aClass);
                 }
                 aWalker.next();
@@ -234,10 +284,20 @@ bool SpifPolicy::parse(SvStream& rStream)
 OUString SpifPolicy::buildMarking(const OUString& rClassification,
                                   const std::vector<bool>& rSelected) const
 {
-    // First cut: classification, then per tag with selected values
-    // separator + prefix + space-joined names + suffix. Display modifiers
-    // (noNameDisplay/suppressClassName) and multi-level marking data: TODO.
+    // Classification display honours its markingData codes: suppressClassName drops
+    // it entirely, noNameDisplay shows the marking phrase, otherwise the name.
     OUString aMarking = rClassification;
+    for (const auto& rClass : aClassifications)
+    {
+        if (rClass.aName != rClassification)
+            continue;
+        if (rClass.bSuppressClassName)
+            aMarking.clear();
+        else if (rClass.bNoNameDisplay && !rClass.aMarkingPhrase.isEmpty())
+            aMarking = rClass.aMarkingPhrase;
+        break;
+    }
+
     size_t nIdx = 0;
     for (const auto& rTagSet : aTagSets)
     {
@@ -254,13 +314,20 @@ OUString SpifPolicy::buildMarking(const OUString& rClassification,
                 {
                     if (!aValues.isEmpty())
                         aValues += u" "_ustr;
-                    aValues += rCategory.aName;
+                    // noNameDisplay shows the category's marking phrase, not its name.
+                    aValues += (rCategory.bNoNameDisplay && !rCategory.aMarkingPhrase.isEmpty())
+                                   ? rCategory.aMarkingPhrase
+                                   : rCategory.aName;
                 }
                 ++nIdx;
             }
-            if (!aValues.isEmpty())
-                aMarking
-                    += rTag.aMarkingSeparator + rTag.aMarkingPrefix + aValues + rTag.aMarkingSuffix;
+            if (aValues.isEmpty())
+                continue;
+            // The separator joins this group to what precedes it; with the class
+            // name suppressed, the first group leads without one.
+            if (!aMarking.isEmpty())
+                aMarking += rTag.aMarkingSeparator;
+            aMarking += rTag.aMarkingPrefix + aValues + rTag.aMarkingSuffix;
         }
     }
     return aMarking;

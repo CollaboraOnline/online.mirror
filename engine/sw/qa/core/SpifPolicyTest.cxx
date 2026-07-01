@@ -29,6 +29,7 @@ class SpifPolicyTest : public CppUnit::TestFixture
     void testMatchesLabel();
     void testPolicySet();
     void testWantsWatermark();
+    void testMarkingModifiers();
 
     CPPUNIT_TEST_SUITE(SpifPolicyTest);
     CPPUNIT_TEST(testParse);
@@ -38,6 +39,7 @@ class SpifPolicyTest : public CppUnit::TestFixture
     CPPUNIT_TEST(testMatchesLabel);
     CPPUNIT_TEST(testPolicySet);
     CPPUNIT_TEST(testWantsWatermark);
+    CPPUNIT_TEST(testMarkingModifiers);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -436,6 +438,60 @@ void SpifPolicyTest::testWantsWatermark()
 
     CPPUNIT_ASSERT(aPolicy.wantsDocumentEnd(u"SECRET"_ustr, { false, false, false, true })); // ENDP
     CPPUNIT_ASSERT(!aPolicy.wantsDocumentEnd(u"SECRET"_ustr, { true, true, true, false }));
+}
+
+void SpifPolicyTest::testMarkingModifiers()
+{
+    // markingData display codes: noNameDisplay (show phrase) on a classification and
+    // a category, and suppressClassName (drop the classification from the marking).
+    static const OString aSpif(
+        R"xml(<?xml version="1.0" encoding="utf-8"?>
+<spif:SPIF xmlns:spif="http://www.xmlspif.org/spif" schemaVersion="1.0" version="1">
+  <spif:securityPolicyId name="T" id="1.2.3" />
+  <spif:securityClassifications>
+    <spif:securityClassification name="SECRET" color="red" lacv="4" hierarchy="4">
+      <spif:markingData phrase="S"><spif:code>noNameDisplay</spif:code></spif:markingData>
+    </spif:securityClassification>
+    <spif:securityClassification name="TOPSECRET" color="red" lacv="5" hierarchy="5">
+      <spif:markingData><spif:code>suppressClassName</spif:code></spif:markingData>
+    </spif:securityClassification>
+  </spif:securityClassifications>
+  <spif:securityCategoryTagSets>
+    <spif:securityCategoryTagSet name="Rel" id="1.2.3.0">
+      <spif:securityCategoryTag name="Releasable" tagType="enumerated" enumType="permissive">
+        <spif:tagCategory name="CANADA" lacv="1" obsolete="false" />
+        <spif:tagCategory name="GBR" lacv="2" obsolete="false">
+          <spif:markingData phrase="UK"><spif:code>noNameDisplay</spif:code></spif:markingData>
+        </spif:tagCategory>
+        <spif:markingQualifier markingCode="pageTopBottom">
+          <spif:qualifier markingQualifier="//" qualifierCode="separator" />
+          <spif:qualifier markingQualifier="." qualifierCode="suffix" />
+        </spif:markingQualifier>
+      </spif:securityCategoryTag>
+    </spif:securityCategoryTagSet>
+  </spif:securityCategoryTagSets>
+</spif:SPIF>)xml"_ostr);
+    SvMemoryStream aStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(), StreamMode::READ);
+    sw::seclabel::SpifPolicy aPolicy;
+    CPPUNIT_ASSERT(aPolicy.parse(aStream));
+
+    CPPUNIT_ASSERT(aPolicy.aClassifications[0].bNoNameDisplay);
+    CPPUNIT_ASSERT_EQUAL(u"S"_ustr, aPolicy.aClassifications[0].aMarkingPhrase);
+    CPPUNIT_ASSERT(aPolicy.aClassifications[1].bSuppressClassName);
+    CPPUNIT_ASSERT(aPolicy.aTagSets[0].aTags[0].aCategories[1].bNoNameDisplay);
+
+    // noNameDisplay: the classification shows its phrase "S", not "SECRET".
+    CPPUNIT_ASSERT_EQUAL(u"S//CANADA."_ustr,
+                         aPolicy.buildMarking(u"SECRET"_ustr, { true, false }));
+    // ... and the category GBR shows its phrase "UK".
+    CPPUNIT_ASSERT_EQUAL(u"S//UK."_ustr, aPolicy.buildMarking(u"SECRET"_ustr, { false, true }));
+
+    // suppressClassName: the class is dropped and the first group leads without a
+    // separator.
+    CPPUNIT_ASSERT_EQUAL(u"CANADA."_ustr,
+                         aPolicy.buildMarking(u"TOPSECRET"_ustr, { true, false }));
+    CPPUNIT_ASSERT_EQUAL(u"CANADA UK."_ustr,
+                         aPolicy.buildMarking(u"TOPSECRET"_ustr, { true, true }));
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SpifPolicyTest);
