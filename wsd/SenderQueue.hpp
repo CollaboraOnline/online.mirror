@@ -34,7 +34,10 @@ public:
         std::unique_lock<std::mutex> lock(_mutex);
 
         if (!SigUtil::getTerminationFlag() && deduplicate(item))
+        {
             _queue.push_back(item);
+            _totalBytes += item->size();
+        }
 
         return _queue.size();
     }
@@ -55,6 +58,7 @@ public:
         {
             item = _queue.front();
             _queue.pop_front();
+            _totalBytes -= item->size();
             return true;
         }
 
@@ -65,6 +69,13 @@ public:
     {
         std::lock_guard<std::mutex> lock(_mutex);
         return _queue.size();
+    }
+
+    /// Total number of payload bytes currently held across all queued items.
+    size_t bytes() const
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+        return _totalBytes;
     }
 
     void dumpState(std::ostream& os)
@@ -98,10 +109,17 @@ public:
         }
         if (repeats > 0)
             os << "\t\t\t<repeats " << repeats << " times>\n";
-        os << "\t\tqueue size: " << totalSize << " bytes\n";
+        os << "\t\tqueue size: " << totalSize << " bytes == " << _totalBytes << "\n";
     }
 
 private:
+    /// Remove a queued item, keeping the running byte total in step.
+    void eraseAt(typename std::deque<Item>::iterator pos)
+    {
+        _totalBytes -= (*pos)->size();
+        _queue.erase(pos);
+    }
+
     /// Deduplicate messages based on the new one.
     /// Returns true if the new message should be
     /// enqueued, otherwise false.
@@ -134,7 +152,7 @@ private:
                 });
 
             if (pos != _queue.end())
-                _queue.erase(pos);
+                eraseAt(pos);
         }
         else if (command == "invalidatecursor:" ||
                  command == "setpart:")
@@ -148,7 +166,7 @@ private:
                 });
 
             if (pos != _queue.end())
-                _queue.erase(pos);
+                eraseAt(pos);
         }
         else if (command == "progress:")
         {
@@ -164,7 +182,7 @@ private:
                 });
 
                 if (pos != _queue.end())
-                    _queue.erase(pos);
+                    eraseAt(pos);
             }
         }
         else if (command == "invalidateviewcursor:")
@@ -193,7 +211,7 @@ private:
                 });
 
             if (pos != _queue.end())
-                _queue.erase(pos);
+                eraseAt(pos);
         }
 
         return true;
@@ -202,6 +220,8 @@ private:
 private:
     mutable std::mutex _mutex;
     std::deque<Item> _queue;
+    /// Sum of the payload sizes of every item currently in the queue.
+    std::size_t _totalBytes = 0;
     using queue_item_t = typename std::deque<Item>::value_type;
 };
 
