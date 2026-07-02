@@ -431,6 +431,13 @@ void SwSecurityLabelDlg::applyLabel(const OUString& rClassification,
     sw::seclabel::applyBodyMarkings(xModel, m_pPolicy->buildMarking(rClassification, rSelected),
                                     nColor, m_pPolicy->wantsDocumentStart(rClassification, rSelected),
                                     m_pPolicy->wantsDocumentEnd(rClassification, rSelected));
+
+    // Portion marking annotates the portion the user had selected (the view cursor).
+    if (m_pPolicy->wantsPortionMarking(rClassification, rSelected))
+    {
+        sw::seclabel::applyPortionMarking(
+            xModel, m_pPolicy->buildMarking(rClassification, rSelected), nColor);
+    }
 }
 
 IMPL_LINK_NOARG(SwSecurityLabelDlg, PolicyHdl, weld::ComboBox&, void)

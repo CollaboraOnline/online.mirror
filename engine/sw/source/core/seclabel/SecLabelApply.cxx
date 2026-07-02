@@ -28,6 +28,7 @@
 #include <com/sun/star/text/XTextContent.hpp>
 #include <com/sun/star/text/XTextCursor.hpp>
 #include <com/sun/star/text/XTextDocument.hpp>
+#include <com/sun/star/text/XTextViewCursorSupplier.hpp>
 #include <com/sun/star/xml/dom/DocumentBuilder.hpp>
 #include <com/sun/star/xml/dom/XDocument.hpp>
 #include <com/sun/star/xml/sax/Writer.hpp>
@@ -420,6 +421,42 @@ void removeBodyMarkings(const uno::Reference<frame::XModel>& xModel)
 {
     removeBookmarkedMarking(xModel, BOOKMARK_DOC_START, true);
     removeBookmarkedMarking(xModel, BOOKMARK_DOC_END, false);
+}
+
+void applyPortionMarking(const uno::Reference<frame::XModel>& xModel,
+                         std::u16string_view rMarking, sal_Int32 nColor)
+{
+    // Portion marking annotates one portion: the paragraph holding the view cursor.
+    uno::Reference<text::XTextViewCursorSupplier> xSupplier(xModel->getCurrentController(),
+                                                            uno::UNO_QUERY);
+    if (!xSupplier.is())
+        return;
+    uno::Reference<text::XTextRange> xViewCursor = xSupplier->getViewCursor();
+    if (!xViewCursor.is())
+        return;
+    uno::Reference<text::XText> xText = xViewCursor->getText();
+    if (!xText.is())
+        return;
+
+    const OUString aPrefix = u"("_ustr + rMarking + u") "_ustr;
+
+    // Work at the start of the portion's paragraph.
+    uno::Reference<text::XTextCursor> xCursor
+        = xText->createTextCursorByRange(xViewCursor->getStart());
+    uno::Reference<text::XParagraphCursor> xPara(xCursor, uno::UNO_QUERY);
+    if (!xPara.is())
+        return;
+    xPara->gotoStartOfParagraph(false);
+
+    // Idempotent: skip if this paragraph is already portion-marked with this prefix.
+    uno::Reference<text::XTextCursor> xProbe = xText->createTextCursorByRange(xCursor->getStart());
+    xProbe->goRight(aPrefix.getLength(), true);
+    if (xProbe->getString() == aPrefix)
+        return;
+
+    xText->insertString(xCursor, aPrefix, false); // cursor ends after the prefix
+    xCursor->goLeft(aPrefix.getLength(), true); // select the inserted prefix
+    formatMarkingSelection(xCursor, nColor);
 }
 
 void removeLabel(const uno::Reference<frame::XModel>& xModel, const OUString& rPageStyleName)

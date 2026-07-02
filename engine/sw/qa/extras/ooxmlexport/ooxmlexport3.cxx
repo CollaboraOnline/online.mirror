@@ -31,6 +31,9 @@
 #include <StanagLabel.hxx>
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/frame/XModel.hpp>
+#include <com/sun/star/text/ControlCharacter.hpp>
+#include <com/sun/star/text/XTextViewCursorSupplier.hpp>
+#include <com/sun/star/view/XViewCursor.hpp>
 #include <comphelper/sequenceashashmap.hxx>
 #include <tools/stream.hxx>
 
@@ -277,6 +280,37 @@ CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelBodyMarking)
     sw::seclabel::removeBodyMarkings(xModel);
     CPPUNIT_ASSERT_EQUAL(1, getParagraphs());
     CPPUNIT_ASSERT_EQUAL(u"BODY"_ustr, getParagraph(1)->getString());
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelPortionMarking)
+{
+    // Portion marking prefixes the view cursor's paragraph, and is idempotent.
+    createSwDoc();
+    uno::Reference<frame::XModel> xModel(mxComponent, uno::UNO_QUERY);
+    uno::Reference<text::XTextDocument> xTextDoc(mxComponent, uno::UNO_QUERY);
+
+    // Two paragraphs; place the view cursor in the second.
+    uno::Reference<text::XText> xBody = xTextDoc->getText();
+    uno::Reference<text::XTextCursor> xBodyCursor = xBody->createTextCursor();
+    xBody->insertString(xBodyCursor, u"FIRST"_ustr, false);
+    xBody->insertControlCharacter(xBodyCursor, text::ControlCharacter::PARAGRAPH_BREAK, false);
+    xBody->insertString(xBodyCursor, u"SECOND"_ustr, false);
+
+    uno::Reference<text::XTextViewCursorSupplier> xSupplier(xModel->getCurrentController(),
+                                                            uno::UNO_QUERY);
+    uno::Reference<text::XTextViewCursor> xViewCursor = xSupplier->getViewCursor();
+    xViewCursor->gotoEnd(false); // land in the second paragraph
+
+    sw::seclabel::applyPortionMarking(xModel, u"SECRET//X"_ustr, 0xC00000);
+
+    // Only the cursor's paragraph is prefixed; the other is untouched.
+    CPPUNIT_ASSERT_EQUAL(2, getParagraphs());
+    CPPUNIT_ASSERT_EQUAL(u"FIRST"_ustr, getParagraph(1)->getString());
+    CPPUNIT_ASSERT_EQUAL(u"(SECRET//X) SECOND"_ustr, getParagraph(2)->getString());
+
+    // Re-applying the same portion marking does not stack a second prefix.
+    sw::seclabel::applyPortionMarking(xModel, u"SECRET//X"_ustr, 0xC00000);
+    CPPUNIT_ASSERT_EQUAL(u"(SECRET//X) SECOND"_ustr, getParagraph(2)->getString());
 }
 
 DECLARE_OOXMLEXPORT_TEST(testA4AndBorders, "a4andborders.docx")

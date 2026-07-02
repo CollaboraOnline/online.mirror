@@ -416,6 +416,12 @@ void SpifPolicyTest::testWantsWatermark()
         <spif:markingQualifier markingCode="documentEnd" />
       </spif:securityCategoryTag>
     </spif:securityCategoryTagSet>
+    <spif:securityCategoryTagSet name="Portion" id="1.2.3.4">
+      <spif:securityCategoryTag name="PortionTag" tagType="enumerated" enumType="permissive">
+        <spif:tagCategory name="PORT" lacv="5" obsolete="false" />
+        <spif:markingQualifier markingCode="portionMarking" />
+      </spif:securityCategoryTag>
+    </spif:securityCategoryTagSet>
   </spif:securityCategoryTagSets>
 </spif:SPIF>)xml"_ostr);
     SvMemoryStream aStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(), StreamMode::READ);
@@ -427,17 +433,25 @@ void SpifPolicyTest::testWantsWatermark()
     CPPUNIT_ASSERT(!aPolicy.aTagSets[1].aTags[0].bWatermark);
     CPPUNIT_ASSERT(aPolicy.aTagSets[2].aTags[0].bDocumentStart);
     CPPUNIT_ASSERT(aPolicy.aTagSets[3].aTags[0].bDocumentEnd);
+    CPPUNIT_ASSERT(aPolicy.aTagSets[4].aTags[0].bPortionMarking);
 
-    // Selectable order under SECRET: TS(0), CANADA(1), COVER(2), ENDP(3).
-    CPPUNIT_ASSERT(aPolicy.wantsWatermark(u"SECRET"_ustr, { true, false, false, false })); // TS
-    CPPUNIT_ASSERT(!aPolicy.wantsWatermark(u"SECRET"_ustr, { false, true, false, false })); // CANADA
-    CPPUNIT_ASSERT(!aPolicy.wantsWatermark(u"SECRET"_ustr, { false, false, false, false }));
+    // Selectable order under SECRET: TS(0), CANADA(1), COVER(2), ENDP(3), PORT(4).
+    CPPUNIT_ASSERT(aPolicy.wantsWatermark(u"SECRET"_ustr, { true, false, false, false, false })); // TS
+    CPPUNIT_ASSERT(
+        !aPolicy.wantsWatermark(u"SECRET"_ustr, { false, true, false, false, false })); // CANADA
+    CPPUNIT_ASSERT(!aPolicy.wantsWatermark(u"SECRET"_ustr, { false, false, false, false, false }));
 
-    CPPUNIT_ASSERT(aPolicy.wantsDocumentStart(u"SECRET"_ustr, { false, false, true, false })); // COVER
-    CPPUNIT_ASSERT(!aPolicy.wantsDocumentStart(u"SECRET"_ustr, { true, true, false, true }));
+    CPPUNIT_ASSERT(
+        aPolicy.wantsDocumentStart(u"SECRET"_ustr, { false, false, true, false, false })); // COVER
+    CPPUNIT_ASSERT(!aPolicy.wantsDocumentStart(u"SECRET"_ustr, { true, true, false, true, true }));
 
-    CPPUNIT_ASSERT(aPolicy.wantsDocumentEnd(u"SECRET"_ustr, { false, false, false, true })); // ENDP
-    CPPUNIT_ASSERT(!aPolicy.wantsDocumentEnd(u"SECRET"_ustr, { true, true, true, false }));
+    CPPUNIT_ASSERT(
+        aPolicy.wantsDocumentEnd(u"SECRET"_ustr, { false, false, false, true, false })); // ENDP
+    CPPUNIT_ASSERT(!aPolicy.wantsDocumentEnd(u"SECRET"_ustr, { true, true, true, false, true }));
+
+    CPPUNIT_ASSERT(
+        aPolicy.wantsPortionMarking(u"SECRET"_ustr, { false, false, false, false, true })); // PORT
+    CPPUNIT_ASSERT(!aPolicy.wantsPortionMarking(u"SECRET"_ustr, { true, true, true, true, false }));
 }
 
 void SpifPolicyTest::testMarkingModifiers()

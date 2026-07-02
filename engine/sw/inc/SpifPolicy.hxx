@@ -83,6 +83,7 @@ struct SpifCategoryTag
     bool bWatermark = false; ///< markingQualifier @markingCode=waterMark
     bool bDocumentStart = false; ///< @markingCode=documentStart (cover marking)
     bool bDocumentEnd = false; ///< @markingCode=documentEnd (end-page marking)
+    bool bPortionMarking = false; ///< @markingCode=portionMarking (mark a selected portion)
     std::vector<SpifTagCategory> aCategories;
 };
 
@@ -143,6 +144,8 @@ public:
                             const std::vector<bool>& rSelected) const;
     bool wantsDocumentEnd(const OUString& rClassification,
                           const std::vector<bool>& rSelected) const;
+    bool wantsPortionMarking(const OUString& rClassification,
+                             const std::vector<bool>& rSelected) const;
 
     /// Check selection-count constraints (minSelection/maxSelection per tag) for
     /// the given classification and selection. rSelected is indexed as in

@@ -138,6 +138,8 @@ SpifCategoryTag parseCategoryTag(tools::XmlWalker& rWalker)
                 aTag.bDocumentStart = true;
             else if (aMarkingCode == "documentEnd")
                 aTag.bDocumentEnd = true;
+            else if (aMarkingCode == "portionMarking")
+                aTag.bPortionMarking = true;
             rWalker.children();
             while (rWalker.isValid())
             {
@@ -371,6 +373,12 @@ bool SpifPolicy::wantsDocumentEnd(const OUString& rClassification,
                                   const std::vector<bool>& rSelected) const
 {
     return anySelectedTag(rClassification, rSelected, &SpifCategoryTag::bDocumentEnd);
+}
+
+bool SpifPolicy::wantsPortionMarking(const OUString& rClassification,
+                                     const std::vector<bool>& rSelected) const
+{
+    return anySelectedTag(rClassification, rSelected, &SpifCategoryTag::bPortionMarking);
 }
 
 std::vector<SpifViolation> SpifPolicy::validate(const OUString& rClassification,
