@@ -2853,7 +2853,7 @@ button.has-img img {
 }
 
 .ui-custom-textarea.focused .ui-custom-textarea-cursor-layer span.cursor:not(.hidden) {
-	border-left: 1px solid black;
+	border-left: 1px solid var(--color-cursor-blink-background);
 	margin-left: -1px;
 }
 
