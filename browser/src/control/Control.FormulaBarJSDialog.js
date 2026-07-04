@@ -13,7 +13,7 @@
  * JSDialog.FormulaBar - implementation of formulabar toolbar
  */
 
-/* global JSDialog _ _UNO UNOKey WindowId */
+/* global JSDialog _ _UNO UNOKey WindowId app */
 
 const EXPAND_FORMULA_BAR_TEXT = _('Expand Formula Bar');
 const FUNCTION_WIZARD_TEXT = _('Function Wizard');
@@ -214,6 +214,23 @@ class FormulaBar {
 
 	blurField() {
 		window.L.DomUtil.removeClass(this.getInputField(), 'focused');
+	}
+
+	// Move keyboard focus into the formula bar, the same way a click on it
+	// does. Returns false when it cannot take focus, either because there is
+	// no field yet or the view is read-only.
+	focus() {
+		if (app.isReadOnly())
+			return false;
+		var input = this.getInputField();
+		if (!input)
+			return false;
+		this.map.setWinId(0);
+		this.map._textInput._emptyArea();
+		this.map._textInput.focus(true);
+		this.focusField();
+		this.map.onFormulaBarFocus();
+		return true;
 	}
 
 	enable() {
