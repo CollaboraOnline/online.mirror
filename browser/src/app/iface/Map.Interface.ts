@@ -124,6 +124,7 @@ interface MapInterface extends Evented {
 	menubar: Menubar;
 	userList: UserList;
 	sidebar: Sidebar;
+	formulabar: any;
 	getViewColor(viewId: number): number;
 	hasFocus(): boolean;
 	insertThreadedComment(): void;
