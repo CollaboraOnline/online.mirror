@@ -1952,6 +1952,46 @@ std::string Document::getDefaultBackgroundTheme(const std::shared_ptr<ChildSessi
     return darkTheme ? "Dark" : "Light";
 }
 
+namespace
+{
+/// A server-controlled entry of the comma-separated document load options
+/// string. The client is not allowed to set these keys.
+struct ServerLoadOption
+{
+    std::string_view name;
+    std::string value;
+};
+
+/// Drop any client-supplied copy of the server-controlled keys. The engine
+/// reads the first matching key, so a client copy ahead of the server one
+/// would otherwise win.
+std::string removeServerLoadOptions(const std::string& filterOptions,
+                                    const std::vector<ServerLoadOption>& serverOptions)
+{
+    std::string result;
+    for (const auto& token : Util::splitStringToVector(filterOptions, ','))
+    {
+        bool drop = false;
+        for (const auto& option : serverOptions)
+        {
+            // drop the token when it has the form "name=..."
+            if (token.starts_with(option.name) && token.size() > option.name.size()
+                && token[option.name.size()] == '=')
+            {
+                drop = true;
+                break;
+            }
+        }
+        if (drop)
+            continue;
+        if (!result.empty())
+            result += ',';
+        result += token;
+    }
+    return result;
+}
+}
+
 std::shared_ptr<lok::Document> Document::load(const std::shared_ptr<ChildSession>& session,
                                               const std::string& renderOpts)
 {
@@ -1978,31 +2018,28 @@ std::shared_ptr<lok::Document> Document::load(const std::shared_ptr<ChildSession
     if constexpr (!Util::isMobileApp())
         consistencyCheckFileExists(uri);
 
+    // Server-controlled load options. The client cannot set these, so they are
+    // also stripped from the incoming filter options below.
+    const std::vector<ServerLoadOption> serverOptions = {
+        { "Language", lang },
+        { "DeviceFormFactor", deviceFormFactor },
+        { "Batch", batchMode },
+        { "EnableMacrosExecution", enableMacrosExecution },
+        { "MacroSecurityLevel", macroSecurityLevel },
+        { "ClientVisibleArea", clientVisibleArea },
+        { "Timezone", userTimezone },
+    };
+
     std::string options;
 
     if (!filterOption.empty())
-        options = filterOption;
+        options = removeServerLoadOptions(filterOption, serverOptions);
 
-    if (!lang.empty())
-        options += ",Language=" + lang;
-
-    if (!deviceFormFactor.empty())
-        options += ",DeviceFormFactor=" + deviceFormFactor;
-
-    if (!batchMode.empty())
-        options += ",Batch=" + batchMode;
-
-    if (!enableMacrosExecution.empty())
-        options += ",EnableMacrosExecution=" + enableMacrosExecution;
-
-    if (!macroSecurityLevel.empty())
-        options += ",MacroSecurityLevel=" + macroSecurityLevel;
-
-    if (!clientVisibleArea.empty())
-        options += ",ClientVisibleArea=" + clientVisibleArea;
-
-    if (!userTimezone.empty())
-        options += ",Timezone=" + userTimezone;
+    for (const auto& option : serverOptions)
+    {
+        if (!option.value.empty())
+            options += ',' + std::string(option.name) + '=' + option.value;
+    }
 
     const std::string wopiCertDir = pathFromFileURL(session->getJailedFilePath() + ".certs");
     if (FileUtil::Stat(wopiCertDir).exists())
