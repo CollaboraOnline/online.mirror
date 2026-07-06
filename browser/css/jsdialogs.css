@@ -525,6 +525,11 @@ algned to the bottom */
 	box-shadow: 0 0 2px 1px var(--color-box-shadow-dark) !important;
 }
 
+.ui-tab.jsdialog:focus-visible {
+	outline: 2px solid var(--color-primary-dark);
+	outline-offset: -2px;
+}
+
 .ui-tab.jsdialog:not(.selected):hover {
 	cursor: pointer !important;
 	background-color: var(--color-background-darker) !important;
