@@ -1575,6 +1575,11 @@ img.context-menu-icon {
 	background-color: var(--color-background-hover);
 }
 
+.ui-combobox-entry.disabled {
+	opacity: 0.5;
+	pointer-events: none;
+}
+
 [id^='comment-menu-'][id$='-entries'] .ui-combobox-entry:hover,
 #jsd-context-menu-entries .ui-combobox-entry:hover {
 	background-color: var(--color-background-darker) !important;
