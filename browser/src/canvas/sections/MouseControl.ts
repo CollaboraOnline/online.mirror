@@ -126,21 +126,42 @@ class MouseControl extends CanvasSectionObject {
 		}
 	}
 
-	// Gets the mouse position on browser page in CSS pixels.
-	public getMousePagePosition() {
+	// Transforms a point in document coordinates (twips) into a css-pixel
+	// position on the browser page.
+	private _documentToPagePosition(point: cool.SimplePoint): cool.PointLike {
 		Util.ensureValue(app.activeDocument);
 		const boundingClientRectangle = this.context.canvas.getBoundingClientRect();
-		const pagePosition = this.currentPosition.clone();
-		pagePosition.pX -=
+		point.pX -=
 			app.activeDocument.activeLayout.viewedRectangle.pX1 -
 			this.containerObject.getDocumentAnchor()[0];
-		pagePosition.pY -=
+		point.pY -=
 			app.activeDocument.activeLayout.viewedRectangle.pY1 -
 			this.containerObject.getDocumentAnchor()[1];
 		return {
-			x: pagePosition.cX + boundingClientRectangle.left,
-			y: pagePosition.cY + boundingClientRectangle.top,
+			x: point.cX + boundingClientRectangle.left,
+			y: point.cY + boundingClientRectangle.top,
 		};
+	}
+
+	// Gets the mouse position on browser page in CSS pixels.
+	public getMousePagePosition(): cool.PointLike {
+		return this._documentToPagePosition(this.currentPosition.clone());
+	}
+
+	// Gets the text caret (Writer, Impress) or active cell (Calc) position on
+	// the browser page in css pixels, or null when there is no visible cursor.
+	public getCursorPagePosition(): cool.PointLike | null {
+		let rectangle: cool.SimpleRectangle | null = null;
+		if (app.calc.cellCursorVisible) rectangle = app.calc.cellCursorRectangle;
+		else if (app.file.textCursor.visible)
+			rectangle = app.file.textCursor.rectangle;
+
+		if (!rectangle) return null;
+
+		// Anchor at the bottom-left corner so the menu opens just below the
+		// caret or active cell instead of covering it.
+		const point = new cool.SimplePoint(rectangle.x1, rectangle.y2);
+		return this._documentToPagePosition(point);
 	}
 
 	// This is useful when a section handles the event but wants to set the document mouse position.

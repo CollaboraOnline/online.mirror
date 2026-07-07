@@ -78,6 +78,12 @@ window.L.Control.ContextMenu = window.L.Control.extend({
 
 	_onContextMenu: function(obj) {
 		var map = this._map;
+
+		// Core sends "mouse":"true"/"false" as a quoted string, so a menu
+		// asked for by the keyboard (Menu key or Shift+F10) arrives as 'false'.
+		// A missing key means an older core and is treated as a mouse click.
+		const keyboardInvoked = obj.mouse === 'false';
+
 		if (!map.isEditMode()) {
 			return;
 		}
@@ -154,9 +160,20 @@ window.L.Control.ContextMenu = window.L.Control.extend({
 				}
 			});
 
-			const position = app.activeDocument.mouseControl.getMousePagePosition();
+			// A keyboard-opened menu is placed at the caret or active cell,
+			// falling back to the mouse when there is no visible cursor.
+			const position =
+				(keyboardInvoked &&
+					app.activeDocument.mouseControl.getCursorPagePosition()) ||
+				app.activeDocument.mouseControl.getMousePagePosition();
 			$('#canvas-container').contextMenu(position);
 			$('.context-menu-root').focus();
+			// When opened from the keyboard, select the first entry so the
+			// arrow keys move from it at once. A right-click opens with no
+			// entry preselected. The plugin keeps hidden menu lists around, so
+			// act on the one just made visible.
+			if (keyboardInvoked)
+				$('.context-menu-list:visible').first().trigger('nextcommand');
 			this.hasContextMenu = true;
 		}
 	},
