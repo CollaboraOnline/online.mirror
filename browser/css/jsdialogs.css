@@ -3267,3 +3267,9 @@ div [id^='themeview'].ui-iconview-entry, div [id^='themeview1col'].ui-iconview-e
 #ManageStylePage #box1 #desc {
 	display: block;
 }
+
+/* Focus indicator for listboxes and treeviews */
+.ui-treeview:focus-within {
+	outline: 2px solid var(--color-primary);
+	outline-offset: -1px;
+}
