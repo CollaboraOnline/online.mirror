@@ -934,8 +934,11 @@ void ScModelObj::setTextSelection(int nType, int nX, int nY)
 
     ScTabViewShell* pViewShell = pViewData->GetViewShell();
 
+    // In COKit RTL mode draw/svx operates in negative X coordinates, but the
+    // coordinates from the client are always positive, so negate nX.
+    bool bNegativeX = pViewData->GetDocument().IsNegativePage(pViewData->CurrentTabForData());
     KitChartHelper aChartHelper(pViewShell);
-    if (aChartHelper.setTextSelection(nType, nX, nY))
+    if (aChartHelper.setTextSelection(nType, bNegativeX ? -nX : nX, nY))
         return;
 
     ScInputHandler* pInputHandler = ScModule::get()->GetInputHdl(pViewShell);
@@ -1056,8 +1059,11 @@ void ScModelObj::setGraphicSelection(int nType, int nX, int nY)
     double fPPTY = pViewData->GetPPTY();
 
     pViewShell = pViewData->GetViewShell();
+    // In COKit RTL mode draw/svx operates in negative X coordinates, but the
+    // coordinates from the client are always positive, so negate nX.
+    bool bNegativeX = pViewData->GetDocument().IsNegativePage(pViewData->CurrentTabForData());
     KitChartHelper aChartHelper(pViewShell);
-    if (aChartHelper.setGraphicSelection(nType, nX, nY, fPPTX, fPPTY))
+    if (aChartHelper.setGraphicSelection(nType, bNegativeX ? -nX : nX, nY, fPPTX, fPPTY))
         return;
 
     int nPixelX = nX * fPPTX;
