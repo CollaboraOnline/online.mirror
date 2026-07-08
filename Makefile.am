@@ -516,6 +516,7 @@ shared_headers = \
                  common/Unit.hpp \
                  common/Uri.hpp \
                  common/Util.hpp \
+                 common/ViewSettings.hpp \
                  common/Watchdog.hpp \
                  common/base64.hpp \
                  common/security.h \
