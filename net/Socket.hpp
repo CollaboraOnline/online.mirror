@@ -1702,6 +1702,7 @@ public:
                     << _outBuffer.size() << ") for more than "
                     << std::chrono::duration_cast<std::chrono::seconds>(BufferBloatCloseDuration).count()
                     << " seconds; closing the connection to reclaim the memory.");
+            ++BufferBloatClosedCount;
             ensureDisconnected();
             setShutdown();
             disposition.setClosed();
@@ -1898,6 +1899,10 @@ public:
 
     static size_t getExternalConnectionCount() { return ExternalConnectionCount; }
 
+    /// Number of sockets closed because they stayed over the buffer bloat
+    /// threshold for too long, since the start of the application.
+    static size_t getBufferBloatClosedCount() { return BufferBloatClosedCount; }
+
 protected:
     void handshakeFail()
     {
@@ -2055,6 +2060,9 @@ private:
     /// Close the socket if either buffer stays above this many bytes for too long
     static size_t BufferBloatCloseSize;
     static std::chrono::milliseconds BufferBloatCloseDuration;
+
+    /// Count of sockets closed for staying over BufferBloatCloseSize too long.
+    static std::atomic<size_t> BufferBloatClosedCount;
 
     /// Continuous time buffer has been above BufferBloatCloseSize, or epoc if not above
     std::chrono::steady_clock::time_point _largeBufferSince;
