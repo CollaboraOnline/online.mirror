@@ -1817,6 +1817,10 @@ bool ClientSession::resolveAndApplyAICredentials(Poco::JSON::Object::Ptr& viewSe
         // The desktop apps enable AI per-user via the Options dialog, not the
         // server-wide ai.enabled switch.
         ConfigUtil::getConfigValue<bool>("ai.enabled", false) &&
+        // AI is refused for an anonymous user (for example a public share-link
+        // visitor with no account), so a server-wide provider is not spent on
+        // them.
+        !isAnonymousUser() &&
 #endif
         !disableAISettings && !model.empty() && !url.empty();
     outModel = configured ? model : std::string{};
