@@ -395,7 +395,7 @@ class Dispatcher {
 			if (!app.map.isAIConfigured) {
 				app.map.uiManager.showSnackbar(
 					_(
-						'AI is not configured. Go to File > Options > View Settings to set it up.',
+						'AI is not configured. Go to File > Options > AI Assistant to set it up.',
 					),
 				);
 				return;
@@ -408,7 +408,7 @@ class Dispatcher {
 			if (!app.map.isAIConfigured) {
 				app.map.uiManager.showSnackbar(
 					_(
-						'AI is not configured. Go to File > Options > View Settings to set it up.',
+						'AI is not configured. Go to File > Options > AI Assistant to set it up.',
 					),
 				);
 				return;
