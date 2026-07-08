@@ -173,6 +173,13 @@ button.jsdialog[disabled] img {
 	min-width: 62px !important;
 }
 
+.button-secondary:focus-visible,
+.button-primary:focus-visible,
+.ui-pushbutton:focus-visible {
+	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
+	outline-offset: 2px;
+}
+
 .button-primary {
 	height: 32px;
 	line-height: 0em;
