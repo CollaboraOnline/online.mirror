@@ -1111,6 +1111,14 @@ window.L.Clipboard = window.L.Class.extend({
 		try {
 			clipboardContents = await this._readClipboardItems();
 
+			// Record the paste-special request before checking the read result.
+			// On the desktop apps the read reports null and drops straight to an
+			// internal paste, so the flag has to be set by this point for that
+			// internal paste to run as paste special instead of a plain paste.
+			if (isSpecial) {
+				this._navigatorClipboardPasteSpecial = true;
+			}
+
 			if (clipboardContents === null) {
 				this._doInternalPaste(this._map, false);
 				return; // Internal paste, skip the rest of the browser paste code
@@ -1125,10 +1133,6 @@ window.L.Clipboard = window.L.Class.extend({
 				this._afterCopyCutPaste('paste');
 			}
 			return;
-		}
-
-		if (isSpecial) {
-			this._navigatorClipboardPasteSpecial = true;
 		}
 
 		if (clipboardContents.length < 1) {
