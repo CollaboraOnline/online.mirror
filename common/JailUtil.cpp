@@ -460,7 +460,14 @@ bool tryRemoveJail(const std::string& root)
         // Unmount the tmp directory. Don't care if we fail.
         const std::string tmpPath = Poco::Path(root, "tmp").toString();
 #ifdef __FreeBSD__
-        unmount(tmpPath + "/dev");
+        bool  res = unmount(Poco::Path(root,"dev").toString());
+        LOG_TRC("unmount" << root.c_str() << "dev"  << (res ? " Succes" : " failed"));
+        res = unmount(Poco::Path(root,"lo/share/template/common/presnt").toString());
+        LOG_TRC("unmount" << root.c_str() << "/lo/share/template/common/presnt"  << (res  ? " Success" : " Failed"));
+        res = unmount(Poco::Path(root,"lo/share/wordbook").toString());
+        LOG_TRC("unmount" << root.c_str() << "/lo/share/wordbook"  << (res ? " Success" : " Failed"));
+        res = unmount(Poco::Path(root,"lo/share/autotext/common").toString());
+        LOG_TRC("unmount" << root.c_str() << "/lo/share/autotext/common"  << (res ? " Success" : " Failed"));
 #endif
         FileUtil::removeFile(tmpPath, true); // Delete tmp contents with prejudice.
         unmount(tmpPath);
@@ -704,11 +711,15 @@ namespace SysTemplate
 /// These must be up-to-date, as they can change during
 /// the long lifetime of our process. Also, it's unlikely
 /// that systemplate will get re-generated after installation.
-const auto DynamicFilePaths
+const std::string DynamicFilePaths[]
+#ifdef __linux__
     = { "/etc/passwd", "/etc/group",
         "/etc/host.conf", "/etc/hosts",
         "/etc/nsswitch.conf", "/etc/resolv.conf" };
 
+#elif defined(__FreeBSD__)
+= {};
+#endif
 namespace
 {
 /// Copy (false) by default for KIT_IN_PROCESS.

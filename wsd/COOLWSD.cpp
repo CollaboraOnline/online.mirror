@@ -1402,7 +1402,7 @@ bool startWithLandlockJail()
 }
 
 } // namespace
-
+#ifndef __FreeBSD__
 // Due to the possibility of enterMountingNS failing at an intermediate stage
 // after entering a usernamespace, but unable to enter a useful mounting namespace
 // do a test mount in another separate child whose failure don't affect the parent
@@ -1419,7 +1419,7 @@ bool COOLWSD::testMountingNSInFork()
                                   return JailUtil::enterMountingNS(geteuid(), getegid()) ? 1 : 0;
                               }) == 1;
 }
-
+#endif
 void COOLWSD::setupChildRoot(const bool UseMountNamespaces)
 {
     JailUtil::disableBindMounting(); // Default to assume failure
@@ -1436,6 +1436,7 @@ void COOLWSD::setupChildRoot(const bool UseMountNamespaces)
 
             if (UseMountNamespaces)
             {
+#ifndef __FreeBSD__
                 // setupChildRoot does a test bind mount + umount to see if that fully works
                 // so we have a mount namespace here just for the purposes of that test
 
@@ -1454,14 +1455,16 @@ void COOLWSD::setupChildRoot(const bool UseMountNamespaces)
                             "CAP_CHOWN, CAP_FOWNER and CAP_SYS_CHROOT and is allowed to raise "
                             "privileges as it starts.");
                 }
+#endif
             }
-
             // Setup the jails.
             JailUtil::cleanupJails(CleanupChildRoot);
             JailUtil::setupChildRoot(IsBindMountingEnabled, ChildRoot, SysTemplate);
 
+#ifndef __FreeBSD__
             if (JailUtil::isMountNamespacesEnabled())
                 ret |= (1 << 0);
+#endif
             if (JailUtil::isBindMountingEnabled())
                 ret |= (1 << 1);
 

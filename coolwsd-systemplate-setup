@@ -32,6 +32,12 @@ else
     CP=gcp
     REALPATH=grealpath
     LOCALBASE=usr/local/
+    mkdir -p "${CHROOT}/etc"
+    cat /etc/master.passwd |egrep '^(root|toor|coolwsd)' | awk 'BEGIN {FS=":"} { sub(".*","*",$2); print $1":"$2":"$3":"$4":"$5":"$6":"$7":"$8":"$9":"$10}' > "${CHROOT}/etc/master.passwd"
+    cat /etc/passwd |egrep "^(root|toor|coolwsd)" > "${CHROOT}/etc/passwd"
+    echo 'wheel:*:0:root' > "${CHROOT}/etc/group"
+    cat /etc/group |egrep "^(coolwsd)" >> "${CHROOT}/etc/group"
+    pwd_mkdb -d "${CHROOT}/etc" "${CHROOT}/etc/master.passwd"
 fi
 
 # Detect C library
@@ -60,6 +66,7 @@ if [ "$LIBC" != "musl" ]; then
          lib/libnss_* lib64/libnss_* lib/*/libnss_* \
          lib/libresolv* lib64/libresolv* lib/*/libresolv* \
          var/cache/fontconfig \
+         var/db/fontconfig \
          etc/fonts \
          -type f 2>/dev/null
 
@@ -86,18 +93,29 @@ find etc/pki/tls/certs/ca-bundle.crt \
      var/lib/ca-certificates/ca-bundle.pem \
 	-type l,f -print -quit 2>/dev/null
 
-) |
+if [  `uname -s` = "FreeBSD" ]; then
+find "${INSTDIR}/program/" -type f  -maxdepth 1 -exec sh -c 'if [  "`file -b --mime-type $0`" = "application/x-sharedlib" ]; then  realpath `ldd -a -f  "%p\n" $0  | grep -E ".*\.so([^:])*$"` |  grep -v $(realpath $1) ;fi;' {} $INSTDIR \; | sort | uniq
 
+fi
+) |
 # Can't use -l because then symlinks won't be handled well enough.
 # This will now copy the file a symlink points to, but whatever.
 cpio -p -d -L $CHROOT
 
+if [ `uname -s` = "FreeBSD" ]; then  #copy extra libs not found above (pdf export fails without them)
+pkg query %b nss | xargs -n1 -I[]  find /usr/local/lib -name  [] -exec cp -iv {} "${CHROOT}/usr/local/lib/" \;
+pkg query %B nss | xargs -n1 -I[]  find /usr/local/lib -name  [] -exec cp -iv {} "${CHROOT}/usr/local/lib/" \;
+fi
 # Link the dynamic files, replacing any existing.
 rm -f $CHROOT/etc/copied
 mkdir -p $CHROOT/etc/
+if [ `uname -s` = "FreeBSD" ]; then
+ETC_FILES="resolv.conf localtime";
+else
 ETC_FILES="hosts resolv.conf passwd group host.conf"
 if [ "$LIBC" != "musl" ]; then
     ETC_FILES="$ETC_FILES nsswitch.conf"
+fi
 fi
 for file in $ETC_FILES
 do

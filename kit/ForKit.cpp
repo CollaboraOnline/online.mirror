@@ -47,6 +47,7 @@
 #include <sys/capability.h>
 #endif
 #include <sys/types.h>
+#include <unistd.h>
 #include <sys/wait.h>
 #include <sysexits.h>
 
@@ -58,7 +59,9 @@
 #include <map>
 #include <thread>
 #include <utility>
-
+#ifdef __FreeBSD__
+#include <signal.h>
+#endif
 namespace
 {
 
@@ -315,6 +318,9 @@ bool haveCorrectCapabilities()
 bool haveCorrectCapabilities()
 {
     // chroot() can only be called by root
+#ifdef __FreeBSD__
+    return true;
+#endif
     return getuid() == 0;
 }
 #endif // HAVE_LIBCAP
@@ -1045,6 +1051,16 @@ int forkit_main(int argc, char** argv)
     }
 
     LOG_DBG("About to init Kit UnitBase with test [" << UnitTestLibrary << ']');
+#ifdef __FreeBSD__
+    struct passwd *pw = getpwnam(COOL_USER_ID);
+    if(pw != nullptr)
+    {
+        setegid(pw->pw_gid);
+        seteuid(pw->pw_uid);
+    } else  {
+        LOG_FTL("Cannot find user" << COOL_USER_ID);
+    }
+#endif
     if (!Util::isKitInProcess() && !UnitBase::init(UnitBase::UnitType::Kit, UnitTestLibrary))
     {
         LOG_FTL("Failed to load kit unit test library");

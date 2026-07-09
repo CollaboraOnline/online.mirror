@@ -168,7 +168,30 @@ public:
 #if !MOBILEAPP
         try
         {
+#if defined(__FreeBSD__)
+            if(_pid > 1 && _ws)
+            {
+                if(kill(_pid,0)==-1)
+                {
+                    if(errno == EPERM)
+                        // Process exists but we are not allowed to kill it from
+                        // outside the jail on FreeBSD >= 15
+                    {
+                         return true;
+                    } else if(errno == ESRCH) {
+                         return false;
+                    }
+                } else {
+                    return true; //FreeBSD 14 ends up here
+                }
+            } else {
+                return false;
+            }
+
+
+#else
             return _pid > 1 && _ws && ::kill(_pid, 0) == 0;
+#endif
         }
         catch (const std::exception&)
         {

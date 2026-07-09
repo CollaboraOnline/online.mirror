@@ -53,6 +53,8 @@
 #endif
 
 #ifdef __FreeBSD__
+#include <osreldate.h>
+#if __FreeBSD_version < 1500000
 void
 build_iovec(struct iovec **iov, int *iovlen, const char *name, const void *val,
         size_t len)
@@ -80,7 +82,11 @@ build_iovec(struct iovec **iov, int *iovlen, const char *name, const void *val,
     (*iov)[i].iov_len = (int)len;
     *iovlen = ++i;
 }
-
+#else
+extern "C"  {
+#include <mntopts.h>
+}
+#endif
 int mount_wrapper(const char *source, const char *target,
           const char *filesystemtype, unsigned long mountflags,
           const void *data)
@@ -104,9 +110,9 @@ int mount_wrapper(const char *source, const char *target,
 
     // TODO: handle MS_REC?
 
-    build_iovec(&iov, &iovlen, "fstype", reinterpret_cast<const void*>(filesystemtype), (size_t)-1);
-    build_iovec(&iov, &iovlen, "fspath", reinterpret_cast<const void*>(target), (size_t)-1);
-    build_iovec(&iov, &iovlen, "from", reinterpret_cast<const void*>(source), (size_t)-1);
+    build_iovec(&iov, &iovlen, "fstype", __DECONST(void*,filesystemtype), (size_t)-1);
+    build_iovec(&iov, &iovlen, "fspath", __DECONST(void*,target), (size_t)-1);
+    build_iovec(&iov, &iovlen, "from", __DECONST(void*,source), (size_t)-1);
 
     return nmount(iov, iovlen, freebsd_flags);
 }
@@ -264,12 +270,12 @@ int domount(int argc, const char* const* argv)
         struct iovec *iov = NULL;
         int iovlen = 0;
 
-        build_iovec(&iov, &iovlen, "fstype", "devfs", (size_t)-1);
-        build_iovec(&iov, &iovlen, "fspath", reinterpret_cast<const void*>(target), (size_t)-1);
-        build_iovec(&iov, &iovlen, "from", "devfs", (size_t)-1);
+        build_iovec(&iov, &iovlen, "fstype", __DECONST(void*,"devfs"), (size_t)-1);
+        build_iovec(&iov, &iovlen, "fspath", __DECONST(void*,target), (size_t)-1);
+        build_iovec(&iov, &iovlen, "from",__DECONST(void*, "devfs"), (size_t)-1);
         // See /etc/defaults/devfs.rules
         // [devfsrules_jail=4]
-        build_iovec(&iov, &iovlen, "ruleset", "4", (size_t)-1);
+        build_iovec(&iov, &iovlen, "ruleset", __DECONST(void*,"4"), (size_t)-1);
 
         int retval = nmount(iov, iovlen, 0);
         if (retval)
@@ -304,7 +310,6 @@ int domount(int argc, const char* const* argv)
                 return EX_USAGE;
             }
         }
-
         if (!isDir && !isCharDev)
         {
             fprintf(stderr,
@@ -332,6 +337,52 @@ int domount(int argc, const char* const* argv)
             return EX_USAGE;
         }
 
+#ifdef __FreeBSD__
+        if (strcmp(option, "-b") == 0 || strcmp(option,"-r") == 0)
+        {
+            if(strcmp(option,"-r") == 0)
+            {
+                struct statfs buf;
+                if(statfs(target,&buf)==0)
+                {
+                    if(strcmp(source,buf.f_mntfromname)==0)
+                    {
+                        if(unmount(target,0))
+                        {
+                            perror("unmount");
+                        }
+                    }
+                }
+            }
+
+            char errmsg[255];
+            errmsg[0] = '\0';
+            char * fstype = (char*)"nullfs";
+            int iovlen=0;
+            struct iovec *iov = NULL;
+            if (strcmp(option, "-r") == 0)
+            {
+                build_iovec(&iov,&iovlen,"ro",__DECONST(void*,"ro"),-1);
+            }
+            build_iovec(&iov,&iovlen,"fstype",__DECONST(void*,fstype),(size_t)-1);
+            build_iovec(&iov,&iovlen,"fspath",__DECONST(void*,target),(size_t)-1);
+            build_iovec(&iov,&iovlen,"target",__DECONST(void *,source),(size_t)-1);
+            build_iovec(&iov,&iovlen,"errmsg",errmsg,sizeof(errmsg));
+            if (nmount(iov, iovlen, 0) <0)
+            {
+                fprintf(stderr,"iovlen = %d errmsg:%s",iovlen,errmsg);
+                perror("nmount");
+                free(iov);
+                return -1;
+            }
+            else
+            {
+                free(iov);
+            }
+
+
+
+#else
         // Mount the source path as the target path.
         // First bind to mount an existing directory node into the chroot.
         // MS_BIND ignores other flags.
@@ -378,6 +429,7 @@ int domount(int argc, const char* const* argv)
                         strerror(errno));
                 return EX_SOFTWARE;
             }
+#endif
         }
     }
     else
@@ -385,7 +437,6 @@ int domount(int argc, const char* const* argv)
         usage(program);
         return EX_USAGE;
     }
-
     fflush(stderr);
     return EX_OK;
 }
