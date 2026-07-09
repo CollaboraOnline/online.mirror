@@ -58,6 +58,7 @@
 #include <osl/detail/emscripten-bootstrap.h>
 #endif
 
+#include <cassert>
 #include <algorithm>
 #include <memory>
 #include <iostream>
@@ -95,6 +96,7 @@
 #include <comphelper/dispatchcommand.hxx>
 #include <comphelper/embeddedobjectcontainer.hxx>
 #include <comphelper/kit.hxx>
+#include <comphelper/legacyunoapinotice.hxx>
 #include <comphelper/processfactory.hxx>
 #include <comphelper/string.hxx>
 #include <comphelper/profilezone.hxx>
@@ -2835,10 +2837,12 @@ static int lo_getDocsCount(COKit* pThis);
 
 static void lo_executeScript(
     char const * script, char ** result, char ** error,
-    void (*proxyCallback) (void * data, char const * payload), void * proxyCallbackData);
+    void (*proxyCallback) (void * data, char const * payload), void * proxyCallbackData,
+    bool * usedLegacyUnoApi);
 static void lo_deliverProxyResult(char const * callId, char const * jsonValue);
 static void lo_cancelProxyCalls();
 static int lo_isExpectedReentry();
+static bool lo_takeLegacyUnoApiUseFlag();
 
 LibCO_Impl::LibCO_Impl()
     : m_pOfficeClass( gOfficeClass.lock() )
@@ -2882,6 +2886,7 @@ LibCO_Impl::LibCO_Impl()
         m_pOfficeClass->deliverProxyResult = lo_deliverProxyResult;
         m_pOfficeClass->cancelProxyCalls = lo_cancelProxyCalls;
         m_pOfficeClass->isExpectedReentry = lo_isExpectedReentry;
+        m_pOfficeClass->takeLegacyUnoApiUseFlag = lo_takeLegacyUnoApiUseFlag;
 
         gOfficeClass = m_pOfficeClass;
     }
@@ -8191,7 +8196,10 @@ static void doc_setColorPreviewState(SAL_UNUSED_PARAMETER COKitDocument* /*pThis
 
 static void lo_executeScript(
     char const * script, char ** result, char ** error,
-    void (*proxyCallback) (void * data, char const * payload), void * proxyCallbackData) {
+    void (*proxyCallback) (void * data, char const * payload), void * proxyCallbackData,
+    bool * usedLegacyUnoApi)
+{
+    assert(usedLegacyUnoApi != nullptr);
     comphelper::ProfileZone zone("lo_executeScript");
     SolarMutexGuard guard;
     SetLastExceptionMsg();
@@ -8206,7 +8214,8 @@ static void lo_executeScript(
         };
     }
     try {
-        OUString value = jsuno::execute(OUString::fromUtf8(script), std::move(hook));
+        OUString value = jsuno::execute(
+            OUString::fromUtf8(script), std::move(hook), usedLegacyUnoApi);
         if (!value.isEmpty()) {
             *result = convertOUString(value);
         }
@@ -8218,6 +8227,7 @@ static void lo_executeScript(
     (void) script;
     (void) proxyCallback;
     (void) proxyCallbackData;
+    (void) usedLegacyUnoApi;
     static constexpr auto msg = u"executeScript: QuickJS support is not enabled in this build"_ustr;
     SetLastExceptionMsg(msg);
     *error = convertOUString(msg);
@@ -8249,6 +8259,11 @@ static void lo_cancelProxyCalls()
 static int lo_isExpectedReentry()
 {
     return vcl::kit::isExpectedReentry() ? 1 : 0;
+}
+
+static bool lo_takeLegacyUnoApiUseFlag()
+{
+    return comphelper::takeLegacyUnoApiUseFlag();
 }
 
 static char* lo_getError (COKit *pThis)
