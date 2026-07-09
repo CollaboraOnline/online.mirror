@@ -10,6 +10,7 @@
 #
 
 $(eval $(call gb_Executable_Executable,coolmount))
+$(eval $(call gb_add_libutil,coolmount))
 
 $(eval $(call gb_Executable_set_generated_cxx_suffix,coolmount,cpp))
 

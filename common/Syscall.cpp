@@ -19,6 +19,9 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <sys/un.h>
+#ifdef __FreeBSD__
+#include <sys/ucred.h>
+#endif
 
 
 /**

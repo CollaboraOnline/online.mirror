@@ -10,6 +10,7 @@
 #
 
 $(eval $(call gb_Executable_Executable,coolforkit-caps))
+$(eval $(call gb_add_libutil,coolforkit-caps))
 
 $(eval $(call gb_Executable_set_visibility_default,coolforkit-caps))
 

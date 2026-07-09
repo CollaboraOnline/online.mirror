@@ -8,8 +8,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-
 $(eval $(call gb_Executable_Executable,coolwsd))
+$(eval $(call gb_add_libutil,coolwsd))
 
 $(eval $(call gb_Executable_set_visibility_default,coolwsd))
 
@@ -39,6 +39,7 @@ $(eval $(call gb_Executable_use_static_libraries,coolwsd, \
 $(eval $(call gb_Executable_use_externals,coolwsd, \
     expat \
     libpng \
+    $(if $(filter FREEBSD,$(OS)),iconv) \
     openssl \
     openssl_headers \
     zlib \

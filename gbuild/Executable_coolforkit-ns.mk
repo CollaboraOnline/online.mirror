@@ -10,6 +10,7 @@
 #
 
 $(eval $(call gb_Executable_Executable,coolforkit-ns))
+$(eval $(call gb_add_libutil,coolforkit-ns))
 
 $(eval $(call gb_Executable_set_visibility_default,coolforkit-ns))
 
