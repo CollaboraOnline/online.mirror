@@ -70,6 +70,7 @@
 #include <cassert>
 #include <chrono>
 #include <ctime>
+#include <deque>
 #include <fstream>
 #include <memory>
 #include <sstream>
@@ -1210,6 +1211,16 @@ bool DocumentBroker::download(
                            "so ignoring inconsistent timestamp. Expected: "
                         << _storageManager.getLastModifiedServerTimeString()
                         << ", Actual: " << fileInfo.getLastModifiedServerTimeString());
+            }
+            else if (_storageManager.isEarlierModifiedServerTimeString(
+                         fileInfo.getLastModifiedServerTimeString()))
+            {
+                // An earlier time of our own, not an outside edit.
+                LOG_DBG("Document ["
+                        << _docKey << "] timestamp [" << fileInfo.getLastModifiedServerTimeString()
+                        << "] is an earlier one the document is known to have had, "
+                           "so ignoring inconsistent timestamp. Expected: "
+                        << _storageManager.getLastModifiedServerTimeString());
             }
             else
             {
