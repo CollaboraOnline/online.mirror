@@ -10,6 +10,7 @@
 #
 
 module_directory:=$(dir $(realpath $(firstword $(MAKEFILE_LIST))))
+include $(module_directory)/Executables_add_libutil.mk
 
 # In the monorepo the engine sources sit next to this directory.  A build from
 # the distribution tarball ships no engine, so take the engine source directory

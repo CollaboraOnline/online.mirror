@@ -631,10 +631,18 @@ int main(int argc, char**argv)
 #ifdef EBFONT
         case EBFONT: return "EBFONT";
 #endif
+#ifdef ENOSTR
         case ENOSTR: return "ENOSTR";
+#endif
+#ifdef ENODATA
         case ENODATA: return "ENODATA";
+#endif
+#ifdef ETIME
         case ETIME: return "ETIME";
+#endif
+#ifdef ENOSR
         case ENOSR: return "ENOSR";
+#endif
 #ifdef ENONET
         case ENONET: return "ENONET";
 #endif

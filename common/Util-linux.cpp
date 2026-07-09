@@ -17,6 +17,8 @@
 #include <sys/resource.h>
 #elif defined __FreeBSD__
 #include <sys/resource.h>
+#include <libutil.h>
+#include <sys/user.h>
 #endif
 
 #include <dirent.h>
@@ -36,17 +38,26 @@ private:
     DIR* _dir = nullptr;
 
 public:
+#ifdef __linux__
     CounterImpl(const char* procPath)
         : _dir(opendir(procPath))
     {
         if (!_dir)
             LOG_ERR("No proc mounted for procPath " << procPath << ", can't count threads");
     }
-
-    ~CounterImpl() { closedir(_dir); }
+#else
+    CounterImpl(__unused const char* procPath) {
+    }
+#endif
+    ~CounterImpl() {
+#ifdef __linux__
+closedir(_dir);
+#endif
+}
 
     int count()
     {
+#ifdef __linux__
         if (!_dir)
             return -1;
 
@@ -61,6 +72,11 @@ public:
         }
 
         return tasks;
+#endif
+#ifdef __FreeBSD__
+struct kinfo_proc* ki = kinfo_getproc(getpid());
+return ki->ki_numthreads;
+#endif
     }
 };
 

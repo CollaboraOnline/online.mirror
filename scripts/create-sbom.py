@@ -207,10 +207,15 @@ def parse_gbuild_executables(srcdir):
             content = f.read()
         externals = set()
         match = re.search(
-            r"gb_Executable_use_externals," + re.escape(exe) + r"\b,?\s*\\\n(.*?)\)\)",
+            r"gb_Executable_use_externals," + re.escape(exe) + r"\b,?\s*\\\n(.*?)\)\)\n",
             content, re.DOTALL)
         if match:
-            for token in match.group(1).replace("\\", " ").split():
+            for match in match.group(1).split("\\\n"):
+                match=match.lstrip(" ").rstrip('\n')
+                if match == "" or match.startswith("$(if"):
+                   continue
+                else:
+                    token = match.lstrip(" ").rstrip(" \n");
                 # openssl_headers is the include-only variant of openssl
                 externals.add("openssl" if token == "openssl_headers" else token)
         if "online_poco_whole_libs" in content \

@@ -64,7 +64,7 @@ const char* startsWith(const char* line, std::string_view tag)
 
     return nullptr;
 }
-
+#ifdef __linux__
 std::size_t getFromCGroup(const std::string& group, const std::string& key)
 {
     std::size_t num = 0;
@@ -123,7 +123,6 @@ std::string getCurrentCGroupPath()
 }
 
 bool isCGroupV2() { return std::ifstream("/sys/fs/cgroup/cgroup.controllers").good(); }
-
 std::size_t getFromCGroupV2(const std::string& key)
 {
     std::string cgroupPath = getCurrentCGroupPath();
@@ -150,6 +149,7 @@ std::size_t getFromCGroupV2(const std::string& key)
     }
     return num;
 }
+#endif
 } // namespace
 
 namespace ProcUtil
