@@ -80,6 +80,13 @@ Util::LoadTimings KitLoadTimings;
 #if defined(__FreeBSD__) || defined(MACOS) || (defined(__linux__) && !defined(__GLIBC__))
 #include <ftw.h>
 // FTW_CONTINUE, FTW_STOP, FTW_SKIP_SUBTREE, FTW_ACTIONRETVAL are glibc extensions
+#ifdef __FreeBSD__
+#include <sys/param.h>
+#include <sys/mount.h>
+#include <sys/param.h>
+#include <sys/jail.h>
+#include <sys/procctl.h>
+#endif
 #define FTW_CONTINUE 0
 #define FTW_STOP (-1)
 #define FTW_SKIP_SUBTREE 0
@@ -155,6 +162,13 @@ using namespace COOLProtocol;
 using JsonUtil::makePropertyValue;
 
 extern "C" { void dump_kit_state(void); /* easy for gdb */ }
+#ifdef __FreeBSD__
+static int gotojail(const char* jailPath,const char* name);
+#endif
+#if MOBILEAPP
+extern std::map<std::string, std::shared_ptr<DocumentBroker>> DocBrokers;
+extern std::mutex DocBrokersMutex;
+#endif
 
 #if !MOBILEAPP
 
@@ -2562,6 +2576,7 @@ std::shared_ptr<COKitDocument> Document::load(const std::shared_ptr<ChildSession
         {
             _loKitDocument->setAllowChangeComments(viewId, true);
         }
+
         if (session->isAllowManageRedlines())
         {
             _loKitDocument->setAllowManageRedlines(viewId, true);
@@ -4393,20 +4408,49 @@ void lokit_main(
                 if (ProcSMapsFile < 0)
                     LOG_SYS("Failed to open /proc/self/smaps. Memory stats will be missing.");
             }
-
             LOG_INF("chroot(\"" << jailPathStr << "\")");
+
+#ifdef __FreeBSD__
+    setegid(0);
+    seteuid(0);
+#endif
+            LOG_INF("chroot(\"" << jailPathStr << "\")" << "as effective uid :"<< geteuid() << "uid" << getuid());
+#ifdef __FreeBSD__
+            if (gotojail(jailPathStr.c_str(),jailId.c_str()) == -1)
+#else
             if (chroot(jailPathStr.c_str()) == -1)
+#endif
             {
                 LOG_SFL("chroot(\"" << jailPathStr << "\") failed");
                 Util::forcedExit(EX_SOFTWARE);
             }
-
             if (chdir("/") == -1)
             {
                 LOG_SFL("chdir(\"/\") in jail failed");
                 Util::forcedExit(EX_SOFTWARE);
             }
-
+#ifdef __FreeBSD__
+    struct passwd *pw = getpwnam(COOL_USER_ID);
+    int ret=0;
+    if(pw != nullptr)
+    {
+        ret = setgid(pw->pw_gid);
+        if(ret != 0)
+        {
+            LOG_FTL("Cannot setgid to " << COOL_USER_ID);
+            Util::forcedExit(EX_SOFTWARE);
+        }
+        ret = setuid(pw->pw_uid);
+        if(ret != 0)
+        {
+            LOG_FTL("Cannot setuid to " << COOL_USER_ID << " error: " << errno);
+            Util::forcedExit(EX_SOFTWARE);
+        }
+    } else {
+            LOG_FTL("Cannot find user " << COOL_USER_ID << " error: " << errno);
+            Util::forcedExit(EX_SOFTWARE);
+        }
+#endif
 #if HAVE_LIBCAP
             if (usingMountNamespace)
             {
@@ -5007,6 +5051,7 @@ bool startURP(const std::shared_ptr<COKit>& LOKit, void** ppURPContext)
 /// Initializes COKit for cross-fork re-use.
 bool globalPreinit(const std::string &loTemplate)
 {
+
     std::string loadedLibrary;
     // we deliberately don't dlclose handle on success, make it
     // static so static analysis doesn't see this as a leak
@@ -5131,5 +5176,79 @@ void dump_kit_state()
     fprintf(stderr, "%s", msg.c_str()); // Log in the journal.
     LOG_WRN(msg);
 }
+#ifdef __FreeBSD__
+static int jailmountdevfs(const char* jailPath) {
+    int error;
+    struct iovec* iov = (struct iovec* )malloc(sizeof(struct iovec) * 10);
+    std::string to = std::string(jailPath) +"/dev";
+    char  errmsg[255];
+    errmsg[0]='\0';
+    iov[0].iov_base = __DECONST(char*,"fstype");
+    iov[0].iov_len  = sizeof("fstype");
+    iov[1].iov_base = __DECONST(char*, "devfs");
+    iov[1].iov_len  = strlen("devfs") + 1;
+
+    iov[2].iov_base = __DECONST(char*,"fspath");
+    iov[2].iov_len  = sizeof("fspath");
+    iov[3].iov_base = __DECONST(char*, to.c_str());
+    iov[3].iov_len  = strlen(to.c_str()) + 1;
+
+    iov[4].iov_base = __DECONST(char*,"from");
+    iov[4].iov_len  = sizeof("from");
+    iov[5].iov_base = __DECONST(char*, "devfs");
+    iov[5].iov_len  = strlen("devfs") + 1;
+
+    iov[6].iov_base = __DECONST(char*,"errmsg");
+    iov[6].iov_len  = sizeof("errmsg");
+    iov[7].iov_base = errmsg;
+    iov[7].iov_len  = sizeof(errmsg);
+
+    iov[8].iov_base = __DECONST(char*,"ruleset");
+    iov[8].iov_len  = sizeof("ruleset");
+    iov[9].iov_base = __DECONST(char*,"4");
+    iov[9].iov_len  = sizeof("4");
+    error = nmount(iov, 10, 0);
+    if(error<0)
+    {
+        LOG_FTL("Could not mount devfs in the jails root " << jailPath << " "  << errno << errmsg);
+    }
+    free(iov);
+    return error;
+}
+static int gotojail(const char* jailPath,const char *name) {
+    int error;
+    if(jailmountdevfs(jailPath)<0)
+    {
+        LOG_FTL("Could not mount devfs in the jails root " << jailPath << " "  << errno);
+        return -1;
+    }
+    struct iovec *iov = (struct iovec*)malloc(sizeof(struct iovec)*9);
+
+
+
+    int iovlen = 0;
+    iov[iovlen].iov_base = const_cast<void*>(static_cast<const void*>("path"));
+    iov[iovlen].iov_len = strlen("path")+1;
+    iovlen++;
+    iov[iovlen].iov_base =const_cast<void*>(static_cast<const void*>(jailPath));
+    iov[iovlen].iov_len = strlen(jailPath)+1;
+    iovlen++;
+    iov[iovlen].iov_base = const_cast<void*>(static_cast<const void*>("name"));
+    iov[iovlen].iov_len = strlen("name")+1;
+    iovlen++;
+    iov[iovlen].iov_base = const_cast<void*>(static_cast<const void*>(name));
+    iov[iovlen].iov_len = strlen(name)+1;
+    iovlen++;
+    error = jail_set(iov,iovlen,JAIL_CREATE|JAIL_ATTACH);
+    if(error<0)
+    {
+        free(iov);
+        LOG_FTL("Could not jail procces "<<errno);
+        return error;
+    }
+    free(iov);
+    return error;
+}
+#endif
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
