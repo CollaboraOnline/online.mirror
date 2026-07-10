@@ -1974,7 +1974,7 @@ bool ClientSession::getCommandValues(const char *buffer, int length, const Strin
         return sendTextFrameAndLogError("error: cmd=commandvalues kind=syntax");
 
     std::string cmdValues;
-    if (docBroker->hasTileCache() && docBroker->tileCache().getTextStream(TileCache::StreamType::CmdValues, command, cmdValues))
+    if (docBroker->hasTileCache() && docBroker->tileCache().getTextStream(TileCache::StreamType::CmdValues, commandValuesCacheKey(command), cmdValues))
         return sendTextFrame(cmdValues);
 
     return forwardToChild(std::string(buffer, length), docBroker);
@@ -2861,7 +2861,7 @@ ClientSession::handleOpenDocKitToClientMessage(const std::shared_ptr<Message>& p
                 {
                     // other commands should not be cached
                     docBroker->tileCache().saveTextStream(TileCache::StreamType::CmdValues,
-                                                          commandName, payload->data());
+                                                          commandValuesCacheKey(commandName), payload->data());
                 }
             }
             catch (const std::exception& exception)
