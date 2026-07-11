@@ -54,14 +54,14 @@ class FindBar(UITestCase):
             # Press on Find Next in the Find Bar
             xfind_bar.executeAction("CLICK", mkPropertyValues({"POS": "3"}))  # 3 is Find Next pos
             self.assertEqual(get_state_as_dict(xfind_bar)["CurrSelectedItemID"], "4")
-            self.assertEqual(get_state_as_dict(xfind_bar)["CurrSelectedItemText"], "Find Next")
+            self.assertEqual(get_state_as_dict(xfind_bar)["CurrSelectedItemText"], "Find Next  (F3)")
             self.assertEqual(get_state_as_dict(xfind_bar)["CurrSelectedItemCommand"], ".uno:DownSearch")
             self.assertEqual(get_state_as_dict(xWriterEdit)["SelectedText"], "Libre")
 
             # Press on Find Previous in the Find Bar
             xfind_bar.executeAction("CLICK", mkPropertyValues({"POS": "2"}))  # 2 is Find Previous pos
             self.assertEqual(get_state_as_dict(xfind_bar)["CurrSelectedItemID"], "3")
-            self.assertEqual(get_state_as_dict(xfind_bar)["CurrSelectedItemText"], "Find Previous")
+            self.assertEqual(get_state_as_dict(xfind_bar)["CurrSelectedItemText"], "Find Previous  (Shift+F3)")
             self.assertEqual(get_state_as_dict(xfind_bar)["CurrSelectedItemCommand"], ".uno:UpSearch")
             self.assertEqual(get_state_as_dict(xWriterEdit)["SelectedText"], "libre")
 
