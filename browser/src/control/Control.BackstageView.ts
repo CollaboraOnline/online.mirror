@@ -42,6 +42,7 @@ class BackstageView extends window.L.Class {
 		share: () => this.executeShare(),
 		repair: () => this.executeRepair(),
 		properties: () => this.executeDocumentProperties(),
+		minimize: () => this.executeMinimizePresentation(),
 		history: () => this.executeRevisionHistory(),
 		options: () => this.executeOptions(),
 		about: () => this.executeAbout(),
@@ -59,10 +60,13 @@ class BackstageView extends window.L.Class {
 			(e: any) => {
 				if (e.commandName === '.uno:ModifiedStatus') {
 					this.updateSaveButtonState();
+				} else if (e.commandName === '.uno:PresentationMinimizer') {
+					this.updateMinimizeButtonState();
 				}
 			},
 			this,
 		);
+		app.events.on('updatepermission', () => this.updateMinimizeButtonState());
 	}
 
 	private createContainer(): HTMLElement {
@@ -175,6 +179,15 @@ class BackstageView extends window.L.Class {
 				actionType: 'sign',
 				icon: 'lc_signature.svg',
 				visible: !this.isStarterMode && !!window.documentSigningEnabled,
+			},
+			{
+				id: 'minimize',
+				label: _('Minimize Presentation'),
+				type: 'action',
+				actionType: 'minimize',
+				icon: 'lc_presentationminimizer.svg',
+				visible:
+					!this.isStarterMode && this.map?.getDocType?.() === 'presentation',
 			},
 			{
 				type: 'separator',
@@ -1128,6 +1141,11 @@ class BackstageView extends window.L.Class {
 		this.hide();
 	}
 
+	private executeMinimizePresentation(): void {
+		this.sendUnoCommand('.uno:PresentationMinimizer');
+		this.hide();
+	}
+
 	private triggerNewDocument(template: TemplateData): void {
 		const docType = template.type || 'writer';
 		const params: string[] = ['type=' + docType];
@@ -1216,6 +1234,7 @@ class BackstageView extends window.L.Class {
 			$(this.container).removeClass('hidden');
 			this.hideDocumentContainer();
 			this.updateSaveButtonState();
+			this.updateMinimizeButtonState();
 			this.container.focus();
 			this.fireMapEvent('backstageshow');
 		}
@@ -1290,6 +1309,20 @@ class BackstageView extends window.L.Class {
 			'disabled',
 			!this.isDocumentModified(),
 		);
+	}
+
+	// The minimizer rewrites the content of the presentation, so the entry
+	// follows the command state, which is disabled whenever the document may
+	// not be changed.
+	private updateMinimizeButtonState(): void {
+		const element = this.container.querySelector('#backstage-minimize');
+		if (!element) return;
+		const disabled =
+			this.map?.isReadOnlyMode?.() ||
+			this.map?.stateChangeHandler?.getItemValue(
+				'.uno:PresentationMinimizer',
+			) === 'disabled';
+		element.classList.toggle('disabled', !!disabled);
 	}
 }
 

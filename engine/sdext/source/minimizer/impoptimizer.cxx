@@ -51,6 +51,7 @@
 #include <com/sun/star/io/XSeekable.hpp>
 #include <com/sun/star/io/TempFile.hpp>
 #include <com/sun/star/frame/XComponentLoader.hpp>
+#include <com/sun/star/frame/XTitle.hpp>
 #include <com/sun/star/util/URLTransformer.hpp>
 
 #include <comphelper/propertyvalue.hxx>
@@ -676,17 +677,37 @@ void ImpOptimizer::Optimize( const Sequence< PropertyValue >& rArguments )
 
     if ( mxDocumentFrame.is() )
     {
-        InformationDialog aInformationDialog( mxContext, mxDialogParentWindow, maSaveAsURL, mbOpenNewDocument, nSourceSize, nDestSize, nEstimatedFileSize );
-        aInformationDialog.execute();
-        SetStatusValue( TK_OpenNewDocument, Any( mbOpenNewDocument ) );
-        DispatchStatus();
-    }
+        // when the result stays in the current presentation, the summary
+        // names the document by its title
+        OUString aDocumentTitle;
+        Reference< XTitle > xTitle( mxModel, UNO_QUERY );
+        if ( xTitle.is() )
+            aDocumentTitle = xTitle->getTitle();
 
+        auto xInformationDialog = std::make_shared<InformationDialog>( mxContext, mxDialogParentWindow,
+            maSaveAsURL, aDocumentTitle, mbOpenNewDocument, nSourceSize, nDestSize, nEstimatedFileSize );
+        auto pThis = shared_from_this();
+        weld::DialogController::runAsync( xInformationDialog,
+            [pThis, xInformationDialog, xSelf, nSourceSize, nDestSize]( sal_Int32 )
+        {
+            xInformationDialog->AcceptChoice();
+            pThis->SetStatusValue( TK_OpenNewDocument, Any( pThis->mbOpenNewDocument ) );
+            pThis->DispatchStatus();
+            pThis->ImplPostOptimize( xSelf, nSourceSize, nDestSize );
+        });
+    }
+    else
+        ImplPostOptimize( xSelf, nSourceSize, nDestSize );
+}
+
+void ImpOptimizer::ImplPostOptimize( const Reference< XFrame >& rxSelf,
+    sal_Int64 nSourceSize, sal_Int64 nDestSize )
+{
     if ( !maSaveAsURL.isEmpty() )
     {
-        if ( mbOpenNewDocument && xSelf.is() )
+        if ( mbOpenNewDocument && rxSelf.is() )
         {
-            Reference< awt::XWindow > xContainerWindow( xSelf->getContainerWindow() );
+            Reference< awt::XWindow > xContainerWindow( rxSelf->getContainerWindow() );
             xContainerWindow->setVisible( true );
         }
         else

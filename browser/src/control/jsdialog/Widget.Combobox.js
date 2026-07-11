@@ -301,11 +301,12 @@ JSDialog.combobox = function (parentContainer, data, builder) {
 	};
 
 	if (data.enabled === false) {
-		container.disabled = true;
+		container.setAttribute('disabled', 'true');
 		content.disabled = true;
+		button.disabled = true;
 	}
 
-	JSDialog.SynchronizeDisabledState(container, [content]);
+	JSDialog.SynchronizeDisabledState(container, [content, button]);
 
 	// notebookbar a11y requires main element to have click handler for shortcuts to work
 	container.addEventListener('click', function () { content.focus(); });

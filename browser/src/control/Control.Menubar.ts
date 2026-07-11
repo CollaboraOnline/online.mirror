@@ -478,6 +478,7 @@ class Menubar extends window.L.Control {
 					{name: _('Current slide as Portable Network Graphics (.png)'), id: 'downloadas-png', type: 'action'},
 					{name: _('Current slide as Tag Image File Format (.tiff)'), id: 'downloadas-tiff', type: 'action'},
 				]},
+				{name: _('Minimize...'), uno: '.uno:PresentationMinimizer', id: 'minimizepresentation'},
 				{name: _UNO('.uno:SetDocumentProperties', 'presentation'), uno: '.uno:SetDocumentProperties', id: 'properties'},
 				{name: _UNO('.uno:Signature', 'presentation'), uno: '.uno:Signature', id: 'signature'},
 				{name: _('Options'), id: 'settings-dialog', type: 'action', mobileapp: false},

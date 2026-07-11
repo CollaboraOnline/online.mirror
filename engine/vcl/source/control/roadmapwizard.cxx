@@ -444,7 +444,15 @@ namespace vcl
         mpNextBtn = m_pNextPage;
         m_pNextPage->SetClickHdl( LINK( this, RoadmapWizard, OnNextPage ) );
 
-        // the finish button
+        // the cancel button
+        m_pCancel = VclPtr<CancelButton>::Create(this, WB_TABSTOP);
+        m_pCancel->SetSizePixel(LogicToPixel(Size(50, 14), MapMode(MapUnit::MapAppFont)));
+        m_pCancel->Show();
+        m_pCancel->set_id(u"cancel"_ustr);
+        AddButton( m_pCancel, WIZARDDIALOG_BUTTON_STDOFFSET_X );
+
+        // the finish button confirms the whole wizard, so it takes the
+        // outermost spot in the row of buttons
         m_pFinish = VclPtr<OKButton>::Create(this, WB_TABSTOP);
         m_pFinish->SetSizePixel(LogicToPixel(Size(50, 14), MapMode(MapUnit::MapAppFont)));
         m_pFinish->SetText(VclResId(STR_WIZDLG_FINISH));
@@ -452,12 +460,6 @@ namespace vcl
         m_pFinish->set_id(u"finish"_ustr);
         AddButton( m_pFinish, WIZARDDIALOG_BUTTON_STDOFFSET_X );
         m_pFinish->SetClickHdl( LINK( this, RoadmapWizard, OnFinish ) );
-
-        // the cancel button
-        m_pCancel = VclPtr<CancelButton>::Create(this, WB_TABSTOP);
-        m_pCancel->SetSizePixel(LogicToPixel(Size(50, 14), MapMode(MapUnit::MapAppFont)));
-        m_pCancel->Show();
-        AddButton( m_pCancel, WIZARDDIALOG_BUTTON_STDOFFSET_X );
     }
 
     void RoadmapWizard::Resize()

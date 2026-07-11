@@ -30,10 +30,13 @@ public:
 
     InformationDialog( const css::uno::Reference< css::uno::XComponentContext >& rxContext,
                        const css::uno::Reference<css::awt::XWindow>& rxDialogParent, const OUString& rSaveAsURL,
-                       bool& bOpenNewDocument, sal_Int64 nSourceSize, sal_Int64 nDestSize, sal_Int64 nApproxDest );
+                       const OUString& rDocumentTitle, bool& bOpenNewDocument,
+                       sal_Int64 nSourceSize, sal_Int64 nDestSize, sal_Int64 nApproxDest );
     ~InformationDialog();
 
-    void                execute();
+    // takes the open-new-document choice from the checkbox once the
+    // dialog has been dismissed
+    void                AcceptChoice();
 
 private:
 
@@ -46,6 +49,8 @@ private:
     sal_Int64 mnApproxSize;
     bool& mrbOpenNewDocument;
     const OUString& maSaveAsURL;
+    // shown in the primary text when no save-as URL names the result
+    OUString maDocumentTitle;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

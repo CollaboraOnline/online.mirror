@@ -20,6 +20,8 @@
 #ifndef INCLUDED_SDEXT_SOURCE_MINIMIZER_IMPOPTIMIZER_HXX
 #define INCLUDED_SDEXT_SOURCE_MINIMIZER_IMPOPTIMIZER_HXX
 
+#include <memory>
+
 #include "optimizationstats.hxx"
 #include <cpo/uno/Sequence.h>
 #include <com/sun/star/frame/XDispatch.hpp>
@@ -28,7 +30,7 @@
 #include <com/sun/star/uno/XComponentContext.hpp>
 
 
-class ImpOptimizer : public OptimizationStats
+class ImpOptimizer : public OptimizationStats, public std::enable_shared_from_this<ImpOptimizer>
 {
 private:
 
@@ -54,6 +56,8 @@ private:
     bool        mbOpenNewDocument;
 
     void Optimize();
+    void ImplPostOptimize( const css::uno::Reference< css::frame::XFrame >& rxSelf,
+        sal_Int64 nSourceSize, sal_Int64 nDestSize );
 
 public:
 

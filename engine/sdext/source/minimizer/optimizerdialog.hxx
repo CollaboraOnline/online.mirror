@@ -36,6 +36,14 @@
 
 class OptimizerDialog;
 
+// The independent changes the wizard can apply to the presentation.
+enum class OptimizerPass
+{
+    DeleteSlides,
+    OptimizeImages,
+    ReplaceOLEObjects
+};
+
 class OptimizedDialogPage : public vcl::OWizardPage
 {
 protected:
@@ -51,20 +59,8 @@ public:
 
 class IntroPage : public OptimizedDialogPage
 {
-private:
-    std::unique_ptr<weld::ComboBox> mxComboBox;
-    std::unique_ptr<weld::Button> mxButton;
-
-    DECL_LINK(ComboBoxActionPerformed, weld::ComboBox&, void);
-    DECL_LINK(ButtonActionPerformed, weld::Button&, void);
-
 public:
     IntroPage(weld::Container* pPage, OptimizerDialog& rOptimizerDialog);
-    void UpdateControlStates(const std::vector<OUString>& rItemList, int nSelectedItem, bool bRemoveButtonEnabled);
-    OUString Get_TK_Name() const
-    {
-        return mxComboBox->get_active_text();
-    }
 };
 
 class SlidesPage : public OptimizedDialogPage
@@ -100,13 +96,17 @@ private:
     std::unique_ptr<weld::Label> m_xQualityLabel;
     std::unique_ptr<weld::SpinButton> m_xQuality;
     std::unique_ptr<weld::RadioButton> m_xJpegCompression;
-    std::unique_ptr<weld::ComboBox> m_xResolution;
+    // one button per offered resolution, in the order of maResolutions
+    std::unique_ptr<weld::RadioButton> m_xResolutions[5];
     std::unique_ptr<weld::CheckButton> m_xRemoveCropArea;
     std::unique_ptr<weld::CheckButton> m_xEmbedLinkedGraphics;
 
+    // the resolutions in dots per inch, where 0 keeps the images as they are
+    static const int maResolutions[5];
+
     DECL_LINK(EmbedLinkedGraphicsActionPerformed, weld::Toggleable&, void);
     DECL_LINK(RemoveCropAreaActionPerformed, weld::Toggleable&, void);
-    DECL_LINK(ComboBoxActionPerformed, weld::ComboBox&, void);
+    DECL_LINK(ResolutionActionPerformed, weld::Toggleable&, void);
     DECL_LINK(CompressionActionPerformed, weld::Toggleable&, void);
     DECL_LINK(SpinButtonActionPerformed, weld::SpinButton&, void);
 
@@ -123,7 +123,11 @@ private:
     std::unique_ptr<weld::CheckButton> m_xCreateStaticImage;
     std::unique_ptr<weld::RadioButton> m_xAllOLEObjects;
     std::unique_ptr<weld::RadioButton> m_xForeignOLEObjects;
+    std::unique_ptr<weld::Label> m_xNoObjects;
     std::unique_ptr<weld::Label> m_xLabel;
+
+    // true when the presentation holds at least one OLE object
+    bool mbHasOLEObjects = false;
 
     DECL_LINK(OLEOptimizationActionPerformed, weld::Toggleable&, void);
     DECL_LINK(OLEActionPerformed, weld::Toggleable&, void);
@@ -131,7 +135,7 @@ private:
 public:
     ObjectsPage(weld::Container* pPage, OptimizerDialog& rOptimizerDialog);
 
-    void Init(const OUString& rDesc);
+    void Init(const OUString& rDesc, bool bHasOLEObjects);
 
     void UpdateControlStates(bool bConvertOLEObjects, int nOLEOptimizationType);
 };
@@ -139,38 +143,30 @@ public:
 class SummaryPage : public OptimizedDialogPage
 {
 private:
-    std::unique_ptr<weld::Label> m_xLabel1;
-    std::unique_ptr<weld::Label> m_xLabel2;
-    std::unique_ptr<weld::Label> m_xLabel3;
+    std::unique_ptr<weld::CheckButton> m_xChanges[3];
     std::unique_ptr<weld::Label> m_xCurrentSize;
     std::unique_ptr<weld::Label> m_xEstimatedSize;
     std::unique_ptr<weld::Label> m_xStatus;
     std::unique_ptr<weld::ProgressBar> m_xProgress;
-    std::unique_ptr<weld::RadioButton> m_xApplyToCurrent;
-    std::unique_ptr<weld::RadioButton> m_xSaveToNew;
-    std::unique_ptr<weld::ComboBox> m_xComboBox;
-    std::unique_ptr<weld::CheckButton> m_xSaveSettings;
 
-    DECL_LINK(SaveSettingsActionPerformed, weld::Toggleable&, void);
-    DECL_LINK(SaveAsNewActionPerformed, weld::Toggleable&, void);
+    // the pass each visible checkbox stands for, in checkbox order
+    std::vector<OptimizerPass> maListedPasses;
+
+    DECL_LINK(ChangeToggled, weld::Toggleable&, void);
 
 public:
     SummaryPage(weld::Container* pPage, OptimizerDialog& rOptimizerDialog);
 
-    void Init(const OUString& rSettingsName, bool bIsReadonly);
-
-    void UpdateControlStates(bool bSaveAs, bool bSaveSettingsEnabled,
-                             const std::vector<OUString>& rItemList,
-                             const std::vector<OUString>& rSummaryStrings,
+    void UpdateControlStates(const std::vector<std::pair<OptimizerPass, OUString>>& rChanges,
                              const OUString& rCurrentFileSize,
                              const OUString& rEstimatedFileSize);
 
     void UpdateStatusLabel(const OUString& rStatus);
     void UpdateProgressValue(int nProgress);
 
-    bool GetSaveAsNew() const { return m_xSaveToNew->get_active(); }
-    bool GetSaveSettings() const { return m_xSaveSettings->get_active(); }
-    OUString GetSettingsName() const { return m_xComboBox->get_active_text(); }
+    // A pass the summary page does not list has no checkbox and stays
+    // enabled.
+    bool IsPassEnabled(OptimizerPass ePass) const;
 };
 
 class OptimizerDialog : public vcl::RoadmapWizardMachine, public ConfigurationAccess
@@ -182,8 +178,6 @@ public:
     std::unique_ptr<BuilderPage> createPage(vcl::WizardTypes::WizardState nState) override;
     ~OptimizerDialog();
 
-    void                execute();
-
     short               mnEndStatus;
     bool                mbIsReadonly;
 
@@ -193,21 +187,18 @@ private:
 
     css::uno::Reference< css::frame::XDispatch >      mxStatusDispatcher;
 
-    IntroPage* mpPage0;
-    SlidesPage* mpPage1;
-    ImagesPage* mpPage2;
-    ObjectsPage* mpPage3;
-    SummaryPage* mpPage4;
+    SlidesPage* mpPage1 = nullptr;
+    ImagesPage* mpPage2 = nullptr;
+    ObjectsPage* mpPage3 = nullptr;
+    SummaryPage* mpPage4 = nullptr;
 
     void InitDialog();
     void InitRoadmap();
     void InitNavigationBar();
-    void InitPage0();
     void InitPage1();
     void InitPage2();
     void InitPage3();
     void InitPage4();
-    void UpdateControlStatesPage0();
     void UpdateControlStatesPage1();
     void UpdateControlStatesPage2();
     void UpdateControlStatesPage3();
@@ -215,7 +206,13 @@ private:
 
     virtual OUString getStateDisplayName(vcl::WizardTypes::WizardState nState) const override;
 
+    virtual void enterState(vcl::WizardTypes::WizardState nState) override;
+
     virtual bool onFinish() override;
+
+    // runs the optimization and closes the wizard; on error the wizard
+    // stays open with the navigation buttons restored
+    bool implApplyOptimizationAndFinish();
 
 public:
 
@@ -228,7 +225,6 @@ public:
 
     void UpdateControlStates( sal_Int16 nStep = -1 );
 
-    void SetIntroPage(IntroPage* pPage0) { mpPage0 = pPage0; }
     void SetSlidesPage(SlidesPage* pPage1) { mpPage1 = pPage1; }
     void SetImagesPage(ImagesPage* pPage2) { mpPage2 = pPage2; }
     void SetObjectsPage(ObjectsPage* pPage3) { mpPage3 = pPage3; }

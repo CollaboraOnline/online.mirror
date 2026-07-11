@@ -50,37 +50,10 @@ using namespace ::com::sun::star::presentation;
 void OptimizerDialog::InitNavigationBar()
 {
     m_xHelp->hide();
-}
 
-void OptimizerDialog::UpdateControlStatesPage0()
-{
-    int nSelectedItem = -1;
-    std::vector<OUString> aItemList;
-    const std::vector< OptimizerSettings >& rList( GetOptimizerSettings() );
-    if ( rList.size() > 1 ) // the first session in the list is the actual one -> skipping first one
-    {
-        for ( std::vector<OptimizerSettings>::size_type i = 1; i < rList.size(); i++ )
-        {
-            aItemList.push_back(rList[i].maName);
-            if ( nSelectedItem < 0 )
-            {
-                if ( rList[ i ] == rList[ 0 ] )
-                    nSelectedItem = static_cast< short >( i - 1 );
-            }
-        }
-    }
-    bool bRemoveButtonEnabled = false;
-    if ( nSelectedItem >= 0 )
-    {
-        if ( nSelectedItem > 2 )    // only allowing to delete custom themes, the first can|t be deleted
-            bRemoveButtonEnabled = true;
-    }
-    mpPage0->UpdateControlStates(aItemList, nSelectedItem, bRemoveButtonEnabled);
-}
-
-void OptimizerDialog::InitPage0()
-{
-    UpdateControlStatesPage0();
+    // the wizard changes the current presentation rather than finishing a
+    // series of steps, so the finish button reads as apply
+    m_xFinish->set_label(SdextResId( STR_APPLY ));
 }
 
 void OptimizerDialog::UpdateControlStatesPage1()
@@ -148,7 +121,7 @@ void OptimizerDialog::InitPage3()
         }
     }
 
-    mpPage3->Init(nOLECount ? SdextResId( STR_OLE_OBJECTS_DESC ) : SdextResId( STR_NO_OLE_OBJECTS_DESC ));
+    mpPage3->Init(SdextResId( STR_OLE_OBJECTS_DESC ), nOLECount != 0);
 
     UpdateControlStatesPage3();
 }
@@ -171,33 +144,9 @@ static OUString ImpValueOfInMB( sal_Int64 rVal, sal_Unicode nSeparator )
 
 void OptimizerDialog::UpdateControlStatesPage4()
 {
-    bool bSaveAs( GetConfigProperty( TK_SaveAs, true ) );
-    if ( mbIsReadonly )
-        bSaveAs = true;
-
-    std::vector<OUString> aItemList;
-    const std::vector< OptimizerSettings >& rList( GetOptimizerSettings() );
-    if ( rList.size() > 1 ) // the first session in the list is the actual one -> skipping first one
-    {
-        for ( std::vector<OptimizerSettings>::size_type w = 1; w < rList.size(); w++ )
-            aItemList.push_back(rList[ w ].maName);
-    }
-
-    // now check if it is sensible to enable the combo box
-    bool bSaveSettingsEnabled = true;
-    if ( rList.size() > 1 ) // the first session in the list is the actual one -> skipping first one
-    {
-        for ( std::vector<OptimizerSettings>::size_type w = 1; w < rList.size(); w++ )
-        {
-            if ( rList[ w ] == rList[ 0 ] )
-            {
-                bSaveSettingsEnabled = false;
-                break;
-            }
-        }
-    }
-
-    std::vector< OUString > aSummaryStrings;
+    // the changes the current settings would apply, each with the pass it
+    // belongs to, so that its checkbox can disable that pass
+    std::vector< std::pair< OptimizerPass, OUString > > aChanges;
 
     // taking care of deleted slides
     sal_Int32 nDeletedSlides = 0;
@@ -237,7 +186,7 @@ void OptimizerDialog::UpdateControlStatesPage4()
         sal_Int32 i = aStr.indexOf( aPlaceholder );
         if ( i >= 0 )
             aStr = aStr.replaceAt( i, aPlaceholder.getLength(), OUString::number( nDeletedSlides ) );
-        aSummaryStrings.push_back( aStr );
+        aChanges.emplace_back( OptimizerPass::DeleteSlides, aStr );
     }
 
 // generating graphic compression info
@@ -266,7 +215,7 @@ void OptimizerDialog::UpdateControlStatesPage4()
         if ( k >= 0 )
             aStr = aStr.replaceAt( k, aResolutionPlaceholder.getLength(), OUString::number( nImageResolution ) );
 
-        aSummaryStrings.push_back( aStr );
+        aChanges.emplace_back( OptimizerPass::OptimizeImages, aStr );
     }
 
     if ( GetConfigProperty( TK_OLEOptimization, false ) )
@@ -291,11 +240,9 @@ void OptimizerDialog::UpdateControlStatesPage4()
             sal_Int32 i = aStr.indexOf( aPlaceholder );
             if ( i >= 0 )
                 aStr = aStr.replaceAt( i, aPlaceholder.getLength(), OUString::number( nOLEReplacements ) );
-            aSummaryStrings.push_back( aStr );
+            aChanges.emplace_back( OptimizerPass::ReplaceOLEObjects, aStr );
         }
     }
-    while( aSummaryStrings.size() < 3 )
-        aSummaryStrings.emplace_back( );
 
     sal_Int64 nCurrentFileSize = 0;
     sal_Int64 nEstimatedFileSize = 0;
@@ -303,16 +250,19 @@ void OptimizerDialog::UpdateControlStatesPage4()
     if ( xStorable.is() && xStorable->hasLocation() )
         nCurrentFileSize = PPPOptimizer::GetFileSize( xStorable->getLocation() );
 
+    // The estimate covers the images only, so a cleared image checkbox leaves
+    // the current size as the estimate.
+    const bool bOptimizeImages = mpPage4->IsPassEnabled( OptimizerPass::OptimizeImages );
     if ( nCurrentFileSize )
     {
         double fE = static_cast< double >( nCurrentFileSize );
-        if ( nImageResolution )
+        if ( bOptimizeImages && nImageResolution )
         {
             double v = ( static_cast< double >( nImageResolution ) + 75.0 ) / 300.0;
             if ( v < 1.0 )
                 fE *= v;
         }
-        if ( bJPEGCompression )
+        if ( bOptimizeImages && bJPEGCompression )
         {
             double v = 0.75 - ( ( 100.0 - static_cast< double >( nJPEGQuality ) ) / 400.0 ) ;
             fE *= v;
@@ -323,8 +273,7 @@ void OptimizerDialog::UpdateControlStatesPage4()
     OUString aStr( SdextResId( STR_FILESIZESEPARATOR ) );
     if ( !aStr.isEmpty() )
         nSeparator = aStr[ 0 ];
-    mpPage4->UpdateControlStates(bSaveAs, bSaveSettingsEnabled, aItemList,
-                                 aSummaryStrings,
+    mpPage4->UpdateControlStates(aChanges,
                                  ImpValueOfInMB(nCurrentFileSize, nSeparator),
                                  ImpValueOfInMB(nEstimatedFileSize, nSeparator));
     SetConfigProperty( TK_EstimatedFileSize, Any( nEstimatedFileSize ) );
@@ -332,27 +281,6 @@ void OptimizerDialog::UpdateControlStatesPage4()
 
 void OptimizerDialog::InitPage4()
 {
-    // creating a default session name that hasn't been used yet
-    OUString aSettingsName;
-    OUString aDefault( SdextResId( STR_MY_SETTINGS ) );
-    sal_Int32 nSession = 1;
-    std::vector<OptimizerSettings>::size_type i;
-    const std::vector< OptimizerSettings >& rList( GetOptimizerSettings() );
-    do
-    {
-        OUString aTemp = aDefault + OUString::number( nSession++ );
-        for ( i = 1; i < rList.size(); i++ )
-        {
-            if ( rList[ i ].maName == aTemp )
-                break;
-        }
-        if ( i == rList.size() )
-            aSettingsName = aTemp;
-    }
-    while( aSettingsName.isEmpty() );
-
-    mpPage4->Init(aSettingsName, mbIsReadonly);
-
     UpdateControlStatesPage4();
 }
 

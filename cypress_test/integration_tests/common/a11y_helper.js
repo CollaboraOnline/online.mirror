@@ -557,6 +557,7 @@ module.exports.runA11yValidation = runA11yValidation;
 module.exports.getActiveDialog = getActiveDialog;
 module.exports.testNameDialog = testNameDialog;
 module.exports.closeActiveDialog = closeActiveDialog;
+module.exports.closeActiveWarningDialog = closeActiveWarningDialog;
 module.exports.getActiveTabPanel = getActiveTabPanel;
 module.exports.traverseTabs = traverseTabs;
 module.exports.handleTabsInDialog = handleTabsInDialog;

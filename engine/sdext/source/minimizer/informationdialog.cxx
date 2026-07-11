@@ -74,7 +74,9 @@ void InformationDialog::InitDialog()
         nDest = mnApproxSize;
     }
 
-    OUString aTitle;
+    // the title names the new file when the result was saved into one,
+    // and the document itself when the result replaced its content
+    OUString aTitle( maDocumentTitle );
     if ( !maSaveAsURL.isEmpty() )
     {
         Reference< XURLTransformer > xURLTransformer( URLTransformer::create(mxContext) );
@@ -94,8 +96,7 @@ void InformationDialog::InitDialog()
     OUString sSecondary( eInfoString );
     static constexpr OUString aOldSizePlaceholder( u"%OLDFILESIZE"_ustr  );
     static constexpr OUString aNewSizePlaceholder( u"%NEWFILESIZE"_ustr  );
-    const OUString aTitlePlaceholder( !aTitle.isEmpty() ? u"%TITLE"_ustr
-                                                         : u"'%TITLE'"_ustr );
+    static constexpr OUString aTitlePlaceholder( u"%TITLE"_ustr );
 
     sal_Int32 i = sSecondary.indexOf( aOldSizePlaceholder );
     if ( i >= 0 )
@@ -116,7 +117,7 @@ void InformationDialog::InitDialog()
 }
 
 InformationDialog::InformationDialog(const Reference< XComponentContext > &rxContext, const Reference<XWindow>& rxDialogParent,
-                                     const OUString& rSaveAsURL, bool& rbOpenNewDocument,
+                                     const OUString& rSaveAsURL, const OUString& rDocumentTitle, bool& rbOpenNewDocument,
                                      sal_Int64 rSourceSize, sal_Int64 rDestSize, sal_Int64 rApproxSize)
     : MessageDialogController(Application::GetFrameWeld(rxDialogParent), u"modules/simpress/ui/pminfodialog.ui"_ustr, u"PMInfoDialog"_ustr, u"ask"_ustr)
     , ConfigurationAccess(rxContext)
@@ -126,6 +127,7 @@ InformationDialog::InformationDialog(const Reference< XComponentContext > &rxCon
     , mnApproxSize(rApproxSize)
     , mrbOpenNewDocument(rbOpenNewDocument)
     , maSaveAsURL(rSaveAsURL)
+    , maDocumentTitle(rDocumentTitle)
 {
     InitDialog();
 }
@@ -134,9 +136,8 @@ InformationDialog::~InformationDialog()
 {
 }
 
-void InformationDialog::execute()
+void InformationDialog::AcceptChoice()
 {
-    run();
     if (!maSaveAsURL.isEmpty())
         mrbOpenNewDocument = mxCheckBox->get_active();
 }

@@ -43,7 +43,6 @@ $(eval $(call gb_Library_use_libraries,PresentationMinimizer,\
 
 $(eval $(call gb_Library_add_exception_objects,PresentationMinimizer,\
     sdext/source/minimizer/configurationaccess \
-    sdext/source/minimizer/fileopendialog \
     sdext/source/minimizer/graphiccollector \
     sdext/source/minimizer/impoptimizer \
     sdext/source/minimizer/informationdialog \

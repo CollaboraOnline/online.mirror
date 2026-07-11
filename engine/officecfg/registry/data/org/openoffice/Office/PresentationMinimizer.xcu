@@ -32,7 +32,7 @@
             <value>true</value>
         </prop>
         <prop oor:name="ImageResolution">
-            <value>150</value>
+            <value>0</value>
         </prop>
         <prop oor:name="EmbedLinkedGraphics">
             <value>true</value>

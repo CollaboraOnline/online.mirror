@@ -403,6 +403,20 @@ window.L.Control.NotebookbarImpress = window.L.Control.NotebookbarWriter.extend(
 				'type': 'container',
 				'children': [
 					{
+						'id': 'file-minimizepresentation',
+						'type': 'bigtoolitem',
+						'text': _('Minimize'),
+						'command': '.uno:PresentationMinimizer',
+						'accessibility': { focusBack: true, combination: 'MZ', de: null }
+					}
+				]
+		});
+
+		content.push(
+			{
+				'type': 'container',
+				'children': [
+					{
 						'id': 'properties',
 						'type': 'bigtoolitem',
 						'text': _('Properties'),

@@ -20,38 +20,35 @@
 
 #include "optimizerdialog.hxx"
 #include "impoptimizer.hxx"
-#include "fileopendialog.hxx"
 #include <sdextresid.hxx>
 #include <com/sun/star/awt/XItemEventBroadcaster.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/container/XIndexContainer.hpp>
+#include <com/sun/star/drawing/XDrawPagesSupplier.hpp>
 #include <com/sun/star/frame/XStorable.hpp>
-#include <com/sun/star/frame/XTitle.hpp>
 #include <com/sun/star/lang/XSingleServiceFactory.hpp>
-#include <com/sun/star/ui/dialogs/ExecutableDialogResults.hpp>
 #include <com/sun/star/ucb/XSimpleFileAccess.hpp>
 #include <com/sun/star/io/IOException.hpp>
 #include <com/sun/star/util/XModifiable.hpp>
 
+#include <comphelper/kit.hxx>
 #include <comphelper/propertyvalue.hxx>
 #include <sal/macros.h>
-#include <osl/time.h>
 #include <vcl/errinf.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld.hxx>
 #include <svtools/sfxecode.hxx>
 #include <svtools/ehdl.hxx>
-#include <tools/urlobj.hxx>
 #include <o3tl/string_view.hxx>
 #include <bitmaps.hlst>
 #include <strings.hrc>
 
 using namespace ::com::sun::star::io;
-using namespace ::com::sun::star::ui;
 using namespace ::com::sun::star::awt;
 using namespace ::com::sun::star::uno;
 using namespace cpo::uno;
 using namespace ::com::sun::star::util;
+using namespace ::com::sun::star::drawing;
 using namespace ::com::sun::star::frame;
 using namespace ::com::sun::star::beans;
 
@@ -74,21 +71,7 @@ void OptimizedDialogPage::Activate()
 
 IntroPage::IntroPage(weld::Container* pPage, OptimizerDialog& rOptimizerDialog)
     : OptimizedDialogPage(pPage, rOptimizerDialog, u"modules/simpress/ui/pmintropage.ui"_ustr, u"PMIntroPage"_ustr, 0)
-    , mxComboBox(m_xBuilder->weld_combo_box(u"LB_SETTINGS"_ustr))
-    , mxButton(m_xBuilder->weld_button(u"STR_REMOVE"_ustr))
 {
-    rOptimizerDialog.SetIntroPage(this);
-    mxComboBox->connect_changed(LINK(this, IntroPage, ComboBoxActionPerformed));
-    mxButton->connect_clicked(LINK(this, IntroPage, ButtonActionPerformed));
-}
-
-void IntroPage::UpdateControlStates(const std::vector<OUString>& rItemList, int nSelectedItem, bool bRemoveButtonEnabled)
-{
-    mxComboBox->clear();
-    for (const auto& a : rItemList)
-        mxComboBox->append_text(a);
-    mxComboBox->set_active(nSelectedItem);
-    mxButton->set_sensitive(bRemoveButtonEnabled);
 }
 
 SlidesPage::SlidesPage(weld::Container* pPage, OptimizerDialog& rOptimizerDialog)
@@ -122,20 +105,27 @@ void SlidesPage::UpdateControlStates(bool bDeleteUnusedMasterPages, bool bDelete
     mxComboBox->set_sensitive(mxUnusedSlides->get_sensitive());
 }
 
+const int ImagesPage::maResolutions[5] = { 0, 96, 150, 300, 600 };
+
 ImagesPage::ImagesPage(weld::Container* pPage, OptimizerDialog& rOptimizerDialog)
     : OptimizedDialogPage(pPage, rOptimizerDialog, u"modules/simpress/ui/pmimagespage.ui"_ustr, u"PMImagesPage"_ustr, 2)
     , m_xLossLessCompression(m_xBuilder->weld_radio_button(u"STR_LOSSLESS_COMPRESSION"_ustr))
     , m_xQualityLabel(m_xBuilder->weld_label(u"STR_QUALITY"_ustr))
     , m_xQuality(m_xBuilder->weld_spin_button(u"SB_QUALITY"_ustr))
     , m_xJpegCompression(m_xBuilder->weld_radio_button(u"STR_JPEG_COMPRESSION"_ustr))
-    , m_xResolution(m_xBuilder->weld_combo_box(u"LB_RESOLUTION"_ustr))
+    , m_xResolutions{ m_xBuilder->weld_radio_button(u"RB_RESOLUTION_0"_ustr),
+                      m_xBuilder->weld_radio_button(u"RB_RESOLUTION_96"_ustr),
+                      m_xBuilder->weld_radio_button(u"RB_RESOLUTION_150"_ustr),
+                      m_xBuilder->weld_radio_button(u"RB_RESOLUTION_300"_ustr),
+                      m_xBuilder->weld_radio_button(u"RB_RESOLUTION_600"_ustr) }
     , m_xRemoveCropArea(m_xBuilder->weld_check_button(u"STR_REMOVE_CROP_AREA"_ustr))
     , m_xEmbedLinkedGraphics(m_xBuilder->weld_check_button(u"STR_EMBED_LINKED_GRAPHICS"_ustr))
 {
     rOptimizerDialog.SetImagesPage(this);
     m_xRemoveCropArea->connect_toggled(LINK(this, ImagesPage, RemoveCropAreaActionPerformed));
     m_xEmbedLinkedGraphics->connect_toggled(LINK(this, ImagesPage, EmbedLinkedGraphicsActionPerformed));
-    m_xResolution->connect_changed(LINK(this, ImagesPage, ComboBoxActionPerformed));
+    for (auto& rResolution : m_xResolutions)
+        rResolution->connect_toggled(LINK(this, ImagesPage, ResolutionActionPerformed));
     m_xQuality->connect_value_changed(LINK(this, ImagesPage, SpinButtonActionPerformed));
 
     m_xJpegCompression->connect_toggled(LINK(this, ImagesPage, CompressionActionPerformed));
@@ -150,7 +140,15 @@ void ImagesPage::UpdateControlStates(bool bJPEGCompression, int nJPEGQuality, bo
     m_xQualityLabel->set_sensitive(bJPEGCompression);
     m_xQuality->set_sensitive(bJPEGCompression);
     m_xQuality->set_value(nJPEGQuality);
-    m_xResolution->set_active_id(OUString::number(nResolution));
+    // a stored resolution that is not offered falls back to keeping the
+    // images as they are
+    size_t nActive = 0;
+    for (size_t i = 0; i < std::size(maResolutions); ++i)
+    {
+        if (maResolutions[i] == nResolution)
+            nActive = i;
+    }
+    m_xResolutions[nActive]->set_active(true);
     m_xRemoveCropArea->set_active(bRemoveCropArea);
     m_xEmbedLinkedGraphics->set_active(bEmbedLinkedGraphics);
 }
@@ -160,6 +158,7 @@ ObjectsPage::ObjectsPage(weld::Container* pPage, OptimizerDialog& rOptimizerDial
     , m_xCreateStaticImage(m_xBuilder->weld_check_button(u"STR_OLE_REPLACE"_ustr))
     , m_xAllOLEObjects(m_xBuilder->weld_radio_button(u"STR_ALL_OLE_OBJECTS"_ustr))
     , m_xForeignOLEObjects(m_xBuilder->weld_radio_button(u"STR_ALIEN_OLE_OBJECTS_ONLY"_ustr))
+    , m_xNoObjects(m_xBuilder->weld_label(u"STR_NO_OLE_OBJECTS"_ustr))
     , m_xLabel(m_xBuilder->weld_label(u"STR_OLE_OBJECTS_DESC"_ustr))
 {
     rOptimizerDialog.SetObjectsPage(this);
@@ -168,69 +167,95 @@ ObjectsPage::ObjectsPage(weld::Container* pPage, OptimizerDialog& rOptimizerDial
     m_xForeignOLEObjects->connect_toggled(LINK(this, ObjectsPage, OLEActionPerformed));
 }
 
-void ObjectsPage::Init(const OUString& rDesc)
+void ObjectsPage::Init(const OUString& rDesc, bool bHasOLEObjects)
 {
     m_xLabel->set_label(rDesc);
+
+    // With nothing to replace the choice cannot be made, and the page says so
+    // where the choice would have been.
+    mbHasOLEObjects = bHasOLEObjects;
+    m_xCreateStaticImage->set_sensitive(bHasOLEObjects);
+    m_xNoObjects->set_visible(!bHasOLEObjects);
 }
 
 void ObjectsPage::UpdateControlStates(bool bConvertOLEObjects, int nOLEOptimizationType)
 {
     m_xCreateStaticImage->set_active(bConvertOLEObjects);
-    m_xAllOLEObjects->set_sensitive(bConvertOLEObjects);
-    m_xForeignOLEObjects->set_sensitive(bConvertOLEObjects);
+    m_xAllOLEObjects->set_sensitive(mbHasOLEObjects && bConvertOLEObjects);
+    m_xForeignOLEObjects->set_sensitive(mbHasOLEObjects && bConvertOLEObjects);
     m_xAllOLEObjects->set_active(nOLEOptimizationType == 0);
     m_xForeignOLEObjects->set_active(nOLEOptimizationType == 1);
 }
 
 SummaryPage::SummaryPage(weld::Container* pPage, OptimizerDialog& rOptimizerDialog)
     : OptimizedDialogPage(pPage, rOptimizerDialog, u"modules/simpress/ui/pmsummarypage.ui"_ustr, u"PMSummaryPage"_ustr, 4)
-    , m_xLabel1(m_xBuilder->weld_label(u"LABEL1"_ustr))
-    , m_xLabel2(m_xBuilder->weld_label(u"LABEL2"_ustr))
-    , m_xLabel3(m_xBuilder->weld_label(u"LABEL3"_ustr))
+    , m_xChanges{ m_xBuilder->weld_check_button(u"CHECK1"_ustr),
+                  m_xBuilder->weld_check_button(u"CHECK2"_ustr),
+                  m_xBuilder->weld_check_button(u"CHECK3"_ustr) }
     , m_xCurrentSize(m_xBuilder->weld_label(u"CURRENT_FILESIZE"_ustr))
     , m_xEstimatedSize(m_xBuilder->weld_label(u"ESTIMATED_FILESIZE"_ustr))
     , m_xStatus(m_xBuilder->weld_label(u"STR_STATUS"_ustr))
     , m_xProgress(m_xBuilder->weld_progress_bar(u"PROGRESS"_ustr))
-    , m_xApplyToCurrent(m_xBuilder->weld_radio_button(u"STR_APPLY_TO_CURRENT"_ustr))
-    , m_xSaveToNew(m_xBuilder->weld_radio_button(u"STR_SAVE_AS"_ustr))
-    , m_xComboBox(m_xBuilder->weld_combo_box(u"MY_SETTINGS"_ustr))
-    , m_xSaveSettings(m_xBuilder->weld_check_button(u"STR_SAVE_SETTINGS"_ustr))
 {
     rOptimizerDialog.SetSummaryPage(this);
-    m_xApplyToCurrent->connect_toggled(LINK(this, SummaryPage, SaveAsNewActionPerformed));
-    m_xSaveToNew->connect_toggled(LINK(this, SummaryPage, SaveAsNewActionPerformed));
-    m_xSaveSettings->connect_toggled(LINK(this, SummaryPage, SaveSettingsActionPerformed));
+    for (auto& rChange : m_xChanges)
+        rChange->connect_toggled(LINK(this, SummaryPage, ChangeToggled));
+
+    // The progress bar fills while the optimization runs. Until then it shows
+    // as an empty bar across the page, so it stays hidden.
+    m_xProgress->hide();
 }
 
-void SummaryPage::Init(const OUString& rSettingsName, bool bIsReadonly)
-{
-    m_xComboBox->set_entry_text(rSettingsName);
-    m_xApplyToCurrent->set_sensitive(!bIsReadonly);
-    m_xSaveToNew->set_sensitive(!bIsReadonly);
-}
-
-void SummaryPage::UpdateControlStates(bool bSaveAs, bool bSaveSettingsEnabled,
-                                      const std::vector<OUString>& rItemList,
-                                      const std::vector<OUString>& rSummaryStrings,
+void SummaryPage::UpdateControlStates(const std::vector<std::pair<OptimizerPass, OUString>>& rChanges,
                                       const OUString& rCurrentFileSize,
                                       const OUString& rEstimatedFileSize)
 {
-    m_xApplyToCurrent->set_active(!bSaveAs);
-    m_xSaveToNew->set_active(bSaveAs);
+    // Each listed change gets a checkbox. A change that was already listed
+    // keeps the state the user gave it, a newly listed one starts enabled.
+    // The spare checkboxes are hidden.
+    // The states are read before any checkbox is written, because a change can
+    // move to another checkbox between two calls.
+    std::vector<std::pair<OptimizerPass, bool>> aPreviousStates;
+    for (size_t i = 0; i < maListedPasses.size(); ++i)
+        aPreviousStates.emplace_back(maListedPasses[i], m_xChanges[i]->get_active());
 
-    for (const auto& a : rItemList)
-        m_xComboBox->append_text(a);
-
-    m_xSaveSettings->set_sensitive(bSaveSettingsEnabled);
-    m_xComboBox->set_sensitive(bSaveSettingsEnabled && m_xSaveSettings->get_active());
-
-    assert(rSummaryStrings.size() == 3);
-    m_xLabel1->set_label(rSummaryStrings[0]);
-    m_xLabel2->set_label(rSummaryStrings[1]);
-    m_xLabel3->set_label(rSummaryStrings[2]);
+    maListedPasses.clear();
+    size_t nIndex = 0;
+    for (const auto& rChange : rChanges)
+    {
+        if (nIndex >= std::size(m_xChanges))
+            break;
+        const auto aPrevious = std::find_if(aPreviousStates.begin(), aPreviousStates.end(),
+            [&rChange](const auto& rState) { return rState.first == rChange.first; });
+        const bool bActive = aPrevious == aPreviousStates.end() || aPrevious->second;
+        maListedPasses.push_back(rChange.first);
+        m_xChanges[nIndex]->set_label(rChange.second);
+        m_xChanges[nIndex]->set_active(bActive);
+        m_xChanges[nIndex]->show();
+        ++nIndex;
+    }
+    for (; nIndex < std::size(m_xChanges); ++nIndex)
+        m_xChanges[nIndex]->hide();
 
     m_xCurrentSize->set_label(rCurrentFileSize);
     m_xEstimatedSize->set_label(rEstimatedFileSize);
+}
+
+IMPL_LINK_NOARG(SummaryPage, ChangeToggled, weld::Toggleable&, void)
+{
+    // the estimate and the listed changes follow the passes that are left
+    // enabled
+    mrOptimizerDialog.UpdateControlStates(ITEM_ID_SUMMARY);
+}
+
+bool SummaryPage::IsPassEnabled(OptimizerPass ePass) const
+{
+    for (size_t i = 0; i < maListedPasses.size(); ++i)
+    {
+        if (maListedPasses[i] == ePass)
+            return m_xChanges[i]->get_active();
+    }
+    return true;
 }
 
 void SummaryPage::UpdateStatusLabel(const OUString& rStatus)
@@ -240,6 +265,10 @@ void SummaryPage::UpdateStatusLabel(const OUString& rStatus)
 
 void SummaryPage::UpdateProgressValue(int nProgress)
 {
+    // the bar appears with the first reported progress and stays for the rest
+    // of the run
+    if (nProgress > 0)
+        m_xProgress->show();
     m_xProgress->set_percentage(nProgress);
 }
 
@@ -264,11 +293,6 @@ void OptimizerDialog::InitRoadmap()
 
 void OptimizerDialog::UpdateConfiguration()
 {
-    // page0
-    OUString sTKName(mpPage0->Get_TK_Name());
-    if (!sTKName.isEmpty())
-        SetConfigProperty(TK_Name, Any(sTKName));
-
     // page1
     OUString sTKCustomShowName(mpPage1->Get_TK_CustomShowName());
     if (!sTKCustomShowName.isEmpty())
@@ -289,7 +313,6 @@ OptimizerDialog::OptimizerDialog( const Reference< XComponentContext > &rxContex
     InitDialog();
     InitRoadmap();
     InitNavigationBar();
-    InitPage0();
     InitPage1();
     InitPage2();
     InitPage3();
@@ -320,6 +343,15 @@ OUString OptimizerDialog::getStateDisplayName(vcl::WizardTypes::WizardState nSta
             return SdextResId( STR_SUMMARY );
     }
     return OUString();
+}
+
+void OptimizerDialog::enterState(vcl::WizardTypes::WizardState nState)
+{
+    vcl::RoadmapWizardMachine::enterState(nState);
+
+    // The summary page is where the changes to apply are chosen, so the apply
+    // button waits for it. A read-only presentation cannot be changed at all.
+    m_xFinish->set_sensitive(nState == ITEM_ID_SUMMARY && !mbIsReadonly);
 }
 
 std::unique_ptr<BuilderPage> OptimizerDialog::createPage(vcl::WizardTypes::WizardState nState)
@@ -360,24 +392,17 @@ OptimizerDialog::~OptimizerDialog()
         SaveConfiguration();
 }
 
-void OptimizerDialog::execute()
-{
-    mnEndStatus = run();
-    UpdateConfiguration();          // taking actual control settings for the configuration
-}
-
 void OptimizerDialog::UpdateControlStates( sal_Int16 nPage )
 {
     switch( nPage )
     {
-        case 0 : UpdateControlStatesPage0(); break;
+        case 0 : break; // the introduction page has no controls
         case 1 : UpdateControlStatesPage1(); break;
         case 2 : UpdateControlStatesPage2(); break;
         case 3 : UpdateControlStatesPage3(); break;
         case 4 : UpdateControlStatesPage4(); break;
         default:
         {
-            UpdateControlStatesPage0();
             UpdateControlStatesPage1();
             UpdateControlStatesPage2();
             UpdateControlStatesPage3();
@@ -409,21 +434,10 @@ void OptimizerDialog::UpdateStatus( const cpo::uno::Sequence< css::beans::Proper
     if ( pVal )
         SetConfigProperty( TK_OpenNewDocument, *pVal );
 
-    Application::Reschedule(true);
-}
-
-IMPL_LINK(SummaryPage, SaveAsNewActionPerformed, weld::Toggleable&, rBox, void)
-{
-    if (!rBox.get_active())
-        return;
-
-    const bool bSaveToNew = &rBox == m_xSaveToNew.get();
-    mrOptimizerDialog.SetConfigProperty( TK_SaveAs, Any(bSaveToNew) );
-}
-
-IMPL_LINK(SummaryPage, SaveSettingsActionPerformed, weld::Toggleable&, rBox, void)
-{
-    m_xComboBox->set_sensitive(rBox.get_active());
+    // In a kit session the widget updates reach the client on their own;
+    // processing events here would re-enter the kit poll.
+    if (!comphelper::COKit::isActive())
+        Application::Reschedule(true);
 }
 
 IMPL_LINK(ObjectsPage, OLEActionPerformed, weld::Toggleable&, rBox, void)
@@ -440,8 +454,8 @@ IMPL_LINK(ObjectsPage, OLEOptimizationActionPerformed, weld::Toggleable&, rBox, 
 {
     const bool bOLEOptimization = rBox.get_active();
     mrOptimizerDialog.SetConfigProperty( TK_OLEOptimization, Any(bOLEOptimization) );
-    m_xAllOLEObjects->set_sensitive(bOLEOptimization);
-    m_xForeignOLEObjects->set_sensitive(bOLEOptimization);
+    m_xAllOLEObjects->set_sensitive(mbHasOLEObjects && bOLEOptimization);
+    m_xForeignOLEObjects->set_sensitive(mbHasOLEObjects && bOLEOptimization);
 }
 
 IMPL_LINK(ImagesPage, CompressionActionPerformed, weld::Toggleable&, rBox, void)
@@ -489,189 +503,111 @@ bool OptimizerDialog::onFinish()
 {
     UpdateConfiguration();
 
+    // a pass the user disabled on the summary page is turned off in the
+    // working settings before they are handed to the optimizer
+    if (!mpPage4->IsPassEnabled(OptimizerPass::DeleteSlides))
+    {
+        SetConfigProperty( TK_DeleteHiddenSlides, Any( false ) );
+        SetConfigProperty( TK_DeleteUnusedMasterPages, Any( false ) );
+    }
+    if (!mpPage4->IsPassEnabled(OptimizerPass::OptimizeImages))
+    {
+        SetConfigProperty( TK_JPEGCompression, Any( false ) );
+        SetConfigProperty( TK_ImageResolution, Any( sal_Int32( 0 ) ) );
+        SetConfigProperty( TK_RemoveCropArea, Any( false ) );
+        SetConfigProperty( TK_EmbedLinkedGraphics, Any( false ) );
+    }
+    if (!mpPage4->IsPassEnabled(OptimizerPass::ReplaceOLEObjects))
+        SetConfigProperty( TK_OLEOptimization, Any( false ) );
+
     ShowPage(ITEM_ID_SUMMARY);
     m_xPrevPage->set_sensitive(false);
     m_xNextPage->set_sensitive(false);
     m_xFinish->set_sensitive(false);
     m_xCancel->set_sensitive(false);
 
-    // check if we have to open the FileDialog
-    bool bSuccessfullyExecuted = true;
-    if (mpPage4->GetSaveAsNew())
+    // The changes are applied to the current presentation, so unsaved
+    // edits are confirmed before the content is replaced. A kit session
+    // saves the document as it is edited and the introduction page
+    // already says that the presentation itself changes, so there it
+    // applies straight away.
+    Reference<XModifiable> xModifiable(mxController->getModel(),
+                                       UNO_QUERY_THROW );
+    if ( !comphelper::COKit::isActive() && xModifiable->isModified() )
     {
-        // Duplicate presentation before applying changes
-        OUString aSaveAsURL;
-        FileOpenDialog aFileOpenDialog(mxContext);
-
-        // generating default file name
-        OUString aName;
-        Reference< XStorable > xStorable( mxController->getModel(), UNO_QUERY );
-        if ( xStorable.is() && xStorable->hasLocation() )
+        SolarMutexGuard aSolarGuard;
+        std::shared_ptr<weld::MessageDialog> xPopupDlg(Application::CreateMessageDialog(
+            m_xAssistant.get(), VclMessageType::Question, VclButtonsType::YesNo,
+            SdextResId( STR_WARN_UNSAVED_PRESENTATION )));
+        xPopupDlg->runAsync(xPopupDlg, [this](sal_Int32 nResult)
         {
-            INetURLObject aURLObj( xStorable->getLocation() );
-            if ( !aURLObj.hasFinalSlash() )
-            {
-                // tdf#105382 uri-decode file name
-                aURLObj.removeExtension(INetURLObject::LAST_SEGMENT, false);
-                aName = aURLObj.getName(INetURLObject::LAST_SEGMENT, false,
-                                        INetURLObject::DecodeMechanism::WithCharset);
-            }
-        }
-        else
-        {
-            // If no filename, try to use model title ("Untitled 1" or something like this)
-            Reference<XTitle> xTitle(
-                GetFrame()->getController()->getModel(), UNO_QUERY);
-            aName = xTitle->getTitle();
-        }
-
-        if (!aName.isEmpty())
-        {
-            aName += " " + SdextResId( STR_FILENAME_SUFFIX );
-            aFileOpenDialog.setDefaultName(aName);
-        }
-
-        if (aFileOpenDialog.execute() == dialogs::ExecutableDialogResults::OK)
-        {
-            aSaveAsURL = aFileOpenDialog.getURL();
-            SetConfigProperty( TK_SaveAsURL, Any( aSaveAsURL ) );
-            SetConfigProperty( TK_FilterName, Any( aFileOpenDialog.getFilterName() ) );
-        }
-        if ( aSaveAsURL.isEmpty() )
-        {
-            // something goes wrong...
-            bSuccessfullyExecuted = false;
-        }
-
-        // waiting for 500ms
-        Application::Reschedule(true);
-        for ( sal_uInt32 i = osl_getGlobalTimer(); ( i + 500 ) > ( osl_getGlobalTimer() ); )
-        Application::Reschedule(true);
-    }
-    else
-    {
-        // Apply changes to current presentation
-        Reference<XModifiable> xModifiable(mxController->getModel(),
-                                           UNO_QUERY_THROW );
-        if ( xModifiable->isModified() )
-        {
-            SolarMutexGuard aSolarGuard;
-            std::unique_ptr<weld::MessageDialog> popupDlg(Application::CreateMessageDialog(
-                m_xAssistant.get(), VclMessageType::Question, VclButtonsType::YesNo,
-                SdextResId( STR_WARN_UNSAVED_PRESENTATION )));
-            if (popupDlg->run() != RET_YES)
+            if (nResult == RET_YES)
+                implApplyOptimizationAndFinish();
+            else
             {
                 // Selected not "yes" ("no" or dialog was cancelled) so return to previous step
                 m_xPrevPage->set_sensitive(true);
                 m_xNextPage->set_sensitive(true);
                 m_xFinish->set_sensitive(true);
                 m_xCancel->set_sensitive(true);
-                return false;
             }
-        }
+        });
+        // the confirmation dialog continues or cancels the finish from its callback
+        return false;
     }
-    if ( bSuccessfullyExecuted )
+    return implApplyOptimizationAndFinish();
+}
+
+bool OptimizerDialog::implApplyOptimizationAndFinish()
+{
+    URL aURL;
+    aURL.Protocol = u"vnd.com.sun.star.comp.PPPOptimizer:"_ustr;
+    aURL.Path = u"optimize"_ustr;
+
+    // The result dialog outlives the wizard, so it is parented to the
+    // document window rather than to the wizard.
+    Sequence< PropertyValue > lArguments{
+        comphelper::makePropertyValue(u"Settings"_ustr, GetConfigurationSequence()),
+        comphelper::makePropertyValue(u"StatusDispatcher"_ustr, GetStatusDispatcher()),
+        comphelper::makePropertyValue(u"DocumentFrame"_ustr, GetFrame()),
+        comphelper::makePropertyValue(u"DialogParentWindow"_ustr, GetFrame()->getContainerWindow())
+    };
+
+    ErrCode errorCode;
+    try
     {
-        // now check if we have to store a session template
-        const bool bSaveSettings = mpPage4->GetSaveSettings();
-        OUString aSettingsName = mpPage4->GetSettingsName();
-        if (bSaveSettings && !aSettingsName.isEmpty())
-        {
-            std::vector< OptimizerSettings >::iterator aIter( GetOptimizerSettingsByName( aSettingsName ) );
-            std::vector< OptimizerSettings >& rSettings( GetOptimizerSettings() );
-            OptimizerSettings aNewSettings( rSettings[ 0 ] );
-            aNewSettings.maName = aSettingsName;
-            if ( aIter == rSettings.end() )
-                rSettings.push_back( aNewSettings );
-            else
-                *aIter = std::move(aNewSettings);
-        }
+        auto pOptimizer = std::make_shared<ImpOptimizer>(mxContext, GetFrame()->getController()->getModel());
+        pOptimizer->Optimize(lArguments);
     }
-    if ( bSuccessfullyExecuted )
+    catch (css::io::IOException&)
     {
-        URL aURL;
-        aURL.Protocol = u"vnd.com.sun.star.comp.PPPOptimizer:"_ustr;
-        aURL.Path = u"optimize"_ustr;
-
-        Sequence< PropertyValue > lArguments{
-            comphelper::makePropertyValue(u"Settings"_ustr, GetConfigurationSequence()),
-            comphelper::makePropertyValue(u"StatusDispatcher"_ustr, GetStatusDispatcher()),
-            comphelper::makePropertyValue(u"DocumentFrame"_ustr, GetFrame()),
-            comphelper::makePropertyValue(u"DialogParentWindow"_ustr, m_xAssistant->GetXWindow())
-        };
-
-        ErrCode errorCode;
-        try
-        {
-            ImpOptimizer aOptimizer(mxContext, GetFrame()->getController()->getModel());
-            aOptimizer.Optimize(lArguments);
-        }
-        catch (css::io::IOException&)
-        {
-            // We always receive just ERRCODE_IO_CANTWRITE in case of problems, so no need to bother
-            // about extracting error code from exception text
-            errorCode = ERRCODE_IO_CANTWRITE;
-        }
-        catch (css::uno::Exception&)
-        {
-            // Other general exception
-            errorCode = ERRCODE_IO_GENERAL;
-        }
-
-        if (errorCode != ERRCODE_NONE)
-        {
-            // Restore wizard controls
-            maStats.SetStatusValue(TK_Progress, Any(static_cast<sal_Int32>(0)));
-            m_xPrevPage->set_sensitive(true);
-            m_xNextPage->set_sensitive(false);
-            m_xFinish->set_sensitive(true);
-            m_xCancel->set_sensitive(true);
-
-            OUString aFileName;
-            GetConfigProperty(TK_SaveAsURL) >>= aFileName;
-            SfxErrorContext aEc(ERRCTX_SFX_SAVEASDOC, aFileName);
-            ErrorHandler::HandleError(errorCode);
-            return false;
-        }
+        // We always receive just ERRCODE_IO_CANTWRITE in case of problems, so no need to bother
+        // about extracting error code from exception text
+        errorCode = ERRCODE_IO_CANTWRITE;
     }
-    else
+    catch (css::uno::Exception&)
     {
+        // Other general exception
+        errorCode = ERRCODE_IO_GENERAL;
+    }
+
+    if (errorCode != ERRCODE_NONE)
+    {
+        // Restore wizard controls
+        maStats.SetStatusValue(TK_Progress, Any(static_cast<sal_Int32>(0)));
         m_xPrevPage->set_sensitive(true);
         m_xNextPage->set_sensitive(false);
         m_xFinish->set_sensitive(true);
         m_xCancel->set_sensitive(true);
+
+        OUString aFileName;
+        GetConfigProperty(TK_SaveAsURL) >>= aFileName;
+        SfxErrorContext aEc(ERRCTX_SFX_SAVEASDOC, aFileName);
+        ErrorHandler::HandleError(errorCode);
+        return false;
     }
 
     return vcl::RoadmapWizardMachine::onFinish();
-}
-
-IMPL_LINK_NOARG(IntroPage, ButtonActionPerformed, weld::Button&, void)
-{
-    // delete configuration
-    OUString aSelectedItem(mxComboBox->get_active_text());
-    if ( !aSelectedItem.isEmpty() )
-    {
-        std::vector< OptimizerSettings >::iterator aIter( mrOptimizerDialog.GetOptimizerSettingsByName( aSelectedItem ) );
-        std::vector< OptimizerSettings >& rList( mrOptimizerDialog.GetOptimizerSettings() );
-        if ( aIter != rList.end() )
-        {
-            rList.erase( aIter );
-            mrOptimizerDialog.UpdateControlStates();
-        }
-    }
-}
-
-IMPL_LINK(IntroPage, ComboBoxActionPerformed, weld::ComboBox&, rBox, void)
-{
-    OUString sActionCommand(rBox.get_active_text());
-    if (!sActionCommand.isEmpty())
-    {
-        std::vector< OptimizerSettings >::iterator aIter( mrOptimizerDialog.GetOptimizerSettingsByName(sActionCommand) );
-        std::vector< OptimizerSettings >& rList( mrOptimizerDialog.GetOptimizerSettings() );
-        if ( aIter != rList.end() )
-            rList[ 0 ] = *aIter;
-    }
-    mrOptimizerDialog.UpdateControlStates();
 }
 
 IMPL_LINK(ImagesPage, SpinButtonActionPerformed, weld::SpinButton&, rBox, void)
@@ -679,9 +615,20 @@ IMPL_LINK(ImagesPage, SpinButtonActionPerformed, weld::SpinButton&, rBox, void)
     mrOptimizerDialog.SetConfigProperty( TK_JPEGQuality, Any( static_cast<sal_Int32>(rBox.get_value()) ) );
 }
 
-IMPL_LINK_NOARG(ImagesPage, ComboBoxActionPerformed, weld::ComboBox&, void)
+IMPL_LINK(ImagesPage, ResolutionActionPerformed, weld::Toggleable&, rButton, void)
 {
-    mrOptimizerDialog.SetConfigProperty( TK_ImageResolution, Any( m_xResolution->get_active_id().toInt32() ) );
+    if (!rButton.get_active())
+        return;
+
+    for (size_t i = 0; i < std::size(maResolutions); ++i)
+    {
+        if (&rButton == m_xResolutions[i].get())
+        {
+            mrOptimizerDialog.SetConfigProperty( TK_ImageResolution,
+                                                 Any( sal_Int32( maResolutions[i] ) ) );
+            return;
+        }
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

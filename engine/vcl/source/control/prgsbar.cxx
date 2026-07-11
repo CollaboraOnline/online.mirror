@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <comphelper/kit.hxx>
 #include <vcl/event.hxx>
 #include <vcl/status.hxx>
 #include <vcl/toolkit/prgsbar.hxx>
@@ -188,6 +189,12 @@ void ProgressBar::SetValue( sal_uInt16 nNewPercent )
     {
         mnPercent = nNewPercent;
         Invalidate();
+
+        // A kit session forwards the new value to the client without
+        // processing events here; a nested event loop would re-enter
+        // the kit poll.
+        if (comphelper::COKit::isActive())
+            return;
 
         // Make sure the progressbar is actually painted even if the caller is busy with its task,
         // so the main loop would not be invoked.

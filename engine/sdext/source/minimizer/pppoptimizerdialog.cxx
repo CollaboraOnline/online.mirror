@@ -20,6 +20,7 @@
 
 #include "pppoptimizerdialog.hxx"
 #include "optimizerdialog.hxx"
+#include <rtl/ref.hxx>
 #include <sal/log.hxx>
 #include <cppuhelper/supportsservice.hxx>
 
@@ -31,8 +32,7 @@ using namespace ::com::sun::star::frame;
 using namespace ::com::sun::star::beans;
 
 PPPOptimizerDialog::PPPOptimizerDialog( const Reference< XComponentContext > &xContext ) :
-    mxContext( xContext ),
-    mpOptimizerDialog( nullptr )
+    mxContext( xContext )
 {
 }
 
@@ -94,35 +94,44 @@ void SAL_CALL PPPOptimizerDialog::dispatch( const URL& rURL,
 
     if ( rURL.Path == "execute" )
     {
+        if ( mpOptimizerDialog )
+            return; // the wizard is already showing
+
         try
         {
-            sal_Int64 nFileSizeSource = 0;
-            sal_Int64 nFileSizeDest = 0;
-            mpOptimizerDialog = new OptimizerDialog( mxContext, mxFrame, this );
-            mpOptimizerDialog->execute();
-
-            const Any* pVal( mpOptimizerDialog->maStats.GetStatusValue( TK_FileSizeSource ) );
-            if ( pVal )
-                *pVal >>= nFileSizeSource;
-            pVal = mpOptimizerDialog->maStats.GetStatusValue( TK_FileSizeDestination );
-            if ( pVal )
-                *pVal >>= nFileSizeDest;
-
-            if ( nFileSizeSource && nFileSizeDest )
+            mpOptimizerDialog = std::make_shared<OptimizerDialog>( mxContext, mxFrame, this );
+            rtl::Reference<PPPOptimizerDialog> xSelf( this );
+            weld::DialogController::runAsync( mpOptimizerDialog, [xSelf]( sal_Int32 nResult )
             {
-                OUString sResult = "Your Presentation has been minimized from:" +
-                    OUString::number( nFileSizeSource >> 10 ) +
-                    "KB to " +
-                    OUString::number( nFileSizeDest >> 10 ) +
-                    "KB.";
-                SAL_INFO("sdext.minimizer", sResult );
-            }
+                std::shared_ptr<OptimizerDialog>& rDialog( xSelf->mpOptimizerDialog );
+                rDialog->mnEndStatus = nResult;
+                rDialog->UpdateConfiguration(); // taking actual control settings for the configuration
+
+                sal_Int64 nFileSizeSource = 0;
+                sal_Int64 nFileSizeDest = 0;
+                const Any* pVal( rDialog->maStats.GetStatusValue( TK_FileSizeSource ) );
+                if ( pVal )
+                    *pVal >>= nFileSizeSource;
+                pVal = rDialog->maStats.GetStatusValue( TK_FileSizeDestination );
+                if ( pVal )
+                    *pVal >>= nFileSizeDest;
+
+                if ( nFileSizeSource && nFileSizeDest )
+                {
+                    OUString sResult = "Your Presentation has been minimized from:" +
+                        OUString::number( nFileSizeSource >> 10 ) +
+                        "KB to " +
+                        OUString::number( nFileSizeDest >> 10 ) +
+                        "KB.";
+                    SAL_INFO("sdext.minimizer", sResult );
+                }
+                rDialog.reset();
+            });
         }
         catch( ... )
         {
+            mpOptimizerDialog.reset();
         }
-        delete mpOptimizerDialog;
-        mpOptimizerDialog = nullptr;
     }
     else if ( rURL.Path == "statusupdate" )
     {

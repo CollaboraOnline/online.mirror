@@ -327,7 +327,13 @@ constexpr auto SimpressDialogList
         { u"modules/simpress/ui/headerfooterdialog.ui" },
         { u"modules/simpress/ui/headerfootertab.ui" },
         { u"modules/simpress/ui/interactiondialog.ui" },
-        { u"modules/simpress/ui/interactionpage.ui" }
+        { u"modules/simpress/ui/interactionpage.ui" },
+        { u"modules/simpress/ui/pmimagespage.ui" },
+        { u"modules/simpress/ui/pminfodialog.ui" },
+        { u"modules/simpress/ui/pmintropage.ui" },
+        { u"modules/simpress/ui/pmobjectspage.ui" },
+        { u"modules/simpress/ui/pmslidespage.ui" },
+        { u"modules/simpress/ui/pmsummarypage.ui" }
     });
 
 constexpr auto SdrawDialogList

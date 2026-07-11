@@ -204,6 +204,12 @@ class A11yValidator {
 	}
 
 	private checkElementHasLabel(type: string, element: HTMLElement): void {
+		// An element that is not rendered is not part of the accessibility
+		// tree, so it needs no label until it is shown. This also skips its
+		// whole subtree, for example the pages of a wizard other than the
+		// current one.
+		if (!this.isVisible(element)) return;
+
 		if (element.hasAttribute('aria-labelledby')) {
 			const labelledbyValue = element.getAttribute('aria-labelledby') as string;
 			const labelledbyIds = labelledbyValue.trim().split(/\s+/);

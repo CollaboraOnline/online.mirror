@@ -20,6 +20,8 @@
 #ifndef INCLUDED_SDEXT_SOURCE_MINIMIZER_PPPOPTIMIZERDIALOG_HXX
 #define INCLUDED_SDEXT_SOURCE_MINIMIZER_PPPOPTIMIZERDIALOG_HXX
 
+#include <memory>
+
 #include <cpo/uno/Sequence.h>
 #include <com/sun/star/beans/PropertyValue.hpp>
 #include <com/sun/star/lang/XServiceInfo.hpp>
@@ -42,7 +44,7 @@ class PPPOptimizerDialog : public   ::cppu::WeakImplHelper<
     css::uno::Reference< css::frame::XFrame > mxFrame;
     css::uno::Reference< css::frame::XController > mxController;
 
-    OptimizerDialog*    mpOptimizerDialog;
+    std::shared_ptr<OptimizerDialog> mpOptimizerDialog;
 
 public:
 

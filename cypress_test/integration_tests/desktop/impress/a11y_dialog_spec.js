@@ -395,4 +395,89 @@ describe(['tagdesktop'], 'Accessibility Impress Dialog Tests', { testIsolation: 
         helper.typeIntoDocument('{esc}');
     });
 
+    it('Minimize Presentation wizard', function () {
+        cy.then(() => {
+            win.app.map.sendUnoCommand('.uno:PresentationMinimizer');
+        });
+
+        // walk every page: Introduction, Slides, Images, Objects, Summary
+        a11yHelper.getActiveDialog(1)
+            .then(() => helper.processToIdle(win))
+            .then(() => a11yHelper.runA11yValidation(win, 'validatedialogsa11y'));
+
+        // the introduction warns that the presentation itself is changed
+        cy.cGet('#STR_INTRODUCTION_T').should('contain.text', 'different file first');
+
+        // applying waits for the last page
+        cy.cGet('#finish button').should('be.disabled');
+
+        function goToNextPage() {
+            cy.cGet('#next button').should('not.be.disabled').click();
+            cy.then(() => helper.processToIdle(win))
+                .then(() => a11yHelper.runA11yValidation(win, 'validatedialogsa11y'));
+        }
+
+        goToNextPage(); // Slides
+        cy.cGet('#finish button').should('be.disabled');
+
+        goToNextPage(); // Images
+        // the page carries a heading over each group of settings
+        cy.cGet('#STR_RECOMPRESS_IMAGES').should('contain.text', 'Re-compress images');
+        cy.cGet('#STR_IMAGE_RESOLUTION').should('contain.text', 'Reduce image resolution');
+
+        // every image resolution is offered on the page itself, and the images
+        // are kept as they are until another one is picked
+        cy.cGet('#LB_RESOLUTION').should('not.exist');
+        cy.cGet('#RB_RESOLUTION_0 input').should('be.checked');
+        cy.cGet('#RB_RESOLUTION_96 input').should('not.be.checked');
+        cy.cGet('#RB_RESOLUTION_600').should('be.visible');
+
+        goToNextPage(); // Objects
+        // The page is offered whether or not the presentation has OLE
+        // objects. This one has none, so it says so where the choice would
+        // have been and there is nothing to switch on.
+        cy.cGet('#STR_OLE_REPLACE').should('be.visible');
+        cy.cGet('#STR_OLE_REPLACE input').should('be.disabled');
+        cy.cGet('#STR_NO_OLE_OBJECTS').should('be.visible')
+            .should('contain.text', 'contains no OLE objects');
+        cy.cGet('#STR_ALL_OLE_OBJECTS input').should('be.disabled');
+        cy.cGet('#STR_OLE_OBJECTS_DESC')
+            .should('contain.text', 'Object Linking and Embedding')
+            .should('not.contain.text', 'no OLE objects');
+
+        goToNextPage(); // Summary
+
+        // the summary page lists a checkbox per change to apply. This
+        // small document produces no listed changes, and neither the
+        // saved-settings handling nor the where-to-apply choice exist.
+        cy.cGet('#STR_SUMMARY_TITLE').should('contain.text', 'Select which changes to apply');
+        cy.cGet('#CHECK1').should('not.be.visible');
+        cy.cGet('#STR_SAVE_SETTINGS').should('not.exist');
+        cy.cGet('#MY_SETTINGS').should('not.exist');
+        cy.cGet('#STR_APPLY_TO_CURRENT').should('not.exist');
+        cy.cGet('#STR_SAVE_AS').should('not.exist');
+
+        // the progress bar joins the page once the optimization runs
+        cy.cGet('#PROGRESS').should('not.be.visible');
+
+        // the apply button ends the row of buttons
+        cy.cGet('#finish button').should('contain.text', 'Apply');
+        cy.cGet('.jsdialog-window .ui-button-box-right > :last-child')
+            .should('have.id', 'finish');
+
+        cy.cGet('#finish button').should('not.be.disabled').click();
+
+        // the wizard applies without asking about unsaved changes and the
+        // result summary names the document
+        a11yHelper.getActiveDialog(1)
+            .then(() => helper.processToIdle(win))
+            .then(() => a11yHelper.runA11yValidation(win, 'validatedialogsa11y'));
+        cy.cGet('.jsdialog-window')
+            .should('contain.text', 'Successfully updated the presentation')
+            .should('contain.text', '.odp')
+            .should('not.contain.text', '%TITLE');
+        a11yHelper.closeActiveDialog(1);
+    });
+
+
 });
