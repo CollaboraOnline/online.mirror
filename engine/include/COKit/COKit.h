@@ -180,6 +180,18 @@ struct COKitClassStruct
     /// @see kit::Office::registerRevealInFileManagerCallback()
     void (*registerRevealInFileManagerCallback)(COKit* pThis,
             COKitRevealInFileManagerCallback pCallback);
+
+    /** @see kit::Office::installClipboardProvider(). */
+    void (*installClipboardProvider) (COKit* pThis,
+                                      const COKitClipboardProvider* pProvider);
+
+    /** @see kit::Office::getGlobalClipboard(). */
+    int (*getGlobalClipboard) (COKit* pThis,
+                               const char **pMimeTypes,
+                               size_t      *pOutCount,
+                               char      ***pOutMimeTypes,
+                               size_t     **pOutSizes,
+                               char      ***pOutStreams);
 };
 
 struct COKitDocumentStruct
@@ -579,6 +591,9 @@ struct COKitDocumentClassStruct
 
     /// @see kit::Document::transferClipboardFromView().
     void (*transferClipboardFromView)(COKitDocument* pThis, int nSourceViewId);
+
+    /// @see kit::Document::flushClipboard().
+    void (*flushClipboard)(COKitDocument* pThis);
 
 #endif // defined KIT_USE_UNSTABLE_API || defined LIBO_INTERNAL_ONLY
 };
