@@ -107,6 +107,9 @@ public:
         _document->bgSaveEnded();
     }
 
+    // Decide if it is not an interactive prompt that the user must answer.
+    static bool isBenignBgSaveJSDialog(const std::string& jsdialogPayload);
+
 protected:
     virtual void handleMessage(const std::vector<char>& data) override;
     virtual void onDisconnect() override;

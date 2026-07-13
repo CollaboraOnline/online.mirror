@@ -270,6 +270,24 @@ void BgSaveParentWebSocketHandler::reportFailedSave(const std::string &reason)
     _saveCompleted = true;
 }
 
+bool BgSaveParentWebSocketHandler::isBenignBgSaveJSDialog(const std::string& jsdialogPayload)
+{
+    Poco::JSON::Object::Ptr object;
+    if (!JsonUtil::parseJSON(jsdialogPayload, object))
+        return false;
+
+    const std::string jsontype = object->get("jsontype").toString();
+
+    std::string action;
+    const bool bClosingDialog =
+        jsontype == "dialog" &&
+        JsonUtil::findJSONValue(object, "action", action) && action == "close";
+
+    // allow-list of jsdialog messages in bgsave
+    return jsontype == "notebookbar" || jsontype == "sidebar" ||
+           jsontype == "formulabar" || jsontype == "quickfind" || bClosingDialog;
+}
+
 void BgSaveParentWebSocketHandler::handleMessage(const std::vector<char>& data)
 {
     const StringVector tokens = StringVector::tokenize(data.data(), data.size());
@@ -292,12 +310,7 @@ void BgSaveParentWebSocketHandler::handleMessage(const std::vector<char>& data)
 
     if (tokens[1] == "jsdialog:")
     {
-        Poco::JSON::Object::Ptr object;
-        if (JsonUtil::parseJSON(tokens.cat(' ', 2), object) &&
-            (object->get("jsontype").toString() == "notebookbar" ||
-             object->get("jsontype").toString() == "sidebar" ||
-             object->get("jsontype").toString() == "formulabar"))
-            // white-listing to avoid popup & dialog & other interactive errors
+        if (isBenignBgSaveJSDialog(tokens.cat(' ', 2)))
         {
             LOG_DBG("Unexpected but benign jsdialog message from bgsave process " <<
                     COOLProtocol::getAbbreviatedMessage(data));
