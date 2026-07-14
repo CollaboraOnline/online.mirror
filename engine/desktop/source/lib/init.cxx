@@ -1265,8 +1265,6 @@ static bool doc_paste(COKitDocument* pThis,
                       const char* pMimeType,
                       const char* pData,
                       size_t nSize);
-static void doc_installClipboardProvider(COKitDocument* pThis,
-                                         const COKitClipboardProvider* pProvider);
 static void doc_flushClipboard(COKitDocument* pThis);
 static void doc_setGraphicSelection (COKitDocument* pThis,
                                   int nType,
@@ -1557,7 +1555,6 @@ LibLODocument_Impl::LibLODocument_Impl(uno::Reference <css::lang::XComponent> xC
         m_pDocumentClass->setClipboard = doc_setClipboard;
         m_pDocumentClass->transferClipboardFromView = doc_transferClipboardFromView;
         m_pDocumentClass->paste = doc_paste;
-        m_pDocumentClass->installClipboardProvider = doc_installClipboardProvider;
         m_pDocumentClass->flushClipboard = doc_flushClipboard;
         m_pDocumentClass->setGraphicSelection = doc_setGraphicSelection;
         m_pDocumentClass->resetSelection = doc_resetSelection;
@@ -6680,22 +6677,6 @@ static int doc_setClipboard(COKitDocument* pThis,
     }
 
     return true;
-}
-
-static void doc_installClipboardProvider(COKitDocument* pThis,
-                                         const COKitClipboardProvider* pProvider)
-{
-    SolarMutexGuard aGuard;
-    SetLastExceptionMsg();
-
-    // The provider does synchronous platform clipboard input and output during a
-    // copy or paste. That is only safe where the document work runs on the app's
-    // own (main) thread, i.e. the in-process unipoll apps; the out-of-process
-    // server has no local clipboard and keeps the plain get/setClipboard path.
-    if (!vcl::kit::isUnipoll())
-        return;
-
-    forceSetClipboardForCurrentView(pThis)->setProvider(pProvider);
 }
 
 // Office-level: install one process-global provider and switch the kit to a
