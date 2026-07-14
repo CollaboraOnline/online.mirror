@@ -20,6 +20,7 @@
 #include <fstream>
 #include <iomanip>
 #include <spawn.h>
+#include <unistd.h>
 
 #ifdef __linux__
 #include <sys/time.h>
