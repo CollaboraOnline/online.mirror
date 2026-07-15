@@ -335,7 +335,7 @@ OUString SwarmSolver::getResourceString(TranslateId aId)
     if (!aId)
         return OUString();
 
-    return Translate::get(aId, Translate::Create("scc"));
+    return Translate::get(aId, Translate::Create("sc"));
 }
 
 uno::Reference<table::XCell> SwarmSolver::getCell(const table::CellAddress& rPosition)
