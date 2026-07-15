@@ -1662,6 +1662,12 @@ class TreeViewControl {
 						builder,
 						data,
 					);
+				else {
+					const searchInput = this._container.querySelector(
+						'.ui-treeview-search-input',
+					) as HTMLElement;
+					if (searchInput) searchInput.focus();
+				}
 			}
 
 			preventDef = true;
