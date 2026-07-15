@@ -1085,7 +1085,7 @@ msgstr "Menü öffnen"
 
 #: src/canvas/sections/CommentSection.ts:464
 msgid "Press Ctrl + Enter to post"
-msgstr "Drücken Sie Strg + Eingabetaste zu einwerfen"
+msgstr "Drücken Sie Strg + Eingabetaste zum Posten"
 
 #: src/canvas/sections/CommentSection.ts:536
 #: src/canvas/sections/CommentSection.ts:537
