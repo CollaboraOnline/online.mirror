@@ -148,6 +148,7 @@ interface AppInterface {
 	};
 	calc: {
 		maxColumnCount: number;
+		maxRowCount: number;
 		cellAddress: null | cool.SimplePoint;
 		cellCursorVisible: boolean;
 		cellCursorRectangle: null | cool.SimpleRectangle;
