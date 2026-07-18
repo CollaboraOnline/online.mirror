@@ -1693,6 +1693,24 @@ body.slideshow-presenting-in-window .jsdialog-window.modalpopup {
 	color: var(--color-background-lighter);
 }
 
+/* Security label banner: a full-width strip above the document area. It is a
+   flex item in the body column (before #main-document-content), so the document
+   area reflows below it -- no overlap, and space is reclaimed when hidden.
+   Colours are themeable via the --security-banner-* custom properties, which
+   default to the doc-type theme colour (as the compare banner uses). */
+#security-label-banner {
+	flex: none; /* fixed height in the column; never grow/shrink */
+	height: var(--security-banner-height, 24px);
+	line-height: var(--security-banner-height, 24px);
+	text-align: center;
+	font-weight: bold;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	background-color: var(--security-banner-background, rgb(var(--doc-type, 3, 105, 163)));
+	color: var(--security-banner-color, var(--color-background-lighter));
+}
+
 /* Debug panel */
 
 #debug-panel {

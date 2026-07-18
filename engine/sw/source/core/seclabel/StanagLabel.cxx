@@ -217,6 +217,17 @@ bool StanagLabel::parse(SvStream& rStream)
     return true;
 }
 
+OUString StanagLabel::summary() const
+{
+    OUString aSummary = aClassification;
+    for (const auto& rCategory : aCategories)
+    {
+        for (const auto& rValue : rCategory.aValues)
+            aSummary += u" " + rValue;
+    }
+    return aSummary;
+}
+
 } // namespace sw::seclabel
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

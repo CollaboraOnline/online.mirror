@@ -607,6 +607,7 @@ COOL_JS_LST =\
 	src/control/Control.AIChatSidebar.ts \
 	src/control/SlideDragGhost.tsx \
 	src/control/Control.PaneExpander.ts \
+	src/control/Control.SecurityLabelBanner.ts \
 	src/control/CalcNotifications.ts \
 	src/control/ColorPicker.ts \
 	src/control/jsdialog/Util.Shortcuts.ts \
@@ -1569,6 +1570,7 @@ pot:
 		src/canvas/sections/HeaderFooterBoundarySection.ts \
 		src/control/jsdialog/Definitions.MenuCommands.ts \
 		src/control/CalcNotifications.ts \
+		src/control/Control.SecurityLabelBanner.ts \
 		src/control/ColorPicker.ts \
 		src/control/Control.AboutDialog.ts \
 		src/control/Control.AddressInputField.ts \

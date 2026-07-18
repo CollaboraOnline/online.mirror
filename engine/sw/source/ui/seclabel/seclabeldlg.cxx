@@ -15,6 +15,7 @@
 #include <docsh.hxx>
 #include <strings.hrc>
 #include <swtypes.hxx>
+#include <view.hxx>
 #include <wrtsh.hxx>
 
 #include <com/sun/star/beans/XPropertySet.hpp>
@@ -22,6 +23,8 @@
 #include <com/sun/star/frame/XModel.hpp>
 #include <com/sun/star/text/XTextViewCursorSupplier.hpp>
 
+#include <COKit/COKit.hxx>
+#include <comphelper/kit.hxx>
 #include <rtl/ustrbuf.hxx>
 #include <rtl/uuid.h>
 #include <sfx2/watermarkitem.hxx>
@@ -29,6 +32,7 @@
 #include <tools/datetime.hxx>
 #include <rtl/bootstrap.hxx>
 #include <config_folders.h>
+#include <tools/json_writer.hxx>
 #include <unotools/datetime.hxx>
 #include <unotools/pathoptions.hxx>
 
@@ -306,15 +310,9 @@ void SwSecurityLabelDlg::enterForeignMode(const sw::seclabel::StanagLabel& rLabe
 {
     m_bForeignPolicy = true;
 
-    // The 4774 label is self-describing; reconstruct a readable summary from it,
-    // since the policy that defines its exact marking is not available here.
-    OUString sSummary = rLabel.aClassification;
-    for (const auto& rCategory : rLabel.aCategories)
-    {
-        for (const auto& rValue : rCategory.aValues)
-            sSummary += u" " + rValue;
-    }
-    m_xPreview->set_label(sSummary);
+    // The 4774 label is self-describing; use its summary, since the policy that
+    // defines its exact marking is not available here.
+    m_xPreview->set_label(rLabel.summary());
 
     const OUString sPolicy = rLabel.aPolicyName.isEmpty() ? rLabel.aPolicyId : rLabel.aPolicyName;
     m_xWarning->set_label(SwResId(STR_SECLABEL_FOREIGN).replaceFirst(u"%1", sPolicy));
@@ -438,6 +436,32 @@ void SwSecurityLabelDlg::applyLabel(const OUString& rClassification,
         sw::seclabel::applyPortionMarking(
             xModel, m_pPolicy->buildMarking(rClassification, rSelected), nColor);
     }
+
+    notifyBanner();
+}
+
+void SwSecurityLabelDlg::notifyBanner()
+{
+    if (!comphelper::COKit::isActive())
+        return;
+    SwDocShell* pDocShell = m_rSh.GetDoc()->GetDocShell();
+    if (!pDocShell)
+        return;
+    uno::Reference<frame::XModel> xModel(pDocShell->GetModel());
+    sw::seclabel::StanagLabel aLabel;
+    OUString aMarking;
+    if (xModel.is() && sw::seclabel::readLabel(xModel, aLabel))
+        aMarking = aLabel.summary();
+
+    // Same shape as getCommandValues(".uno:SecurityLabel"): the browser banner
+    // reads state.marking (empty => hide the banner).
+    tools::JsonWriter aJson;
+    aJson.put("commandName", ".uno:SecurityLabel");
+    {
+        auto aState = aJson.startNode("state");
+        aJson.put("marking", aMarking);
+    }
+    m_rSh.GetView().viewCallback(COKitCallbackType::STATE_CHANGED, aJson.finishAndGetAsOString());
 }
 
 IMPL_LINK_NOARG(SwSecurityLabelDlg, PolicyHdl, weld::ComboBox&, void)
@@ -483,6 +507,7 @@ IMPL_LINK_NOARG(SwSecurityLabelDlg, RemoveHdl, weld::Button&, void)
     // A default item has empty text, which clears any watermark the label set.
     m_rSh.SetWatermark(SfxWatermarkItem());
 
+    notifyBanner();
     m_xDialog->response(RET_OK);
 }
 

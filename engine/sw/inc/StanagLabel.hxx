@@ -54,6 +54,11 @@ public:
     /// instance. Returns false if no OriginatorConfidentialityLabel is found.
     bool parse(SvStream& rStream);
 
+    /// A human-readable summary derived from the label itself (classification
+    /// followed by the category values, space-joined). Self-describing: needs no
+    /// SPIF policy. Used for the read-only banner and the foreign-policy view.
+    OUString summary() const;
+
 private:
     /// Write the OriginatorConfidentialityLabel element into rWriter.
     void writeTo(tools::XmlWriter& rWriter) const;

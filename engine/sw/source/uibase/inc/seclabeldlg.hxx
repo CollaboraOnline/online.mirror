@@ -68,6 +68,10 @@ class SwSecurityLabelDlg final : public weld::GenericDialogController
 
     std::vector<bool> collectSelection() const;
     void applyLabel(const OUString& rClassification, const std::vector<bool>& rSelected);
+    // Push the document's current marking to the browser (online) as a
+    // .uno:SecurityLabel state change, so the classification banner tracks a
+    // label being applied or removed mid-session.
+    void notifyBanner();
     void PopulatePolicies();
     void PopulateClassifications();
     void PopulateCategories();

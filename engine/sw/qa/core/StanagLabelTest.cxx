@@ -27,6 +27,7 @@ class StanagLabelTest : public CppUnit::TestFixture
     void testItemProps();
     void testParseRoundTrip();
     void testResolveColor();
+    void testSummary();
 
     CPPUNIT_TEST_SUITE(StanagLabelTest);
     CPPUNIT_TEST(testToXml);
@@ -34,6 +35,7 @@ class StanagLabelTest : public CppUnit::TestFixture
     CPPUNIT_TEST(testItemProps);
     CPPUNIT_TEST(testParseRoundTrip);
     CPPUNIT_TEST(testResolveColor);
+    CPPUNIT_TEST(testSummary);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -145,6 +147,17 @@ void StanagLabelTest::testResolveColor()
     CPPUNIT_ASSERT_EQUAL(sal_Int32(0xFFFF00), sw::seclabel::resolveColor(u"yellow"_ustr));
     CPPUNIT_ASSERT_EQUAL(sal_Int32(0x1A2B3C), sw::seclabel::resolveColor(u"#1A2B3C"_ustr));
     CPPUNIT_ASSERT_EQUAL(sal_Int32(0x000000), sw::seclabel::resolveColor(u"bogus"_ustr));
+}
+
+void StanagLabelTest::testSummary()
+{
+    // classification followed by the category values, space-joined.
+    CPPUNIT_ASSERT_EQUAL(u"SECRET CANADA UNITED KINGDOM"_ustr, makeSampleLabel().summary());
+
+    // Classification alone when there are no categories.
+    sw::seclabel::StanagLabel aBare;
+    aBare.aClassification = u"OFFICIAL"_ustr;
+    CPPUNIT_ASSERT_EQUAL(u"OFFICIAL"_ustr, aBare.summary());
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(StanagLabelTest);

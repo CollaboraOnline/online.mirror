@@ -36,6 +36,8 @@
 
 #include <IDocumentMarkAccess.hxx>
 #include <IDocumentRedlineAccess.hxx>
+#include <SecLabelApply.hxx>
+#include <StanagLabel.hxx>
 #include <doc.hxx>
 #include <docsh.hxx>
 #include <fmtrfmrk.hxx>
@@ -1391,6 +1393,25 @@ void GetExtractLinkTargets(tools::JsonWriter& rJsonWriter, SwDocShell* pDocShell
     WriteLinkTargets(xDoc->getLinks(), /*subcontent*/ false, rJsonWriter);
 }
 
+/// Implements getCommandValues(".uno:SecurityLabel"): the document's STANAG label
+/// as a self-describing marking string (empty when the document has no label), for
+/// the browser's read-only classification banner.
+void GetSecurityLabel(tools::JsonWriter& rJsonWriter, SwDocShell* pDocShell)
+{
+    OUString aMarking;
+    if (pDocShell)
+    {
+        sw::seclabel::StanagLabel aLabel;
+        if (sw::seclabel::readLabel(pDocShell->GetModel(), aLabel))
+            aMarking = aLabel.summary();
+    }
+    // Standard {commandName, commandValues} envelope so the browser routes it by
+    // command name (the kit forwards this JSON verbatim, adding no envelope).
+    rJsonWriter.put("commandName", ".uno:SecurityLabel");
+    auto aValues = rJsonWriter.startNode("commandValues");
+    rJsonWriter.put("marking", aMarking);
+}
+
 /// Implements getCommandValues(".uno:Sections").
 ///
 /// Parameters:
@@ -1436,7 +1457,8 @@ bool SwXTextDocument::supportsCommand(std::u16string_view rCommand)
             u"Field",
             u"Layout",
             u"ExtractDocumentStructure",
-            u"ExtractLinkTargets" };
+            u"ExtractLinkTargets",
+            u"SecurityLabel" };
 
     return std::find(vForward.begin(), vForward.end(), rCommand) != vForward.end();
 }
@@ -1537,6 +1559,10 @@ void SwXTextDocument::getCommandValues(tools::JsonWriter& rJsonWriter, std::stri
     else if (o3tl::starts_with(rCommand, ".uno:Layout"sv))
     {
         GetLayout(rJsonWriter, m_pDocShell);
+    }
+    else if (o3tl::starts_with(rCommand, ".uno:SecurityLabel"sv))
+    {
+        GetSecurityLabel(rJsonWriter, m_pDocShell);
     }
 }
 

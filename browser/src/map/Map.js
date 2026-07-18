@@ -3,7 +3,7 @@
  * window.L.Map is the central class of the API - it is used to create a map.
  */
 
-/* global app _ Cursor JSDialog RenderManager cool InternPointUtil */
+/* global app _ Cursor JSDialog RenderManager cool InternPointUtil SecurityLabelBanner */
 
 window.L.Map = window.L.Evented.extend({
 
@@ -332,7 +332,18 @@ window.L.Map = window.L.Evented.extend({
 				});
 				this.fire('languagesupdated');
 			}
+			else if (e.commandName === '.uno:SecurityLabel') {
+				// Initial value on load (getCommandValues).
+				this._updateSecurityLabelBanner(e.commandValues && e.commandValues.marking);
+			}
 		});
+
+		this.on('commandstatechanged', function(e) {
+			// Live updates when a label is applied/removed mid-session (pushed by
+			// the engine as a .uno:SecurityLabel state change).
+			if (e.commandName === '.uno:SecurityLabel')
+				this._updateSecurityLabelBanner(e.state && e.state.marking);
+		}, this);
 
 		this.on('docloaded', function(e) {
 			if (this.options.debug && !this._debug.debugOn)
@@ -353,6 +364,9 @@ window.L.Map = window.L.Evented.extend({
 
 				app.activeDocument.activeLayout.sendClientVisibleArea(true);
 				app.serverConnectionService.onDocumentLoaded();
+
+				// Show the security classification banner if the document is labeled.
+				app.socket.sendMessage('commandvalues command=.uno:SecurityLabel');
 			} else if (this._docLayer && app.sectionContainer) {
 				// remove the comments and changes
 				var commentSection = app.sectionContainer.getSectionWithName(app.CSections.CommentList.name);
@@ -375,6 +389,15 @@ window.L.Map = window.L.Evented.extend({
 				Status: 'Initialized',
 			}
 		});
+	},
+
+	// Show/update the security classification banner from a marking string
+	// (empty hides it). Fed by both the initial getCommandValues and live
+	// .uno:SecurityLabel state changes.
+	_updateSecurityLabelBanner: function(marking) {
+		if (!this._securityLabelBanner)
+			this._securityLabelBanner = new SecurityLabelBanner();
+		this._securityLabelBanner.update(marking || '');
 	},
 
 	// A11y
