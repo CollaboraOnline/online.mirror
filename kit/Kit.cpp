@@ -3900,7 +3900,6 @@ void lokit_main(
                     if (!JailUtil::bind(sharedAutotext, loJailDestAutotextPath)
                         || !JailUtil::remountReadonly(sharedAutotext, loJailDestAutotextPath))
                     {
-                        // TODO: actually do this link on failure
                         LOG_WRN("Failed to mount [" << sharedAutotext << "] -> ["
                                                     << loJailDestAutotextPath
                                                     << "], will link contents");
@@ -3911,11 +3910,9 @@ void lokit_main(
                     if (!JailUtil::bind(sharedWordbook, loJailDestWordbookPath)
                         || !JailUtil::remountReadonly(sharedWordbook, loJailDestWordbookPath))
                     {
-                        // TODO: actually do this link on failure
                         LOG_WRN("Failed to mount [" << sharedWordbook << "] -> [" << loJailDestWordbookPath
                                                     << "], will link contents");
                         return false;
-
                     }
 
                     // mount the shared templates over the lo shared templates' 'common' dir
@@ -4026,8 +4023,14 @@ void lokit_main(
                 linkOrCopy(loTemplate, loJailDestPath, linkablePath, LinkOrCopyType::LO);
 
                 if (!configId.empty())
+                {
+                    linkOrCopy(sharedAutotext, loJailDestAutotextPath + "/", linkablePath,
+                               LinkOrCopyType::All);
+                    linkOrCopy(sharedWordbook, loJailDestWordbookPath + "/", linkablePath,
+                               LinkOrCopyType::All);
                     linkOrCopy(sharedTemplate, loJailDestImpressTemplatePath + "/", linkablePath,
                                LinkOrCopyType::All);
+                }
 
 #if CODE_COVERAGE
                 // Link the .gcda files.
