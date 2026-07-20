@@ -921,21 +921,50 @@ class Dispatcher {
 		};
 
 		this.actionsMap['deletepage'] = function () {
+			const count = app.impress.getSelectedSlidesCount();
+			const sectionName = app.impress.getSelectedSectionName();
+			if (!sectionName && count <= 1) {
+				app.map.deletePage();
+				return;
+			}
+
+			let title: string;
 			let msg: string;
 			if (app.map.getDocType() === 'presentation') {
-				msg = _('Are you sure you want to delete this slide?');
+				if (sectionName) {
+					title = _('Delete section');
+					msg = _n(
+						'Delete section "%1" and its %n slide?',
+						'Delete section "%1" and its %n slides?',
+						count,
+					).replace('%1', sectionName);
+				} else {
+					title = _('Delete slides');
+					msg = _n('Delete %n slide?', 'Delete %n slides?', count);
+				}
 			} else {
 				/* drawing */
-				msg = _('Are you sure you want to delete this page?');
+				title = _('Delete pages');
+				msg = _n('Delete %n page?', 'Delete %n pages?', count);
 			}
+			const fromSlideSorter = app.map.keyboard._slideSorterFocused();
 			app.map.uiManager.showInfoModal(
 				'deleteslide-modal',
-				_('Delete'),
+				title,
 				msg,
 				'',
-				_('OK'),
+				_('Delete'),
 				function () {
 					app.map.deletePage();
+					if (!fromSlideSorter) return false;
+
+					// The dialog puts its focus back in a layouting task, so this task runs after it.
+					const uiManager = app.map.uiManager;
+					uiManager.closeModal(uiManager.generateModalId('deleteslide-modal'));
+					app.layoutingService.appendLayoutingTask(() => {
+						app.map._docLayer._preview.focusCurrentSlide();
+					});
+					return true;
 				},
 				true,
 				'deleteslide-modal-response',
@@ -1500,6 +1529,11 @@ class Dispatcher {
 		if (action === 'copy') {
 			// Split-button main-click case.
 			app.map._clip.filterExecCopyPaste('.uno:Copy');
+			return;
+		}
+
+		if (action === '.uno:DeletePage') {
+			this.actionsMap['deletepage']();
 			return;
 		}
 

@@ -239,10 +239,6 @@ describe.skip(['tagmobile'], 'Trigger hamburger menu options.', function() {
 
 		mobileHelper.selectHamburgerMenuItem(['Slide', 'Delete Slide']);
 
-		cy.cGet('#mobile-wizard-content-modal-dialog-deleteslide-modal').should('exist');
-		cy.cGet('#deleteslide-modal-response').click();
-		cy.cGet('#mobile-wizard-content-modal-dialog-deleteslide-modal').should('not.exist');
-
 		impressHelper.assertSlidePreviewCountAfterIdle(this.win, 1);
 	});
 

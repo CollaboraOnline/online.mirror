@@ -152,6 +152,62 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Slide sections', function(
 			});
 		});
 
+		// Selecting a section header selects all its slides. Pressing Delete
+		// must ask first, naming the section and its slide count, and must not
+		// remove anything until the user confirms.
+		it('Delete key on a selected section asks before removing its slides', function() {
+			helper.processToIdle(this.win);
+
+			assertSectionHeaders(['Section-1', 'Section-2', 'Section-3']);
+			cy.window().should(function(win) {
+				expect(win['0'].app.impress.partList).to.have.length(13);
+			});
+
+			// Focus the slide sorter on slide 0, then select all of Section-1.
+			cy.cGet('#preview-frame-part-0').click();
+			cy.cGet('.slide-section-header').eq(0)
+				.find('.slide-section-name').click();
+			helper.processToIdle(this.win);
+			cy.window().should(function(win) {
+				var preview = win['0'].app.map._docLayer._preview;
+				expect(preview.partsFocused).to.be.true;
+				expect(win['0'].app.impress.getSelectedSlidesCount()).to.equal(4);
+			});
+
+			// Press Delete on the focused sorter.
+			cy.cGet('#preview-frame-part-0')
+				.trigger('keydown', { keyCode: 46, which: 46, key: 'Delete', code: 'Delete' });
+
+			// The confirm names the section and its four slides. Nothing is gone.
+			cy.cGet('[id^="info-modal-tile-m"]').should('have.text', 'Delete section');
+			cy.cGet('#deleteslide-modal-response').should('have.text', 'Delete');
+			cy.cGet('[id^="info-modal-label1"]').should('contain.text', 'Section-1');
+			cy.cGet('[id^="info-modal-label1"]').should('contain.text', '4');
+			cy.window().should(function(win) {
+				expect(win['0'].app.impress.partList).to.have.length(13);
+			});
+
+			// Cancel keeps every slide.
+			cy.cGet('#deleteslide-modal-cancel').click();
+			helper.processToIdle(this.win);
+			cy.window().should(function(win) {
+				expect(win['0'].app.impress.partList).to.have.length(13);
+			});
+
+			// Press Delete again and confirm; Section-1's four slides go, 9 remain.
+			cy.cGet('#preview-frame-part-0').click();
+			cy.cGet('.slide-section-header').eq(0)
+				.find('.slide-section-name').click();
+			helper.processToIdle(this.win);
+			cy.cGet('#preview-frame-part-0')
+				.trigger('keydown', { keyCode: 46, which: 46, key: 'Delete', code: 'Delete' });
+			cy.cGet('#deleteslide-modal-response').click();
+			helper.processToIdle(this.win);
+			cy.window().should(function(win) {
+				expect(win['0'].app.impress.partList).to.have.length(9);
+			});
+		});
+
 		describe('Drop slide at a section boundary', function() {
 
 			// Wait until app.impress.sections reflects [0, 4, 11] - the section

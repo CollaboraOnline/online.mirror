@@ -29,7 +29,6 @@ describe(['tagmobile', 'tagnextcloud', 'tagproxy'], 'Slide operations', function
 		mobileHelper.openHamburgerMenu();
 		cy.cGet('.menu-entry-icon.slidemenu').parent().click();
 		cy.cGet('.menu-entry-icon.deletepage').parent().click();
-		cy.cGet('#deleteslide-modal-response').click();
 		impressHelper.assertSlidePreviewCountAfterIdle(this.win, 1);
 	});
 

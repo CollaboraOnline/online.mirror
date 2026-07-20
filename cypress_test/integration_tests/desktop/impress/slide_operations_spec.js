@@ -51,8 +51,6 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Slide operations', { testI
 		cy.cGet('#presentation-toolbar #deletepage')
 			.click();
 
-		cy.cGet('#modal-dialog-deleteslide-modal .button-primary').click();
-
 		cy.cGet('#presentation-toolbar #deletepage')
 			.should('have.attr', 'disabled')
 
@@ -88,7 +86,6 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Slide operations', { testI
 			slideFrame(0).click();
 
 			cy.cGet('#presentation-toolbar #deletepage').click();
-			cy.cGet('#modal-dialog-deleteslide-modal .button-primary').click();
 
 			impressHelper.assertSlidePreviewCountAfterIdle(this.win, initialSlides + 1);
 
@@ -134,7 +131,6 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Slide operations', { testI
 			slideFrame(0).click();
 
 			cy.cGet('#presentation-toolbar #deletepage').click();
-			cy.cGet('#modal-dialog-deleteslide-modal .button-primary').click();
 
 			impressHelper.assertSlidePreviewCountAfterIdle(this.win, initialSlides + 1);
 
