@@ -636,7 +636,7 @@ window.L.Map.Keyboard = window.L.Handler.extend({
 				this._map.jsdialog &&
 				!this._map.jsdialog.hasDialogOpened()
 		) {
-			this._map.deletePage(this._map._docLayer._selectedPart);
+			app.dispatcher.dispatch('deletepage');
 		}
 	},
 

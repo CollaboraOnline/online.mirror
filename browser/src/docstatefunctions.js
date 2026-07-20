@@ -460,6 +460,34 @@ app.impress.getSelectedSlidesCount = function () {
 	return count;
 };
 
+app.impress.getSelectedSectionName = function () {
+	const sections = app.impress.sections;
+	if (!sections || sections.length === 0) return null;
+	if (!app.impress.partList) return null;
+
+	const selected = [];
+	for (let i = 0; i < app.impress.partList.length; i++) {
+		if (app.impress.partList[i].selected === 1) selected.push(i);
+	}
+	if (selected.length < 2) return null;
+
+	// The selected indices are collected in order. When their count equals a
+	// section's slide count and the first and last land on the section's first
+	// and last slide, the selection fills the section exactly with no gaps.
+	for (let s = 0; s < sections.length; s++) {
+		const start = sections[s].startIndex;
+		const end = start + sections[s].slideCount - 1;
+		if (
+			selected.length === sections[s].slideCount &&
+			selected[0] === start &&
+			selected[selected.length - 1] === end
+		) {
+			return sections[s].name;
+		}
+	}
+	return null;
+};
+
 app.impress.getIndexFromPart = function (part) {
 	if (app.impress.partList) {
 		for (let i = 0; i < app.impress.partList.length; i++) {

@@ -167,6 +167,8 @@ interface AppInterface {
 		isSlideHidden(partNo: number): boolean;
 		areAllSlidesHidden(): boolean;
 		isSlideImportSupported(): boolean;
+		getSelectedSlidesCount(): number;
+		getSelectedSectionName(): string | null;
 	};
 	writer: {
 		compareDocumentProperties: CompareDocumentProperties | null;
