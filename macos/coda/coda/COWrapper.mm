@@ -72,7 +72,6 @@ static unsigned sOwnedClipboardDocId = 0;
  */
 static COClipboardOwner *sClipboardOwner = nil;
 
-static int closeNotificationPipeForForwardingThread[2];
 static std::thread coolwsdThread;
 
 /**
@@ -318,15 +317,11 @@ static void clipboardProviderRelease(void* pUserData) { CFBridgingRelease(pUserD
         coolwsd = nullptr; // Reset the pointer after deletion
         NSLog(@"CollaboraOffice: The COOLWSD thread completed");
     });
-
-    // Create a socket pair to notify the thread created in handleHULLOWithDocument:document when the document has been closed
-    fakeSocketPipe2(closeNotificationPipeForForwardingThread);
 }
 
 + (void)stopServer {
     NSLog(@"CollaboraOffice: Requesting shutdown");
     SigUtil::requestShutdown();
-    fakeSocketClose(closeNotificationPipeForForwardingThread[0]);
 
     // wait until coolwsdThread is torn down, so that we don't start cleaning up too early
     coolwsdThread.join();
@@ -339,6 +334,14 @@ static void clipboardProviderRelease(void* pUserData) { CFBridgingRelease(pUserD
     int rc = fakeSocketConnect(document.fakeClientFd, coolwsd_server_socket_fd);
     assert(rc != -1);
 
+    // Create this document's close-notification socket pair. Each document has its
+    // own pair, so closing one document leaves the other documents' forwarding
+    // threads and engine connections running.
+    int closeNotificationPipe[2];
+    fakeSocketPipe2(closeNotificationPipe);
+    document.closeNotificationSignalFd = closeNotificationPipe[0];
+    document.closeNotificationWatchedFd = closeNotificationPipe[1];
+
     // Start another thread to read responses and forward them to the JavaScript
     dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
                    ^{
@@ -347,17 +350,17 @@ static void clipboardProviderRelease(void* pUserData) { CFBridgingRelease(pUserD
                            struct pollfd p[2];
                            p[0].fd = document.fakeClientFd;
                            p[0].events = POLLIN;
-                           p[1].fd = closeNotificationPipeForForwardingThread[1];
+                           p[1].fd = document.closeNotificationWatchedFd;
                            p[1].events = POLLIN;
                            if (fakeSocketPoll(p, 2, -1) > 0) {
                                if (p[1].revents == POLLIN) {
                                    // The code below handling the "BYE" fake Websocket
-                                   // message has closed the other end of the
-                                   // closeNotificationPipeForForwardingThread. Let's close
-                                   // the other end too just for cleanliness, even if a
-                                   // FakeSocket as such is not a system resource so nothing
-                                   // is saved by closing it.
-                                   fakeSocketClose(closeNotificationPipeForForwardingThread[1]);
+                                   // message has closed the signal end of this document's
+                                   // close-notification pair. Let's close the watched end
+                                   // too just for cleanliness, even if a FakeSocket as
+                                   // such is not a system resource so nothing is saved by
+                                   // closing it.
+                                   fakeSocketClose(document.closeNotificationWatchedFd);
 
                                    // Close our end of the fake socket connection to the
                                    // ClientSession thread, so that it terminates
@@ -406,8 +409,9 @@ static void clipboardProviderRelease(void* pUserData) { CFBridgingRelease(pUserD
     // while its engine is still alive, so a later paste elsewhere still works.
     [COWrapper materializeClipboardFor:document];
 
-    // Close one end of the socket pair, that will wake up the forwarding thread
-    fakeSocketClose(closeNotificationPipeForForwardingThread[0]);
+    // Close the signal end of this document's close-notification pair, which
+    // wakes up this document's forwarding thread.
+    fakeSocketClose(document.closeNotificationSignalFd);
 }
 
 + (void)handleMessageWith:(Document *)document message:(NSString *)message {
