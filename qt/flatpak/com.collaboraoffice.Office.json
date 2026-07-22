@@ -420,11 +420,11 @@
           "dest-filename": "Open_Sans.zip"
         },
         {
-          "url": "https://dev-www.libreoffice.org/src/quickjs-v0.13.0.tar.gz",
-          "sha256": "13ed1d22cd4b2b693a94a234e752d1ea6a0064434a740031ff90439679257c6c",
+          "url": "https://dev-www.libreoffice.org/src/quickjs-v0.14.0.tar.gz",
+          "sha256": "928e9406addd99eb8623348f2cfcd916eade9a263c60d42be79bc7aee4ee8453",
           "type": "file",
           "dest": "engine/external/tarballs",
-          "dest-filename": "quickjs-v0.13.0.tar.gz"
+          "dest-filename": "quickjs-v0.14.0.tar.gz"
         },
         {
           "url": "https://dev-www.libreoffice.org/src/pdfium-7897.tar.bz2",
@@ -455,11 +455,11 @@
           "dest-filename": "antlr4-cpp-runtime-4.13.2-source.zip"
         },
         {
-          "url": "https://dev-www.libreoffice.org/src/xmlsec1-1.3.11.tar.gz",
-          "sha256": "53675e98fa83b48201d24f7bfbcaeaa1b51496b8b19ff969785856bdeb196af3",
+          "url": "https://dev-www.libreoffice.org/src/xmlsec1-1.3.12.tar.gz",
+          "sha256": "24045199af12d93fe5fdbbbf7e386e823e4842071e9432e2b90ac108b889a923",
           "type": "file",
           "dest": "engine/external/tarballs",
-          "dest-filename": "xmlsec1-1.3.11.tar.gz"
+          "dest-filename": "xmlsec1-1.3.12.tar.gz"
         },
         {
           "url": "https://dev-www.libreoffice.org/src/368f114c078f94214a308a74c7e991bc-crosextrafonts-20130214.tar.gz",
