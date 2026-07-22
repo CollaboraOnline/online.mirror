@@ -357,6 +357,9 @@ interface Window {
 		setMultiple(prefs: Record<string, string>): void;
 		sendPendingBrowserSettingsUpdate(): void;
 		canPersist: boolean;
+		prefersDarkOS(): boolean;
+		hasExplicitDarkModePref(): boolean;
+		seedDarkModeDefault(): boolean;
 	};
 	KeyboardShortcuts: KeyboardShortcuts;
 
