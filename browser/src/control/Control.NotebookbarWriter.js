@@ -367,13 +367,31 @@ window.L.Control.NotebookbarWriter = window.L.Control.Notebookbar.extend({
 				'type': 'container',
 				'children': [
 					{
-						'id': 'properties',
-						'type': 'bigtoolitem',
-						'text': _('Properties'),
-						'command': '.uno:SetDocumentProperties',
-						'accessibility': { focusBack: true,	combination: 'FP', de: 'I' }
+						'type': 'toolbox',
+						'children': [
+							{
+								'id': 'properties',
+								'type': 'toolitem',
+								'text': _('Properties'),
+								'command': '.uno:SetDocumentProperties',
+								'accessibility': { focusBack: true,	combination: 'FP', de: 'I' }
+							}
+						]
+					},
+					{
+						'type': 'toolbox',
+						'children': [
+							{
+								'id': 'securitylabel',
+								'type': 'toolitem',
+								'text': _('Security label'),
+								'command': '.uno:SecurityLabel',
+								'accessibility': { focusBack: true,	combination: 'SL', de: null }
+							}
+						]
 					}
-				]
+				],
+				'vertical': 'true'
 		});
 		if (window.documentSigningEnabled) {
 			content.push({

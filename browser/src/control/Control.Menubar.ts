@@ -125,6 +125,7 @@ class Menubar extends window.L.Control {
 					{name: _('HTML file (.html)'), id: 'downloadas-html', type: 'action'},
 					{name: _('Markdown (.md)'), id: 'downloadas-md', type: 'action'}]},
 				{name: _UNO('.uno:SetDocumentProperties', 'text'), uno: '.uno:SetDocumentProperties', id: 'properties'},
+				{name: _('Security label'), uno: '.uno:SecurityLabel', id: 'securitylabel'},
 				{name: _UNO('.uno:Signature', 'text'), uno: '.uno:Signature', id: 'signature'},
 				{name: _('Options'), id: 'settings-dialog', type: 'action', mobileapp: false},
 				{type: 'separator'},
