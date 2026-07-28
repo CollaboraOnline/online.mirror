@@ -1329,7 +1329,7 @@ std::vector<std::string> splitFoldedStack(const std::string& folded)
 std::chrono::milliseconds Admin::getDefaultProfileInterval()
 {
     return std::chrono::milliseconds(
-        ConfigUtil::getConfigValue<int>("admin_console.stack_sampler.interval_ms", 100));
+        ConfigUtil::getConfigValue<int>("admin_console.stack_sampler.interval_ms", 50));
 }
 
 KitStackSampler& Admin::stackSampler()

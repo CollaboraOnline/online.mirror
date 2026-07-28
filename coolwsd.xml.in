@@ -347,7 +347,7 @@
             <admin_action desc="log when admin does some action for example killing a process" type="bool" default="true">true</admin_action>
         </logging>
         <stack_sampler desc="Limits on the admin console stack sampler, which shows where a document session spends its time.">
-            <interval_ms desc="How long to wait between samples, in milliseconds. The allowed range is 20 to 1000." type="uint" default="100">100</interval_ms>
+            <interval_ms desc="How long to wait between samples, in milliseconds. The allowed range is 20 to 1000." type="uint" default="50">50</interval_ms>
             <max_duration_secs desc="How long one capture may run before it stops itself, in seconds. Zero means it runs until the admin stops it or the browser goes away." type="uint" default="0">0</max_duration_secs>
             <max_stack_depth desc="How many frames of one stack to walk. A deeper stack is cut, not dropped." type="uint" default="128">128</max_stack_depth>
         </stack_sampler>
