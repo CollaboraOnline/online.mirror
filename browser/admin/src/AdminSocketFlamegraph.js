@@ -15,8 +15,12 @@
 
 /* global Admin AdminSocketBase d3 _ */
 
-// One row per stack level, the height the flamegraph tools use.
+// One row per stack level, the height the flamegraph tools use. Fitting the whole picture into the
+// window shrinks the rows down to MinRowHeight, and a row shorter than LabelRowHeight carries no
+// label because there is no room to read one.
 const RowHeight = 16;
+const MinRowHeight = 2;
+const LabelRowHeight = 10;
 const LabelFont = 'Verdana, sans-serif';
 const LabelFontSize = 12;
 // Verdana at that size takes about seven pixels for a character.
@@ -215,6 +219,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._frozen = false;
 		this._zoomNode = null;
 		this._threadFilter = '';
+		this._fitHeight = true;
 		this._searchPattern = null;
 		this._redrawPending = false;
 		this._lastDrawnAt = 0;
@@ -259,6 +264,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		document.getElementById('profile-reset').onclick = this._onReset.bind(this);
 		document.getElementById('profile-zoom-reset').onclick =
 			this._onZoomReset.bind(this);
+		document.getElementById('profile-fit').onclick = this._onFit.bind(this);
 		document.getElementById('profile-download-folded').onclick =
 			this._onDownloadFolded.bind(this);
 		document.getElementById('profile-download-svg').onclick =
@@ -415,6 +421,14 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		if (this._capture) {
 			this.socket.send('profile_stop ' + this._capture.pid);
 		}
+	},
+
+	_onFit: function () {
+		this._fitHeight = !this._fitHeight;
+		document.getElementById('profile-fit').textContent = this._fitHeight
+			? _('Full rows')
+			: _('Fit to window');
+		this._scheduleRedraw();
 	},
 
 	_onFreeze: function () {
@@ -751,15 +765,17 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		const width = container.clientWidth - 4;
 		const root = this._viewRoot();
 		const cells = this._cells(root, width);
+		const rowHeight = this._rowHeight(container, cells.rowCount);
+		const labelled = rowHeight >= LabelRowHeight;
 
 		// A reader sitting at the bottom of the picture is watching the bar that stands for every
 		// sample, and stays with it as the stacks above grow taller. A reader who has scrolled up to
 		// look at a leaf is left where they are.
 		const atBottom =
 			container.scrollHeight - container.clientHeight - container.scrollTop <
-			2 * RowHeight;
+			2 * rowHeight;
 
-		svg.attr('height', cells.rowCount * RowHeight + 2);
+		svg.attr('height', cells.rowCount * rowHeight + 2);
 
 		if (atBottom) {
 			container.scrollTop = container.scrollHeight;
@@ -778,14 +794,13 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		const entered = groups.enter().append('g').attr('class', 'profile-frame');
 		entered
 			.append('rect')
-			.attr('height', RowHeight - 1)
 			.attr('rx', 2)
 			.attr('ry', 2)
 			.attr('x', function (cell) {
 				return cell.x;
 			})
 			.attr('y', function (cell) {
-				return self._rowY(cells, cell, RowHeight);
+				return self._rowY(cells, cell, rowHeight);
 			})
 			.attr('width', function (cell) {
 				return Math.max(1, cell.width - 1);
@@ -801,7 +816,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				return cell.x + 3;
 			})
 			.attr('y', function (cell) {
-				return self._rowY(cells, cell, RowHeight) + RowHeight - 5;
+				return self._rowY(cells, cell, rowHeight) + rowHeight - 5;
 			});
 
 		const merged = entered.merge(groups);
@@ -825,6 +840,9 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				}
 				return self._colourFor(cell.node);
 			})
+			// The gap that separates one row from the next is worth a pixel only while the rows are
+			// tall enough to spare it. Squeezed rows are drawn solid instead.
+			.attr('height', rowHeight >= 6 ? rowHeight - 1 : rowHeight)
 			.transition()
 			.duration(250)
 			.ease(d3.easeLinear)
@@ -832,7 +850,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				return cell.x;
 			})
 			.attr('y', function (cell) {
-				return self._rowY(cells, cell, RowHeight);
+				return self._rowY(cells, cell, rowHeight);
 			})
 			.attr('width', function (cell) {
 				return Math.max(1, cell.width - 1);
@@ -845,7 +863,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		merged
 			.select('text')
 			.text(function (cell) {
-				return self._label(cell.node.name, cell.width);
+				return labelled ? self._label(cell.node.name, cell.width) : '';
 			})
 			.transition()
 			.duration(250)
@@ -854,8 +872,19 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				return cell.x + 3;
 			})
 			.attr('y', function (cell) {
-				return self._rowY(cells, cell, RowHeight) + RowHeight - 5;
+				return self._rowY(cells, cell, rowHeight) + rowHeight - 5;
 			});
+	},
+
+	// The whole picture fits the window unless the reader has asked for full rows and a scrollbar.
+	_rowHeight: function (container, rowCount) {
+		if (!this._fitHeight) {
+			return RowHeight;
+		}
+		const room = Math.floor(
+			(container.clientHeight - 2) / Math.max(1, rowCount),
+		);
+		return Math.max(MinRowHeight, Math.min(RowHeight, room));
 	},
 
 	// As much of the name as fits inside the frame, cut short with two dots.
