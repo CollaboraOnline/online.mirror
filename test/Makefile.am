@@ -166,6 +166,7 @@ wsd_sources = \
 	../wsd/FileServer.cpp \
 	../wsd/FileServerUtil.cpp \
 	../wsd/HostUtil.cpp \
+	../wsd/KitStackSampler.cpp \
 	../wsd/ProofKey.cpp \
 	../wsd/ProxyProtocol.cpp \
 	../wsd/ProxyRequestHandler.cpp \
@@ -258,6 +259,7 @@ unittest_SOURCES = \
 	../wsd/AIUtil.cpp \
 	../wsd/FileServerUtil.cpp \
 	../wsd/HostUtil.cpp \
+	../wsd/KitStackSampler.cpp \
 	../wsd/ProofKey.cpp \
 	../wsd/RequestDetails.cpp \
 	../wsd/StackWalker.cpp \

@@ -69,6 +69,9 @@ static const Util::UnorderedStringMap<std::string> DefAppConfig = {
     { "admin_console.logging.metrics_fetch", "true" },
     { "admin_console.logging.monitor_connect", "true" },
     { "admin_console.password", "" },
+    { "admin_console.stack_sampler.interval_ms", "100" },
+    { "admin_console.stack_sampler.max_duration_secs", "300" },
+    { "admin_console.stack_sampler.max_stack_depth", "128" },
     { "admin_console.username", "" },
     { "ai.allow_user_settings", "true" },
     { "ai.api_key", "" },
@@ -421,6 +424,7 @@ std::map<std::string, std::string> extractAll(const Poco::Util::AbstractConfigur
     // their children concatenated, which is worse than useless.
     // E.g. logging.file: /tmp/coolwsd.lognevertimestamptrue10 days10truefalse
     map.erase("admin_console.logging");
+    map.erase("admin_console.stack_sampler");
     map.erase("feature_lock.locked_hosts");
     map.erase("indirection_endpoint.geolocation_setup");
     map.erase("logging.anonymize");

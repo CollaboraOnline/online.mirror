@@ -346,6 +346,11 @@
             <monitor_connect desc="log when external monitor gets connected" type="bool" default="true">true</monitor_connect>
             <admin_action desc="log when admin does some action for example killing a process" type="bool" default="true">true</admin_action>
         </logging>
+        <stack_sampler desc="Limits on the admin console stack sampler, which shows where a document session spends its time.">
+            <interval_ms desc="How long to wait between samples, in milliseconds. The allowed range is 20 to 1000." type="uint" default="100">100</interval_ms>
+            <max_duration_secs desc="How long one capture may run before it stops itself, in seconds." type="uint" default="300">300</max_duration_secs>
+            <max_stack_depth desc="How many frames of one stack to walk. A deeper stack is cut, not dropped." type="uint" default="128">128</max_stack_depth>
+        </stack_sampler>
     </admin_console>
 
     <monitors desc="Addresses of servers we connect to on start for monitoring">
