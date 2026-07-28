@@ -229,6 +229,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._state = 'idle';
 		this._frozen = false;
 		this._zoomNode = null;
+		this._placed = false;
 		this._threadFilter = '';
 		this._fitHeight = false;
 		this._searchPattern = null;
@@ -456,6 +457,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._nextNodeId = 1;
 		this._root = this._makeNode('all', null);
 		this._zoomNode = null;
+		this._placed = false;
 		this._totals.samples = 0;
 		this._totals.idle = 0;
 		this._totals.dropped = 0;
@@ -851,9 +853,15 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			container.scrollHeight - container.clientHeight - container.scrollTop <
 			2 * rowHeight;
 
-		svg.attr('height', cells.rowCount * rowHeight + 2);
+		const height = cells.rowCount * rowHeight + 2;
+		svg.attr('height', height);
 
-		if (atBottom) {
+		if (!this._placed && height > container.clientHeight) {
+			// The first look starts halfway up, where the work the document is doing is, rather than
+			// on the run of frames along the bottom that every stack goes through.
+			container.scrollTop = (height - container.clientHeight) / 2;
+			this._placed = true;
+		} else if (atBottom) {
 			container.scrollTop = container.scrollHeight;
 		}
 
