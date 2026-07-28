@@ -173,6 +173,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    // The admin console sampler reads the call frame information and the symbols of every module
+    // before its first sample, so do the same here or the numbers below describe a different program.
+    const auto warmingStartedAt = std::chrono::steady_clock::now();
+    const unsigned warmedModules = walker.warmModules();
+    const auto warmingCost = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::steady_clock::now() - warmingStartedAt);
+
     struct sigaction interruptAction;
     std::memset(&interruptAction, 0, sizeof(interruptAction));
     interruptAction.sa_handler = onInterrupt;
@@ -298,8 +305,10 @@ int main(int argc, char** argv)
               << "  distinct stacks         " << folded.size() << '\n'
               << "  frames                  " << totalFrames << ", " << unresolvedFrames
               << " without a name, " << cutStacks << " stacks cut at the depth cap\n"
+              << "  modules read up front   " << warmedModules << " in " << warmingCost.count()
+              << " ms\n"
               << "  first sample            " << firstSampleCost
-              << " us, which is where the symbols get read\n"
+              << " us, which pays for whatever the read above did not cover\n"
               << "  later samples           median " << percentile(sampleCosts, 0.5) << " us, 95th "
               << percentile(sampleCosts, 0.95) << " us, worst "
               << (sampleCosts.empty() ? 0 : *std::max_element(sampleCosts.begin(),
