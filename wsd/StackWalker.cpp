@@ -658,6 +658,8 @@ void StackWalker::detach()
     _startTime = 0;
     _addressLookups = 0;
     _addressCacheHits = 0;
+    _symbolSearchTime = 0;
+    _nameBuildTime = 0;
     _moduleRefreshes = 0;
 }
 
@@ -785,6 +787,7 @@ const std::string& StackWalker::labelFor(uintptr_t programCounter, bool& resolve
     }
 
     DwflState::Label label;
+    const auto searchStartedAt = std::chrono::steady_clock::now();
     Dwfl_Module* module = dwfl_addrmodule(_state->dwfl, programCounter);
     if (module)
     {
@@ -792,6 +795,11 @@ const std::string& StackWalker::labelFor(uintptr_t programCounter, bool& resolve
         GElf_Sym symbol;
         const char* symbolName = dwfl_module_addrinfo(module, programCounter, &offsetInSymbol,
                                                       &symbol, nullptr, nullptr, nullptr);
+        const auto searchEndedAt = std::chrono::steady_clock::now();
+        _symbolSearchTime +=
+            std::chrono::duration_cast<std::chrono::nanoseconds>(searchEndedAt - searchStartedAt)
+                .count();
+
         if (symbolName && *symbolName)
         {
             const std::string demangled = ProcUtil::demangle(symbolName);
@@ -799,6 +807,9 @@ const std::string& StackWalker::labelFor(uintptr_t programCounter, bool& resolve
                 StackText::compactSymbolName(demangled.empty() ? std::string(symbolName)
                                                                : demangled));
             label.resolved = true;
+            _nameBuildTime += std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                  std::chrono::steady_clock::now() - searchEndedAt)
+                                  .count();
         }
         else
         {
@@ -815,10 +826,17 @@ const std::string& StackWalker::labelFor(uintptr_t programCounter, bool& resolve
 
             label.text = StackText::sanitiseFrameLabel(
                 shortName + "+" + toHex(programCounter - moduleStart));
+            _nameBuildTime += std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                  std::chrono::steady_clock::now() - searchEndedAt)
+                                  .count();
         }
     }
     else
     {
+        _symbolSearchTime +=
+            std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() -
+                                                                 searchStartedAt)
+                .count();
         label.text = "[unknown " + toHex(programCounter) + ']';
         _state->sawUnknownModule = true;
     }

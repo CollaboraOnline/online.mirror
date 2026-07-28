@@ -138,6 +138,17 @@ public:
     /// How many program counters were looked up, and how many of those the label cache answered.
     uint64_t addressLookups() const { return _addressLookups; }
     uint64_t addressCacheHits() const { return _addressCacheHits; }
+    /// The two halves of what a program counter the label cache could not answer costs. The first is
+    /// the search of the module's symbol table for the symbol covering the address. The second is
+    /// turning the symbol the search returned into the short name a graph node carries.
+    std::chrono::nanoseconds symbolSearchTime() const
+    {
+        return std::chrono::nanoseconds(_symbolSearchTime);
+    }
+    std::chrono::nanoseconds nameBuildTime() const
+    {
+        return std::chrono::nanoseconds(_nameBuildTime);
+    }
     /// How many times the module list was reread over the life of this attach.
     unsigned moduleRefreshes() const { return _moduleRefreshes; }
 
@@ -156,6 +167,9 @@ private:
     unsigned long long _startTime = 0;
     uint64_t _addressLookups = 0;
     uint64_t _addressCacheHits = 0;
+    /// Nanoseconds spent in each half of a label cache miss.
+    uint64_t _symbolSearchTime = 0;
+    uint64_t _nameBuildTime = 0;
     unsigned _moduleRefreshes = 0;
 };
 

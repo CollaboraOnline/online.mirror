@@ -253,6 +253,8 @@ int main(int argc, char** argv)
     const uint64_t addressLookups = walker.addressLookups();
     const uint64_t addressCacheHits = walker.addressCacheHits();
     const unsigned moduleRefreshes = walker.moduleRefreshes();
+    const auto symbolSearchTime = walker.symbolSearchTime();
+    const auto nameBuildTime = walker.nameBuildTime();
     walker.detach();
 
     std::ofstream outputFile;
@@ -306,7 +308,22 @@ int main(int argc, char** argv)
               << (stopTimes.empty() ? 0 : *std::max_element(stopTimes.begin(), stopTimes.end()))
               << " us\n"
               << "  address lookups         " << addressLookups << ", " << addressCacheHits
-              << " answered from the cache\n"
+              << " answered from the cache\n";
+
+    // Where an address the cache could not answer spends its time. The two lines together are what
+    // an interval short enough to matter has to fit around, so they say which half is worth
+    // attacking.
+    const uint64_t misses = addressLookups - addressCacheHits;
+    const auto perMiss = [misses](std::chrono::nanoseconds total) -> long long
+    { return misses ? total.count() / static_cast<long long>(misses) : 0; };
+
+    std::cerr << "  symbol table searched   "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(symbolSearchTime).count()
+              << " ms over " << misses << " misses, " << perMiss(symbolSearchTime)
+              << " ns each\n"
+              << "  names demangled         "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(nameBuildTime).count()
+              << " ms over " << misses << " misses, " << perMiss(nameBuildTime) << " ns each\n"
               << "  module list reread      " << moduleRefreshes << " times\n";
 
     return 0;
