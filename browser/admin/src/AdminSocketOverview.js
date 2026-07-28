@@ -114,6 +114,25 @@ function upsertDocsTable(doc, sName, socket, wopiHost) {
 		dialog.open();
 	};
 
+	if (add === true) { // This cell opens the flamegraph page for this document.
+		var profileCell = document.createElement('td');
+		var profileIcon = document.createElement('i');
+		profileIcon.className = 'fas fa-fire';
+		profileCell.appendChild(profileIcon);
+		profileCell.title = _('Show where this document spends its time.');
+		profileCell.className = 'has-text-centered';
+		profileCell.style.cursor = 'pointer';
+		row.appendChild(profileCell);
+		profileCell.onclick = function() {
+			var url = 'adminFlamegraph.html?pid=' + encodeURIComponent(doc['pid']) +
+				'&docKey=' + encodeURIComponent(doc['docKey'] || '');
+			if (window.routeToken) {
+				url += '&RouteToken=' + encodeURIComponent(window.routeToken);
+			}
+			window.open(url, '_blank');
+		};
+	}
+
 	var wopiHostCell = document.createElement('td');
 	wopiHostCell.innerText = wopiHost;
 	if (add === true) { row.appendChild(wopiHostCell); } else { row.cells[0] = wopiHostCell; }
@@ -303,6 +322,7 @@ var AdminSocketOverview = AdminSocketBase.extend({
 				'userId': docProps[4],
 				'memory': docProps[5],
 				'wopiHost': docProps[6],
+				'docKey': docProps.slice(9).join(' '), // The key is the last field, and it is not encoded.
 				'elapsedTime': '0',
 				'idleTime': '0',
 				'modified': 'No',
