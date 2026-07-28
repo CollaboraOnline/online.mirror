@@ -54,6 +54,8 @@ public:
     /// Process incoming websocket messages
     void handleMessage(const std::vector<char> &data) override;
 
+    void onDisconnect() override;
+
 private:
     /// Sends text frames simply to authenticated clients.
     void sendTextFrame(const std::string& message);
@@ -244,6 +246,10 @@ public:
 
     /// Ends the capture of that process, naming why for the log and for the reader.
     void stopProfile(pid_t pid, const std::string& reason);
+
+    /// Ends the capture that admin session asked for, if it is the one running. Safe to call from
+    /// any thread.
+    void stopProfileForSession(int sessionId);
 
     /// Changes how often the running capture samples.
     void setProfileRate(pid_t pid, std::chrono::milliseconds interval, std::string& code);

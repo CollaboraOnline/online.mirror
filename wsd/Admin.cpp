@@ -560,6 +560,13 @@ void AdminSocketHandler::sendTextFrame(const std::string& message)
         LOG_TRC("Skip sending message to non-authenticated client: '" << message << '\'');
 }
 
+void AdminSocketHandler::onDisconnect()
+{
+    // This runs on whichever poll owns the socket, so the work is handed to the admin thread. A
+    // capture belongs to the reader that asked for it and ends as soon as that reader is gone.
+    _admin->stopProfileForSession(_sessionId);
+}
+
 void AdminSocketHandler::subscribeAsync(const std::shared_ptr<AdminSocketHandler>& handler)
 {
     Admin &admin = Admin::instance();
@@ -1464,6 +1471,20 @@ void Admin::stopProfile(pid_t pid, const std::string& reason)
         _stackSampler->stopCapture(_profileCapture->pid);
 
     endProfile(reason, std::string());
+}
+
+void Admin::stopProfileForSession(int sessionId)
+{
+    addCallback(
+        [this, sessionId]
+        {
+            if (!_profileCapture || _profileCapture->sessionId != sessionId)
+                return;
+
+            LOG_INF("Admin session " << sessionId << " has gone, so the capture of "
+                                     << _profileCapture->pid << " stops.");
+            stopProfile(_profileCapture->pid, "sockgone");
+        });
 }
 
 void Admin::endProfile(const std::string& reason, const std::string& message)
