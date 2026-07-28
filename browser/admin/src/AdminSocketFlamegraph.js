@@ -230,7 +230,6 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._frozen = false;
 		this._zoomNode = null;
 		this._placed = false;
-		this._threadFilter = '';
 		this._fitHeight = false;
 		this._searchPattern = null;
 		this._redrawPending = false;
@@ -282,8 +281,6 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		document.getElementById('profile-download-svg').onclick =
 			this._onDownloadSvg.bind(this);
 		document.getElementById('profile-rate').onchange = this._onRate.bind(this);
-		document.getElementById('profile-thread').onchange =
-			this._onThread.bind(this);
 		document.getElementById('profile-search').oninput =
 			this._onSearch.bind(this);
 
@@ -464,7 +461,6 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._totals.unresolved = 0;
 		this._totals.frames = 0;
 		this._totals.truncated = false;
-		this._fillThreadPicker();
 		this._scheduleRedraw();
 	},
 
@@ -482,13 +478,6 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 					document.getElementById('profile-rate').value,
 			);
 		}
-	},
-
-	_onThread: function () {
-		this._threadFilter = document.getElementById('profile-thread').value;
-		this._zoomNode = null;
-		this._updateMatched();
-		this._scheduleRedraw();
 	},
 
 	_onSearch: function () {
@@ -614,7 +603,6 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		}
 
 		this._setButtons();
-		this._fillThreadPicker();
 		this._updateMatched();
 		this._scheduleRedraw();
 		this._updateStatus();
@@ -641,31 +629,9 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		node.self += count;
 	},
 
-	// What the bottom bar stands for when nothing is zoomed: every sample, or every sample of the
-	// one chosen thread.
+	// What the bottom bar stands for when nothing is zoomed: every sample taken.
 	_baseNode: function () {
-		if (this._threadFilter && this._root.byName[this._threadFilter]) {
-			return this._root.byName[this._threadFilter];
-		}
 		return this._root;
-	},
-
-	_fillThreadPicker: function () {
-		const picker = document.getElementById('profile-thread');
-		const known = {};
-		for (let i = 0; i < picker.options.length; i++) {
-			known[picker.options[i].value] = true;
-		}
-
-		for (let t = 0; t < this._root.children.length; t++) {
-			const name = this._root.children[t].name;
-			if (!known[name]) {
-				const option = document.createElement('option');
-				option.value = name;
-				option.textContent = name;
-				picker.appendChild(option);
-			}
-		}
 	},
 
 	// Drawing.

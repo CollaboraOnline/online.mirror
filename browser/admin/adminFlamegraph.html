@@ -2,7 +2,9 @@
   <div class="container" style="max-width:none;">
     <script>Admin.Flamegraph(host);</script>
 
-    <!-- Every control is on one wrapping row, and the picture gets the rest of the window. -->
+    <!-- The controls take two wrapping rows, and the picture gets the rest of the window. What
+         starts and steers the capture is on the first row, what changes the view of it on the
+         second. -->
     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:4px;">
       <h3 class="title is-5" style="margin:0 6px 0 0;"><script>document.write(l10nstrings.strFlamegraph)</script></h3>
 
@@ -17,22 +19,19 @@
         <option value="50">20</option>
         <option value="20">50</option>
       </select>
+    </div>
 
-      <label for="profile-thread"><script>document.write(l10nstrings.strProfileThread)</script></label>
-      <select class="select" id="profile-thread">
-        <option value=""><script>document.write(l10nstrings.strProfileAllThreads)</script></option>
-      </select>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:4px;">
+      <button type="button" class="button is-small" id="profile-zoom-reset"><script>document.write(l10nstrings.strProfileResetZoom)</script></button>
+      <button type="button" class="button is-small" id="profile-fit" style="min-width:110px;"><script>document.write(l10nstrings.strProfileFitWindow)</script></button>
+      <button type="button" class="button is-small" id="profile-freeze"><script>document.write(l10nstrings.strProfileFreeze)</script></button>
+      <button type="button" class="button is-small" id="profile-reset"><script>document.write(l10nstrings.strProfileReset)</script></button>
+      <button type="button" class="button is-small" id="profile-download-folded"><script>document.write(l10nstrings.strProfileDownloadFolded)</script></button>
+      <button type="button" class="button is-small" id="profile-download-svg"><script>document.write(l10nstrings.strProfileDownloadSvg)</script></button>
 
       <label for="profile-search"><script>document.write(l10nstrings.strProfileSearch)</script></label>
       <input class="input" type="text" id="profile-search" style="min-width:140px;width:140px;">
       <span id="profile-matched" class="has-text-grey"></span>
-
-      <button type="button" class="button is-small" id="profile-freeze"><script>document.write(l10nstrings.strProfileFreeze)</script></button>
-      <button type="button" class="button is-small" id="profile-reset"><script>document.write(l10nstrings.strProfileReset)</script></button>
-      <button type="button" class="button is-small" id="profile-zoom-reset"><script>document.write(l10nstrings.strProfileResetZoom)</script></button>
-      <button type="button" class="button is-small" id="profile-fit" style="min-width:110px;"><script>document.write(l10nstrings.strProfileFitWindow)</script></button>
-      <button type="button" class="button is-small" id="profile-download-folded"><script>document.write(l10nstrings.strProfileDownloadFolded)</script></button>
-      <button type="button" class="button is-small" id="profile-download-svg"><script>document.write(l10nstrings.strProfileDownloadSvg)</script></button>
     </div>
 
     <p id="profile-status" class="has-text-grey" style="margin:0;font-size:0.85rem;"></p>
