@@ -297,6 +297,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		// A document named in the query string is what the overview table links to.
 		const params = new URLSearchParams(window.location.search);
 		this._wantedPid = params.get('pid') || '';
+		this._suggestedPid = '';
 		this._wantedDocKey = params.get('docKey') || '';
 
 		this._updateStatus();
@@ -402,6 +403,10 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			// A link from the overview table starts sampling straight away.
 			this._wantedPid = '';
 			this._onStart();
+		} else if (this._suggestedPid && this._documents[this._suggestedPid]) {
+			// Sampling waits for the Start button, so the document is only picked out.
+			picker.value = this._suggestedPid;
+			this._suggestedPid = '';
 		}
 	},
 
@@ -533,9 +538,11 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			return;
 		}
 
-		// A page that has just loaded adopts a capture that is already running.
+		// Leaving the page ends the capture, so a capture the server still lists belongs to a
+		// reader that has gone and is on its way out. Its document is offered in the picker, and
+		// the Start button is what begins sampling again.
 		if (json.capture) {
-			this._wantedPid = String(json.capture.pid);
+			this._suggestedPid = String(json.capture.pid);
 		}
 	},
 
