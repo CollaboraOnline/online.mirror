@@ -602,6 +602,7 @@ bool FileServerRequestHandler::handleRequest(const HTTPRequest& request,
             if (endPoint == "admin.html" || endPoint == "adminSettings.html" ||
                 endPoint == "adminHistory.html" || endPoint == "adminAnalytics.html" ||
                 endPoint == "adminLog.html" || endPoint == "adminAudit.html" ||
+                endPoint == "adminFlamegraph.html" ||
                 endPoint == "adminClusterOverview.html" ||
                 endPoint == "adminClusterOverviewAbout.html")
             {

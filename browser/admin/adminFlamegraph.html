@@ -1,0 +1,66 @@
+<main>
+  <div class="container" style="max-width:none;">
+    <script>Admin.Flamegraph(host);</script>
+
+    <h3 class="title is-3"><script>document.write(l10nstrings.strFlamegraph)</script></h3>
+
+    <div class="level is-fullwidth is-mobile" style="flex-wrap:wrap;gap:8px;">
+      <div class="field is-horizontal">
+        <label class="field-label" style="vertical-align: middle; line-height:30px;" for="profile-document"><script>document.write(l10nstrings.strProfilePickDocument)</script></label>
+        <div class="control">
+          <select class="select" id="profile-document"></select>
+        </div>
+      </div>
+
+      <div class="field is-horizontal">
+        <label class="field-label" style="vertical-align: middle; line-height:30px;" for="profile-rate"><script>document.write(l10nstrings.strProfileRate)</script></label>
+        <div class="control">
+          <select class="select" id="profile-rate">
+            <option value="100" selected>10</option>
+            <option value="50">20</option>
+            <option value="20">50</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field is-horizontal">
+        <label class="field-label" style="vertical-align: middle; line-height:30px;" for="profile-thread"><script>document.write(l10nstrings.strProfileThread)</script></label>
+        <div class="control">
+          <select class="select" id="profile-thread">
+            <option value=""><script>document.write(l10nstrings.strProfileAllThreads)</script></option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field is-horizontal">
+        <label class="field-label" style="vertical-align: middle; line-height:30px;" for="profile-search"><script>document.write(l10nstrings.strProfileSearch)</script></label>
+        <div class="control">
+          <input class="input" type="text" id="profile-search" style="min-width:160px;">
+        </div>
+      </div>
+    </div>
+
+    <div class="buttons is-fullwidth" style="gap:8px;">
+      <button type="button" class="button is-info" id="profile-start" style="min-width:100px;"><script>document.write(l10nstrings.strProfileStart)</script></button>
+      <button type="button" class="button is-info" id="profile-stop" style="min-width:100px;" disabled><script>document.write(l10nstrings.strProfileStop)</script></button>
+      <button type="button" class="button" id="profile-freeze" style="min-width:140px;"><script>document.write(l10nstrings.strProfileFreeze)</script></button>
+      <button type="button" class="button" id="profile-reset" style="min-width:140px;"><script>document.write(l10nstrings.strProfileReset)</script></button>
+      <button type="button" class="button" id="profile-zoom-reset" style="min-width:140px;"><script>document.write(l10nstrings.strProfileResetZoom)</script></button>
+      <button type="button" class="button" id="profile-download-folded" style="min-width:200px;"><script>document.write(l10nstrings.strProfileDownloadFolded)</script></button>
+      <button type="button" class="button" id="profile-download-svg" style="min-width:160px;"><script>document.write(l10nstrings.strProfileDownloadSvg)</script></button>
+    </div>
+
+    <p id="profile-status" class="has-text-grey"></p>
+    <p id="profile-detail" style="min-height:1.5em;font-family:monospace;word-break:break-all;"></p>
+
+    <div id="profile-graph" style="width:100%;height:calc(100vh - 380px);min-height:300px;overflow:auto;background-color:#FFFFFF;">
+      <svg id="profile-svg" width="100%" height="0"></svg>
+    </div>
+  </div>
+</main>
+
+<script>
+  document.getElementById('a-flamegraph-mobile').classList.add('is-active');
+  document.getElementById('a-flamegraph-tablet').classList.add('is-active');
+  document.getElementById('button-admin-panel-collapse').click();
+</script>
