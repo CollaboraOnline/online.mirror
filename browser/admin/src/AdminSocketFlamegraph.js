@@ -284,7 +284,14 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		document.getElementById('profile-search').oninput =
 			this._onSearch.bind(this);
 
-		window.addEventListener('resize', this._scheduleRedraw.bind(this));
+		window.addEventListener(
+			'resize',
+			function () {
+				// A frozen picture keeps its samples, and still follows the window it sits in.
+				this._fillToBottom(document.getElementById('profile-graph'));
+				this._scheduleRedraw();
+			}.bind(this),
+		);
 
 		// Control-F reaches the search box, as it does in a flamegraph the tools produced.
 		window.addEventListener('keydown', function (event) {
@@ -300,6 +307,9 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._suggestedPid = '';
 		this._wantedDocKey = params.get('docKey') || '';
 
+		// The empty picture already takes the room it will draw into, so nothing jumps once the
+		// first samples arrive.
+		this._fillToBottom(document.getElementById('profile-graph'));
 		this._updateStatus();
 	},
 
