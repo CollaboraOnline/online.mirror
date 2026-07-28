@@ -441,6 +441,8 @@ public:
     void sendMigrateMsgAfterSave(bool lastSaveSuccessful, const std::string& docKey);
     std::string getWopiSrcMap() const;
     std::string getFilename(int pid) const;
+    /// The process of the document with that key, or 0 when no document has that key.
+    pid_t getPidForDocKey(const std::string& docKey) const;
     void routeTokenSanityCheck();
     void sendShutdownReceivedMsg();
 

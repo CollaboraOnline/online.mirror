@@ -1492,6 +1492,12 @@ std::string AdminModel::getFilename(int pid) const
     return std::string();
 }
 
+pid_t AdminModel::getPidForDocKey(const std::string& docKey) const
+{
+    const auto it = _documents.find(docKey);
+    return it != _documents.end() ? it->second.getPid() : 0;
+}
+
 void AdminModel::routeTokenSanityCheck()
 {
     ASSERT_CORRECT_THREAD_OWNER(_owner);

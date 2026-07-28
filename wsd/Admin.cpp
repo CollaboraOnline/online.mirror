@@ -214,6 +214,92 @@ void AdminSocketHandler::handleMessage(const std::vector<char> &payload)
             LOG_ERR("Invalid PID to kill (out of range): " << tokens[1]);
         }
     }
+    else if (tokens.equals(0, "profile_start") && tokens.size() >= 3)
+    {
+        pid_t pid = 0;
+        try
+        {
+            pid = NumUtil::stoi(tokens[1]);
+        }
+        catch (const std::exception& exc)
+        {
+            LOG_ERR("Invalid PID to sample: " << tokens[1]);
+            sendTextFrame("profile_error 0 notfound That is not a process number.");
+            return;
+        }
+
+        const std::string docKey = Uri::decode(tokens[2]);
+        std::chrono::milliseconds interval = Admin::getDefaultProfileInterval();
+        int asked = 0;
+        if (tokens.size() > 3 && getTokenInteger(tokens[3], "interval", asked))
+            interval = std::chrono::milliseconds(asked);
+
+        std::string reason;
+        std::string code;
+        const std::weak_ptr<WebSocketHandler> socket =
+            std::dynamic_pointer_cast<WebSocketHandler>(shared_from_this());
+        if (!_admin->startProfile(pid, docKey, _sessionId, _clientIPAdress, socket, interval, reason,
+                                  code))
+        {
+            LOG_WRN("Refused a sampling request for pid [" << pid << "] from source IPAddress ["
+                                                           << _clientIPAdress << "]: " << code
+                                                           << ' ' << reason);
+            sendTextFrame("profile_error " + std::to_string(pid) + ' ' + code + ' ' + reason);
+            return;
+        }
+
+        std::ostringstream json;
+        json << "{\"pid\":" << pid << ",\"docKey\":\"" << JsonUtil::escapeJSONValue(docKey)
+             << "\",\"filename\":\""
+             << JsonUtil::escapeJSONValue(Anonymizer::anonymizeUrl(model.getFilename(pid)))
+             << "\",\"interval\":" << interval.count()
+             << ",\"minInterval\":" << KitStackSampler::MinInterval.count()
+             << ",\"maxInterval\":" << KitStackSampler::MaxInterval.count() << '}';
+        sendTextFrame("profile_started " + std::to_string(pid) + ' ' + json.str());
+    }
+    else if (tokens.equals(0, "profile_stop") && tokens.size() == 2)
+    {
+        try
+        {
+            _admin->stopProfile(NumUtil::stoi(tokens[1]), "user");
+        }
+        catch (const std::exception& exc)
+        {
+            LOG_ERR("Invalid PID to stop sampling: " << tokens[1]);
+        }
+    }
+    else if (tokens.equals(0, "profile_rate") && tokens.size() == 3)
+    {
+        try
+        {
+            const pid_t pid = NumUtil::stoi(tokens[1]);
+            std::string code;
+            _admin->setProfileRate(pid, std::chrono::milliseconds(NumUtil::stoi(tokens[2])), code);
+            if (!code.empty())
+                sendTextFrame("profile_error " + std::to_string(pid) + ' ' + code +
+                              " That sampling rate cannot be used.");
+        }
+        catch (const std::exception& exc)
+        {
+            LOG_ERR("Invalid sampling rate request: " << firstLine);
+        }
+    }
+    else if (tokens.equals(0, "profile_ack") && tokens.size() == 3)
+    {
+        try
+        {
+            _admin->ackProfile(NumUtil::stoi(tokens[1]),
+                               std::stoull(tokens[2]));
+        }
+        catch (const std::exception& exc)
+        {
+            LOG_ERR("Invalid sampling acknowledgement: " << firstLine);
+        }
+    }
+    else if (tokens.equals(0, "profile_status"))
+    {
+        sendTextFrame("profile_status " + _admin->getProfileStatus());
+    }
     else if (tokens.equals(0, "settings"))
     {
         // for now, we have only these settings
@@ -612,6 +698,11 @@ Admin::Admin()
 Admin::~Admin()
 {
     LOG_INF("~Admin dtor.");
+
+    // The sampler's own destructor joins its thread and only then detaches, so this is where the
+    // ptrace attach is guaranteed to be gone even when the poll loop left on the shutdown flag.
+    _profileCapture.reset();
+    _stackSampler.reset();
 }
 
 void Admin::pollingThread()
@@ -722,6 +813,8 @@ void Admin::pollingThread()
             }
         }
 
+        checkProfileStillWanted();
+
         bool dumpMetrics = true;
         if (_dumpMetrics.compare_exchange_strong(dumpMetrics, false))
         {
@@ -820,13 +913,23 @@ void Admin::addDoc(const std::string& docKey, pid_t pid, const std::string& file
 
 void Admin::rmDoc(const std::string& docKey, const std::string& sessionId)
 {
-    addCallback([this, docKey, sessionId] { _model.removeDocument(docKey, sessionId); });
+    addCallback(
+        [this, docKey, sessionId]
+        {
+            _model.removeDocument(docKey, sessionId);
+            checkProfileStillWanted();
+        });
 }
 
 void Admin::rmDoc(const std::string& docKey)
 {
     LOG_INF("Removing complete doc [" << docKey << "] from Admin.");
-    addCallback([this, docKey]{ _model.removeDocument(docKey); });
+    addCallback(
+        [this, docKey]
+        {
+            _model.removeDocument(docKey);
+            checkProfileStillWanted();
+        });
 }
 
 void Admin::rescheduleMemTimer(std::chrono::milliseconds interval)
@@ -1166,6 +1269,484 @@ void Admin::cleanupLostKits()
         Admin::instance().addLostKitsTerminated(lostKitsTerminated);
 }
 
+namespace
+{
+/// The most bytes one profile_samples message may carry. Beyond this the smallest counts are left
+/// for the next window and the message says it was truncated.
+constexpr size_t MaxProfileUpdateBytes = 128 * 1024;
+/// How many windows the reader may be behind before the server stops sending and adds the windows
+/// together instead.
+constexpr uint64_t MaxProfileWindowsUnacked = 2;
+/// A reader that has not acknowledged anything for this long is treated as gone.
+constexpr std::chrono::seconds ProfileAckTimeout{ 30 };
+/// One attach per process per this long, so that a stuck reader cannot attach in a loop.
+constexpr std::chrono::seconds ProfileStartInterval{ 5 };
+
+const char* profileStateName(KitStackSampler::State state)
+{
+    switch (state)
+    {
+        case KitStackSampler::State::Idle:
+            return "idle";
+        case KitStackSampler::State::Priming:
+            return "priming";
+        case KitStackSampler::State::Running:
+            return "running";
+        case KitStackSampler::State::Failed:
+            return "failed";
+    }
+
+    return "idle";
+}
+
+/// Splits a folded stack into its frames, outermost first.
+std::vector<std::string> splitFoldedStack(const std::string& folded)
+{
+    std::vector<std::string> frames;
+    size_t start = 0;
+    for (;;)
+    {
+        const size_t end = folded.find(';', start);
+        if (end == std::string::npos)
+        {
+            frames.push_back(folded.substr(start));
+            return frames;
+        }
+
+        frames.push_back(folded.substr(start, end - start));
+        start = end + 1;
+    }
+}
+}
+
+std::chrono::milliseconds Admin::getDefaultProfileInterval()
+{
+    return std::chrono::milliseconds(
+        ConfigUtil::getConfigValue<int>("admin_console.stack_sampler.interval_ms", 100));
+}
+
+KitStackSampler& Admin::stackSampler()
+{
+    if (!_stackSampler)
+    {
+        // The batch is built on the sampler thread, so all the sink does is hand it over to this
+        // thread, which is the only one that may touch the capture record or the admin socket.
+        _stackSampler = std::make_unique<KitStackSampler>(
+            [](KitStackSampler::BatchPtr batch)
+            {
+                Admin::instance().addCallback([batch] { Admin::instance().handleSampleBatch(batch); });
+            });
+    }
+
+    return *_stackSampler;
+}
+
+bool Admin::startProfile(pid_t pid, const std::string& docKey, int sessionId,
+                         const std::string& clientIPAddress,
+                         const std::weak_ptr<WebSocketHandler>& socket,
+                         std::chrono::milliseconds interval, std::string& reason,
+                         std::string& code)
+{
+    std::string why;
+    if (!KitStackSampler::isAvailable(why))
+    {
+        reason = why;
+        code = KitStackSampler::errorCode(KitStackSampler::availabilityError());
+        return false;
+    }
+
+    const std::set<pid_t> pids = _model.getDocumentPids();
+    if (pids.find(pid) == pids.end())
+    {
+        reason = "Process " + std::to_string(pid) + " is not a document.";
+        code = "notfound";
+        return false;
+    }
+
+    // A process can be recycled between the reader listing the documents and this command arriving,
+    // so the document is named as well as the process and the two have to still agree.
+    if (_model.getPidForDocKey(docKey) != pid)
+    {
+        reason = "That document is no longer running as process " + std::to_string(pid) + '.';
+        code = "stale";
+        return false;
+    }
+
+    if (interval < KitStackSampler::MinInterval || interval > KitStackSampler::MaxInterval)
+    {
+        reason = "A sample interval of " + std::to_string(interval.count()) +
+                 " ms is outside the allowed range of " +
+                 std::to_string(KitStackSampler::MinInterval.count()) + " ms to " +
+                 std::to_string(KitStackSampler::MaxInterval.count()) + " ms.";
+        code = "badrate";
+        return false;
+    }
+
+    if (_profileCapture)
+    {
+        if (_profileCapture->pid != pid || !_profileCapture->socket.expired())
+        {
+            reason = "Process " + std::to_string(_profileCapture->pid) +
+                     " is already being sampled. Only one capture runs at a time.";
+            code = "busy";
+            return false;
+        }
+
+        // The reader that asked for this capture has gone, so a reloaded page takes it over. Its
+        // symbol table starts again, because the new reader has seen none of it.
+        LOG_INF("Admin session " << sessionId << " is taking over the capture of " << pid);
+        _profileCapture->socket = socket;
+        _profileCapture->sessionId = sessionId;
+        _profileCapture->clientIPAddress = clientIPAddress;
+        _profileCapture->internedIds.clear();
+        _profileCapture->nextId = 1;
+        _profileCapture->ackedSeq = _profileCapture->seq;
+        _profileCapture->lastAckAt = std::chrono::steady_clock::now();
+
+        if (interval != _profileCapture->interval)
+        {
+            _profileCapture->interval = interval;
+            stackSampler().setInterval(pid, interval);
+        }
+
+        return true;
+    }
+
+    const auto now = std::chrono::steady_clock::now();
+    const auto lastStart = _lastProfileStart.find(pid);
+    if (lastStart != _lastProfileStart.end() && now - lastStart->second < ProfileStartInterval)
+    {
+        reason = "Process " + std::to_string(pid) + " was sampled a moment ago. Try again shortly.";
+        code = "busy";
+        return false;
+    }
+
+    KitStackSampler::Error error = KitStackSampler::Error::None;
+    uint64_t captureId = 0;
+    if (!stackSampler().startCapture(pid, docKey, interval, reason, error, captureId))
+    {
+        code = KitStackSampler::errorCode(error);
+        return false;
+    }
+
+    _lastProfileStart[pid] = now;
+
+    auto capture = std::make_unique<ProfileCapture>();
+    capture->pid = pid;
+    capture->docKey = docKey;
+    capture->filename = _model.getFilename(pid);
+    capture->clientIPAddress = clientIPAddress;
+    capture->sessionId = sessionId;
+    capture->socket = socket;
+    capture->interval = interval;
+    capture->captureId = captureId;
+    capture->startedAt = now;
+    capture->lastAckAt = now;
+    _profileCapture = std::move(capture);
+
+    if (logAdminAction())
+    {
+        LOG_ANY("Admin request to sample document ["
+                << Anonymizer::anonymizeUrl(_profileCapture->filename) << "] with pid [" << pid
+                << "] and docKey [" << Anonymizer::anonymizeUrl(docKey) << "] every " << interval
+                << " from source IPAddress [" << clientIPAddress << ']');
+    }
+
+    return true;
+}
+
+void Admin::stopProfile(pid_t pid, const std::string& reason)
+{
+    if (!_profileCapture || (pid != 0 && _profileCapture->pid != pid))
+        return;
+
+    if (_stackSampler)
+        _stackSampler->stopCapture(_profileCapture->pid);
+
+    endProfile(reason, std::string());
+}
+
+void Admin::endProfile(const std::string& reason, const std::string& message)
+{
+    if (!_profileCapture)
+        return;
+
+    const ProfileCapture& capture = *_profileCapture;
+    const auto duration = std::chrono::duration_cast<std::chrono::seconds>(
+        std::chrono::steady_clock::now() - capture.startedAt);
+
+    if (logAdminAction())
+    {
+        LOG_ANY("Sampling of document [" << Anonymizer::anonymizeUrl(capture.filename)
+                                         << "] with pid [" << capture.pid << "] ended after "
+                                         << duration << " with " << capture.totalSamples
+                                         << " samples delivered, reason [" << reason
+                                         << "], source IPAddress [" << capture.clientIPAddress
+                                         << ']');
+    }
+
+    sendProfileFrame("profile_stopped " + std::to_string(capture.pid) + ' ' + reason +
+                     (message.empty() ? std::string() : ' ' + message));
+
+    _profileCapture.reset();
+}
+
+void Admin::setProfileRate(pid_t pid, std::chrono::milliseconds interval, std::string& code)
+{
+    if (!_profileCapture || _profileCapture->pid != pid)
+    {
+        code = "notfound";
+        return;
+    }
+
+    if (interval < KitStackSampler::MinInterval || interval > KitStackSampler::MaxInterval)
+    {
+        code = "badrate";
+        return;
+    }
+
+    if (logAdminAction())
+    {
+        LOG_ANY("Admin request to sample pid [" << pid << "] every " << interval << " instead of "
+                                                << _profileCapture->interval
+                                                << " from source IPAddress ["
+                                                << _profileCapture->clientIPAddress << ']');
+    }
+
+    _profileCapture->interval = interval;
+    stackSampler().setInterval(pid, interval);
+    code.clear();
+}
+
+void Admin::ackProfile(pid_t pid, uint64_t seq)
+{
+    if (!_profileCapture || _profileCapture->pid != pid)
+        return;
+
+    _profileCapture->ackedSeq = std::max(_profileCapture->ackedSeq, seq);
+    _profileCapture->lastAckAt = std::chrono::steady_clock::now();
+}
+
+std::string Admin::getProfileStatus() const
+{
+    std::string reason;
+    const bool available = KitStackSampler::isAvailable(reason);
+
+    std::ostringstream json;
+    json << "{\"available\":" << (available ? "true" : "false") << ",\"reason\":\""
+         << JsonUtil::escapeJSONValue(reason) << "\",\"code\":\""
+         << KitStackSampler::errorCode(KitStackSampler::availabilityError())
+         << "\",\"minInterval\":" << KitStackSampler::MinInterval.count()
+         << ",\"maxInterval\":" << KitStackSampler::MaxInterval.count()
+         << ",\"defaultInterval\":" << getDefaultProfileInterval().count();
+
+    if (_profileCapture)
+    {
+        const auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::steady_clock::now() - _profileCapture->startedAt);
+        json << ",\"capture\":{\"pid\":" << _profileCapture->pid << ",\"docKey\":\""
+             << JsonUtil::escapeJSONValue(_profileCapture->docKey) << "\",\"filename\":\""
+             << JsonUtil::escapeJSONValue(_profileCapture->filename)
+             << "\",\"interval\":" << _profileCapture->interval.count()
+             << ",\"elapsed\":" << elapsed.count()
+             << ",\"samples\":" << _profileCapture->totalSamples
+             << ",\"seq\":" << _profileCapture->seq << ",\"mine\":"
+             << (_profileCapture->socket.expired() ? "false" : "true") << '}';
+    }
+
+    json << '}';
+    return json.str();
+}
+
+void Admin::sendProfileFrame(const std::string& message)
+{
+    if (!_profileCapture)
+        return;
+
+    std::shared_ptr<WebSocketHandler> socket = _profileCapture->socket.lock();
+    if (!socket)
+        return;
+
+    try
+    {
+        socket->sendTextMessage(message);
+    }
+    catch (const std::exception& exc)
+    {
+        LOG_WRN("Failed to send a profile message to admin session "
+                << _profileCapture->sessionId << ": " << exc.what());
+        _profileCapture->socket.reset();
+    }
+}
+
+void Admin::handleSampleBatch(const KitStackSampler::BatchPtr& batch)
+{
+    if (_stackSampler)
+        _stackSampler->noteBatchConsumed();
+
+    if (!_profileCapture || _profileCapture->pid != batch->pid ||
+        _profileCapture->captureId != batch->captureId)
+    {
+        LOGA_TRC(Admin, "Dropping a stale sample batch of pid " << batch->pid);
+        return;
+    }
+
+    if (_profileCapture->socket.expired())
+    {
+        stopProfile(batch->pid, "sockgone");
+        return;
+    }
+
+    _profileCapture->interval = batch->interval;
+    sendProfileSamples(batch);
+
+    if (batch->error != KitStackSampler::Error::None ||
+        batch->state == KitStackSampler::State::Idle ||
+        batch->state == KitStackSampler::State::Failed)
+    {
+        // A clean end that this side did not ask for is the server going down, since an admin stop
+        // drops the record before the sampler's closing window arrives.
+        endProfile(batch->error == KitStackSampler::Error::None
+                       ? "shutdown"
+                       : KitStackSampler::errorCode(batch->error),
+                   batch->message);
+    }
+}
+
+void Admin::sendProfileSamples(const KitStackSampler::BatchPtr& batch)
+{
+    ProfileCapture& capture = *_profileCapture;
+
+    for (const auto& count : batch->folded)
+        capture.pendingDelta[count.first] += count.second;
+
+    capture.pendingSamples += batch->samples;
+    capture.pendingIdleSamples += batch->idleSamples;
+    capture.pendingDroppedSamples += batch->droppedSamples;
+    capture.pendingUnresolvedFrames += batch->unresolvedFrames;
+    capture.pendingTotalFrames += batch->totalFrames;
+    if (batch->truncated)
+        capture.truncated = true;
+
+    const bool ending = batch->error != KitStackSampler::Error::None ||
+                        batch->state == KitStackSampler::State::Idle ||
+                        batch->state == KitStackSampler::State::Failed;
+
+    // A reader that is behind gets nothing new until it catches up, and the windows it has not seen
+    // are added together meanwhile. The state changes and the closing window always go out.
+    if (!ending && batch->state == KitStackSampler::State::Running &&
+        capture.seq > capture.ackedSeq + MaxProfileWindowsUnacked)
+    {
+        if (std::chrono::steady_clock::now() - capture.lastAckAt > ProfileAckTimeout)
+        {
+            LOG_INF("Admin session " << capture.sessionId << " has acknowledged nothing for "
+                                     << ProfileAckTimeout << ", so the capture of " << capture.pid
+                                     << " stops.");
+            stopProfile(capture.pid, "sockgone");
+        }
+
+        return;
+    }
+
+    // Counts are ordered by size so that a window too big for one message keeps the frames that
+    // matter and leaves the rest for the next one.
+    std::vector<std::pair<std::string, uint32_t>> ordered(capture.pendingDelta.begin(),
+                                                          capture.pendingDelta.end());
+    std::sort(ordered.begin(), ordered.end(),
+              [](const std::pair<std::string, uint32_t>& a,
+                 const std::pair<std::string, uint32_t>& b) { return a.second > b.second; });
+
+    std::ostringstream newFrames;
+    std::ostringstream stacks;
+    std::vector<std::string> sent;
+    size_t bytes = 0;
+    bool overflowed = false;
+    for (const auto& count : ordered)
+    {
+        if (bytes >= MaxProfileUpdateBytes)
+        {
+            overflowed = true;
+            break;
+        }
+
+        std::ostringstream path;
+        bool firstFrame = true;
+        for (const std::string& frame : splitFoldedStack(count.first))
+        {
+            uint32_t id;
+            const auto known = capture.internedIds.find(frame);
+            if (known != capture.internedIds.end())
+                id = known->second;
+            else
+            {
+                id = capture.nextId++;
+                capture.internedIds.emplace(frame, id);
+                if (newFrames.tellp() > 0)
+                    newFrames << ',';
+                newFrames << '[' << id << ",\"" << JsonUtil::escapeJSONValue(frame) << "\"]";
+                bytes += frame.size() + 16;
+            }
+
+            if (!firstFrame)
+                path << ',';
+            firstFrame = false;
+            path << id;
+        }
+
+        const std::string pathText = path.str();
+        if (stacks.tellp() > 0)
+            stacks << ',';
+        stacks << "[[" << pathText << "]," << count.second << ']';
+        bytes += pathText.size() + 16;
+        sent.push_back(count.first);
+    }
+
+    for (const std::string& key : sent)
+        capture.pendingDelta.erase(key);
+
+    ++capture.seq;
+    capture.totalSamples += capture.pendingSamples;
+
+    std::ostringstream json;
+    json << "{\"seq\":" << capture.seq << ",\"captureId\":" << capture.captureId
+         << ",\"interval\":" << batch->interval.count() << ",\"state\":\""
+         << profileStateName(batch->state) << "\",\"samples\":" << capture.pendingSamples
+         << ",\"idle\":" << capture.pendingIdleSamples
+         << ",\"dropped\":" << capture.pendingDroppedSamples
+         << ",\"unresolved\":" << capture.pendingUnresolvedFrames
+         << ",\"frameCount\":" << capture.pendingTotalFrames
+         << ",\"totalSamples\":" << capture.totalSamples << ",\"merged\":" << batch->mergedWindows
+         << ",\"worstStopUs\":" << batch->worstStop.count()
+         << ",\"meanStopUs\":" << batch->meanStop.count() << ",\"trunc\":"
+         << ((capture.truncated || overflowed) ? "true" : "false")
+         << ",\"frames\":[" << newFrames.str() << "],\"stacks\":[" << stacks.str() << "]}";
+
+    sendProfileFrame("profile_samples " + std::to_string(capture.pid) + ' ' + json.str());
+
+    capture.pendingSamples = 0;
+    capture.pendingIdleSamples = 0;
+    capture.pendingDroppedSamples = 0;
+    capture.pendingUnresolvedFrames = 0;
+    capture.pendingTotalFrames = 0;
+    capture.truncated = false;
+}
+
+void Admin::checkProfileStillWanted()
+{
+    if (!_profileCapture)
+        return;
+
+    if (_profileCapture->socket.expired())
+    {
+        stopProfile(_profileCapture->pid, "sockgone");
+        return;
+    }
+
+    const std::set<pid_t> pids = _model.getDocumentPids();
+    if (pids.find(_profileCapture->pid) == pids.end())
+        stopProfile(_profileCapture->pid, "docgone");
+}
+
 void Admin::dumpState(std::ostream& os) const
 {
     SocketPoll::dumpState(os);
@@ -1178,6 +1759,33 @@ void Admin::dumpState(std::ostream& os) const
             os << socket.first << ": " << (socket.second->isConnected() ? "" : "dis")
                << "connected\n";
         }
+    }
+
+    os << "Stack sampler: ";
+    if (!_stackSampler)
+        os << "never used\n";
+    else
+    {
+        os << '\n';
+        _stackSampler->dumpState(os);
+    }
+
+    os << "Profile capture: ";
+    if (!_profileCapture)
+        os << "none\n";
+    else
+    {
+        os << "\n\tpid: " << _profileCapture->pid
+           << "\n\tdocKey: " << _profileCapture->docKey
+           << "\n\tsession: " << _profileCapture->sessionId
+           << "\n\treader: " << (_profileCapture->socket.expired() ? "gone" : "connected")
+           << "\n\tinterval: " << _profileCapture->interval
+           << "\n\tcapture id: " << _profileCapture->captureId
+           << "\n\tsent windows: " << _profileCapture->seq
+           << "\n\tacknowledged: " << _profileCapture->ackedSeq
+           << "\n\tsamples: " << _profileCapture->totalSamples
+           << "\n\tinterned frames: " << _profileCapture->internedIds.size()
+           << "\n\theld back stacks: " << _profileCapture->pendingDelta.size() << '\n';
     }
 
     os << "Admin Metrics:\n";
@@ -1391,6 +1999,16 @@ void Admin::deleteMonitorSocket(const std::string& uriWithoutParam)
 void Admin::stop()
 {
     joinThread();
+
+    // The sampler thread detaches from whatever it is attached to as it winds down, so it goes now
+    // rather than at process exit.
+    if (_stackSampler)
+    {
+        _stackSampler->stopCapture(0);
+        _stackSampler.reset();
+    }
+
+    _profileCapture.reset();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

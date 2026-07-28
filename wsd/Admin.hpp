@@ -17,11 +17,16 @@
 #pragma once
 
 #include <AdminModel.hpp>
+#include <KitStackSampler.hpp>
 
 #include <net/WebSocketHandler.hpp>
 #include <common/ConfigUtil.hpp>
 
+#include <chrono>
+#include <map>
 #include <memory>
+#include <string>
+#include <unordered_map>
 
 class Admin;
 
@@ -229,7 +234,75 @@ public:
 
     void setCloseMonitorFlag() { _closeMonitor = true; }
 
+    /// Starts sampling the stacks of one document's kit and sending the counts to one admin socket.
+    /// Returns false with a reason and a code when the request is turned down.
+    bool startProfile(pid_t pid, const std::string& docKey, int sessionId,
+                      const std::string& clientIPAddress,
+                      const std::weak_ptr<WebSocketHandler>& socket,
+                      std::chrono::milliseconds interval, std::string& reason,
+                      std::string& code);
+
+    /// Ends the capture of that process, naming why for the log and for the reader.
+    void stopProfile(pid_t pid, const std::string& reason);
+
+    /// Changes how often the running capture samples.
+    void setProfileRate(pid_t pid, std::chrono::milliseconds interval, std::string& code);
+
+    /// Records that the reader has applied everything up to that position.
+    void ackProfile(pid_t pid, uint64_t seq);
+
+    /// What the sampler can do here, and what it is doing, as JSON.
+    std::string getProfileStatus() const;
+
+    /// Takes one published window of counts. Runs on the Admin thread.
+    void handleSampleBatch(const KitStackSampler::BatchPtr& batch);
+
+    /// The interval a capture gets when the reader asks for no particular one.
+    static std::chrono::milliseconds getDefaultProfileInterval();
+
 private:
+    /// Creates the sampler on first use, so a server where nobody profiles never starts the thread.
+    KitStackSampler& stackSampler();
+
+    /// Ends the capture when the document it belongs to has gone, or its reader has.
+    void checkProfileStillWanted();
+
+    /// One live capture: who asked for it, what has been sent, and the symbol table that has been
+    /// sent so far.
+    struct ProfileCapture
+    {
+        pid_t pid = 0;
+        std::string docKey;
+        std::string filename;
+        /// A copy, because the automatic stop is logged from the Admin thread, which has no socket.
+        std::string clientIPAddress;
+        int sessionId = 0;
+        std::weak_ptr<WebSocketHandler> socket;
+        std::chrono::milliseconds interval{};
+        uint64_t captureId = 0;
+        uint64_t seq = 0;
+        uint64_t ackedSeq = 0;
+        uint64_t totalSamples = 0;
+        std::chrono::steady_clock::time_point startedAt;
+        std::chrono::steady_clock::time_point lastAckAt;
+        /// Frame label to the number that stands for it on the wire.
+        std::unordered_map<std::string, uint32_t> internedIds;
+        uint32_t nextId = 1;
+        /// Windows held back because the reader had not caught up, already added together.
+        std::map<std::string, uint32_t> pendingDelta;
+        uint32_t pendingSamples = 0;
+        uint32_t pendingIdleSamples = 0;
+        uint32_t pendingDroppedSamples = 0;
+        uint32_t pendingUnresolvedFrames = 0;
+        uint32_t pendingTotalFrames = 0;
+        bool truncated = false;
+    };
+
+    /// Sends one window, or holds it back when the reader is behind.
+    void sendProfileSamples(const KitStackSampler::BatchPtr& batch);
+    void sendProfileFrame(const std::string& message);
+    /// Tells the reader the capture is over, writes the audit line and drops the record.
+    void endProfile(const std::string& reason, const std::string& message);
     /// Notify Forkit of changed settings.
     void notifyForkit();
 
@@ -297,6 +370,14 @@ private:
     std::atomic_bool _dumpMetrics;
 
     std::atomic<bool> _closeMonitor = false;
+
+    /// Made on the first capture request and kept afterwards, idle. Only the Admin thread touches
+    /// the pointer itself.
+    std::unique_ptr<KitStackSampler> _stackSampler;
+    /// The capture in progress, if there is one.
+    std::unique_ptr<ProfileCapture> _profileCapture;
+    /// When each process was last attached to, so that a stuck reader cannot attach in a loop.
+    std::map<pid_t, std::chrono::steady_clock::time_point> _lastProfileStart;
 
     // Don't update any more frequently than this since it's excessive.
     static constexpr std::chrono::milliseconds MinStatsIntervalMs{ 50 };
