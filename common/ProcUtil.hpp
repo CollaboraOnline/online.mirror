@@ -71,6 +71,11 @@ void killThreadById(ThreadId tid, int signal);
 /// Asserts in the debug builds, otherwise just logs.
 void assertCorrectThread(ThreadId owner, LOG_CAPTURE_CALLER_DECLARATION);
 
+/// Turns one C++ mangled linkage name into the readable form, for example _ZN4Ns3FooEv becomes
+/// Ns::Foo(). Returns an empty string when the name is not a mangled C++ name, which includes
+/// every plain C symbol.
+std::string demangle(const char* mangled);
+
 #ifndef ASSERT_CORRECT_THREAD
 #define ASSERT_CORRECT_THREAD() assertCorrectThread()
 #endif

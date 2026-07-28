@@ -39,9 +39,9 @@
 #include <sys/types.h>
 #include <thread>
 
+#include <cxxabi.h>
 #if defined(__GLIBC__)
 #include <execinfo.h>
-#include <cxxabi.h>
 #endif
 #ifdef __linux__
 #include <sys/prctl.h>
@@ -248,6 +248,22 @@ std::string Backtrace::Symbol::toMangledString() const
     }
     return s;
 }
+
+std::string demangle(const char* mangled)
+{
+    if (!mangled || !*mangled)
+        return std::string();
+
+    int status;
+    char* readable = abi::__cxa_demangle(mangled, nullptr, nullptr, &status);
+    if (!readable)
+        return std::string();
+
+    std::string result(readable);
+    free(readable);
+    return result;
+}
+
 bool Backtrace::separateRawSymbol(const std::string& raw, Symbol& s)
 {
     auto idx0 = raw.find('(');
@@ -288,15 +304,7 @@ Backtrace::Backtrace([[maybe_unused]] const int maxFrames, const int skip)
             {
                 Symbol symbol;
                 separateRawSymbol(rawSymbols[i], symbol);
-                int status;
-                char* demangled;
-                std::string s("`");
-                if ((demangled = abi::__cxa_demangle(symbol.mangled.c_str(), nullptr, nullptr,
-                                                     &status)) != nullptr)
-                {
-                    symbol.demangled = demangled;
-                    free(demangled);
-                }
+                symbol.demangled = demangle(symbol.mangled.c_str());
                 _frames.emplace_back(backtraceBuffer[i], symbol);
             }
             free(rawSymbols);
