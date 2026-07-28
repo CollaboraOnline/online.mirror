@@ -70,7 +70,7 @@ static const Util::UnorderedStringMap<std::string> DefAppConfig = {
     { "admin_console.logging.monitor_connect", "true" },
     { "admin_console.password", "" },
     { "admin_console.stack_sampler.interval_ms", "100" },
-    { "admin_console.stack_sampler.max_duration_secs", "300" },
+    { "admin_console.stack_sampler.max_duration_secs", "0" },
     { "admin_console.stack_sampler.max_stack_depth", "128" },
     { "admin_console.username", "" },
     { "ai.allow_user_settings", "true" },

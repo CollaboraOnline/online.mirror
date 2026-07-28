@@ -226,8 +226,10 @@ void KitStackSampler::beginCapture(pid_t pid, const std::string& docKey,
     _capture.captureId = captureId;
     _capture.askedInterval = interval;
     _capture.interval = interval;
+    // Zero means a capture runs until something ends it. A client that stops acknowledging ends it
+    // after thirty seconds, and a closed socket ends it on the next publish.
     _capture.maxDuration = std::chrono::seconds(
-        ConfigUtil::getConfigValue<int>("admin_console.stack_sampler.max_duration_secs", 300));
+        ConfigUtil::getConfigValue<int>("admin_console.stack_sampler.max_duration_secs", 0));
     _capture.maxStackDepth =
         ConfigUtil::getConfigValue<unsigned>("admin_console.stack_sampler.max_stack_depth", 128);
     _capture.state = State::Priming;
@@ -528,7 +530,7 @@ void KitStackSampler::pollingThread()
             publishBatch(/*final=*/false, Error::None, std::string());
         }
 
-        if (now >= _capture.endsAt)
+        if (_capture.maxDuration.count() > 0 && now >= _capture.endsAt)
         {
             endCapture(Error::MaxDurationReached,
                        "Sampling stopped after the longest a capture may run, " +
