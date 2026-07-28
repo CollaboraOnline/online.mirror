@@ -939,9 +939,11 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 	// The controls wrap on a narrow window, so how much room is left has to be measured rather than
 	// worked out from a fixed figure.
 	_fillToBottom: function (container) {
+		const detail = document.getElementById('profile-detail');
 		const room =
 			window.innerHeight -
 			container.getBoundingClientRect().top -
+			(detail ? detail.offsetHeight : 0) -
 			GraphBottomGap;
 		container.style.height = Math.max(MinGraphHeight, room) + 'px';
 	},
@@ -1015,10 +1017,8 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 	},
 
 	_updateStatus: function (message) {
+		// The picker above already names the document being sampled.
 		const parts = [];
-		if (this._capture) {
-			parts.push(this._capture.filename + ' (' + this._capture.pid + ')');
-		}
 		if (this._totals.startedAt) {
 			parts.push(
 				Math.round((Date.now() - this._totals.startedAt) / 1000) + 's',
