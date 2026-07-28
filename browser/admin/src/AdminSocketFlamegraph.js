@@ -1029,11 +1029,16 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		if (this._totals.dropped) {
 			parts.push(this._totals.dropped + ' ' + _('dropped'));
 		}
-		if (this._totals.frames) {
+		// A name is missing when the debug information for that library is not installed, which is
+		// worth saying only when it happens.
+		if (this._totals.unresolved) {
 			const unresolved = (100 * this._totals.unresolved) / this._totals.frames;
 			parts.push(unresolved.toFixed(1) + '% ' + _('frames without a name'));
 		}
-		if (this._totals.interval) {
+		// The sampler slows itself down when a sample costs too much, so the interval is only worth
+		// showing once it differs from the one that was asked for.
+		const asked = Number(document.getElementById('profile-rate').value);
+		if (this._totals.interval && this._totals.interval !== asked) {
 			parts.push(this._totals.interval + 'ms');
 		}
 		if (this._totals.truncated) {
