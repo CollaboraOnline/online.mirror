@@ -19,6 +19,181 @@ const RowHeight = 18;
 const MinDrawnWidth = 1.5;
 const MaxFramesPerSecond = 4;
 
+// Geometry of the standalone file the download writes: the margin either side, the room above the
+// frames for the title and the two links, and the room below for the details line.
+const SvgPad = 10;
+const SvgHeadHeight = 40;
+const SvgFootHeight = 30;
+
+// The script carried inside that file, which is all that makes it clickable once it has been saved
+// and opened on its own. It reads the geometry back out of the frames it is given, so it needs
+// nothing passed in.
+const SvgScript = `
+(function () {
+	var frames = document.getElementById('frames');
+	var groups = frames.getElementsByClassName('frame');
+	var details = document.getElementById('details');
+	var matched = document.getElementById('matched');
+	var unzoom = document.getElementById('unzoom');
+	var search = document.getElementById('search');
+	var pattern = null;
+	var all = [];
+	var base = null;
+
+	for (var i = 0; i < groups.length; i++) {
+		var group = groups[i];
+		var rect = group.getElementsByTagName('rect')[0];
+		var text = group.getElementsByTagName('text')[0];
+		var frame = {
+			group: group,
+			rect: rect,
+			text: text,
+			name: group.getAttribute('data-name') || '',
+			title: group.getElementsByTagName('title')[0].textContent,
+			x: parseFloat(rect.getAttribute('x')),
+			y: parseFloat(rect.getAttribute('y')),
+			width: parseFloat(rect.getAttribute('width'))
+		};
+		all.push(frame);
+		if (!base || frame.width > base.width) {
+			base = frame;
+		}
+	}
+
+	function label(frame, width) {
+		var room = Math.floor((width - 6) / 7);
+		if (room < 3) {
+			return '';
+		}
+		return frame.name.length <= room ? frame.name : frame.name.substring(0, room - 1) + '..';
+	}
+
+	function place(frame, x, width) {
+		frame.rect.setAttribute('x', x.toFixed(2));
+		frame.rect.setAttribute('width', Math.max(1, width).toFixed(2));
+		frame.text.setAttribute('x', (x + 3).toFixed(2));
+		frame.text.textContent = label(frame, width);
+		frame.group.classList.remove('hide');
+	}
+
+	function draw(target) {
+		var left = target.x;
+		var right = target.x + target.width;
+		var scale = base.width / target.width;
+		var fudge = 0.0001;
+
+		for (var i = 0; i < all.length; i++) {
+			var frame = all[i];
+			if (frame.x + frame.width <= left + fudge || frame.x + fudge >= right) {
+				// Nothing of this frame is inside the part being looked at.
+				frame.group.classList.add('hide');
+				continue;
+			}
+			if (frame.x <= left + fudge && frame.x + frame.width + fudge >= right && frame.y > target.y) {
+				// A frame the chosen one sits on top of. It spans the whole width now.
+				place(frame, base.x, base.width);
+				continue;
+			}
+			place(frame, base.x + (frame.x - left) * scale, frame.width * scale);
+		}
+
+		if (target === base) {
+			unzoom.classList.add('hide');
+		} else {
+			unzoom.classList.remove('hide');
+		}
+		mark();
+	}
+
+	function mark() {
+		for (var i = 0; i < all.length; i++) {
+			var frame = all[i];
+			if (pattern && pattern.test(frame.name)) {
+				frame.rect.setAttribute('stroke', 'rgb(230,0,230)');
+				frame.rect.setAttribute('stroke-width', '2');
+			} else {
+				frame.rect.setAttribute('stroke', 'rgb(255,255,255)');
+				frame.rect.setAttribute('stroke-width', '0.5');
+			}
+		}
+
+		if (!pattern) {
+			matched.textContent = ' ';
+			return;
+		}
+
+		// A frame sitting on top of another match is part of the same marked block, so taking the
+		// widest match of each block gives the share of all the samples that matched.
+		var covered = 0;
+		var sorted = all.slice().sort(function (a, b) {
+			return b.width - a.width;
+		});
+		var ranges = [];
+		for (var s = 0; s < sorted.length; s++) {
+			if (!pattern.test(sorted[s].name)) {
+				continue;
+			}
+			var from = sorted[s].x;
+			var to = from + sorted[s].width;
+			var inside = false;
+			for (var r = 0; r < ranges.length; r++) {
+				if (from >= ranges[r][0] - 0.0001 && to <= ranges[r][1] + 0.0001) {
+					inside = true;
+					break;
+				}
+			}
+			if (!inside) {
+				ranges.push([from, to]);
+				covered += sorted[s].width;
+			}
+		}
+		matched.textContent = 'Matched: ' + ((100 * covered) / base.width).toFixed(1) + '%';
+	}
+
+	frames.addEventListener('mouseover', function (event) {
+		var group = event.target.parentNode;
+		if (group && group.classList && group.classList.contains('frame')) {
+			details.textContent = group.getElementsByTagName('title')[0].textContent;
+		}
+	});
+
+	frames.addEventListener('click', function (event) {
+		var group = event.target.parentNode;
+		if (!group || !group.classList || !group.classList.contains('frame')) {
+			return;
+		}
+		for (var i = 0; i < all.length; i++) {
+			if (all[i].group === group) {
+				draw(all[i]);
+				return;
+			}
+		}
+	});
+
+	unzoom.addEventListener('click', function () {
+		draw(base);
+	});
+
+	search.addEventListener('click', function () {
+		var text = window.prompt('Search for a frame name, as a regular expression', pattern ? pattern.source : '');
+		if (text === null) {
+			return;
+		}
+		pattern = null;
+		if (text) {
+			try {
+				pattern = new RegExp(text, 'i');
+			} catch (exc) {
+				pattern = null;
+			}
+		}
+		mark();
+	});
+
+	mark();
+})();
+`;
+
 const AdminSocketFlamegraph = AdminSocketBase.extend({
 	constructor: function (host) {
 		this.base(host);
@@ -796,14 +971,135 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 	},
 
 	_onDownloadSvg: function () {
-		const svg = document.getElementById('profile-svg').cloneNode(true);
-		svg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-		svg.setAttribute('font-family', 'monospace');
-		this._download(
-			new XMLSerializer().serializeToString(svg),
-			'image/svg+xml',
-			'.svg',
+		this._download(this._standaloneSvg(), 'image/svg+xml', '.svg');
+	},
+
+	// A file laid out like the one the flamegraph tools write, and readable on its own: the whole
+	// accumulated tree rather than the part currently on screen, a title and a details line, and
+	// enough script for a click to zoom and for a search to mark and count its hits.
+	_standaloneSvg: function () {
+		const width = 1200;
+		const cells = this._cells(this._root, width - 2 * SvgPad);
+		const height = cells.rowCount * RowHeight + SvgHeadHeight + SvgFootHeight;
+		const title =
+			(this._capture
+				? this._capture.filename + ' (' + this._capture.pid + ')'
+				: 'Collabora Online') +
+			', ' +
+			this._root.value +
+			' samples';
+
+		const parts = [];
+		parts.push(
+			'<?xml version="1.0" standalone="no"?>',
+			'<svg xmlns="http://www.w3.org/2000/svg" ' +
+				'xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" ' +
+				'width="' +
+				width +
+				'" height="' +
+				height +
+				'" ' +
+				'viewBox="0 0 ' +
+				width +
+				' ' +
+				height +
+				'">',
+			'<defs><linearGradient id="background" y1="0" y2="1" x1="0" x2="0">' +
+				'<stop stop-color="#eeeeee" offset="5%"/>' +
+				'<stop stop-color="#eeeeb0" offset="95%"/></linearGradient></defs>',
+			'<style type="text/css">' +
+				'text { font-family: Verdana, sans-serif; font-size: 12px; fill: rgb(0,0,0); }' +
+				'#title { text-anchor: middle; font-size: 17px; }' +
+				'#details, #unzoom, #search, #matched { text-anchor: start; }' +
+				'#unzoom, #search { fill: rgb(0,0,128); cursor: pointer; }' +
+				'#matched { text-anchor: end; }' +
+				'.hide { display: none; }' +
+				'.frame text { pointer-events: none; }' +
+				'.frame rect { stroke: rgb(255,255,255); stroke-width: 0.5; }' +
+				'</style>',
+			'<rect x="0" y="0" width="' +
+				width +
+				'" height="' +
+				height +
+				'" fill="url(#background)"/>',
+			'<text id="title" x="' +
+				width / 2 +
+				'" y="24">' +
+				this._escapeXml(title) +
+				'</text>',
+			'<text id="unzoom" class="hide" x="' +
+				SvgPad +
+				'" y="24">Reset Zoom</text>',
+			'<text id="search" x="' +
+				(width - SvgPad - 80) +
+				'" y="24">Search</text>',
+			'<text id="matched" x="' +
+				(width - SvgPad) +
+				'" y="' +
+				(height - 10) +
+				'"> </text>',
+			'<text id="details" x="' +
+				SvgPad +
+				'" y="' +
+				(height - 10) +
+				'"> </text>',
+			'<g id="frames">',
 		);
+
+		for (let i = 0; i < cells.length; i++) {
+			const cell = cells[i];
+			const node = cell.node;
+			const rectWidth = Math.max(1, cell.width - 1);
+			const room = Math.floor((rectWidth - 6) / 7);
+			const label =
+				room < 3
+					? ''
+					: node.name.length <= room
+						? node.name
+						: node.name.substring(0, room - 1) + '..';
+			parts.push(
+				'<g class="frame" data-name="' + this._escapeXml(node.name) + '">',
+				'<title>' +
+					this._escapeXml(this._describe(node).replace('\n', ' -- ')) +
+					'</title>',
+				'<rect x="' +
+					(cell.x + SvgPad).toFixed(2) +
+					'" y="' +
+					(cell.y + SvgHeadHeight) +
+					'" width="' +
+					rectWidth.toFixed(2) +
+					'" height="' +
+					(RowHeight - 1) +
+					'" fill="' +
+					this._colourFor(node) +
+					'"/>',
+				'<text x="' +
+					(cell.x + SvgPad + 3).toFixed(2) +
+					'" y="' +
+					(cell.y + SvgHeadHeight + RowHeight - 5) +
+					'">' +
+					this._escapeXml(label) +
+					'</text>',
+				'</g>',
+			);
+		}
+
+		parts.push(
+			'</g>',
+			'<script type="text/ecmascript"><![CDATA[',
+			SvgScript,
+			']]></script>',
+			'</svg>',
+		);
+		return parts.join('\n') + '\n';
+	},
+
+	_escapeXml: function (text) {
+		return String(text)
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;');
 	},
 });
 
