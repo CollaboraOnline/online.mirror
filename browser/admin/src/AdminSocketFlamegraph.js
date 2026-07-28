@@ -59,6 +59,7 @@ const SvgScript = `
 			text: text,
 			name: group.getAttribute('data-name') || '',
 			title: group.getElementsByTagName('title')[0].textContent,
+			fill: rect.getAttribute('fill'),
 			x: parseFloat(rect.getAttribute('x')),
 			y: parseFloat(rect.getAttribute('y')),
 			width: parseFloat(rect.getAttribute('width'))
@@ -115,16 +116,15 @@ const SvgScript = `
 	}
 
 	function mark() {
+		// A hit is filled with the magenta the flamegraph tools use, and anything else goes back
+		// to the colour its name gives it.
 		for (var i = 0; i < all.length; i++) {
 			var frame = all[i];
-			if (pattern && pattern.test(frame.name)) {
-				frame.rect.setAttribute('stroke', 'rgb(230,0,230)');
-				frame.rect.setAttribute('stroke-width', '2');
-			} else {
-				frame.rect.setAttribute('stroke', 'rgb(255,255,255)');
-				frame.rect.setAttribute('stroke-width', '0.5');
-			}
+			var hit = pattern && pattern.test(frame.name);
+			frame.rect.setAttribute('fill', hit ? 'rgb(230,0,230)' : frame.fill);
 		}
+
+		search.textContent = pattern ? 'Reset Search' : 'Search';
 
 		if (!pattern) {
 			matched.textContent = ' ';
@@ -184,7 +184,12 @@ const SvgScript = `
 	});
 
 	search.addEventListener('click', function () {
-		var text = window.prompt('Search for a frame name, as a regular expression', pattern ? pattern.source : '');
+		if (pattern) {
+			pattern = null;
+			mark();
+			return;
+		}
+		var text = window.prompt('Search for a frame name, as a regular expression', '');
 		if (text === null) {
 			return;
 		}
@@ -1058,7 +1063,8 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				'#matched { text-anchor: end; }' +
 				'.hide { display: none; }' +
 				'.frame text { pointer-events: none; }' +
-				'.frame rect { stroke: rgb(255,255,255); stroke-width: 0.5; }' +
+				'.frame:hover rect { stroke: rgb(0,0,0); stroke-width: 0.5; }' +
+				'#frames { cursor: pointer; }' +
 				'</style>',
 			'<rect x="0" y="0" width="' +
 				width +
