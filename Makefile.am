@@ -140,7 +140,8 @@ include_paths += ${OPENSSL_CFLAGS}
 endif
 
 AM_CPPFLAGS = -pthread \
-	      ${include_paths}
+	      ${include_paths} \
+	      ${LIBDW_CFLAGS}
 
 if !ENABLE_DEBUG
 AM_CPPFLAGS += -DNDEBUG
@@ -162,7 +163,7 @@ endif
 
 LDADD = $(POCO_LIBS)
 
-coolwsd_LDADD = libwsdglobals.a $(POCO_LIBS_HOST)
+coolwsd_LDADD = libwsdglobals.a $(POCO_LIBS_HOST) $(LIBDW_LIBS)
 coolwsd_LDFLAGS = $(POCO_LIBS_WHOLE) $(AM_LDFLAGS)
 coolconfig_LDADD = libglobals.a $(LDADD)
 
@@ -252,6 +253,7 @@ coolwsd_sources = \
                   wsd/ServerAuditUtil.cpp \
                   wsd/SlideCache.cpp \
                   wsd/SpecialBrokers.cpp \
+                  wsd/StackWalker.cpp \
                   wsd/Storage.cpp \
                   wsd/TileCache.cpp \
                   wsd/Unzip.cpp \
@@ -278,6 +280,9 @@ noinst_PROGRAMS = \
                   coolmap \
                   coolsocketdump \
                   lokitclient
+if ENABLE_LIBDW
+noinst_PROGRAMS += coolstacksample
+endif
 endif
 
 connect_SOURCES = \
@@ -359,7 +364,7 @@ coolwsd_inproc_SOURCES = $(coolwsd_sources) \
                          wsd/coolwsd-inproc.cpp
 
 coolwsd_inproc_CPPFLAGS = $(AM_CPPFLAGS) -DENABLE_INPROC=1
-coolwsd_inproc_LDADD = libsimd.a libkitwsdglobals.a $(POCO_LIBS_HOST)
+coolwsd_inproc_LDADD = libsimd.a libkitwsdglobals.a $(POCO_LIBS_HOST) $(LIBDW_LIBS)
 coolwsd_inproc_LDFLAGS = $(POCO_LIBS_WHOLE) $(AM_LDFLAGS)
 
 if !ENABLE_SSL
@@ -401,6 +406,21 @@ coolbench_SOURCES = \
                     tools/Benchmark.cpp
 
 coolbench_LDADD = libsimd.a libglobals.a $(LDADD)
+
+coolstacksample_SOURCES = \
+                    $(util_platform_cpp) \
+                    common/DummyTraceEventEmitter.cpp \
+                    common/Log-common.cpp \
+                    common/Log-poco.cpp \
+                    common/ProcUtil.cpp \
+                    common/StringVector.cpp \
+                    common/Util-server.cpp \
+                    common/Util-unix.cpp \
+                    common/Util.cpp \
+                    wsd/StackWalker.cpp \
+                    tools/StackSample.cpp
+
+coolstacksample_LDADD = libglobals.a $(LDADD) $(LIBDW_LIBS)
 
 coolconvert_SOURCES = tools/Tool.cpp
 
@@ -476,6 +496,7 @@ wsd_headers = \
               wsd/SlideCache.hpp \
               wsd/SpecialBrokers.hpp \
               wsd/SslConfig.hpp \
+              wsd/StackWalker.hpp \
               wsd/Storage.hpp \
               wsd/TileCache.hpp \
               wsd/TileDesc.hpp \
@@ -921,6 +942,7 @@ all_compiled_sources = $(sort \
 	$(coolconfig_SOURCES) \
 	$(coolsocketdump_SOURCES) \
 	$(coolbench_SOURCES) \
+	$(coolstacksample_SOURCES) \
 	$(coolconvert_SOURCES) \
 	$(coconvert_SOURCES) \
 	$(coolmount_SOURCES) \

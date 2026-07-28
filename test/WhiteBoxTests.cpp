@@ -26,6 +26,7 @@
 #include <common/StateEnum.hpp>
 #include <common/ThreadPool.hpp>
 #include <common/Util.hpp>
+#include <wsd/StackWalker.hpp>
 #include <wsd/TileCache.hpp>
 #include <wsd/TileDesc.hpp>
 
@@ -74,6 +75,7 @@ class WhiteBoxTests : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(testThreadPool);
     CPPUNIT_TEST(testLogCaptureCaller);
     CPPUNIT_TEST(testIsIso8601);
+    CPPUNIT_TEST(testStackTextFolding);
     CPPUNIT_TEST_SUITE_END();
 
     void testCOOLProtocolFunctions();
@@ -101,6 +103,7 @@ class WhiteBoxTests : public CPPUNIT_NS::TestFixture
     void testThreadPool();
     void testLogCaptureCaller();
     void testIsIso8601();
+    void testStackTextFolding();
 
     size_t waitForThreads(size_t count);
 };
@@ -1070,6 +1073,90 @@ void WhiteBoxTests::testIsIso8601()
     // offset without a fraction) are rejected.
     LOK_ASSERT(!Util::isIso8601("2021-03-04T05:06:07Z"));
     LOK_ASSERT(!Util::isIso8601("2021-03-04T05:06:07+01:00"));
+}
+
+void WhiteBoxTests::testStackTextFolding()
+{
+    constexpr auto testname = __func__;
+
+    // Threads of the same kind land on one flamegraph node, however they are numbered.
+    LOK_ASSERT_EQUAL(std::string("kitbroker"), StackText::foldThreadName("kitbroker_1a2b"));
+    LOK_ASSERT_EQUAL(std::string("docbroker"), StackText::foldThreadName("docbroker_003"));
+    LOK_ASSERT_EQUAL(std::string("kitbgsv"), StackText::foldThreadName("kitbgsv_07"));
+    LOK_ASSERT_EQUAL(std::string("lokit_main"), StackText::foldThreadName("lokit_main"));
+
+    // A spare kit keeps its own family rather than falling in with the kits.
+    LOK_ASSERT_EQUAL(std::string("kit_spare"), StackText::foldThreadName("kit_spare_001"));
+    LOK_ASSERT_EQUAL(std::string("kit"), StackText::foldThreadName("kit_1a2b"));
+
+    // A name from outside coolwsd is shown as it is.
+    LOK_ASSERT_EQUAL(std::string("gdbus"), StackText::foldThreadName("gdbus"));
+    LOK_ASSERT_EQUAL(std::string(""), StackText::foldThreadName(""));
+
+    // The label is the qualified function name, with no parameters and no template arguments.
+    LOK_ASSERT_EQUAL(std::string("SocketPoll::poll"),
+                     StackText::compactSymbolName("SocketPoll::poll(long, bool)"));
+    LOK_ASSERT_EQUAL(std::string("SocketPoll::insertNewSocket"),
+                     StackText::compactSymbolName("void SocketPoll::insertNewSocket<std::shared_"
+                                                  "ptr<Socket> >(std::shared_ptr<Socket>)"));
+    LOK_ASSERT_EQUAL(std::string("ScDocument::Broadcast"),
+                     StackText::compactSymbolName("ScDocument::Broadcast"));
+
+    // The parentheses of operator() are part of the name, so they stay.
+    LOK_ASSERT_EQUAL(std::string("std::function::operator()"),
+                     StackText::compactSymbolName("std::function<void ()>::operator()() const"));
+
+    // An unnamed namespace and a lambda both spell themselves with parentheses and a space, and
+    // both keep them.
+    LOK_ASSERT_EQUAL(std::string("(anonymous namespace)::createCOKit"),
+                     StackText::compactSymbolName(
+                         "(anonymous namespace)::createCOKit(std::__cxx11::basic_string<char> "
+                         "const&, bool)"));
+    LOK_ASSERT_EQUAL(std::string("(anonymous namespace)::createCOKit::{lambda()#2}::operator()"),
+                     StackText::compactSymbolName("(anonymous namespace)::createCOKit(bool)::"
+                                                  "{lambda()#2}::operator()() const"));
+
+    // The space in operator new belongs to the name, so the return type in front of it still goes.
+    LOK_ASSERT_EQUAL(std::string("operator new"),
+                     StackText::compactSymbolName("void* operator new(unsigned long)"));
+    LOK_ASSERT_EQUAL(std::string("hb_iter_t::operator bool"),
+                     StackText::compactSymbolName("bool hb_iter_t::operator bool() const"));
+
+    // A return type written as decltype of an expression is parenthesised, so the name only starts
+    // after it.
+    LOK_ASSERT_EQUAL(
+        std::string("operator|"),
+        StackText::compactSymbolName(
+            "decltype (((forward<._anon_221 const&>)({parm#2}))((forward<hb_map_iter_t<int> >)"
+            "({parm#1}))) operator|<hb_map_iter_t<int>, ._anon_221 const&, (void*)0>"
+            "(hb_map_iter_t<int>&&, ._anon_221 const&)"));
+
+    // A name that is nothing but a parameter list would leave nothing behind, so it is kept whole.
+    LOK_ASSERT_EQUAL(std::string("(anonymous namespace)"),
+                     StackText::compactSymbolName("(anonymous namespace)"));
+
+    // The two characters that carry meaning in a folded line cannot come from a symbol name.
+    LOK_ASSERT_EQUAL(std::string("A:B"), StackText::sanitiseFrameLabel("A;B"));
+    LOK_ASSERT_EQUAL(std::string("one two"), StackText::sanitiseFrameLabel("one  \t two"));
+    LOK_ASSERT_EQUAL(std::string("one two"), StackText::sanitiseFrameLabel("  one\ntwo  "));
+
+    // A mangled name the demangler could not read can run to a thousand characters, and the front of
+    // it is the part worth keeping.
+    const std::string wide(1037, 'x');
+    const std::string cut = StackText::sanitiseFrameLabel(wide);
+    LOK_ASSERT_EQUAL(static_cast<size_t>(200), cut.size());
+    LOK_ASSERT_EQUAL(std::string("xxx..."), cut.substr(cut.size() - 6));
+
+    // A label that is already short enough keeps every character.
+    const std::string exact(200, 'y');
+    LOK_ASSERT_EQUAL(exact, StackText::sanitiseFrameLabel(exact));
+
+    // The unwinder gives the leaf first, and the folded line reads outermost first.
+    LOK_ASSERT_EQUAL(std::string("kitbroker;main;SocketPoll::poll 7"),
+                     StackText::foldedLine("kitbroker", { "SocketPoll::poll", "main" }, 7));
+
+    // A thread that was walked but gave no frames still counts as that thread.
+    LOK_ASSERT_EQUAL(std::string("kit 1"), StackText::foldedLine("kit", {}, 1));
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(WhiteBoxTests);

@@ -74,6 +74,7 @@
 #include <wsd/PlatformMobile.hpp>
 #include <wsd/PlatformUnix.hpp>
 #include <wsd/Process.hpp>
+#include <wsd/StackWalker.hpp>
 #include <wsd/TraceFile.hpp>
 #include <wsd/wopi/StorageConnectionManager.hpp>
 
@@ -1588,6 +1589,10 @@ void COOLWSD::innerInitialize(Poco::Util::Application& self)
 
     Util::setApplicationPath(
         Poco::Path(Poco::Util::Application::instance().commandPath()).parent().toString());
+
+    // Done here, on the one thread there is, because it changes the environment, and reading the
+    // environment from another thread at the same time is not safe.
+    StackWalker::keepDebugInfoLookupLocal();
 
     StartTime = std::chrono::steady_clock::now();
 

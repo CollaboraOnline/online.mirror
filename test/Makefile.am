@@ -140,7 +140,7 @@ endif
 # the server side and here in unit tests with conditional compilation
 # based on BUILDING_TESTS
 
-AM_CPPFLAGS = -pthread -I$(top_srcdir) -DBUILDING_TESTS -DLOK_ABORT_ON_ASSERTION
+AM_CPPFLAGS = -pthread -I$(top_srcdir) -DBUILDING_TESTS -DLOK_ABORT_ON_ASSERTION $(LIBDW_CFLAGS)
 
 kit_sources = \
 	../kit/Kit.cpp \
@@ -176,6 +176,7 @@ wsd_sources = \
 	../wsd/ServerAuditUtil.cpp \
 	../wsd/SlideCache.cpp \
 	../wsd/SpecialBrokers.cpp \
+	../wsd/StackWalker.cpp \
 	../wsd/Storage.cpp \
 	../wsd/TileCache.cpp \
 	../wsd/Unzip.cpp \
@@ -259,11 +260,12 @@ unittest_SOURCES = \
 	../wsd/HostUtil.cpp \
 	../wsd/ProofKey.cpp \
 	../wsd/RequestDetails.cpp \
+	../wsd/StackWalker.cpp \
 	../wsd/TestStubs.cpp \
 	../wsd/TileCache.cpp \
 	test.cpp
 
-unittest_LDADD = $(top_builddir)/libsimd.a $(CPPUNIT_LIBS) $(POCO_LIBS)
+unittest_LDADD = $(top_builddir)/libsimd.a $(CPPUNIT_LIBS) $(POCO_LIBS) $(LIBDW_LIBS)
 
 clienttest_CPPFLAGS = -I$(top_srcdir) -DBUILDING_TESTS -DSTANDALONE_CPPUNIT -g
 
@@ -276,7 +278,7 @@ clienttest_SOURCES = \
 	XcuScrubWhiteBoxTests.cpp \
 	test.cpp
 
-clienttest_LDADD = $(top_builddir)/libsimd.a $(CPPUNIT_LIBS) $(POCO_LIBS)
+clienttest_LDADD = $(top_builddir)/libsimd.a $(CPPUNIT_LIBS) $(POCO_LIBS) $(LIBDW_LIBS)
 
 # Add SSL dependencies if needed.
 if ENABLE_SSL
