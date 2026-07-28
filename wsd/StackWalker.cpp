@@ -22,6 +22,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <unordered_map>
 
@@ -504,15 +505,35 @@ std::string libdwError(int result)
     return message ? message : "unknown libdw failure";
 }
 
-/// One function of one module, at the address it has in the running process. The name points into
-/// the module's string table, which libdw keeps for as long as the module is reported.
-struct SymbolRange
+/// The functions of one module in address order, at the addresses they have in the running process.
+/// A module of the document engine holds a million of them, so the two arrays are kept as narrow as
+/// they can be: sixteen bytes a function, and a search that reads only the eight-byte addresses.
+struct ModuleSymbols
+{
+    /// Ascending, one entry per function.
+    std::vector<Dwarf_Addr> starts;
+
+    struct Extent
+    {
+        /// How many bytes of code the function holds, or zero when the symbol table gave no size.
+        /// Hand-written assembler is what usually has none.
+        uint32_t size = 0;
+        /// Which entry of the module's symbol table holds this function's name.
+        uint32_t tableIndex = 0;
+    };
+
+    /// One entry for each address in starts, at the same position.
+    std::vector<Extent> extents;
+
+    size_t count() const { return starts.size(); }
+};
+
+/// One function as it comes out of the symbol table, before the aliases are thrown away.
+struct SymbolCandidate
 {
     Dwarf_Addr start = 0;
-    /// One past the last address of the function, or equal to start when the symbol table gave no
-    /// size. A size of zero is what hand-written assembler usually has.
-    Dwarf_Addr end = 0;
-    const char* name = nullptr;
+    uint32_t size = 0;
+    uint32_t tableIndex = 0;
     /// How good a name this is for the address, lowest first. Several symbols often sit on one
     /// address, and only one of them belongs in a graph.
     unsigned char rank = 0;
@@ -546,16 +567,17 @@ unsigned char rankSymbolName(const GElf_Sym& symbol, const char* name)
 
 /// Every function of a module, in address order. Asking libdw for the symbol covering an address
 /// makes it walk the whole symbol table, and an engine library has a million entries, so the walk
-/// costs milliseconds. Reading the table once into this list turns each later lookup into a binary
-/// search.
-std::vector<SymbolRange> readModuleSymbols(Dwfl_Module* module)
+/// costs milliseconds. Reading the table once into these arrays turns each later lookup into a
+/// binary search.
+ModuleSymbols readModuleSymbols(Dwfl_Module* module)
 {
-    std::vector<SymbolRange> symbols;
+    ModuleSymbols symbols;
     const int count = dwfl_module_getsymtab(module);
     if (count <= 0)
         return symbols;
 
-    symbols.reserve(count);
+    std::vector<SymbolCandidate> candidates;
+    candidates.reserve(count);
     for (int index = 0; index < count; ++index)
     {
         GElf_Sym symbol;
@@ -571,12 +593,16 @@ std::vector<SymbolRange> readModuleSymbols(Dwfl_Module* module)
         if (type != STT_FUNC && type != STT_GNU_IFUNC)
             continue;
 
-        symbols.push_back(
-            { address, address + symbol.st_size, name, rankSymbolName(symbol, name) });
+        // No single function holds four gigabytes of code, so a size that large is a broken symbol
+        // table. Treat it as no size at all.
+        const uint32_t size =
+            symbol.st_size <= std::numeric_limits<uint32_t>::max() ? symbol.st_size : 0;
+        candidates.push_back({ address, size, static_cast<uint32_t>(index),
+                               rankSymbolName(symbol, name) });
     }
 
-    std::sort(symbols.begin(), symbols.end(),
-              [](const SymbolRange& left, const SymbolRange& right)
+    std::sort(candidates.begin(), candidates.end(),
+              [](const SymbolCandidate& left, const SymbolCandidate& right)
               {
                   if (left.start != right.start)
                       return left.start < right.start;
@@ -584,30 +610,37 @@ std::vector<SymbolRange> readModuleSymbols(Dwfl_Module* module)
               });
 
     // The best-ranked name of each address sorted first, so the rest of that address goes.
-    symbols.erase(std::unique(symbols.begin(), symbols.end(),
-                              [](const SymbolRange& left, const SymbolRange& right)
-                              { return left.start == right.start; }),
-                  symbols.end());
+    candidates.erase(std::unique(candidates.begin(), candidates.end(),
+                                 [](const SymbolCandidate& left, const SymbolCandidate& right)
+                                 { return left.start == right.start; }),
+                     candidates.end());
+
+    symbols.starts.reserve(candidates.size());
+    symbols.extents.reserve(candidates.size());
+    for (const SymbolCandidate& candidate : candidates)
+    {
+        symbols.starts.push_back(candidate.start);
+        symbols.extents.push_back({ candidate.size, candidate.tableIndex });
+    }
 
     return symbols;
 }
 
-/// The function an address falls inside, or nothing when no symbol covers it.
-const SymbolRange* findSymbol(const std::vector<SymbolRange>& symbols, Dwarf_Addr address)
+/// Which function of a module an address falls inside, or -1 when no function covers it.
+long findSymbol(const ModuleSymbols& symbols, Dwarf_Addr address)
 {
-    const auto above = std::upper_bound(symbols.begin(), symbols.end(), address,
-                                        [](Dwarf_Addr value, const SymbolRange& range)
-                                        { return value < range.start; });
-    if (above == symbols.begin())
-        return nullptr;
+    const auto above = std::upper_bound(symbols.starts.begin(), symbols.starts.end(), address);
+    if (above == symbols.starts.begin())
+        return -1;
 
-    const SymbolRange& candidate = *(above - 1);
-    // A symbol whose size the table did not give reaches as far as the next symbol, so an address
+    const size_t found = static_cast<size_t>(above - symbols.starts.begin()) - 1;
+    // A function whose size the table did not give reaches as far as the next one, so any address
     // past its start belongs to it.
-    if (candidate.end > candidate.start && address >= candidate.end)
-        return nullptr;
+    const uint32_t size = symbols.extents[found].size;
+    if (size && address >= symbols.starts[found] + size)
+        return -1;
 
-    return &candidate;
+    return static_cast<long>(found);
 }
 } // namespace
 
@@ -632,7 +665,7 @@ struct StackWalker::DwflState
     /// reference handed out here does not go stale.
     std::unordered_map<uintptr_t, Label> labels;
     /// Each module's functions in address order, read the first time the module is asked about.
-    std::unordered_map<Dwfl_Module*, std::vector<SymbolRange>> symbolIndex;
+    std::unordered_map<Dwfl_Module*, ModuleSymbols> symbolIndex;
     /// Thread id to folded thread name.
     std::unordered_map<pid_t, std::string> threadNames;
     /// Set when an address landed in no known module, which is what a library loaded since the last
@@ -832,7 +865,7 @@ unsigned StackWalker::warmModules()
 
     struct WarmContext
     {
-        std::unordered_map<Dwfl_Module*, std::vector<SymbolRange>>* symbolIndex;
+        std::unordered_map<Dwfl_Module*, ModuleSymbols>* symbolIndex;
         uint64_t indexTime = 0;
         uint64_t symbols = 0;
         unsigned modules = 0;
@@ -854,13 +887,13 @@ unsigned StackWalker::warmModules()
             // The address-ordered symbol list is read here too, with no thread stopped, so naming a
             // frame during a sample is a binary search and nothing more.
             const auto readStartedAt = std::chrono::steady_clock::now();
-            const auto placed = warming->symbolIndex->emplace(module, std::vector<SymbolRange>());
+            const auto placed = warming->symbolIndex->emplace(module, ModuleSymbols());
             if (placed.second)
                 placed.first->second = readModuleSymbols(module);
             warming->indexTime += std::chrono::duration_cast<std::chrono::nanoseconds>(
                                       std::chrono::steady_clock::now() - readStartedAt)
                                       .count();
-            warming->symbols += placed.first->second.size();
+            warming->symbols += placed.first->second.count();
 
             ++warming->modules;
             return DWARF_CB_OK;
@@ -925,15 +958,25 @@ const std::string& StackWalker::labelFor(uintptr_t programCounter, bool& resolve
             // one address the wait the whole capture would otherwise pay on every lookup.
             const auto readStartedAt = std::chrono::steady_clock::now();
             indexed = _state->symbolIndex.emplace(module, readModuleSymbols(module)).first;
-            _indexedSymbols += indexed->second.size();
+            _indexedSymbols += indexed->second.count();
             searchStartedAt = std::chrono::steady_clock::now();
             _symbolIndexTime +=
                 std::chrono::duration_cast<std::chrono::nanoseconds>(searchStartedAt - readStartedAt)
                     .count();
         }
 
-        const SymbolRange* found = findSymbol(indexed->second, programCounter);
-        const char* symbolName = found ? found->name : nullptr;
+        // The name is not held in the index, since a module of the document engine has a million
+        // functions and a pointer each would be megabytes. Reading it back out of the symbol table
+        // is direct indexing, and only the one address being named pays for it.
+        const long found = findSymbol(indexed->second, programCounter);
+        const char* symbolName = nullptr;
+        if (found >= 0)
+        {
+            GElf_Sym symbol;
+            symbolName =
+                dwfl_module_getsym(module, indexed->second.extents[found].tableIndex, &symbol,
+                                   nullptr);
+        }
         const auto searchEndedAt = std::chrono::steady_clock::now();
         _symbolSearchTime +=
             std::chrono::duration_cast<std::chrono::nanoseconds>(searchEndedAt - searchStartedAt)
