@@ -15,7 +15,12 @@
 
 /* global Admin AdminSocketBase d3 _ */
 
-const RowHeight = 18;
+// One row per stack level, the height the flamegraph tools use.
+const RowHeight = 16;
+const LabelFont = 'Verdana, sans-serif';
+const LabelFontSize = 12;
+// Verdana at that size takes about seven pixels for a character.
+const CharWidth = 7;
 const MinDrawnWidth = 1.5;
 const MaxFramesPerSecond = 4;
 
@@ -61,7 +66,7 @@ const SvgScript = `
 	}
 
 	function label(frame, width) {
-		var room = Math.floor((width - 6) / 7);
+		var room = Math.floor((width - 6) / ${CharWidth});
 		if (room < 3) {
 			return '';
 		}
@@ -669,7 +674,8 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 
 	// The cells to draw, with the deepest frames along the top and the bar standing for every
 	// sample along the bottom, which is the way round the flamegraph tools draw them. The
-	// height needed comes back as the rowCount of the returned array.
+	// height needed comes back as the rowCount of the returned array, and the caller turns the
+	// depth of each cell into a y once it has chosen a row height.
 	_cells: function (root, width) {
 		const cells = [];
 		const scale = root.value > 0 ? width / root.value : 0;
@@ -696,30 +702,30 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		const drawn = cells.filter(function (cell) {
 			return cell.width >= MinDrawnWidth;
 		});
-		for (let i = 0; i < drawn.length; i++) {
-			drawn[i].y = (deepest - drawn[i].depth) * RowHeight;
-		}
 		drawn.rowCount = deepest + 1;
+		drawn.deepest = deepest;
 		return drawn;
 	},
 
-	// A vector hash of the name, weighting the first characters most, so that one function keeps
-	// its colour between updates and matches the colour the flamegraph tools give it.
+	// Where a cell sits, counting up from the bar along the bottom.
+	_rowY: function (cells, cell, rowHeight) {
+		return (cells.deepest - cell.depth) * rowHeight;
+	},
+
+	// A number from zero up to but not including one, spread evenly over that range, and the same
+	// every time for the same name, so a function keeps its colour between updates.
 	_nameHash: function (name) {
-		let vector = 0;
-		let weight = 1;
-		let max = 1;
-		let mod = 10;
+		let hash = 0x811c9dc5;
 		for (let i = 0; i < name.length; i++) {
-			const step = name.charCodeAt(i) % mod;
-			vector += (step / (mod++ - 1)) * weight;
-			max += weight;
-			weight *= 0.7;
-			if (mod > 12) {
-				break;
-			}
+			hash = (hash ^ (name.charCodeAt(i) & 0xff)) >>> 0;
+			hash = Math.imul(hash, 0x01000193) >>> 0;
 		}
-		return 1 - vector / max;
+		// The multiply on its own leaves neighbouring names close together, and the two shifts
+		// carry the low bits up into the range the colour is taken from.
+		hash = (hash ^ (hash >>> 15)) >>> 0;
+		hash = Math.imul(hash, 0x2545f491) >>> 0;
+		hash = (hash ^ (hash >>> 13)) >>> 0;
+		return ((hash >>> 8) & 0xffffff) / 0x1000000;
 	},
 
 	// The hot palette of the flamegraph tools: red is nearly full, green carries the hash and
@@ -753,7 +759,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			container.scrollHeight - container.clientHeight - container.scrollTop <
 			2 * RowHeight;
 
-		svg.attr('height', (cells.rowCount + 1) * RowHeight);
+		svg.attr('height', cells.rowCount * RowHeight + 2);
 
 		if (atBottom) {
 			container.scrollTop = container.scrollHeight;
@@ -774,11 +780,12 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			.append('rect')
 			.attr('height', RowHeight - 1)
 			.attr('rx', 2)
+			.attr('ry', 2)
 			.attr('x', function (cell) {
 				return cell.x;
 			})
 			.attr('y', function (cell) {
-				return cell.y;
+				return self._rowY(cells, cell, RowHeight);
 			})
 			.attr('width', function (cell) {
 				return Math.max(1, cell.width - 1);
@@ -786,14 +793,15 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		entered.append('title');
 		entered
 			.append('text')
-			.attr('font-size', '11px')
-			.attr('fill', '#000000')
+			.attr('font-family', LabelFont)
+			.attr('font-size', LabelFontSize + 'px')
+			.attr('fill', 'rgb(0,0,0)')
 			.attr('pointer-events', 'none')
 			.attr('x', function (cell) {
 				return cell.x + 3;
 			})
 			.attr('y', function (cell) {
-				return cell.y + RowHeight - 5;
+				return self._rowY(cells, cell, RowHeight) + RowHeight - 5;
 			});
 
 		const merged = entered.merge(groups);
@@ -824,7 +832,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				return cell.x;
 			})
 			.attr('y', function (cell) {
-				return cell.y;
+				return self._rowY(cells, cell, RowHeight);
 			})
 			.attr('width', function (cell) {
 				return Math.max(1, cell.width - 1);
@@ -837,14 +845,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		merged
 			.select('text')
 			.text(function (cell) {
-				// About seven pixels per character at this font size.
-				const room = Math.floor((cell.width - 6) / 7);
-				if (room < 3) {
-					return '';
-				}
-				return cell.node.name.length <= room
-					? cell.node.name
-					: cell.node.name.substring(0, room - 1) + '..';
+				return self._label(cell.node.name, cell.width);
 			})
 			.transition()
 			.duration(250)
@@ -853,8 +854,17 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				return cell.x + 3;
 			})
 			.attr('y', function (cell) {
-				return cell.y + RowHeight - 5;
+				return self._rowY(cells, cell, RowHeight) + RowHeight - 5;
 			});
+	},
+
+	// As much of the name as fits inside the frame, cut short with two dots.
+	_label: function (name, width) {
+		const room = Math.floor((width - 6) / CharWidth);
+		if (room < 3) {
+			return '';
+		}
+		return name.length <= room ? name : name.substring(0, room - 1) + '..';
 	},
 
 	_describe: function (node) {
@@ -1008,7 +1018,11 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				'<stop stop-color="#eeeeee" offset="5%"/>' +
 				'<stop stop-color="#eeeeb0" offset="95%"/></linearGradient></defs>',
 			'<style type="text/css">' +
-				'text { font-family: Verdana, sans-serif; font-size: 12px; fill: rgb(0,0,0); }' +
+				'text { font-family: ' +
+				LabelFont +
+				'; font-size: ' +
+				LabelFontSize +
+				'px; fill: rgb(0,0,0); }' +
 				'#title { text-anchor: middle; font-size: 17px; }' +
 				'#details, #unzoom, #search, #matched { text-anchor: start; }' +
 				'#unzoom, #search { fill: rgb(0,0,128); cursor: pointer; }' +
@@ -1031,13 +1045,11 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				SvgPad +
 				'" y="24">Reset Zoom</text>',
 			'<text id="search" x="' +
-				(width - SvgPad - 80) +
+				(width - SvgPad - 260) +
 				'" y="24">Search</text>',
-			'<text id="matched" x="' +
-				(width - SvgPad) +
-				'" y="' +
-				(height - 10) +
-				'"> </text>',
+			// Beside the Search link rather than along the bottom, where a tall picture would put
+			// it off the screen.
+			'<text id="matched" x="' + (width - SvgPad) + '" y="24"> </text>',
 			'<text id="details" x="' +
 				SvgPad +
 				'" y="' +
@@ -1050,13 +1062,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			const cell = cells[i];
 			const node = cell.node;
 			const rectWidth = Math.max(1, cell.width - 1);
-			const room = Math.floor((rectWidth - 6) / 7);
-			const label =
-				room < 3
-					? ''
-					: node.name.length <= room
-						? node.name
-						: node.name.substring(0, room - 1) + '..';
+			const top = this._rowY(cells, cell, RowHeight) + SvgHeadHeight;
 			parts.push(
 				'<g class="frame" data-name="' + this._escapeXml(node.name) + '">',
 				'<title>' +
@@ -1065,20 +1071,20 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				'<rect x="' +
 					(cell.x + SvgPad).toFixed(2) +
 					'" y="' +
-					(cell.y + SvgHeadHeight) +
+					top +
 					'" width="' +
 					rectWidth.toFixed(2) +
 					'" height="' +
 					(RowHeight - 1) +
-					'" fill="' +
+					'" rx="2" ry="2" fill="' +
 					this._colourFor(node) +
 					'"/>',
 				'<text x="' +
 					(cell.x + SvgPad + 3).toFixed(2) +
 					'" y="' +
-					(cell.y + SvgHeadHeight + RowHeight - 5) +
+					(top + RowHeight - 5) +
 					'">' +
-					this._escapeXml(label) +
+					this._escapeXml(this._label(node.name, rectWidth)) +
 					'</text>',
 				'</g>',
 			);
