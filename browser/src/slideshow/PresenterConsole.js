@@ -39,6 +39,8 @@ class PresenterConsole {
 			goBack: _('Go Back'),
 			zoomIn: _('Zoom In'),
 			zoomOut: _('Zoom Out'),
+			currentSlidePreview: _('Preview of the current slide'),
+			nextSlidePreview: _('Preview of the next slide'),
 		};
 		let sanitizer = document.createElement('div');
 		sanitizer.innerText = title;
@@ -79,7 +81,7 @@ class PresenterConsole {
 											<div id="today"></div>
 										</div>
                                         <div id='current-slide-container'>
-                                            <canvas id="current-presentation"></canvas>
+                                            <canvas id="current-presentation" role="img" aria-label="${this.labels.currentSlidePreview}"></canvas>
 											<div id="slideshow-control-container">
 											<div id="navigation-container">
 												<button type="button" id="prev" data-cooltip="${this.labels.previous}" aria-label="${this.labels.previous}">
@@ -105,7 +107,7 @@ class PresenterConsole {
                                      <div id="second-presentation">
                                          <div id="title-next">${this.labels.nextSlide}</div>
                                          <div id='next-slide-container'>
-                                            <img id="next-presentation"></img>
+                                            <img id="next-presentation" alt="${this.labels.nextSlidePreview}"></img>
                                          </div>
                                     </div>
                                   </div>
