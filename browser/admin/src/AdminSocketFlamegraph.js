@@ -29,6 +29,11 @@ const CharWidth = Math.round(LabelFontSize * CharWidthRatio);
 const MinDrawnWidth = 1.5;
 const MaxFramesPerSecond = 4;
 
+// The picture reaches to this many pixels short of the bottom of the window, and never gets less
+// room than MinGraphHeight even on a window too short to hold that.
+const GraphBottomGap = 8;
+const MinGraphHeight = 200;
+
 // Geometry of the standalone file the download writes: the margin either side, the room above the
 // frames for the title and the two links, and the room below for the details line.
 const SvgPad = 10;
@@ -831,6 +836,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 	_render: function () {
 		const container = document.getElementById('profile-graph');
 		const svg = d3.select('#profile-svg');
+		this._fillToBottom(container);
 		const width = container.clientWidth - 4;
 		const root = this._baseNode();
 		const cells = this._cells(root, width);
@@ -946,6 +952,17 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			.attr('y', function (cell) {
 				return self._labelY(cells, cell, rowHeight, fontSize);
 			});
+	},
+
+	// The picture takes the window from wherever the controls above it end down to the bottom edge.
+	// The controls wrap on a narrow window, so how much room is left has to be measured rather than
+	// worked out from a fixed figure.
+	_fillToBottom: function (container) {
+		const room =
+			window.innerHeight -
+			container.getBoundingClientRect().top -
+			GraphBottomGap;
+		container.style.height = Math.max(MinGraphHeight, room) + 'px';
 	},
 
 	// The whole picture fits the window unless the reader has asked for full rows and a scrollbar.
