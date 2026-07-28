@@ -1391,7 +1391,7 @@ bool Admin::startProfile(pid_t pid, const std::string& docKey, int sessionId,
 
     if (_profileCapture)
     {
-        if (_profileCapture->pid != pid || !_profileCapture->socket.expired())
+        if (_profileCapture->pid != pid)
         {
             reason = "Process " + std::to_string(_profileCapture->pid) +
                      " is already being sampled. Only one capture runs at a time.";
@@ -1399,8 +1399,10 @@ bool Admin::startProfile(pid_t pid, const std::string& docKey, int sessionId,
             return false;
         }
 
-        // The reader that asked for this capture has gone, so a reloaded page takes it over. Its
-        // symbol table starts again, because the new reader has seen none of it.
+        // A request for the process already being sampled takes the capture over, which is what a
+        // reloaded page needs: the browser can be back and asking again before the socket it left
+        // behind has been noticed as gone. Its symbol table starts again, because the new reader
+        // has seen none of it.
         LOG_INF("Admin session " << sessionId << " is taking over the capture of " << pid);
         _profileCapture->socket = socket;
         _profileCapture->sessionId = sessionId;
