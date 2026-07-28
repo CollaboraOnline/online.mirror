@@ -16,6 +16,7 @@
 #include <common/Log.hpp>
 #include <common/ProcUtil.hpp>
 
+#include <algorithm>
 #include <cerrno>
 #include <cstdio>
 #include <cstdlib>
@@ -502,6 +503,112 @@ std::string libdwError(int result)
     const char* message = dwfl_errmsg(-1);
     return message ? message : "unknown libdw failure";
 }
+
+/// One function of one module, at the address it has in the running process. The name points into
+/// the module's string table, which libdw keeps for as long as the module is reported.
+struct SymbolRange
+{
+    Dwarf_Addr start = 0;
+    /// One past the last address of the function, or equal to start when the symbol table gave no
+    /// size. A size of zero is what hand-written assembler usually has.
+    Dwarf_Addr end = 0;
+    const char* name = nullptr;
+    /// How good a name this is for the address, lowest first. Several symbols often sit on one
+    /// address, and only one of them belongs in a graph.
+    unsigned char rank = 0;
+};
+
+/// Ranks one name for an address it shares with others. A name the whole program can link against
+/// beats an internal alias for the same code, and a plain name beats the same name with a version
+/// glued on, so that a frame reads fwrite rather than __GI__IO_fwrite@GLIBC_2.2.5.
+unsigned char rankSymbolName(const GElf_Sym& symbol, const char* name)
+{
+    unsigned char rank = 0;
+    switch (GELF_ST_BIND(symbol.st_info))
+    {
+        case STB_GLOBAL:
+            rank = 0;
+            break;
+        case STB_WEAK:
+            rank = 1;
+            break;
+        default:
+            rank = 2;
+            break;
+    }
+
+    rank *= 4;
+    if (const char* version = std::strchr(name, '@'))
+        rank += version[1] == '@' ? 1 : 2;
+
+    return rank;
+}
+
+/// Every function of a module, in address order. Asking libdw for the symbol covering an address
+/// makes it walk the whole symbol table, and an engine library has a million entries, so the walk
+/// costs milliseconds. Reading the table once into this list turns each later lookup into a binary
+/// search.
+std::vector<SymbolRange> readModuleSymbols(Dwfl_Module* module)
+{
+    std::vector<SymbolRange> symbols;
+    const int count = dwfl_module_getsymtab(module);
+    if (count <= 0)
+        return symbols;
+
+    symbols.reserve(count);
+    for (int index = 0; index < count; ++index)
+    {
+        GElf_Sym symbol;
+        GElf_Addr address = 0;
+        const char* name =
+            dwfl_module_getsym_info(module, index, &symbol, &address, nullptr, nullptr, nullptr);
+        if (!name || !*name || address == 0)
+            continue;
+
+        // Only code gets a frame in a stack. An indirect function resolves at load time to a
+        // function, so it counts as code too.
+        const unsigned char type = GELF_ST_TYPE(symbol.st_info);
+        if (type != STT_FUNC && type != STT_GNU_IFUNC)
+            continue;
+
+        symbols.push_back(
+            { address, address + symbol.st_size, name, rankSymbolName(symbol, name) });
+    }
+
+    std::sort(symbols.begin(), symbols.end(),
+              [](const SymbolRange& left, const SymbolRange& right)
+              {
+                  if (left.start != right.start)
+                      return left.start < right.start;
+                  return left.rank < right.rank;
+              });
+
+    // The best-ranked name of each address sorted first, so the rest of that address goes.
+    symbols.erase(std::unique(symbols.begin(), symbols.end(),
+                              [](const SymbolRange& left, const SymbolRange& right)
+                              { return left.start == right.start; }),
+                  symbols.end());
+
+    return symbols;
+}
+
+/// The function an address falls inside, or nothing when no symbol covers it.
+const SymbolRange* findSymbol(const std::vector<SymbolRange>& symbols, Dwarf_Addr address)
+{
+    const auto above = std::upper_bound(symbols.begin(), symbols.end(), address,
+                                        [](Dwarf_Addr value, const SymbolRange& range)
+                                        { return value < range.start; });
+    if (above == symbols.begin())
+        return nullptr;
+
+    const SymbolRange& candidate = *(above - 1);
+    // A symbol whose size the table did not give reaches as far as the next symbol, so an address
+    // past its start belongs to it.
+    if (candidate.end > candidate.start && address >= candidate.end)
+        return nullptr;
+
+    return &candidate;
+}
 } // namespace
 
 struct StackWalker::DwflState
@@ -524,6 +631,8 @@ struct StackWalker::DwflState
     /// Program counter to frame label. Every entry stays valid for the life of the attach, so a
     /// reference handed out here does not go stale.
     std::unordered_map<uintptr_t, Label> labels;
+    /// Each module's functions in address order, read the first time the module is asked about.
+    std::unordered_map<Dwfl_Module*, std::vector<SymbolRange>> symbolIndex;
     /// Thread id to folded thread name.
     std::unordered_map<pid_t, std::string> threadNames;
     /// Set when an address landed in no known module, which is what a library loaded since the last
@@ -660,6 +769,8 @@ void StackWalker::detach()
     _addressCacheHits = 0;
     _symbolSearchTime = 0;
     _nameBuildTime = 0;
+    _symbolIndexTime = 0;
+    _indexedSymbols = 0;
     _moduleRefreshes = 0;
 }
 
@@ -719,31 +830,47 @@ unsigned StackWalker::warmModules()
 
     ScopedTarget target(_pid);
 
-    struct WarmCount
+    struct WarmContext
     {
+        std::unordered_map<Dwfl_Module*, std::vector<SymbolRange>>* symbolIndex;
+        uint64_t indexTime = 0;
+        uint64_t symbols = 0;
         unsigned modules = 0;
-    } counted;
+    } context{ &_state->symbolIndex, 0, 0, 0 };
 
     dwfl_getmodules(
         _state->dwfl,
         [](Dwfl_Module* module, void**, const char*, Dwarf_Addr, void* argument) -> int
         {
+            WarmContext* warming = static_cast<WarmContext*>(argument);
+
             // Reading the call frame information here is the whole point. It is what libdw would
             // otherwise read during the first walk that reaches this library, with a thread stopped
             // and waiting for it.
             Dwarf_Addr bias = 0;
             dwfl_module_eh_cfi(module, &bias);
             dwfl_module_dwarf_cfi(module, &bias);
-            // The symbol table is read for the labels, which happens with no thread stopped, so this
-            // only moves work out of the first few samples.
-            dwfl_module_getsymtab(module);
 
-            ++static_cast<WarmCount*>(argument)->modules;
+            // The address-ordered symbol list is read here too, with no thread stopped, so naming a
+            // frame during a sample is a binary search and nothing more.
+            const auto readStartedAt = std::chrono::steady_clock::now();
+            const auto placed = warming->symbolIndex->emplace(module, std::vector<SymbolRange>());
+            if (placed.second)
+                placed.first->second = readModuleSymbols(module);
+            warming->indexTime += std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                      std::chrono::steady_clock::now() - readStartedAt)
+                                      .count();
+            warming->symbols += placed.first->second.size();
+
+            ++warming->modules;
             return DWARF_CB_OK;
         },
-        &counted, 0);
+        &context, 0);
 
-    return counted.modules;
+    _symbolIndexTime += context.indexTime;
+    _indexedSymbols = context.symbols;
+
+    return context.modules;
 }
 
 bool StackWalker::refreshModules(std::string& reason)
@@ -787,14 +914,26 @@ const std::string& StackWalker::labelFor(uintptr_t programCounter, bool& resolve
     }
 
     DwflState::Label label;
-    const auto searchStartedAt = std::chrono::steady_clock::now();
+    auto searchStartedAt = std::chrono::steady_clock::now();
     Dwfl_Module* module = dwfl_addrmodule(_state->dwfl, programCounter);
     if (module)
     {
-        GElf_Off offsetInSymbol = 0;
-        GElf_Sym symbol;
-        const char* symbolName = dwfl_module_addrinfo(module, programCounter, &offsetInSymbol,
-                                                      &symbol, nullptr, nullptr, nullptr);
+        auto indexed = _state->symbolIndex.find(module);
+        if (indexed == _state->symbolIndex.end())
+        {
+            // A library that came along after the last warm-up, so read its symbols now. This costs
+            // one address the wait the whole capture would otherwise pay on every lookup.
+            const auto readStartedAt = std::chrono::steady_clock::now();
+            indexed = _state->symbolIndex.emplace(module, readModuleSymbols(module)).first;
+            _indexedSymbols += indexed->second.size();
+            searchStartedAt = std::chrono::steady_clock::now();
+            _symbolIndexTime +=
+                std::chrono::duration_cast<std::chrono::nanoseconds>(searchStartedAt - readStartedAt)
+                    .count();
+        }
+
+        const SymbolRange* found = findSymbol(indexed->second, programCounter);
+        const char* symbolName = found ? found->name : nullptr;
         const auto searchEndedAt = std::chrono::steady_clock::now();
         _symbolSearchTime +=
             std::chrono::duration_cast<std::chrono::nanoseconds>(searchEndedAt - searchStartedAt)

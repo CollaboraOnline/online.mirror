@@ -149,6 +149,13 @@ public:
     {
         return std::chrono::nanoseconds(_nameBuildTime);
     }
+    /// How long reading the modules' address-ordered symbol lists took, and how many functions those
+    /// lists hold.
+    std::chrono::nanoseconds symbolIndexTime() const
+    {
+        return std::chrono::nanoseconds(_symbolIndexTime);
+    }
+    uint64_t indexedSymbols() const { return _indexedSymbols; }
     /// How many times the module list was reread over the life of this attach.
     unsigned moduleRefreshes() const { return _moduleRefreshes; }
 
@@ -170,6 +177,9 @@ private:
     /// Nanoseconds spent in each half of a label cache miss.
     uint64_t _symbolSearchTime = 0;
     uint64_t _nameBuildTime = 0;
+    /// Nanoseconds spent reading symbol tables, and how many functions came out of them.
+    uint64_t _symbolIndexTime = 0;
+    uint64_t _indexedSymbols = 0;
     unsigned _moduleRefreshes = 0;
 };
 

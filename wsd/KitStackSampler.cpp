@@ -579,6 +579,9 @@ void KitStackSampler::dumpState(std::ostream& os) const
     {
         os << "\n\t\taddress lookups: " << _walker->addressLookups();
         os << "\n\t\taddress cache hits: " << _walker->addressCacheHits();
+        os << "\n\t\tsymbols indexed: " << _walker->indexedSymbols();
+        os << "\n\t\tsymbol index read time: "
+           << std::chrono::duration_cast<std::chrono::milliseconds>(_walker->symbolIndexTime());
         os << "\n\t\tsymbol table search time: "
            << std::chrono::duration_cast<std::chrono::milliseconds>(_walker->symbolSearchTime());
         os << "\n\t\tname demangle time: "

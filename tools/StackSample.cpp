@@ -255,6 +255,8 @@ int main(int argc, char** argv)
     const unsigned moduleRefreshes = walker.moduleRefreshes();
     const auto symbolSearchTime = walker.symbolSearchTime();
     const auto nameBuildTime = walker.nameBuildTime();
+    const auto symbolIndexTime = walker.symbolIndexTime();
+    const uint64_t indexedSymbols = walker.indexedSymbols();
     walker.detach();
 
     std::ofstream outputFile;
@@ -317,7 +319,10 @@ int main(int argc, char** argv)
     const auto perMiss = [misses](std::chrono::nanoseconds total) -> long long
     { return misses ? total.count() / static_cast<long long>(misses) : 0; };
 
-    std::cerr << "  symbol table searched   "
+    std::cerr << "  symbols indexed         " << indexedSymbols << " functions read in "
+              << std::chrono::duration_cast<std::chrono::milliseconds>(symbolIndexTime).count()
+              << " ms\n"
+              << "  symbol table searched   "
               << std::chrono::duration_cast<std::chrono::milliseconds>(symbolSearchTime).count()
               << " ms over " << misses << " misses, " << perMiss(symbolSearchTime)
               << " ns each\n"
