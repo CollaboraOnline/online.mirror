@@ -26,7 +26,9 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		// Frame labels by the number the server interns them as.
 		this._names = [];
 		this._nextNodeId = 1;
-		this._root = this._makeNode('', null);
+		// The bar along the bottom stands for every sample, and is named as the flamegraph
+		// tools name it.
+		this._root = this._makeNode('all', null);
 		this._documents = {};
 		this._capture = null;
 		this._state = 'idle';
@@ -88,6 +90,14 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			this._onSearch.bind(this);
 
 		window.addEventListener('resize', this._scheduleRedraw.bind(this));
+
+		// Control-F reaches the search box, as it does in a flamegraph the tools produced.
+		window.addEventListener('keydown', function (event) {
+			if (event.ctrlKey && event.key === 'f') {
+				event.preventDefault();
+				document.getElementById('profile-search').focus();
+			}
+		});
 
 		// A document named in the query string is what the overview table links to.
 		const params = new URLSearchParams(window.location.search);
@@ -239,7 +249,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 
 	_onReset: function () {
 		this._nextNodeId = 1;
-		this._root = this._makeNode('', null);
+		this._root = this._makeNode('all', null);
 		this._zoomNode = null;
 		this._totals.samples = 0;
 		this._totals.idle = 0;
@@ -270,6 +280,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 	_onThread: function () {
 		this._threadFilter = document.getElementById('profile-thread').value;
 		this._zoomNode = null;
+		this._updateMatched();
 		this._scheduleRedraw();
 	},
 
@@ -283,7 +294,35 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				this._searchPattern = null;
 			}
 		}
+		this._updateMatched();
 		this._scheduleRedraw();
+	},
+
+	// The share of the samples that lie under a matching frame. A frame under another match is not
+	// counted twice, so the figure is the width of the marked part of the picture.
+	_updateMatched: function () {
+		const label = document.getElementById('profile-matched');
+		const pattern = this._searchPattern;
+		if (!pattern) {
+			label.textContent = '';
+			return;
+		}
+
+		const base = this._baseNode();
+		let matched = 0;
+		const walk = function (node) {
+			if (pattern.test(node.name)) {
+				matched += node.value;
+				return;
+			}
+			for (let i = 0; i < node.children.length; i++) {
+				walk(node.children[i]);
+			}
+		};
+		walk(base);
+
+		const percent = base.value > 0 ? (100 * matched) / base.value : 0;
+		label.textContent = _('Matched') + ': ' + percent.toFixed(1) + '%';
 	},
 
 	// Server replies.
@@ -369,6 +408,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 
 		this._setButtons();
 		this._fillThreadPicker();
+		this._updateMatched();
 		this._scheduleRedraw();
 		this._updateStatus();
 	},
@@ -394,14 +434,17 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		node.self += count;
 	},
 
-	_viewRoot: function () {
-		if (this._zoomNode) {
-			return this._zoomNode;
-		}
+	// What the bottom bar stands for when nothing is zoomed: every sample, or every sample of the
+	// one chosen thread.
+	_baseNode: function () {
 		if (this._threadFilter && this._root.byName[this._threadFilter]) {
 			return this._root.byName[this._threadFilter];
 		}
 		return this._root;
+	},
+
+	_viewRoot: function () {
+		return this._zoomNode || this._baseNode();
 	},
 
 	_fillThreadPicker: function () {
@@ -449,17 +492,21 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		);
 	},
 
+	// The cells to draw, with the deepest frames along the top and the bar standing for every
+	// sample along the bottom, which is the way round the flamegraph tools draw them. The
+	// height needed comes back as the rowCount of the returned array.
 	_cells: function (root, width) {
 		const cells = [];
 		const scale = root.value > 0 ? width / root.value : 0;
+		let deepest = 0;
 
 		const walk = function (node, left, depth) {
-			const nodeWidth = node.value * scale;
+			deepest = Math.max(deepest, depth);
 			cells.push({
 				node: node,
 				x: left,
-				y: depth * RowHeight,
-				width: nodeWidth,
+				depth: depth,
+				width: node.value * scale,
 			});
 
 			let childLeft = left;
@@ -470,20 +517,51 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		};
 
 		walk(root, 0, 0);
-		return cells.filter(function (cell) {
+
+		const drawn = cells.filter(function (cell) {
 			return cell.width >= MinDrawnWidth;
 		});
+		for (let i = 0; i < drawn.length; i++) {
+			drawn[i].y = (deepest - drawn[i].depth) * RowHeight;
+		}
+		drawn.rowCount = deepest + 1;
+		return drawn;
 	},
 
-	_colourOf: function (name) {
-		let hash = 0;
+	// A vector hash of the name, weighting the first characters most, so that one function keeps
+	// its colour between updates and matches the colour the flamegraph tools give it.
+	_nameHash: function (name) {
+		let vector = 0;
+		let weight = 1;
+		let max = 1;
+		let mod = 10;
 		for (let i = 0; i < name.length; i++) {
-			hash = (hash * 31 + name.charCodeAt(i)) & 0xffffff;
+			const step = name.charCodeAt(i) % mod;
+			vector += (step / (mod++ - 1)) * weight;
+			max += weight;
+			weight *= 0.7;
+			if (mod > 12) {
+				break;
+			}
 		}
-		// Warm hues, so the picture reads as a flamegraph.
-		return d3
-			.hsl(20 + (hash % 40), 0.7, 0.45 + ((hash >> 8) % 20) / 100)
-			.formatHex();
+		return 1 - vector / max;
+	},
+
+	// The hot palette of the flamegraph tools: red is nearly full, green carries the hash and
+	// blue stays low. Black text is readable on all of it.
+	_colourOf: function (name) {
+		const forwards = this._nameHash(name);
+		const backwards = this._nameHash(name.split('').reverse().join(''));
+		const red = 205 + Math.floor(50 * backwards);
+		const green = Math.floor(230 * forwards);
+		const blue = Math.floor(55 * backwards);
+		return 'rgb(' + red + ',' + green + ',' + blue + ')';
+	},
+
+	// The bar standing for every sample carries no name of its own, and takes the colour an empty
+	// name gives, which is the top of the palette.
+	_colourFor: function (node) {
+		return this._colourOf(node.parent ? node.name : '');
 	},
 
 	_render: function () {
@@ -493,11 +571,18 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		const root = this._viewRoot();
 		const cells = this._cells(root, width);
 
-		let depth = 0;
-		for (let i = 0; i < cells.length; i++) {
-			depth = Math.max(depth, cells[i].y / RowHeight);
+		// A reader sitting at the bottom of the picture is watching the bar that stands for every
+		// sample, and stays with it as the stacks above grow taller. A reader who has scrolled up to
+		// look at a leaf is left where they are.
+		const atBottom =
+			container.scrollHeight - container.clientHeight - container.scrollTop <
+			2 * RowHeight;
+
+		svg.attr('height', (cells.rowCount + 1) * RowHeight);
+
+		if (atBottom) {
+			container.scrollTop = container.scrollHeight;
 		}
-		svg.attr('height', (depth + 2) * RowHeight);
 
 		const self = this;
 		const groups = svg
@@ -508,17 +593,33 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 
 		groups.exit().remove();
 
+		// A frame is drawn where it belongs the moment it appears, and only moves from there.
 		const entered = groups.enter().append('g').attr('class', 'profile-frame');
 		entered
 			.append('rect')
 			.attr('height', RowHeight - 1)
-			.attr('rx', 2);
+			.attr('rx', 2)
+			.attr('x', function (cell) {
+				return cell.x;
+			})
+			.attr('y', function (cell) {
+				return cell.y;
+			})
+			.attr('width', function (cell) {
+				return Math.max(1, cell.width - 1);
+			});
 		entered.append('title');
 		entered
 			.append('text')
 			.attr('font-size', '11px')
-			.attr('fill', '#FFFFFF')
-			.attr('pointer-events', 'none');
+			.attr('fill', '#000000')
+			.attr('pointer-events', 'none')
+			.attr('x', function (cell) {
+				return cell.x + 3;
+			})
+			.attr('y', function (cell) {
+				return cell.y + RowHeight - 5;
+			});
 
 		const merged = entered.merge(groups);
 		merged
@@ -526,7 +627,9 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				self._showDetail(cell.node);
 			})
 			.on('click', function (event, cell) {
-				self._zoomNode = cell.node;
+				// Clicking a frame the view is already inside zooms back out to it, so the bar
+				// along the bottom takes you all the way out.
+				self._zoomNode = cell.node === self._baseNode() ? null : cell.node;
 				self._scheduleRedraw();
 			});
 
@@ -534,9 +637,10 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			.select('rect')
 			.attr('fill', function (cell) {
 				if (self._searchPattern && self._searchPattern.test(cell.node.name)) {
-					return '#3273DC';
+					// The magenta the flamegraph tools mark a search hit with.
+					return 'rgb(230,0,230)';
 				}
-				return self._colourOf(cell.node.name);
+				return self._colourFor(cell.node);
 			})
 			.transition()
 			.duration(250)
