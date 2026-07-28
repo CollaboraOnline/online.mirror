@@ -16,15 +16,16 @@
 /* global Admin AdminSocketBase d3 _ */
 
 // One row per stack level, the height the flamegraph tools use. Fitting the whole picture into the
-// window shrinks the rows down to MinRowHeight, and a row shorter than LabelRowHeight carries no
-// label because there is no room to read one.
+// window shrinks the rows down to MinRowHeight, and the label shrinks with them until it would be
+// too small to read, below MinLabelFontSize, and then it is left out.
 const RowHeight = 16;
 const MinRowHeight = 2;
-const LabelRowHeight = 10;
 const LabelFont = 'Verdana, sans-serif';
 const LabelFontSize = 12;
-// Verdana at that size takes about seven pixels for a character.
-const CharWidth = 7;
+const MinLabelFontSize = 7;
+// Verdana takes about six tenths of the font size for a character, so about seven pixels at twelve.
+const CharWidthRatio = 0.59;
+const CharWidth = Math.round(LabelFontSize * CharWidthRatio);
 const MinDrawnWidth = 1.5;
 const MaxFramesPerSecond = 4;
 
@@ -224,7 +225,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._frozen = false;
 		this._zoomNode = null;
 		this._threadFilter = '';
-		this._fitHeight = true;
+		this._fitHeight = false;
 		this._searchPattern = null;
 		this._redrawPending = false;
 		this._lastDrawnAt = 0;
@@ -731,6 +732,17 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		return (cells.deepest - cell.depth) * rowHeight;
 	},
 
+	// The line the letters stand on, leaving a little more room below the word than above it, which
+	// is where the flamegraph tools put it.
+	_labelY: function (cells, cell, rowHeight, fontSize) {
+		const ascent = fontSize * 0.73;
+		return (
+			this._rowY(cells, cell, rowHeight) +
+			ascent +
+			(rowHeight - fontSize) * 0.45
+		);
+	},
+
 	// A number from zero up to but not including one, spread evenly over that range, and the same
 	// every time for the same name, so a function keeps its colour between updates.
 	_nameHash: function (name) {
@@ -771,7 +783,8 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		const root = this._viewRoot();
 		const cells = this._cells(root, width);
 		const rowHeight = this._rowHeight(container, cells.rowCount);
-		const labelled = rowHeight >= LabelRowHeight;
+		const fontSize = this._labelFontSize(rowHeight);
+		const charWidth = fontSize * CharWidthRatio;
 
 		// A reader sitting at the bottom of the picture is watching the bar that stands for every
 		// sample, and stays with it as the stacks above grow taller. A reader who has scrolled up to
@@ -814,14 +827,13 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		entered
 			.append('text')
 			.attr('font-family', LabelFont)
-			.attr('font-size', LabelFontSize + 'px')
 			.attr('fill', 'rgb(0,0,0)')
 			.attr('pointer-events', 'none')
 			.attr('x', function (cell) {
 				return cell.x + 3;
 			})
 			.attr('y', function (cell) {
-				return self._rowY(cells, cell, rowHeight) + rowHeight - 5;
+				return self._labelY(cells, cell, rowHeight, fontSize);
 			});
 
 		const merged = entered.merge(groups);
@@ -847,7 +859,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			})
 			// The gap that separates one row from the next is worth a pixel only while the rows are
 			// tall enough to spare it. Squeezed rows are drawn solid instead.
-			.attr('height', rowHeight >= 6 ? rowHeight - 1 : rowHeight)
+			.attr('height', rowHeight >= 8 ? rowHeight - 1 : rowHeight)
 			.transition()
 			.duration(250)
 			.ease(d3.easeLinear)
@@ -867,8 +879,11 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 
 		merged
 			.select('text')
+			.attr('font-size', fontSize ? fontSize + 'px' : null)
 			.text(function (cell) {
-				return labelled ? self._label(cell.node.name, cell.width) : '';
+				return fontSize
+					? self._label(cell.node.name, cell.width, charWidth)
+					: '';
 			})
 			.transition()
 			.duration(250)
@@ -877,7 +892,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				return cell.x + 3;
 			})
 			.attr('y', function (cell) {
-				return self._rowY(cells, cell, rowHeight) + rowHeight - 5;
+				return self._labelY(cells, cell, rowHeight, fontSize);
 			});
 	},
 
@@ -892,9 +907,16 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		return Math.max(MinRowHeight, Math.min(RowHeight, room));
 	},
 
+	// The size the labels are drawn at, which follows the row height so a squeezed row still says
+	// what it is. Zero means the row is too short for a word anyone could read.
+	_labelFontSize: function (rowHeight) {
+		const size = Math.min(LabelFontSize, rowHeight - 2);
+		return size >= MinLabelFontSize ? size : 0;
+	},
+
 	// As much of the name as fits inside the frame, cut short with two dots.
-	_label: function (name, width) {
-		const room = Math.floor((width - 6) / CharWidth);
+	_label: function (name, width, charWidth) {
+		const room = Math.floor((width - 6) / charWidth);
 		if (room < 3) {
 			return '';
 		}
@@ -1119,7 +1141,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 					'" y="' +
 					(top + RowHeight - 5) +
 					'">' +
-					this._escapeXml(this._label(node.name, rectWidth)) +
+					this._escapeXml(this._label(node.name, rectWidth, CharWidth)) +
 					'</text>',
 				'</g>',
 			);
