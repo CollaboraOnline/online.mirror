@@ -31,8 +31,34 @@ constexpr std::chrono::seconds IdleWait(1);
 /// and walking all of them would cost more than the sample is worth.
 constexpr size_t MaxThreadsPerSample = 16;
 
-/// How long all the threads of one sample may be stopped for, taken together.
-constexpr std::chrono::microseconds SampleStopBudget(25000);
+/// The share of the sampling interval that all the stopped threads of one sample may take up,
+/// written as the number the interval is divided by. A tenth leaves the target with the rest of its
+/// time at any rate it can be asked to run at.
+constexpr int StopBudgetShareOfInterval = 10;
+
+/// The narrowest and the widest that share may become. Walking one running thread of a document
+/// engine kit stops it for about a tenth of a millisecond, so a millisecond is already generous, and
+/// a slow rate has nothing to gain from a stop longer than the top figure.
+constexpr std::chrono::microseconds MinSampleStopBudget(1000);
+constexpr std::chrono::microseconds MaxSampleStopBudget(25000);
+
+/// How long one thread may stay stopped while its stack is walked, whatever the rate allows for all
+/// the threads of a sample together.
+constexpr std::chrono::microseconds MaxPerThreadStop(5000);
+
+/// How long all the threads of one sample may be stopped for, taken together, at a given rate.
+std::chrono::microseconds stopBudgetFor(std::chrono::milliseconds interval)
+{
+    return std::clamp(std::chrono::duration_cast<std::chrono::microseconds>(interval) /
+                          StopBudgetShareOfInterval,
+                      MinSampleStopBudget, MaxSampleStopBudget);
+}
+
+/// One thread may not be stopped for longer than all of them together are allowed to be.
+std::chrono::microseconds perThreadDeadlineFor(std::chrono::milliseconds interval)
+{
+    return std::min(MaxPerThreadStop, stopBudgetFor(interval));
+}
 
 /// A single sample this slow means something is badly wrong, and the capture ends.
 constexpr std::chrono::microseconds RunawaySample(2000000);
@@ -206,6 +232,8 @@ void KitStackSampler::setInterval(pid_t pid, std::chrono::milliseconds interval)
             _capture.recentSamples = 0;
             _capture.recentOverruns = 0;
             _capture.nextSampleAt = std::chrono::steady_clock::now() + _capture.interval;
+            if (_walker)
+                _walker->setPerThreadDeadline(perThreadDeadlineFor(_capture.interval));
             LOG_INF("Stack sampler of " << _capture.pid << " now sampling every "
                                         << _capture.interval);
         });
@@ -247,6 +275,7 @@ void KitStackSampler::beginCapture(pid_t pid, const std::string& docKey,
 
     StackWalker::Options options;
     options.maxStackDepth = _capture.maxStackDepth;
+    options.perThreadDeadline = perThreadDeadlineFor(_capture.interval);
 
     std::string reason;
     if (!_walker->attach(pid, options, reason))
@@ -349,6 +378,7 @@ void KitStackSampler::takeSample()
     if (threads.empty())
         ++_capture.idleSamples;
 
+    const auto stopBudget = stopBudgetFor(_capture.interval);
     std::chrono::microseconds stoppedInThisSample{};
     for (const pid_t tid : threads)
     {
@@ -376,7 +406,7 @@ void KitStackSampler::takeSample()
             countStack(folded);
         }
 
-        if (stoppedInThisSample > SampleStopBudget)
+        if (stoppedInThisSample > stopBudget)
         {
             LOG_WRN("Stack sampler stopped the threads of " << _capture.pid << " for "
                                                             << stoppedInThisSample
@@ -417,7 +447,7 @@ void KitStackSampler::takeSample()
     ++_capture.samples;
     ++_samplesTaken;
 
-    if (stoppedInThisSample > SampleStopBudget)
+    if (stoppedInThisSample > stopBudget)
     {
         ++_capture.droppedSamples;
         _capture.skipNextSample = true;
@@ -426,7 +456,7 @@ void KitStackSampler::takeSample()
     // A target that is consistently slow to walk gets sampled less often rather than badly. The rate
     // only ever goes down within one capture, and asking for a rate resets the count.
     ++_capture.recentSamples;
-    if (stoppedInThisSample > SampleStopBudget)
+    if (stoppedInThisSample > stopBudget)
         ++_capture.recentOverruns;
 
     if (_capture.recentSamples >= 10)
@@ -434,6 +464,7 @@ void KitStackSampler::takeSample()
         if (_capture.recentOverruns >= OverrunsBeforeBackingOff && _capture.interval < MaxInterval)
         {
             _capture.interval = std::min(_capture.interval * 2, MaxInterval);
+            _walker->setPerThreadDeadline(perThreadDeadlineFor(_capture.interval));
             LOG_WRN("Stack sampler backed off to one sample every "
                     << _capture.interval << " because walking " << _capture.pid
                     << " keeps going over its budget");

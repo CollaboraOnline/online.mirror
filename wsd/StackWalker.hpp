@@ -108,6 +108,12 @@ public:
     /// Detaches and frees every module and every open file. Safe to call when not attached.
     void detach();
 
+    /// Changes how long one thread may stay stopped, from the next walk onwards.
+    void setPerThreadDeadline(std::chrono::microseconds deadline)
+    {
+        _options.perThreadDeadline = deadline;
+    }
+
     bool isAttached() const;
     pid_t pid() const { return _pid; }
 
