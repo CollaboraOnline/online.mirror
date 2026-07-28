@@ -643,10 +643,6 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		return this._root;
 	},
 
-	_viewRoot: function () {
-		return this._zoomNode || this._baseNode();
-	},
-
 	_fillThreadPicker: function () {
 		const picker = document.getElementById('profile-thread');
 		const known = {};
@@ -719,12 +715,68 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 
 		walk(root, 0, 0);
 
-		const drawn = cells.filter(function (cell) {
+		const shown = this._applyZoom(cells, width);
+		const drawn = shown.filter(function (cell) {
 			return cell.width >= MinDrawnWidth;
 		});
 		drawn.rowCount = deepest + 1;
 		drawn.deepest = deepest;
 		return drawn;
+	},
+
+	// Zooming stretches the chosen frame across the whole width and takes the frames it stands on
+	// with it, each of them spanning the width as well. The frames beside it are left out, and every
+	// frame keeps the row it was already on.
+	_applyZoom: function (cells, width) {
+		if (!this._zoomNode) {
+			return cells;
+		}
+
+		let target = null;
+		for (let i = 0; i < cells.length; i++) {
+			if (cells[i].node === this._zoomNode) {
+				target = cells[i];
+				break;
+			}
+		}
+		if (!target || target.width <= 0) {
+			return cells;
+		}
+
+		const left = target.x;
+		const right = target.x + target.width;
+		const factor = width / target.width;
+		// A frame edge that arithmetic has left a hair outside the range is still inside it.
+		const fudge = 0.0001;
+		const shown = [];
+
+		for (let i = 0; i < cells.length; i++) {
+			const cell = cells[i];
+			if (cell.x + cell.width <= left + fudge || cell.x + fudge >= right) {
+				continue;
+			}
+			if (
+				cell.x <= left + fudge &&
+				cell.x + cell.width + fudge >= right &&
+				cell.depth < target.depth
+			) {
+				shown.push({
+					node: cell.node,
+					x: 0,
+					depth: cell.depth,
+					width: width,
+				});
+				continue;
+			}
+			shown.push({
+				node: cell.node,
+				x: (cell.x - left) * factor,
+				depth: cell.depth,
+				width: cell.width * factor,
+			});
+		}
+
+		return shown;
 	},
 
 	// Where a cell sits, counting up from the bar along the bottom.
@@ -780,7 +832,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		const container = document.getElementById('profile-graph');
 		const svg = d3.select('#profile-svg');
 		const width = container.clientWidth - 4;
-		const root = this._viewRoot();
+		const root = this._baseNode();
 		const cells = this._cells(root, width);
 		const rowHeight = this._rowHeight(container, cells.rowCount);
 		const fontSize = this._labelFontSize(rowHeight);
