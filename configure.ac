@@ -320,6 +320,11 @@ AC_ARG_ENABLE([seccomp],
               AS_HELP_STRING([--disable-seccomp],
                              [Disable use of linux/seccomp.h header when kernel on target system does not support it.
                               Beware of the security consequences!]))
+AC_ARG_ENABLE([stack-sampler],
+              AS_HELP_STRING([--disable-stack-sampler],
+                             [Disable the admin console stack sampler, which needs libdw from
+                              elfutils to walk the call stack of a running kit.]))
+
 AC_ARG_WITH([lokit-path],
             AS_HELP_STRING([--with-lokit-path=<path>],
                            [Path to the "include" directory with the COKit headers.
@@ -2065,6 +2070,31 @@ else
 fi
 AC_SUBST(LIBPFM_LIBS)
 
+# libdw from elfutils walks the call stack of another process using the DWARF call frame
+# information, which is what the admin console stack sampler needs. Release builds leave out the
+# frame pointer, so there is no cheaper way to get a stack out of a running kit.
+has_libdw=no
+libdw_msg="disabled"
+if test "$enable_stack_sampler" != "no" -a "$mobile_app" != "true" -a "$host_os" != "emscripten"; then
+    PKG_CHECK_MODULES([LIBDW], [libdw >= 0.170], [has_libdw=yes], [has_libdw=no])
+    if test "${has_libdw}" = "yes" ; then
+        libdw_msg="enabled, `$PKG_CONFIG --modversion libdw`"
+    else
+        libdw_msg="disabled, no libdw >= 0.170 found"
+    fi
+fi
+
+if test "${has_libdw}" = "no" ; then
+   LIBDW_CFLAGS=
+   LIBDW_LIBS=
+   AC_DEFINE([ENABLE_LIBDW],0,[Whether the stack sampler is built with libdw])
+else
+   AC_DEFINE([ENABLE_LIBDW],1,[Whether the stack sampler is built with libdw])
+fi
+AC_SUBST(LIBDW_CFLAGS)
+AC_SUBST(LIBDW_LIBS)
+AM_CONDITIONAL([ENABLE_LIBDW], [test "$has_libdw" = "yes"])
+
 ENABLE_SSL=true
 if test "$enable_ssl" != "no" -a "$mobile_app" != "true"; then
    ssl_msg="ssl enabled. cert verification: $SSL_VERIFY"
@@ -2950,6 +2980,7 @@ Configuration:
     LO path                   $LO_PATH
     LO integration tests      ${lo_msg}
     SSL support               $ssl_msg
+    Stack sampler (libdw)     $libdw_msg
     Debug & low security      $debug_msg
     Experimental features     $experimental_msg
     Test assertion logging    $log_asserts_msg

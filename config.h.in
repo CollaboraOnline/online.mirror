@@ -63,6 +63,9 @@
 /* Whether to compile and enable feature restrictions */
 #undef ENABLE_FEATURE_RESTRICTION
 
+/* Whether the stack sampler is built with libdw */
+#undef ENABLE_LIBDW
+
 /* Whether to enable SSL */
 #undef ENABLE_SSL
 
