@@ -1,0 +1,49 @@
+/* The icons that mark where in a Writer page a comment was written. They lie in
+ * a layer of their own over the document view, under the line that joins a
+ * picked comment to the words it was written about. */
+
+#comment-margin-markers {
+	position: absolute;
+	top: 0;
+	inset-inline-start: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 11;
+	overflow: hidden;
+	/* The layer covers the whole view, so it lets everything through and only
+	 * the icons themselves answer the pointer. */
+	pointer-events: none;
+}
+
+/* btns.css gives every plain button that sits directly inside a div the look of
+ * a dialog button. An icon is a shape of its own, so it takes its whole box
+ * back. The id of the layer gives this rule the weight to win against that one. */
+#comment-margin-markers .comment-margin-marker {
+	position: absolute;
+	top: 0;
+	inset-inline-start: 0;
+	box-sizing: border-box;
+	width: 22px;
+	height: 22px;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: 0;
+	background-color: transparent;
+	background-image: url('images/note.svg');
+	background-size: 100% 100%;
+	background-repeat: no-repeat;
+	line-height: 1;
+	vertical-align: baseline;
+	cursor: pointer;
+	pointer-events: auto;
+}
+
+#comment-margin-markers .comment-margin-marker:hover {
+	filter: brightness(1.1);
+}
+
+#comment-margin-markers .comment-margin-marker:focus-visible {
+	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
+	outline-offset: 1px;
+}

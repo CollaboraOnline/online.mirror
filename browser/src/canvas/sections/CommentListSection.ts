@@ -315,6 +315,7 @@ export class CommentSection extends CanvasSectionObject {
 		this.sectionProperties.deflectionOfSelectedComment = 160; // CSS pixels.
 		this.sectionProperties.showSelectedBigger = false;
 		this.sectionProperties.calcCurrentComment = null; // We don't automatically show a Calc comment when cursor is on its cell. But we remember it to show if user presses Alt+C keys.
+		this.sectionProperties.marginMarkers = null; // Writer. The icons in the page margin that say where a comment was written.
 		this.sectionProperties.reLayout = true;
 
 		// This (commentsAreListed) variable means that comments are shown as a list on the right side of the document.
@@ -365,7 +366,23 @@ export class CommentSection extends CanvasSectionObject {
 			this.size[0] = 0;
 		}
 
+		// Writer marks every comment with an icon in its page
+		// margin. The other types mark the shape or the cell.
+		if (app.map._docLayer._docType === 'text' && !(<any>window).mode.isSmallScreenDevice())
+			this.sectionProperties.marginMarkers = new CommentMarginMarkers(this);
+
 		this.escapeSelectedComment();
+	}
+
+	// Take the reader to a comment in the comments tab: bring
+	// the panel up on it and mark the comment's row.
+	public showCommentInCommentsPanel (id: string): void {
+		const navigator = this.map.navigator;
+		if (!navigator) return;
+
+		navigator.showNavigationPanel(false);
+		navigator.switchNavigationTab('tab-comments');
+		this.map.commentsPanel?.showComment(id);
 	}
 
 	public navigateAndFocusComment(annotation: any): void {
@@ -2793,7 +2810,13 @@ export class CommentSection extends CanvasSectionObject {
 					this.hideArrow();
 				}
 				else if (!resolved || resolved === 'false' || this.sectionProperties.showResolved) {
-					var posX = isRTL ? (this.containerObject.getDocumentAnchorSection().size[0] + x + 15) : x;
+					// The line ends at the icon that stands for
+					// the comment, or beside its box.
+					const iconPlace = this.sectionProperties.marginMarkers?.positionOfComment(
+						String(this.sectionProperties.commentList[selectedIndex].sectionProperties.data.id));
+					const posX = iconPlace
+						? (iconPlace[0] + (isRTL ? CommentMarginMarkers.iconWidth() : 0)) * app.dpiScale
+						: (isRTL ? (this.containerObject.getDocumentAnchorSection().size[0] + x + 15) : x);
 					this.showArrow([tempCrd[0], tempCrd[1]], [posX, tempCrd[1]]);
 				}
 			}
@@ -2886,6 +2909,10 @@ export class CommentSection extends CanvasSectionObject {
 
 			if (reLayout && app.map._docLayer._docType === 'text')
 				this.updateThreadInfoIndicator();
+
+			// The icons follow the comment anchors, which move
+			// with every scroll and zoom.
+			this.sectionProperties.marginMarkers?.update();
 		});
 
 		app.sectionContainer.requestReDraw();

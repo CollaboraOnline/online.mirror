@@ -286,6 +286,7 @@ COOL_CSS =\
 	$(srcdir)/css/backstage.css \
 	$(srcdir)/css/jssidebar.css \
 	$(srcdir)/css/commentspanel.css \
+	$(srcdir)/css/commentmarginmarkers.css \
 	$(srcdir)/css/forced-colors.css \
 	$(srcdir)/css/aichat-sidebar.css \
 	$(srcdir)/css/extension-sidebar.css \
@@ -744,6 +745,7 @@ COOL_JS_LST =\
 	src/control/Control.NavigatorPanel.ts \
 	src/control/Control.QuickFindPanel.ts \
 	src/control/CommentsPanel.tsx \
+	src/control/CommentMarginMarkers.tsx \
 	src/control/AutoCompletePopup.ts \
 	src/control/Control.Mention.ts \
 	src/control/Control.FormulaUsagePopup.ts \
@@ -1636,6 +1638,7 @@ pot:
 		src/control/Control.NavigatorPanel.ts \
 		src/control/Control.QuickFindPanel.ts \
 		src/control/CommentsPanel.tsx \
+		src/control/CommentMarginMarkers.tsx \
 		src/control/Notebookbar.CalcTableTab.ts \
 		src/control/Notebookbar.ImpressAnimationTab.ts \
 		src/control/Notebookbar.ImpressTableDesignTab.ts \

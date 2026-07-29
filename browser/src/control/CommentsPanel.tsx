@@ -725,6 +725,24 @@ class CommentsPanel {
     section.goToComment(comment);
   }
 
+  // Bring a comment's row up and mark it, for a reader who
+  // reached the comment somewhere else. A filtered row waits.
+  public showComment(id: string): void {
+    if (this.stale) this.render();
+    this.markSelectedRow(id);
+
+    // The panel takes a moment to come up, and a row not on the
+    // page yet cannot be scrolled to, so the scrolling waits.
+    app.layoutingService.appendLayoutingTask(() => {
+      this.listNode
+        ?.querySelectorAll<HTMLElement>('.comments-panel-comment')
+        .forEach((row) => {
+          if (row.dataset.commentId === id)
+            row.scrollIntoView({ block: 'nearest' });
+        });
+    });
+  }
+
   private markSelectedRow(id: string): void {
     this.selectedId = id;
     if (!this.listNode) return;
