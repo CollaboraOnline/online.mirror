@@ -272,7 +272,6 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		document.getElementById('profile-stop').onclick = this._onStop.bind(this);
 		document.getElementById('profile-freeze').onclick =
 			this._onFreeze.bind(this);
-		document.getElementById('profile-reset').onclick = this._onReset.bind(this);
 		document.getElementById('profile-zoom-reset').onclick =
 			this._onZoomReset.bind(this);
 		document.getElementById('profile-fit').onclick = this._onFit.bind(this);
@@ -466,7 +465,9 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		}
 	},
 
-	_onReset: function () {
+	_clearSamples: function () {
+		// A capture numbers its frame names from one, so the names of the one before it go too.
+		this._names = [];
 		this._nextNodeId = 1;
 		this._root = this._makeNode('all', null);
 		this._zoomNode = null;
@@ -558,6 +559,9 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 	},
 
 	_onStarted: function (json) {
+		// A capture starts on an empty picture. The samples of the one before it stay readable
+		// until this moment, which is what keeps them there after a kit has died.
+		this._clearSamples();
 		this._capture = {
 			pid: String(json.pid),
 			docKey: json.docKey,

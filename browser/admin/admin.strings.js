@@ -78,7 +78,6 @@ l10nstrings.strProfileHowToStart = _(
 l10nstrings.strProfileStart = _('Start');
 l10nstrings.strProfileStop = _('Stop');
 l10nstrings.strProfileFreeze = _('Freeze view');
-l10nstrings.strProfileReset = _('Clear samples');
 l10nstrings.strProfileRate = _('Samples per second');
 l10nstrings.strProfileSearch = _('Highlight');
 l10nstrings.strProfileDownloadFolded = _('Download folded stacks');
