@@ -23,6 +23,133 @@
 	color: var(--color-main-text);
 }
 
+/* The controls give the rest of the panel to the list of
+   threads and scroll on their own. */
+.comments-panel-filters {
+	display: flex;
+	flex-direction: column;
+	flex: 0 1 auto;
+	max-height: 60%;
+	border-bottom: 1px solid var(--color-border);
+	font-size: 0.83rem;
+}
+
+.comments-panel-filters-summary {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-s);
+	padding: var(--spacing-m) var(--spacing-l);
+	cursor: pointer;
+	/* Drops the triangle the browser draws before the label, so
+	   the arrow below is the only marker. */
+	list-style: none;
+}
+
+.comments-panel-filters-summary:hover {
+	background: var(--color-background-dark);
+}
+
+.comments-panel-filters-summary:focus-visible {
+	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
+	outline-offset: -2px;
+}
+
+.comments-panel-filters-label {
+	font-weight: bold;
+}
+
+/* How many filters are narrowing the list. */
+.comments-panel-filters-count {
+	min-width: 18px;
+	padding: 0 var(--spacing-xs);
+	border-radius: 9px;
+	background: rgb(var(--doc-type, 11, 135, 231));
+	color: var(--color-primary-text);
+	font-size: 0.7rem;
+	text-align: center;
+}
+
+.comments-panel-filters-count.hidden {
+	display: none;
+}
+
+/* Points at the label while the fold is closed, and turns a
+   quarter to point down once it is open. */
+.comments-panel-filters-arrow {
+	width: 0;
+	height: 0;
+	margin-inline-start: auto;
+	border-top: 4px solid transparent;
+	border-bottom: 4px solid transparent;
+	border-inline-start: 5px solid currentcolor;
+	transition: transform 150ms ease-out;
+}
+
+.comments-panel-filters[open] .comments-panel-filters-arrow {
+	transform: rotate(90deg);
+}
+
+.comments-panel-filters-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-m);
+	padding: 0 var(--spacing-l) var(--spacing-l);
+	overflow-y: auto;
+	scrollbar-width: var(--scrollbar-width);
+	scrollbar-color: var(--scrollbar-color);
+}
+
+.comments-panel-filter-search {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.comments-panel-filter-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spacing-xs) var(--spacing-m);
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+.comments-panel-filter-group > legend {
+	padding: 0;
+	color: var(--color-text-light);
+	font-size: 0.75rem;
+}
+
+.comments-panel-filter-check {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-s);
+	cursor: pointer;
+}
+
+.comments-panel-filter-check > input {
+	margin: 0;
+}
+
+.comments-panel-filter-author {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+/* The authors of a document can outgrow the panel, so the
+   choices scroll. */
+.comments-panel-filter-authors {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-xs);
+	max-height: 120px;
+	overflow-y: auto;
+}
+
+.comments-panel-filters-clear {
+	align-self: start;
+}
+
 .comments-panel-list {
 	flex: 1 1 auto;
 	overflow-y: auto;

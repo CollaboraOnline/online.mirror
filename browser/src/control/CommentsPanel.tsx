@@ -20,10 +20,38 @@ interface CommentThread {
   replies: any[];
 }
 
+// Which threads the list shows. A thread has to pass the words
+// to look for, the authors, the status and the reply filter.
+interface CommentFilters {
+  search: string;
+  authors: Set<string>;
+  status: 'all' | 'unresolved' | 'resolved';
+  onlyWithReplies: boolean;
+}
+
 class CommentsPanel {
   private map: any;
   private listNode: HTMLElement | null = null;
   private placeholderNode: HTMLElement | null = null;
+  private authorsNode: HTMLElement | null = null;
+  private filterCountNode: HTMLElement | null = null;
+  private filtersForm: HTMLFormElement | null = null;
+
+  // The words of a comment, kept by the data object they were
+  // read out of. A stale entry becomes unreachable on its own.
+  private textOfData: WeakMap<object, { html: string; text: string }> =
+    new WeakMap();
+
+  private filters: CommentFilters = {
+    search: '',
+    authors: new Set<string>(),
+    status: 'all',
+    onlyWithReplies: false,
+  };
+
+  // The authors the filter offers, so the checkboxes are built
+  // again only when the document has different ones.
+  private offeredAuthors: string[] = [];
 
   // The thread the user last picked, by the id of its first
   // comment. A rebuilt list keeps the mark on that row.
@@ -51,6 +79,7 @@ class CommentsPanel {
   private build(panel: HTMLElement): void {
     panel.replaceChildren(
       <div class="comments-panel">
+        {this.buildFilters()}
         <ul
           class="comments-panel-list"
           aria-label={_('Comments')}
@@ -64,6 +93,197 @@ class CommentsPanel {
         </div>
       </div>,
     );
+  }
+
+  // The controls that pick which threads the list shows, behind
+  // a fold that starts closed.
+  private buildFilters(): HTMLElement {
+    return (
+      <details class="comments-panel-filters">
+        <summary class="comments-panel-filters-summary">
+          <span class="comments-panel-filters-label">{_('Filters')}</span>
+          <span
+            class="comments-panel-filters-count hidden"
+            ref={(node: HTMLElement) => (this.filterCountNode = node)}
+          ></span>
+          <span class="comments-panel-filters-arrow" aria-hidden="true"></span>
+        </summary>
+        <form
+          class="comments-panel-filters-body"
+          ref={(node: HTMLElement) =>
+            (this.filtersForm = node as HTMLFormElement)
+          }
+          onSubmit={(event: Event) => event.preventDefault()}
+        >
+          <input
+            class="comments-panel-filter-search"
+            type="search"
+            placeholder={_('Search comments...')}
+            aria-label={_('Search comments')}
+            onInput={(event: Event) => {
+              this.filters.search = (event.target as HTMLInputElement).value;
+              this.render();
+            }}
+          />
+          <fieldset class="comments-panel-filter-group">
+            <legend>{_('Status')}</legend>
+            {this.buildStatusChoice('all', _('All'))}
+            {this.buildStatusChoice('unresolved', _('Unresolved'))}
+            {this.buildStatusChoice('resolved', _('Resolved'))}
+          </fieldset>
+          <label class="comments-panel-filter-check">
+            <input
+              class="comments-panel-filter-replies"
+              type="checkbox"
+              onChange={(event: Event) => {
+                this.filters.onlyWithReplies = (
+                  event.target as HTMLInputElement
+                ).checked;
+                this.render();
+              }}
+            />
+            {_('Only threads with replies')}
+          </label>
+          <fieldset class="comments-panel-filter-group">
+            <legend>{_('Author')}</legend>
+            <div
+              class="comments-panel-filter-authors"
+              ref={(node: HTMLElement) => (this.authorsNode = node)}
+            ></div>
+          </fieldset>
+          <button
+            class="comments-panel-filters-clear button"
+            type="button"
+            onClick={() => this.clearFilters()}
+          >
+            {_('Clear filters')}
+          </button>
+        </form>
+      </details>
+    );
+  }
+
+  private buildStatusChoice(
+    status: CommentFilters['status'],
+    label: string,
+  ): HTMLElement {
+    return (
+      <label class="comments-panel-filter-check">
+        <input
+          type="radio"
+          name="comments-panel-status"
+          value={status}
+          checked={this.filters.status === status}
+          onChange={() => {
+            this.filters.status = status;
+            this.render();
+          }}
+        />
+        {label}
+      </label>
+    );
+  }
+
+  private buildAuthorChoice(author: string): HTMLElement {
+    return (
+      <label class="comments-panel-filter-check">
+        <input
+          type="checkbox"
+          checked={this.filters.authors.has(author)}
+          onChange={(event: Event) => {
+            if ((event.target as HTMLInputElement).checked)
+              this.filters.authors.add(author);
+            else this.filters.authors.delete(author);
+            this.render();
+          }}
+        />
+        <span class="comments-panel-filter-author">{author}</span>
+      </label>
+    );
+  }
+
+  private clearFilters(): void {
+    this.filters.search = '';
+    this.filters.authors.clear();
+    this.filters.status = 'all';
+    this.filters.onlyWithReplies = false;
+
+    // The controls carry their own state, and a form goes back
+    // to what its fields were built with, so these are rebuilt.
+    this.filtersForm?.reset();
+    this.offeredAuthors = [];
+
+    this.render();
+  }
+
+  // How many of the filters are narrowing the list.
+  private activeFilterCount(): number {
+    let count = 0;
+    if (this.filters.search.trim().length > 0) count++;
+    if (this.filters.authors.size > 0) count++;
+    if (this.filters.status !== 'all') count++;
+    if (this.filters.onlyWithReplies) count++;
+    return count;
+  }
+
+  // Offer one checkbox per author who has written a comment. An
+  // author the document lost loses the choice made on them.
+  private updateAuthorFilter(threads: CommentThread[]): void {
+    if (!this.authorsNode) return;
+
+    const authors: string[] = [];
+    for (const thread of threads) {
+      for (const comment of [thread.root, ...thread.replies]) {
+        const author = comment.sectionProperties.data.author;
+        if (typeof author === 'string' && !authors.includes(author))
+          authors.push(author);
+      }
+    }
+    authors.sort((a, b) => a.localeCompare(b));
+
+    const sameAuthors =
+      authors.length === this.offeredAuthors.length &&
+      authors.every((author, index) => author === this.offeredAuthors[index]);
+    if (sameAuthors) return;
+
+    for (const picked of Array.from(this.filters.authors))
+      if (!authors.includes(picked)) this.filters.authors.delete(picked);
+
+    this.offeredAuthors = authors;
+    this.authorsNode.replaceChildren(
+      ...authors.map((author) => this.buildAuthorChoice(author)),
+    );
+  }
+
+  private matchesFilters(thread: CommentThread): boolean {
+    const resolved = thread.root.sectionProperties.data.resolved === 'true';
+    if (this.filters.status === 'resolved' && !resolved) return false;
+    if (this.filters.status === 'unresolved' && resolved) return false;
+
+    if (this.filters.onlyWithReplies && thread.replies.length === 0)
+      return false;
+
+    const comments = [thread.root, ...thread.replies];
+    if (
+      this.filters.authors.size > 0 &&
+      !comments.some((comment) =>
+        this.filters.authors.has(comment.sectionProperties.data.author),
+      )
+    )
+      return false;
+
+    const search = this.filters.search.trim().toLowerCase();
+    if (
+      search.length > 0 &&
+      !comments.some((comment) =>
+        this.plainTextOf(comment.sectionProperties.data)
+          .toLowerCase()
+          .includes(search),
+      )
+    )
+      return false;
+
+    return true;
   }
 
   // Called when the navigation panel switches tabs or closes.
@@ -90,12 +310,26 @@ class CommentsPanel {
     this.stale = false;
 
     const threads = this.collectThreads();
+    this.updateAuthorFilter(threads);
+    const shown = threads.filter((thread) => this.matchesFilters(thread));
+
     const scrollTop = this.listNode.scrollTop;
     this.listNode.replaceChildren(
-      ...threads.map((thread) => this.buildThreadRow(thread)),
+      ...shown.map((thread) => this.buildThreadRow(thread)),
     );
     this.listNode.scrollTop = scrollTop;
-    this.placeholderNode.classList.toggle('hidden', threads.length > 0);
+
+    this.placeholderNode.textContent =
+      threads.length === 0
+        ? _('This document has no comments.')
+        : _('No comment matches the filters.');
+    this.placeholderNode.classList.toggle('hidden', shown.length > 0);
+
+    if (this.filterCountNode) {
+      const active = this.activeFilterCount();
+      this.filterCountNode.textContent = active > 0 ? String(active) : '';
+      this.filterCountNode.classList.toggle('hidden', active === 0);
+    }
   }
 
   // The comments of the document, each with the replies under
@@ -104,35 +338,55 @@ class CommentsPanel {
     const section = this.getCommentSection();
     if (!section) return [];
 
-    const comments: any[] = section.sectionProperties.commentList;
-    const threadOfId = new Map<string, CommentThread>();
+    // A comment with a tracked change belongs to track changes,
+    // and one still being written has nothing to show yet.
+    const comments: any[] = (
+      section.sectionProperties.commentList as any[]
+    ).filter((comment) => {
+      const data = comment.sectionProperties.data;
+      return !data.trackchange && data.id !== 'new';
+    });
+
+    const commentOfId = new Map<string, any>();
+    for (const comment of comments)
+      commentOfId.set(String(comment.sectionProperties.data.id), comment);
+
+    const threadOfRootId = new Map<string, CommentThread>();
     const threads: CommentThread[] = [];
 
     for (const comment of comments) {
-      const data = comment.sectionProperties.data;
-      // A comment with a tracked change belongs to track
-      // changes, and one being written has nothing to show.
-      if (data.trackchange || data.id === 'new') continue;
+      const root = CommentsPanel.rootOf(comment, commentOfId);
+      const rootId = String(root.sectionProperties.data.id);
 
-      const id = String(data.id);
-      const parentId = String(data.parent);
-      const parentThread = threadOfId.get(parentId);
-      if (parentThread) {
-        parentThread.replies.push(comment);
-        // A reply can be replied to in turn, and the answer
-        // belongs to the same thread.
-        threadOfId.set(id, parentThread);
-        continue;
+      let thread = threadOfRootId.get(rootId);
+      if (!thread) {
+        thread = { root: root, replies: [] };
+        threadOfRootId.set(rootId, thread);
+        threads.push(thread);
       }
-
-      // Either a comment that starts a thread, or a reply whose
-      // parent is not in the list. Both start one.
-      const thread: CommentThread = { root: comment, replies: [] };
-      threads.push(thread);
-      threadOfId.set(id, thread);
+      if (comment !== root) thread.replies.push(comment);
     }
 
     return threads;
+  }
+
+  // The comment a thread starts with, found by following each
+  // parent up. A lost parent makes a thread of its own.
+  private static rootOf(comment: any, commentOfId: Map<string, any>): any {
+    const visited = new Set<string>();
+    let current = comment;
+
+    for (;;) {
+      const data = current.sectionProperties.data;
+      visited.add(String(data.id));
+
+      const parentId = String(data.parent);
+      if (parentId === '0' || visited.has(parentId)) return current;
+
+      const parent = commentOfId.get(parentId);
+      if (!parent) return current;
+      current = parent;
+    }
   }
 
   private buildThreadRow(thread: CommentThread): HTMLElement {
@@ -161,7 +415,7 @@ class CommentsPanel {
             <span class="comments-panel-thread-author">{data.author}</span>
           </span>
           <span class="comments-panel-thread-text">
-            {CommentsPanel.plainText(data)}
+            {this.plainTextOf(data)}
           </span>
           {this.buildThreadTags(thread)}
         </button>
@@ -212,6 +466,15 @@ class CommentsPanel {
       .forEach((row) => {
         row.classList.toggle('is-selected', row.dataset.commentId === id);
       });
+  }
+
+  private plainTextOf(data: any): string {
+    const known = this.textOfData.get(data);
+    if (known && known.html === data.html) return known.text;
+
+    const text = CommentsPanel.plainText(data);
+    this.textOfData.set(data, { html: data.html, text: text });
+    return text;
   }
 
   // The words of a comment, without the markup they arrive in.
