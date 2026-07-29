@@ -949,11 +949,13 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 	// The controls wrap on a narrow window, so how much room is left has to be measured rather than
 	// worked out from a fixed figure.
 	_fillToBottom: function (container) {
-		const detail = document.getElementById('profile-detail');
+		// The whole bottom line is measured, not the frame readout alone, because the status text
+		// beside it wraps to further lines on a narrow window.
+		const bottom = document.getElementById('profile-bottom');
 		const room =
 			window.innerHeight -
 			container.getBoundingClientRect().top -
-			(detail ? detail.offsetHeight : 0) -
+			(bottom ? bottom.offsetHeight : 0) -
 			GraphBottomGap;
 		container.style.height = Math.max(MinGraphHeight, room) + 'px';
 	},

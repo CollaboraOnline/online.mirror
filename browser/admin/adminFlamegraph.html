@@ -32,17 +32,18 @@
       <label for="profile-search"><script>document.write(l10nstrings.strProfileSearch)</script></label>
       <input class="input" type="text" id="profile-search" style="min-width:140px;width:140px;">
       <span id="profile-matched" class="has-text-grey"></span>
-
-      <!-- How the capture is going, along the far end of the row so it costs no height of its own. -->
-      <span id="profile-status" class="has-text-grey" style="margin-left:auto;font-size:0.85rem;"></span>
     </div>
 
     <div id="profile-graph" style="width:100%;overflow:auto;background-color:#FFFFFF;">
       <svg id="profile-svg" width="100%" height="0"></svg>
     </div>
 
-    <!-- The frame under the pointer is named along the bottom, where the flamegraph tools put it. -->
-    <p id="profile-detail" style="margin:0;min-height:1.4em;font-family:monospace;font-size:0.85rem;word-break:break-all;"></p>
+    <!-- The bottom line carries both readouts: the frame under the pointer at the left, where the
+         flamegraph tools put it, and how the capture is going at the right. -->
+    <div id="profile-bottom" style="display:flex;flex-wrap:wrap;align-items:baseline;gap:0 10px;">
+      <p id="profile-detail" style="margin:0;min-height:1.4em;font-family:monospace;font-size:0.85rem;word-break:break-all;flex:1 1 12em;"></p>
+      <span id="profile-status" class="has-text-grey" style="font-size:0.85rem;text-align:right;"></span>
+    </div>
   </div>
 </main>
 
