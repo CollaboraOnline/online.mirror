@@ -472,6 +472,8 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._totals.unresolved = 0;
 		this._totals.frames = 0;
 		this._totals.truncated = false;
+		this._totals.startedAt = 0;
+		this._totals.interval = 0;
 		this._scheduleRedraw();
 	},
 
@@ -588,8 +590,19 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 
 	_onStopped: function (rest) {
 		const tokens = rest.split(' ');
-		this._state = 'stopped';
 		this._capture = null;
+
+		// A capture that counted no stack leaves nothing to look at, so the page returns to the
+		// words and the empty counters it showed before Start was pressed.
+		if (!this._root.value) {
+			this._state = 'idle';
+			this._clearSamples();
+			this._setButtons();
+			this._updateStatus();
+			return;
+		}
+
+		this._state = 'stopped';
 		this._setButtons();
 		const reason = tokens[1] || 'user';
 		if (reason === 'docgone' || reason === 'kitdied') {
@@ -1071,6 +1084,15 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 	},
 
 	_updateStatus: function (message) {
+		const status = document.getElementById('profile-status');
+
+		// With no capture behind it every counter reads zero, and the words in the empty picture
+		// carry the page on their own.
+		if (this._state === 'idle' && !this._totals.startedAt && !message) {
+			status.textContent = '';
+			return;
+		}
+
 		// The picker above already names the document being sampled.
 		const parts = [];
 		const add = function (text, alarm) {
@@ -1108,7 +1130,6 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			add(message);
 		}
 
-		const status = document.getElementById('profile-status');
 		status.textContent = '';
 		for (let i = 0; i < parts.length; i++) {
 			if (i) {
