@@ -1475,13 +1475,16 @@ export class Comment extends CanvasSectionObject {
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 	public onReplyClick (e: any): void {
 		window.L.DomEvent.stopPropagation(e);
+		// The words go into data.reply and data.replyHtml, while
+		// data.text keeps the comment being answered.
 		if ((<any>window).mode.isSmallScreenDevice()) {
 			this.sectionProperties.data.reply = this.sectionProperties.data.text;
+			this.sectionProperties.data.replyHtml = this.sectionProperties.data.html;
 			this.sectionProperties.commentListSection.saveReply(this);
 		} else {
 			this.removeLastBRTag(this.sectionProperties.nodeReplyText);
 			this.sectionProperties.data.reply = this.sectionProperties.nodeReplyText.innerText;
-			this.sectionProperties.data.html = this.sectionProperties.nodeReplyText.innerHTML;
+			this.sectionProperties.data.replyHtml = this.sectionProperties.nodeReplyText.innerHTML;
 			// Assigning an empty string to .innerHTML property in some browsers will convert it to 'null'
 			// While in browsers like Chrome and Firefox, a null value is automatically converted to ''
 			// Better to assign '' here instead of null to keep the behavior same for all

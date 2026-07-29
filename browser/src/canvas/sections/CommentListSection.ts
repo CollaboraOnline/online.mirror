@@ -1703,10 +1703,10 @@ export class CommentSection extends CanvasSectionObject {
 			},
 			// send if html exists, and it's writer send just html, otherwise text
 			... (app.map._docLayer._docType === 'text' &&
-			     annotation.sectionProperties.data.html) ?
+			     annotation.sectionProperties.data.replyHtml) ?
 				{ Html: {
 					type: 'string',
-					value: annotation.sectionProperties.data.html
+					value: annotation.sectionProperties.data.replyHtml
 				} } :
 				{ Text: {
 					type: 'string',
