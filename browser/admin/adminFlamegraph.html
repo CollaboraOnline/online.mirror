@@ -26,12 +26,16 @@
       <button type="button" class="button is-small" id="profile-fit" style="min-width:110px;"><script>document.write(l10nstrings.strProfileFitWindow)</script></button>
       <button type="button" class="button is-small" id="profile-freeze"><script>document.write(l10nstrings.strProfileFreeze)</script></button>
       <button type="button" class="button is-small" id="profile-reset"><script>document.write(l10nstrings.strProfileReset)</script></button>
-      <button type="button" class="button is-small" id="profile-download-folded"><script>document.write(l10nstrings.strProfileDownloadFolded)</script></button>
-      <button type="button" class="button is-small" id="profile-download-svg"><script>document.write(l10nstrings.strProfileDownloadSvg)</script></button>
 
       <label for="profile-search"><script>document.write(l10nstrings.strProfileSearch)</script></label>
       <input class="input" type="text" id="profile-search" style="min-width:140px;width:140px;">
       <span id="profile-matched" class="has-text-grey"></span>
+
+      <!-- Taking a capture away is occasional work, so it sits apart at the right end of the row. -->
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-left:auto;">
+        <button type="button" class="button is-small" id="profile-download-folded"><script>document.write(l10nstrings.strProfileDownloadFolded)</script></button>
+        <button type="button" class="button is-small" id="profile-download-svg"><script>document.write(l10nstrings.strProfileDownloadSvg)</script></button>
+      </div>
     </div>
 
     <div id="profile-graph" style="width:100%;overflow:auto;background-color:#FFFFFF;">
