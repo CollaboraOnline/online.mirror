@@ -1091,6 +1091,8 @@ $(DIST_FOLDER)/images/templates/preview/%.png: $(srcdir)/images/templates/previe
 	@cp $< $@
 
 $(DIST_FOLDER)/admin-bundle.js: $(COOL_ADMIN_DST) \
+	$(srcdir)/admin/main-admin.js \
+	$(srcdir)/admin/admin.strings.js \
 	$(INTERMEDIATE_DIR)/admin-src.js
 	@NODE_PATH=$(abs_builddir)/node_modules:$(INTERMEDIATE_DIR) $(NODE) node_modules/browserify/bin/cmd.js -g browserify-css $(if $(IS_SEPARATE),--debug,) -o $@ $(srcdir)/admin/main-admin.js
 	$(if $(IS_SEPARATE),,@$(NODE) node_modules/esbuild-wasm/bin/esbuild --minify --charset=utf8 --outfile=$@.tmp $@ && mv $@.tmp $@)
