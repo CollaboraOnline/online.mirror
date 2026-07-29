@@ -14,6 +14,7 @@
     <script>
         var params = new URLSearchParams(window.location.search);
         var routeToken = params.get('RouteToken');
+        var hasProfilingPage = %HAS_PROFILING_PAGE%;
         var adminBundleSrc = '%SERVICE_ROOT%/browser/%VERSION%/admin-bundle.js';
         if (routeToken) {
             adminBundleSrc += '?RouteToken=' + routeToken

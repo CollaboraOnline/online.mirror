@@ -602,7 +602,11 @@ bool FileServerRequestHandler::handleRequest(const HTTPRequest& request,
             if (endPoint == "admin.html" || endPoint == "adminSettings.html" ||
                 endPoint == "adminHistory.html" || endPoint == "adminAnalytics.html" ||
                 endPoint == "adminLog.html" || endPoint == "adminAudit.html" ||
+#if !MOBILEAPP
+                // Sampling a kit means attaching to another process, so the page is only there
+                // when coolwsd runs as a server.
                 endPoint == "adminFlamegraph.html" ||
+#endif
                 endPoint == "adminClusterOverview.html" ||
                 endPoint == "adminClusterOverviewAbout.html")
             {
@@ -2946,6 +2950,11 @@ void FileServerRequestHandler::preprocessAdminFile(const HTTPRequest& request,
 
     const std::string escapedJwtToken = Uri::encode(jwtToken, "'");
     Poco::replaceInPlace(templateFile, std::string("%JWT_TOKEN%"), escapedJwtToken);
+#if MOBILEAPP
+    Poco::replaceInPlace(templateFile, std::string("%HAS_PROFILING_PAGE%"), std::string("false"));
+#else
+    Poco::replaceInPlace(templateFile, std::string("%HAS_PROFILING_PAGE%"), std::string("true"));
+#endif
     if (relPath == "/browser/dist/admin/adminClusterOverview.html" ||
         relPath == "/browser/dist/admin/adminClusterOverviewAbout.html")
     {

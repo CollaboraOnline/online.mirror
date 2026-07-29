@@ -114,7 +114,8 @@ function upsertDocsTable(doc, sName, socket, wopiHost) {
 		dialog.open();
 	};
 
-	if (add === true) { // This cell opens the flamegraph page for this document.
+	// This cell opens the flamegraph page for this document, so it is there when that page is.
+	if (add === true && window.hasProfilingPage) {
 		var profileCell = document.createElement('td');
 		var profileIcon = document.createElement('i');
 		profileIcon.className = 'fas fa-fire';
