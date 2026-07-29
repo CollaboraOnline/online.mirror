@@ -946,6 +946,9 @@ class UIManager extends window.L.Control {
 				// setup quickfind panel
 				this.map.quickFindPanel = JSDialog.QuickFindPanel(this.map);
 				this.map.addControl(this.map.quickFindPanel);
+
+				// setup the comments tab of the navigation panel
+				this.map.commentsPanel = new CommentsPanel(this.map);
 			}
 
 			if (this.getStartCompareChanges()) {

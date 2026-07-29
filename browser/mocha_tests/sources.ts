@@ -273,6 +273,7 @@
 /// <reference path="../src/control/Sidebar.FromNotebookbarPanel.ts" />
 /// <reference path="../src/control/Control.NavigatorPanel.ts" />
 /// <reference path="../src/control/Control.QuickFindPanel.ts" />
+/// <reference path="../src/control/CommentsPanel.tsx" />
 /// <reference path="../src/control/AutoCompletePopup.ts" />
 /// <reference path="../src/control/Control.Mention.ts" />
 /// <reference path="../src/control/Control.FormulaUsagePopup.ts" />

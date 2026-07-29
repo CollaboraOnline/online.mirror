@@ -387,8 +387,15 @@ export class CommentSection extends CanvasSectionObject {
 	public goToComment(annotation: any): void {
 		if (!annotation) return;
 
-		this.map.showComments(true);
-		if (annotation.sectionProperties.data.resolved === 'true')
+		// Asking for these flips the setting, so they are
+		// only asked for while they are off.
+		const states = this.map.stateChangeHandler;
+		const isOn = (value: any) => value === true || value === 'true';
+
+		if (!isOn(states.getItemValue('showannotations')))
+			this.map.showComments(true);
+		if (annotation.sectionProperties.data.resolved === 'true'
+			&& !isOn(states.getItemValue('.uno:ShowResolvedAnnotations')))
 			this.map.showResolvedComments(true);
 
 		// Move the cursor to the comment's anchor

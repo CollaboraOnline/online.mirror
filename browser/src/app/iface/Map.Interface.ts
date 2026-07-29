@@ -183,6 +183,9 @@ interface MapInterface extends Evented {
 	slideLinks: SlideLinks;
 	paneExpander: PaneExpander;
 	paneSplitter: PaneSplitter;
+	// The comments tab of the navigation panel. Writer only, and
+	// not on a small screen, where the wizard shows them.
+	commentsPanel?: CommentsPanel;
 	setPart(
 		part: number | string,
 		external?: boolean,

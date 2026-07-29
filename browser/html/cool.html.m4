@@ -210,6 +210,9 @@ m4_ifelse(MOBILEAPP, [true],
         <div id="quickfind-dock-wrapper">
           <div id="quickfind-panel" class="sidebar-panel"></div>
         </div>
+        <div id="comments-dock-wrapper">
+          <div id="comments-panel"></div>
+        </div>
       </nav>
       <div id="slide-import-dock-wrapper">
         <div id="slide-import-panel"></div>

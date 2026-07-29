@@ -20,12 +20,17 @@ class NavigatorPanel extends SidebarBase {
 	presentationControlsWrapper: HTMLElement;
 	navigatorDockWrapper: HTMLElement;
 	quickFindWrapper: HTMLElement;
+	commentsWrapper: HTMLElement;
 	closeNavButton: HTMLElement;
 	expandButton: HTMLElement;
 
 	// The panel element of each tab, keyed by the tab button id.
 	// A tab whose panel the page lacks is not in the map.
 	tabPanels: Map<string, HTMLElement>;
+
+	// The tab that is on show, by the id of its button. Not set
+	// before the first switch.
+	pickedTab: string | undefined;
 
 	highlightTerm: string;
 	focusQuickFind: boolean;
@@ -60,6 +65,9 @@ class NavigatorPanel extends SidebarBase {
 		);
 		this.quickFindWrapper = this.navigationPanel.querySelector(
 			'#quickfind-dock-wrapper',
+		);
+		this.commentsWrapper = this.navigationPanel.querySelector(
+			'#comments-dock-wrapper',
 		);
 		this.collectTabPanels();
 		this.map.on(
@@ -263,6 +271,24 @@ class NavigatorPanel extends SidebarBase {
 					contentDivs.push(this.quickFindWrapper);
 				}
 				navigationTabs.push(quickFindTab);
+
+				// Create Comments tab
+				const commentsTab = window.L.DomUtil.create(
+					'button',
+					'tab',
+					navOptions,
+				);
+				commentsTab.id = 'tab-comments';
+				commentsTab.textContent = _('Comments');
+
+				if (this.commentsWrapper) {
+					commentsTab.setAttribute('aria-controls', 'comments-dock-wrapper');
+
+					this.commentsWrapper.setAttribute('role', 'tabpanel');
+					this.commentsWrapper.setAttribute('aria-labelledby', 'tab-comments');
+					contentDivs.push(this.commentsWrapper);
+				}
+				navigationTabs.push(commentsTab);
 			}
 
 			if (navigationTabs.length > 0) {
@@ -422,7 +448,9 @@ class NavigatorPanel extends SidebarBase {
 			) {
 				this.switchNavigationTab('tab-slide-sorter');
 			} else {
-				this.switchNavigationTab('tab-navigator');
+				// The outline arrives after it was asked for,
+				// and by then the user may be on another tab.
+				this.switchNavigationTab(this.pickedTab ?? 'tab-navigator');
 			}
 			if (this.focusQuickFind) {
 				this.switchNavigationTab('tab-quick-find');
@@ -470,6 +498,8 @@ class NavigatorPanel extends SidebarBase {
 			this.tabPanels.set('tab-navigator', this.navigatorDockWrapper);
 		if (this.quickFindWrapper)
 			this.tabPanels.set('tab-quick-find', this.quickFindWrapper);
+		if (this.commentsWrapper)
+			this.tabPanels.set('tab-comments', this.commentsWrapper);
 	}
 
 	// Function to handle tab click
@@ -486,6 +516,8 @@ class NavigatorPanel extends SidebarBase {
 			);
 
 		if (!this.tabPanels.has(tabId)) return;
+
+		this.pickedTab = tabId;
 
 		// Remove 'selected' class from all tabs
 		this.navigationPanel
@@ -516,6 +548,8 @@ class NavigatorPanel extends SidebarBase {
 		this.tabPanels.forEach((panel, id) => {
 			panel.style.display = id === tabId ? 'block' : 'none';
 		});
+
+		this.map.commentsPanel?.setShown(tabId === 'tab-comments');
 	}
 
 	handleFloatingButtonVisibilityOnZoomChange() {
@@ -615,6 +649,7 @@ class NavigatorPanel extends SidebarBase {
 	closeNavigation() {
 		if (this.map.paneExpander)
 			this.map.paneExpander.onPanelClosing('navigation-sidebar');
+		this.map.commentsPanel?.setShown(false);
 		app.layoutingService.appendLayoutingTask(() => {
 			this.navigationPanel.classList.remove('visible');
 			this.floatingNavIcon.classList.add('visible');

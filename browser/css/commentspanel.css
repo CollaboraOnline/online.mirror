@@ -1,0 +1,133 @@
+/* The comments tab of the navigation panel, one row per thread.
+   The panel shows the wrapper when its tab is picked. */
+
+#comments-dock-wrapper {
+	display: none;
+	position: relative;
+	z-index: 990;
+	max-width: 350px;
+	height: 100%;
+	background: var(--color-background-lighter);
+	overflow: hidden;
+}
+
+#comments-panel {
+	height: 100%;
+}
+
+.comments-panel {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	font-family: var(--cool-font);
+	color: var(--color-main-text);
+}
+
+.comments-panel-list {
+	flex: 1 1 auto;
+	overflow-y: auto;
+	scrollbar-width: var(--scrollbar-width);
+	scrollbar-color: var(--scrollbar-color);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.comments-panel-placeholder {
+	padding: var(--spacing-xl);
+	color: var(--color-text-light);
+	font-size: 0.83rem;
+}
+
+.comments-panel-placeholder.hidden {
+	display: none;
+}
+
+.comments-panel-thread {
+	border-bottom: 1px solid var(--color-border-lighter);
+}
+
+.comments-panel-thread-button {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-s);
+	width: 100%;
+	margin: 0;
+	padding: var(--spacing-m) var(--spacing-l);
+	border: none;
+	border-inline-start: 3px solid transparent;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	text-align: start;
+	cursor: pointer;
+}
+
+.comments-panel-thread-button:hover {
+	background: var(--color-background-dark);
+}
+
+.comments-panel-thread-button:focus-visible {
+	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
+	outline-offset: -2px;
+}
+
+.comments-panel-thread.is-selected .comments-panel-thread-button {
+	background: var(--color-background-dark);
+	border-inline-start-color: rgb(var(--doc-type, 11, 135, 231));
+}
+
+.comments-panel-thread-head {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-s);
+}
+
+/* The author's colour in the document. An author who is not in
+   the session keeps the neutral fill set here. */
+.comments-panel-thread-dot {
+	flex: 0 0 auto;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--color-border-dark);
+}
+
+.comments-panel-thread-author {
+	flex: 1 1 auto;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	font-weight: bold;
+	font-size: 0.83rem;
+}
+
+.comments-panel-thread-date {
+	margin-inline-end: auto;
+}
+
+/* A long comment is cut off after three lines. All of the text
+   stays in the row, so a search reaches the hidden part too. */
+.comments-panel-thread-text {
+	overflow: hidden;
+	max-height: 3.9em;
+	line-height: 1.3;
+	font-size: 0.83rem;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+
+.comments-panel-thread-tags {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spacing-s);
+	font-size: 0.75rem;
+	color: var(--color-text-light);
+}
+
+.comments-panel-thread-resolved {
+	padding: 0 var(--spacing-s);
+	border: 1px solid var(--color-border-lighter);
+	border-radius: var(--border-radius);
+	background: var(--color-background-dark);
+}
