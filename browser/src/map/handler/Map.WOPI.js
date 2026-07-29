@@ -1001,48 +1001,7 @@ window.L.Map.WOPI = window.L.Handler.extend({
 			return;
 		}
 
-		this._map.showComments(true);
-		if (comment.sectionProperties.data.resolved === 'true')
-			this._map.showResolvedComments(true);
-
-		// Move the cursor to the comment's anchor
-		var clickX, clickY;
-		var cellRange = comment.sectionProperties.data.cellRange;
-		if (this._map._docLayer._docType === 'spreadsheet' && cellRange) {
-			var cellRect = this._map._docLayer._cellRangeToTwipRect(cellRange).toRectangle();
-			clickX = Math.round(cellRect[0] + cellRect[2] / 2);
-			clickY = Math.round(cellRect[1] + cellRect[3] / 2);
-		} else {
-			var anchorPos = comment.sectionProperties.data.anchorPos;
-			clickX = anchorPos[0];
-			clickY = anchorPos[1];
-		}
-		if (clickX && clickY) {
-			this._map._docLayer._postMouseEvent('buttondown', clickX, clickY, 1, 1, 0);
-			this._map._docLayer._postMouseEvent('buttonup', clickX, clickY, 1, 1, 0);
-		}
-
-		commentSection.navigateAndFocusComment(comment);
-
-		if (this._map._docLayer._docType === 'spreadsheet') {
-			// The sheet switch and mouse click (which sets cursor to anchor) trigger
-			// async events (_onSetPartMsg, onNewDocumentTopLeft, onCellAddressChanged)
-			// that would normally hide the comment. Set a guard to prevent that, show
-			// the comment, then clear the guard after a timeout to let events settle.
-			// 2 s timeout is an arbitrary value, hoped to cover typical cases, and at
-			// the same time, not block expected responsiveness, when user expects it
-			// to hide.
-			var props = commentSection.sectionProperties;
-			if (props.doNotHideCommentTimer)
-				clearTimeout(props.doNotHideCommentTimer);
-			props.doNotHideCommentTimer = setTimeout(function() {
-				props.doNotHideCommentTimer = null;
-			}, 2000);
-
-			// Finally, an additional operation specific to Calc (maybe also Draw?):
-			// it actually shows the comment on mouse hover
-			comment.onMouseEnter();
-		}
+		commentSection.goToComment(comment);
 
 		this._sendGoToCommentResp(commentId, true);
 	},

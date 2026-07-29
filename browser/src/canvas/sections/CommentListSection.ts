@@ -382,6 +382,55 @@ export class CommentSection extends CanvasSectionObject {
 		this.addCommentAttention(annotation);
 	}
 
+	// Take the user to a comment picked outside the document:
+	// show the comments, set the cursor, then scroll to it.
+	public goToComment(annotation: any): void {
+		if (!annotation) return;
+
+		this.map.showComments(true);
+		if (annotation.sectionProperties.data.resolved === 'true')
+			this.map.showResolvedComments(true);
+
+		// Move the cursor to the comment's anchor
+		var clickX, clickY;
+		var cellRange = annotation.sectionProperties.data.cellRange;
+		if (app.map._docLayer._docType === 'spreadsheet' && cellRange) {
+			var cellRect = this.map._docLayer._cellRangeToTwipRect(cellRange).toRectangle();
+			clickX = Math.round(cellRect[0] + cellRect[2] / 2);
+			clickY = Math.round(cellRect[1] + cellRect[3] / 2);
+		} else {
+			var anchorPos = annotation.sectionProperties.data.anchorPos;
+			clickX = anchorPos[0];
+			clickY = anchorPos[1];
+		}
+		if (clickX && clickY) {
+			this.map._docLayer._postMouseEvent('buttondown', clickX, clickY, 1, 1, 0);
+			this.map._docLayer._postMouseEvent('buttonup', clickX, clickY, 1, 1, 0);
+		}
+
+		this.navigateAndFocusComment(annotation);
+
+		if (app.map._docLayer._docType === 'spreadsheet') {
+			// The sheet switch and mouse click (which sets cursor to anchor) trigger
+			// async events (_onSetPartMsg, onNewDocumentTopLeft, onCellAddressChanged)
+			// that would normally hide the comment. Set a guard to prevent that, show
+			// the comment, then clear the guard after a timeout to let events settle.
+			// 2 s timeout is an arbitrary value, hoped to cover typical cases, and at
+			// the same time, not block expected responsiveness, when user expects it
+			// to hide.
+			var props = this.sectionProperties;
+			if (props.doNotHideCommentTimer)
+				clearTimeout(props.doNotHideCommentTimer);
+			props.doNotHideCommentTimer = setTimeout(function() {
+				props.doNotHideCommentTimer = null;
+			}, 2000);
+
+			// Finally, an additional operation specific to Calc (maybe also Draw?):
+			// it actually shows the comment on mouse hover
+			annotation.onMouseEnter();
+		}
+	}
+
 	private addCommentAttention(annotation: any): void {
 		if (!annotation) return;
 
