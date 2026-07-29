@@ -22,13 +22,20 @@
     </div>
 
     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:4px;">
-      <button type="button" class="button is-small" id="profile-zoom-reset"><script>document.write(l10nstrings.strProfileResetZoom)</script></button>
+      <!-- How tall the rows are drawn is a mode for the whole picture, so it opens the row on its
+           own, with a rule between it and the controls for looking through a picture. -->
       <button type="button" class="button is-small" id="profile-fit" style="min-width:110px;"><script>document.write(l10nstrings.strProfileFitWindow)</script></button>
-      <button type="button" class="button is-small" id="profile-freeze"><script>document.write(l10nstrings.strProfileFreeze)</script></button>
 
-      <label for="profile-search"><script>document.write(l10nstrings.strProfileSearch)</script></label>
-      <input class="input" type="text" id="profile-search" style="min-width:140px;width:140px;">
-      <span id="profile-matched" class="has-text-grey"></span>
+      <span aria-hidden="true" style="border-left:1px solid #DBDBDB;align-self:stretch;min-height:1.5em;"></span>
+
+      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;">
+        <button type="button" class="button is-small" id="profile-zoom-reset"><script>document.write(l10nstrings.strProfileResetZoom)</script></button>
+        <button type="button" class="button is-small" id="profile-freeze"><script>document.write(l10nstrings.strProfileFreeze)</script></button>
+
+        <label for="profile-search"><script>document.write(l10nstrings.strProfileSearch)</script></label>
+        <input class="input" type="text" id="profile-search" style="min-width:140px;width:140px;">
+        <span id="profile-matched" class="has-text-grey"></span>
+      </div>
 
       <!-- Taking a capture away is occasional work, so it sits apart at the right end of the row. -->
       <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-left:auto;">
