@@ -60,6 +60,38 @@ describe(['tagdesktop'], 'Comments panel', function() {
 			.find('.comments-panel-thread-author').should('not.have.text', '');
 	});
 
+	it('a comment longer than its row is read in full on request', function() {
+		// A row gives a comment three lines, so this one has
+		// words to spare.
+		desktopHelper.insertComment('This comment carries far more words than the '
+			+ 'three lines a row of the list has room for, so the list holds the '
+			+ 'end of it back until the reader asks to see the whole of it.');
+
+		openCommentsTab();
+
+		cy.cGet('.comments-panel-thread-open').should('be.visible');
+		cy.cGet('.comments-panel-thread-open').should('have.text', '...');
+		cy.cGet('.comments-panel-thread-text').should('not.have.class', 'is-opened');
+
+		cy.cGet('.comments-panel-thread-open').click();
+
+		cy.cGet('.comments-panel-thread-text').should('have.class', 'is-opened');
+		cy.cGet('.comments-panel-thread-open').should('have.text', 'Show less');
+
+		cy.cGet('.comments-panel-thread-open').click();
+
+		cy.cGet('.comments-panel-thread-text').should('not.have.class', 'is-opened');
+	});
+
+	it('a comment that fits in its row is shown whole', function() {
+		desktopHelper.insertComment('a short comment');
+
+		openCommentsTab();
+
+		cy.cGet('.comments-panel-thread-text').should('have.text', 'a short comment');
+		cy.cGet('.comments-panel-thread-open').should('not.be.visible');
+	});
+
 	it('a comment added while the tab is up shows up in it', function() {
 		openCommentsTab();
 		cy.cGet('.comments-panel-placeholder').should('be.visible');

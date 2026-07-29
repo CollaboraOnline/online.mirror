@@ -188,8 +188,22 @@
 	display: none;
 }
 
+/* A row of the list: the author and the words, then a footer
+   with the date, the replies and the resolved marker. */
 .comments-panel-thread {
+	display: flex;
+	flex-direction: column;
 	border-bottom: 1px solid var(--color-border-lighter);
+	border-inline-start: 3px solid transparent;
+}
+
+.comments-panel-thread:hover {
+	background: var(--color-background-dark);
+}
+
+.comments-panel-thread.is-selected {
+	background: var(--color-background-dark);
+	border-inline-start-color: rgb(var(--doc-type, 11, 135, 231));
 }
 
 .comments-panel-thread-button {
@@ -198,9 +212,8 @@
 	gap: var(--spacing-s);
 	width: 100%;
 	margin: 0;
-	padding: var(--spacing-m) var(--spacing-l);
+	padding: var(--spacing-m) var(--spacing-l) var(--spacing-s);
 	border: none;
-	border-inline-start: 3px solid transparent;
 	background: transparent;
 	color: inherit;
 	font: inherit;
@@ -208,18 +221,9 @@
 	cursor: pointer;
 }
 
-.comments-panel-thread-button:hover {
-	background: var(--color-background-dark);
-}
-
 .comments-panel-thread-button:focus-visible {
 	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
 	outline-offset: -2px;
-}
-
-.comments-panel-thread.is-selected .comments-panel-thread-button {
-	background: var(--color-background-dark);
-	border-inline-start-color: rgb(var(--doc-type, 11, 135, 231));
 }
 
 .comments-panel-thread-head {
@@ -250,10 +254,6 @@
 	font-size: 0.83rem;
 }
 
-.comments-panel-thread-date {
-	margin-inline-end: auto;
-}
-
 /* A long comment is cut off after three lines. All of the text
    stays in the row, so a search reaches the hidden part too. */
 .comments-panel-thread-text {
@@ -261,6 +261,18 @@
 	max-height: 3.9em;
 	line-height: 1.3;
 	font-size: 0.83rem;
+}
+
+/* An open row gives the comment all the lines it needs. */
+.comments-panel-thread-text.is-opened {
+	max-height: none;
+}
+
+.comments-panel-thread-footer {
+	display: flex;
+	align-items: baseline;
+	gap: var(--spacing-s);
+	padding: 0 var(--spacing-l) var(--spacing-m);
 }
 
 .comments-panel-thread-tags {
@@ -271,3 +283,27 @@
 	color: var(--color-text-light);
 }
 
+/* Opens the row to read the rest of a comment, and closes it
+   again. Kept at the end of the footer line. */
+.comments-panel-thread-open {
+	margin: 0;
+	margin-inline-start: auto;
+	padding: 0;
+	border: none;
+	background: transparent;
+	color: rgb(var(--doc-type, 11, 135, 231));
+	font: inherit;
+	font-size: 0.75rem;
+	line-height: 1;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.comments-panel-thread-open:hover {
+	text-decoration: underline;
+}
+
+.comments-panel-thread-open:focus-visible {
+	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
+	outline-offset: 1px;
+}

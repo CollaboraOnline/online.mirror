@@ -63,6 +63,18 @@ class CommentsPanel {
   // comment. A rebuilt list keeps the mark on that row.
   private selectedId: string | null = null;
 
+  // The threads the user opened to read in full, by first
+  // comment id. A rebuilt list keeps the open ones open.
+  private openedIds: Set<string> = new Set<string>();
+
+  // The parts of each row as it stands, in the order the rows
+  // are in. The measuring pass and the open control read them.
+  private builtRows: Array<{
+    id: string;
+    textNode: HTMLElement;
+    openNode: HTMLElement;
+  }> = [];
+
   // Whether the comments tab is the one on show. Rows are built
   // only while they can be seen; a change marks the list stale.
   private shown: boolean = false;
@@ -362,7 +374,15 @@ class CommentsPanel {
   // Called when the navigation panel switches tabs or closes.
   public setShown(shown: boolean): void {
     this.shown = shown;
-    if (this.shown && this.stale) this.render();
+    if (!this.shown) return;
+
+    if (this.stale) this.render();
+    // A row has no height while its tab is hidden, so the cut
+    // comments can only be told once the tab is up.
+    else
+      app.layoutingService.appendLayoutingTask(() =>
+        this.offerToOpenTheCutRows(),
+      );
   }
 
   private markStale(): void {
@@ -384,15 +404,20 @@ class CommentsPanel {
 
     const threads = this.collectThreads();
     this.updateAuthorFilter(threads);
+    this.forgetOpenedThreadsThatAreGone(threads);
     const shown = this.sortThreads(
       threads.filter((thread) => this.matchesFilters(thread)),
     );
 
     const scrollTop = this.listNode.scrollTop;
+    this.builtRows = [];
     this.listNode.replaceChildren(
       ...shown.map((thread) => this.buildThreadRow(thread)),
     );
     this.listNode.scrollTop = scrollTop;
+    app.layoutingService.appendLayoutingTask(() =>
+      this.offerToOpenTheCutRows(),
+    );
 
     this.placeholderNode.textContent =
       threads.length === 0
@@ -467,6 +492,34 @@ class CommentsPanel {
   private buildThreadRow(thread: CommentThread): HTMLElement {
     const data = thread.root.sectionProperties.data;
     const id = String(data.id);
+    const opened = this.openedIds.has(id);
+    const textId = 'comments-panel-text-' + id;
+
+    const textNode = (
+      <span
+        id={textId}
+        class={
+          'comments-panel-thread-text cool-dont-break' +
+          (opened ? ' is-opened' : '')
+        }
+      >
+        {this.plainTextOf(data)}
+      </span>
+    );
+
+    const openNode = (
+      <button
+        class="comments-panel-thread-open hidden"
+        type="button"
+        aria-controls={textId}
+        aria-expanded={String(opened)}
+        onClick={() => this.toggleOpened(id)}
+      >
+        {CommentsPanel.openLabel(opened)}
+      </button>
+    );
+
+    this.builtRows.push({ id: id, textNode: textNode, openNode: openNode });
 
     return (
       <li
@@ -485,13 +538,55 @@ class CommentsPanel {
             {this.buildAvatar(data)}
             <span class="comments-panel-thread-author">{data.author}</span>
           </span>
-          <span class="comments-panel-thread-text cool-dont-break">
-            {this.plainTextOf(data)}
-          </span>
-          {this.buildThreadTags(thread)}
+          {textNode}
         </button>
+        <div class="comments-panel-thread-footer">
+          {this.buildThreadTags(thread)}
+          {openNode}
+        </div>
       </li>
     );
+  }
+
+  // What the control that opens a row says. Three dots stand for
+  // the words the row is holding back.
+  private static openLabel(opened: boolean): string {
+    return opened ? _('Show less') : '...';
+  }
+
+  // Offer the open control on the rows whose comment does not
+  // fit the three lines a row gives it.
+  private offerToOpenTheCutRows(): void {
+    for (const row of this.builtRows) {
+      const cutShort = row.textNode.scrollHeight > row.textNode.clientHeight;
+      row.openNode.classList.toggle(
+        'hidden',
+        !cutShort && !this.openedIds.has(row.id),
+      );
+    }
+  }
+
+  private toggleOpened(id: string): void {
+    const opened = !this.openedIds.has(id);
+    if (opened) this.openedIds.add(id);
+    else this.openedIds.delete(id);
+
+    for (const row of this.builtRows) {
+      if (row.id !== id) continue;
+      row.textNode.classList.toggle('is-opened', opened);
+      row.openNode.textContent = CommentsPanel.openLabel(opened);
+      row.openNode.setAttribute('aria-expanded', String(opened));
+    }
+  }
+
+  // A thread the document no longer has is no longer open. A
+  // thread a filter holds back keeps its state and returns.
+  private forgetOpenedThreadsThatAreGone(threads: CommentThread[]): void {
+    const present = new Set<string>(
+      threads.map((thread) => String(thread.root.sectionProperties.data.id)),
+    );
+    for (const id of Array.from(this.openedIds))
+      if (!present.has(id)) this.openedIds.delete(id);
   }
 
   // The picture of the author, in the round frame and the colour
