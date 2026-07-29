@@ -80,7 +80,7 @@ l10nstrings.strProfileSearch = _('Search');
 l10nstrings.strProfileDownloadFolded = _('Download folded stacks');
 l10nstrings.strProfileDownloadSvg = _('Download SVG');
 l10nstrings.strProfileResetZoom = _('Reset');
-l10nstrings.strProfileFitWindow = _('Fit to window');
+l10nstrings.strProfileFitRows = _('Fit rows');
 l10nstrings.strLicense = _('License');
 l10nstrings.strAbout = _('About');
 if (module) {

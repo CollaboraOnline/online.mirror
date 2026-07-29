@@ -440,9 +440,11 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 
 	_onFit: function () {
 		this._fitHeight = !this._fitHeight;
-		document.getElementById('profile-fit').textContent = this._fitHeight
-			? _('Full rows')
-			: _('Fit to window');
+		// The label stays put and the button looks pressed while the rows are squeezed, so the word
+		// on it always names the mode rather than sometimes naming the state it is in.
+		const fit = document.getElementById('profile-fit');
+		fit.classList.toggle('is-dark', this._fitHeight);
+		fit.setAttribute('aria-pressed', this._fitHeight ? 'true' : 'false');
 		this._scheduleRedraw();
 	},
 
