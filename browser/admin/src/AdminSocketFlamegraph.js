@@ -520,7 +520,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			return;
 		}
 
-		const base = this._baseNode();
+		const base = this._root;
 		let matched = 0;
 		const walk = function (node) {
 			if (pattern.test(node.name)) {
@@ -645,11 +645,6 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			node = child;
 		}
 		node.self += count;
-	},
-
-	// What the bottom bar stands for when nothing is zoomed: every sample taken.
-	_baseNode: function () {
-		return this._root;
 	},
 
 	// Drawing.
@@ -824,7 +819,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		const svg = d3.select('#profile-svg');
 		this._fillToBottom(container);
 		const width = container.clientWidth - 4;
-		const root = this._baseNode();
+		const root = this._root;
 		const cells = this._cells(root, width);
 		const rowHeight = this._rowHeight(container, cells.rowCount);
 		const fontSize = this._labelFontSize(rowHeight);
@@ -894,7 +889,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			.on('click', function (event, cell) {
 				// Clicking a frame the view is already inside zooms back out to it, so the bar
 				// along the bottom takes you all the way out.
-				self._zoomNode = cell.node === self._baseNode() ? null : cell.node;
+				self._zoomNode = cell.node === self._root ? null : cell.node;
 				self._scheduleRedraw();
 			});
 
