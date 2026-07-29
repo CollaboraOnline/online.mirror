@@ -1235,7 +1235,9 @@ export class Comment extends CanvasSectionObject {
 		window.L.DomEvent.stopPropagation(e);
 	}
 
-	private openContextMenu (): void {
+	/// Open the menu of actions for this comment. anchorElement
+	/// is the element it drops down from.
+	public openContextMenu (anchorElement?: HTMLElement): void {
 		const listSection = this.sectionProperties.commentListSection;
 		const data = this.sectionProperties.data;
 		const docLayer = app.map._docLayer;
@@ -1306,7 +1308,10 @@ export class Comment extends CanvasSectionObject {
 		if (entries.length === 0)
 			return;
 
-		const menuEl = this.sectionProperties.menu;
+		const menuEl = anchorElement ?? this.sectionProperties.menu;
+		if (!menuEl)
+			return;
+
 		menuEl._onDropDown = function (open: boolean) {
 			this.sectionProperties.contextMenu = open;
 		}.bind(this);

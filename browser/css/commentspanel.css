@@ -329,6 +329,13 @@
 	cursor: pointer;
 }
 
+/* Drops down the menu of actions for the comment. Only its place
+   in the footer line is set here. */
+.comments-panel-comment-menu {
+	flex: 0 0 auto;
+	cursor: pointer;
+}
+
 .comments-panel-comment-open:hover {
 	text-decoration: underline;
 }

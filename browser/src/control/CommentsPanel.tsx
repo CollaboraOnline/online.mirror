@@ -98,6 +98,10 @@ class CommentsPanel {
     this.map.on('insertannotation', this.markStale, this);
     this.map.on('deleteannotation', this.markStale, this);
     this.map.on('comment', this.markStale, this);
+
+    // Whether a reader may write comments decides whether the
+    // rows offer the menu, so a change of it reaches the rows.
+    app.events.on('updatepermission', () => this.markStale());
   }
 
   private build(panel: HTMLElement): void {
@@ -614,8 +618,25 @@ class CommentsPanel {
         <div class="comments-panel-comment-footer">
           {this.buildCommentTags(thread, comment)}
           {openNode}
+          {app.isCommentEditingAllowed() && this.buildMenuButton(comment)}
         </div>
       </div>
+    );
+  }
+
+  // Opens the menu of actions for a comment. The menu is the
+  // comment's own, so the list offers what the page offers.
+  private buildMenuButton(comment: any): HTMLElement {
+    return (
+      <button
+        class="comments-panel-comment-menu cool-annotation-menu"
+        type="button"
+        aria-label={_('Open menu')}
+        data-title={_('Open menu')}
+        onClick={(event: MouseEvent) =>
+          comment.openContextMenu(event.currentTarget as HTMLElement)
+        }
+      ></button>
     );
   }
 

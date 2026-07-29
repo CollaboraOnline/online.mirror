@@ -308,6 +308,32 @@ describe(['tagdesktop'], 'Comments panel', function() {
 			.find('.comments-panel-comment-text').should('have.text', 'apples came first');
 	});
 
+	it('a row offers the actions the document has for the comment', function() {
+		desktopHelper.insertComment('a comment to resolve from the list');
+
+		openCommentsTab();
+
+		cy.cGet('.comments-panel-comment-menu').click();
+		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Resolve').click();
+
+		cy.cGet('.comments-panel-comment-resolved').should('exist');
+	});
+
+	it('a reply written from the list joins the thread', function() {
+		desktopHelper.insertComment('a comment to answer from the list');
+
+		openCommentsTab();
+
+		cy.cGet('.comments-panel-comment-menu').click();
+		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		cy.cGet('#annotation-reply-textarea-1').type('the answer from the list');
+		cy.cGet('#annotation-reply-1').click();
+
+		cy.cGet('.comments-panel-comment').should('have.length', 2);
+		cy.cGet('.comments-panel-comment.is-reply .comments-panel-comment-text')
+			.should('have.text', 'the answer from the list');
+	});
+
 	it('a resolved thread is marked as resolved', function() {
 		desktopHelper.insertComment('a comment to resolve');
 		resolveFirstComment();
