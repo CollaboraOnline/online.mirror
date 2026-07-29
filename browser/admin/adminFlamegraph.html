@@ -39,8 +39,9 @@
 
     <div id="profile-graph" style="width:100%;overflow:auto;background-color:#FFFFFF;position:relative;">
       <svg id="profile-svg" width="100%" height="0"></svg>
-      <!-- Before there is a picture, the room it will take says how to fill it. -->
-      <p id="profile-empty" class="has-text-grey has-text-centered" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);margin:0;"><script>document.write(l10nstrings.strProfileHowToStart)</script></p>
+      <!-- Before there is a picture, the room it will take says why it is still empty. The page's
+           own JavaScript writes the words, which depend on what the capture is doing. -->
+      <p id="profile-empty" class="has-text-grey has-text-centered" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);margin:0;"></p>
     </div>
 
     <!-- The bottom line carries both readouts: the frame under the pointer at the left, where the

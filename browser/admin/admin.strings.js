@@ -72,9 +72,6 @@ l10nstrings.strVersionInfo = _('Version Information');
 // JavaScript shows calls _() there instead of going through this file.
 l10nstrings.strFlamegraph = _('Profiling');
 l10nstrings.strProfilePickDocument = _('Document to sample');
-l10nstrings.strProfileHowToStart = _(
-	'Choose a document above, then press Start to sample it.',
-);
 l10nstrings.strProfileStart = _('Start');
 l10nstrings.strProfileStop = _('Stop');
 l10nstrings.strProfileFreeze = _('Freeze view');

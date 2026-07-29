@@ -563,7 +563,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._totals.interval = json.interval;
 		this._totals.startedAt = Date.now();
 		this._setButtons();
-		this._updateStatus(_('Reading symbols, the first sample takes a moment'));
+		this._updateStatus();
 	},
 
 	_onError: function (rest) {
@@ -1018,17 +1018,36 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			running || (this._availability && !this._availability.available);
 		document.getElementById('profile-stop').disabled = !running;
 
-		// What to do to fill the picture is worth saying only while it is still empty and starting a
-		// capture is the reader's next move. A server that cannot sample, and a capture that has been
-		// stopped, both have something of their own to say in the status line instead. Availability is
-		// unknown until the server answers, and the words are useful in that moment, so an unknown
-		// server counts as one that can sample.
+		this._updateEmpty();
+	},
+
+	// Why the picture is still empty, in the room it will draw into. A server that cannot sample,
+	// and a capture that has been stopped, both have something of their own to say in the status
+	// line instead, so those two say nothing here. Availability is unknown until the server
+	// answers, and the words are useful in that moment, so an unknown server counts as one that
+	// can sample.
+	_updateEmpty: function () {
+		const empty = document.getElementById('profile-empty');
 		const available = !this._availability || this._availability.available;
-		const waitingToStart =
-			this._state === 'idle' && !this._totals.samples && available;
-		document.getElementById('profile-empty').style.display = waitingToStart
-			? ''
-			: 'none';
+		let words = '';
+
+		if (this._state === 'idle' && !this._totals.samples && available) {
+			words = _('Choose a document above, then press Start to sample it.');
+		} else if (this._state === 'priming') {
+			words = _('Reading symbols, the first sample takes a moment.');
+		} else if (this._state === 'running' && !this._totals.samples) {
+			// A kit asleep in poll has no thread to sample, so a document that nobody is working on
+			// draws nothing. The idle count rising is what shows the sampler is still going.
+			words =
+				_('Waiting for activity') +
+				', ' +
+				this._totals.idle +
+				' ' +
+				_('idle samples so far');
+		}
+
+		empty.textContent = words;
+		empty.style.display = words ? '' : 'none';
 	},
 
 	_updateStatus: function (message) {
