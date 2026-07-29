@@ -29,6 +29,10 @@ interface CommentFilters {
   onlyWithReplies: boolean;
 }
 
+// The order of the rows. 'position' is the order in the
+// document; the rest read the date or the author's name.
+type CommentSort = 'position' | 'newest' | 'oldest' | 'author';
+
 class CommentsPanel {
   private map: any;
   private listNode: HTMLElement | null = null;
@@ -41,6 +45,8 @@ class CommentsPanel {
   // read out of. A stale entry becomes unreachable on its own.
   private textOfData: WeakMap<object, { html: string; text: string }> =
     new WeakMap();
+
+  private sortBy: CommentSort = 'position';
 
   private filters: CommentFilters = {
     search: '',
@@ -79,6 +85,7 @@ class CommentsPanel {
   private build(panel: HTMLElement): void {
     panel.replaceChildren(
       <div class="comments-panel">
+        {this.buildSortRow()}
         {this.buildFilters()}
         <ul
           class="comments-panel-list"
@@ -92,6 +99,33 @@ class CommentsPanel {
           {_('This document has no comments.')}
         </div>
       </div>,
+    );
+  }
+
+  private buildSortRow(): HTMLElement {
+    return (
+      <div class="comments-panel-sort">
+        <label
+          class="comments-panel-sort-label"
+          for="comments-panel-sort-select"
+        >
+          {_('Sort by')}
+        </label>
+        <select
+          id="comments-panel-sort-select"
+          class="comments-panel-sort-select"
+          onChange={(event: Event) => {
+            this.sortBy = (event.target as HTMLSelectElement)
+              .value as CommentSort;
+            this.render();
+          }}
+        >
+          <option value="position">{_('Position in document')}</option>
+          <option value="newest">{_('Newest first')}</option>
+          <option value="oldest">{_('Oldest first')}</option>
+          <option value="author">{_('Author')}</option>
+        </select>
+      </div>
     );
   }
 
@@ -255,6 +289,45 @@ class CommentsPanel {
     );
   }
 
+  // Threads in the order the sort control asks for. Ties keep
+  // the order they came in, which is the document order.
+  private sortThreads(threads: CommentThread[]): CommentThread[] {
+    if (this.sortBy === 'position') return threads;
+
+    const inDocumentOrder = threads.map((thread, index) => ({
+      thread: thread,
+      index: index,
+    }));
+
+    inDocumentOrder.sort((left, right) => {
+      const leftData = left.thread.root.sectionProperties.data;
+      const rightData = right.thread.root.sectionProperties.data;
+
+      let order = 0;
+      if (this.sortBy === 'newest')
+        order =
+          CommentsPanel.timeOf(rightData) - CommentsPanel.timeOf(leftData);
+      else if (this.sortBy === 'oldest')
+        order =
+          CommentsPanel.timeOf(leftData) - CommentsPanel.timeOf(rightData);
+      else if (this.sortBy === 'author')
+        order = String(leftData.author ?? '').localeCompare(
+          String(rightData.author ?? ''),
+        );
+
+      return order || left.index - right.index;
+    });
+
+    return inDocumentOrder.map((entry) => entry.thread);
+  }
+
+  // When a comment was written, in milliseconds. A date that
+  // cannot be read counts as the oldest there is.
+  private static timeOf(data: any): number {
+    const time = Date.parse(String(data.dateTime ?? '').replace(/,.*/, ''));
+    return isNaN(time) ? 0 : time;
+  }
+
   private matchesFilters(thread: CommentThread): boolean {
     const resolved = thread.root.sectionProperties.data.resolved === 'true';
     if (this.filters.status === 'resolved' && !resolved) return false;
@@ -311,7 +384,9 @@ class CommentsPanel {
 
     const threads = this.collectThreads();
     this.updateAuthorFilter(threads);
-    const shown = threads.filter((thread) => this.matchesFilters(thread));
+    const shown = this.sortThreads(
+      threads.filter((thread) => this.matchesFilters(thread)),
+    );
 
     const scrollTop = this.listNode.scrollTop;
     this.listNode.replaceChildren(

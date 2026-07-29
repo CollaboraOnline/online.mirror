@@ -23,6 +23,24 @@
 	color: var(--color-main-text);
 }
 
+.comments-panel-sort {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-s);
+	flex: 0 0 auto;
+	padding: var(--spacing-m) var(--spacing-l);
+	font-size: 0.83rem;
+}
+
+.comments-panel-sort-label {
+	color: var(--color-text-light);
+}
+
+.comments-panel-sort-select {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
 /* The controls give the rest of the panel to the list of
    threads and scroll on their own. */
 .comments-panel-filters {

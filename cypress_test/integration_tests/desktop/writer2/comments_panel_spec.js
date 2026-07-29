@@ -198,6 +198,53 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-filter-search').should('have.value', '');
 	});
 
+	it('the rows can be ordered by the date a thread was started', function() {
+		desktopHelper.insertComment('the older comment');
+		// The date is kept to the second, so the two must be
+		// written in different seconds to be told apart.
+		cy.wait(1100);
+		desktopHelper.insertComment('the newer comment');
+
+		openCommentsTab();
+
+		// The document holds the comments in the order they sit
+		// on the page.
+		cy.cGet('.comments-panel-thread').eq(0)
+			.find('.comments-panel-thread-text').should('have.text', 'the older comment');
+
+		cy.cGet('#comments-panel-sort-select').select('newest');
+		cy.cGet('.comments-panel-thread').eq(0)
+			.find('.comments-panel-thread-text').should('have.text', 'the newer comment');
+		cy.cGet('.comments-panel-thread').eq(1)
+			.find('.comments-panel-thread-text').should('have.text', 'the older comment');
+
+		cy.cGet('#comments-panel-sort-select').select('oldest');
+		cy.cGet('.comments-panel-thread').eq(0)
+			.find('.comments-panel-thread-text').should('have.text', 'the older comment');
+		cy.cGet('.comments-panel-thread').eq(1)
+			.find('.comments-panel-thread-text').should('have.text', 'the newer comment');
+	});
+
+	it('the sort and the filters hold at the same time', function() {
+		desktopHelper.insertComment('apples came first');
+		cy.wait(1100);
+		desktopHelper.insertComment('pears came second');
+		cy.wait(1100);
+		desktopHelper.insertComment('apples again, last');
+
+		openCommentsTab();
+		openFilters();
+
+		cy.cGet('.comments-panel-filter-search').type('apples');
+		cy.cGet('#comments-panel-sort-select').select('newest');
+
+		cy.cGet('.comments-panel-thread').should('have.length', 2);
+		cy.cGet('.comments-panel-thread').eq(0)
+			.find('.comments-panel-thread-text').should('have.text', 'apples again, last');
+		cy.cGet('.comments-panel-thread').eq(1)
+			.find('.comments-panel-thread-text').should('have.text', 'apples came first');
+	});
+
 	it('a resolved thread is marked as resolved', function() {
 		desktopHelper.insertComment('a comment to resolve');
 		resolveFirstComment();
