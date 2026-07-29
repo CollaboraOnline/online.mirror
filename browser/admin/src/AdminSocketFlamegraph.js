@@ -29,6 +29,10 @@ const CharWidth = Math.round(LabelFontSize * CharWidthRatio);
 const MinDrawnWidth = 1.5;
 const MaxFramesPerSecond = 4;
 
+// How many windows have to arrive without a dropped sample for the dropped count to go back to
+// reading as part of the running text. A window arrives about once a second.
+const CleanWindowsAfterDrop = 3;
+
 // The picture reaches to this many pixels short of the bottom of the window, and never gets less
 // room than MinGraphHeight even on a window too short to hold that.
 const GraphBottomGap = 8;
@@ -238,6 +242,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			samples: 0,
 			idle: 0,
 			dropped: 0,
+			cleanWindows: CleanWindowsAfterDrop,
 			unresolved: 0,
 			frames: 0,
 			truncated: false,
@@ -463,6 +468,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._totals.samples = 0;
 		this._totals.idle = 0;
 		this._totals.dropped = 0;
+		this._totals.cleanWindows = CleanWindowsAfterDrop;
 		this._totals.unresolved = 0;
 		this._totals.frames = 0;
 		this._totals.truncated = false;
@@ -610,6 +616,10 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._totals.samples += json.samples || 0;
 		this._totals.idle += json.idle || 0;
 		this._totals.dropped += json.dropped || 0;
+		// Samples are being dropped right now, or the sampler has settled and the count is history.
+		this._totals.cleanWindows = json.dropped
+			? 0
+			: this._totals.cleanWindows + 1;
 		this._totals.unresolved += json.unresolved || 0;
 		this._totals.frames += json.frameCount || 0;
 		this._totals.truncated = this._totals.truncated || json.trunc;
@@ -1061,36 +1071,57 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 	_updateStatus: function (message) {
 		// The picker above already names the document being sampled.
 		const parts = [];
+		const add = function (text, alarm) {
+			parts.push({ text: text, alarm: alarm === true });
+		};
 		if (this._totals.startedAt) {
-			parts.push(
-				Math.round((Date.now() - this._totals.startedAt) / 1000) + 's',
-			);
+			add(Math.round((Date.now() - this._totals.startedAt) / 1000) + 's');
 		}
-		parts.push(this._totals.samples + ' ' + _('samples'));
-		parts.push(this._totals.idle + ' ' + _('idle'));
+		add(this._totals.samples + ' ' + _('samples'));
+		add(this._totals.idle + ' ' + _('idle'));
 		if (this._totals.dropped) {
-			parts.push(this._totals.dropped + ' ' + _('dropped'));
+			// Red says the sampler is losing samples as the reader watches. A capture that has settled
+			// or ended keeps the count, in the colour of the text around it.
+			const dropping =
+				this._state === 'running' &&
+				this._totals.cleanWindows < CleanWindowsAfterDrop;
+			add(this._totals.dropped + ' ' + _('dropped'), dropping);
 		}
 		// A name is missing when the debug information for that library is not installed, which is
 		// worth saying only when it happens.
 		if (this._totals.unresolved) {
 			const unresolved = (100 * this._totals.unresolved) / this._totals.frames;
-			parts.push(unresolved.toFixed(1) + '% ' + _('frames without a name'));
+			add(unresolved.toFixed(1) + '% ' + _('frames without a name'));
 		}
 		// The sampler slows itself down when a sample costs too much, so the interval is only worth
 		// showing once it differs from the one that was asked for.
 		const asked = Number(document.getElementById('profile-rate').value);
 		if (this._totals.interval && this._totals.interval !== asked) {
-			parts.push(this._totals.interval + 'ms');
+			add(this._totals.interval + 'ms');
 		}
 		if (this._totals.truncated) {
-			parts.push(_('Some stacks were left out of this update'));
+			add(_('Some stacks were left out of this update'));
 		}
 		if (message) {
-			parts.push(message);
+			add(message);
 		}
 
-		document.getElementById('profile-status').textContent = parts.join(' -- ');
+		const status = document.getElementById('profile-status');
+		status.textContent = '';
+		for (let i = 0; i < parts.length; i++) {
+			if (i) {
+				status.appendChild(document.createTextNode(' -- '));
+			}
+			if (!parts[i].alarm) {
+				status.appendChild(document.createTextNode(parts[i].text));
+				continue;
+			}
+			// A colour of its own on the child beats the grey the whole line inherits.
+			const span = document.createElement('span');
+			span.className = 'has-text-danger';
+			span.textContent = parts[i].text;
+			status.appendChild(span);
+		}
 	},
 
 	// Downloads.
