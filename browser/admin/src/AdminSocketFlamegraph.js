@@ -297,6 +297,18 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			}.bind(this),
 		);
 
+		// The bottom line grows a further line of its own accord on a narrow window, as the status
+		// text gains a dropped count or a percentage of unnamed frames. The picture takes its height
+		// from where that line starts, so it follows the line rather than only the window.
+		if (window.ResizeObserver) {
+			new window.ResizeObserver(
+				function () {
+					this._fillToBottom(document.getElementById('profile-graph'));
+					this._scheduleRedraw();
+				}.bind(this),
+			).observe(document.getElementById('profile-bottom'));
+		}
+
 		// Control-F reaches the search box, as it does in a flamegraph the tools produced.
 		window.addEventListener('keydown', function (event) {
 			if (event.ctrlKey && event.key === 'f') {
@@ -1006,7 +1018,10 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		return name.length <= room ? name : name.substring(0, room - 1) + '..';
 	},
 
-	_describe: function (node) {
+	// What a frame is worth, as the flamegraph tools count it: how many samples landed anywhere
+	// inside it, what share of the whole capture and of the frame below it that is, and how many
+	// samples landed in the frame itself with nothing above it.
+	_figuresFor: function (node) {
 		const root = this._root;
 		const percent = root.value > 0 ? (100 * node.value) / root.value : 0;
 		const ofParent =
@@ -1014,8 +1029,6 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				? (100 * node.value) / node.parent.value
 				: 100;
 		return (
-			node.name +
-			'\n' +
 			node.value +
 			' ' +
 			_('samples') +
@@ -1034,10 +1047,18 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		);
 	},
 
+	// The name and the figures on separate lines, for the tooltip a browser draws over a frame.
+	_describe: function (node) {
+		return node.name + '\n' + this._figuresFor(node);
+	},
+
 	_showDetail: function (node) {
-		document.getElementById('profile-detail').textContent = this._describe(
-			node,
-		).replace('\n', ' -- ');
+		const name = document.getElementById('profile-detail-name');
+		name.textContent = node.name;
+		// The readout shows as much of the name as the window holds, so the whole of it is on hover.
+		name.title = node.name;
+		document.getElementById('profile-detail-figures').textContent =
+			this._figuresFor(node);
 	},
 
 	_setButtons: function () {
