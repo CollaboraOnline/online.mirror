@@ -39,6 +39,35 @@
 	pointer-events: auto;
 }
 
+/* An icon that stands for more than one comment is a stack of notes rather than
+ * a single one: the same note drawn twice, the one behind peeking out at the top
+ * corner. The first of the two images is the one in front. */
+#comment-margin-markers .comment-margin-marker.has-many {
+	background-image: url('images/note.svg'), url('images/note.svg');
+	background-size: 76% 76%, 76% 76%;
+	background-position: left top, right 24%;
+}
+
+/* How many comments the stack stands for, along the bottom edge of it. */
+#comment-margin-markers .comment-margin-marker-count {
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+	transform: translateX(-50%);
+	min-width: 13px;
+	height: 13px;
+	box-sizing: border-box;
+	padding: 0 3px;
+	border-radius: 7px;
+	background: var(--color-primary);
+	color: var(--color-primary-text);
+	font-family: var(--cool-font);
+	font-size: 9px;
+	font-weight: bold;
+	line-height: 13px;
+	text-align: center;
+}
+
 #comment-margin-markers .comment-margin-marker:hover {
 	filter: brightness(1.1);
 }

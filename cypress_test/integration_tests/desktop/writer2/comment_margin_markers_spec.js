@@ -33,6 +33,37 @@ describe(['tagdesktop'], 'Comment markers in the page margin', function() {
 		});
 	});
 
+	it('one marker stands for the comments written in the same place', function() {
+		// Both comments are written at the same place in the text, so their
+		// markers would cover each other and one marker stands for the two.
+		desktopHelper.insertComment('the first comment here');
+		desktopHelper.insertComment('the second comment here');
+
+		cy.cGet('.comment-margin-marker').should('have.length', 1);
+		cy.cGet('.comment-margin-marker').should('have.class', 'has-many');
+		cy.cGet('.comment-margin-marker-count').should('have.text', '2');
+	});
+
+	it('a marker counts the replies under the comment as well', function() {
+		desktopHelper.insertComment('a comment with an answer');
+
+		cy.cGet('#comment-annotation-menu-1').click();
+		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		cy.cGet('#annotation-reply-textarea-1').type('the answer');
+		cy.cGet('#annotation-reply-1').click();
+		cy.cGet('#annotation-content-area-2').should('contain', 'the answer');
+
+		cy.cGet('.comment-margin-marker').should('have.length', 1);
+		cy.cGet('.comment-margin-marker-count').should('have.text', '2');
+	});
+
+	it('a single comment keeps a marker without a number', function() {
+		desktopHelper.insertComment('the only comment here');
+
+		cy.cGet('.comment-margin-marker').should('not.have.class', 'has-many');
+		cy.cGet('.comment-margin-marker-count').should('not.exist');
+	});
+
 	it('picking a marker opens the comment in the navigation panel', function() {
 		desktopHelper.insertComment('a comment to reach from its marker');
 

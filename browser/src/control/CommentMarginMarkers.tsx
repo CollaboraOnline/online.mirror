@@ -117,14 +117,21 @@ class CommentMarginMarkers {
   }
 
   private buildMarker(group: CommentMarkerGroup): HTMLElement {
-    const label = _('Go to comment by {author}').replace(
-      '{author}',
-      group.comments[0].sectionProperties.data.author,
-    );
+    const count = group.comments.length;
+    const label =
+      count === 1
+        ? _('Go to comment by {author}').replace(
+            '{author}',
+            group.comments[0].sectionProperties.data.author,
+          )
+        : _('Go to {count} comments written here').replace(
+            '{count}',
+            String(count),
+          );
 
     return (
       <button
-        class="comment-margin-marker"
+        class={'comment-margin-marker' + (count > 1 ? ' has-many' : '')}
         type="button"
         aria-label={label}
         data-title={label}
@@ -132,7 +139,11 @@ class CommentMarginMarkers {
           event.stopPropagation();
           this.goToComment(group.comments[0]);
         }}
-      ></button>
+      >
+        {count > 1 && (
+          <span class="comment-margin-marker-count">{String(count)}</span>
+        )}
+      </button>
     );
   }
 
