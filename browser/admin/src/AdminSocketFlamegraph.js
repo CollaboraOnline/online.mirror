@@ -300,11 +300,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			}
 		});
 
-		// A document named in the query string is what the overview table links to.
-		const params = new URLSearchParams(window.location.search);
-		this._wantedPid = params.get('pid') || '';
 		this._suggestedPid = '';
-		this._wantedDocKey = params.get('docKey') || '';
 
 		// The empty picture already takes the room it will draw into, so nothing jumps once the
 		// first samples arrive.
@@ -408,11 +404,6 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			picker.value = this._capture.pid;
 		} else if (chosen && this._documents[chosen]) {
 			picker.value = chosen;
-		} else if (this._wantedPid && this._documents[this._wantedPid]) {
-			picker.value = this._wantedPid;
-			// A link from the overview table starts sampling straight away.
-			this._wantedPid = '';
-			this._onStart();
 		} else if (this._suggestedPid && this._documents[this._suggestedPid]) {
 			// Sampling waits for the Start button, so the document is only picked out.
 			picker.value = this._suggestedPid;
