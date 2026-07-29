@@ -68,31 +68,20 @@ l10nstrings.strLogLevels = _('Log Levels');
 l10nstrings.strCloseModal = _('Close');
 l10nstrings.strUpdateLogLevels = _('Update Log Levels');
 l10nstrings.strVersionInfo = _('Version Information');
+// The Profiling page writes these into its HTML fragment. Text that only the page's own
+// JavaScript shows calls _() there instead of going through this file.
 l10nstrings.strFlamegraph = _('Profiling');
-l10nstrings.strProfileToolTip = _('Show where this document spends its time.');
 l10nstrings.strProfilePickDocument = _('Document to sample');
 l10nstrings.strProfileStart = _('Start');
 l10nstrings.strProfileStop = _('Stop');
 l10nstrings.strProfileFreeze = _('Freeze view');
-l10nstrings.strProfileResume = _('Resume view');
 l10nstrings.strProfileReset = _('Clear samples');
 l10nstrings.strProfileRate = _('Samples per second');
 l10nstrings.strProfileSearch = _('Highlight');
 l10nstrings.strProfileDownloadFolded = _('Download folded stacks');
 l10nstrings.strProfileDownloadSvg = _('Download SVG');
 l10nstrings.strProfileResetZoom = _('Reset zoom');
-l10nstrings.strProfileFullRows = _('Full rows');
 l10nstrings.strProfileFitWindow = _('Fit to window');
-l10nstrings.strProfileLoadingSymbols = _('Reading symbols, the first sample takes a moment');
-l10nstrings.strProfileNotAvailable = _('Sampling is not available on this server');
-l10nstrings.strProfileNoDocument = _('Pick a document to sample');
-l10nstrings.strProfileSamples = _('samples');
-l10nstrings.strProfileIdle = _('idle');
-l10nstrings.strProfileDropped = _('dropped');
-l10nstrings.strProfileUnresolved = _('frames without a name');
-l10nstrings.strProfileTruncated = _('Some stacks were left out of this update');
-l10nstrings.strProfileDocumentClosed = _('The document closed. The samples so far are kept.');
-l10nstrings.strProfileStopped = _('Sampling stopped');
 l10nstrings.strLicense = _('License');
 l10nstrings.strAbout = _('About');
 if (module) {
