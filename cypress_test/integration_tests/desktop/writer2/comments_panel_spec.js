@@ -53,11 +53,11 @@ describe(['tagdesktop'], 'Comments panel', function() {
 
 		cy.cGet('.comments-panel-thread').should('have.length', 2);
 		cy.cGet('.comments-panel-thread').eq(0)
-			.find('.comments-panel-thread-text').should('have.text', 'first comment');
+			.find('.comments-panel-comment-text').should('have.text', 'first comment');
 		cy.cGet('.comments-panel-thread').eq(1)
-			.find('.comments-panel-thread-text').should('have.text', 'second comment');
+			.find('.comments-panel-comment-text').should('have.text', 'second comment');
 		cy.cGet('.comments-panel-thread').eq(0)
-			.find('.comments-panel-thread-author').should('not.have.text', '');
+			.find('.comments-panel-comment-author').should('not.have.text', '');
 	});
 
 	it('a comment longer than its row is read in full on request', function() {
@@ -69,18 +69,18 @@ describe(['tagdesktop'], 'Comments panel', function() {
 
 		openCommentsTab();
 
-		cy.cGet('.comments-panel-thread-open').should('be.visible');
-		cy.cGet('.comments-panel-thread-open').should('have.text', '...');
-		cy.cGet('.comments-panel-thread-text').should('not.have.class', 'is-opened');
+		cy.cGet('.comments-panel-comment-open').should('be.visible');
+		cy.cGet('.comments-panel-comment-open').should('have.text', '...');
+		cy.cGet('.comments-panel-comment-text').should('not.have.class', 'is-opened');
 
-		cy.cGet('.comments-panel-thread-open').click();
+		cy.cGet('.comments-panel-comment-open').click();
 
-		cy.cGet('.comments-panel-thread-text').should('have.class', 'is-opened');
-		cy.cGet('.comments-panel-thread-open').should('have.text', 'Show less');
+		cy.cGet('.comments-panel-comment-text').should('have.class', 'is-opened');
+		cy.cGet('.comments-panel-comment-open').should('have.text', 'Show less');
 
-		cy.cGet('.comments-panel-thread-open').click();
+		cy.cGet('.comments-panel-comment-open').click();
 
-		cy.cGet('.comments-panel-thread-text').should('not.have.class', 'is-opened');
+		cy.cGet('.comments-panel-comment-text').should('not.have.class', 'is-opened');
 	});
 
 	it('a comment that fits in its row is shown whole', function() {
@@ -88,8 +88,8 @@ describe(['tagdesktop'], 'Comments panel', function() {
 
 		openCommentsTab();
 
-		cy.cGet('.comments-panel-thread-text').should('have.text', 'a short comment');
-		cy.cGet('.comments-panel-thread-open').should('not.be.visible');
+		cy.cGet('.comments-panel-comment-text').should('have.text', 'a short comment');
+		cy.cGet('.comments-panel-comment-open').should('not.be.visible');
 	});
 
 	it('a comment added while the tab is up shows up in it', function() {
@@ -99,7 +99,7 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		desktopHelper.insertComment('a fresh comment');
 
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
-		cy.cGet('.comments-panel-thread-text').should('have.text', 'a fresh comment');
+		cy.cGet('.comments-panel-comment-text').should('have.text', 'a fresh comment');
 		cy.cGet('.comments-panel-placeholder').should('not.be.visible');
 	});
 
@@ -107,9 +107,9 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		desktopHelper.insertComment('the comment to reach');
 		openCommentsTab();
 
-		cy.cGet('.comments-panel-thread-button').click();
+		cy.cGet('.comments-panel-comment-button').click();
 
-		cy.cGet('.comments-panel-thread').should('have.class', 'is-selected');
+		cy.cGet('.comments-panel-comment').should('have.class', 'is-selected');
 		selectedCommentId().then(function(id) {
 			expect(id).to.equal('1');
 		});
@@ -122,9 +122,40 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		openCommentsTab();
 
 		// The reply belongs to the thread of the comment it
-		// answers, so the list holds one row for both.
+		// answers, so the two make up one thread.
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
-		cy.cGet('.comments-panel-thread-replies').should('have.text', '1 reply');
+		cy.cGet('.comments-panel-comment-replies').should('have.text', '1 reply');
+	});
+
+	it('a reply is shown under the comment it answers', function() {
+		desktopHelper.insertComment('a comment with an answer');
+		replyToFirstComment('the answer');
+
+		openCommentsTab();
+
+		cy.cGet('.comments-panel-comment').should('have.length', 2);
+		cy.cGet('.comments-panel-comment').eq(0)
+			.should('have.class', 'is-first')
+			.find('.comments-panel-comment-text')
+			.should('have.text', 'a comment with an answer');
+		cy.cGet('.comments-panel-comment').eq(1)
+			.should('have.class', 'is-reply')
+			.find('.comments-panel-comment-text')
+			.should('have.text', 'the answer');
+
+		// The reply is stepped in from the comment it answers.
+		cy.cGet('.comments-panel-comment').eq(1)
+			.should('have.css', 'margin-inline-start', '14px');
+	});
+
+	it('two comments of their own start two threads', function() {
+		desktopHelper.insertComment('one comment');
+		desktopHelper.insertComment('another comment');
+
+		openCommentsTab();
+
+		cy.cGet('.comments-panel-thread').should('have.length', 2);
+		cy.cGet('.comments-panel-comment.is-reply').should('not.exist');
 	});
 
 	it('the search keeps the threads that hold the word', function() {
@@ -137,7 +168,7 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-filter-search').type('pears');
 
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
-		cy.cGet('.comments-panel-thread-text').should('have.text', 'a comment about pears');
+		cy.cGet('.comments-panel-comment-text').should('have.text', 'a comment about pears');
 	});
 
 	it('the search reaches the words of a reply', function() {
@@ -151,7 +182,7 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-filter-search').type('pears');
 
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
-		cy.cGet('.comments-panel-thread-text')
+		cy.cGet('.comments-panel-comment.is-first .comments-panel-comment-text')
 			.should('have.text', 'a comment with an answer');
 	});
 
@@ -165,12 +196,12 @@ describe(['tagdesktop'], 'Comments panel', function() {
 
 		cy.cGet('input[name="comments-panel-status"][value="unresolved"]').check();
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
-		cy.cGet('.comments-panel-thread-text')
+		cy.cGet('.comments-panel-comment-text')
 			.should('have.text', 'a comment to leave alone');
 
 		cy.cGet('input[name="comments-panel-status"][value="resolved"]').check();
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
-		cy.cGet('.comments-panel-thread-text')
+		cy.cGet('.comments-panel-comment-text')
 			.should('have.text', 'a comment to resolve');
 
 		cy.cGet('input[name="comments-panel-status"][value="all"]').check();
@@ -188,7 +219,7 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-filter-replies').check();
 
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
-		cy.cGet('.comments-panel-thread-text')
+		cy.cGet('.comments-panel-comment.is-first .comments-panel-comment-text')
 			.should('have.text', 'a comment with an answer');
 	});
 
@@ -242,19 +273,19 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		// The document holds the comments in the order they sit
 		// on the page.
 		cy.cGet('.comments-panel-thread').eq(0)
-			.find('.comments-panel-thread-text').should('have.text', 'the older comment');
+			.find('.comments-panel-comment-text').should('have.text', 'the older comment');
 
 		cy.cGet('#comments-panel-sort-select').select('newest');
 		cy.cGet('.comments-panel-thread').eq(0)
-			.find('.comments-panel-thread-text').should('have.text', 'the newer comment');
+			.find('.comments-panel-comment-text').should('have.text', 'the newer comment');
 		cy.cGet('.comments-panel-thread').eq(1)
-			.find('.comments-panel-thread-text').should('have.text', 'the older comment');
+			.find('.comments-panel-comment-text').should('have.text', 'the older comment');
 
 		cy.cGet('#comments-panel-sort-select').select('oldest');
 		cy.cGet('.comments-panel-thread').eq(0)
-			.find('.comments-panel-thread-text').should('have.text', 'the older comment');
+			.find('.comments-panel-comment-text').should('have.text', 'the older comment');
 		cy.cGet('.comments-panel-thread').eq(1)
-			.find('.comments-panel-thread-text').should('have.text', 'the newer comment');
+			.find('.comments-panel-comment-text').should('have.text', 'the newer comment');
 	});
 
 	it('the sort and the filters hold at the same time', function() {
@@ -272,9 +303,9 @@ describe(['tagdesktop'], 'Comments panel', function() {
 
 		cy.cGet('.comments-panel-thread').should('have.length', 2);
 		cy.cGet('.comments-panel-thread').eq(0)
-			.find('.comments-panel-thread-text').should('have.text', 'apples again, last');
+			.find('.comments-panel-comment-text').should('have.text', 'apples again, last');
 		cy.cGet('.comments-panel-thread').eq(1)
-			.find('.comments-panel-thread-text').should('have.text', 'apples came first');
+			.find('.comments-panel-comment-text').should('have.text', 'apples came first');
 	});
 
 	it('a resolved thread is marked as resolved', function() {
@@ -284,7 +315,7 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		openCommentsTab();
 
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
-		cy.cGet('.comments-panel-thread-resolved').should('exist');
+		cy.cGet('.comments-panel-comment-resolved').should('exist');
 	});
 
 	it('picking a resolved comment leaves the resolved ones on show', function() {

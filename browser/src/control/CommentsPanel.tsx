@@ -13,11 +13,12 @@
 /* CommentsPanel - every comment thread as one list, in a tab
    of the navigation panel. The canvas section owns them. */
 
-// A comment together with the replies written under it, in the
-// order the comment list section holds them.
+// A comment together with the replies under it. root starts it,
+// replies read in order, depthOfId says how deep each is.
 interface CommentThread {
   root: any;
   replies: any[];
+  depthOfId: Map<string, number>;
 }
 
 // Which threads the list shows. A thread has to pass the words
@@ -34,6 +35,11 @@ interface CommentFilters {
 type CommentSort = 'position' | 'newest' | 'oldest' | 'author';
 
 class CommentsPanel {
+  // How far a reply is stepped in from the comment it answers,
+  // in pixels, and how many steps deep the stepping goes.
+  private static readonly stepWidth = 14;
+  private static readonly deepestStep = 4;
+
   private map: any;
   private listNode: HTMLElement | null = null;
   private placeholderNode: HTMLElement | null = null;
@@ -59,12 +65,12 @@ class CommentsPanel {
   // again only when the document has different ones.
   private offeredAuthors: string[] = [];
 
-  // The thread the user last picked, by the id of its first
-  // comment. A rebuilt list keeps the mark on that row.
+  // The comment the user last picked, by id. A rebuilt list
+  // keeps the mark on that row.
   private selectedId: string | null = null;
 
-  // The threads the user opened to read in full, by first
-  // comment id. A rebuilt list keeps the open ones open.
+  // The comments the user opened to read in full, by id. A
+  // rebuilt list keeps the open ones open.
   private openedIds: Set<string> = new Set<string>();
 
   // The parts of each row as it stands, in the order the rows
@@ -404,7 +410,7 @@ class CommentsPanel {
 
     const threads = this.collectThreads();
     this.updateAuthorFilter(threads);
-    this.forgetOpenedThreadsThatAreGone(threads);
+    this.forgetOpenedCommentsThatAreGone(threads);
     const shown = this.sortThreads(
       threads.filter((thread) => this.matchesFilters(thread)),
     );
@@ -451,23 +457,70 @@ class CommentsPanel {
     for (const comment of comments)
       commentOfId.set(String(comment.sectionProperties.data.id), comment);
 
-    const threadOfRootId = new Map<string, CommentThread>();
-    const threads: CommentThread[] = [];
-
+    // The comments that answer each comment, in the order the
+    // document holds them.
+    const answersOfId = new Map<string, any[]>();
+    const roots: any[] = [];
     for (const comment of comments) {
       const root = CommentsPanel.rootOf(comment, commentOfId);
-      const rootId = String(root.sectionProperties.data.id);
-
-      let thread = threadOfRootId.get(rootId);
-      if (!thread) {
-        thread = { root: root, replies: [] };
-        threadOfRootId.set(rootId, thread);
-        threads.push(thread);
+      if (comment === root) {
+        roots.push(comment);
+        continue;
       }
-      if (comment !== root) thread.replies.push(comment);
+      const parentId = String(comment.sectionProperties.data.parent);
+      const answers = answersOfId.get(parentId);
+      if (answers) answers.push(comment);
+      else answersOfId.set(parentId, [comment]);
+    }
+
+    const threads = roots.map((root) =>
+      CommentsPanel.buildThread(root, answersOfId),
+    );
+
+    // A comment whose chain of parents closes on itself has no
+    // first comment, so a thread starts at the comment itself.
+    const held = new Set<string>();
+    for (const thread of threads)
+      for (const id of thread.depthOfId.keys()) held.add(id);
+    for (const comment of comments) {
+      const id = String(comment.sectionProperties.data.id);
+      if (held.has(id)) continue;
+      const thread = CommentsPanel.buildThread(comment, answersOfId);
+      for (const heldId of thread.depthOfId.keys()) held.add(heldId);
+      threads.push(thread);
     }
 
     return threads;
+  }
+
+  // Walk a thread from its first comment down, so every reply
+  // lands after what it answers and carries its depth.
+  private static buildThread(
+    root: any,
+    answersOfId: Map<string, any[]>,
+  ): CommentThread {
+    const thread: CommentThread = {
+      root: root,
+      replies: [],
+      depthOfId: new Map<string, number>(),
+    };
+    thread.depthOfId.set(String(root.sectionProperties.data.id), 0);
+
+    const collectAnswers = (comment: any, depth: number): void => {
+      const id = String(comment.sectionProperties.data.id);
+      for (const answer of answersOfId.get(id) ?? []) {
+        const answerId = String(answer.sectionProperties.data.id);
+        // A comment that is its own ancestor would send this
+        // walk round for ever, so reaching one twice stops.
+        if (thread.depthOfId.has(answerId)) continue;
+        thread.depthOfId.set(answerId, depth + 1);
+        thread.replies.push(answer);
+        collectAnswers(answer, depth + 1);
+      }
+    };
+    collectAnswers(root, 0);
+
+    return thread;
   }
 
   // The comment a thread starts with, found by following each
@@ -489,17 +542,29 @@ class CommentsPanel {
     }
   }
 
+  // A thread: the comment it starts with, then the replies under
+  // it, each stepped in one level further than what it answers.
   private buildThreadRow(thread: CommentThread): HTMLElement {
-    const data = thread.root.sectionProperties.data;
+    return (
+      <li class="comments-panel-thread">
+        {this.buildCommentRow(thread, thread.root)}
+        {thread.replies.map((reply) => this.buildCommentRow(thread, reply))}
+      </li>
+    );
+  }
+
+  private buildCommentRow(thread: CommentThread, comment: any): HTMLElement {
+    const data = comment.sectionProperties.data;
     const id = String(data.id);
     const opened = this.openedIds.has(id);
     const textId = 'comments-panel-text-' + id;
+    const depth = thread.depthOfId.get(id) ?? 0;
 
     const textNode = (
       <span
         id={textId}
         class={
-          'comments-panel-thread-text cool-dont-break' +
+          'comments-panel-comment-text cool-dont-break' +
           (opened ? ' is-opened' : '')
         }
       >
@@ -509,7 +574,7 @@ class CommentsPanel {
 
     const openNode = (
       <button
-        class="comments-panel-thread-open hidden"
+        class="comments-panel-comment-open hidden"
         type="button"
         aria-controls={textId}
         aria-expanded={String(opened)}
@@ -521,30 +586,36 @@ class CommentsPanel {
 
     this.builtRows.push({ id: id, textNode: textNode, openNode: openNode });
 
+    // Beyond this depth the steps would leave no room to read
+    // in, so the deeper replies line up with the last step.
+    const step = Math.min(depth, CommentsPanel.deepestStep);
+
     return (
-      <li
+      <div
         class={
-          'comments-panel-thread' +
+          'comments-panel-comment' +
+          (comment === thread.root ? ' is-first' : ' is-reply') +
           (id === this.selectedId ? ' is-selected' : '')
         }
+        style={{ marginInlineStart: step * CommentsPanel.stepWidth + 'px' }}
         data-comment-id={id}
       >
         <button
-          class="comments-panel-thread-button"
+          class="comments-panel-comment-button"
           type="button"
-          onClick={() => this.goToThread(thread)}
+          onClick={() => this.goToComment(comment)}
         >
-          <span class="comments-panel-thread-head">
+          <span class="comments-panel-comment-head">
             {this.buildAvatar(data)}
-            <span class="comments-panel-thread-author">{data.author}</span>
+            <span class="comments-panel-comment-author">{data.author}</span>
           </span>
           {textNode}
         </button>
-        <div class="comments-panel-thread-footer">
-          {this.buildThreadTags(thread)}
+        <div class="comments-panel-comment-footer">
+          {this.buildCommentTags(thread, comment)}
           {openNode}
         </div>
-      </li>
+      </div>
     );
   }
 
@@ -579,12 +650,13 @@ class CommentsPanel {
     }
   }
 
-  // A thread the document no longer has is no longer open. A
-  // thread a filter holds back keeps its state and returns.
-  private forgetOpenedThreadsThatAreGone(threads: CommentThread[]): void {
-    const present = new Set<string>(
-      threads.map((thread) => String(thread.root.sectionProperties.data.id)),
-    );
+  // A comment the document no longer has is no longer open. One
+  // a filter holds back keeps its state and comes back open.
+  private forgetOpenedCommentsThatAreGone(threads: CommentThread[]): void {
+    const present = new Set<string>();
+    for (const thread of threads)
+      for (const id of thread.depthOfId.keys()) present.add(id);
+
     for (const id of Array.from(this.openedIds))
       if (!present.has(id)) this.openedIds.delete(id);
   }
@@ -603,13 +675,13 @@ class CommentsPanel {
     else if (data.avatar) image.setAttribute('src', data.avatar);
     else {
       app.LOUtil.setUserImage(image, this.map, this.map.getViewId(data.author));
-      image.classList.add('comments-panel-thread-avatar-figure');
+      image.classList.add('comments-panel-comment-avatar-figure');
     }
 
     const color = this.authorColor(data.author);
     return (
       <span
-        class="comments-panel-thread-avatar cool-annotation-img"
+        class="comments-panel-comment-avatar cool-annotation-img"
         style={color ? { borderColor: color } : {}}
       >
         {image}
@@ -617,27 +689,27 @@ class CommentsPanel {
     );
   }
 
-  // What a row says besides the words: when the thread was
-  // started, how many replies it holds and whether resolved.
-  private buildThreadTags(thread: CommentThread): HTMLElement {
-    const data = thread.root.sectionProperties.data;
+  // What a row says besides the words: when the comment was
+  // written, whether it is resolved, and the reply count.
+  private buildCommentTags(thread: CommentThread, comment: any): HTMLElement {
+    const data = comment.sectionProperties.data;
     const resolved = data.resolved === 'true';
-    const replyCount = thread.replies.length;
+    const replyCount = comment === thread.root ? thread.replies.length : 0;
 
     return (
-      <span class="comments-panel-thread-tags">
-        <span class="comments-panel-thread-date cool-annotation-date">
+      <span class="comments-panel-comment-tags">
+        <span class="comments-panel-comment-date cool-annotation-date">
           {this.formatDate(data.dateTime)}
         </span>
         {replyCount > 0 && (
-          <span class="comments-panel-thread-replies">
+          <span class="comments-panel-comment-replies">
             {replyCount === 1
               ? replyCount + ' ' + _('reply')
               : replyCount + ' ' + _('replies')}
           </span>
         )}
         {resolved && (
-          <span class="comments-panel-thread-resolved cool-annotation-content-resolved">
+          <span class="comments-panel-comment-resolved cool-annotation-content-resolved">
             {_('Resolved')}
           </span>
         )}
@@ -645,12 +717,12 @@ class CommentsPanel {
     );
   }
 
-  private goToThread(thread: CommentThread): void {
+  private goToComment(comment: any): void {
     const section = this.getCommentSection();
     if (!section) return;
 
-    this.markSelectedRow(String(thread.root.sectionProperties.data.id));
-    section.goToComment(thread.root);
+    this.markSelectedRow(String(comment.sectionProperties.data.id));
+    section.goToComment(comment);
   }
 
   private markSelectedRow(id: string): void {
@@ -658,7 +730,7 @@ class CommentsPanel {
     if (!this.listNode) return;
 
     this.listNode
-      .querySelectorAll<HTMLElement>('.comments-panel-thread')
+      .querySelectorAll<HTMLElement>('.comments-panel-comment')
       .forEach((row) => {
         row.classList.toggle('is-selected', row.dataset.commentId === id);
       });

@@ -188,45 +188,65 @@
 	display: none;
 }
 
-/* A row of the list: the author and the words, then a footer
-   with the date, the replies and the resolved marker. */
+/* One thread: the comment it starts with, then its replies. The
+   line between threads tells one from the next. */
 .comments-panel-thread {
 	display: flex;
 	flex-direction: column;
-	border-bottom: 1px solid var(--color-border-lighter);
+	border-bottom: 1px solid var(--color-border);
+	padding-block: var(--spacing-xs);
+}
+
+/* One comment of a thread. A reply is stepped in, and the line
+   down its leading edge ties it to the comment above. */
+.comments-panel-comment {
+	display: flex;
+	flex-direction: column;
 	border-inline-start: 3px solid transparent;
 }
 
-.comments-panel-thread:hover {
+.comments-panel-comment.is-reply {
+	border-inline-start: 1px dashed var(--color-annotation-line);
+	padding-inline-start: 2px;
+}
+
+.comments-panel-comment:hover {
 	background: var(--color-background-dark);
 }
 
-.comments-panel-thread.is-selected {
+.comments-panel-comment.is-selected {
 	background: var(--color-background-dark);
-	border-inline-start-color: rgb(var(--doc-type, 11, 135, 231));
+	border-inline-start: 3px solid rgb(var(--doc-type, 11, 135, 231));
+	padding-inline-start: 0;
 }
 
-.comments-panel-thread-button {
+/* btns.css gives a plain button in a div the look of a dialog
+   button. These take their box back, by id to outweigh it. */
+#comments-panel .comments-panel-comment-button {
 	display: flex;
 	flex-direction: column;
 	gap: var(--spacing-s);
 	width: 100%;
+	height: auto;
 	margin: 0;
 	padding: var(--spacing-m) var(--spacing-l) var(--spacing-s);
 	border: none;
+	border-radius: 0;
 	background: transparent;
 	color: inherit;
 	font: inherit;
+	line-height: inherit;
 	text-align: start;
+	vertical-align: baseline;
 	cursor: pointer;
 }
 
-.comments-panel-thread-button:focus-visible {
+.comments-panel-comment-button:focus-visible {
 	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
 	outline-offset: -2px;
 }
 
-.comments-panel-thread-head {
+.comments-panel-comment-head {
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-s);
@@ -234,18 +254,18 @@
 
 /* The round frame around an author's picture. It carries the
    author's view colour, or the neutral one set here. */
-.comments-panel-thread-avatar {
+.comments-panel-comment-avatar {
 	flex: 0 0 auto;
 	border-color: var(--color-border-dark);
 }
 
 /* The figure that stands in for a missing picture is drawn to
    the edges of its box, so it needs room inside the frame. */
-.comments-panel-thread-avatar-figure {
+.comments-panel-comment-avatar-figure {
 	padding: 1.8px;
 }
 
-.comments-panel-thread-author {
+.comments-panel-comment-author {
 	flex: 1 1 auto;
 	overflow: hidden;
 	white-space: nowrap;
@@ -254,9 +274,15 @@
 	font-size: 0.83rem;
 }
 
+/* A reply is a smaller thing than the comment that started the
+   thread. */
+.comments-panel-comment.is-reply .comments-panel-comment-author {
+	font-weight: normal;
+}
+
 /* A long comment is cut off after three lines. All of the text
    stays in the row, so a search reaches the hidden part too. */
-.comments-panel-thread-text {
+.comments-panel-comment-text {
 	overflow: hidden;
 	max-height: 3.9em;
 	line-height: 1.3;
@@ -264,18 +290,18 @@
 }
 
 /* An open row gives the comment all the lines it needs. */
-.comments-panel-thread-text.is-opened {
+.comments-panel-comment-text.is-opened {
 	max-height: none;
 }
 
-.comments-panel-thread-footer {
+.comments-panel-comment-footer {
 	display: flex;
 	align-items: baseline;
 	gap: var(--spacing-s);
 	padding: 0 var(--spacing-l) var(--spacing-m);
 }
 
-.comments-panel-thread-tags {
+.comments-panel-comment-tags {
 	display: flex;
 	flex-wrap: wrap;
 	gap: var(--spacing-s);
@@ -285,25 +311,29 @@
 
 /* Opens the row to read the rest of a comment, and closes it
    again. Kept at the end of the footer line. */
-.comments-panel-thread-open {
+#comments-panel .comments-panel-comment-open {
+	width: auto;
+	height: auto;
 	margin: 0;
 	margin-inline-start: auto;
 	padding: 0;
 	border: none;
+	border-radius: 0;
 	background: transparent;
 	color: rgb(var(--doc-type, 11, 135, 231));
 	font: inherit;
 	font-size: 0.75rem;
 	line-height: 1;
+	vertical-align: baseline;
 	white-space: nowrap;
 	cursor: pointer;
 }
 
-.comments-panel-thread-open:hover {
+.comments-panel-comment-open:hover {
 	text-decoration: underline;
 }
 
-.comments-panel-thread-open:focus-visible {
+.comments-panel-comment-open:focus-visible {
 	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
 	outline-offset: 1px;
 }
