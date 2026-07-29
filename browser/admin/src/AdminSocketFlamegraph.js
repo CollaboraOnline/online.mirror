@@ -310,6 +310,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		// The empty picture already takes the room it will draw into, so nothing jumps once the
 		// first samples arrive.
 		this._fillToBottom(document.getElementById('profile-graph'));
+		this._setButtons();
 		this._updateStatus();
 	},
 
@@ -544,7 +545,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			this._updateStatus(
 				_('Sampling is not available on this server') + ': ' + json.reason,
 			);
-			document.getElementById('profile-start').disabled = true;
+			this._setButtons();
 			return;
 		}
 
@@ -1026,6 +1027,18 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		document.getElementById('profile-start').disabled =
 			running || (this._availability && !this._availability.available);
 		document.getElementById('profile-stop').disabled = !running;
+
+		// What to do to fill the picture is worth saying only while it is still empty and starting a
+		// capture is the reader's next move. A server that cannot sample, and a capture that has been
+		// stopped, both have something of their own to say in the status line instead. Availability is
+		// unknown until the server answers, and the words are useful in that moment, so an unknown
+		// server counts as one that can sample.
+		const available = !this._availability || this._availability.available;
+		const waitingToStart =
+			this._state === 'idle' && !this._totals.samples && available;
+		document.getElementById('profile-empty').style.display = waitingToStart
+			? ''
+			: 'none';
 	},
 
 	_updateStatus: function (message) {
