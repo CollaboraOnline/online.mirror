@@ -463,7 +463,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._names = [];
 		this._nextNodeId = 1;
 		this._root = this._makeNode('all', null);
-		this._zoomNode = null;
+		this._setZoom(null);
 		this._placed = false;
 		this._totals.samples = 0;
 		this._totals.idle = 0;
@@ -474,9 +474,16 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		this._scheduleRedraw();
 	},
 
-	_onZoomReset: function () {
-		this._zoomNode = null;
+	// A null node is the whole picture. Reset zoom is live only while one frame is stretched across
+	// the width, since a whole picture leaves it nothing to do.
+	_setZoom: function (node) {
+		this._zoomNode = node;
+		document.getElementById('profile-zoom-reset').disabled = !node;
 		this._scheduleRedraw();
+	},
+
+	_onZoomReset: function () {
+		this._setZoom(null);
 	},
 
 	_onRate: function () {
@@ -886,8 +893,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			.on('click', function (event, cell) {
 				// Clicking a frame the view is already inside zooms back out to it, so the bar
 				// along the bottom takes you all the way out.
-				self._zoomNode = cell.node === self._root ? null : cell.node;
-				self._scheduleRedraw();
+				self._setZoom(cell.node === self._root ? null : cell.node);
 			});
 
 		merged
