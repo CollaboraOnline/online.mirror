@@ -36,6 +36,7 @@
 #include <sfx2/request.hxx>
 #include <sfx2/kit/helper.hxx>
 #include <svx/srchdlg.hxx>
+#include <pamtyp.hxx>
 #include <swmodule.hxx>
 #include <swwait.hxx>
 #include <workctrl.hxx>
@@ -129,6 +130,14 @@ static void lcl_emitSearchResultCallbacks(SvxSearchItem const * pSearchItem, SwW
         KitHelper::notifyUpdate(pNotifySh,COKitCallbackType::TEXT_SELECTION);
         KitHelper::notifyOtherViewsUpdatePerViewId(pNotifySh, COKitCallbackType::TEXT_VIEW_SELECTION);
     }
+}
+
+static bool lcl_IsNotTextSearch(const SvxSearchItem* pSearchItem)
+{
+    if (!pSearchItem || pSearchItem->GetSearchString().isEmpty())
+        return true;
+
+    return pSearchItem->GetPattern(); // paragraph style search
 }
 
 void SwView::ExecSearch(SfxRequest& rReq)
@@ -544,19 +553,44 @@ bool SwView::SearchAndWrap(bool bApi)
             m_pWrtShell->StartOfSection();
     }
 
-    if (!m_pWrtShell->HasSelection() && (s_pSrchItem->HasStartPoint()))
-    {
-        // No selection -> but we have a start point (top left corner of the
-        // current view), start searching from there, not from the current
-        // cursor position.
-        SwEditShell& rShell = GetWrtShell();
-        Point aPosition(s_pSrchItem->GetStartPointX(), s_pSrchItem->GetStartPointY());
-        rShell.SetCursor(aPosition);
-    }
-
-        // If you want to search in selected areas, they must not be unselected.
     if (!s_pSrchItem->GetSelection())
+    {
+        // If you want to search in selected areas, they must not be unselected.
         m_pWrtShell->KillSelection(nullptr, false);
+
+        if (s_pSrchItem->HasStartPoint())
+        {
+            // No selection -> but we have a start point (top left corner of the
+            // current view), start searching from there, not from the current
+            // cursor position.
+            SwEditShell& rShell = GetWrtShell();
+            Point aPosition(s_pSrchItem->GetStartPointX(), s_pSrchItem->GetStartPointY());
+            rShell.SetCursor(aPosition);
+        }
+        else if (m_pWrtShell->GetCursor()->GetPointContentNode()
+                 && lcl_IsNotTextSearch(s_pSrchItem))
+        {
+            // if already at the end then start at the next paragraph
+            SwCursor* pCursor = m_pWrtShell->GetCursor();
+            const sal_Int32 nIndex = pCursor->GetPoint()->GetContentIndex();
+            const bool bToNextPara
+                = s_pSrchItem->GetBackward()
+                    ? !nIndex
+                    : nIndex == pCursor->GetPointContentNode()->Len();
+            if (bToNextPara)
+            {
+                SwMoveFnCollection const & fnMove
+                    = s_pSrchItem->GetBackward() ? fnMoveBackward : fnMoveForward;
+                if (!(*fnMove.fnPos)(pCursor->GetPoint(), false))
+                {
+                    if (s_pSrchItem->GetBackward())
+                        m_pWrtShell->EndOfSection();
+                    else
+                        m_pWrtShell->StartOfSection();
+                }
+            }
+        }
+    }
 
     std::optional<SwWait> oWait( std::in_place, *GetDocShell(), true );
     if( FUNC_Search( aOpts ) )
