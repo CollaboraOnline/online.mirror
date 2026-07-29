@@ -531,6 +531,7 @@ void Bridge::promptSaveLocation(std::function<void(const std::string&, const std
     if (!loKitDoc)
     {
         LOG_ERR("promptSaveLocation: no loKitDocument");
+        finishSave(false);
         return;
     }
 
@@ -540,6 +541,7 @@ void Bridge::promptSaveLocation(std::function<void(const std::string&, const std
     if (formats.empty())
     {
         LOG_ERR("promptSaveLocation: no formats available for document type");
+        finishSave(false);
         return;
     }
 
@@ -665,6 +667,9 @@ void Bridge::promptSaveLocation(std::function<void(const std::string&, const std
 
                          callback(finalPath.toStdString(), format.toStdString());
                      });
+
+    // save never happened, so clear the save-in-flight flag
+    QObject::connect(dialog, &QFileDialog::rejected, this, [this] { finishSave(false); });
 
     dialog->open();
 }
@@ -899,6 +904,10 @@ QVariant Bridge::cool(const QString& messageStr)
         const std::string hostDisplayUri = coda::hostDisplayUriForPath(
             QString::fromStdString(_document._fileURL.getPath()));
         Application::getRecentFiles().add(_document._fileURL.toString(), hostDisplayUri);
+
+        // a Save As ends here, unlike a regular save; it never gets a
+        // SAVECOMPLETED, so clear the save-in-flight flag
+        finishSave(false);
 
         LOG_TRC_NOFILE("loaddocument: sent initial message with new appDocId");
         return {};
