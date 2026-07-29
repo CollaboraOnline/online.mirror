@@ -387,6 +387,7 @@ interface Window {
 	socketProxy: boolean;
 	langParam: string;
 	logoURL?: string;
+	accessibilityStatementUrl: string;
 	MobileAppName: string;
 	geolocationSetup: boolean;
 	wopiHostId: string;

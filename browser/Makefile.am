@@ -525,6 +525,7 @@ COOL_JS_LST =\
 	src/control/Control.NotebookbarImpress.js \
 	src/control/Control.NotebookbarDraw.js \
 	src/control/Control.NotebookbarBuilder.js \
+	src/control/AccessibilityNotice.ts \
 	src/control/Control.ContextToolbar.ts \
 	src/control/Control.Layers.js \
 	src/control/Control.SidebarBase.ts \
@@ -1140,6 +1141,7 @@ pot:
 		src/control/Control.AboutDialog.ts \
 		src/control/Control.AddressInputField.ts \
 		src/control/Control.AlertDialog.js \
+		src/control/AccessibilityNotice.ts \
 		src/control/Control.Command.js \
 		src/control/Control.ContextMenu.js \
 		src/control/Control.DocumentNameInput.js \
