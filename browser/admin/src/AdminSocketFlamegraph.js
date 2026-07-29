@@ -597,7 +597,9 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 				_('The document closed. The samples so far are kept.'),
 			);
 		} else {
-			this._updateStatus(_('Sampling stopped') + ' (' + reason + ')');
+			// The server writes a sentence for an end nobody here asked for, and sends none for a stop
+			// the reader pressed, where the buttons and the kept picture say it already.
+			this._updateStatus(tokens.slice(2).join(' '));
 		}
 	},
 
