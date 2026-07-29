@@ -274,7 +274,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 			this._onFreeze.bind(this);
 		document.getElementById('profile-zoom-reset').onclick =
 			this._onZoomReset.bind(this);
-		document.getElementById('profile-fit').onclick = this._onFit.bind(this);
+		document.getElementById('profile-fit').onchange = this._onFit.bind(this);
 		document.getElementById('profile-download-folded').onclick =
 			this._onDownloadFolded.bind(this);
 		document.getElementById('profile-download-svg').onclick =
@@ -439,12 +439,7 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 	},
 
 	_onFit: function () {
-		this._fitHeight = !this._fitHeight;
-		// The label stays put and the button looks pressed while the rows are squeezed, so the word
-		// on it always names the mode rather than sometimes naming the state it is in.
-		const fit = document.getElementById('profile-fit');
-		fit.classList.toggle('is-dark', this._fitHeight);
-		fit.setAttribute('aria-pressed', this._fitHeight ? 'true' : 'false');
+		this._fitHeight = document.getElementById('profile-fit').checked;
 		this._scheduleRedraw();
 	},
 
