@@ -23,6 +23,10 @@ class NavigatorPanel extends SidebarBase {
 	closeNavButton: HTMLElement;
 	expandButton: HTMLElement;
 
+	// The panel element of each tab, keyed by the tab button id.
+	// A tab whose panel the page lacks is not in the map.
+	tabPanels: Map<string, HTMLElement>;
+
 	highlightTerm: string;
 	focusQuickFind: boolean;
 	dirtyWidth: boolean = true;
@@ -57,6 +61,7 @@ class NavigatorPanel extends SidebarBase {
 		this.quickFindWrapper = this.navigationPanel.querySelector(
 			'#quickfind-dock-wrapper',
 		);
+		this.collectTabPanels();
 		this.map.on(
 			'zoomend',
 			this.handleFloatingButtonVisibilityOnZoomChange,
@@ -455,6 +460,18 @@ class NavigatorPanel extends SidebarBase {
 		super.closeSidebar();
 	}
 
+	// Note down the panel of each tab, so that showing one tab
+	// and hiding the rest is a lookup rather than a branch each.
+	collectTabPanels() {
+		this.tabPanels = new Map();
+		if (this.presentationControlsWrapper)
+			this.tabPanels.set('tab-slide-sorter', this.presentationControlsWrapper);
+		if (this.navigatorDockWrapper)
+			this.tabPanels.set('tab-navigator', this.navigatorDockWrapper);
+		if (this.quickFindWrapper)
+			this.tabPanels.set('tab-quick-find', this.quickFindWrapper);
+	}
+
 	// Function to handle tab click
 	switchNavigationTab(tabId: string) {
 		// The maximized grid is a view of the slide list, so it lives on the
@@ -467,6 +484,8 @@ class NavigatorPanel extends SidebarBase {
 				'hidden',
 				tabId !== 'tab-slide-sorter',
 			);
+
+		if (!this.tabPanels.has(tabId)) return;
 
 		// Remove 'selected' class from all tabs
 		this.navigationPanel
@@ -486,23 +505,17 @@ class NavigatorPanel extends SidebarBase {
 			tab.removeAttribute('tabindex');
 		}
 
-		// Toggle visibility based on tabId
-		if (tabId === 'tab-slide-sorter') {
-			// todo: must be a better way to handle this
-			this.presentationControlsWrapper.style.display = 'block';
-			this.navigatorDockWrapper.style.display = 'none';
-			this.quickFindWrapper.style.display = 'none';
-		} else if (tabId === 'tab-navigator') {
+		// The decks that core fills are only asked for once
+		// their tab is shown.
+		if (tabId === 'tab-navigator') {
 			if (!app.showNavigator) app.map.sendUnoCommand('.uno:Navigator');
-			this.presentationControlsWrapper.style.display = 'none';
-			this.navigatorDockWrapper.style.display = 'block';
-			this.quickFindWrapper.style.display = 'none';
 		} else if (tabId === 'tab-quick-find') {
 			if (!app.showQuickFind) app.map.sendUnoCommand('.uno:QuickFind'); // todo add showQuickFind to other areas of app
-			this.presentationControlsWrapper.style.display = 'none';
-			this.navigatorDockWrapper.style.display = 'none';
-			this.quickFindWrapper.style.display = 'block';
 		}
+
+		this.tabPanels.forEach((panel, id) => {
+			panel.style.display = id === tabId ? 'block' : 'none';
+		});
 	}
 
 	handleFloatingButtonVisibilityOnZoomChange() {
