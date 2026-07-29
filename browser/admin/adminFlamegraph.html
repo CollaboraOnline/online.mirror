@@ -5,7 +5,7 @@
     <!-- The controls take two wrapping rows, and the picture gets the rest of the window. What
          starts and steers the capture is on the first row, what changes the view of it on the
          second. -->
-    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:4px;">
+    <div class="profile-row" style="margin-bottom:4px;">
       <h3 class="title is-5" style="margin:0 6px 0 0;"><script>document.write(l10nstrings.strFlamegraph)</script></h3>
 
       <label for="profile-document"><script>document.write(l10nstrings.strProfilePickDocument)</script></label>
@@ -21,14 +21,14 @@
       </select>
     </div>
 
-    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-bottom:4px;">
+    <div class="profile-row" style="margin-bottom:4px;">
       <!-- How tall the rows are drawn is a mode for the whole picture, so it opens the row on its
            own, with a rule between it and the controls for looking through a picture. -->
       <label class="checkbox is-size-7"><input type="checkbox" id="profile-fit"> <script>document.write(l10nstrings.strProfileFitRows)</script></label>
 
       <span aria-hidden="true" style="border-left:1px solid #DBDBDB;align-self:stretch;min-height:1.5em;"></span>
 
-      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;">
+      <div class="profile-row">
         <button type="button" class="button is-small" id="profile-zoom-reset" disabled><script>document.write(l10nstrings.strProfileResetZoom)</script></button>
         <button type="button" class="button is-small" id="profile-freeze"><script>document.write(l10nstrings.strProfileFreeze)</script></button>
 
@@ -38,7 +38,7 @@
       </div>
 
       <!-- Taking a capture away is occasional work, so it sits apart at the right end of the row. -->
-      <div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;margin-left:auto;">
+      <div class="profile-row" style="margin-left:auto;">
         <button type="button" class="button is-small" id="profile-download-folded"><script>document.write(l10nstrings.strProfileDownloadFolded)</script></button>
         <button type="button" class="button is-small" id="profile-download-svg"><script>document.write(l10nstrings.strProfileDownloadSvg)</script></button>
       </div>
