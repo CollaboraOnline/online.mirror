@@ -1031,11 +1031,16 @@ const AdminSocketFlamegraph = AdminSocketBase.extend({
 		const available = !this._availability || this._availability.available;
 		let words = '';
 
-		if (this._state === 'idle' && !this._totals.samples && available) {
+		// The picture is empty while no stack has been counted. A sample is taken on every tick,
+		// including the ticks that found no thread on the processor, so the sample count is not what
+		// says whether there is anything to draw.
+		const drawn = this._root.value;
+
+		if (this._state === 'idle' && !drawn && available) {
 			words = _('Choose a document above, then press Start to sample it.');
 		} else if (this._state === 'priming') {
 			words = _('Reading symbols, the first sample takes a moment.');
-		} else if (this._state === 'running' && !this._totals.samples) {
+		} else if (this._state === 'running' && !drawn) {
 			// A kit asleep in poll has no thread to sample, so a document that nobody is working on
 			// draws nothing. The idle count rising is what shows the sampler is still going.
 			words =
