@@ -64,6 +64,19 @@ describe(['tagdesktop'], 'Comment markers in the page margin', function() {
 		cy.cGet('.comment-margin-marker-count').should('not.exist');
 	});
 
+	it('the marker of a resolved comment carries a tick', function() {
+		desktopHelper.insertComment('a comment to resolve');
+
+		cy.cGet('.comment-margin-marker').should('not.have.class', 'is-resolved');
+		cy.cGet('.comment-margin-marker-resolved').should('not.exist');
+
+		cy.cGet('#comment-annotation-menu-1').click();
+		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Resolve').click();
+
+		cy.cGet('.comment-margin-marker').should('have.class', 'is-resolved');
+		cy.cGet('.comment-margin-marker-resolved').should('exist');
+	});
+
 	it('picking a marker opens the comment in the navigation panel', function() {
 		desktopHelper.insertComment('a comment to reach from its marker');
 

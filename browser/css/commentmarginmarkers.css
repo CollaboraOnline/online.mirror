@@ -68,6 +68,28 @@
 	text-align: center;
 }
 
+/* A tick in the top corner of an icon whose comments have all been resolved. */
+#comment-margin-markers .comment-margin-marker-resolved {
+	position: absolute;
+	top: -3px;
+	inset-inline-end: -3px;
+	width: 12px;
+	height: 12px;
+	line-height: 0;
+}
+
+#comment-margin-markers .comment-margin-marker-tick-disc {
+	fill: var(--color-success);
+}
+
+#comment-margin-markers .comment-margin-marker-tick {
+	fill: none;
+	stroke: var(--color-primary-text);
+	stroke-width: 1.7;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
 #comment-margin-markers .comment-margin-marker:hover {
 	filter: brightness(1.1);
 }

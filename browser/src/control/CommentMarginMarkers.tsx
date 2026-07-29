@@ -118,23 +118,17 @@ class CommentMarginMarkers {
 
   private buildMarker(group: CommentMarkerGroup): HTMLElement {
     const count = group.comments.length;
-    const label =
-      count === 1
-        ? _('Go to comment by {author}').replace(
-            '{author}',
-            group.comments[0].sectionProperties.data.author,
-          )
-        : _('Go to {count} comments written here').replace(
-            '{count}',
-            String(count),
-          );
 
     return (
       <button
-        class={'comment-margin-marker' + (count > 1 ? ' has-many' : '')}
+        class={
+          'comment-margin-marker' +
+          (count > 1 ? ' has-many' : '') +
+          (group.resolved ? ' is-resolved' : '')
+        }
         type="button"
-        aria-label={label}
-        data-title={label}
+        aria-label={CommentMarginMarkers.labelOf(group)}
+        data-title={CommentMarginMarkers.labelOf(group)}
         onClick={(event: MouseEvent) => {
           event.stopPropagation();
           this.goToComment(group.comments[0]);
@@ -143,7 +137,42 @@ class CommentMarginMarkers {
         {count > 1 && (
           <span class="comment-margin-marker-count">{String(count)}</span>
         )}
+        {group.resolved && CommentMarginMarkers.buildResolvedTick()}
       </button>
+    );
+  }
+
+  // What an icon says to a reader who cannot see it.
+  private static labelOf(group: CommentMarkerGroup): string {
+    const count = group.comments.length;
+    const author = group.comments[0].sectionProperties.data.author;
+
+    if (count === 1)
+      return group.resolved
+        ? _('Go to resolved comment by {author}').replace('{author}', author)
+        : _('Go to comment by {author}').replace('{author}', author);
+
+    return group.resolved
+      ? _('Go to {count} comments written here, all of them resolved').replace(
+          '{count}',
+          String(count),
+        )
+      : _('Go to {count} comments written here').replace(
+          '{count}',
+          String(count),
+        );
+  }
+
+  // The tick that marks an icon whose comments have all been resolved. It is
+  // drawn rather than fetched so that it takes its colours from the theme.
+  private static buildResolvedTick(): HTMLElement {
+    return (
+      <span class="comment-margin-marker-resolved" aria-hidden="true">
+        <svg viewBox="0 0 12 12" width="12" height="12">
+          <circle class="comment-margin-marker-tick-disc" cx="6" cy="6" r="6" />
+          <path class="comment-margin-marker-tick" d="M3 6.1 L5.2 8.3 L9 3.9" />
+        </svg>
+      </span>
     );
   }
 
