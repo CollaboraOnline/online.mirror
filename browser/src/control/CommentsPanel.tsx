@@ -467,7 +467,6 @@ class CommentsPanel {
   private buildThreadRow(thread: CommentThread): HTMLElement {
     const data = thread.root.sectionProperties.data;
     const id = String(data.id);
-    const color = this.authorColor(data.author);
 
     return (
       <li
@@ -483,18 +482,43 @@ class CommentsPanel {
           onClick={() => this.goToThread(thread)}
         >
           <span class="comments-panel-thread-head">
-            <span
-              class="comments-panel-thread-dot"
-              style={color ? { backgroundColor: color } : {}}
-            ></span>
+            {this.buildAvatar(data)}
             <span class="comments-panel-thread-author">{data.author}</span>
           </span>
-          <span class="comments-panel-thread-text">
+          <span class="comments-panel-thread-text cool-dont-break">
             {this.plainTextOf(data)}
           </span>
           {this.buildThreadTags(thread)}
         </button>
       </li>
+    );
+  }
+
+  // The picture of the author, in the round frame and the colour
+  // of their view. A missing one falls back to a plain figure.
+  private buildAvatar(data: any): HTMLElement {
+    const image = (
+      <img class="avatar-img" alt={data.author} />
+    ) as HTMLImageElement;
+
+    const hostAvatar = this.map['wopi']
+      ? this.map['wopi'].CommentAvatarUrl
+      : null;
+    if (hostAvatar) image.setAttribute('src', hostAvatar);
+    else if (data.avatar) image.setAttribute('src', data.avatar);
+    else {
+      app.LOUtil.setUserImage(image, this.map, this.map.getViewId(data.author));
+      image.classList.add('comments-panel-thread-avatar-figure');
+    }
+
+    const color = this.authorColor(data.author);
+    return (
+      <span
+        class="comments-panel-thread-avatar cool-annotation-img"
+        style={color ? { borderColor: color } : {}}
+      >
+        {image}
+      </span>
     );
   }
 
@@ -507,7 +531,7 @@ class CommentsPanel {
 
     return (
       <span class="comments-panel-thread-tags">
-        <span class="comments-panel-thread-date">
+        <span class="comments-panel-thread-date cool-annotation-date">
           {this.formatDate(data.dateTime)}
         </span>
         {replyCount > 0 && (
@@ -518,7 +542,9 @@ class CommentsPanel {
           </span>
         )}
         {resolved && (
-          <span class="comments-panel-thread-resolved">{_('Resolved')}</span>
+          <span class="comments-panel-thread-resolved cool-annotation-content-resolved">
+            {_('Resolved')}
+          </span>
         )}
       </span>
     );
@@ -582,7 +608,10 @@ class CommentsPanel {
     const date = new Date(dateTime.replace(/,.*/, ''));
     if (isNaN(date.getTime())) return dateTime;
 
+    // The same fields the document writes under a comment on the
+    // page.
     return date.toLocaleDateString((String as any).locale, {
+      weekday: 'short',
       year: 'numeric',
       month: 'short',
       day: 'numeric',
