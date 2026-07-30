@@ -59,6 +59,30 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Compare Changes view.', fu
 		markerSitsInTheTrailingPage();
 	});
 
+	it('The two versions share the whole width of the window.', function() {
+		// Given a document with a comment, in doc compare mode:
+		loadDocument('track_changes_comment.docx');
+		enterCompareChangesMode();
+		cy.getFrameWindow().then(function(win) {
+			helper.processToIdle(win);
+		});
+
+		// Then what is left past the trailing page is a margin,
+		// not a column wide enough to hold a comment.
+		cy.getFrameWindow().then(function(win) {
+			var layout = win.app.activeDocument.activeLayout;
+			var pageEnd = new win.cool.SimplePoint(win.app.activeDocument.fileSize.x, 0);
+			pageEnd.mode = 2; // TileMode.RightSide
+			var end = layout.documentToViewX(pageEnd) / win.app.dpiScale;
+			var commentWidth = win.cool.CommentSection.getCommentWidth() / win.app.dpiScale;
+
+			cy.cGet('#document-container').should(function($el) {
+				expect($el.width() - end, 'room left past the trailing page')
+					.to.be.lessThan(commentWidth / 2);
+			});
+		});
+	});
+
 	it('Picking the icon of a comment reads it in the navigation panel.', function() {
 		loadDocument('track_changes_comment.docx');
 		enterCompareChangesMode();

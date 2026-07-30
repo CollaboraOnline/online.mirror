@@ -70,16 +70,13 @@ class ViewLayoutCompareChanges extends ViewLayoutBase {
 
 		const anchorSection = this.getDocumentAnchorSection();
 
-		// Reserve space for the comment section on the right side of the pages.
-		const commentReserve = app.activeDocument.partHasComments
-			? cool.CommentSection.getCommentWidth()
-			: 0;
-		// Shift the center divider to the left so comments fit on the right.
-		this.halfWidth = Math.round((anchorSection.size[0] - commentReserve) * 0.5);
+		// The two versions share the width of the window. A
+		// comment is marked by an icon in its page margin.
+		this.halfWidth = Math.round(anchorSection.size[0] * 0.5);
 		// The gap between the two pages is 2 * viewGap (each page is offset
 		// by viewGap from the center divider).
 		const targetPageWidth = Math.round(
-			(anchorSection.size[0] - 2 * this.viewGap - commentReserve) * 0.5,
+			(anchorSection.size[0] - 2 * this.viewGap) * 0.5,
 		);
 
 		const ratio = targetPageWidth / app.activeDocument.fileSize.pX;
