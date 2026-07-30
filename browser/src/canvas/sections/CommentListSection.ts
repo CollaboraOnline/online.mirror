@@ -1923,6 +1923,19 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public showHideComment (annotation: Comment): void {
+		// The pages take the whole width in these two views, so
+		// no comment sits beside one. The margin icons stand in.
+		if (CommentSection.isMultiColumnLayout()) {
+			if (annotation.isContainerVisible()) {
+				if (this.sectionProperties.selectedComment === annotation)
+					this.unselect();
+				annotation.hide();
+				annotation.update();
+				this.update();
+			}
+			return;
+		}
+
 		// This manually shows/hides comments
 		if (!this.sectionProperties.showResolved && app.map._docLayer._docType === 'text') {
 			const hide = annotation.isContainerVisible() && annotation.sectionProperties.data.resolved === 'true';
@@ -2688,6 +2701,28 @@ export class CommentSection extends CanvasSectionObject {
 		return startY;
 	}
 
+	// Put the box of the comment being written beside its words.
+	// It is kept inside the window, so it stays reachable.
+	private placeCommentBeingWrittenAtItsAnchor (): void {
+		const written = Comment.isAnyEdit();
+		if (!written)
+			return;
+
+		const data = written.sectionProperties.data;
+		if (!data.anchorPos)
+			return;
+
+		if (!data.anchorSPoint)
+			data.anchorSPoint = new cool.SimplePoint(data.anchorPos[0], data.anchorPos[1]);
+
+		written.setContainerPos(
+			true,
+			this.sectionProperties.canvasContainerBounds,
+			data.anchorSPoint.vX / app.dpiScale,
+			data.anchorSPoint.vY / app.dpiScale
+		);
+	}
+
 	public hideArrow (): void {
 		if (this.sectionProperties.arrow) {
 			document.getElementById('document-container').removeChild(this.sectionProperties.arrow);
@@ -2767,12 +2802,18 @@ export class CommentSection extends CanvasSectionObject {
 			return; // No adjustments for Calc, since only one comment can be shown at a time and that comment is shown at its belonging cell.
 		}
 
-		this.sectionProperties.canvasContainerBounds = document.getElementById('document-container').getBoundingClientRect();
+		const documentContainer = document.getElementById('document-container');
+		this.sectionProperties.canvasContainerBounds = documentContainer.getBoundingClientRect();
+
+		// The pages take the whole width in these two views, so
+		// no comment sits beside one. The icons stand for them.
+		const commentsSitBesideThePage = !CommentSection.isMultiColumnLayout();
+		documentContainer.classList.toggle('comments-only-in-the-margin', !commentsSitBesideThePage);
 
 		const availableSpace = this.calculateAvailableSpace();
 		if (!this.commentsHiddenOrNotPresent()) {
 			this.orderCommentList();
-			if (relayout)
+			if (relayout && commentsSitBesideThePage)
 				this.resetCommentsSize();
 
 			var isRTL = document.documentElement.dir === 'rtl';
@@ -2782,16 +2823,7 @@ export class CommentSection extends CanvasSectionObject {
 			var selectedIndex = null;
 			var x = isRTL ? 0 : topRight[0];
 
-			if (CommentSection.isMultiColumnLayout()) {
-				// Follow horizontal scroll like the pages do (documentToViewX also
-				// subtracts viewX), so scrolling right brings the comment column into
-				// view instead of leaving it pinned off-screen.
-				x =
-					topRight[0] -
-					availableSpace -
-					app.activeDocument.activeLayout.scrollProperties.viewX;
-			}
-			else if (isRTL)
+			if (isRTL)
 				x = availableSpace - this.sectionProperties.commentWidth;
 			else {
 				x = (app.activeDocument.fileSize.cX - app.activeDocument.activeLayout.viewedRectangle.cX1 - app.sectionContainer.getCanvasBoundingClientRect().x) * app.dpiScale;
@@ -2811,19 +2843,25 @@ export class CommentSection extends CanvasSectionObject {
 				}
 				else if (!resolved || resolved === 'false' || this.sectionProperties.showResolved) {
 					// The line ends at the icon that stands for
-					// the comment, or beside its box.
+					// it. Without one it is left out.
 					const iconPlace = this.sectionProperties.marginMarkers?.positionOfComment(
 						String(this.sectionProperties.commentList[selectedIndex].sectionProperties.data.id));
-					const posX = iconPlace
-						? (iconPlace[0] + (isRTL ? CommentMarginMarkers.iconWidth() : 0)) * app.dpiScale
-						: (isRTL ? (this.containerObject.getDocumentAnchorSection().size[0] + x + 15) : x);
-					this.showArrow([tempCrd[0], tempCrd[1]], [posX, tempCrd[1]]);
+					if (iconPlace) {
+						const posX = (iconPlace[0] + (isRTL ? CommentMarginMarkers.iconWidth() : 0)) * app.dpiScale;
+						this.showArrow([tempCrd[0], tempCrd[1]], [posX, tempCrd[1]]);
+					}
+					else if (commentsSitBesideThePage) {
+						const posX = isRTL ? (this.containerObject.getDocumentAnchorSection().size[0] + x + 15) : x;
+						this.showArrow([tempCrd[0], tempCrd[1]], [posX, tempCrd[1]]);
+					}
+					else
+						this.hideArrow();
 				}
 			}
 			else
 				this.hideArrow();
 
-			if (relayout)
+			if (relayout && commentsSitBesideThePage)
 				this.resizeLastComment();
 			var lastY = 0;
 			// In Writer a comment is anchored to a point in the text that flows
@@ -2837,7 +2875,11 @@ export class CommentSection extends CanvasSectionObject {
 			var stackFromTop = !selectedIndex
 				|| app.map._docLayer._docType === 'presentation'
 				|| app.map._docLayer._docType === 'drawing';
-			if (stackFromTop) {
+			if (!commentsSitBesideThePage) {
+				this.hideAllComments();
+				this.placeCommentBeingWrittenAtItsAnchor();
+			}
+			else if (stackFromTop) {
 				lastY = this.loopDown(0, x, topRight[1], relayout);
 			}
 			else {
@@ -2849,7 +2891,7 @@ export class CommentSection extends CanvasSectionObject {
 				comment.setContainerPos(false, this.sectionProperties.canvasContainerBounds);
 			}
 		}
-		if (relayout) {
+		if (relayout && commentsSitBesideThePage) {
 			this.resizeComments();
 			// resizeComments changes comment heights after they were positioned, which
 			// detaches replies from their (now resized) parent. Reposition once more

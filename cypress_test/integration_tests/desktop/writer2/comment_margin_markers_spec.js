@@ -121,3 +121,47 @@ describe(['tagdesktop'], 'Comment markers in the page margin', function() {
 		cy.cGet('.comment-margin-marker').should('have.length', 0);
 	});
 });
+
+describe(['tagdesktop'], 'Comments in the multi page view', function() {
+
+	beforeEach(function() {
+		cy.viewport(1400, 600);
+		helper.setupAndLoadDocument('writer/annotation.odt');
+		desktopHelper.switchUIToNotebookbar();
+		desktopHelper.ensureSidebarHidden();
+	});
+
+	function switchToMultiPageView() {
+		cy.cGet('#multi-page-view-button').click();
+		cy.getFrameWindow().then(function(win) {
+			helper.processToIdle(win);
+			expect(win.app.activeDocument.activeLayout.type).to.equal('ViewLayoutMultiPage');
+		});
+	}
+
+	it('the pages are left to themselves and the marker stands for the comment', function() {
+		desktopHelper.insertComment('a comment to leave in the margin');
+
+		switchToMultiPageView();
+
+		cy.cGet('#comment-container-1').should('not.be.visible');
+		cy.cGet('.comment-margin-marker').should('be.visible');
+	});
+
+	it('a comment comes back beside the page in the single page view', function() {
+		desktopHelper.insertComment('a comment to come back');
+
+		switchToMultiPageView();
+		cy.cGet('#comment-container-1').should('not.be.visible');
+
+		// The same button takes the view back to one page at a time.
+		cy.cGet('#multi-page-view-button').click();
+		cy.getFrameWindow().then(function(win) {
+			helper.processToIdle(win);
+			expect(win.app.activeDocument.activeLayout.type).to.equal('ViewLayoutWriter');
+		});
+
+		cy.cGet('.comment-margin-marker').click();
+		cy.cGet('#comment-container-1').should('be.visible');
+	});
+});

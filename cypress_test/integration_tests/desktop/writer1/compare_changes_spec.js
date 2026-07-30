@@ -19,7 +19,29 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Compare Changes view.', fu
 		cy.cGet('.compare-changes-labels').should('not.have.css', 'display', 'none');
 	}
 
-	it('Comment does not overlap with page or sidebar.', function() {
+	// The icon for a comment belongs in the margin of the
+	// version it was written in, the one on the trailing side.
+	function markerSitsInTheTrailingPage() {
+		cy.cGet('.comment-margin-marker').should('be.visible');
+		cy.getFrameWindow().then(function(win) {
+			var layout = win.app.activeDocument.activeLayout;
+			var pageStart = new win.cool.SimplePoint(0, 0);
+			pageStart.mode = 2; // TileMode.RightSide
+			var pageEnd = new win.cool.SimplePoint(win.app.activeDocument.fileSize.x, 0);
+			pageEnd.mode = 2;
+			var start = layout.documentToViewX(pageStart) / win.app.dpiScale;
+			var end = layout.documentToViewX(pageEnd) / win.app.dpiScale;
+
+			cy.cGet('.comment-margin-marker').should(function($el) {
+				expect($el.position().left, 'marker vs the start of the page')
+					.to.be.at.least(start);
+				expect($el.position().left, 'marker vs the end of the page')
+					.to.be.at.most(end);
+			});
+		});
+	}
+
+	it('An icon in the page margin stands for a comment.', function() {
 		// Given a document with a comment, sidebar is visible:
 		loadDocument('track_changes_comment.docx');
 		cy.cGet('#sidebar-dock-wrapper').should('be.visible');
@@ -29,31 +51,35 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Compare Changes view.', fu
 		cy.getFrameWindow().then(function(win) {
 			helper.processToIdle(win);
 		});
-		cy.cGet('#comment-container-1').should('exist');
 
-		// Then make sure that we have the pages, then the comment, then the sidebar, with
-		// no overlaps:
+		// Then the two versions are side by side and no comment
+		// box is beside them.
+		cy.cGet('#comment-container-1').should('not.be.visible');
+
+		markerSitsInTheTrailingPage();
+	});
+
+	it('Picking the icon of a comment reads it in the navigation panel.', function() {
+		loadDocument('track_changes_comment.docx');
+		enterCompareChangesMode();
 		cy.getFrameWindow().then(function(win) {
-			var layout = win.app.activeDocument.activeLayout;
-			var rightEdgePoint = new win.cool.SimplePoint(win.app.activeDocument.fileSize.pX, 0);
-			rightEdgePoint.mode = 2; // TileMode.RightSide
-			var rightPageEdge = layout.documentToViewX(rightEdgePoint) / win.app.dpiScale;
-
-			cy.cGet('#comment-container-1').should(function($el) {
-				expect($el.position().left, 'comment left vs right page edge').to.be.at.least(rightPageEdge);
-			});
+			helper.processToIdle(win);
 		});
-		cy.cGet('#sidebar-dock-wrapper').then(function($sidebar) {
-			var sidebarLeft = $sidebar[0].getBoundingClientRect().left;
 
-			cy.cGet('#comment-container-1').should(function($el) {
-				var commentRight = $el[0].getBoundingClientRect().right;
-				// Without the accompanying fix in place, this test would have failed with:
-				// - comment right vs sidebar left: expected 1290 to be at most 1071
-				// while normally it's around 1015.
-				expect(commentRight, 'comment right vs sidebar left').to.be.at.most(sidebarLeft);
-			});
-		});
+		// Picking the mode leaves the notebookbar group open,
+		// with an overlay over the page. Dismiss it first.
+		cy.cGet('.jsdialog-overlay.cancellable').click();
+		cy.cGet('.jsdialog-overlay').should('not.exist');
+
+		cy.cGet('.comment-margin-marker').click();
+
+		cy.cGet('#comments-dock-wrapper').should('be.visible');
+		cy.cGet('#tab-comments').should('have.class', 'selected');
+		cy.cGet('.comments-panel-comment.is-selected').should('exist');
+
+		// Reading a comment still leaves the pages to
+		// themselves.
+		cy.cGet('#comment-container-1').should('not.be.visible');
 	});
 
 	// Regression test for: compare changes view: fix "scroll by pressing scrollbar" feature.
@@ -233,7 +259,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Compare Changes view.', fu
 		});
 	});
 
-	it('Comment does not overlap when sidebar is enabled in compare mode.', function() {
+	it('The icon of a comment stays clear of the sidebar in compare mode.', function() {
 		// Given a document with a comment, sidebar hidden, in doc compare mode:
 		loadDocument('track_changes_comment.docx');
 		desktopHelper.sidebarToggle();
@@ -242,7 +268,6 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Compare Changes view.', fu
 		cy.getFrameWindow().then(function(win) {
 			helper.processToIdle(win);
 		});
-		cy.cGet('#comment-container-1').should('exist');
 
 		// And then turning the sidebar on:
 		desktopHelper.sidebarToggle();
@@ -251,25 +276,15 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Compare Changes view.', fu
 			helper.processToIdle(win);
 		});
 
-		// Then make sure that pages, comment and sidebar don't overlap:
-		cy.getFrameWindow().then(function(win) {
-			var layout = win.app.activeDocument.activeLayout;
-			var rightEdgePoint = new win.cool.SimplePoint(win.app.activeDocument.fileSize.pX, 0);
-			rightEdgePoint.mode = 2; // TileMode.RightSide
-			var rightPageEdge = layout.documentToViewX(rightEdgePoint) / win.app.dpiScale;
-
-			cy.cGet('#comment-container-1').should(function($el) {
-				expect($el.position().left, 'comment left vs right page edge').to.be.at.least(rightPageEdge);
-			});
-		});
+		// Then the pages have made room for the sidebar, and the
+		// icon went with its page, so neither is under it.
+		markerSitsInTheTrailingPage();
 		cy.cGet('#sidebar-dock-wrapper').then(function($sidebar) {
 			var sidebarLeft = $sidebar[0].getBoundingClientRect().left;
 
-			cy.cGet('#comment-container-1').should(function($el) {
-				var commentRight = $el[0].getBoundingClientRect().right;
-				// Without the accompanying fix in place, this test would have failed with:
-				// comment right vs sidebar left: expected 1335 to be at most 1174.8583984375
-				expect(commentRight, 'comment right vs sidebar left').to.be.at.most(sidebarLeft);
+			cy.cGet('.comment-margin-marker').should(function($el) {
+				expect($el[0].getBoundingClientRect().right, 'marker right vs sidebar left')
+					.to.be.at.most(sidebarLeft);
 			});
 		});
 	});
