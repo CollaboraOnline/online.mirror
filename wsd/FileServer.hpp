@@ -130,6 +130,7 @@ private:
                                          http::Response& httpResponse,
                                          const RequestDetails& requestDetails,
                                          std::istream& message,
+                                         bool noCache,
                                          const std::shared_ptr<StreamSocket>& socket);
     void preprocessWelcomeFile(const Poco::Net::HTTPRequest& request,
                                http::Response& httpResponse,
