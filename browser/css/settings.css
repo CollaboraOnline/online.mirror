@@ -30,6 +30,8 @@
 }
 
 #allConfigSection {
+	box-sizing: border-box;
+	padding-inline: 0.75rem;
 	overflow-y: auto;
 }
 
