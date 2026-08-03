@@ -83,11 +83,8 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Impress hyperlink popup te
 
 		cy.get('@writeText').should('have.been.calledOnceWith', 'http://www.example.com/');
 	});
-	// TODO: fixme
-	it.skip('In readonly mode, edit and remove buttons are hidden and copy button is visible.', function() {
-		cy.getFrameWindow().its('app').then(function(app) {
-			app.map.setPermission('readonly');
-		});
+	it('In readonly mode, edit and remove buttons are hidden and copy button is visible.', function() {
+		cy.then(() => this.win.app.map.setPermission('readonly'));
 
 		helper.typeIntoDocument('{home}');
 		cy.then(() => helper.processToIdle(this.win));
