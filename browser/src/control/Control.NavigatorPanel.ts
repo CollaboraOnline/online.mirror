@@ -549,7 +549,24 @@ class NavigatorPanel extends SidebarBase {
 			panel.style.display = id === tabId ? 'block' : 'none';
 		});
 
-		this.map.commentsPanel?.setShown(tabId === 'tab-comments');
+		const onComments = tabId === 'tab-comments';
+		this.map.commentsPanel?.setShown(onComments);
+		if (onComments)
+			this.map.commentsPanel?.setSearch(this.getSearchTerm() ?? '');
+		this.tellTheSearchBoxWhatItLooksThrough(onComments);
+	}
+
+	// The search box at the top of the panel searches the
+	// document, or picks comments while their tab is on show.
+	private tellTheSearchBoxWhatItLooksThrough(onComments: boolean): void {
+		const searchInput = document.getElementById(
+			'navigator-search-input',
+		) as HTMLInputElement;
+		if (!searchInput) return;
+
+		const placeholder = onComments ? _('Search comments...') : _('Search...');
+		searchInput.placeholder = placeholder;
+		searchInput.setAttribute('aria-label', placeholder);
 	}
 
 	handleFloatingButtonVisibilityOnZoomChange() {
@@ -747,6 +764,13 @@ class NavigatorPanel extends SidebarBase {
 		object: any,
 		builder: JSBuilder,
 	) {
+		// While the comments tab is on show, the box picks which
+		// comments the list holds rather than searching.
+		if (this.pickedTab === 'tab-comments') {
+			this.map.commentsPanel?.setSearch(this.getSearchTerm() ?? '');
+			return;
+		}
+
 		// Switch to "Results tab" first.
 		if (eventType === 'activate') {
 			const resultsTab = this.navigationPanel.querySelector(

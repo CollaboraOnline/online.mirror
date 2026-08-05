@@ -23,22 +23,67 @@
 	color: var(--color-main-text);
 }
 
+/* The order the rows are in, on a line above the filters. */
 .comments-panel-sort {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
-	gap: var(--spacing-s);
+	gap: var(--spacing-xs);
 	flex: 0 0 auto;
 	padding: var(--spacing-m) var(--spacing-l);
 	font-size: 0.83rem;
 }
 
 .comments-panel-sort-label {
+	margin-inline-end: var(--spacing-xs);
 	color: var(--color-text-light);
+	font-size: 0.75rem;
 }
 
-.comments-panel-sort-select {
-	flex: 1 1 auto;
-	min-width: 0;
+/* A row of choices where one holds at a time. The one that holds
+   is filled in. */
+.comments-panel-sort-choice,
+.comments-panel-filter-segment {
+	display: inline-flex;
+	align-items: center;
+	padding: 1px var(--spacing-s);
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius);
+	background: transparent;
+	color: var(--color-main-text);
+	font: inherit;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	white-space: nowrap;
+	cursor: pointer;
+}
+
+.comments-panel-sort-choice:hover,
+.comments-panel-filter-segment:hover {
+	background: var(--color-background-dark);
+}
+
+.comments-panel-sort-choice.is-picked,
+.comments-panel-filter-segment:has(input:checked) {
+	background: rgb(var(--doc-type, 11, 135, 231));
+	border-color: rgb(var(--doc-type, 11, 135, 231));
+	color: var(--color-primary-text);
+}
+
+.comments-panel-sort-choice:focus-visible,
+.comments-panel-filter-segment:has(input:focus-visible) {
+	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
+	outline-offset: 1px;
+}
+
+/* The choice itself is the button, so the control behind it is
+   taken out of the picture. */
+.comments-panel-filter-segment > input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+	pointer-events: none;
 }
 
 /* The controls give the rest of the panel to the list of
@@ -115,11 +160,6 @@
 	overflow-y: auto;
 	scrollbar-width: var(--scrollbar-width);
 	scrollbar-color: var(--scrollbar-color);
-}
-
-.comments-panel-filter-search {
-	width: 100%;
-	box-sizing: border-box;
 }
 
 .comments-panel-filter-group {

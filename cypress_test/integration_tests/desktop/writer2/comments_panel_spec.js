@@ -28,6 +28,20 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-filters-body').should('be.visible');
 	}
 
+	// The words to look for are typed in the search box at the
+	// top of the panel while the comments tab is up.
+	function searchTheComments(words) {
+		cy.cGet('#navigator-search-input').clear().type(words);
+	}
+
+	function pickTheOrder(label) {
+		cy.cGet('.comments-panel-sort-choice').contains(label).click();
+	}
+
+	function pickTheStatus(label) {
+		cy.cGet('.comments-panel-filter-segment').contains(label).click();
+	}
+
 	function replyToFirstComment(text) {
 		desktopHelper.pickCommentAction(1, 'Reply');
 		cy.cGet('#annotation-reply-textarea-1').type(text);
@@ -152,14 +166,13 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-comment.is-reply').should('not.exist');
 	});
 
-	it('the search keeps the threads that hold the word', function() {
+	it('the search box of the panel keeps the threads that hold the word', function() {
 		desktopHelper.insertComment('a comment about apples');
 		desktopHelper.insertComment('a comment about pears');
 
 		openCommentsTab();
-		openFilters();
 
-		cy.cGet('.comments-panel-filter-search').type('pears');
+		searchTheComments('pears');
 
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
 		cy.cGet('.comments-panel-comment-text').should('have.text', 'a comment about pears');
@@ -171,9 +184,8 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		desktopHelper.insertComment('a comment about apples');
 
 		openCommentsTab();
-		openFilters();
 
-		cy.cGet('.comments-panel-filter-search').type('pears');
+		searchTheComments('pears');
 
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
 		cy.cGet('.comments-panel-comment.is-first .comments-panel-comment-text')
@@ -188,17 +200,17 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		openCommentsTab();
 		openFilters();
 
-		cy.cGet('input[name="comments-panel-status"][value="unresolved"]').check();
+		pickTheStatus('Unresolved');
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
 		cy.cGet('.comments-panel-comment-text')
 			.should('have.text', 'a comment to leave alone');
 
-		cy.cGet('input[name="comments-panel-status"][value="resolved"]').check();
+		pickTheStatus('Resolved');
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
 		cy.cGet('.comments-panel-comment-text')
 			.should('have.text', 'a comment to resolve');
 
-		cy.cGet('input[name="comments-panel-status"][value="all"]').check();
+		pickTheStatus('All');
 		cy.cGet('.comments-panel-thread').should('have.length', 2);
 	});
 
@@ -236,10 +248,12 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		openCommentsTab();
 		openFilters();
 
-		cy.cGet('.comments-panel-filter-search').type('pears');
+		// The words to look for are not one of the filters the
+		// fold holds, so the count covers only it.
+		pickTheStatus('Resolved');
 		cy.cGet('.comments-panel-filters-count').should('have.text', '1');
 
-		cy.cGet('input[name="comments-panel-status"][value="resolved"]').check();
+		cy.cGet('.comments-panel-filter-replies').check();
 		cy.cGet('.comments-panel-filters-count').should('have.text', '2');
 		// Neither thread is resolved, so the list says why it is
 		// empty.
@@ -252,7 +266,6 @@ describe(['tagdesktop'], 'Comments panel', function() {
 
 		cy.cGet('.comments-panel-filters-count').should('not.be.visible');
 		cy.cGet('.comments-panel-thread').should('have.length', 2);
-		cy.cGet('.comments-panel-filter-search').should('have.value', '');
 	});
 
 	it('the rows can be ordered by the date a thread was started', function() {
@@ -269,13 +282,13 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-thread').eq(0)
 			.find('.comments-panel-comment-text').should('have.text', 'the older comment');
 
-		cy.cGet('#comments-panel-sort-select').select('newest');
+		pickTheOrder('Newest');
 		cy.cGet('.comments-panel-thread').eq(0)
 			.find('.comments-panel-comment-text').should('have.text', 'the newer comment');
 		cy.cGet('.comments-panel-thread').eq(1)
 			.find('.comments-panel-comment-text').should('have.text', 'the older comment');
 
-		cy.cGet('#comments-panel-sort-select').select('oldest');
+		pickTheOrder('Oldest');
 		cy.cGet('.comments-panel-thread').eq(0)
 			.find('.comments-panel-comment-text').should('have.text', 'the older comment');
 		cy.cGet('.comments-panel-thread').eq(1)
@@ -290,10 +303,9 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		desktopHelper.insertComment('apples again, last');
 
 		openCommentsTab();
-		openFilters();
 
-		cy.cGet('.comments-panel-filter-search').type('apples');
-		cy.cGet('#comments-panel-sort-select').select('newest');
+		searchTheComments('apples');
+		pickTheOrder('Newest');
 
 		cy.cGet('.comments-panel-thread').should('have.length', 2);
 		cy.cGet('.comments-panel-thread').eq(0)
@@ -406,6 +418,19 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-placeholder')
 			.should('be.visible')
 			.should('have.text', 'This document has no comments.');
+	});
+
+	it('the search box says it looks through the comments while the tab is up', function() {
+		desktopHelper.insertComment('a comment to look for');
+
+		openCommentsTab();
+		cy.cGet('#navigator-search-input')
+			.should('have.attr', 'placeholder', 'Search comments...');
+
+		// Off the comments tab it searches the document again.
+		cy.cGet('#tab-navigator').click();
+		cy.cGet('#navigator-search-input')
+			.should('have.attr', 'placeholder', 'Search...');
 	});
 
 	it('a resolved thread is marked as resolved', function() {

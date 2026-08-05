@@ -54,6 +54,10 @@ class CommentsPanel {
 
   private sortBy: CommentSort = 'position';
 
+  // The button that picks each order, so the one that holds can
+  // be marked without the row being built again.
+  private sortChoiceNodes: Map<CommentSort, HTMLElement> = new Map();
+
   private filters: CommentFilters = {
     search: '',
     authors: new Set<string>(),
@@ -128,31 +132,58 @@ class CommentsPanel {
     );
   }
 
+  // The order the rows are in. The choices sit on a line of
+  // their own, beside the filters that hold at the same time.
   private buildSortRow(): HTMLElement {
+    const choices: Array<{ order: CommentSort; label: string; title: string }> =
+      [
+        {
+          order: 'position',
+          label: _('Position'),
+          title: _('Position in document'),
+        },
+        { order: 'newest', label: _('Newest'), title: _('Newest first') },
+        { order: 'oldest', label: _('Oldest'), title: _('Oldest first') },
+        { order: 'author', label: _('Author'), title: _('Author') },
+      ];
+
+    this.sortChoiceNodes.clear();
+
     return (
-      <div class="comments-panel-sort">
-        <label
-          class="comments-panel-sort-label"
-          for="comments-panel-sort-select"
-        >
-          {_('Sort by')}
-        </label>
-        <select
-          id="comments-panel-sort-select"
-          class="comments-panel-sort-select"
-          onChange={(event: Event) => {
-            this.sortBy = (event.target as HTMLSelectElement)
-              .value as CommentSort;
-            this.render();
-          }}
-        >
-          <option value="position">{_('Position in document')}</option>
-          <option value="newest">{_('Newest first')}</option>
-          <option value="oldest">{_('Oldest first')}</option>
-          <option value="author">{_('Author')}</option>
-        </select>
+      <div class="comments-panel-sort" role="group" aria-label={_('Sort by')}>
+        <span class="comments-panel-sort-label">{_('Sort')}</span>
+        {choices.map((choice) => {
+          const picked = this.sortBy === choice.order;
+          const button = (
+            <button
+              class={
+                'comments-panel-sort-choice' + (picked ? ' is-picked' : '')
+              }
+              type="button"
+              aria-pressed={String(picked)}
+              data-title={choice.title}
+              onClick={() => this.pickSort(choice.order)}
+            >
+              {choice.label}
+            </button>
+          ) as HTMLElement;
+          this.sortChoiceNodes.set(choice.order, button);
+          return button;
+        })}
       </div>
     );
+  }
+
+  private pickSort(order: CommentSort): void {
+    if (this.sortBy === order) return;
+
+    this.sortBy = order;
+    this.sortChoiceNodes.forEach((button, held) => {
+      const picked = held === order;
+      button.classList.toggle('is-picked', picked);
+      button.setAttribute('aria-pressed', String(picked));
+    });
+    this.render();
   }
 
   // The controls that pick which threads the list shows, behind
@@ -175,16 +206,6 @@ class CommentsPanel {
           }
           onSubmit={(event: Event) => event.preventDefault()}
         >
-          <input
-            class="comments-panel-filter-search"
-            type="search"
-            placeholder={_('Search comments...')}
-            aria-label={_('Search comments')}
-            onInput={(event: Event) => {
-              this.filters.search = (event.target as HTMLInputElement).value;
-              this.render();
-            }}
-          />
           <fieldset class="comments-panel-filter-group">
             <legend>{_('Status')}</legend>
             {this.buildStatusChoice('all', _('All'))}
@@ -223,12 +244,14 @@ class CommentsPanel {
     );
   }
 
+  // One of the three states a thread can be in. They share a
+  // line the way the sort choices do, one holding at a time.
   private buildStatusChoice(
     status: CommentFilters['status'],
     label: string,
   ): HTMLElement {
     return (
-      <label class="comments-panel-filter-check">
+      <label class="comments-panel-filter-segment">
         <input
           type="radio"
           name="comments-panel-status"
@@ -262,8 +285,16 @@ class CommentsPanel {
     );
   }
 
+  // The words to look for, which come from the search box at the
+  // top of the panel while the comments tab is on show.
+  public setSearch(search: string): void {
+    if (this.filters.search === search) return;
+
+    this.filters.search = search;
+    this.render();
+  }
+
   private clearFilters(): void {
-    this.filters.search = '';
     this.filters.authors.clear();
     this.filters.status = 'all';
     this.filters.onlyWithReplies = false;
@@ -276,10 +307,10 @@ class CommentsPanel {
     this.render();
   }
 
-  // How many of the filters are narrowing the list.
+  // How many of the filters in the fold are narrowing the list.
+  // The words to look for are typed outside it and do not count.
   private activeFilterCount(): number {
     let count = 0;
-    if (this.filters.search.trim().length > 0) count++;
     if (this.filters.authors.size > 0) count++;
     if (this.filters.status !== 'all') count++;
     if (this.filters.onlyWithReplies) count++;
