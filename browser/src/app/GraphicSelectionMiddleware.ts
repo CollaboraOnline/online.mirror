@@ -120,6 +120,39 @@ class GraphicSelection {
 		return this.extraInfo?.isSignature === true;
 	}
 
+	// The part of the preview the current graphic selection covers on the overview page,
+	// or -1 when the selection is not a slide preview. A preview is recognised by its
+	// rectangle: it matches one of the preview grid rectangles within a small tolerance.
+	private static coveredPreviewPart(): number {
+		if (
+			app.map._docLayer._docType !== 'presentation' ||
+			!app.impress.hasOverviewPage ||
+			app.map._docLayer._selectedPart !== 0 ||
+			app.impress.previewEditMode.active ||
+			!app.impress.previewRects ||
+			!this.rectangle
+		)
+			return -1;
+		const tolerance = 50; // twips
+		for (const preview of app.impress.previewRects) {
+			const rect = preview.rectangle;
+			if (
+				Math.abs(rect.x1 - this.rectangle.x1) <= tolerance &&
+				Math.abs(rect.y1 - this.rectangle.y1) <= tolerance &&
+				Math.abs(rect.width - this.rectangle.width) <= tolerance &&
+				Math.abs(rect.height - this.rectangle.height) <= tolerance
+			)
+				return preview.part;
+		}
+		return -1;
+	}
+
+	private static setSelectedPreviewPart(part: number): void {
+		if (app.impress.selectedPreviewPart === part) return;
+		app.impress.selectedPreviewPart = part;
+		app.sectionContainer.requestReDraw();
+	}
+
 	public static onUpdatePermission() {
 		this.rectangle = null;
 		this.updateGraphicSelection();
@@ -452,6 +485,7 @@ class GraphicSelection {
 	}
 
 	static resetSelectionRanges() {
+		GraphicSelection.setSelectedPreviewPart(-1);
 		this.selectionChanged([]);
 		GraphicSelection.updateSelectionSection();
 		GraphicSelection.travel()?.leave();
@@ -926,6 +960,20 @@ class GraphicSelection {
 				return;
 			}
 
+			// A selected preview keeps its fixed grid geometry, so it takes a plain
+			// highlight instead of the core resize handles.
+			const previewPart = GraphicSelection.coveredPreviewPart();
+			GraphicSelection.setSelectedPreviewPart(previewPart);
+			if (previewPart !== -1) {
+				if (this.handlesSection) {
+					this.handlesSection.removeSubSections();
+					app.sectionContainer.removeSection(this.handlesSection.name);
+					this.handlesSection = null;
+				}
+				app.map._docLayer._updateCursorAndOverlay();
+				return;
+			}
+
 			var extraInfo = this.extraInfo;
 			let addHandlesSection = false;
 
@@ -958,13 +1006,16 @@ class GraphicSelection {
 			GraphicSelection.updateSelectionSection();
 			this.selectionSection?.setShowSection(editMode);
 			app.sectionContainer.requestReDraw();
-		} else if (
-			this.handlesSection &&
-			app.sectionContainer.doesSectionExist(this.handlesSection.name)
-		) {
-			this.handlesSection.removeSubSections();
-			app.sectionContainer.removeSection(this.handlesSection.name);
-			this.handlesSection = null;
+		} else {
+			GraphicSelection.setSelectedPreviewPart(-1);
+			if (
+				this.handlesSection &&
+				app.sectionContainer.doesSectionExist(this.handlesSection.name)
+			) {
+				this.handlesSection.removeSubSections();
+				app.sectionContainer.removeSection(this.handlesSection.name);
+				this.handlesSection = null;
+			}
 		}
 		app.map._docLayer._updateCursorAndOverlay();
 	}
