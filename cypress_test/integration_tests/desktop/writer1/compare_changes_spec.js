@@ -42,12 +42,13 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Compare Changes view.', fu
 
 			cy.cGet('#document-container').then(function($container) {
 				var viewLeft = $container[0].getBoundingClientRect().left;
+				// The bubble sits on the page edge, so its
+				// middle is measured against it.
 				cy.cGet('#comment-container-1 .cool-annotation-img').should(function($el) {
 					var box = $el[0].getBoundingClientRect();
-					expect(box.left - viewLeft, 'bubble vs the start of the page')
-						.to.be.at.least(start);
-					expect(box.right - viewLeft, 'bubble vs the end of the page')
-						.to.be.at.most(end);
+					var middle = (box.left + box.right) / 2 - viewLeft;
+					expect(middle, 'bubble vs the start of the page').to.be.at.least(start);
+					expect(middle, 'bubble vs the end of the page').to.be.at.most(end);
 				});
 			});
 		});

@@ -426,11 +426,14 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Track Changes', function (
 			cy.cGet('#document-container').then(function($container) {
 				var viewLeft = $container[0].getBoundingClientRect().left;
 				var halfTheWindow = $container.width() / 2;
+				// The bubble sits on the page edge, so its
+				// middle is measured against it.
 				cy.cGet('#comment-container-1 .cool-annotation-img').should(function($el) {
 					var box = $el[0].getBoundingClientRect();
-					expect(box.right - viewLeft, 'the far edge of the bubble')
+					var middle = (box.left + box.right) / 2 - viewLeft;
+					expect(middle, 'the middle of the bubble against the end of the page')
 						.to.be.at.most(rightPageEdge);
-					expect(box.left - viewLeft, 'the near edge of the bubble')
+					expect(middle, 'the middle of the bubble against the middle of the window')
 						.to.be.greaterThan(halfTheWindow);
 				});
 			});

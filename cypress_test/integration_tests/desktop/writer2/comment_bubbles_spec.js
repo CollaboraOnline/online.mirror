@@ -15,13 +15,19 @@ function badgeOf(id) {
 	return cy.cGet('#comment-container-' + id + ' .cool-annotation-info-collapsed');
 }
 
-// Where the page ends across the width of the window, in pixels.
+// Where the page starts and ends across the width of the window,
+// in pixels. The first page is the one the tests write on.
 function pageEdges() {
-	return cy.cGet('#document-container').then(function($container) {
-		const left = $container[0].getBoundingClientRect().left;
-		return cy.getFrameWindow().then(function(win) {
-			const end = new win.cool.SimplePoint(win.app.activeDocument.fileSize.x, 0);
-			return { left: left, right: left + end.vX / win.app.dpiScale };
+	return cy.cGet('#document-container').then(function ($container) {
+		const viewLeft = $container[0].getBoundingClientRect().left;
+		return cy.getFrameWindow().then(function (win) {
+			const page = win.app.file.writer.pageRectangleList[0];
+			const start = new win.cool.SimplePoint(page[0], 0);
+			const end = new win.cool.SimplePoint(page[0] + page[2], 0);
+			return {
+				left: viewLeft + start.vX / win.app.dpiScale,
+				right: viewLeft + end.vX / win.app.dpiScale,
+			};
 		});
 	});
 }
@@ -52,13 +58,15 @@ describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
 		bubbleOf(1).should('be.visible');
 		cy.cGet('#comment-container-1').should('be.not.visible');
 
-		// Inside the page, towards the edge it ends at rather
-		// than at the place in the text the comment belongs to.
+		// On the edge the page ends at, mostly inside the margin
+		// and hanging a little past it.
 		pageEdges().then(function(page) {
 			bubbleOf(1).should(function($bubble) {
 				const box = $bubble[0].getBoundingClientRect();
+				expect(box.left, 'the near edge of the bubble against the end of the page')
+					.to.be.lessThan(page.right);
 				expect(box.right, 'the far edge of the bubble against the end of the page')
-					.to.be.at.most(page.right);
+					.to.be.greaterThan(page.right);
 				expect(box.left, 'the near edge of the bubble against the middle of the page')
 					.to.be.greaterThan(page.left + (page.right - page.left) * 0.8);
 			});

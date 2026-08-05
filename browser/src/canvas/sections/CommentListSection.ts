@@ -291,9 +291,9 @@ export class CommentSection extends CanvasSectionObject {
 	private placementOverlay: HTMLDivElement | null = null;
 	private static readonly DRAG_THRESHOLD_PX = 5;
 
-	// The gap kept between a bubble and the edge of the page it
-	// sits inside, in CSS pixels.
-	private static readonly bubbleGapFromThePageEdge = 4;
+	// How far a bubble hangs past the edge of its page, in CSS
+	// pixels. The page draws controls of its own in the margin.
+	private static readonly bubbleOverhangPastThePageEdge = 9;
 
 	constructor () {
 		super(app.CSections.CommentList.name);
@@ -2743,7 +2743,7 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	// Where the bubble of a comment belongs, in CSS pixels from
-	// the canvas corner: in the margin, at its words' height.
+	// the canvas corner: on the edge of its page, at its words.
 	private bubblePlaceOf (comment: Comment, bubbleSize: number): number[] {
 		const data = comment.sectionProperties.data;
 		if (!data.anchorSPoint)
@@ -2758,10 +2758,10 @@ export class CommentSection extends CanvasSectionObject {
 			anchor.part, anchor.mode);
 
 		const edgeX = inside.vX / app.dpiScale;
-		const gap = CommentSection.bubbleGapFromThePageEdge;
+		const overhang = CommentSection.bubbleOverhangPastThePageEdge;
 
 		return [
-			Math.round(rightToLeft ? edgeX + gap : edgeX - gap - bubbleSize),
+			Math.round(rightToLeft ? edgeX - overhang : edgeX + overhang - bubbleSize),
 			Math.round(anchor.vY / app.dpiScale),
 		];
 	}
