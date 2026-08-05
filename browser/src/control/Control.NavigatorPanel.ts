@@ -556,6 +556,14 @@ class NavigatorPanel extends SidebarBase {
 		this.tellTheSearchBoxWhatItLooksThrough(onComments);
 	}
 
+	// Empty the search box at the top of the panel.
+	public clearSearchBox(): void {
+		const searchInput = document.getElementById(
+			'navigator-search-input',
+		) as HTMLInputElement;
+		if (searchInput) searchInput.value = '';
+	}
+
 	// The search box at the top of the panel searches the
 	// document, or picks comments while their tab is on show.
 	private tellTheSearchBoxWhatItLooksThrough(onComments: boolean): void {

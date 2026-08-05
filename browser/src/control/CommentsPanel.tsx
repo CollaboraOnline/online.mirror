@@ -44,8 +44,8 @@ class CommentsPanel {
   private listNode: HTMLElement | null = null;
   private placeholderNode: HTMLElement | null = null;
   private authorsNode: HTMLElement | null = null;
-  private filterCountNode: HTMLElement | null = null;
-  private filtersForm: HTMLFormElement | null = null;
+  private repliesNode: HTMLInputElement | null = null;
+  private appliedNode: HTMLElement | null = null;
 
   // The words of a comment, kept by the data object they were
   // read out of. A stale entry becomes unreachable on its own.
@@ -62,6 +62,11 @@ class CommentsPanel {
   // round, so the row can be marked without being built again.
   private sortChoiceNodes: Map<CommentSortKey, HTMLElement> = new Map();
   private sortDirectionNode: HTMLElement | null = null;
+
+  // The button that adds each state filter, so the one that
+  // holds can be marked from the filters themselves.
+  private statusChoiceNodes: Map<CommentFilters['status'], HTMLElement> =
+    new Map();
 
   private filters: CommentFilters = {
     search: '',
@@ -122,6 +127,11 @@ class CommentsPanel {
       <div class="comments-panel">
         {this.buildSortRow()}
         {this.buildFilters()}
+        <div
+          class="comments-panel-applied"
+          aria-label={_('Filters in force')}
+          ref={(node: HTMLElement) => (this.appliedNode = node)}
+        ></div>
         <ul
           class="comments-panel-list"
           aria-label={_('Comments')}
@@ -231,29 +241,18 @@ class CommentsPanel {
     this.sayWhatTurningTheOrderDoes();
   }
 
-  // The controls that pick which threads the list shows, behind
-  // a fold that starts closed.
+  // The controls that add a filter, behind a fold that starts
+  // closed. What they added is on show below it either way.
   private buildFilters(): HTMLElement {
     return (
       <details class="comments-panel-filters">
         <summary class="comments-panel-filters-summary">
           <span class="comments-panel-filters-label">{_('Filters')}</span>
-          <span
-            class="comments-panel-filters-count hidden"
-            ref={(node: HTMLElement) => (this.filterCountNode = node)}
-          ></span>
           <span class="comments-panel-filters-arrow" aria-hidden="true"></span>
         </summary>
-        <form
-          class="comments-panel-filters-body"
-          ref={(node: HTMLElement) =>
-            (this.filtersForm = node as HTMLFormElement)
-          }
-          onSubmit={(event: Event) => event.preventDefault()}
-        >
+        <div class="comments-panel-filters-body">
           <fieldset class="comments-panel-filter-group">
             <legend>{_('Status')}</legend>
-            {this.buildStatusChoice('all', _('All'))}
             {this.buildStatusChoice('unresolved', _('Unresolved'))}
             {this.buildStatusChoice('resolved', _('Resolved'))}
           </fieldset>
@@ -261,6 +260,9 @@ class CommentsPanel {
             <input
               class="comments-panel-filter-replies"
               type="checkbox"
+              ref={(node: HTMLElement) =>
+                (this.repliesNode = node as HTMLInputElement)
+              }
               onChange={(event: Event) => {
                 this.filters.onlyWithReplies = (
                   event.target as HTMLInputElement
@@ -277,39 +279,33 @@ class CommentsPanel {
               ref={(node: HTMLElement) => (this.authorsNode = node)}
             ></div>
           </fieldset>
-          <button
-            class="comments-panel-filters-clear button"
-            type="button"
-            onClick={() => this.clearFilters()}
-          >
-            {_('Clear filters')}
-          </button>
-        </form>
+        </div>
       </details>
     );
   }
 
-  // One of the three states a thread can be in. They share a
-  // line the way the sort choices do, one holding at a time.
+  // One of the two states a thread can be in. Picking the one
+  // that holds lets it go again, leaving both states in.
   private buildStatusChoice(
     status: CommentFilters['status'],
     label: string,
   ): HTMLElement {
-    return (
-      <label class="comments-panel-filter-segment">
-        <input
-          type="radio"
-          name="comments-panel-status"
-          value={status}
-          checked={this.filters.status === status}
-          onChange={() => {
-            this.filters.status = status;
-            this.render();
-          }}
-        />
+    const button = (
+      <button
+        class="comments-panel-filter-choice"
+        type="button"
+        data-status={status}
+        onClick={() => {
+          this.filters.status = this.filters.status === status ? 'all' : status;
+          this.render();
+        }}
+      >
         {label}
-      </label>
-    );
+      </button>
+    ) as HTMLElement;
+
+    this.statusChoiceNodes.set(status, button);
+    return button;
   }
 
   private buildAuthorChoice(author: string): HTMLElement {
@@ -340,26 +336,38 @@ class CommentsPanel {
   }
 
   private clearFilters(): void {
+    this.filters.search = '';
     this.filters.authors.clear();
     this.filters.status = 'all';
     this.filters.onlyWithReplies = false;
-
-    // The controls carry their own state, and a form goes back
-    // to what its fields were built with, so these are rebuilt.
-    this.filtersForm?.reset();
-    this.offeredAuthors = [];
+    this.clearTheSearchBox();
 
     this.render();
   }
 
-  // How many of the filters in the fold are narrowing the list.
-  // The words to look for are typed outside it and do not count.
-  private activeFilterCount(): number {
-    let count = 0;
-    if (this.filters.authors.size > 0) count++;
-    if (this.filters.status !== 'all') count++;
-    if (this.filters.onlyWithReplies) count++;
-    return count;
+  // The controls are drawn from the filters rather than from a
+  // state of their own, so the strip and they are one thing.
+  private drawTheControlsFromTheFilters(): void {
+    this.statusChoiceNodes.forEach((button, status) => {
+      const picked = this.filters.status === status;
+      button.classList.toggle('is-picked', picked);
+      button.setAttribute('aria-pressed', String(picked));
+    });
+
+    const replies = this.repliesNode;
+    if (replies) replies.checked = this.filters.onlyWithReplies;
+
+    this.authorsNode
+      ?.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
+      .forEach((box) => {
+        box.checked = this.filters.authors.has(box.value);
+      });
+  }
+
+  // The search box at the top of the panel is where the words to
+  // look for are typed, so taking that filter away empties it.
+  private clearTheSearchBox(): void {
+    this.map.navigator?.clearSearchBox();
   }
 
   // Offer one checkbox per author who has written a comment. An
@@ -552,11 +560,98 @@ class CommentsPanel {
         : _('No comment matches the filters.');
     this.placeholderNode.classList.toggle('hidden', shown.length > 0);
 
-    if (this.filterCountNode) {
-      const active = this.activeFilterCount();
-      this.filterCountNode.textContent = active > 0 ? String(active) : '';
-      this.filterCountNode.classList.toggle('hidden', active === 0);
-    }
+    this.drawTheControlsFromTheFilters();
+    this.showWhatIsNarrowingTheList();
+  }
+
+  // What is narrowing the list, one chip each, with a cross that
+  // takes that one away. It is out of the way while none hold.
+  private showWhatIsNarrowingTheList(): void {
+    if (!this.appliedNode) return;
+
+    const applied: Array<{ name: string; remove: () => void }> = [];
+
+    const search = this.filters.search.trim();
+    if (search.length > 0)
+      applied.push({
+        name: search,
+        remove: () => {
+          this.filters.search = '';
+          this.clearTheSearchBox();
+          this.render();
+        },
+      });
+
+    if (this.filters.status !== 'all')
+      applied.push({
+        name:
+          this.filters.status === 'resolved' ? _('Resolved') : _('Unresolved'),
+        remove: () => {
+          this.filters.status = 'all';
+          this.render();
+        },
+      });
+
+    if (this.filters.onlyWithReplies)
+      applied.push({
+        name: _('With replies'),
+        remove: () => {
+          this.filters.onlyWithReplies = false;
+          this.render();
+        },
+      });
+
+    for (const author of Array.from(this.filters.authors))
+      applied.push({
+        name: author,
+        remove: () => {
+          this.filters.authors.delete(author);
+          this.render();
+        },
+      });
+
+    const chips: HTMLElement[] = applied.map((filter) =>
+      this.buildAppliedChip(filter),
+    );
+
+    // Taking them away one at a time is a chore once there are
+    // several of them.
+    if (applied.length > 1)
+      chips.push(
+        <button
+          class="comments-panel-applied-clear"
+          type="button"
+          onClick={() => this.clearFilters()}
+        >
+          {_('Clear all')}
+        </button>,
+      );
+
+    this.appliedNode.replaceChildren(...chips);
+    this.appliedNode.classList.toggle('hidden', applied.length === 0);
+  }
+
+  private buildAppliedChip(filter: {
+    name: string;
+    remove: () => void;
+  }): HTMLElement {
+    const away = _('Stop narrowing the list by {name}').replace(
+      '{name}',
+      filter.name,
+    );
+
+    return (
+      <span class="comments-panel-applied-chip">
+        <span class="comments-panel-applied-name">{filter.name}</span>
+        <button
+          class="comments-panel-applied-remove"
+          type="button"
+          aria-label={away}
+          data-title={away}
+          onClick={filter.remove}
+        ></button>
+      </span>
+    );
   }
 
   // Whatever holds the focus inside a box a comment is being

@@ -44,7 +44,18 @@ describe(['tagdesktop'], 'Comments panel', function() {
 	}
 
 	function pickTheStatus(label) {
-		cy.cGet('.comments-panel-filter-segment').contains(label).click();
+		cy.cGet('.comments-panel-filter-choice').contains(label).click();
+	}
+
+	// The chips under the controls, one per filter that is
+	// narrowing the list.
+	function appliedChips() {
+		return cy.cGet('.comments-panel-applied-chip');
+	}
+
+	function takeTheChipAway(name) {
+		cy.cGet('.comments-panel-applied-chip').contains(name).parent()
+			.find('.comments-panel-applied-remove').click();
 	}
 
 	function replyToFirstComment(text) {
@@ -215,7 +226,9 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-comment-text')
 			.should('have.text', 'a comment to resolve');
 
-		pickTheStatus('All');
+		// Picking the state that holds lets it go, which leaves
+		// both states in.
+		pickTheStatus('Resolved');
 		cy.cGet('.comments-panel-thread').should('have.length', 2);
 	});
 
@@ -246,30 +259,77 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-thread').should('have.length', 1);
 	});
 
-	it('the label counts the filters that are on, and Clear turns them off', function() {
+	it('what is narrowing the list is on show under the controls', function() {
 		desktopHelper.insertComment('a comment about apples');
 		desktopHelper.insertComment('a comment about pears');
 
 		openCommentsTab();
+
+		// Nothing is narrowing the list, so the strip has
+		// nothing to say.
+		cy.cGet('.comments-panel-applied').should('not.be.visible');
+
+		searchTheComments('pears');
+		appliedChips().should('have.length', 1);
+		appliedChips().should('have.text', 'pears');
+
 		openFilters();
-
-		// The words to look for are not one of the filters the
-		// fold holds, so the count covers only it.
 		pickTheStatus('Resolved');
-		cy.cGet('.comments-panel-filters-count').should('have.text', '1');
-
-		cy.cGet('.comments-panel-filter-replies').check();
-		cy.cGet('.comments-panel-filters-count').should('have.text', '2');
+		appliedChips().should('have.length', 2);
 		// Neither thread is resolved, so the list says why it is
 		// empty.
 		cy.cGet('.comments-panel-thread').should('have.length', 0);
 		cy.cGet('.comments-panel-placeholder')
 			.should('be.visible')
 			.should('have.text', 'No comment matches the filters.');
+	});
 
-		cy.cGet('.comments-panel-filters-clear').click();
+	it('a filter is taken away by the cross on its chip', function() {
+		desktopHelper.insertComment('a comment about apples');
+		desktopHelper.insertComment('a comment about pears');
 
-		cy.cGet('.comments-panel-filters-count').should('not.be.visible');
+		openCommentsTab();
+		openFilters();
+		pickTheStatus('Resolved');
+		cy.cGet('.comments-panel-thread').should('have.length', 0);
+
+		takeTheChipAway('Resolved');
+
+		cy.cGet('.comments-panel-applied').should('not.be.visible');
+		cy.cGet('.comments-panel-thread').should('have.length', 2);
+		// The control that added the filter goes back with it.
+		cy.cGet('.comments-panel-filter-choice').contains('Resolved')
+			.should('not.have.class', 'is-picked');
+	});
+
+	it('taking the words away empties the search box they were typed in', function() {
+		desktopHelper.insertComment('a comment about apples');
+		desktopHelper.insertComment('a comment about pears');
+
+		openCommentsTab();
+		searchTheComments('pears');
+		cy.cGet('.comments-panel-thread').should('have.length', 1);
+
+		takeTheChipAway('pears');
+
+		cy.cGet('#navigator-search-input').should('have.value', '');
+		cy.cGet('.comments-panel-thread').should('have.length', 2);
+	});
+
+	it('several filters are taken away at once', function() {
+		desktopHelper.insertComment('a comment about apples');
+		desktopHelper.insertComment('a comment about pears');
+
+		openCommentsTab();
+		searchTheComments('pears');
+		openFilters();
+		pickTheStatus('Unresolved');
+		appliedChips().should('have.length', 2);
+
+		cy.cGet('.comments-panel-applied-clear').click();
+
+		cy.cGet('.comments-panel-applied').should('not.be.visible');
+		cy.cGet('#navigator-search-input').should('have.value', '');
 		cy.cGet('.comments-panel-thread').should('have.length', 2);
 	});
 

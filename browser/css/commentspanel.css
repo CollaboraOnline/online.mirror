@@ -43,7 +43,7 @@
 /* A row of choices where one holds at a time. The one that holds
    is filled in. */
 .comments-panel-sort-choice,
-.comments-panel-filter-segment {
+.comments-panel-filter-choice {
 	display: inline-flex;
 	align-items: center;
 	padding: 1px var(--spacing-s);
@@ -59,19 +59,19 @@
 }
 
 .comments-panel-sort-choice:hover,
-.comments-panel-filter-segment:hover {
+.comments-panel-filter-choice:hover {
 	background: var(--color-background-dark);
 }
 
 .comments-panel-sort-choice.is-picked,
-.comments-panel-filter-segment:has(input:checked) {
+.comments-panel-filter-choice.is-picked {
 	background: rgb(var(--doc-type, 11, 135, 231));
 	border-color: rgb(var(--doc-type, 11, 135, 231));
 	color: var(--color-primary-text);
 }
 
 .comments-panel-sort-choice:focus-visible,
-.comments-panel-filter-segment:has(input:focus-visible) {
+.comments-panel-filter-choice:focus-visible {
 	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
 	outline-offset: 1px;
 }
@@ -114,14 +114,80 @@
 	outline-offset: 1px;
 }
 
-/* The choice itself is the button, so the control behind it is
-   taken out of the picture. */
-.comments-panel-filter-segment > input {
+/* What is narrowing the list: one chip per filter, each with a
+   cross that takes that one away. */
+.comments-panel-applied {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spacing-xs);
+	flex: 0 0 auto;
+	padding: var(--spacing-s) var(--spacing-l);
+	border-bottom: 1px solid var(--color-border);
+}
+
+.comments-panel-applied.hidden {
+	display: none;
+}
+
+.comments-panel-applied-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--spacing-xs);
+	max-width: 100%;
+	padding: 1px var(--spacing-xs) 1px var(--spacing-s);
+	border-radius: 999px;
+	background: rgb(var(--doc-type, 11, 135, 231));
+	color: var(--color-primary-text);
+	font-size: 0.75rem;
+	line-height: 1.5;
+}
+
+.comments-panel-applied-name {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+/* The cross is two bars turned against each other, so it takes
+   the colour of the chip. */
+.comments-panel-applied-remove {
+	position: relative;
+	flex: 0 0 auto;
+	width: 14px;
+	height: 14px;
+	padding: 0;
+	border: none;
+	border-radius: 50%;
+	background: transparent;
+	cursor: pointer;
+}
+
+.comments-panel-applied-remove::before,
+.comments-panel-applied-remove::after {
+	content: '';
 	position: absolute;
-	width: 1px;
+	inset-inline-start: 3px;
+	inset-block-start: 6px;
+	width: 8px;
 	height: 1px;
-	opacity: 0;
-	pointer-events: none;
+	background: currentcolor;
+}
+
+.comments-panel-applied-remove::before {
+	transform: rotate(45deg);
+}
+
+.comments-panel-applied-remove::after {
+	transform: rotate(-45deg);
+}
+
+.comments-panel-applied-remove:hover {
+	background: rgba(0, 0, 0, 0.2);
+}
+
+.comments-panel-applied-remove:focus-visible {
+	outline: 2px solid var(--color-primary-text);
+	outline-offset: -1px;
 }
 
 /* The controls give the rest of the panel to the list of
@@ -157,21 +223,6 @@
 
 .comments-panel-filters-label {
 	font-weight: bold;
-}
-
-/* How many filters are narrowing the list. */
-.comments-panel-filters-count {
-	min-width: 18px;
-	padding: 0 var(--spacing-xs);
-	border-radius: 9px;
-	background: rgb(var(--doc-type, 11, 135, 231));
-	color: var(--color-primary-text);
-	font-size: 0.7rem;
-	text-align: center;
-}
-
-.comments-panel-filters-count.hidden {
-	display: none;
 }
 
 /* Points at the label while the fold is closed, and turns a
@@ -242,8 +293,28 @@
 	overflow-y: auto;
 }
 
-.comments-panel-filters-clear {
-	align-self: start;
+/* Takes every filter away at once, offered once there is more
+   than one. */
+.comments-panel-applied-clear {
+	padding: 1px var(--spacing-s);
+	border: none;
+	border-radius: 999px;
+	background: transparent;
+	color: var(--color-text-light);
+	font: inherit;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+.comments-panel-applied-clear:hover {
+	color: var(--color-main-text);
+}
+
+.comments-panel-applied-clear:focus-visible {
+	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
+	outline-offset: 1px;
 }
 
 .comments-panel-list {
