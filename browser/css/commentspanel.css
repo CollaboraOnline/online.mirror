@@ -76,6 +76,44 @@
 	outline-offset: 1px;
 }
 
+/* Turns the order round. The triangle points the way the order
+   runs and turns over when the order does. */
+.comments-panel-sort-direction {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 22px;
+	height: 20px;
+	padding: 0;
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius);
+	background: transparent;
+	cursor: pointer;
+}
+
+.comments-panel-sort-direction::after {
+	content: '';
+	width: 0;
+	height: 0;
+	border-inline-start: 4px solid transparent;
+	border-inline-end: 4px solid transparent;
+	border-top: 5px solid var(--color-main-text);
+	transition: transform 150ms ease-out;
+}
+
+.comments-panel-sort-direction.is-turned::after {
+	transform: rotate(180deg);
+}
+
+.comments-panel-sort-direction:hover {
+	background: var(--color-background-dark);
+}
+
+.comments-panel-sort-direction:focus-visible {
+	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
+	outline-offset: 1px;
+}
+
 /* The choice itself is the button, so the control behind it is
    taken out of the picture. */
 .comments-panel-filter-segment > input {

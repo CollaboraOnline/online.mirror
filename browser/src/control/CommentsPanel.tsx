@@ -30,9 +30,9 @@ interface CommentFilters {
   onlyWithReplies: boolean;
 }
 
-// The order of the rows. 'position' is the order in the
-// document; the rest read the date or the author's name.
-type CommentSort = 'position' | 'newest' | 'oldest' | 'author';
+// What the order of the rows is read from: the place in the
+// document, the date, or the name of the author.
+type CommentSortKey = 'position' | 'date' | 'author';
 
 class CommentsPanel {
   // How far a reply is stepped in from the comment it answers,
@@ -52,11 +52,16 @@ class CommentsPanel {
   private textOfData: WeakMap<object, { html: string; text: string }> =
     new WeakMap();
 
-  private sortBy: CommentSort = 'position';
+  private sortKey: CommentSortKey = 'position';
 
-  // The button that picks each order, so the one that holds can
-  // be marked without the row being built again.
-  private sortChoiceNodes: Map<CommentSort, HTMLElement> = new Map();
+  // Which way round the order runs. False is the way the thing
+  // it is read from runs by itself, down the document or A to Z.
+  private sortDescending: boolean = false;
+
+  // The button that picks each order and the one that turns it
+  // round, so the row can be marked without being built again.
+  private sortChoiceNodes: Map<CommentSortKey, HTMLElement> = new Map();
+  private sortDirectionNode: HTMLElement | null = null;
 
   private filters: CommentFilters = {
     search: '',
@@ -132,20 +137,14 @@ class CommentsPanel {
     );
   }
 
-  // The order the rows are in. The choices sit on a line of
-  // their own, beside the filters that hold at the same time.
+  // The order the rows are in: what it is read from, and which
+  // way round it runs. Both sit on a line of their own.
   private buildSortRow(): HTMLElement {
-    const choices: Array<{ order: CommentSort; label: string; title: string }> =
-      [
-        {
-          order: 'position',
-          label: _('Position'),
-          title: _('Position in document'),
-        },
-        { order: 'newest', label: _('Newest'), title: _('Newest first') },
-        { order: 'oldest', label: _('Oldest'), title: _('Oldest first') },
-        { order: 'author', label: _('Author'), title: _('Author') },
-      ];
+    const choices: Array<{ key: CommentSortKey; label: string }> = [
+      { key: 'position', label: _('Position') },
+      { key: 'date', label: _('Date') },
+      { key: 'author', label: _('Author') },
+    ];
 
     this.sortChoiceNodes.clear();
 
@@ -153,7 +152,7 @@ class CommentsPanel {
       <div class="comments-panel-sort" role="group" aria-label={_('Sort by')}>
         <span class="comments-panel-sort-label">{_('Sort')}</span>
         {choices.map((choice) => {
-          const picked = this.sortBy === choice.order;
+          const picked = this.sortKey === choice.key;
           const button = (
             <button
               class={
@@ -161,29 +160,75 @@ class CommentsPanel {
               }
               type="button"
               aria-pressed={String(picked)}
-              data-title={choice.title}
-              onClick={() => this.pickSort(choice.order)}
+              onClick={() => this.pickSortKey(choice.key)}
             >
               {choice.label}
             </button>
           ) as HTMLElement;
-          this.sortChoiceNodes.set(choice.order, button);
+          this.sortChoiceNodes.set(choice.key, button);
           return button;
         })}
+        {this.buildSortDirection()}
       </div>
     );
   }
 
-  private pickSort(order: CommentSort): void {
-    if (this.sortBy === order) return;
+  // Turns the order round. It carries what the order becomes
+  // when it is pressed, which is what a reader wants to know.
+  private buildSortDirection(): HTMLElement {
+    const button = (
+      <button
+        class={
+          'comments-panel-sort-direction' +
+          (this.sortDescending ? ' is-turned' : '')
+        }
+        type="button"
+        onClick={() => {
+          this.sortDescending = !this.sortDescending;
+          this.markTheSortRow();
+          this.render();
+        }}
+      ></button>
+    ) as HTMLElement;
 
-    this.sortBy = order;
+    this.sortDirectionNode = button;
+    this.sayWhatTurningTheOrderDoes();
+    return button;
+  }
+
+  // What the order becomes if the direction is pressed, in the
+  // words of the thing the order is read from.
+  private sayWhatTurningTheOrderDoes(): void {
+    if (!this.sortDirectionNode) return;
+
+    let label = this.sortDescending
+      ? _('From the top of the document')
+      : _('From the bottom of the document');
+    if (this.sortKey === 'date')
+      label = this.sortDescending ? _('Oldest first') : _('Newest first');
+    else if (this.sortKey === 'author')
+      label = this.sortDescending ? _('A to Z') : _('Z to A');
+
+    this.sortDirectionNode.setAttribute('aria-label', label);
+    this.sortDirectionNode.dataset.title = label;
+  }
+
+  private pickSortKey(key: CommentSortKey): void {
+    if (this.sortKey === key) return;
+
+    this.sortKey = key;
+    this.markTheSortRow();
+    this.render();
+  }
+
+  private markTheSortRow(): void {
     this.sortChoiceNodes.forEach((button, held) => {
-      const picked = held === order;
+      const picked = held === this.sortKey;
       button.classList.toggle('is-picked', picked);
       button.setAttribute('aria-pressed', String(picked));
     });
-    this.render();
+    this.sortDirectionNode?.classList.toggle('is-turned', this.sortDescending);
+    this.sayWhatTurningTheOrderDoes();
   }
 
   // The controls that pick which threads the list shows, behind
@@ -346,10 +391,9 @@ class CommentsPanel {
     );
   }
 
-  // Threads in the order the sort control asks for. Ties keep
-  // the order they came in, which is the document order.
+  // Threads in the order the sort controls ask for.
   private sortThreads(threads: CommentThread[]): CommentThread[] {
-    if (this.sortBy === 'position') return threads;
+    if (this.sortKey === 'position' && !this.sortDescending) return threads;
 
     const inDocumentOrder = threads.map((thread, index) => ({
       thread: thread,
@@ -361,18 +405,19 @@ class CommentsPanel {
       const rightData = right.thread.root.sectionProperties.data;
 
       let order = 0;
-      if (this.sortBy === 'newest')
-        order =
-          CommentsPanel.timeOf(rightData) - CommentsPanel.timeOf(leftData);
-      else if (this.sortBy === 'oldest')
+      if (this.sortKey === 'date')
         order =
           CommentsPanel.timeOf(leftData) - CommentsPanel.timeOf(rightData);
-      else if (this.sortBy === 'author')
+      else if (this.sortKey === 'author')
         order = String(leftData.author ?? '').localeCompare(
           String(rightData.author ?? ''),
         );
 
-      return order || left.index - right.index;
+      // Threads the order cannot tell apart keep the order they
+      // came in. Turning it round turns those over too.
+      return (
+        (order || left.index - right.index) * (this.sortDescending ? -1 : 1)
+      );
     });
 
     return inDocumentOrder.map((entry) => entry.thread);

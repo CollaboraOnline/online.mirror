@@ -34,8 +34,13 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('#navigator-search-input').clear().type(words);
 	}
 
+	// What the order is read from, and which way round it runs.
 	function pickTheOrder(label) {
 		cy.cGet('.comments-panel-sort-choice').contains(label).click();
+	}
+
+	function turnTheOrderRound() {
+		cy.cGet('.comments-panel-sort-direction').click();
 	}
 
 	function pickTheStatus(label) {
@@ -282,17 +287,19 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-thread').eq(0)
 			.find('.comments-panel-comment-text').should('have.text', 'the older comment');
 
-		pickTheOrder('Newest');
+		// By date, which runs from the first written to the last
+		// until it is turned round.
+		pickTheOrder('Date');
 		cy.cGet('.comments-panel-thread').eq(0)
-			.find('.comments-panel-comment-text').should('have.text', 'the newer comment');
-		cy.cGet('.comments-panel-thread').eq(1)
 			.find('.comments-panel-comment-text').should('have.text', 'the older comment');
+		cy.cGet('.comments-panel-thread').eq(1)
+			.find('.comments-panel-comment-text').should('have.text', 'the newer comment');
 
-		pickTheOrder('Oldest');
+		turnTheOrderRound();
 		cy.cGet('.comments-panel-thread').eq(0)
-			.find('.comments-panel-comment-text').should('have.text', 'the older comment');
-		cy.cGet('.comments-panel-thread').eq(1)
 			.find('.comments-panel-comment-text').should('have.text', 'the newer comment');
+		cy.cGet('.comments-panel-thread').eq(1)
+			.find('.comments-panel-comment-text').should('have.text', 'the older comment');
 	});
 
 	it('the sort and the filters hold at the same time', function() {
@@ -305,7 +312,8 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		openCommentsTab();
 
 		searchTheComments('apples');
-		pickTheOrder('Newest');
+		pickTheOrder('Date');
+		turnTheOrderRound();
 
 		cy.cGet('.comments-panel-thread').should('have.length', 2);
 		cy.cGet('.comments-panel-thread').eq(0)
