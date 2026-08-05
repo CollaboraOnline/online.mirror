@@ -86,6 +86,10 @@ class CommentsPanel {
   private shown: boolean = false;
   private stale: boolean = true;
 
+  // The comments whose box the rows held when they were last
+  // built, by id, joined into one string.
+  private commentsBeingWritten: string = '';
+
   constructor(map: any) {
     this.map = map;
 
@@ -400,6 +404,22 @@ class CommentsPanel {
     if (this.shown) this.render();
   }
 
+  // The rows hold the box a comment is written in, so a change
+  // in which comments are being written has to reach them.
+  public checkTheCommentsBeingWritten(): void {
+    const section = this.getCommentSection();
+    if (!section) return;
+
+    const beingWritten = (section.sectionProperties.commentList as any[])
+      .filter((comment) => comment.isEdit())
+      .map((comment) => String(comment.sectionProperties.data.id))
+      .join(',');
+
+    if (beingWritten === this.commentsBeingWritten) return;
+    this.commentsBeingWritten = beingWritten;
+    this.markStale();
+  }
+
   private getCommentSection(): any {
     if (!app.sectionContainer) return null;
     return app.sectionContainer.getSectionWithName(
@@ -419,12 +439,25 @@ class CommentsPanel {
       threads.filter((thread) => this.matchesFilters(thread)),
     );
 
+    // Building the rows moves the box a comment is written in,
+    // which takes the focus off it, so the focus goes back.
+    const written = this.theFocusInsideABoxBeingWrittenIn();
+
     const scrollTop = this.listNode.scrollTop;
     this.builtRows = [];
+    this.returnTheEditorsToTheirComments();
     this.listNode.replaceChildren(
       ...shown.map((thread) => this.buildThreadRow(thread)),
     );
     this.listNode.scrollTop = scrollTop;
+
+    // The row that holds a box to write in is brought into view,
+    // because that is where the reader is about to type.
+    this.listNode
+      .querySelector<HTMLElement>('.comments-panel-comment.is-being-written')
+      ?.scrollIntoView({ block: 'nearest' });
+
+    if (written && written.isConnected) written.focus();
     app.layoutingService.appendLayoutingTask(() =>
       this.offerToOpenTheCutRows(),
     );
@@ -440,6 +473,54 @@ class CommentsPanel {
       this.filterCountNode.textContent = active > 0 ? String(active) : '';
       this.filterCountNode.classList.toggle('hidden', active === 0);
     }
+  }
+
+  // Whatever holds the focus inside a box a comment is being
+  // written in, or null when the focus is somewhere else.
+  private theFocusInsideABoxBeingWrittenIn(): HTMLElement | null {
+    const focused = document.activeElement as HTMLElement | null;
+    if (!focused || !focused.closest('.cool-annotation-edit')) return null;
+    return focused;
+  }
+
+  // The rows the pass is about to throw away hand their boxes
+  // back to the comments they belong to first.
+  private returnTheEditorsToTheirComments(): void {
+    this.listNode
+      ?.querySelectorAll<HTMLElement>('.cool-annotation-edit')
+      .forEach((editor) => {
+        editor.classList.remove('comment-editor-in-the-list');
+        const comment = this.commentOfId(editor.dataset.editorOf ?? '');
+        if (comment) comment.sectionProperties.wrapper.appendChild(editor);
+        else editor.remove();
+      });
+  }
+
+  private commentOfId(id: string): any {
+    const section = this.getCommentSection();
+    if (!section || id.length === 0) return null;
+    return (section.sectionProperties.commentList as any[]).find(
+      (comment) => String(comment.sectionProperties.data.id) === id,
+    );
+  }
+
+  // The box a comment is being written in, moved out of the
+  // comment's frame and into its row.
+  private editorOf(comment: any): HTMLElement | null {
+    const properties = comment.sectionProperties;
+    let editor: HTMLElement | null = null;
+    if (properties.nodeModify && properties.nodeModify.style.display !== 'none')
+      editor = properties.nodeModify;
+    else if (
+      properties.nodeReply &&
+      properties.nodeReply.style.display !== 'none'
+    )
+      editor = properties.nodeReply;
+    if (!editor) return null;
+
+    editor.dataset.editorOf = String(properties.data.id);
+    editor.classList.add('comment-editor-in-the-list');
+    return editor;
   }
 
   // The comments of the document, each with the replies under
@@ -590,6 +671,11 @@ class CommentsPanel {
 
     this.builtRows.push({ id: id, textNode: textNode, openNode: openNode });
 
+    // A comment being modified holds its words in the box below,
+    // so the row does not show them twice over.
+    const editor = this.editorOf(comment);
+    const beingModified = editor !== null && comment.isModifying();
+
     // Beyond this depth the steps would leave no room to read
     // in, so the deeper replies line up with the last step.
     const step = Math.min(depth, CommentsPanel.deepestStep);
@@ -599,7 +685,8 @@ class CommentsPanel {
         class={
           'comments-panel-comment' +
           (comment === thread.root ? ' is-first' : ' is-reply') +
-          (id === this.selectedId ? ' is-selected' : '')
+          (id === this.selectedId ? ' is-selected' : '') +
+          (editor !== null ? ' is-being-written' : '')
         }
         style={{ marginInlineStart: step * CommentsPanel.stepWidth + 'px' }}
         data-comment-id={id}
@@ -613,13 +700,14 @@ class CommentsPanel {
             {this.buildAvatar(data)}
             <span class="comments-panel-comment-author">{data.author}</span>
           </span>
-          {textNode}
+          {!beingModified && textNode}
         </button>
         <div class="comments-panel-comment-footer">
           {this.buildCommentTags(thread, comment)}
           {openNode}
           {app.isCommentEditingAllowed() && this.buildMenuButton(comment)}
         </div>
+        {editor}
       </div>
     );
   }

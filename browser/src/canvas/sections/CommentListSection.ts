@@ -1363,7 +1363,14 @@ export class CommentSection extends CanvasSectionObject {
 			}
 		}
 		else {
+			// A Writer comment is answered in its row, so the
+			// comments tab comes up before the box opens.
+			if (app.map._docLayer._docType === 'text')
+				this.showCommentInCommentsPanel(String(annotation.sectionProperties.data.id));
 			annotation.reply();
+			// The box moves into the row before the focus goes
+			// to it, because moving it after takes it off.
+			this.map.commentsPanel?.checkTheCommentsBeingWritten();
 			this.select(annotation, true);
 			annotation.focus();
 		}
@@ -1390,7 +1397,14 @@ export class CommentSection extends CanvasSectionObject {
 						tempFunction();
 					}
 					else {
+						// A Writer comment is edited in its row,
+						// so the tab comes up first.
+						if (app.map._docLayer._docType === 'text')
+							this.showCommentInCommentsPanel(String(annotation.sectionProperties.data.id));
 						annotation.edit();
+						// The box moves into the row before the
+						// focus, or it loses it again.
+						this.map.commentsPanel?.checkTheCommentsBeingWritten();
 						this.select(annotation, true);
 						annotation.focus();
 					}
@@ -2611,11 +2625,11 @@ export class CommentSection extends CanvasSectionObject {
 		return startY;
 	}
 
-	// Put the box of the comment being written beside its words.
-	// It is kept inside the window, so it stays reachable.
-	private placeCommentBeingWrittenAtItsAnchor (): void {
+	// Put the box of a comment nobody has written yet beside the
+	// words. It has no bubble and no row, so the box is it.
+	private placeTheCommentNotWrittenYet (): void {
 		const written = Comment.isAnyEdit();
-		if (!written)
+		if (!written || written.sectionProperties.data.id !== 'new')
 			return;
 
 		const data = written.sectionProperties.data;
@@ -2705,14 +2719,14 @@ export class CommentSection extends CanvasSectionObject {
 		);
 	}
 
-	// Whether a comment has a bubble in its page margin. One
-	// being written, a tracked change and a hidden one do not.
+	// Whether a comment has a bubble in its page margin. One not
+	// written yet, a tracked change and a hidden one have none.
 	private hasABubble (comment: Comment): boolean {
 		if (this.sectionProperties.show !== true)
 			return false;
 
 		const data = comment.sectionProperties.data;
-		if (data.id === 'new' || data.trackchange || comment.isEdit())
+		if (data.id === 'new' || data.trackchange)
 			return false;
 		if (data.resolved === 'true' && !this.sectionProperties.showResolved)
 			return false;
@@ -2821,10 +2835,8 @@ export class CommentSection extends CanvasSectionObject {
 		for (const comment of this.sectionProperties.commentList) {
 			if (this.isLaidOutBesideThePage(comment))
 				continue;
-			// A comment being written keeps its box, because its
-			// words are not in the document yet.
-			const onThePage = comment.isRootComment() || comment.isEdit();
-			comment.sectionProperties.container.style.display = onThePage ? '' : 'none';
+			comment.sectionProperties.container.style.display =
+				comment.isRootComment() ? '' : 'none';
 		}
 	}
 
@@ -2871,7 +2883,7 @@ export class CommentSection extends CanvasSectionObject {
 					this.myTopLeft[1] + this.sectionProperties.marginY + (new cool.SimplePoint(0, 0)).vY,
 					relayout);
 
-			this.placeCommentBeingWrittenAtItsAnchor();
+			this.placeTheCommentNotWrittenYet();
 		}
 
 		this.drawTheLineToThePickedBubble();
@@ -3007,8 +3019,10 @@ export class CommentSection extends CanvasSectionObject {
 
 			this.layout(reLayout);
 
-			if (reLayout && app.map._docLayer._docType === 'text')
+			if (reLayout && app.map._docLayer._docType === 'text') {
 				this.updateThreadInfoIndicator();
+				this.map.commentsPanel?.checkTheCommentsBeingWritten();
+			}
 		});
 
 		app.sectionContainer.requestReDraw();

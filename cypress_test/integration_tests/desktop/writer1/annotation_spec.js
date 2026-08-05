@@ -170,7 +170,9 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		desktopHelper.insertComment();
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
-		cy.cGet('.cool-annotation-content-resolved').should('have.text', '');
+		// The comment's row in the comments tab says the same,
+		// so the comment itself is the one asked.
+		cy.cGet('#comment-container-1 .cool-annotation-content-resolved').should('have.text', '');
 
 		// Send Action_ResolveComment postMessage with the comment's Id
 		cy.getFrameWindow().then(win => {
@@ -182,7 +184,8 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		});
 
 		// The comment should now show as resolved
-		cy.cGet('.cool-annotation-content-resolved').should('have.text', 'Resolved');
+		cy.cGet('#comment-container-1 .cool-annotation-content-resolved')
+			.should('have.text', 'Resolved');
 	});
 
 	it('Toggle Resolved/Unresolved', function() {

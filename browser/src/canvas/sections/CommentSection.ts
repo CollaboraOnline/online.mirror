@@ -184,6 +184,10 @@ export class Comment extends CanvasSectionObject {
 		}
 
 		var button = window.L.DomUtil.create('div', 'annotation-btns-container', this.sectionProperties.nodeModify);
+		// The focus leaving an editing box saves what it holds.
+		// The listener sits on the box, not on the comment.
+		window.L.DomEvent.on(this.sectionProperties.nodeModify, 'focusout', this.onLostFocus, this);
+		window.L.DomEvent.on(this.sectionProperties.nodeReply, 'focusout', this.onLostFocus, this);
 		window.L.DomEvent.on(this.sectionProperties.nodeModifyText, 'focus', this.onFocus, this);
 		window.L.DomEvent.on(this.sectionProperties.nodeReplyText, 'focus', this.onFocusReply, this);
 		window.L.DomEvent.on(this.sectionProperties.nodeModifyText, 'input', this.textAreaInput, this);
@@ -209,6 +213,10 @@ export class Comment extends CanvasSectionObject {
 		var events = ['click', 'dblclick', 'mousedown', 'mouseup', 'mouseover', 'mouseout', 'keydown', 'keypress', 'keyup', 'touchstart', 'touchmove', 'touchend'];
 		window.L.DomEvent.on(this.sectionProperties.container, 'click', this.onMouseClick, this);
 		window.L.DomEvent.on(this.sectionProperties.container, 'keydown', this.onCommentKeyDown, this);
+		// The box sits in the comment's row, outside the
+		// frame above, so it is listened to on its own.
+		window.L.DomEvent.on(this.sectionProperties.nodeModify, 'keydown', this.onCommentKeyDown, this);
+		window.L.DomEvent.on(this.sectionProperties.nodeReply, 'keydown', this.onCommentKeyDown, this);
 
 		for (var it = 0; it < events.length; it++) {
 			window.L.DomEvent.on(this.sectionProperties.container, events[it], window.L.DomEvent.stopPropagation, this);
@@ -321,7 +329,6 @@ export class Comment extends CanvasSectionObject {
 		var isRTL = document.documentElement.dir === 'rtl';
 		this.sectionProperties.container = window.L.DomUtil.create('div', 'cool-annotation' + (isRTL ? ' rtl' : ''));
 		this.sectionProperties.container.id = 'comment-container-' + this.sectionProperties.data.id;
-		window.L.DomEvent.on(this.sectionProperties.container, 'focusout', this.onLostFocus, this);
 
 		var mobileClass = (<any>window).mode.isSmallScreenDevice() ? ' wizard-comment-box': '';
 
@@ -451,9 +458,7 @@ export class Comment extends CanvasSectionObject {
 
 		// A box on show is kept inside the window. A box with
 		// nothing but its bubble is left where the layout asks.
-		const carriesOnlyItsBubble = app.map._docLayer._docType === 'text'
-			&& !this.isEdit() && !this.sectionProperties.data.trackchange;
-		if ((this.isSelected() || this.isEdit()) && !carriesOnlyItsBubble) {
+		if ((this.isSelected() || this.isEdit()) && !this.showsOnlyItsBubble()) {
 			// Gap kept between the comment and the toolbar/canvas edges.
 			const margin = this.sectionProperties.commentListSection.sectionProperties.marginY / app.dpiScale;
 
@@ -509,6 +514,14 @@ export class Comment extends CanvasSectionObject {
 		this.sectionProperties.childLinesNode = window.L.DomUtil.create('div', '', this.sectionProperties.container);
 		this.sectionProperties.childLinesNode.id = 'annotation-child-lines-' + this.sectionProperties.data.id;
 		this.sectionProperties.childLinesNode.style.width = this.sectionProperties.childCommentOffset*(this.getChildLevel() + 1) + 'px';
+	}
+
+	// Whether the page shows nothing of this comment but its
+	// bubble. In Writer that is all but a tracked change.
+	public showsOnlyItsBubble(): boolean {
+		return app.map._docLayer._docType === 'text'
+			&& this.sectionProperties.data.id !== 'new'
+			&& !this.sectionProperties.data.trackchange;
 	}
 
 	// How big the bubble drawn out of this box is and how far
@@ -1424,6 +1437,11 @@ export class Comment extends CanvasSectionObject {
 			return;
 		}
 
+		// The box is listened to on its own and sits inside
+		// the frame, so a key can arrive twice. First wins.
+		if ((e as any).commentKeyHandled) return;
+		(e as any).commentKeyHandled = true;
+
 		if (this.isCtrlEnter(e)) {
 			e.preventDefault();
 			e.stopPropagation();
@@ -1644,8 +1662,12 @@ export class Comment extends CanvasSectionObject {
 
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 	public onLostFocus (e: any): void {
+		// Moving the focus about inside the box being written
+		// in, from the words to Save, is not leaving it.
+		const written = this.sectionProperties.nodeReply.contains(e.target)
+			? this.sectionProperties.nodeReply : this.sectionProperties.nodeModify;
 
-		if (!this.isEdit() || this.sectionProperties.container.contains(e.relatedTarget))
+		if (!this.isEdit() || written.contains(e.relatedTarget))
 			return;
 		if (this.sectionProperties.nodeReply.contains(e.target)) {
 			this.onLostFocusReply(e);
@@ -1755,10 +1777,10 @@ export class Comment extends CanvasSectionObject {
 
 	public reply (): Comment {
 		this.sectionProperties.container.classList.add('reply-annotation-container');
-		// A reply has no box of its own on the page, so the box
-		// comes back while something is being written in it.
-		this.sectionProperties.container.style.display = '';
-		this.sectionProperties.container.style.visibility = '';
+		// A box carrying nothing but its bubble stays down while
+		// the words are written, in the row that reads them.
+		if (!this.showsOnlyItsBubble())
+			this.sectionProperties.container.style.visibility = '';
 		this.sectionProperties.contentNode.style.display = '';
 		this.sectionProperties.nodeModify.style.display = 'none';
 		this.sectionProperties.nodeReply.style.display = '';
@@ -1774,10 +1796,10 @@ export class Comment extends CanvasSectionObject {
 		this.sectionProperties.container.classList.add('modify-annotation-container');
 		this.sectionProperties.nodeModify.style.display = '';
 		this.sectionProperties.nodeReply.style.display = 'none';
-		// A reply has no box of its own on the page, so the box
-		// comes back while something is being written in it.
-		this.sectionProperties.container.style.display = '';
-		this.sectionProperties.container.style.visibility = '';
+		// A box carrying nothing but its bubble stays down while
+		// the words are written, in the row that reads them.
+		if (!this.showsOnlyItsBubble())
+			this.sectionProperties.container.style.visibility = '';
 		this.sectionProperties.contentNode.style.display = 'none';
 		this.cachedIsEdit = true;
 		if (app.map._docLayer._docType !== 'spreadsheet') {

@@ -344,3 +344,15 @@
 	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
 	outline-offset: 1px;
 }
+
+/* The box a comment is written in, moved into its row. What is
+   set here is the room the row gives it. */
+.cool-annotation-edit.comment-editor-in-the-list {
+	padding: var(--spacing-s) var(--spacing-m) var(--spacing-m) var(--spacing-m);
+	box-sizing: border-box;
+	width: 100%;
+}
+
+.comments-panel-comment.is-being-written {
+	background-color: var(--color-background-dark);
+}

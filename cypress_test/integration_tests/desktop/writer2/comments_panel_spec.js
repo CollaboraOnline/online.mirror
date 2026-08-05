@@ -328,6 +328,49 @@ describe(['tagdesktop'], 'Comments panel', function() {
 			.should('have.text', 'the answer from the list');
 	});
 
+	it('the box to answer a comment in sits in the comment\'s row', function() {
+		desktopHelper.insertComment('a comment to answer');
+
+		desktopHelper.pickCommentAction(1, 'Reply');
+
+		cy.cGet('.comments-panel-comment[data-comment-id="1"] #annotation-reply-textarea-1')
+			.should('be.visible');
+		// Nothing of the comment comes up over the page to be
+		// written in.
+		cy.cGet('#comment-container-1').should('be.not.visible');
+	});
+
+	it('the box to edit a comment in holds the words of the comment', function() {
+		desktopHelper.insertComment('a comment to edit');
+
+		desktopHelper.pickCommentAction(1, 'Modify');
+
+		cy.cGet('.comments-panel-comment[data-comment-id="1"] #annotation-modify-textarea-1')
+			.should('be.visible')
+			.should('have.text', 'a comment to edit');
+		// The words are in the box being written in, so the row
+		// does not show them twice over.
+		cy.cGet('.comments-panel-comment[data-comment-id="1"]')
+			.should('have.class', 'is-being-written')
+			.find('.comments-panel-comment-text').should('not.exist');
+	});
+
+	it('the box goes away again once the answer is written', function() {
+		desktopHelper.insertComment('a comment to answer');
+
+		desktopHelper.pickCommentAction(1, 'Reply');
+		cy.cGet('.comments-panel-comment[data-comment-id="1"] #annotation-reply-textarea-1')
+			.should('be.visible')
+			.type('the answer');
+		cy.cGet('#annotation-reply-1').click();
+
+		// The answer has a row of its own, and no row is left
+		// with a box to write in.
+		cy.cGet('.comments-panel-comment').should('have.length', 2);
+		cy.cGet('.comments-panel-comment .cool-annotation-edit').should('not.exist');
+		cy.cGet('.comments-panel-comment.is-being-written').should('not.exist');
+	});
+
 	it('a resolved thread is marked as resolved', function() {
 		desktopHelper.insertComment('a comment to resolve');
 		resolveFirstComment();
