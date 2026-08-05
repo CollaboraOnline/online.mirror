@@ -911,25 +911,13 @@ class ViewLayoutBase {
 	}
 
 	// virtual function implemented by the children
-	public viewHasEnoughSpaceToShowFullWidthComments() {
-		return false;
-	}
-
 	public unselectCommentOnScroll() {
 		const commentSection = app.sectionContainer.getSectionWithName(
 			app.CSections.CommentList.name,
 		) as cool.CommentSection;
 
-		if (commentSection && commentSection.sectionProperties.selectedComment) {
-			if (
-				commentSection.isShownBig(
-					commentSection.sectionProperties.selectedComment,
-				)
-			)
-				// Deselecting the comment would also close its full-view.
-				return;
+		if (commentSection && commentSection.sectionProperties.selectedComment)
 			commentSection.unselect();
-		}
 	}
 
 	public canScrollHorizontal(documentAnchor: CanvasSectionObject): boolean {

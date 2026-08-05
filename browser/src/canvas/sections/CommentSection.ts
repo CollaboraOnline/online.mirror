@@ -477,12 +477,7 @@ export class Comment extends CanvasSectionObject {
 			}
 		}
 
-		if (this.sectionProperties.commentListSection.isShownBig(this)) {
-			// Full view lifts the card and the overlay it casts over the sidebars.
-			// That level lives in the stylesheet, so leave the inline value empty
-			// here instead of pinning the card back down beside the document.
-			this.sectionProperties.container.style.zIndex = '';
-		} else if (this.isSelected()) {
+		if (this.isSelected()) {
 			this.sectionProperties.container.style.zIndex = 14;
 		} else if (this.isEdit()) {
 			this.sectionProperties.container.style.zIndex = 13;
@@ -1008,12 +1003,21 @@ export class Comment extends CanvasSectionObject {
 		}
 	}
 
-	private showWriter() {
-		if (!this.isCollapsed || this.isSelected()) {
+	// Returns whether the comment ended up on the page. It
+	// shows nothing while resolved ones are hidden.
+	private showWriter(): boolean {
+		// A Writer comment keeps its box down, picked or not.
+		// The page shows the bubble the class below turns on.
+		if (this.sectionProperties.data.trackchange) {
 			this.sectionProperties.container.style.visibility = '';
 			this.sectionProperties.container.style.display = '';
 		}
-		if (this.sectionProperties.data.resolved !== 'true' || this.sectionProperties.commentListSection.sectionProperties.showResolved) {
+		else
+			this.sectionProperties.container.style.visibility = 'hidden';
+
+		const onShow = this.sectionProperties.data.resolved !== 'true'
+			|| this.sectionProperties.commentListSection.sectionProperties.showResolved;
+		if (onShow) {
 			window.L.DomUtil.addClass(this.sectionProperties.container, 'cool-annotation-collapsed-show');
 			this.sectionProperties.showSelectedCoordinate = true;
 		}
@@ -1023,6 +1027,7 @@ export class Comment extends CanvasSectionObject {
 		this.sectionProperties.collapsedInfoNode.style.visibility = '';
 		this.cachedIsEdit = false;
 		this.setContainerPos(true);
+		return onShow;
 	}
 
 	private showCalc() {
@@ -1111,8 +1116,7 @@ export class Comment extends CanvasSectionObject {
 		// We don't cache the hidden state for spreadsheets. Only one comment can be
 		// visible and they're hidden when scrolling, so it's easier this way.
 		if (app.map._docLayer._docType === 'text') {
-			this.showWriter();
-			this.hidden = false;
+			this.hidden = !this.showWriter();
 		} else if (app.map._docLayer._docType === 'presentation' || app.map._docLayer._docType === 'drawing') {
 			// The flag holds whether the box ended up on display. A comment
 			// anchored to another slide or page keeps its box closed, so it
@@ -1292,14 +1296,6 @@ export class Comment extends CanvasSectionObject {
 				&& isShown('.uno:PromoteComment'))
 				entries.push({ text: _('Promote to top comment'), type: 'action', id: 'promote', pos: String(pos++) });
 
-			if (docLayer._docType === 'text' && !window.mode.isSmallScreenDevice()) {
-				const isShownBig = listSection.isShownBig(this);
-				entries.push({
-					text: isShownBig ? _('Show on the side') : _('Open in full view'),
-					type: 'action', id: 'showBigger', pos: String(pos++),
-				});
-			}
-
 			if ((docLayer._docType === 'text' || docLayer._docType === 'spreadsheet')
 				&& !window.mode.isSmallScreenDevice())
 				entries.push({ text: _('Show in navigator'), type: 'action', id: 'showInNavigator', pos: String(pos++) });
@@ -1373,7 +1369,6 @@ export class Comment extends CanvasSectionObject {
 		case 'resolve': listSection.resolve(this); break;
 		case 'resolveThread': listSection.resolveThread(this); break;
 		case 'promote': listSection.promote(this); break;
-		case 'showBigger': listSection.toggleShowBigger(this); break;
 		case 'showInNavigator': listSection.showInNavigator(this); break;
 		}
 	}
@@ -2189,6 +2184,11 @@ export class Comment extends CanvasSectionObject {
 	}
 
 	public setCollapsed(): void {
+		// A comment with a tracked change is read in a box
+		// beside the page, so it has no bubble to stand behind.
+		if (this.sectionProperties.data.trackchange && app.map._docLayer._docType === 'text')
+			return;
+
 		this.isCollapsed = true;
 
 		// A collapsed comment shows only its avatar bubble, and only on the slide
@@ -2212,7 +2212,11 @@ export class Comment extends CanvasSectionObject {
 			this.sectionProperties.commentListSection.removeCommentAttention(this);
 		}
 
-		if (this.isRootComment() || app.map._docLayer._docType === 'presentation' || app.map._docLayer._docType === 'drawing') {
+		// A Writer comment being written keeps its box open,
+		// because its words are not in the document yet.
+		const beingWrittenInWriter = this.isEdit() && app.map._docLayer._docType === 'text';
+		if (!beingWrittenInWriter
+			&& (this.isRootComment() || app.map._docLayer._docType === 'presentation' || app.map._docLayer._docType === 'drawing')) {
 			this.sectionProperties.container.style.display = '';
 			this.sectionProperties.container.style.visibility = 'hidden';
 		}

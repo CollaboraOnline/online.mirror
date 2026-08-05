@@ -47,8 +47,7 @@ describe(['tagdesktop'], 'Comment markers in the page margin', function() {
 	it('a marker counts the replies under the comment as well', function() {
 		desktopHelper.insertComment('a comment with an answer');
 
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 		cy.cGet('#annotation-reply-textarea-1').type('the answer');
 		cy.cGet('#annotation-reply-1').click();
 		cy.cGet('#annotation-content-area-2').should('contain', 'the answer');
@@ -70,8 +69,7 @@ describe(['tagdesktop'], 'Comment markers in the page margin', function() {
 		cy.cGet('.comment-margin-marker').should('not.have.class', 'is-resolved');
 		cy.cGet('.comment-margin-marker-resolved').should('not.exist');
 
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Resolve').click();
+		desktopHelper.pickCommentAction(1, 'Resolve');
 
 		cy.cGet('.comment-margin-marker').should('have.class', 'is-resolved');
 		cy.cGet('.comment-margin-marker-resolved').should('exist');
@@ -144,24 +142,25 @@ describe(['tagdesktop'], 'Comments in the multi page view', function() {
 
 		switchToMultiPageView();
 
-		cy.cGet('#comment-container-1').should('not.be.visible');
+		cy.cGet('#comment-container-1 .cool-annotation-img').should('not.be.visible');
 		cy.cGet('.comment-margin-marker').should('be.visible');
 	});
 
-	it('a comment comes back beside the page in the single page view', function() {
+	it('the bubble of a comment comes back in the single page view', function() {
 		desktopHelper.insertComment('a comment to come back');
+		cy.cGet('#comment-container-1 .cool-annotation-img').should('be.visible');
 
 		switchToMultiPageView();
-		cy.cGet('#comment-container-1').should('not.be.visible');
+		cy.cGet('#comment-container-1 .cool-annotation-img').should('not.be.visible');
 
-		// The same button takes the view back to one page at a time.
+		// The same button takes the view back to one page at a time, and the bubble of
+		// the comment comes back with it.
 		cy.cGet('#multi-page-view-button').click();
 		cy.getFrameWindow().then(function(win) {
 			helper.processToIdle(win);
 			expect(win.app.activeDocument.activeLayout.type).to.equal('ViewLayoutWriter');
 		});
 
-		cy.cGet('.comment-margin-marker').click();
-		cy.cGet('#comment-container-1').should('be.visible');
+		cy.cGet('#comment-container-1 .cool-annotation-img').should('be.visible');
 	});
 });

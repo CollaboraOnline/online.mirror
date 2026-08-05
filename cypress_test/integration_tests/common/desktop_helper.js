@@ -387,6 +387,39 @@ function insertComment(text = 'some text0', save = true) {
 }
 
 
+// Bring up the comments tab of the navigation panel, where a
+// Writer comment is read. Asking again leaves it where it is.
+function openCommentsTab() {
+	cy.log('>> openCommentsTab - start');
+
+	cy.cGet('body').then(function($body) {
+		if ($body.find('#navigation-sidebar.visible').length === 0)
+			cy.cGet('#navigator-floating-icon').click();
+	});
+	cy.cGet('#tab-comments').click();
+	cy.cGet('#comments-dock-wrapper').should('be.visible');
+
+	cy.log('<< openCommentsTab - end');
+}
+
+// Open the menu of what can be done to a comment. The page
+// carries only the bubble, so the menu comes off the row.
+function openCommentMenu(id) {
+	cy.log('>> openCommentMenu - start');
+
+	openCommentsTab();
+	cy.cGet('.comments-panel-comment[data-comment-id="' + id + '"]'
+		+ ' .comments-panel-comment-menu').click();
+
+	cy.log('<< openCommentMenu - end');
+}
+
+// Pick the action the comment's menu offers under this name.
+function pickCommentAction(id, action) {
+	openCommentMenu(id);
+	cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', action).click();
+}
+
 function toggleComments(resolved = false) {
 	cy.log('>> toggleComments - start');
 
@@ -943,6 +976,9 @@ module.exports.insertImage = insertImage;
 module.exports.insertVideo = insertVideo;
 module.exports.deleteImage = deleteImage;
 module.exports.insertComment = insertComment;
+module.exports.openCommentsTab = openCommentsTab;
+module.exports.openCommentMenu = openCommentMenu;
+module.exports.pickCommentAction = pickCommentAction;
 module.exports.toggleComments = toggleComments;
 module.exports.actionOnSelector = actionOnSelector;
 module.exports.assertScrollbarPosition = assertScrollbarPosition;

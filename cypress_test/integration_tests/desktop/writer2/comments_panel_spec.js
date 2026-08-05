@@ -21,11 +21,7 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		});
 	}
 
-	function openCommentsTab() {
-		cy.cGet('#navigator-floating-icon').click();
-		cy.cGet('#tab-comments').click();
-		cy.cGet('#comments-dock-wrapper').should('be.visible');
-	}
+	const openCommentsTab = desktopHelper.openCommentsTab;
 
 	function openFilters() {
 		cy.cGet('.comments-panel-filters-summary').click();
@@ -33,16 +29,14 @@ describe(['tagdesktop'], 'Comments panel', function() {
 	}
 
 	function replyToFirstComment(text) {
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 		cy.cGet('#annotation-reply-textarea-1').type(text);
 		cy.cGet('#annotation-reply-1').click();
 		cy.cGet('#annotation-content-area-2').should('contain', text);
 	}
 
 	function resolveFirstComment() {
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Resolve').click();
+		desktopHelper.pickCommentAction(1, 'Resolve');
 	}
 
 	it('a comment of the document has a row of its own', function() {

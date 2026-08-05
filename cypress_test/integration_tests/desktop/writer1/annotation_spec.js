@@ -25,8 +25,7 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('contain','some text0');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Modify').click();
+		desktopHelper.pickCommentAction(1, 'Modify');
 		cy.cGet('#annotation-modify-textarea-1').type('{end}, some other text');
 		cy.cGet('#annotation-save-1').click();
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
@@ -36,8 +35,7 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 	it('Paste keeps no formatting', function() {
 		desktopHelper.insertComment();
 
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Modify').click();
+		desktopHelper.pickCommentAction(1, 'Modify');
 		cy.cGet('#annotation-modify-textarea-1').should('exist');
 
 		cy.getFrameWindow().then(function(win) {
@@ -73,8 +71,7 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('contain','some text');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 		cy.cGet('#annotation-reply-textarea-1').type('some reply text');
 		cy.cGet('#annotation-reply-1').click();
 		cy.cGet('#annotation-content-area-2').should('contain','some reply text');
@@ -94,8 +91,7 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('.cool-annotation-content > div').should('contain','some text');
-		cy.cGet('.cool-annotation-menu').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Remove').click();
+		desktopHelper.pickCommentAction(1, 'Remove');
 		cy.cGet('.cool-annotation-content-wrapper').should('not.exist');
 	});
 
@@ -108,9 +104,9 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 			cy.stub(win.parent, 'postMessage').as('postMessage');
 		});
 
-		// <div class="cool-annotation-content-wrapper" ...> is the topmost element of the comment
-		cy.cGet('.cool-annotation-content-wrapper').should('be.visible');
-		cy.cGet('.cool-annotation-content-wrapper').click();
+		// The bubble is what the page carries of the comment, so
+		// that is what is picked.
+		cy.cGet('#comment-container-1 .cool-annotation-img').click();
 
 		cy.get('@postMessage').should(stub => {
 			const found = stub.getCalls().some(call => {
@@ -152,8 +148,7 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 			cy.stub(win.parent, 'postMessage').as('postMessage');
 		});
 
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 		cy.cGet('#annotation-reply-textarea-1').type('some reply text');
 		cy.cGet('#annotation-reply-1').click();
 		cy.cGet('#annotation-content-area-2').should('contain', 'some reply text');
@@ -174,7 +169,7 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 	it('Action_ResolveComment postMessage resolves a comment', function() {
 		desktopHelper.insertComment();
 
-		cy.cGet('.cool-annotation-content-wrapper').should('be.visible');
+		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('.cool-annotation-content-resolved').should('have.text', '');
 
 		// Send Action_ResolveComment postMessage with the comment's Id
@@ -205,9 +200,14 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		desktopHelper.insertComment("resolved comment", true);
 		cy.cGet('body').type('focus out of comments');
 		cy.cGet('#comment-container-2').should('exist');
-		cy.cGet('#comment-annotation-menu-2').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Resolve').click();
+		desktopHelper.pickCommentAction(2, 'Resolve');
 		cy.cGet('.cool-annotation-content-resolved').should('exist');
+
+		// All the page shows of a comment is its bubble, so that
+		// is what says whether the comment is on show at all.
+		function bubbleOf(id) {
+			return cy.cGet('#comment-container-' + id + ' .cool-annotation-img');
+		}
 
 		/* scenario 1:
 		 *   - hide all comments -> both hidden, and the resolved choice goes off
@@ -215,18 +215,18 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		 *   - show all comments -> only the unresolved comment comes back
 		 */
 		desktopHelper.toggleComments();
-		cy.cGet('#comment-container-1').should('be.not.visible');
-		cy.cGet('#comment-container-2').should('be.not.visible');
+		bubbleOf(1).should('have.css', 'visibility', 'hidden');
+		bubbleOf(2).should('have.css', 'visibility', 'hidden');
 		desktopHelper.toggleComments();
-		cy.cGet('#comment-container-1').should('be.visible');
-		cy.cGet('#comment-container-2').should('be.not.visible');
+		bubbleOf(1).should('have.css', 'visibility', 'visible');
+		bubbleOf(2).should('have.css', 'visibility', 'hidden');
 
 		/* scenario 2:
 		 *   - show resolved comments -> both visible
 		 */
 		desktopHelper.toggleComments(/*resolved = */ true);
-		cy.cGet('#comment-container-1').should('be.visible');
-		cy.cGet('#comment-container-2').should('be.visible');
+		bubbleOf(1).should('have.css', 'visibility', 'visible');
+		bubbleOf(2).should('have.css', 'visibility', 'visible');
 
 		/* scenario 3:
 		 *   - hide all comments      -> both hidden
@@ -234,120 +234,66 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		 *                              both are visible
 		 */
 		desktopHelper.toggleComments();
-		cy.cGet('#comment-container-1').should('be.not.visible');
-		cy.cGet('#comment-container-2').should('be.not.visible');
+		bubbleOf(1).should('have.css', 'visibility', 'hidden');
+		bubbleOf(2).should('have.css', 'visibility', 'hidden');
 		desktopHelper.toggleComments(/*resolved = */ true);
-		cy.cGet('#comment-container-1').should('be.visible');
-		cy.cGet('#comment-container-2').should('be.visible');
+		bubbleOf(1).should('have.css', 'visibility', 'visible');
+		bubbleOf(2).should('have.css', 'visibility', 'visible');
 	});
 
-	it('Visibility at Different Zoom Levels', function() {
-		/*
-			1. insert comment at 50% zoom level
-			2. then keep increasing the zoom level and assert comment visibility.
-			3. visible at 100% and 120%, and hidden (collapsed) at 150%
-		*/
+	it('The page shows a comment as a bubble and nothing more', function() {
+		desktopHelper.insertComment('a comment to find behind its bubble');
+
+		// The box of the comment stays down. The bubble drawn
+		// out of it is what the page carries.
+		cy.cGet('#comment-container-1').should('be.not.visible');
+		cy.cGet('#comment-container-1 .cool-annotation-img')
+			.should('have.css', 'visibility', 'visible');
+	});
+
+	it('Picking a bubble brings its comment up in the comments tab', function() {
+		desktopHelper.insertComment('a comment to reach from its bubble');
+
+		cy.cGet('#comment-container-1 .cool-annotation-img').click();
+
+		// The tab comes up by itself with the comment's row
+		// marked, and the box of the comment is still down.
+		cy.cGet('#comments-dock-wrapper').should('be.visible');
+		cy.cGet('.comments-panel-comment[data-comment-id="1"]')
+			.should('have.class', 'is-selected')
+			.find('.comments-panel-comment-text')
+			.should('have.text', 'a comment to reach from its bubble');
+		cy.cGet('#comment-container-1').should('be.not.visible');
+	});
+
+	it('The bubble of a comment stays on show through a change of zoom', function() {
 		desktopHelper.selectZoomLevel('100', false);
 		desktopHelper.insertComment('test comment', true);
-		cy.cGet('#comment-container-1').should('exist');
-		cy.cGet('#comment-container-1').should('be.visible');
 
-		desktopHelper.selectZoomLevel('120', false);
-		cy.cGet('#comment-container-1').should('be.visible');
-
-		desktopHelper.selectZoomLevel('150', false);
-		cy.cGet('#comment-container-1').should('be.not.visible');
-	});
-
-	it.skip('Visibility at Different Window Widths (increasing)', function () {
-		/*
-			1. start with collapsed comment and increase window width
-			2. cy.viewport(1400, 600); at 150% comment is collapsed
-			3. increase width by 20 and assert visibility
-		*/
-		desktopHelper.insertComment('test comment', true);
-		cy.cGet('#comment-container-1').should('exist');
-		cy.cGet('#comment-container-1').should('be.visible');
-
-		desktopHelper.selectZoomLevel('150', false);
-		cy.cGet('#comment-container-1').should('be.not.visible');
-
-		for (let width = 1420; width < 1500; width += 20) {
-			cy.viewport(width, 600);
-			cy.cGet('#comment-container-1').should('be.visible');
-		}
-
-		for (let width = 1500; width < 1620; width += 20) {
-			cy.viewport(width, 600);
-			cy.cGet('#comment-container-1').should('be.visible');
+		for (const level of ['120', '150', '100']) {
+			desktopHelper.selectZoomLevel(level, false);
+			cy.cGet('#comment-container-1 .cool-annotation-img')
+				.should('have.css', 'visibility', 'visible');
 		}
 	});
 
-	it('Visibility at Different Window Widths (decreasing)', function() {
-		/*
-			1. start with wide window (== zoomed out document) and reduce window width
-			2. cy.viewport(1400, 600); at 100% comments are visible
-			3. decrease width by 10 and assert visibility
-		*/
+	it('The bubble of a comment stays on show while the window is resized', function() {
 		desktopHelper.insertComment('test comment', true);
-		cy.cGet('#comment-container-1').should('exist');
-		cy.cGet('#comment-container-1').should('be.visible');
-
 		desktopHelper.selectZoomLevel('120', false);
-		cy.cGet('#comment-container-1').should('be.visible');
 
+		// Down to a window narrower than a comment, twenty
+		// pixels at a time then one at a time, and back up.
 		for (let width = 1420; width > 1260; width -= 20) {
 			cy.viewport(width, 600);
-			cy.cGet('#comment-container-1').should('be.visible');
+			cy.cGet('#comment-container-1 .cool-annotation-img')
+				.should('have.css', 'visibility', 'visible');
 		}
-	});
 
-	it('Visibility on Small Resizes (1px width increase/decrease)', function() {
-		desktopHelper.insertComment('test comment', true);
-		cy.cGet('#comment-container-1').should('exist');
-		cy.cGet('#comment-container-1').should('be.visible');
-
-		desktopHelper.selectZoomLevel('120', false);
-		cy.cGet('#comment-container-1').should('be.visible');
-
-		for (let width = 1420; width > 1300; width -= 1) {
+		for (let width = 1280; width < 1420; width += 20) {
 			cy.viewport(width, 600);
-			cy.cGet('#comment-container-1').should('be.visible');
+			cy.cGet('#comment-container-1 .cool-annotation-img')
+				.should('have.css', 'visibility', 'visible');
 		}
-
-		for (let width = 1300; width < 1420; width += 1) {
-			cy.viewport(width, 600);
-			cy.cGet('#comment-container-1').should('be.visible');
-		}
-	});
-
-	it('Collapse/Expand On Last 1px Resize', function() {
-		desktopHelper.insertComment('test comment', true);
-		cy.cGet('#comment-container-1').should('exist');
-		cy.cGet('#comment-container-1').should('be.visible');
-
-		desktopHelper.selectZoomLevel('120', false);
-		cy.cGet('#comment-container-1').should('be.visible');
-
-		/*
-			at this point, the space on the left of the document and the
-			space on the right of the document (without moving the document
-			to the left) is same, equal to half of the comment width;
-		*/
-		cy.viewport(1285, 600);
-		cy.cGet('#comment-container-1').should('be.visible');
-
-		/*
-			we reduce the width by just one pixel at this point, and
-			`haveEnoughLeftMarginForMove` becomes false in
-			`ViewLayoutWriter.documentCanMoveLeft(...)` and thus document
-			can't move left anymore, so we collapse the comments.
-		*/
-		cy.viewport(1284, 600);
-		cy.cGet('#comment-container-1').should('be.visible');
-
-		cy.viewport(1285, 600);
-		cy.cGet('#comment-container-1').should('be.visible');
 	});
 
 	it('Tab Navigation', function() {
@@ -387,7 +333,9 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 
 		desktopHelper.insertComment();
 
-		cy.cGet('.cool-annotation-content-wrapper').click();
+		// Take the focus off the document by picking the bubble
+		// of the comment.
+		cy.cGet('#comment-container-1 .cool-annotation-img').click();
 
 		cy.getFrameWindow().then(function(win) {
 			win.document.dispatchEvent(new win.KeyboardEvent('keydown', {
@@ -413,15 +361,16 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 
 		desktopHelper.insertComment();
 
-		cy.cGet('.cool-annotation-content-wrapper').should('be.visible');
+		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('contain', 'some text0');
 
 		// Type lots of paragraph breaks so the document scrolls well past the comment.
 		helper.typeIntoDocument('{ctrl}{end}');
 		helper.typeIntoDocument('{enter}'.repeat(80) + 'BOTTOM_OF_DOCUMENT');
 
-		// The comment should now be scrolled out of view.
-		cy.cGet('#comment-container-1').should('not.be.visible');
+		// The bubble of the comment should now be scrolled out
+		// of view.
+		cy.cGet('#comment-container-1 .cool-annotation-img').should('not.be.visible');
 
 		// Stub postMessage to capture the response.
 		cy.getFrameWindow().then(win => {
@@ -451,8 +400,9 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 			expect(resp.Values.Id).to.equal('1');
 		});
 
-		// After GoToComment, the comment should be scrolled back into view.
-		cy.cGet('#comment-container-1').should('be.visible');
+		// After GoToComment, the bubble of the comment should be
+		// scrolled back into view.
+		cy.cGet('#comment-container-1 .cool-annotation-img').should('be.visible');
 		// The cursor should be at the end of the first paragraph (the comment anchor).
 		// #clipboard-area has a copy of current cursor's node text (including anchor character):
 		cy.cGet('#clipboard-area').should('have.prop', 'textContent', 'COMMENT_ANCHOR_LINE\uFFFC');
@@ -749,28 +699,6 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		});
 	});
 
-	it('Annotation minimum width', function () {
-		cy.viewport(1920, 1080); // Let's have plenty of space
-		desktopHelper.insertComment();
-
-		cy.cGet('.cool-annotation-content-wrapper').should('exist');
-		cy.cGet('#annotation-content-area-1').should('contain', 'some text');
-
-		// Add several nested replies to create a deep thread
-		const replyCount = 5;
-		for (let i = 1; i <= replyCount; i++) {
-			cy.cGet('#comment-annotation-menu-' + i).click();
-			cy.cGet('body').contains('.ui-combobox-entry', 'Reply').click();
-			cy.cGet('#annotation-reply-textarea-' + i).type('reply ' + i);
-			cy.cGet('#annotation-reply-' + i).click();
-			cy.cGet('#annotation-content-area-' + (i + 1)).should('contain', 'reply ' + i);
-		}
-
-		// Check that the last reply content is wide enough
-		cy.cGet('#comment-container-' + (replyCount + 1) + ' .cool-annotation-content')
-			.should(el => expect(el.width()).gte(200));
-	});
-
 	it('Get_Comments postMessage returns all comments', function() {
 		desktopHelper.insertComment('first comment');
 		cy.cGet('#annotation-content-area-1').should('contain', 'first comment');
@@ -819,16 +747,14 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 	it('Reply focuses the reply textbox', function () {
 		desktopHelper.insertComment();
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 		cy.cGet('#annotation-reply-textarea-1').should('have.focus');
 	});
 
 	it('Modify focuses the modify textbox', function () {
 		desktopHelper.insertComment();
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Modify').click();
+		desktopHelper.pickCommentAction(1, 'Modify');
 		cy.cGet('#annotation-modify-textarea-1').should('have.focus');
 	});
 
@@ -837,20 +763,18 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		cy.cGet('#comment-container-1').should('exist');
 
 		// Reply to create a thread (root id 1, reply id 2).
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 		cy.cGet('#annotation-reply-textarea-1').type('reply text');
 		cy.cGet('#annotation-reply-1').click();
 		cy.cGet('#annotation-content-area-2').should('contain', 'reply text');
 
 		// Resolve only the reply, leaving the root unresolved.
-		cy.cGet('#comment-annotation-menu-2').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Resolve').click();
+		desktopHelper.pickCommentAction(2, 'Resolve');
 		cy.cGet('#comment-container-2 .cool-annotation-content-resolved').should('have.text', 'Resolved');
 		cy.cGet('#comment-container-1 .cool-annotation-content-resolved').should('have.text', '');
 
 		// Root menu must offer 'Resolve Thread' since the thread is not fully resolved.
-		cy.cGet('#comment-annotation-menu-1').click();
+		desktopHelper.openCommentMenu(1);
 		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Resolve Thread').should('be.visible');
 		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Unresolve Thread').should('not.exist');
 		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Resolve Thread').click();
@@ -860,7 +784,7 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		cy.cGet('#comment-container-2 .cool-annotation-content-resolved').should('have.text', 'Resolved');
 
 		// Root menu now offers 'Unresolve Thread'.
-		cy.cGet('#comment-annotation-menu-1').click();
+		desktopHelper.openCommentMenu(1);
 		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Unresolve Thread').should('be.visible');
 		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Unresolve Thread').click();
 
@@ -869,10 +793,7 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		cy.cGet('#comment-container-2 .cool-annotation-content-resolved').should('have.text', '');
 	});
 
-	it('Preserves thread layout on copy paste', function() {
-		// Two threads make four comment boxes, more than the 600px viewport the
-		// other tests share leaves below the notebookbar.
-		cy.viewport(1400, 1080);
+	it('A pasted reply still answers the comment it was written under', function() {
 		desktopHelper.selectZoomLevel('100', false);
 		cy.getFrameWindow().then(function(win) {
 			return helper.processToIdle(win);
@@ -887,8 +808,7 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		desktopHelper.insertComment('root comment');
 		cy.cGet('#annotation-content-area-1').should('contain', 'root comment');
 
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 		cy.cGet('#annotation-reply-textarea-1').type('reply text');
 		cy.cGet('#annotation-reply-1').click();
 		cy.cGet('#annotation-content-area-2').should('contain', 'reply text');
@@ -918,89 +838,27 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('have.length', 4);
 
-		cy.cGet('.cool-annotation-content-wrapper').each(function($el) {
-			cy.wrap($el).should('be.visible');
-		});
-
-		cy.getFrameWindow().then(function(win) {
-			var commentSection = win.app.sectionContainer.getSectionWithName(
-				win.app.CSections.CommentList.name);
-			var comments = commentSection.sectionProperties.commentList;
-
-			var threadsFound = 0;
-			for (var i = 0; i < comments.length; i++) {
-				var comment = comments[i];
-				if (comment.sectionProperties.children.length > 0) {
-					threadsFound++;
-					var parentY = comment.getContainerPosY();
-					var parentHeight = comment.getCommentHeight(false);
-					for (var j = 0; j < comment.sectionProperties.children.length; j++) {
-						var child = comment.sectionProperties.children[j];
-						var childY = child.getContainerPosY();
-						expect(childY - parentY,
-							'child ' + child.sectionProperties.data.id +
-							' too far from parent ' + comment.sectionProperties.data.id
-						).to.be.lessThan(parentHeight + 200);
-					}
-				}
-			}
-			expect(threadsFound, 'should have at least 2 comment threads').to.be.at.least(2);
+		// The pasted reply still answers its comment, so the
+		// four make two threads of two, not four of one.
+		desktopHelper.openCommentsTab();
+		cy.cGet('.comments-panel-thread').should('have.length', 2);
+		cy.cGet('.comments-panel-comment.is-reply').should('have.length', 2);
+		cy.cGet('.comments-panel-thread').each(function($thread) {
+			cy.wrap($thread).find('.comments-panel-comment.is-first')
+				.find('.comments-panel-comment-text').should('have.text', 'root comment');
+			cy.wrap($thread).find('.comments-panel-comment.is-reply')
+				.find('.comments-panel-comment-text').should('have.text', 'reply text');
 		});
 	});
 });
 
-describe(['tagdesktop'], 'Collapsed Annotation Tests', function() {
+describe(['tagdesktop'], 'Annotation autosave and the bubble', function() {
 	var newFilePath;
 
 	beforeEach(function() {
 		newFilePath = helper.setupAndLoadDocument('writer/annotation.odt');
 		desktopHelper.switchUIToNotebookbar();
 		desktopHelper.sidebarToggle();
-	});
-
-	it('Insert', function() {
-		desktopHelper.insertComment();
-
-		cy.cGet('.cool-annotation-content-wrapper').should('exist');
-		cy.cGet('#annotation-content-area-1').should('contain','some text0');
-	});
-
-	it('Modify', function() {
-		desktopHelper.insertComment();
-
-		cy.cGet('.cool-annotation-content-wrapper').should('exist');
-		cy.cGet('#annotation-content-area-1').should('contain','some text0');
-		cy.cGet('.cool-annotation-img').click();
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Modify').click();
-		cy.cGet('#annotation-modify-textarea-1').type('{end}, some other text');
-		cy.cGet('#annotation-save-1').click();
-		cy.cGet('.cool-annotation-content-wrapper').should('exist');
-		cy.cGet('#annotation-content-area-1').should('contain','some text0, some other text');
-	});
-
-	it('Reply', function() {
-		desktopHelper.insertComment();
-
-		cy.cGet('.cool-annotation-content-wrapper').should('exist');
-		cy.cGet('#annotation-content-area-1').should('contain','some text');
-		cy.cGet('.cool-annotation-img').click();
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
-		cy.cGet('#annotation-reply-textarea-1').type('some reply text');
-		cy.cGet('#annotation-reply-1').click();
-		cy.cGet('#annotation-content-area-2').should('contain','some reply text');
-	});
-
-	it('Remove', function() {
-		desktopHelper.insertComment();
-
-		cy.cGet('.cool-annotation-content-wrapper').should('exist');
-		cy.cGet('.cool-annotation-content > div').should('contain','some text');
-		cy.cGet('.cool-annotation-img').click();
-		cy.cGet('.cool-annotation-menu').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Remove').click();
-		cy.cGet('.cool-annotation-content-wrapper').should('not.exist');
 	});
 
 	it('Autosave Collapse', function() {
@@ -1011,12 +869,10 @@ describe(['tagdesktop'], 'Collapsed Annotation Tests', function() {
 		helper.typeIntoDocument('{home}');
 		cy.cGet('.cool-annotation-info-collapsed').should('have.text','!');
 		cy.cGet('.cool-annotation-info-collapsed').should('be.not.visible');
-		cy.cGet('.cool-annotation-img').click();
 		cy.cGet('.annotation-button-autosaved').should('be.visible');
 		cy.cGet('.annotation-button-delete').should('be.visible');
 		cy.cGet('#annotation-save-1').click();
 		helper.typeIntoDocument('{home}');
-		cy.cGet('.cool-annotation-img').click();
 		cy.cGet('#annotation-content-area-1').should('have.text','some text0');
 		cy.cGet('.annotation-button-autosaved').should('be.not.visible');
 		cy.cGet('.annotation-button-delete').should('be.not.visible');
@@ -1027,7 +883,6 @@ describe(['tagdesktop'], 'Collapsed Annotation Tests', function() {
 
 		helper.reloadDocument(newFilePath);
 		desktopHelper.ensureSidebarHidden();
-		cy.cGet('.cool-annotation-img').click();
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('have.text','some text0');
 		cy.cGet('.cool-annotation-info-collapsed').should('be.not.visible');
@@ -1096,8 +951,7 @@ describe(['tagdesktop'], 'Annotation Autosave Tests', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('have.text','some text0');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Modify').click();
+		desktopHelper.pickCommentAction(1, 'Modify');
 		cy.cGet('#annotation-modify-textarea-1').type('{end}, some other text');
 		cy.cGet('#map').focus();
 		cy.cGet('.annotation-button-autosaved').should('be.visible');
@@ -1114,8 +968,7 @@ describe(['tagdesktop'], 'Annotation Autosave Tests', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('have.text','some text0');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Modify').click();
+		desktopHelper.pickCommentAction(1, 'Modify');
 		cy.cGet('#annotation-modify-textarea-1').type('{end}, some other text');
 		cy.cGet('#map').focus();
 		cy.cGet('.annotation-button-autosaved').should('be.visible');
@@ -1136,8 +989,7 @@ describe(['tagdesktop'], 'Annotation Autosave Tests', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('have.text','some text0');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Modify').click();
+		desktopHelper.pickCommentAction(1, 'Modify');
 		cy.cGet('#annotation-modify-textarea-1').type('some other text, ');
 		cy.cGet('#map').focus();
 		cy.cGet('.annotation-button-autosaved').should('be.visible');
@@ -1159,8 +1011,7 @@ describe(['tagdesktop'], 'Annotation Autosave Tests', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('have.text','some text0');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 		cy.cGet('#annotation-reply-textarea-1').type('some reply text');
 		cy.cGet('#map').focus();
 		cy.cGet('.annotation-button-autosaved').should('be.visible');
@@ -1177,8 +1028,7 @@ describe(['tagdesktop'], 'Annotation Autosave Tests', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('have.text','some text0');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 		cy.cGet('#annotation-reply-textarea-1').type('some reply text');
 		cy.cGet('#map').focus();
 		cy.cGet('.annotation-button-autosaved').should('be.visible');
@@ -1202,8 +1052,7 @@ describe(['tagdesktop'], 'Annotation Autosave Tests', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('have.text','some text0');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 		cy.cGet('#annotation-reply-textarea-1').type('some reply text');
 		cy.cGet('#map').focus();
 		cy.cGet('.annotation-button-autosaved').should('be.visible');
@@ -1263,8 +1112,7 @@ describe(['tagdesktop'], 'Annotation with @mention', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('contain', 'some text0');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Modify').click();
+		desktopHelper.pickCommentAction(1, 'Modify');
 
 		cy.cGet('#annotation-modify-textarea-1').type('{end}');
 		cy.cGet('#annotation-modify-textarea-1').type(' @Ale');
@@ -1290,8 +1138,7 @@ describe(['tagdesktop'], 'Annotation with @mention', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('contain','some text0');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 
 		cy.cGet('#annotation-reply-textarea-1').type('some reply text @Ale');
 
@@ -1312,8 +1159,7 @@ describe(['tagdesktop'], 'Annotation with @mention', function() {
 
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('contain','some text0');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(1, 'Reply');
 
 		cy.cGet('#annotation-reply-textarea-1').type('some reply text @Ale');
 
@@ -1328,8 +1174,7 @@ describe(['tagdesktop'], 'Annotation with @mention', function() {
 		cy.cGet('#annotation-reply-1').click();
 		cy.cGet('#annotation-content-area-2').should('contain','some reply text @Alexandra ');
 
-		cy.cGet('#comment-annotation-menu-2').should('exist').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
+		desktopHelper.pickCommentAction(2, 'Reply');
 		cy.cGet('#annotation-reply-textarea-2').type('some reply to reply text @Ale');
 
 		cy.cGet('#mentionPopup').should('be.visible');
@@ -1386,31 +1231,19 @@ describe(['tagdesktop'], 'Annotation with @mention', function() {
 	it('Unselect comment on scroll', function() {
 		desktopHelper.insertComment('test comment');
 		cy.cGet('#comment-container-1').should('exist');
-		cy.cGet('#comment-container-1').should('exist').should('not.have.class', 'annotation-active');
-		cy.cGet('#comment-container-1').click();
-		cy.cGet('#comment-container-1').should('exist').should('have.class', 'annotation-active');
+
+		// The comment the reader has just written is the picked
+		// one, and scrolling the document lets it go again.
+		cy.cGet('#comment-container-1').should('have.class', 'annotation-active');
 		cy.getFrameWindow().then(function(win) { win.app.sectionContainer.getSectionWithName('scroll').scrollVerticalWithOffset(10); });
-		cy.cGet('#comment-container-1').should('exist').should('not.have.class', 'annotation-active');
+		cy.cGet('#comment-container-1').should('not.have.class', 'annotation-active');
+
+		// Picking it again by its bubble and scrolling once more
+		// does the same.
+		cy.cGet('#comment-container-1 .cool-annotation-img').click();
+		cy.cGet('#comment-container-1').should('have.class', 'annotation-active');
+		cy.getFrameWindow().then(function(win) { win.app.sectionContainer.getSectionWithName('scroll').scrollVerticalWithOffset(10); });
+		cy.cGet('#comment-container-1').should('not.have.class', 'annotation-active');
 	})
 
-	it('Keep full view comment on scroll', function() {
-		// Given a full-view comment in a document:
-		desktopHelper.insertComment('test comment');
-		cy.cGet('#comment-container-1').should('exist');
-		cy.cGet('#comment-container-1').click();
-		cy.cGet('#comment-container-1').should('have.class', 'annotation-active');
-		cy.cGet('#comment-annotation-menu-1').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Open in full view').click();
-		cy.cGet('#comment-container-1').should('have.class', 'annotation-pop-up');
-
-		// When scrolling:
-		cy.getFrameWindow().then(function(win) { win.app.sectionContainer.getSectionWithName('scroll').scrollVerticalWithOffset(10); });
-
-		// Then make sure the comment is still in full-view:
-		// Without the accompanying fix in place, this test would have failed with:
-		// AssertionError: Timed out retrying after 60000ms: expected '<div#comment-container-1.cool-annotation.cool-annotation-collapsed-show>' to have class 'annotation-active'
-		// i.e. the annotation's active state was lost for a full-view comment on scroll.
-		cy.cGet('#comment-container-1').should('have.class', 'annotation-active');
-		cy.cGet('#comment-container-1').should('have.class', 'annotation-pop-up');
-	})
 });

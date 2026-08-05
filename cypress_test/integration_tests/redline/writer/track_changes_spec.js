@@ -34,8 +34,7 @@ describe(['tagredline', 'tagnextcloud', 'tagproxy'], 'Track Changes as comments'
 
 		redlineHelper.enableRecord(this.win);
 
-		cy.cGet('#comment-container-1 .cool-annotation-menubar .cool-annotation-menu').click();
-		cy.cGet('body').contains('.ui-combobox-entry', 'Remove').click();
+		desktopHelper.pickCommentAction(1, 'Remove');
 
 		cy.cGet('#comment-container-1').should('have.class', 'tracked-deleted-comment-show');
 		cy.cGet('#comment-container-1').should('contain', 'test comment');
@@ -79,8 +78,7 @@ describe(['tagredline', 'tagnextcloud', 'tagproxy'], 'Track Changes as comments'
 
 		redlineHelper.enableRecord(this.win);
 
-		cy.cGet('#comment-container-1 .cool-annotation-menubar .cool-annotation-menu').click();
-		cy.cGet('body').contains('.ui-combobox-entry', 'Remove').click();
+		desktopHelper.pickCommentAction(1, 'Remove');
 		cy.cGet('#comment-container-1').should('have.class', 'tracked-deleted-comment-show');
 		cy.cGet('#comment-container-1').should('contain', 'some text');
 
@@ -103,8 +101,7 @@ describe(['tagredline', 'tagnextcloud', 'tagproxy'], 'Track Changes as comments'
 
 		redlineHelper.enableRecord(this.win);
 
-		cy.cGet('#comment-container-1 .cool-annotation-menubar .cool-annotation-menu').click();
-		cy.cGet('body').contains('.ui-combobox-entry', 'Remove').click();
+		desktopHelper.pickCommentAction(1, 'Remove');
 		cy.cGet('#comment-container-1').should('have.class', 'tracked-deleted-comment-show');
 		cy.cGet('#comment-container-1').should('contain', 'some text');
 

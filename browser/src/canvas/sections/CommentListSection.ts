@@ -244,7 +244,7 @@ export class CommentSection extends CanvasSectionObject {
 		width: number;
 		commentWidth: number;
 		deflectionOfSelectedComment: number;
-		showSelectedBigger: boolean;
+		collapsedCommentWidth: number;
 		commentsAreListed: boolean;
 		show: boolean;
 		showResolved: boolean;
@@ -311,9 +311,8 @@ export class CommentSection extends CanvasSectionObject {
 		this.sectionProperties.width = Math.round(1 * app.dpiScale); // Configurable variable.
 		this.sectionProperties.scrollAnnotation = null; // For impress, when 1 or more comments exist.
 		this.sectionProperties.commentWidth = CommentSection.getCommentWidth();
-		this.sectionProperties.commentWidthBigger =  588 * app.dpiScale;
+		this.sectionProperties.collapsedCommentWidth = 32 * 1.5 * app.dpiScale;
 		this.sectionProperties.deflectionOfSelectedComment = 160; // CSS pixels.
-		this.sectionProperties.showSelectedBigger = false;
 		this.sectionProperties.calcCurrentComment = null; // We don't automatically show a Calc comment when cursor is on its cell. But we remember it to show if user presses Alt+C keys.
 		this.sectionProperties.marginMarkers = null; // Writer. The icons in the page margin that say where a comment was written.
 		this.sectionProperties.reLayout = true;
@@ -475,13 +474,16 @@ export class CommentSection extends CanvasSectionObject {
 
 	private checkCollapseState(): void {
 		if (!(<any>window).mode.isSmallScreenDevice() && app.map._docLayer._docType !== 'spreadsheet') {
-			if (this.shouldCollapse()) {
-				this.sectionProperties.deflectionOfSelectedComment = 180;
-				this.setCollapsed();
-			}
-			else {
-				this.sectionProperties.deflectionOfSelectedComment = 70;
-				this.setExpanded();
+			const collapse = this.shouldCollapse();
+			this.sectionProperties.deflectionOfSelectedComment = collapse ? 180 : 70;
+
+			// Only a change of state reaches the comments, so a
+			// thread opened on a slide stays open on a zoom.
+			if (collapse !== (this.isCollapsed === true)) {
+				if (collapse)
+					this.setCollapsed();
+				else
+					this.setExpanded();
 			}
 
 			if (app.map._docLayer._docType === 'presentation' || app.map._docLayer._docType === 'drawing')
@@ -570,12 +572,24 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public setCollapsed(): void {
+		// The list counts as closed whether or not the comments
+		// are on show, so a comment arriving then is closed too.
+		this.isCollapsed = true;
 		if (this.sectionProperties.show != true || this.isEditing()) {
 			return;
 		}
-		this.isCollapsed = true;
 		this.unselect();
+		this.closeEveryThread();
+	}
+
+	// Put every comment behind its bubble, and a thread behind
+	// the bubble of the comment it starts with.
+	private closeEveryThread(): void {
 		for (var i: number = 0; i < this.sectionProperties.commentList.length; i++) {
+			// A comment with a tracked change is read in a box
+			// beside the page, so it has no bubble of its own.
+			if (this.sectionProperties.commentList[i].sectionProperties.data.trackchange)
+				continue;
 			if (this.sectionProperties.commentList[i].sectionProperties.data.id !== 'new')
 				this.sectionProperties.commentList[i].setCollapsed();
 			$(this.sectionProperties.commentList[i].sectionProperties.container).addClass('collapsed-comment');
@@ -622,27 +636,18 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public shouldCollapse (): boolean {
+		if (app.map._docLayer._docType === 'spreadsheet' || (<any>window).mode.isSmallScreenDevice())
+			return false;
+		// A Writer comment is closed whatever room the window
+		// leaves, because it is read in the comments tab.
 		if (app.map._docLayer._docType === 'text')
+			return true;
+		if (!this.containerObject.getDocumentAnchorSection())
 			return false;
-		if (!this.containerObject.getDocumentAnchorSection() || app.map._docLayer._docType === 'spreadsheet' || (<any>window).mode.isSmallScreenDevice())
-			return false;
+		// A slide leaves the comments the room beside it. They
+		// close once that room is too narrow to read one in.
 		const availableSpace = this.calculateAvailableSpace();
-		/*
-			in case the comment section is half hidden and there
-			is some space on the left side of the document (since
-			the document is centered), we don't collapse the comments.
-			the comments section doesn't end up in such layout normally,
-			either the user resized the window, or zoomed in. both of
-			those events are being listened to in ViewLayoutWriter and
-			when that happens, `ViewLayoutWriter` shifts the document to
-			the left through its `getCenteringOffset` override.
-		*/
-		if (app.activeDocument.activeLayout.viewHasEnoughSpaceToShowFullWidthComments())
-			return false;
-		// The space beside the page turns negative once the page is wider than
-		// the view. That is less room than a narrow margin, so the comments
-		// collapse there too.
-		return availableSpace < this.sectionProperties.commentWidth;
+		return availableSpace < this.sectionProperties.commentWidth && availableSpace >= 0;
 	}
 
 	public hideAllComments (): void {
@@ -1208,7 +1213,19 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public click (annotation: any): void {
+		// On a slide a comment can be closed and still be the
+		// picked one, so picking it again is what opens it.
+		if (this.isCollapsed && app.map._docLayer._docType !== 'text'
+			&& annotation === this.sectionProperties.selectedComment)
+			this.showCollapsedReplies(this.getRootIndexOf(annotation.sectionProperties.data.id));
+
 		this.select(annotation);
+
+		// In Writer the page carries only the bubble, so picking
+		// it brings the tab up with the row marked.
+		if (app.map._docLayer._docType === 'text' && !annotation.sectionProperties.data.trackchange)
+			this.showCommentInCommentsPanel(String(annotation.sectionProperties.data.id));
+
 		app.map.fire('postMessage', {
 			msgId: 'Clicked_Comment',
 			args: { Id: annotation.sectionProperties.data.id }
@@ -1439,16 +1456,13 @@ export class CommentSection extends CanvasSectionObject {
 				$(this.sectionProperties.selectedComment.sectionProperties.container).addClass('annotation-active');
 			}
 
-			if (app.map._docLayer._docType === 'text' && this.sectionProperties.showSelectedBigger) {
-				this.setThreadPopup(this.sectionProperties.selectedComment, true);
-			}
-
 			this.scrollCommentIntoView(annotation);
 
-			const selectedComment = this.sectionProperties.selectedComment;
-			if (this.isCollapsed) {
+			// A Writer comment is read in the comments tab, so
+			// the picked one leaves its box down.
+			if (this.isCollapsed && app.map._docLayer._docType !== 'text') {
 				this.showCollapsedReplies(idx);
-				selectedComment.updateThreadInfoIndicator();
+				this.sectionProperties.selectedComment.updateThreadInfoIndicator();
 			}
 
 			if (app.map._docLayer._docType !== 'spreadsheet') {
@@ -1617,10 +1631,6 @@ export class CommentSection extends CanvasSectionObject {
 				this.sectionProperties.selectedComment.setCollapsed();
 				this.collapseReplies(this.getRootIndexOf(this.sectionProperties.selectedComment.sectionProperties.data.id), this.sectionProperties.selectedComment.sectionProperties.data.id);
 			}
-			if (app.map._docLayer._docType === 'text' && this.sectionProperties.showSelectedBigger) {
-				this.setThreadPopup(this.sectionProperties.selectedComment, false);
-				this.sectionProperties.showSelectedBigger = false;
-			}
 
 			const previouslySelectedComment = this.sectionProperties.selectedComment;
 			this.sectionProperties.selectedComment = null;
@@ -1672,38 +1682,6 @@ export class CommentSection extends CanvasSectionObject {
 			documentContainer.addEventListener('click', this.onClickOutsideComment);
 		else
 			documentContainer.removeEventListener('click', this.onClickOutsideComment);
-	}
-
-	private setThreadPopup (comment: Comment, popup: boolean) {
-		if (popup && !$(comment.sectionProperties.container).hasClass('annotation-pop-up'))
-			$(comment.sectionProperties.container).addClass('annotation-pop-up');
-		else if (!popup && $(comment.sectionProperties.container).hasClass('annotation-pop-up'))
-			$(comment.sectionProperties.container).removeClass('annotation-pop-up');
-
-		for (const childComment of comment.sectionProperties.children) {
-			this.setThreadPopup(childComment, popup);
-		}
-	}
-
-	public toggleShowBigger (comment: Comment) {
-		const rootComment = this.sectionProperties.commentList[this.getRootIndexOf(comment.sectionProperties.data.id)];
-		const isSelected = this.sectionProperties.selectedComment === rootComment;
-		if (this.sectionProperties.showSelectedBigger && isSelected) {
-			this.sectionProperties.showSelectedBigger = false;
-			this.setThreadPopup(this.sectionProperties.selectedComment, false);
-		}
-		else if (!isSelected) {
-			if (this.sectionProperties.selectedComment)
-				this.unselect();
-			this.sectionProperties.showSelectedBigger = true;
-			this.select(comment);
-		}
-		else {
-			this.sectionProperties.showSelectedBigger = true;
-			this.setThreadPopup(rootComment, true);
-			this.scrollCommentIntoView(comment);
-		}
-		this.update();
 	}
 
 	public showInNavigator(comment: Comment) {
@@ -1883,11 +1861,6 @@ export class CommentSection extends CanvasSectionObject {
 		const index = this.getRootIndexOf(annotation.sectionProperties.data.parent);
 		const top_comment = this.sectionProperties.commentList[index];
 		return this.isSubThreadResolved(top_comment);
-	}
-
-	public isShownBig (annotation: any): boolean {
-		return this.sectionProperties.showSelectedBigger
-			&& this.sectionProperties.selectedComment === this.sectionProperties.commentList[this.getRootIndexOf(annotation.sectionProperties.data.id)];
 	}
 
 	public onResize (): void {
@@ -2639,10 +2612,8 @@ export class CommentSection extends CanvasSectionObject {
 			lastY = subList[i].sectionProperties.data.anchorSPoint.vY > lastY ? subList[i].sectionProperties.data.anchorSPoint.vY: lastY;
 			var renderedCommentTop: number;
 			if (selectedComment) {
-				const commentWidth = (this.sectionProperties.showSelectedBigger ? this.sectionProperties.commentWidthBigger: this.sectionProperties.commentWidth) / app.dpiScale;
-								let posX = (this.sectionProperties.showSelectedBigger ?
-								Math.round((documentCanvasWidth - commentWidth)/2) :
-								Math.round(actualPosition[0] / app.dpiScale) - this.sectionProperties.deflectionOfSelectedComment * (isRTL ? -1 : 1));
+				const commentWidth = this.sectionProperties.commentWidth / app.dpiScale;
+				let posX = Math.round(actualPosition[0] / app.dpiScale) - this.sectionProperties.deflectionOfSelectedComment * (isRTL ? -1 : 1);
 				// if on selection full comment is not visible bring it fully inside view, helps in narrow windows and tablets
 				if (isRTL && posX < 0)
 					posX = 0;
@@ -2836,12 +2807,7 @@ export class CommentSection extends CanvasSectionObject {
 				yOrigin = this.sectionProperties.commentList[selectedIndex].sectionProperties.data.anchorSPoint.vY;
 				var tempCrd: Array<number> = this.sectionProperties.commentList[selectedIndex].sectionProperties.data.anchorSPoint.vToArray();
 				var resolved:string = this.sectionProperties.commentList[selectedIndex].sectionProperties.data.resolved;
-				// In full view the card sits centred over the document instead of in
-				// the comment column, so the connector would run to empty space.
-				if (this.sectionProperties.showSelectedBigger) {
-					this.hideArrow();
-				}
-				else if (!resolved || resolved === 'false' || this.sectionProperties.showResolved) {
+				if (!resolved || resolved === 'false' || this.sectionProperties.showResolved) {
 					// The line ends at the icon that stands for
 					// it. Without one it is left out.
 					const iconPlace = this.sectionProperties.marginMarkers?.positionOfComment(
@@ -2916,11 +2882,14 @@ export class CommentSection extends CanvasSectionObject {
 		// laid out (the block above), so skip the growth otherwise - an undefined
 		// lastY would poison viewSize with NaN and blank the tiles.
 		const noComments = this.commentsHiddenOrNotPresent();
+		// The comments ask for the width of a bubble while
+		// closed, and of a whole comment while open.
+		const roomForComments = this.isCollapsed
+			? this.sectionProperties.collapsedCommentWidth
+			: this.sectionProperties.commentWidth;
 		const extraWidth =
-			!noComments &&
-			availableSpace < this.sectionProperties.commentWidth &&
-			!this.isCollapsed
-				? this.sectionProperties.commentWidth * app.pixelsToTwips
+			!noComments && availableSpace < roomForComments
+				? roomForComments * app.pixelsToTwips
 				: 0;
 		const commentBottomY = noComments
 			? 0
@@ -3037,7 +3006,6 @@ export class CommentSection extends CanvasSectionObject {
 	*/
 	public setView(state: boolean): void {
 		this.sectionProperties.show = state;
-		const commentShouldCollapse = this.shouldCollapse();
 
 		// Showing or hiding the whole list changes what is on screen, not where the
 		// view is, so the view stays where the reader left it. In Calc each comment
@@ -3050,13 +3018,16 @@ export class CommentSection extends CanvasSectionObject {
 				this.sectionProperties.commentList[idx].hide();
 			} else if (this.sectionProperties.commentList[idx].sectionProperties.data.resolved != 'true' || this.sectionProperties.showResolved == true) {
 				this.sectionProperties.commentList[idx].show();
-				if (commentShouldCollapse) {
-					this.sectionProperties.commentList[idx].setCollapsed();
-				}
 			}
 		}
 
 		CommentSection.showingEveryComment = false;
+
+		// A comment comes back on show the way the list stands:
+		// closed while the list is closed, whole where open.
+		if (state && this.isCollapsed)
+			this.closeEveryThread();
+
 		this.update();
 	}
 

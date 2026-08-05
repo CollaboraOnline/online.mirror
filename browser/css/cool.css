@@ -722,23 +722,6 @@ input, button {
 	cursor: crosshair !important;
 }
 
-.cool-annotation.annotation-pop-up {
-	/* Make sure the comment card is not cropped if the window is narrow: */
-	max-width: 95%;
-	max-height: 95%;
-	width: 66ch;
-	/* Centered align comment in TS, we cannot align it here with position relative */
-	z-index: 1000;
-}
-.cool-annotation.annotation-pop-up:not(.annotation-active) > .cool-annotation-content-wrapper {
-	margin-right: 8px;
-}
-.cool-annotation.annotation-pop-up.annotation-active {
-	transition: transform var(--duration-deliberate) var(--ease-standard), box-shadow var(--duration-deliberate) var(--ease-standard);
-	will-change: transform, box-shadow;
-	box-shadow: 0 0 0 1000px rgba(var(--doc-type),0.15);
-}
-
 .cool-annotation.tracked-deleted-comment-hide {
 	display: none;
 }
@@ -767,10 +750,6 @@ input, button {
 	display: flex;
 	flex-direction: column;
 	row-gap: var(--spacing-m);
-}
-
-.annotation-active.annotation-pop-up .cool-annotation-content-wrapper {
-	font-size: var(--medium-font-size);
 }
 
 .cool-annotation-author-header {

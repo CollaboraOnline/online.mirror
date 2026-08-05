@@ -53,8 +53,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Track Changes', function (
 		cy.cGet('div.cool-annotation').should('have.length', 3);
 
 		cy.cGet('#comment-container-2').should('contain','some text1');
-		cy.cGet('#comment-container-2 .cool-annotation-menubar .cool-annotation-menu').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Remove').click();
+		desktopHelper.pickCommentAction(2, 'Remove');
 		cy.cGet('#comment-container-2').should('have.class','tracked-deleted-comment-show');
 		cy.cGet('#comment-container-2').should('contain','some text1');
 		cy.cGet('div.cool-annotation').should('have.length', 3);
@@ -97,8 +96,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Track Changes', function (
 		cy.cGet('div.cool-annotation').should('have.length', 3);
 
 		cy.cGet('#comment-container-2').should('contain','some text1');
-		cy.cGet('#comment-container-2 .cool-annotation-menubar .cool-annotation-menu').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Remove').click();
+		desktopHelper.pickCommentAction(2, 'Remove');
 		cy.cGet('#comment-container-2').should('have.class','tracked-deleted-comment-show');
 		cy.cGet('#comment-container-2').should('contain','some text1');
 		cy.cGet('div.cool-annotation').should('have.length', 3);
@@ -469,8 +467,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Track Changes', function (
 
 		// undo removed comment
 		cy.cGet('#comment-container-2').should('contain','some text1');
-		cy.cGet('#comment-container-2 .cool-annotation-menubar .cool-annotation-menu').click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Remove').click();
+		desktopHelper.pickCommentAction(2, 'Remove');
 		cy.cGet('#comment-container-2').should('have.class','tracked-deleted-comment-show');
 		cy.cGet('div.cool-annotation').should('have.length', 3);
 		cy.cGet('#undo').click();
