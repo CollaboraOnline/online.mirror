@@ -353,21 +353,22 @@ function insertComment(text = 'some text0', save = true) {
 	}
 
 	// Wait for the annotation to be created
-	cy.cGet('.cool-annotation').last({log: false}).find('#annotation-modify-textarea-new').should('exist');
+	cy.cGet('#annotation-modify-textarea-new').should('exist');
 	// Wait for core to process and layouting to settle so the textarea has its final ID
 	cy.getFrameWindow().then(function(win) {
 		return helper.processToIdle(win);
 	});
 
-	// Use class selector since processToIdle may have caused the textarea ID to change from 'new' to a number
-	cy.cGet('.cool-annotation').last({log: false}).find('.modify-annotation .cool-annotation-textarea').should('not.have.attr','disabled');
-	cy.cGet('.cool-annotation').last({log: false}).find('.modify-annotation .cool-annotation-textarea').type(text);
+	// Only one comment is written in at a time, so the box on
+	// show is it. In Writer it sits in the comment's row.
+	cy.cGet('.modify-annotation:visible .cool-annotation-textarea').should('not.have.attr','disabled');
+	cy.cGet('.modify-annotation:visible .cool-annotation-textarea').type(text);
 	// Check that comment exists
-	cy.cGet('.cool-annotation').last({log: false}).find('.cool-annotation-textarea').should('contain',text);
+	cy.cGet('.modify-annotation:visible .cool-annotation-textarea').should('contain',text);
 
 	if (save) {
-		cy.cGet('.cool-annotation').last({log: false}).find('[value="Save"]').click();
-		cy.cGet('.cool-annotation').last({log: false}).find('.modify-annotation').should('not.be.visible');
+		cy.cGet('.modify-annotation:visible [value="Save"]').click();
+		cy.cGet('.modify-annotation:visible').should('not.exist');
 		cy.cGet('.cool-annotation').last({log: false}).find('.cool-annotation-content').should('contain',text);
 		// Comments can be automatically hidden after save in some cases,
 		// so we can't check that the final content is visible
@@ -380,7 +381,7 @@ function insertComment(text = 'some text0', save = true) {
 		});
 	} else {
 		cy.cGet('.cool-annotation').last({log: false}).find('.cool-annotation-content').should('not.be.visible');
-		cy.cGet('.cool-annotation').last({log: false}).find('.modify-annotation').should('be.visible');
+		cy.cGet('.modify-annotation:visible').should('exist');
 	}
 
 	cy.log('<< insertComment - end');

@@ -1095,7 +1095,7 @@ describe(['tagdesktop'], 'Annotation with @mention', function() {
 	it('Insert comment with mention', function() {
 		desktopHelper.insertComment('some text0', false);
 
-		cy.cGet('.cool-annotation').find('#annotation-modify-textarea-new').type(' @Ale');
+		cy.cGet('#annotation-modify-textarea-new').type(' @Ale');
 		cy.cGet('#mentionPopup').should('be.visible');
 		cy.cGet('#mentionPopupList .ui-treeview-entry:nth-child(1)').click();
 
@@ -1198,7 +1198,7 @@ describe(['tagdesktop'], 'Annotation with @mention', function() {
 	it('Escape should close the mentionPopup, comment should be in focus', function() {
 		desktopHelper.insertComment('some text0', false);
 
-		cy.cGet('.cool-annotation').find('#annotation-modify-textarea-new').type(' @Ale');
+		cy.cGet('#annotation-modify-textarea-new').type(' @Ale');
 		cy.cGet('#mentionPopup').should('be.visible');
 		helper.typeIntoDocument('{esc}');
 
@@ -1216,7 +1216,7 @@ describe(['tagdesktop'], 'Annotation with @mention', function() {
 	it('Special characters should not close the mention popup', function() {
 		desktopHelper.insertComment('some text0', false);
 
-		cy.cGet('.cool-annotation').find('#annotation-modify-textarea-new').type(' @Ale');
+		cy.cGet('#annotation-modify-textarea-new').type(' @Ale');
 		cy.cGet('#mentionPopup').should('be.visible');
 		cy.cGet('#mentionPopupList .ui-treeview-entry:nth-child(1)').should('exist');
 

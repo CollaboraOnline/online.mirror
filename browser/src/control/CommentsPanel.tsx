@@ -355,6 +355,11 @@ class CommentsPanel {
   }
 
   private matchesFilters(thread: CommentThread): boolean {
+    // A thread somebody is writing in is always in the list, or
+    // a filter would leave the writer nowhere to write.
+    if ([thread.root, ...thread.replies].some((comment) => comment.isEdit()))
+      return true;
+
     const resolved = thread.root.sectionProperties.data.resolved === 'true';
     if (this.filters.status === 'resolved' && !resolved) return false;
     if (this.filters.status === 'unresolved' && resolved) return false;
@@ -462,8 +467,11 @@ class CommentsPanel {
       this.offerToOpenTheCutRows(),
     );
 
+    const held = threads.filter(
+      (thread) => thread.root.sectionProperties.data.id !== 'new',
+    ).length;
     this.placeholderNode.textContent =
-      threads.length === 0
+      held === 0
         ? _('This document has no comments.')
         : _('No comment matches the filters.');
     this.placeholderNode.classList.toggle('hidden', shown.length > 0);
@@ -529,14 +537,11 @@ class CommentsPanel {
     const section = this.getCommentSection();
     if (!section) return [];
 
-    // A comment with a tracked change belongs to track changes,
-    // and one still being written has nothing to show yet.
+    // A comment with a tracked change is read beside the page.
+    // One not written yet keeps a row, for the box it holds.
     const comments: any[] = (
       section.sectionProperties.commentList as any[]
-    ).filter((comment) => {
-      const data = comment.sectionProperties.data;
-      return !data.trackchange && data.id !== 'new';
-    });
+    ).filter((comment) => !comment.sectionProperties.data.trackchange);
 
     const commentOfId = new Map<string, any>();
     for (const comment of comments)
@@ -705,7 +710,9 @@ class CommentsPanel {
         <div class="comments-panel-comment-footer">
           {this.buildCommentTags(thread, comment)}
           {openNode}
-          {app.isCommentEditingAllowed() && this.buildMenuButton(comment)}
+          {app.isCommentEditingAllowed() &&
+            id !== 'new' &&
+            this.buildMenuButton(comment)}
         </div>
         {editor}
       </div>

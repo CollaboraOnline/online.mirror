@@ -458,7 +458,7 @@ export class Comment extends CanvasSectionObject {
 
 		// A box on show is kept inside the window. A box with
 		// nothing but its bubble is left where the layout asks.
-		if ((this.isSelected() || this.isEdit()) && !this.showsOnlyItsBubble()) {
+		if ((this.isSelected() || this.isEdit()) && !this.isReadInTheList()) {
 			// Gap kept between the comment and the toolbar/canvas edges.
 			const margin = this.sectionProperties.commentListSection.sectionProperties.marginY / app.dpiScale;
 
@@ -516,11 +516,10 @@ export class Comment extends CanvasSectionObject {
 		this.sectionProperties.childLinesNode.style.width = this.sectionProperties.childCommentOffset*(this.getChildLevel() + 1) + 'px';
 	}
 
-	// Whether the page shows nothing of this comment but its
-	// bubble. In Writer that is all but a tracked change.
-	public showsOnlyItsBubble(): boolean {
+	// Whether this comment is read away from the page, in the
+	// comments tab. A tracked change keeps its box instead.
+	public isReadInTheList(): boolean {
 		return app.map._docLayer._docType === 'text'
-			&& this.sectionProperties.data.id !== 'new'
 			&& !this.sectionProperties.data.trackchange;
 	}
 
@@ -1779,7 +1778,7 @@ export class Comment extends CanvasSectionObject {
 		this.sectionProperties.container.classList.add('reply-annotation-container');
 		// A box carrying nothing but its bubble stays down while
 		// the words are written, in the row that reads them.
-		if (!this.showsOnlyItsBubble())
+		if (!this.isReadInTheList())
 			this.sectionProperties.container.style.visibility = '';
 		this.sectionProperties.contentNode.style.display = '';
 		this.sectionProperties.nodeModify.style.display = 'none';
@@ -1798,7 +1797,7 @@ export class Comment extends CanvasSectionObject {
 		this.sectionProperties.nodeReply.style.display = 'none';
 		// A box carrying nothing but its bubble stays down while
 		// the words are written, in the row that reads them.
-		if (!this.showsOnlyItsBubble())
+		if (!this.isReadInTheList())
 			this.sectionProperties.container.style.visibility = '';
 		this.sectionProperties.contentNode.style.display = 'none';
 		this.cachedIsEdit = true;

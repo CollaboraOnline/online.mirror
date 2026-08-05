@@ -371,6 +371,43 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		cy.cGet('.comments-panel-comment.is-being-written').should('not.exist');
 	});
 
+	it('a comment is written in a row of its own before it is in the document', function() {
+		// Left unsaved, so the comment is still the one being
+		// written.
+		desktopHelper.insertComment('the words of a new comment', false);
+
+		// The comments tab comes up by itself, because that is
+		// where the words go.
+		cy.cGet('#comments-dock-wrapper').should('be.visible');
+		cy.cGet('.comments-panel-comment[data-comment-id="new"]')
+			.should('have.class', 'is-being-written')
+			.find('#annotation-modify-textarea-new')
+			.should('be.visible')
+			.should('have.text', 'the words of a new comment');
+		// Nothing of the comment comes up over the page.
+		cy.cGet('#comment-container-new').should('be.not.visible');
+	});
+
+	it('a comment written in the list joins the document when it is saved', function() {
+		desktopHelper.insertComment('a comment written in the list');
+
+		cy.cGet('.comments-panel-comment[data-comment-id="new"]').should('not.exist');
+		cy.cGet('.comments-panel-comment[data-comment-id="1"] .comments-panel-comment-text')
+			.should('have.text', 'a comment written in the list');
+	});
+
+	it('a comment given up on leaves no row behind', function() {
+		desktopHelper.insertComment('a comment to give up on', false);
+		cy.cGet('.comments-panel-comment[data-comment-id="new"]').should('exist');
+
+		cy.cGet('#annotation-cancel-new').click();
+
+		cy.cGet('.comments-panel-comment').should('not.exist');
+		cy.cGet('.comments-panel-placeholder')
+			.should('be.visible')
+			.should('have.text', 'This document has no comments.');
+	});
+
 	it('a resolved thread is marked as resolved', function() {
 		desktopHelper.insertComment('a comment to resolve');
 		resolveFirstComment();

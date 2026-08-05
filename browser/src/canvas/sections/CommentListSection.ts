@@ -2625,28 +2625,6 @@ export class CommentSection extends CanvasSectionObject {
 		return startY;
 	}
 
-	// Put the box of a comment nobody has written yet beside the
-	// words. It has no bubble and no row, so the box is it.
-	private placeTheCommentNotWrittenYet (): void {
-		const written = Comment.isAnyEdit();
-		if (!written || written.sectionProperties.data.id !== 'new')
-			return;
-
-		const data = written.sectionProperties.data;
-		if (!data.anchorPos)
-			return;
-
-		if (!data.anchorSPoint)
-			data.anchorSPoint = new cool.SimplePoint(data.anchorPos[0], data.anchorPos[1]);
-
-		written.setContainerPos(
-			true,
-			this.sectionProperties.canvasContainerBounds,
-			data.anchorSPoint.vX / app.dpiScale,
-			data.anchorSPoint.vY / app.dpiScale
-		);
-	}
-
 	public hideArrow (): void {
 		if (this.sectionProperties.arrow) {
 			document.getElementById('document-container').removeChild(this.sectionProperties.arrow);
@@ -2882,8 +2860,6 @@ export class CommentSection extends CanvasSectionObject {
 				lastY = this.loopDown(0, this.roomBesideThePageX(),
 					this.myTopLeft[1] + this.sectionProperties.marginY + (new cool.SimplePoint(0, 0)).vY,
 					relayout);
-
-			this.placeTheCommentNotWrittenYet();
 		}
 
 		this.drawTheLineToThePickedBubble();
