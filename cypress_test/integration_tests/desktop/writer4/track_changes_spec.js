@@ -398,36 +398,41 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Track Changes', function (
 		cy.cGet('#compare-tracked-change-entry-1').click();
 		cy.cGet('.compare-changes-labels').should('not.have.css', 'display', 'none');
 
-		// When scrolling down:
+		// Scrolling down moves the bubble up with the words it
+		// belongs to, which is all the page shows.
 		let initialTop;
-		cy.cGet('#comment-container-1').then(function($el) {
-			initialTop = $el.position().top;
+		cy.cGet('#comment-container-1 .cool-annotation-img').then(function($el) {
+			initialTop = $el[0].getBoundingClientRect().top;
 		});
 		cy.getFrameWindow().then(function(win) {
 			win.app.sectionContainer.getSectionWithName('scroll').scrollVerticalWithOffset(100);
 		});
 
-		// Then the comment should move up:
-		// Without the accompanying fix in place, this test would have failed with:
-		// - comment top after scroll: expected 207 to be below 207
-		// while it reduced to 189 with the fix.
-		cy.cGet('#comment-container-1').should(function($el) {
-			expect($el.position().top, 'comment top after scroll').to.be.lessThan(initialTop);
+		// Then the bubble should move up. Without the fix beside
+		// it, the bubble stayed where it was.
+		cy.cGet('#comment-container-1 .cool-annotation-img').should(function($el) {
+			expect($el[0].getBoundingClientRect().top, 'bubble top after scroll')
+				.to.be.lessThan(initialTop);
 		});
 
-		// Also verify the comment is to the right of the "new" page (right half),
-		// not between the two pages:
+		// The bubble belongs inside the margin of the version
+		// the comment was written in, not past its end.
 		cy.getFrameWindow().then(function(win) {
 			// Compute the right edge of the right-side page in view coordinates.
 			var layout = win.app.activeDocument.activeLayout;
-			var rightEdgePoint = new win.cool.SimplePoint(win.app.activeDocument.fileSize.pX, 0);
+			var rightEdgePoint = new win.cool.SimplePoint(win.app.activeDocument.fileSize.x, 0);
 			rightEdgePoint.mode = 2; // TileMode.RightSide
 			var rightPageEdge = layout.documentToViewX(rightEdgePoint) / win.app.dpiScale;
-			cy.cGet('#comment-container-1').should(function($el) {
-				// Without the accompanying fix in place, this test would have failed with:
-				// - comment left position: expected 593 to be above 747
-				// i.e. the comment left is 1247.125 with the fix.
-				expect($el.position().left, 'comment left position').to.be.greaterThan(rightPageEdge);
+			cy.cGet('#document-container').then(function($container) {
+				var viewLeft = $container[0].getBoundingClientRect().left;
+				var halfTheWindow = $container.width() / 2;
+				cy.cGet('#comment-container-1 .cool-annotation-img').should(function($el) {
+					var box = $el[0].getBoundingClientRect();
+					expect(box.right - viewLeft, 'the far edge of the bubble')
+						.to.be.at.most(rightPageEdge);
+					expect(box.left - viewLeft, 'the near edge of the bubble')
+						.to.be.greaterThan(halfTheWindow);
+				});
 			});
 		});
 	});

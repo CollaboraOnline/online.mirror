@@ -156,6 +156,7 @@ export class Comment extends CanvasSectionObject {
 
 		this.sectionProperties.commentContainerRemoved = false;
 		this.sectionProperties.children = []; // This is used for Writer comments. There is parent / child relationship between comments in Writer files.
+		this.sectionProperties.bubblePos = null; // Writer. Where the bubble of this comment was put.
 		this.sectionProperties.childLinesNode = null;
 		this.sectionProperties.childLines = [];
 		this.sectionProperties.childCommentOffset = 8;
@@ -448,7 +449,11 @@ export class Comment extends CanvasSectionObject {
 		left += canvasContainerBounds.left;
 		top += canvasContainerBounds.top;
 
-		if (this.isSelected() || this.isEdit()) {
+		// A box on show is kept inside the window. A box with
+		// nothing but its bubble is left where the layout asks.
+		const carriesOnlyItsBubble = app.map._docLayer._docType === 'text'
+			&& !this.isEdit() && !this.sectionProperties.data.trackchange;
+		if ((this.isSelected() || this.isEdit()) && !carriesOnlyItsBubble) {
 			// Gap kept between the comment and the toolbar/canvas edges.
 			const margin = this.sectionProperties.commentListSection.sectionProperties.marginY / app.dpiScale;
 
@@ -504,6 +509,35 @@ export class Comment extends CanvasSectionObject {
 		this.sectionProperties.childLinesNode = window.L.DomUtil.create('div', '', this.sectionProperties.container);
 		this.sectionProperties.childLinesNode.id = 'annotation-child-lines-' + this.sectionProperties.data.id;
 		this.sectionProperties.childLinesNode.style.width = this.sectionProperties.childCommentOffset*(this.getChildLevel() + 1) + 'px';
+	}
+
+	// How big the bubble drawn out of this box is and how far
+	// inside the box it sits, in CSS pixels.
+	public measureBubble(): { size: number; insetX: number; insetY: number } {
+		const box = this.sectionProperties.container.getBoundingClientRect();
+		const bubble = this.sectionProperties.authorAvatartdImg.getBoundingClientRect();
+
+		return {
+			size: bubble.height,
+			insetX: bubble.left - box.left,
+			insetY: bubble.top - box.top,
+		};
+	}
+
+	// A bubble is drawn at half size while it shares its page
+	// margin with the bubbles of comments written close by.
+	public setBubbleHalfSize(halfSize: boolean): void {
+		this.sectionProperties.container.classList.toggle('half-size-bubble', halfSize);
+	}
+
+	// Where this comment's bubble was put and how big it was
+	// drawn, as [left, top, size] in CSS pixels.
+	public setBubblePos(place: number[]): void {
+		this.sectionProperties.bubblePos = place;
+	}
+
+	public getBubblePos(): number[] | null {
+		return this.sectionProperties.bubblePos ?? null;
 	}
 
 	public getContainerPosX(): number {
@@ -1721,6 +1755,9 @@ export class Comment extends CanvasSectionObject {
 
 	public reply (): Comment {
 		this.sectionProperties.container.classList.add('reply-annotation-container');
+		// A reply has no box of its own on the page, so the box
+		// comes back while something is being written in it.
+		this.sectionProperties.container.style.display = '';
 		this.sectionProperties.container.style.visibility = '';
 		this.sectionProperties.contentNode.style.display = '';
 		this.sectionProperties.nodeModify.style.display = 'none';
@@ -1737,6 +1774,9 @@ export class Comment extends CanvasSectionObject {
 		this.sectionProperties.container.classList.add('modify-annotation-container');
 		this.sectionProperties.nodeModify.style.display = '';
 		this.sectionProperties.nodeReply.style.display = 'none';
+		// A reply has no box of its own on the page, so the box
+		// comes back while something is being written in it.
+		this.sectionProperties.container.style.display = '';
 		this.sectionProperties.container.style.visibility = '';
 		this.sectionProperties.contentNode.style.display = 'none';
 		this.cachedIsEdit = true;

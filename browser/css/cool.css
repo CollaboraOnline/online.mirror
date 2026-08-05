@@ -726,12 +726,6 @@ input, button {
 	display: none;
 }
 
-/* The pages take the whole width in these two views, so no
-   comment sits beside the page. The margin bubbles stand in. */
-.comments-only-in-the-margin > .cool-annotation:not(.modify-annotation-container):not(.reply-annotation-container) {
-	display: none;
-}
-
 .cool-annotation > .modalpopup {
 	max-height: initial !important;
 }
@@ -941,6 +935,21 @@ input, button {
 	cursor: pointer;
 	opacity: 1;
 	box-shadow: 0px 4px 10px var(--color-box-shadow);
+}
+
+/* Bubbles of comments written close together would cover each
+   other, so a run of them is drawn at half size. */
+.cool-annotation.half-size-bubble .cool-annotation-img {
+	height: calc(var(--default-height) / 2);
+	width: calc(var(--default-width) / 2);
+	border-width: 1px;
+	outline-width: 1px;
+	outline-offset: -2px;
+}
+
+.cool-annotation.half-size-bubble .cool-annotation-img > .avatar-img {
+	height: calc(var(--default-height) / 2);
+	width: calc(var(--default-width) / 2);
 }
 
 .cool-annotation-img .avatar-img {

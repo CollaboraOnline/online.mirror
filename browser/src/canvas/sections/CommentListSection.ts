@@ -291,6 +291,10 @@ export class CommentSection extends CanvasSectionObject {
 	private placementOverlay: HTMLDivElement | null = null;
 	private static readonly DRAG_THRESHOLD_PX = 5;
 
+	// The gap kept between a bubble and the edge of the page it
+	// sits inside, in CSS pixels.
+	private static readonly bubbleGapFromThePageEdge = 4;
+
 	constructor () {
 		super(app.CSections.CommentList.name);
 
@@ -314,7 +318,6 @@ export class CommentSection extends CanvasSectionObject {
 		this.sectionProperties.collapsedCommentWidth = 32 * 1.5 * app.dpiScale;
 		this.sectionProperties.deflectionOfSelectedComment = 160; // CSS pixels.
 		this.sectionProperties.calcCurrentComment = null; // We don't automatically show a Calc comment when cursor is on its cell. But we remember it to show if user presses Alt+C keys.
-		this.sectionProperties.marginMarkers = null; // Writer. The icons in the page margin that say where a comment was written.
 		this.sectionProperties.reLayout = true;
 
 		// This (commentsAreListed) variable means that comments are shown as a list on the right side of the document.
@@ -364,11 +367,6 @@ export class CommentSection extends CanvasSectionObject {
 			this.setShowSection(false);
 			this.size[0] = 0;
 		}
-
-		// Writer marks every comment with an icon in its page
-		// margin. The other types mark the shape or the cell.
-		if (app.map._docLayer._docType === 'text' && !(<any>window).mode.isSmallScreenDevice())
-			this.sectionProperties.marginMarkers = new CommentMarginMarkers(this);
 
 		this.escapeSelectedComment();
 	}
@@ -1896,31 +1894,21 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public showHideComment (annotation: Comment): void {
-		// The pages take the whole width in these two views, so
-		// no comment sits beside one. The margin icons stand in.
-		if (CommentSection.isMultiColumnLayout()) {
-			if (annotation.isContainerVisible()) {
-				if (this.sectionProperties.selectedComment === annotation)
-					this.unselect();
-				annotation.hide();
-				annotation.update();
-				this.update();
-			}
-			return;
-		}
-
 		// This manually shows/hides comments
 		if (!this.sectionProperties.showResolved && app.map._docLayer._docType === 'text') {
-			const hide = annotation.isContainerVisible() && annotation.sectionProperties.data.resolved === 'true';
+			// A Writer comment is on show as the bubble drawn
+			// out of a box that stays down.
+			const onShow = annotation.hidden === false;
+			const hide = onShow && annotation.sectionProperties.data.resolved === 'true';
 
-			if (hide && annotation.isContainerVisible()) {
+			if (hide) {
 				if (this.sectionProperties.selectedComment == annotation) {
 					this.unselect();
 				}
 				annotation.hide();
 				annotation.update();
 			}
-			else if (!hide && !annotation.isContainerVisible() && annotation.sectionProperties.data.resolved === 'false') {
+			else if (!onShow && annotation.sectionProperties.data.resolved === 'false') {
 				annotation.show();
 				annotation.update();
 			}
@@ -2551,58 +2539,6 @@ export class CommentSection extends CanvasSectionObject {
 		return comment.isInsideActivePart();
 	}
 
-	private layoutUp (subList: Array<Comment>, actualPosition: Array<number>, lastY: number, relayout: boolean = true): number {
-		var height: number;
-		for (var i = 0; i < subList.length; i++) {
-			if (this.sectionProperties.show != false && !subList[i].isEdit())
-				subList[i].show();
-			height = subList[i].getCommentHeight(relayout);
-			lastY = subList[i].sectionProperties.data.anchorSPoint.vY + height < lastY ? subList[i].sectionProperties.data.anchorSPoint.vY: lastY - (height * app.dpiScale);
-
-			subList[i].setContainerPos(
-				false,
-				this.sectionProperties.canvasContainerBounds,
-				actualPosition[0] / app.dpiScale,
-				lastY / app.dpiScale
-			);
-		}
-		return lastY;
-	}
-
-	private loopUp (startIndex: number, x: number, startY: number, relayout: boolean = true): number {
-		var tmpIdx = 0;
-		var checkSelectedPart: boolean = this.mustCheckSelectedPart();
-		startY -= this.sectionProperties.marginY;
-		// Pass over all comments present
-		for (var i = startIndex; i > -1;) {
-			var subList = [];
-			tmpIdx = i;
-			do {
-				// Add this item to the list of comments.
-				if (this.sectionProperties.commentList[tmpIdx].sectionProperties.data.resolved !== 'true' || this.sectionProperties.showResolved) {
-					if (!checkSelectedPart || app.map._docLayer._selectedPart === this.sectionProperties.commentList[tmpIdx].sectionProperties.partIndex)
-						subList.push(this.sectionProperties.commentList[tmpIdx]);
-				}
-				tmpIdx = tmpIdx - 1;
-				// Continue this loop, until we reach the last item, or an item which is not a direct descendant of the previous item.
-			} while (tmpIdx > -1 && this.sectionProperties.commentList[tmpIdx].sectionProperties.data.parent === this.sectionProperties.commentList[tmpIdx + 1].sectionProperties.data.id);
-
-			if (subList.length > 0) {
-				if (!subList[0].sectionProperties.data.anchorSPoint)
-					subList[0].sectionProperties.data.anchorSPoint = new cool.SimplePoint(subList[0].sectionProperties.data.anchorPos[0], subList[0].sectionProperties.data.anchorPos[1]);
-
-				startY = this.layoutUp(subList, [x, subList[0].sectionProperties.data.anchorSPoint.vY], startY, relayout);
-				i = i - subList.length;
-				// Only a thread that was laid out gets the inter-thread gap, so
-				// the stack's positions depend only on the threads it shows.
-				startY -= this.sectionProperties.marginY;
-			} else {
-				i = tmpIdx;
-			}
-		}
-		return startY;
-	}
-
 	private layoutDown (subList: any, actualPosition: Array<number>, lastY: number, relayout: boolean = true): number {
 		const selectedComment = subList[0] === this.sectionProperties.selectedComment;
 		const documentCanvasWidth = parseInt((document.getElementById('document-canvas') as any).style.width);
@@ -2647,10 +2583,13 @@ export class CommentSection extends CanvasSectionObject {
 			var subList = [];
 			tmpIdx = i;
 			do {
-				// Add this item to the list of comments.
-				if (this.sectionProperties.commentList[tmpIdx].sectionProperties.data.resolved !== 'true' || this.sectionProperties.showResolved) {
-					if (!checkSelectedPart || app.map._docLayer._selectedPart === this.sectionProperties.commentList[tmpIdx].sectionProperties.partIndex)
-						subList.push(this.sectionProperties.commentList[tmpIdx]);
+				// Add this item to the list, unless the layout
+				// beside the page has no box to place for it.
+				const candidate = this.sectionProperties.commentList[tmpIdx];
+				if (this.isLaidOutBesideThePage(candidate)
+					&& (candidate.sectionProperties.data.resolved !== 'true' || this.sectionProperties.showResolved)) {
+					if (!checkSelectedPart || app.map._docLayer._selectedPart === candidate.sectionProperties.partIndex)
+						subList.push(candidate);
 				}
 				tmpIdx = tmpIdx + 1;
 				// Continue this loop, until we reach the last item, or an item which is not a direct descendant of the previous item.
@@ -2766,6 +2705,200 @@ export class CommentSection extends CanvasSectionObject {
 		);
 	}
 
+	// Whether a comment has a bubble in its page margin. One
+	// being written, a tracked change and a hidden one do not.
+	private hasABubble (comment: Comment): boolean {
+		if (this.sectionProperties.show !== true)
+			return false;
+
+		const data = comment.sectionProperties.data;
+		if (data.id === 'new' || data.trackchange || comment.isEdit())
+			return false;
+		if (data.resolved === 'true' && !this.sectionProperties.showResolved)
+			return false;
+		if (!comment.isRootComment())
+			return false;
+
+		return data.anchorPos !== undefined && data.anchorPos !== null;
+	}
+
+	// Whether the layout beside the page has a box for this
+	// comment. In Writer only a tracked change has one.
+	private isLaidOutBesideThePage (comment: Comment): boolean {
+		if (app.map._docLayer._docType !== 'text')
+			return true;
+		return comment.sectionProperties.data.trackchange === true;
+	}
+
+	// The edge of the page a comment sits inside, in twips. A
+	// document read right to left has the near edge.
+	private static pageEdgeBesideTheComments (anchor: cool.SimplePoint): number {
+		const rightToLeft = document.documentElement.dir === 'rtl';
+
+		let page: number[] | null = null;
+		for (const candidate of app.file.writer.pageRectangleList) {
+			if (anchor.y < candidate[1])
+				break;
+			page = candidate;
+			if (anchor.y <= candidate[1] + candidate[3])
+				break;
+		}
+
+		if (page === null)
+			return rightToLeft || !app.activeDocument ? 0 : app.activeDocument.fileSize.x;
+
+		return rightToLeft ? page[0] : page[0] + page[2];
+	}
+
+	// Where the bubble of a comment belongs, in CSS pixels from
+	// the canvas corner: in the margin, at its words' height.
+	private bubblePlaceOf (comment: Comment, bubbleSize: number): number[] {
+		const data = comment.sectionProperties.data;
+		if (!data.anchorSPoint)
+			data.anchorSPoint = new cool.SimplePoint(data.anchorPos[0], data.anchorPos[1]);
+		const anchor = data.anchorSPoint;
+
+		const rightToLeft = document.documentElement.dir === 'rtl';
+		const edge = CommentSection.pageEdgeBesideTheComments(anchor);
+		// A twip inside the page, so a layout working out which
+		// page a point is on does not read the next one.
+		const inside = new cool.SimplePoint(rightToLeft ? edge + 1 : edge - 1, anchor.y,
+			anchor.part, anchor.mode);
+
+		const edgeX = inside.vX / app.dpiScale;
+		const gap = CommentSection.bubbleGapFromThePageEdge;
+
+		return [
+			Math.round(rightToLeft ? edgeX + gap : edgeX - gap - bubbleSize),
+			Math.round(anchor.vY / app.dpiScale),
+		];
+	}
+
+	// Put every bubble inside the margin of its page. A run of
+	// bubbles written close together is drawn at half size.
+	private placeBubblesInThePageMargins (): void {
+		const bubbles = this.sectionProperties.commentList.filter(
+			(comment: Comment) => this.hasABubble(comment));
+		if (bubbles.length === 0)
+			return;
+
+		// Every bubble goes back to full size before one is
+		// measured, so the pass reads a full bubble.
+		for (const comment of bubbles)
+			comment.setBubbleHalfSize(false);
+
+		const bubble = bubbles[0].measureBubble();
+		const places = bubbles.map(
+			(comment: Comment) => this.bubblePlaceOf(comment, bubble.size));
+
+		let runStart = 0;
+		while (runStart < bubbles.length) {
+			// The run goes on while each bubble would cover the
+			// one before it.
+			let runEnd = runStart;
+			while (runEnd + 1 < bubbles.length
+				&& places[runEnd + 1][0] === places[runEnd][0]
+				&& places[runEnd + 1][1] - places[runEnd][1] < bubble.size)
+				runEnd++;
+
+			const halfSize = runEnd > runStart;
+			const step = halfSize ? bubble.size / 2 : bubble.size;
+			for (let i = runStart; i <= runEnd; i++) {
+				const left = places[i][0];
+				const top = places[runStart][1] + (i - runStart) * step;
+				bubbles[i].setBubbleHalfSize(halfSize);
+				bubbles[i].setBubblePos([left, top, step]);
+				bubbles[i].setContainerPos(true, this.sectionProperties.canvasContainerBounds,
+					left - bubble.insetX, top - bubble.insetY);
+			}
+			runStart = runEnd + 1;
+		}
+	}
+
+	// A reply stands behind the bubble of what it answers, so
+	// its box is taken off the page.
+	private takeTheRepliesOffThePage (): void {
+		for (const comment of this.sectionProperties.commentList) {
+			if (this.isLaidOutBesideThePage(comment))
+				continue;
+			// A comment being written keeps its box, because its
+			// words are not in the document yet.
+			const onThePage = comment.isRootComment() || comment.isEdit();
+			comment.sectionProperties.container.style.display = onThePage ? '' : 'none';
+		}
+	}
+
+	// The line from the picked comment to the words it was
+	// written about. Without a bubble it is left out.
+	private drawTheLineToThePickedBubble (): void {
+		const picked = this.sectionProperties.selectedComment;
+		if (!picked) {
+			this.hideArrow();
+			return;
+		}
+
+		const root = this.sectionProperties.commentList[
+			this.getRootIndexOf(picked.sectionProperties.data.id)];
+		const place = root && this.hasABubble(root) ? root.getBubblePos() : null;
+		if (!place) {
+			this.hideArrow();
+			return;
+		}
+
+		const anchor = root.sectionProperties.data.anchorSPoint.vToArray();
+		// The line ends at the edge of the bubble that faces the
+		// words.
+		const rightToLeft = document.documentElement.dir === 'rtl';
+		const endX = rightToLeft ? place[0] + place[2] : place[0];
+		this.showArrow([anchor[0], anchor[1]], [endX * app.dpiScale, anchor[1]]);
+	}
+
+	// Writer keeps no comment beside the page. What is drawn
+	// there is the box being written and the tracked changes.
+	private layoutWriter (relayout: boolean): void {
+		let lastY = 0;
+
+		if (!this.commentsHiddenOrNotPresent()) {
+			this.orderCommentList();
+			this.takeTheRepliesOffThePage();
+			this.placeBubblesInThePageMargins();
+
+			// The column beside the page is laid out only where
+			// there is a box to put in it.
+			if (this.sectionProperties.commentList.some(
+				(comment: Comment) => this.isLaidOutBesideThePage(comment)))
+				lastY = this.loopDown(0, this.roomBesideThePageX(),
+					this.myTopLeft[1] + this.sectionProperties.marginY + (new cool.SimplePoint(0, 0)).vY,
+					relayout);
+
+			this.placeCommentBeingWrittenAtItsAnchor();
+		}
+
+		this.drawTheLineToThePickedBubble();
+
+		// The comments ask the view for no width of their own. A
+		// tracked change can still reach below the document.
+		app.activeDocument.activeLayout.ensureViewSizeCoversComments(
+			0,
+			this.commentStackBottomViewTwips(lastY),
+		);
+
+		this.disableLayoutAnimation = false;
+	}
+
+	// Where the room beside the page starts, in canvas pixels
+	// counted from the left edge of the canvas.
+	private roomBesideThePageX (): number {
+		if (document.documentElement.dir === 'rtl')
+			return this.calculateAvailableSpace() - this.sectionProperties.commentWidth;
+
+		let x = (app.activeDocument.fileSize.cX
+			- app.activeDocument.activeLayout.viewedRectangle.cX1
+			- app.sectionContainer.getCanvasBoundingClientRect().x) * app.dpiScale;
+		x += app.map.navigator ? app.map.navigator.navigationPanel.offsetWidth * app.dpiScale : 0;
+		return x;
+	}
+
 	private layout (relayout: boolean = true): void {
 		if ((<any>window).mode.isSmallScreenDevice() || app.map._docLayer._docType === 'spreadsheet') {
 			if (this.sectionProperties.commentList.length > 0)
@@ -2776,97 +2909,53 @@ export class CommentSection extends CanvasSectionObject {
 		const documentContainer = document.getElementById('document-container');
 		this.sectionProperties.canvasContainerBounds = documentContainer.getBoundingClientRect();
 
-		// The pages take the whole width in these two views, so
-		// no comment sits beside one. The icons stand for them.
-		const commentsSitBesideThePage = !CommentSection.isMultiColumnLayout();
-		documentContainer.classList.toggle('comments-only-in-the-margin', !commentsSitBesideThePage);
+		if (app.map._docLayer._docType === 'text') {
+			this.layoutWriter(relayout);
+			return;
+		}
 
 		const availableSpace = this.calculateAvailableSpace();
 		if (!this.commentsHiddenOrNotPresent()) {
 			this.orderCommentList();
-			if (relayout && commentsSitBesideThePage)
+			if (relayout)
 				this.resetCommentsSize();
 
 			var isRTL = document.documentElement.dir === 'rtl';
 
 			var topRight: Array<number> = [this.myTopLeft[0], this.myTopLeft[1] + this.sectionProperties.marginY + (new cool.SimplePoint(0, 0)).vY];
-			var yOrigin = 0;
 			var selectedIndex = null;
-			var x = isRTL ? 0 : topRight[0];
-
-			if (isRTL)
-				x = availableSpace - this.sectionProperties.commentWidth;
-			else {
-				x = (app.activeDocument.fileSize.cX - app.activeDocument.activeLayout.viewedRectangle.cX1 - app.sectionContainer.getCanvasBoundingClientRect().x) * app.dpiScale;
-				x += app.map.navigator ? app.map.navigator.navigationPanel.offsetWidth * app.dpiScale : 0;
-			}
+			var x = this.roomBesideThePageX();
 
 			if (this.sectionProperties.selectedComment) {
 				selectedIndex = this.getRootIndexOf(this.sectionProperties.selectedComment.sectionProperties.data.id);
 
-				yOrigin = this.sectionProperties.commentList[selectedIndex].sectionProperties.data.anchorSPoint.vY;
 				var tempCrd: Array<number> = this.sectionProperties.commentList[selectedIndex].sectionProperties.data.anchorSPoint.vToArray();
 				var resolved:string = this.sectionProperties.commentList[selectedIndex].sectionProperties.data.resolved;
 				if (!resolved || resolved === 'false' || this.sectionProperties.showResolved) {
-					// The line ends at the icon that stands for
-					// it. Without one it is left out.
-					const iconPlace = this.sectionProperties.marginMarkers?.positionOfComment(
-						String(this.sectionProperties.commentList[selectedIndex].sectionProperties.data.id));
-					if (iconPlace) {
-						const posX = (iconPlace[0] + (isRTL ? CommentMarginMarkers.iconWidth() : 0)) * app.dpiScale;
-						this.showArrow([tempCrd[0], tempCrd[1]], [posX, tempCrd[1]]);
-					}
-					else if (commentsSitBesideThePage) {
-						const posX = isRTL ? (this.containerObject.getDocumentAnchorSection().size[0] + x + 15) : x;
-						this.showArrow([tempCrd[0], tempCrd[1]], [posX, tempCrd[1]]);
-					}
-					else
-						this.hideArrow();
+					const posX = isRTL ? (this.containerObject.getDocumentAnchorSection().size[0] + x + 15) : x;
+					this.showArrow([tempCrd[0], tempCrd[1]], [posX, tempCrd[1]]);
 				}
 			}
 			else
 				this.hideArrow();
 
-			if (relayout && commentsSitBesideThePage)
+			if (relayout)
 				this.resizeLastComment();
-			var lastY = 0;
-			// In Writer a comment is anchored to a point in the text that flows
-			// down the page, so comments before the selected one belong above it
-			// and are laid out upwards from its anchor. In Impress and Draw every
-			// comment is an independent thread pinned to a marker, and new comments
-			// all land at the same viewport top-left point. Laying the earlier ones
-			// upwards from that shared top anchor pushes them above the slide into
-			// the toolbar. Keep them in a single top-down stack with the selected
-			// comment expanded in place instead.
-			var stackFromTop = !selectedIndex
-				|| app.map._docLayer._docType === 'presentation'
-				|| app.map._docLayer._docType === 'drawing';
-			if (!commentsSitBesideThePage) {
-				this.hideAllComments();
-				this.placeCommentBeingWrittenAtItsAnchor();
-			}
-			else if (stackFromTop) {
-				lastY = this.loopDown(0, x, topRight[1], relayout);
-			}
-			else {
-				this.loopUp(selectedIndex - 1, x, yOrigin, relayout);
-				lastY = this.loopDown(selectedIndex, x, yOrigin, relayout);
-			}
+			// Every comment on a slide is a thread of its own,
+			// so they are kept in one stack from the top down.
+			var lastY = this.loopDown(0, x, topRight[1], relayout);
 		} else {
 			for (const comment of this.sectionProperties.commentList) {
 				comment.setContainerPos(false, this.sectionProperties.canvasContainerBounds);
 			}
 		}
-		if (relayout && commentsSitBesideThePage) {
+		if (relayout) {
 			this.resizeComments();
 			// resizeComments changes comment heights after they were positioned, which
 			// detaches replies from their (now resized) parent. Reposition once more
 			// with the final heights so replies sit right under the parent.
 			if (!this.commentsHiddenOrNotPresent()) {
-				if (stackFromTop)
-					lastY = this.loopDown(0, x, topRight[1], false);
-				else
-					lastY = this.loopDown(selectedIndex, x, yOrigin, false);
+				lastY = this.loopDown(0, x, topRight[1], false);
 				// Redraw indent lines for the repositioned replies (resizeComments drew
 				// them against the pre-reposition positions).
 				this.updateChildLines();
@@ -2920,10 +3009,6 @@ export class CommentSection extends CanvasSectionObject {
 
 			if (reLayout && app.map._docLayer._docType === 'text')
 				this.updateThreadInfoIndicator();
-
-			// The icons follow the comment anchors, which move
-			// with every scroll and zoom.
-			this.sectionProperties.marginMarkers?.update();
 		});
 
 		app.sectionContainer.requestReDraw();
