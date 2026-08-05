@@ -9,6 +9,12 @@ function bubbleOf(id) {
 	return cy.cGet('#comment-container-' + id + ' .cool-annotation-img');
 }
 
+// The badge in the corner of a bubble, which says what the
+// thread behind the bubble holds.
+function badgeOf(id) {
+	return cy.cGet('#comment-container-' + id + ' .cool-annotation-info-collapsed');
+}
+
 // Where the page ends across the width of the window, in pixels.
 function pageEdges() {
 	return cy.cGet('#document-container').then(function($container) {
@@ -18,6 +24,17 @@ function pageEdges() {
 			return { left: left, right: left + end.vX / win.app.dpiScale };
 		});
 	});
+}
+
+// The colour the document draws a design token in, read back
+// from the browser so a test can compare against it.
+function colourOfToken(win, token) {
+	const probe = win.document.createElement('div');
+	probe.style.backgroundColor = 'var(' + token + ')';
+	win.document.body.appendChild(probe);
+	const colour = win.getComputedStyle(probe).backgroundColor;
+	probe.remove();
+	return colour;
 }
 
 describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
@@ -138,6 +155,60 @@ describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
 				expect(second.top, 'the top of the bubble under it')
 					.to.be.closeTo(first.bottom, 2);
 			});
+		});
+	});
+
+	it('the badge on the bubble of a lone comment carries a tick', function() {
+		desktopHelper.insertComment('a comment on its own');
+
+		badgeOf(1).should('be.visible');
+		// A thread of one has no number to give, so the badge
+		// draws a tick instead.
+		badgeOf(1).should('have.text', '');
+		badgeOf(1).should(function($badge) {
+			const win = $badge[0].ownerDocument.defaultView;
+			expect(win.getComputedStyle($badge[0], '::after').borderBottomWidth,
+				'the stroke of the tick').to.not.equal('0px');
+		});
+	});
+
+	it('the badge on the bubble says how many comments the thread holds', function() {
+		desktopHelper.insertComment('a comment with an answer');
+
+		desktopHelper.pickCommentAction(1, 'Reply');
+		cy.cGet('#annotation-reply-textarea-1').type('the answer');
+		cy.cGet('#annotation-reply-1').click();
+		cy.cGet('#annotation-content-area-2').should('contain', 'the answer');
+
+		// The comment and the answer under it make two, and the
+		// tick gives way to the number.
+		badgeOf(1).should('have.text', '2');
+		badgeOf(1).should(function($badge) {
+			const win = $badge[0].ownerDocument.defaultView;
+			expect(win.getComputedStyle($badge[0], '::after').borderBottomWidth,
+				'the stroke of the tick').to.equal('0px');
+		});
+	});
+
+	it('the badge on the bubble turns green once the thread is resolved', function() {
+		desktopHelper.insertComment('a comment to resolve');
+
+		// Blue while the comment is still open.
+		badgeOf(1).should(function($badge) {
+			const win = $badge[0].ownerDocument.defaultView;
+			expect(win.getComputedStyle($badge[0]).backgroundColor, 'the badge')
+				.to.equal(colourOfToken(win, '--color-primary'));
+		});
+
+		desktopHelper.pickCommentAction(1, 'Resolve');
+		// A resolved comment is on show only while the document
+		// is showing the resolved ones.
+		desktopHelper.toggleComments(/* resolved = */ true);
+
+		badgeOf(1).should(function($badge) {
+			const win = $badge[0].ownerDocument.defaultView;
+			expect(win.getComputedStyle($badge[0]).backgroundColor, 'the badge')
+				.to.equal(colourOfToken(win, '--color-success'));
 		});
 	});
 

@@ -802,6 +802,24 @@ input, button {
 	top: -15px;
 }
 
+/* The badge stands for the thread. Blue while a comment of it is
+   still open, green once every one is resolved. */
+.cool-annotation-info-collapsed.bubble-badge-resolved {
+	background-color: var(--color-success);
+	border-color: var(--color-success);
+}
+
+/* A thread of one has no number, so the badge carries a tick.
+   Two turned box edges draw it, in the badge's own colour. */
+.cool-annotation-info-collapsed.bubble-badge-tick::after {
+	content: '';
+	width: 3px;
+	height: 6px;
+	border: solid var(--color-primary-text);
+	border-width: 0 1.5px 1.5px 0;
+	transform: rotate(45deg) translate(-1px, -1px);
+}
+
 .tracked-deleted-comment-show .cool-annotation-menubar {
 	display: none;
 }
@@ -950,6 +968,20 @@ input, button {
 .cool-annotation.half-size-bubble .cool-annotation-img > .avatar-img {
 	height: calc(var(--default-height) / 2);
 	width: calc(var(--default-width) / 2);
+}
+
+.cool-annotation.half-size-bubble .cool-annotation-info-collapsed {
+	width: calc(var(--btn-size-s) / 2);
+	height: calc(var(--btn-size-s) / 2);
+	font-size: calc(var(--default-font-size) * 0.7);
+	left: -3px;
+	top: -8px;
+}
+
+.cool-annotation.half-size-bubble .cool-annotation-info-collapsed.bubble-badge-tick::after {
+	width: 2px;
+	height: 4px;
+	border-width: 0 1px 1px 0;
 }
 
 .cool-annotation-img .avatar-img {

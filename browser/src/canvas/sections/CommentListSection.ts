@@ -3014,7 +3014,29 @@ export class CommentSection extends CanvasSectionObject {
 		app.sectionContainer.requestReDraw();
 	}
 
+	// Every comment of the thread this one starts, itself
+	// included, leaving out the ones the document hides.
+	public getThreadOnShow (root: Comment): Comment[] {
+		const thread: Comment[] = [root];
+		this.getChildren(root, thread);
+
+		const showTrackedChanges =
+			this.map['stateChangeHandler'].getItemValue('.uno:ShowTrackedChanges') === 'true';
+
+		return thread.filter((comment: Comment) =>
+			comment.sectionProperties.data.layoutStatus !== CommentLayoutStatus.DELETED
+			|| showTrackedChanges);
+	}
+
 	private updateThreadInfoIndicator(): void {
+		// In Writer the badge on a bubble says what the thread
+		// holds, which each comment works out for itself.
+		if (app.map._docLayer._docType === 'text') {
+			for (const comment of this.sectionProperties.commentList)
+				comment.updateThreadInfoIndicator();
+			return;
+		}
+
 		for (var i = 0; i < this.sectionProperties.commentList.length; i++) {
 			var comment = this.sectionProperties.commentList[i];
 			var replyCount = 0;

@@ -879,13 +879,16 @@ describe(['tagdesktop'], 'Annotation autosave and the bubble', function() {
 		cy.cGet('.cool-annotation-info-collapsed').should('not.have.text','!');
 		cy.cGet('#map').focus();
 		helper.typeIntoDocument('{home}');
-		cy.cGet('.cool-annotation-info-collapsed').should('be.not.visible');
+		// The comment is saved, so its box is down and the badge
+		// shows the tick that stands for a thread of one.
+		cy.cGet('.cool-annotation-info-collapsed').should('be.visible');
+		cy.cGet('.cool-annotation-info-collapsed').should('have.text','');
 
 		helper.reloadDocument(newFilePath);
 		desktopHelper.ensureSidebarHidden();
 		cy.cGet('.cool-annotation-content-wrapper').should('exist');
 		cy.cGet('#annotation-content-area-1').should('have.text','some text0');
-		cy.cGet('.cool-annotation-info-collapsed').should('be.not.visible');
+		cy.cGet('.cool-annotation-info-collapsed').should('have.text','');
 	})
 
 });
