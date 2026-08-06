@@ -260,6 +260,14 @@ public:
     }
 
     /**
+     * Whether writing the document out through the given filter puts a question to the
+     * person, such as a warning that the format holds only part of the document.
+     *
+     * @rFilterName - the name of the filter the document would be written with.
+     */
+    virtual bool exportRaisesDialog(const OUString& /*rFilterName*/) { return false; }
+
+    /**
      * Get position and size of cell cursor in Calc - as JSON in the
      * current' views' co-ordinate system.
      * (This could maybe also be used for tables in Writer/Impress in future?)

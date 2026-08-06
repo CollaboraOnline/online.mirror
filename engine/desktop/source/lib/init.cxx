@@ -4382,6 +4382,40 @@ static SfxObjectShell* getSfxObjectShell(COKitDocument* pThis)
     return pBaseModel->GetObjectShell();
 }
 
+/// The filter that writes this document out in the given format, empty when the document
+/// type has no filter for it.
+static OUString getFilterNameForFormat(COKitDocument* pThis, std::u16string_view rFormat)
+{
+    std::span<const ExtensionMap> pMap;
+
+    switch (doc_getDocumentType(pThis))
+    {
+        case COKitDocumentType::SPREADSHEET:
+            pMap = aCalcExtensionMap;
+            break;
+        case COKitDocumentType::PRESENTATION:
+            pMap = aImpressExtensionMap;
+            break;
+        case COKitDocumentType::DRAWING:
+            pMap = aDrawExtensionMap;
+            break;
+        case COKitDocumentType::TEXT:
+            pMap = aWriterExtensionMap;
+            break;
+        case COKitDocumentType::OTHER:
+        default:
+            return {};
+    }
+
+    for (const auto& item : pMap)
+    {
+        if (o3tl::equalsIgnoreAsciiCase(rFormat, item.extn))
+            return item.filterName;
+    }
+
+    return {};
+}
+
 static bool doc_saveAs(COKitDocument* pThis, const char* sUrl, const char* pFormat, const char* pFilterOptions)
 {
     comphelper::ProfileZone aZone("doc_saveAs");
@@ -4405,28 +4439,6 @@ static bool doc_saveAs(COKitDocument* pThis, const char* sUrl, const char* pForm
 
     try
     {
-        std::span<const ExtensionMap> pMap;
-
-        switch (doc_getDocumentType(pThis))
-        {
-        case COKitDocumentType::SPREADSHEET:
-            pMap = aCalcExtensionMap;
-            break;
-        case COKitDocumentType::PRESENTATION:
-            pMap = aImpressExtensionMap;
-            break;
-        case COKitDocumentType::DRAWING:
-            pMap = aDrawExtensionMap;
-            break;
-        case COKitDocumentType::TEXT:
-            pMap = aWriterExtensionMap;
-            break;
-        case COKitDocumentType::OTHER:
-        default:
-            SAL_INFO("kit", "Can't save document - unsupported document type.");
-            return false;
-        }
-
         if (pFormat == nullptr)
         {
             // sniff from the extension
@@ -4442,15 +4454,7 @@ static bool doc_saveAs(COKitDocument* pThis, const char* sUrl, const char* pForm
             }
         }
 
-        OUString aFilterName;
-        for (const auto& item : pMap)
-        {
-            if (sFormat.equalsIgnoreAsciiCaseAscii(item.extn))
-            {
-                aFilterName = item.filterName;
-                break;
-            }
-        }
+        const OUString aFilterName = getFilterNameForFormat(pThis, sFormat);
         if (aFilterName.isEmpty())
         {
             SetLastExceptionMsg(u"no output filter found for provided suffix"_ustr);
@@ -7796,6 +7800,26 @@ static std::string getDocHasPasswordToModify(COKitDocument* pThis)
     return aStream.str();
 }
 
+static std::string getExportRaisesDialog(COKitDocument* pThis, std::u16string_view rFormat)
+{
+    ITiledRenderable* pDoc = getTiledRenderable(pThis);
+    if (!pDoc)
+    {
+        SetLastExceptionMsg(u"Document doesn't support tiled rendering"_ustr);
+        return {};
+    }
+
+    const OUString aFilterName = getFilterNameForFormat(pThis, rFormat);
+
+    boost::property_tree::ptree aTree;
+    aTree.put("commandName", ".uno:ExportRaisesDialog");
+    aTree.put("raisesDialog", !aFilterName.isEmpty() && pDoc->exportRaisesDialog(aFilterName));
+
+    std::stringstream aStream;
+    boost::property_tree::write_json(aStream, aTree, false /* pretty */);
+    return aStream.str();
+}
+
 static std::string verifyDocPasswordToModify(COKitDocument* pThis, std::u16string_view rPassword)
 {
     SfxObjectShell* pObjectShell = getSfxObjectShell(pThis);
@@ -8399,6 +8423,17 @@ static std::string doc_getCommandValues(COKitDocument* pThis, const char* pComma
     else if (aCommand == ".uno:HasPasswordToModify")
     {
         return getDocHasPasswordToModify(pThis);
+    }
+    else if (aCommand.starts_with(".uno:ExportRaisesDialog"))
+    {
+        static constexpr std::string_view aPrefix = ".uno:ExportRaisesDialog?format=";
+        if (!aCommand.starts_with(aPrefix))
+        {
+            SetLastExceptionMsg(u"Missing format parameter for .uno:ExportRaisesDialog"_ustr);
+            return {};
+        }
+
+        return getExportRaisesDialog(pThis, OUString::fromUtf8(aCommand.substr(aPrefix.size())));
     }
     else if (aCommand.starts_with(".uno:VerifyPasswordToModify"))
     {

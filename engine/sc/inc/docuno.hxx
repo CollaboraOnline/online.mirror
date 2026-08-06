@@ -379,6 +379,9 @@ public:
     /// @see vcl::ITiledRenderable::getRowColumnHeaders().
     virtual void getRowColumnHeaders(const tools::Rectangle& rRectangle, tools::JsonWriter& rJsonWriter) override;
 
+    /// @see vcl::ITiledRenderable::exportRaisesDialog().
+    virtual bool exportRaisesDialog(const OUString& rFilterName) override;
+
     /// @see vcl::ITiledRenderable::getSheetGeometryData().
     virtual std::string getSheetGeometryData(bool bColumns, bool bRows, bool bSizes, bool bHidden,
                                          bool bFiltered, bool bGroups) override;

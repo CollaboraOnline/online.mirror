@@ -213,6 +213,15 @@ public:
 
 class ChildSession;
 
+/// What a forked child process was started to produce. Save writes the document back to
+/// its own file, so the parent takes the document to be unmodified while it runs. Export
+/// writes a separate copy elsewhere in the jail and leaves the document's state alone.
+enum class BackgroundForkPurpose : std::uint8_t
+{
+    Save,
+    Export
+};
+
 /// A document container.
 /// Owns LOKitDocument instance and connections.
 /// Manages the lifetime of a document.
@@ -363,9 +372,13 @@ public:
     bool joinThreads();
     void startThreads();
 
-    bool forkToSave(const std::function<void()> &childSave, int viewId);
+    bool forkToSave(const std::function<void()> &childSave, int viewId,
+                    BackgroundForkPurpose purpose);
 
     void handleSaveMessage(const std::string &msg);
+
+    /// Release the document and close the socket to the parent, in a forked child.
+    void finishBackgroundForkProcess();
 
     /// Notify all views of viewId and their associated usernames
     void notifyViewInfo();

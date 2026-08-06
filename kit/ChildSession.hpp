@@ -11,12 +11,14 @@
 
 #pragma once
 
+#include <common/FileUtil.hpp>
 #include <common/Session.hpp>
 #include <kit/Kit.hpp>
 #include <kit/StateRecorder.hpp>
 #include <kit/Watermark.hpp>
 
 #include <chrono>
+#include <optional>
 #include <queue>
 
 class Document;
@@ -170,6 +172,25 @@ public:
     ;
 #endif
 
+    /// One "download as" export: where in the jail the copy is written, the format and
+    /// filter options to write it in, and the id and file name the client's reply has to
+    /// carry back.
+    struct DownloadAsRequest
+    {
+        FileUtil::DownloadJailPath _path;
+        std::string _id;
+        std::string _filename;
+        std::string _format;
+        std::string _filterOptions;
+    };
+
+    /// Reply to the client for the export that ran in a forked process.
+    void sendBackgroundDownloadAsResult(bool success);
+
+    /// Run the export that was handed to a forked process here instead, because core asked
+    /// the person something that only this process can put in front of them.
+    void downloadAsInForeground();
+
 private:
     bool loadDocument(const StringVector& tokens);
     bool saveDocumentBackground(const StringVector &tokens);
@@ -180,6 +201,16 @@ private:
     bool clientVisibleArea(const StringVector& tokens);
     bool outlineState(const StringVector& tokens);
     bool downloadAs(const StringVector& tokens);
+    /// Whether core will put a question to the person while writing the document out in
+    /// this format.
+    bool exportRaisesDialog(const std::string& format);
+    /// Write a copy of the document to a path in the jail, without adopting it.
+    bool exportCopy(const std::string& path, const std::string& format,
+                    const std::string& filterOptions);
+    bool downloadAsBackground(const DownloadAsRequest& request);
+    /// Export in this process, holding off everything else on the document while it runs.
+    bool downloadAsHere(const DownloadAsRequest& request);
+    void sendDownloadAsResult(const DownloadAsRequest& request, bool success);
     bool getChildId();
     bool getTextSelection(const StringVector& tokens);
     bool setClipboard(const StringVector& tokens);
@@ -316,6 +347,8 @@ public:
             << "\n\tclientVisibleArea: " << _clientVisibleArea.toString()
             << "\n\thasURP: " << _hasURP
             << "\n\tURPContext?: " << (_urpContext == nullptr)
+            << "\n\tbackgroundDownloadAs: "
+            << (_downloadAs ? _downloadAs->_path.tmpDir : std::string("none"))
             << '\n';
 
         _stateRecorder.dumpState(oss);
@@ -380,12 +413,16 @@ private:
     /// whether there is a URP session created for this ChildSession
     bool _hasURP;
 
+    /// The export running in a forked process, empty when none is.
+    std::optional<DownloadAsRequest> _downloadAs;
+
     // When state is added - please update dumpState above.
 
     friend class LogUiCommands;
     int _lastUiCmdLinesLoggedCount = 0;
     LogUiCommandsLine _lastUiCmdLinesLogged[2];
     std::chrono::steady_clock::time_point _logUiSaveBackGroundTimeStart;
+    std::chrono::steady_clock::time_point _logUiDownloadBackGroundTimeStart;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

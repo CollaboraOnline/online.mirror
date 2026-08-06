@@ -2868,13 +2868,11 @@ bool ScDocShell::ConvertTo( SfxMedium &rMed )
                 AsciiSave(*pStream, aOptions, GetSaveTab());
                 bRet = true;
 
-                if (m_pDocument->GetTableCount() > 1)
+                if (!rMed.GetErrorIgnoreWarning()
+                    && WillWarnOnlyActiveSheetSaved(SC_TEXT_CSV_FILTER_NAME))
                 {
-                    if (!rMed.GetErrorIgnoreWarning() && ScModule::get()->GetInputOptions().GetWarnActiveSheet())
-                    {
-                        if (ScTabViewShell* pViewShell = GetBestViewShell())
-                            pViewShell->ExecuteOnlyActiveSheetSavedDlg();
-                    }
+                    if (ScTabViewShell* pViewShell = GetBestViewShell())
+                        pViewShell->ExecuteOnlyActiveSheetSavedDlg();
                 }
             }
         }
@@ -3124,6 +3122,13 @@ bool ScDocShell::PrepareClose( bool bUI )
         m_pDocument->EnableIdle(false); // Do not mess around with it anymore!
 
     return bRet;
+}
+
+bool ScDocShell::WillWarnOnlyActiveSheetSaved( std::u16string_view rFilter ) const
+{
+    return rFilter == SC_TEXT_CSV_FILTER_NAME
+        && m_pDocument->GetTableCount() > 1
+        && ScModule::get()->GetInputOptions().GetWarnActiveSheet();
 }
 
 bool ScDocShell::HasAutomaticTableName( std::u16string_view rFilter )

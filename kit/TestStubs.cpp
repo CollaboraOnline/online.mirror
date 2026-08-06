@@ -23,6 +23,8 @@ void ChildSession::disconnect() {}
 int ChildSession::getSpeed() { return 0; }
 bool ChildSession::_handleInput(const char* /*buffer*/, int /*length*/) { return false; }
 TilePrioritizer::Priority ChildSession::getTilePriority(const TileDesc &) const { return TilePrioritizer::Priority::NORMAL; }
+void ChildSession::sendBackgroundDownloadAsResult(bool /* success */) {}
+void ChildSession::downloadAsInForeground() {}
 ChildSession::~ChildSession() {}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

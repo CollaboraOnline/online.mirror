@@ -1585,45 +1585,58 @@ void Document::handleSaveMessage(const std::string &)
     if (_isBgSaveProcess)
     {
         LOG_TRC("BgSave completed");
-
-        // unregister the view callbacks
-        const std::vector<int> viewIds = getLOKitDocument()->getViewIds();
-        for (const auto viewId : viewIds)
-        {
-            _loKitDocument->setView(viewId);
-            _loKitDocument->registerCallback(nullptr, nullptr);
-        }
-
-        // cleanup any lingering file-system pieces
-        _loKitDocument.reset();
-
-        // any further messages are not interesting.
-        if (_queue)
-            _queue->clear();
-
-        auto socket = _saveProcessParent.lock();
-        if (socket)
-        {
-            LOG_TRC("Shutting down bgsv child's socket to parent kit post save");
-
-            // We don't want to wait around for the parent's websocket
-            socket->shutdownAfterWriting();
-
-            // This means we don't get to send statechanged: .uno:ModifiedStatus
-            // which is fine - we want to leave that to the Kit process.
-        }
-        else
-            LOG_TRC("Shutting down already shutdown bgsv child's socket to parent kit post save");
-
-        // Next step in the chain is BgSaveChildWebSocketHandler::onDisconnect
+        finishBackgroundForkProcess();
     }
+#endif
+}
+
+void Document::finishBackgroundForkProcess()
+{
+#if !MOBILEAPP
+    if (!_loKitDocument)
+    {
+        LOG_TRC("Background fork process already released its document");
+        return;
+    }
+
+    // unregister the view callbacks
+    const std::vector<int> viewIds = getLOKitDocument()->getViewIds();
+    for (const auto viewId : viewIds)
+    {
+        _loKitDocument->setView(viewId);
+        _loKitDocument->registerCallback(nullptr, nullptr);
+    }
+
+    // cleanup any lingering file-system pieces
+    _loKitDocument.reset();
+
+    // any further messages are not interesting.
+    if (_queue)
+        _queue->clear();
+
+    auto socket = _saveProcessParent.lock();
+    if (socket)
+    {
+        LOG_TRC("Shutting down bgsv child's socket to parent kit post save");
+
+        // We don't want to wait around for the parent's websocket
+        socket->shutdownAfterWriting();
+
+        // This means we don't get to send statechanged: .uno:ModifiedStatus
+        // which is fine - we want to leave that to the Kit process.
+    }
+    else
+        LOG_TRC("Shutting down already shutdown bgsv child's socket to parent kit post save");
+
+    // Next step in the chain is BgSaveChildWebSocketHandler::onDisconnect
 #endif
 }
 
 #if !MOBILEAPP
 
 // need to hold a reference on session in case it exits during async save
-bool Document::forkToSave(const std::function<void()>& childSave, int viewId)
+bool Document::forkToSave(const std::function<void()>& childSave, int viewId,
+                          BackgroundForkPurpose purpose)
 {
     if constexpr (Util::isMobileApp())
         return false;
@@ -1778,6 +1791,11 @@ bool Document::forkToSave(const std::function<void()>& childSave, int viewId)
 
         SigUtil::addActivity("background save process shutdown");
 
+        // An export is already finished when childSave returns, while a save has yet
+        // to report its result asynchronously through handleSaveMessage.
+        if (purpose == BackgroundForkPurpose::Export)
+            finishBackgroundForkProcess();
+
         // Wait now for an async save result from the core,
         // and head to handleSaveMessage
     }
@@ -1788,11 +1806,12 @@ bool Document::forkToSave(const std::function<void()>& childSave, int viewId)
         parentSocket.reset();
         // now we have a socket to the child: childSocket
 
-        forceDocUnmodifiedForBgSave(viewId);
+        if (purpose == BackgroundForkPurpose::Save)
+            forceDocUnmodifiedForBgSave(viewId);
 
         auto bgSaveChild = std::make_shared<BgSaveParentWebSocketHandler>(
             "bgsv_kit_ws", pid, shared_from_this(),
-            findSessionByViewId(viewId));
+            findSessionByViewId(viewId), purpose);
         childSocket->setHandler(bgSaveChild);
         childSocket->setWebSocket(); // avoid http upgrade.
         KitSocketPoll::getMainPoll()->insertNewSocket(childSocket);

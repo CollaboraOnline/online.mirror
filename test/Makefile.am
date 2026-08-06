@@ -120,7 +120,8 @@ all_la_unit_tests = \
 	unit-bad-doc-load.la \
 	unit-hosting.la \
 	unit-legacy-uno-api-warning.la \
-	unit-legacy-uno-api-warning-suppressed.la
+	unit-legacy-uno-api-warning-suppressed.la \
+	unit-bg-download.la
 #	unit-admin.la
 #	unit-tilecache.la # Empty test.
 else
@@ -435,6 +436,8 @@ unit_load_torture_la_SOURCES = UnitLoadTorture.cpp
 unit_load_torture_la_LIBADD = $(CPPUNIT_LIBS)
 unit_save_torture_la_SOURCES = UnitSaveTorture.cpp
 unit_save_torture_la_LIBADD = $(CPPUNIT_LIBS)
+unit_bg_download_la_SOURCES = UnitBgDownload.cpp
+unit_bg_download_la_LIBADD = $(CPPUNIT_LIBS)
 unit_synthetic_lok_la_SOURCES = UnitSyntheticLok.cpp
 unit_synthetic_lok_la_LIBADD = $(CPPUNIT_LIBS)
 unit_rendering_options_la_SOURCES = UnitRenderingOptions.cpp

@@ -434,6 +434,11 @@ public:
 
     SAL_RET_MAYBENULL static ScDocShell* GetShellByNum( sal_uInt16 nDocNo );
     static bool       HasAutomaticTableName( std::u16string_view rFilter );
+
+                        /** Whether writing the document out through this filter warns that
+                            only the active sheet reaches the file. True while the document
+                            has more than one sheet to lose and the warning is turned on. */
+    bool              WillWarnOnlyActiveSheetSaved( std::u16string_view rFilter ) const;
     static void       KitCommentNotify(KitCommentNotificationType nType, const ScDocument& rDocument, const ScAddress& rPos, const ScPostIt* pNote);
 
     DECL_LINK( RefreshDBDataHdl, Timer*, void );

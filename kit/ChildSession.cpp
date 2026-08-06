@@ -1260,7 +1260,7 @@ bool ChildSession::saveDocumentBackground([[maybe_unused]] const StringVector& t
                     // Next: we wait for an async UNO_COMMAND_RESULT on .uno:Save
                     // cf. Document::handleSaveMessage.
                 },
-                getViewId()))
+                getViewId(), BackgroundForkPurpose::Save))
         {
             LOG_TRC("saveDocumentBackground returns successful start");
             return true;
@@ -1607,9 +1607,7 @@ bool ChildSession::downloadAs(const StringVector& tokens)
             // saveAs takes a URI, not a plain path, and decodes any
             // percent-escapes in it.
             const std::string fileUri = Poco::URI(Poco::Path(filePath)).toString();
-            const bool ok = getLOKitDocument()->saveAs(
-                fileUri.c_str(), format.empty() ? nullptr : format.c_str(),
-                filterOptions.empty() ? nullptr : filterOptions.c_str());
+            const bool ok = exportCopy(fileUri, format, filterOptions);
             // A true return from saveAs does not guarantee the output landed on
             // disk: an edge-case document or filter can produce a missing or
             // empty file.
@@ -1658,29 +1656,181 @@ bool ChildSession::downloadAs(const StringVector& tokens)
             << "], Filter Options: ["
             << (filterOptions.empty() ? "(nullptr)" : filterOptions.c_str()) << ']');
 
-    bool success = getLOKitDocument()->saveAs(download.absolutePath.c_str(),
-                               format.empty() ? nullptr : format.c_str(),
-                               filterOptions.empty() ? nullptr : filterOptions.c_str());
+    const DownloadAsRequest request{ download, id, filename, format, filterOptions };
 
-    if (!success)
+    // A second download from the same session while one is still running in a forked
+    // process has nowhere to park its reply, so it is exported here instead.
+    if (!_downloadAs && downloadAsBackground(request))
+        return true;
+
+    return downloadAsHere(request);
+#endif
+}
+
+bool ChildSession::downloadAsHere([[maybe_unused]] const DownloadAsRequest& request)
+{
+#if MOBILEAPP
+    return false;
+#else
+    // Nothing else on this document is served while the export runs here, so hold off
+    // the other messages and let the responsiveness watchdog know this wait is expected.
+    InputProcessingManager processInput(getProtocol(), false);
+    WatchdogGuard watchdogGuard;
+
+    const std::chrono::steady_clock::time_point timeStart = std::chrono::steady_clock::now();
+    const bool success =
+        exportCopy(request._path.absolutePath, request._format, request._filterOptions);
+    if (success)
     {
-        LOG_ERR("SaveAs Failed for id=" << id << " [" << download.absolutePath
-                << "]. error= " << getLOKitLastError());
-        sendTextFrameAndLogError("error: cmd=downloadas kind=saveasfailed");
+        LogUiCommands uiLog(*this);
+        uiLog.logSaveLoad("downloadas", Poco::URI(getJailedFilePath()).getPath(), timeStart);
+    }
+
+    sendDownloadAsResult(request, success);
+    return success;
+#endif
+}
+
+void ChildSession::downloadAsInForeground()
+{
+    if (!_downloadAs)
+    {
+        LOG_WRN("No export waiting to be run in the foreground");
+        return;
+    }
+
+    const DownloadAsRequest request = *_downloadAs;
+    _downloadAs.reset();
+
+    LOG_DBG("Running the export for id=" << request._id << " here after all");
+    downloadAsHere(request);
+}
+
+bool ChildSession::exportRaisesDialog(const std::string& format)
+{
+    if (!_isDocLoaded)
+        return false;
+
+    const std::string reply(getLOKitDocument()->getCommandValues(
+        (".uno:ExportRaisesDialog?format=" + format).c_str()));
+
+    Poco::JSON::Object::Ptr object;
+    if (!JsonUtil::parseJSON(reply, object))
+    {
+        LOG_WRN("Could not read whether exporting to " << format << " asks anything");
         return false;
     }
 
+    const Poco::Dynamic::Var var = object->get("raisesDialog");
+    return !var.isEmpty() && var.convert<bool>();
+}
+
+bool ChildSession::exportCopy(const std::string& path, const std::string& format,
+                              const std::string& filterOptions)
+{
+    getLOKitDocument()->setView(_viewId);
+
+    const bool success =
+        getLOKitDocument()->saveAs(path.c_str(), format.empty() ? nullptr : format.c_str(),
+                                   filterOptions.empty() ? nullptr : filterOptions.c_str());
+    if (!success)
+        LOG_ERR("SaveAs Failed for [" << path << "]. error= " << getLOKitLastError());
+
+    return success;
+}
+
+// attempt to shutdown threads, fork and export in the background
+bool ChildSession::downloadAsBackground([[maybe_unused]] const DownloadAsRequest& request)
+{
+    if constexpr (!Util::isMobileApp())
+    {
+        if (!ConfigUtil::getBool("per_document.background_downloadas", true))
+            return false;
+
+        // Core knows before the export starts when writing this format puts a question to
+        // the person. The forked process has nobody to ask, so that export stays here.
+        if (exportRaisesDialog(request._format))
+        {
+            LOG_DBG("Exporting to " << request._format << " here, because it asks something");
+            return false;
+        }
+
+        LOG_TRC("Attempting background download");
+        _logUiDownloadBackGroundTimeStart = std::chrono::steady_clock::now();
+
+        const std::string path = request._path.absolutePath;
+        const std::string format = request._format;
+        const std::string filterOptions = request._filterOptions;
+        if (_docManager->forkToSave(
+                [this, path, format, filterOptions]
+                {
+                    // Called back in the forked process: so do the export !
+                    const bool success = exportCopy(path, format, filterOptions);
+
+                    // Whatever core raised on the way is still queued. It goes out ahead
+                    // of the result, so the parent has seen any question this export needs
+                    // answered before it acts on the result.
+                    _docManager->drainCallbacks();
+
+                    sendTextFrame(std::string("downloadresult: success=") +
+                                  (success ? "true" : "false"));
+                    SigUtil::addActivity("async download process exiting");
+                },
+                getViewId(), BackgroundForkPurpose::Export))
+        {
+            _downloadAs = request;
+            return true;
+        }
+
+        // fork failed
+    }
+
+    return false;
+}
+
+void ChildSession::sendBackgroundDownloadAsResult(bool success)
+{
+    if (!_downloadAs)
+    {
+        LOG_WRN("No background download in flight to report on");
+        return;
+    }
+
+    const DownloadAsRequest request = *_downloadAs;
+    _downloadAs.reset();
+
+    if (success)
+    {
+        LogUiCommands uiLog(*this);
+        uiLog.logSaveLoad("downloadasbg", Poco::URI(getJailedFilePath()).getPath(),
+                          _logUiDownloadBackGroundTimeStart);
+    }
+
+    sendDownloadAsResult(request, success);
+}
+
+void ChildSession::sendDownloadAsResult([[maybe_unused]] const DownloadAsRequest& request,
+                                        [[maybe_unused]] bool success)
+{
+#if !MOBILEAPP
+    if (!success)
+    {
+        FileUtil::removeFile(getJailDocRoot() + request._path.tmpDir, /*recursive=*/true);
+        sendTextFrameAndLogError("error: cmd=downloadas kind=saveasfailed id=" + request._id);
+        return;
+    }
+
     // Register download id -> URL mapping in the DocumentBroker
-    const std::string docBrokerMessage = "registerdownload: downloadid=" + download.tmpDir
-                                         + " url=" + download.urlInJail + " clientid=" + getId();
+    const std::string docBrokerMessage = "registerdownload: downloadid=" + request._path.tmpDir
+                                         + " url=" + request._path.urlInJail +
+                                         " clientid=" + getId();
     _docManager->sendFrame(docBrokerMessage);
 
     // Send download id to the client
-    sendTextFrame("downloadas: downloadid=" + download.tmpDir
-                  + " port=" + std::to_string(ClientPortNumber) + " id=" + id
-                  + " filename=" + filename);
+    sendTextFrame("downloadas: downloadid=" + request._path.tmpDir
+                  + " port=" + std::to_string(ClientPortNumber) + " id=" + request._id
+                  + " filename=" + request._filename);
 #endif
-    return true;
 }
 
 bool ChildSession::getChildId()

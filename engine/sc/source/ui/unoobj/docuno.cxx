@@ -1247,6 +1247,11 @@ void ScModelObj::getRowColumnHeaders(const tools::Rectangle& rRectangle, tools::
     pTabView->getRowColumnHeaders(rRectangle, rJsonWriter);
 }
 
+bool ScModelObj::exportRaisesDialog(const OUString& rFilterName)
+{
+    return pDocShell && pDocShell->WillWarnOnlyActiveSheetSaved(rFilterName);
+}
+
 std::string ScModelObj::getSheetGeometryData(bool bColumns, bool bRows, bool bSizes, bool bHidden,
                                          bool bFiltered, bool bGroups)
 {

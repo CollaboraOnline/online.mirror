@@ -19,6 +19,7 @@
 #include <net/WebSocketHandler.hpp>
 #include <Poco/JSON/Object.h>
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
@@ -28,6 +29,8 @@ class KitQueue;
 class KitSocketPoll;
 
 struct COKit;
+
+enum class BackgroundForkPurpose : std::uint8_t;
 
 class KitWebSocketHandler final : public WebSocketHandler
 {
@@ -95,11 +98,13 @@ class BgSaveParentWebSocketHandler final : public WebSocketHandler
     std::string _socketName;
     std::shared_ptr<Document> _document;
     std::shared_ptr<ChildSession> _session;
+    BackgroundForkPurpose _purpose;
 
 public:
     BgSaveParentWebSocketHandler(const std::string& socketName, const pid_t childPid,
                                  std::shared_ptr<Document> document,
-                                 const std::shared_ptr<ChildSession>& session);
+                                 const std::shared_ptr<ChildSession>& session,
+                                 BackgroundForkPurpose purpose);
 
     ~BgSaveParentWebSocketHandler();
 
@@ -117,8 +122,14 @@ protected:
     // something weird happened, cleanup & report save failure
     void terminateSave(const std::string &reason);
 
+    // End a forked export and run it in this process, where its dialog can be answered.
+    void terminateExportForForeground(const std::string& reason);
+
     // let WSD know something went wrong during the save
     void reportFailedSave(const std::string &reason);
+
+    // let the client know the work the child was forked for did not happen
+    void reportFailure(const std::string &reason);
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

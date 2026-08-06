@@ -209,6 +209,7 @@ const Util::UnorderedStringMap<std::string> DefAppConfig = {
     { "per_document.always_save_on_exit", "false" },
     { "per_document.autosave_duration_secs", "300" },
     { "per_document.background_autosave", "true" },
+    { "per_document.background_downloadas", "true" },
     { "per_document.background_manualsave", "true" },
     { "per_document.batch_priority", "5" },
     { "per_document.bgsave_priority", "5" },
