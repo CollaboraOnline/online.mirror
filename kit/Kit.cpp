@@ -3766,7 +3766,7 @@ void lokit_main(
     // lokit's destroy typically throws from
     // framework/source/services/modulemanager.cxx:198
     // So we insure it lives until std::_Exit is called.
-    std::shared_ptr<COKit> loKit;
+    std::shared_ptr<COKit> coKit;
     ChildSession::NoCapsForKit = noCapabilities;
 #endif // MOBILEAPP
 
@@ -4232,8 +4232,8 @@ void lokit_main(
 
             kit = initFunction(instdir, userdir);
 
-            loKit = std::shared_ptr<COKit>(kit, kit::Deleter());
-            if (!loKit)
+            coKit = std::shared_ptr<COKit>(kit, kit::Deleter());
+            if (!coKit)
             {
                 LOG_FTL("COKit initialization failed. Exiting.");
                 Util::forcedExit(EX_SOFTWARE);
@@ -4295,7 +4295,18 @@ void lokit_main(
         }
         if (queryVersion)
         {
-            LOKitHelper::ScopedString versionInfo(loKit->getVersionInfo());
+            LOKitHelper::ScopedString versionInfo(coKit->getVersionInfo());
+            if (!versionInfo.get())
+            {
+                // A matching office library always hands back a version string. A null
+                // means the call landed on some other COKit member, i.e. the library
+                // has a different vtable layout than the one we were built against.
+                LOG_FTL("COKit returned no version information. The office library in ["
+                        << instdir_path
+                        << "] does not match the one coolwsd was built against. Exiting.");
+                Util::forcedExit(EX_SOFTWARE);
+            }
+
             std::string versionString(versionInfo.get());
             if (displayVersion)
                 std::cout << "office version details: " << versionString << std::endl;
@@ -4381,10 +4392,10 @@ void lokit_main(
 
         assert(kit);
 
-        static std::shared_ptr<COKit> loKit(kit, kit::Deleter());
-        assert(loKit);
+        static std::shared_ptr<COKit> coKit(kit, kit::Deleter());
+        assert(coKit);
 
-        COOLWSD::LOKitVersion = loKit->getVersionInfo();
+        COOLWSD::LOKitVersion = coKit->getVersionInfo();
 
         // Dummies
         const std::string jailId = "jailid";
@@ -4392,7 +4403,7 @@ void lokit_main(
 #endif // MOBILEAPP
 
         std::shared_ptr<KitWebSocketHandler> websocketHandler =
-            std::make_shared<KitWebSocketHandler>("child_ws", loKit, jailId, mainKit, numericIdentifier);
+            std::make_shared<KitWebSocketHandler>("child_ws", coKit, jailId, mainKit, numericIdentifier);
 
 #if !MOBILEAPP
 
@@ -4445,7 +4456,7 @@ void lokit_main(
 #endif
 
 #if !DOCS_SHARE_PROCESS
-        startMainLoop(kit, loKit, mainKit);
+        startMainLoop(kit, coKit, mainKit);
 
         // Trap the signal handler, if invoked,
         // to prevent exiting.
