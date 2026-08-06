@@ -160,9 +160,43 @@ describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
 					.to.be.closeTo(fullHeight / 2, 2);
 				expect(second.height, 'the height of the bubble under it')
 					.to.be.closeTo(fullHeight / 2, 2);
-				expect(second.top, 'the top of the bubble under it')
-					.to.be.closeTo(first.bottom, 2);
+
+				// Room is left between the two, so they read as
+				// two comments rather than one long shape.
+				const gap = second.top - first.bottom;
+				expect(gap, 'the room left between one bubble and the next')
+					.to.be.greaterThan(0);
+				expect(gap, 'the room left between one bubble and the next')
+					.to.be.lessThan(first.height);
 			});
+		});
+	});
+
+	it('no bubble is drawn against the one above it, at any zoom', function() {
+		// Two comments a few lines down and two at the top: two
+		// runs of bubbles, each to fit without meeting.
+		helper.typeIntoDocument('{enter}{enter}{enter}a line further down');
+		desktopHelper.insertComment('the first comment down here');
+		desktopHelper.insertComment('the second comment down here');
+		helper.typeIntoDocument('{ctrl+home}');
+		desktopHelper.insertComment('the first comment up here');
+		desktopHelper.insertComment('the second comment up here');
+
+		// Zooming out draws the page smaller and brings its
+		// comments closer, where bubbles used to meet.
+		desktopHelper.selectZoomLevel('50', false);
+
+		cy.cGet('body').should(function($body) {
+			const boxes = [1, 2, 3, 4]
+				.map(function(id) {
+					return $body.find('#comment-container-' + id + ' .cool-annotation-img')[0]
+						.getBoundingClientRect();
+				})
+				.sort(function(one, other) { return one.top - other.top; });
+
+			for (let i = 1; i < boxes.length; i++)
+				expect(boxes[i].top, 'the top of a bubble against the bottom of the one above it')
+					.to.be.greaterThan(boxes[i - 1].bottom);
 		});
 	});
 

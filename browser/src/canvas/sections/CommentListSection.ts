@@ -295,6 +295,10 @@ export class CommentSection extends CanvasSectionObject {
 	// pixels. The page draws controls of its own in the margin.
 	private static readonly bubbleOverhangPastThePageEdge = 9;
 
+	// The room left between one bubble and the next, in CSS
+	// pixels at a zoom of one hundred percent.
+	private static readonly gapBetweenBubbles = 4;
+
 	constructor () {
 		super(app.CSections.CommentList.name);
 
@@ -2763,9 +2767,9 @@ export class CommentSection extends CanvasSectionObject {
 		return rightToLeft ? page[0] : page[0] + page[2];
 	}
 
-	// Where the bubble of a comment belongs, in CSS pixels from
-	// the canvas corner: on the edge of its page, at its words.
-	private bubblePlaceOf (comment: Comment, bubbleSize: number): number[] {
+	// Where in the margin a bubble asks to go, in CSS pixels
+	// from the canvas corner: its page edge, at its words.
+	private bubbleAnchorOf (comment: Comment): number[] {
 		const data = comment.sectionProperties.data;
 		if (!data.anchorSPoint)
 			data.anchorSPoint = new cool.SimplePoint(data.anchorPos[0], data.anchorPos[1]);
@@ -2778,17 +2782,23 @@ export class CommentSection extends CanvasSectionObject {
 		const inside = new cool.SimplePoint(rightToLeft ? edge + 1 : edge - 1, anchor.y,
 			anchor.part, anchor.mode);
 
-		const edgeX = inside.vX / app.dpiScale;
-		const overhang = CommentSection.bubbleOverhangPastThePageEdge;
-
 		return [
-			Math.round(rightToLeft ? edgeX - overhang : edgeX + overhang - bubbleSize),
+			Math.round(inside.vX / app.dpiScale),
 			Math.round(anchor.vY / app.dpiScale),
 		];
 	}
 
-	// Put every bubble inside the margin of its page. A run of
-	// bubbles written close together is drawn at half size.
+	// Where the left side of a bubble goes, in CSS pixels. The
+	// size decides it, so a half bubble hangs out as far.
+	private static bubbleLeftOf (edgeX: number, size: number): number {
+		const rightToLeft = document.documentElement.dir === 'rtl';
+		const overhang = CommentSection.bubbleOverhangPastThePageEdge;
+
+		return Math.round(rightToLeft ? edgeX - overhang : edgeX + overhang - size);
+	}
+
+	// Put every bubble on the edge of the page it was written
+	// on. Each page is filled on its own.
 	private placeBubblesInThePageMargins (): void {
 		const bubbles = this.sectionProperties.commentList.filter(
 			(comment: Comment) => this.hasABubble(comment));
@@ -2801,31 +2811,74 @@ export class CommentSection extends CanvasSectionObject {
 			comment.setBubbleHalfSize(false);
 
 		const bubble = bubbles[0].measureBubble();
-		const places = bubbles.map(
-			(comment: Comment) => this.bubblePlaceOf(comment, bubble.size));
+		const gap = CommentSection.gapBetweenBubbles;
 
-		let runStart = 0;
-		while (runStart < bubbles.length) {
-			// The run goes on while each bubble would cover the
-			// one before it.
-			let runEnd = runStart;
-			while (runEnd + 1 < bubbles.length
-				&& places[runEnd + 1][0] === places[runEnd][0]
-				&& places[runEnd + 1][1] - places[runEnd][1] < bubble.size)
-				runEnd++;
+		const anchorOf = new Map<Comment, number[]>();
+		const margins = new Map<number, Comment[]>();
+		for (const comment of bubbles) {
+			const anchor = this.bubbleAnchorOf(comment);
+			anchorOf.set(comment, anchor);
 
-			const halfSize = runEnd > runStart;
-			const step = halfSize ? bubble.size / 2 : bubble.size;
-			for (let i = runStart; i <= runEnd; i++) {
-				const left = places[i][0];
-				const top = places[runStart][1] + (i - runStart) * step;
-				bubbles[i].setBubbleHalfSize(halfSize);
-				bubbles[i].setBubblePos([left, top, step]);
-				bubbles[i].setContainerPos(true, this.sectionProperties.canvasContainerBounds,
-					left - bubble.insetX, top - bubble.insetY);
-			}
-			runStart = runEnd + 1;
+			const beside = margins.get(anchor[0]);
+			if (beside)
+				beside.push(comment);
+			else
+				margins.set(anchor[0], [comment]);
 		}
+
+		for (const beside of margins.values()) {
+			beside.sort((one: Comment, other: Comment) =>
+				anchorOf.get(one)[1] - anchorOf.get(other)[1]);
+			this.fillOneMargin(beside, anchorOf, bubble, gap);
+		}
+	}
+
+	// Fill the margin of one page from the top down. A bubble in
+	// the way pushes the next one under it, with a gap.
+	private fillOneMargin (beside: Comment[], anchorOf: Map<Comment, number[]>,
+		bubble: { size: number; insetX: number; insetY: number }, gap: number): void {
+
+		// The first height a bubble may take: the bottom of the
+		// one above it and the gap after it.
+		let free = Number.NEGATIVE_INFINITY;
+
+		for (const run of CommentSection.runsOfCrowdedBubbles(beside, anchorOf, bubble.size + gap)) {
+			const halfSize = run.length > 1;
+			const size = halfSize ? bubble.size / 2 : bubble.size;
+
+			for (const comment of run) {
+				const anchor = anchorOf.get(comment);
+				const top = Math.max(anchor[1], free);
+				const left = CommentSection.bubbleLeftOf(anchor[0], size);
+
+				comment.setBubbleHalfSize(halfSize);
+				comment.setBubblePos([left, top, size]);
+				comment.setContainerPos(true, this.sectionProperties.canvasContainerBounds,
+					left - bubble.insetX, top - bubble.insetY);
+
+				free = top + size + gap;
+			}
+		}
+	}
+
+	// The bubbles of one page margin, split into the runs that
+	// have to share the room they ask for.
+	private static runsOfCrowdedBubbles (beside: Comment[], anchorOf: Map<Comment, number[]>,
+		pitch: number): Comment[][] {
+		const runs: Comment[][] = [];
+		let free = Number.NEGATIVE_INFINITY;
+
+		for (const comment of beside) {
+			const top = anchorOf.get(comment)[1];
+			if (runs.length > 0 && top < free)
+				runs[runs.length - 1].push(comment);
+			else
+				runs.push([comment]);
+
+			free = Math.max(top, free) + pitch;
+		}
+
+		return runs;
 	}
 
 	// A reply stands behind the bubble of what it answers, so
