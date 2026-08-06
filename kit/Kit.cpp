@@ -1339,7 +1339,8 @@ bool Document::onLoad(const std::string& sessionId,
     {
         if (load(session, renderOpts))
         {
-            if (_legacyUnoApiSeen)
+            if (_legacyUnoApiSeen &&
+                !ConfigUtil::getBool("hide_legacy_script_warning", false))
             {
                 session->sendTextFrame("legacyunoapinotice:");
             }
@@ -2741,9 +2742,12 @@ void Document::drainQueue()
         if (_loKit->takeLegacyUnoApiUseFlag())
         {
             _legacyUnoApiSeen = true;
-            for (auto const & [id, session] : _sessions)
+            if (!ConfigUtil::getBool("hide_legacy_script_warning", false))
             {
-                session->sendTextFrame("legacyunoapinotice:");
+                for (auto const & [id, session] : _sessions)
+                {
+                    session->sendTextFrame("legacyunoapinotice:");
+                }
             }
         }
     }
