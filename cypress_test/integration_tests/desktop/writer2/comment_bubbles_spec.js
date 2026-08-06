@@ -200,6 +200,37 @@ describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
 		});
 	});
 
+	it('the bubble is drawn smaller as the reader zooms out', function() {
+		desktopHelper.insertComment('a comment to zoom away from');
+
+		bubbleOf(1).then(function($bubble) {
+			const fullHeight = $bubble[0].getBoundingClientRect().height;
+
+			desktopHelper.selectZoomLevel('50', false);
+
+			// The margin is drawn half as wide, and the bubble
+			// goes down with it rather than covering the page.
+			cy.cGet('body').should(function($body) {
+				const box = $body.find('#comment-container-1 .cool-annotation-img')[0]
+					.getBoundingClientRect();
+				expect(box.height, 'the height of the bubble at half the zoom')
+					.to.be.closeTo(fullHeight / 2, 2);
+			});
+
+			// It is still on the edge of the page it belongs to,
+			// the same way round as before.
+			pageEdges().then(function(page) {
+				bubbleOf(1).should(function($smaller) {
+					const box = $smaller[0].getBoundingClientRect();
+					expect(box.left, 'the near edge of the bubble against the end of the page')
+						.to.be.lessThan(page.right);
+					expect(box.right, 'the far edge of the bubble against the end of the page')
+						.to.be.greaterThan(page.right);
+				});
+			});
+		});
+	});
+
 	it('a comment on its own that is still open carries no badge', function() {
 		desktopHelper.insertComment('a comment on its own');
 

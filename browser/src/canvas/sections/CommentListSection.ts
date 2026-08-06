@@ -2767,6 +2767,14 @@ export class CommentSection extends CanvasSectionObject {
 		return rightToLeft ? page[0] : page[0] + page[2];
 	}
 
+	// How big a bubble is drawn against its size at a zoom of
+	// one hundred. It goes down with the margin, no more.
+	private static bubbleScaleForTheZoom (): number {
+		const fullSizeZoom = app.map.options.defaultZoom;
+		return Math.min(1,
+			app.activeDocument.getZoomScale(app.map.getZoom(), fullSizeZoom));
+	}
+
 	// Where in the margin a bubble asks to go, in CSS pixels
 	// from the canvas corner: its page edge, at its words.
 	private bubbleAnchorOf (comment: Comment): number[] {
@@ -2788,11 +2796,11 @@ export class CommentSection extends CanvasSectionObject {
 		];
 	}
 
-	// Where the left side of a bubble goes, in CSS pixels. The
-	// size decides it, so a half bubble hangs out as far.
-	private static bubbleLeftOf (edgeX: number, size: number): number {
+	// Where the left side of a bubble goes, in CSS pixels. A
+	// smaller bubble hangs out by as much less.
+	private static bubbleLeftOf (edgeX: number, size: number, scale: number): number {
 		const rightToLeft = document.documentElement.dir === 'rtl';
-		const overhang = CommentSection.bubbleOverhangPastThePageEdge;
+		const overhang = CommentSection.bubbleOverhangPastThePageEdge * scale;
 
 		return Math.round(rightToLeft ? edgeX - overhang : edgeX + overhang - size);
 	}
@@ -2806,12 +2814,15 @@ export class CommentSection extends CanvasSectionObject {
 			return;
 
 		// Every bubble goes back to full size before one is
-		// measured, so the pass reads a full bubble.
-		for (const comment of bubbles)
+		// measured. The zoom is worked out once for all.
+		const scale = CommentSection.bubbleScaleForTheZoom();
+		for (const comment of bubbles) {
 			comment.setBubbleHalfSize(false);
+			comment.setBubbleScale(scale);
+		}
 
 		const bubble = bubbles[0].measureBubble();
-		const gap = CommentSection.gapBetweenBubbles;
+		const gap = CommentSection.gapBetweenBubbles * scale;
 
 		const anchorOf = new Map<Comment, number[]>();
 		const margins = new Map<number, Comment[]>();
@@ -2829,14 +2840,15 @@ export class CommentSection extends CanvasSectionObject {
 		for (const beside of margins.values()) {
 			beside.sort((one: Comment, other: Comment) =>
 				anchorOf.get(one)[1] - anchorOf.get(other)[1]);
-			this.fillOneMargin(beside, anchorOf, bubble, gap);
+			this.fillOneMargin(beside, anchorOf, bubble, gap, scale);
 		}
 	}
 
 	// Fill the margin of one page from the top down. A bubble in
 	// the way pushes the next one under it, with a gap.
 	private fillOneMargin (beside: Comment[], anchorOf: Map<Comment, number[]>,
-		bubble: { size: number; insetX: number; insetY: number }, gap: number): void {
+		bubble: { size: number; insetX: number; insetY: number },
+		gap: number, scale: number): void {
 
 		// The first height a bubble may take: the bottom of the
 		// one above it and the gap after it.
@@ -2849,7 +2861,7 @@ export class CommentSection extends CanvasSectionObject {
 			for (const comment of run) {
 				const anchor = anchorOf.get(comment);
 				const top = Math.max(anchor[1], free);
-				const left = CommentSection.bubbleLeftOf(anchor[0], size);
+				const left = CommentSection.bubbleLeftOf(anchor[0], size, scale);
 
 				comment.setBubbleHalfSize(halfSize);
 				comment.setBubblePos([left, top, size]);

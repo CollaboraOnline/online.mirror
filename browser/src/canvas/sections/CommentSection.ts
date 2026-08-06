@@ -542,6 +542,14 @@ export class Comment extends CanvasSectionObject {
 		this.sectionProperties.container.classList.toggle('half-size-bubble', halfSize);
 	}
 
+	// How big the bubble is drawn against its size at a zoom of
+	// one hundred. One is full size, a half is half as wide.
+	public setBubbleScale(scale: number): void {
+		const container = this.sectionProperties.container;
+		container.style.setProperty('--bubble-scale', String(scale));
+		container.classList.toggle('scaled-bubble', scale !== 1);
+	}
+
 	// Where this comment's bubble was put and how big it was
 	// drawn, as [left, top, size] in CSS pixels.
 	public setBubblePos(place: number[]): void {

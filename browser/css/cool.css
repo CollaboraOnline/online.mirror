@@ -960,6 +960,13 @@ input, button {
 	box-shadow: 0px 4px 10px var(--color-box-shadow);
 }
 
+/* A bubble is drawn against the size it has at a zoom of one
+   hundred, so it keeps to the margin as the reader zooms out. */
+.cool-annotation.scaled-bubble .cool-annotation-img {
+	transform: scale(var(--bubble-scale, 1));
+	transform-origin: top left;
+}
+
 /* Bubbles of comments written close together would cover each
    other, so a run of them is drawn at half size. */
 .cool-annotation.half-size-bubble .cool-annotation-img {
