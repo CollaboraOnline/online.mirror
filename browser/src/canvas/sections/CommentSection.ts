@@ -2316,8 +2316,8 @@ export class Comment extends CanvasSectionObject {
 			this.sectionProperties.collapsedInfoNode.style.display = '';
 	}
 
-	// The badge in the bubble's corner: a tick for a thread of
-	// one, the count for more, green once all are resolved.
+	// The badge in the bubble's corner: the count for a thread
+	// of more than one, a tick once a thread of one is done.
 	private updateBubbleBadge(): void {
 		const badge = this.sectionProperties.collapsedInfoNode;
 		const listSection = this.sectionProperties.commentListSection;
@@ -2330,6 +2330,7 @@ export class Comment extends CanvasSectionObject {
 		const thread = listSection.getThreadOnShow(this);
 		const beingWritten = thread.some((comment: Comment) => comment.isEdit());
 		const resolved = !beingWritten && listSection.isThreadResolved(this);
+		const tick = resolved && thread.length === 1;
 
 		let text = '';
 		if (beingWritten)
@@ -2339,11 +2340,12 @@ export class Comment extends CanvasSectionObject {
 
 		if (badge.innerText !== text)
 			badge.innerText = text;
-		badge.classList.toggle('bubble-badge-tick', !beingWritten && thread.length === 1);
+		badge.classList.toggle('bubble-badge-tick', tick);
 		badge.classList.toggle('bubble-badge-resolved', resolved);
 		// While the box is on show it says everything the badge
 		// would, so the badge stays out of its way.
-		badge.style.display = this.isContainerVisible() ? 'none' : '';
+		const saysNothing = text === '' && !tick;
+		badge.style.display = saysNothing || this.isContainerVisible() ? 'none' : '';
 	}
 
 	public setExpanded(): void {

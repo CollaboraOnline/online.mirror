@@ -814,8 +814,8 @@ input, button {
 	border-color: var(--color-success);
 }
 
-/* A thread of one has no number, so the badge carries a tick.
-   Two turned box edges draw it, in the badge's own colour. */
+/* A resolved thread of one has no number, so the badge carries a
+   tick. Two turned box edges draw it, in the badge's colour. */
 .cool-annotation-info-collapsed.bubble-badge-tick::after {
 	content: '';
 	width: 2px;

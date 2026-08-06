@@ -166,18 +166,13 @@ describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
 		});
 	});
 
-	it('the badge on the bubble of a lone comment carries a tick', function() {
+	it('a comment on its own that is still open carries no badge', function() {
 		desktopHelper.insertComment('a comment on its own');
 
-		badgeOf(1).should('be.visible');
-		// A thread of one has no number to give, so the badge
-		// draws a tick instead.
-		badgeOf(1).should('have.text', '');
-		badgeOf(1).should(function($badge) {
-			const win = $badge[0].ownerDocument.defaultView;
-			expect(win.getComputedStyle($badge[0], '::after').borderBottomWidth,
-				'the stroke of the tick').to.not.equal('0px');
-		});
+		bubbleOf(1).should('be.visible');
+		// The bubble already stands for one comment still to be
+		// read, so a badge has nothing to add to it.
+		badgeOf(1).should('be.not.visible');
 	});
 
 	it('the badge on the bubble says how many comments the thread holds', function() {
@@ -188,35 +183,37 @@ describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
 		cy.cGet('#annotation-reply-1').click();
 		cy.cGet('#annotation-content-area-2').should('contain', 'the answer');
 
-		// The comment and the answer under it make two, and the
-		// tick gives way to the number.
+		// The comment and the answer under it make two.
+		badgeOf(1).should('be.visible');
 		badgeOf(1).should('have.text', '2');
 		badgeOf(1).should(function($badge) {
 			const win = $badge[0].ownerDocument.defaultView;
+			// Blue while any comment of the thread is still
+			// open, and no tick where there is a number to give.
+			expect(win.getComputedStyle($badge[0]).backgroundColor, 'the badge')
+				.to.equal(colourOfToken(win, '--color-primary'));
 			expect(win.getComputedStyle($badge[0], '::after').borderBottomWidth,
 				'the stroke of the tick').to.equal('0px');
 		});
 	});
 
-	it('the badge on the bubble turns green once the thread is resolved', function() {
+	it('the bubble of a comment on its own gets a green tick once it is resolved', function() {
 		desktopHelper.insertComment('a comment to resolve');
 
-		// Blue while the comment is still open.
-		badgeOf(1).should(function($badge) {
-			const win = $badge[0].ownerDocument.defaultView;
-			expect(win.getComputedStyle($badge[0]).backgroundColor, 'the badge')
-				.to.equal(colourOfToken(win, '--color-primary'));
-		});
-
 		desktopHelper.pickCommentAction(1, 'Resolve');
-		// A resolved comment is on show only while the document
-		// is showing the resolved ones.
-		desktopHelper.toggleComments(/* resolved = */ true);
 
+		// Resolved comments are shown to begin with, so the
+		// bubble stays once the thread is done.
+		badgeOf(1).should('be.visible');
+		// A thread of one has no number to give, so the badge
+		// draws a tick instead.
+		badgeOf(1).should('have.text', '');
 		badgeOf(1).should(function($badge) {
 			const win = $badge[0].ownerDocument.defaultView;
 			expect(win.getComputedStyle($badge[0]).backgroundColor, 'the badge')
 				.to.equal(colourOfToken(win, '--color-success'));
+			expect(win.getComputedStyle($badge[0], '::after').borderBottomWidth,
+				'the stroke of the tick').to.not.equal('0px');
 		});
 	});
 
