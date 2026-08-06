@@ -69,6 +69,13 @@ describe(['tagdesktop'], 'Comments panel', function() {
 		desktopHelper.pickCommentAction(1, 'Resolve');
 	}
 
+	// Ask the document for a comment the way a reader does and
+	// stop there. The comments tab is closed until then.
+	function askForAComment() {
+		cy.cGet('#Insert-tab-label').click();
+		cy.cGet('#Insert .unoInsertAnnotation').click();
+	}
+
 	it('a comment of the document has a row of its own', function() {
 		desktopHelper.insertComment('first comment');
 		desktopHelper.insertComment('second comment');
@@ -466,6 +473,21 @@ describe(['tagdesktop'], 'Comments panel', function() {
 			.should('have.text', 'the words of a new comment');
 		// Nothing of the comment comes up over the page.
 		cy.cGet('#comment-container-new').should('be.not.visible');
+	});
+
+	it('the words of a new comment go into its box without the box being picked', function() {
+		askForAComment();
+
+		cy.cGet('.comments-panel-comment[data-comment-id="new"] #annotation-modify-textarea-new')
+			.should('be.visible')
+			.should('have.focus');
+
+		// The reader types straight away, so the words go
+		// wherever the focus is, the document included.
+		cy.getFrameWindow().then(function(win) {
+			cy.wrap(win.document.activeElement).type('straight into the box');
+		});
+		cy.cGet('#annotation-modify-textarea-new').should('have.text', 'straight into the box');
 	});
 
 	it('a comment written in the list joins the document when it is saved', function() {

@@ -382,6 +382,22 @@ export class CommentSection extends CanvasSectionObject {
 		this.map.commentsPanel?.showComment(id);
 	}
 
+	// Put the focus in the box a comment is written in. The tab
+	// reaches the page a task later, so the focus waits for it.
+	public focusTheBoxToWriteIn (annotation: Comment): void {
+		if (!annotation.isReadInTheList()) {
+			annotation.focus();
+			return;
+		}
+
+		app.layoutingService.appendLayoutingTask(() => {
+			// The writer may have given the comment up while the
+			// panel was coming up.
+			if (annotation.isEdit())
+				annotation.focus();
+		});
+	}
+
 	public navigateAndFocusComment(annotation: any): void {
 		if (!annotation) return;
 
@@ -392,7 +408,12 @@ export class CommentSection extends CanvasSectionObject {
 			this.select(annotation, true);
 		}
 
-		annotation.focus();
+		// A Writer comment is written in its row, so that tab
+		// comes up before the focus goes to the box.
+		if (annotation.isReadInTheList())
+			this.showCommentInCommentsPanel(String(annotation.sectionProperties.data.id));
+
+		this.focusTheBoxToWriteIn(annotation);
 		this.addCommentAttention(annotation);
 	}
 
@@ -1372,7 +1393,7 @@ export class CommentSection extends CanvasSectionObject {
 			// to it, because moving it after takes it off.
 			this.map.commentsPanel?.checkTheCommentsBeingWritten();
 			this.select(annotation, true);
-			annotation.focus();
+			this.focusTheBoxToWriteIn(annotation);
 		}
 	}
 
@@ -1406,7 +1427,7 @@ export class CommentSection extends CanvasSectionObject {
 						// focus, or it loses it again.
 						this.map.commentsPanel?.checkTheCommentsBeingWritten();
 						this.select(annotation, true);
-						annotation.focus();
+						this.focusTheBoxToWriteIn(annotation);
 					}
 				}.bind(this), 1);
 			}.bind(this);
