@@ -9,6 +9,9 @@
 
 #include <swmodeltestbase.hxx>
 
+#include <com/sun/star/awt/FontUnderline.hpp>
+#include <com/sun/star/util/XPropertyReplace.hpp>
+
 #include <officecfg/Office/Writer.hxx>
 #include <test/commontesttools.hxx>
 #include <vcl/event.hxx>
@@ -664,6 +667,25 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testResolveCommentThreadPartiallyResolved
     // i.e. the whole thread was unresolved.
     CPPUNIT_ASSERT(pRoot->GetResolved());
     CPPUNIT_ASSERT(pReply->GetResolved());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testTdf135857_findWithoutUnderline)
+{
+    // given a document contains a single underlined word and a few explicitly un-underlined words
+
+    createSwDoc("tdf135857_findWithoutUnderline.odt");
+
+    // Get the count of a FindAll of all runs that are not underlined.
+    uno::Reference<util::XSearchable> xSearch(mxComponent, uno::UNO_QUERY);
+    uno::Reference<util::XSearchDescriptor> xSearchDes = xSearch->createSearchDescriptor();
+
+    // specifying the search attributes
+    uno::Reference<util::XPropertyReplace> xProp(xSearchDes, uno::UNO_QUERY);
+    uno::Sequence<beans::PropertyValue> aDescriptor(comphelper::InitPropertySequence(
+        { { "CharUnderline", uno::Any(css::awt::FontUnderline::NONE) } }));
+    xProp->setSearchAttributes(aDescriptor);
+
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(2), xSearch->findAll(xSearchDes)->getCount());
 }
 
 CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testTdf36582_findReplaceRedline)
