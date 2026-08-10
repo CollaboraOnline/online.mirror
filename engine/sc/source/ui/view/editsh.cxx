@@ -372,6 +372,7 @@ void ScEditShell::Execute( SfxRequest& rReq )
                 pDlg->Insert( SotClipboardFormatId::STRING, OUString() );
                 pDlg->Insert( SotClipboardFormatId::RTF,    OUString() );
                 pDlg->Insert( SotClipboardFormatId::RICHTEXT,    OUString() );
+                pDlg->Insert(SotClipboardFormatId::MARKDOWN, OUString());
                 // Do not offer SotClipboardFormatId::STRING_TSVC for
                 // in-cell paste.
 
@@ -389,6 +390,8 @@ void ScEditShell::Execute( SfxRequest& rReq )
                 {
                     if (SotClipboardFormatId::STRING == nFormat)
                         pTableView->Paste();
+                    else if (SotClipboardFormatId::MARKDOWN == nFormat)
+                        pTableView->PasteSpecial(SotClipboardFormatId::MARKDOWN);
                     else
                         pTableView->PasteSpecial();
 
