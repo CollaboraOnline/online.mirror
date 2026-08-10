@@ -21,7 +21,7 @@
 
 #include <vcl/weld.hxx>
 
-#include <SpifPolicy.hxx>
+#include <svx/seclabel/SpifPolicy.hxx>
 
 class SwWrtShell;
 
@@ -30,10 +30,10 @@ class SwWrtShell;
 // classification dropdown and the flat checkable category list.
 class SwSecurityLabelDlg final : public weld::GenericDialogController
 {
-    sw::seclabel::SpifPolicySet m_aPolicySet;
+    svx::seclabel::SpifPolicySet m_aPolicySet;
     // The policy currently driving the editor (an entry of m_aPolicySet), or null
     // when no policy is provisioned.
-    const sw::seclabel::SpifPolicy* m_pPolicy = nullptr;
+    const svx::seclabel::SpifPolicy* m_pPolicy = nullptr;
     SwWrtShell& m_rSh;
 
     // Per category row: flat index of its owning tag, and whether that tag is
@@ -83,7 +83,7 @@ class SwSecurityLabelDlg final : public weld::GenericDialogController
     // document, or enter the read-only foreign-policy view if its policy is not ours.
     void initFromExistingLabel();
     // Show rLabel read-only and offer re-labeling (foreign/un-provisioned policy).
-    void enterForeignMode(const sw::seclabel::StanagLabel& rLabel);
+    void enterForeignMode(const svx::seclabel::StanagLabel& rLabel);
 
 public:
     SwSecurityLabelDlg(weld::Window* pParent, SwWrtShell& rSh);

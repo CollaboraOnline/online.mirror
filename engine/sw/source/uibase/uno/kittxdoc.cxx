@@ -36,8 +36,8 @@
 
 #include <IDocumentMarkAccess.hxx>
 #include <IDocumentRedlineAccess.hxx>
-#include <SecLabelApply.hxx>
-#include <StanagLabel.hxx>
+#include <svx/seclabel/SecLabelStore.hxx>
+#include <svx/seclabel/StanagLabel.hxx>
 #include <doc.hxx>
 #include <docsh.hxx>
 #include <fmtrfmrk.hxx>
@@ -1401,8 +1401,8 @@ void GetSecurityLabel(tools::JsonWriter& rJsonWriter, SwDocShell* pDocShell)
     OUString aMarking;
     if (pDocShell)
     {
-        sw::seclabel::StanagLabel aLabel;
-        if (sw::seclabel::readLabel(pDocShell->GetModel(), aLabel))
+        svx::seclabel::StanagLabel aLabel;
+        if (svx::seclabel::readLabel(pDocShell->GetModel(), aLabel))
             aMarking = aLabel.summary();
     }
     // Standard {commandName, commandValues} envelope so the browser routes it by

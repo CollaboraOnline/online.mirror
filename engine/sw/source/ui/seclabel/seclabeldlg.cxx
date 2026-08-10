@@ -10,7 +10,8 @@
 #include <seclabeldlg.hxx>
 
 #include <SecLabelApply.hxx>
-#include <StanagLabel.hxx>
+#include <svx/seclabel/SecLabelStore.hxx>
+#include <svx/seclabel/StanagLabel.hxx>
 #include <doc.hxx>
 #include <docsh.hxx>
 #include <strings.hrc>
@@ -56,9 +57,9 @@ OUString getDevPolicyUrl()
     return sUrl;
 }
 
-OUString formatViolation(const sw::seclabel::SpifViolation& rViolation)
+OUString formatViolation(const svx::seclabel::SpifViolation& rViolation)
 {
-    using T = sw::seclabel::SpifViolationType;
+    using T = svx::seclabel::SpifViolationType;
     switch (rViolation.eType)
     {
         case T::MinSelection:
@@ -258,15 +259,15 @@ void SwSecurityLabelDlg::initFromExistingLabel()
     if (!xModel.is())
         return;
 
-    sw::seclabel::StanagLabel aLabel;
-    if (!sw::seclabel::readLabel(xModel, aLabel))
+    svx::seclabel::StanagLabel aLabel;
+    if (!svx::seclabel::readLabel(xModel, aLabel))
         return;
 
     m_bHasLabel = true;
 
     // A label written under a policy we don't have can't be edited structurally;
     // show it read-only and offer re-labeling under an available policy.
-    const sw::seclabel::SpifPolicy* pMatch = m_aPolicySet.findByLabel(aLabel);
+    const svx::seclabel::SpifPolicy* pMatch = m_aPolicySet.findByLabel(aLabel);
     if (!pMatch)
     {
         enterForeignMode(aLabel);
@@ -306,7 +307,7 @@ void SwSecurityLabelDlg::initFromExistingLabel()
     }
 }
 
-void SwSecurityLabelDlg::enterForeignMode(const sw::seclabel::StanagLabel& rLabel)
+void SwSecurityLabelDlg::enterForeignMode(const svx::seclabel::StanagLabel& rLabel)
 {
     m_bForeignPolicy = true;
 
@@ -395,19 +396,19 @@ void SwSecurityLabelDlg::applyLabel(const OUString& rClassification,
     DateTime aReview(aNow);
     aReview.AddYears(1);
 
-    const sw::seclabel::StanagLabel aLabel
+    const svx::seclabel::StanagLabel aLabel
         = m_pPolicy->buildLabel(rClassification, rSelected, utl::toISO8601(aNow.GetUNODateTime()),
                                 utl::toISO8601(aReview.GetUNODateTime()));
     const OUString sItemProps
-        = sw::seclabel::buildItemProps(makeGuid(), sw::seclabel::STANAG_BINDING_SCHEMA);
-    sw::seclabel::storeLabelPart(xModel, aLabel.toBindingXml(), sItemProps);
+        = svx::seclabel::buildItemProps(makeGuid(), svx::seclabel::STANAG_BINDING_SCHEMA);
+    svx::seclabel::storeLabelPart(xModel, aLabel.toBindingXml(), sItemProps);
 
     sal_Int32 nColor = 0;
     for (const auto& rClass : m_pPolicy->aClassifications)
     {
         if (rClass.aName == rClassification)
         {
-            nColor = sw::seclabel::resolveColor(rClass.aColor);
+            nColor = svx::seclabel::resolveColor(rClass.aColor);
             break;
         }
     }
@@ -448,9 +449,9 @@ void SwSecurityLabelDlg::notifyBanner()
     if (!pDocShell)
         return;
     uno::Reference<frame::XModel> xModel(pDocShell->GetModel());
-    sw::seclabel::StanagLabel aLabel;
+    svx::seclabel::StanagLabel aLabel;
     OUString aMarking;
-    if (xModel.is() && sw::seclabel::readLabel(xModel, aLabel))
+    if (xModel.is() && svx::seclabel::readLabel(xModel, aLabel))
         aMarking = aLabel.summary();
 
     // Same shape as getCommandValues(".uno:SecurityLabel"): the browser banner

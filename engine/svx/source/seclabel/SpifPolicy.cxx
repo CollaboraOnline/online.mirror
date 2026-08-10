@@ -7,7 +7,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <SpifPolicy.hxx>
+#include <svx/seclabel/SpifPolicy.hxx>
 
 #include <o3tl/string_view.hxx>
 #include <osl/file.hxx>
@@ -18,7 +18,7 @@
 #include <set>
 #include <vector>
 
-namespace sw::seclabel
+namespace svx::seclabel
 {
 namespace
 {
@@ -570,6 +570,6 @@ StanagLabel SpifPolicy::buildLabel(const OUString& rClassification,
     return aLabel;
 }
 
-} // namespace sw::seclabel
+} // namespace svx::seclabel
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

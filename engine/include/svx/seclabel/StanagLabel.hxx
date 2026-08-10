@@ -7,10 +7,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#ifndef INCLUDED_SW_INC_STANAGLABEL_HXX
-#define INCLUDED_SW_INC_STANAGLABEL_HXX
+#ifndef INCLUDED_SVX_SECLABEL_STANAGLABEL_HXX
+#define INCLUDED_SVX_SECLABEL_STANAGLABEL_HXX
 
-#include "swdllapi.h"
+#include <svx/svxdllapi.h>
 #include <rtl/ustring.hxx>
 #include <string_view>
 #include <vector>
@@ -22,7 +22,7 @@ namespace tools
 class XmlWriter;
 }
 
-namespace sw::seclabel
+namespace svx::seclabel
 {
 /// One category of a STANAG 4774 label (a tag and its selected values).
 struct StanagCategory
@@ -34,7 +34,7 @@ struct StanagCategory
 
 /// A STANAG 4774 confidentiality label, serializable to its XML form.
 /// Timestamps are caller-provided (ISO 8601) so serialization stays deterministic.
-class SW_DLLPUBLIC StanagLabel
+class SVXCORE_DLLPUBLIC StanagLabel
 {
 public:
     OUString aPolicyName; ///< PolicyIdentifier element text
@@ -66,10 +66,11 @@ private:
 
 /// Build the OOXML customXml itemProps (ds:datastoreItem + ds:schemaRef) for a
 /// STANAG part: rItemId is the "{GUID}" item id, rSchemaUri the part's schema namespace.
-SW_DLLPUBLIC OUString buildItemProps(std::u16string_view rItemId, std::u16string_view rSchemaUri);
+SVXCORE_DLLPUBLIC OUString buildItemProps(std::u16string_view rItemId,
+                                          std::u16string_view rSchemaUri);
 
-} // namespace sw::seclabel
+} // namespace svx::seclabel
 
-#endif // INCLUDED_SW_INC_STANAGLABEL_HXX
+#endif // INCLUDED_SVX_SECLABEL_STANAGLABEL_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -7,13 +7,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <StanagLabel.hxx>
+#include <svx/seclabel/StanagLabel.hxx>
 
 #include <tools/XmlWalker.hxx>
 #include <tools/XmlWriter.hxx>
 #include <tools/stream.hxx>
 
-namespace sw::seclabel
+namespace svx::seclabel
 {
 namespace
 {
@@ -228,6 +228,6 @@ OUString StanagLabel::summary() const
     return aSummary;
 }
 
-} // namespace sw::seclabel
+} // namespace svx::seclabel
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

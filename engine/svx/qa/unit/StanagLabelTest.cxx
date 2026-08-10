@@ -11,14 +11,15 @@
 
 #include <rtl/ustring.hxx>
 
-#include <StanagLabel.hxx>
-#include <SecLabelApply.hxx>
+#include <svx/seclabel/StanagLabel.hxx>
+#include <svx/seclabel/SecLabelStore.hxx>
 
 #include <tools/stream.hxx>
 
 #include <cppunit/TestAssert.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/plugin/TestPlugIn.h>
 
 class StanagLabelTest : public CppUnit::TestFixture
 {
@@ -41,16 +42,16 @@ class StanagLabelTest : public CppUnit::TestFixture
 
 namespace
 {
-sw::seclabel::StanagLabel makeSampleLabel()
+svx::seclabel::StanagLabel makeSampleLabel()
 {
-    sw::seclabel::StanagLabel aLabel;
+    svx::seclabel::StanagLabel aLabel;
     aLabel.aPolicyName = u"SPIF Collabora"_ustr;
     aLabel.aPolicyId = u"urn:oid:1.2.826.0.1310.1.2.0"_ustr;
     aLabel.aClassification = u"SECRET"_ustr;
     aLabel.aCreationDateTime = u"2026-06-21T10:00:00Z"_ustr;
     aLabel.aReviewDateTime = u"2027-06-21T10:00:00Z"_ustr;
 
-    sw::seclabel::StanagCategory aCategory;
+    svx::seclabel::StanagCategory aCategory;
     aCategory.aTagName = u"Releasable To"_ustr;
     aCategory.aType = u"PERMISSIVE"_ustr;
     aCategory.aValues = { u"CANADA"_ustr, u"UNITED KINGDOM"_ustr };
@@ -95,7 +96,7 @@ void StanagLabelTest::testToBindingXml()
 
 void StanagLabelTest::testItemProps()
 {
-    const OUString aXml = sw::seclabel::buildItemProps(
+    const OUString aXml = svx::seclabel::buildItemProps(
         u"{B6E4D8A1-1A35-4F0E-9B7A-71F4C0F5E0D3}"_ustr,
         u"urn:nato:stanag:4778:bindinginformation:1:0"_ustr);
 
@@ -116,7 +117,7 @@ void StanagLabelTest::testParseRoundTrip()
     SvMemoryStream aStream(const_cast<char*>(aBinding.getStr()), aBinding.getLength(),
                            StreamMode::READ);
 
-    sw::seclabel::StanagLabel aParsed;
+    svx::seclabel::StanagLabel aParsed;
     CPPUNIT_ASSERT(aParsed.parse(aStream));
 
     CPPUNIT_ASSERT_EQUAL(u"SPIF Collabora"_ustr, aParsed.aPolicyName);
@@ -135,7 +136,7 @@ void StanagLabelTest::testParseRoundTrip()
     const OString aLabel = OUStringToOString(makeSampleLabel().toXml(), RTL_TEXTENCODING_UTF8);
     SvMemoryStream aLabelStream(const_cast<char*>(aLabel.getStr()), aLabel.getLength(),
                                 StreamMode::READ);
-    sw::seclabel::StanagLabel aParsed2;
+    svx::seclabel::StanagLabel aParsed2;
     CPPUNIT_ASSERT(aParsed2.parse(aLabelStream));
     CPPUNIT_ASSERT_EQUAL(u"SECRET"_ustr, aParsed2.aClassification);
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), aParsed2.aCategories[0].aValues.size());
@@ -143,10 +144,10 @@ void StanagLabelTest::testParseRoundTrip()
 
 void StanagLabelTest::testResolveColor()
 {
-    CPPUNIT_ASSERT_EQUAL(sal_Int32(0xFF0000), sw::seclabel::resolveColor(u"red"_ustr));
-    CPPUNIT_ASSERT_EQUAL(sal_Int32(0xFFFF00), sw::seclabel::resolveColor(u"yellow"_ustr));
-    CPPUNIT_ASSERT_EQUAL(sal_Int32(0x1A2B3C), sw::seclabel::resolveColor(u"#1A2B3C"_ustr));
-    CPPUNIT_ASSERT_EQUAL(sal_Int32(0x000000), sw::seclabel::resolveColor(u"bogus"_ustr));
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(0xFF0000), svx::seclabel::resolveColor(u"red"_ustr));
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(0xFFFF00), svx::seclabel::resolveColor(u"yellow"_ustr));
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(0x1A2B3C), svx::seclabel::resolveColor(u"#1A2B3C"_ustr));
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(0x000000), svx::seclabel::resolveColor(u"bogus"_ustr));
 }
 
 void StanagLabelTest::testSummary()
@@ -155,7 +156,7 @@ void StanagLabelTest::testSummary()
     CPPUNIT_ASSERT_EQUAL(u"SECRET CANADA UNITED KINGDOM"_ustr, makeSampleLabel().summary());
 
     // Classification alone when there are no categories.
-    sw::seclabel::StanagLabel aBare;
+    svx::seclabel::StanagLabel aBare;
     aBare.aClassification = u"OFFICIAL"_ustr;
     CPPUNIT_ASSERT_EQUAL(u"OFFICIAL"_ustr, aBare.summary());
 }

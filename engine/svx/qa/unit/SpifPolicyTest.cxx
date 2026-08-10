@@ -11,7 +11,7 @@
 
 #include <rtl/ustring.hxx>
 
-#include <SpifPolicy.hxx>
+#include <svx/seclabel/SpifPolicy.hxx>
 
 #include <tools/stream.hxx>
 #include <unotools/tempfile.hxx>
@@ -19,6 +19,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include <cppunit/plugin/TestPlugIn.h>
 
 class SpifPolicyTest : public CppUnit::TestFixture
 {
@@ -86,7 +87,7 @@ void SpifPolicyTest::testParse()
 
     SvMemoryStream aStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(), StreamMode::READ);
 
-    sw::seclabel::SpifPolicy aPolicy;
+    svx::seclabel::SpifPolicy aPolicy;
     CPPUNIT_ASSERT(aPolicy.parse(aStream));
 
     CPPUNIT_ASSERT_EQUAL(u"SPIF Collabora"_ustr, aPolicy.aName);
@@ -189,10 +190,10 @@ void SpifPolicyTest::testValidate()
 </spif:SPIF>)xml"_ostr);
 
     SvMemoryStream aStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(), StreamMode::READ);
-    sw::seclabel::SpifPolicy aPolicy;
+    svx::seclabel::SpifPolicy aPolicy;
     CPPUNIT_ASSERT(aPolicy.parse(aStream));
 
-    using T = sw::seclabel::SpifViolationType;
+    using T = svx::seclabel::SpifViolationType;
 
     // Below minimum (0 < 1).
     auto aTooFew = aPolicy.validate(u"SECRET"_ustr, { false, false, false });
@@ -241,10 +242,10 @@ void SpifPolicyTest::testValidateRelationships()
 </spif:SPIF>)xml"_ostr);
 
     SvMemoryStream aStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(), StreamMode::READ);
-    sw::seclabel::SpifPolicy aPolicy;
+    svx::seclabel::SpifPolicy aPolicy;
     CPPUNIT_ASSERT(aPolicy.parse(aStream));
 
-    using T = sw::seclabel::SpifViolationType;
+    using T = svx::seclabel::SpifViolationType;
 
     // Selectable order under SECRET: X(0), Y(1), Z(2).
     // Z alone: requiredCategory (needs Y) unmet.
@@ -281,7 +282,7 @@ void SpifPolicyTest::testBuildLabel()
 </spif:SPIF>)xml"_ostr);
 
     SvMemoryStream aStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(), StreamMode::READ);
-    sw::seclabel::SpifPolicy aPolicy;
+    svx::seclabel::SpifPolicy aPolicy;
     CPPUNIT_ASSERT(aPolicy.parse(aStream));
 
     const auto aLabel = aPolicy.buildLabel(u"SECRET"_ustr, { true, true },
@@ -310,11 +311,11 @@ void SpifPolicyTest::testMatchesLabel()
   </spif:securityClassifications>
 </spif:SPIF>)xml"_ostr);
     SvMemoryStream aStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(), StreamMode::READ);
-    sw::seclabel::SpifPolicy aPolicy;
+    svx::seclabel::SpifPolicy aPolicy;
     CPPUNIT_ASSERT(aPolicy.parse(aStream));
 
     // A label naming this policy's OID (urn:oid: prefixed) is ours to edit.
-    sw::seclabel::StanagLabel aLabel;
+    svx::seclabel::StanagLabel aLabel;
     aLabel.aPolicyId = u"urn:oid:1.2.826.0.1310.1.2.0"_ustr;
     CPPUNIT_ASSERT(aPolicy.matchesLabel(aLabel));
 
@@ -356,7 +357,7 @@ void SpifPolicyTest::testPolicySet()
     writeFile(u"notspif.xml"_ustr, "<html/>"_ostr); // valid XML, wrong root -> skipped
     writeFile(u"readme.txt"_ustr, makeSpif("Policy C", "7.8.9")); // not *.xml -> skipped
 
-    sw::seclabel::SpifPolicySet aSet;
+    svx::seclabel::SpifPolicySet aSet;
     aSet.loadFromDir(sDir);
 
     // Only the two SPIF *.xml files load, in filename order.
@@ -365,9 +366,9 @@ void SpifPolicyTest::testPolicySet()
     CPPUNIT_ASSERT_EQUAL(u"Policy B"_ustr, aSet.aPolicies[1].aName);
 
     // findByLabel resolves a label's OID to the provisioned policy.
-    sw::seclabel::StanagLabel aLabel;
+    svx::seclabel::StanagLabel aLabel;
     aLabel.aPolicyId = u"urn:oid:4.5.6"_ustr;
-    const sw::seclabel::SpifPolicy* pMatch = aSet.findByLabel(aLabel);
+    const svx::seclabel::SpifPolicy* pMatch = aSet.findByLabel(aLabel);
     CPPUNIT_ASSERT(pMatch);
     CPPUNIT_ASSERT_EQUAL(u"Policy B"_ustr, pMatch->aName);
 
@@ -425,7 +426,7 @@ void SpifPolicyTest::testWantsWatermark()
   </spif:securityCategoryTagSets>
 </spif:SPIF>)xml"_ostr);
     SvMemoryStream aStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(), StreamMode::READ);
-    sw::seclabel::SpifPolicy aPolicy;
+    svx::seclabel::SpifPolicy aPolicy;
     CPPUNIT_ASSERT(aPolicy.parse(aStream));
 
     // Each placement flag is parsed only onto the tag that declares it.
@@ -486,7 +487,7 @@ void SpifPolicyTest::testMarkingModifiers()
   </spif:securityCategoryTagSets>
 </spif:SPIF>)xml"_ostr);
     SvMemoryStream aStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(), StreamMode::READ);
-    sw::seclabel::SpifPolicy aPolicy;
+    svx::seclabel::SpifPolicy aPolicy;
     CPPUNIT_ASSERT(aPolicy.parse(aStream));
 
     CPPUNIT_ASSERT(aPolicy.aClassifications[0].bNoNameDisplay);
@@ -509,5 +510,7 @@ void SpifPolicyTest::testMarkingModifiers()
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SpifPolicyTest);
+
+CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

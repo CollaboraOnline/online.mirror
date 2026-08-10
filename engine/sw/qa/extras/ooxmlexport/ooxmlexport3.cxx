@@ -27,8 +27,9 @@
 #include <svx/diagram/DiagramHelper_svx.hxx>
 
 #include <SecLabelApply.hxx>
-#include <SpifPolicy.hxx>
-#include <StanagLabel.hxx>
+#include <svx/seclabel/SecLabelStore.hxx>
+#include <svx/seclabel/SpifPolicy.hxx>
+#include <svx/seclabel/StanagLabel.hxx>
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/frame/XModel.hpp>
 #include <com/sun/star/text/ControlCharacter.hpp>
@@ -89,19 +90,19 @@ CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelApply)
 </spif:SPIF>)xml"_ostr);
     SvMemoryStream aPolicyStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(),
                                  StreamMode::READ);
-    sw::seclabel::SpifPolicy aPolicy;
+    svx::seclabel::SpifPolicy aPolicy;
     CPPUNIT_ASSERT(aPolicy.parse(aPolicyStream));
 
     uno::Reference<frame::XModel> xModel(mxComponent, uno::UNO_QUERY);
     const std::vector<bool> aSelected{ true, true };
-    const sw::seclabel::StanagLabel aLabel = aPolicy.buildLabel(
+    const svx::seclabel::StanagLabel aLabel = aPolicy.buildLabel(
         u"SECRET"_ustr, aSelected, u"2026-06-21T10:00:00Z"_ustr, u"2027-06-21T10:00:00Z"_ustr);
-    sw::seclabel::storeLabelPart(
+    svx::seclabel::storeLabelPart(
         xModel, aLabel.toBindingXml(),
-        sw::seclabel::buildItemProps(u"{B6E4D8A1-1A35-4F0E-9B7A-71F4C0F5E0D3}"_ustr,
+        svx::seclabel::buildItemProps(u"{B6E4D8A1-1A35-4F0E-9B7A-71F4C0F5E0D3}"_ustr,
                                      u"urn:nato:stanag:4778:bindinginformation:1:0"_ustr));
     sw::seclabel::applyMarking(xModel, aPolicy.buildMarking(u"SECRET"_ustr, aSelected),
-                               sw::seclabel::resolveColor(u"red"_ustr), u"Standard"_ustr);
+                               svx::seclabel::resolveColor(u"red"_ustr), u"Standard"_ustr);
 
     saveAndReload(TestFilter::DOCX);
 
@@ -116,8 +117,8 @@ CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelApply)
 
     // Read the label back out of the reloaded document.
     uno::Reference<frame::XModel> xReloaded(mxComponent, uno::UNO_QUERY);
-    sw::seclabel::StanagLabel aReadBack;
-    CPPUNIT_ASSERT(sw::seclabel::readLabel(xReloaded, aReadBack));
+    svx::seclabel::StanagLabel aReadBack;
+    CPPUNIT_ASSERT(svx::seclabel::readLabel(xReloaded, aReadBack));
     CPPUNIT_ASSERT_EQUAL(u"SECRET"_ustr, aReadBack.aClassification);
     CPPUNIT_ASSERT_EQUAL(size_t(1), aReadBack.aCategories.size());
     CPPUNIT_ASSERT_EQUAL(size_t(2), aReadBack.aCategories[0].aValues.size());
@@ -152,16 +153,16 @@ CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelReplace)
 </spif:SPIF>)xml"_ostr);
     SvMemoryStream aPolicyStream(const_cast<char*>(aSpif.getStr()), aSpif.getLength(),
                                  StreamMode::READ);
-    sw::seclabel::SpifPolicy aPolicy;
+    svx::seclabel::SpifPolicy aPolicy;
     CPPUNIT_ASSERT(aPolicy.parse(aPolicyStream));
 
     uno::Reference<frame::XModel> xModel(mxComponent, uno::UNO_QUERY);
     auto applyOnce = [&](const std::vector<bool>& rSelected, const OUString& rGuid) {
-        const sw::seclabel::StanagLabel aLabel = aPolicy.buildLabel(
+        const svx::seclabel::StanagLabel aLabel = aPolicy.buildLabel(
             u"SECRET"_ustr, rSelected, u"2026-06-21T10:00:00Z"_ustr, u"2027-06-21T10:00:00Z"_ustr);
-        sw::seclabel::storeLabelPart(xModel, aLabel.toBindingXml(),
-                                     sw::seclabel::buildItemProps(
-                                         rGuid, sw::seclabel::STANAG_BINDING_SCHEMA));
+        svx::seclabel::storeLabelPart(xModel, aLabel.toBindingXml(),
+                                     svx::seclabel::buildItemProps(
+                                         rGuid, svx::seclabel::STANAG_BINDING_SCHEMA));
     };
     applyOnce({ true, false }, u"{B6E4D8A1-1A35-4F0E-9B7A-71F4C0F5E0D3}"_ustr); // CANADA
     applyOnce({ true, true }, u"{C7F5E9B2-2B46-5A1F-AC8B-82F5D1F6E1E4}"_ustr); // + UK
@@ -178,8 +179,8 @@ CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelReplace)
     // One part on disk, and it carries the second (latest) selection.
     CPPUNIT_ASSERT(parseExport(u"customXml/item1.xml"_ustr));
     uno::Reference<frame::XModel> xReloaded(mxComponent, uno::UNO_QUERY);
-    sw::seclabel::StanagLabel aReadBack;
-    CPPUNIT_ASSERT(sw::seclabel::readLabel(xReloaded, aReadBack));
+    svx::seclabel::StanagLabel aReadBack;
+    CPPUNIT_ASSERT(svx::seclabel::readLabel(xReloaded, aReadBack));
     CPPUNIT_ASSERT_EQUAL(size_t(1), aReadBack.aCategories.size());
     CPPUNIT_ASSERT_EQUAL(size_t(2), aReadBack.aCategories[0].aValues.size());
 }
@@ -219,25 +220,25 @@ CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelRemove)
     createSwDoc();
     uno::Reference<frame::XModel> xModel(mxComponent, uno::UNO_QUERY);
 
-    sw::seclabel::StanagLabel aLabel;
+    svx::seclabel::StanagLabel aLabel;
     aLabel.aPolicyId = u"urn:oid:1.2.826.0.1310.1.2.0"_ustr;
     aLabel.aClassification = u"SECRET"_ustr;
     aLabel.aCreationDateTime = u"2026-06-21T10:00:00Z"_ustr;
-    sw::seclabel::storeLabelPart(
+    svx::seclabel::storeLabelPart(
         xModel, aLabel.toBindingXml(),
-        sw::seclabel::buildItemProps(u"{B6E4D8A1-1A35-4F0E-9B7A-71F4C0F5E0D3}"_ustr,
-                                     sw::seclabel::STANAG_BINDING_SCHEMA));
+        svx::seclabel::buildItemProps(u"{B6E4D8A1-1A35-4F0E-9B7A-71F4C0F5E0D3}"_ustr,
+                                     svx::seclabel::STANAG_BINDING_SCHEMA));
     sw::seclabel::applyMarking(xModel, u"SECRET//X"_ustr, 0xC00000, u"Standard"_ustr);
 
     // Sanity: the label is present before removal.
-    sw::seclabel::StanagLabel aBefore;
-    CPPUNIT_ASSERT(sw::seclabel::readLabel(xModel, aBefore));
+    svx::seclabel::StanagLabel aBefore;
+    CPPUNIT_ASSERT(svx::seclabel::readLabel(xModel, aBefore));
 
     sw::seclabel::removeLabel(xModel, u"Standard"_ustr);
 
     // The STANAG part is gone and the header is cleared.
-    sw::seclabel::StanagLabel aAfter;
-    CPPUNIT_ASSERT(!sw::seclabel::readLabel(xModel, aAfter));
+    svx::seclabel::StanagLabel aAfter;
+    CPPUNIT_ASSERT(!svx::seclabel::readLabel(xModel, aAfter));
     uno::Reference<beans::XPropertySet> xProps(xModel, uno::UNO_QUERY);
     comphelper::SequenceAsHashMap aGrabBag(xProps->getPropertyValue(u"InteropGrabBag"_ustr));
     cpo::uno::Sequence<uno::Reference<css::xml::dom::XDocument>> aParts;

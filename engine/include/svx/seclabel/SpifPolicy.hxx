@@ -7,17 +7,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#ifndef INCLUDED_SW_INC_SPIFPOLICY_HXX
-#define INCLUDED_SW_INC_SPIFPOLICY_HXX
+#ifndef INCLUDED_SVX_SECLABEL_SPIFPOLICY_HXX
+#define INCLUDED_SVX_SECLABEL_SPIFPOLICY_HXX
 
-#include "swdllapi.h"
-#include "StanagLabel.hxx"
+#include <svx/svxdllapi.h>
+#include <svx/seclabel/StanagLabel.hxx>
 #include <rtl/ustring.hxx>
 #include <vector>
 
 class SvStream;
 
-namespace sw::seclabel
+namespace svx::seclabel
 {
 /// A classification level defined by a SPIF policy (xmlspif.org).
 struct SpifClassification
@@ -51,7 +51,7 @@ struct SpifRequiredCategory
 };
 
 /// A selectable value within a category tag (e.g. "CANADA" under "Releasable To").
-struct SW_DLLPUBLIC SpifTagCategory
+struct SVXCORE_DLLPUBLIC SpifTagCategory
 {
     OUString aName; ///< tagCategory/@name
     sal_Int64 nLacv = 0; ///< @lacv (may exceed 32 bits)
@@ -116,7 +116,7 @@ struct SpifViolation
 
 /// A parsed SPIF policy: policy identifier, classifications and category tag
 /// sets. Privacy marks, marking rules and relationships follow.
-class SW_DLLPUBLIC SpifPolicy
+class SVXCORE_DLLPUBLIC SpifPolicy
 {
 public:
     OUString aName; ///< securityPolicyId/@name
@@ -175,7 +175,7 @@ private:
 
 /// The SPIF policies provisioned for this session (org + user). The label dialog
 /// offers all of them; an existing label is matched to one by OID.
-class SW_DLLPUBLIC SpifPolicySet
+class SVXCORE_DLLPUBLIC SpifPolicySet
 {
 public:
     std::vector<SpifPolicy> aPolicies;
@@ -194,8 +194,8 @@ public:
     bool empty() const { return aPolicies.empty(); }
 };
 
-} // namespace sw::seclabel
+} // namespace svx::seclabel
 
-#endif // INCLUDED_SW_INC_SPIFPOLICY_HXX
+#endif // INCLUDED_SVX_SECLABEL_SPIFPOLICY_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
