@@ -2156,6 +2156,7 @@ std::shared_ptr<COKitDocument> Document::load(const std::shared_ptr<ChildSession
     }
 
     std::string spellOnline = session->getSpellOnline();
+    const std::string formattingMarks = session->getFormattingMarks();
     if (!_loKitDocument)
     {
         // This is the first time we are loading the document
@@ -2323,11 +2324,11 @@ std::shared_ptr<COKitDocument> Document::load(const std::shared_ptr<ChildSession
 
     // Avoid logging userPrivateInfo till it's not anonymized.
     LOG_INF("Initializing for rendering session [" << sessionId << "] on document url [" <<
-            anonymizeUrl(_url) << "] with: [" << makeRenderParams(_renderOpts, userNameAnonym, spellOnline, theme, backgroundTheme, "") << "].");
+            anonymizeUrl(_url) << "] with: [" << makeRenderParams(_renderOpts, userNameAnonym, spellOnline, formattingMarks, theme, backgroundTheme, "") << "].");
 
     // initializeForRendering() should be called before
     // registerCallback(), as the previous creates a new view in Impress.
-    const std::string renderParams = makeRenderParams(_renderOpts, userName, spellOnline, theme, backgroundTheme, userPrivateInfo);
+    const std::string renderParams = makeRenderParams(_renderOpts, userName, spellOnline, formattingMarks, theme, backgroundTheme, userPrivateInfo);
 
     _loKitDocument->initializeForRendering(renderParams.c_str());
 
@@ -2485,7 +2486,8 @@ bool Document::forwardToChild(const std::string_view prefix, const std::vector<c
 }
 
 /* static */ std::string Document::makeRenderParams(const std::string& renderOpts, const std::string& userName,
-                                                    const std::string& spellOnline, const std::string& theme,
+                                                    const std::string& spellOnline,
+                                                    const std::string& formattingMarks, const std::string& theme,
                                                     const std::string& backgroundTheme,
                                                     const std::string& userPrivateInfo)
 {
@@ -2542,6 +2544,12 @@ bool Document::forwardToChild(const std::string_view prefix, const std::vector<c
     {
         const bool set = (spellOnline != "false");
         renderOptsObj->set(".uno:SpellOnline", makePropertyValue("boolean", set));
+    }
+
+    if (!formattingMarks.empty())
+    {
+        const bool set = (formattingMarks == "true");
+        renderOptsObj->set(".uno:ControlCodes", makePropertyValue("boolean", set));
     }
 
     if (!theme.empty())
