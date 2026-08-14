@@ -48,8 +48,9 @@ SW_DLLPUBLIC void removeBodyMarkings(const css::uno::Reference<css::frame::XMode
 SW_DLLPUBLIC void applyPortionMarking(const css::uno::Reference<css::frame::XModel>& xModel,
                                       std::u16string_view rMarking, sal_Int32 nColor);
 
-/// Remove the document's STANAG label: strip its customXml part, clear the body
-/// (cover/end-page) markings, and clear the page style's header and footer marking.
+/// Clear the label's Writer markings: the body (cover/end-page) markings and the
+/// page style's header and footer marking. The customXml part is removed separately
+/// (svx::seclabel::removeLabelPart); the watermark by the caller.
 SW_DLLPUBLIC void removeLabel(const css::uno::Reference<css::frame::XModel>& xModel,
                               const OUString& rPageStyleName);
 

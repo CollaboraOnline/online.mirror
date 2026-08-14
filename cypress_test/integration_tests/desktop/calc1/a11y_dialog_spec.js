@@ -62,8 +62,8 @@ const allCalcDialogs = [
 const excludedCommonDialogs = [
     '.uno:AcceptTrackedChanges',
     '.uno:GotoPage',
-    // Writer-only dialog; .uno:SecurityLabel is not dispatched in calc, so
-    // it opens nothing here. Its a11y is exercised by the writer spec.
+    // Not exercised in this ODF a11y run: the Security Label rides in the OOXML
+    // customXml part, so the command is not meaningful on these fixtures.
     '.uno:SecurityLabel',
     '.uno:SpellingAndGrammarDialog',
     '.uno:SplitCell',

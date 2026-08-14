@@ -7,35 +7,24 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <seclabeldlg.hxx>
+#include <SvxSecurityLabelDialog.hxx>
 
-#include <SecLabelApply.hxx>
+#include <svx/dialmgr.hxx>
 #include <svx/seclabel/SecLabelStore.hxx>
+#include <svx/seclabel/SecurityLabelDialog.hxx>
 #include <svx/seclabel/StanagLabel.hxx>
-#include <doc.hxx>
-#include <docsh.hxx>
-#include <strings.hrc>
-#include <swtypes.hxx>
-#include <view.hxx>
-#include <wrtsh.hxx>
+#include <svx/strings.hrc>
 
-#include <com/sun/star/beans/XPropertySet.hpp>
-#include <com/sun/star/frame/XController.hpp>
 #include <com/sun/star/frame/XModel.hpp>
-#include <com/sun/star/text/XTextViewCursorSupplier.hpp>
 
-#include <COKit/COKit.hxx>
-#include <comphelper/kit.hxx>
 #include <rtl/ustrbuf.hxx>
 #include <rtl/uuid.h>
-#include <sfx2/watermarkitem.hxx>
-#include <tools/color.hxx>
 #include <tools/datetime.hxx>
 #include <rtl/bootstrap.hxx>
 #include <config_folders.h>
-#include <tools/json_writer.hxx>
 #include <unotools/datetime.hxx>
 #include <unotools/pathoptions.hxx>
+#include <vcl/abstdlgimpl.hxx>
 
 #include <set>
 
@@ -63,17 +52,17 @@ OUString formatViolation(const svx::seclabel::SpifViolation& rViolation)
     switch (rViolation.eType)
     {
         case T::MinSelection:
-            return SwResId(STR_SECLABEL_MIN)
+            return SvxResId(RID_SVXSTR_SECLABEL_MIN)
                 .replaceFirst(u"%1", OUString::number(rViolation.nMinSelection))
                 .replaceFirst(u"%2", rViolation.aName);
         case T::MaxSelection:
-            return SwResId(STR_SECLABEL_MAX)
+            return SvxResId(RID_SVXSTR_SECLABEL_MAX)
                 .replaceFirst(u"%1", OUString::number(rViolation.nMaxSelection))
                 .replaceFirst(u"%2", rViolation.aName);
         case T::ExcludedCategory:
-            return SwResId(STR_SECLABEL_EXCLUDED).replaceFirst(u"%1", rViolation.aName);
+            return SvxResId(RID_SVXSTR_SECLABEL_EXCLUDED).replaceFirst(u"%1", rViolation.aName);
         case T::RequiredCategory:
-            return SwResId(STR_SECLABEL_REQUIRED).replaceFirst(u"%1", rViolation.aName);
+            return SvxResId(RID_SVXSTR_SECLABEL_REQUIRED).replaceFirst(u"%1", rViolation.aName);
     }
     return OUString();
 }
@@ -96,27 +85,13 @@ OUString makeGuid()
     aBuf.append(u"}");
     return aBuf.makeStringAndClear();
 }
-
-// The page style of the current view cursor (consistent with PageStyles getByName).
-OUString getCurrentPageStyle(const uno::Reference<frame::XModel>& xModel)
-{
-    OUString sName(u"Standard"_ustr);
-    uno::Reference<text::XTextViewCursorSupplier> xSupplier(xModel->getCurrentController(),
-                                                            uno::UNO_QUERY);
-    if (xSupplier.is())
-    {
-        uno::Reference<beans::XPropertySet> xProps(xSupplier->getViewCursor(), uno::UNO_QUERY);
-        if (xProps.is())
-            xProps->getPropertyValue(u"PageStyleName"_ustr) >>= sName;
-    }
-    return sName;
-}
 }
 
-SwSecurityLabelDlg::SwSecurityLabelDlg(weld::Window* pParent, SwWrtShell& rSh)
-    : GenericDialogController(pParent, u"modules/swriter/ui/seclabeldialog.ui"_ustr,
+SvxSecurityLabelDialog::SvxSecurityLabelDialog(
+    weld::Window* pParent, std::unique_ptr<svx::seclabel::SecurityLabelTarget> pTarget)
+    : GenericDialogController(pParent, u"svx/ui/seclabeldialog.ui"_ustr,
                               u"SecurityLabelDialog"_ustr)
-    , m_rSh(rSh)
+    , m_pTarget(std::move(pTarget))
     , m_xEditBox(m_xBuilder->weld_widget(u"editbox"_ustr))
     , m_xPolicy(m_xBuilder->weld_combo_box(u"policy"_ustr))
     , m_xClassification(m_xBuilder->weld_combo_box(u"classification"_ustr))
@@ -143,21 +118,21 @@ SwSecurityLabelDlg::SwSecurityLabelDlg(weld::Window* pParent, SwWrtShell& rSh)
     // Removal is offered whenever the document already carries a label.
     m_xRemoveBtn->set_visible(m_bHasLabel);
 
-    m_xPolicy->connect_changed(LINK(this, SwSecurityLabelDlg, PolicyHdl));
-    m_xClassification->connect_changed(LINK(this, SwSecurityLabelDlg, ClassificationHdl));
-    m_xCategories->connect_toggled(LINK(this, SwSecurityLabelDlg, CategoryToggleHdl));
-    m_xOkBtn->connect_clicked(LINK(this, SwSecurityLabelDlg, OkHdl));
-    m_xRelabelBtn->connect_clicked(LINK(this, SwSecurityLabelDlg, RelabelHdl));
-    m_xRemoveBtn->connect_clicked(LINK(this, SwSecurityLabelDlg, RemoveHdl));
+    m_xPolicy->connect_changed(LINK(this, SvxSecurityLabelDialog, PolicyHdl));
+    m_xClassification->connect_changed(LINK(this, SvxSecurityLabelDialog, ClassificationHdl));
+    m_xCategories->connect_toggled(LINK(this, SvxSecurityLabelDialog, CategoryToggleHdl));
+    m_xOkBtn->connect_clicked(LINK(this, SvxSecurityLabelDialog, OkHdl));
+    m_xRelabelBtn->connect_clicked(LINK(this, SvxSecurityLabelDialog, RelabelHdl));
+    m_xRemoveBtn->connect_clicked(LINK(this, SvxSecurityLabelDialog, RemoveHdl));
 
     m_xWarning->set_label_type(weld::LabelType::Warning);
 
     UpdatePreview();
 }
 
-SwSecurityLabelDlg::~SwSecurityLabelDlg() {}
+SvxSecurityLabelDialog::~SvxSecurityLabelDialog() {}
 
-void SwSecurityLabelDlg::PopulatePolicies()
+void SvxSecurityLabelDialog::PopulatePolicies()
 {
     m_xPolicy->clear();
     for (const auto& rPolicy : m_aPolicySet.aPolicies)
@@ -167,7 +142,7 @@ void SwSecurityLabelDlg::PopulatePolicies()
     {
         // Nothing to label with: hide the editor and Apply, leaving only the notice.
         m_pPolicy = nullptr;
-        m_xWarning->set_label(SwResId(STR_SECLABEL_NOPOLICY));
+        m_xWarning->set_label(SvxResId(RID_SVXSTR_SECLABEL_NOPOLICY));
         m_xWarning->set_visible(true);
         m_xEditBox->set_visible(false);
         m_xOkBtn->set_visible(false);
@@ -178,7 +153,7 @@ void SwSecurityLabelDlg::PopulatePolicies()
     setActivePolicy(0);
 }
 
-void SwSecurityLabelDlg::setActivePolicy(int nIndex)
+void SvxSecurityLabelDialog::setActivePolicy(int nIndex)
 {
     if (nIndex < 0 || nIndex >= static_cast<int>(m_aPolicySet.aPolicies.size()))
     {
@@ -190,7 +165,7 @@ void SwSecurityLabelDlg::setActivePolicy(int nIndex)
     PopulateCategories();
 }
 
-void SwSecurityLabelDlg::PopulateClassifications()
+void SvxSecurityLabelDialog::PopulateClassifications()
 {
     m_xClassification->clear();
     if (!m_pPolicy)
@@ -207,7 +182,7 @@ void SwSecurityLabelDlg::PopulateClassifications()
         m_xClassification->set_active(0);
 }
 
-void SwSecurityLabelDlg::PopulateCategories()
+void SvxSecurityLabelDialog::PopulateCategories()
 {
     // Rebuild the list, dropping categories the current classification excludes
     // while preserving the checks of those that survive. Identity is the owning
@@ -250,12 +225,9 @@ void SwSecurityLabelDlg::PopulateCategories()
     }
 }
 
-void SwSecurityLabelDlg::initFromExistingLabel()
+void SvxSecurityLabelDialog::initFromExistingLabel()
 {
-    SwDocShell* pDocShell = m_rSh.GetDoc()->GetDocShell();
-    if (!pDocShell)
-        return;
-    uno::Reference<frame::XModel> xModel(pDocShell->GetModel());
+    uno::Reference<frame::XModel> xModel = m_pTarget->getModel();
     if (!xModel.is())
         return;
 
@@ -307,7 +279,7 @@ void SwSecurityLabelDlg::initFromExistingLabel()
     }
 }
 
-void SwSecurityLabelDlg::enterForeignMode(const svx::seclabel::StanagLabel& rLabel)
+void SvxSecurityLabelDialog::enterForeignMode(const svx::seclabel::StanagLabel& rLabel)
 {
     m_bForeignPolicy = true;
 
@@ -316,7 +288,7 @@ void SwSecurityLabelDlg::enterForeignMode(const svx::seclabel::StanagLabel& rLab
     m_xPreview->set_label(rLabel.summary());
 
     const OUString sPolicy = rLabel.aPolicyName.isEmpty() ? rLabel.aPolicyId : rLabel.aPolicyName;
-    m_xWarning->set_label(SwResId(STR_SECLABEL_FOREIGN).replaceFirst(u"%1", sPolicy));
+    m_xWarning->set_label(SvxResId(RID_SVXSTR_SECLABEL_FOREIGN).replaceFirst(u"%1", sPolicy));
     m_xWarning->set_visible(true);
 
     // View-only: hide the (provisioned-policy) editor and Apply. Offer Re-label only
@@ -326,7 +298,7 @@ void SwSecurityLabelDlg::enterForeignMode(const svx::seclabel::StanagLabel& rLab
     m_xRelabelBtn->set_visible(!m_aPolicySet.empty());
 }
 
-std::vector<bool> SwSecurityLabelDlg::collectSelection() const
+std::vector<bool> SvxSecurityLabelDialog::collectSelection() const
 {
     const int nCount = m_xCategories->n_children();
     std::vector<bool> aSelected(nCount);
@@ -335,7 +307,7 @@ std::vector<bool> SwSecurityLabelDlg::collectSelection() const
     return aSelected;
 }
 
-void SwSecurityLabelDlg::UpdatePreview()
+void SvxSecurityLabelDialog::UpdatePreview()
 {
     if (m_bForeignPolicy || !m_pPolicy)
         return; // the foreign/no-policy view owns the preview and notice
@@ -356,13 +328,13 @@ void SwSecurityLabelDlg::UpdatePreview()
     m_xWarning->set_visible(!sWarning.isEmpty());
 }
 
-IMPL_LINK_NOARG(SwSecurityLabelDlg, ClassificationHdl, weld::ComboBox&, void)
+IMPL_LINK_NOARG(SvxSecurityLabelDialog, ClassificationHdl, weld::ComboBox&, void)
 {
     PopulateCategories();
     UpdatePreview();
 }
 
-IMPL_LINK(SwSecurityLabelDlg, CategoryToggleHdl, const weld::TreeView::iter_col&, rIterCol, void)
+IMPL_LINK(SvxSecurityLabelDialog, CategoryToggleHdl, const weld::TreeView::iter_col&, rIterCol, void)
 {
     // Single-selection tags: toggling one category clears the others of that tag.
     const int nRow = m_xCategories->get_iter_index_in_parent(rIterCol.first);
@@ -382,13 +354,10 @@ IMPL_LINK(SwSecurityLabelDlg, CategoryToggleHdl, const weld::TreeView::iter_col&
     UpdatePreview();
 }
 
-void SwSecurityLabelDlg::applyLabel(const OUString& rClassification,
-                                   const std::vector<bool>& rSelected)
+void SvxSecurityLabelDialog::applyLabel(const OUString& rClassification,
+                                        const std::vector<bool>& rSelected)
 {
-    SwDocShell* pDocShell = m_rSh.GetDoc()->GetDocShell();
-    if (!pDocShell)
-        return;
-    uno::Reference<frame::XModel> xModel(pDocShell->GetModel());
+    uno::Reference<frame::XModel> xModel = m_pTarget->getModel();
     if (!xModel.is())
         return;
 
@@ -403,75 +372,33 @@ void SwSecurityLabelDlg::applyLabel(const OUString& rClassification,
         = svx::seclabel::buildItemProps(makeGuid(), svx::seclabel::STANAG_BINDING_SCHEMA);
     svx::seclabel::storeLabelPart(xModel, aLabel.toBindingXml(), sItemProps);
 
-    sal_Int32 nColor = 0;
+    // Derive the marking + placements from the policy; the target renders them.
+    svx::seclabel::LabelPlacement aPlacement;
+    aPlacement.aMarking = m_pPolicy->buildMarking(rClassification, rSelected);
     for (const auto& rClass : m_pPolicy->aClassifications)
     {
         if (rClass.aName == rClassification)
         {
-            nColor = svx::seclabel::resolveColor(rClass.aColor);
+            aPlacement.nColor = svx::seclabel::resolveColor(rClass.aColor);
             break;
         }
     }
-    sw::seclabel::applyMarking(xModel, m_pPolicy->buildMarking(rClassification, rSelected), nColor,
-                               getCurrentPageStyle(xModel));
+    aPlacement.bCoverStart = m_pPolicy->wantsDocumentStart(rClassification, rSelected);
+    aPlacement.bCoverEnd = m_pPolicy->wantsDocumentEnd(rClassification, rSelected);
+    aPlacement.bPortion = m_pPolicy->wantsPortionMarking(rClassification, rSelected);
+    aPlacement.bWatermark = m_pPolicy->wantsWatermark(rClassification, rSelected);
+    m_pTarget->applyMarking(aPlacement);
 
-    // Watermark is policy-driven: set it when the selection calls for one. A
-    // default-constructed item has empty text, which clears any prior watermark,
-    // so a re-label that drops the watermark can't leave a stale one behind.
-    SfxWatermarkItem aWatermark;
-    if (m_pPolicy->wantsWatermark(rClassification, rSelected))
-    {
-        aWatermark.SetText(m_pPolicy->buildMarking(rClassification, rSelected));
-        aWatermark.SetColor(Color(ColorTransparency, static_cast<sal_uInt32>(nColor)));
-    }
-    m_rSh.SetWatermark(aWatermark);
-
-    // Cover/end-page markings are policy-driven too (and self-clearing on re-label).
-    sw::seclabel::applyBodyMarkings(xModel, m_pPolicy->buildMarking(rClassification, rSelected),
-                                    nColor, m_pPolicy->wantsDocumentStart(rClassification, rSelected),
-                                    m_pPolicy->wantsDocumentEnd(rClassification, rSelected));
-
-    // Portion marking annotates the portion the user had selected (the view cursor).
-    if (m_pPolicy->wantsPortionMarking(rClassification, rSelected))
-    {
-        sw::seclabel::applyPortionMarking(
-            xModel, m_pPolicy->buildMarking(rClassification, rSelected), nColor);
-    }
-
-    notifyBanner();
+    m_pTarget->notify(aLabel.summary());
 }
 
-void SwSecurityLabelDlg::notifyBanner()
-{
-    if (!comphelper::COKit::isActive())
-        return;
-    SwDocShell* pDocShell = m_rSh.GetDoc()->GetDocShell();
-    if (!pDocShell)
-        return;
-    uno::Reference<frame::XModel> xModel(pDocShell->GetModel());
-    svx::seclabel::StanagLabel aLabel;
-    OUString aMarking;
-    if (xModel.is() && svx::seclabel::readLabel(xModel, aLabel))
-        aMarking = aLabel.summary();
-
-    // Same shape as getCommandValues(".uno:SecurityLabel"): the browser banner
-    // reads state.marking (empty => hide the banner).
-    tools::JsonWriter aJson;
-    aJson.put("commandName", ".uno:SecurityLabel");
-    {
-        auto aState = aJson.startNode("state");
-        aJson.put("marking", aMarking);
-    }
-    m_rSh.GetView().viewCallback(COKitCallbackType::STATE_CHANGED, aJson.finishAndGetAsOString());
-}
-
-IMPL_LINK_NOARG(SwSecurityLabelDlg, PolicyHdl, weld::ComboBox&, void)
+IMPL_LINK_NOARG(SvxSecurityLabelDialog, PolicyHdl, weld::ComboBox&, void)
 {
     setActivePolicy(m_xPolicy->get_active());
     UpdatePreview();
 }
 
-IMPL_LINK_NOARG(SwSecurityLabelDlg, OkHdl, weld::Button&, void)
+IMPL_LINK_NOARG(SvxSecurityLabelDialog, OkHdl, weld::Button&, void)
 {
     if (m_bForeignPolicy || !m_pPolicy)
         return; // read-only foreign/no-policy view; nothing to apply
@@ -483,7 +410,7 @@ IMPL_LINK_NOARG(SwSecurityLabelDlg, OkHdl, weld::Button&, void)
     m_xDialog->response(RET_OK);
 }
 
-IMPL_LINK_NOARG(SwSecurityLabelDlg, RelabelHdl, weld::Button&, void)
+IMPL_LINK_NOARG(SvxSecurityLabelDialog, RelabelHdl, weld::Button&, void)
 {
     // Leave the read-only foreign view and start a fresh label under the policy
     // selected in the selector: re-enable the editor, drop the notice, restore Apply.
@@ -495,21 +422,25 @@ IMPL_LINK_NOARG(SwSecurityLabelDlg, RelabelHdl, weld::Button&, void)
     UpdatePreview();
 }
 
-IMPL_LINK_NOARG(SwSecurityLabelDlg, RemoveHdl, weld::Button&, void)
+IMPL_LINK_NOARG(SvxSecurityLabelDialog, RemoveHdl, weld::Button&, void)
 {
-    SwDocShell* pDocShell = m_rSh.GetDoc()->GetDocShell();
-    if (!pDocShell)
-        return;
-    uno::Reference<frame::XModel> xModel(pDocShell->GetModel());
+    uno::Reference<frame::XModel> xModel = m_pTarget->getModel();
     if (!xModel.is())
         return;
-    sw::seclabel::removeLabel(xModel, getCurrentPageStyle(xModel));
-
-    // A default item has empty text, which clears any watermark the label set.
-    m_rSh.SetWatermark(SfxWatermarkItem());
-
-    notifyBanner();
+    svx::seclabel::removeLabelPart(xModel); // the customXml part
+    m_pTarget->clearMarkings(); // header/footer, body, watermark
+    m_pTarget->notify(OUString()); // empty => banner hides
     m_xDialog->response(RET_OK);
+}
+
+namespace svx::seclabel
+{
+VclPtr<VclAbstractDialog>
+CreateSecurityLabelDialog(weld::Window* pParent, std::unique_ptr<SecurityLabelTarget> pTarget)
+{
+    using AbstractImpl = vcl::AbstractDialogImpl_Async<VclAbstractDialog, SvxSecurityLabelDialog>;
+    return VclPtr<AbstractImpl>::Create(pParent, std::move(pTarget));
+}
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -76,7 +76,8 @@
 #include <mailmrge.hxx>
 #include <mergetbl.hxx>
 #include <multmrk.hxx>
-#include <seclabeldlg.hxx>
+#include <SwSecurityLabelTarget.hxx>
+#include <svx/seclabel/SecurityLabelDialog.hxx>
 #include <num.hxx>
 #include <outline.hxx>
 #include <column.hxx>
@@ -1032,9 +1033,9 @@ VclPtr<VclAbstractDialog> SwAbstractDialogFactory_Impl::CreateMultiTOXMarkDlg(we
 
 VclPtr<VclAbstractDialog> SwAbstractDialogFactory_Impl::CreateSecurityLabelDlg(weld::Window* pParent, SwWrtShell& rSh)
 {
-    using AbstractSecurityLabelDlg_Impl
-        = vcl::AbstractDialogImpl_Async<VclAbstractDialog, SwSecurityLabelDlg>;
-    return VclPtr<AbstractSecurityLabelDlg_Impl>::Create(pParent, rSh);
+    // The dialog itself lives in svx; Writer supplies the marking placement target.
+    return svx::seclabel::CreateSecurityLabelDialog(
+        pParent, std::make_unique<SwSecurityLabelTarget>(rSh));
 }
 
 namespace

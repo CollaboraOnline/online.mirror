@@ -16,25 +16,27 @@
  *   except in compliance with the License. You may obtain a copy of
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
-#ifndef INCLUDED_SW_SOURCE_UIBASE_INC_SECLABELDLG_HXX
-#define INCLUDED_SW_SOURCE_UIBASE_INC_SECLABELDLG_HXX
+
+#pragma once
 
 #include <vcl/weld.hxx>
 
+#include <svx/seclabel/SecurityLabelTarget.hxx>
 #include <svx/seclabel/SpifPolicy.hxx>
 
-class SwWrtShell;
+#include <memory>
 
 // SPIF/STANAG security label dialog. The provisioned policies populate the policy
 // selector; the chosen policy's classifications and category tag sets drive the
 // classification dropdown and the flat checkable category list.
-class SwSecurityLabelDlg final : public weld::GenericDialogController
+class SvxSecurityLabelDialog final : public weld::GenericDialogController
 {
     svx::seclabel::SpifPolicySet m_aPolicySet;
     // The policy currently driving the editor (an entry of m_aPolicySet), or null
     // when no policy is provisioned.
     const svx::seclabel::SpifPolicy* m_pPolicy = nullptr;
-    SwWrtShell& m_rSh;
+    // App-specific marking placement + banner push, and the model access.
+    std::unique_ptr<svx::seclabel::SecurityLabelTarget> m_pTarget;
 
     // Per category row: flat index of its owning tag, and whether that tag is
     // single-selection (toggling one of its categories clears the others).
@@ -68,10 +70,6 @@ class SwSecurityLabelDlg final : public weld::GenericDialogController
 
     std::vector<bool> collectSelection() const;
     void applyLabel(const OUString& rClassification, const std::vector<bool>& rSelected);
-    // Push the document's current marking to the browser (online) as a
-    // .uno:SecurityLabel state change, so the classification banner tracks a
-    // label being applied or removed mid-session.
-    void notifyBanner();
     void PopulatePolicies();
     void PopulateClassifications();
     void PopulateCategories();
@@ -86,10 +84,9 @@ class SwSecurityLabelDlg final : public weld::GenericDialogController
     void enterForeignMode(const svx::seclabel::StanagLabel& rLabel);
 
 public:
-    SwSecurityLabelDlg(weld::Window* pParent, SwWrtShell& rSh);
-    virtual ~SwSecurityLabelDlg() override;
+    SvxSecurityLabelDialog(weld::Window* pParent,
+                           std::unique_ptr<svx::seclabel::SecurityLabelTarget> pTarget);
+    virtual ~SvxSecurityLabelDialog() override;
 };
-
-#endif // INCLUDED_SW_SOURCE_UIBASE_INC_SECLABELDLG_HXX
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

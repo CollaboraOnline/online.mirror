@@ -43,6 +43,9 @@ const allWriterDialogs = [
 
 // 'common' dialogs that writer specifically does not support
 const excludedCommonDialogs = [
+    // Not exercised in this ODF a11y run: the Security Label rides in the OOXML
+    // customXml part, so the command is not meaningful on these fixtures.
+    '.uno:SecurityLabel',
     '.uno:SpellDialog'
 ];
 

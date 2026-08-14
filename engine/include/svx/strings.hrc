@@ -1870,6 +1870,14 @@
 #define STR_WARNING_GRAPHIC_PIXEL_COUNT_LOW   NC_("STR_WARNING_GRAPHIC_PIXEL_COUNT_LOW", "Image '%NAME%' has too few pixels for the current size (%DPIX% x %DPIY% DPI)")
 #define STR_WARNING_GRAPHIC_PIXEL_COUNT_HIGH  NC_("STR_WARNING_GRAPHIC_PIXEL_COUNT_HIGH", "Image '%NAME%' has too many pixels for the current size (%DPIX% x %DPIY% DPI)")
 
+// Security-label (SPIF/STANAG) dialog validation and status messages.
+#define RID_SVXSTR_SECLABEL_MIN               NC_("RID_SVXSTR_SECLABEL_MIN", "Select at least %1 value(s) from '%2'.")
+#define RID_SVXSTR_SECLABEL_MAX               NC_("RID_SVXSTR_SECLABEL_MAX", "Select at most %1 value(s) from '%2'.")
+#define RID_SVXSTR_SECLABEL_EXCLUDED          NC_("RID_SVXSTR_SECLABEL_EXCLUDED", "'%1' cannot be combined with the current selection.")
+#define RID_SVXSTR_SECLABEL_REQUIRED          NC_("RID_SVXSTR_SECLABEL_REQUIRED", "'%1' requires another category to be selected.")
+#define RID_SVXSTR_SECLABEL_FOREIGN           NC_("RID_SVXSTR_SECLABEL_FOREIGN", "This document is labeled under policy '%1', which is not available here. You can view it, or re-label it under an available policy.")
+#define RID_SVXSTR_SECLABEL_NOPOLICY          NC_("RID_SVXSTR_SECLABEL_NOPOLICY", "No security policies are available.")
+
 #endif
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

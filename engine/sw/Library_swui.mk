@@ -137,7 +137,7 @@ $(eval $(call gb_Library_add_exception_objects,swui,\
     sw/source/ui/index/cntex \
     sw/source/ui/index/cnttab \
     sw/source/ui/index/multmrk \
-    sw/source/ui/seclabel/seclabeldlg \
+    sw/source/ui/seclabel/SwSecurityLabelTarget \
     sw/source/ui/index/swuiidxmrk \
     sw/source/ui/misc/bookmark \
     sw/source/ui/misc/contentcontroldlg \

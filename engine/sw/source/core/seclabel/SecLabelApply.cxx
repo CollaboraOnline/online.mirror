@@ -9,8 +9,6 @@
 
 #include <SecLabelApply.hxx>
 
-#include <svx/seclabel/SecLabelStore.hxx>
-
 #include <com/sun/star/awt/FontWeight.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/container/XNameAccess.hpp>
@@ -277,7 +275,6 @@ void applyPortionMarking(const uno::Reference<frame::XModel>& xModel,
 
 void removeLabel(const uno::Reference<frame::XModel>& xModel, const OUString& rPageStyleName)
 {
-    svx::seclabel::removeLabelPart(xModel);
     removeBodyMarkings(xModel);
 
     // Clear the marking the label wrote into the page style (v1 apply replaced the

@@ -283,7 +283,6 @@ constexpr auto SwriterDialogList
         { u"modules/swriter/ui/inputfielddialog.ui" },
         { u"modules/swriter/ui/insertbookmark.ui" },
         { u"modules/swriter/ui/insertbreak.ui" },
-        { u"modules/swriter/ui/seclabeldialog.ui" },
         { u"modules/swriter/ui/insertcaption.ui" },
         { u"modules/swriter/ui/inserttable.ui" },
         { u"modules/swriter/ui/insertsectiondialog.ui" },
@@ -404,6 +403,7 @@ constexpr auto OtherDialogList
         { u"svx/ui/redlinecontrol.ui" },
         { u"svx/ui/redlinefilterpage.ui" },
         { u"svx/ui/redlineviewpage.ui" },
+        { u"svx/ui/seclabeldialog.ui" },
         { u"svx/ui/themecoloreditdialog.ui" },
         { u"svx/ui/themedialog.ui" },
         // uui
@@ -915,6 +915,11 @@ std::vector<OUString> completeCommonDialogList(const o3tl::sorted_vector<OUStrin
                 // Spelling dialog's Options... button
                 continue;
             }
+
+            // The Security Label rides in the OOXML customXml part, so the command
+            // is only meaningful on those documents; every a11y fixture is ODF.
+            if (entry == u"svx/ui/seclabeldialog.ui")
+                continue;
 
             if (docType != COKitDocumentType::TEXT)
             {

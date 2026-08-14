@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Security label dialog (SPIF/STANAG). Spike: contents populated at runtime. -->
-<interface domain="sw">
+<interface domain="svx">
   <requires lib="gtk+" version="3.24"/>
   <object class="GtkTreeStore" id="categorystore">
     <columns>

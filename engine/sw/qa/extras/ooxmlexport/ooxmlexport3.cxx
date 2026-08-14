@@ -234,6 +234,9 @@ CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelRemove)
     svx::seclabel::StanagLabel aBefore;
     CPPUNIT_ASSERT(svx::seclabel::readLabel(xModel, aBefore));
 
+    // Removal is two steps (as the dialog RemoveHdl does): drop the customXml part
+    // (app-agnostic) then clear the Writer markings.
+    svx::seclabel::removeLabelPart(xModel);
     sw::seclabel::removeLabel(xModel, u"Standard"_ustr);
 
     // The STANAG part is gone and the header is cleared.

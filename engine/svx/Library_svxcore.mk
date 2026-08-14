@@ -112,6 +112,7 @@ $(eval $(call gb_Library_add_exception_objects,svxcore,\
     svx/source/core/graphichelper \
     svx/source/core/extendedprimitive2dxmldump \
     svx/source/seclabel/SecLabelStore \
+    svx/source/seclabel/SecurityLabelTarget \
     svx/source/seclabel/SpifPolicy \
     svx/source/seclabel/StanagLabel \
     svx/source/customshapes/EnhancedCustomShape2d \
