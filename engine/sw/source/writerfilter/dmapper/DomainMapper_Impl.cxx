@@ -10188,7 +10188,7 @@ void DomainMapper_Impl::ApplySettingsTable()
         // A distance of zero means the document has no automatic tab stops. The document
         // default only takes a positive distance, so store the smallest one it accepts.
         if (nDefTab == 0)
-            nDefTab = convertTwipToMm100(1);
+            nDefTab = 1;
         xTextDefaults->setPropertyValue( getPropertyName( PROP_TAB_STOP_DISTANCE ), cpo::uno::Any(nDefTab) );
         if (m_pSettingsTable->GetLinkStyles())
         {
