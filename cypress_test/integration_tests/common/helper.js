@@ -1359,6 +1359,18 @@ function processToIdle(win) {
 	});
 }
 
+// Waits for a map stateChangeHandler item to reach the expected value.
+// Useful after sending uno commands where the state change message from
+// core may arrive asynchronously based on a state change timer from core
+function waitForMapState(command, expectedValue) {
+	cy.log('>> waitForMapState - start');
+	cy.log('Param - command: ' + command + ', expectedValue: ' + expectedValue);
+	cy.getFrameWindow().should(win => {
+		expect(win.app.map['stateChangeHandler'].getItemValue(command)).to.equal(expectedValue);
+	});
+	cy.log('<< waitForMapState - end');
+}
+
 // Wait until no timers of the given tag exist.
 // If no timers with the tag exist at call time resolve immediately.
 function waitForTimers(win, tag) {
@@ -1451,6 +1463,7 @@ module.exports.getMenuEntry = getMenuEntry;
 module.exports.waitUntilCoreIsIdle = waitUntilCoreIsIdle;
 module.exports.waitUntilLayoutingIsIdle = waitUntilLayoutingIsIdle;
 module.exports.processToIdle = processToIdle;
+module.exports.waitForMapState = waitForMapState;
 module.exports.waitForTimers = waitForTimers;
 module.exports.maxScreenshotableViewportHeight = maxScreenshotableViewportHeight;
 module.exports.realPressInDialog = realPressInDialog;
