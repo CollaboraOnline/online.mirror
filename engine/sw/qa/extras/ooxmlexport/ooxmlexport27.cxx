@@ -528,6 +528,18 @@ CPPUNIT_TEST_FIXTURE(Test, testEquationFontSize)
     assertXPath(pXmlDoc, "//w:p[3]/m:oMath/m:f/m:fPr/m:ctrlPr/w:rPr/w:sz", "val", u"40");
 }
 
+CPPUNIT_TEST_FIXTURE(Test, testTdf168607_tabstopZero)
+{
+    // Given a 1 page document, where the default tab-stop length is zero
+
+    createSwDoc("tdf168607_tabstopZero.docx");
+    CPPUNIT_ASSERT_EQUAL(1, getPages());
+
+    saveAndReload(TestFilter::DOC);
+
+    CPPUNIT_ASSERT_EQUAL(1, getPages());
+}
+
 } // end of anonymous namespace
 CPPUNIT_PLUGIN_IMPLEMENT();
 
