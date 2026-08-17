@@ -1588,6 +1588,12 @@ window.L.Map = window.L.Evented.extend({
 
 		// prevents outline when clicking on keyboard-focusable element
 		if (type === 'mousedown') {
+			if (this._docLayer && (this._docLayer._docType === 'presentation' || this._docLayer._docType === 'drawing') && this._docLayer._preview) {
+				this._docLayer._preview.partsFocused = false;
+				if (this._clip) {
+					this._clip.clearSelection();
+				}
+			}
 			window.L.DomUtil.preventOutline(e.target || e.srcElement);
 			// Prevents image dragging on Mozilla when map's dragging
 			// option is set to false
