@@ -5,6 +5,7 @@ const desktopHelper = require('../../common/desktop_helper');
 
 describe(['tagdesktop'], 'Sidebar accelerator info boxes', function () {
 	let win;
+	const sidebarJSON = [];
 
 	before(function () {
 		cy.viewport(1920, 1024);
@@ -13,6 +14,32 @@ describe(['tagdesktop'], 'Sidebar accelerator info boxes', function () {
 
 		cy.getFrameWindow().then(function (frameWindow) {
 			win = frameWindow;
+			win.app.map.on('sidebar', function (e) {
+				sidebarJSON.push(e.data);
+			});
+		});
+
+		// Reopen the deck so core describes the panel again, this time with a listener.
+		cy.then(function () {
+			win.app.map.sendUnoCommand('.uno:SidebarDeck.PropertyDeck');
+			return helper.processToIdle(win);
+		});
+
+		cy.then(function () {
+			win.app.map.sendUnoCommand('.uno:SidebarDeck.PropertyDeck');
+			return helper.processToIdle(win);
+		});
+
+
+		cy.wrap(null, { timeout: 20000 }).should(function () {
+			const combinations = win.app.UI.notebookbarAccessibility.definitions
+				.sidebarCombinations[win.app.map.getDocType()] || {};
+			const sidebar = win.document.getElementById('sidebar-dock-wrapper');
+
+			Object.keys(combinations).forEach(function (id) {
+				if (!sidebar || !sidebar.querySelector('[id="' + id + '"]'))
+					throw new Error(id + ' is not in the sidebar yet');
+			});
 		});
 
 		cy.wrap(null, { timeout: 20000 }).should(function () {
@@ -30,17 +57,41 @@ describe(['tagdesktop'], 'Sidebar accelerator info boxes', function () {
 	});
 
 	it('Slide panel widgets show a clash free accelerator combination', function () {
-		const expected = {
-			'paperformat-input': 'KF',
-			'fillstyle-input': 'KB',
-			'orientation-input': 'KO',
-			'marginLB-input': 'KM',
-			'masterslide-input': 'KS'
-		};
+		const definitions = win.app.UI.notebookbarAccessibility.definitions;
+		const combinations = definitions.sidebarCombinations[win.app.map.getDocType()] || {};
 
-		Object.keys(expected).forEach(function (id) {
-			cy.cGet('#sidebar-dock-wrapper #' + id)
-				.should('have.attr', 'accesskey', expected[id]);
+		cy.wrap(Object.keys(combinations)).should('not.be.empty');
+
+		cy.then(function () {
+			const owners = [];
+			function findOwners(node, panel) {
+				if (!node) return;
+				const owner = node.type === 'panel' ? node : panel;
+				if (owner && node.type === 'listbox' && combinations[node.id + '-input'] !== undefined)
+					owners.push(owner);
+				(node.children || []).forEach(function (child) { findOwners(child, owner); });
+			}
+			sidebarJSON.forEach(function (payload) { findOwners(payload, null); });
+
+			const listboxes = [];
+			function collect(node) {
+				if (!node) return;
+				if (node.type === 'listbox') listboxes.push(node.id + '-input');
+				(node.children || []).forEach(collect);
+			}
+			owners.forEach(collect);
+
+			return listboxes.filter(function (id, at) { return listboxes.indexOf(id) === at; });
+		}).should('not.be.empty').each(function (id) {
+			cy.cGet('#sidebar-dock-wrapper #' + id).then(function ($widget) {
+				if (!$widget.is(':visible')) {
+					cy.wrap($widget).should('not.have.attr', 'accesskey');
+					return;
+				}
+
+				cy.wrap(combinations).should('have.property', id);
+				cy.wrap($widget).should('have.attr', 'accesskey', combinations[id]);
+			});
 		});
 
 		cy.then(function () {
@@ -48,9 +99,9 @@ describe(['tagdesktop'], 'Sidebar accelerator info boxes', function () {
 				win.document.querySelectorAll('.accessibility-info-box')
 			).map(function (box) { return box.textContent; });
 
-			cy.wrap(shown).should('include.members', Object.values(expected));
+			cy.wrap(shown).should('include.members', Object.values(combinations));
 
-			const defs = win.app.UI.notebookbarAccessibility.definitions.getDefinitions();
+			const defs = definitions.getDefinitions();
 			const seen = {};
 			const clashes = [];
 
