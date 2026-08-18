@@ -1031,9 +1031,10 @@ public:
 
     // Each is defined only by the builds that have that kind of socket.
 
-    /// Inserts a new remote websocket to be polled.
+    /// Inserts a new remote websocket to be polled. Returns true when the
+    /// connection was made and the socket is being polled.
     /// NOTE: The DNS lookup is synchronous.
-    void insertNewWebSocketSync(const Poco::URI& uri,
+    bool insertNewWebSocketSync(const Poco::URI& uri,
                                 const std::shared_ptr<WebSocketHandler>& websocketHandler);
 
     bool insertNewUnixSocket(

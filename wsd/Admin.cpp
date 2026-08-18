@@ -1211,26 +1211,36 @@ void MonitorSocketHandler::performWrites(std::size_t capacity)
     return AdminSocketHandler::performWrites(capacity);
 }
 
-void MonitorSocketHandler::onDisconnect()
+/// Schedules another attempt at this monitor, after the retry interval the
+/// configuration gives it, and says what left it needing one. It returns false
+/// when the configuration names no such monitor, in which case nothing is
+/// scheduled.
+static bool scheduleMonitorRetry(const std::string& uri, const std::string_view reason)
 {
-    bool reconnect = false;
-    // schedule monitor reconnect only if monitor uri exist in configuration
+    const std::string uriWithoutParam = uri.substr(0, uri.find('?'));
     for (const auto& monitor : Admin::getMonitorList())
     {
-        const std::string uriWithoutParam = _uri.substr(0, _uri.find('?'));
-        if (Util::iequal(monitor.first, uriWithoutParam))
-        {
-            LOG_ERR("Monitor " << _uri << " dis-connected, re-trying in " << monitor.second  << " seconds");
-            Admin::instance().scheduleMonitorConnect(
-                _uri, std::chrono::steady_clock::now() + std::chrono::seconds(monitor.second));
-            Admin::instance().deleteMonitorSocket(uriWithoutParam);
-            reconnect = true;
-            break;
-        }
+        if (!Util::iequal(monitor.first, uriWithoutParam))
+            continue;
+
+        LOG_ERR("Monitor " << uri << ' ' << reason << ", re-trying in " << monitor.second
+                           << " seconds");
+        Admin::instance().scheduleMonitorConnect(
+            uri, std::chrono::steady_clock::now() + std::chrono::seconds(monitor.second));
+        return true;
+    }
+    return false;
+}
+
+void MonitorSocketHandler::onDisconnect()
+{
+    if (!scheduleMonitorRetry(_uri, "dis-connected"))
+    {
+        LOG_TRC("Remove monitor " << _uri);
+        return;
     }
 
-    if (!reconnect)
-        LOG_TRC("Remove monitor " << _uri);
+    Admin::instance().deleteMonitorSocket(_uri.substr(0, _uri.find('?')));
 }
 
 void Admin::connectToMonitorSync(const std::string &uri)
@@ -1243,6 +1253,16 @@ void Admin::connectToMonitorSync(const std::string &uri)
     }
 
     LOG_TRC("Add monitor " << uri);
+    auto handler = std::make_shared<MonitorSocketHandler>(this, uri);
+    if (!insertNewWebSocketSync(Poco::URI(uri), handler))
+    {
+        // The monitor stays out of _monitorSockets, so the attempt scheduled here gets
+        // past the check above and connects again.
+        if (!scheduleMonitorRetry(uri, "could not be reached"))
+            LOG_TRC("Remove monitor " << uri);
+        return;
+    }
+
     static const bool logMonitorConnect =
         ConfigUtil::getConfigValue<bool>("admin_console.logging.monitor_connect", true);
     if (logMonitorConnect)
@@ -1250,9 +1270,7 @@ void Admin::connectToMonitorSync(const std::string &uri)
         LOG_ANY("Connected to remote monitor with uri [" << uriWithoutParam << ']');
     }
 
-    auto handler = std::make_shared<MonitorSocketHandler>(this, uri);
     _monitorSockets.insert({uriWithoutParam, handler});
-    insertNewWebSocketSync(Poco::URI(uri), handler);
     AdminSocketHandler::subscribeAsync(handler);
 }
 

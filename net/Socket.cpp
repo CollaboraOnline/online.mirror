@@ -933,7 +933,7 @@ void SocketPoll::removeSockets()
 
 #if !MOBILEAPP
 
-void SocketPoll::insertNewWebSocketSync(const Poco::URI& uri,
+bool SocketPoll::insertNewWebSocketSync(const Poco::URI& uri,
                                         const std::shared_ptr<WebSocketHandler>& websocketHandler)
 {
     LOG_TRC("Connecting WS to " << uri.getHost());
@@ -943,7 +943,7 @@ void SocketPoll::insertNewWebSocketSync(const Poco::URI& uri,
     if (isSSL)
     {
         LOG_ERR("Error: wss for client websocket requested but SSL not compiled in.");
-        return;
+        return false;
     }
 #endif
 
@@ -958,11 +958,11 @@ void SocketPoll::insertNewWebSocketSync(const Poco::URI& uri,
     if (websocketHandler->wsRequest(req, uri.getHost(), port, isSSL, *this))
     {
         LOG_DBG("Connected WS to " << uri.getHost());
+        return true;
     }
-    else
-    {
-        LOG_ERR("Failed to connected WS to " << uri.getHost());
-    }
+
+    LOG_ERR("Failed to connected WS to " << uri.getHost());
+    return false;
 }
 
 bool SocketPoll::insertNewUnixSocket(
