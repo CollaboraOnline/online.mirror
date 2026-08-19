@@ -23,6 +23,10 @@ describe('VectorPrimitiveRenderer pattern fill', function () {
 		(globalThis as any).Path2D = originalPath2D;
 	});
 
+	afterEach(function () {
+		ScratchCanvasStub.uninstall();
+	});
+
 	// Its color tells a tile apart from anything else drawn.
 	const child = {
 		type: 'polyPolygonColor',
@@ -39,15 +43,38 @@ describe('VectorPrimitiveRenderer pattern fill', function () {
 		return context;
 	}
 
-	it('draws the children once per tile, clipped to it', function () {
-		const context = render({
-			type: 'patternFill',
-			path: 'M 0 0 L 100 0 L 100 100 L 0 100 Z',
-			bounds: [0, 0, 100, 100],
-			// Quarter-size tiles, four rows of four.
-			referenceRange: [0, 0, 0.25, 0.25],
-			children: [child],
-		});
+	// A square of quarter-size tiles.
+	const pattern = {
+		type: 'patternFill',
+		path: 'M 0 0 L 100 0 L 100 100 L 0 100 Z',
+		bounds: [0, 0, 100, 100],
+		referenceRange: [0, 0, 0.25, 0.25],
+		children: [child],
+	};
+
+	it('draws one tile and repeats it across the bounds', function () {
+		ScratchCanvasStub.install();
+		const context = render(pattern);
+
+		const tile = ScratchCanvasStub.recorder(0);
+		assert.strictEqual(tile.countOf('fill'), 1, 'the children are drawn once');
+		// A quarter of the 100 pixel bounds.
+		assert.strictEqual(tile.canvas.width, 25);
+		assert.strictEqual(tile.canvas.height, 25);
+
+		const fill = context.findCall('fillRect');
+		assert.ok(fill, 'the bounds are filled with the tile');
+		const repeated = fill.properties.fillStyle;
+		assert.strictEqual(repeated.args[1], 'repeat');
+		// The tile maps onto a quarter of the unit square.
+		assert.ok(Math.abs(repeated.transform.a - 0.01) < 1e-12);
+		assert.ok(Math.abs(repeated.transform.d - 0.01) < 1e-12);
+		assert.strictEqual(context.countOf('fill'), 0);
+	});
+
+	it('draws each tile in turn, clipped to it, without a canvas for the tile', function () {
+		ScratchCanvasStub.installUnavailable();
+		const context = render(pattern);
 
 		// Every other row starts one tile back, as the engine lays
 		// them out, so two of the rows hold a fifth tile that lies
@@ -55,6 +82,20 @@ describe('VectorPrimitiveRenderer pattern fill', function () {
 		assert.strictEqual(context.countOf('fill'), 18);
 		// The polygon, and then each tile.
 		assert.strictEqual(context.countOf('clip'), 1 + 18);
+	});
+
+	it('draws each tile in turn when a tile is larger than the target', function () {
+		ScratchCanvasStub.install();
+		// Half-size tiles of a 1000 twip square on a 200 pixel target.
+		const context = render({
+			...pattern,
+			bounds: [0, 0, 1000, 1000],
+			referenceRange: [0, 0, 0.5, 0.5],
+		});
+
+		// Two rows of two, and the second row starts one tile back.
+		assert.strictEqual(context.countOf('fill'), 5);
+		assert.strictEqual(ScratchCanvasStub.created.length, 0);
 	});
 
 	it('skips a pattern whose tiles are under a pixel', function () {

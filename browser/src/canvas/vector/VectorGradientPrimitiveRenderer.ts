@@ -115,36 +115,49 @@ namespace cool {
 				return;
 			}
 
-			const width = context.canvas.width;
-			const height = context.canvas.height;
-			const scratch =
-				width > 0 && height > 0 ? this._scratch.context(width, height) : null;
-			if (!scratch) {
-				// Without a scratch canvas the ramp is painted with
-				// nothing taken back out.
+			// Without a scratch canvas the ramp is drawn opaque, without the
+			// transparency gradient.
+			const plainRamp = (): void =>
 				this._fillRamp(context, gradient, range, stops);
-				context.restore();
-				return;
-			}
+			try {
+				this._scratch.withEffectSlots(plainRamp, (slot) => {
+					const width = context.canvas.width;
+					const height = context.canvas.height;
+					const scratch =
+						width > 0 && height > 0
+							? this._scratch.slotContext(slot, width, height)
+							: null;
+					if (!scratch) {
+						plainRamp();
+						return;
+					}
 
-			// The alpha ramp takes away what it says is clear.
-			scratch.setTransform(context.getTransform());
-			this._fillRamp(scratch, gradient, range, stops);
-			scratch.globalCompositeOperation = 'destination-in';
-			this._fillRamp(
-				scratch,
-				alphaGradient,
-				range,
-				VectorGradientPrimitiveRenderer._rampStops(alphaGradient, {
-					red: 0,
-					green: 0,
-					blue: 0,
-					alpha: 1,
-				}),
-			);
-			scratch.globalCompositeOperation = 'source-over';
-			this._scratch.drawOnto(context, scratch);
-			context.restore();
+					// The transparency ramp, drawn with destination-in, scales
+					// the color ramp by its opacity.
+					scratch.setTransform(context.getTransform());
+					this._fillRamp(scratch, gradient, range, stops);
+					scratch.globalCompositeOperation = 'destination-in';
+					this._fillRamp(
+						scratch,
+						alphaGradient,
+						range,
+						VectorGradientPrimitiveRenderer._rampStops(alphaGradient, {
+							red: 0,
+							green: 0,
+							blue: 0,
+							alpha: 1,
+						}),
+					);
+					scratch.globalCompositeOperation = 'source-over';
+					this._scratch.drawOnto(
+						context,
+						scratch,
+						VectorScratchCanvases.wholeTarget(context),
+					);
+				});
+			} finally {
+				context.restore();
+			}
 		}
 
 		// The canvas gradient for a ramp, in the ramp's own space.

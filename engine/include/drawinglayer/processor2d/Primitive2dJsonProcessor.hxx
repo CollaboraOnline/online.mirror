@@ -117,6 +117,8 @@ private:
     void writePathScaled(const basegfx::B2DPolyPolygon& rPolyPolygon);
 
     void writeRange(std::string_view sName, const basegfx::B2DRange& rRange, double fScale);
+    /// Write the range the primitive covers as "bounds", scaled. An empty range is left out.
+    void writeBoundsScaled(const drawinglayer::primitive2d::BasePrimitive2D& rPrimitive);
     void writeHatchScaled(const drawinglayer::attribute::FillHatchAttribute& rHatch);
     void writeFillGraphic(const drawinglayer::attribute::FillGraphicAttribute& rFillGraphic);
     void writeLineAttributeScaled(const drawinglayer::attribute::LineAttribute& rLineAttribute);

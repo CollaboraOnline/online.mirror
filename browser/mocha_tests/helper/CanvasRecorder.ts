@@ -46,6 +46,17 @@ class GradientRecorder {
 	}
 }
 
+/// A pattern from CanvasRecorder, with its arguments and last transform.
+class PatternRecorder {
+	public transform: Record<string, number> | undefined;
+
+	constructor(public readonly args: any[]) {}
+
+	setTransform(transform: Record<string, number>): void {
+		this.transform = transform;
+	}
+}
+
 /// Test helper that mimics a CanvasRenderingContext2D. Pass an instance of
 /// CanvasRecorder wherever production code expects a context. Every method
 /// invocation is recorded into calls, and every assigned drawing-state
@@ -61,6 +72,9 @@ class CanvasRecorder {
 	public readonly canvas: { width: number; height: number };
 	/// Every gradient handed out, in the order it was created.
 	public readonly gradients: GradientRecorder[] = [];
+	/// The RGBA value of every pixel getImageData returns. Unset is transparent
+	/// black.
+	public imagePixel: number[] | undefined;
 	private _depth: number = 0;
 	/// The live transform as [a, b, c, d, e, f], kept up to date through
 	/// the transform calls and the save stack so getTransform answers
@@ -242,6 +256,18 @@ class CanvasRecorder {
 		const t = this._transform;
 		return { a: t[0], b: t[1], c: t[2], d: t[3], e: t[4], f: t[5] };
 	}
+	getImageData(x: number, y: number, width: number, height: number): any {
+		this._record('getImageData', [x, y, width, height]);
+		const data = new Uint8ClampedArray(width * height * 4);
+		if (this.imagePixel) {
+			for (let index = 0; index < data.length; index += 4)
+				data.set(this.imagePixel, index);
+		}
+		return { width: width, height: height, data: data };
+	}
+	putImageData(...args: any[]): void {
+		this._record('putImageData', args);
+	}
 
 	/// Multiply the live transform by another, the way a canvas
 	/// composes a new transform onto the one already in place.
@@ -265,9 +291,9 @@ class CanvasRecorder {
 	createRadialGradient(...args: any[]): GradientRecorder {
 		return this._makeGradient('radial', args);
 	}
-	createPattern(...args: any[]): null {
+	createPattern(...args: any[]): PatternRecorder {
 		this._record('createPattern', args);
-		return null;
+		return new PatternRecorder(args);
 	}
 
 	private _makeGradient(kind: string, args: any[]): GradientRecorder {

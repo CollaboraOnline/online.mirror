@@ -408,6 +408,13 @@ void Primitive2dJsonProcessor::writeArrowAttributeScaled(
                  rArrow.isCentered() ? aRange.getCenter().getY() : aRange.getMinimum().getY());
 }
 
+void Primitive2dJsonProcessor::writeBoundsScaled(const BasePrimitive2D& rPrimitive)
+{
+    const basegfx::B2DRange aRange(rPrimitive.getB2DRange(maViewInformation2D));
+    if (!aRange.isEmpty())
+        writeRange("bounds", aRange, mfScaleFactor);
+}
+
 void Primitive2dJsonProcessor::writeTextPortionScaled(
     const TextSimplePortionPrimitive2D& rPrimitive)
 {
@@ -1101,6 +1108,7 @@ void Primitive2dJsonProcessor::processPrimitive(const BasePrimitive2D& rBasePrim
         {
             const auto& rPrimitive = static_cast<const TransparencePrimitive2D&>(rBasePrimitive);
             mrWriter.put("type", "transparence");
+            writeBoundsScaled(rPrimitive);
             {
                 auto aChildArray = mrWriter.startArray("children");
                 decomposeAndWrite(rPrimitive.getChildren());
@@ -1141,6 +1149,7 @@ void Primitive2dJsonProcessor::processPrimitive(const BasePrimitive2D& rBasePrim
             mrWriter.put("color", colorToHex(rPrimitive.getShadowColor()));
             mrWriter.put("blur", rPrimitive.getShadowBlur() * mfScaleFactor);
             writeMatrixTranslationScaled("matrix", rPrimitive.getShadowTransform());
+            writeBoundsScaled(rPrimitive);
             {
                 auto aChildArray = mrWriter.startArray("children");
                 decomposeAndWrite(rPrimitive.getChildren());
@@ -1152,8 +1161,12 @@ void Primitive2dJsonProcessor::processPrimitive(const BasePrimitive2D& rBasePrim
         {
             const auto& rPrimitive = static_cast<const GlowPrimitive2D&>(rBasePrimitive);
             mrWriter.put("type", "glow");
-            mrWriter.put("color", colorToHex(rPrimitive.getGlowColor().getBColor()));
+            const Color aGlowColor(rPrimitive.getGlowColor());
+            mrWriter.put("color", colorToHex(aGlowColor.getBColor()));
+            if (aGlowColor.IsTransparent())
+                mrWriter.put("transparency", 1.0 - aGlowColor.GetAlpha() / 255.0);
             mrWriter.put("radius", rPrimitive.getGlowRadius() * mfScaleFactor);
+            writeBoundsScaled(rPrimitive);
             {
                 auto aChildArray = mrWriter.startArray("children");
                 decomposeAndWrite(rPrimitive.getChildren());
@@ -1166,6 +1179,7 @@ void Primitive2dJsonProcessor::processPrimitive(const BasePrimitive2D& rBasePrim
             const auto& rPrimitive = static_cast<const SoftEdgePrimitive2D&>(rBasePrimitive);
             mrWriter.put("type", "softEdge");
             mrWriter.put("radius", rPrimitive.getRadius() * mfScaleFactor);
+            writeBoundsScaled(rPrimitive);
             {
                 auto aChildArray = mrWriter.startArray("children");
                 decomposeAndWrite(rPrimitive.getChildren());

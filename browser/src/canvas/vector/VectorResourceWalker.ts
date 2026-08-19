@@ -11,8 +11,8 @@
 
 namespace cool {
 	/// Walk a JSON primitive tree and collect the checksum of every
-	/// image-bearing primitive and the font id of every text portion
-	/// seen. Recurses into the children container.
+	/// image-bearing primitive and the font id of every text portion, including
+	/// those in the mask of a transparence.
 	export class VectorResourceWalker {
 		private _checksums: Set<number>;
 		private _fontIds: Set<string>;
@@ -42,6 +42,9 @@ namespace cool {
 				this._checksums.add(fillGraphic.checksum);
 			const fontId = (primitive as TextSimplePortionPrimitive).fontId;
 			if (typeof fontId === 'string') this._fontIds.add(fontId);
+			// A mask is a subtree, a uniform transparency a number.
+			const transparence = (primitive as TransparencePrimitive).transparence;
+			if (Array.isArray(transparence)) this.walkPrimitives(transparence);
 			if (primitive.children) this.walkPrimitives(primitive.children);
 		}
 	}

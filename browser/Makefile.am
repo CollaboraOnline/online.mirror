@@ -490,6 +490,7 @@ COOL_JS_LST =\
 	src/canvas/vector/primitive/FillGraphicAttribute.ts \
 	src/canvas/vector/primitive/FillGraphicPrimitive.ts \
 	src/canvas/vector/primitive/FillHatchPrimitive.ts \
+	src/canvas/vector/primitive/GlowPrimitive.ts \
 	src/canvas/vector/primitive/GradientAttribute.ts \
 	src/canvas/vector/primitive/HatchAttribute.ts \
 	src/canvas/vector/primitive/PatternFillPrimitive.ts \
@@ -497,6 +498,9 @@ COOL_JS_LST =\
 	src/canvas/vector/primitive/PolyPolygonGradientPrimitive.ts \
 	src/canvas/vector/primitive/PolyPolygonGraphicPrimitive.ts \
 	src/canvas/vector/primitive/PolyPolygonHatchPrimitive.ts \
+	src/canvas/vector/primitive/ShadowPrimitive.ts \
+	src/canvas/vector/primitive/SoftEdgePrimitive.ts \
+	src/canvas/vector/primitive/TransparencePrimitive.ts \
 	src/canvas/vector/primitive/Primitive.ts \
 	src/canvas/vector/primitive/SingleLinePrimitive.ts \
 	src/canvas/vector/primitive/TextDecoratedPortionPrimitive.ts \

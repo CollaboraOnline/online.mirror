@@ -30,6 +30,7 @@
 /// <reference path="./helper/Events.ts"/>
 /// <reference path="./helper/util.ts"/>
 /// <reference path="./helper/CanvasRecorder.ts"/>
+/// <reference path="./helper/ScratchCanvasStub.ts"/>
 /// <reference path="./helper/Path2DRecorder.ts"/>
 /// <reference path="./helper/ImageRecorder.ts"/>
 /// <reference path="./helper/VectorRenderingReference.ts"/>
@@ -59,6 +60,8 @@
 /// <reference path="./VectorHatchPrimitives.test.ts" />
 /// <reference path="./VectorImageFillPrimitives.test.ts" />
 /// <reference path="./VectorPatternFillPrimitives.test.ts" />
+/// <reference path="./VectorEffectPrimitives.test.ts" />
+/// <reference path="./VectorResourceWalker.test.ts" />
 /// <reference path="./InternUtil.test.ts" />
 /// <reference path="./Plural.test.ts" />
 /// <reference path="./VectorManager.test.ts" />

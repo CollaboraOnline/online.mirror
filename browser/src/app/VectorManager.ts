@@ -658,6 +658,7 @@ class VectorManager extends RenderManagerBase {
 		this._bitmaps.clear();
 		this._cache.clear();
 		this._inFlightParts.clear();
+		this._renderer.releaseScratchCanvases();
 		this._fireChanged();
 	}
 
@@ -668,6 +669,7 @@ class VectorManager extends RenderManagerBase {
 		this._pendingPreviews.clear();
 		this._bitmaps.clear();
 		this._renderedPreviews.clear();
+		this._renderer.releaseScratchCanvases();
 		for (const face of this._fonts.values())
 			(document as unknown as { fonts: Set<FontFace> }).fonts.delete(face);
 		this._fonts.clear();
