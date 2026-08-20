@@ -89,8 +89,9 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		this.sectionProperties.handleHeight = ShapeHandlesSection.handleSize();
 		this.sectionProperties.anchorWidth = 20 * app.dpiScale;
 		this.sectionProperties.anchorHeight = 20 * app.dpiScale;
-		this.sectionProperties.rotationHandleWidth = 15 * app.dpiScale;
-		this.sectionProperties.rotationHandleHeight = 15 * app.dpiScale;
+		// Twice the width of a scaling handle, so the rotate icon drawn in it reads clearly.
+		this.sectionProperties.rotationHandleWidth = 24 * app.dpiScale;
+		this.sectionProperties.rotationHandleHeight = 24 * app.dpiScale;
 		this.sectionProperties.gluePointRadius = ShapeHandlesSection.gluePointSize();
 		this.sectionProperties.subSectionPrefix = 'shape-handle-';
 		this.sectionProperties.svg = null; // This is for preview of modifications.

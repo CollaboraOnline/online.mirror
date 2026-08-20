@@ -10,6 +10,33 @@
 */
 
 class ShapeHandleRotationSubSection extends ShapeHandleSubSection {
+	// The rotate icon, loaded once and kept until the theme asks for another one.
+	private static icon: HTMLImageElement | null = null;
+	private static iconURL: string | null = null;
+
+	/*
+		The rotate icon for the current theme, light or dark. A new one has not loaded yet, so
+		the canvas is asked to draw again when loading ends, whether it worked or failed.
+	*/
+	private static getIcon(): HTMLImageElement {
+		const url = app.LOUtil.getImageURL('shape-rotate-handle.svg');
+		const kept = ShapeHandleRotationSubSection.icon;
+
+		if (kept !== null && ShapeHandleRotationSubSection.iconURL === url)
+			return kept;
+
+		const icon = new Image();
+		const redraw = function () { app.sectionContainer.requestReDraw(); };
+		icon.src = url;
+		icon.onload = redraw;
+		icon.onerror = redraw;
+
+		ShapeHandleRotationSubSection.icon = icon;
+		ShapeHandleRotationSubSection.iconURL = url;
+
+		return icon;
+	}
+
 	constructor (parentHandlerSection: ShapeHandlesSection, sectionName: string, size: number[], documentPosition: cool.SimplePoint, ownInfo: any) {
 		super(parentHandlerSection, sectionName, size, documentPosition, ownInfo);
 
@@ -38,8 +65,12 @@ class ShapeHandleRotationSubSection extends ShapeHandleSubSection {
 		this.context.canvas.style.cursor = this.sectionProperties.cursorStyle;
 	}
 
-	onDraw(frameCount?: number, elapsedTime?: number): void {
-		const addition = (this.documentObject === true && app.map._docLayer.isCalcRTL()) ? -this.size[0] : 0;
+	/*
+		A plain circle the size of the handle, drawn while the rotate icon is still loading and
+		for as long as it cannot be loaded at all. Dragging works with or without the icon, so
+		the handle always shows something the user can grab.
+	*/
+	private drawCircle(addition: number): void {
 		this.context.fillStyle = 'white';
 		this.context.strokeStyle = 'black';
 		this.context.beginPath();
@@ -49,18 +80,36 @@ class ShapeHandleRotationSubSection extends ShapeHandleSubSection {
 		this.context.stroke();
 	}
 
+	onDraw(frameCount?: number, elapsedTime?: number): void {
+		const addition = (this.documentObject === true && app.map._docLayer.isCalcRTL()) ? -this.size[0] : 0;
+		const icon = ShapeHandleRotationSubSection.getIcon();
+
+		if (icon.complete && icon.naturalWidth > 0)
+			this.context.drawImage(icon, addition, 0, this.size[0], this.size[1]);
+		else
+			this.drawCircle(addition);
+	}
+
 	// This is called after dragging the rotation handler. It re-calculates initial angle with the handler's new position.
 	getAngleDifference(): number {
 		const dragDistanceInTwips = [this.sectionProperties.lastDraggingDistance[0] * app.pixelsToTwips, this.sectionProperties.lastDraggingDistance[1] * app.pixelsToTwips];
 		const draggedToPoint = new cool.SimplePoint(dragDistanceInTwips[0], dragDistanceInTwips[1]);
 
-		draggedToPoint.pX += this.position[0];
-		draggedToPoint.pY += this.position[1];
+		/*
+			The angle is measured to the middle of the handle, which is the point the mouse
+			takes hold of. A handle is placed by its upper left corner, so half of its size
+			goes onto the point it started from and onto the point the drag moved it to.
+		*/
+		draggedToPoint.pX += this.position[0] + this.size[0] * 0.5;
+		draggedToPoint.pY += this.position[1] + this.size[1] * 0.5;
 
 		Util.ensureValue(GraphicSelection.rectangle);
 		const selectionCenter = new cool.SimplePoint(GraphicSelection.rectangle.center[0], GraphicSelection.rectangle.center[1]);
 
-		const initialPoint = this.sectionProperties.ownInfo.initialPosition;
+		const initialPoint = this.sectionProperties.ownInfo.initialPosition.clone();
+		initialPoint.pX += this.size[0] * 0.5;
+		initialPoint.pY += this.size[1] * 0.5;
+
 		const initialAngle = this.calculateAngle(selectionCenter, initialPoint);
 		const newAngle = this.calculateAngle(selectionCenter, draggedToPoint);
 
