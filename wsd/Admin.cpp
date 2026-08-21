@@ -427,6 +427,7 @@ void AdminSocketHandler::handleMessage(const std::vector<char> &payload)
         {
             LOG_DBG("Auth command without any token");
             sendTextFrame("InvalidAuthToken");
+            return;
         }
         std::string jwtToken, id;
         COOLProtocol::getTokenString(tokens[1], "jwt", jwtToken);
