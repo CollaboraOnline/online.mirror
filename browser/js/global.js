@@ -1952,6 +1952,12 @@ function showWelcomeSVG() {
 		} , false);
 	}
 
+	// Route-token request timings. The controller answers 202 while it is scaling or migrating,
+	// and the request is repeated until it answers or the limit below is reached.
+	const routeTokenTimeoutMs = 30000;
+	const routeTokenRetryIntervalMs = 3000;
+	const routeTokenRetryLimitMs = 300000;
+
 	// indirect socket to wrap the asyncness around fetching the routetoken from indirection url endpoint
 	global.IndirectSocket = function(uri) {
 		var that = this;
@@ -1960,22 +1966,47 @@ function showWelcomeSVG() {
 		this.unloading = false;
 		this.readyState = 0; // connecting
 		this.innerSocket = undefined;
+		this.tokenRequest = undefined;
+		this.retryTimer = undefined;
+		this.retryDeadline = undefined;
 
 		this.onclose = function() {};
 		this.onerror = function () {};
 		this.onmessage = function () {};
 		this.onopen = function () {};
 
+		// Drops the request for a route and any repeat of it that is still scheduled.
+		this.stopRouteTokenRequest = function () {
+			if (this.retryTimer !== undefined) {
+				clearTimeout(this.retryTimer);
+				this.retryTimer = undefined;
+			}
+			if (this.tokenRequest !== undefined) {
+				const request = this.tokenRequest;
+				this.tokenRequest = undefined;
+				request.abort();
+			}
+		};
+
 		this.close = function() {
-			this.innerSocket.close();
+			this.stopRouteTokenRequest();
+			if (this.innerSocket)
+				this.innerSocket.close();
+			else
+				this.readyState = 3;
 		};
 
 		this.send = function(msg) {
-			this.innerSocket.send(msg);
+			if (this.innerSocket)
+				this.innerSocket.send(msg);
+			else
+				global.app.console.warn(
+					'Indirection url: no route yet, dropping ' + msg);
 		};
 
 		this.setUnloading = function() {
 			this.unloading = true;
+			this.stopRouteTokenRequest();
 		};
 
 		this.sendPostMsg = function(errorCode) {
@@ -1999,52 +2030,110 @@ function showWelcomeSVG() {
 			global.parent.postMessage(JSON.stringify(msg), '*');
 		};
 
+		// Tells the outer socket the route could not be had, so that it runs the reconnect
+		// ladder it runs for any other close.
+		this.routeFailed = function (reason) {
+			that.stopRouteTokenRequest();
+			if (that.readyState === 3)
+				return;
+
+			global.app.console.error('Indirection url: ' + reason);
+			that.readyState = 3;
+			that.sendPostMsg(-1);
+			that.onerror();
+			that.onclose({ code: 1006, wasClean: false, reason: reason });
+		};
+
+		this.connectToRoute = function (response) {
+			const uriWithRouteToken = response ? response.uri : undefined;
+			if (typeof uriWithRouteToken !== 'string' || uriWithRouteToken === '') {
+				that.routeFailed('the controller answered without a uri');
+				return;
+			}
+
+			let params;
+			try {
+				params = (new URL(uriWithRouteToken)).searchParams;
+			} catch (error) {
+				that.routeFailed('the controller answered with the unusable uri '
+					+ uriWithRouteToken);
+				return;
+			}
+
+			global.expectedServerId = response.serverId;
+			global.routeToken = params.get('RouteToken');
+			global.app.console.log('updated routeToken: ' + global.routeToken);
+
+			const socket = new WebSocket(uriWithRouteToken);
+			that.innerSocket = socket;
+			socket.binaryType = that.binaryType;
+			socket.onerror = function () {
+				that.readyState = socket.readyState;
+				that.onerror();
+			};
+			socket.onclose = function (e) {
+				that.readyState = 3;
+				that.onclose(e);
+				socket.onerror = function () { };
+				socket.onclose = function () { };
+				socket.onmessage = function () { };
+			};
+			socket.onopen = function () {
+				that.readyState = 1;
+				that.onopen();
+			};
+			socket.onmessage = function (e) {
+				that.readyState = socket.readyState;
+				that.onmessage(e);
+			};
+		};
+
+		// The controller is busy. Tell the integrator once, then ask again until the limit.
+		this.retryRouteTokenRequest = function (requestUri, response) {
+			if (that.unloading || that.readyState === 3)
+				return;
+
+			if (that.retryDeadline === undefined) {
+				that.retryDeadline = Date.now() + routeTokenRetryLimitMs;
+				if (!(window.app && window.app.socket && window.app.socket._reconnecting))
+					that.sendPostMsg(response ? response.errorCode : -1);
+			}
+
+			if (Date.now() >= that.retryDeadline) {
+				that.routeFailed('the controller stayed busy, giving up');
+				return;
+			}
+
+			that.retryTimer = setTimeout(function () {
+				that.retryTimer = undefined;
+				global.app.console.warn('Requesting again for routeToken');
+				that.sendRouteTokenRequest(requestUri);
+			}, routeTokenRetryIntervalMs);
+		};
+
 		this.sendRouteTokenRequest = function (requestUri) {
 			var http = new XMLHttpRequest();
-			// let url = global.indirectionUrl + '?Uri=' + encodeURIComponent(that.uri);
+			that.tokenRequest = http;
 			http.open('GET', requestUri, true);
 			http.responseType = 'json';
+			http.timeout = routeTokenTimeoutMs;
+			http.addEventListener('error', function () {
+				that.tokenRequest = undefined;
+				that.routeFailed('the request to the controller failed');
+			});
+			http.addEventListener('timeout', function () {
+				that.tokenRequest = undefined;
+				that.routeFailed('the request to the controller timed out after '
+					+ routeTokenTimeoutMs + 'ms');
+			});
 			http.addEventListener('load', function () {
+				that.tokenRequest = undefined;
 				if (this.status === 200) {
-					var uriWithRouteToken = http.response.uri;
-					global.expectedServerId = http.response.serverId;
-					var params = (new URL(uriWithRouteToken)).searchParams;
-					global.routeToken = params.get('RouteToken');
-					global.app.console.log('updated routeToken: ' + global.routeToken);
-					that.innerSocket = new WebSocket(uriWithRouteToken);
-					that.innerSocket.binaryType = that.binaryType;
-					that.innerSocket.onerror = function () {
-						that.readyState = that.innerSocket.readyState;
-						that.onerror();
-					};
-					that.innerSocket.onclose = function () {
-						that.readyState = 3;
-						that.onclose();
-						that.innerSocket.onerror = function () { };
-						that.innerSocket.onclose = function () { };
-						that.innerSocket.onmessage = function () { };
-					};
-					that.innerSocket.onopen = function () {
-						that.readyState = 1;
-						that.onopen();
-					};
-					that.innerSocket.onmessage = function (e) {
-						that.readyState = that.innerSocket.readyState;
-						that.onmessage(e);
-					};
+					that.connectToRoute(http.response);
 				} else if (this.status === 202) {
-					if (!(window.app && window.app.socket && window.app.socket._reconnecting)) {
-						that.sendPostMsg(http.response.errorCode);
-					}
-					var timeoutFn = function (requestUri) {
-						console.warn('Requesting again for routeToken');
-						this.open('GET', requestUri, true);
-						this.send();
-					}.bind(this);
-					setTimeout(timeoutFn, 3000, requestUri);
+					that.retryRouteTokenRequest(requestUri, http.response);
 				} else {
-					global.app.console.error('Indirection url: error on incoming response ' + this.status);
-					that.sendPostMsg(-1);
+					that.routeFailed('the controller answered ' + this.status);
 				}
 			});
 			http.send();
