@@ -331,11 +331,11 @@ void COOLWSD::alertUserInternal(const std::string& dockey, const std::string& ms
 
     LOG_INF("Alerting document users with dockey: [" << dockey << ']' << " msg: [" << msg << ']');
 
-    for (const auto& brokerIt : DocBrokers)
+    const auto brokerIt = DocBrokers.find(dockey);
+    if (brokerIt != DocBrokers.end())
     {
-        std::shared_ptr<DocumentBroker> docBroker = brokerIt.second;
-        if (docBroker->getDocKey() == dockey)
-            docBroker->addCallback([msg, docBroker](){ docBroker->alertAllUsers(msg); });
+        std::shared_ptr<DocumentBroker> docBroker = brokerIt->second;
+        docBroker->addCallback([msg, docBroker]() { docBroker->alertAllUsers(msg); });
     }
 }
 
