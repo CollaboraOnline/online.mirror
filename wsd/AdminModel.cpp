@@ -28,6 +28,7 @@
 #include <wsd/COOLWSD.hpp>
 #include <wsd/Exceptions.hpp>
 
+#include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>
 
 #include <chrono>
@@ -1456,24 +1457,20 @@ void AdminModel::sendMigrateMsgAfterSave(bool lastSaveSuccessful, const std::str
 
 std::string AdminModel::getWopiSrcMap() const
 {
-    std::ostringstream oss;
-    oss << "wopiSrcMap: {";
-    oss << "\"routeToken\": \"" << COOLWSD::RouteToken << "\",";
-    oss << "\"wopiSrc\": [";
-    size_t count = 0;
+    Poco::JSON::Array::Ptr wopiSrc(new Poco::JSON::Array());
     for (const auto& it : _documents)
     {
         if (!it.second.isExpired())
-        {
-            oss << "\"" << it.second.getWopiSrc() << "\"";
-            if (count < _documents.size() - 1)
-            {
-                oss << ',';
-            }
-        }
-        count++;
+            wopiSrc->add(it.second.getWopiSrc());
     }
-    oss << "]}";
+
+    Poco::JSON::Object map;
+    map.set("routeToken", COOLWSD::RouteToken);
+    map.set("wopiSrc", wopiSrc);
+
+    std::ostringstream oss;
+    oss << "wopiSrcMap: ";
+    map.stringify(oss);
     return oss.str();
 }
 
