@@ -492,20 +492,20 @@ class Socket {
 		app.idleHandler._activate();
 	}
 
-	private _onSocketClose(event: CloseEvent): void {
+	private _onSocketClose(event?: Partial<CloseEvent>): void {
+		const reason = event?.reason ?? '';
 		window.app.console.debug(
 			'_onSocketClose: code=' +
-				event.code +
+				event?.code +
 				' wasClean=' +
-				event.wasClean +
+				event?.wasClean +
 				' reason=' +
-				event.reason,
+				reason,
 		);
 		if (!this._map._docLoadedOnce && this.ReconnectCount === 0) {
 			let errorType: string = '';
 			let errorMsg: string;
 			let errorDetail: string | undefined;
-			const reason = event.reason;
 			if (reason && reason.startsWith('error:')) {
 				var command = this.parseServerCmd(reason);
 				errorDetail = command.errorDetail;

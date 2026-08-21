@@ -1655,7 +1655,7 @@ function showWelcomeSVG() {
 			if (that.readyState < 3)
 			{
 				this.onerror();
-				this.onclose();
+				this.onclose({ code: 1006, wasClean: false, reason: 'proxy error' });
 			}
 			this.sessionId = 'open';
 			this.inSerial = 0;
@@ -1849,7 +1849,7 @@ function showWelcomeSVG() {
 			var oldState = this.readyState;
 			global.app.console.debug('proxy: close socket');
 			this.readyState = 3;
-			this.onclose();
+			this.onclose({ code: 1000, wasClean: true, reason: 'proxy closed' });
 			clearInterval(this.pollInterval);
 			clearTimeout(this.delaySession);
 			this.pollInterval = undefined;
