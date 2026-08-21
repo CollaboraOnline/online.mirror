@@ -39,6 +39,7 @@
 #include <wsd/Auth.hpp>
 #include <wsd/COOLWSD.hpp>
 
+#include <Poco/JSON/Object.h>
 #include <Poco/Net/HTTPRequest.h>
 
 #include <algorithm>
@@ -361,39 +362,60 @@ void AdminSocketHandler::handleMessage(const std::vector<char> &payload)
             LOG_ERR("Failed to update the route token, invalid JSON parsing: " << tokens[1]);
         }
     }
-    else if (tokens.equals(0, "migrate") && tokens.size() > 1)
+    else if (tokens.equals(0, "migrate"))
     {
+        // migrate <saved|unsaved|readonly> <docKey> <routeToken> <serverId>
+        if (tokens.size() < 5)
+        {
+            LOG_WRN("Incomplete migrate command with " << tokens.size()
+                                                       << " arguments, five are expected");
+            return;
+        }
+
         const std::string docStatus = tokens[1];
         const std::string dockey = tokens[2];
         const std::string routeToken = tokens[3];
         const std::string serverId = tokens[4];
-        if (!dockey.empty() && !routeToken.empty() && !serverId.empty())
+        if (dockey.empty() || routeToken.empty() || serverId.empty())
         {
-            model.setMigratingInfo(dockey, routeToken, serverId);
-            std::ostringstream oss;
-            oss << "migrate: {";
-            oss << "\"afterSave\"" ":false,";
-            if (docStatus == "unsaved" && !model.isDocSaved(dockey))
-            {
-                COOLWSD::autoSave(dockey);
-                oss << "\"saved\"" ":false,";
-            }
-            else if ((docStatus == "readonly" && model.isDocReadOnly(dockey)) ||
-                     (docStatus == "saved" && model.isDocSaved(dockey)))
-            {
-                oss << "\"saved\"" ":true,";
-            }
-            oss << "\"routeToken\"" << ':' << '"' << routeToken << '"' << ',';
-            oss << "\"serverId\"" << ':' << '"' << serverId << '"' << '}';
-            COOLWSD::alertUserInternal(dockey, oss.str());
-            if (SigUtil::getShutdownRequestFlag())
-                COOLWSD::setMigrationMsgReceived(dockey);
+            LOG_WRN("Empty argument in migrate command for docKey [" << dockey << ']');
+            return;
+        }
+
+        // The controller names the state it expects the document to be in. The document is
+        // handed over only when its state still agrees, since a client told to migrate a
+        // document that has since changed has nothing it can do with the new route.
+        const bool needsSave = docStatus == "unsaved" && !model.isDocSaved(dockey);
+        const bool alreadySaved = (docStatus == "readonly" && model.isDocReadOnly(dockey)) ||
+                                  (docStatus == "saved" && model.isDocSaved(dockey));
+        if (!needsSave && !alreadySaved)
+        {
+            LOG_WRN("Not migrating docKey [" << dockey << "], the controller expects it to be ["
+                                             << docStatus
+                                             << "] which no longer matches its state");
         }
         else
         {
-            LOG_WRN("Document migration failed for dockey:" << dockey <<
-                        ", reason has been changed");
+            model.setMigratingInfo(dockey, routeToken, serverId);
+
+            if (needsSave)
+                COOLWSD::autoSave(dockey);
+
+            // The route token and the server id come off the wire, so let the JSON writer quote
+            // them.
+            Poco::JSON::Object migrate;
+            migrate.set("afterSave", false);
+            migrate.set("saved", alreadySaved);
+            migrate.set("routeToken", routeToken);
+            migrate.set("serverId", serverId);
+            std::ostringstream oss;
+            oss << "migrate: ";
+            migrate.stringify(oss);
+            COOLWSD::alertUserInternal(dockey, oss.str());
         }
+
+        if (SigUtil::getShutdownRequestFlag())
+            COOLWSD::setMigrationMsgReceived(dockey);
     }
     else if (tokens.equals(0, "wopiSrcMap"))
     {

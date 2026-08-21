@@ -28,6 +28,8 @@
 #include <wsd/COOLWSD.hpp>
 #include <wsd/Exceptions.hpp>
 
+#include <Poco/JSON/Object.h>
+
 #include <chrono>
 #include <cmath>
 #include <csignal>
@@ -1431,23 +1433,24 @@ void AdminModel::sendMigrateMsgAfterSave(bool lastSaveSuccessful, const std::str
     {
         return;
     }
-    std::ostringstream oss;
-    std::string saveSuccessful = lastSaveSuccessful ? "true" : "false";
-    oss << "migrate: {";
-    oss << "\"afterSave\""
-           ":true,";
-    oss << "\"saved\":" << saveSuccessful;
+    // The route token and the server id came off the wire from the controller, so let the JSON
+    // writer quote them.
+    Poco::JSON::Object migrate;
+    migrate.set("afterSave", true);
+    migrate.set("saved", lastSaveSuccessful);
     if (lastSaveSuccessful)
     {
-        oss << ',';
-        oss << "\"routeToken\"" << ':' << '"' << getCurrentMigToken() << '"' << ',';
-        oss << "\"serverId\"" << ':' << '"' << getTargetMigServerId() << '"' << '}';
+        migrate.set("routeToken", getCurrentMigToken());
+        migrate.set("serverId", getTargetMigServerId());
     }
     else
     {
-        oss << '}';
         resetMigratingInfo();
     }
+
+    std::ostringstream oss;
+    oss << "migrate: ";
+    migrate.stringify(oss);
     COOLWSD::alertUserInternal(docKey, oss.str());
 }
 
