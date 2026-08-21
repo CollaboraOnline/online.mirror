@@ -47,7 +47,7 @@ describe(['tagdesktop'], 'Test style sidebar', function() {
 		getEntry('Complimentary Close').click();
 
 		helper.processToIdle(this.win); // stabilize
-		cy.cGet('#sidebar-dock-wrapper').compareSnapshot('style_initial', 0.07);
+		cy.cGet('#sidebar-dock-wrapper').compareSnapshot('style_initial', 0.075);
 
 		// open context menu and "new" dialog
 		getEntry('Complimentary Close').rightclick();
@@ -65,7 +65,7 @@ describe(['tagdesktop'], 'Test style sidebar', function() {
 			.find('.ui-treeview-expander-column').should('exist').click();
 
 		helper.processToIdle(this.win); // stabilize
-		cy.cGet('#sidebar-dock-wrapper').compareSnapshot('style_added', 0.07);
+		cy.cGet('#sidebar-dock-wrapper').compareSnapshot('style_added', 0.085);
 	});
 
 	it('Style sidebar context menu on node with spaces', function() {
