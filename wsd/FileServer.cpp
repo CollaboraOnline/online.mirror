@@ -1996,10 +1996,10 @@ FileServerRequestHandler::ResourceAccessDetails FileServerRequestHandler::prepro
         extraExportFormats += " impress_tiff";
     Poco::replaceInPlace(preprocess, std::string("%EXTRA_EXPORT_FORMATS%"), extraExportFormats);
 
-    bool geoLocationSetup = config.getBool("indirection_endpoint.geolocation_setup.enable", false);
-    if (geoLocationSetup)
-        Poco::replaceInPlace(preprocess, std::string("%GEOLOCATION_SETUP%"),
-                             boolToString(geoLocationSetup));
+    const bool geoLocationSetup =
+        config.getBool("indirection_endpoint.geolocation_setup.enable", false);
+    Poco::replaceInPlace(preprocess, std::string("%GEOLOCATION_SETUP%"),
+                         boolToString(geoLocationSetup));
 
     ContentSecurityPolicy csp;
     csp.appendDirective("default-src", "'none'");
