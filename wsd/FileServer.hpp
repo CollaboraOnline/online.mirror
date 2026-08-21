@@ -193,6 +193,10 @@ public:
 
     void readDirToHash(const std::string &basePath, const std::string &path, const std::string &prefix = std::string());
 
+    void readAdminTemplates(const std::string& basePath);
+
+    const std::string& getAdminTemplate(const std::string& name);
+
     const std::string *getCompressedFile(const std::string &path);
 
     const std::string *getUncompressedFile(const std::string &path);
@@ -220,6 +224,9 @@ public:
 
 private:
     std::map<std::string, std::pair<std::string, std::string>> FileHash;
+    /// The admin page templates, keyed by file name, each holding the text with its placeholders
+    /// still in place.
+    std::map<std::string, std::string> AdminTemplates;
     static void sendError(http::StatusCode errorCode, const Poco::Net::HTTPRequest& request,
                           const std::shared_ptr<StreamSocket>& socket,
                           const std::string& shortMessage, const std::string& longMessage,
