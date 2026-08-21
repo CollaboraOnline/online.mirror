@@ -41,6 +41,7 @@
 
 #include <Poco/Net/HTTPRequest.h>
 
+#include <algorithm>
 #include <chrono>
 #include <csignal>
 #include <cstdint>
@@ -712,15 +713,17 @@ void Admin::pollingThread()
             }
         }
 
-        // (re)-connect (with sync. DNS - urk) to one monitor at a time
-        if (_pendingConnects.size())
+        // (re)-connect (with sync. DNS - urk) to one monitor at a time, the one whose retry
+        // interval elapsed first.
+        auto earliest = std::min_element(_pendingConnects.begin(), _pendingConnects.end(),
+                                         [](const MonitorConnectRecord& lhs,
+                                            const MonitorConnectRecord& rhs)
+                                         { return lhs.getWhen() < rhs.getWhen(); });
+        if (earliest != _pendingConnects.end() && earliest->getWhen() < now)
         {
-            MonitorConnectRecord rec = _pendingConnects[0];
-            if (rec.getWhen() < now)
-            {
-                _pendingConnects.erase(_pendingConnects.begin());
-                connectToMonitorSync(rec.getUri());
-            }
+            const std::string uri = earliest->getUri();
+            _pendingConnects.erase(earliest);
+            connectToMonitorSync(uri);
         }
 
         bool dumpMetrics = true;
@@ -1179,6 +1182,15 @@ void Admin::dumpState(std::ostream& os) const
             os << socket.first << ": " << (socket.second->isConnected() ? "" : "dis")
                << "connected\n";
         }
+    }
+
+    const auto now = std::chrono::steady_clock::now();
+    os << "Pending monitor connects: " << _pendingConnects.size() << ":\n";
+    for (const auto& pending : _pendingConnects)
+    {
+        os << pending.getUri() << ": due in "
+           << std::chrono::duration_cast<std::chrono::milliseconds>(pending.getWhen() - now)
+           << '\n';
     }
 
     os << "Admin Metrics:\n";
