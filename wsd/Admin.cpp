@@ -45,6 +45,7 @@
 #include <csignal>
 #include <cstdint>
 #include <iomanip>
+#include <set>
 #include <sstream>
 #include <string>
 #include <poll.h>
@@ -1245,6 +1246,8 @@ void MonitorSocketHandler::onDisconnect()
 
 void Admin::connectToMonitorSync(const std::string &uri)
 {
+    ASSERT_CORRECT_THREAD();
+
     const std::string uriWithoutParam = uri.substr(0, uri.find('?'));
     if (_monitorSockets.find(uriWithoutParam) != _monitorSockets.end())
     {
@@ -1367,43 +1370,39 @@ void Admin::startMonitors()
         LOG_TRC("No monitors configured.");
 }
 
-void Admin::updateMonitors(std::vector<std::pair<std::string,int>>& oldMonitors)
+void Admin::updateMonitors()
 {
-    if (oldMonitors.empty())
-    {
-        startMonitors();
-        return;
-    }
-
-    std::unordered_map<std::string, bool> currentMonitorMap;
+    // The configuration is read here, on the thread that has just rewritten it, and applied on
+    // the Admin thread, which owns the monitor sockets.
+    std::set<std::string> configured;
     for (const auto& monitor : getMonitorList())
-    {
-        currentMonitorMap[monitor.first] = true;
-    }
+        configured.insert(monitor.first);
 
-    // shutdown monitors which does not not exist in currentMonitorMap
-    for (const auto& monitor : oldMonitors)
-    {
-        if (!currentMonitorMap[monitor.first])
+    addCallback(
+        [this, configured = std::move(configured)]
         {
-            auto socketHandler = _monitorSockets[monitor.first];
-            if (socketHandler != nullptr)
+            for (auto it = _monitorSockets.begin(); it != _monitorSockets.end();)
             {
-                socketHandler->shutdown();
-                _monitorSockets.erase(monitor.first);
-            }
-        }
-    }
+                if (configured.find(it->first) != configured.end())
+                {
+                    ++it;
+                    continue;
+                }
 
-    startMonitors();
+                LOG_TRC("Remove monitor " << it->first << ", the configuration no longer names it");
+                it->second->shutdown();
+                it = _monitorSockets.erase(it);
+            }
+
+            startMonitors();
+        });
 }
 
 void Admin::deleteMonitorSocket(const std::string& uriWithoutParam)
 {
-    if (_monitorSockets.find(uriWithoutParam) != _monitorSockets.end())
-    {
-        _monitorSockets.erase(uriWithoutParam);
-    }
+    ASSERT_CORRECT_THREAD();
+
+    _monitorSockets.erase(uriWithoutParam);
 }
 
 void Admin::stop()

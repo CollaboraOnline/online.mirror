@@ -124,7 +124,9 @@ public:
 
     void startMonitors();
 
-    void updateMonitors(std::vector<std::pair<std::string, int>>& oldMonitors);
+    /// Shuts down the monitor connections the configuration no longer names, and starts one for
+    /// every monitor it does name. Safe to call from any thread.
+    void updateMonitors();
 
     static std::vector<std::pair<std::string, int>> getMonitorList();
 

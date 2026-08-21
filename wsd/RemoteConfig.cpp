@@ -169,15 +169,12 @@ void RemoteConfigPoll::handleJSON(const Poco::JSON::Object::Ptr& remoteJson)
 
     fetchRemoteFontConfig(newAppConfig, remoteJson);
 
-    // before resetting get monitors list
-    std::vector<std::pair<std::string, int>> oldMonitors = Admin::getMonitorList();
-
     _persistConfig->reset(newAppConfig);
 
 #if ENABLE_FEATURE_LOCK
     CommandControl::LockManager::parseLockedHost();
 #endif
-    Admin::instance().updateMonitors(oldMonitors);
+    Admin::instance().updateMonitors();
 
     HostUtil::parseAliases(_conf);
 
