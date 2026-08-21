@@ -128,6 +128,7 @@ const Util::UnorderedStringMap<std::string> DefAppConfig = {
     { "hexify_embedded_urls", "false" },
     { "hide_legacy_script_warning", "false" },
     { "home_mode.enable", "false" },
+    { "indirection_endpoint.controller_monitor_url", "" },
     { "indirection_endpoint.geolocation_setup.enable", "false" },
     { "indirection_endpoint.geolocation_setup.timezone", "" },
     { "indirection_endpoint.migration_timeout_secs", "180" },

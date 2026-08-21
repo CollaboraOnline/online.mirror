@@ -509,6 +509,12 @@ void RemoteConfigPoll::fetchIndirectionEndpoint(std::map<std::string, std::strin
                                 serverName))
         newAppConfig.insert(std::make_pair(indrectionEndpointKey + ".server_name", serverName));
 
+    std::string controllerMonitorUrl;
+    if (JsonUtil::findJSONValue(indirectionEndpoint, "controller_monitor_url",
+                                controllerMonitorUrl))
+        newAppConfig.insert(std::make_pair(indrectionEndpointKey + ".controller_monitor_url",
+                                           controllerMonitorUrl));
+
     const std::string geolocationKey = indrectionEndpointKey + ".geolocation_setup";
     if (!indirectionEndpoint->isObject("geolocation_setup"))
     {

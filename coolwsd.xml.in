@@ -404,6 +404,7 @@
         </allowed_websocket_origins>
       </geolocation_setup>
       <server_name desc="server name to show in cluster overview admin panel" type="string" default=""></server_name>
+      <controller_monitor_url desc="Which of the monitors.monitor entries is the controller. Documents are handed over to it before this server shuts down. When left empty, a monitor whose address contains the word controller is taken to be the controller." type="string" default=""></controller_monitor_url>
     </indirection_endpoint>
 
     @HOME_MODE_CONFIGURATION@

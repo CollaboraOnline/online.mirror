@@ -751,12 +751,22 @@ void Admin::pollingThread()
     if (!COOLWSD::IndirectionServerEnabled)
         return;
 
-    // if don't have monitor connection to the controller we set the _migrateMsgReceived
-    // for each docbroker so that docbroker can cleanup the documents
+    // Without a monitor connection to the controller nothing will hand these documents a new
+    // route, so every DocumentBroker is told the migration message it waits for has arrived and
+    // cleans its document up.
+    //
+    // The controller is the monitor named by indirection_endpoint.controller_monitor_url. A
+    // configuration that names none falls back to a monitor whose address carries the word
+    // controller.
+    const std::string controllerUri =
+        ConfigUtil::getString("indirection_endpoint.controller_monitor_url", "");
     bool controllerMonitorConnection = false;
     for (const auto& pair : _monitorSockets)
     {
-        if (pair.first.find("controller") != std::string::npos)
+        const bool isController = controllerUri.empty()
+                                      ? pair.first.find("controller") != std::string::npos
+                                      : Util::iequal(pair.first, controllerUri);
+        if (isController)
         {
             controllerMonitorConnection = true;
             break;
