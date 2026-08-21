@@ -23,6 +23,8 @@ class Socket {
 		TimeZone: '',
 	};
 	private IndirectSocketReconnectCount: number = 0;
+	// Runs while the document is being handed to another server. See beginMigration.
+	private _migrationTimer: TimeoutHdl | undefined;
 	private _initialConnectRetries: number = 0;
 	// Once the compact /cool/ws URL has failed to connect and we have dropped
 	// back to the legacy /cool/<doc>/ws URL, stay on the legacy URL for the
@@ -1117,7 +1119,7 @@ class Socket {
 			// close all the popups otherwise document textArea will not get focus
 			this._map.uiManager.closeAll();
 			this._map.setPermission(app.file.permission);
-			window.migrating = false;
+			this.endMigration();
 			this._map.uiManager.initializeSidebar();
 			this._map.uiManager.refreshTheme();
 		}
@@ -2114,13 +2116,46 @@ class Socket {
 		}
 	}
 
+	// The controller is handing the document to another server. window.migrating keeps the
+	// client off the controller for the reconnect that follows, because the new route is
+	// already in hand. Nothing guarantees the rest of the exchange arrives, so the flag is
+	// dropped again after this long and the next reconnect asks the controller for a fresh
+	// route. The server gives the handover indirection_endpoint.migration_timeout_secs, 180 by
+	// default, so this is comfortably longer.
+	private static readonly MigrationTimeoutMs: number = 240000;
+
+	private beginMigration(): void {
+		this.endMigration();
+		window.migrating = true;
+		this._migrationTimer = setTimeout(() => {
+			window.app.console.warn(
+				'Migration did not complete, asking the controller again',
+			);
+			this.endMigration();
+		}, Socket.MigrationTimeoutMs);
+	}
+
+	private endMigration(): void {
+		if (this._migrationTimer !== undefined) {
+			clearTimeout(this._migrationTimer);
+			this._migrationTimer = undefined;
+		}
+		window.migrating = false;
+	}
+
 	// 'migrate: ' message.
 	private _onMigrateMsg(textMsg: string): void {
-		const migrate = JSON.parse(textMsg.substring(textMsg.indexOf('{')));
+		let migrate;
+		try {
+			migrate = JSON.parse(textMsg.substring(textMsg.indexOf('{')));
+		} catch {
+			window.app.console.error('Unparseable migrate message: ' + textMsg);
+			return;
+		}
 		const afterSave = migrate.afterSave as boolean;
 		app.idleHandler._serverRecycling = false;
 		if (!afterSave) {
-			window.migrating = true;
+			this.beginMigration();
 			this._map.uiManager.closeAll();
 			if (this._map.isEditMode()) {
 				this._map.setPermission('view');
@@ -2145,7 +2180,7 @@ class Socket {
 			this.manualReconnect(2000);
 		} else {
 			this._map.setPermission(app.file.permission);
-			window.migrating = false;
+			this.endMigration();
 		}
 	}
 
