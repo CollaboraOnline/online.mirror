@@ -1958,9 +1958,11 @@ class Socket {
 					this.IndirectSocketReconnectCount = 0;
 				} else {
 					this._map.showBusy(_('Wrong server, reconnecting...'), false);
-					this.manualReconnect(3000);
-					// request to indirection server to sanity check the tokens
+					// Ask the controller to check the tokens before
+					// manualReconnect, which closes the socket and
+					// stops outgoing messages.
 					this.sendMessage('routetokensanitycheck');
+					this.manualReconnect(3000);
 					return true;
 				}
 			}
