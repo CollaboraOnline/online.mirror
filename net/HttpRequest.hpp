@@ -1109,6 +1109,7 @@ public:
         : _state(State::New)
         , _parserStage(ParserStage::StatusLine)
         , _recvBodySize(0)
+        , _bodySizeLimit(0)
         , _finishedCallback(std::move(finishedCallback))
         , _fd(fd)
     {
@@ -1130,6 +1131,7 @@ public:
         , _state(State::New)
         , _parserStage(ParserStage::StatusLine)
         , _recvBodySize(0)
+        , _bodySizeLimit(0)
         , _fd(fd)
     {
         _header.add("Date", Util::getHttpTimeNow());
@@ -1226,6 +1228,11 @@ public:
         };
     }
 
+    /// Sets the largest response body size, in bytes, this parser accepts. A response that
+    /// declares a larger Content-Length, or whose received body passes the limit, ends the
+    /// transfer as an error and the state becomes State::Error. 0, the default, accepts any size.
+    void setBodySizeLimit(int64_t limit) { _bodySizeLimit = limit; }
+
     /// Returns the body, assuming it wasn't redirected to file or callback.
     const std::string& getBody() const { return _body; }
 
@@ -1312,6 +1319,7 @@ public:
         os << indent << "\tstate: " << name(_state);
         os << indent << "\tparseStage: " << name(_parserStage);
         os << indent << "\trecvBodySize: " << _recvBodySize;
+        os << indent << "\tbodySizeLimit: " << _bodySizeLimit;
         os << indent << "\theaders: ";
 
         std::string childIndent = indent + '\t';
@@ -1343,6 +1351,7 @@ private:
     std::atomic<State> _state; ///< The state of the Response.
     ParserStage _parserStage; ///< The parser's state.
     int64_t _recvBodySize; ///< The amount of data we received (compared to the Content-Length).
+    int64_t _bodySizeLimit; ///< The largest accepted body size, in bytes. 0 accepts any size.
     std::string _body; ///< Used when _bodyHandling is InMemory.
     std::ofstream _bodyFile; ///< Used when _bodyHandling is OnDisk.
     IoWriteFunc _onBodyWriteCb; ///< Used to handling body receipt in all cases.
@@ -1369,6 +1378,7 @@ private:
         , _timeout(getDefaultTimeout())
         , _connected(false)
         , _asyncShutdownOnFinish(false)
+        , _bodySizeLimit(0)
         , _result(net::AsyncConnectResult::Ok)
     {
         assert(!_host.empty() && portNumber > 0 && !_port.empty() &&
@@ -1492,6 +1502,10 @@ public:
     using ConnectFailCallback = std::function<void(const std::shared_ptr<Session>& session)>;
 
     void setConnectFailHandler(ConnectFailCallback onConnectFail) { _onConnectFail = std::move(onConnectFail); }
+
+    /// Sets the largest response body size, in bytes, the responses of this session accept.
+    /// 0, the default, accepts any size.
+    void setBodySizeLimit(int64_t limit) { _bodySizeLimit = limit; }
 
     /// Make a synchronous request to download a file to the given path.
     /// Note: when the server returns an error, the response body,
@@ -1669,6 +1683,7 @@ public:
            << " socket)";
         os << indent << "\tconnected: " << _connected;
         os << indent << "\tasyncShutdownOnFinish: " << _asyncShutdownOnFinish;
+        os << indent << "\tbodySizeLimit: " << _bodySizeLimit;
         os << indent << "\ttimeout: " << _timeout;
         os << indent << "\thost: " << _host;
         os << indent << "\tport: " << _port;
@@ -1788,6 +1803,7 @@ private:
 
         _response.reset();
         _response = std::make_shared<Response>(onFinished, _fd);
+        _response->setBodySizeLimit(_bodySizeLimit);
 
         _request = req;
 
@@ -2094,6 +2110,7 @@ private:
     std::chrono::steady_clock::time_point _startTime;
     bool _connected;
     bool _asyncShutdownOnFinish;
+    int64_t _bodySizeLimit; ///< The largest accepted body size, in bytes. 0 accepts any size.
     Request _request;
     net::AsyncConnectResult _result; // last connection tentative result
     FinishedCallback _onFinished;
