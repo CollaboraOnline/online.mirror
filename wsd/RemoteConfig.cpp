@@ -184,8 +184,8 @@ void RemoteConfigPoll::handleJSON(const Poco::JSON::Object::Ptr& remoteJson)
 
     COOLWSD::IndirectionServerEnabled =
         !ConfigUtil::getConfigValue<std::string>(_conf, "indirection_endpoint.url", "").empty();
-    COOLWSD::GeolocationSetup =
-        ConfigUtil::getConfigValue("indirection_endpoint.geolocation_setup.enable", false);
+    COOLWSD::GeolocationSetup = ConfigUtil::getConfigValue(
+        _conf, "indirection_endpoint.geolocation_setup.enable", false);
 
     handleOptions(remoteJson);
 }
@@ -505,8 +505,7 @@ void RemoteConfigPoll::fetchIndirectionEndpoint(std::map<std::string, std::strin
         newAppConfig.insert(std::make_pair(indrectionEndpointKey + ".url", url));
 
     std::string serverName;
-    if (JsonUtil::findJSONValue(indirectionEndpoint, indrectionEndpointKey + ".server_name",
-                                serverName))
+    if (JsonUtil::findJSONValue(indirectionEndpoint, "server_name", serverName))
         newAppConfig.insert(std::make_pair(indrectionEndpointKey + ".server_name", serverName));
 
     std::string controllerMonitorUrl;
