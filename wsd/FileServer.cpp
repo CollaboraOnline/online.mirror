@@ -91,6 +91,13 @@ constexpr auto MaxFileSizeToCacheInBytes = 1024 * 1024 *
 #else
     50;
 #endif
+// The largest body the settings fetch endpoints accept from a remote server, in bytes. The files
+// they relay are settings JSON, xcu configuration and wordbook dictionaries. The biggest of those
+// in practice is a wordbook, and a whole-language spelling dictionary, the ceiling for one, is
+// about 4.5 MB, so 20 MB leaves generous headroom while bounding what one request can hold in
+// memory on the thread that serves every client.
+constexpr int64_t MaxSettingsFetchSizeBytes = 20 * 1024 * 1024;
+
 constexpr std::string_view MetaViewPort =
     R"(<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, interactive-widget=resizes-content">)";
 
@@ -2310,6 +2317,15 @@ void FileServerRequestHandler::fetchWopiSettingConfigs(const Poco::Net::HTTPRequ
         }
 
         const std::shared_ptr<const http::Response> httpResponse = wopiSession->response();
+        if (httpResponse->state() != http::Response::State::Complete)
+        {
+            LOG_ERR("Failed to fetch wopi settings config from WopiHost["
+                    << uriAnonym << "]: the transfer did not complete");
+            sendError(http::StatusCode::BadGateway, requestPath, destSocket, shortMessage,
+                      "The transfer did not complete");
+            return;
+        }
+
         const http::StatusLine statusLine = httpResponse->statusLine();
         const http::StatusCode statusCode = statusLine.statusCode();
         if (statusCode != http::StatusCode::OK && statusCode != http::StatusCode::NoContent)
@@ -2338,18 +2354,10 @@ void FileServerRequestHandler::fetchWopiSettingConfigs(const Poco::Net::HTTPRequ
     LOG_DBG("Fetching wopi setting config from WopiHost[" << uriAnonym << ']');
     auto httpSession = StorageConnectionManager::getHttpSession(sharedUri);
     httpSession->setFinishedHandler(std::move(finishedCallback));
-    httpSession->asyncRequest(httpRequest, COOLWSD::getWebServerPoll());
+    if (!httpSession->asyncRequest(httpRequest, COOLWSD::getWebServerPoll()))
+        return;
+    httpSession->response()->setBodySizeLimit(MaxSettingsFetchSizeBytes);
 }
-
-namespace
-{
-// The largest body fetch-settings-file accepts from the storage server, in bytes. The files it
-// relays are settings JSON, xcu configuration and wordbook dictionaries. The biggest of those in
-// practice is a wordbook, and a whole-language spelling dictionary, the ceiling for one, is about
-// 4.5 MB, so 20 MB leaves generous headroom while bounding what one request can hold in memory
-// on the thread that serves every client.
-constexpr int64_t MaxSettingFileSizeBytes = 20 * 1024 * 1024;
-} // namespace
 
 void FileServerRequestHandler::fetchSettingFile(const Poco::Net::HTTPRequest& request,
                                                 std::istream& message,
@@ -2407,7 +2415,7 @@ void FileServerRequestHandler::fetchSettingFile(const Poco::Net::HTTPRequest& re
     httpRequest.set("Content-Type", "text/plain");
 
     auto httpSession = StorageConnectionManager::getHttpSession(dicUrl);
-    httpSession->setBodySizeLimit(MaxSettingFileSizeBytes);
+    httpSession->setBodySizeLimit(MaxSettingsFetchSizeBytes);
     auto httpResponse = httpSession->syncRequest(httpRequest);
 
     if (httpResponse->state() != http::Response::State::Complete)
