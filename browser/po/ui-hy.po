@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-05 22:58+0200\n"
+"POT-Creation-Date: 2026-08-23 10:59+0200\n"
 "PO-Revision-Date: 2026-06-27 18:12+0000\n"
 "Last-Translator: Tigran Zargaryan <tigranflib@gmail.com>\n"
 "Language-Team: Armenian <https://hosted.weblate.org/projects/"
@@ -169,10 +169,10 @@ msgstr "Ցանցային գրաֆիկ"
 #: admin/src/integrator/AdminIntegratorSettings.ts:1508
 #: admin/src/integrator/AdminIntegratorSettings.ts:3674
 #: admin/src/integrator/WordBook.ts:394 admin/src/integrator/Xcu.ts:446
-#: src/canvas/sections/CommentListSection.ts:766
+#: src/canvas/sections/CommentListSection.ts:778
 #: src/canvas/sections/CommentSection.ts:193
 #: src/canvas/sections/CommentSection.ts:672
-#: src/canvas/sections/CommentSection.ts:1646
+#: src/canvas/sections/CommentSection.ts:1656
 #: src/control/Control.BackstageView.ts:141
 #: src/control/Control.Notebookbar.js:351
 #: src/control/Control.NotebookbarBuilder.js:177
@@ -266,12 +266,12 @@ msgstr "Սահմանել գրանցամատյանի մակարդակները"
 msgid "Log Levels"
 msgstr "Գրանցամատյանի մակարդակներ"
 
-#: admin/admin.strings.js:68 src/control/Control.AIChatSidebar.ts:664
+#: admin/admin.strings.js:68 src/control/Control.AIChatSidebar.ts:726
 #: src/control/Control.AlertDialog.js:32
 #: src/control/Control.AlertDialog.js:103
 #: src/control/backstage/CloudDialogs.tsx:232
-#: src/control/Control.UIManager.ts:2847 src/control/Control.Zotero.js:191
-#: src/app/Socket.ts:978 src/app/Socket.ts:2468 src/app/Socket.ts:2479
+#: src/control/Control.UIManager.ts:2940 src/control/Control.Zotero.js:191
+#: src/app/Socket.ts:985 src/app/Socket.ts:2480 src/app/Socket.ts:2491
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.div:51-7
 msgid "Close"
 msgstr "Փակել"
@@ -330,7 +330,7 @@ msgstr "Զգուշացում"
 #: admin/src/AdminSocketBase.js:74 admin/src/AdminSocketOverview.js:108
 #: admin/src/AdminSocketOverview.js:432 admin/src/AdminSocketSettings.js:47
 #: admin/src/integrator/AdminIntegratorSettings.ts:3794 src/app/Debug.ts:1622
-#: src/canvas/sections/CommentListSection.ts:1969
+#: src/canvas/sections/CommentListSection.ts:1981
 #: src/control/Control.AboutDialog.ts:245
 #: src/control/Control.AlertDialog.js:56
 #: src/control/Control.DocumentRepair.js:77
@@ -339,44 +339,45 @@ msgstr "Զգուշացում"
 #: src/control/Control.PartsPreview.js:1072
 #: src/control/Control.PartsPreview.js:1114
 #: src/control/Control.ServerAuditDialog.ts:357
-#: src/control/Control.Tabs.js:674 src/control/Control.Tabs.js:683
+#: src/control/Control.Tabs.js:677 src/control/Control.Tabs.js:686
+#: src/control/Control.Tabs.js:725 src/control/Control.Tabs.js:729
 #: src/control/Control.Zotero.js:365 src/control/Control.Zotero.js:411
 #: src/control/Parts.js:546 src/control/Permission.js:98
 #: src/control/Permission.js:108 src/control/Permission.js:169
-#: src/control/Toolbar.js:751 src/app/Socket.ts:1044 src/app/Socket.ts:1762
-#: src/app/Socket.ts:1937 src/app/Socket.ts:2422 src/app/Socket.ts:2525
+#: src/control/Toolbar.js:758 src/app/Socket.ts:1051 src/app/Socket.ts:1772
+#: src/app/Socket.ts:1947 src/app/Socket.ts:2434 src/app/Socket.ts:2537
 #: src/docdispatcher.ts:879 src/main.js:133 src/main.js:136 src/main.js:400
-#: src/map/Clipboard.js:1460 src/map/handler/Map.Feedback.js:96
+#: src/map/Clipboard.js:1475 src/map/handler/Map.Feedback.js:96
 #: src/map/handler/Map.SlideShow.js:60 src/map/handler/Map.SlideShow.js:169
 #: src/map/handler/Map.SlideShow.js:297 src/map/handler/Map.SlideShow.js:308
-#: src/map/handler/Map.WOPI.js:878 src/slideshow/SlideShowPresenter.ts:1378
-#: src/slideshow/SlideShowPresenter.ts:1393
-#: src/slideshow/SlideShowPresenter.ts:1408
-#: src/slideshow/SlideShowPresenter.ts:1434
+#: src/map/handler/Map.WOPI.js:878 src/slideshow/SlideShowPresenter.ts:1386
+#: src/slideshow/SlideShowPresenter.ts:1401
+#: src/slideshow/SlideShowPresenter.ts:1416
+#: src/slideshow/SlideShowPresenter.ts:1442
 msgid "OK"
 msgstr "ԼԱՎ"
 
 #: admin/src/AdminClusterOverview.js:561 admin/src/AdminSocketOverview.js:109
 #: admin/src/AdminSocketOverview.js:433 admin/src/AdminSocketSettings.js:48
 #: admin/src/integrator/WordBook.ts:386
-#: src/canvas/sections/CommentListSection.ts:761
+#: src/canvas/sections/CommentListSection.ts:773
 #: src/canvas/sections/CommentSection.ts:192
 #: src/canvas/sections/CommentSection.ts:195
-#: src/canvas/sections/CommentSection.ts:1647
-#: src/canvas/sections/CommentSection.ts:1652
-#: src/control/Control.AIChatSidebar.ts:1369
-#: src/control/Control.AIChatSidebar.ts:1371
-#: src/control/Control.AIChatSidebar.ts:1456
+#: src/canvas/sections/CommentSection.ts:1657
+#: src/canvas/sections/CommentSection.ts:1662
+#: src/control/Control.AIChatSidebar.ts:1431
+#: src/control/Control.AIChatSidebar.ts:1433
+#: src/control/Control.AIChatSidebar.ts:1518
 #: src/control/backstage/CloudDialogs.tsx:140
 #: src/control/backstage/CloudDialogs.tsx:289
 #: src/control/Control.DocumentRepair.js:71
 #: src/control/Control.DownloadProgress.js:81
 #: src/control/Control.LanguageDialog.js:114
 #: src/control/Control.MobileTopBar.ts:43
-#: src/control/Control.UIManager.ts:2394 src/control/Control.UIManager.ts:2475
-#: src/control/Control.UIManager.ts:2636 src/control/Control.UIManager.ts:2814
-#: src/control/Control.Zotero.js:360 src/app/Socket.ts:1706
-#: src/map/handler/Map.Settings.ts:82
+#: src/control/Control.UIManager.ts:2396 src/control/Control.UIManager.ts:2477
+#: src/control/Control.UIManager.ts:2638 src/control/Control.UIManager.ts:2723
+#: src/control/Control.UIManager.ts:2907 src/control/Control.Zotero.js:360
+#: src/app/Socket.ts:1716 src/map/handler/Map.Settings.ts:82
 msgid "Cancel"
 msgstr "Չեղարկել"
 
@@ -416,10 +417,11 @@ msgstr "Ձեր WOPI սերվերը անվտանգ չէ. SSL ստուգումը �
 #: admin/src/AdminSocketServerAudit.js:40
 #: src/control/Control.ServerAuditDialog.ts:72
 msgid ""
-"Documents are not effectively contained: missing capabilities or namespaces."
+"Documents are not effectively contained: missing capabilities, namespaces "
+"and landlock."
 msgstr ""
-"Փաստաթղթերը արդյունավետորեն չեն պարունակվում. բացակայում են "
-"հնարավորություններ կամ անվանատարածքներ։"
+"Փաստաթղթերը արդյունավետորեն չեն պարունակվում՝ բացակայում են "
+"հնարավորություններ, անվանատարածքներ և ցամաքային սահմանափակումներ։"
 
 #: admin/src/AdminSocketServerAudit.js:45
 #: src/control/Control.ServerAuditDialog.ts:83
@@ -459,7 +461,7 @@ msgstr ""
 
 #: admin/src/AdminSocketServerAudit.js:91
 #: admin/src/integrator/AdminIntegratorSettings.ts:3782
-#: src/control/Control.AIChatSidebar.ts:3108 src/map/handler/Map.WOPI.js:878
+#: src/control/Control.AIChatSidebar.ts:3502 src/map/handler/Map.WOPI.js:878
 msgid "Error"
 msgstr "Սխալ"
 
@@ -540,7 +542,7 @@ msgstr "Փաստաթղթի ներսում էկրանի ընթերցիչ"
 #: src/control/Control.NotebookbarCalc.js:1659
 #: src/control/Control.NotebookbarDraw.js:571
 #: src/control/Control.NotebookbarImpress.js:738
-#: src/control/Control.NotebookbarWriter.js:1829
+#: src/control/Control.NotebookbarWriter.js:1831
 msgid "Dark Mode"
 msgstr "Մութ ռեժիմ"
 
@@ -570,8 +572,8 @@ msgid "Show Formatting Marks"
 msgstr "Ցուցադրել ձևաչափման նշանները"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:619
-#: src/control/Control.NotebookbarWriter.js:2313
-#: src/control/Control.NotebookbarWriter.js:2329
+#: src/control/Control.NotebookbarWriter.js:2315
+#: src/control/Control.NotebookbarWriter.js:2331
 #: src/control/jsdialog/Widget.HTMLContent.ts:52
 msgid "Show Comments"
 msgstr "Ցուցադրել մեկնաբանությունները"
@@ -671,7 +673,7 @@ msgstr "Նկարչություն"
 #: admin/src/integrator/AdminIntegratorSettings.ts:645
 #: src/control/Control.NotebookbarDraw.js:1245
 #: src/control/Control.NotebookbarDraw.js:1526
-#: src/control/Control.NotebookbarWriter.js:1235
+#: src/control/Control.NotebookbarWriter.js:1237
 msgid "Page"
 msgstr "Էջ"
 
@@ -701,7 +703,7 @@ msgstr "Էջի անվանումը"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:652
 #: src/control/Control.NotebookbarCalc.js:817
-#: src/control/Control.NotebookbarWriter.js:1638
+#: src/control/Control.NotebookbarWriter.js:1640
 #: src/control/Control.Zotero.js:1153 src/control/Control.Zotero.js:1614
 msgid "Date"
 msgstr "Ամսաթիվ"
@@ -736,7 +738,7 @@ msgid "Presentation"
 msgstr "Շնորհանդես"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:657
-#: src/control/Control.Zotero.js:1341 src/slideshow/PresenterConsole.js:34
+#: src/control/Control.Zotero.js:1341 src/slideshow/PresenterConsole.js:36
 msgid "Notes"
 msgstr "Նշումներ"
 
@@ -870,14 +872,16 @@ msgid ""
 "Upload a packaged extension as a .zip; its contents (manifest.json, ...) "
 "are unpacked on the server."
 msgstr ""
+"Վերբեռնեք փաթեթի ընդլայնումը որպես .zip նիշքլ։ Դրա պարունակությունը ("
+"manifest.json, ...) բացվում է սերվերի վրա։"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:968
 msgid "Upload Extension"
-msgstr ""
+msgstr "Վերբեռնեք ընդլայնումը"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1057
 msgid "Settings are only available to signed-in users."
-msgstr ""
+msgstr "Կարգավորումները հասանելի են միայն մուտք գործած օգտատերերին։"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1066
 msgid "Something went wrong. Please try to refresh the page."
@@ -945,7 +949,7 @@ msgstr "Նոթատետրի վահանակի տեսք"
 #: src/control/Control.NotebookbarCalc.js:1620
 #: src/control/Control.NotebookbarDraw.js:496
 #: src/control/Control.NotebookbarImpress.js:640
-#: src/control/Control.NotebookbarWriter.js:1747
+#: src/control/Control.NotebookbarWriter.js:1749
 msgid "Compact view"
 msgstr "Կոմպակտ տեսք"
 
@@ -954,9 +958,9 @@ msgid "Something went wrong while uploading the file. Please try again."
 msgstr "Նիշքը վերբեռնելիս ինչ-որ սխալ է տեղի ունեցել։ Խնդրում ենք կրկին փորձել։"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:2102
-#: src/canvas/sections/CommentSection.ts:1560
-#: src/canvas/sections/CommentSection.ts:1565
-#: src/control/Control.AIChatSidebar.ts:1463
+#: src/canvas/sections/CommentSection.ts:1570
+#: src/canvas/sections/CommentSection.ts:1575
+#: src/control/Control.AIChatSidebar.ts:1525
 #: src/control/backstage/CloudDialogs.tsx:194
 #: src/control/Control.PartsPreview.js:1069
 #: src/control/jsdialog/Control.ContextMenu.ts:306
@@ -1013,15 +1017,15 @@ msgstr "Փաստաթղթի ստորագրման կարգավորումներ"
 #: admin/src/integrator/AdminIntegratorSettings.ts:2275
 #: admin/src/integrator/AdminIntegratorSettings.ts:2292
 #: admin/src/integrator/AdminIntegratorSettings.ts:3345
-#: src/control/Control.AIChatSidebar.ts:649 src/control/Control.Menubar.ts:233
+#: src/control/Control.AIChatSidebar.ts:711 src/control/Control.Menubar.ts:233
 #: src/control/Control.Menubar.ts:550 src/control/Control.Menubar.ts:738
 #: src/control/Control.Menubar.ts:933
 #: src/control/Control.NotebookbarCalc.js:1691
 #: src/control/Control.NotebookbarCalc.js:1692
 #: src/control/Control.NotebookbarImpress.js:763
 #: src/control/Control.NotebookbarImpress.js:764
-#: src/control/Control.NotebookbarWriter.js:1818
-#: src/control/Control.NotebookbarWriter.js:1819
+#: src/control/Control.NotebookbarWriter.js:1820
+#: src/control/Control.NotebookbarWriter.js:1821
 msgid "AI Assistant"
 msgstr "ԱԲ օգնական"
 
@@ -1044,7 +1048,7 @@ msgstr "օրինակ՝"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:2441
 msgid "Leave empty if your server does not require one"
-msgstr ""
+msgstr "Թողեք դատարկ, եթե ձեր սերվերը չի պահանջում դա"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:2460
 msgid ""
@@ -1105,7 +1109,7 @@ msgstr "Բեռնել մոդելները ընտրելու համար"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3171
 msgid "API quota exceeded - check your plan and billing details"
-msgstr ""
+msgstr "API-ի քվոտան գերազանցվել է. ստուգեք ձեր պլանը և վճարման մանրամասները"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3176
 msgid "Could not fetch models (HTTP {0}). Check the provider URL and API key."
@@ -1239,7 +1243,7 @@ msgstr " րոպ"
 msgid " s"
 msgstr " վրկ"
 
-#: js/global.js:1915
+#: js/global.js:1930
 msgid ""
 "The system is currently adjusting resources. Please wait a moment while we "
 "retry your request..."
@@ -1247,11 +1251,11 @@ msgstr ""
 "Համակարգն այժմ կարգավորում է ռեսուրսները։ Խնդրում ենք մի փոքր սպասել, մինչև "
 "մենք կկրկնենք ձեր հարցումը..."
 
-#: js/global.js:1917
+#: js/global.js:1932
 msgid "The document is being migrated to a new server. Retrying shortly..."
 msgstr "Փաստաթուղթը տեղափոխվում է նոր սերվեր։ Շուտով կրկին կփորձենք..."
 
-#: js/global.js:1919
+#: js/global.js:1934
 msgid "Failed to get RouteToken from controller"
 msgstr "Չհաջողվեց ստանալ RouteToken-ը կառավարիչից"
 
@@ -1268,11 +1272,11 @@ msgid "Event handling has been delayed for an unexpectedly long time: {0}ms"
 msgstr ""
 "Իրադարձությունների մշակումը հետաձգվել է անսպասելիորեն երկար ժամանակով՝ {0} մվ"
 
-#: src/app/LOUtil.ts:981
+#: src/app/LOUtil.ts:1022
 msgid "{0} website, opens in new tab"
 msgstr "{0} կայքէջ, բացվում է նոր ներդիրում"
 
-#: src/app/LOUtil.ts:984
+#: src/app/LOUtil.ts:1025
 msgid "file type icon"
 msgstr "նիշքի տեսակի պատկերակ"
 
@@ -1298,16 +1302,16 @@ msgstr "Անհատականացված"
 msgid "Table Styles"
 msgstr "Աղյուսակի ոճեր"
 
-#: src/canvas/sections/CommentListSection.ts:1967
-#: src/canvas/sections/CommentListSection.ts:1980
+#: src/canvas/sections/CommentListSection.ts:1979
+#: src/canvas/sections/CommentListSection.ts:1992
 msgid "Comments Updated"
 msgstr "Մեկնաբանությունները թարմացվել են"
 
-#: src/canvas/sections/CommentListSection.ts:1968
+#: src/canvas/sections/CommentListSection.ts:1980
 msgid "Another user has removed this comment."
 msgstr "Մեկ այլ օգտատեր հեռացրել է այս մեկնաբանությունը։"
 
-#: src/canvas/sections/CommentListSection.ts:1981
+#: src/canvas/sections/CommentListSection.ts:1993
 msgid ""
 "Another user has updated the comment. Would you like to overwrite those "
 "changes?"
@@ -1315,12 +1319,12 @@ msgstr ""
 "Մեկ այլ օգտատեր թարմացրել է մեկնաբանությունը։ Կցանկանայի՞ք վերագրել այդ "
 "փոփոխությունները։"
 
-#: src/canvas/sections/CommentListSection.ts:1982 src/control/Styles.js:39
-#: src/app/Socket.ts:1710
+#: src/canvas/sections/CommentListSection.ts:1994 src/control/Styles.js:39
+#: src/app/Socket.ts:1720
 msgid "Overwrite"
 msgstr "Վերագրել"
 
-#: src/canvas/sections/CommentListSection.ts:1983
+#: src/canvas/sections/CommentListSection.ts:1995
 msgid "Update"
 msgstr "Թարմացում"
 
@@ -1338,8 +1342,8 @@ msgstr "Բացել ընտրացանկը"
 
 #: src/canvas/sections/CommentSection.ts:196
 #: src/canvas/sections/CommentSection.ts:676
-#: src/canvas/sections/CommentSection.ts:1250
-#: src/canvas/sections/CommentSection.ts:1651
+#: src/canvas/sections/CommentSection.ts:1260
+#: src/canvas/sections/CommentSection.ts:1661
 msgid "Reply"
 msgstr "Պատասխան"
 
@@ -1365,62 +1369,62 @@ msgstr "Լուծված"
 msgid "Removed"
 msgstr "Հեռացված"
 
-#: src/canvas/sections/CommentSection.ts:1237
+#: src/canvas/sections/CommentSection.ts:1247
 #: src/control/jsdialog/Widget.Comment.ts:177
-#: src/layer/tile/CanvasTileLayer.js:3721
-#: src/layer/tile/CanvasTileLayer.js:3732
+#: src/layer/tile/CanvasTileLayer.js:3724
+#: src/layer/tile/CanvasTileLayer.js:3735
 msgid "Comment"
 msgstr "Մեկնաբանություն"
 
-#: src/canvas/sections/CommentSection.ts:1247
+#: src/canvas/sections/CommentSection.ts:1257
 msgid "Modify"
 msgstr "Ձևափոխել"
 
-#: src/canvas/sections/CommentSection.ts:1253
+#: src/canvas/sections/CommentSection.ts:1263
 #: src/control/backstage/CloudDialogs.tsx:296
 #: src/control/Notebookbar.ImpressAnimationTab.ts:83
 msgid "Remove"
 msgstr "Հեռացնել"
 
-#: src/canvas/sections/CommentSection.ts:1257
+#: src/canvas/sections/CommentSection.ts:1267
 msgid "Remove Thread"
 msgstr "Հեռացնել գալարը"
 
-#: src/canvas/sections/CommentSection.ts:1264
+#: src/canvas/sections/CommentSection.ts:1274
 msgid "Resolve"
 msgstr "Լուծել"
 
-#: src/canvas/sections/CommentSection.ts:1264
+#: src/canvas/sections/CommentSection.ts:1274
 msgid "Unresolve"
 msgstr "Չլուծված"
 
-#: src/canvas/sections/CommentSection.ts:1271
+#: src/canvas/sections/CommentSection.ts:1281
 msgid "Unresolve Thread"
 msgstr "Չլուծված թնջուկ"
 
-#: src/canvas/sections/CommentSection.ts:1271
+#: src/canvas/sections/CommentSection.ts:1281
 msgid "Resolve Thread"
 msgstr "Լուծել թնջուկը"
 
-#: src/canvas/sections/CommentSection.ts:1277
+#: src/canvas/sections/CommentSection.ts:1287
 msgid "Promote to top comment"
 msgstr "Առաջ մղել դեպի լավագույն մեկնաբանություն"
 
-#: src/canvas/sections/CommentSection.ts:1282
+#: src/canvas/sections/CommentSection.ts:1292
 msgid "Show on the side"
 msgstr "Ցույց տալ կողքում"
 
-#: src/canvas/sections/CommentSection.ts:1282
+#: src/canvas/sections/CommentSection.ts:1292
 msgid "Open in full view"
 msgstr "Բացել լրիվ դիտումում"
 
-#: src/canvas/sections/CommentSection.ts:1289
+#: src/canvas/sections/CommentSection.ts:1299
 msgid "Show in navigator"
 msgstr "Ցուցադրել նավարկիչում"
 
-#: src/canvas/sections/CommentSection.ts:1559
-#: src/canvas/sections/CommentSection.ts:1564
-#: src/control/Control.SaveState.ts:69
+#: src/canvas/sections/CommentSection.ts:1569
+#: src/canvas/sections/CommentSection.ts:1574
+#: src/control/Control.SaveState.ts:78
 msgid "Saved"
 msgstr "Պահպանված է"
 
@@ -1446,7 +1450,7 @@ msgstr "Ընթացիկ տարբերակ"
 
 #: src/canvas/sections/OtherViewCellCursorSection.ts:185
 msgid "%n more"
-msgstr ""
+msgstr "%n ավելի"
 
 #: src/canvas/sections/ShapeHandlesSection.ts:538
 msgid "Document contains unsupported media"
@@ -1553,82 +1557,82 @@ msgstr "բջջի հասցե"
 #: src/control/Control.AddressInputField.ts:72
 #: src/control/Control.AddressInputField.ts:124
 msgid "Name Box"
-msgstr ""
+msgstr "Անվան վանդակ"
 
-#: src/control/Control.AIChatSidebar.ts:113
+#: src/control/Control.AIChatSidebar.ts:136
 msgid "Make the following text more concise"
 msgstr "Հետևյալ տեքստը դարձրեք ավելի հակիրճ"
 
-#: src/control/Control.AIChatSidebar.ts:114
+#: src/control/Control.AIChatSidebar.ts:137
 msgid "Make it more concise"
-msgstr ""
+msgstr "Դարձրեք այն ավելի հակիրճ"
 
-#: src/control/Control.AIChatSidebar.ts:117
+#: src/control/Control.AIChatSidebar.ts:140
 msgid "Summarize the key points of this text"
 msgstr "Ամփոփեք այս տեքստի հիմնական կետերը"
 
-#: src/control/Control.AIChatSidebar.ts:118
+#: src/control/Control.AIChatSidebar.ts:141
 msgid "Summarize this text"
-msgstr ""
+msgstr "Ամփոփեք այս տեքստը"
 
-#: src/control/Control.AIChatSidebar.ts:121
+#: src/control/Control.AIChatSidebar.ts:144
 msgid "Expand and add more detail to this text"
 msgstr "Ընդարձակեք և ավելացրեք ավելի շատ մանրամասներ այս տեքստին"
 
-#: src/control/Control.AIChatSidebar.ts:122
+#: src/control/Control.AIChatSidebar.ts:145
 msgid "Expand this text"
-msgstr ""
+msgstr "Ընդարձակեք այս տեքստը"
 
-#: src/control/Control.AIChatSidebar.ts:125
+#: src/control/Control.AIChatSidebar.ts:148
 msgid "Fix grammar, spelling, and punctuation errors"
 msgstr "Շտկեք քերականության, ուղղագրության և կետադրության սխալները"
 
-#: src/control/Control.AIChatSidebar.ts:126
+#: src/control/Control.AIChatSidebar.ts:149
 msgid "Fix grammar & spelling"
-msgstr ""
+msgstr "Շտկեք քերականությունը և ուղղագրությունը"
 
-#: src/control/Control.AIChatSidebar.ts:141
+#: src/control/Control.AIChatSidebar.ts:164
 msgid "Natural"
 msgstr "Բնական"
 
-#: src/control/Control.AIChatSidebar.ts:142
+#: src/control/Control.AIChatSidebar.ts:165
 msgid "Formal"
 msgstr "Պաշտոնական"
 
-#: src/control/Control.AIChatSidebar.ts:143
+#: src/control/Control.AIChatSidebar.ts:166
 msgid "Short"
 msgstr "Կարճ"
 
-#: src/control/Control.AIChatSidebar.ts:144
+#: src/control/Control.AIChatSidebar.ts:167
 msgid "Friendly"
 msgstr "Բարեկամական"
 
-#: src/control/Control.AIChatSidebar.ts:145
+#: src/control/Control.AIChatSidebar.ts:168
 msgid "Professional"
 msgstr "Արհեստավարժ"
 
-#: src/control/Control.AIChatSidebar.ts:146
+#: src/control/Control.AIChatSidebar.ts:169
 msgid "Casual"
 msgstr "Պատահական"
 
-#: src/control/Control.AIChatSidebar.ts:387
+#: src/control/Control.AIChatSidebar.ts:411
 msgid "Best"
-msgstr ""
+msgstr "Լավագույնը"
 
-#: src/control/Control.AIChatSidebar.ts:389
+#: src/control/Control.AIChatSidebar.ts:413
 #: src/control/Control.NotebookbarCalc.js:1030
 msgid "Good"
 msgstr "Լավ"
 
-#: src/control/Control.AIChatSidebar.ts:391
+#: src/control/Control.AIChatSidebar.ts:415
 msgid "Poor"
-msgstr ""
+msgstr "Աղքատիկ"
 
-#: src/control/Control.AIChatSidebar.ts:393
+#: src/control/Control.AIChatSidebar.ts:417
 msgid "Unknown"
 msgstr "Անհայտ"
 
-#: src/control/Control.AIChatSidebar.ts:404
+#: src/control/Control.AIChatSidebar.ts:438
 msgid ""
 "Ethical AI rating: {0} ({1}). Based on open-source licensing, self-hosting, "
 "and training data."
@@ -1636,296 +1640,294 @@ msgstr ""
 "ԱԲ էթիկական գնահատական՝ {0} ({1}): Հիմնված է բաց կոդով արտոնագրման, "
 "ինքնահոսթինգի և ուսուցման տվյալների վրա:"
 
-#: src/control/Control.AIChatSidebar.ts:497
+#: src/control/Control.AIChatSidebar.ts:530
 msgid "Your message"
 msgstr "Ձեր հաղորդագրությունը"
 
-#: src/control/Control.AIChatSidebar.ts:499
+#: src/control/Control.AIChatSidebar.ts:532
 msgid "Action requiring approval"
 msgstr "Հաստատում պահանջող գործողություն"
 
-#: src/control/Control.AIChatSidebar.ts:501
+#: src/control/Control.AIChatSidebar.ts:534
 msgid "Error message"
 msgstr "Սխալի հաղորդագրություն"
 
-#: src/control/Control.AIChatSidebar.ts:502
+#: src/control/Control.AIChatSidebar.ts:535
 msgid "AI response"
 msgstr "ԱԲ-ի արձագանք"
 
-#: src/control/Control.AIChatSidebar.ts:576
+#: src/control/Control.AIChatSidebar.ts:638
 msgid ""
 "Content generated by an external AI service ({0}). Please review before use."
 msgstr ""
 "Արտաքին ԱԲ ծառայության ({0}) կողմից ստեղծված բովանդակություն։ Խնդրում ենք "
 "կարդալ օգտագործելուց առաջ։"
 
-#: src/control/Control.AIChatSidebar.ts:579
+#: src/control/Control.AIChatSidebar.ts:641
 msgid "Content generated by an external AI service. Please review before use."
 msgstr ""
 "Արտաքին ԱԲ ծառայության կողմից ստեղծված բովանդակություն։ Խնդրում ենք կարդալ "
 "օգտագործելուց առաջ։"
 
-#: src/control/Control.AIChatSidebar.ts:657
+#: src/control/Control.AIChatSidebar.ts:719
 msgid "New conversation"
 msgstr "Նոր խոսակցություն"
 
-#: src/control/Control.AIChatSidebar.ts:688
+#: src/control/Control.AIChatSidebar.ts:750
 msgid "Ask AI anything about your document..."
 msgstr "Հարցրեք ԱԲ-ին ձեր փաստաթղթի վերաբերյալ ամեն ինչ..."
 
-#: src/control/Control.AIChatSidebar.ts:746
+#: src/control/Control.AIChatSidebar.ts:808
 msgid "Loading"
 msgstr "Բեռնում"
 
-#: src/control/Control.AIChatSidebar.ts:759
+#: src/control/Control.AIChatSidebar.ts:821
 msgid "Chat messages"
 msgstr "Զրույցի հաղորդագրություններ"
 
-#: src/control/Control.AIChatSidebar.ts:789
+#: src/control/Control.AIChatSidebar.ts:851
 msgid "AI generated image"
 msgstr "ԱԲ գեներացված պատկեր"
 
-#: src/control/Control.AIChatSidebar.ts:828
+#: src/control/Control.AIChatSidebar.ts:890
 msgid "Retry"
 msgstr "Կրկին փորձել"
 
-#: src/control/Control.AIChatSidebar.ts:852
-#: src/control/Control.AIChatSidebar.ts:885
+#: src/control/Control.AIChatSidebar.ts:914
+#: src/control/Control.AIChatSidebar.ts:947
 msgid "Insert at cursor"
 msgstr "Տեղադրեք կուրսորի մոտ"
 
-#: src/control/Control.AIChatSidebar.ts:861
-#: src/control/Control.AIChatSidebar.ts:892
+#: src/control/Control.AIChatSidebar.ts:923
+#: src/control/Control.AIChatSidebar.ts:954
 msgid "Copy to clipboard"
 msgstr "Պատճենել սեղմատախտակին"
 
-#: src/control/Control.AIChatSidebar.ts:912
+#: src/control/Control.AIChatSidebar.ts:974
 msgid "Using selected text as context"
 msgstr "Ընտրված տեքստի օգտագործումը որպես համատեքստ"
 
-#: src/control/Control.AIChatSidebar.ts:919
+#: src/control/Control.AIChatSidebar.ts:981
 msgid "Ask AI..."
 msgstr "Հարցրեք ԱԲ-ին..."
 
-#: src/control/Control.AIChatSidebar.ts:922
+#: src/control/Control.AIChatSidebar.ts:984
 msgid "Message input"
 msgstr "Հաղորդագրության մուտքագրում"
 
-#: src/control/Control.AIChatSidebar.ts:938
+#: src/control/Control.AIChatSidebar.ts:1000
 msgid "Stop generating"
 msgstr "Դադարեցնել գեներացնելը"
 
-#: src/control/Control.AIChatSidebar.ts:939
+#: src/control/Control.AIChatSidebar.ts:1001
 msgid "Send message"
 msgstr "Ուղարկել հաղորդագրություն"
 
-#: src/control/Control.AIChatSidebar.ts:953
-#: src/control/Control.AIChatSidebar.ts:966
+#: src/control/Control.AIChatSidebar.ts:1015
+#: src/control/Control.AIChatSidebar.ts:1028
 msgid "Set tone"
 msgstr "Սահմանել տոնը"
 
-#: src/control/Control.AIChatSidebar.ts:977
+#: src/control/Control.AIChatSidebar.ts:1039
 msgid "Set tone of voice"
 msgstr "Սահմանել ձայնի տոնը"
 
-#: src/control/Control.AIChatSidebar.ts:978
+#: src/control/Control.AIChatSidebar.ts:1040
 msgid "Tone of voice: {0}{1}"
 msgstr "Ձայնի տոնը: {0}{1}"
 
-#: src/control/Control.AIChatSidebar.ts:980
+#: src/control/Control.AIChatSidebar.ts:1042
 msgid "with emoji"
 msgstr "էմոջիով"
 
-#: src/control/Control.AIChatSidebar.ts:1022
-#: src/control/Control.AIChatSidebar.ts:1072
-#: src/control/Control.AIChatSidebar.ts:1444
+#: src/control/Control.AIChatSidebar.ts:1084
+#: src/control/Control.AIChatSidebar.ts:1134
+#: src/control/Control.AIChatSidebar.ts:1506
 msgid "tone"
 msgstr "տոն"
 
-#: src/control/Control.AIChatSidebar.ts:1035
-#: src/control/Control.AIChatSidebar.ts:1306
+#: src/control/Control.AIChatSidebar.ts:1097
+#: src/control/Control.AIChatSidebar.ts:1368
 msgid "Tone of voice"
 msgstr "Ձայնի տոնը"
 
-#: src/control/Control.AIChatSidebar.ts:1041
+#: src/control/Control.AIChatSidebar.ts:1103
 msgid "Reset voice"
 msgstr "Վերականգնել ձայնը"
 
-#: src/control/Control.AIChatSidebar.ts:1044
+#: src/control/Control.AIChatSidebar.ts:1106
 msgid "Reset tone of voice"
 msgstr "Վերականգնել ձայնի տոնը"
 
-#: src/control/Control.AIChatSidebar.ts:1060
+#: src/control/Control.AIChatSidebar.ts:1122
 msgid "Your tones"
 msgstr "Ձեր տոնայնությունները"
 
-#: src/control/Control.AIChatSidebar.ts:1077
+#: src/control/Control.AIChatSidebar.ts:1139
 msgid "Edit tone"
 msgstr "Խմբագրել տոնը"
 
-#: src/control/Control.AIChatSidebar.ts:1094
+#: src/control/Control.AIChatSidebar.ts:1156
 msgid "+ Add my own voice"
 msgstr "+ Ավելացնել իմ սեփական ձայնը"
 
-#: src/control/Control.AIChatSidebar.ts:1096
+#: src/control/Control.AIChatSidebar.ts:1158
 msgid "Add a custom tone of voice"
 msgstr "Ավելացրեք ձայնի անհատականացված տոն"
 
-#: src/control/Control.AIChatSidebar.ts:1107
+#: src/control/Control.AIChatSidebar.ts:1169
 msgid "Emojify"
 msgstr "Էմոջիացնել"
 
-#: src/control/Control.AIChatSidebar.ts:1113
+#: src/control/Control.AIChatSidebar.ts:1175
 #: src/control/Control.StatusBar.js:171
 msgid "On"
 msgstr "Միացված է"
 
-#: src/control/Control.AIChatSidebar.ts:1113
+#: src/control/Control.AIChatSidebar.ts:1175
 #: src/control/Control.StatusBar.js:173
-#: src/control/jsdialog/Definitions.Menu.ts:1841
+#: src/control/jsdialog/Definitions.Menu.ts:1856
 msgid "Off"
 msgstr "Անջատված"
 
-#: src/control/Control.AIChatSidebar.ts:1116
+#: src/control/Control.AIChatSidebar.ts:1178
 msgid "Toggle emojify"
 msgstr "Միացնել/անջատել էմոջիացումը"
 
-#: src/control/Control.AIChatSidebar.ts:1277
+#: src/control/Control.AIChatSidebar.ts:1339
 msgid "Use icon"
 msgstr "Օգտագործեք պատկերակ"
 
-#: src/control/Control.AIChatSidebar.ts:1287
+#: src/control/Control.AIChatSidebar.ts:1349
 msgid "Pick another emoji"
 msgstr "Վերցրեք մեկ այլ էմոջի"
 
-#: src/control/Control.AIChatSidebar.ts:1301
+#: src/control/Control.AIChatSidebar.ts:1363
 msgid "Back to tones"
 msgstr "Վերադառնալ տոնայնություններին"
 
-#: src/control/Control.AIChatSidebar.ts:1314
+#: src/control/Control.AIChatSidebar.ts:1376
 msgid "Icon"
 msgstr "Պատկերակ"
 
-#: src/control/Control.AIChatSidebar.ts:1326
+#: src/control/Control.AIChatSidebar.ts:1388
 msgid "Name your tone"
 msgstr "Անվանեք ձեր տոնայնությունը"
 
-#: src/control/Control.AIChatSidebar.ts:1333
+#: src/control/Control.AIChatSidebar.ts:1395
 msgid "e.g. Quick reply"
 msgstr "օրինակ՝ Արագ պատասխան"
 
-#: src/control/Control.AIChatSidebar.ts:1335
+#: src/control/Control.AIChatSidebar.ts:1397
 msgid "Tone name"
 msgstr "Տոնայնության անուն"
 
-#: src/control/Control.AIChatSidebar.ts:1340
+#: src/control/Control.AIChatSidebar.ts:1402
 msgid "Describe how AI should write"
 msgstr "Նկարագրեք, թե ինչպես պետք է գրի ԱԲ-ն"
 
-#: src/control/Control.AIChatSidebar.ts:1348
+#: src/control/Control.AIChatSidebar.ts:1410
 msgid ""
 "Write short, direct sentences. Use plain language and skip the small talk."
 msgstr ""
 "Գրեք հակիրճ, ուղիղ նախադասություններ։ Օգտագործեք պարզ լեզու և բաց թողեք մանր "
 "զրույցները։"
 
-#: src/control/Control.AIChatSidebar.ts:1352
+#: src/control/Control.AIChatSidebar.ts:1414
 msgid "Tone description"
 msgstr "Տոնայնության նկարագրություն"
 
-#: src/control/Control.AIChatSidebar.ts:1361
 #: src/control/Control.AIChatSidebar.ts:1423
-#: src/control/Control.AIChatSidebar.ts:1465
+#: src/control/Control.AIChatSidebar.ts:1485
+#: src/control/Control.AIChatSidebar.ts:1527
 msgid "Delete tone"
 msgstr "Ջնջել տոնայնությունը"
 
-#: src/control/Control.AIChatSidebar.ts:1363
+#: src/control/Control.AIChatSidebar.ts:1425
 msgid "Delete this tone"
 msgstr "Ջնջեք այս տոնայնությունը"
 
-#: src/control/Control.AIChatSidebar.ts:1376
+#: src/control/Control.AIChatSidebar.ts:1438
 msgid "Save voice"
 msgstr "Պահպանել ձայնը"
 
-#: src/control/Control.AIChatSidebar.ts:1378
+#: src/control/Control.AIChatSidebar.ts:1440
 msgid "Save tone of voice"
 msgstr "Պահպանել այս ձայնի տոնայնությունը"
 
-#: src/control/Control.AIChatSidebar.ts:1393
+#: src/control/Control.AIChatSidebar.ts:1455
 #: src/control/jsdialog/Widget.EmojiPicker.ts:410
 msgid "Search emojis"
 msgstr "Որոնել զմայլիկներ"
 
-#: src/control/Control.AIChatSidebar.ts:1394
+#: src/control/Control.AIChatSidebar.ts:1456
 #: src/control/jsdialog/Widget.EmojiPicker.ts:401
 msgid "Choose an emoji"
 msgstr "Ընտրեք զմայլիկ"
 
-#: src/control/Control.AIChatSidebar.ts:1418
+#: src/control/Control.AIChatSidebar.ts:1480
 msgid "Delete tone confirmation"
 msgstr "Ջնջել տոնայնության հաստատումը"
 
-#: src/control/Control.AIChatSidebar.ts:1429
+#: src/control/Control.AIChatSidebar.ts:1491
 msgid "This tone of voice will be deleted"
 msgstr "Այս ձայնի տոնը կջնջվի"
 
-#: src/control/Control.AIChatSidebar.ts:1458
+#: src/control/Control.AIChatSidebar.ts:1520
 msgid "Cancel delete"
 msgstr "Չեղարկել ջնջումը"
 
-#: src/control/Control.AIChatSidebar.ts:1485
-#: src/control/Control.AIChatSidebar.ts:1545
+#: src/control/Control.AIChatSidebar.ts:1547
+#: src/control/Control.AIChatSidebar.ts:1607
 msgid "You have reached the maximum of {0} custom tones."
 msgstr "Դուք հասել եք անհատականացված տոների {0} առավելագույնին։"
 
-#: src/control/Control.AIChatSidebar.ts:1719
+#: src/control/Control.AIChatSidebar.ts:1781
 msgid "Diagnose formula error"
 msgstr "Ախտորոշել բանաձևի սխալը"
 
-#: src/control/Control.AIChatSidebar.ts:1725
+#: src/control/Control.AIChatSidebar.ts:1787
 msgid "Sanity check data"
 msgstr "Ողջամտության ստուգման տվյալներ"
 
-#: src/control/Control.AIChatSidebar.ts:1731
+#: src/control/Control.AIChatSidebar.ts:1793
 msgid "Create a formula"
 msgstr "Ստեղծեք բանաձև"
 
-#: src/control/Control.AIChatSidebar.ts:1738
+#: src/control/Control.AIChatSidebar.ts:1800
 msgid "Create slides"
 msgstr "Ստեղծեք սահիկներ"
 
-#: src/control/Control.AIChatSidebar.ts:1770
+#: src/control/Control.AIChatSidebar.ts:1832
 msgid "See less"
 msgstr "Տեսնել ավելի քիչ"
 
-#: src/control/Control.AIChatSidebar.ts:1770
+#: src/control/Control.AIChatSidebar.ts:1832
 msgid "See more"
 msgstr "Տեսնել ավելին"
 
-#: src/control/Control.AIChatSidebar.ts:1798
-msgid "Design template choice cancelled."
-msgstr ""
-
-#: src/control/Control.AIChatSidebar.ts:1892
+#: src/control/Control.AIChatSidebar.ts:1944
 msgid "Image inserted at cursor"
 msgstr "Պատկերը տեղադրված է կուրսորի մոտ"
 
-#: src/control/Control.AIChatSidebar.ts:1911
+#: src/control/Control.AIChatSidebar.ts:1963
 msgid "Text inserted at cursor"
 msgstr "Տեքստը տեղադրված է կուրսորի մոտ"
 
-#: src/control/Control.AIChatSidebar.ts:1990
+#: src/control/Control.AIChatSidebar.ts:2042
 msgid "Approaching message length limit"
 msgstr "Մոտենում է հաղորդագրության երկարության սահմանաչափին"
 
-#: src/control/Control.AIChatSidebar.ts:2037
+#: src/control/Control.AIChatSidebar.ts:2089
 msgid ""
 "The request timed out. You can increase the request timeout in the AI "
 "section of the settings."
 msgstr ""
+"Հարցման ժամանակը սպառվեց։ Դուք կարող եք մեծացնել հարցման ժամանակը "
+"կարգավորումների ԱԲ բաժնում։"
 
-#: src/control/Control.AIChatSidebar.ts:2065
-#: src/control/Control.AIChatSidebar.ts:3254
+#: src/control/Control.AIChatSidebar.ts:2122
+#: src/control/Control.AIChatSidebar.ts:3648
 msgid ""
 "The selection contains images or other non-text content that cannot be sent "
 "as context."
@@ -1933,180 +1935,324 @@ msgstr ""
 "Ընտրվածը պարունակում է պատկերներ կամ այլ ոչ տեքստային բովանդակություն, որոնք "
 "չեն կարող ուղարկվել որպես համատեքստ։"
 
-#: src/control/Control.AIChatSidebar.ts:2158
+#: src/control/Control.AIChatSidebar.ts:2211
 msgid "Message is too long. Please shorten it and try again."
 msgstr ""
 "Հաղորդագրությունը չափազանց երկար է։ Խնդրում ենք կրճատել այն և կրկին փորձել։"
 
-#: src/control/Control.AIChatSidebar.ts:2239
+#: src/control/Control.AIChatSidebar.ts:2272
 msgid "Error: "
 msgstr "Սխալ: "
 
-#: src/control/Control.AIChatSidebar.ts:2269
+#: src/control/Control.AIChatSidebar.ts:2302
 msgid "Generated image"
 msgstr "Գեներացված պատկեր"
 
-#: src/control/Control.AIChatSidebar.ts:2281
+#: src/control/Control.AIChatSidebar.ts:2314
 msgid "AI request failed"
 msgstr "ԱԲ հարցումը ձախողվեց"
 
-#: src/control/Control.AIChatSidebar.ts:2298
+#: src/control/Control.AIChatSidebar.ts:2331
 msgid "The AI assistant"
 msgstr "ԱԲ-ի օգնական"
 
-#: src/control/Control.AIChatSidebar.ts:2311
+#: src/control/Control.AIChatSidebar.ts:2372
+msgid "insert 1 slide"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2372
+msgid "insert %1 slides"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2377
+msgid "delete 1 slide"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2378
+msgid "delete %1 slides"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2385
+msgid "duplicate 1 slide"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2386
+msgid "duplicate %1 slides"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2391
+msgid "move 1 slide"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2391
+msgid "move %1 slides"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2397
+msgid "rename 1 slide"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2398
+msgid "rename %1 slides"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2404
+msgid "change 1 layout"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2404
+msgid "change %1 layouts"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2409
+msgid "set text in 1 place"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2410
+msgid "set text in %1 places"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2417
+msgid "format text in 1 place"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2418
+msgid "format text in %1 places"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2425
+#, fuzzy
+msgid "generate 1 image"
+msgstr "Գեներացված պատկեր"
+
+#: src/control/Control.AIChatSidebar.ts:2426
+#, fuzzy
+msgid "generate %1 images"
+msgstr "Գեներացված պատկեր"
+
+#: src/control/Control.AIChatSidebar.ts:2433
+msgid "run 1 document command"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2434
+msgid "run %1 document commands"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2465
+msgid "run 1 %2 command"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2466
+msgid "run %1 %2 commands"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2472
+msgid "apply the design template '%1'"
+msgstr "կիրառել '%1' դիզայնի ձևանմուշը"
+
+#: src/control/Control.AIChatSidebar.ts:2475
+msgid "This will: %1."
+msgstr "Սա կհանգեցնի՝ %1։"
+
+#: src/control/Control.AIChatSidebar.ts:2489
 msgid "Do you want to proceed?"
 msgstr "Ցանկանո՞ւմ եք շարունակել։"
 
-#: src/control/Control.AIChatSidebar.ts:2314
+#: src/control/Control.AIChatSidebar.ts:2492
 msgid "%1 wants to inspect your document. Do you want to proceed?"
 msgstr "%1 -ը ցանկանում է ստուգել ձեր փաստաթուղթը։ Շարունակե՞լ։"
 
-#: src/control/Control.AIChatSidebar.ts:2318
+#: src/control/Control.AIChatSidebar.ts:2496
 msgid "Modify document structure"
 msgstr "Փոփոխել փաստաթղթի կառուցվածքը"
 
-#: src/control/Control.AIChatSidebar.ts:2320
+#: src/control/Control.AIChatSidebar.ts:2502
 msgid "%1 wants to modify your document:"
 msgstr "%1-ը ցանկանում է փոփոխել ձեր փաստաթուղթը՝"
 
-#: src/control/Control.AIChatSidebar.ts:2324
-#: src/control/Control.AIChatSidebar.ts:2335
+#: src/control/Control.AIChatSidebar.ts:2507
+#: src/control/Control.AIChatSidebar.ts:2518
 msgid "Do you want to apply this change?"
 msgstr "Ցանկանո՞ւմ եք կիրառել այս փոփոխությունը։"
 
-#: src/control/Control.AIChatSidebar.ts:2326
+#: src/control/Control.AIChatSidebar.ts:2509
 msgid "Set cell formula"
 msgstr "Սահմանել բջջի բանաձևը"
 
-#: src/control/Control.AIChatSidebar.ts:2328
+#: src/control/Control.AIChatSidebar.ts:2511
 msgid "%1 wants to set a formula in your spreadsheet:"
 msgstr "%1-ը ցանկանում է ձեր էլ․ աղյուսակում բանաձև սահմանել:"
 
-#: src/control/Control.AIChatSidebar.ts:2338
+#: src/control/Control.AIChatSidebar.ts:2521
 msgid "%1 wants to perform an action. Do you want to proceed?"
 msgstr "%1-ը ցանկանում է կատարել գործողություն։ Շարունակե՞լ։"
 
-#: src/control/Control.AIChatSidebar.ts:2369
+#: src/control/Control.AIChatSidebar.ts:2549
+#: src/control/Control.AIChatSidebar.ts:3168
 msgid "Approve"
 msgstr "Վավերացնել"
 
-#: src/control/Control.AIChatSidebar.ts:2371
+#: src/control/Control.AIChatSidebar.ts:2551
 msgid "Approve action"
 msgstr "Վավերացնել գործողությունը"
 
-#: src/control/Control.AIChatSidebar.ts:2383
+#: src/control/Control.AIChatSidebar.ts:2555
+#: src/control/Control.AIChatSidebar.ts:3171
 msgid "Reject"
 msgstr "Մերժել"
 
-#: src/control/Control.AIChatSidebar.ts:2385
+#: src/control/Control.AIChatSidebar.ts:2557
 msgid "Reject action"
 msgstr "Մերժել գործողությունը"
 
-#: src/control/Control.AIChatSidebar.ts:2404
+#: src/control/Control.AIChatSidebar.ts:2575
 msgid "Applying changes..."
 msgstr "Փոփոխությունների կիրառում..."
 
-#: src/control/Control.AIChatSidebar.ts:2407
+#: src/control/Control.AIChatSidebar.ts:2578
 msgid "Change rejected"
 msgstr "Փոփոխությունը մերժվեց"
 
-#: src/control/Control.AIChatSidebar.ts:2497
+#: src/control/Control.AIChatSidebar.ts:2685
 msgid "Use section: "
 msgstr "Օգտագործեք ենթաբաժինը: "
 
-#: src/control/Control.AIChatSidebar.ts:2541
+#: src/control/Control.AIChatSidebar.ts:2724
 msgid "Selection fetch timeout"
 msgstr "Ընտրվածության ստացման ժամանակի սպառում"
 
-#: src/control/Control.AIChatSidebar.ts:2560
+#: src/control/Control.AIChatSidebar.ts:2743
 msgid "Failed to parse selection content"
 msgstr "Չհաջողվեց վերլուծել ընտրության բովանդակությունը"
 
-#: src/control/Control.AIChatSidebar.ts:2885
-msgid "Pick a design for your deck, or continue without one:"
-msgstr ""
+#: src/control/Control.AIChatSidebar.ts:3027
+msgid "Design (optional):"
+msgstr "Դիզայն (ըստ ցանկության):"
 
-#: src/control/Control.AIChatSidebar.ts:2930
-msgid "No template"
-msgstr ""
+#: src/control/Control.AIChatSidebar.ts:3044
+msgid "No design"
+msgstr "Դիզայն չկա"
 
-#: src/control/Control.AIChatSidebar.ts:2933
+#: src/control/Control.AIChatSidebar.ts:3045
 msgid "Continue without a design template"
-msgstr ""
+msgstr "Շարունակել առանց դիզայնի ձևանմուշի"
 
-#: src/control/Control.AIChatSidebar.ts:2959
-msgid "Design template: %1"
+#: src/control/Control.AIChatSidebar.ts:3111
+msgid ""
+"Here is a proposed outline. Edit the titles or descriptions, remove slides "
+"you do not want, then approve to build the deck:"
 msgstr ""
+"Ահա առաջարկվող ուրվագիծը։ Խմբագրեք վերնագրերը կամ նկարագրությունները, "
+"հեռացրեք անցանկալի սահիկները, ապա հաստատեք տախտակամածի կառուցումը:"
 
-#: src/control/Control.AIChatSidebar.ts:2960
-msgid "Continuing without a design template."
-msgstr ""
+#: src/control/Control.AIChatSidebar.ts:3172
+msgid "Reject outline"
+msgstr "Մերժել ուրվագիծը"
 
-#: src/control/Control.AIChatSidebar.ts:3026
+#: src/control/Control.AIChatSidebar.ts:3178
+msgid "Give every added slide a title to approve."
+msgstr "Յուրաքանչյուր ավելացված սահիկին հաստատման համար տվեք վերնագիր։"
+
+#: src/control/Control.AIChatSidebar.ts:3206
+msgid "Slide %1 title"
+msgstr "Սահիկ %1 վերնագիր"
+
+#: src/control/Control.AIChatSidebar.ts:3212
+msgid "Slide %1 description"
+msgstr "Սահիկ %1 նկարագրություն"
+
+#: src/control/Control.AIChatSidebar.ts:3218
+msgid "Remove slide %1"
+msgstr "Հեռացնել սահիկ %1 -ը"
+
+#: src/control/Control.AIChatSidebar.ts:3266
+msgid "Slide title"
+msgstr "Սահիկի վերնագիր"
+
+#: src/control/Control.AIChatSidebar.ts:3278
+msgid "What this slide should cover"
+msgstr "Ինչ պետք է ներառի այս սահիկը"
+
+#: src/control/Control.AIChatSidebar.ts:3303
+msgid "Add slide"
+msgstr "Ավելացնել սահիկ"
+
+#: src/control/Control.AIChatSidebar.ts:3341
+msgid "Outline approved - building %1 slides."
+msgstr "Հաստատված ուրվագիծ - %1 սահիկների կառուցում։"
+
+#: src/control/Control.AIChatSidebar.ts:3350
+msgid "Outline rejected."
+msgstr "Ուրվագիծը մերժվեց։"
+
+#: src/control/Control.AIChatSidebar.ts:3386
+msgid "Building slides..."
+msgstr "Սահիկների կառուցում..."
+
+#: src/control/Control.AIChatSidebar.ts:3420
 msgid "Formula analysis timeout"
 msgstr "Բանաձևի վերլուծության ժամանակի սպառում"
 
-#: src/control/Control.AIChatSidebar.ts:3045
+#: src/control/Control.AIChatSidebar.ts:3439
 msgid "Analyzing formula dependencies..."
 msgstr "Բանաձևի կախվածությունների վերլուծություն..."
 
-#: src/control/Control.AIChatSidebar.ts:3053
+#: src/control/Control.AIChatSidebar.ts:3447
 msgid "Failed to analyze formula."
 msgstr "Չհաջողվեց վերլուծել բանաձևը։"
 
-#: src/control/Control.AIChatSidebar.ts:3063
+#: src/control/Control.AIChatSidebar.ts:3457
 msgid "The selected cell does not contain a formula."
 msgstr "Ընտրված բջիջը բանաձև չի պարունակում։"
 
-#: src/control/Control.AIChatSidebar.ts:3065
+#: src/control/Control.AIChatSidebar.ts:3459
 msgid "The selected cell does not have a formula error."
 msgstr "Ընտրված բջիջը բանաձևի սխալ չունի։"
 
-#: src/control/Control.AIChatSidebar.ts:3074
+#: src/control/Control.AIChatSidebar.ts:3468
 msgid "Diagnose formula error in"
 msgstr "Ախտորոշել բանաձևի սխալը սրանում"
 
-#: src/control/Control.AIChatSidebar.ts:3095
+#: src/control/Control.AIChatSidebar.ts:3489
 msgid "I have a formula error in my spreadsheet."
 msgstr "Իմ էլ․ աղյուսակում ես ունեմ բանաձևի սխալ։"
 
-#: src/control/Control.AIChatSidebar.ts:3097
+#: src/control/Control.AIChatSidebar.ts:3491
 msgid "Cell"
 msgstr "Բջիջ"
 
-#: src/control/Control.AIChatSidebar.ts:3101
+#: src/control/Control.AIChatSidebar.ts:3495
 msgid "Sheet"
 msgstr "Թերթ"
 
-#: src/control/Control.AIChatSidebar.ts:3105
+#: src/control/Control.AIChatSidebar.ts:3499
 msgid "contains"
 msgstr "պարունակում է"
 
-#: src/control/Control.AIChatSidebar.ts:3107
+#: src/control/Control.AIChatSidebar.ts:3501
 #: src/control/Control.FormulaBarJSDialog.js:116
 #: src/control/Control.NotebookbarWriter.js:121
-#: src/control/Control.NotebookbarWriter.js:1578
+#: src/control/Control.NotebookbarWriter.js:1580
 msgid "Formula"
 msgstr "Բանաձև"
 
-#: src/control/Control.AIChatSidebar.ts:3111
+#: src/control/Control.AIChatSidebar.ts:3505
 msgid "Referenced cells"
 msgstr "Հղված բջիջներ"
 
-#: src/control/Control.AIChatSidebar.ts:3117
+#: src/control/Control.AIChatSidebar.ts:3511
 msgid "Please diagnose why this formula produces the"
 msgstr "Խնդրում եմ ախտորոշել, թե ինչու է այս բանաձևը արտադրում"
 
-#: src/control/Control.AIChatSidebar.ts:3121
+#: src/control/Control.AIChatSidebar.ts:3515
 msgid "error."
 msgstr "սխալ։"
 
-#: src/control/Control.AIChatSidebar.ts:3123
+#: src/control/Control.AIChatSidebar.ts:3517
 msgid "Explain the root cause and suggest how to fix it."
 msgstr "Բացատրեք հիմնական պատճառը և առաջարկեք, թե ինչպես այն շտկել։"
 
-#: src/control/Control.AIChatSidebar.ts:3127
+#: src/control/Control.AIChatSidebar.ts:3521
 msgid ""
 "When referencing specific cells, format each cell address as a clickable "
 "link: [A1](cell://A1)."
@@ -2114,59 +2260,59 @@ msgstr ""
 "Երբ հղում եք կատարում որոշակի բջիջների, յուրաքանչյուր բջջի հասցեն ձևաչափեք "
 "որպես կտտացվող հղում՝ [A1](cell://A1):"
 
-#: src/control/Control.AIChatSidebar.ts:3142
+#: src/control/Control.AIChatSidebar.ts:3536
 msgid "formula"
 msgstr "բանաձև"
 
-#: src/control/Control.AIChatSidebar.ts:3144
+#: src/control/Control.AIChatSidebar.ts:3538
 msgid "ERROR"
 msgstr "ՍԽԱԼ"
 
-#: src/control/Control.AIChatSidebar.ts:3158
+#: src/control/Control.AIChatSidebar.ts:3552
 msgid "value"
 msgstr "արժեք"
 
-#: src/control/Control.AIChatSidebar.ts:3168
+#: src/control/Control.AIChatSidebar.ts:3562
 msgid "text"
 msgstr "տեքստ"
 
-#: src/control/Control.AIChatSidebar.ts:3173
+#: src/control/Control.AIChatSidebar.ts:3567
 msgid "empty"
 msgstr "դատարկ"
 
-#: src/control/Control.AIChatSidebar.ts:3175
+#: src/control/Control.AIChatSidebar.ts:3569
 msgid "range"
 msgstr "տիրույթ"
 
-#: src/control/Control.AIChatSidebar.ts:3177
+#: src/control/Control.AIChatSidebar.ts:3571
 msgid "errors in"
 msgstr "սխալներ սրանում"
 
-#: src/control/Control.AIChatSidebar.ts:3180
+#: src/control/Control.AIChatSidebar.ts:3574
 msgid "only partially scanned"
 msgstr "միայն մասամբ սկանավորված"
 
-#: src/control/Control.AIChatSidebar.ts:3189
+#: src/control/Control.AIChatSidebar.ts:3583
 msgid "circular reference"
 msgstr "շրջանաձև հղում"
 
-#: src/control/Control.AIChatSidebar.ts:3239
+#: src/control/Control.AIChatSidebar.ts:3633
 msgid "Select the data you want to sanity-check first."
 msgstr "Ընտրեք այն տվյալները, որոնց ողջմտությունը ցանկանում եք առաջինը ստուգել։"
 
-#: src/control/Control.AIChatSidebar.ts:3244
+#: src/control/Control.AIChatSidebar.ts:3638
 msgid "Analyzing selected data..."
 msgstr "Ընտրված տվյալների վերլուծություն..."
 
-#: src/control/Control.AIChatSidebar.ts:3257
+#: src/control/Control.AIChatSidebar.ts:3651
 msgid "Failed to extract spreadsheet data."
 msgstr "Չհաջողվեց արդյունահանել էլ․ աղյուսակի տվյալները։"
 
-#: src/control/Control.AIChatSidebar.ts:3266
+#: src/control/Control.AIChatSidebar.ts:3660
 msgid "No data found in selection."
 msgstr "Ընտրվածի մեջ տվյալներ չեն գտնվել։"
 
-#: src/control/Control.AIChatSidebar.ts:3296
+#: src/control/Control.AIChatSidebar.ts:3690
 msgid ""
 "Describe the slides you want to create. For example: \"A 5-slide overview "
 "of renewable energy\" or \"An introduction to our team\"."
@@ -2174,7 +2320,7 @@ msgstr ""
 "Նկարագրեք այն սահիկները, որոնք ցանկանում եք ստեղծել: Օրինակ՝ «Վերականգնվող "
 "էներգիայի 5 սահիկից բաղկացած ակնարկ» կամ «Ներածություն մեր թիմին»:"
 
-#: src/control/Control.AIChatSidebar.ts:3323
+#: src/control/Control.AIChatSidebar.ts:3717
 msgid ""
 "Describe what formula you need. For example: \"Calculate the average of "
 "column B\" or \"Sum all values where column A is greater than 100\"."
@@ -2182,7 +2328,7 @@ msgstr ""
 "Նկարագրեք, թե ինչ բանաձև է ձեզ անհրաժեշտ։ Օրինակ՝ «Հաշվարկեք B սյունակի "
 "միջինը» կամ «Գումարեք բոլոր արժեքները, որտեղ A սյունակը մեծ է 100-ից»։"
 
-#: src/control/Control.AIChatSidebar.ts:3333
+#: src/control/Control.AIChatSidebar.ts:3727
 msgid ""
 "Read row numbers from the \"Row\" column — do not count or estimate row "
 "positions."
@@ -2190,7 +2336,7 @@ msgstr ""
 "Կարդացեք տողերի համարները «Տող» սյունակից՝ մի՛ հաշվեք կամ մի՛ գնահատեք "
 "տողերի դիրքերը։"
 
-#: src/control/Control.AIChatSidebar.ts:3337
+#: src/control/Control.AIChatSidebar.ts:3731
 msgid ""
 "To identify a cell's column, match the value to the column letter in the "
 "header row — do not guess."
@@ -2198,7 +2344,7 @@ msgstr ""
 "Բջիջի սյունակը նույնականացնելու համար համապատասխանեցրեք արժեքը վերնագրի "
 "տողում գտնվող սյունակի տառին՝ մի՛ կռահեք։"
 
-#: src/control/Control.AIChatSidebar.ts:3341
+#: src/control/Control.AIChatSidebar.ts:3735
 msgid ""
 "Reference a cell by combining its column header with the row number (e.g., "
 "column B + row 2 = B2)."
@@ -2206,7 +2352,7 @@ msgstr ""
 "Հղում կատարեք բջիջին՝ դրա սյունակի վերնագիրը համատեղելով տողի թվի հետ "
 "(օրինակ՝ B սյուն + 2-րդ տող = B2):"
 
-#: src/control/Control.AIChatSidebar.ts:3344
+#: src/control/Control.AIChatSidebar.ts:3738
 msgid ""
 "When referencing specific cells, format each cell as a clickable link: [B2]"
 "(cell://B2)."
@@ -2214,15 +2360,15 @@ msgstr ""
 "Երբ հղում եք կատարում որոշակի բջիջների, յուրաքանչյուր բջիջը ձևաչափեք որպես "
 "կտտացվող հղում՝ [B2](cell://B2):"
 
-#: src/control/Control.AIChatSidebar.ts:3350
+#: src/control/Control.AIChatSidebar.ts:3744
 msgid "Sanity check the following spreadsheet data."
 msgstr "Ողջամտորեն ստուգեք էլ․ աղյուսակի հետևյալ տվյալները։"
 
-#: src/control/Control.AIChatSidebar.ts:3351
+#: src/control/Control.AIChatSidebar.ts:3745
 msgid "Please analyze this data for:"
 msgstr "Խնդրում ենք վերլուծել այս տվյալները հետևյալի համար:"
 
-#: src/control/Control.AIChatSidebar.ts:3355
+#: src/control/Control.AIChatSidebar.ts:3749
 msgid ""
 "Benford's Law violations — check if leading digit distribution of numeric "
 "values deviates significantly from the expected distribution, which may "
@@ -2232,7 +2378,7 @@ msgstr ""
 "թվանշանների բաշխումը զգալիորեն շեղվում է սպասվող բաշխումից, ինչը կարող է "
 "ենթադրել տվյալների մանիպուլյացիա։"
 
-#: src/control/Control.AIChatSidebar.ts:3361
+#: src/control/Control.AIChatSidebar.ts:3755
 msgid ""
 "Statistical outliers — identify values that deviate significantly from "
 "their column or group."
@@ -2240,7 +2386,7 @@ msgstr ""
 "Վիճակագրական արտառոց արժեքներ — նույնականացրեք արժեքները, որոնք զգալիորեն "
 "շեղվում են իրենց սյունակից կամ խմբից։"
 
-#: src/control/Control.AIChatSidebar.ts:3367
+#: src/control/Control.AIChatSidebar.ts:3761
 msgid ""
 "General anomalies — suspicious patterns, unexpected duplicates, "
 "inconsistencies, or formatting issues."
@@ -2252,7 +2398,7 @@ msgstr ""
 msgid "External link"
 msgstr "Արտաքին հղում"
 
-#: src/control/Control.AlertDialog.js:56 src/slideshow/PresenterConsole.js:803
+#: src/control/Control.AlertDialog.js:56 src/slideshow/PresenterConsole.js:821
 msgid "Open link"
 msgstr "Բացել հղումը"
 
@@ -2290,7 +2436,7 @@ msgstr ""
 "Ընտրված արտաքին տվյալների աղբյուրը արգելված է: Խնդրում ենք կապվել համակարգի "
 "ադմինիստրատորի հետ:"
 
-#: src/control/Control.AlertDialog.js:88 src/map/Clipboard.js:1461
+#: src/control/Control.AlertDialog.js:88 src/map/Clipboard.js:1476
 msgid "Don’t show this again"
 msgstr "Այլևս սա չցուցադրել"
 
@@ -2334,7 +2480,7 @@ msgstr "Բացել"
 #: src/control/Control.NotebookbarImpress.js:306
 #: src/control/Control.NotebookbarWriter.js:226
 #: src/control/Control.NotebookbarWriter.js:259
-#: src/control/PermissionMode.ts:150
+#: src/control/PermissionMode.ts:155
 msgid "Share"
 msgstr "Համօգտագործել"
 
@@ -2411,7 +2557,7 @@ msgstr "Էջեր"
 msgid "Spreadsheet"
 msgstr "Էլ․ աղյուսակ"
 
-#: src/control/Control.BackstageView.ts:822 src/control/Control.Tabs.js:216
+#: src/control/Control.BackstageView.ts:822 src/control/Control.Tabs.js:218
 msgid "Sheets"
 msgstr "Թերթեր"
 
@@ -2419,7 +2565,7 @@ msgstr "Թերթեր"
 #: src/control/Control.NavigatorPanel.ts:210
 #: src/control/Control.NotebookbarImpress.js:1479
 #: src/control/Control.PartsPreview.js:104
-#: src/slideshow/PresenterConsole.js:35
+#: src/slideshow/PresenterConsole.js:37
 msgid "Slides"
 msgstr "Սահիկներ"
 
@@ -2504,7 +2650,7 @@ msgstr "Որոնել ձևանմուշներ"
 #: src/control/Control.NotebookbarDraw.js:371
 #: src/control/Control.NotebookbarImpress.js:408
 #: src/control/Control.NotebookbarWriter.js:362
-#: src/control/Control.NotebookbarWriter.js:1646
+#: src/control/Control.NotebookbarWriter.js:1648
 msgid "Properties"
 msgstr "Հատկություններ"
 
@@ -2514,104 +2660,104 @@ msgstr "Ավելին հատկությունների մասին"
 
 #: src/control/backstage/OpenView.tsx:43
 msgid "Open a document from your computer or a cloud location."
-msgstr ""
+msgstr "Բացեք փաստաթուղթը ձեր համակարգչից կամ ամպային տիրույթից։"
 
 #: src/control/backstage/OpenView.tsx:47
 msgid "Open File from Computer"
-msgstr ""
+msgstr "Բացեք նիշքը համակարգչից"
 
 #: src/control/backstage/OpenView.tsx:65
 msgid "Add Cloud +"
-msgstr ""
+msgstr "Ավելացնել Cloud +"
 
 #: src/control/backstage/CloudDialogs.tsx:90
 msgid "Edit account"
-msgstr ""
+msgstr "Խմբագրել հաշիվը"
 
 #: src/control/backstage/CloudDialogs.tsx:90
 msgid "Add new account"
-msgstr ""
+msgstr "Ավելացնել նոր հաշիվ"
 
 #: src/control/backstage/CloudDialogs.tsx:104
 msgid "Server URL"
-msgstr ""
+msgstr "Սերվերի URL"
 
 #: src/control/backstage/CloudDialogs.tsx:109
 msgid "Enter server URL"
-msgstr ""
+msgstr "Մուտքագրեք սերվերի URL-ը"
 
 #: src/control/backstage/CloudDialogs.tsx:117
 msgid "Display name"
-msgstr ""
+msgstr "Ցուցադրվող անուն"
 
 #: src/control/backstage/CloudDialogs.tsx:123
 msgid "Enter display name"
-msgstr ""
+msgstr "Խմբագրել ցուցադրվող անունը"
 
 #: src/control/backstage/CloudDialogs.tsx:130
 msgid "Name displayed in your cloud list (max. 40 characters)."
-msgstr ""
+msgstr "Անունը ցուցադրվում է ձեր ամպային ցանկում (առավելագույնը՝ 40 նիշ):"
 
 #: src/control/backstage/CloudDialogs.tsx:143
 msgid "Save changes"
-msgstr ""
+msgstr "Պահպանել փոփոխությունները"
 
 #: src/control/backstage/CloudDialogs.tsx:143
 msgid "Add Account"
-msgstr ""
+msgstr "Ավելացնել հաշիվ"
 
 #: src/control/backstage/CloudDialogs.tsx:184
 msgid "Remove account"
-msgstr ""
+msgstr "Հեռացնել հաշիվը"
 
 #: src/control/backstage/CloudDialogs.tsx:186
 msgid "Disconnects this cloud"
-msgstr ""
+msgstr "Անջատում է այս ամպը"
 
 #: src/control/backstage/CloudDialogs.tsx:214
 msgid "New account successfully added"
-msgstr ""
+msgstr "Նոր հաշիվը հաջողությամբ ավելացվեց"
 
 #: src/control/backstage/CloudDialogs.tsx:219
 msgid "You can now access your files from this cloud."
-msgstr ""
+msgstr "Այժմ դուք կարող եք մուտք գործել ձեր նիշքերին այս ամպից։"
 
 #: src/control/backstage/CloudDialogs.tsx:242
 msgid "Open Files"
-msgstr ""
+msgstr "Բացել նիշքերը"
 
 #: src/control/backstage/CloudDialogs.tsx:268
 msgid "Remove this account?"
-msgstr ""
+msgstr "Հեռացնե՞լ այս հաշիվը։"
 
 #: src/control/backstage/CloudDialogs.tsx:273
 msgid "You'll be disconnected from this cloud account."
-msgstr ""
+msgstr "Դուք կանջատվեք այս ամպային հաշվից։"
 
 #: src/control/backstage/CloudDialogs.tsx:316
 msgid "Nextcloud"
-msgstr ""
+msgstr "Nextcloud"
 
 #: src/control/backstage/CloudDialogs.tsx:317
 msgid "OpenCloud"
-msgstr ""
+msgstr "OpenCloud"
 
 #: src/control/backstage/CloudDialogs.tsx:318
 msgid "Seafile"
-msgstr ""
+msgstr "Seafile"
 
 #: src/control/DropFileOverlay.tsx:30
 msgid "Drop file to open"
-msgstr ""
+msgstr "Բացելու համար գցեք նիշքը"
 
 #: src/control/AccessibilityNotice.tsx:34
 #: src/control/AccessibilityNotice.tsx:64
 msgid "This mobile view is not fully accessible."
-msgstr ""
+msgstr "Այս բջջային տեսքը լիովին հասանելի չէ։"
 
 #: src/control/AccessibilityNotice.tsx:43
 msgid "Accessibility statement"
-msgstr ""
+msgstr "Հասանելիության հայտարարություն"
 
 #: src/control/AccessibilityNotice.tsx:50
 #: src/control/jsdialog/Util.SnackbarController.ts:122
@@ -2690,7 +2836,7 @@ msgstr "Սեղմակի բովանդակության ներբեռնում"
 
 #: src/control/Control.DownloadProgress.js:87
 #: src/control/Control.DownloadProgress.js:112
-#: src/control/Control.PartsPreview.js:494 src/map/Clipboard.js:1522
+#: src/control/Control.PartsPreview.js:494 src/map/Clipboard.js:1537
 msgid "Copy"
 msgstr "Պատճեն"
 
@@ -3061,7 +3207,7 @@ msgstr ""
 "Անգործուն փաստաթուղթ - խնդրում ենք սեղմել՝ վերաբեռնելու և խմբագրումը "
 "վերսկսելու համար"
 
-#: src/control/Control.JSDialog.js:435
+#: src/control/Control.JSDialog.js:443
 msgid "Close dialog"
 msgstr "Փակել երկխոսությունը"
 
@@ -3097,69 +3243,69 @@ msgstr "Քառակուսի"
 msgid "Fixed size"
 msgstr "Սևեռված չափ"
 
-#: src/control/Control.JSDialogBuilder.js:1175
+#: src/control/Control.JSDialogBuilder.js:1207
 msgid "From"
 msgstr "Սկսած"
 
-#: src/control/Control.JSDialogBuilder.js:1178
+#: src/control/Control.JSDialogBuilder.js:1210
 msgid "To"
 msgstr "Դեպի"
 
-#: src/control/Control.JSDialogBuilder.js:1181
+#: src/control/Control.JSDialogBuilder.js:1213
 #: src/control/jsdialog/Widget.ColorPicker.ts:226
 msgid "Color"
 msgstr "Գույն"
 
-#: src/control/Control.JSDialogBuilder.js:1216
+#: src/control/Control.JSDialogBuilder.js:1248
 #: src/control/Control.NotebookbarBuilder.js:151
 msgid "Font Name"
 msgstr "Տառատեսակի անունը"
 
-#: src/control/Control.JSDialogBuilder.js:1218
+#: src/control/Control.JSDialogBuilder.js:1250
 msgid "Font Size"
 msgstr "Տառատեսակի չափը"
 
-#: src/control/Control.JSDialogBuilder.js:1220
+#: src/control/Control.JSDialogBuilder.js:1252
 #: src/control/Control.NotebookbarCalc.js:982
 #: src/control/Control.NotebookbarCalc.js:2764
 #: src/control/Control.NotebookbarDraw.js:1854
 #: src/control/Control.NotebookbarImpress.js:1380
-#: src/control/Control.NotebookbarWriter.js:1075
+#: src/control/Control.NotebookbarWriter.js:1077
 msgid "Style"
 msgstr "Ոճ"
 
-#: src/control/Control.JSDialogBuilder.js:1631
+#: src/control/Control.JSDialogBuilder.js:1669
 msgid "Toggle dropdown"
 msgstr "Ցուցադրել/անջատել իջնող ցանկը"
 
-#: src/control/Control.JSDialogBuilder.js:1633
+#: src/control/Control.JSDialogBuilder.js:1671
 msgid "Dialog dropdown"
 msgstr "Երկխոսության ցանկ"
 
-#: src/control/Control.JSDialogBuilder.js:1635
-#: src/control/Control.NotebookbarWriter.js:1622
+#: src/control/Control.JSDialogBuilder.js:1673
+#: src/control/Control.NotebookbarWriter.js:1624
 msgid "Dropdown"
 msgstr "Բացվող ցանկ"
 
-#: src/control/Control.JSDialogBuilder.js:1637
+#: src/control/Control.JSDialogBuilder.js:1675
 msgid "Apply action dropdown"
 msgstr "Կիրառել գործողությունների ցանկը"
 
-#: src/control/Control.JSDialogBuilder.js:1663
+#: src/control/Control.JSDialogBuilder.js:1701
 msgid "Open {name}"
 msgstr "Բացել {name}"
 
-#: src/control/Control.JSDialogBuilder.js:1949
+#: src/control/Control.JSDialogBuilder.js:1987
 #: src/control/Control.Menubar.ts:1034
 msgid "Rows"
 msgstr "Տողեր"
 
-#: src/control/Control.JSDialogBuilder.js:1950
+#: src/control/Control.JSDialogBuilder.js:1988
 #: src/control/Control.Menubar.ts:1037
 msgid "Columns"
 msgstr "Սյունակներ"
 
-#: src/control/Control.JSDialogBuilder.js:1970
+#: src/control/Control.JSDialogBuilder.js:2008
 msgid "Insert Table"
 msgstr "Աղյուսակի տեղադրում"
 
@@ -3341,7 +3487,7 @@ msgid "Toggle UI Mode"
 msgstr "Միացնել/անջատել UI ռեժիմը"
 
 #: src/control/Control.Menubar.ts:179
-#: src/control/Control.NotebookbarWriter.js:1754
+#: src/control/Control.NotebookbarWriter.js:1756
 #: src/control/Control.StatusBar.js:274 src/control/Control.StatusBar.js:275
 msgid "Multi Page View"
 msgstr "Բազմաէջ դիտում"
@@ -3363,13 +3509,13 @@ msgstr "Թաքցնել ընտրացանկի վահանակը"
 #: src/control/Control.NotebookbarCalc.js:1666
 #: src/control/Control.NotebookbarDraw.js:578
 #: src/control/Control.NotebookbarImpress.js:745
-#: src/control/Control.NotebookbarWriter.js:1836
+#: src/control/Control.NotebookbarWriter.js:1838
 msgid "Invert Background"
 msgstr "Շրջել ֆոնը"
 
 #: src/control/Control.Menubar.ts:186 src/control/Control.Menubar.ts:906
 #: src/control/Control.NotebookbarCalc.js:2791
-#: src/control/Control.NotebookbarWriter.js:1102
+#: src/control/Control.NotebookbarWriter.js:1104
 msgid "Style list"
 msgstr "Ոճերի ցանկ"
 
@@ -3395,7 +3541,7 @@ msgstr "Բոլորը"
 #: src/control/Control.NotebookbarCalc.js:1928
 #: src/control/Control.NotebookbarDraw.js:1685
 #: src/control/Control.NotebookbarImpress.js:1670
-#: src/control/Control.NotebookbarWriter.js:1358
+#: src/control/Control.NotebookbarWriter.js:1360
 msgid "Smart Picker"
 msgstr "Խելացի ընտրիչ"
 
@@ -3614,7 +3760,7 @@ msgstr "Ներկայացնել ընթացիկ սահիկը"
 msgid "Present in new window"
 msgstr "Ներկայացնել նոր պատուհանում"
 
-#: src/control/Control.Menubar.ts:639 src/slideshow/PresenterConsole.js:284
+#: src/control/Control.Menubar.ts:639 src/slideshow/PresenterConsole.js:301
 msgid "Presenter Console"
 msgstr "Ներկայացնողի կոնսոլ"
 
@@ -3661,78 +3807,78 @@ msgid "Focus Cell"
 msgstr "Ֆոկուսային բջիջ"
 
 #: src/control/Control.Menubar.ts:1006
-#: src/control/jsdialog/Definitions.Menu.ts:1902
+#: src/control/jsdialog/Definitions.Menu.ts:1917
 msgid "Highlight cells with..."
 msgstr "Գունանշեք բջիջները սրանով..."
 
 #: src/control/Control.Menubar.ts:1007
-#: src/control/jsdialog/Definitions.Menu.ts:1905
+#: src/control/jsdialog/Definitions.Menu.ts:1920
 msgid "Values greater than..."
 msgstr "Արժեքները մեծ են, քան..."
 
 #: src/control/Control.Menubar.ts:1008
-#: src/control/jsdialog/Definitions.Menu.ts:1909
+#: src/control/jsdialog/Definitions.Menu.ts:1924
 msgid "Values less than..."
 msgstr "Արժեքները փոքր են, քան..."
 
 #: src/control/Control.Menubar.ts:1009
-#: src/control/jsdialog/Definitions.Menu.ts:1913
+#: src/control/jsdialog/Definitions.Menu.ts:1928
 msgid "Values equal to..."
 msgstr "Արժեքները հավասար են..."
 
 #: src/control/Control.Menubar.ts:1010
-#: src/control/jsdialog/Definitions.Menu.ts:1917
+#: src/control/jsdialog/Definitions.Menu.ts:1932
 msgid "Values between..."
 msgstr "Արժեքները միջև..."
 
 #: src/control/Control.Menubar.ts:1011
-#: src/control/jsdialog/Definitions.Menu.ts:1921
+#: src/control/jsdialog/Definitions.Menu.ts:1936
 msgid "Values duplicate..."
 msgstr "Արժեքները կրկնօրինակ են..."
 
 #: src/control/Control.Menubar.ts:1012
-#: src/control/jsdialog/Definitions.Menu.ts:1925
+#: src/control/jsdialog/Definitions.Menu.ts:1940
 msgid "Containing text..."
 msgstr "Պարունակող տեքստ..."
 
 #: src/control/Control.Menubar.ts:1014 src/control/Control.Menubar.ts:1024
-#: src/control/jsdialog/Definitions.Menu.ts:1929
-#: src/control/jsdialog/Definitions.Menu.ts:1960
+#: src/control/jsdialog/Definitions.Menu.ts:1944
+#: src/control/jsdialog/Definitions.Menu.ts:1975
 msgid "More highlights..."
 msgstr "Ավելի շատ կարևորագույն պահեր..."
 
 #: src/control/Control.Menubar.ts:1016
-#: src/control/jsdialog/Definitions.Menu.ts:1933
+#: src/control/jsdialog/Definitions.Menu.ts:1948
 msgid "Top/Bottom Rules..."
 msgstr "Վերևի/Ներքևի կանոններ..."
 
 #: src/control/Control.Menubar.ts:1017
-#: src/control/jsdialog/Definitions.Menu.ts:1936
+#: src/control/jsdialog/Definitions.Menu.ts:1951
 msgid "Top N elements..."
 msgstr "Վերին N տարրերը..."
 
 #: src/control/Control.Menubar.ts:1018
-#: src/control/jsdialog/Definitions.Menu.ts:1940
+#: src/control/jsdialog/Definitions.Menu.ts:1955
 msgid "Top N percent..."
 msgstr "Վերին N տոկոսը..."
 
 #: src/control/Control.Menubar.ts:1019
-#: src/control/jsdialog/Definitions.Menu.ts:1944
+#: src/control/jsdialog/Definitions.Menu.ts:1959
 msgid "Bottom N elements..."
 msgstr "Ստորին N տարրերը..."
 
 #: src/control/Control.Menubar.ts:1020
-#: src/control/jsdialog/Definitions.Menu.ts:1948
+#: src/control/jsdialog/Definitions.Menu.ts:1963
 msgid "Bottom N percent..."
 msgstr "Ստորին N տոկոսը..."
 
 #: src/control/Control.Menubar.ts:1021
-#: src/control/jsdialog/Definitions.Menu.ts:1952
+#: src/control/jsdialog/Definitions.Menu.ts:1967
 msgid "Above Average..."
 msgstr "Միջինից բարձր..."
 
 #: src/control/Control.Menubar.ts:1022
-#: src/control/jsdialog/Definitions.Menu.ts:1956
+#: src/control/jsdialog/Definitions.Menu.ts:1971
 msgid "Below Average..."
 msgstr "Միջինից ցածր..."
 
@@ -3745,16 +3891,16 @@ msgstr "Միջինից ցածր..."
 #: src/control/Control.NotebookbarDraw.js:1205
 #: src/control/Control.NotebookbarImpress.js:1335
 #: src/control/Control.NotebookbarImpress.js:1348
-#: src/control/Control.NotebookbarWriter.js:1030
-#: src/control/Control.NotebookbarWriter.js:1043
+#: src/control/Control.NotebookbarWriter.js:1032
+#: src/control/Control.NotebookbarWriter.js:1045
 #: src/control/Control.Zotero.js:220 src/control/Toolbar.js:549
-#: src/control/Toolbar.js:550 src/control/Toolbar.js:588
+#: src/control/Toolbar.js:550 src/control/Toolbar.js:595
 msgid "Search"
 msgstr "Որոնում"
 
 #: src/control/Control.Menubar.ts:1209
 #: src/control/Control.NotebookbarCalc.js:1137
-#: src/control/Control.NotebookbarWriter.js:1849
+#: src/control/Control.NotebookbarWriter.js:1851
 msgid "Page Setup"
 msgstr "Էջի կարգաբերում"
 
@@ -3772,13 +3918,13 @@ msgstr "Վերականգնել լռելյայն լեզվին"
 
 #: src/control/Control.Menubar.ts:1756 src/control/Control.Menubar.ts:1757
 #: src/control/Control.Menubar.ts:1758 src/control/Control.Toolbar.js:256
-#: src/control/jsdialog/Definitions.Menu.ts:2186
+#: src/control/jsdialog/Definitions.Menu.ts:2201
 msgid "More..."
 msgstr "Ավելին..."
 
 #: src/control/Control.Menubar.ts:1979
 msgid "Menu"
-msgstr ""
+msgstr "Ընտրացանկ"
 
 #: src/control/Control.Menubar.ts:2183
 msgid "Use Compact view"
@@ -3852,14 +3998,14 @@ msgstr "Արյունքներ"
 
 #: src/control/Control.NavigatorPanel.ts:315
 msgid "Maximize to grid"
-msgstr ""
+msgstr "Մեծացնել մինչև ցանց"
 
 #: src/control/Control.NavigatorPanel.ts:627
 msgid "Find and Replace"
-msgstr ""
+msgstr "Գտնել և Փոխարինել"
 
 #: src/control/Control.NavigatorPanel.ts:636
-#: src/control/jsdialog/Widget.Combobox.js:405
+#: src/control/jsdialog/Widget.Combobox.js:409
 #: src/control/jsdialog/Widget.TreeView.ts:2580
 msgid "Search..."
 msgstr "Որոնում..."
@@ -3982,7 +4128,7 @@ msgstr "Դաշտ"
 #: src/control/Control.NotebookbarDraw.js:1592
 #: src/control/Control.NotebookbarImpress.js:122
 #: src/control/Control.NotebookbarImpress.js:1573
-#: src/control/Control.NotebookbarWriter.js:1258
+#: src/control/Control.NotebookbarWriter.js:1260
 msgid "Table"
 msgstr "Աղյուսակ"
 
@@ -3999,13 +4145,13 @@ msgstr "Ընտրել"
 #: src/control/Control.NotebookbarImpress.js:90
 #: src/control/Control.NotebookbarImpress.js:2172
 #: src/control/Control.NotebookbarWriter.js:50
-#: src/control/Control.NotebookbarWriter.js:979 src/control/Styles.js:38
+#: src/control/Control.NotebookbarWriter.js:981 src/control/Styles.js:38
 msgid "Insert"
 msgstr "Ներդնել"
 
 #: src/control/Notebookbar.WriterTableTab.ts:209
 #: src/control/Control.NotebookbarCalc.js:1154
-#: src/control/Control.NotebookbarWriter.js:1866
+#: src/control/Control.NotebookbarWriter.js:1868
 msgid "Size"
 msgstr "Չափ"
 
@@ -4055,7 +4201,7 @@ msgstr "Անիմացիաներ"
 #: src/control/Control.NotebookbarBuilder.js:168
 #: src/control/Control.NotebookbarBuilder.js:745
 msgid "Unsaved changes. Save"
-msgstr ""
+msgstr "Չպահպանված փոփոխություններ։ Պահպանել"
 
 #: src/control/Control.NotebookbarBuilder.js:232
 msgid "Click to expand"
@@ -4095,7 +4241,7 @@ msgstr "Պատկեր (.png)"
 
 #: src/control/Control.NotebookbarBuilder.js:743
 msgid "Unsaved changes."
-msgstr ""
+msgstr "Չպահպանված փոփոխություններ։"
 
 #: src/control/Control.NotebookbarCalc.js:29
 #: src/control/Control.NotebookbarDraw.js:57
@@ -4135,7 +4281,7 @@ msgstr "Ուրվագիծ"
 #: src/control/Control.NotebookbarDraw.js:108
 #: src/control/Control.NotebookbarImpress.js:136
 #: src/control/Control.NotebookbarWriter.js:89
-#: src/control/Control.NotebookbarWriter.js:1630
+#: src/control/Control.NotebookbarWriter.js:1632
 msgid "Picture"
 msgstr "Նկար"
 
@@ -4225,7 +4371,7 @@ msgstr ""
 
 #: src/control/Control.NotebookbarCalc.js:499
 #: src/control/Control.NotebookbarDraw.js:692
-#: src/control/Control.NotebookbarWriter.js:684
+#: src/control/Control.NotebookbarWriter.js:686
 msgid "Font"
 msgstr "Տառատեսակ"
 
@@ -4267,7 +4413,7 @@ msgstr "Բուլյան արժեք"
 #: src/control/Control.NotebookbarCalc.js:2174
 #: src/control/Control.NotebookbarDraw.js:1768
 #: src/control/Control.NotebookbarImpress.js:1780
-#: src/control/Control.NotebookbarWriter.js:1507
+#: src/control/Control.NotebookbarWriter.js:1509
 msgid "Text"
 msgstr "Տեքստ"
 
@@ -4280,7 +4426,7 @@ msgid "Cells"
 msgstr "Բջիջներ"
 
 #: src/control/Control.NotebookbarCalc.js:1003
-#: src/control/jsdialog/Definitions.Menu.ts:2392
+#: src/control/jsdialog/Definitions.Menu.ts:2407
 msgid "Default"
 msgstr "Լռելյայն"
 
@@ -4301,19 +4447,19 @@ msgid "Bad"
 msgstr "Վատ"
 
 #: src/control/Control.NotebookbarCalc.js:1059
-#: src/control/PermissionMode.ts:212
+#: src/control/PermissionMode.ts:219
 msgid "Editing"
 msgstr "Խմբագրում"
 
 #: src/control/Control.NotebookbarCalc.js:1083
 #: src/control/Control.NotebookbarDraw.js:1216
 #: src/control/Control.NotebookbarImpress.js:1359
-#: src/control/Control.NotebookbarWriter.js:1054
+#: src/control/Control.NotebookbarWriter.js:1056
 msgid "Replace"
 msgstr "Փոխարինել"
 
 #: src/control/Control.NotebookbarCalc.js:1147
-#: src/control/Control.NotebookbarWriter.js:1859
+#: src/control/Control.NotebookbarWriter.js:1861
 msgid "Margin"
 msgstr "Լուսանցք"
 
@@ -4356,9 +4502,9 @@ msgstr "Ջնջեք սյունակները"
 #: src/control/Control.NotebookbarImpress.js:2456
 #: src/control/Control.NotebookbarImpress.js:2663
 #: src/control/Control.NotebookbarImpress.js:3057
-#: src/control/Control.NotebookbarWriter.js:2090
-#: src/control/Control.NotebookbarWriter.js:2673
-#: src/control/Control.NotebookbarWriter.js:3003
+#: src/control/Control.NotebookbarWriter.js:2092
+#: src/control/Control.NotebookbarWriter.js:2675
+#: src/control/Control.NotebookbarWriter.js:3005
 msgid "Align"
 msgstr "Հավասարեցնել"
 
@@ -4369,9 +4515,9 @@ msgstr "Հավասարեցնել"
 #: src/control/Control.NotebookbarImpress.js:2523
 #: src/control/Control.NotebookbarImpress.js:2811
 #: src/control/Control.NotebookbarImpress.js:3205
-#: src/control/Control.NotebookbarWriter.js:2161
-#: src/control/Control.NotebookbarWriter.js:2732
-#: src/control/Control.NotebookbarWriter.js:3062
+#: src/control/Control.NotebookbarWriter.js:2163
+#: src/control/Control.NotebookbarWriter.js:2734
+#: src/control/Control.NotebookbarWriter.js:3064
 msgid "Arrange"
 msgstr "Դասավորել"
 
@@ -4406,28 +4552,28 @@ msgstr "Սառեցնել"
 #: src/control/Control.NotebookbarCalc.js:1559
 #: src/control/Control.NotebookbarDraw.js:435
 #: src/control/Control.NotebookbarImpress.js:586
-#: src/control/Control.NotebookbarWriter.js:1661
+#: src/control/Control.NotebookbarWriter.js:1663
 msgid "Zoom"
 msgstr "Մեծացնել"
 
 #: src/control/Control.NotebookbarCalc.js:1566
 #: src/control/Control.NotebookbarDraw.js:442
 #: src/control/Control.NotebookbarImpress.js:480
-#: src/control/Control.NotebookbarWriter.js:1723
+#: src/control/Control.NotebookbarWriter.js:1725
 msgid "Read mode"
 msgstr "Կարդալու ռեժիմ"
 
 #: src/control/Control.NotebookbarCalc.js:1633
 #: src/control/Control.NotebookbarDraw.js:535
 #: src/control/Control.NotebookbarImpress.js:679
-#: src/control/Control.NotebookbarWriter.js:1761
+#: src/control/Control.NotebookbarWriter.js:1763
 msgid "Collapse Tabs"
 msgstr "Ծալել ներդիրները"
 
 #: src/control/Control.NotebookbarCalc.js:1646
 #: src/control/Control.NotebookbarDraw.js:523
 #: src/control/Control.NotebookbarImpress.js:667
-#: src/control/Control.NotebookbarWriter.js:1796
+#: src/control/Control.NotebookbarWriter.js:1798
 msgid "Status Bar"
 msgstr "Կարգավիճակի գոտի"
 
@@ -4437,8 +4583,8 @@ msgstr "Կարգավիճակի գոտի"
 #: src/control/Control.NotebookbarCalc.js:3520
 #: src/control/Control.NotebookbarImpress.js:2864
 #: src/control/Control.NotebookbarImpress.js:3258
-#: src/control/Control.NotebookbarWriter.js:2781
-#: src/control/Control.NotebookbarWriter.js:3111
+#: src/control/Control.NotebookbarWriter.js:2783
+#: src/control/Control.NotebookbarWriter.js:3113
 msgid "Group"
 msgstr "Խմբավորել"
 
@@ -4468,7 +4614,7 @@ msgstr "Ընտրեք խմբագրելի բջիջների միջակայք՝ ոճ
 #: src/control/Control.NotebookbarDraw.js:1572
 #: src/control/Control.NotebookbarImpress.js:1246
 #: src/control/Control.NotebookbarImpress.js:1526
-#: src/control/Control.NotebookbarWriter.js:1266
+#: src/control/Control.NotebookbarWriter.js:1268
 msgid "Illustrations"
 msgstr "Նկարազարդումներ"
 
@@ -4477,14 +4623,14 @@ msgstr "Նկարազարդումներ"
 #: src/control/Control.NotebookbarDraw.js:1623
 #: src/control/Control.NotebookbarImpress.js:1260
 #: src/control/Control.NotebookbarImpress.js:1604
-#: src/control/Control.NotebookbarWriter.js:1311
+#: src/control/Control.NotebookbarWriter.js:1313
 msgid "Shapes"
 msgstr "Որվագծեր"
 
 #: src/control/Control.NotebookbarCalc.js:1936
 #: src/control/Control.NotebookbarDraw.js:1693
 #: src/control/Control.NotebookbarImpress.js:1691
-#: src/control/Control.NotebookbarWriter.js:1379
+#: src/control/Control.NotebookbarWriter.js:1381
 msgid "Assistant"
 msgstr "Օգնական"
 
@@ -4538,7 +4684,7 @@ msgstr "Ապացուցում"
 
 #: src/control/Control.NotebookbarCalc.js:2655
 #: src/control/Control.NotebookbarImpress.js:2053
-#: src/control/Control.NotebookbarWriter.js:2285
+#: src/control/Control.NotebookbarWriter.js:2287
 msgid "Auto Spell Check"
 msgstr "Ուղղագրության ինքնաշխատ ստուգում"
 
@@ -4563,15 +4709,15 @@ msgstr "Թեմաներ"
 
 #: src/control/Control.NotebookbarCalc.js:2967
 #: src/control/Control.NotebookbarCalc.js:3333
-#: src/control/Control.NotebookbarWriter.js:1992
-#: src/control/Control.NotebookbarWriter.js:2618
-#: src/control/Control.NotebookbarWriter.js:2948
+#: src/control/Control.NotebookbarWriter.js:1994
+#: src/control/Control.NotebookbarWriter.js:2620
+#: src/control/Control.NotebookbarWriter.js:2950
 msgid "Wrap"
 msgstr "Փաթաթել"
 
 #: src/control/Control.NotebookbarCalc.js:3215
 #: src/control/Control.NotebookbarImpress.js:2933
-#: src/control/Control.NotebookbarWriter.js:2834
+#: src/control/Control.NotebookbarWriter.js:2836
 msgid "Image Controls"
 msgstr "Պատկերի վերահսկում"
 
@@ -4586,7 +4732,7 @@ msgstr "PDF փաստաթուղթ (.pdf) - Գիտակ"
 
 #: src/control/Control.NotebookbarDraw.js:510
 #: src/control/Control.NotebookbarImpress.js:654
-#: src/control/Control.NotebookbarWriter.js:1783
+#: src/control/Control.NotebookbarWriter.js:1785
 msgid "Ruler"
 msgstr "Քանոն"
 
@@ -4601,7 +4747,7 @@ msgstr ""
 
 #: src/control/Control.NotebookbarDraw.js:920
 #: src/control/Control.NotebookbarImpress.js:1060
-#: src/control/Control.NotebookbarWriter.js:829
+#: src/control/Control.NotebookbarWriter.js:831
 msgid "Paragraph"
 msgstr "Պարբերություն"
 
@@ -4662,7 +4808,7 @@ msgid "Starts a slideshow on every viewer's screen"
 msgstr "Սկսում է սահիկաներկայացումը յուրաքանչյուր դիտողի էկրանին"
 
 #: src/control/Control.NotebookbarImpress.js:548
-#: src/slideshow/SlideShowPresenter.ts:1617
+#: src/slideshow/SlideShowPresenter.ts:1625
 msgid "Follow Presenter"
 msgstr "Հետևեք ներկայացնողին"
 
@@ -4750,58 +4896,58 @@ msgstr "Կողային վահանակի վավերացում"
 msgid "Validate Dialog"
 msgstr "Երկխոսության վավերացում"
 
-#: src/control/Control.NotebookbarWriter.js:959
+#: src/control/Control.NotebookbarWriter.js:961
 #: src/control/Control.Zotero.js:828
 msgid "Styles"
 msgstr "Ոճեր"
 
-#: src/control/Control.NotebookbarWriter.js:1112
+#: src/control/Control.NotebookbarWriter.js:1114
 msgid "Lists/Bullets"
 msgstr "Ցուցակներ/Նշիկներ"
 
-#: src/control/Control.NotebookbarWriter.js:1399
+#: src/control/Control.NotebookbarWriter.js:1401
 msgid "Header & Footer"
 msgstr "Վերնախորագիր և Տողատակ"
 
-#: src/control/Control.NotebookbarWriter.js:1468
+#: src/control/Control.NotebookbarWriter.js:1470
 msgid "Section"
 msgstr "Բաժին"
 
-#: src/control/Control.NotebookbarWriter.js:1553
+#: src/control/Control.NotebookbarWriter.js:1555
 #: src/control/jsdialog/Widget.EmojiPicker.ts:182
 msgid "Symbols"
 msgstr "Նշաններ"
 
-#: src/control/Control.NotebookbarWriter.js:1606
+#: src/control/Control.NotebookbarWriter.js:1608
 msgid "Rich Text"
 msgstr "Հարստացված տեքստ"
 
-#: src/control/Control.NotebookbarWriter.js:1614
+#: src/control/Control.NotebookbarWriter.js:1616
 msgid "Checkbox"
 msgstr "Ընտրավանդակ"
 
-#: src/control/Control.NotebookbarWriter.js:1675
+#: src/control/Control.NotebookbarWriter.js:1677
 msgid "Page Width"
 msgstr "Էջի լայնությունը"
 
-#: src/control/Control.NotebookbarWriter.js:2260
+#: src/control/Control.NotebookbarWriter.js:2262
 msgid "Spellcheck"
 msgstr "Ուղղագրության ստուգիչ"
 
-#: src/control/Control.NotebookbarWriter.js:2273
+#: src/control/Control.NotebookbarWriter.js:2275
 msgid "Spelling Options"
 msgstr "Ուղղագրության տարբերակներ"
 
-#: src/control/Control.NotebookbarWriter.js:2384
+#: src/control/Control.NotebookbarWriter.js:2386
 msgid "Tracking"
 msgstr "Հետևում"
 
-#: src/control/Control.NotebookbarWriter.js:2398
+#: src/control/Control.NotebookbarWriter.js:2400
 msgid "View Changes"
 msgstr "Դիտել փոփոխությունները"
 
 #: src/control/Control.PartsPreview.js:428
-#: src/control/Control.PartsPreview.js:503 src/map/Clipboard.js:1522
+#: src/control/Control.PartsPreview.js:503 src/map/Clipboard.js:1537
 msgid "Paste"
 msgstr "Հետ տեղադրել"
 
@@ -4858,7 +5004,7 @@ msgstr "Ջնջե՞լ \"%1\" բաժինը և դրա %2 սահիկ(ներ)ը։"
 msgid "Enter new section name:"
 msgstr "Մուտքագրեք բաժնի նոր անունը:"
 
-#: src/control/Control.SaveState.ts:51
+#: src/control/Control.SaveState.ts:55
 msgid "Saving"
 msgstr "Պահպանում"
 
@@ -5069,37 +5215,53 @@ msgstr "Տեղադրեք թերթիկը սրանից առաջ"
 msgid "Insert sheet after this"
 msgstr "Տեղադրեք թերթիկը սրանից հետո"
 
-#: src/control/Control.Tabs.js:108 src/control/Control.Tabs.js:115
+#: src/control/Control.Tabs.js:109 src/control/Control.Tabs.js:116
 msgid "Reset Tab Color"
 msgstr "Վերագործարկեք ներդիրի գույնը"
 
-#: src/control/Control.Tabs.js:135 src/control/Control.Tabs.js:139
+#: src/control/Control.Tabs.js:136 src/control/Control.Tabs.js:140
 msgid "Move Sheet Left"
 msgstr "Տեղափոխել թերթիկը ձախ"
 
-#: src/control/Control.Tabs.js:143 src/control/Control.Tabs.js:147
+#: src/control/Control.Tabs.js:144 src/control/Control.Tabs.js:148
 msgid "Move Sheet Right"
 msgstr "Տեղափոխել թերթիկը աջ"
 
-#: src/control/Control.Tabs.js:157 src/control/Control.Tabs.js:163
+#: src/control/Control.Tabs.js:159 src/control/Control.Tabs.js:165
 msgid "Copy Sheet..."
 msgstr "Պատճենել թերթիկը..."
 
-#: src/control/Control.Tabs.js:350
+#: src/control/Control.Tabs.js:353
 msgid "{0}, protected"
-msgstr ""
+msgstr "{0}, պաշտպանված"
 
-#: src/control/Control.Tabs.js:672
+#: src/control/Control.Tabs.js:675
 msgid "Are you sure you want to delete sheet, {sheet}?"
 msgstr "Վստա՞հ եք, որ ուզում եք ջնջել {sheet} թերթիկը։"
 
-#: src/control/Control.Tabs.js:683
+#: src/control/Control.Tabs.js:686
 msgid "Rename sheet"
 msgstr "Անվանափոխել թերթիկը"
 
-#: src/control/Control.Tabs.js:683
+#: src/control/Control.Tabs.js:686
 msgid "Enter new sheet name"
 msgstr "Մուտքագրեք նոր թերթիկի անունը"
+
+#: src/control/Control.Tabs.js:724
+msgid "Protect Sheet"
+msgstr ""
+
+#: src/control/Control.Tabs.js:724
+msgid "Enter a password to protect the sheet"
+msgstr ""
+
+#: src/control/Control.Tabs.js:728
+msgid "Unprotect Sheet"
+msgstr ""
+
+#: src/control/Control.Tabs.js:728
+msgid "Enter the password to unprotect the sheet"
+msgstr ""
 
 #: src/control/Control.Toolbar.js:1034
 msgid ""
@@ -5137,37 +5299,47 @@ msgstr "Դուք ներկայումս գտնվում եք դիտման ռեժի�
 msgid "Enter new name"
 msgstr "Մուտքագրեք նոր անունը"
 
-#: src/control/Control.UIManager.ts:1586
+#: src/control/Control.UIManager.ts:1587
 msgid "Hide Menu"
 msgstr "Թաքցնել ընտրացանկը"
 
-#: src/control/Control.UIManager.ts:1613
+#: src/control/Control.UIManager.ts:1614
 msgid "Show Menu"
 msgstr "Ցուցադրել ընտրացանկը"
 
-#: src/control/Control.UIManager.ts:2201
+#: src/control/Control.UIManager.ts:2203
 msgid ""
 "An embedded script uses the legacy com.sun.star UNO API, which may be "
 "removed in future releases."
 msgstr ""
+"Ներդրված սկրիպտը օգտագործում է հնացած com.sun.star UNO API-ը, որը կարող է "
+"հեռացվել ապագա թողարկումներում։"
 
-#: src/control/Control.UIManager.ts:2869
+#: src/control/Control.UIManager.ts:2698
+msgid "Confirm password"
+msgstr ""
+
+#: src/control/Control.UIManager.ts:2744
+msgid "The confirmation does not match the password"
+msgstr ""
+
+#: src/control/Control.UIManager.ts:2962
 msgid "Copy error details"
 msgstr "Պատճենեք սխալի մանրամասները"
 
-#: src/control/Control.UIManager.ts:2916
+#: src/control/Control.UIManager.ts:3009
 msgid "Show technical details"
 msgstr "Ցուցադրել տեխնիկական մանրամասները"
 
-#: src/control/Control.UIManager.ts:2930
+#: src/control/Control.UIManager.ts:3023
 msgid "Technical Details:"
 msgstr "Տեխնիկական մանրամասներ:"
 
-#: src/control/Control.UIManager.ts:2934
+#: src/control/Control.UIManager.ts:3027
 msgid "Error details copied to clipboard"
 msgstr "Սխալի մանրամասները պատճենվեցին սեղմատախտակին"
 
-#: src/control/Control.UIManager.ts:2944
+#: src/control/Control.UIManager.ts:3037
 msgid "Failed to copy error details"
 msgstr "Չհաջողվեց պատճենել սխալի մանրամասները"
 
@@ -5240,23 +5412,23 @@ msgstr ""
 "վեբ API-ի միջոցով: Դա կարող է որոշ խնդիրներ առաջացնել մեջբերումները կամ "
 "մատենագիտությունը խմբագրելիս:"
 
-#: src/control/Control.Zotero.js:246 src/app/Socket.ts:2653
+#: src/control/Control.Zotero.js:246 src/app/Socket.ts:2678
 msgid "Loading..."
 msgstr "Բեռնվում է..."
 
 #: src/control/Control.Zotero.js:257 src/control/Control.Zotero.js:454
 #: src/slideshow/engine/SlideShowHandler.ts:102
-#: src/slideshow/PresenterConsole.js:32
-#: src/slideshow/SlideShowPresenter.ts:827
-#: src/slideshow/SlideShowPresenter.ts:873
+#: src/slideshow/PresenterConsole.js:33
+#: src/slideshow/SlideShowPresenter.ts:835
+#: src/slideshow/SlideShowPresenter.ts:881
 msgid "Previous"
 msgstr "Նախորդ"
 
 #: src/control/Control.Zotero.js:270 src/control/Control.Zotero.js:469
 #: src/slideshow/engine/SlideShowHandler.ts:103
-#: src/slideshow/PresenterConsole.js:33
-#: src/slideshow/SlideShowPresenter.ts:833
-#: src/slideshow/SlideShowPresenter.ts:884
+#: src/slideshow/PresenterConsole.js:34
+#: src/slideshow/SlideShowPresenter.ts:841
+#: src/slideshow/SlideShowPresenter.ts:892
 msgid "Next"
 msgstr "Հաջորդը"
 
@@ -5398,19 +5570,19 @@ msgstr ""
 "Կրկնակի սեղմեք՝ ներդիրի կանգ տեղադրելու համար: Ավելի շատ տարբերակների համար "
 "սեղմեք աջ կոճակով:"
 
-#: src/control/HRuler.ts:785 src/control/HRuler.ts:952
+#: src/control/HRuler.ts:787 src/control/HRuler.ts:954
 msgid "Left Margin"
 msgstr "Ձախ լուսանցք"
 
-#: src/control/HRuler.ts:790 src/control/HRuler.ts:957
+#: src/control/HRuler.ts:792 src/control/HRuler.ts:959
 msgid "Right Margin"
 msgstr "Աջ լուսանցք"
 
-#: src/control/HRuler.ts:1376
+#: src/control/HRuler.ts:1378
 msgid "Insert tabstop"
 msgstr "Տեղադրեք ներդիրի կանգ"
 
-#: src/control/HRuler.ts:1384
+#: src/control/HRuler.ts:1386
 msgid "Delete tabstop"
 msgstr "Ջնջեք ներդիրի կանգը"
 
@@ -5440,64 +5612,71 @@ msgstr "Մուտքագրեք նիշքի անունը"
 
 #: src/control/Permission.js:366 src/control/Permission.js:520
 msgid "How would you like to edit?"
-msgstr ""
+msgstr "Ինչպե՞ս կցանկանայիք խմբագրել։"
 
 #: src/control/Permission.js:367
 msgid ""
 "Other users are viewing this document. Choose how you'd like to continue:"
 msgstr ""
+"Այլ օգտատերեր դիտում են այս փաստաթուղթը։ Ընտրեք, թե ինչպես եք ցանկանում "
+"շարունակել:"
 
 #: src/control/Permission.js:372
 msgid "Edit locally"
-msgstr ""
+msgstr "Խմբագրել տեղում"
 
 #: src/control/Permission.js:373
 msgid "Changes sync when you save"
-msgstr ""
+msgstr "Փոփոխությունները համաժամացվում են, երբ դուք պահպանում եք"
 
 #: src/control/Permission.js:379
 msgid "Collaborative editing"
-msgstr ""
+msgstr "Համագործակցային խմբագրում"
 
 #: src/control/Permission.js:380 src/control/Permission.js:412
 msgid "Edit together in real-time"
-msgstr ""
+msgstr "Խմբագրեք միասին իրական ժամանակում"
 
 #: src/control/Permission.js:402
 msgid "Keep viewing local copy"
-msgstr ""
+msgstr "Շարունակեք դիտել տեղային օրինակը"
 
 #: src/control/Permission.js:403
 msgid "Continue with your version"
-msgstr ""
+msgstr "Շարունակեք ձեր տարբերակով"
 
 #: src/control/Permission.js:411
 msgid "Join collaborative editing"
-msgstr ""
+msgstr "Միացեք համագործակցային խմբագրմանը"
 
 #: src/control/Permission.js:437
 msgid "Waiting for changes to be saved..."
-msgstr ""
+msgstr "Սպասում ենք փոփոխությունների պահպանմանը..."
 
 #: src/control/Permission.js:521
 msgid ""
 "Other users are editing this document. Choose how you'd like to continue:"
 msgstr ""
+"Այլ օգտատերեր խմբագրում են այս փաստաթուղթը։ Ընտրեք, թե ինչպես եք ցանկանում "
+"շարունակել:"
 
 #: src/control/Permission.js:537
 msgid "started editing"
-msgstr ""
+msgstr "սկսեց խմբագրումը"
 
 #: src/control/Permission.js:538
 #, javascript-format
+#, fuzzy, javascript-format
 msgid "%0 started editing"
-msgstr ""
+msgstr "սկսեց խմբագրումը"
 
 #: src/control/Permission.js:539
 msgid ""
 "Someone else is now editing this document. Choose how you'd like to "
 "continue:"
 msgstr ""
+"Մեկ ուրիշը այժմ խմբագրում է այս փաստաթուղթը։ Ընտրեք, թե ինչպես եք ցանկանում "
+"շարունակել:"
 
 #: src/control/Permission.js:572
 msgid "Save as ODF format"
@@ -5551,67 +5730,67 @@ msgstr ""
 "Ստորագրությունը կարգին է, բայց վկայականը չի կարող վավերացվել, և փաստաթուղթը "
 "միայն մասամբ է ստորագրված։"
 
-#: src/control/Styles.js:19 src/control/jsdialog/Definitions.Menu.ts:2248
+#: src/control/Styles.js:19 src/control/jsdialog/Definitions.Menu.ts:2263
 msgid "Title Slide"
 msgstr "Վերնագրի սահիկ"
 
-#: src/control/Styles.js:20 src/control/jsdialog/Definitions.Menu.ts:2249
+#: src/control/Styles.js:20 src/control/jsdialog/Definitions.Menu.ts:2264
 msgid "Title, Content"
 msgstr "Վերնագիր, բովանդակություն"
 
-#: src/control/Styles.js:21 src/control/jsdialog/Definitions.Menu.ts:2250
+#: src/control/Styles.js:21 src/control/jsdialog/Definitions.Menu.ts:2265
 msgid "Title and 2 Content"
 msgstr "Վերնագիր և 2 Բովանդակություն"
 
-#: src/control/Styles.js:22 src/control/jsdialog/Definitions.Menu.ts:2251
+#: src/control/Styles.js:22 src/control/jsdialog/Definitions.Menu.ts:2266
 msgid "Title Only"
 msgstr "Միայն վերնագիր"
 
-#: src/control/Styles.js:23 src/control/jsdialog/Definitions.Menu.ts:2247
+#: src/control/Styles.js:23 src/control/jsdialog/Definitions.Menu.ts:2262
 msgid "Blank Slide"
 msgstr "Դատարկ սահիկ"
 
-#: src/control/Styles.js:24 src/control/jsdialog/Definitions.Menu.ts:2252
+#: src/control/Styles.js:24 src/control/jsdialog/Definitions.Menu.ts:2267
 msgid "Centered Text"
 msgstr "Կենտրոնացված տեքստ"
 
-#: src/control/Styles.js:25 src/control/jsdialog/Definitions.Menu.ts:2254
+#: src/control/Styles.js:25 src/control/jsdialog/Definitions.Menu.ts:2269
 msgid "Title, Content and 2 Content"
 msgstr "Վերնագիր, բովանդակություն և 2 բովանդակություն"
 
-#: src/control/Styles.js:26 src/control/jsdialog/Definitions.Menu.ts:2253
+#: src/control/Styles.js:26 src/control/jsdialog/Definitions.Menu.ts:2268
 msgid "Title, 2 Content and Content"
 msgstr "Վերնագիր, 2 Բովանդակություն և Բովանդակություն"
 
-#: src/control/Styles.js:27 src/control/jsdialog/Definitions.Menu.ts:2255
+#: src/control/Styles.js:27 src/control/jsdialog/Definitions.Menu.ts:2270
 msgid "Title, 2 Content over Content"
 msgstr "Վերնագիր, 2 Բովանդակություն բովանդակության վրա"
 
-#: src/control/Styles.js:28 src/control/jsdialog/Definitions.Menu.ts:2256
+#: src/control/Styles.js:28 src/control/jsdialog/Definitions.Menu.ts:2271
 msgid "Title, Content over Content"
 msgstr "Վերնագիր, բովանդակություն բովանդակության նկատմամբ"
 
-#: src/control/Styles.js:29 src/control/jsdialog/Definitions.Menu.ts:2257
+#: src/control/Styles.js:29 src/control/jsdialog/Definitions.Menu.ts:2272
 msgid "Title, 4 Content"
 msgstr "Վերնագիր, 4 Բովանդակություն"
 
-#: src/control/Styles.js:30 src/control/jsdialog/Definitions.Menu.ts:2258
+#: src/control/Styles.js:30 src/control/jsdialog/Definitions.Menu.ts:2273
 msgid "Title, 6 Content"
 msgstr "Վերնագիր, 6 Բովանդակություն"
 
-#: src/control/Styles.js:31 src/control/jsdialog/Definitions.Menu.ts:2259
+#: src/control/Styles.js:31 src/control/jsdialog/Definitions.Menu.ts:2274
 msgid "Vertical Title, Text, Chart"
 msgstr "Ուղղահայաց վերնագիր, տեքստ, գծապատկեր"
 
-#: src/control/Styles.js:32 src/control/jsdialog/Definitions.Menu.ts:2260
+#: src/control/Styles.js:32 src/control/jsdialog/Definitions.Menu.ts:2275
 msgid "Vertical Title, Vertical Text"
 msgstr "Ուղղահայաց վերնագիր, ուղղահայաց տեքստ"
 
-#: src/control/Styles.js:33 src/control/jsdialog/Definitions.Menu.ts:2261
+#: src/control/Styles.js:33 src/control/jsdialog/Definitions.Menu.ts:2276
 msgid "Title, Vertical Text"
 msgstr "Վերնագիր, ուղղահայաց տեքստ"
 
-#: src/control/Styles.js:34 src/control/jsdialog/Definitions.Menu.ts:2262
+#: src/control/Styles.js:34 src/control/jsdialog/Definitions.Menu.ts:2277
 msgid "Title, Vertical Text, Clipart"
 msgstr "Վերնագիր, ուղղահայաց տեքստ, կլիպարտ"
 
@@ -5644,38 +5823,38 @@ msgstr "Պահպանվում է..."
 msgid "Renaming..."
 msgstr "Վերանվանվում է..."
 
-#: src/control/Toolbar.js:837
+#: src/control/Toolbar.js:844
 msgid "Unable to share"
-msgstr ""
+msgstr "Հնարավոր չէ կիսվել"
 
-#: src/control/VRuler.ts:195 src/control/VRuler.ts:424
+#: src/control/VRuler.ts:195 src/control/VRuler.ts:426
 msgid "Top Margin"
 msgstr "Վերին լուսանցք"
 
-#: src/control/VRuler.ts:201 src/control/VRuler.ts:429
+#: src/control/VRuler.ts:201 src/control/VRuler.ts:431
 msgid "Bottom Margin"
 msgstr "Ստորին լուսանցք"
 
-#: src/control/PermissionMode.ts:83
+#: src/control/PermissionMode.ts:88
 #: src/control/jsdialog/Widget.HTMLContent.ts:86
 msgid "Permission Mode"
 msgstr "Թույլտվության ռեժիմ"
 
-#: src/control/PermissionMode.ts:90
+#: src/control/PermissionMode.ts:95
 #: src/control/jsdialog/Widget.HTMLContent.ts:115
 msgid "Read-only"
 msgstr "Միայն-կարդալ"
 
-#: src/control/PermissionMode.ts:125
+#: src/control/PermissionMode.ts:130
 msgid "Viewing Mode"
 msgstr "Դիտման ռեժիմ"
 
-#: src/control/PermissionMode.ts:131
+#: src/control/PermissionMode.ts:136
 msgid "Editing Mode"
 msgstr "Խմբագրման ռեժիմ"
 
-#: src/control/PermissionMode.ts:141 src/control/PermissionMode.ts:215
-#: src/control/PermissionMode.ts:221 src/control/PermissionMode.ts:227
+#: src/control/PermissionMode.ts:146 src/control/PermissionMode.ts:222
+#: src/control/PermissionMode.ts:228 src/control/PermissionMode.ts:234
 msgid "Viewing"
 msgstr "Դիտում"
 
@@ -5880,161 +6059,165 @@ msgstr "Թույլ"
 msgid "Very Loose"
 msgstr "Շատ թույլ"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1819
+#: src/control/jsdialog/Definitions.Menu.ts:1806
+msgid "Copy Markdown"
+msgstr "Պատճենել Markdown-ը"
+
+#: src/control/jsdialog/Definitions.Menu.ts:1834
 msgid "Inline"
 msgstr "Համահունչ"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1826
+#: src/control/jsdialog/Definitions.Menu.ts:1841
 msgid "Side by Side"
 msgstr "Կողք կողքի"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1832
+#: src/control/jsdialog/Definitions.Menu.ts:1847
 msgid "Hidden"
 msgstr "Թաքնված"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1846
+#: src/control/jsdialog/Definitions.Menu.ts:1861
 msgid "This user"
 msgstr "Այս օգտվողը"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1854
+#: src/control/jsdialog/Definitions.Menu.ts:1869
 msgid "All users"
 msgstr "Բոլոր օգտատերերը"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1993
+#: src/control/jsdialog/Definitions.Menu.ts:2008
 msgid "No Borders"
 msgstr "Առանց սահմանների"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1999
+#: src/control/jsdialog/Definitions.Menu.ts:2014
 msgid "Left Border"
 msgstr "Ձախ սահման"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2005
+#: src/control/jsdialog/Definitions.Menu.ts:2020
 msgid "Right Border"
 msgstr "Աջ սահման"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2011
+#: src/control/jsdialog/Definitions.Menu.ts:2026
 msgid "Left And Right Borders"
 msgstr "Ձախ և աջ սահմաններ"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2017
+#: src/control/jsdialog/Definitions.Menu.ts:2032
 msgid "Top Border"
 msgstr "Վերին սահման"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2023
+#: src/control/jsdialog/Definitions.Menu.ts:2038
 msgid "Bottom Border"
 msgstr "Ներքևի սահման"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2029
+#: src/control/jsdialog/Definitions.Menu.ts:2044
 msgid "Top And Bottom Border"
 msgstr "Վերին և ստորին սահմաններ"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2035
+#: src/control/jsdialog/Definitions.Menu.ts:2050
 msgid "Outer Border"
 msgstr "Արտաքին սահման"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2041
+#: src/control/jsdialog/Definitions.Menu.ts:2056
 msgid "All Horizontal Lines"
 msgstr "Բոլոր հորիզոնական գծերը"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2047
+#: src/control/jsdialog/Definitions.Menu.ts:2062
 msgid "Outer Border And Horizontal Lines"
 msgstr "Արտաքին սահման և հորիզոնական գծեր"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2053
+#: src/control/jsdialog/Definitions.Menu.ts:2068
 msgid "Outer Border and Vertical Lines"
 msgstr "Արտաքին սահման և ուղղահայաց գծեր"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2059
+#: src/control/jsdialog/Definitions.Menu.ts:2074
 msgid "Outer Borders And All Inner lines"
 msgstr "Արտաքին սահմաններ և բոլոր ներքին գծերը"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2065
+#: src/control/jsdialog/Definitions.Menu.ts:2080
 msgid "Line color"
 msgstr "Գծի գույնը"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2078
+#: src/control/jsdialog/Definitions.Menu.ts:2093
 msgid "Line style"
 msgstr "Գծի ոճը"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2082
+#: src/control/jsdialog/Definitions.Menu.ts:2097
 msgid "Hairline (0.05 pt)"
 msgstr "Մազագիծ (0.05 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2091
+#: src/control/jsdialog/Definitions.Menu.ts:2106
 msgid "Very thin (0.50 pt)"
 msgstr "Շատ բարակ (0.50 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2100
+#: src/control/jsdialog/Definitions.Menu.ts:2115
 msgid "Thin (0.75 pt)"
 msgstr "Բարակ (0.75 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2109
+#: src/control/jsdialog/Definitions.Menu.ts:2124
 msgid "Medium (1.50 pt)"
 msgstr "Միջին (1.50 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2118
+#: src/control/jsdialog/Definitions.Menu.ts:2133
 msgid "Thick (2.25 pt)"
 msgstr "Հաստ (2.25 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2127
+#: src/control/jsdialog/Definitions.Menu.ts:2142
 msgid "Extra thick (4.50 pt)"
 msgstr "Ավելի հաստ (4.50 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2136
+#: src/control/jsdialog/Definitions.Menu.ts:2151
 msgid "Double Hairline (1.10 pt)"
 msgstr "Կրկնակի մազագիծ (1.10 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2145
+#: src/control/jsdialog/Definitions.Menu.ts:2160
 msgid "Double Hairline (2.35 pt)"
 msgstr "Կրկնակի մազագիծ (2.35 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2154
+#: src/control/jsdialog/Definitions.Menu.ts:2169
 msgid "Thin/Medium (3.00 pt)"
 msgstr "Բարակ/Միջին (3.00 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2163
+#: src/control/jsdialog/Definitions.Menu.ts:2178
 msgid "Medium/Hairline (3.05 pt)"
 msgstr "Միջին/Մազագիծ (3.05 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2172
+#: src/control/jsdialog/Definitions.Menu.ts:2187
 msgid "Medium/Medium (4.50 pt)"
 msgstr "Միջին/Միջին (4.50 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2232
+#: src/control/jsdialog/Definitions.Menu.ts:2247
 msgid "Standard (4:3)"
 msgstr "Ստանդարտ (4:3)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2237
+#: src/control/jsdialog/Definitions.Menu.ts:2252
 msgid "Widescreen (16:9)"
 msgstr "Լայնէկրան (16:9)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2397
+#: src/control/jsdialog/Definitions.Menu.ts:2412
 msgid "Grayscale"
 msgstr "Մոխրագույն երանգներ"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2402
+#: src/control/jsdialog/Definitions.Menu.ts:2417
 msgid "Black/White"
 msgstr "Սև/Սպիտակ"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2407
+#: src/control/jsdialog/Definitions.Menu.ts:2422
 msgid "Watermark"
 msgstr "Ջրանիշ"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2415
+#: src/control/jsdialog/Definitions.Menu.ts:2430
 msgid "Insert comment"
 msgstr "Ներդնել մեկնաբանություն"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2419
 #: src/control/jsdialog/Definitions.Menu.ts:2434
+#: src/control/jsdialog/Definitions.Menu.ts:2449
 msgid "Comments list"
 msgstr "Մեկնաբանությունների ցանկ"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2426
+#: src/control/jsdialog/Definitions.Menu.ts:2441
 #: src/control/jsdialog/Widget.Comment.ts:58
 msgid "Insert Comment"
 msgstr "Ներդրեք մեկնաբանություն"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2430
+#: src/control/jsdialog/Definitions.Menu.ts:2445
 msgid "Insert Note"
 msgstr "Զետեղեք նշում"
 
@@ -6059,19 +6242,19 @@ msgstr "Ներկապնակ"
 msgid "Color palette"
 msgstr "Գույների ներկապնակ"
 
-#: src/control/jsdialog/Widget.Combobox.js:274
+#: src/control/jsdialog/Widget.Combobox.js:278
 msgid "Open "
 msgstr "Բացել "
 
-#: src/control/jsdialog/Widget.Combobox.js:274
+#: src/control/jsdialog/Widget.Combobox.js:278
 msgid " list"
 msgstr " ցուցակ"
 
-#: src/control/jsdialog/Widget.Combobox.js:275
+#: src/control/jsdialog/Widget.Combobox.js:279
 msgid "Open list"
 msgstr "Բացել ցուցակը"
 
-#: src/control/jsdialog/Widget.Combobox.js:406
+#: src/control/jsdialog/Widget.Combobox.js:410
 msgid "Filter entries"
 msgstr "Զտել մուտքերը"
 
@@ -6206,11 +6389,11 @@ msgstr "Աղյուսակի բջիջների ֆունկցիաներ"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:72
 msgid "Size of selected shape"
-msgstr ""
+msgstr "Ընտրված ձևի չափը"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:73
 msgid "Shape Size"
-msgstr ""
+msgstr "Ձևի չափը"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:79
 msgid "Sheet Navigation"
@@ -6300,7 +6483,7 @@ msgstr "Որոնել տարրերը"
 msgid "Oops, there is a problem connecting to {productname}: "
 msgstr "Վա՜յ, {productname}-ին միանալու խնդիր կա: "
 
-#: src/app/Socket.ts:605
+#: src/app/Socket.ts:612
 msgid ""
 "Well, this is embarrassing, we cannot connect to your document. Please try "
 "again."
@@ -6308,47 +6491,47 @@ msgstr ""
 "Դե, սա ամոթալի է, մենք չենք կարողանում կապ հաստատել ձեր փաստաթղթի հետ։ "
 "Խնդրում ենք կրկին փորձել։"
 
-#: src/app/Socket.ts:640
+#: src/app/Socket.ts:647
 msgid "The connection to the document has been lost."
 msgstr "Փաստաթղթի հետ կապը կորել է։"
 
-#: src/app/Socket.ts:641
+#: src/app/Socket.ts:648
 msgid "The server has been disconnected."
 msgstr "Սերվերը անջատվել է։"
 
-#: src/app/Socket.ts:676
+#: src/app/Socket.ts:683
 msgid "Reconnecting..."
 msgstr "Վերամիացում..."
 
-#: src/app/Socket.ts:1041
+#: src/app/Socket.ts:1048
 msgid "Exported to storage"
 msgstr "Արտահանվել է պահեստում"
 
-#: src/app/Socket.ts:1042
+#: src/app/Socket.ts:1049
 msgid "Successfully exported: "
 msgstr "Հաջողությամբ արտահանվեց: "
 
-#: src/app/Socket.ts:1174
+#: src/app/Socket.ts:1181
 msgid "This document has links to external content."
 msgstr "Այս փաստաթուղթը պարունակում է հղումներ դեպի արտաքին բովանդակություն։"
 
-#: src/app/Socket.ts:1175
+#: src/app/Socket.ts:1182
 msgid "Allow"
 msgstr "Թույլատրել"
 
-#: src/app/Socket.ts:1709
+#: src/app/Socket.ts:1719
 msgid "Discard"
 msgstr "Հրաժարվել"
 
-#: src/app/Socket.ts:1727
+#: src/app/Socket.ts:1737
 msgid "Save to new file"
 msgstr "Պահպանել նոր նիշքում"
 
-#: src/app/Socket.ts:1740
+#: src/app/Socket.ts:1750
 msgid "Document has been changed"
 msgstr "Փաստաթուղթը փոփոխվել է"
 
-#: src/app/Socket.ts:1742
+#: src/app/Socket.ts:1752
 msgid ""
 "Document has been changed in storage. What would you like to do with your "
 "unsaved changes?"
@@ -6356,95 +6539,94 @@ msgstr ""
 "Փաստաթուղթը փոփոխվել է հիշողության պահեստում: Ի՞նչ եք ուզում անել ձեր "
 "չպահպանված փոփոխությունների հետ:"
 
-#: src/app/Socket.ts:1895
+#: src/app/Socket.ts:1905
 msgid "Server is now reachable. We have to refresh the page now."
 msgstr "Սերվերն այժմ հասանելի է։ Մենք պետք է թարմացնենք էջը։"
 
-#: src/app/Socket.ts:1898
+#: src/app/Socket.ts:1908
 msgid "Server is now reachable..."
 msgstr "Սերվերն այժմ հասանելի է..."
 
-#: src/app/Socket.ts:1906
+#: src/app/Socket.ts:1916
 msgid "RELOAD"
 msgstr "ՎԵՐԱԲԵՌՆԵԼ"
 
-#: src/app/Socket.ts:1934
+#: src/app/Socket.ts:1944
 msgid "Cluster configuration warning"
 msgstr "Կլաստերի կարգավորման նախազգուշացում"
 
-#: src/app/Socket.ts:1943
+#: src/app/Socket.ts:1953
 msgid "Wrong server, reconnecting..."
 msgstr "Սխալ սերվեր, վերամիացում..."
 
-#: src/app/Socket.ts:1963
+#: src/app/Socket.ts:1973
 msgid "Unsupported version."
 msgstr "Չաջակցվող տարբերակ։"
 
-#: src/app/Socket.ts:1964
+#: src/app/Socket.ts:1974
 msgid "Unsupported server version."
 msgstr "Չաջակցվող սերվերի տարբերակ։"
 
-#: src/app/Socket.ts:2109
+#: src/app/Socket.ts:2119
 msgid "Document is getting migrated"
 msgstr "Փաստաթուղթը տեղափոխվում է"
 
-#: src/app/Socket.ts:2358
+#: src/app/Socket.ts:2370
 msgid "Document requires password to view."
 msgstr "Փաստաթուղթը դիտելու համար գաղտնաբառ է պահանջվում։"
 
-#: src/app/Socket.ts:2360
+#: src/app/Socket.ts:2372
 msgid "Document requires password to modify."
 msgstr "Փաստաթուղթը փոփոխելու համար գաղտնաբառ է պահանջվում։"
 
-#: src/app/Socket.ts:2362
+#: src/app/Socket.ts:2374
 msgid "Hit Cancel to open in view-only mode."
 msgstr "Սեղմեք «Չեղարկել»՝ միայն դիտման ռեժիմով բացելու համար։"
 
-#: src/app/Socket.ts:2366
+#: src/app/Socket.ts:2378
 msgid "Wrong password provided. Please try again."
 msgstr "Սխալ գաղտնաբառ է տրամադրվել։ Խնդրում ենք կրկին փորձել։"
 
-#: src/app/Socket.ts:2421
+#: src/app/Socket.ts:2433
 msgid "Only the document owner can change the password."
 msgstr "Միայն փաստաթղթի սեփականատերը կարող է փոխել գաղտնաբառը։"
 
-#: src/app/Socket.ts:2465 src/app/Socket.ts:2476
+#: src/app/Socket.ts:2477 src/app/Socket.ts:2488
 msgid "Missing Fonts"
 msgstr "Բացակայող տառատեսակներ"
 
-#: src/app/Socket.ts:2514
+#: src/app/Socket.ts:2526
 msgid "Someone"
 msgstr "Ինչ-որ մեկը"
 
-#: src/app/Socket.ts:2516
+#: src/app/Socket.ts:2528
 msgid "{username} saved this document as {filename}. Do you want to join?"
 msgstr ""
 "{username}-ը պահպանել է այս փաստաթուղթը որպես {filename}: Ցանկանո՞ւմ եք "
 "միանալ:"
 
-#: src/app/Socket.ts:2539
+#: src/app/Socket.ts:2551
 msgid "The document is being renamed and will reload shortly"
 msgstr "Փաստաթուղթը վերանվանվում է և շուտով կվերաբեռնվի"
 
-#: src/app/Socket.ts:2542
+#: src/app/Socket.ts:2554
 msgid "The document is switching to Offline mode and will reload shortly"
 msgstr "Փաստաթուղթը անցնում է անցանց ռեժիմի և շուտով կվերբեռնվի"
 
-#: src/app/Socket.ts:2653
+#: src/app/Socket.ts:2678
 msgid "Connecting..."
 msgstr "Միանում է..."
 
-#: src/app/Socket.ts:2669
+#: src/app/Socket.ts:2694
 msgid "Server is shutting down"
 msgstr "Սերվերը անջատվում է"
 
 #: src/docdispatcher.ts:611
-#, fuzzy
 msgid ""
 "AI is not configured. Go to File > Options > AI Assistant to set it up."
 msgstr ""
-"ԱԲ-ն կարգավորված չէ: Անցեք Նիշք > Ընտրանքներ > Դիտման կարգավորումներ՝ այն "
-"կարգավորելու համար:"
+"ԱԲ-ն կարգավորված չէ: Անցեք Նիշք > Ընտրանքներ > ԱԲ աջակից՝ այն կարգավորելու "
+"համար:"
 
 #: src/docdispatcher.ts:869
 msgid "Are you sure you want to delete this slide?"
@@ -6798,15 +6980,15 @@ msgstr "«Դիտել» ընտրացանկը"
 msgid "Online Editor"
 msgstr "Առցանց խմբագրիչ"
 
-#: src/layer/tile/CanvasTileLayer.js:1583
+#: src/layer/tile/CanvasTileLayer.js:1591
 msgid "Functions"
 msgstr "Ֆունկցիաներ"
 
-#: src/layer/tile/CanvasTileLayer.js:1869
+#: src/layer/tile/CanvasTileLayer.js:1877
 msgid "Named Range"
 msgstr "Անվանված միջակայք"
 
-#: src/layer/tile/CanvasTileLayer.js:3749
+#: src/layer/tile/CanvasTileLayer.js:3752
 msgid "No Comments"
 msgstr "Մեկնաբանություններ չկան"
 
@@ -6814,28 +6996,28 @@ msgstr "Մեկնաբանություններ չկան"
 msgid "Warning! The browser you are using is not supported."
 msgstr "Զգուշացում։ Ձեր օգտագործած դիտարկիչը չի աջակցվում։"
 
-#: src/map/Clipboard.js:186
+#: src/map/Clipboard.js:188
 msgid ""
 "To paste outside {productname}, please first click the 'download' button"
 msgstr "{productname}-ից դուրս տեղադրելու համար նախ սեղմեք «ներբեռնել» կոճակը"
 
-#: src/map/Clipboard.js:194
+#: src/map/Clipboard.js:196
 msgid "Copying from the document has been disabled by your administrator"
-msgstr ""
+msgstr "Փաստաթղթից պատճենումը անջատվել է ձեր ադմինիստրատորի կողմից"
 
-#: src/map/Clipboard.js:307
+#: src/map/Clipboard.js:309
 msgid "warning: copy/paste request timed out"
 msgstr "զգուշացում. պատճենելու/տեղադրելու հարցման ժամանակը սպառվել է"
 
-#: src/map/Clipboard.js:341
+#: src/map/Clipboard.js:343
 msgid "Failed to download clipboard, please re-copy"
 msgstr "Չհաջողվեց ներբեռնել սեղմատախտակը, խնդրում ենք վերապատճենել"
 
-#: src/map/Clipboard.js:390
+#: src/map/Clipboard.js:392
 msgid "Failed to upload the clipboard"
 msgstr "Չհաջողվեց վերբեռնել սեղմատախտակը"
 
-#: src/map/Clipboard.js:1482
+#: src/map/Clipboard.js:1497
 msgid ""
 "Your browser has very limited access to the clipboard, so please use the "
 "paste buttons on your on-screen keyboard instead."
@@ -6843,7 +7025,7 @@ msgstr ""
 "Ձեր դիտարկիչը շատ սահմանափակ մուտք ունի սեղմատախտակին, ուստի խնդրում ենք "
 "օգտագործել էկրանային ստեղնաշարի վրա գտնվող տեղադրման կոճակները։"
 
-#: src/map/Clipboard.js:1488
+#: src/map/Clipboard.js:1503
 msgid ""
 "Your browser has very limited access to the clipboard, so use these "
 "keyboard shortcuts:"
@@ -6851,11 +7033,11 @@ msgstr ""
 "Ձեր դիտարկիչը շատ սահմանափակ մուտք ունի սեղմատախտակին, ուստի օգտագործեք այս "
 "ստեղնաշարի դյուրանցումները:"
 
-#: src/map/Clipboard.js:1522
+#: src/map/Clipboard.js:1537
 msgid "Cut"
 msgstr "Կտրել"
 
-#: src/map/Clipboard.js:1538
+#: src/map/Clipboard.js:1553
 msgid ""
 "A download due to a large copy/paste operation has already started. Please, "
 "wait for the current download or cancel it before starting a new one"
@@ -6864,23 +7046,23 @@ msgstr ""
 "է: Խնդրում ենք սպասել ընթացիկ ներբեռնմանը կամ չեղարկել այն՝ նախքան նորը "
 "սկսելը"
 
-#: src/map/Clipboard.js:1566
+#: src/map/Clipboard.js:1581
 msgid "Paste from this document"
 msgstr "Տեղադրել այս փաստաթղթից"
 
-#: src/map/Clipboard.js:1566
+#: src/map/Clipboard.js:1581
 msgid "Cancel paste special"
 msgstr "Չեղարկել հատուկ տեղադրումը"
 
-#: src/map/Clipboard.js:1588
+#: src/map/Clipboard.js:1603
 msgid "Your browser has very limited access to the clipboard"
 msgstr "Ձեր դիտարկիչը շատ սահմանափակ մուտք ունի սեղմատախտակին"
 
-#: src/map/Clipboard.js:1593
+#: src/map/Clipboard.js:1608
 msgid "Please use following combination to see more options:"
 msgstr "Ավելի շատ տարբերակներ տեսնելու համար օգտագործեք հետևյալ համադրությունը:"
 
-#: src/map/Clipboard.js:1611
+#: src/map/Clipboard.js:1626
 msgid "Close popup to ignore paste special"
 msgstr "Փակեք բացվող պատուհանը՝ հատուկ տեղադրումը անտեսելու համար"
 
@@ -6888,11 +7070,11 @@ msgstr "Փակեք բացվող պատուհանը՝ հատուկ տեղադրո
 msgid "Initializing..."
 msgstr "Նախաձեռնվում է..."
 
-#: src/map/Map.js:539 src/map/Map.js:542 src/map/Map.js:545 src/map/Map.js:548
+#: src/map/Map.js:548 src/map/Map.js:551 src/map/Map.js:554 src/map/Map.js:557
 msgid "Last saved:"
 msgstr "Վերջին անգամ պահպանված:"
 
-#: src/map/Map.js:1553
+#: src/map/Map.js:1562
 msgid "Please wait!"
 msgstr "Խնդրում եմ սպասեք։"
 
@@ -6937,22 +7119,22 @@ msgid "Print dialog"
 msgstr "Տպելու երկխոսություն"
 
 #: src/map/handler/Map.SlideShow.js:59
-#: src/slideshow/SlideShowPresenter.ts:1375
+#: src/slideshow/SlideShowPresenter.ts:1383
 msgid "Empty Slide Show"
 msgstr "Դատարկ սահիկացուցադրություն"
 
 #: src/map/handler/Map.SlideShow.js:60
-#: src/slideshow/SlideShowPresenter.ts:1376
+#: src/slideshow/SlideShowPresenter.ts:1384
 msgid "All slides are hidden!"
 msgstr "Բոլոր սահիկները թաքնված են։"
 
 #: src/map/handler/Map.SlideShow.js:167
-#: src/slideshow/SlideShowPresenter.ts:1403
+#: src/slideshow/SlideShowPresenter.ts:1411
 msgid "Windowed Presentation Blocked"
 msgstr "Պատուհանային ներկայացումը արգելափակված է"
 
 #: src/map/handler/Map.SlideShow.js:168
-#: src/slideshow/SlideShowPresenter.ts:1405
+#: src/slideshow/SlideShowPresenter.ts:1413
 msgid ""
 "Presentation was blocked. Please allow pop-ups in your browser. This lets "
 "slide shows to be displayed in separated windows, allowing for easy screen "
@@ -6963,17 +7145,17 @@ msgstr ""
 "պատուհաններում, ինչը թույլ է տալիս հեշտությամբ կիսվել էկրանով:"
 
 #: src/map/handler/Map.SlideShow.js:172
-#: src/slideshow/SlideShowPresenter.ts:1133
+#: src/slideshow/SlideShowPresenter.ts:1141
 msgid "Windowed Presentation: "
 msgstr "Պատուհանային ներկայացում: "
 
 #: src/map/handler/Map.SlideShow.js:202
-#: src/slideshow/SlideShowPresenter.ts:1212
+#: src/slideshow/SlideShowPresenter.ts:1220
 msgid "Presenting in another window"
-msgstr ""
+msgstr "Ներկայացվում է մեկ այլ պատուհանում"
 
 #: src/map/handler/Map.SlideShow.js:203
-#: src/slideshow/SlideShowPresenter.ts:1213
+#: src/slideshow/SlideShowPresenter.ts:1221
 msgid "Close Presentation"
 msgstr "Փակել շնորհանդեսը"
 
@@ -6986,22 +7168,22 @@ msgid "End Presentation"
 msgstr "Ավարտել Շնորհանդեսը"
 
 #: src/map/handler/Map.SlideShow.js:295
-#: src/slideshow/SlideShowPresenter.ts:1390
+#: src/slideshow/SlideShowPresenter.ts:1398
 msgid "Already presenting"
 msgstr "Արդեն ներկայացված է"
 
 #: src/map/handler/Map.SlideShow.js:296
-#: src/slideshow/SlideShowPresenter.ts:1391
+#: src/slideshow/SlideShowPresenter.ts:1399
 msgid "You are already presenting this document"
 msgstr "Դուք արդեն ներկայացնում եք այս փաստաթուղթը"
 
 #: src/map/handler/Map.SlideShow.js:306
-#: src/slideshow/SlideShowPresenter.ts:1431
+#: src/slideshow/SlideShowPresenter.ts:1439
 msgid "Presentation disabled"
 msgstr "Շնորհանդեսը արգելափակված է"
 
 #: src/map/handler/Map.SlideShow.js:307
-#: src/slideshow/SlideShowPresenter.ts:1432
+#: src/slideshow/SlideShowPresenter.ts:1440
 msgid "Presentation mode has been disabled for this document"
 msgstr "Ներկայացման ռեժիմը անջատված է այս փաստաթղթի համար"
 
@@ -7041,6 +7223,8 @@ msgstr "Ողջույնի երկխոսություն"
 #: src/map/handler/Map.Settings.ts:159
 msgid "Settings saved. Add an API key to use the AI assistant."
 msgstr ""
+"Կարգավորումները պահպանված են: Ավելացրեք API բանալի՝ ԱԲ օգնականն օգտագործելու "
+"համար:"
 
 #: src/map/handler/Map.Settings.ts:164
 msgid "Settings saved"
@@ -7063,7 +7247,7 @@ msgid "First Slide"
 msgstr "Առաջին սահիկ"
 
 #: src/slideshow/engine/SlideShowHandler.ts:108
-#: src/slideshow/PresenterConsole.js:31
+#: src/slideshow/PresenterConsole.js:32
 msgid "Next Slide"
 msgstr "Հաջորդ սահիկը"
 
@@ -7076,7 +7260,7 @@ msgid "Last Slide"
 msgstr "Վերջին սահիկը"
 
 #: src/slideshow/engine/SlideShowHandler.ts:111
-#: src/slideshow/SlideShowPresenter.ts:863
+#: src/slideshow/SlideShowPresenter.ts:871
 msgid "End Show"
 msgstr "Ավարտել ցուցադրությունը"
 
@@ -7096,102 +7280,104 @@ msgstr "Անցման ավարտ: "
 msgid "Pause... ( %SECONDS% )"
 msgstr "Դադար... ( %SECONDS% )"
 
-#: src/slideshow/PresenterConsole.js:30
+#: src/slideshow/PresenterConsole.js:31
 msgid "Current Slide"
 msgstr "Ընթացիկ սահիկը"
 
-#: src/slideshow/PresenterConsole.js:36
-#: src/slideshow/SlideShowPresenter.ts:928
-msgid "Exchange"
-msgstr "Փոխանակում"
-
-#: src/slideshow/PresenterConsole.js:37
-msgid "Pause"
-msgstr "Դադար"
-
-#: src/slideshow/PresenterConsole.js:38
-msgid "Restart"
-msgstr "Վերագործարկում"
-
-#: src/slideshow/PresenterConsole.js:39 templates/templates.js:40
-msgid "Resume"
-msgstr "Վերսկսել"
-
-#: src/slideshow/PresenterConsole.js:40
-msgid "Present to all"
-msgstr "Ներկայացնել բոլորին"
-
-#: src/slideshow/PresenterConsole.js:41
-msgid "Exit"
-msgstr "Ելք"
-
-#: src/slideshow/PresenterConsole.js:42
-msgid "Go Back"
-msgstr "Գնա հետ"
-
-#: src/slideshow/PresenterConsole.js:43
-msgid "Zoom In"
-msgstr "Խոշորացնել"
-
-#: src/slideshow/PresenterConsole.js:44
-msgid "Zoom Out"
-msgstr "Փոքրացնել"
-
-#: src/slideshow/PresenterConsole.js:45
-msgid "Preview of the current slide"
-msgstr ""
-
-#: src/slideshow/PresenterConsole.js:46
-msgid "Preview of the next slide"
-msgstr ""
-
-#: src/slideshow/PresenterConsole.js:194
-msgid "Preview Slide {1}"
-msgstr "Նախադիտել սահիկ {1}"
-
-#: src/slideshow/PresenterConsole.js:797
-msgid "You are leaving the presentation."
-msgstr ""
-
-#: src/slideshow/PresenterConsole.js:798
-msgid "The link is not valid."
-msgstr ""
-
-#: src/slideshow/PresenterConsole.js:1470
-msgid "Slide {0} of {1}"
-msgstr "Սահիկ {0} ընդ․ {1}"
-
-#: src/slideshow/PresenterConsole.js:1494
-msgid "No Notes"
-msgstr "Նշումներ չկան"
-
-#: src/slideshow/PresenterConsole.js:1582
-msgid "Repeat in {0} seconds"
-msgstr "Կրկնել {0} վայրկյանից"
-
-#: src/slideshow/PresenterConsole.js:1589
-#: src/slideshow/SlideShowPresenter.ts:655
-msgid "Click to exit presentation..."
-msgstr "Սեղմեք՝ շնորհանդեսից դուրս գալու համար..."
-
-#: src/slideshow/SlideShowPresenter.ts:827
-msgid "You are on the first slide"
-msgstr "Դուք առաջին սահիկի վրա եք"
-
-#: src/slideshow/SlideShowPresenter.ts:835
-msgid "Waiting for presenter to advance"
-msgstr "Սպասում եմ ներկայացնողի առաջխաղացմանը"
-
-#: src/slideshow/SlideShowPresenter.ts:899
-#: src/slideshow/SlideShowPresenter.ts:912
+#: src/slideshow/PresenterConsole.js:35 src/slideshow/PresenterConsole.js:1149
+#: src/slideshow/SlideShowPresenter.ts:907
+#: src/slideshow/SlideShowPresenter.ts:920
 msgid "Disable Animations"
 msgstr "Արգելափակել անիմացիաները"
 
-#: src/slideshow/SlideShowPresenter.ts:911
+#: src/slideshow/PresenterConsole.js:38
+#: src/slideshow/SlideShowPresenter.ts:936
+msgid "Exchange"
+msgstr "Փոխանակում"
+
+#: src/slideshow/PresenterConsole.js:39
+msgid "Pause"
+msgstr "Դադար"
+
+#: src/slideshow/PresenterConsole.js:40
+msgid "Restart"
+msgstr "Վերագործարկում"
+
+#: src/slideshow/PresenterConsole.js:41 templates/templates.js:40
+msgid "Resume"
+msgstr "Վերսկսել"
+
+#: src/slideshow/PresenterConsole.js:42
+msgid "Present to all"
+msgstr "Ներկայացնել բոլորին"
+
+#: src/slideshow/PresenterConsole.js:43
+msgid "Exit"
+msgstr "Ելք"
+
+#: src/slideshow/PresenterConsole.js:44
+msgid "Go Back"
+msgstr "Գնա հետ"
+
+#: src/slideshow/PresenterConsole.js:45
+msgid "Zoom In"
+msgstr "Խոշորացնել"
+
+#: src/slideshow/PresenterConsole.js:46
+msgid "Zoom Out"
+msgstr "Փոքրացնել"
+
+#: src/slideshow/PresenterConsole.js:47
+msgid "Preview of the current slide"
+msgstr "Ընթացիկ սահիկի նախադիտում"
+
+#: src/slideshow/PresenterConsole.js:48
+msgid "Preview of the next slide"
+msgstr "Հաջորդ սահիկի նախադիտում"
+
+#: src/slideshow/PresenterConsole.js:211
+msgid "Preview Slide {1}"
+msgstr "Նախադիտել սահիկ {1}"
+
+#: src/slideshow/PresenterConsole.js:815
+msgid "You are leaving the presentation."
+msgstr "Դուք լքում եք ներկայացումը։"
+
+#: src/slideshow/PresenterConsole.js:816
+msgid "The link is not valid."
+msgstr "Հղումը վավեր չէ։"
+
+#: src/slideshow/PresenterConsole.js:1148
+#: src/slideshow/SlideShowPresenter.ts:919
 msgid "Enable Animations"
 msgstr "Միացնել անիմացիաները"
 
-#: src/slideshow/SlideShowPresenter.ts:1612
+#: src/slideshow/PresenterConsole.js:1507
+msgid "Slide {0} of {1}"
+msgstr "Սահիկ {0} ընդ․ {1}"
+
+#: src/slideshow/PresenterConsole.js:1565
+msgid "No Notes"
+msgstr "Նշումներ չկան"
+
+#: src/slideshow/PresenterConsole.js:1658
+msgid "Repeat in {0} seconds"
+msgstr "Կրկնել {0} վայրկյանից"
+
+#: src/slideshow/PresenterConsole.js:1665
+#: src/slideshow/SlideShowPresenter.ts:663
+msgid "Click to exit presentation..."
+msgstr "Սեղմեք՝ շնորհանդեսից դուրս գալու համար..."
+
+#: src/slideshow/SlideShowPresenter.ts:835
+msgid "You are on the first slide"
+msgstr "Դուք առաջին սահիկի վրա եք"
+
+#: src/slideshow/SlideShowPresenter.ts:843
+msgid "Waiting for presenter to advance"
+msgstr "Սպասում եմ ներկայացնողի առաջխաղացմանը"
+
+#: src/slideshow/SlideShowPresenter.ts:1620
 msgid "Stop Following"
 msgstr "Դադարեք հետևել"
 
@@ -7321,11 +7507,11 @@ msgstr "Դեղին գաղափար"
 
 #: introdocs/introdocs.js:5 introdocs/introdocs.js:8
 msgid "Welcome to Spreadsheet"
-msgstr ""
+msgstr "Բարի գալուստ էլ․ աղյուսակ"
 
 #: introdocs/introdocs.js:13 introdocs/introdocs.js:16
 msgid "Welcome to Presentation"
-msgstr ""
+msgstr "Բարի գալուստ Ներկայացում"
 
 #: welcome/welcome.html%2Bhtml.head.title:9-3
 msgid "Collabora Online Welcome"

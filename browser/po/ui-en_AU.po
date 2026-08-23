@@ -6,12 +6,12 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-05 22:58+0200\n"
+"POT-Creation-Date: 2026-08-23 10:59+0200\n"
 "PO-Revision-Date: 2026-08-12 22:54+0000\n"
 "Last-Translator: Rob Pearson <rob.dunedin@gmail.com>\n"
 "Language-Team: English (Australia) <https://hosted.weblate.org/projects/"
 "collabora-online/collabora-ui/en_AU/>\n"
-"Language: en_AU\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -169,10 +169,10 @@ msgstr "Network Graph"
 #: admin/src/integrator/AdminIntegratorSettings.ts:1508
 #: admin/src/integrator/AdminIntegratorSettings.ts:3674
 #: admin/src/integrator/WordBook.ts:394 admin/src/integrator/Xcu.ts:446
-#: src/canvas/sections/CommentListSection.ts:766
+#: src/canvas/sections/CommentListSection.ts:778
 #: src/canvas/sections/CommentSection.ts:193
 #: src/canvas/sections/CommentSection.ts:672
-#: src/canvas/sections/CommentSection.ts:1646
+#: src/canvas/sections/CommentSection.ts:1656
 #: src/control/Control.BackstageView.ts:141
 #: src/control/Control.Notebookbar.js:351
 #: src/control/Control.NotebookbarBuilder.js:177
@@ -260,12 +260,12 @@ msgstr "Set Log Levels"
 msgid "Log Levels"
 msgstr "Log Levels"
 
-#: admin/admin.strings.js:68 src/control/Control.AIChatSidebar.ts:664
+#: admin/admin.strings.js:68 src/control/Control.AIChatSidebar.ts:726
 #: src/control/Control.AlertDialog.js:32
 #: src/control/Control.AlertDialog.js:103
 #: src/control/backstage/CloudDialogs.tsx:232
-#: src/control/Control.UIManager.ts:2847 src/control/Control.Zotero.js:191
-#: src/app/Socket.ts:978 src/app/Socket.ts:2468 src/app/Socket.ts:2479
+#: src/control/Control.UIManager.ts:2940 src/control/Control.Zotero.js:191
+#: src/app/Socket.ts:985 src/app/Socket.ts:2480 src/app/Socket.ts:2491
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.div:51-7
 msgid "Close"
 msgstr "Close"
@@ -324,7 +324,7 @@ msgstr "Warning"
 #: admin/src/AdminSocketBase.js:74 admin/src/AdminSocketOverview.js:108
 #: admin/src/AdminSocketOverview.js:432 admin/src/AdminSocketSettings.js:47
 #: admin/src/integrator/AdminIntegratorSettings.ts:3794 src/app/Debug.ts:1622
-#: src/canvas/sections/CommentListSection.ts:1969
+#: src/canvas/sections/CommentListSection.ts:1981
 #: src/control/Control.AboutDialog.ts:245
 #: src/control/Control.AlertDialog.js:56
 #: src/control/Control.DocumentRepair.js:77
@@ -333,44 +333,45 @@ msgstr "Warning"
 #: src/control/Control.PartsPreview.js:1072
 #: src/control/Control.PartsPreview.js:1114
 #: src/control/Control.ServerAuditDialog.ts:357
-#: src/control/Control.Tabs.js:674 src/control/Control.Tabs.js:683
+#: src/control/Control.Tabs.js:677 src/control/Control.Tabs.js:686
+#: src/control/Control.Tabs.js:725 src/control/Control.Tabs.js:729
 #: src/control/Control.Zotero.js:365 src/control/Control.Zotero.js:411
 #: src/control/Parts.js:546 src/control/Permission.js:98
 #: src/control/Permission.js:108 src/control/Permission.js:169
-#: src/control/Toolbar.js:751 src/app/Socket.ts:1044 src/app/Socket.ts:1762
-#: src/app/Socket.ts:1937 src/app/Socket.ts:2422 src/app/Socket.ts:2525
+#: src/control/Toolbar.js:758 src/app/Socket.ts:1051 src/app/Socket.ts:1772
+#: src/app/Socket.ts:1947 src/app/Socket.ts:2434 src/app/Socket.ts:2537
 #: src/docdispatcher.ts:879 src/main.js:133 src/main.js:136 src/main.js:400
-#: src/map/Clipboard.js:1460 src/map/handler/Map.Feedback.js:96
+#: src/map/Clipboard.js:1475 src/map/handler/Map.Feedback.js:96
 #: src/map/handler/Map.SlideShow.js:60 src/map/handler/Map.SlideShow.js:169
 #: src/map/handler/Map.SlideShow.js:297 src/map/handler/Map.SlideShow.js:308
-#: src/map/handler/Map.WOPI.js:878 src/slideshow/SlideShowPresenter.ts:1378
-#: src/slideshow/SlideShowPresenter.ts:1393
-#: src/slideshow/SlideShowPresenter.ts:1408
-#: src/slideshow/SlideShowPresenter.ts:1434
+#: src/map/handler/Map.WOPI.js:878 src/slideshow/SlideShowPresenter.ts:1386
+#: src/slideshow/SlideShowPresenter.ts:1401
+#: src/slideshow/SlideShowPresenter.ts:1416
+#: src/slideshow/SlideShowPresenter.ts:1442
 msgid "OK"
 msgstr "OK"
 
 #: admin/src/AdminClusterOverview.js:561 admin/src/AdminSocketOverview.js:109
 #: admin/src/AdminSocketOverview.js:433 admin/src/AdminSocketSettings.js:48
 #: admin/src/integrator/WordBook.ts:386
-#: src/canvas/sections/CommentListSection.ts:761
+#: src/canvas/sections/CommentListSection.ts:773
 #: src/canvas/sections/CommentSection.ts:192
 #: src/canvas/sections/CommentSection.ts:195
-#: src/canvas/sections/CommentSection.ts:1647
-#: src/canvas/sections/CommentSection.ts:1652
-#: src/control/Control.AIChatSidebar.ts:1369
-#: src/control/Control.AIChatSidebar.ts:1371
-#: src/control/Control.AIChatSidebar.ts:1456
+#: src/canvas/sections/CommentSection.ts:1657
+#: src/canvas/sections/CommentSection.ts:1662
+#: src/control/Control.AIChatSidebar.ts:1431
+#: src/control/Control.AIChatSidebar.ts:1433
+#: src/control/Control.AIChatSidebar.ts:1518
 #: src/control/backstage/CloudDialogs.tsx:140
 #: src/control/backstage/CloudDialogs.tsx:289
 #: src/control/Control.DocumentRepair.js:71
 #: src/control/Control.DownloadProgress.js:81
 #: src/control/Control.LanguageDialog.js:114
 #: src/control/Control.MobileTopBar.ts:43
-#: src/control/Control.UIManager.ts:2394 src/control/Control.UIManager.ts:2475
-#: src/control/Control.UIManager.ts:2636 src/control/Control.UIManager.ts:2814
-#: src/control/Control.Zotero.js:360 src/app/Socket.ts:1706
-#: src/map/handler/Map.Settings.ts:82
+#: src/control/Control.UIManager.ts:2396 src/control/Control.UIManager.ts:2477
+#: src/control/Control.UIManager.ts:2638 src/control/Control.UIManager.ts:2723
+#: src/control/Control.UIManager.ts:2907 src/control/Control.Zotero.js:360
+#: src/app/Socket.ts:1716 src/map/handler/Map.Settings.ts:82
 msgid "Cancel"
 msgstr "Cancel"
 
@@ -410,9 +411,11 @@ msgstr "Your WOPI server is not secure: SSL verification failed"
 #: admin/src/AdminSocketServerAudit.js:40
 #: src/control/Control.ServerAuditDialog.ts:72
 msgid ""
-"Documents are not effectively contained: missing capabilities or namespaces."
+"Documents are not effectively contained: missing capabilities, namespaces "
+"and landlock."
 msgstr ""
-"Documents are not effectively contained: missing capabilities or namespaces."
+"Documents are not effectively contained: missing capabilities, namespaces "
+"and landlock."
 
 #: admin/src/AdminSocketServerAudit.js:45
 #: src/control/Control.ServerAuditDialog.ts:83
@@ -452,7 +455,7 @@ msgstr ""
 
 #: admin/src/AdminSocketServerAudit.js:91
 #: admin/src/integrator/AdminIntegratorSettings.ts:3782
-#: src/control/Control.AIChatSidebar.ts:3108 src/map/handler/Map.WOPI.js:878
+#: src/control/Control.AIChatSidebar.ts:3502 src/map/handler/Map.WOPI.js:878
 msgid "Error"
 msgstr "Error"
 
@@ -532,7 +535,7 @@ msgstr "In-document Screen Reader"
 #: src/control/Control.NotebookbarCalc.js:1659
 #: src/control/Control.NotebookbarDraw.js:571
 #: src/control/Control.NotebookbarImpress.js:738
-#: src/control/Control.NotebookbarWriter.js:1829
+#: src/control/Control.NotebookbarWriter.js:1831
 msgid "Dark Mode"
 msgstr "Dark Mode"
 
@@ -562,8 +565,8 @@ msgid "Show Formatting Marks"
 msgstr "Show Formatting Marks"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:619
-#: src/control/Control.NotebookbarWriter.js:2313
-#: src/control/Control.NotebookbarWriter.js:2329
+#: src/control/Control.NotebookbarWriter.js:2315
+#: src/control/Control.NotebookbarWriter.js:2331
 #: src/control/jsdialog/Widget.HTMLContent.ts:52
 msgid "Show Comments"
 msgstr "Show Comments"
@@ -663,7 +666,7 @@ msgstr "Drawing"
 #: admin/src/integrator/AdminIntegratorSettings.ts:645
 #: src/control/Control.NotebookbarDraw.js:1245
 #: src/control/Control.NotebookbarDraw.js:1526
-#: src/control/Control.NotebookbarWriter.js:1235
+#: src/control/Control.NotebookbarWriter.js:1237
 msgid "Page"
 msgstr "Page"
 
@@ -693,7 +696,7 @@ msgstr "Page name"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:652
 #: src/control/Control.NotebookbarCalc.js:817
-#: src/control/Control.NotebookbarWriter.js:1638
+#: src/control/Control.NotebookbarWriter.js:1640
 #: src/control/Control.Zotero.js:1153 src/control/Control.Zotero.js:1614
 msgid "Date"
 msgstr "Date"
@@ -728,7 +731,7 @@ msgid "Presentation"
 msgstr "Presentation"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:657
-#: src/control/Control.Zotero.js:1341 src/slideshow/PresenterConsole.js:34
+#: src/control/Control.Zotero.js:1341 src/slideshow/PresenterConsole.js:36
 msgid "Notes"
 msgstr "Notes"
 
@@ -935,7 +938,7 @@ msgstr "Notebookbar view"
 #: src/control/Control.NotebookbarCalc.js:1620
 #: src/control/Control.NotebookbarDraw.js:496
 #: src/control/Control.NotebookbarImpress.js:640
-#: src/control/Control.NotebookbarWriter.js:1747
+#: src/control/Control.NotebookbarWriter.js:1749
 msgid "Compact view"
 msgstr "Compact view"
 
@@ -944,9 +947,9 @@ msgid "Something went wrong while uploading the file. Please try again."
 msgstr "Something went wrong while uploading the file. Please try again."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:2102
-#: src/canvas/sections/CommentSection.ts:1560
-#: src/canvas/sections/CommentSection.ts:1565
-#: src/control/Control.AIChatSidebar.ts:1463
+#: src/canvas/sections/CommentSection.ts:1570
+#: src/canvas/sections/CommentSection.ts:1575
+#: src/control/Control.AIChatSidebar.ts:1525
 #: src/control/backstage/CloudDialogs.tsx:194
 #: src/control/Control.PartsPreview.js:1069
 #: src/control/jsdialog/Control.ContextMenu.ts:306
@@ -1002,15 +1005,15 @@ msgstr "Document Signing Settings"
 #: admin/src/integrator/AdminIntegratorSettings.ts:2275
 #: admin/src/integrator/AdminIntegratorSettings.ts:2292
 #: admin/src/integrator/AdminIntegratorSettings.ts:3345
-#: src/control/Control.AIChatSidebar.ts:649 src/control/Control.Menubar.ts:233
+#: src/control/Control.AIChatSidebar.ts:711 src/control/Control.Menubar.ts:233
 #: src/control/Control.Menubar.ts:550 src/control/Control.Menubar.ts:738
 #: src/control/Control.Menubar.ts:933
 #: src/control/Control.NotebookbarCalc.js:1691
 #: src/control/Control.NotebookbarCalc.js:1692
 #: src/control/Control.NotebookbarImpress.js:763
 #: src/control/Control.NotebookbarImpress.js:764
-#: src/control/Control.NotebookbarWriter.js:1818
-#: src/control/Control.NotebookbarWriter.js:1819
+#: src/control/Control.NotebookbarWriter.js:1820
+#: src/control/Control.NotebookbarWriter.js:1821
 msgid "AI Assistant"
 msgstr "AI Assistant"
 
@@ -1225,7 +1228,7 @@ msgstr " mins"
 msgid " s"
 msgstr " s"
 
-#: js/global.js:1915
+#: js/global.js:1930
 msgid ""
 "The system is currently adjusting resources. Please wait a moment while we "
 "retry your request..."
@@ -1233,11 +1236,11 @@ msgstr ""
 "The system is currently adjusting resources. Please wait a moment while we "
 "retry your request..."
 
-#: js/global.js:1917
+#: js/global.js:1932
 msgid "The document is being migrated to a new server. Retrying shortly..."
 msgstr "The document is being migrated to a new server. Retrying shortly..."
 
-#: js/global.js:1919
+#: js/global.js:1934
 msgid "Failed to get RouteToken from controller"
 msgstr "Failed to get RouteToken from controller"
 
@@ -1253,11 +1256,11 @@ msgstr "Ctrl+Shift+Alt+D to exit"
 msgid "Event handling has been delayed for an unexpectedly long time: {0}ms"
 msgstr "Event handling has been delayed for an unexpectedly long time: {0}ms"
 
-#: src/app/LOUtil.ts:981
+#: src/app/LOUtil.ts:1022
 msgid "{0} website, opens in new tab"
 msgstr "{0} website, opens in new tab"
 
-#: src/app/LOUtil.ts:984
+#: src/app/LOUtil.ts:1025
 msgid "file type icon"
 msgstr "file type icon"
 
@@ -1283,16 +1286,16 @@ msgstr "Custom"
 msgid "Table Styles"
 msgstr "Table Styles"
 
-#: src/canvas/sections/CommentListSection.ts:1967
-#: src/canvas/sections/CommentListSection.ts:1980
+#: src/canvas/sections/CommentListSection.ts:1979
+#: src/canvas/sections/CommentListSection.ts:1992
 msgid "Comments Updated"
 msgstr "Comments Updated"
 
-#: src/canvas/sections/CommentListSection.ts:1968
+#: src/canvas/sections/CommentListSection.ts:1980
 msgid "Another user has removed this comment."
 msgstr "Another user has removed this comment."
 
-#: src/canvas/sections/CommentListSection.ts:1981
+#: src/canvas/sections/CommentListSection.ts:1993
 msgid ""
 "Another user has updated the comment. Would you like to overwrite those "
 "changes?"
@@ -1300,12 +1303,12 @@ msgstr ""
 "Another user has updated the comment. Would you like to overwrite those "
 "changes?"
 
-#: src/canvas/sections/CommentListSection.ts:1982 src/control/Styles.js:39
-#: src/app/Socket.ts:1710
+#: src/canvas/sections/CommentListSection.ts:1994 src/control/Styles.js:39
+#: src/app/Socket.ts:1720
 msgid "Overwrite"
 msgstr "Overwrite"
 
-#: src/canvas/sections/CommentListSection.ts:1983
+#: src/canvas/sections/CommentListSection.ts:1995
 msgid "Update"
 msgstr "Update"
 
@@ -1323,8 +1326,8 @@ msgstr "Open menu"
 
 #: src/canvas/sections/CommentSection.ts:196
 #: src/canvas/sections/CommentSection.ts:676
-#: src/canvas/sections/CommentSection.ts:1250
-#: src/canvas/sections/CommentSection.ts:1651
+#: src/canvas/sections/CommentSection.ts:1260
+#: src/canvas/sections/CommentSection.ts:1661
 msgid "Reply"
 msgstr "Reply"
 
@@ -1350,62 +1353,62 @@ msgstr "Resolved"
 msgid "Removed"
 msgstr "Removed"
 
-#: src/canvas/sections/CommentSection.ts:1237
+#: src/canvas/sections/CommentSection.ts:1247
 #: src/control/jsdialog/Widget.Comment.ts:177
-#: src/layer/tile/CanvasTileLayer.js:3721
-#: src/layer/tile/CanvasTileLayer.js:3732
+#: src/layer/tile/CanvasTileLayer.js:3724
+#: src/layer/tile/CanvasTileLayer.js:3735
 msgid "Comment"
 msgstr "Comment"
 
-#: src/canvas/sections/CommentSection.ts:1247
+#: src/canvas/sections/CommentSection.ts:1257
 msgid "Modify"
 msgstr "Modify"
 
-#: src/canvas/sections/CommentSection.ts:1253
+#: src/canvas/sections/CommentSection.ts:1263
 #: src/control/backstage/CloudDialogs.tsx:296
 #: src/control/Notebookbar.ImpressAnimationTab.ts:83
 msgid "Remove"
 msgstr "Remove"
 
-#: src/canvas/sections/CommentSection.ts:1257
+#: src/canvas/sections/CommentSection.ts:1267
 msgid "Remove Thread"
 msgstr "Remove Thread"
 
-#: src/canvas/sections/CommentSection.ts:1264
+#: src/canvas/sections/CommentSection.ts:1274
 msgid "Resolve"
 msgstr "Resolve"
 
-#: src/canvas/sections/CommentSection.ts:1264
+#: src/canvas/sections/CommentSection.ts:1274
 msgid "Unresolve"
 msgstr "Unresolve"
 
-#: src/canvas/sections/CommentSection.ts:1271
+#: src/canvas/sections/CommentSection.ts:1281
 msgid "Unresolve Thread"
 msgstr "Unresolve Thread"
 
-#: src/canvas/sections/CommentSection.ts:1271
+#: src/canvas/sections/CommentSection.ts:1281
 msgid "Resolve Thread"
 msgstr "Resolve Thread"
 
-#: src/canvas/sections/CommentSection.ts:1277
+#: src/canvas/sections/CommentSection.ts:1287
 msgid "Promote to top comment"
 msgstr "Promote to top comment"
 
-#: src/canvas/sections/CommentSection.ts:1282
+#: src/canvas/sections/CommentSection.ts:1292
 msgid "Show on the side"
 msgstr "Show on the side"
 
-#: src/canvas/sections/CommentSection.ts:1282
+#: src/canvas/sections/CommentSection.ts:1292
 msgid "Open in full view"
 msgstr "Open in full view"
 
-#: src/canvas/sections/CommentSection.ts:1289
+#: src/canvas/sections/CommentSection.ts:1299
 msgid "Show in navigator"
 msgstr "Show in navigator"
 
-#: src/canvas/sections/CommentSection.ts:1559
-#: src/canvas/sections/CommentSection.ts:1564
-#: src/control/Control.SaveState.ts:69
+#: src/canvas/sections/CommentSection.ts:1569
+#: src/canvas/sections/CommentSection.ts:1574
+#: src/control/Control.SaveState.ts:78
 msgid "Saved"
 msgstr "Saved"
 
@@ -1539,80 +1542,80 @@ msgstr "cell address"
 msgid "Name Box"
 msgstr "Name Box"
 
-#: src/control/Control.AIChatSidebar.ts:113
+#: src/control/Control.AIChatSidebar.ts:136
 msgid "Make the following text more concise"
 msgstr "Make the following text more concise"
 
-#: src/control/Control.AIChatSidebar.ts:114
+#: src/control/Control.AIChatSidebar.ts:137
 msgid "Make it more concise"
 msgstr "Make it more concise"
 
-#: src/control/Control.AIChatSidebar.ts:117
+#: src/control/Control.AIChatSidebar.ts:140
 msgid "Summarize the key points of this text"
 msgstr "Summarise the key points of this text"
 
-#: src/control/Control.AIChatSidebar.ts:118
+#: src/control/Control.AIChatSidebar.ts:141
 msgid "Summarize this text"
 msgstr "Summarise this text"
 
-#: src/control/Control.AIChatSidebar.ts:121
+#: src/control/Control.AIChatSidebar.ts:144
 msgid "Expand and add more detail to this text"
 msgstr "Expand and add more detail to this text"
 
-#: src/control/Control.AIChatSidebar.ts:122
+#: src/control/Control.AIChatSidebar.ts:145
 msgid "Expand this text"
 msgstr "Expand this text"
 
-#: src/control/Control.AIChatSidebar.ts:125
+#: src/control/Control.AIChatSidebar.ts:148
 msgid "Fix grammar, spelling, and punctuation errors"
 msgstr "Fix grammar, spelling, and punctuation errors"
 
-#: src/control/Control.AIChatSidebar.ts:126
+#: src/control/Control.AIChatSidebar.ts:149
 msgid "Fix grammar & spelling"
 msgstr "Fix grammar & spelling"
 
-#: src/control/Control.AIChatSidebar.ts:141
+#: src/control/Control.AIChatSidebar.ts:164
 msgid "Natural"
 msgstr "Natural"
 
-#: src/control/Control.AIChatSidebar.ts:142
+#: src/control/Control.AIChatSidebar.ts:165
 msgid "Formal"
 msgstr "Formal"
 
-#: src/control/Control.AIChatSidebar.ts:143
+#: src/control/Control.AIChatSidebar.ts:166
 msgid "Short"
 msgstr "Short"
 
-#: src/control/Control.AIChatSidebar.ts:144
+#: src/control/Control.AIChatSidebar.ts:167
 msgid "Friendly"
 msgstr "Friendly"
 
-#: src/control/Control.AIChatSidebar.ts:145
+#: src/control/Control.AIChatSidebar.ts:168
 msgid "Professional"
 msgstr "Professional"
 
-#: src/control/Control.AIChatSidebar.ts:146
+#: src/control/Control.AIChatSidebar.ts:169
 msgid "Casual"
 msgstr "Casual"
 
-#: src/control/Control.AIChatSidebar.ts:387
+#: src/control/Control.AIChatSidebar.ts:411
 msgid "Best"
 msgstr "Best"
 
-#: src/control/Control.AIChatSidebar.ts:389
+#: src/control/Control.AIChatSidebar.ts:413
 #: src/control/Control.NotebookbarCalc.js:1030
 msgid "Good"
 msgstr "Good"
 
-#: src/control/Control.AIChatSidebar.ts:391
+#: src/control/Control.AIChatSidebar.ts:415
 msgid "Poor"
 msgstr "Poor"
 
-#: src/control/Control.AIChatSidebar.ts:393
+#: src/control/Control.AIChatSidebar.ts:417
 msgid "Unknown"
 msgstr "Unknown"
 
-#: src/control/Control.AIChatSidebar.ts:404
+#: src/control/Control.AIChatSidebar.ts:438
 msgid ""
 "Ethical AI rating: {0} ({1}). Based on open-source licensing, self-hosting, "
 "and training data."
@@ -1620,285 +1623,281 @@ msgstr ""
 "Ethical AI rating: {0} ({1}). Based on open-source licensing, self-hosting, "
 "and training data."
 
-#: src/control/Control.AIChatSidebar.ts:497
+#: src/control/Control.AIChatSidebar.ts:530
 msgid "Your message"
 msgstr "Your message"
 
-#: src/control/Control.AIChatSidebar.ts:499
+#: src/control/Control.AIChatSidebar.ts:532
 msgid "Action requiring approval"
 msgstr "Action requiring approval"
 
-#: src/control/Control.AIChatSidebar.ts:501
+#: src/control/Control.AIChatSidebar.ts:534
 msgid "Error message"
 msgstr "Error message"
 
-#: src/control/Control.AIChatSidebar.ts:502
+#: src/control/Control.AIChatSidebar.ts:535
 msgid "AI response"
 msgstr "AI response"
 
-#: src/control/Control.AIChatSidebar.ts:576
+#: src/control/Control.AIChatSidebar.ts:638
 msgid ""
 "Content generated by an external AI service ({0}). Please review before use."
 msgstr ""
 "Content generated by an external AI service ({0}). Please review before use."
 
-#: src/control/Control.AIChatSidebar.ts:579
+#: src/control/Control.AIChatSidebar.ts:641
 msgid "Content generated by an external AI service. Please review before use."
 msgstr "Content generated by an external AI service. Please review before use."
 
-#: src/control/Control.AIChatSidebar.ts:657
+#: src/control/Control.AIChatSidebar.ts:719
 msgid "New conversation"
 msgstr "New conversation"
 
-#: src/control/Control.AIChatSidebar.ts:688
+#: src/control/Control.AIChatSidebar.ts:750
 msgid "Ask AI anything about your document..."
 msgstr "Ask AI anything about your document..."
 
-#: src/control/Control.AIChatSidebar.ts:746
+#: src/control/Control.AIChatSidebar.ts:808
 msgid "Loading"
 msgstr "Loading"
 
-#: src/control/Control.AIChatSidebar.ts:759
+#: src/control/Control.AIChatSidebar.ts:821
 msgid "Chat messages"
 msgstr "Chat messages"
 
-#: src/control/Control.AIChatSidebar.ts:789
+#: src/control/Control.AIChatSidebar.ts:851
 msgid "AI generated image"
 msgstr "AI generated image"
 
-#: src/control/Control.AIChatSidebar.ts:828
+#: src/control/Control.AIChatSidebar.ts:890
 msgid "Retry"
 msgstr "Retry"
 
-#: src/control/Control.AIChatSidebar.ts:852
-#: src/control/Control.AIChatSidebar.ts:885
+#: src/control/Control.AIChatSidebar.ts:914
+#: src/control/Control.AIChatSidebar.ts:947
 msgid "Insert at cursor"
 msgstr "Insert at cursor"
 
-#: src/control/Control.AIChatSidebar.ts:861
-#: src/control/Control.AIChatSidebar.ts:892
+#: src/control/Control.AIChatSidebar.ts:923
+#: src/control/Control.AIChatSidebar.ts:954
 msgid "Copy to clipboard"
 msgstr "Copy to clipboard"
 
-#: src/control/Control.AIChatSidebar.ts:912
+#: src/control/Control.AIChatSidebar.ts:974
 msgid "Using selected text as context"
 msgstr "Using selected text as context"
 
-#: src/control/Control.AIChatSidebar.ts:919
+#: src/control/Control.AIChatSidebar.ts:981
 msgid "Ask AI..."
 msgstr "Ask AI..."
 
-#: src/control/Control.AIChatSidebar.ts:922
+#: src/control/Control.AIChatSidebar.ts:984
 msgid "Message input"
 msgstr "Message input"
 
-#: src/control/Control.AIChatSidebar.ts:938
+#: src/control/Control.AIChatSidebar.ts:1000
 msgid "Stop generating"
 msgstr "Stop generating"
 
-#: src/control/Control.AIChatSidebar.ts:939
+#: src/control/Control.AIChatSidebar.ts:1001
 msgid "Send message"
 msgstr "Send message"
 
-#: src/control/Control.AIChatSidebar.ts:953
-#: src/control/Control.AIChatSidebar.ts:966
+#: src/control/Control.AIChatSidebar.ts:1015
+#: src/control/Control.AIChatSidebar.ts:1028
 msgid "Set tone"
 msgstr "Set tone"
 
-#: src/control/Control.AIChatSidebar.ts:977
+#: src/control/Control.AIChatSidebar.ts:1039
 msgid "Set tone of voice"
 msgstr "Set tone of voice"
 
-#: src/control/Control.AIChatSidebar.ts:978
+#: src/control/Control.AIChatSidebar.ts:1040
 msgid "Tone of voice: {0}{1}"
 msgstr "Tone of voice: {0}{1}"
 
-#: src/control/Control.AIChatSidebar.ts:980
+#: src/control/Control.AIChatSidebar.ts:1042
 msgid "with emoji"
 msgstr "with emoji"
 
-#: src/control/Control.AIChatSidebar.ts:1022
-#: src/control/Control.AIChatSidebar.ts:1072
-#: src/control/Control.AIChatSidebar.ts:1444
+#: src/control/Control.AIChatSidebar.ts:1084
+#: src/control/Control.AIChatSidebar.ts:1134
+#: src/control/Control.AIChatSidebar.ts:1506
 msgid "tone"
 msgstr "tone"
 
-#: src/control/Control.AIChatSidebar.ts:1035
-#: src/control/Control.AIChatSidebar.ts:1306
+#: src/control/Control.AIChatSidebar.ts:1097
+#: src/control/Control.AIChatSidebar.ts:1368
 msgid "Tone of voice"
 msgstr "Tone of voice"
 
-#: src/control/Control.AIChatSidebar.ts:1041
+#: src/control/Control.AIChatSidebar.ts:1103
 msgid "Reset voice"
 msgstr "Reset voice"
 
-#: src/control/Control.AIChatSidebar.ts:1044
+#: src/control/Control.AIChatSidebar.ts:1106
 msgid "Reset tone of voice"
 msgstr "Reset tone of voice"
 
-#: src/control/Control.AIChatSidebar.ts:1060
+#: src/control/Control.AIChatSidebar.ts:1122
 msgid "Your tones"
 msgstr "Your tones"
 
-#: src/control/Control.AIChatSidebar.ts:1077
+#: src/control/Control.AIChatSidebar.ts:1139
 msgid "Edit tone"
 msgstr "Edit tone"
 
-#: src/control/Control.AIChatSidebar.ts:1094
+#: src/control/Control.AIChatSidebar.ts:1156
 msgid "+ Add my own voice"
 msgstr "+ Add my own voice"
 
-#: src/control/Control.AIChatSidebar.ts:1096
+#: src/control/Control.AIChatSidebar.ts:1158
 msgid "Add a custom tone of voice"
 msgstr "Add a custom tone of voice"
 
-#: src/control/Control.AIChatSidebar.ts:1107
+#: src/control/Control.AIChatSidebar.ts:1169
 msgid "Emojify"
 msgstr "Emojify"
 
-#: src/control/Control.AIChatSidebar.ts:1113
+#: src/control/Control.AIChatSidebar.ts:1175
 #: src/control/Control.StatusBar.js:171
 msgid "On"
 msgstr "On"
 
-#: src/control/Control.AIChatSidebar.ts:1113
+#: src/control/Control.AIChatSidebar.ts:1175
 #: src/control/Control.StatusBar.js:173
-#: src/control/jsdialog/Definitions.Menu.ts:1841
+#: src/control/jsdialog/Definitions.Menu.ts:1856
 msgid "Off"
 msgstr "Off"
 
-#: src/control/Control.AIChatSidebar.ts:1116
+#: src/control/Control.AIChatSidebar.ts:1178
 msgid "Toggle emojify"
 msgstr "Toggle emojify"
 
-#: src/control/Control.AIChatSidebar.ts:1277
+#: src/control/Control.AIChatSidebar.ts:1339
 msgid "Use icon"
 msgstr "Use icon"
 
-#: src/control/Control.AIChatSidebar.ts:1287
+#: src/control/Control.AIChatSidebar.ts:1349
 msgid "Pick another emoji"
 msgstr "Pick another emoji"
 
-#: src/control/Control.AIChatSidebar.ts:1301
+#: src/control/Control.AIChatSidebar.ts:1363
 msgid "Back to tones"
 msgstr "Back to tones"
 
-#: src/control/Control.AIChatSidebar.ts:1314
+#: src/control/Control.AIChatSidebar.ts:1376
 msgid "Icon"
 msgstr "Icon"
 
-#: src/control/Control.AIChatSidebar.ts:1326
+#: src/control/Control.AIChatSidebar.ts:1388
 msgid "Name your tone"
 msgstr "Name your tone"
 
-#: src/control/Control.AIChatSidebar.ts:1333
+#: src/control/Control.AIChatSidebar.ts:1395
 msgid "e.g. Quick reply"
 msgstr "e.g. Quick reply"
 
-#: src/control/Control.AIChatSidebar.ts:1335
+#: src/control/Control.AIChatSidebar.ts:1397
 msgid "Tone name"
 msgstr "Tone name"
 
-#: src/control/Control.AIChatSidebar.ts:1340
+#: src/control/Control.AIChatSidebar.ts:1402
 msgid "Describe how AI should write"
 msgstr "Describe how AI should write"
 
-#: src/control/Control.AIChatSidebar.ts:1348
+#: src/control/Control.AIChatSidebar.ts:1410
 msgid ""
 "Write short, direct sentences. Use plain language and skip the small talk."
 msgstr ""
 "Write short, direct sentences. Use plain language and skip the small talk."
 
-#: src/control/Control.AIChatSidebar.ts:1352
+#: src/control/Control.AIChatSidebar.ts:1414
 msgid "Tone description"
 msgstr "Tone description"
 
-#: src/control/Control.AIChatSidebar.ts:1361
 #: src/control/Control.AIChatSidebar.ts:1423
-#: src/control/Control.AIChatSidebar.ts:1465
+#: src/control/Control.AIChatSidebar.ts:1485
+#: src/control/Control.AIChatSidebar.ts:1527
 msgid "Delete tone"
 msgstr "Delete tone"
 
-#: src/control/Control.AIChatSidebar.ts:1363
+#: src/control/Control.AIChatSidebar.ts:1425
 msgid "Delete this tone"
 msgstr "Delete this tone"
 
-#: src/control/Control.AIChatSidebar.ts:1376
+#: src/control/Control.AIChatSidebar.ts:1438
 msgid "Save voice"
 msgstr "Save voice"
 
-#: src/control/Control.AIChatSidebar.ts:1378
+#: src/control/Control.AIChatSidebar.ts:1440
 msgid "Save tone of voice"
 msgstr "Save tone of voice"
 
-#: src/control/Control.AIChatSidebar.ts:1393
+#: src/control/Control.AIChatSidebar.ts:1455
 #: src/control/jsdialog/Widget.EmojiPicker.ts:410
 msgid "Search emojis"
 msgstr "Search emojis"
 
-#: src/control/Control.AIChatSidebar.ts:1394
+#: src/control/Control.AIChatSidebar.ts:1456
 #: src/control/jsdialog/Widget.EmojiPicker.ts:401
 msgid "Choose an emoji"
 msgstr "Choose an emoji"
 
-#: src/control/Control.AIChatSidebar.ts:1418
+#: src/control/Control.AIChatSidebar.ts:1480
 msgid "Delete tone confirmation"
 msgstr "Delete tone confirmation"
 
-#: src/control/Control.AIChatSidebar.ts:1429
+#: src/control/Control.AIChatSidebar.ts:1491
 msgid "This tone of voice will be deleted"
 msgstr "This tone of voice will be deleted"
 
-#: src/control/Control.AIChatSidebar.ts:1458
+#: src/control/Control.AIChatSidebar.ts:1520
 msgid "Cancel delete"
 msgstr "Cancel delete"
 
-#: src/control/Control.AIChatSidebar.ts:1485
-#: src/control/Control.AIChatSidebar.ts:1545
+#: src/control/Control.AIChatSidebar.ts:1547
+#: src/control/Control.AIChatSidebar.ts:1607
 msgid "You have reached the maximum of {0} custom tones."
 msgstr "You have reached the maximum of {0} custom tones."
 
-#: src/control/Control.AIChatSidebar.ts:1719
+#: src/control/Control.AIChatSidebar.ts:1781
 msgid "Diagnose formula error"
 msgstr "Diagnose formula error"
 
-#: src/control/Control.AIChatSidebar.ts:1725
+#: src/control/Control.AIChatSidebar.ts:1787
 msgid "Sanity check data"
 msgstr "Sanity check data"
 
-#: src/control/Control.AIChatSidebar.ts:1731
+#: src/control/Control.AIChatSidebar.ts:1793
 msgid "Create a formula"
 msgstr "Create a formula"
 
-#: src/control/Control.AIChatSidebar.ts:1738
+#: src/control/Control.AIChatSidebar.ts:1800
 msgid "Create slides"
 msgstr "Create slides"
 
-#: src/control/Control.AIChatSidebar.ts:1770
+#: src/control/Control.AIChatSidebar.ts:1832
 msgid "See less"
 msgstr "See less"
 
-#: src/control/Control.AIChatSidebar.ts:1770
+#: src/control/Control.AIChatSidebar.ts:1832
 msgid "See more"
 msgstr "See more"
 
-#: src/control/Control.AIChatSidebar.ts:1798
-msgid "Design template choice cancelled."
-msgstr "Design template choice cancelled."
-
-#: src/control/Control.AIChatSidebar.ts:1892
+#: src/control/Control.AIChatSidebar.ts:1944
 msgid "Image inserted at cursor"
 msgstr "Image inserted at cursor"
 
-#: src/control/Control.AIChatSidebar.ts:1911
+#: src/control/Control.AIChatSidebar.ts:1963
 msgid "Text inserted at cursor"
 msgstr "Text inserted at cursor"
 
-#: src/control/Control.AIChatSidebar.ts:1990
+#: src/control/Control.AIChatSidebar.ts:2042
 msgid "Approaching message length limit"
 msgstr "Approaching message length limit"
 
-#: src/control/Control.AIChatSidebar.ts:2037
+#: src/control/Control.AIChatSidebar.ts:2089
 msgid ""
 "The request timed out. You can increase the request timeout in the AI "
 "section of the settings."
@@ -1906,8 +1905,8 @@ msgstr ""
 "The request timed out. You can increase the request timeout in the AI "
 "section of the settings."
 
-#: src/control/Control.AIChatSidebar.ts:2065
-#: src/control/Control.AIChatSidebar.ts:3254
+#: src/control/Control.AIChatSidebar.ts:2122
+#: src/control/Control.AIChatSidebar.ts:3648
 msgid ""
 "The selection contains images or other non-text content that cannot be sent "
 "as context."
@@ -1915,179 +1914,323 @@ msgstr ""
 "The selection contains images or other non-text content that cannot be sent "
 "as context."
 
-#: src/control/Control.AIChatSidebar.ts:2158
+#: src/control/Control.AIChatSidebar.ts:2211
 msgid "Message is too long. Please shorten it and try again."
 msgstr "Message is too long. Please shorten it and try again."
 
-#: src/control/Control.AIChatSidebar.ts:2239
+#: src/control/Control.AIChatSidebar.ts:2272
 msgid "Error: "
 msgstr "Error: "
 
-#: src/control/Control.AIChatSidebar.ts:2269
+#: src/control/Control.AIChatSidebar.ts:2302
 msgid "Generated image"
 msgstr "Generated image"
 
-#: src/control/Control.AIChatSidebar.ts:2281
+#: src/control/Control.AIChatSidebar.ts:2314
 msgid "AI request failed"
 msgstr "AI request failed"
 
-#: src/control/Control.AIChatSidebar.ts:2298
+#: src/control/Control.AIChatSidebar.ts:2331
 msgid "The AI assistant"
 msgstr "The AI assistant"
 
-#: src/control/Control.AIChatSidebar.ts:2311
+#: src/control/Control.AIChatSidebar.ts:2372
+msgid "insert 1 slide"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2372
+msgid "insert %1 slides"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2377
+msgid "delete 1 slide"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2378
+msgid "delete %1 slides"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2385
+msgid "duplicate 1 slide"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2386
+msgid "duplicate %1 slides"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2391
+msgid "move 1 slide"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2391
+msgid "move %1 slides"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2397
+msgid "rename 1 slide"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2398
+msgid "rename %1 slides"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2404
+msgid "change 1 layout"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2404
+msgid "change %1 layouts"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2409
+msgid "set text in 1 place"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2410
+msgid "set text in %1 places"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2417
+msgid "format text in 1 place"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2418
+msgid "format text in %1 places"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2425
+#, fuzzy
+msgid "generate 1 image"
+msgstr "Generated image"
+
+#: src/control/Control.AIChatSidebar.ts:2426
+#, fuzzy
+msgid "generate %1 images"
+msgstr "Generated image"
+
+#: src/control/Control.AIChatSidebar.ts:2433
+msgid "run 1 document command"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2434
+msgid "run %1 document commands"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2465
+msgid "run 1 %2 command"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2466
+msgid "run %1 %2 commands"
+msgstr ""
+
+#: src/control/Control.AIChatSidebar.ts:2472
+msgid "apply the design template '%1'"
+msgstr "apply the design template '%1'"
+
+#: src/control/Control.AIChatSidebar.ts:2475
+msgid "This will: %1."
+msgstr "This will: %1."
+
+#: src/control/Control.AIChatSidebar.ts:2489
 msgid "Do you want to proceed?"
 msgstr "Do you want to proceed?"
 
-#: src/control/Control.AIChatSidebar.ts:2314
+#: src/control/Control.AIChatSidebar.ts:2492
 msgid "%1 wants to inspect your document. Do you want to proceed?"
 msgstr "%1 wants to inspect your document. Do you want to proceed?"
 
-#: src/control/Control.AIChatSidebar.ts:2318
+#: src/control/Control.AIChatSidebar.ts:2496
 msgid "Modify document structure"
 msgstr "Modify document structure"
 
-#: src/control/Control.AIChatSidebar.ts:2320
+#: src/control/Control.AIChatSidebar.ts:2502
 msgid "%1 wants to modify your document:"
 msgstr "%1 wants to modify your document:"
 
-#: src/control/Control.AIChatSidebar.ts:2324
-#: src/control/Control.AIChatSidebar.ts:2335
+#: src/control/Control.AIChatSidebar.ts:2507
+#: src/control/Control.AIChatSidebar.ts:2518
 msgid "Do you want to apply this change?"
 msgstr "Do you want to apply this change?"
 
-#: src/control/Control.AIChatSidebar.ts:2326
+#: src/control/Control.AIChatSidebar.ts:2509
 msgid "Set cell formula"
 msgstr "Set cell formula"
 
-#: src/control/Control.AIChatSidebar.ts:2328
+#: src/control/Control.AIChatSidebar.ts:2511
 msgid "%1 wants to set a formula in your spreadsheet:"
 msgstr "%1 wants to set a formula in your spreadsheet:"
 
-#: src/control/Control.AIChatSidebar.ts:2338
+#: src/control/Control.AIChatSidebar.ts:2521
 msgid "%1 wants to perform an action. Do you want to proceed?"
 msgstr "%1 wants to perform an action. Do you want to proceed?"
 
-#: src/control/Control.AIChatSidebar.ts:2369
+#: src/control/Control.AIChatSidebar.ts:2549
+#: src/control/Control.AIChatSidebar.ts:3168
 msgid "Approve"
 msgstr "Approve"
 
-#: src/control/Control.AIChatSidebar.ts:2371
+#: src/control/Control.AIChatSidebar.ts:2551
 msgid "Approve action"
 msgstr "Approve action"
 
-#: src/control/Control.AIChatSidebar.ts:2383
+#: src/control/Control.AIChatSidebar.ts:2555
+#: src/control/Control.AIChatSidebar.ts:3171
 msgid "Reject"
 msgstr "Reject"
 
-#: src/control/Control.AIChatSidebar.ts:2385
+#: src/control/Control.AIChatSidebar.ts:2557
 msgid "Reject action"
 msgstr "Reject action"
 
-#: src/control/Control.AIChatSidebar.ts:2404
+#: src/control/Control.AIChatSidebar.ts:2575
 msgid "Applying changes..."
 msgstr "Applying changes..."
 
-#: src/control/Control.AIChatSidebar.ts:2407
+#: src/control/Control.AIChatSidebar.ts:2578
 msgid "Change rejected"
 msgstr "Change rejected"
 
-#: src/control/Control.AIChatSidebar.ts:2497
+#: src/control/Control.AIChatSidebar.ts:2685
 msgid "Use section: "
 msgstr "Use section: "
 
-#: src/control/Control.AIChatSidebar.ts:2541
+#: src/control/Control.AIChatSidebar.ts:2724
 msgid "Selection fetch timeout"
 msgstr "Selection fetch timeout"
 
-#: src/control/Control.AIChatSidebar.ts:2560
+#: src/control/Control.AIChatSidebar.ts:2743
 msgid "Failed to parse selection content"
 msgstr "Failed to parse selection content"
 
-#: src/control/Control.AIChatSidebar.ts:2885
-msgid "Pick a design for your deck, or continue without one:"
-msgstr "Pick a design for your deck, or continue without one:"
+#: src/control/Control.AIChatSidebar.ts:3027
+msgid "Design (optional):"
+msgstr "Design (optional):"
 
-#: src/control/Control.AIChatSidebar.ts:2930
-msgid "No template"
-msgstr "No template"
+#: src/control/Control.AIChatSidebar.ts:3044
+msgid "No design"
+msgstr "No design"
 
-#: src/control/Control.AIChatSidebar.ts:2933
+#: src/control/Control.AIChatSidebar.ts:3045
 msgid "Continue without a design template"
 msgstr "Continue without a design template"
 
-#: src/control/Control.AIChatSidebar.ts:2959
-msgid "Design template: %1"
-msgstr "Design template: %1"
+#: src/control/Control.AIChatSidebar.ts:3111
+msgid ""
+"Here is a proposed outline. Edit the titles or descriptions, remove slides "
+"you do not want, then approve to build the deck:"
+msgstr ""
+"Here is a proposed outline. Edit the titles or descriptions, remove slides "
+"you do not want, then approve to build the deck:"
 
-#: src/control/Control.AIChatSidebar.ts:2960
-msgid "Continuing without a design template."
-msgstr "Continuing without a design template."
+#: src/control/Control.AIChatSidebar.ts:3172
+msgid "Reject outline"
+msgstr "Reject outline"
 
-#: src/control/Control.AIChatSidebar.ts:3026
+#: src/control/Control.AIChatSidebar.ts:3178
+msgid "Give every added slide a title to approve."
+msgstr "Give every added slide a title to approve."
+
+#: src/control/Control.AIChatSidebar.ts:3206
+msgid "Slide %1 title"
+msgstr "Slide %1 title"
+
+#: src/control/Control.AIChatSidebar.ts:3212
+msgid "Slide %1 description"
+msgstr "Slide %1 description"
+
+#: src/control/Control.AIChatSidebar.ts:3218
+msgid "Remove slide %1"
+msgstr "Remove slide %1"
+
+#: src/control/Control.AIChatSidebar.ts:3266
+msgid "Slide title"
+msgstr "Slide title"
+
+#: src/control/Control.AIChatSidebar.ts:3278
+msgid "What this slide should cover"
+msgstr "What this slide should cover"
+
+#: src/control/Control.AIChatSidebar.ts:3303
+msgid "Add slide"
+msgstr "Add slide"
+
+#: src/control/Control.AIChatSidebar.ts:3341
+msgid "Outline approved - building %1 slides."
+msgstr "Outline approved - building %1 slides."
+
+#: src/control/Control.AIChatSidebar.ts:3350
+msgid "Outline rejected."
+msgstr "Outline rejected."
+
+#: src/control/Control.AIChatSidebar.ts:3386
+msgid "Building slides..."
+msgstr "Building slides..."
+
+#: src/control/Control.AIChatSidebar.ts:3420
 msgid "Formula analysis timeout"
 msgstr "Formula analysis timeout"
 
-#: src/control/Control.AIChatSidebar.ts:3045
+#: src/control/Control.AIChatSidebar.ts:3439
 msgid "Analyzing formula dependencies..."
 msgstr "Analysing formula dependencies..."
 
-#: src/control/Control.AIChatSidebar.ts:3053
+#: src/control/Control.AIChatSidebar.ts:3447
 msgid "Failed to analyze formula."
 msgstr "Failed to analyse formula."
 
-#: src/control/Control.AIChatSidebar.ts:3063
+#: src/control/Control.AIChatSidebar.ts:3457
 msgid "The selected cell does not contain a formula."
 msgstr "The selected cell does not contain a formula."
 
-#: src/control/Control.AIChatSidebar.ts:3065
+#: src/control/Control.AIChatSidebar.ts:3459
 msgid "The selected cell does not have a formula error."
 msgstr "The selected cell does not have a formula error."
 
-#: src/control/Control.AIChatSidebar.ts:3074
+#: src/control/Control.AIChatSidebar.ts:3468
 msgid "Diagnose formula error in"
 msgstr "Diagnose formula error in"
 
-#: src/control/Control.AIChatSidebar.ts:3095
+#: src/control/Control.AIChatSidebar.ts:3489
 msgid "I have a formula error in my spreadsheet."
 msgstr "I have a formula error in my spreadsheet."
 
-#: src/control/Control.AIChatSidebar.ts:3097
+#: src/control/Control.AIChatSidebar.ts:3491
 msgid "Cell"
 msgstr "Cell"
 
-#: src/control/Control.AIChatSidebar.ts:3101
+#: src/control/Control.AIChatSidebar.ts:3495
 msgid "Sheet"
 msgstr "Sheet"
 
-#: src/control/Control.AIChatSidebar.ts:3105
+#: src/control/Control.AIChatSidebar.ts:3499
 msgid "contains"
 msgstr "contains"
 
-#: src/control/Control.AIChatSidebar.ts:3107
+#: src/control/Control.AIChatSidebar.ts:3501
 #: src/control/Control.FormulaBarJSDialog.js:116
 #: src/control/Control.NotebookbarWriter.js:121
-#: src/control/Control.NotebookbarWriter.js:1578
+#: src/control/Control.NotebookbarWriter.js:1580
 msgid "Formula"
 msgstr "Formula"
 
-#: src/control/Control.AIChatSidebar.ts:3111
+#: src/control/Control.AIChatSidebar.ts:3505
 msgid "Referenced cells"
 msgstr "Referenced cells"
 
-#: src/control/Control.AIChatSidebar.ts:3117
+#: src/control/Control.AIChatSidebar.ts:3511
 msgid "Please diagnose why this formula produces the"
 msgstr "Please diagnose why this formula produces the"
 
-#: src/control/Control.AIChatSidebar.ts:3121
+#: src/control/Control.AIChatSidebar.ts:3515
 msgid "error."
 msgstr "error."
 
-#: src/control/Control.AIChatSidebar.ts:3123
+#: src/control/Control.AIChatSidebar.ts:3517
 msgid "Explain the root cause and suggest how to fix it."
 msgstr "Explain the root cause and suggest how to fix it."
 
-#: src/control/Control.AIChatSidebar.ts:3127
+#: src/control/Control.AIChatSidebar.ts:3521
 msgid ""
 "When referencing specific cells, format each cell address as a clickable "
 "link: [A1](cell://A1)."
@@ -2095,59 +2238,59 @@ msgstr ""
 "When referencing specific cells, format each cell address as a clickable "
 "link: [A1](cell://A1)."
 
-#: src/control/Control.AIChatSidebar.ts:3142
+#: src/control/Control.AIChatSidebar.ts:3536
 msgid "formula"
 msgstr "formula"
 
-#: src/control/Control.AIChatSidebar.ts:3144
+#: src/control/Control.AIChatSidebar.ts:3538
 msgid "ERROR"
 msgstr "ERROR"
 
-#: src/control/Control.AIChatSidebar.ts:3158
+#: src/control/Control.AIChatSidebar.ts:3552
 msgid "value"
 msgstr "value"
 
-#: src/control/Control.AIChatSidebar.ts:3168
+#: src/control/Control.AIChatSidebar.ts:3562
 msgid "text"
 msgstr "text"
 
-#: src/control/Control.AIChatSidebar.ts:3173
+#: src/control/Control.AIChatSidebar.ts:3567
 msgid "empty"
 msgstr "empty"
 
-#: src/control/Control.AIChatSidebar.ts:3175
+#: src/control/Control.AIChatSidebar.ts:3569
 msgid "range"
 msgstr "range"
 
-#: src/control/Control.AIChatSidebar.ts:3177
+#: src/control/Control.AIChatSidebar.ts:3571
 msgid "errors in"
 msgstr "errors in"
 
-#: src/control/Control.AIChatSidebar.ts:3180
+#: src/control/Control.AIChatSidebar.ts:3574
 msgid "only partially scanned"
 msgstr "only partially scanned"
 
-#: src/control/Control.AIChatSidebar.ts:3189
+#: src/control/Control.AIChatSidebar.ts:3583
 msgid "circular reference"
 msgstr "circular reference"
 
-#: src/control/Control.AIChatSidebar.ts:3239
+#: src/control/Control.AIChatSidebar.ts:3633
 msgid "Select the data you want to sanity-check first."
 msgstr "Select the data you want to sanity-check first."
 
-#: src/control/Control.AIChatSidebar.ts:3244
+#: src/control/Control.AIChatSidebar.ts:3638
 msgid "Analyzing selected data..."
 msgstr "Analysing selected data..."
 
-#: src/control/Control.AIChatSidebar.ts:3257
+#: src/control/Control.AIChatSidebar.ts:3651
 msgid "Failed to extract spreadsheet data."
 msgstr "Failed to extract spreadsheet data."
 
-#: src/control/Control.AIChatSidebar.ts:3266
+#: src/control/Control.AIChatSidebar.ts:3660
 msgid "No data found in selection."
 msgstr "No data found in selection."
 
-#: src/control/Control.AIChatSidebar.ts:3296
+#: src/control/Control.AIChatSidebar.ts:3690
 msgid ""
 "Describe the slides you want to create. For example: \"A 5-slide overview "
 "of renewable energy\" or \"An introduction to our team\"."
@@ -2155,7 +2298,7 @@ msgstr ""
 "Describe the slides you want to create. For example: \"A 5-slide overview of "
 "renewable energy\" or \"An introduction to our team\"."
 
-#: src/control/Control.AIChatSidebar.ts:3323
+#: src/control/Control.AIChatSidebar.ts:3717
 msgid ""
 "Describe what formula you need. For example: \"Calculate the average of "
 "column B\" or \"Sum all values where column A is greater than 100\"."
@@ -2163,7 +2306,7 @@ msgstr ""
 "Describe what formula you need. For example: \"Calculate the average of "
 "column B\" or \"Sum all values where column A is greater than 100\"."
 
-#: src/control/Control.AIChatSidebar.ts:3333
+#: src/control/Control.AIChatSidebar.ts:3727
 msgid ""
 "Read row numbers from the \"Row\" column — do not count or estimate row "
 "positions."
@@ -2171,7 +2314,7 @@ msgstr ""
 "Read row numbers from the \"Row\" column — do not count or estimate row "
 "positions."
 
-#: src/control/Control.AIChatSidebar.ts:3337
+#: src/control/Control.AIChatSidebar.ts:3731
 msgid ""
 "To identify a cell's column, match the value to the column letter in the "
 "header row — do not guess."
@@ -2179,7 +2322,7 @@ msgstr ""
 "To identify a cell's column, match the value to the column letter in the "
 "header row — do not guess."
 
-#: src/control/Control.AIChatSidebar.ts:3341
+#: src/control/Control.AIChatSidebar.ts:3735
 msgid ""
 "Reference a cell by combining its column header with the row number (e.g., "
 "column B + row 2 = B2)."
@@ -2187,7 +2330,7 @@ msgstr ""
 "Reference a cell by combining its column header with the row number (e.g., "
 "column B + row 2 = B2)."
 
-#: src/control/Control.AIChatSidebar.ts:3344
+#: src/control/Control.AIChatSidebar.ts:3738
 msgid ""
 "When referencing specific cells, format each cell as a clickable link: [B2]"
 "(cell://B2)."
@@ -2195,15 +2338,15 @@ msgstr ""
 "When referencing specific cells, format each cell as a clickable link: "
 "[B2](cell://B2)."
 
-#: src/control/Control.AIChatSidebar.ts:3350
+#: src/control/Control.AIChatSidebar.ts:3744
 msgid "Sanity check the following spreadsheet data."
 msgstr "Sanity check the following spreadsheet data."
 
-#: src/control/Control.AIChatSidebar.ts:3351
+#: src/control/Control.AIChatSidebar.ts:3745
 msgid "Please analyze this data for:"
 msgstr "Please analyse this data for:"
 
-#: src/control/Control.AIChatSidebar.ts:3355
+#: src/control/Control.AIChatSidebar.ts:3749
 msgid ""
 "Benford's Law violations — check if leading digit distribution of numeric "
 "values deviates significantly from the expected distribution, which may "
@@ -2213,7 +2356,7 @@ msgstr ""
 "values deviates significantly from the expected distribution, which may "
 "suggest data manipulation."
 
-#: src/control/Control.AIChatSidebar.ts:3361
+#: src/control/Control.AIChatSidebar.ts:3755
 msgid ""
 "Statistical outliers — identify values that deviate significantly from "
 "their column or group."
@@ -2221,7 +2364,7 @@ msgstr ""
 "Statistical outliers — identify values that deviate significantly from their "
 "column or group."
 
-#: src/control/Control.AIChatSidebar.ts:3367
+#: src/control/Control.AIChatSidebar.ts:3761
 msgid ""
 "General anomalies — suspicious patterns, unexpected duplicates, "
 "inconsistencies, or formatting issues."
@@ -2233,7 +2376,7 @@ msgstr ""
 msgid "External link"
 msgstr "External link"
 
-#: src/control/Control.AlertDialog.js:56 src/slideshow/PresenterConsole.js:803
+#: src/control/Control.AlertDialog.js:56 src/slideshow/PresenterConsole.js:821
 msgid "Open link"
 msgstr "Open link"
 
@@ -2271,7 +2414,7 @@ msgstr ""
 "Selected external data source is forbidden. Please contact the system "
 "administrator."
 
-#: src/control/Control.AlertDialog.js:88 src/map/Clipboard.js:1461
+#: src/control/Control.AlertDialog.js:88 src/map/Clipboard.js:1476
 msgid "Don’t show this again"
 msgstr "Don’t show this again"
 
@@ -2315,7 +2458,7 @@ msgstr "Open"
 #: src/control/Control.NotebookbarImpress.js:306
 #: src/control/Control.NotebookbarWriter.js:226
 #: src/control/Control.NotebookbarWriter.js:259
-#: src/control/PermissionMode.ts:150
+#: src/control/PermissionMode.ts:155
 msgid "Share"
 msgstr "Share"
 
@@ -2392,7 +2535,7 @@ msgstr "Pages"
 msgid "Spreadsheet"
 msgstr "Spreadsheet"
 
-#: src/control/Control.BackstageView.ts:822 src/control/Control.Tabs.js:216
+#: src/control/Control.BackstageView.ts:822 src/control/Control.Tabs.js:218
 msgid "Sheets"
 msgstr "Sheets"
 
@@ -2400,7 +2543,7 @@ msgstr "Sheets"
 #: src/control/Control.NavigatorPanel.ts:210
 #: src/control/Control.NotebookbarImpress.js:1479
 #: src/control/Control.PartsPreview.js:104
-#: src/slideshow/PresenterConsole.js:35
+#: src/slideshow/PresenterConsole.js:37
 msgid "Slides"
 msgstr "Slides"
 
@@ -2485,7 +2628,7 @@ msgstr "Search templates"
 #: src/control/Control.NotebookbarDraw.js:371
 #: src/control/Control.NotebookbarImpress.js:408
 #: src/control/Control.NotebookbarWriter.js:362
-#: src/control/Control.NotebookbarWriter.js:1646
+#: src/control/Control.NotebookbarWriter.js:1648
 msgid "Properties"
 msgstr "Properties"
 
@@ -2671,7 +2814,7 @@ msgstr "Downloading clipboard content"
 
 #: src/control/Control.DownloadProgress.js:87
 #: src/control/Control.DownloadProgress.js:112
-#: src/control/Control.PartsPreview.js:494 src/map/Clipboard.js:1522
+#: src/control/Control.PartsPreview.js:494 src/map/Clipboard.js:1537
 msgid "Copy"
 msgstr "Copy"
 
@@ -3039,7 +3182,7 @@ msgstr "Idle document - please click to reload and resume editing"
 msgid "Idle document - please tap to reload and resume editing"
 msgstr "Idle document - please tap to reload and resume editing"
 
-#: src/control/Control.JSDialog.js:435
+#: src/control/Control.JSDialog.js:443
 msgid "Close dialog"
 msgstr "Close dialogue"
 
@@ -3075,69 +3218,69 @@ msgstr "Square"
 msgid "Fixed size"
 msgstr "Fixed size"
 
-#: src/control/Control.JSDialogBuilder.js:1175
+#: src/control/Control.JSDialogBuilder.js:1207
 msgid "From"
 msgstr "From"
 
-#: src/control/Control.JSDialogBuilder.js:1178
+#: src/control/Control.JSDialogBuilder.js:1210
 msgid "To"
 msgstr "To"
 
-#: src/control/Control.JSDialogBuilder.js:1181
+#: src/control/Control.JSDialogBuilder.js:1213
 #: src/control/jsdialog/Widget.ColorPicker.ts:226
 msgid "Color"
 msgstr "Colour"
 
-#: src/control/Control.JSDialogBuilder.js:1216
+#: src/control/Control.JSDialogBuilder.js:1248
 #: src/control/Control.NotebookbarBuilder.js:151
 msgid "Font Name"
 msgstr "Font Name"
 
-#: src/control/Control.JSDialogBuilder.js:1218
+#: src/control/Control.JSDialogBuilder.js:1250
 msgid "Font Size"
 msgstr "Font Size"
 
-#: src/control/Control.JSDialogBuilder.js:1220
+#: src/control/Control.JSDialogBuilder.js:1252
 #: src/control/Control.NotebookbarCalc.js:982
 #: src/control/Control.NotebookbarCalc.js:2764
 #: src/control/Control.NotebookbarDraw.js:1854
 #: src/control/Control.NotebookbarImpress.js:1380
-#: src/control/Control.NotebookbarWriter.js:1075
+#: src/control/Control.NotebookbarWriter.js:1077
 msgid "Style"
 msgstr "Style"
 
-#: src/control/Control.JSDialogBuilder.js:1631
+#: src/control/Control.JSDialogBuilder.js:1669
 msgid "Toggle dropdown"
 msgstr "Toggle dropdown"
 
-#: src/control/Control.JSDialogBuilder.js:1633
+#: src/control/Control.JSDialogBuilder.js:1671
 msgid "Dialog dropdown"
 msgstr "Dialog dropdown"
 
-#: src/control/Control.JSDialogBuilder.js:1635
-#: src/control/Control.NotebookbarWriter.js:1622
+#: src/control/Control.JSDialogBuilder.js:1673
+#: src/control/Control.NotebookbarWriter.js:1624
 msgid "Dropdown"
 msgstr "Dropdown"
 
-#: src/control/Control.JSDialogBuilder.js:1637
+#: src/control/Control.JSDialogBuilder.js:1675
 msgid "Apply action dropdown"
 msgstr "Apply action dropdown"
 
-#: src/control/Control.JSDialogBuilder.js:1663
+#: src/control/Control.JSDialogBuilder.js:1701
 msgid "Open {name}"
 msgstr "Open {name}"
 
-#: src/control/Control.JSDialogBuilder.js:1949
+#: src/control/Control.JSDialogBuilder.js:1987
 #: src/control/Control.Menubar.ts:1034
 msgid "Rows"
 msgstr "Rows"
 
-#: src/control/Control.JSDialogBuilder.js:1950
+#: src/control/Control.JSDialogBuilder.js:1988
 #: src/control/Control.Menubar.ts:1037
 msgid "Columns"
 msgstr "Columns"
 
-#: src/control/Control.JSDialogBuilder.js:1970
+#: src/control/Control.JSDialogBuilder.js:2008
 msgid "Insert Table"
 msgstr "Insert Table"
 
@@ -3319,7 +3462,7 @@ msgid "Toggle UI Mode"
 msgstr "Toggle UI Mode"
 
 #: src/control/Control.Menubar.ts:179
-#: src/control/Control.NotebookbarWriter.js:1754
+#: src/control/Control.NotebookbarWriter.js:1756
 #: src/control/Control.StatusBar.js:274 src/control/Control.StatusBar.js:275
 msgid "Multi Page View"
 msgstr "Multi Page View"
@@ -3341,13 +3484,13 @@ msgstr "Hide Menu Bar"
 #: src/control/Control.NotebookbarCalc.js:1666
 #: src/control/Control.NotebookbarDraw.js:578
 #: src/control/Control.NotebookbarImpress.js:745
-#: src/control/Control.NotebookbarWriter.js:1836
+#: src/control/Control.NotebookbarWriter.js:1838
 msgid "Invert Background"
 msgstr "Invert Background"
 
 #: src/control/Control.Menubar.ts:186 src/control/Control.Menubar.ts:906
 #: src/control/Control.NotebookbarCalc.js:2791
-#: src/control/Control.NotebookbarWriter.js:1102
+#: src/control/Control.NotebookbarWriter.js:1104
 msgid "Style list"
 msgstr "Style list"
 
@@ -3373,7 +3516,7 @@ msgstr "All"
 #: src/control/Control.NotebookbarCalc.js:1928
 #: src/control/Control.NotebookbarDraw.js:1685
 #: src/control/Control.NotebookbarImpress.js:1670
-#: src/control/Control.NotebookbarWriter.js:1358
+#: src/control/Control.NotebookbarWriter.js:1360
 msgid "Smart Picker"
 msgstr "Smart Picker"
 
@@ -3592,7 +3735,7 @@ msgstr "Present current slide"
 msgid "Present in new window"
 msgstr "Present in new window"
 
-#: src/control/Control.Menubar.ts:639 src/slideshow/PresenterConsole.js:284
+#: src/control/Control.Menubar.ts:639 src/slideshow/PresenterConsole.js:301
 msgid "Presenter Console"
 msgstr "Presenter Console"
 
@@ -3639,78 +3782,78 @@ msgid "Focus Cell"
 msgstr "Focus Cell"
 
 #: src/control/Control.Menubar.ts:1006
-#: src/control/jsdialog/Definitions.Menu.ts:1902
+#: src/control/jsdialog/Definitions.Menu.ts:1917
 msgid "Highlight cells with..."
 msgstr "Highlight cells with..."
 
 #: src/control/Control.Menubar.ts:1007
-#: src/control/jsdialog/Definitions.Menu.ts:1905
+#: src/control/jsdialog/Definitions.Menu.ts:1920
 msgid "Values greater than..."
 msgstr "Values greater than..."
 
 #: src/control/Control.Menubar.ts:1008
-#: src/control/jsdialog/Definitions.Menu.ts:1909
+#: src/control/jsdialog/Definitions.Menu.ts:1924
 msgid "Values less than..."
 msgstr "Values less than..."
 
 #: src/control/Control.Menubar.ts:1009
-#: src/control/jsdialog/Definitions.Menu.ts:1913
+#: src/control/jsdialog/Definitions.Menu.ts:1928
 msgid "Values equal to..."
 msgstr "Values equal to..."
 
 #: src/control/Control.Menubar.ts:1010
-#: src/control/jsdialog/Definitions.Menu.ts:1917
+#: src/control/jsdialog/Definitions.Menu.ts:1932
 msgid "Values between..."
 msgstr "Values between..."
 
 #: src/control/Control.Menubar.ts:1011
-#: src/control/jsdialog/Definitions.Menu.ts:1921
+#: src/control/jsdialog/Definitions.Menu.ts:1936
 msgid "Values duplicate..."
 msgstr "Values duplicate..."
 
 #: src/control/Control.Menubar.ts:1012
-#: src/control/jsdialog/Definitions.Menu.ts:1925
+#: src/control/jsdialog/Definitions.Menu.ts:1940
 msgid "Containing text..."
 msgstr "Containing text..."
 
 #: src/control/Control.Menubar.ts:1014 src/control/Control.Menubar.ts:1024
-#: src/control/jsdialog/Definitions.Menu.ts:1929
-#: src/control/jsdialog/Definitions.Menu.ts:1960
+#: src/control/jsdialog/Definitions.Menu.ts:1944
+#: src/control/jsdialog/Definitions.Menu.ts:1975
 msgid "More highlights..."
 msgstr "More highlights..."
 
 #: src/control/Control.Menubar.ts:1016
-#: src/control/jsdialog/Definitions.Menu.ts:1933
+#: src/control/jsdialog/Definitions.Menu.ts:1948
 msgid "Top/Bottom Rules..."
 msgstr "Top/Bottom Rules..."
 
 #: src/control/Control.Menubar.ts:1017
-#: src/control/jsdialog/Definitions.Menu.ts:1936
+#: src/control/jsdialog/Definitions.Menu.ts:1951
 msgid "Top N elements..."
 msgstr "Top N elements..."
 
 #: src/control/Control.Menubar.ts:1018
-#: src/control/jsdialog/Definitions.Menu.ts:1940
+#: src/control/jsdialog/Definitions.Menu.ts:1955
 msgid "Top N percent..."
 msgstr "Top N percent..."
 
 #: src/control/Control.Menubar.ts:1019
-#: src/control/jsdialog/Definitions.Menu.ts:1944
+#: src/control/jsdialog/Definitions.Menu.ts:1959
 msgid "Bottom N elements..."
 msgstr "Bottom N elements..."
 
 #: src/control/Control.Menubar.ts:1020
-#: src/control/jsdialog/Definitions.Menu.ts:1948
+#: src/control/jsdialog/Definitions.Menu.ts:1963
 msgid "Bottom N percent..."
 msgstr "Bottom N percent..."
 
 #: src/control/Control.Menubar.ts:1021
-#: src/control/jsdialog/Definitions.Menu.ts:1952
+#: src/control/jsdialog/Definitions.Menu.ts:1967
 msgid "Above Average..."
 msgstr "Above Average..."
 
 #: src/control/Control.Menubar.ts:1022
-#: src/control/jsdialog/Definitions.Menu.ts:1956
+#: src/control/jsdialog/Definitions.Menu.ts:1971
 msgid "Below Average..."
 msgstr "Below Average..."
 
@@ -3723,16 +3866,16 @@ msgstr "Below Average..."
 #: src/control/Control.NotebookbarDraw.js:1205
 #: src/control/Control.NotebookbarImpress.js:1335
 #: src/control/Control.NotebookbarImpress.js:1348
-#: src/control/Control.NotebookbarWriter.js:1030
-#: src/control/Control.NotebookbarWriter.js:1043
+#: src/control/Control.NotebookbarWriter.js:1032
+#: src/control/Control.NotebookbarWriter.js:1045
 #: src/control/Control.Zotero.js:220 src/control/Toolbar.js:549
-#: src/control/Toolbar.js:550 src/control/Toolbar.js:588
+#: src/control/Toolbar.js:550 src/control/Toolbar.js:595
 msgid "Search"
 msgstr "Search"
 
 #: src/control/Control.Menubar.ts:1209
 #: src/control/Control.NotebookbarCalc.js:1137
-#: src/control/Control.NotebookbarWriter.js:1849
+#: src/control/Control.NotebookbarWriter.js:1851
 msgid "Page Setup"
 msgstr "Page Setup"
 
@@ -3750,7 +3893,7 @@ msgstr "Reset to Default Language"
 
 #: src/control/Control.Menubar.ts:1756 src/control/Control.Menubar.ts:1757
 #: src/control/Control.Menubar.ts:1758 src/control/Control.Toolbar.js:256
-#: src/control/jsdialog/Definitions.Menu.ts:2186
+#: src/control/jsdialog/Definitions.Menu.ts:2201
 msgid "More..."
 msgstr "More..."
 
@@ -3835,7 +3978,7 @@ msgid "Find and Replace"
 msgstr "Find and Replace"
 
 #: src/control/Control.NavigatorPanel.ts:636
-#: src/control/jsdialog/Widget.Combobox.js:405
+#: src/control/jsdialog/Widget.Combobox.js:409
 #: src/control/jsdialog/Widget.TreeView.ts:2580
 msgid "Search..."
 msgstr "Search..."
@@ -3958,7 +4101,7 @@ msgstr "Field"
 #: src/control/Control.NotebookbarDraw.js:1592
 #: src/control/Control.NotebookbarImpress.js:122
 #: src/control/Control.NotebookbarImpress.js:1573
-#: src/control/Control.NotebookbarWriter.js:1258
+#: src/control/Control.NotebookbarWriter.js:1260
 msgid "Table"
 msgstr "Table"
 
@@ -3975,13 +4118,13 @@ msgstr "Select"
 #: src/control/Control.NotebookbarImpress.js:90
 #: src/control/Control.NotebookbarImpress.js:2172
 #: src/control/Control.NotebookbarWriter.js:50
-#: src/control/Control.NotebookbarWriter.js:979 src/control/Styles.js:38
+#: src/control/Control.NotebookbarWriter.js:981 src/control/Styles.js:38
 msgid "Insert"
 msgstr "Insert"
 
 #: src/control/Notebookbar.WriterTableTab.ts:209
 #: src/control/Control.NotebookbarCalc.js:1154
-#: src/control/Control.NotebookbarWriter.js:1866
+#: src/control/Control.NotebookbarWriter.js:1868
 msgid "Size"
 msgstr "Size"
 
@@ -4111,7 +4254,7 @@ msgstr "Shape"
 #: src/control/Control.NotebookbarDraw.js:108
 #: src/control/Control.NotebookbarImpress.js:136
 #: src/control/Control.NotebookbarWriter.js:89
-#: src/control/Control.NotebookbarWriter.js:1630
+#: src/control/Control.NotebookbarWriter.js:1632
 msgid "Picture"
 msgstr "Picture"
 
@@ -4201,7 +4344,7 @@ msgstr ""
 
 #: src/control/Control.NotebookbarCalc.js:499
 #: src/control/Control.NotebookbarDraw.js:692
-#: src/control/Control.NotebookbarWriter.js:684
+#: src/control/Control.NotebookbarWriter.js:686
 msgid "Font"
 msgstr "Font"
 
@@ -4243,7 +4386,7 @@ msgstr "Boolean Value"
 #: src/control/Control.NotebookbarCalc.js:2174
 #: src/control/Control.NotebookbarDraw.js:1768
 #: src/control/Control.NotebookbarImpress.js:1780
-#: src/control/Control.NotebookbarWriter.js:1507
+#: src/control/Control.NotebookbarWriter.js:1509
 msgid "Text"
 msgstr "Text"
 
@@ -4256,7 +4399,7 @@ msgid "Cells"
 msgstr "Cells"
 
 #: src/control/Control.NotebookbarCalc.js:1003
-#: src/control/jsdialog/Definitions.Menu.ts:2392
+#: src/control/jsdialog/Definitions.Menu.ts:2407
 msgid "Default"
 msgstr "Default"
 
@@ -4277,19 +4420,19 @@ msgid "Bad"
 msgstr "Bad"
 
 #: src/control/Control.NotebookbarCalc.js:1059
-#: src/control/PermissionMode.ts:212
+#: src/control/PermissionMode.ts:219
 msgid "Editing"
 msgstr "Editing"
 
 #: src/control/Control.NotebookbarCalc.js:1083
 #: src/control/Control.NotebookbarDraw.js:1216
 #: src/control/Control.NotebookbarImpress.js:1359
-#: src/control/Control.NotebookbarWriter.js:1054
+#: src/control/Control.NotebookbarWriter.js:1056
 msgid "Replace"
 msgstr "Replace"
 
 #: src/control/Control.NotebookbarCalc.js:1147
-#: src/control/Control.NotebookbarWriter.js:1859
+#: src/control/Control.NotebookbarWriter.js:1861
 msgid "Margin"
 msgstr "Margin"
 
@@ -4332,9 +4475,9 @@ msgstr "Delete Columns"
 #: src/control/Control.NotebookbarImpress.js:2456
 #: src/control/Control.NotebookbarImpress.js:2663
 #: src/control/Control.NotebookbarImpress.js:3057
-#: src/control/Control.NotebookbarWriter.js:2090
-#: src/control/Control.NotebookbarWriter.js:2673
-#: src/control/Control.NotebookbarWriter.js:3003
+#: src/control/Control.NotebookbarWriter.js:2092
+#: src/control/Control.NotebookbarWriter.js:2675
+#: src/control/Control.NotebookbarWriter.js:3005
 msgid "Align"
 msgstr "Align"
 
@@ -4345,9 +4488,9 @@ msgstr "Align"
 #: src/control/Control.NotebookbarImpress.js:2523
 #: src/control/Control.NotebookbarImpress.js:2811
 #: src/control/Control.NotebookbarImpress.js:3205
-#: src/control/Control.NotebookbarWriter.js:2161
-#: src/control/Control.NotebookbarWriter.js:2732
-#: src/control/Control.NotebookbarWriter.js:3062
+#: src/control/Control.NotebookbarWriter.js:2163
+#: src/control/Control.NotebookbarWriter.js:2734
+#: src/control/Control.NotebookbarWriter.js:3064
 msgid "Arrange"
 msgstr "Arrange"
 
@@ -4382,28 +4525,28 @@ msgstr "Freeze"
 #: src/control/Control.NotebookbarCalc.js:1559
 #: src/control/Control.NotebookbarDraw.js:435
 #: src/control/Control.NotebookbarImpress.js:586
-#: src/control/Control.NotebookbarWriter.js:1661
+#: src/control/Control.NotebookbarWriter.js:1663
 msgid "Zoom"
 msgstr "Zoom"
 
 #: src/control/Control.NotebookbarCalc.js:1566
 #: src/control/Control.NotebookbarDraw.js:442
 #: src/control/Control.NotebookbarImpress.js:480
-#: src/control/Control.NotebookbarWriter.js:1723
+#: src/control/Control.NotebookbarWriter.js:1725
 msgid "Read mode"
 msgstr "Read mode"
 
 #: src/control/Control.NotebookbarCalc.js:1633
 #: src/control/Control.NotebookbarDraw.js:535
 #: src/control/Control.NotebookbarImpress.js:679
-#: src/control/Control.NotebookbarWriter.js:1761
+#: src/control/Control.NotebookbarWriter.js:1763
 msgid "Collapse Tabs"
 msgstr "Collapse Tabs"
 
 #: src/control/Control.NotebookbarCalc.js:1646
 #: src/control/Control.NotebookbarDraw.js:523
 #: src/control/Control.NotebookbarImpress.js:667
-#: src/control/Control.NotebookbarWriter.js:1796
+#: src/control/Control.NotebookbarWriter.js:1798
 msgid "Status Bar"
 msgstr "Status Bar"
 
@@ -4413,8 +4556,8 @@ msgstr "Status Bar"
 #: src/control/Control.NotebookbarCalc.js:3520
 #: src/control/Control.NotebookbarImpress.js:2864
 #: src/control/Control.NotebookbarImpress.js:3258
-#: src/control/Control.NotebookbarWriter.js:2781
-#: src/control/Control.NotebookbarWriter.js:3111
+#: src/control/Control.NotebookbarWriter.js:2783
+#: src/control/Control.NotebookbarWriter.js:3113
 msgid "Group"
 msgstr "Group"
 
@@ -4444,7 +4587,7 @@ msgstr "Select an editable cell range to insert a styled table"
 #: src/control/Control.NotebookbarDraw.js:1572
 #: src/control/Control.NotebookbarImpress.js:1246
 #: src/control/Control.NotebookbarImpress.js:1526
-#: src/control/Control.NotebookbarWriter.js:1266
+#: src/control/Control.NotebookbarWriter.js:1268
 msgid "Illustrations"
 msgstr "Illustrations"
 
@@ -4453,14 +4596,14 @@ msgstr "Illustrations"
 #: src/control/Control.NotebookbarDraw.js:1623
 #: src/control/Control.NotebookbarImpress.js:1260
 #: src/control/Control.NotebookbarImpress.js:1604
-#: src/control/Control.NotebookbarWriter.js:1311
+#: src/control/Control.NotebookbarWriter.js:1313
 msgid "Shapes"
 msgstr "Shapes"
 
 #: src/control/Control.NotebookbarCalc.js:1936
 #: src/control/Control.NotebookbarDraw.js:1693
 #: src/control/Control.NotebookbarImpress.js:1691
-#: src/control/Control.NotebookbarWriter.js:1379
+#: src/control/Control.NotebookbarWriter.js:1381
 msgid "Assistant"
 msgstr "Assistant"
 
@@ -4514,7 +4657,7 @@ msgstr "Proofing"
 
 #: src/control/Control.NotebookbarCalc.js:2655
 #: src/control/Control.NotebookbarImpress.js:2053
-#: src/control/Control.NotebookbarWriter.js:2285
+#: src/control/Control.NotebookbarWriter.js:2287
 msgid "Auto Spell Check"
 msgstr "Auto Spell Check"
 
@@ -4539,15 +4682,15 @@ msgstr "Themes"
 
 #: src/control/Control.NotebookbarCalc.js:2967
 #: src/control/Control.NotebookbarCalc.js:3333
-#: src/control/Control.NotebookbarWriter.js:1992
-#: src/control/Control.NotebookbarWriter.js:2618
-#: src/control/Control.NotebookbarWriter.js:2948
+#: src/control/Control.NotebookbarWriter.js:1994
+#: src/control/Control.NotebookbarWriter.js:2620
+#: src/control/Control.NotebookbarWriter.js:2950
 msgid "Wrap"
 msgstr "Wrap"
 
 #: src/control/Control.NotebookbarCalc.js:3215
 #: src/control/Control.NotebookbarImpress.js:2933
-#: src/control/Control.NotebookbarWriter.js:2834
+#: src/control/Control.NotebookbarWriter.js:2836
 msgid "Image Controls"
 msgstr "Image Controls"
 
@@ -4562,7 +4705,7 @@ msgstr "PDF Document (.pdf) - Expert"
 
 #: src/control/Control.NotebookbarDraw.js:510
 #: src/control/Control.NotebookbarImpress.js:654
-#: src/control/Control.NotebookbarWriter.js:1783
+#: src/control/Control.NotebookbarWriter.js:1785
 msgid "Ruler"
 msgstr "Ruler"
 
@@ -4575,7 +4718,7 @@ msgstr "Clone Formatting is active (click again or press Esc to exit)"
 
 #: src/control/Control.NotebookbarDraw.js:920
 #: src/control/Control.NotebookbarImpress.js:1060
-#: src/control/Control.NotebookbarWriter.js:829
+#: src/control/Control.NotebookbarWriter.js:831
 msgid "Paragraph"
 msgstr "Paragraph"
 
@@ -4636,7 +4779,7 @@ msgid "Starts a slideshow on every viewer's screen"
 msgstr "Starts a slideshow on every viewer's screen"
 
 #: src/control/Control.NotebookbarImpress.js:548
-#: src/slideshow/SlideShowPresenter.ts:1617
+#: src/slideshow/SlideShowPresenter.ts:1625
 msgid "Follow Presenter"
 msgstr "Follow Presenter"
 
@@ -4724,58 +4867,58 @@ msgstr "Validate Sidebar"
 msgid "Validate Dialog"
 msgstr "Validate Dialog"
 
-#: src/control/Control.NotebookbarWriter.js:959
+#: src/control/Control.NotebookbarWriter.js:961
 #: src/control/Control.Zotero.js:828
 msgid "Styles"
 msgstr "Styles"
 
-#: src/control/Control.NotebookbarWriter.js:1112
+#: src/control/Control.NotebookbarWriter.js:1114
 msgid "Lists/Bullets"
 msgstr "Lists/Bullets"
 
-#: src/control/Control.NotebookbarWriter.js:1399
+#: src/control/Control.NotebookbarWriter.js:1401
 msgid "Header & Footer"
 msgstr "Header & Footer"
 
-#: src/control/Control.NotebookbarWriter.js:1468
+#: src/control/Control.NotebookbarWriter.js:1470
 msgid "Section"
 msgstr "Section"
 
-#: src/control/Control.NotebookbarWriter.js:1553
+#: src/control/Control.NotebookbarWriter.js:1555
 #: src/control/jsdialog/Widget.EmojiPicker.ts:182
 msgid "Symbols"
 msgstr "Symbols"
 
-#: src/control/Control.NotebookbarWriter.js:1606
+#: src/control/Control.NotebookbarWriter.js:1608
 msgid "Rich Text"
 msgstr "Rich Text"
 
-#: src/control/Control.NotebookbarWriter.js:1614
+#: src/control/Control.NotebookbarWriter.js:1616
 msgid "Checkbox"
 msgstr "Checkbox"
 
-#: src/control/Control.NotebookbarWriter.js:1675
+#: src/control/Control.NotebookbarWriter.js:1677
 msgid "Page Width"
 msgstr "Page Width"
 
-#: src/control/Control.NotebookbarWriter.js:2260
+#: src/control/Control.NotebookbarWriter.js:2262
 msgid "Spellcheck"
 msgstr "Spellcheck"
 
-#: src/control/Control.NotebookbarWriter.js:2273
+#: src/control/Control.NotebookbarWriter.js:2275
 msgid "Spelling Options"
 msgstr "Spelling Options"
 
-#: src/control/Control.NotebookbarWriter.js:2384
+#: src/control/Control.NotebookbarWriter.js:2386
 msgid "Tracking"
 msgstr "Tracking"
 
-#: src/control/Control.NotebookbarWriter.js:2398
+#: src/control/Control.NotebookbarWriter.js:2400
 msgid "View Changes"
 msgstr "View Changes"
 
 #: src/control/Control.PartsPreview.js:428
-#: src/control/Control.PartsPreview.js:503 src/map/Clipboard.js:1522
+#: src/control/Control.PartsPreview.js:503 src/map/Clipboard.js:1537
 msgid "Paste"
 msgstr "Paste"
 
@@ -4832,7 +4975,7 @@ msgstr "Delete section \"%1\" and its %2 slide(s)?"
 msgid "Enter new section name:"
 msgstr "Enter new section name:"
 
-#: src/control/Control.SaveState.ts:51
+#: src/control/Control.SaveState.ts:55
 msgid "Saving"
 msgstr "Saving"
 
@@ -5043,37 +5186,53 @@ msgstr "Insert sheet before this"
 msgid "Insert sheet after this"
 msgstr "Insert sheet after this"
 
-#: src/control/Control.Tabs.js:108 src/control/Control.Tabs.js:115
+#: src/control/Control.Tabs.js:109 src/control/Control.Tabs.js:116
 msgid "Reset Tab Color"
 msgstr "Reset Tab Colour"
 
-#: src/control/Control.Tabs.js:135 src/control/Control.Tabs.js:139
+#: src/control/Control.Tabs.js:136 src/control/Control.Tabs.js:140
 msgid "Move Sheet Left"
 msgstr "Move Sheet Left"
 
-#: src/control/Control.Tabs.js:143 src/control/Control.Tabs.js:147
+#: src/control/Control.Tabs.js:144 src/control/Control.Tabs.js:148
 msgid "Move Sheet Right"
 msgstr "Move Sheet Right"
 
-#: src/control/Control.Tabs.js:157 src/control/Control.Tabs.js:163
+#: src/control/Control.Tabs.js:159 src/control/Control.Tabs.js:165
 msgid "Copy Sheet..."
 msgstr "Copy Sheet..."
 
-#: src/control/Control.Tabs.js:350
+#: src/control/Control.Tabs.js:353
 msgid "{0}, protected"
 msgstr "{0}, protected"
 
-#: src/control/Control.Tabs.js:672
+#: src/control/Control.Tabs.js:675
 msgid "Are you sure you want to delete sheet, {sheet}?"
 msgstr "Are you sure you want to delete sheet, {sheet}?"
 
-#: src/control/Control.Tabs.js:683
+#: src/control/Control.Tabs.js:686
 msgid "Rename sheet"
 msgstr "Rename sheet"
 
-#: src/control/Control.Tabs.js:683
+#: src/control/Control.Tabs.js:686
 msgid "Enter new sheet name"
 msgstr "Enter new sheet name"
+
+#: src/control/Control.Tabs.js:724
+msgid "Protect Sheet"
+msgstr ""
+
+#: src/control/Control.Tabs.js:724
+msgid "Enter a password to protect the sheet"
+msgstr ""
+
+#: src/control/Control.Tabs.js:728
+msgid "Unprotect Sheet"
+msgstr ""
+
+#: src/control/Control.Tabs.js:728
+msgid "Enter the password to unprotect the sheet"
+msgstr ""
 
 #: src/control/Control.Toolbar.js:1034
 msgid ""
@@ -5110,15 +5269,15 @@ msgstr "You are currently in View mode"
 msgid "Enter new name"
 msgstr "Enter new name"
 
-#: src/control/Control.UIManager.ts:1586
+#: src/control/Control.UIManager.ts:1587
 msgid "Hide Menu"
 msgstr "Hide Menu"
 
-#: src/control/Control.UIManager.ts:1613
+#: src/control/Control.UIManager.ts:1614
 msgid "Show Menu"
 msgstr "Show Menu"
 
-#: src/control/Control.UIManager.ts:2201
+#: src/control/Control.UIManager.ts:2203
 msgid ""
 "An embedded script uses the legacy com.sun.star UNO API, which may be "
 "removed in future releases."
@@ -5126,23 +5285,31 @@ msgstr ""
 "An embedded script uses the legacy com.sun.star UNO API, which may be "
 "removed in future releases."
 
-#: src/control/Control.UIManager.ts:2869
+#: src/control/Control.UIManager.ts:2698
+msgid "Confirm password"
+msgstr ""
+
+#: src/control/Control.UIManager.ts:2744
+msgid "The confirmation does not match the password"
+msgstr ""
+
+#: src/control/Control.UIManager.ts:2962
 msgid "Copy error details"
 msgstr "Copy error details"
 
-#: src/control/Control.UIManager.ts:2916
+#: src/control/Control.UIManager.ts:3009
 msgid "Show technical details"
 msgstr "Show technical details"
 
-#: src/control/Control.UIManager.ts:2930
+#: src/control/Control.UIManager.ts:3023
 msgid "Technical Details:"
 msgstr "Technical Details:"
 
-#: src/control/Control.UIManager.ts:2934
+#: src/control/Control.UIManager.ts:3027
 msgid "Error details copied to clipboard"
 msgstr "Error details copied to clipboard"
 
-#: src/control/Control.UIManager.ts:2944
+#: src/control/Control.UIManager.ts:3037
 msgid "Failed to copy error details"
 msgstr "Failed to copy error details"
 
@@ -5214,23 +5381,23 @@ msgstr ""
 "The document contains some citations which may be unreachable through web "
 "API. It may cause some problems while editing citations or bibliography."
 
-#: src/control/Control.Zotero.js:246 src/app/Socket.ts:2653
+#: src/control/Control.Zotero.js:246 src/app/Socket.ts:2678
 msgid "Loading..."
 msgstr "Loading…"
 
 #: src/control/Control.Zotero.js:257 src/control/Control.Zotero.js:454
 #: src/slideshow/engine/SlideShowHandler.ts:102
-#: src/slideshow/PresenterConsole.js:32
-#: src/slideshow/SlideShowPresenter.ts:827
-#: src/slideshow/SlideShowPresenter.ts:873
+#: src/slideshow/PresenterConsole.js:33
+#: src/slideshow/SlideShowPresenter.ts:835
+#: src/slideshow/SlideShowPresenter.ts:881
 msgid "Previous"
 msgstr "Previous"
 
 #: src/control/Control.Zotero.js:270 src/control/Control.Zotero.js:469
 #: src/slideshow/engine/SlideShowHandler.ts:103
-#: src/slideshow/PresenterConsole.js:33
-#: src/slideshow/SlideShowPresenter.ts:833
-#: src/slideshow/SlideShowPresenter.ts:884
+#: src/slideshow/PresenterConsole.js:34
+#: src/slideshow/SlideShowPresenter.ts:841
+#: src/slideshow/SlideShowPresenter.ts:892
 msgid "Next"
 msgstr "Next"
 
@@ -5369,19 +5536,19 @@ msgstr "Before"
 msgid "Double-click to insert a tab stop. Right-click for more options."
 msgstr "Double-click to insert a tab stop. Right-click for more options."
 
-#: src/control/HRuler.ts:785 src/control/HRuler.ts:952
+#: src/control/HRuler.ts:787 src/control/HRuler.ts:954
 msgid "Left Margin"
 msgstr "Left Margin"
 
-#: src/control/HRuler.ts:790 src/control/HRuler.ts:957
+#: src/control/HRuler.ts:792 src/control/HRuler.ts:959
 msgid "Right Margin"
 msgstr "Right Margin"
 
-#: src/control/HRuler.ts:1376
+#: src/control/HRuler.ts:1378
 msgid "Insert tabstop"
 msgstr "Insert tabstop"
 
-#: src/control/HRuler.ts:1384
+#: src/control/HRuler.ts:1386
 msgid "Delete tabstop"
 msgstr "Delete tabstop"
 
@@ -5525,67 +5692,67 @@ msgstr ""
 "The signature is OK, but the certificate could not be validated and the "
 "document is only partially signed."
 
-#: src/control/Styles.js:19 src/control/jsdialog/Definitions.Menu.ts:2248
+#: src/control/Styles.js:19 src/control/jsdialog/Definitions.Menu.ts:2263
 msgid "Title Slide"
 msgstr "Title Slide"
 
-#: src/control/Styles.js:20 src/control/jsdialog/Definitions.Menu.ts:2249
+#: src/control/Styles.js:20 src/control/jsdialog/Definitions.Menu.ts:2264
 msgid "Title, Content"
 msgstr "Title, Content"
 
-#: src/control/Styles.js:21 src/control/jsdialog/Definitions.Menu.ts:2250
+#: src/control/Styles.js:21 src/control/jsdialog/Definitions.Menu.ts:2265
 msgid "Title and 2 Content"
 msgstr "Title and 2 Content"
 
-#: src/control/Styles.js:22 src/control/jsdialog/Definitions.Menu.ts:2251
+#: src/control/Styles.js:22 src/control/jsdialog/Definitions.Menu.ts:2266
 msgid "Title Only"
 msgstr "Title Only"
 
-#: src/control/Styles.js:23 src/control/jsdialog/Definitions.Menu.ts:2247
+#: src/control/Styles.js:23 src/control/jsdialog/Definitions.Menu.ts:2262
 msgid "Blank Slide"
 msgstr "Blank Slide"
 
-#: src/control/Styles.js:24 src/control/jsdialog/Definitions.Menu.ts:2252
+#: src/control/Styles.js:24 src/control/jsdialog/Definitions.Menu.ts:2267
 msgid "Centered Text"
 msgstr "Centred Text"
 
-#: src/control/Styles.js:25 src/control/jsdialog/Definitions.Menu.ts:2254
+#: src/control/Styles.js:25 src/control/jsdialog/Definitions.Menu.ts:2269
 msgid "Title, Content and 2 Content"
 msgstr "Title, Content and 2 Content"
 
-#: src/control/Styles.js:26 src/control/jsdialog/Definitions.Menu.ts:2253
+#: src/control/Styles.js:26 src/control/jsdialog/Definitions.Menu.ts:2268
 msgid "Title, 2 Content and Content"
 msgstr "Title, 2 Content and Content"
 
-#: src/control/Styles.js:27 src/control/jsdialog/Definitions.Menu.ts:2255
+#: src/control/Styles.js:27 src/control/jsdialog/Definitions.Menu.ts:2270
 msgid "Title, 2 Content over Content"
 msgstr "Title, 2 Content over Content"
 
-#: src/control/Styles.js:28 src/control/jsdialog/Definitions.Menu.ts:2256
+#: src/control/Styles.js:28 src/control/jsdialog/Definitions.Menu.ts:2271
 msgid "Title, Content over Content"
 msgstr "Title, Content over Content"
 
-#: src/control/Styles.js:29 src/control/jsdialog/Definitions.Menu.ts:2257
+#: src/control/Styles.js:29 src/control/jsdialog/Definitions.Menu.ts:2272
 msgid "Title, 4 Content"
 msgstr "Title, 4 Content"
 
-#: src/control/Styles.js:30 src/control/jsdialog/Definitions.Menu.ts:2258
+#: src/control/Styles.js:30 src/control/jsdialog/Definitions.Menu.ts:2273
 msgid "Title, 6 Content"
 msgstr "Title, 6 Content"
 
-#: src/control/Styles.js:31 src/control/jsdialog/Definitions.Menu.ts:2259
+#: src/control/Styles.js:31 src/control/jsdialog/Definitions.Menu.ts:2274
 msgid "Vertical Title, Text, Chart"
 msgstr "Vertical Title, Text, Chart"
 
-#: src/control/Styles.js:32 src/control/jsdialog/Definitions.Menu.ts:2260
+#: src/control/Styles.js:32 src/control/jsdialog/Definitions.Menu.ts:2275
 msgid "Vertical Title, Vertical Text"
 msgstr "Vertical Title, Vertical Text"
 
-#: src/control/Styles.js:33 src/control/jsdialog/Definitions.Menu.ts:2261
+#: src/control/Styles.js:33 src/control/jsdialog/Definitions.Menu.ts:2276
 msgid "Title, Vertical Text"
 msgstr "Title, Vertical Text"
 
-#: src/control/Styles.js:34 src/control/jsdialog/Definitions.Menu.ts:2262
+#: src/control/Styles.js:34 src/control/jsdialog/Definitions.Menu.ts:2277
 msgid "Title, Vertical Text, Clipart"
 msgstr "Title, Vertical Text, Clipart"
 
@@ -5618,38 +5785,38 @@ msgstr "Saving..."
 msgid "Renaming..."
 msgstr "Renaming..."
 
-#: src/control/Toolbar.js:837
+#: src/control/Toolbar.js:844
 msgid "Unable to share"
 msgstr "Unable to share"
 
-#: src/control/VRuler.ts:195 src/control/VRuler.ts:424
+#: src/control/VRuler.ts:195 src/control/VRuler.ts:426
 msgid "Top Margin"
 msgstr "Top Margin"
 
-#: src/control/VRuler.ts:201 src/control/VRuler.ts:429
+#: src/control/VRuler.ts:201 src/control/VRuler.ts:431
 msgid "Bottom Margin"
 msgstr "Bottom Margin"
 
-#: src/control/PermissionMode.ts:83
+#: src/control/PermissionMode.ts:88
 #: src/control/jsdialog/Widget.HTMLContent.ts:86
 msgid "Permission Mode"
 msgstr "Permission Mode"
 
-#: src/control/PermissionMode.ts:90
+#: src/control/PermissionMode.ts:95
 #: src/control/jsdialog/Widget.HTMLContent.ts:115
 msgid "Read-only"
 msgstr "Read-only"
 
-#: src/control/PermissionMode.ts:125
+#: src/control/PermissionMode.ts:130
 msgid "Viewing Mode"
 msgstr "Viewing Mode"
 
-#: src/control/PermissionMode.ts:131
+#: src/control/PermissionMode.ts:136
 msgid "Editing Mode"
 msgstr "Editing Mode"
 
-#: src/control/PermissionMode.ts:141 src/control/PermissionMode.ts:215
-#: src/control/PermissionMode.ts:221 src/control/PermissionMode.ts:227
+#: src/control/PermissionMode.ts:146 src/control/PermissionMode.ts:222
+#: src/control/PermissionMode.ts:228 src/control/PermissionMode.ts:234
 msgid "Viewing"
 msgstr "Viewing"
 
@@ -5854,161 +6021,165 @@ msgstr "Loose"
 msgid "Very Loose"
 msgstr "Very Loose"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1819
+#: src/control/jsdialog/Definitions.Menu.ts:1806
+msgid "Copy Markdown"
+msgstr "Copy Markdown"
+
+#: src/control/jsdialog/Definitions.Menu.ts:1834
 msgid "Inline"
 msgstr "Inline"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1826
+#: src/control/jsdialog/Definitions.Menu.ts:1841
 msgid "Side by Side"
 msgstr "Side by Side"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1832
+#: src/control/jsdialog/Definitions.Menu.ts:1847
 msgid "Hidden"
 msgstr "Hidden"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1846
+#: src/control/jsdialog/Definitions.Menu.ts:1861
 msgid "This user"
 msgstr "This user"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1854
+#: src/control/jsdialog/Definitions.Menu.ts:1869
 msgid "All users"
 msgstr "All users"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1993
+#: src/control/jsdialog/Definitions.Menu.ts:2008
 msgid "No Borders"
 msgstr "No Borders"
 
-#: src/control/jsdialog/Definitions.Menu.ts:1999
+#: src/control/jsdialog/Definitions.Menu.ts:2014
 msgid "Left Border"
 msgstr "Left Border"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2005
+#: src/control/jsdialog/Definitions.Menu.ts:2020
 msgid "Right Border"
 msgstr "Right Border"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2011
+#: src/control/jsdialog/Definitions.Menu.ts:2026
 msgid "Left And Right Borders"
 msgstr "Left And Right Borders"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2017
+#: src/control/jsdialog/Definitions.Menu.ts:2032
 msgid "Top Border"
 msgstr "Top Border"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2023
+#: src/control/jsdialog/Definitions.Menu.ts:2038
 msgid "Bottom Border"
 msgstr "Bottom Border"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2029
+#: src/control/jsdialog/Definitions.Menu.ts:2044
 msgid "Top And Bottom Border"
 msgstr "Top And Bottom Border"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2035
+#: src/control/jsdialog/Definitions.Menu.ts:2050
 msgid "Outer Border"
 msgstr "Outer Border"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2041
+#: src/control/jsdialog/Definitions.Menu.ts:2056
 msgid "All Horizontal Lines"
 msgstr "All Horizontal Lines"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2047
+#: src/control/jsdialog/Definitions.Menu.ts:2062
 msgid "Outer Border And Horizontal Lines"
 msgstr "Outer Border And Horizontal Lines"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2053
+#: src/control/jsdialog/Definitions.Menu.ts:2068
 msgid "Outer Border and Vertical Lines"
 msgstr "Outer Border and Vertical Lines"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2059
+#: src/control/jsdialog/Definitions.Menu.ts:2074
 msgid "Outer Borders And All Inner lines"
 msgstr "Outer Borders And All Inner lines"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2065
+#: src/control/jsdialog/Definitions.Menu.ts:2080
 msgid "Line color"
 msgstr "Line colour"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2078
+#: src/control/jsdialog/Definitions.Menu.ts:2093
 msgid "Line style"
 msgstr "Line style"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2082
+#: src/control/jsdialog/Definitions.Menu.ts:2097
 msgid "Hairline (0.05 pt)"
 msgstr "Hairline (0.05 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2091
+#: src/control/jsdialog/Definitions.Menu.ts:2106
 msgid "Very thin (0.50 pt)"
 msgstr "Very thin (0.50 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2100
+#: src/control/jsdialog/Definitions.Menu.ts:2115
 msgid "Thin (0.75 pt)"
 msgstr "Thin (0.75 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2109
+#: src/control/jsdialog/Definitions.Menu.ts:2124
 msgid "Medium (1.50 pt)"
 msgstr "Medium (1.50 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2118
+#: src/control/jsdialog/Definitions.Menu.ts:2133
 msgid "Thick (2.25 pt)"
 msgstr "Thick (2.25 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2127
+#: src/control/jsdialog/Definitions.Menu.ts:2142
 msgid "Extra thick (4.50 pt)"
 msgstr "Extra thick (4.50 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2136
+#: src/control/jsdialog/Definitions.Menu.ts:2151
 msgid "Double Hairline (1.10 pt)"
 msgstr "Double Hairline (1.10 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2145
+#: src/control/jsdialog/Definitions.Menu.ts:2160
 msgid "Double Hairline (2.35 pt)"
 msgstr "Double Hairline (2.35 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2154
+#: src/control/jsdialog/Definitions.Menu.ts:2169
 msgid "Thin/Medium (3.00 pt)"
 msgstr "Thin/Medium (3.00 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2163
+#: src/control/jsdialog/Definitions.Menu.ts:2178
 msgid "Medium/Hairline (3.05 pt)"
 msgstr "Medium/Hairline (3.05 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2172
+#: src/control/jsdialog/Definitions.Menu.ts:2187
 msgid "Medium/Medium (4.50 pt)"
 msgstr "Medium/Medium (4.50 pt)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2232
+#: src/control/jsdialog/Definitions.Menu.ts:2247
 msgid "Standard (4:3)"
 msgstr "Standard (4:3)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2237
+#: src/control/jsdialog/Definitions.Menu.ts:2252
 msgid "Widescreen (16:9)"
 msgstr "Widescreen (16:9)"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2397
+#: src/control/jsdialog/Definitions.Menu.ts:2412
 msgid "Grayscale"
 msgstr "Greyscale"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2402
+#: src/control/jsdialog/Definitions.Menu.ts:2417
 msgid "Black/White"
 msgstr "Black/White"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2407
+#: src/control/jsdialog/Definitions.Menu.ts:2422
 msgid "Watermark"
 msgstr "Watermark"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2415
+#: src/control/jsdialog/Definitions.Menu.ts:2430
 msgid "Insert comment"
 msgstr "Insert comment"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2419
 #: src/control/jsdialog/Definitions.Menu.ts:2434
+#: src/control/jsdialog/Definitions.Menu.ts:2449
 msgid "Comments list"
 msgstr "Comments list"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2426
+#: src/control/jsdialog/Definitions.Menu.ts:2441
 #: src/control/jsdialog/Widget.Comment.ts:58
 msgid "Insert Comment"
 msgstr "Insert Comment"
 
-#: src/control/jsdialog/Definitions.Menu.ts:2430
+#: src/control/jsdialog/Definitions.Menu.ts:2445
 msgid "Insert Note"
 msgstr "Insert Date"
 
@@ -6033,19 +6204,19 @@ msgstr "Palette"
 msgid "Color palette"
 msgstr "Colour palette"
 
-#: src/control/jsdialog/Widget.Combobox.js:274
+#: src/control/jsdialog/Widget.Combobox.js:278
 msgid "Open "
 msgstr "Open "
 
-#: src/control/jsdialog/Widget.Combobox.js:274
+#: src/control/jsdialog/Widget.Combobox.js:278
 msgid " list"
 msgstr " list"
 
-#: src/control/jsdialog/Widget.Combobox.js:275
+#: src/control/jsdialog/Widget.Combobox.js:279
 msgid "Open list"
 msgstr "Open list"
 
-#: src/control/jsdialog/Widget.Combobox.js:406
+#: src/control/jsdialog/Widget.Combobox.js:410
 msgid "Filter entries"
 msgstr "Filter entries"
 
@@ -6273,7 +6444,7 @@ msgstr "Search items"
 msgid "Oops, there is a problem connecting to {productname}: "
 msgstr "Oops, there is a problem connecting to {productname}: "
 
-#: src/app/Socket.ts:605
+#: src/app/Socket.ts:612
 msgid ""
 "Well, this is embarrassing, we cannot connect to your document. Please try "
 "again."
@@ -6281,47 +6452,47 @@ msgstr ""
 "Well, this is embarrassing, we cannot connect to your document. Please try "
 "again."
 
-#: src/app/Socket.ts:640
+#: src/app/Socket.ts:647
 msgid "The connection to the document has been lost."
 msgstr "The connection to the document has been lost."
 
-#: src/app/Socket.ts:641
+#: src/app/Socket.ts:648
 msgid "The server has been disconnected."
 msgstr "The server has been disconnected."
 
-#: src/app/Socket.ts:676
+#: src/app/Socket.ts:683
 msgid "Reconnecting..."
 msgstr "Reconnecting..."
 
-#: src/app/Socket.ts:1041
+#: src/app/Socket.ts:1048
 msgid "Exported to storage"
 msgstr "Exported to storage"
 
-#: src/app/Socket.ts:1042
+#: src/app/Socket.ts:1049
 msgid "Successfully exported: "
 msgstr "Successfully exported: "
 
-#: src/app/Socket.ts:1174
+#: src/app/Socket.ts:1181
 msgid "This document has links to external content."
 msgstr "This document has links to external content."
 
-#: src/app/Socket.ts:1175
+#: src/app/Socket.ts:1182
 msgid "Allow"
 msgstr "Allow"
 
-#: src/app/Socket.ts:1709
+#: src/app/Socket.ts:1719
 msgid "Discard"
 msgstr "Discard"
 
-#: src/app/Socket.ts:1727
+#: src/app/Socket.ts:1737
 msgid "Save to new file"
 msgstr "Save to new file"
 
-#: src/app/Socket.ts:1740
+#: src/app/Socket.ts:1750
 msgid "Document has been changed"
 msgstr "Document has been changed"
 
-#: src/app/Socket.ts:1742
+#: src/app/Socket.ts:1752
 msgid ""
 "Document has been changed in storage. What would you like to do with your "
 "unsaved changes?"
@@ -6329,83 +6500,83 @@ msgstr ""
 "Document has been changed in storage. What would you like to do with your "
 "unsaved changes?"
 
-#: src/app/Socket.ts:1895
+#: src/app/Socket.ts:1905
 msgid "Server is now reachable. We have to refresh the page now."
 msgstr "Server has been restarted. We have to refresh the page now."
 
-#: src/app/Socket.ts:1898
+#: src/app/Socket.ts:1908
 msgid "Server is now reachable..."
 msgstr "Server is now reachable..."
 
-#: src/app/Socket.ts:1906
+#: src/app/Socket.ts:1916
 msgid "RELOAD"
 msgstr "RELOAD"
 
-#: src/app/Socket.ts:1934
+#: src/app/Socket.ts:1944
 msgid "Cluster configuration warning"
 msgstr "Cluster configuration warning"
 
-#: src/app/Socket.ts:1943
+#: src/app/Socket.ts:1953
 msgid "Wrong server, reconnecting..."
 msgstr "Wrong server, reconnecting..."
 
-#: src/app/Socket.ts:1963
+#: src/app/Socket.ts:1973
 msgid "Unsupported version."
 msgstr "Unsupported version."
 
-#: src/app/Socket.ts:1964
+#: src/app/Socket.ts:1974
 msgid "Unsupported server version."
 msgstr "Unsupported server version."
 
-#: src/app/Socket.ts:2109
+#: src/app/Socket.ts:2119
 msgid "Document is getting migrated"
 msgstr "Document is getting migrated"
 
-#: src/app/Socket.ts:2358
+#: src/app/Socket.ts:2370
 msgid "Document requires password to view."
 msgstr "Document requires password to view."
 
-#: src/app/Socket.ts:2360
+#: src/app/Socket.ts:2372
 msgid "Document requires password to modify."
 msgstr "Document requires password to modify."
 
-#: src/app/Socket.ts:2362
+#: src/app/Socket.ts:2374
 msgid "Hit Cancel to open in view-only mode."
 msgstr "Hit Cancel to open in view-only mode."
 
-#: src/app/Socket.ts:2366
+#: src/app/Socket.ts:2378
 msgid "Wrong password provided. Please try again."
 msgstr "Wrong password provided. Please try again."
 
-#: src/app/Socket.ts:2421
+#: src/app/Socket.ts:2433
 msgid "Only the document owner can change the password."
 msgstr "Only the document owner can change the password."
 
-#: src/app/Socket.ts:2465 src/app/Socket.ts:2476
+#: src/app/Socket.ts:2477 src/app/Socket.ts:2488
 msgid "Missing Fonts"
 msgstr "Missing Fonts"
 
-#: src/app/Socket.ts:2514
+#: src/app/Socket.ts:2526
 msgid "Someone"
 msgstr "Someone"
 
-#: src/app/Socket.ts:2516
+#: src/app/Socket.ts:2528
 msgid "{username} saved this document as {filename}. Do you want to join?"
 msgstr "{username} saved this document as {filename}. Do you want to join?"
 
-#: src/app/Socket.ts:2539
+#: src/app/Socket.ts:2551
 msgid "The document is being renamed and will reload shortly"
 msgstr "The document is being renamed and will reload shortly"
 
-#: src/app/Socket.ts:2542
+#: src/app/Socket.ts:2554
 msgid "The document is switching to Offline mode and will reload shortly"
 msgstr "The document is switching to Offline mode and will reload shortly"
 
-#: src/app/Socket.ts:2653
+#: src/app/Socket.ts:2678
 msgid "Connecting..."
 msgstr "Connecting..."
 
-#: src/app/Socket.ts:2669
+#: src/app/Socket.ts:2694
 msgid "Server is shutting down"
 msgstr "Server is shutting down"
 
@@ -6753,15 +6924,15 @@ msgstr "the View menu"
 msgid "Online Editor"
 msgstr "Online Editor"
 
-#: src/layer/tile/CanvasTileLayer.js:1583
+#: src/layer/tile/CanvasTileLayer.js:1591
 msgid "Functions"
 msgstr "Functions"
 
-#: src/layer/tile/CanvasTileLayer.js:1869
+#: src/layer/tile/CanvasTileLayer.js:1877
 msgid "Named Range"
 msgstr "Named Range"
 
-#: src/layer/tile/CanvasTileLayer.js:3749
+#: src/layer/tile/CanvasTileLayer.js:3752
 msgid "No Comments"
 msgstr "No Comments"
 
@@ -6769,29 +6940,29 @@ msgstr "No Comments"
 msgid "Warning! The browser you are using is not supported."
 msgstr "Warning! The browser you are using is not supported."
 
-#: src/map/Clipboard.js:186
+#: src/map/Clipboard.js:188
 msgid ""
 "To paste outside {productname}, please first click the 'download' button"
 msgstr ""
 "To paste outside {productname}, please first click the ‘download’ button"
 
-#: src/map/Clipboard.js:194
+#: src/map/Clipboard.js:196
 msgid "Copying from the document has been disabled by your administrator"
 msgstr "Copying from the document has been disabled by your administrator"
 
-#: src/map/Clipboard.js:307
+#: src/map/Clipboard.js:309
 msgid "warning: copy/paste request timed out"
 msgstr "warning: copy/paste request timed out"
 
-#: src/map/Clipboard.js:341
+#: src/map/Clipboard.js:343
 msgid "Failed to download clipboard, please re-copy"
 msgstr "Failed to download clipboard, please re-copy"
 
-#: src/map/Clipboard.js:390
+#: src/map/Clipboard.js:392
 msgid "Failed to upload the clipboard"
 msgstr "Failed to upload the clipboard"
 
-#: src/map/Clipboard.js:1482
+#: src/map/Clipboard.js:1497
 msgid ""
 "Your browser has very limited access to the clipboard, so please use the "
 "paste buttons on your on-screen keyboard instead."
@@ -6799,7 +6970,7 @@ msgstr ""
 "Your browser has very limited access to the clipboard, so please use the "
 "paste buttons on your on-screen keyboard instead."
 
-#: src/map/Clipboard.js:1488
+#: src/map/Clipboard.js:1503
 msgid ""
 "Your browser has very limited access to the clipboard, so use these "
 "keyboard shortcuts:"
@@ -6807,11 +6978,11 @@ msgstr ""
 "Your browser has very limited access to the clipboard, so use these keyboard "
 "shortcuts:"
 
-#: src/map/Clipboard.js:1522
+#: src/map/Clipboard.js:1537
 msgid "Cut"
 msgstr "Cut"
 
-#: src/map/Clipboard.js:1538
+#: src/map/Clipboard.js:1553
 msgid ""
 "A download due to a large copy/paste operation has already started. Please, "
 "wait for the current download or cancel it before starting a new one"
@@ -6819,23 +6990,23 @@ msgstr ""
 "A download due to a large copy/paste operation has already started. Please, "
 "wait for the current download or cancel it before starting a new one"
 
-#: src/map/Clipboard.js:1566
+#: src/map/Clipboard.js:1581
 msgid "Paste from this document"
 msgstr "Paste from this document"
 
-#: src/map/Clipboard.js:1566
+#: src/map/Clipboard.js:1581
 msgid "Cancel paste special"
 msgstr "Cancel paste special"
 
-#: src/map/Clipboard.js:1588
+#: src/map/Clipboard.js:1603
 msgid "Your browser has very limited access to the clipboard"
 msgstr "Your browser has very limited access to the clipboard"
 
-#: src/map/Clipboard.js:1593
+#: src/map/Clipboard.js:1608
 msgid "Please use following combination to see more options:"
 msgstr "Please use following combination to see more options:"
 
-#: src/map/Clipboard.js:1611
+#: src/map/Clipboard.js:1626
 msgid "Close popup to ignore paste special"
 msgstr "Close popup to ignore paste special"
 
@@ -6843,11 +7014,11 @@ msgstr "Close popup to ignore paste special"
 msgid "Initializing..."
 msgstr "Initialising…"
 
-#: src/map/Map.js:539 src/map/Map.js:542 src/map/Map.js:545 src/map/Map.js:548
+#: src/map/Map.js:548 src/map/Map.js:551 src/map/Map.js:554 src/map/Map.js:557
 msgid "Last saved:"
 msgstr "Last saved:"
 
-#: src/map/Map.js:1553
+#: src/map/Map.js:1562
 msgid "Please wait!"
 msgstr "Please wait!"
 
@@ -6896,22 +7067,22 @@ msgid "Print dialog"
 msgstr "Print dialogue"
 
 #: src/map/handler/Map.SlideShow.js:59
-#: src/slideshow/SlideShowPresenter.ts:1375
+#: src/slideshow/SlideShowPresenter.ts:1383
 msgid "Empty Slide Show"
 msgstr "Empty Slide Show"
 
 #: src/map/handler/Map.SlideShow.js:60
-#: src/slideshow/SlideShowPresenter.ts:1376
+#: src/slideshow/SlideShowPresenter.ts:1384
 msgid "All slides are hidden!"
 msgstr "All slides are hidden!"
 
 #: src/map/handler/Map.SlideShow.js:167
-#: src/slideshow/SlideShowPresenter.ts:1403
+#: src/slideshow/SlideShowPresenter.ts:1411
 msgid "Windowed Presentation Blocked"
 msgstr "Windowed Presentation Blocked"
 
 #: src/map/handler/Map.SlideShow.js:168
-#: src/slideshow/SlideShowPresenter.ts:1405
+#: src/slideshow/SlideShowPresenter.ts:1413
 msgid ""
 "Presentation was blocked. Please allow pop-ups in your browser. This lets "
 "slide shows to be displayed in separated windows, allowing for easy screen "
@@ -6922,17 +7093,17 @@ msgstr ""
 "sharing."
 
 #: src/map/handler/Map.SlideShow.js:172
-#: src/slideshow/SlideShowPresenter.ts:1133
+#: src/slideshow/SlideShowPresenter.ts:1141
 msgid "Windowed Presentation: "
 msgstr "Windowed Presentation: "
 
 #: src/map/handler/Map.SlideShow.js:202
-#: src/slideshow/SlideShowPresenter.ts:1212
+#: src/slideshow/SlideShowPresenter.ts:1220
 msgid "Presenting in another window"
 msgstr "Presenting in another window"
 
 #: src/map/handler/Map.SlideShow.js:203
-#: src/slideshow/SlideShowPresenter.ts:1213
+#: src/slideshow/SlideShowPresenter.ts:1221
 msgid "Close Presentation"
 msgstr "Close Presentation"
 
@@ -6945,22 +7116,22 @@ msgid "End Presentation"
 msgstr "End Presentation"
 
 #: src/map/handler/Map.SlideShow.js:295
-#: src/slideshow/SlideShowPresenter.ts:1390
+#: src/slideshow/SlideShowPresenter.ts:1398
 msgid "Already presenting"
 msgstr "Already presenting"
 
 #: src/map/handler/Map.SlideShow.js:296
-#: src/slideshow/SlideShowPresenter.ts:1391
+#: src/slideshow/SlideShowPresenter.ts:1399
 msgid "You are already presenting this document"
 msgstr "You are already presenting this document"
 
 #: src/map/handler/Map.SlideShow.js:306
-#: src/slideshow/SlideShowPresenter.ts:1431
+#: src/slideshow/SlideShowPresenter.ts:1439
 msgid "Presentation disabled"
 msgstr "Presentation disabled"
 
 #: src/map/handler/Map.SlideShow.js:307
-#: src/slideshow/SlideShowPresenter.ts:1432
+#: src/slideshow/SlideShowPresenter.ts:1440
 msgid "Presentation mode has been disabled for this document"
 msgstr "Presentation mode has been disabled for this document"
 
@@ -7021,7 +7192,7 @@ msgid "First Slide"
 msgstr "First Slide"
 
 #: src/slideshow/engine/SlideShowHandler.ts:108
-#: src/slideshow/PresenterConsole.js:31
+#: src/slideshow/PresenterConsole.js:32
 msgid "Next Slide"
 msgstr "Next Slide"
 
@@ -7034,7 +7205,7 @@ msgid "Last Slide"
 msgstr "Last Slide"
 
 #: src/slideshow/engine/SlideShowHandler.ts:111
-#: src/slideshow/SlideShowPresenter.ts:863
+#: src/slideshow/SlideShowPresenter.ts:871
 msgid "End Show"
 msgstr "End Show"
 
@@ -7054,102 +7225,104 @@ msgstr "Transition End: "
 msgid "Pause... ( %SECONDS% )"
 msgstr "Pause... ( %SECONDS% )"
 
-#: src/slideshow/PresenterConsole.js:30
+#: src/slideshow/PresenterConsole.js:31
 msgid "Current Slide"
 msgstr "Current Slide"
 
-#: src/slideshow/PresenterConsole.js:36
-#: src/slideshow/SlideShowPresenter.ts:928
-msgid "Exchange"
-msgstr "Exchange"
-
-#: src/slideshow/PresenterConsole.js:37
-msgid "Pause"
-msgstr "Pause"
-
-#: src/slideshow/PresenterConsole.js:38
-msgid "Restart"
-msgstr "Restart"
-
-#: src/slideshow/PresenterConsole.js:39 templates/templates.js:40
-msgid "Resume"
-msgstr "Resume"
-
-#: src/slideshow/PresenterConsole.js:40
-msgid "Present to all"
-msgstr "Present to all"
-
-#: src/slideshow/PresenterConsole.js:41
-msgid "Exit"
-msgstr "Exit"
-
-#: src/slideshow/PresenterConsole.js:42
-msgid "Go Back"
-msgstr "Go Back"
-
-#: src/slideshow/PresenterConsole.js:43
-msgid "Zoom In"
-msgstr "Zoom In"
-
-#: src/slideshow/PresenterConsole.js:44
-msgid "Zoom Out"
-msgstr "Zoom Out"
-
-#: src/slideshow/PresenterConsole.js:45
-msgid "Preview of the current slide"
-msgstr "Preview of the current slide"
-
-#: src/slideshow/PresenterConsole.js:46
-msgid "Preview of the next slide"
-msgstr "Preview of the next slide"
-
-#: src/slideshow/PresenterConsole.js:194
-msgid "Preview Slide {1}"
-msgstr "Preview Slide {1}"
-
-#: src/slideshow/PresenterConsole.js:797
-msgid "You are leaving the presentation."
-msgstr "You are leaving the presentation."
-
-#: src/slideshow/PresenterConsole.js:798
-msgid "The link is not valid."
-msgstr "The link is not valid."
-
-#: src/slideshow/PresenterConsole.js:1470
-msgid "Slide {0} of {1}"
-msgstr "Slide {0} of {1}"
-
-#: src/slideshow/PresenterConsole.js:1494
-msgid "No Notes"
-msgstr "No Notes"
-
-#: src/slideshow/PresenterConsole.js:1582
-msgid "Repeat in {0} seconds"
-msgstr "Repeat in {0} seconds"
-
-#: src/slideshow/PresenterConsole.js:1589
-#: src/slideshow/SlideShowPresenter.ts:655
-msgid "Click to exit presentation..."
-msgstr "Click to exit presentation..."
-
-#: src/slideshow/SlideShowPresenter.ts:827
-msgid "You are on the first slide"
-msgstr "You are on the first slide"
-
-#: src/slideshow/SlideShowPresenter.ts:835
-msgid "Waiting for presenter to advance"
-msgstr "Waiting for presenter to advance"
-
-#: src/slideshow/SlideShowPresenter.ts:899
-#: src/slideshow/SlideShowPresenter.ts:912
+#: src/slideshow/PresenterConsole.js:35 src/slideshow/PresenterConsole.js:1149
+#: src/slideshow/SlideShowPresenter.ts:907
+#: src/slideshow/SlideShowPresenter.ts:920
 msgid "Disable Animations"
 msgstr "Disable Animations"
 
-#: src/slideshow/SlideShowPresenter.ts:911
+#: src/slideshow/PresenterConsole.js:38
+#: src/slideshow/SlideShowPresenter.ts:936
+msgid "Exchange"
+msgstr "Exchange"
+
+#: src/slideshow/PresenterConsole.js:39
+msgid "Pause"
+msgstr "Pause"
+
+#: src/slideshow/PresenterConsole.js:40
+msgid "Restart"
+msgstr "Restart"
+
+#: src/slideshow/PresenterConsole.js:41 templates/templates.js:40
+msgid "Resume"
+msgstr "Resume"
+
+#: src/slideshow/PresenterConsole.js:42
+msgid "Present to all"
+msgstr "Present to all"
+
+#: src/slideshow/PresenterConsole.js:43
+msgid "Exit"
+msgstr "Exit"
+
+#: src/slideshow/PresenterConsole.js:44
+msgid "Go Back"
+msgstr "Go Back"
+
+#: src/slideshow/PresenterConsole.js:45
+msgid "Zoom In"
+msgstr "Zoom In"
+
+#: src/slideshow/PresenterConsole.js:46
+msgid "Zoom Out"
+msgstr "Zoom Out"
+
+#: src/slideshow/PresenterConsole.js:47
+msgid "Preview of the current slide"
+msgstr "Preview of the current slide"
+
+#: src/slideshow/PresenterConsole.js:48
+msgid "Preview of the next slide"
+msgstr "Preview of the next slide"
+
+#: src/slideshow/PresenterConsole.js:211
+msgid "Preview Slide {1}"
+msgstr "Preview Slide {1}"
+
+#: src/slideshow/PresenterConsole.js:815
+msgid "You are leaving the presentation."
+msgstr "You are leaving the presentation."
+
+#: src/slideshow/PresenterConsole.js:816
+msgid "The link is not valid."
+msgstr "The link is not valid."
+
+#: src/slideshow/PresenterConsole.js:1148
+#: src/slideshow/SlideShowPresenter.ts:919
 msgid "Enable Animations"
 msgstr "Enable Animations"
 
-#: src/slideshow/SlideShowPresenter.ts:1612
+#: src/slideshow/PresenterConsole.js:1507
+msgid "Slide {0} of {1}"
+msgstr "Slide {0} of {1}"
+
+#: src/slideshow/PresenterConsole.js:1565
+msgid "No Notes"
+msgstr "No Notes"
+
+#: src/slideshow/PresenterConsole.js:1658
+msgid "Repeat in {0} seconds"
+msgstr "Repeat in {0} seconds"
+
+#: src/slideshow/PresenterConsole.js:1665
+#: src/slideshow/SlideShowPresenter.ts:663
+msgid "Click to exit presentation..."
+msgstr "Click to exit presentation..."
+
+#: src/slideshow/SlideShowPresenter.ts:835
+msgid "You are on the first slide"
+msgstr "You are on the first slide"
+
+#: src/slideshow/SlideShowPresenter.ts:843
+msgid "Waiting for presenter to advance"
+msgstr "Waiting for presenter to advance"
+
+#: src/slideshow/SlideShowPresenter.ts:1620
 msgid "Stop Following"
 msgstr "Stop Following"
 
@@ -7366,6 +7539,21 @@ msgstr ""
 "translate=\"true\">1</a> <a id=\"slide-2-indicator\" href=\"#slide-2\" data-"
 "translate=\"true\">2</a> <a id=\"slide-3-indicator\" href=\"#slide-3\" data-"
 "translate=\"true\">3</a>"
+
+#~ msgid "Design template choice cancelled."
+#~ msgstr "Design template choice cancelled."
+
+#~ msgid "Pick a design for your deck, or continue without one:"
+#~ msgstr "Pick a design for your deck, or continue without one:"
+
+#~ msgid "No template"
+#~ msgstr "No template"
+
+#~ msgid "Design template: %1"
+#~ msgstr "Design template: %1"
+
+#~ msgid "Continuing without a design template."
+#~ msgstr "Continuing without a design template."
 
 #~ msgid "Request timeout"
 #~ msgstr "Request timeout"
