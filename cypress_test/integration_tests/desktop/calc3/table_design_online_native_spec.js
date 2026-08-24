@@ -61,6 +61,36 @@ describe(['tagdesktop'], 'Calc Table Design tab (Online-native).', function() {
 		cy.cGet('body').type('{esc}');
 	});
 
+	it('the New and Clear Table Style entries follow whether the sheet allows them', function() {
+		insertTable(this.win);
+		// Let the gallery updates that follow the table insert settle, so the
+		// expanded dropdown is not rebuilt away while the test uses it.
+		cy.getFrameWindow().then(function(win) {
+			helper.processToIdle(win);
+		});
+		cy.cGet('#tablestyles_design-iconview-list-expand-button').click();
+		cy.cGet('[id^="tablestyles_design-iconview-list-dropdown"] [modelid="new-table-style"]').should('not.have.attr', 'disabled');
+		cy.cGet('[id^="tablestyles_design-iconview-list-dropdown"] [modelid="clear-table-style"]').should('not.have.attr', 'disabled');
+		cy.cGet('body').type('{esc}');
+
+		// Protecting the sheet leaves the table there but refuses both commands,
+		// so neither entry may still invite a click.
+		cy.getFrameWindow().then(function(win) {
+			win.app.socket.sendMessage('uno .uno:Protect');
+		});
+		cy.cGet('#ProtectSheetDialog').should('be.visible');
+		cy.cGet('#ProtectSheetDialog #ok').click();
+		cy.cGet('#ProtectSheetDialog').should('not.exist');
+		cy.getFrameWindow().then(function(win) {
+			helper.processToIdle(win);
+		});
+
+		cy.cGet('#tablestyles_design-iconview-list-expand-button').click();
+		cy.cGet('[id^="tablestyles_design-iconview-list-dropdown"] [modelid="new-table-style"]').should('have.attr', 'disabled');
+		cy.cGet('[id^="tablestyles_design-iconview-list-dropdown"] [modelid="clear-table-style"]').should('have.attr', 'disabled');
+		cy.cGet('body').type('{esc}');
+	});
+
 	it('right-clicking a style offers Set as Default at the pointer', function() {
 		insertTable(this.win);
 		// The gallery slides the style of the table at the cursor into view, so the
