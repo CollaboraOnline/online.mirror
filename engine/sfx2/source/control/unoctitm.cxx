@@ -1429,6 +1429,8 @@ const std::map<std::u16string_view, KitUnoCommand>& GetKitUnoCommandList()
         { u"ResizeCalcTable", { PayloadType::EnabledPayload, true } },
         { u"RenameCalcTable", { PayloadType::EnabledPayload, true } },
         { u"ConvertCalcTableToRange", { PayloadType::EnabledPayload, true } },
+        { u"NewTableStyle", { PayloadType::EnabledPayload, true } },
+        { u"ClearTableStyle", { PayloadType::EnabledPayload, true } },
         { u"SummarizeWithPivot", { PayloadType::EnabledPayload, true } },
         { u"RemoveDuplicates", { PayloadType::EnabledPayload, true } },
         { u"HandleDuplicateRecords", { PayloadType::EnabledPayload, true } },
