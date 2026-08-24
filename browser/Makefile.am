@@ -1063,6 +1063,7 @@ l10n: pot
 clean-local:
 	@rm -rf $(DIST_FOLDER)
 	@rm -rf $(INTERMEDIATE_DIR)
+	@rm -rf $(ADMIN_TEMPLATE_FOLDER)
 	@rm -rf node_modules
 	@rm -f $(abs_srcdir)/jsconfig.json
 	@rm -f $(abs_srcdir)/admin/jsconfig.json
