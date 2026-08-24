@@ -82,6 +82,12 @@ function _getDropdownContent(data: IconViewListJSON, builder: JSBuilder) {
 		data.children.length === 1 &&
 		data.children[0].id === 'tablestyles_design'
 	) {
+		// These entries are built anew every time the dropdown opens, so they take
+		// the state their command is already known to be in. Waiting for the next
+		// state change would leave them usable while the gallery beside them is not.
+		const isCommandEnabled = (command: string) =>
+			builder.map.stateChangeHandler.getItemValue(command) !== 'disabled';
+
 		dropdownContent.push(
 			{
 				id: 'dropdown-entry-tablestyles-separator',
@@ -101,6 +107,7 @@ function _getDropdownContent(data: IconViewListJSON, builder: JSBuilder) {
 					text: _('New Table Style...'),
 					command: '.uno:NewTableStyle',
 					icon: 'lc_newtablestyle.svg',
+					enabled: isCommandEnabled('.uno:NewTableStyle'),
 				} as ToolItemWidgetJSON,
 			},
 			{
@@ -112,6 +119,7 @@ function _getDropdownContent(data: IconViewListJSON, builder: JSBuilder) {
 					text: _('Clear Style'),
 					command: '.uno:ClearTableStyle',
 					icon: 'lc_cleartablestyle.svg',
+					enabled: isCommandEnabled('.uno:ClearTableStyle'),
 				} as ToolItemWidgetJSON,
 			},
 		);
