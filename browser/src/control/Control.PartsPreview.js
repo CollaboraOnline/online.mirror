@@ -1857,7 +1857,7 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 			}
 			// Give the frames their measured size first, so the change
 			// animates from the real value.
-			void this._partsPreviewCont.offsetHeight;
+			window.L.DomUtil.forceLayoutFlush(this._partsPreviewCont);
 			for (let i = 0; i < frames.length; i++) {
 				frames[i].style[sizeProperty] = '0px';
 				frames[i].style.padding = '0px';
@@ -2007,7 +2007,7 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 
 		// With the old positions frozen in as transforms, releasing them
 		// after a reflow slides each child into its new cell.
-		void container.offsetHeight;
+		window.L.DomUtil.forceLayoutFlush(container);
 		for (let i = 0; i < moved.length; i++) {
 			const el = moved[i];
 			el.style.transition = 'transform 0.15s ease-out';
@@ -2331,7 +2331,9 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 
 		if (!animate) {
 			state.frames.forEach(restoreFrame);
-			void container.offsetHeight;
+			// The restored sizes land while transitions are still off, so
+			// the frames appear at once when the class comes back off.
+			window.L.DomUtil.forceLayoutFlush(container);
 			container.classList.remove('drag-no-transition');
 			container.classList.remove('dragging-slide');
 			this._schedulePreviewRefresh();
