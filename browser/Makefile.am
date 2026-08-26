@@ -1075,11 +1075,16 @@ endif
 	@echo
 	@echo "JS, HTML and CSS has been updated ($(DIST_FOLDER))."
 endif
+# A release build carries a welcome slideshow only when the app branding provides one. A debug
+# build also bundles the placeholder, which the apps keep hidden unless the welcome.enable
+# setting is true.
+if ENABLE_DEBUG
 	@if test "$(ENABLE_QTAPP)" = true || test "$(ENABLE_MACOSAPP)" = true || test "$(ENABLE_WINDOWSAPP)" = true ; then \
 		mkdir -p $(DIST_FOLDER)/welcome && \
 		test -f $(DIST_FOLDER)/welcome/welcome-slideshow.odp || cp $(srcdir)/welcome/welcome-slideshow.odp $(DIST_FOLDER)/welcome/welcome-slideshow.odp ; \
 		test -f $(DIST_FOLDER)/welcome/welcome.svg || cp $(srcdir)/welcome/welcome.svg $(DIST_FOLDER)/welcome/welcome.svg ; \
 	fi
+endif
 	@if test "$(ENABLE_QTAPP)" = true || test "$(ENABLE_MACOSAPP)" = true || test "$(ENABLE_WINDOWSAPP)" = true ; then \
 		echo "Generating localized introductory documents"; \
 		mkdir -p $(DIST_FOLDER)/introdocs/preview ; \
