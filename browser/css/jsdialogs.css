@@ -1512,11 +1512,13 @@ img.context-menu-icon {
 	white-space: nowrap;
 }
 
-.jsdialog input[type='radio'][disabled='disabled'] ~ label {
+/* the disabled attribute is set to 'disabled' when the widget is built and
+   to 'true' by the runtime enable / disable actions, so match on presence */
+.jsdialog input[type='radio'][disabled] ~ label {
 	color: var(--color-text-light);
 }
 
-.jsdialog input[type='checkbox'][disabled='disabled'] ~ label {
+.jsdialog input[type='checkbox'][disabled] ~ label {
 	color: var(--color-text-light);
 }
 
@@ -1816,8 +1818,8 @@ img.ui-combobox-value-preview {
 	margin-inline-end: 0;
 }
 
-.ui-listbox[disabled='disabled'] ~ .ui-listbox-arrow,
-.ui-combobox[disabled='disabled'] ~ .ui-listbox-arrow {
+.ui-listbox[disabled] ~ .ui-listbox-arrow,
+.ui-combobox[disabled] ~ .ui-listbox-arrow {
 	opacity: 0.5;
 	cursor: auto;
 }

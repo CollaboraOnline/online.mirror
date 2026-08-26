@@ -925,6 +925,24 @@ public:
         : JSWidget<SalInstanceWidget, vcl::Window>(pSender, pObject, pBuilder, bTakeOwnership)
     {
     }
+
+    // weld_widget() wraps any window, a container of other widgets included -
+    // for those, like JSContainer, the whole subtree has to be refreshed on the
+    // client: Window::Enable() walks the children, but an action carries only
+    // this widget's id.
+    virtual void set_sensitive(bool sensitive) override
+    {
+        if (!m_xWidget->GetChildCount())
+        {
+            JSWidget::set_sensitive(sensitive);
+            return;
+        }
+
+        bool bIsSensitive = SalInstanceWidget::get_sensitive();
+        SalInstanceWidget::set_sensitive(sensitive);
+        if (bIsSensitive != sensitive)
+            sendUpdate();
+    }
 };
 
 class JSImage : public JSWidget<SalInstanceImage, FixedImage>
