@@ -279,7 +279,7 @@ button.jsdialog[disabled] img {
 	justify-content: space-between;
 }
 
-.jsdialog.ui-button-box button[disabled='disabled'] {
+.jsdialog.ui-button-box button[disabled] {
 	color: var(--color-text-light) !important;
 	background-color: var(--color-background-lighter) !important;
 	border-color: var(--color-border-lighter) !important;

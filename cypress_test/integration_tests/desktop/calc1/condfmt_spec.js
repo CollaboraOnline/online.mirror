@@ -40,6 +40,10 @@ describe(['tagdesktop'], 'Conditional Format Dialog Tests', function() {
 		cy.cGet('body').contains('.ui-pushbutton.jsdialog', 'Edit').click();
 		cy.cGet('body').contains('.ui-pushbutton.jsdialog', 'Down').should('be.visible');
 		cy.cGet('body').contains('.ui-pushbutton.jsdialog', 'Add').click();
+		// Adding an entry makes the core send a full dialog update, which
+		// rebuilds the dialog with a fresh container. Wait for that rebuild,
+		// so the input typed into below is the one that stays on screen.
+		helper.processToIdle(this.win);
 		const span = cy.cGet('div.ui-grid.ui-grid-cell')
 			.contains('span.jsdialog.static-label.ui-text', 'Condition 5');
 		span.should('have.length', 1);
