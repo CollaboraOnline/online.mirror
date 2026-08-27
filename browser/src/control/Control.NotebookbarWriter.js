@@ -3475,6 +3475,7 @@ window.L.Control.NotebookbarWriter = window.L.Control.Notebookbar.extend({
 			'id': '',
 			'type': 'tabpage',
 			'text': '',
+			'name': tabName,
 			'enabled': 'true',
 			'children': [
 				{
