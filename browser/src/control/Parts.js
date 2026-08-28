@@ -54,8 +54,12 @@ window.L.Map.include({
 			return;
 		}
 
-		if (docLayer.isCalc())
+		if (docLayer.isCalc()) {
 			docLayer._sheetSwitch.save(part /* toPart */);
+			// The cursor rectangle is in document coordinates, so the old one
+			// would land on unrelated cells of the new sheet.
+			docLayer.hideCellCursor();
+		}
 
 		docLayer._clearMsgReplayStore(true /* notOtherMsg*/);
 		docLayer._prevSelectedPart = docLayer._selectedPart;
