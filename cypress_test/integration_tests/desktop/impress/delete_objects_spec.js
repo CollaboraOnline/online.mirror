@@ -104,6 +104,33 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Delete Objects', { testIso
 		cy.cGet('#test-div-shapeHandlesSection').should('not.exist');
 	});
 
+	it('Delete Shape In Master View', function() {
+		var win = this.win;
+
+		cy.then(function() {
+			win.app.map.sendUnoCommand('.uno:SlideMasterPage');
+		});
+		helper.processToIdle(win);
+
+		// The insert-shapes toolbar item is not offered in master view, so
+		// insert through the same uno command the toolbar would send.
+		cy.then(function() {
+			win.app.map.sendUnoCommand('.uno:SymbolShapes.smiley');
+		});
+		cy.cGet('#test-div-shapeHandlesSection').should('exist');
+		helper.processToIdle(win);
+
+		//delete - master view used to swallow the key, leaving the shape behind
+		helper.typeIntoDocument('{del}');
+		cy.cGet('#test-div-shapeHandlesSection').should('not.exist');
+
+		// leave the document in normal view for whatever runs after this
+		cy.then(function() {
+			win.app.map.sendUnoCommand('.uno:CloseMasterView');
+		});
+		helper.processToIdle(win);
+	});
+
 	// This one comes last because it zooms out to 50 percent, which is not part
 	// of the document and stays for whatever runs after it.
 	it('Delete Table',function() {

@@ -7,7 +7,7 @@
  * at TextInput.
  */
 
-/* global app UNOKey RenderManager */
+/* global app UNOKey RenderManager GraphicSelection */
 
 window.L.Map.mergeOptions({
 	keyboard: true,
@@ -412,6 +412,24 @@ window.L.Map.Keyboard = window.L.Handler.extend({
 		].includes(ev.keyCode);
 	},
 
+	// _isMasterViewObjectKey - master view swallows keys so that its text
+	// cannot be typed into, but the keys that act on the selected object
+	// itself have to get through. Delete and Backspace remove the selected
+	// shape; they are posted from TextInput's 'beforeinput' handler, so all
+	// they need here is to escape the preventDefault() that would stop the
+	// text area from ever emitting that event.
+	_isMasterViewObjectKey: function (ev) {
+		if (ev.keyCode !== this.keyCodes.DELETE && ev.keyCode !== this.keyCodes.BACKSPACE)
+			return false;
+
+		// With a text cursor up these delete characters instead of the
+		// object, which is the text editing master view keeps out.
+		if (app.file.textCursor.visible)
+			return false;
+
+		return GraphicSelection.hasActiveSelection();
+	},
+
 	// _onKeyDown - called only as a DOM event handler
 	// Calls _handleKeyEvent(), but only if the event doesn't have
 	// a charCode property (set to something different than 0) - that ignores
@@ -780,7 +798,8 @@ window.L.Map.Keyboard = window.L.Handler.extend({
 		}
 
 		if (this._map.stateChangeHandler._items['.uno:SlideMasterPage'] === 'true') {
-			ev.preventDefault();
+			if (!this._isMasterViewObjectKey(ev))
+				ev.preventDefault();
 			return;
 		}
 
