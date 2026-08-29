@@ -2449,6 +2449,10 @@ window.L.Control.JSDialogBuilder = window.L.Control.extend({
 		if (builder.isHyperlinkTarget(builder, data))
 			return true;
 
+		// Compatibility for older core versions (e.g. 25.04) where showlocation is a linkbutton
+		if (data.id === 'showlocation' && data.type === 'linkbutton')
+			return true;
+
 		return false;
 	},
 
@@ -2460,6 +2464,9 @@ window.L.Control.JSDialogBuilder = window.L.Control.extend({
 			};
 
 			return builder._controlHandlers['edit'](parentContainer, data, builder, callback);
+		} else if (data.id === 'showlocation' && data.type === 'linkbutton') {
+			data.type = 'fixedtext';
+			return builder._controlHandlers['fixedtext'](parentContainer, data, builder);
 		}
 
 		console.error('It seems widget doesn\'t require overwriting.');
