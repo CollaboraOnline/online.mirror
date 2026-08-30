@@ -424,6 +424,7 @@ void ComponentContext::disposing(std::unique_lock<std::mutex>& rGuard)
     // dispose tdmgr; revokes callback from cppu runtime
     try_dispose( rGuard, xTDMgr );
 
+    // coverity[missing_lock : FALSE] - rGuard holds the mutex
     m_map.clear();
 
     // Hack to terminate any JNI bridge's AsynchronousFinalizer thread (as JNI

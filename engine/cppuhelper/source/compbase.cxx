@@ -27,7 +27,10 @@ void WeakComponentImplHelperBase2::dispose()
     m_bDisposed = true;
     disposing(aGuard);
     if (!aGuard.owns_lock())
+    {
+        // coverity[double_lock : FALSE] - owns_lock decides whether to relock
         aGuard.lock();
+    }
     css::lang::EventObject aEvt(static_cast<OWeakObject*>(this));
     maEventListeners.disposeAndClear(aGuard, aEvt);
 }
