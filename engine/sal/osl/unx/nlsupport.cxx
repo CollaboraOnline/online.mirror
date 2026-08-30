@@ -635,6 +635,7 @@ void imp_getProcessLocale( rtl_Locale ** ppLocale )
             }
         }
     }
+    // coverity[overrun-buffer-val : FALSE] - parse_locale returns early for C
     *ppLocale = parse_locale(locale);
 }
 

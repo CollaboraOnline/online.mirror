@@ -886,6 +886,7 @@ void setAllowedPaths(
                 return; // too bad
             else
             {
+                // coverity[fixed_size_dest : FALSE] - the length test above returns first
                 strcat(resolvedPath, aPath.getStr() + n);
             }
         }
@@ -932,6 +933,7 @@ bool isForbidden(const OString &filePath, sal_uInt32 nFlags)
             return true; // too bad
         else
         {
+            // coverity[fixed_size_dest : FALSE] - the length test above returns first
             strcat(resolvedPath, filePath.getStr() + n);
         }
     }
@@ -1406,10 +1408,11 @@ const off_t MAX_OFF_T = std::numeric_limits< off_t >::max();
 
 namespace {
 
+// coverity[result_independent_of_operands] - off_t is 32 bit on some platforms
 template<typename T> bool exceedsMaxOffT(T n) { return n > MAX_OFF_T; }
 
-template<typename T> bool exceedsMinOffT(T n)
-{ return n < std::numeric_limits<off_t>::min(); }
+// coverity[result_independent_of_operands] - off_t is 32 bit on some platforms
+template<typename T> bool exceedsMinOffT(T n) { return n < std::numeric_limits<off_t>::min(); }
 
 }
 
