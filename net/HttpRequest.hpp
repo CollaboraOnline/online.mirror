@@ -602,11 +602,13 @@ public:
         set(CONNECTION, std::move(value));
     }
 
-    /// Adds a new "Cookie" header entry with the given content.
-    void addCookie(std::string cookie) { add(std::string(COOKIE), std::move(cookie)); }
+    /// Adds a new "Cookie" header entry with the given content. Returns false, and adds nothing,
+    /// when the content holds a byte a field cannot carry.
+    bool addCookie(std::string cookie) { return add(std::string(COOKIE), std::move(cookie)); }
 
-    /// Adds a new "Cookie" header entry with the given pairs.
-    void addCookie(const Container& pairs)
+    /// Adds a new "Cookie" header entry with the given pairs. Returns false, and adds nothing,
+    /// when the pairs hold a byte a field cannot carry.
+    bool addCookie(const Container& pairs)
     {
         std::string s;
         s.reserve(256);
@@ -619,7 +621,7 @@ public:
             s += pair.second;
         }
 
-        add(std::string(COOKIE), std::move(s));
+        return add(std::string(COOKIE), std::move(s));
     }
 
     /// Gets the name=value pairs of all "Cookie" header entries.
@@ -1251,8 +1253,9 @@ public:
     /// Set the Content-Length header.
     void setContentLength(int64_t length) { _header.setContentLength(length); }
 
-    /// Adds a new "Cookie" header entry with the given content.
-    void addCookie(const std::string& cookie) { _header.addCookie(cookie); }
+    /// Adds a new "Cookie" header entry with the given content. Returns false, and adds nothing,
+    /// when the content holds a byte a field cannot carry.
+    bool addCookie(const std::string& cookie) { return _header.addCookie(cookie); }
 
     /// Get a header entry value by key, if found, defaulting to @def, if missing.
     [[nodiscard]] std::string get(const std::string& key,

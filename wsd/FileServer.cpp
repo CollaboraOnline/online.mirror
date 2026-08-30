@@ -466,7 +466,14 @@ bool FileServerRequestHandler::authenticateAdmin(const Poco::Net::HTTPBasicCrede
     cookie.setPath(COOLWSD::ServiceRoot + "/browser/dist/");
     cookie.setSecure(ConfigUtil::isSslEnabled());
     cookie.setHttpOnly(true);
-    response.addCookie(cookie.toString());
+    if (!response.addCookie(cookie.toString()))
+    {
+        // The console session lives in this cookie, so the login only counts once it is on the
+        // response.
+        LOG_ERR("Could not put the Admin Console session cookie on the response.");
+        jwtToken.clear();
+        return false;
+    }
 
     return true;
 }
