@@ -538,15 +538,15 @@ public:
     /// Return the HOST header.
     [[nodiscard]] std::string getHost() const { return get(HOST); }
 
-    /// Set the Content-Type header.
-    void setContentType(std::string type) { set(CONTENT_TYPE, std::move(type)); }
+    /// Set the Content-Type header. Returns false when the type holds a byte a field cannot carry.
+    bool setContentType(std::string type) { return set(CONTENT_TYPE, std::move(type)); }
     /// Get the Content-Type header.
     [[nodiscard]] std::string getContentType() const { return get(CONTENT_TYPE); }
     /// Returns true iff a Content-Type header exists.
     [[nodiscard]] bool hasContentType() const { return has(CONTENT_TYPE); }
 
-    /// Set the Content-Length header.
-    void setContentLength(int64_t length) { set(CONTENT_LENGTH, std::to_string(length)); }
+    /// Set the Content-Length header. Returns false when the field could not be set.
+    bool setContentLength(int64_t length) { return set(CONTENT_LENGTH, std::to_string(length)); }
     /// Get the Content-Length header.
     [[nodiscard]] int64_t getContentLength() const;
     /// Returns true iff a Content-Length header exists.
@@ -580,7 +580,8 @@ public:
         return ConnectionToken::None;
     }
 
-    void setConnectionToken(ConnectionToken token)
+    /// Set the Connection header. Returns false when the field could not be set.
+    bool setConnectionToken(ConnectionToken token)
     {
         std::string value;
         switch (token)
@@ -596,10 +597,10 @@ public:
                 break;
             default:
                 remove(CONNECTION);
-                return;
+                return true;
         }
 
-        set(CONNECTION, std::move(value));
+        return set(CONNECTION, std::move(value));
     }
 
     /// Adds a new "Cookie" header entry with the given content. Returns false, and adds nothing,
@@ -832,12 +833,15 @@ public:
     using RequestCommon::setVerb;
     using RequestCommon::setVersion;
 
-    void setConnectionToken(Header::ConnectionToken token)
+    /// Set the Connection header. Returns false when the field could not be set.
+    bool setConnectionToken(Header::ConnectionToken token)
     {
-        editHeader().setConnectionToken(token);
+        return editHeader().setConnectionToken(token);
     }
-    void setContentType(std::string type) { editHeader().setContentType(std::move(type)); }
-    void setContentLength(int64_t length) { editHeader().setContentLength(length); }
+    /// Set the Content-Type header. Returns false when the type holds a byte a field cannot carry.
+    bool setContentType(std::string type) { return editHeader().setContentType(std::move(type)); }
+    /// Set the Content-Length header. Returns false when the field could not be set.
+    bool setContentLength(int64_t length) { return editHeader().setContentLength(length); }
 
     /// Add an HTTP header field. Returns false when the field holds a byte it cannot carry.
     bool add(std::string key, std::string value)
@@ -1239,14 +1243,17 @@ public:
     /// Returns false when the field holds a byte it cannot carry.
     bool set(const std::string& key, std::string value) { return _header.set(key, std::move(value)); }
 
-    /// Set the Connection header.
-    void setConnectionToken(Header::ConnectionToken token) { _header.setConnectionToken(token); }
+    /// Set the Connection header. Returns false when the field could not be set.
+    bool setConnectionToken(Header::ConnectionToken token)
+    {
+        return _header.setConnectionToken(token);
+    }
 
-    /// Set the Content-Type header.
-    void setContentType(std::string type) { _header.setContentType(std::move(type)); }
+    /// Set the Content-Type header. Returns false when the type holds a byte a field cannot carry.
+    bool setContentType(std::string type) { return _header.setContentType(std::move(type)); }
 
-    /// Set the Content-Length header.
-    void setContentLength(int64_t length) { _header.setContentLength(length); }
+    /// Set the Content-Length header. Returns false when the field could not be set.
+    bool setContentLength(int64_t length) { return _header.setContentLength(length); }
 
     /// Adds a new "Cookie" header entry with the given content. Returns false, and adds nothing,
     /// when the content holds a byte a field cannot carry.
