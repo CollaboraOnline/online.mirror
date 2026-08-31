@@ -318,7 +318,18 @@ class TopToolbar extends JSDialog.Toolbar {
 		this.reset();
 
 		var items = this.getToolItems();
-		this.builder.build(this.parentContainer, items);
+
+		var json = {
+			id: this.toolbarElementId,
+			dialogid: this.toolbarElementId,
+			jsontype: 'toolbar',
+			type: 'toolbox',
+			children: items,
+		};
+		var previousModel = this.model.getSnapshot();
+		this.model.fullUpdate(json);
+		this.restoreDynamicEntries(previousModel);
+		this.builder.build(this.parentContainer, this.model.getSnapshot().children);
 
 		if (window.mode.isMobile()) {
 			JSDialog.MakeScrollable(this.parentContainer, this.parentContainer.querySelector('div'));
@@ -392,14 +403,11 @@ class TopToolbar extends JSDialog.Toolbar {
 		case 'presentation':
 			{
 				// Fill the style combobox with Impress layouts
-				var stylesContainer = document.getElementById('styles');
-				if (stylesContainer && stylesContainer.updateEntries) {
-					var layoutEntries = [];
-					window.L.Styles.impressLayout.forEach(function(layout) {
-						layoutEntries.push(_(layout.text));
-					});
-					stylesContainer.updateEntries(layoutEntries);
-				}
+				var layoutEntries = [];
+				window.L.Styles.impressLayout.forEach(function(layout) {
+					layoutEntries.push(_(layout.text));
+				});
+				this.updateComboboxEntries('styles', layoutEntries);
 			}
 
 			if (this.parentContainer) {
@@ -530,12 +538,11 @@ class TopToolbar extends JSDialog.Toolbar {
 			}, this);
 		}
 
+		this.updateComboboxEntries('styles', entries);
+
 		var container = document.getElementById('styles');
-		if (container && container.updateEntries) {
-			container.updateEntries(entries);
-			if (this.stylesSelectValue)
-				container.onSetText(this.stylesSelectValue);
-		}
+		if (container && this.stylesSelectValue)
+			container.onSetText(this.stylesSelectValue);
 	}
 
 	processStateChangedCommand(commandName, state) {
