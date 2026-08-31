@@ -181,6 +181,35 @@ CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelReplace)
     CPPUNIT_ASSERT_EQUAL(size_t(2), aReadBack.aCategories[0].aValues.size());
 }
 
+CPPUNIT_TEST_FIXTURE(Test, testSecurityLabelHeaderVariants)
+{
+    // When the page style has distinct left/right and first-page headers/footers,
+    // the marking must land on every variant, not just the shared text.
+    createSwDoc();
+    uno::Reference<frame::XModel> xModel(mxComponent, uno::UNO_QUERY);
+
+    uno::Reference<beans::XPropertySet> xPageStyle(
+        getStyles(u"PageStyles"_ustr)->getByName(u"Standard"_ustr), uno::UNO_QUERY);
+    xPageStyle->setPropertyValue(u"HeaderIsOn"_ustr, cpo::uno::Any(true));
+    xPageStyle->setPropertyValue(u"HeaderIsShared"_ustr, cpo::uno::Any(false)); // left != right
+    xPageStyle->setPropertyValue(u"FooterIsOn"_ustr, cpo::uno::Any(true));
+    xPageStyle->setPropertyValue(u"FooterIsShared"_ustr, cpo::uno::Any(false));
+    xPageStyle->setPropertyValue(u"FirstIsShared"_ustr, cpo::uno::Any(false)); // first != rest
+
+    sw::seclabel::applyMarking(xModel, u"SECRET//X"_ustr, 0xC00000, u"Standard"_ustr);
+
+    auto areaText = [&](const OUString& rProp) {
+        uno::Reference<text::XText> xText
+            = getProperty<uno::Reference<text::XText>>(xPageStyle, rProp);
+        return getParagraphOfText(1, xText)->getString();
+    };
+    CPPUNIT_ASSERT_EQUAL(u"SECRET//X"_ustr, areaText(u"HeaderText"_ustr)); // shared/right
+    CPPUNIT_ASSERT_EQUAL(u"SECRET//X"_ustr, areaText(u"HeaderTextLeft"_ustr)); // left page
+    CPPUNIT_ASSERT_EQUAL(u"SECRET//X"_ustr, areaText(u"HeaderTextFirst"_ustr)); // first page
+    CPPUNIT_ASSERT_EQUAL(u"SECRET//X"_ustr, areaText(u"FooterTextLeft"_ustr)); // footer left
+    CPPUNIT_ASSERT_EQUAL(u"SECRET//X"_ustr, areaText(u"FooterTextFirst"_ustr)); // footer first
+}
+
 DECLARE_OOXMLEXPORT_TEST(testA4AndBorders, "a4andborders.docx")
 {
     /*

@@ -62,11 +62,11 @@ void appendDom(comphelper::SequenceAsHashMap& rGrabBag, const OUString& rKey,
     rGrabBag[rKey] <<= aList;
 }
 
-// Set one page area (header or footer) to the marking text, formatted.
-void setMarkingArea(const uno::Reference<beans::XPropertySet>& xPageStyle, const OUString& rIsOn,
-                    const OUString& rTextProp, const OUString& rMarking, sal_Int32 nColor)
+// Set one header/footer text property to the marking, formatted (bold, coloured,
+// centred), replacing any existing content. No-op if the property holds no text.
+void markText(const uno::Reference<beans::XPropertySet>& xPageStyle, const OUString& rTextProp,
+              const OUString& rMarking, sal_Int32 nColor)
 {
-    xPageStyle->setPropertyValue(rIsOn, cpo::uno::Any(true));
     uno::Reference<text::XText> xText(xPageStyle->getPropertyValue(rTextProp), uno::UNO_QUERY);
     if (!xText.is())
         return;
@@ -80,6 +80,30 @@ void setMarkingArea(const uno::Reference<beans::XPropertySet>& xPageStyle, const
     xProps->setPropertyValue(u"CharWeight"_ustr, cpo::uno::Any(awt::FontWeight::BOLD));
     xProps->setPropertyValue(u"CharColor"_ustr, cpo::uno::Any(nColor));
     xProps->setPropertyValue(u"ParaAdjust"_ustr, cpo::uno::Any(style::ParagraphAdjust_CENTER));
+}
+
+bool getBool(const uno::Reference<beans::XPropertySet>& xPageStyle, const OUString& rProp)
+{
+    bool bValue = true; // header/footer sharing defaults to on
+    xPageStyle->getPropertyValue(rProp) >>= bValue;
+    return bValue;
+}
+
+// Turn an area (header or footer) on and mark every variant the page style
+// actually shows: the shared/right text always, plus the left text when left and
+// right pages differ, and the first-page text when it differs. Creating the area
+// if it was off, so a label always appears regardless of the sharing settings.
+void setMarkingArea(const uno::Reference<beans::XPropertySet>& xPageStyle, const OUString& rIsOn,
+                    const OUString& rIsShared, const OUString& rText, const OUString& rTextLeft,
+                    const OUString& rTextFirst, const OUString& rMarking, sal_Int32 nColor)
+{
+    xPageStyle->setPropertyValue(rIsOn, cpo::uno::Any(true));
+
+    markText(xPageStyle, rText, rMarking, nColor);
+    if (!getBool(xPageStyle, rIsShared))
+        markText(xPageStyle, rTextLeft, rMarking, nColor);
+    if (!getBool(xPageStyle, u"FirstIsShared"_ustr))
+        markText(xPageStyle, rTextFirst, rMarking, nColor);
 }
 
 // Serialize a DOM document back to its XML string.
@@ -226,8 +250,10 @@ void applyMarking(const uno::Reference<frame::XModel>& xModel, const OUString& r
     if (!xPageStyle.is())
         return;
 
-    setMarkingArea(xPageStyle, u"HeaderIsOn"_ustr, u"HeaderText"_ustr, rMarking, nColor);
-    setMarkingArea(xPageStyle, u"FooterIsOn"_ustr, u"FooterText"_ustr, rMarking, nColor);
+    setMarkingArea(xPageStyle, u"HeaderIsOn"_ustr, u"HeaderIsShared"_ustr, u"HeaderText"_ustr,
+                   u"HeaderTextLeft"_ustr, u"HeaderTextFirst"_ustr, rMarking, nColor);
+    setMarkingArea(xPageStyle, u"FooterIsOn"_ustr, u"FooterIsShared"_ustr, u"FooterText"_ustr,
+                   u"FooterTextLeft"_ustr, u"FooterTextFirst"_ustr, rMarking, nColor);
 }
 
 bool readLabel(const uno::Reference<frame::XModel>& xModel, StanagLabel& rLabel)
