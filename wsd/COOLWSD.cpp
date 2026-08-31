@@ -1278,6 +1278,11 @@ bool queueMessageToForKit(const std::string& message)
     return true;
 }
 
+bool COOLWSD::queueMessageToPrimordialForKit(const std::string& message)
+{
+    return queueMessageToForKit(message);
+}
+
 void COOLWSD::requestTerminateSpareKits()
 {
     // Request existing spare kits to quit, to get replaced with ones that
