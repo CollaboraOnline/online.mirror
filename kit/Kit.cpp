@@ -2348,7 +2348,10 @@ std::shared_ptr<COKitDocument> Document::load(const std::shared_ptr<ChildSession
             if (viewRenderState)
             {
                 StringVector tokens(StringVector::tokenize(viewRenderState.get(), strlen(viewRenderState.get()), ';'));
-                spellOnline = tokens[0] == "S" ? "true" : "false";
+                // The part before the semicolon spells out the states that are on, in a fixed
+                // order that starts with spell checking, so its letter leads whenever it is on
+                // and the letters of the states after it follow.
+                spellOnline = tokens[0].starts_with('S') ? "true" : "false";
             }
             break;
         }
