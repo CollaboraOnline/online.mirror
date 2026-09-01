@@ -6484,7 +6484,7 @@ static void doc_postUnoCommand(COKitDocument* pThis, const char* pCommand, const
     {
         if (aCommand == ".uno:Save")
         {
-            COKitDocumentImpl* pRefusedDocument = static_cast<COKitDocumentImpl*>(pThis);
+            LibLODocument_Impl* pRefusedDocument = static_cast<LibLODocument_Impl*>(pThis);
             tools::JsonWriter aJson;
             aJson.put("commandName", pCommand);
             aJson.put("success", false);
