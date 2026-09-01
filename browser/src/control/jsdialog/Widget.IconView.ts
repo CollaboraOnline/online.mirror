@@ -24,6 +24,7 @@
  */
 
 declare var JSDialog: any;
+declare var UNOKey: any;
 
 function _createEntryImage(
 	parent: HTMLElement,
@@ -213,21 +214,23 @@ function _iconViewEntry(
 
 		const isInNotebookbar = builder.options.cssClass === 'notebookbar';
 		entryContainer.addEventListener('keydown', function (e: KeyboardEvent) {
-			if (e.key === ' ' || e.code === 'Space')
+			const isSpace = e.key === ' ' || e.code === 'Space';
+			const isEnter = e.key === 'Enter';
+			if (isSpace || isEnter) {
 				parentContainer.builderCallback(
 					'iconview',
 					'select',
 					entry.row,
 					builder,
 				);
-			else if (e.key === 'Enter')
 				parentContainer.builderCallback(
 					'iconview',
-					'activate',
-					entry.row,
+					'keypress',
+					isSpace ? UNOKey.SPACE : UNOKey.RETURN,
 					builder,
 				);
-			else if (
+				e.preventDefault();
+			} else if (
 				isInNotebookbar &&
 				['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)
 			) {
