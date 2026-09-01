@@ -179,6 +179,9 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 		var partList = (app.impress && app.impress.partList) || [];
 		var activeTab = (selectedPart >= 0 && selectedPart < this._previewTiles.length)
 			? selectedPart : 0;
+		var focusedTab = this._previewTiles.indexOf(document.activeElement);
+		if (focusedTab !== -1)
+			activeTab = focusedTab;
 		for (var i = 0; i < this._previewTiles.length; i++) {
 			var img = this._previewTiles[i];
 			if (!img)
@@ -1018,6 +1021,7 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 		if (document.activeElement === img) {
 			this.partsFocused = true;
 			this.partsFocusedApplied = true;
+			this._updateA11ySelection();
 		}
 	},
 });
