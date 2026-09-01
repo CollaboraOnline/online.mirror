@@ -604,6 +604,122 @@ function getDropdown(dropdownId) {
 	return cy.cGet('[id^="' + dropdownId + '"].modalpopup');
 }
 
+/// the entries of the menu popup that is open, in the order it shows them
+function getOpenMenuEntries() {
+	return cy.cGet('.modalpopup [role="listbox"] [role="option"]:visible');
+}
+
+/// a widget is addressed by the id it was declared with, kept in modelId; its
+/// DOM id carries a counter over the whole notebookbar
+function widgetButtonSelector(modelId) {
+	return '[modelId="' + modelId + '"] button';
+}
+
+/// get the button of the widget declared with the given id
+function getWidgetButton(modelId) {
+	return cy.cGet(widgetButtonSelector(modelId));
+}
+
+/// whether that button is on screen - a folded overflow group hides its own
+function isWidgetButtonShown(win, modelId) {
+	const button = win.document.querySelector(widgetButtonSelector(modelId));
+	return !!button && button.checkVisibility();
+}
+
+// A menu button of a notebookbar tab whose menu has several entries and no
+// state on any of them, so its popup opens with nothing to focus by id.
+// Returns { id, overflow } or null, read from the model the client built.
+function findStatelessMenuButton(win, tabName) {
+	const definitions = win.JSDialog.MenuDefinitions;
+	// The wrapper exposes getFullJSON; getTabsJSON sits on the impl it holds.
+	const model = win.app.map.uiManager.notebookbar.getFullJSON();
+
+	function findPage(node) {
+		if (!node) return null;
+		if (node.type === 'tabpage')
+			return node.name === tabName ? node : null;
+
+		let page = null;
+		(node.children || []).forEach(function (child) {
+			page = page || findPage(child);
+		});
+		return page;
+	}
+
+	function isStateless(entries) {
+		return !!entries && entries.length > 1 && entries.every(function (entry) {
+			return entry.type === undefined && entry.items === undefined &&
+				entry.checked === undefined && entry.selected === undefined &&
+				entry.statusCommand === undefined;
+		});
+	}
+
+	let found = null;
+
+	function walk(node, overflow) {
+		if (!node || found) return;
+
+		if (node.type === 'overflowgroup') overflow = 'overflow-button-' + node.id;
+
+		// A menu button declares itself as '<widget id>:<menu id>'.
+		if (node.type === 'menubutton' && typeof node.id === 'string' &&
+			node.id.indexOf(':') > 0) {
+			const parts = node.id.split(':');
+			if (isStateless(definitions.get(parts[1])))
+				found = { id: parts[0], overflow: overflow };
+		}
+
+		(node.children || []).forEach(function (child) {
+			walk(child, overflow);
+		});
+	}
+
+	walk(findPage(model), null);
+	return found;
+}
+
+// Ask core for the current undo depth with a commandvalues round-trip,
+// answered from the live undo manager. The reply is a bare number, for
+// example "commandvalues: 3".
+function getUndoCount(win) {
+	var spy;
+	var ownSpy = false;
+	var baseline = 0;
+	var result = { count: 0 };
+
+	cy.then(function() {
+		if (win.app.socket._onMessage.restore) {
+			spy = win.app.socket._onMessage;
+		} else {
+			spy = Cypress.sinon.spy(win.app.socket, '_onMessage');
+			ownSpy = true;
+		}
+		baseline = spy.callCount;
+		win.app.socket.sendMessage('commandvalues command=.uno:UndoCount');
+	});
+
+	cy.wrap(null).should(function() {
+		var reply = spy.getCalls().slice(baseline).reverse().find(function(call) {
+			var textMsg = call.args && call.args[0] && call.args[0].textMsg;
+			return textMsg && /^commandvalues:\s*\d+\s*$/.test(textMsg);
+		});
+		expect(reply, '.uno:UndoCount reply').to.exist;
+		result.count = parseInt(reply.args[0].textMsg.replace('commandvalues:', '').trim(), 10);
+	});
+
+	return cy.then(function() {
+		if (ownSpy && spy && spy.restore)
+			spy.restore();
+		return result.count;
+	});
+}
+
+// Undo every change, undoing as many steps as core reports on the stack.
+// A step can still land on the stack while the earlier ones are being
+// undone, for example from a click whose change reached core late, so the
+// count is read again after undoing and the round is repeated until it
+// reports zero.
+
 // Undo all changes until undo is no longer possible
 function undoAll() {
 	cy.log('>> undoAll - start');
@@ -665,4 +781,9 @@ module.exports.getNbIcon = getNbIcon;
 module.exports.getCompactIconArrow = getCompactIconArrow;
 module.exports.getNbIconArrow = getNbIconArrow;
 module.exports.getDropdown = getDropdown;
+module.exports.getOpenMenuEntries = getOpenMenuEntries;
+module.exports.getWidgetButton = getWidgetButton;
+module.exports.isWidgetButtonShown = isWidgetButtonShown;
+module.exports.findStatelessMenuButton = findStatelessMenuButton;
+module.exports.getUndoCount = getUndoCount;
 module.exports.undoAll = undoAll;
