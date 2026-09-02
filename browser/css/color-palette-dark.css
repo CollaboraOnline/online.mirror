@@ -36,9 +36,9 @@
 	--color-primary-darker: #004b86;
 	--color-primary-lighter: #83beec; /* background-color */
 
-	--color-border: #121212;
-	--color-border-dark: #1E1E1E; /* select */
-	--color-border-darker: #000;  /* hover */
+	--color-border: #767676;
+	--color-border-dark: #767676; /* select */
+	--color-border-darker: #8e8e8e;  /* hover */
 	--color-border-dark-63: #5e5e5e;
 	--color-border-lighter: #303030; /* disabled */
 
