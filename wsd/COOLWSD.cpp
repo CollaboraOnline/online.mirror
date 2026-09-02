@@ -825,6 +825,9 @@ inline std::string getServiceURI(const std::string &sub, bool asAdmin = false)
 std::atomic<int> COOLWSD::ForKitProcId(-1);
 std::shared_ptr<ForKitProcess> COOLWSD::ForKitProc;
 bool COOLWSD::NoCapsForKit = false;
+bool COOLWSD::RequireLandlock = false;
+bool COOLWSD::LandlockAvailable = false;
+bool COOLWSD::CapabilityJailUnusable = false;
 bool COOLWSD::NoSeccomp = false;
 bool COOLWSD::AdminEnabled = true;
 bool COOLWSD::UnattendedRun = false;
@@ -1342,6 +1345,19 @@ int runInThrowawayFork(const char* name, const std::function<int()>& body)
     int status = WEXITSTATUS(wstatus);
     LOG_DBG(name << " status: " << std::hex << status << std::dec);
     return status;
+}
+
+/// True when the kernel here lets a process apply landlock rules.
+/// Landlock rules cannot be lifted once applied, so this runs in a child.
+bool testLandlock()
+{
+    return Landlock::isSupported() &&
+           runInThrowawayFork("testLandlock",
+                              []
+                              {
+                                  return Landlock::lock(std::vector<Landlock::Permission>()) ? 1
+                                                                                             : 0;
+                              }) == 1;
 }
 
 } // namespace
@@ -2290,6 +2306,12 @@ void COOLWSD::innerInitialize(Poco::Util::Application& self)
     if constexpr (Util::isKitInProcess())
         SingleKit = true;
 #endif
+
+    if (!NoCapsForKit && !EnableMountNamespaces)
+    {
+        LandlockAvailable = testLandlock();
+        LOG_INF("Landlock available as a fallback jail: " << LandlockAvailable);
+    }
 #endif
 
     // LanguageTool configuration
@@ -2910,6 +2932,10 @@ bool COOLWSD::checkAndRestoreForKit()
                 {
                     LOG_INF("Forkit process [" << pid << "] exited with code: " <<
                             WEXITSTATUS(status) << '.');
+
+                    // EX_CONFIG is coolforkit-caps saying it holds no capabilities.
+                    if (WEXITSTATUS(status) == EX_CONFIG)
+                        CapabilityJailUnusable = true;
                 }
                 else
                 {
@@ -3147,8 +3173,22 @@ bool COOLWSD::createForKit()
 
     args.push_back("--version");
 
-    if (NoCapsForKit)
+    const bool capabilityJailWasTheChoice = !EnableMountNamespaces && !NoCapsForKit;
+    RequireLandlock = capabilityJailWasTheChoice && CapabilityJailUnusable && LandlockAvailable;
+    const bool usingCapabilityJail = capabilityJailWasTheChoice && !RequireLandlock;
+
+    if (usingCapabilityJail && CapabilityJailUnusable)
+    {
+        LOG_FTL("The chroot built from file capabilities does not work here and landlock is "
+                "unavailable, so a document can be isolated in no way.");
+        return false;
+    }
+
+    if (NoCapsForKit || RequireLandlock)
         args.push_back("--nocaps");
+
+    if (RequireLandlock)
+        args.push_back("--require-landlock");
 
     if (NoSeccomp)
         args.push_back("--noseccomp");
@@ -3172,7 +3212,7 @@ bool COOLWSD::createForKit()
     std::string forKitPath = "/usr/bin/valgrind";
 #else
     std::string forKitPath = std::move(parentPath);
-    if (EnableMountNamespaces || NoCapsForKit)
+    if (!usingCapabilityJail)
     {
         forKitPath += "coolforkit-ns";
         if (EnableMountNamespaces)
@@ -3211,6 +3251,9 @@ bool COOLWSD::createForKit()
 
     LastForkRequestTimes[defaultConfigId] = std::chrono::steady_clock::now();
     int child = createForkit(forKitPath, args);
+    if (child == -1 && usingCapabilityJail)
+        CapabilityJailUnusable = true;
+
     ForKitProcId = child;
 
     LOG_INF("Forkit process launched: " << ForKitProcId);
@@ -3221,6 +3264,14 @@ bool COOLWSD::createForKit()
     const int balance = COOLWSD::NumPreSpawnedChildren - OutstandingForks[defaultConfigId];
     if (balance > 0)
         rebalanceChildren(defaultConfigId, balance);
+
+    // Answering true with no forkit lets the next attempt start coolforkit-ns instead.
+    if (ForKitProcId == -1 && usingCapabilityJail && LandlockAvailable)
+    {
+        LOG_WRN("The coolforkit-caps helper did not start. The next attempt uses a landlock "
+                "jail.");
+        return true;
+    }
 
     return ForKitProcId != -1;
 }
