@@ -554,8 +554,12 @@ window.L.Map = window.L.Evented.extend({
 
 	removeView: function(viewid) {
 		var username = this._viewInfo[viewid].username;
-		delete this._viewInfoByUserName[this._viewInfo[viewid].username];
 		delete this._viewInfo[viewid];
+
+		// Keep the entry while the same user still has another view.
+		if (this.getViewId(username) === -1)
+			delete this._viewInfoByUserName[username];
+
 		this.fire('postMessage', {msgId: 'View_Removed', args: {Deprecated: true, ViewId: viewid}});
 
 		// Fire last, otherwise not all events are handled correctly.

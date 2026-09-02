@@ -1915,8 +1915,8 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 		var obj = JSON.parse(textMsg.substring('cellviewcursor:'.length + 1));
 		var viewId = parseInt(obj.viewId);
 
-		// Ignore if viewid is same as ours
-		if (viewId === this._viewId) {
+		// Ignore our own view and views we don't know
+		if (viewId === this._viewId || !this._map._viewInfo[viewId]) {
 			return;
 		}
 
@@ -1990,6 +1990,10 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 
 		OtherViewCellCursorSection.removeView(viewId);
 		OtherViewGraphicSelectionSection.removeView(viewId);
+
+		if (this._printTwipsMessagesForReplay)
+			this._printTwipsMessagesForReplay.removeView(viewId);
+
 		this._map.removeView(viewId);
 	},
 
@@ -4312,6 +4316,14 @@ window.L.MessageStore = window.L.Class.extend({
 				msgs[msgType] = [];
 			});
 		}
+	},
+
+	// Drop the saved messages of a view that is gone.
+	removeView: function (viewId) {
+		const msgs = this._othersMessages;
+		Object.keys(msgs).forEach(function (msgType) {
+			delete msgs[msgType][viewId];
+		});
 	},
 
 	save: function (msgType, textMsg, viewId) {
