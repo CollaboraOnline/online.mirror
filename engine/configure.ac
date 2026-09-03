@@ -3233,6 +3233,12 @@ elif test -n "$enable_ccache" -o \( "$enable_ccache" = "" -a "$enable_icecream" 
             # check that it has MSVC support (it should recognize it in CCACHE_COMPILERTYPE)
             rm -f conftest.txt
             AC_MSG_CHECKING([whether $CCACHE has MSVC support])
+            dnl wsl passes on only what WSLENV names. Under WSL_ONLY_AS_HELPER
+            dnl configure runs in wsl while the build runs native Windows tools,
+            dnl and a wsl configure and build is a Linux one instead.
+            if test -n "$WSL_ONLY_AS_HELPER"; then
+                export WSLENV=${WSLENV:+$WSLENV:}CCACHE_COMPILERTYPE:CCACHE_LOGFILE
+            fi
             CCACHE_COMPILERTYPE=msvc CCACHE_LOGFILE=conftest.txt $CCACHE echo >/dev/null 2>/dev/null
             if grep -q 'Config: (environment) compiler_type = msvc' conftest.txt; then
                 AC_MSG_RESULT(yes)
@@ -4524,6 +4530,33 @@ AC_SUBST(SHOWINCLUDES_PREFIX)
 #
 # prefix C with ccache if needed
 #
+dnl Under wsl, CC becomes two programs with two different launchers:
+dnl
+dnl     /mnt/c/.../ccache.exe  C:/PROGRA~1/.../cl.exe  -c conftest.c
+dnl     \__ the shell runs this __/\__ ccache runs this __/
+dnl
+dnl and each launcher can only open one spelling. The shell reaches a Windows
+dnl binary through /mnt/<drive>/, so ccache keeps that form; ccache is itself a
+dnl Windows process by then and needs C:/, so the compiler takes that one.
+dnl
+dnl Only CC and CXX are respelled. MSVC_CXX and the other compiler variables
+dnl stay as the shell writes them and are converted later, when the /mnt/<drive>/
+dnl postprocessing rewrites config_host.mk for make.
+if test "$CCACHE" != "" -a -n "$WSL_ONLY_AS_HELPER"; then
+    dnl PathFormat takes one pathname. MSVC detection shortened CC to an 8.3
+    dnl path, so the first space in it is the one before the flags.
+    cc_prog=`echo "$CC" | sed 's/ .*//'`
+    dnl @<:@ and @:>@ are how autoconf spells [ and ].
+    cc_rest=`echo "$CC" | sed 's/^@<:@^ @:>@*//'`
+    PathFormat "$cc_prog"
+    CC="$formatted_path$cc_rest"
+    cxx_prog=`echo "$CXX" | sed 's/ .*//'`
+    cxx_rest=`echo "$CXX" | sed 's/^@<:@^ @:>@*//'`
+    PathFormat "$cxx_prog"
+    CXX="$formatted_path$cxx_rest"
+    AC_MSG_NOTICE([compiler named for ccache as $CC])
+    AC_MSG_NOTICE([and CXX as $CXX])
+fi
 if test "$CCACHE" != ""; then
     AC_MSG_CHECKING([whether $CC_BASE is already ccached])
 
