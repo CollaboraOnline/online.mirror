@@ -4922,6 +4922,19 @@ void COKitDocumentImpl::registerCallback(COKitCallback pCallback, void* pData)
 
             pair.second->removeViewStates(nView);
         }
+
+        auto* viewShellCallback = pViewShell->getCOKitViewCallback();
+        for (auto* pShell = SfxViewShell::GetFirst(); pShell != nullptr;
+             pShell = SfxViewShell::GetNext(*pShell))
+        {
+            if (pShell->getCOKitViewCallback() == viewShellCallback)
+            {
+                pShell->setCOKitViewCallback(nullptr);
+            }
+        }
+
+        mpCallbackFlushHandlers.erase(nView);
+        return;
     }
 
     auto pCallbackFlushHandler = std::make_shared<CallbackFlushHandler>(this, pCallback, pData);
