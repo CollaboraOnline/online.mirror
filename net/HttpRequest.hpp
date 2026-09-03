@@ -714,12 +714,7 @@ public:
     /// a URI either.
     [[nodiscard]] static bool hasOnlyValidRequestLineBytes(const std::string_view field)
     {
-        return std::none_of(field.begin(), field.end(),
-                            [](const char ch) -> bool
-                            {
-                                const unsigned char byte = static_cast<unsigned char>(ch);
-                                return byte <= 0x20 || byte == 0x7f;
-                            });
+        return net::hasNoSpaceOrControlByte(field);
     }
 
     /// Get the request URL.

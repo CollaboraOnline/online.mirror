@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include <algorithm>
 #include <chrono>
 #include <functional>
 #include <string>
@@ -133,6 +134,18 @@ inline std::string_view getDefaultPortForScheme(const std::string_view scheme)
         return "80";
     return std::string_view();
 }
+
+inline bool hasNoSpaceOrControlByte(const std::string_view text)
+{
+    return std::none_of(text.begin(), text.end(),
+                        [](const char ch) -> bool
+                        {
+                            const unsigned char byte = static_cast<unsigned char>(ch);
+                            return byte <= 0x20 || byte == 0x7f;
+                        });
+}
+
+inline bool isValidHost(const std::string_view host) { return hasNoSpaceOrControlByte(host); }
 
 // Returns true if both URIs are equivalent for an origin check. Implicit
 // default port numbers are considered equivalent if explicitly included in the

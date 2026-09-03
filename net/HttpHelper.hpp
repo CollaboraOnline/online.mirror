@@ -19,6 +19,9 @@
 #include <common/Log.hpp>
 #include <common/Uri.hpp>
 #include <net/HttpRequest.hpp>
+#include <net/NetUtil.hpp>
+
+#include <Poco/URI.h>
 
 #include <memory>
 #include <string>
@@ -62,14 +65,37 @@ void sendFile(const std::shared_ptr<StreamSocket>& socket, const std::string& pa
               http::Response& response, bool noCache = false, bool deflate = false,
               bool headerOnly = false);
 
-/// Verifies that the given WOPISrc is properly URI-encoded.
-/// Warns if it isn't and, in debug builds, closes the socket (if given) and returns false.
-/// The idea is to only warn in release builds, but to help developers in debug builds.
-/// Returns false only in debug build.
+/// Verifies that the host in the given WOPISrc holds only bytes a host name can hold, and that
+/// the WOPISrc is properly URI-encoded. A malformed host gets an HTTP error in every build. An
+/// unencoded WOPISrc only warns in release builds, but closes the socket in debug builds, to
+/// help developers.
 inline bool verifyWOPISrc(const std::string& uri, const std::string& wopiSrc,
                           const std::shared_ptr<StreamSocket>& socket = {},
                           LOG_CAPTURE_CALLER_DECLARATION)
 {
+    try
+    {
+        const Poco::URI uriWopiSrc(wopiSrc);
+        const std::string& host = uriWopiSrc.getHost();
+        if (!net::isValidHost(host))
+        {
+            LOG_ERR_S("WOPISrc validation error: malformed host [" << host << "] in WOPISrc ["
+                                                                   << wopiSrc << "] in URL [" << uri
+                                                                   << ']');
+            if (socket)
+            {
+                sendErrorAndShutdown(http::StatusCode::BadRequest, socket,
+                                     "Malformed host in WOPISrc");
+            }
+
+            return false;
+        }
+    }
+    catch (const Poco::SyntaxException&)
+    {
+        // A WOPISrc Poco cannot parse is left to the caller that parses it again.
+    }
+
     // getQueryParameters(), which is used to extract wopiSrc, decodes the values.
     // Compare with the URI. WopiSrc is complex enough to require encoding.
     // But, if it matches, check if the WOPISrc actually needed encoding.

@@ -21,6 +21,7 @@
 #include <common/HexUtil.hpp>
 #include <common/Log.hpp>
 #include <common/Util.hpp>
+#include <net/NetUtil.hpp>
 #if !MOBILEAPP
 #include <wsd/HostUtil.hpp>
 #endif // !MOBILEAPP
@@ -35,6 +36,12 @@
 
 namespace
 {
+
+[[maybe_unused]] void checkHostHeader(const std::string& host)
+{
+    if (!host.empty() && !net::isValidHost(host))
+        throw BadRequestException("Malformed Host header: [" + host + ']');
+}
 
 std::map<std::string, std::string> getParams(const std::string& uri)
 {
@@ -83,7 +90,10 @@ RequestDetails::RequestDetails(Poco::Net::HTTPRequest &request, const std::strin
     _closeConnection = !request.getKeepAlive(); // HTTP/1.1: closeConnection true w/ "Connection: close" only!
     // request.getHost fires an exception on mobile.
     if constexpr (!Util::isMobileApp())
+    {
         _hostUntrusted = request.getHost();
+        checkHostHeader(_hostUntrusted);
+    }
 
     processURI();
 }
@@ -107,7 +117,10 @@ RequestDetails::RequestDetails(http::RequestParser& request, const std::string& 
         !request.isKeepAlive(); // HTTP/1.1: closeConnection true w/ "Connection: close" only!
     // request.getHost fires an exception on mobile.
     if constexpr (!Util::isMobileApp())
+    {
         _hostUntrusted = request.get("Host");
+        checkHostHeader(_hostUntrusted);
+    }
 
     processURI();
 }
