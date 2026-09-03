@@ -3254,6 +3254,11 @@ elif test -n "$enable_ccache" -o \( "$enable_ccache" = "" -a "$enable_icecream" 
                 ;;
             *)
                 # for sharing code below, reuse CCACHE env var
+                dnl AC_PATH_PROG caches on a variable named after CCACHE rather than
+                dnl after the program, and the ccache lookup above already filled it.
+                dnl Without clearing it this one finds nothing new and reports that
+                dnl same ccache as sccache.
+                unset ac_cv_path_CCACHE
                 AC_PATH_PROG([CCACHE],[sccache],[not found])
                 if test "$CCACHE" != "not found"; then
                     CCACHE=`win_short_path_for_make "$CCACHE"`
