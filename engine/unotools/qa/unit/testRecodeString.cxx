@@ -21,9 +21,11 @@ class Test : public CppUnit::TestFixture
 {
 public:
     void testRecodeString();
+    void testWingdings3ArrowBullet();
 
     CPPUNIT_TEST_SUITE(Test);
     CPPUNIT_TEST(testRecodeString);
+    CPPUNIT_TEST(testWingdings3ArrowBullet);
 
     CPPUNIT_TEST_SUITE_END();
 };
@@ -36,6 +38,20 @@ void Test::testRecodeString()
     OUString aStr(u"u"_ustr);
     pConversion->RecodeString(aStr, 0, 1);
     CPPUNIT_ASSERT_EQUAL(u""_ustr, aStr);
+#endif
+}
+
+void Test::testWingdings3ArrowBullet()
+{
+// note, the below won't work with mergelibs as the class is not visible to the linker
+#if !ENABLE_MERGELIBS
+    // A Wingdings 3 bullet at character 0x86 must recode to a character that OpenSymbol
+    // actually has a glyph for. It used to recode to a private-use character that only the
+    // long-superseded StarSymbol font carried, which left the bullet with no visible glyph.
+    ConvertChar const* pConversion = ConvertChar::GetRecodeData(u"wingdings3", u"opensymbol");
+    OUString aStr(u""_ustr);
+    pConversion->RecodeString(aStr, 0, 1);
+    CPPUNIT_ASSERT_EQUAL(u"▸"_ustr, aStr);
 #endif
 }
 
