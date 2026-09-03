@@ -116,10 +116,11 @@ void LineEndStyleBoxes::FillBox(End& rEnd, tools::Long nExtraStyle)
         const tools::Long nCount = mxLineEndList->Count();
         for (const OUString& rApiName : ARROW_STYLES)
         {
+            OUString sInternalName = SvxUnogetInternalNameForItem(sal_uInt16(XATTR_LINEEND), rApiName);
             for (tools::Long i = 0; i < nCount; ++i)
             {
                 const OUString& rName = mxLineEndList->GetLineEnd(i)->GetName();
-                if (SvxUnogetApiNameForItem(sal_uInt16(XATTR_LINEEND), rName) != rApiName)
+                if (sInternalName != rName)
                     continue;
 
                 rBox.append(OUString::number(i), rName);
