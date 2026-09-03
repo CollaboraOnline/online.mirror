@@ -3213,18 +3213,21 @@ elif test -n "$enable_ccache" -o \( "$enable_ccache" = "" -a "$enable_icecream" 
         CCACHE_DEPEND_MODE=1
         ;;
     *)
+        if test "$_os" = "WINNT"; then
+            ccache_ext=.exe # e.g. openssl build needs ccache.exe, not just ccache
+        fi
         # try to use our own ccache if it is available and CCACHE was not already defined
         if test -z "$CCACHE"; then
-            if test "$_os" = "WINNT"; then
-                ccache_ext=.exe # e.g. openssl build needs ccache.exe, not just ccache
-            fi
             if test -n "$LODE_HOME" -a -x "$LODE_HOME/opt/bin/ccache$ccache_ext" ; then
                 CCACHE="$LODE_HOME/opt/bin/ccache$ccache_ext"
             elif test -x "/opt/lo/bin/ccache$ccache_ext"; then
                 CCACHE="/opt/lo/bin/ccache$ccache_ext"
             fi
         fi
-        AC_PATH_PROG([CCACHE],[ccache],[not found])
+        dnl ccache.exe rather than ccache, so that a build shell whose PATH is a
+        dnl Linux one does not record a binary make could never run. The suffix is
+        dnl empty off Windows, and Cygwin resolves the bare name to the .exe anyway.
+        AC_PATH_PROG([CCACHE],[ccache$ccache_ext],[not found])
         if test "$CCACHE" != "not found" -a "$_os" = "WINNT"; then
             CCACHE=`win_short_path_for_make "$CCACHE"`
             # check that it has MSVC support (it should recognize it in CCACHE_COMPILERTYPE)
