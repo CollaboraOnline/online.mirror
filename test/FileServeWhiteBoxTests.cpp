@@ -480,6 +480,13 @@ void FileServeTests::testCSPMergeNewlines()
         LOK_ASSERT_EQUAL_STR(" https://example.com", csp.getDirective("frame-ancestors"));
         LOK_ASSERT_EQUAL_STR(" https://example.com", csp.getDirective("img-src"));
     }
+
+    // Value on new line in a config file written with carriage returns.
+    {
+        ContentSecurityPolicy csp("\r\n        frame-ancestors https://example.com; img-src https://example.com\r\n    ");
+        LOK_ASSERT_EQUAL_STR(" https://example.com", csp.getDirective("frame-ancestors"));
+        LOK_ASSERT_EQUAL_STR(" https://example.com", csp.getDirective("img-src"));
+    }
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(FileServeTests);
