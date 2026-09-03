@@ -14116,6 +14116,15 @@ if test -n "$UNIX_ONLY_AS_HELPER"; then
     SRC_ROOT="$formatted_path"
     PathFormat "$BUILDDIR"
     BUILDDIR="$formatted_path"
+    # CCACHE_BASEDIR was copied from BUILDDIR long before this, while it still
+    # held the shell's spelling, so it has to follow it here. ccache compares it
+    # against the paths on the command line as plain text: gbuild builds those
+    # out of BUILDDIR, and a base directory written any other way matches none
+    # of them and quietly rewrites nothing.
+    if test -n "$CCACHE_BASEDIR"; then
+        PathFormat "$CCACHE_BASEDIR"
+        CCACHE_BASEDIR="$formatted_path"
+    fi
     # TARFILE_LOCATION and JAVAINTERPRETER are used in the validator scripts
     PathFormat "$TARFILE_LOCATION"
     TARFILE_LOCATION="$formatted_path"
