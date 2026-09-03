@@ -479,6 +479,15 @@ void FileServeTests::testCSPMergeNewlines()
         LOK_ASSERT(policyHasSources(csp, "frame-ancestors", "https://example.com"));
         LOK_ASSERT(policyHasSources(csp, "img-src", "https://example.com"));
     }
+
+    // Value on new line in a config file written with carriage returns.
+    {
+        ContentSecurityPolicy csp;
+        csp.merge(
+            "\r\n        frame-ancestors https://example.com; img-src https://example.com\r\n    ");
+        LOK_ASSERT(policyHasSources(csp, "frame-ancestors", "https://example.com"));
+        LOK_ASSERT(policyHasSources(csp, "img-src", "https://example.com"));
+    }
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(FileServeTests);
