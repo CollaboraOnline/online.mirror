@@ -1593,10 +1593,10 @@ struct COKit
      * in heavy use. This provides a critical tool for inspecting
      * relevant internal state.
      *
-     * @param pOptions future expansion - string options.
-     * @param pState - heap allocated, C string containing the state dump.
+     * @param aOptions future expansion - string options.
+     * @return the state dump.
      */
-    virtual void dumpState(const char* pOptions, char** pState) = 0;
+    virtual std::string dumpState(std::string_view aOptions) = 0;
 
     virtual std::string extractRequest(const char* pFilePath) = 0;
 

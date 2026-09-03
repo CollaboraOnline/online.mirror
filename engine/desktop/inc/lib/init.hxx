@@ -454,7 +454,7 @@ namespace desktop {
                      void* pData) override;
         void sendDialogEvent(unsigned long long int nKitWindowId, const char* pArguments) override;
         void setOption(const char* pOption, const char* pValue) override;
-        void dumpState(const char* pOptions, char** pState) override;
+        std::string dumpState(std::string_view aOptions) override;
         std::string extractRequest(const char* pFilePath) override;
         void trimMemory(int nTarget) override;
         void* startURP(

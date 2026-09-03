@@ -3085,11 +3085,9 @@ void Document::dumpState(std::ostream& oss)
     }
     oss << '\n';
 
-    char *pState = nullptr;
-    _loKit->dumpState("", &pState);
+    std::string stateStr = _loKit->dumpState("");
     oss << "lok state:\n";
-    if (pState) {
-        std::string stateStr(pState);
+    if (!stateStr.empty()) {
         std::string fileId = Uri::getFilenameFromURL(Uri::decode(_jailedUrl));
         Util::replaceAllSubStr(stateStr, fileId, _obfuscatedFileId);
         oss << stateStr;

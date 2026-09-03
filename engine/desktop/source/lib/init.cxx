@@ -3230,7 +3230,7 @@ static void lo_sendDialogEvent(COKit* pThis,
 
 static void lo_setOption(COKit* pThis, const char* pOption, const char* pValue);
 
-static void lo_dumpState(COKit* pThis, const char* pOptions, char** pState);
+static std::string lo_dumpState(COKit* pThis, std::string_view aOptions);
 
 static std::string lo_extractDocumentStructureRequest(COKit* pThis, const char* pFilePath,
                                                 const char* pFilter);
@@ -3315,9 +3315,9 @@ void COKitImpl::setOption(const char* pOption, const char* pValue)
     lo_setOption(this, pOption, pValue);
 }
 
-void COKitImpl::dumpState(const char* pOptions, char** pState)
+std::string COKitImpl::dumpState(std::string_view aOptions)
 {
-    lo_dumpState(this, pOptions, pState);
+    return lo_dumpState(this, aOptions);
 }
 
 std::string COKitImpl::extractRequest(const char* pFilePath)
@@ -6390,22 +6390,18 @@ static void lo_setOption(COKit* /*pThis*/, const char *pOption, const char* pVal
 #endif
 }
 
-static void lo_dumpState (COKit* pThis, const char* /* pOptions */, char** pState)
+static std::string lo_dumpState (COKit* pThis, std::string_view /* aOptions */)
 {
-    if (!pState)
-        return;
-
     // NB. no SolarMutexGuard since this may be caused in some extremis / deadlock
     SetLastExceptionMsg();
 
-    *pState = nullptr;
     OStringBuffer aState(4096*256);
 
     COKitImpl* pLib = static_cast<COKitImpl*>(pThis);
 
     pLib->dumpState(aState);
 
-    *pState = convertOString(aState.makeStringAndClear());
+    return convertOStringToStdString(aState.makeStringAndClear());
 }
 
 void COKitImpl::dumpState(rtl::OStringBuffer &rState)
