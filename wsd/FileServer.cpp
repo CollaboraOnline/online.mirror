@@ -88,6 +88,13 @@ using Poco::Util::Application;
 // WASM files are in the order of 30 MB, however,
 constexpr auto MaxFileSizeToCacheInBytes = 50 * 1024 * 1024;
 
+// The largest body the settings fetch endpoints accept from a remote server, in bytes. The files
+// they relay are settings JSON, xcu configuration and wordbook dictionaries. The biggest of those
+// in practice is a wordbook, and a whole-language spelling dictionary, the ceiling for one, is
+// about 4.5 MB, so 20 MB leaves generous headroom while bounding what one request can hold in
+// memory on the thread that serves every client.
+constexpr int64_t MaxSettingsFetchSizeBytes = 20 * 1024 * 1024;
+
 namespace
 {
 
@@ -2197,6 +2204,15 @@ void FileServerRequestHandler::fetchWopiSettingConfigs(const Poco::Net::HTTPRequ
         wopiSession->asyncShutdown();
 
         const std::shared_ptr<const http::Response> httpResponse = wopiSession->response();
+        if (httpResponse->state() != http::Response::State::Complete)
+        {
+            LOG_ERR("Failed to fetch wopi settings config from WopiHost["
+                    << uriAnonym << "]: the transfer did not complete");
+            sendError(http::StatusCode::BadGateway, request, socket, shortMessage,
+                      "The transfer did not complete");
+            return;
+        }
+
         const http::StatusLine statusLine = httpResponse->statusLine();
         const http::StatusCode statusCode = statusLine.statusCode();
         if (statusCode != http::StatusCode::OK && statusCode != http::StatusCode::NoContent)
@@ -2221,17 +2237,9 @@ void FileServerRequestHandler::fetchWopiSettingConfigs(const Poco::Net::HTTPRequ
 
     LOG_DBG("Fetching wopi setting config from WopiHost[" << uriAnonym << ']');
     auto httpSession = StorageConnectionManager::getHttpSession(sharedUri);
+    httpSession->setBodySizeLimit(MaxSettingsFetchSizeBytes);
     httpSession->setFinishedHandler(std::move(finishedCallback));
     httpSession->asyncRequest(httpRequest, *COOLWSD::getWebServerPoll());
-}
-
-namespace
-{
-// The largest body the wordbook fetch accepts from the storage server, in bytes. A whole-language
-// spelling dictionary, the ceiling for one of these files, is about 4.5 MB, so 20 MB leaves
-// generous headroom while bounding what one request can hold in memory on the thread that serves
-// every client.
-constexpr int64_t MaxWordbookFileSizeBytes = 20 * 1024 * 1024;
 }
 
 void FileServerRequestHandler::fetchWordbook(const Poco::Net::HTTPRequest& request,
@@ -2260,7 +2268,7 @@ void FileServerRequestHandler::fetchWordbook(const Poco::Net::HTTPRequest& reque
     httpRequest.header().set("Content-Type", "text/plain");
 
     auto httpSession = StorageConnectionManager::getHttpSession(dicUrl);
-    httpSession->setBodySizeLimit(MaxWordbookFileSizeBytes);
+    httpSession->setBodySizeLimit(MaxSettingsFetchSizeBytes);
     auto httpResponse = httpSession->syncRequest(httpRequest);
 
     if (httpResponse->state() != http::Response::State::Complete)
