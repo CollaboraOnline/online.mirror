@@ -39,6 +39,7 @@ class FileServeTests : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(testPreProcessedFileRoundtrip);
     CPPUNIT_TEST(testPreProcessedFileSubstitution);
     CPPUNIT_TEST(testCSPMergeNewlines);
+    CPPUNIT_TEST(testCSPKeepsOutBadSources);
     CPPUNIT_TEST_SUITE_END();
 
     void testUIDefaults();
@@ -47,6 +48,7 @@ class FileServeTests : public CPPUNIT_NS::TestFixture
     void testPreProcessedFileRoundtrip();
     void testPreProcessedFileSubstitution();
     void testCSPMergeNewlines();
+    void testCSPKeepsOutBadSources();
 
     void preProcessedFileSubstitution(const std::string_view testname,
                                       const Util::UnorderedStringMap<std::string>& variables);
@@ -486,6 +488,55 @@ void FileServeTests::testCSPMergeNewlines()
         ContentSecurityPolicy csp("\r\n        frame-ancestors https://example.com; img-src https://example.com\r\n    ");
         LOK_ASSERT_EQUAL_STR(" https://example.com", csp.getDirective("frame-ancestors"));
         LOK_ASSERT_EQUAL_STR(" https://example.com", csp.getDirective("img-src"));
+    }
+}
+
+void FileServeTests::testCSPKeepsOutBadSources()
+{
+    constexpr std::string_view testname = __func__;
+
+    // A URL carrying a carriage return and a newline stays out, and the good source stays in.
+    {
+        ContentSecurityPolicy csp;
+        csp.appendDirectiveUrl("frame-src", "https://good.example.com");
+        csp.appendDirectiveUrl("frame-src", "https://evil.example.com\r\n\r\n<script>");
+        LOK_ASSERT_EQUAL_STR(" https://good.example.com", csp.getDirective("frame-src"));
+    }
+
+    // A space in a URL cannot smuggle a second source into the directive.
+    {
+        ContentSecurityPolicy csp;
+        csp.appendDirectiveUrl("frame-src", "https://evil.example.com *");
+        LOK_ASSERT_EQUAL_STR("", csp.getDirective("frame-src"));
+    }
+
+    // A tab is whitespace to the policy, so it cannot smuggle one either.
+    {
+        ContentSecurityPolicy csp;
+        csp.appendDirectiveUrl("frame-src", "https://evil.example.com\t*");
+        LOK_ASSERT_EQUAL_STR("", csp.getDirective("frame-src"));
+    }
+
+    // A comma would start a second policy, so a URL holding one stays out.
+    {
+        ContentSecurityPolicy csp;
+        csp.appendDirectiveUrl("img-src", "https://evil.example.com,https://other.example.com");
+        LOK_ASSERT_EQUAL_STR("", csp.getDirective("img-src"));
+    }
+
+    // A list of good sources still goes in whole.
+    {
+        ContentSecurityPolicy csp;
+        csp.appendDirective("frame-ancestors", "example.com:* other.example.com:*");
+        LOK_ASSERT_EQUAL_STR(" example.com:* other.example.com:*",
+                             csp.getDirective("frame-ancestors"));
+    }
+
+    // One bad source keeps the whole list out.
+    {
+        ContentSecurityPolicy csp;
+        csp.appendDirective("frame-ancestors", "example.com:* evil.example.com\r\n:*");
+        LOK_ASSERT_EQUAL_STR("", csp.getDirective("frame-ancestors"));
     }
 }
 
