@@ -20,8 +20,10 @@
 #include <common/Log.hpp>
 #include <common/StringVector.hpp>
 #include <common/Util.hpp>
+#include <algorithm>
 #include <sstream>
 #include <string>
+#include <string_view>
 
 /// Manages the HTTP Content-Security-Policy Header.
 /// See https://www.w3.org/TR/CSP2/
@@ -73,21 +75,62 @@ public:
         }
     }
 
+    /// True when the string holds only bytes one source expression can carry. Whitespace ends
+    /// the source, a semicolon ends the directive, a comma ends the policy, and a control byte
+    /// ends the header field.
+    [[nodiscard]] static bool hasOnlyValidSourceBytes(const std::string_view source)
+    {
+        return std::none_of(source.begin(), source.end(),
+                            [](const char ch) -> bool
+                            {
+                                const unsigned char byte = static_cast<unsigned char>(ch);
+                                return byte <= 0x20 || byte == 0x7f || byte == ';' ||
+                                       byte == ',';
+                            });
+    }
+
+    /// True when every source in the space-delimited list is one the policy can carry.
+    [[nodiscard]] static bool hasOnlyValidSources(const std::string_view value)
+    {
+        for (std::string_view rest = value; !rest.empty();)
+        {
+            const std::size_t space = rest.find(' ');
+            const std::string_view source = rest.substr(0, space);
+            if (!source.empty() && !hasOnlyValidSourceBytes(source))
+                return false;
+
+            if (space == std::string_view::npos)
+                break;
+
+            rest = rest.substr(space + 1);
+        }
+
+        return true;
+    }
+
     /// Append the given URL to a directive.
     /// @value must be space-delimited and cannot have semicolon.
     void appendDirectiveUrl(std::string directive, const std::string& url)
     {
-        appendDirective(std::move(directive), Util::trimURI(url));
+        std::string source = Util::trimURI(url);
+        if (!hasOnlyValidSourceBytes(source))
+        {
+            LOG_WRN("Bad byte in CSP source URL for policy directive [" << directive
+                    << "] - ignoring it.");
+            return;
+        }
+
+        appendDirective(std::move(directive), std::move(source));
     }
 
     /// Append the given value to a directive.
     /// @value must be space-delimited and cannot have semicolon.
     void appendDirective(std::string directive, std::string value)
     {
-        if (value.find_first_of(';') != std::string::npos)
+        if (!hasOnlyValidSources(value))
         {
-            LOG_WRN("Unexpected semicolon in CSP source [" << value << "] for policy directive ["
-                    << directive << "] - ignoring it.");
+            LOG_WRN("Bad byte in a CSP source for policy directive [" << directive
+                    << "] - ignoring it.");
             return;
         }
 
