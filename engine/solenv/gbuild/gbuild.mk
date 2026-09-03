@@ -382,18 +382,23 @@ endif
 endef
 
 # Setup for ccache.
+# locale, because ccache hashes LANG and two shells on one machine need not
+# agree about it: VS Code's terminal sets it and Git Bash does not, and the same
+# build from the two windows then shares nothing. That is not about precompiled
+# headers, so it is set either way. pch_defines and time_macros are for the PCHs.
+gb_CCACHE_SLOPPINESS_VALUES := locale
 ifneq ($(gb_ENABLE_PCH),)
-# CCACHE_SLOPPINESS should contain pch_defines,time_macros for PCHs.
+gb_CCACHE_SLOPPINESS_VALUES := locale,pch_defines,time_macros
+endif
 gb_CCACHE_SLOPPINESS :=
 ifeq ($(shell test -z "$$CCACHE_SLOPPINESS" && echo 1),1)
-gb_CCACHE_SLOPPINESS := CCACHE_SLOPPINESS=pch_defines,time_macros
+gb_CCACHE_SLOPPINESS := CCACHE_SLOPPINESS=$(gb_CCACHE_SLOPPINESS_VALUES)
 else
-# The setting from the environment is kept and the two above added to it, with
+# The setting from the environment is kept and the above added to it, with
 # spaces turned into commas so the assignment stays one word. Repeats are fine.
-gb_CCACHE_SLOPPINESS := CCACHE_SLOPPINESS=$(subst $(gb_SPACE),$(COMMA),$(CCACHE_SLOPPINESS)),pch_defines,time_macros
+gb_CCACHE_SLOPPINESS := CCACHE_SLOPPINESS=$(subst $(gb_SPACE),$(COMMA),$(CCACHE_SLOPPINESS)),$(gb_CCACHE_SLOPPINESS_VALUES)
 endif
 gb_COMPILER_SETUP += $(gb_CCACHE_SLOPPINESS)
-endif
 ifneq ($(CCACHE_BASEDIR),)
 export CCACHE_BASEDIR
 # With a base directory set, ccache works in relative paths and the generated
