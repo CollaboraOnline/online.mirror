@@ -15,17 +15,10 @@
 #include <COKit/COKit.hxx>
 #include <vector>
 #include <common/Log.hpp>
-#include <cstdlib>
 #include <string>
 #include <cmath>
 #include <unordered_map>
 #include <memory>
-
-struct BytesDeleter
-{
-    void operator()(unsigned char* bytes) { std::free(bytes); }
-};
-using ScopedBytes = std::unique_ptr<unsigned char, BytesDeleter>;
 
 class Watermark final
 {
@@ -129,17 +122,20 @@ private:
         // are always set to 0 (black) and the alpha level is 0 everywhere
         // except on the text area; the alpha level take into account of
         // performing anti-aliasing over the text edges.
-        ScopedBytes textPixels(_loKitDoc->renderFontOrientation(_font.c_str(), _text.c_str(), &width, &height, 0));
+        COKitBitmap aTextBitmap
+            = _loKitDoc->renderFontOrientation(_font.c_str(), _text.c_str(), width, height, 0);
 
-        if (!textPixels)
+        if (aTextBitmap.aPixels.empty())
         {
             LOG_ERR("Watermark: rendering failed.");
             return nullptr;
         }
 
+        width = aTextBitmap.nWidth;
+        height = aTextBitmap.nHeight;
         const unsigned int pixel_count = width * height * 4;
 
-        std::vector<unsigned char> text(textPixels.get(), textPixels.get() + pixel_count);
+        std::vector<unsigned char> text = std::move(aTextBitmap.aPixels);
 
         _pixmaps.emplace(key, std::vector<unsigned char>(pixel_count));
         std::vector<unsigned char>& _pixmap = _pixmaps[key];

@@ -1284,12 +1284,12 @@ static int doc_getView(COKitDocument* pThis);
 static int doc_getViewsCount(COKitDocument* pThis);
 static bool doc_getViewIds(COKitDocument* pThis, std::vector<int>& rIds);
 static void doc_setViewLanguage(COKitDocument* pThis, int nId, const char* language);
-static unsigned char* doc_renderFontOrientation(COKitDocument* pThis,
+static COKitBitmap doc_renderFontOrientation(COKitDocument* pThis,
                           const char *pFontName,
                           const char *pChar,
-                          int* pFontWidth,
-                          int* pFontHeight,
-                          int pOrientation);
+                          int nRequestedWidth,
+                          int nRequestedHeight,
+                          int nOrientation);
 
 static void doc_paintWindow(COKitDocument* pThis, unsigned nKitWindowId, unsigned char* pBuffer,
                             const int nX, const int nY,
@@ -1810,11 +1810,11 @@ void COKitDocumentImpl::sendDialogEvent(unsigned long long int nKitWindowId,
     doc_sendDialogEvent(this, nKitWindowId, pArguments);
 }
 
-unsigned char* COKitDocumentImpl::renderFontOrientation(const char* pFontName, const char* pChar,
-                                                         int* pFontWidth, int* pFontHeight,
-                                                         int pOrientation)
+COKitBitmap COKitDocumentImpl::renderFontOrientation(const char* pFontName, const char* pChar,
+                                                     int nRequestedWidth, int nRequestedHeight,
+                                                     int nOrientation)
 {
-    return doc_renderFontOrientation(this, pFontName, pChar, pFontWidth, pFontHeight, pOrientation);
+    return doc_renderFontOrientation(this, pFontName, pChar, nRequestedWidth, nRequestedHeight, nOrientation);
 }
 
 void COKitDocumentImpl::paintWindowForView(unsigned nWindowId, unsigned char* pBuffer,
@@ -8622,12 +8622,12 @@ static void doc_setViewLanguage(SAL_UNUSED_PARAMETER COKitDocument* /*pThis*/, i
     KitHelper::setViewLocale(nId, sLanguage);
 }
 
-unsigned char* doc_renderFontOrientation(SAL_UNUSED_PARAMETER COKitDocument* /*pThis*/,
+COKitBitmap doc_renderFontOrientation(SAL_UNUSED_PARAMETER COKitDocument* /*pThis*/,
                               const char* pFontName,
                               const char* pChar,
-                              int* pFontWidth,
-                              int* pFontHeight,
-                              int pOrientation)
+                              int nRequestedWidth,
+                              int nRequestedHeight,
+                              int nOrientation)
 {
     comphelper::ProfileZone aZone("doc_renderFont");
 
@@ -8645,22 +8645,22 @@ unsigned char* doc_renderFontOrientation(SAL_UNUSED_PARAMETER COKitDocument* /*p
     ScopedVclPtrInstance<VirtualDevice> aDevice(DeviceFormat::WITHOUT_ALPHA);
     ::tools::Rectangle aRect;
     aFont.SetFontSize(Size(0, nDefaultFontSize));
-    aFont.SetOrientation(Degree10(pOrientation));
+    aFont.SetOrientation(Degree10(nOrientation));
     aDevice->SetFont(aFont);
     aDevice->GetTextBoundRect(aRect, aText);
     if (aRect.IsEmpty())
-        return nullptr;
+        return {};
 
     int nFontWidth = aRect.Right() + 1;
     int nFontHeight = aRect.Bottom() + 1;
 
     if (nFontWidth <= 0 || nFontHeight <= 0)
-        return nullptr;
+        return {};
 
-    if (*pFontWidth > 0 && *pFontHeight > 0)
+    if (nRequestedWidth > 0 && nRequestedHeight > 0)
     {
-        double fScaleX = *pFontWidth / static_cast<double>(nFontWidth) / 1.5;
-        double fScaleY = *pFontHeight / static_cast<double>(nFontHeight) / 1.5;
+        double fScaleX = nRequestedWidth / static_cast<double>(nFontWidth) / 1.5;
+        double fScaleY = nRequestedHeight / static_cast<double>(nFontHeight) / 1.5;
 
         double fScale = std::min(fScaleX, fScaleY);
 
@@ -8671,24 +8671,21 @@ unsigned char* doc_renderFontOrientation(SAL_UNUSED_PARAMETER COKitDocument* /*p
             aDevice->SetFont(aFont);
         }
 
-        aRect = tools::Rectangle(0, 0, *pFontWidth, *pFontHeight);
+        aRect = tools::Rectangle(0, 0, nRequestedWidth, nRequestedHeight);
 
-        nFontWidth = *pFontWidth;
-        nFontHeight = *pFontHeight;
+        nFontWidth = nRequestedWidth;
+        nFontHeight = nRequestedHeight;
 
     }
 
-    unsigned char* pBuffer = static_cast<unsigned char*>(malloc(4 * nFontWidth * nFontHeight));
-    if (!pBuffer)
-        return nullptr;
+    std::vector<unsigned char> aPixels(4 * nFontWidth * nFontHeight, 0);
 
-    memset(pBuffer, 0, nFontWidth * nFontHeight * 4);
     aDevice->SetBackground(Wallpaper(COL_TRANSPARENT));
     aDevice->SetOutputSizePixelScaleOffsetAndKitBuffer(
                 Size(nFontWidth, nFontHeight), 1.0, Point(),
-                pBuffer);
+                aPixels.data());
 
-    if (*pFontWidth > 0 && *pFontHeight > 0)
+    if (nRequestedWidth > 0 && nRequestedHeight > 0)
     {
         DrawTextFlags const nStyle =
                 DrawTextFlags::Center
@@ -8700,14 +8697,10 @@ unsigned char* doc_renderFontOrientation(SAL_UNUSED_PARAMETER COKitDocument* /*p
     }
     else
     {
-        *pFontWidth = nFontWidth;
-        *pFontHeight = nFontHeight;
-
         aDevice->DrawText(Point(0,0), aText);
     }
 
-
-    return pBuffer;
+    return { std::move(aPixels), nFontWidth, nFontHeight };
 }
 
 

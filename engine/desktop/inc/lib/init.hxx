@@ -382,9 +382,9 @@ namespace desktop {
         COKitSelectionType getSelectionType() override;
         void removeTextContext(unsigned nWindowId, int nBefore, int nAfter) override;
         void sendDialogEvent(unsigned long long int nKitWindowId, const char* pArguments) override;
-        unsigned char* renderFontOrientation(const char* pFontName, const char* pChar,
-                                             int* pFontWidth, int* pFontHeight,
-                                             int pOrientation) override;
+        COKitBitmap renderFontOrientation(const char* pFontName, const char* pChar,
+                                          int nRequestedWidth, int nRequestedHeight,
+                                          int nOrientation) override;
         void paintWindowForView(unsigned nWindowId, unsigned char* pBuffer, const int x,
                                 const int y, const int width, const int height,
                                 const double dpiscale, int viewId) override;

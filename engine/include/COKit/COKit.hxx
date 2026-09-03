@@ -80,6 +80,15 @@ enum class COKitDocumentType
   OTHER
 };
 
+/// A rendered image. The pixels are four bytes each, so aPixels holds
+/// nWidth * nHeight * 4 bytes. An empty aPixels means nothing was rendered.
+struct COKitBitmap
+{
+    std::vector<unsigned char> aPixels;
+    int nWidth = 0;
+    int nHeight = 0;
+};
+
 enum class COKitPartMode
 {
     SLIDES,
@@ -2280,12 +2289,18 @@ struct COKitDocument
     virtual void sendDialogEvent(unsigned long long int nWindowId, const char* pArguments) = 0;
 
     /**
-     * Paints a font name or character if provided to be displayed in the font list
-     * @param pFontName the font to be painted
+     * Paints a font name or some text in that font, for display in a font list.
+     *
+     * @param pFontName the name of the font
+     * @param pChar the text to paint in the font, or empty
+     * @param nRequestedWidth the width to render at, or 0 for the font's own size
+     * @param nRequestedHeight the height to render at, or 0 for the font's own size
+     * @param nOrientation the rotation, in 10ths of a degree
+     * @return the pixels and the size they cover, empty when nothing was rendered
      */
-    virtual unsigned char* renderFontOrientation(const char* pFontName, const char* pChar,
-                                                 int* pFontWidth, int* pFontHeight,
-                                                 int pOrientation) = 0;
+    virtual COKitBitmap renderFontOrientation(const char* pFontName, const char* pChar,
+                                              int nRequestedWidth, int nRequestedHeight,
+                                              int nOrientation) = 0;
 
     /**
      * Renders a window (dialog, popup, etc.) with the given id, switching to
