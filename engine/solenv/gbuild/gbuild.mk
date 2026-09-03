@@ -388,9 +388,9 @@ gb_CCACHE_SLOPPINESS :=
 ifeq ($(shell test -z "$$CCACHE_SLOPPINESS" && echo 1),1)
 gb_CCACHE_SLOPPINESS := CCACHE_SLOPPINESS=pch_defines,time_macros
 else
-ifeq ($(shell echo "$$CCACHE_SLOPPINESS" | grep -q pch_defines | grep -q time_macros && echo 1),1)
-gb_CCACHE_SLOPPINESS := CCACHE_SLOPPINESS=$CCACHE_SLOPPINESS:pch_defines,time_macros
-endif
+# The setting from the environment is kept and the two above added to it, with
+# spaces turned into commas so the assignment stays one word. Repeats are fine.
+gb_CCACHE_SLOPPINESS := CCACHE_SLOPPINESS=$(subst $(gb_SPACE),$(COMMA),$(CCACHE_SLOPPINESS)),pch_defines,time_macros
 endif
 gb_COMPILER_SETUP += $(gb_CCACHE_SLOPPINESS)
 endif
