@@ -512,6 +512,13 @@ int64_t Response::readData(const char* p, int64_t len)
                                 << ", Transfer-Encoding: " << _header.getTransferEncoding());
                         return -1;
                     }
+                    else if (_bodySizeLimit > 0 && _header.getContentLength() > _bodySizeLimit)
+                    {
+                        LOG_ERR("Response Content-Length " << _header.getContentLength()
+                                                           << " passes the body size limit of "
+                                                           << _bodySizeLimit << " bytes");
+                        return -1;
+                    }
                     else if (_header.getContentLength() == 0)
                         _parserStage = ParserStage::Finished; // No body, we are done.
                 }
@@ -601,6 +608,14 @@ int64_t Response::readData(const char* p, int64_t len)
                     _recvBodySize += chunkLen;
                     LOG_TRC("Wrote " << chunkLen << " bytes for a total of " << _recvBodySize);
 
+                    if (_bodySizeLimit > 0 && _recvBodySize > _bodySizeLimit)
+                    {
+                        LOG_ERR("Response body of " << _recvBodySize
+                                                    << " bytes passes the body size limit of "
+                                                    << _bodySizeLimit << " bytes");
+                        return -1;
+                    }
+
                     // Skip blank lines.
                     off = skipCRLF(p, 0, available);
                     p += off;
@@ -634,6 +649,15 @@ int64_t Response::readData(const char* p, int64_t len)
             {
                 available -= wrote;
                 _recvBodySize += wrote;
+
+                if (_bodySizeLimit > 0 && _recvBodySize > _bodySizeLimit)
+                {
+                    LOG_ERR("Response body of " << _recvBodySize
+                                                << " bytes passes the body size limit of "
+                                                << _bodySizeLimit << " bytes");
+                    return -1;
+                }
+
                 if (_header.hasContentLength() && _recvBodySize >= _header.getContentLength())
                 {
                     LOG_TRC("Wrote all received content into the body-callback, finished.");

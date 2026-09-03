@@ -2225,6 +2225,15 @@ void FileServerRequestHandler::fetchWopiSettingConfigs(const Poco::Net::HTTPRequ
     httpSession->asyncRequest(httpRequest, *COOLWSD::getWebServerPoll());
 }
 
+namespace
+{
+// The largest body the wordbook fetch accepts from the storage server, in bytes. A whole-language
+// spelling dictionary, the ceiling for one of these files, is about 4.5 MB, so 20 MB leaves
+// generous headroom while bounding what one request can hold in memory on the thread that serves
+// every client.
+constexpr int64_t MaxWordbookFileSizeBytes = 20 * 1024 * 1024;
+}
+
 void FileServerRequestHandler::fetchWordbook(const Poco::Net::HTTPRequest& request,
                                                  Poco::MemoryInputStream& message,
                                                  const std::shared_ptr<StreamSocket>& socket)
@@ -2251,7 +2260,13 @@ void FileServerRequestHandler::fetchWordbook(const Poco::Net::HTTPRequest& reque
     httpRequest.header().set("Content-Type", "text/plain");
 
     auto httpSession = StorageConnectionManager::getHttpSession(dicUrl);
+    httpSession->setBodySizeLimit(MaxWordbookFileSizeBytes);
     auto httpResponse = httpSession->syncRequest(httpRequest);
+
+    if (httpResponse->state() != http::Response::State::Complete)
+    {
+        throw std::runtime_error("Integrator wopi call failed: the transfer did not complete");
+    }
 
     if (httpResponse->statusLine().statusCode() != http::StatusCode::OK)
     {

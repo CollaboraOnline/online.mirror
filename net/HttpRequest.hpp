@@ -918,6 +918,7 @@ public:
         : _state(State::New)
         , _parserStage(ParserStage::StatusLine)
         , _recvBodySize(0)
+        , _bodySizeLimit(0)
         , _finishedCallback(std::move(finishedCallback))
         , _fd(fd)
     {
@@ -939,6 +940,7 @@ public:
         , _state(State::New)
         , _parserStage(ParserStage::StatusLine)
         , _recvBodySize(0)
+        , _bodySizeLimit(0)
         , _fd(fd)
     {
         _header.add("Date", Util::getHttpTimeNow());
@@ -1029,6 +1031,11 @@ public:
         };
     }
 
+    /// Sets the largest response body size, in bytes, this parser accepts. A response that
+    /// declares a larger Content-Length, or whose received body passes the limit, ends the
+    /// transfer as an error and the state becomes State::Error. 0, the default, accepts any size.
+    void setBodySizeLimit(int64_t limit) { _bodySizeLimit = limit; }
+
     /// Returns the body, assuming it wasn't redirected to file or callback.
     const std::string& getBody() const { return _body; }
 
@@ -1105,6 +1112,7 @@ public:
         os << indent << "\tstate: " << name(_state);
         os << indent << "\tparseStage: " << name(_parserStage);
         os << indent << "\trecvBodySize: " << _recvBodySize;
+        os << indent << "\tbodySizeLimit: " << _bodySizeLimit;
         os << indent << "\theaders: ";
 
         std::string childIndent = indent + '\t';
@@ -1136,6 +1144,7 @@ private:
     std::atomic<State> _state; ///< The state of the Response.
     ParserStage _parserStage; ///< The parser's state.
     int64_t _recvBodySize; ///< The amount of data we received (compared to the Content-Length).
+    int64_t _bodySizeLimit; ///< The largest accepted body size, in bytes. 0 accepts any size.
     std::string _body; ///< Used when _bodyHandling is InMemory.
     std::ofstream _bodyFile; ///< Used when _bodyHandling is OnDisk.
     IoWriteFunc _onBodyWriteCb; ///< Used to handling body receipt in all cases.
@@ -1160,6 +1169,7 @@ private:
         , _fd(-1)
         , _handshakeSslVerifyFailure(0)
         , _timeout(getDefaultTimeout())
+        , _bodySizeLimit(0)
         , _connected(false)
         , _result(net::AsyncConnectResult::Ok)
     {
@@ -1268,6 +1278,10 @@ public:
     void setTimeout(const std::chrono::microseconds timeout) { _timeout = timeout; }
     /// Get the timeout, in microseconds.
     std::chrono::microseconds getTimeout() const { return _timeout; }
+
+    /// Sets the largest response body size, in bytes, that a response on this session accepts.
+    /// Applied to the response of every later request. 0, the default, accepts any size.
+    void setBodySizeLimit(int64_t limit) { _bodySizeLimit = limit; }
 
     /// The response we _got_ for our request. Do *not* use this to _send_ a response!
     const std::shared_ptr<Response>& response() const { return _response; }
@@ -1474,6 +1488,7 @@ public:
            << " socket)";
         os << indent << "\tconnected: " << std::boolalpha << _connected;
         os << indent << "\ttimeout: " << _timeout;
+        os << indent << "\tbodySizeLimit: " << _bodySizeLimit;
         os << indent << "\thost: " << _host;
         os << indent << "\tport: " << _port;
         os << indent << "\tprotocol: " << name(_protocol);
@@ -1589,6 +1604,7 @@ private:
 
         _response.reset();
         _response = std::make_shared<Response>(onFinished, _fd);
+        _response->setBodySizeLimit(_bodySizeLimit);
 
         _request = req;
 
@@ -1876,6 +1892,7 @@ private:
     int _fd; ///< The socket file-descriptor.
     long _handshakeSslVerifyFailure; ///< Save SslVerityResult at onHandshakeFail
     std::chrono::microseconds _timeout;
+    int64_t _bodySizeLimit; ///< The largest accepted body size, in bytes. 0 accepts any size.
     std::chrono::steady_clock::time_point _startTime;
     bool _connected;
     Request _request;
