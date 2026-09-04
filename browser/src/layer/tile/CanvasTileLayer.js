@@ -1946,7 +1946,9 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 			if (!viewCursorSection.isVisible) {
 				const scrollX = viewCursorSection.position[0];
 				const scrollY = viewCursorSection.position[1];
-				this.scrollToPos(new cool.SimplePoint(scrollX * app.pixelsToTwips, scrollY * app.pixelsToTwips));
+				const position = new cool.SimplePoint(scrollX * app.pixelsToTwips, scrollY * app.pixelsToTwips);
+				this.extendDocumentSizeToInclude(position);
+				this.scrollToPos(position);
 			}
 
 			OtherViewCellCursorSection.showPopUpForView(viewId);

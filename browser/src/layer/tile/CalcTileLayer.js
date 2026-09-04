@@ -264,6 +264,27 @@ window.L.CalcTileLayer = window.L.CanvasTileLayer.extend({
 		this._syncTileContainerSize();
 	},
 
+	// The scrollable area only reaches the cells this view has been to, so a position
+	// outside it cannot be scrolled to until the area covers it.
+	extendDocumentSizeToInclude: function (position) {
+		if (!this.sheetGeometry)
+			return;
+
+		const fileSize = app.activeDocument.fileSize;
+		const maxDocumentSize = this.sheetGeometry.getSize('tiletwips');
+
+		// A frame past the position, so it can still be centered.
+		const frameSize = app.activeDocument.activeLayout.frameSize;
+		const newWidth = Math.min(maxDocumentSize.x, Math.max(fileSize.x, position.x + frameSize.x));
+		const newHeight = Math.min(maxDocumentSize.y, Math.max(fileSize.y, position.y + frameSize.y));
+
+		if (newWidth === fileSize.x && newHeight === fileSize.y)
+			return;
+
+		this._applyDocumentSize(new cool.SimplePoint(newWidth, newHeight));
+		this._syncTileContainerSize();
+	},
+
 	// While the document size is frozen, the scrollable area does not grow or
 	// shrink. A size received from the engine in the meantime is stored and
 	// applied when the freeze ends.
