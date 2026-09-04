@@ -52,4 +52,5 @@
 /// <reference path="./InternUtil.test.ts" />
 /// <reference path="./VectorManager.test.ts" />
 /// <reference path="./CDarkOverlay.test.ts" />
+/// <reference path="./OtherViewCursorSection.test.ts" />
 // NOTE: reference new tests here ...
