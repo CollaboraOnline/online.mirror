@@ -3771,20 +3771,22 @@ bool ChildSession::renderSlide(const StringVector& tokens)
     if (tokens.size() > 8 && getTokenString(tokens[8], "compressedLayers", compressedLayersString))
         compressedLayers = NumUtil::stoi(compressedLayersString) > 0;
 
-    unsigned bufferWidth = suggestedWidth;
-    unsigned bufferHeight = suggestedHeight;
-    bool success = getLOKitDocument()->createSlideRenderer(hash.c_str(), part,
-                                                           &bufferWidth, &bufferHeight,
-                                                           renderBackground, renderMasterPage);
-    if (!success) {
+    const std::optional<COKitPixelSize> oBufferSize = getLOKitDocument()->createSlideRenderer(
+        hash.c_str(), part, COKitPixelSize{ suggestedWidth, suggestedHeight },
+        renderBackground, renderMasterPage);
+    if (!oBufferSize) {
         sendRenderingFailed();
         return false;
     }
 
+    const unsigned bufferWidth = oBufferSize->nWidth;
+    const unsigned bufferHeight = oBufferSize->nHeight;
     assert(bufferWidth <= suggestedWidth);
     assert(bufferHeight <= suggestedHeight);
 
     bool done = false;
+    // The renderer was made, so nothing has failed yet. The loop below sets this.
+    bool success = true;
     SlideCompressor scomp(_docManager->getSyncPool());
     while (!done)
     {

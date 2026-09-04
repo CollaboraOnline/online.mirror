@@ -409,9 +409,10 @@ namespace desktop {
         void setViewReadOnly(int nId, const bool readOnly) override;
         void setAllowChangeComments(int nId, const bool allow) override;
         std::string getPresentationInfo() override;
-        bool createSlideRenderer(const char* pSlideHash, int nSlideNumber, unsigned* nViewWidth,
-                                 unsigned* nViewHeight, bool bRenderBackground,
-                                 bool bRenderMasterPage) override;
+        std::optional<COKitPixelSize> createSlideRenderer(const char* pSlideHash, int nSlideNumber,
+                                                          COKitPixelSize aMaximumSize,
+                                                          bool bRenderBackground,
+                                                          bool bRenderMasterPage) override;
         void postSlideshowCleanup() override;
         bool renderNextSlideLayer(unsigned char* pBuffer, bool* bIsBitmapLayer, double* pScale,
                                   std::string* pJsonMessage) override;

@@ -1330,10 +1330,10 @@ static int doc_getA11yCaretPosition(COKitDocument* pThis);
 
 static std::string doc_getPresentationInfo(COKitDocument* pThis);
 
-static bool doc_createSlideRenderer(
+static std::optional<COKitPixelSize> doc_createSlideRenderer(
     COKitDocument* pThis,
     const char* pSlideHash,
-    int nSlideNumber, unsigned* nViewWidth, unsigned* nViewHeight,
+    int nSlideNumber, COKitPixelSize aMaximumSize,
     bool bRenderBackground, bool bRenderMasterPage);
 
 static void doc_postSlideshowCleanup(COKitDocument* pThis);
@@ -1846,11 +1846,11 @@ std::string COKitDocumentImpl::getPresentationInfo()
     return doc_getPresentationInfo(this);
 }
 
-bool COKitDocumentImpl::createSlideRenderer(const char* pSlideHash, int nSlideNumber,
-                                             unsigned* nViewWidth, unsigned* nViewHeight,
-                                             bool bRenderBackground, bool bRenderMasterPage)
+std::optional<COKitPixelSize> COKitDocumentImpl::createSlideRenderer(
+    const char* pSlideHash, int nSlideNumber, COKitPixelSize aMaximumSize,
+    bool bRenderBackground, bool bRenderMasterPage)
 {
-    return doc_createSlideRenderer(this, pSlideHash, nSlideNumber, nViewWidth, nViewHeight,
+    return doc_createSlideRenderer(this, pSlideHash, nSlideNumber, aMaximumSize,
                                    bRenderBackground, bRenderMasterPage);
 }
 
@@ -6961,10 +6961,10 @@ static std::string doc_getPresentationInfo(COKitDocument* pThis)
     return pDoc->getPresentationInfo(bAllyState);
 }
 
-static bool doc_createSlideRenderer(
+static std::optional<COKitPixelSize> doc_createSlideRenderer(
     COKitDocument* pThis,
     const char* pSlideHash,
-    int nSlideNumber, unsigned* pViewWidth, unsigned* pViewHeight,
+    int nSlideNumber, COKitPixelSize aMaximumSize,
     bool bRenderBackground, bool bRenderMasterPage)
 {
     SolarMutexGuard aGuard;
@@ -6974,21 +6974,20 @@ static bool doc_createSlideRenderer(
     if (!pDoc)
     {
         SetLastExceptionMsg(u"Document doesn't support tiled rendering"_ustr);
-        return false;
+        return {};
     }
 
     OString sSlideHash(pSlideHash);
-    sal_Int32 nViewWidth = *pViewWidth;
-    sal_Int32 nViewHeight = *pViewHeight;
-    bool bReturn = pDoc->createSlideRenderer(
+    sal_Int32 nViewWidth = aMaximumSize.nWidth;
+    sal_Int32 nViewHeight = aMaximumSize.nHeight;
+    if (!pDoc->createSlideRenderer(
                     sSlideHash,
                     nSlideNumber, nViewWidth, nViewHeight,
-                    bRenderBackground, bRenderMasterPage);
+                    bRenderBackground, bRenderMasterPage))
+        return {};
 
-    *pViewWidth = nViewWidth;
-    *pViewHeight = nViewHeight;
-
-    return bReturn;
+    return COKitPixelSize{ static_cast<unsigned>(nViewWidth),
+                           static_cast<unsigned>(nViewHeight) };
 }
 
 static void doc_postSlideshowCleanup(COKitDocument* pThis)

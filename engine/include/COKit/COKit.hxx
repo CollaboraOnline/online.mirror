@@ -102,6 +102,13 @@ struct COKitDataArea
     int64_t nLastRow = 1;
 };
 
+/// A size in pixels.
+struct COKitPixelSize
+{
+    unsigned nWidth = 0;
+    unsigned nHeight = 0;
+};
+
 /// A size in twips. Zero in both when the document cannot report one.
 struct COKitSize
 {
@@ -2495,10 +2502,15 @@ struct COKitDocument
     /// Get the information about the current presentation (Impress only).
     virtual std::string getPresentationInfo() = 0;
 
-    /// Create a slide renderer in engine for the input slide.
-    virtual bool createSlideRenderer(const char* pSlideHash, int nSlideNumber,
-                                     unsigned* nViewWidth, unsigned* nViewHeight,
-                                     bool bRenderBackground, bool bRenderMasterPage) = 0;
+    /// Create a slide renderer in engine for the input slide. The size asked
+    /// for is a maximum, and the size that comes back is the one the renderer
+    /// will use, which is no larger. Nothing comes back when no renderer could
+    /// be made.
+    virtual std::optional<COKitPixelSize> createSlideRenderer(const char* pSlideHash,
+                                                              int nSlideNumber,
+                                                              COKitPixelSize aMaximumSize,
+                                                              bool bRenderBackground,
+                                                              bool bRenderMasterPage) = 0;
 
     /// Clean-up the slideshow (slide renderer)
     virtual void postSlideshowCleanup() = 0;
