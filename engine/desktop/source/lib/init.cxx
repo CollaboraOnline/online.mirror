@@ -1310,9 +1310,7 @@ static void doc_completeFunction(COKitDocument* pThis, const char*);
 static void doc_sendFormFieldEvent(COKitDocument* pThis,
                                    const char* pArguments);
 
-static bool doc_renderSearchResult(COKitDocument* pThis,
-                                 const char* pSearchResult, std::vector<unsigned char>* pBitmapBuffer,
-                                 int* pWidth, int* pHeight);
+static COKitBitmap doc_renderSearchResult(COKitDocument* pThis, const char* pSearchResult);
 
 static void doc_sendContentControlEvent(COKitDocument* pThis, const char* pArguments);
 
@@ -1793,11 +1791,9 @@ void COKitDocumentImpl::setBlockedCommandList(int nViewId, const char* blockedCo
     doc_setBlockedCommandList(this, nViewId, blockedCommandList);
 }
 
-bool COKitDocumentImpl::renderSearchResult(const char* pSearchResult,
-                                            std::vector<unsigned char>* pBitmapBuffer, int* pWidth,
-                                            int* pHeight)
+COKitBitmap COKitDocumentImpl::renderSearchResult(const char* pSearchResult)
 {
-    return doc_renderSearchResult(this, pSearchResult, pBitmapBuffer, pWidth, pHeight);
+    return doc_renderSearchResult(this, pSearchResult);
 }
 
 void COKitDocumentImpl::sendContentControlEvent(const char* pArguments)
@@ -9201,24 +9197,19 @@ static void doc_sendFormFieldEvent(COKitDocument* pThis, const char* pArguments)
     pDoc->executeFromFieldEvent(aMap);
 }
 
-static bool doc_renderSearchResult(COKitDocument* pThis,
-                                     const char* pSearchResult, std::vector<unsigned char>* pBitmapBuffer,
-                                     int* pWidth, int* pHeight)
+static COKitBitmap doc_renderSearchResult(COKitDocument* pThis, const char* pSearchResult)
 {
     if (doc_getDocumentType(pThis) != COKitDocumentType::TEXT)
-        return false;
-
-    if (pBitmapBuffer == nullptr)
-        return false;
+        return {};
 
     if (!pSearchResult || pSearchResult[0] == '\0')
-        return false;
+        return {};
 
     ITiledRenderable* pDoc = getTiledRenderable(pThis);
     if (!pDoc)
     {
         SetLastExceptionMsg(u"Document doesn't support tiled rendering"_ustr);
-        return false;
+        return {};
     }
 
     auto aRectangleVector = pDoc->getSearchResultRectangles(pSearchResult);
@@ -9233,19 +9224,16 @@ static bool doc_renderSearchResult(COKitDocument* pThis,
     int aPixelWidth = o3tl::convert(aRangeUnion.getWidth(), o3tl::Length::twip, o3tl::Length::px);
     int aPixelHeight = o3tl::convert(aRangeUnion.getHeight(), o3tl::Length::twip, o3tl::Length::px);
 
-    size_t nByteSize = aPixelWidth * aPixelHeight * 4;
+    const size_t nByteSize = aPixelWidth * aPixelHeight * 4;
 
-    *pWidth = aPixelWidth;
-    *pHeight = aPixelHeight;
+    std::vector<unsigned char> aPixels(nByteSize);
 
-    pBitmapBuffer->resize(nByteSize);
-
-    doc_paintTile(pThis, pBitmapBuffer->data(),
+    doc_paintTile(pThis, aPixels.data(),
         aPixelWidth, aPixelHeight,
         aRangeUnion.getMinX(), aRangeUnion.getMinY(),
         aRangeUnion.getWidth(), aRangeUnion.getHeight());
 
-    return true;
+    return { std::move(aPixels), aPixelWidth, aPixelHeight };
 }
 
 static void doc_sendContentControlEvent(COKitDocument* pThis, const char* pArguments)

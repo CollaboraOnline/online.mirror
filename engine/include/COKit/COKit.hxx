@@ -2399,16 +2399,12 @@ struct COKitDocument
     virtual void setBlockedCommandList(int nViewId, const char* blockedCommandList) = 0;
 
     /**
-     * Render input search result to a bitmap buffer.
+     * Render input search result to a bitmap.
      *
      * @param pSearchResult payload containing the search result data
-     * @param pBitmapBuffer contains the bitmap
-     * @param pWidth output bitmap width
-     * @param pHeight output bitmap height
-     * @return true if successful
+     * @return the bitmap, empty when there is nothing to show
      */
-    virtual bool renderSearchResult(const char* pSearchResult, std::vector<unsigned char>* pBitmapBuffer,
-                                    int* pWidth, int* pHeight) = 0;
+    virtual COKitBitmap renderSearchResult(const char* pSearchResult) = 0;
 
     /**
      * Posts an event for the content control at the cursor position.

@@ -397,8 +397,7 @@ namespace desktop {
         void setWindowTextSelection(unsigned nWindowId, bool bSwap, int nX, int nY) override;
         void sendFormFieldEvent(const char* pArguments) override;
         void setBlockedCommandList(int nViewId, const char* blockedCommandList) override;
-        bool renderSearchResult(const char* pSearchResult, std::vector<unsigned char>* pBitmapBuffer,
-                                int* pWidth, int* pHeight) override;
+        COKitBitmap renderSearchResult(const char* pSearchResult) override;
         void sendContentControlEvent(const char* pArguments) override;
         COKitSelection getSelectionTypeAndText(const char* pMimeType) override;
         COKitDataArea getDataArea(long nPart) override;

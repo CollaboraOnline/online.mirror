@@ -3312,17 +3312,15 @@ bool ChildSession::renderSearchResult(const char* buffer, int length, const Stri
 
     const auto tileMode = getLOKitDocument()->getTileMode();
 
-    std::vector<unsigned char> bitmapBuffer;
-    int width = 0;
-    int height = 0;
-    bool success = getLOKitDocument()->renderSearchResult(arguments.c_str(), &bitmapBuffer, &width, &height);
+    COKitBitmap aResult = getLOKitDocument()->renderSearchResult(arguments.c_str());
 
-    if (success && bitmapBuffer.size() > 0)
+    if (!aResult.aPixels.empty())
     {
         std::vector<char> output;
-        output.reserve(bitmapBuffer.size() * 3 / 4); // reserve 75% of original size
+        output.reserve(aResult.aPixels.size() * 3 / 4); // reserve 75% of original size
 
-        if (Png::encodeBufferToPNG(bitmapBuffer.data(), width, height, output, tileMode))
+        if (Png::encodeBufferToPNG(aResult.aPixels.data(), aResult.nWidth, aResult.nHeight, output,
+                                   tileMode))
         {
             static constexpr std::string_view header = "rendersearchresult:\n";
             const size_t responseSize = header.size() + output.size();

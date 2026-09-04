@@ -4254,27 +4254,24 @@ void DesktopKitTest::testRenderSearchResult_WriterNode()
 
     Scheduler::ProcessEventsToIdle();
 
-    std::vector<unsigned char> aBuffer;
     OString aPayload =
     "<indexing>"
         "<paragraph node_type=\"writer\" index=\"19\">ABC</paragraph>"
     "</indexing>"_ostr;
 
-    int nWidth = 0;
-    int nHeight = 0;
+    const COKitBitmap aResult = pDocument->renderSearchResult(aPayload.getStr());
 
-    bool bResult = pDocument->renderSearchResult(aPayload.getStr(), &aBuffer, &nWidth, &nHeight);
-
-    CPPUNIT_ASSERT(bResult);
+    CPPUNIT_ASSERT(!aResult.aPixels.empty());
 
     Scheduler::ProcessEventsToIdle();
 
-    CPPUNIT_ASSERT_EQUAL(642, nWidth);
-    CPPUNIT_ASSERT_EQUAL(561, nHeight);
-    CPPUNIT_ASSERT_EQUAL(size_t(1440648), aBuffer.size());
+    CPPUNIT_ASSERT_EQUAL(642, aResult.nWidth);
+    CPPUNIT_ASSERT_EQUAL(561, aResult.nHeight);
+    CPPUNIT_ASSERT_EQUAL(size_t(1440648), aResult.aPixels.size());
 
-    const sal_uInt8* pD = reinterpret_cast<const sal_uInt8*>(aBuffer.data());
-    Bitmap aBitmap = vcl::bitmap::CreateFromData(pD, nWidth, nHeight, nWidth * 4, /*nBitsPerPixel*/32, true, true);
+    const sal_uInt8* pD = reinterpret_cast<const sal_uInt8*>(aResult.aPixels.data());
+    Bitmap aBitmap = vcl::bitmap::CreateFromData(pD, aResult.nWidth, aResult.nHeight,
+                                                 aResult.nWidth * 4, /*nBitsPerPixel*/32, true, true);
 
     if (bDumpBitmap)
     {
@@ -4295,27 +4292,24 @@ void DesktopKitTest::testRenderSearchResult_CommonNode()
 
     Scheduler::ProcessEventsToIdle();
 
-    std::vector<unsigned char> aBuffer;
     OString aPayload =
     "<indexing>"
         "<paragraph node_type=\"common\" index=\"0\" object_name=\"Shape 1\" />"
     "</indexing>"_ostr;
 
-    int nWidth = 0;
-    int nHeight = 0;
+    const COKitBitmap aResult = pDocument->renderSearchResult(aPayload.getStr());
 
-    bool bResult = pDocument->renderSearchResult(aPayload.getStr(), &aBuffer, &nWidth, &nHeight);
-
-    CPPUNIT_ASSERT(bResult);
+    CPPUNIT_ASSERT(!aResult.aPixels.empty());
 
     Scheduler::ProcessEventsToIdle();
 
-    CPPUNIT_ASSERT_EQUAL(192, nWidth);
-    CPPUNIT_ASSERT_EQUAL(96, nHeight);
-    CPPUNIT_ASSERT_EQUAL(size_t(73728), aBuffer.size());
+    CPPUNIT_ASSERT_EQUAL(192, aResult.nWidth);
+    CPPUNIT_ASSERT_EQUAL(96, aResult.nHeight);
+    CPPUNIT_ASSERT_EQUAL(size_t(73728), aResult.aPixels.size());
 
-    const sal_uInt8* pD = reinterpret_cast<const sal_uInt8*>(aBuffer.data());
-    Bitmap aBitmap = vcl::bitmap::CreateFromData(pD, nWidth, nHeight, nWidth * 4, /*nBitsPerPixel*/32, true, true);
+    const sal_uInt8* pD = reinterpret_cast<const sal_uInt8*>(aResult.aPixels.data());
+    Bitmap aBitmap = vcl::bitmap::CreateFromData(pD, aResult.nWidth, aResult.nHeight,
+                                                 aResult.nWidth * 4, /*nBitsPerPixel*/32, true, true);
 
     if (bDumpBitmap)
     {
