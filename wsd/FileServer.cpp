@@ -107,13 +107,6 @@ constexpr auto MaxFileSizeToCacheInBytes = 1024 * 1024 *
 #else
     50;
 #endif
-// The largest body the settings fetch endpoints accept from a remote server, in bytes. The files
-// they relay are settings JSON, xcu configuration, wordbook dictionaries and AI model lists. The
-// biggest of those in practice is a wordbook, and a whole-language spelling dictionary, the
-// ceiling for one, is about 4.5 MB, so 20 MB leaves generous headroom while bounding what one
-// request can hold in memory on the thread that serves every client.
-constexpr int64_t MaxSettingsFetchSizeBytes = 20 * 1024 * 1024;
-
 constexpr std::string_view MetaViewPort =
     R"(<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, interactive-widget=resizes-content">)";
 
@@ -2114,7 +2107,7 @@ void FileServerRequestHandler::fetchWopiSettingConfigs(const Poco::Net::HTTPRequ
     httpSession->setFinishedHandler(std::move(finishedCallback));
     if (!httpSession->asyncRequest(httpRequest, COOLWSD::getWebServerPoll()))
         return;
-    httpSession->response()->setBodySizeLimit(MaxSettingsFetchSizeBytes);
+    httpSession->response()->setBodySizeLimit(MaxHttpFetchSizeBytes);
 }
 
 namespace
@@ -2332,7 +2325,7 @@ void FileServerRequestHandler::fetchSettingFile(const Poco::Net::HTTPRequest& re
 
     // asyncRequest has created the response object, and no body is read until this function
     // returns, so the limit is in place before the first byte arrives.
-    httpSession->response()->setBodySizeLimit(MaxSettingsFetchSizeBytes);
+    httpSession->response()->setBodySizeLimit(MaxHttpFetchSizeBytes);
 }
 
 void FileServerRequestHandler::fetchModels(const Poco::Net::HTTPRequest& request,
@@ -2474,7 +2467,7 @@ void FileServerRequestHandler::fetchModels(const Poco::Net::HTTPRequest& request
         httpSession->setFinishedHandler(std::move(finishedCallback));
         if (!httpSession->asyncRequest(httpRequest, COOLWSD::getWebServerPoll()))
             return;
-        httpSession->response()->setBodySizeLimit(MaxSettingsFetchSizeBytes);
+        httpSession->response()->setBodySizeLimit(MaxHttpFetchSizeBytes);
     };
 
     if (!useStoredKey)
@@ -2565,7 +2558,7 @@ void FileServerRequestHandler::fetchModels(const Poco::Net::HTTPRequest& request
     storedSession->setFinishedHandler(std::move(storedCallback));
     if (!storedSession->asyncRequest(storedRequest, COOLWSD::getWebServerPoll()))
         return;
-    storedSession->response()->setBodySizeLimit(MaxSettingsFetchSizeBytes);
+    storedSession->response()->setBodySizeLimit(MaxHttpFetchSizeBytes);
 }
 
 void FileServerRequestHandler::deleteWopiSettingConfigs(const Poco::Net::HTTPRequest& request,
@@ -2936,7 +2929,7 @@ void FileServerRequestHandler::handleViewSettingUpload(
     storedSession->setFinishedHandler(std::move(storedCallback));
     if (!storedSession->asyncRequest(storedRequest, COOLWSD::getWebServerPoll()))
         return;
-    storedSession->response()->setBodySizeLimit(MaxSettingsFetchSizeBytes);
+    storedSession->response()->setBodySizeLimit(MaxHttpFetchSizeBytes);
 }
 
 void FileServerRequestHandler::preprocessIntegratorAdminFile(const HTTPRequest& request,
