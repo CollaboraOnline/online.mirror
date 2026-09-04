@@ -112,8 +112,8 @@ static void scanAutoCorrectDirForLanguageTags( const OUString& rURL )
 namespace
 {
     /** Split the autocorrect path into its share and user halves and append the acor name to
-        each. When bEnsureUserDir is set the user half is created if it is missing. */
-    void lcl_getAutoCorrectFileNames(OUString& rSharePath, OUString& rUserPath, bool bEnsureUserDir)
+        each. The user half is created if it is missing. */
+    void lcl_getAutoCorrectFileNames(OUString& rSharePath, OUString& rUserPath)
     {
         SvtPathOptions aPathOpt;
         OUString const & sAutoPath( aPathOpt.GetAutoCorrectPath() );
@@ -121,15 +121,12 @@ namespace
         rSharePath = sAutoPath.getToken(0, ';');
         rUserPath = sAutoPath.getToken(1, ';');
 
-        if (bEnsureUserDir)
-        {
-            //fdo#67743 ensure the userdir exists so that any later attempt to copy the
-            //shared autocorrect file into the user dir will succeed
-            ::ucbhelper::Content aContent;
-            Reference < ucb::XCommandEnvironment > xEnv;
-            ::utl::UCBContentHelper::ensureFolder(comphelper::getProcessComponentContext(), xEnv,
-                                                 rUserPath, aContent);
-        }
+        //fdo#67743 ensure the userdir exists so that any later attempt to copy the
+        //shared autocorrect file into the user dir will succeed
+        ::ucbhelper::Content aContent;
+        Reference < ucb::XCommandEnvironment > xEnv;
+        ::utl::UCBContentHelper::ensureFolder(comphelper::getProcessComponentContext(), xEnv,
+                                             rUserPath, aContent);
 
         for( OUString* pS : { &rSharePath, &rUserPath } )
         {
@@ -152,7 +149,7 @@ SvxAutoCorrCfg::SvxAutoCorrCfg() :
     bSearchInAllCategories(false)
 {
     OUString sSharePath, sUserPath;
-    lcl_getAutoCorrectFileNames(sSharePath, sUserPath, true);
+    lcl_getAutoCorrectFileNames(sSharePath, sUserPath);
     pAutoCorrect.reset( new SvxAutoCorrect( sSharePath, sUserPath ) );
 
     aBaseConfig.Load(true);
@@ -168,7 +165,7 @@ void SvxAutoCorrCfg::ReloadPaths()
     if (!pAutoCorrect)
         return;
     OUString sSharePath, sUserPath;
-    lcl_getAutoCorrectFileNames(sSharePath, sUserPath, false);
+    lcl_getAutoCorrectFileNames(sSharePath, sUserPath);
     pAutoCorrect->SetAutoCorrFileNames(sSharePath, sUserPath);
 }
 
