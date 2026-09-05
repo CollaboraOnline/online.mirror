@@ -69,7 +69,7 @@ OUString makePrefix(OUString const & name) {
 cpo::uno::Any resolveTypedefs(cpo::uno::Any const & type) {
     for (cpo::uno::Any t(type);;) {
         css::uno::Reference< css::reflection::XIndirectTypeDescription > ind(
-            type, css::uno::UNO_QUERY);
+            t, css::uno::UNO_QUERY);
         if (!ind.is() || ind->getTypeClass() != cpo::uno::TypeClass_TYPEDEF) {
             return t;
         }
