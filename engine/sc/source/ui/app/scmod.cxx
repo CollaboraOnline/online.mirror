@@ -93,7 +93,6 @@
 #include <scslots.hxx>
 
 #include <scabstdlg.hxx>
-#include <formula/errorcodes.hxx>
 #include <documentlinkmgr.hxx>
 #include <COKit/COKit.hxx>
 #include <sfx2/kit/helper.hxx>
@@ -973,10 +972,8 @@ void ScModule::ModifyOptions( const SfxItemSet& rOptSet )
     bool bRepaint = false;
     bool bUpdateMarks = false;
     bool bUpdateRefDev = false;
-    bool bCalcAll = false;
     bool bSaveAppOptions = false;
     bool bSaveInputOptions = false;
-    bool bCompileErrorCells = false;
 
     //  SfxGetpApp()->SetOptions( rOptSet );
 
@@ -1163,28 +1160,6 @@ void ScModule::ModifyOptions( const SfxItemSet& rOptSet )
 
     if ( bSaveInputOptions )
         m_pInputCfg->SetOptions(aInputOptions);
-
-    // Kick off recalculation?
-    if (pDoc && bCompileErrorCells)
-    {
-        // Re-compile cells with name error, and recalc if at least one cell
-        // has been re-compiled.  In the future we may want to find a way to
-        // recalc only those that are affected.
-        if (pDoc->CompileErrorCells(FormulaError::NoName))
-            bCalcAll = true;
-    }
-
-    if ( pDoc && bCalcAll )
-    {
-        weld::WaitObject aWait( ScDocShell::GetActiveDialogParent() );
-        pDoc->CalcAll();
-        if ( pViewSh )
-            pViewSh->UpdateCharts( true );
-        else
-            ScDBFunc::DoUpdateCharts( ScAddress(), *pDoc, true );
-        if (pBindings)
-            pBindings->Invalidate( SID_ATTR_SIZE ); //SvxPosSize StatusControl Update
-    }
 
     if ( pViewSh && bUpdateMarks )
         pViewSh->UpdateAutoFillMark();
