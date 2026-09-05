@@ -240,6 +240,7 @@ void Data::initProperties(
                     u"interface type has too many attributes"_ustr);
             }
             OUString name(m->getMemberName());
+            // coverity[delete_var : FALSE] - the type class picks both the allocation and the free
             if (!properties.emplace(
                         name,
                         PropertyData(
