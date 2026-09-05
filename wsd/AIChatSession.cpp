@@ -424,7 +424,8 @@ ChatError AIChatSession::mapHttpStatusToError(
                 detail.append(": ");
                 detail.append(reasonPhrase);
             }
-            return { "apiError", "API error (" + detail + ")", detail };
+            std::string message = "API error (" + detail + ")";
+            return { "apiError", std::move(message), std::move(detail) };
         }
     }
 }
