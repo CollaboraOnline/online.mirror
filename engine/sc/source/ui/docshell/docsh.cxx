@@ -27,6 +27,7 @@
 #include <vcl/errinf.hxx>
 #include <editeng/justifyitem.hxx>
 #include <comphelper/fileformat.h>
+#include <comphelper/scopeguard.hxx>
 #include <comphelper/classids.hxx>
 #include <comphelper/propertysequence.hxx>
 #include <i18nlangtag/languagetag.hxx>
@@ -3294,8 +3295,14 @@ void ScDocShell::SetDocumentModified()
         m_pDocument->RefreshDirtyTableColumnNames();
         ProcessPendingTableExpansions();
 
-        if (!aHeaderDirtyTables.empty())
+        // A repair puts back the names of every column of every table it collected above. Putting a
+        // name into a header cell marks the document modified, which starts another repair, and the
+        // repair already running finishes the remaining columns itself.
+        if (!aHeaderDirtyTables.empty() && !m_bRestoringHeaderColumnNames)
         {
+            m_bRestoringHeaderColumnNames = true;
+            comphelper::ScopeGuard aRepairGuard(
+                [this] { m_bRestoringHeaderColumnNames = false; });
             ScDBDocFunc aDBFunc(*this);
             for (auto& [pData, aPrevNames] : aHeaderDirtyTables)
                 aDBFunc.RestoreHeaderColumnNames(*pData, aPrevNames);

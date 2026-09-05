@@ -97,6 +97,7 @@ class SAL_DLLPUBLIC_RTTI ScDocShell final: public SfxObjectShell, public SfxList
     bool                m_bUpdateEnabled:1;
     bool                m_bAreasChangedNeedBroadcast:1;
     bool mbExpandRefsWarningShown:1 = false;
+    bool m_bRestoringHeaderColumnNames:1 = false;
     sal_uInt16          m_nDocumentLock;
     sal_Int16           m_nCanUpdate;  // stores the UpdateDocMode from loading a document till update links
     std::unique_ptr<ScDBData> m_pOldAutoDBRange;

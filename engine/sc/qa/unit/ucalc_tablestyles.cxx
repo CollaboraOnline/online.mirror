@@ -26,6 +26,7 @@
 #include <scitems.hxx>
 #include <patattr.hxx>
 #include <undomanager.hxx>
+#include <svl/numformat.hxx>
 
 #include <docmodel/theme/Theme.hxx>
 #include <editeng/borderline.hxx>
@@ -2228,6 +2229,48 @@ CPPUNIT_TEST_FIXTURE(TableStylesTest, testGeneratedNameReusedByUser)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("user header B kept", u"Sales"_ustr, m_pDoc->GetString(1, 0, 0));
     CPPUNIT_ASSERT_EQUAL_MESSAGE("user-typed C must survive remove", u"Column2"_ustr,
                                  m_pDoc->GetString(2, 0, 0));
+
+    m_pDoc->DeleteTab(0);
+}
+
+CPPUNIT_TEST_FIXTURE(TableStylesTest, testHeaderRepairOfDuplicateShownByAFormat)
+{
+    m_pDoc->InsertTab(0, u"HeaderRepair"_ustr);
+    m_pDoc->EnableUndo(true);
+
+    ScDBDocFunc aFunc(*m_xDocShell);
+    CPPUNIT_ASSERT(aFunc.AddDBTable(u"Table1"_ustr, ScRange(0, 0, 0, 2, 4, 0),
+                                    /*bHeader*/ true, /*bRecord*/ true, /*bApi*/ true,
+                                    u"TableStyleMedium2"_ustr));
+
+    // A number format can put extra characters around a header name, so what the header row
+    // shows differs from the name the cell holds.
+    sal_Int32 nCheckPos;
+    SvNumFormatType eType;
+    sal_uInt32 nFormat;
+    OUString aCode = u"\"[\"@\"]\""_ustr;
+    m_pDoc->GetFormatTable()->PutEntry(aCode, nCheckPos, eType, nFormat);
+    ScPatternAttr aFormatAttr(m_pDoc->getCellAttributeHelper());
+    aFormatAttr.ItemSetPut(SfxUInt32Item(ATTR_VALUE_FORMAT, nFormat));
+    m_pDoc->ApplyPattern(0, 0, 0, aFormatAttr);
+    m_pDoc->ApplyPattern(2, 0, 0, aFormatAttr);
+    CPPUNIT_ASSERT_EQUAL(u"[Column1]"_ustr, m_pDoc->GetString(0, 0, 0));
+    CPPUNIT_ASSERT_EQUAL(u"[Column3]"_ustr, m_pDoc->GetString(2, 0, 0));
+
+    // The first and the third header now show the same text, so the third one is a duplicate.
+    m_pDoc->SetString(ScAddress(2, 0, 0), u"Column1"_ustr);
+    CPPUNIT_ASSERT_EQUAL(u"[Column1]"_ustr, m_pDoc->GetString(2, 0, 0));
+
+    ScDBData* pData = m_pDoc->GetDBCollection()->getNamedDBs().findByUpperName(u"TABLE1"_ustr);
+    CPPUNIT_ASSERT(pData);
+    CPPUNIT_ASSERT_MESSAGE("a duplicate header leaves the column names to redo",
+                           pData->AreTableColumnNamesDirty());
+
+    // The repair puts the third column back to its own name and then stops.
+    m_xDocShell->SetDocumentModified();
+
+    CPPUNIT_ASSERT_EQUAL(u"[Column1]"_ustr, m_pDoc->GetString(0, 0, 0));
+    CPPUNIT_ASSERT_EQUAL(u"[Column3]"_ustr, m_pDoc->GetString(2, 0, 0));
 
     m_pDoc->DeleteTab(0);
 }
