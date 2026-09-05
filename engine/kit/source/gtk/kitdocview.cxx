@@ -4045,7 +4045,7 @@ kit_doc_view_get_version_info (KitDocumentView* pDocView)
 {
     KitDocumentViewPrivate& priv = getPrivate(pDocView);
 
-    return priv->m_pOffice->getVersionInfo();
+    return g_strdup(priv->m_pOffice->getVersionInfo().c_str());
 }
 
 
