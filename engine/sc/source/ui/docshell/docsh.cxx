@@ -698,11 +698,12 @@ bool ScDocShell::Load( SfxMedium& rMedium )
             rtl::Bootstrap::expandMacros(aURL);
 
             OUString aPath;
-            osl::FileBase::getSystemPathFromFileURL(aURL, aPath);
+            const bool bHavePath
+                = osl::FileBase::E_None == osl::FileBase::getSystemPathFromFileURL(aURL, aPath);
 
             ScOrcusFilters* pOrcus = ScFormatFilter::Get().GetOrcusFilters();
 
-            if (pOrcus)
+            if (pOrcus && bHavePath)
             {
                 pOrcus->importODS_Styles(*m_pDocument, aPath);
                 m_pDocument->GetStyleSheetPool()->setAllParaStandard();
