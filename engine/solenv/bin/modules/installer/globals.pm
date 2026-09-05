@@ -54,8 +54,6 @@ BEGIN
     $installer::globals::issolarispkgbuild = 0;
     $installer::globals::issolarissparcbuild = 0;
     $installer::globals::issolarisx86build = 0;
-    $installer::globals::isfreebsdbuild = 0;
-    $installer::globals::isfreebsdpkgbuild = 0;
     $installer::globals::ismacbuild = 0;
     $installer::globals::ismacdmgbuild = 0;
     $installer::globals::unpackpath = "";

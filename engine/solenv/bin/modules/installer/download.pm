@@ -323,10 +323,6 @@ sub get_download_platformname
     {
         $platformname = "Solaris";
     }
-    elsif ( $installer::globals::isfreebsdbuild )
-    {
-        $platformname = "FreeBSD";
-    }
     elsif ( $installer::globals::ismacbuild )
     {
         $platformname = "MacOS";

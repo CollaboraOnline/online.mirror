@@ -528,11 +528,6 @@ sub create_epm_header
         $provides = "solarisprovides";   # the name in the packagelist
         $requires = "solarisrequires";   # the name in the packagelist
     }
-    elsif ( $installer::globals::isfreebsdpkgbuild )
-    {
-        $provides = "freebsdprovides";   # the name in the packagelist
-        $requires = "freebsdrequires";   # the name in the packagelist
-    }
     else
     {
         $provides = "provides";         # the name in the packagelist
