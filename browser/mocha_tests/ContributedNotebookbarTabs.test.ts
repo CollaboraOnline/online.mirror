@@ -10,7 +10,6 @@
  */
 
 describe('Notebookbar contributes.notebookbar handling', function () {
-
 	function newNotebookbar(): any {
 		return new (window as any).L.Control.Notebookbar();
 	}
@@ -58,7 +57,11 @@ describe('Notebookbar contributes.notebookbar handling', function () {
 								insertBefore: 'NoSuchTab',
 								insertAfter: 'Home',
 								groups: [
-									{ id: 'g', label: 'Group', items: [{ type: 'button', command: 'cmdX' }] },
+									{
+										id: 'g',
+										label: 'Group',
+										items: [{ type: 'button', command: 'cmdX' }],
+									},
 								],
 							},
 						],
@@ -94,8 +97,11 @@ describe('Notebookbar contributes.notebookbar handling', function () {
 		const names = notebookbar._getContributedNotebookbarTabNames();
 
 		nodeassert.deepStrictEqual(
-			names.map(function (t: any) { return t.name; }),
-			['Ext A Tab 1', 'Ext A Tab 2']);
+			names.map(function (t: any) {
+				return t.name;
+			}),
+			['Ext A Tab 1', 'Ext A Tab 2'],
+		);
 		nodeassert.strictEqual(notebookbar._nextContributedId, 0);
 	});
 
@@ -126,14 +132,20 @@ describe('Notebookbar contributes.notebookbar handling', function () {
 			tab2Button.id,
 		];
 		nodeassert.strictEqual(
-			new Set(ids).size, ids.length,
-			'expected all generated ids to be distinct: ' + JSON.stringify(ids));
+			new Set(ids).size,
+			ids.length,
+			'expected all generated ids to be distinct: ' + JSON.stringify(ids),
+		);
 
 		// The dispatch-relevant fields stay extId+command regardless of the id churn:
 		nodeassert.strictEqual(button.command, 'ext:extA:cmdX');
 		nodeassert.strictEqual(menu.menu[0].action, 'ext:extA:cmdX');
 
-		nodeassert.ok(warnings.some(function (w) { return w.indexOf('more than one group with id "dup"') >= 0; }));
+		nodeassert.ok(
+			warnings.some(function (w) {
+				return w.indexOf('more than one group with id "dup"') >= 0;
+			}),
+		);
 	});
 
 	it('warns on a duplicate group id but still builds both groups', function () {
@@ -145,9 +157,12 @@ describe('Notebookbar contributes.notebookbar handling', function () {
 			tabs = notebookbar._getContributedNotebookbarTabs();
 		});
 
-		nodeassert.strictEqual(warnings.filter(function (w) {
-			return w.indexOf('more than one group with id "dup"') >= 0;
-		}).length, 1);
+		nodeassert.strictEqual(
+			warnings.filter(function (w) {
+				return w.indexOf('more than one group with id "dup"') >= 0;
+			}).length,
+			1,
+		);
 		// group + groupsep + group = 3 entries in tab1's content:
 		nodeassert.strictEqual(tabs[0].items.length, 3);
 		nodeassert.strictEqual(tabs[0].items[0].type, 'overflowgroup');
@@ -191,8 +206,16 @@ describe('Notebookbar contributes.notebookbar handling', function () {
 			tabs = notebookbar._getContributedNotebookbarTabs();
 		});
 
-		nodeassert.ok(warnings.some(function (w) { return w.indexOf('unknown command "missing"') >= 0; }));
-		nodeassert.ok(warnings.some(function (w) { return w.indexOf('unknown type "bogus"') >= 0; }));
+		nodeassert.ok(
+			warnings.some(function (w) {
+				return w.indexOf('unknown command "missing"') >= 0;
+			}),
+		);
+		nodeassert.ok(
+			warnings.some(function (w) {
+				return w.indexOf('unknown type "bogus"') >= 0;
+			}),
+		);
 		// Only the one valid button should have survived into the group's children:
 		const group = tabs[0].items[0];
 		nodeassert.strictEqual(group.children.length, 1);
@@ -210,35 +233,69 @@ describe('Notebookbar contributes.notebookbar handling', function () {
 		it('positions insertBefore/insertAfter relative to an existing entry, defaulting to the end', function () {
 			const notebookbar = newNotebookbar();
 			const arr = builtInArr();
-			notebookbar._insertContributedNotebookbarTabs(arr, [
-				{ extId: 'e', name: 'A', insertAfter: 'File' },
-				{ extId: 'e', name: 'B', insertBefore: 'Insert' },
-				{ extId: 'e', name: 'C' },
-			], identityBuildEntry);
+			notebookbar._insertContributedNotebookbarTabs(
+				arr,
+				[
+					{ extId: 'e', name: 'A', insertAfter: 'File' },
+					{ extId: 'e', name: 'B', insertBefore: 'Insert' },
+					{ extId: 'e', name: 'C' },
+				],
+				identityBuildEntry,
+			);
 
 			nodeassert.deepStrictEqual(
-				arr.map(function (t: any) { return t.name; }),
-				['File', 'A', 'Home', 'B', 'Insert', 'C']);
+				arr.map(function (t: any) {
+					return t.name;
+				}),
+				['File', 'A', 'Home', 'B', 'Insert', 'C'],
+			);
 		});
 
 		it('warns (only when validate is true) on a name collision, both anchors set, and an unknown anchor', function () {
 			const notebookbar = newNotebookbar();
 			const tabs = [
 				{ extId: 'extA', name: 'Home' },
-				{ extId: 'extA', name: 'NewTab', insertBefore: 'NoSuchTab', insertAfter: 'Home' },
+				{
+					extId: 'extA',
+					name: 'NewTab',
+					insertBefore: 'NoSuchTab',
+					insertAfter: 'Home',
+				},
 			];
 
 			const silentWarnings = collectWarnings(function () {
-				notebookbar._insertContributedNotebookbarTabs(builtInArr(), tabs, identityBuildEntry, false);
+				notebookbar._insertContributedNotebookbarTabs(
+					builtInArr(),
+					tabs,
+					identityBuildEntry,
+					false,
+				);
 			});
 			nodeassert.deepStrictEqual(silentWarnings, []);
 
 			const warnings = collectWarnings(function () {
-				notebookbar._insertContributedNotebookbarTabs(builtInArr(), tabs, identityBuildEntry, true);
+				notebookbar._insertContributedNotebookbarTabs(
+					builtInArr(),
+					tabs,
+					identityBuildEntry,
+					true,
+				);
 			});
-			nodeassert.ok(warnings.some(function (w) { return w.indexOf('collides with an existing tab name') >= 0; }));
-			nodeassert.ok(warnings.some(function (w) { return w.indexOf('sets both insertBefore and insertAfter') >= 0; }));
-			nodeassert.ok(warnings.some(function (w) { return w.indexOf('insertBefore names unknown tab "NoSuchTab"') >= 0; }));
+			nodeassert.ok(
+				warnings.some(function (w) {
+					return w.indexOf('collides with an existing tab name') >= 0;
+				}),
+			);
+			nodeassert.ok(
+				warnings.some(function (w) {
+					return w.indexOf('sets both insertBefore and insertAfter') >= 0;
+				}),
+			);
+			nodeassert.ok(
+				warnings.some(function (w) {
+					return w.indexOf('insertBefore names unknown tab "NoSuchTab"') >= 0;
+				}),
+			);
 		});
 	});
 });

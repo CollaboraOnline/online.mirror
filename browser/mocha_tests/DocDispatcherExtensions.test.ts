@@ -10,7 +10,6 @@
  */
 
 describe('Dispatcher ext: routing', function () {
-
 	// Enough of app.map for the constructor and the "is a dialog already open"
 	// guard at the top of dispatch() to run without touching anything else;
 	// _extensions is what the ext: branch actually reads.
@@ -23,7 +22,7 @@ describe('Dispatcher ext: routing', function () {
 		return new Dispatcher('none');
 	}
 
-	it('routes ext:<id>:<command> to that extension\'s invokeCommand', function () {
+	it("routes ext:<id>:<command> to that extension's invokeCommand", function () {
 		const dispatcher = newDispatcher();
 		const calls: string[] = [];
 		app.map._extensions['demo'] = {

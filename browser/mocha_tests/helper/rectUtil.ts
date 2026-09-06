@@ -12,22 +12,22 @@
 /// <reference path="./types.ts" />
 
 function assertPosSize(actual: mtest.Rectangle, expected: mtest.Rectangle) {
-    // Only assert components of expected that are provided.
-    if (typeof expected.x === 'number')
-        nodeassert.equal(actual.x, expected.x, 'Left mismatch');
-    if (typeof expected.y === 'number')
-        nodeassert.equal(actual.y, expected.y, 'Top mismatch');
-    if (typeof expected.width === 'number')
-        nodeassert.equal(actual.width, expected.width, 'Width mismatch');
-    if (typeof expected.height === 'number')
-        nodeassert.equal(actual.height, expected.height, 'Height mismatch');
+	// Only assert components of expected that are provided.
+	if (typeof expected.x === 'number')
+		nodeassert.equal(actual.x, expected.x, 'Left mismatch');
+	if (typeof expected.y === 'number')
+		nodeassert.equal(actual.y, expected.y, 'Top mismatch');
+	if (typeof expected.width === 'number')
+		nodeassert.equal(actual.width, expected.width, 'Width mismatch');
+	if (typeof expected.height === 'number')
+		nodeassert.equal(actual.height, expected.height, 'Height mismatch');
 }
 
 function getSectionRectangle(section: CanvasSectionObject): mtest.Rectangle {
-    return {
-        x: section.myTopLeft[0],
-        y: section.myTopLeft[1],
-        width: section.size[0],
-        height: section.size[1],
-    };
+	return {
+		x: section.myTopLeft[0],
+		y: section.myTopLeft[1],
+		width: section.size[0],
+		height: section.size[1],
+	};
 }

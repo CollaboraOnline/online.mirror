@@ -10,7 +10,6 @@
  */
 
 class HandlerData {
-
 	public numCalls: number;
 	public event?: EventBaseType;
 
@@ -21,7 +20,6 @@ class HandlerData {
 }
 
 class DerivedEvented extends Evented {
-
 	public first: HandlerData;
 	public second: HandlerData;
 
@@ -47,7 +45,6 @@ class DerivedEvented extends Evented {
 }
 
 class ForeignContext {
-
 	public first: HandlerData;
 	public second: HandlerData;
 

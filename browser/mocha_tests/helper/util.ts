@@ -9,7 +9,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-function assertFloat(actual: number, expected: number, eps: number, msg: string) {
-	nodeassert.ok(Math.abs(actual - expected) < eps,
-		msg + ` | actual : ${actual}, expected: ${expected}, eps: ${eps}`);
+function assertFloat(
+	actual: number,
+	expected: number,
+	eps: number,
+	msg: string,
+) {
+	nodeassert.ok(
+		Math.abs(actual - expected) < eps,
+		msg + ` | actual : ${actual}, expected: ${expected}, eps: ${eps}`,
+	);
 }

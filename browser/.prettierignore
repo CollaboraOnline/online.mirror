@@ -10,3 +10,4 @@
 **/._*
 node_modules
 dist/src
+mocha_tests/workdir

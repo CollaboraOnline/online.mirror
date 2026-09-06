@@ -1,22 +1,18 @@
 {
   "compileOnSave": false,
-    "compilerOptions": {
-      "target": "es5",
-      "module": "none",
-      "lib": ["dom", "es2016"],
-      "sourceMap": false,
-      "incremental": true,
+  "compilerOptions": {
+    "target": "es5",
+    "module": "none",
+    "lib": ["dom", "es2016"],
+    "sourceMap": false,
+    "incremental": true,
 
-      "moduleResolution": "node",
-      "noImplicitAny": true,
-      "removeComments": false,
-      "preserveConstEnums": false,
-      "downlevelIteration": true,
-      "watch": false,
-    },
-    "exclude": [
-      "node_modules",
-      "./node_modules",
-      "./node_modules/*"
-    ]
-  }
+    "moduleResolution": "node",
+    "noImplicitAny": true,
+    "removeComments": false,
+    "preserveConstEnums": false,
+    "downlevelIteration": true,
+    "watch": false
+  },
+  "exclude": ["node_modules", "./node_modules", "./node_modules/*"]
+}

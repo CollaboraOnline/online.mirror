@@ -10,50 +10,53 @@
  */
 
 describe('ShortcutsUtil', function () {
-
 	// 'search' is a UNO_ALIAS for vnd.sun.star.findbar:FocusToFindbar,
 	// resolved via the generated unoShortcutsMap (loaded by sources.ts
 	// from browser/src/unoshortcuts.js) — Ctrl+F by default.
 
 	describe('getTooltipLabel()', function () {
-
 		it('appends the shortcut in parentheses', function () {
 			nodeassert.strictEqual(
 				JSDialog.ShortcutsUtil.getTooltipLabel('Find', 'search'),
-				'Find (Ctrl+F)');
+				'Find (Ctrl+F)',
+			);
 		});
 
 		it('strips the mnemonic tilde from the label', function () {
 			nodeassert.strictEqual(
 				JSDialog.ShortcutsUtil.getTooltipLabel('~Find', 'search'),
-				'Find (Ctrl+F)');
+				'Find (Ctrl+F)',
+			);
 		});
 
 		it('returns the text unchanged for unknown commands', function () {
 			nodeassert.strictEqual(
 				JSDialog.ShortcutsUtil.getTooltipLabel('Find', '.uno:NoSuch'),
-				'Find');
+				'Find',
+			);
 		});
 	});
 
 	describe('getMenuLabel()', function () {
-
 		it('wraps the shortcut in span.shortcut for right-aligned rendering', function () {
 			nodeassert.strictEqual(
 				JSDialog.ShortcutsUtil.getMenuLabel('Find', 'search'),
-				'Find <span class="shortcut">Ctrl+F</span>');
+				'Find <span class="shortcut">Ctrl+F</span>',
+			);
 		});
 
 		it('strips the mnemonic tilde from the label', function () {
 			nodeassert.strictEqual(
 				JSDialog.ShortcutsUtil.getMenuLabel('~Find', 'search'),
-				'Find <span class="shortcut">Ctrl+F</span>');
+				'Find <span class="shortcut">Ctrl+F</span>',
+			);
 		});
 
 		it('returns the text unchanged for unknown commands', function () {
 			nodeassert.strictEqual(
 				JSDialog.ShortcutsUtil.getMenuLabel('Find', '.uno:NoSuch'),
-				'Find');
+				'Find',
+			);
 		});
 	});
 });

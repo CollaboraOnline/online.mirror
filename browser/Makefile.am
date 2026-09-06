@@ -129,6 +129,7 @@ MOCHA_SRC_DEPS = $(shell find $(srcdir)/src $(srcdir)/js \( -name '*.ts' -o -nam
 # tsc can report a failure, but still create a .js and a second make attempt will succeed,
 # so if this returns an error then delete the target
 $(MOCHA_JS_DIR)/main.js: $(MOCHA_DIR)/main.ts $(wildcard $(MOCHA_DIR)/*.ts $(MOCHA_DIR)/*/*.ts) $(MOCHA_SRC_DEPS) $(srcdir)/src/unoshortcuts.ts
+	$(call run_prettier_check,--debug-check $(MOCHA_DIR))
 	$(QUIET_TSC) $(NODE) $(builddir)/node_modules/typescript/bin/tsc $< --outfile $@ --module none --moduleResolution node --lib dom,es2016 --target ES5 --downlevelIteration --allowJs --jsx react --jsxFactory h --jsxFragmentFactory Fragment || (rm -f $@ && false)
 
 JQUERY_LIGHTNESS_IMAGE_PATH = $(srcdir)/images/jquery-ui-lightness
@@ -1761,7 +1762,7 @@ eslint: $(COOL_ADMIN_TS_JS)
 
 # Override to check a subset, for example a pre-commit hook passing
 # only the staged files: make prettier PRETTIER_TARGETS="src/foo.ts".
-PRETTIER_TARGETS ?= src js admin/src
+PRETTIER_TARGETS ?= src js admin/src mocha_tests
 
 prettier:
 	$(call run_prettier_check,--check $(addprefix $(srcdir)/,$(PRETTIER_TARGETS)))

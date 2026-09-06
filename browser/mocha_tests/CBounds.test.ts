@@ -10,7 +10,6 @@
  */
 
 describe('CBounds', function () {
-
 	describe('Bounds.parse() call with an empty string argument', function () {
 		it('should return undefined', function () {
 			nodeassert.equal(cool.Bounds.parse(''), undefined);
@@ -31,20 +30,26 @@ describe('CBounds', function () {
 		});
 
 		it('and the Bounds should be correct in position and size', function () {
-			nodeassert.ok(bounds.equals(new cool.Bounds(new cool.Point(10, 20), new cool.Point(40, 60))));
+			nodeassert.ok(
+				bounds.equals(
+					new cool.Bounds(new cool.Point(10, 20), new cool.Point(40, 60)),
+				),
+			);
 		});
 	});
 
 	describe('Bounds constructor call', function () {
 		it('correctness check with PointConstructable[] argument', function () {
-			var bounds = new cool.Bounds(
-				[
-					[10, 20],
-					{ x: 5, y: 50 },
-					[1, 2],
-					{ x: -1, y: 7 },
-				]);
-			var expected = new cool.Bounds(new cool.Point(-1, 2), new cool.Point(10, 50));
+			var bounds = new cool.Bounds([
+				[10, 20],
+				{ x: 5, y: 50 },
+				[1, 2],
+				{ x: -1, y: 7 },
+			]);
+			var expected = new cool.Bounds(
+				new cool.Point(-1, 2),
+				new cool.Point(10, 50),
+			);
 			nodeassert.deepEqual(expected, bounds);
 		});
 	});

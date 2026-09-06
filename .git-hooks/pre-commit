@@ -132,7 +132,7 @@ sub check_author()
 sub check_prettier()
 {
     # limit to the dirs the prettier target formats
-    my @staged = split(/\n/, `git diff --cached --name-only --diff-filter=ACMR -- browser/src browser/js browser/admin/src`);
+    my @staged = split(/\n/, `git diff --cached --name-only --diff-filter=ACMR -- browser/src browser/js browser/admin/src browser/mocha_tests`);
     return unless @staged;
 
     if (-e "browser/Makefile") {

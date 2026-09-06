@@ -25,7 +25,14 @@ describe('AI chat message codes', function () {
 		'utf8',
 	);
 	const clientSource: string = fs.readFileSync(
-		path.join(__dirname, '..', '..', 'src', 'control', 'Control.AIChatSidebar.ts'),
+		path.join(
+			__dirname,
+			'..',
+			'..',
+			'src',
+			'control',
+			'Control.AIChatSidebar.ts',
+		),
 		'utf8',
 	);
 
@@ -87,31 +94,60 @@ describe('AI chat message codes', function () {
 		addMatches(codes, serverSource, /\.errorCode = "(\w+)"/g);
 		// The ChatError struct literals mapHttpStatusToError() returns.
 		const from = serverSource.indexOf('AIChatSession::mapHttpStatusToError');
-		nodeassert.ok(from >= 0, 'mapHttpStatusToError not found in the server source');
+		nodeassert.ok(
+			from >= 0,
+			'mapHttpStatusToError not found in the server source',
+		);
 		const to = serverSource.indexOf('\n}', from);
 		addMatches(codes, serverSource.slice(from, to), /\{ "(\w+)"/g);
 		return codes;
 	}
 
 	const errorCodes = serverErrorCodes();
-	const progressKeys = bareCodeLiterals(callArgs(serverSource, 'sendToolProgress'));
-	const displayCodes = bareCodeLiterals(callArgs(serverSource, 'sendChatResult'));
+	const progressKeys = bareCodeLiterals(
+		callArgs(serverSource, 'sendToolProgress'),
+	);
+	const displayCodes = bareCodeLiterals(
+		callArgs(serverSource, 'sendChatResult'),
+	);
 
 	const errorMap = clientMapKeys('private translateChatError(');
 	const progressMap = clientMapKeys('private translateProgress(');
 	const displayCases = new Set<string>();
-	addMatches(displayCases, clientMethodBody('private translateDisplay('), /case '(\w+)':/g);
+	addMatches(
+		displayCases,
+		clientMethodBody('private translateDisplay('),
+		/case '(\w+)':/g,
+	);
 
 	// Guard the extraction itself: if a refactor breaks one of the source
 	// patterns above, the sets shrink and the sync checks turn vacuous, so
 	// pin one known code per pattern and a floor on the total.
 	it('extracts the message codes from both sources', function () {
-		nodeassert.ok(errorCodes.has('aiNotConfigured'), 'sendChatError literals not found');
-		nodeassert.ok(errorCodes.has('imageSettingsNotConfigured'), 'errorCode assignments not found');
-		nodeassert.ok(errorCodes.has('apiInvalidKey'), 'mapHttpStatusToError codes not found');
-		nodeassert.ok(errorCodes.size >= 30, `implausibly few error codes: ${errorCodes.size}`);
-		nodeassert.ok(progressKeys.has('thinking'), 'sendToolProgress keys not found');
-		nodeassert.ok(displayCodes.has('deckReady'), 'sendChatResult display codes not found');
+		nodeassert.ok(
+			errorCodes.has('aiNotConfigured'),
+			'sendChatError literals not found',
+		);
+		nodeassert.ok(
+			errorCodes.has('imageSettingsNotConfigured'),
+			'errorCode assignments not found',
+		);
+		nodeassert.ok(
+			errorCodes.has('apiInvalidKey'),
+			'mapHttpStatusToError codes not found',
+		);
+		nodeassert.ok(
+			errorCodes.size >= 30,
+			`implausibly few error codes: ${errorCodes.size}`,
+		);
+		nodeassert.ok(
+			progressKeys.has('thinking'),
+			'sendToolProgress keys not found',
+		);
+		nodeassert.ok(
+			displayCodes.has('deckReady'),
+			'sendChatResult display codes not found',
+		);
 	});
 
 	it('translates every server error code', function () {

@@ -38,80 +38,85 @@ noopClass.mergeOptions = () => {};
 noopClass.addInitHook = () => {};
 
 (globalThis as any).L = {
-    LOUtil: {},
-    Map: noopClass,
-    Handler: noopClass,
-    Control: noopClass,
-    Class: noopClass,
-    Layer: noopClass,
-    Evented: noopClass,
-    control: {},
+	LOUtil: {},
+	Map: noopClass,
+	Handler: noopClass,
+	Control: noopClass,
+	Class: noopClass,
+	Layer: noopClass,
+	Evented: noopClass,
+	control: {},
 };
 
 // DOMPurify is loaded via <script> tag in the browser; source files call
 // DOMPurify.addHook(...) at module load time. Stub it so source
 // concatenation doesn't blow up under Node.
 (globalThis as any).DOMPurify = {
-    addHook() {},
-    sanitize(s: string) { return s; },
+	addHook() {},
+	sanitize(s: string) {
+		return s;
+	},
 };
 
 (globalThis as any).app = {
-    CSections: { Scroll: { name : 'scroll' } },
-    roundedDpiScale : 1,
-    canvasSize: null,
-    definitions: {},
-    dpiScale: 1,
-    twipsToPixels: 1 / 15,
-    pixelsToTwips: 15,
-    sectionContainer: {},
-    socket: {},
-    // Loader-time stubs: source files touch these at module-load time.
-    // In the browser, js/global.js + setLogging(true) populate app.console
-    // with real console wrappers (assert, error, warn, ...). app.events is
-    // a DocEvents instance with on/off/fire/emit. Mirror just enough of
-    // that so source concatenation doesn't blow up under Node.
-    console: console,
-    events: { on() {}, off() {}, fire() {}, emit() {} },
-    // docstatefunctions.js attaches functions to app.calc / app.impress at
-    // module-load time (e.g. `app.calc.isRTL = function () {...}`), so the
-    // sub-objects must already exist. In the browser these are created in
-    // docstate.ts; we mirror the bare structure here.
-    //
-    // docstate.ts reassigns `window.app` to a brand-new object, but that
-    // only updates the jsdom window's property — `globalThis.app` keeps
-    // pointing at this stub. The `load` event listener registered in
-    // docstatefunctions.js runs in Node scope where bare `app` resolves to
-    // `globalThis.app`, so the stub also needs `file`, `tile`, `map`, and
-    // `following` populated well enough for the load callback and the
-    // RAF helpers (app.enterRAF / app.exitRAF) not to throw.
-    calc: {},
-    impress: {},
-    file: {
-        textCursor: {
-            visible: false,
-            rectangle: null,
-        },
-    },
-    tile: {
-        size: null,
-    },
-    // `app.enterRAF`/`app.exitRAF` in docstatefunctions.js dereference
-    // `app.map._debug` without a null check on `map`, and SheetGeometry
-    // calls `app.map.fire(...)` after guarding only on `app.map`. Give
-    // `map` no-op event methods so neither site throws when RAF fires
-    // during tests. Tests that exercise map behavior (ViewLayout) still
-    // overwrite `app.map` with a richer fixture.
-    map: { fire() {}, on() {}, off() {}, emit() {}, _debug: null },
-    following: {
-        mode: 'none',
-        viewId: -1,
-    },
+	CSections: { Scroll: { name: 'scroll' } },
+	roundedDpiScale: 1,
+	canvasSize: null,
+	definitions: {},
+	dpiScale: 1,
+	twipsToPixels: 1 / 15,
+	pixelsToTwips: 15,
+	sectionContainer: {},
+	socket: {},
+	// Loader-time stubs: source files touch these at module-load time.
+	// In the browser, js/global.js + setLogging(true) populate app.console
+	// with real console wrappers (assert, error, warn, ...). app.events is
+	// a DocEvents instance with on/off/fire/emit. Mirror just enough of
+	// that so source concatenation doesn't blow up under Node.
+	console: console,
+	events: { on() {}, off() {}, fire() {}, emit() {} },
+	// docstatefunctions.js attaches functions to app.calc / app.impress at
+	// module-load time (e.g. `app.calc.isRTL = function () {...}`), so the
+	// sub-objects must already exist. In the browser these are created in
+	// docstate.ts; we mirror the bare structure here.
+	//
+	// docstate.ts reassigns `window.app` to a brand-new object, but that
+	// only updates the jsdom window's property — `globalThis.app` keeps
+	// pointing at this stub. The `load` event listener registered in
+	// docstatefunctions.js runs in Node scope where bare `app` resolves to
+	// `globalThis.app`, so the stub also needs `file`, `tile`, `map`, and
+	// `following` populated well enough for the load callback and the
+	// RAF helpers (app.enterRAF / app.exitRAF) not to throw.
+	calc: {},
+	impress: {},
+	file: {
+		textCursor: {
+			visible: false,
+			rectangle: null,
+		},
+	},
+	tile: {
+		size: null,
+	},
+	// `app.enterRAF`/`app.exitRAF` in docstatefunctions.js dereference
+	// `app.map._debug` without a null check on `map`, and SheetGeometry
+	// calls `app.map.fire(...)` after guarding only on `app.map`. Give
+	// `map` no-op event methods so neither site throws when RAF fires
+	// during tests. Tests that exercise map behavior (ViewLayout) still
+	// overwrite `app.map` with a richer fixture.
+	map: { fire() {}, on() {}, off() {}, emit() {}, _debug: null },
+	following: {
+		mode: 'none',
+		viewId: -1,
+	},
 };
 
-globalThis.window = (function() {
+globalThis.window = (function () {
 	const jsdom = require('jsdom');
-	const dom = new jsdom.JSDOM('<html><body><div id="document-container"></div></body></html>', { pretendToBeVisual: true });
+	const dom = new jsdom.JSDOM(
+		'<html><body><div id="document-container"></div></body></html>',
+		{ pretendToBeVisual: true },
+	);
 	return dom.window;
 })();
 
@@ -141,8 +146,7 @@ globalThis.document = globalThis.window.document;
 		extend(input: any) {},
 	},
 
-	Control: class _Control {
-	},
+	Control: class _Control {},
 
 	control: {},
 };
@@ -169,18 +173,16 @@ globalThis.document = globalThis.window.document;
 
 globalThis._ = (input: string) => input;
 (globalThis.ResizeObserver as any) = class _ResizeObserver {
-	constructor(firer: () => void) {
-	}
-	observe(container: HTMLElement) {
-	}
+	constructor(firer: () => void) {}
+	observe(container: HTMLElement) {}
 };
- globalThis.JSDialog = {};
+globalThis.JSDialog = {};
 
 (globalThis as any).DOMPurify = require('dompurify');
 (globalThis as any).glMatrix = require('gl-matrix');
 
 String.locale = 'en';
-globalThis._UNO = function(i1: string, i2: string) {
+globalThis._UNO = function (i1: string, i2: string) {
 	return i2;
 };
 globalThis.SlideShow = {};

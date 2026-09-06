@@ -10,8 +10,7 @@
  */
 
 /// all tests based on the possible messages from wsd/protocol.txt
-describe('ServerCommand', function() {
-
+describe('ServerCommand', function () {
 	const mapzoom: MapZoomInterface = {
 		_docLayer: {
 			options: {
@@ -23,26 +22,28 @@ describe('ServerCommand', function() {
 		},
 	};
 
-	it('downloadas', function() {
-		const downloadid = 'SWhzgceoAoUXjc6XxSfKduleBU3pFKPI5jUQFnmRsgRxAPMqOhI8hhY0uWmg6tSp';
+	it('downloadas', function () {
+		const downloadid =
+			'SWhzgceoAoUXjc6XxSfKduleBU3pFKPI5jUQFnmRsgRxAPMqOhI8hhY0uWmg6tSp';
 		const port = '9980';
 		const id = 'export';
 
-		const msg = 'downloadas: downloadid=' + downloadid + ' port=' + port + ' id=' + id;
+		const msg =
+			'downloadas: downloadid=' + downloadid + ' port=' + port + ' id=' + id;
 		const sc = new ServerCommand(msg, mapzoom);
 		nodeassert.equal(downloadid, sc.downloadid);
 		nodeassert.equal(port, sc.port);
 		nodeassert.equal(id, sc.id);
 	});
 
-	it('getchildid', function() {
+	it('getchildid', function () {
 		const id = '23456';
 		const msg = 'getchildid: id=' + id;
 		const sc = new ServerCommand(msg, mapzoom);
 		nodeassert.equal(id, sc.id);
 	});
 
-	it('invalidatetiles (specific region)', function() {
+	it('invalidatetiles (specific region)', function () {
 		const part = 0;
 		const mode = 0;
 		const x = 117690;
@@ -63,7 +64,7 @@ describe('ServerCommand', function() {
 		nodeassert.equal(wireId, sc.wireId);
 	});
 
-	it('invalidatetiles (all cached tiles)', function() {
+	it('invalidatetiles (all cached tiles)', function () {
 		const part = 0;
 		const mode = 0;
 		const wireId = '268';
@@ -74,7 +75,7 @@ describe('ServerCommand', function() {
 		nodeassert.equal(wireId, sc.wireId);
 	});
 
-	it('loaded', function() {
+	it('loaded', function () {
 		const viewid = '34';
 		const views = 39;
 		const isfirst = false;
@@ -84,7 +85,7 @@ describe('ServerCommand', function() {
 		nodeassert.equal(viewid, sc.viewid);
 	});
 
-	it('pong', function() {
+	it('pong', function () {
 		const rendercount = 546;
 		const msg = `pong rendercount=${rendercount}`;
 
@@ -92,7 +93,7 @@ describe('ServerCommand', function() {
 		nodeassert.equal(rendercount, sc.rendercount);
 	});
 
-	it('tile', function() {
+	it('tile', function () {
 		const nviewid = '1000';
 		const part = 0;
 		const width = 256;

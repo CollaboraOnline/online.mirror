@@ -10,7 +10,6 @@
  */
 
 describe('InternPoint', function () {
-
 	describe('InternPointUtil.flexConstruct()', function () {
 		it('flexConstruct(null) should return undefined', function () {
 			nodeassert.equal(InternPointUtil.flexConstruct(null), undefined);
@@ -22,7 +21,10 @@ describe('InternPoint', function () {
 
 		it('flexConstruct(internPoint) should return the argument', function () {
 			const internPoint = InternPointUtil.flexConstruct(-10, 20);
-			nodeassert.deepEqual(InternPointUtil.flexConstruct(internPoint), internPoint);
+			nodeassert.deepEqual(
+				InternPointUtil.flexConstruct(internPoint),
+				internPoint,
+			);
 		});
 
 		it('flexConstruct([]) should return undefined', function () {
@@ -30,7 +32,7 @@ describe('InternPoint', function () {
 		});
 
 		it('flexConstruct([200]) should return undefined', function () {
-			nodeassert.equal(InternPointUtil.flexConstruct([200,]), undefined);
+			nodeassert.equal(InternPointUtil.flexConstruct([200]), undefined);
 		});
 
 		it('flexConstruct([number, number]) should return InternPointUtil', function () {
@@ -40,12 +42,18 @@ describe('InternPoint', function () {
 			nodeassert.deepEqual(InternPointUtil.flexConstruct([a, b]), internPoint);
 		});
 
-		it('flexConstruct([\'100\', \'200\']) should return undefined', function () {
-			nodeassert.equal(InternPointUtil.flexConstruct(['100', '200']), undefined);
+		it("flexConstruct(['100', '200']) should return undefined", function () {
+			nodeassert.equal(
+				InternPointUtil.flexConstruct(['100', '200']),
+				undefined,
+			);
 		});
 
 		it('flexConstruct([number, number, number]) should return undefined', function () {
-			nodeassert.equal(InternPointUtil.flexConstruct([200, 300, 400]), undefined);
+			nodeassert.equal(
+				InternPointUtil.flexConstruct([200, 300, 400]),
+				undefined,
+			);
 		});
 
 		it('flexConstruct(NormPointLike) should return InternPoint', function () {
@@ -70,15 +78,12 @@ describe('InternPoint', function () {
 			nodeassert.deepEqual(InternPointUtil.flexConstruct(a, b), internPoint);
 		});
 	});
-
 });
 
 describe('NormalBounds', function () {
-
 	const IBU = InternBoundsUtil;
 
 	describe('InternBoundsUtil.flexConstruct()', function () {
-
 		it('flexConstruct(null) should return undefined', function () {
 			nodeassert.equal(IBU.flexConstruct(null), undefined);
 		});
@@ -118,7 +123,10 @@ describe('NormalBounds', function () {
 			const internPoint1 = InternPointUtil.flexConstruct(a, b);
 			const internPoint2 = InternPointUtil.flexConstruct(c, d);
 			const bounds = IBU.flexConstruct(internPoint1, internPoint2);
-			nodeassert.deepEqual(IBU.flexConstruct([internPoint1, internPoint2]), bounds);
+			nodeassert.deepEqual(
+				IBU.flexConstruct([internPoint1, internPoint2]),
+				bounds,
+			);
 		});
 
 		it('flexConstruct([number, number], [number, number]) should return InternBounds', function () {
@@ -140,7 +148,13 @@ describe('NormalBounds', function () {
 			const internPoint1 = InternPointUtil.flexConstruct(a, b);
 			const internPoint2 = InternPointUtil.flexConstruct(c, d);
 			const bounds = IBU.flexConstruct(internPoint1, internPoint2);
-			nodeassert.deepEqual(IBU.flexConstruct([[a, b], [c, d]]), bounds);
+			nodeassert.deepEqual(
+				IBU.flexConstruct([
+					[a, b],
+					[c, d],
+				]),
+				bounds,
+			);
 		});
 
 		it('flexConstruct([number, number]) should return InternBounds', function () {

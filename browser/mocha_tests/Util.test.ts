@@ -10,21 +10,20 @@
  */
 
 describe('Util', function () {
-
 	describe('stamp()', function () {
 		const obj1 = { _leaflet_id: -1 };
 		const obj2 = { _leaflet_id: -1 };
 		let obj1Id = Util.stamp(obj1);
 		let obj2Id = Util.stamp(obj2);
-		it('first: id must be > 0', function() {
+		it('first: id must be > 0', function () {
 			nodeassert.ok(obj1Id > 0);
 		});
 
-		it('second: id must be > 0', function() {
+		it('second: id must be > 0', function () {
 			nodeassert.ok(obj2Id > 0);
 		});
 
-		it('first objects id must be less than id of second object', function() {
+		it('first objects id must be less than id of second object', function () {
 			nodeassert.ok(obj1Id < obj2Id);
 		});
 
@@ -35,10 +34,9 @@ describe('Util', function () {
 		it('second: id must not change', function () {
 			nodeassert.equal(obj2Id, Util.stamp(obj2));
 		});
-
 	});
 
-	describe('formatNum()', function() {
+	describe('formatNum()', function () {
 		it('integer with no decimal places', function () {
 			assertFloat(Util.formatNum(5, 0), 5, 1e-5, '');
 		});
@@ -130,7 +128,10 @@ describe('Util', function () {
 		});
 
 		it('Multi prefix and suffix', function () {
-			nodeassert.strictEqual(Util.trim('ABCDABCDXYZABCDABCD', 'ABCD', 'ABCD'), 'ABCDXYZABCD');
+			nodeassert.strictEqual(
+				Util.trim('ABCDABCDXYZABCDABCD', 'ABCD', 'ABCD'),
+				'ABCDXYZABCD',
+			);
 		});
 
 		it('Overlapping prefix and suffix', function () {
@@ -152,15 +153,20 @@ describe('Util', function () {
 		});
 
 		it('split string with single word surrounded by multi white-spaces', function () {
-			nodeassert.deepEqual(Util.splitWords(' \t \t   \t\t  ABC\t \t\t   \t'), ['ABC']);
+			nodeassert.deepEqual(Util.splitWords(' \t \t   \t\t  ABC\t \t\t   \t'), [
+				'ABC',
+			]);
 		});
 
 		it('split string with two words', function () {
-			nodeassert.deepEqual(Util.splitWords(' \t \t   \t\t  ABC\t \t\t   \tXYZ    \t\t   \t'), ['ABC', 'XYZ']);
+			nodeassert.deepEqual(
+				Util.splitWords(' \t \t   \t\t  ABC\t \t\t   \tXYZ    \t\t   \t'),
+				['ABC', 'XYZ'],
+			);
 		});
 	});
 
-	describe('round()', function() {
+	describe('round()', function () {
 		it('integer with no decimal places', function () {
 			assertFloat(Util.round(5), 5, 1e-5, '');
 		});
@@ -192,42 +198,62 @@ describe('Util', function () {
 		});
 
 		it('no substitutions', function () {
-			nodeassert.strictEqual(Util.template('cool apps', {'cool': 32}), 'cool apps');
+			nodeassert.strictEqual(
+				Util.template('cool apps', { cool: 32 }),
+				'cool apps',
+			);
 		});
 
 		it('one key one substitution', function () {
-			nodeassert.strictEqual(Util.template('cool {  app  } abcd', {'cool': 32, 'app': 'calc'}), 'cool calc abcd');
+			nodeassert.strictEqual(
+				Util.template('cool {  app  } abcd', { cool: 32, app: 'calc' }),
+				'cool calc abcd',
+			);
 		});
 
 		it('one key two substitutions', function () {
-			nodeassert.strictEqual(Util.template('A {app   } cool {   app} abcd', {'cool': 32, 'app': 'calc'}), 'A calc cool calc abcd');
+			nodeassert.strictEqual(
+				Util.template('A {app   } cool {   app} abcd', {
+					cool: 32,
+					app: 'calc',
+				}),
+				'A calc cool calc abcd',
+			);
 		});
 
 		it('two keys multiple substitutions', function () {
-			nodeassert.strictEqual(Util.template('A) {  app1}, B) {app2 }, C) { app2}, D) { app1 } ', {'cool': 32, 'app': 'calc', 'app1': 'draw', 'app2': 'impress'}), 'A) draw, B) impress, C) impress, D) draw ');
+			nodeassert.strictEqual(
+				Util.template('A) {  app1}, B) {app2 }, C) { app2}, D) { app1 } ', {
+					cool: 32,
+					app: 'calc',
+					app1: 'draw',
+					app2: 'impress',
+				}),
+				'A) draw, B) impress, C) impress, D) draw ',
+			);
 		});
 
 		it('key function', function () {
-			nodeassert.strictEqual(Util.template('{fkey }, { key }', {
-				'key': '1234',
-				'fkey': function(data: any) {
-					return data['key'] + '_999';
-				},
-			}), '1234_999, 1234');
+			nodeassert.strictEqual(
+				Util.template('{fkey }, { key }', {
+					key: '1234',
+					fkey: function (data: any) {
+						return data['key'] + '_999';
+					},
+				}),
+				'1234_999, 1234',
+			);
 		});
 	});
-
 });
 
 class XDOMParser {
-
 	parseFromString(str: string, type: DOMParserSupportedType): Document {
 		return new jsdom.JSDOM(str).window.document;
 	}
 }
 
 describe('DocUtil', function () {
-
 	describe('stripHTML()', function () {
 		const domParser = new XDOMParser();
 		const tests: string[][] = [
@@ -242,7 +268,7 @@ describe('DocUtil', function () {
 			const input = pair[0];
 			const expected = pair[1];
 			const name = pair[2];
-			it('test ' + name, function() {
+			it('test ' + name, function () {
 				nodeassert.equal(expected, DocUtil.stripHTML(input, domParser));
 			});
 		});
