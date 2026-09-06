@@ -1139,7 +1139,7 @@ static std::string synthesizeGasSidecar(
     static const std::regex reSetTitle(R"RE(setTitle\s*\(\s*(?:'([^']+)'|"([^"]+)"))RE");
     static const std::regex reTitleConst(
         R"RE([A-Za-z_][A-Za-z0-9_]*_TITLE\s*=\s*(?:'([^']+)'|"([^"]+)"))RE");
-    auto tryMatch = [&scripts](std::regex const & re) {
+    auto tryMatch = [&scripts](std::regex const & re) -> std::string {
         for (auto const & [name, src]: scripts) {
             std::smatch m;
             if (std::regex_search(src, m, re)) {
@@ -1347,7 +1347,7 @@ bool FileServerRequestHandler::serveBrowserPresetExtensionFile(
         HttpHelper::sendErrorAndShutdown(http::StatusCode::NotFound, socket);
         return true;
     }
-    auto const subPath = rest.size() > extensionsSegment.size()
+    std::string const subPath = rest.size() > extensionsSegment.size()
         ? rest.substr(extensionsSegment.size()) : std::string();
 
     // On-disk root: <ChildRoot>/tmp/sharedpresets/<configId>/extensions/
