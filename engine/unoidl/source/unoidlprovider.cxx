@@ -542,6 +542,10 @@ std::vector< OUString > readAnnotations(
     if (annotated) {
         sal_uInt32 n = file->read32(offset);
         offset += 4;
+        if (n > (file->size - offset) / 4) {
+            throw FileFormatException(
+                file->uri, u"UNOIDL format: too many annotations"_ustr);
+        }
         for (sal_uInt32 i = 0; i != n; ++i) {
             ans.push_back(file->readIdxString(&offset));
         }
