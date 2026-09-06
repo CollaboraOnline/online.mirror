@@ -215,6 +215,7 @@ static oslPipe osl_psz_createPipe(const char *pszPipeName, oslPipeOptions Option
     }
 
     addr.sun_family = AF_UNIX;
+    // coverity[fixed_size_dest : FALSE] - the length test above returns first
     strcpy(addr.sun_path, name.getStr());
 #if defined(FREEBSD)
     len = SUN_LEN(&addr);
