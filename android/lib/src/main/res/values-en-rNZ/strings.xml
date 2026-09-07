@@ -22,4 +22,9 @@
     <string name="ask_for_convert_odf">Confirm File Format</string>
     <string name="use_odf">Use ODF Format</string>
     <string name="use_text">Use Text Format</string>
+    <string name="all_files_access_title">Opened in read-only mode</string>
+    <string name="all_files_access_message">The app that shared this file did not allow changes to be saved back to it.\n\nGrant \"All files access\" to let this app write the file where it is stored, so that you can edit it here.</string>
+    <string name="all_files_access_grant">Allow access</string>
+    <string name="do_not_ask_again">Do not ask again</string>
+    <string name="failed_to_save_file">Could not save the changes to the file</string>
 </resources>
