@@ -24,4 +24,9 @@
     <string name="ask_for_convert_odf">Confirmar formato de arquivo</string>
     <string name="use_text">Usar Formato de Texto</string>
     <string name="convert_odf_message">Este documento pode conter formatação ou conteúdo que não pode ser salvo no formato de arquivo \"Texto\" atualmente selecionado.</string>
+    <string name="all_files_access_title">Aberto no modo somente leitura</string>
+    <string name="all_files_access_message">O aplicativo que compartilhou este arquivo não permitiu que as alterações fossem salvas nele.\n\nConceda \"Acesso a todos os arquivos\" para permitir que este aplicativo grave o arquivo no local onde ele está armazenado, possibilitando a sua edição aqui.</string>
+    <string name="all_files_access_grant">Permitir acesso</string>
+    <string name="do_not_ask_again">Não pergunte novamente</string>
+    <string name="failed_to_save_file">Não foi possível salvar as alterações no arquivo</string>
 </resources>
