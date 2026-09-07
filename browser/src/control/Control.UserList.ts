@@ -19,6 +19,7 @@ interface UserExtraInfo {
 }
 
 interface User {
+	userId: string;
 	username: string;
 	extraInfo: UserExtraInfo;
 	color: string;
@@ -30,6 +31,7 @@ interface User {
 
 interface UserEvent {
 	viewId: number;
+	userId: string;
 	username: string;
 	extraInfo: UserExtraInfo;
 	readonly: boolean;
@@ -256,9 +258,31 @@ class UserList extends window.L.Control {
 				return;
 			}
 
+			// The list has one row per user. A user who opened the document more
+			// than once has a view for every connection, and the first of those
+			// views to come up here stands for all of them. A view without a user
+			// id keeps a row of its own.
+			const listedUserIds = new Set<string>();
+			const claimsTheRow = (user: User): boolean => {
+				if (!user.userId) {
+					return true;
+				}
+
+				if (listedUserIds.has(user.userId)) {
+					return false;
+				}
+
+				listedUserIds.add(user.userId);
+				return true;
+			};
+
+			// Our own row is always there, so it takes the row of our user before
+			// the other views are looked at.
+			claimsTheRow(self);
+
 			const followedUser = this.getFollowedUser();
 
-			if (followedUser !== undefined) {
+			if (followedUser !== undefined && claimsTheRow(followedUser[1])) {
 				yield followedUser;
 			}
 
@@ -274,6 +298,10 @@ class UserList extends window.L.Control {
 					continue;
 				}
 
+				if (!claimsTheRow(user)) {
+					continue;
+				}
+
 				if (user.readonly) {
 					readonlyUsers.push([viewId, user]);
 					continue;
@@ -286,16 +314,87 @@ class UserList extends window.L.Control {
 		}.bind(this)();
 	}
 
+	// Number of rows the list shows: one per user behind the open views, plus
+	// one for every view that came without a user id.
+	getListedUserCount(): number {
+		const listedUserIds = new Set<string>();
+		let count = 0;
+
+		for (const user of this.users.values()) {
+			if (!user.userId) {
+				count++;
+			} else if (!listedUserIds.has(user.userId)) {
+				listedUserIds.add(user.userId);
+				count++;
+			}
+		}
+
+		return count;
+	}
+
+	// Any view of the given user, or undefined when the user has none left.
+	getViewOfUser(userId: string): number | undefined {
+		if (!userId) {
+			return undefined;
+		}
+
+		for (const [viewId, user] of this.users) {
+			if (user.userId === userId) {
+				return viewId;
+			}
+		}
+
+		return undefined;
+	}
+
+	// Following is by user rather than by connection: when the followed user
+	// acts in another of their views, that view takes over the following and the
+	// screen goes to what they are doing there.
+	moveFollowingToActiveView(viewId: number) {
+		if (!app.isFollowingUser() || !this.map || !this.map._docLayer) {
+			return;
+		}
+
+		const followedViewId = app.getFollowedViewId();
+
+		// Following our own view means the screen stays with our own cursor, so
+		// another view of ours never takes it over.
+		if (
+			followedViewId === viewId ||
+			followedViewId === this.map._docLayer._viewId
+		) {
+			return;
+		}
+
+		const followed = this.users.get(followedViewId);
+		const acting = this.users.get(viewId);
+
+		if (followed === undefined || acting === undefined) {
+			return;
+		}
+
+		if (!acting.userId || acting.userId !== followed.userId) {
+			return;
+		}
+
+		// Following without a jump of its own: the screen goes to the new view
+		// when its cursor arrives.
+		this.map._setFollowing(true, viewId, false);
+		this.renderAll();
+	}
+
 	renderHeaderAvatars() {
 		const userListElementBackground = document.getElementById(
 			'userListSummaryBackground',
 		);
 		const userListElement = document.getElementById('userListSummaryButton');
 
+		const sortedUsers = Array.from(this.getSortedUsers());
+
 		if (
 			window.mode.isSmallScreenDevice() ||
 			this.hideUserList() ||
-			this.users.size === 1
+			sortedUsers.length === 1
 		) {
 			userListElement.removeAttribute('accesskey');
 			userListElementBackground.style.display = 'none';
@@ -310,10 +409,7 @@ class UserList extends window.L.Control {
 			displayCount = this.options.userLimitHeaderWhenFollowing;
 		}
 
-		const avatarUsers = Array.from(this.getSortedUsers()).slice(
-			0,
-			displayCount,
-		);
+		const avatarUsers = sortedUsers.slice(0, displayCount);
 		const followed = this.getFollowedUser();
 
 		userListElement.setAttribute('accesskey', 'UP');
@@ -344,7 +440,7 @@ class UserList extends window.L.Control {
 	}
 
 	updateUserListCount() {
-		const count = this.users.size;
+		const count = this.getListedUserCount();
 
 		if (this.map.mobileTopBar) {
 			if (!this.hideUserList() && count > 1)
@@ -369,6 +465,8 @@ class UserList extends window.L.Control {
 		let username;
 		let you;
 
+		const firstViewOfUser = this.getViewOfUser(e.userId) === undefined;
+
 		if (e.viewId === this.map._docLayer._viewId) {
 			username = _('You');
 			color = 'var(--color-main-text)';
@@ -381,13 +479,18 @@ class UserList extends window.L.Control {
 
 		this.users.set(e.viewId, {
 			you: you,
+			userId: e.userId,
 			username: username,
 			extraInfo: e.extraInfo,
 			color: color,
 			readonly: e.readonly,
 		});
 
-		this.showJoinLeaveMessage('join', e.viewId, username, color);
+		// A user who is already in the list opened one more connection, which
+		// joins the row they already have.
+		if (firstViewOfUser) {
+			this.showJoinLeaveMessage('join', e.viewId, username, color);
+		}
 
 		this.renderAll();
 	}
@@ -396,11 +499,21 @@ class UserList extends window.L.Control {
 		const user = this.users.get(e.viewId);
 		this.users.delete(e.viewId);
 
+		const remainingViewId =
+			user !== undefined ? this.getViewOfUser(user.userId) : undefined;
+
 		if (e.viewId === app.getFollowedViewId()) {
-			this.unfollowAll();
+			// Following a user moves to another connection of that same user when
+			// one is left. Following the editor holds a role rather than a person,
+			// so a closed view ends it.
+			if (app.isFollowingUser() && remainingViewId !== undefined) {
+				this.map._setFollowing(true, remainingViewId, false);
+			} else {
+				this.unfollowAll();
+			}
 		}
 
-		if (user !== undefined) {
+		if (user !== undefined && remainingViewId === undefined) {
 			this.showJoinLeaveMessage('leave', e.viewId, user.username, user.color);
 		}
 
@@ -466,6 +579,44 @@ class UserList extends window.L.Control {
 		}, 3000);
 	}
 
+	// The row that carries the focus back after the popover is rebuilt: the row
+	// of the same user, or the row of the same view when the user has no id. A
+	// user id comes from the integration and can hold any character, so the rows
+	// are compared one by one instead of through a selector.
+	findRowToRefocus(
+		popoverElement: Element,
+		userId: string | null,
+		viewId: string | null,
+	): HTMLElement | null {
+		if (userId === null && viewId === null) {
+			return null;
+		}
+
+		const rows = Array.from(
+			popoverElement.querySelectorAll('.user-list-item'),
+		) as HTMLElement[];
+
+		if (userId !== null) {
+			const sameUser = rows.find(
+				(row) => row.getAttribute('data-user-id') === userId,
+			);
+			if (sameUser) {
+				return sameUser;
+			}
+		}
+
+		if (viewId !== null) {
+			const sameView = rows.find(
+				(row) => row.getAttribute('data-view-id') === viewId,
+			);
+			if (sameView) {
+				return sameView;
+			}
+		}
+
+		return null;
+	}
+
 	renderHeaderAvatarPopover(popoverElement: Element) {
 		// Popover rendering
 		const focusedInside =
@@ -473,6 +624,10 @@ class UserList extends window.L.Control {
 				? (document.activeElement as HTMLElement)
 				: null;
 		const activeViewId = focusedInside?.getAttribute('data-view-id') ?? null;
+		// A row stands for a user, and the view id it carries is the one of that
+		// user's view the row was built from, which changes when the following
+		// moves to another of their views. The user id names the same row again.
+		const activeUserId = focusedInside?.getAttribute('data-user-id') ?? null;
 		const focusedFollowEditor = focusedInside?.id === 'follow-editor';
 
 		const users = Array.from(this.getSortedUsers());
@@ -498,6 +653,9 @@ class UserList extends window.L.Control {
 
 			const listItem = window.L.DomUtil.create('div', 'user-list-item');
 			listItem.setAttribute('data-view-id', viewId);
+			if (user.userId) {
+				listItem.setAttribute('data-user-id', user.userId);
+			}
 			listItem.setAttribute('role', 'button');
 			listItem.setAttribute('tabindex', '0');
 			// JSDialog.KeyboardGridNavigation reads row:col from `index` to move
@@ -585,11 +743,14 @@ class UserList extends window.L.Control {
 
 		popoverElement.replaceChildren(...userElements, followEditorWrapper);
 
-		if (activeViewId !== null) {
-			const restored = popoverElement.querySelector(
-				'.user-list-item[data-view-id="' + activeViewId + '"]',
-			) as HTMLElement | null;
-			if (restored) restored.focus();
+		const restored = this.findRowToRefocus(
+			popoverElement,
+			activeUserId,
+			activeViewId,
+		);
+
+		if (restored) {
+			restored.focus();
 		} else if (focusedFollowEditor) {
 			followEditorWrapper.focus();
 		}

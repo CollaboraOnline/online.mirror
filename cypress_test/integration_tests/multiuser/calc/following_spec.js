@@ -80,3 +80,71 @@ describe(['tagmultiuser'], 'Check following the other views', function() {
 		});
 	});
 });
+
+describe(['tagmultiuser'], 'A user with two connections', function() {
+
+	beforeEach(function() {
+		// One user opens the document in iframe2 and in iframe3, so that user has
+		// two connections. iframe1 is somebody else and does the following.
+		// The document has content down to row 588, so a view can scroll to the
+		// cells the test works in.
+		helper.setupAndLoadDocument('calc/cell_cursor_jump.ods', true, false, undefined,
+			'userid1=test&userid2=test2&userid3=test2');
+
+		cy.cSetActiveFrame('#iframe3');
+		helper.documentChecks(true);
+
+		cy.cSetActiveFrame('#iframe1');
+		desktopHelper.switchUIToNotebookbar();
+	});
+
+	// Moves the cell cursor of the active frame and gives back where that cell is
+	// in cell.y, for the assertion that follows.
+	function moveCellCursor(address, cell) {
+		cy.cGet(helper.addressInputSelector).type('{selectAll}' + address + '{enter}');
+		cy.getFrameWindow().then(function(win) {
+			calcHelper.assertAddressAfterIdle(win, address);
+		});
+		cy.getFrameWindow().then(function(win) {
+			cell.y = win.app.calc.cellCursorRectangle.y1;
+		});
+	}
+
+	// The follower ends up looking at the cell the other user works in.
+	function assertFollowerShows(cell) {
+		cy.cSetActiveFrame('#iframe1');
+		cy.getFrameWindow().should(function(win) {
+			const viewed = win.app.activeDocument.activeLayout.viewedRectangle;
+			expect(viewed.y1, 'top of the followed area').to.be.at.most(cell.y);
+			expect(viewed.y2, 'bottom of the followed area').to.be.at.least(cell.y);
+		});
+	}
+
+	it('Has one entry in the list and is followed in whichever connection it works', function() {
+		// Three views are open, and the two that belong to one user share an
+		// entry, so the list and the avatars in the header show two users.
+		cy.getFrameWindow().should(function(win) {
+			expect(Object.keys(win.app.map._viewInfo)).to.have.length(3);
+		});
+
+		cy.cGet('#userListHeader').click();
+		cy.cGet('.user-list-item').should('have.length', 2);
+		cy.cGet('#userListSummaryButton img').should('have.length', 2);
+
+		// Follow the user with the two connections.
+		cy.cGet('.user-list-item').eq(1).click();
+		cy.cGet('#followingChip').should('be.visible');
+
+		// The followed user works in the first of their connections.
+		const firstCell = {};
+		cy.cSetActiveFrame('#iframe2');
+		moveCellCursor('A200', firstCell);
+		assertFollowerShows(firstCell);
+
+		// The same user carries on in their other connection.
+		const otherCell = {};
+		cy.cSetActiveFrame('#iframe3');
+		moveCellCursor('A400', otherCell);
+		assertFollowerShows(otherCell);
+	});
+});

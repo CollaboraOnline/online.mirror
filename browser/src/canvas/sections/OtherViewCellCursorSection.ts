@@ -282,7 +282,9 @@ class OtherViewCellCursorSection extends CanvasSectionObject {
             this.hideUsernamePopUp();
     }
 
-    public static addOrUpdateOtherViewCellCursor(viewId: number, username: string, rectangleData: Array<string>, part: number, cellAddress?: string) {
+    // Gives back whether the cursor arrived in another cell, as opposed to the same cell
+    // being re-sent with new coordinates.
+    public static addOrUpdateOtherViewCellCursor(viewId: number, username: string, rectangleData: Array<string>, part: number, cellAddress?: string): boolean {
         let rectangle = new cool.SimpleRectangle(0, 0, 0, 0);
         if (rectangleData)
             rectangle = new cool.SimpleRectangle(parseInt(rectangleData[0]), parseInt(rectangleData[1]), parseInt(rectangleData[2]), parseInt(rectangleData[3]));
@@ -330,6 +332,8 @@ class OtherViewCellCursorSection extends CanvasSectionObject {
             section.hideUsernamePopUp();
 
         app.sectionContainer.requestReDraw();
+
+        return moved;
     }
 
     public static resetHover() {

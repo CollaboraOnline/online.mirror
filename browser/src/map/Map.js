@@ -539,15 +539,32 @@ window.L.Map = window.L.Evented.extend({
 		return -1;
 	},
 
+	// True when the integration sent an avatar for the user of this view.
+	_hasAvatar: function (viewInfo) {
+		return viewInfo.userextrainfo !== undefined && viewInfo.userextrainfo.avatar !== undefined;
+	},
+
+	// A view of the given user that carries an avatar, or undefined when the
+	// user has none left.
+	_getViewInfoWithAvatar: function (username) {
+		for (var idx in this._viewInfo) {
+			var viewInfo = this._viewInfo[idx];
+			if (viewInfo.username === username && this._hasAvatar(viewInfo)) {
+				return viewInfo;
+			}
+		}
+		return undefined;
+	},
+
 	addView: function(viewInfo) {
 		this._viewInfo[viewInfo.id] = viewInfo;
-		if (viewInfo.userextrainfo !== undefined && viewInfo.userextrainfo.avatar !== undefined) {
+		if (this._hasAvatar(viewInfo)) {
 			this._viewInfoByUserName[viewInfo.username] = viewInfo;
 		}
 		this.fire('postMessage', {msgId: 'View_Added', args: {Deprecated: true, ViewId: viewInfo.id, UserId: viewInfo.userid, UserName: viewInfo.username, UserExtraInfo: viewInfo.userextrainfo, Color: app.LOUtil.rgbToHex(viewInfo.color), ReadOnly: viewInfo.readonly}});
 
 		// Fire last, otherwise not all events are handled correctly.
-		this.fire('addview', {viewId: viewInfo.id, username: viewInfo.username, extraInfo: viewInfo.userextrainfo, readonly: this.isViewReadOnly(viewInfo.id)});
+		this.fire('addview', {viewId: viewInfo.id, userId: viewInfo.userid, username: viewInfo.username, extraInfo: viewInfo.userextrainfo, readonly: this.isViewReadOnly(viewInfo.id)});
 
 		this.updateAvatars();
 	},
@@ -556,8 +573,12 @@ window.L.Map = window.L.Evented.extend({
 		var username = this._viewInfo[viewid].username;
 		delete this._viewInfo[viewid];
 
-		// Keep the entry while the same user still has another view.
-		if (this.getViewId(username) === -1)
+		// The entry stands for the user, so it moves to another view of the same
+		// user and goes away with the last of them.
+		var remainingViewInfo = this._getViewInfoWithAvatar(username);
+		if (remainingViewInfo !== undefined)
+			this._viewInfoByUserName[username] = remainingViewInfo;
+		else
 			delete this._viewInfoByUserName[username];
 
 		this.fire('postMessage', {msgId: 'View_Removed', args: {Deprecated: true, ViewId: viewid}});

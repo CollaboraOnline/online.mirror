@@ -104,16 +104,23 @@ std::string readFileToString(const std::string& path)
     return buffer.str();
 }
 
+// The debug users that share the historical fixtures: the default user of debug.html and the two
+// users of the multiuser page. They keep no settings store of their own, so every cypress run
+// starts from the same state. Any other id is a user with its own store.
+bool isSharedDebugUser(const std::string& userId)
+{
+    return userId.empty() || userId == "test" || userId == "test2";
+}
+
 // Maps a user id to its on-disk preset directory (relative to FileServerRoot).
 // A real WOPI host keeps each user's settings (browser/view settings,
 // dictionaries, ...) separate, so mirror that here: two debug users with
 // different &userid values get different stores and a theme/view change by one
-// cannot leak into another's. The default debug user (empty or "test") keeps
-// the historical shared location, which the cypress fixtures seed and read
-// directly, so existing tests are unaffected.
+// cannot leak into another's. The shared debug users keep the historical location, which the
+// cypress fixtures seed and read directly, so existing tests are unaffected.
 std::string userPresetDir(const std::string& userId)
 {
-    if (userId.empty() || userId == "test")
+    if (isSharedDebugUser(userId))
         return "test/data/presets/user";
 
     // Keep the directory name filesystem-safe; debug user ids are simple
@@ -247,11 +254,9 @@ void handleWopiRequest(const Poco::Net::HTTPRequest& request, const RequestDetai
         // isolation/reload tests) opts in by passing an explicit &userid: that
         // routes it to the full userconfig with its own per-user store (see
         // userPresetDir), so its browser settings are saved and served back on
-        // reload. The default user (no userid -> "test") keeps the historical
-        // cypressuserconfig.json, so the many tests that don't ask for
-        // persistence are unaffected.
-        const bool persistingTestUser =
-            !userId.empty() && userId != "test";
+        // reload. The shared debug users keep the historical cypressuserconfig.json, so the many
+        // tests that don't ask for persistence are unaffected.
+        const bool persistingTestUser = !isSharedDebugUser(userId);
         const bool cypressUserConfig =
             localPath.find("cypress_test") != std::string::npos && !persistingTestUser;
 #else
@@ -778,16 +783,13 @@ void handleSettingsRequest(const Poco::Net::HTTPRequest& request, const std::str
             else if (type == "systemconfig")
                 dirPath += "test/data/presets/shared";
 
-            // The default cypress user (no &userid -> "test") must not persist
-            // its browser settings: tests rely on a clean starting config, and a
-            // persisted file (e.g. a recent color picked by one test) would leak
-            // into later tests and runs. Only a test that opted in with an
-            // explicit &userid (any value, including 1) gets its own persisted
-            // store. Skip the write for the default user but still respond OK so
-            // the client's upload does not error. Shared/systemconfig is
-            // unaffected.
-            const bool skipPersist =
-                (type == "userconfig" && (userId.empty() || userId == "test"));
+            // The shared cypress users must not persist their browser settings: tests rely on a
+            // clean starting config, and a persisted file (e.g. a recent color picked by one
+            // test) would leak into later tests and runs. Only a test that opted in with an
+            // explicit &userid (any value outside the shared ones, including 1) gets its own
+            // persisted store. Skip the write for the shared users but still respond OK so the
+            // client's upload does not error. Shared/systemconfig is unaffected.
+            const bool skipPersist = (type == "userconfig" && isSharedDebugUser(userId));
             if (!skipPersist)
             {
                 Poco::File(dirPath).createDirectories();

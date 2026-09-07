@@ -272,6 +272,9 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 		this.lastCursorPos = null;
 		// Are we zooming currently ? - if so, no cursor.
 		this._isZooming = false;
+		// True while the saved messages are pushed back through the message
+		// handlers, after a zoom or a sheet geometry change.
+		this._isReplayingMessages = false;
 
 		app.calc.cellCursorVisible = false;
 		this._prevCellCursorAddress = null;
@@ -1618,6 +1621,10 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 		// tracks parts by index.
 		OtherViewGraphicSelectionSection.addOrUpdateGraphicSelectionIndicator(viewId, strTwips, this.getIndexFromPart(obj.part), obj.mode !== undefined ? parseInt(obj.mode): 0);
 
+		// A selection with coordinates points at what the view is working on.
+		if (strTwips)
+			this._moveFollowingToActiveView(viewId);
+
 		if (app.getFollowedViewId() === viewId && app.isFollowingUser()) {
 			if (this.isImpress() || this.isDraw() || this.isWriter()) {
 				this.goToOtherUserView(viewId);
@@ -1878,6 +1885,8 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 		// tracks parts by index.
 		TextCursorSection.addOrUpdateOtherViewCursor(viewId, username, rectangle, this.getIndexFromPart(obj.part), mode);
 
+		this._moveFollowingToActiveView(viewId);
+
 		if (app.getFollowedViewId() === viewId && (app.isFollowingEditor() || app.isFollowingUser())) {
 			if (this.isWriter() || this.isImpress() || this.isDraw()) {
 				this.goToViewCursor(viewId);
@@ -1927,8 +1936,18 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 			const cellAddress = strTwips.slice(4).join(','); // Column and row.
 			strTwips = this._convertRawTwipsToTileTwips(strTwips);
 
-			OtherViewCellCursorSection.addOrUpdateOtherViewCellCursor(viewId, this._map.getViewName(viewId), strTwips, this.getIndexFromPart(obj.part), cellAddress);
+			const moved = OtherViewCellCursorSection.addOrUpdateOtherViewCellCursor(viewId, this._map.getViewName(viewId), strTwips, this.getIndexFromPart(obj.part), cellAddress);
 			CursorHeaderSection.deletePopUpNow(viewId);
+
+			// A move to another cell takes the following along. The cursor is also
+			// re-sent for the cell it already sits in, on zoom and on row and column
+			// resizes, and those leave the view where it is.
+			if (moved) {
+				this._moveFollowingToActiveView(viewId);
+
+				if (app.getFollowedViewId() === viewId && (app.isFollowingEditor() || app.isFollowingUser()))
+					this.goToCellViewCursor(viewId);
+			}
 		}
 
 		if (this.isCalc()) {
@@ -3696,25 +3715,37 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 			return;
 		}
 
-		this._printTwipsMessagesForReplay.forEach(function (msg) {
-			// don't try and replace graphic selection if the sheet/page has changed
-			var skipMessage = differentSheet && msg.startsWith('graphicselection:');
-			if (!skipMessage)
-				this._onMessage(msg);
-		}.bind(this));
-	},
-
-	_replayPrintTwipsMsg: function (msgType) {
-		var msg = this._printTwipsMessagesForReplay.get(msgType);
-		this._onMessage(msg);
+		this._isReplayingMessages = true;
+		try {
+			this._printTwipsMessagesForReplay.forEach(function (msg) {
+				// don't try and replace graphic selection if the sheet/page has changed
+				var skipMessage = differentSheet && msg.startsWith('graphicselection:');
+				if (!skipMessage)
+					this._onMessage(msg);
+			}.bind(this));
+		} finally {
+			this._isReplayingMessages = false;
+		}
 	},
 
 	_replayPrintTwipsMsgAllViews: function (msgType) {
-		Object.keys(this._map._viewInfo).forEach(function (viewId) {
-			var msg = this._printTwipsMessagesForReplay.get(msgType, parseInt(viewId));
-			if (msg)
-				this._onMessage(msg);
-		}.bind(this));
+		this._isReplayingMessages = true;
+		try {
+			Object.keys(this._map._viewInfo).forEach(function (viewId) {
+				var msg = this._printTwipsMessagesForReplay.get(msgType, parseInt(viewId));
+				if (msg)
+					this._onMessage(msg);
+			}.bind(this));
+		} finally {
+			this._isReplayingMessages = false;
+		}
+	},
+
+	// Following goes to the view the user is acting in. A replayed message
+	// repeats a position a view already had, so it does not count as acting.
+	_moveFollowingToActiveView: function (viewId) {
+		if (this._map.userList && !this._isReplayingMessages)
+			this._map.userList.moveFollowingToActiveView(viewId);
 	},
 
 	pauseDrawing: function () {
@@ -4373,7 +4404,6 @@ window.L.MessageStore = window.L.Class.extend({
 	},
 
 	_cleanUpSelectionMessages: function(messages) {
-		// must be called only from _replayPrintTwipsMsg !!
 		// check if textselection is empty
 		// if it is, we need to handle textselectionstart and textselectionend
 		// otherwise we get handles without selection and they also may appear in the wrong cell
