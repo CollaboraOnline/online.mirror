@@ -92,6 +92,12 @@
 	color: var(--color-text-darker) !important;
 }
 
+.spreadsheet-tab:focus-visible {
+	/* See the formula bar: currentColor is brand proof. */
+	outline: 2px solid currentColor;
+	outline-offset: -2px;
+}
+
 #drop-zone-end-container {
 	height: 32px;
 	width: 128px;
