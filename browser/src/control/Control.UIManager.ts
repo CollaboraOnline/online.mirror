@@ -575,6 +575,14 @@ class UIManager extends window.L.Control {
 				this.backgroundSentToCore = window.themeSentWithLoad.background;
 		}
 
+		this.pushThemeToCore(inDarkTheme);
+	}
+
+	/**
+	 * Hands the engine the theme and the document background, each of them only
+	 * when it differs from what the engine was last given.
+	 */
+	pushThemeToCore(inDarkTheme: boolean): void {
 		// On the desktop the load-time render option doesn't reliably override the
 		// engine's persisted theme, so apply it to the engine here too.
 		//
