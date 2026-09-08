@@ -424,6 +424,8 @@ window.L.Control.NotebookbarWriter = window.L.Control.Notebookbar.extend({
 		var hasFeedback = this.map.feedback;
 		var hasAccessibilitySupport = window.enableAccessibility;
 		var hasAccessibilityCheck = this.map.getDocType() === 'text';
+		const screenReadingPurpose =
+			_('Lets a screen reader follow the cursor and read the document');
 		const isDebugOn = this.map._debug.debugOn;
 		var hasAbout = window.L.DomUtil.get('about-dialog') !== null;
 		var hasServerAudit = this.getHiddenItems() ? !this.getHiddenItems().includes('server-audit') : true;
@@ -472,6 +474,8 @@ window.L.Control.NotebookbarWriter = window.L.Control.Notebookbar.extend({
 						'id':'togglea11ystate',
 						'type': 'bigcustomtoolitem',
 						'text': _('Screen Reading'),
+						'tooltip': screenReadingPurpose,
+						'aria': { description: screenReadingPurpose },
 						'accessibility': { focusBack: true,	combination: 'SR', de: null }
 					} : {},
 				hasAccessibilityCheck ?

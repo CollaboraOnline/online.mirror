@@ -127,6 +127,16 @@ JSDialog.SetupA11yLabelForNonLabelableElement = function (
 	if (data.labelledBy)
 		container.setAttribute('aria-labelledby', data.labelledBy);
 	else JSDialog.AddAriaLabel(container, data, builder);
+
+	JSDialog.AddAriaDescription(container, data);
+};
+
+JSDialog.AddAriaDescription = function (
+	element: HTMLElement,
+	data: WidgetJSON,
+) {
+	if (data.aria?.description && data.aria.description.trim())
+		element.setAttribute('aria-description', data.aria.description);
 };
 
 JSDialog.AddAriaLabel = function (
