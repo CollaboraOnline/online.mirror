@@ -59,11 +59,6 @@ RuntimeConstant<bool> SslTermination;
 //       except for properties, which are sorted before the value, e.g.
 //       "setting[@name]" before "setting", which is more readable.
 const Util::UnorderedStringMap<std::string> DefAppConfig = {
-#if !MOBILEAPP
-    { "accessibility.enable", "false" },
-#else
-    { "accessibility.enable", "true" },
-#endif
     { "admin_console.enable", "true" },
     { "admin_console.enable_pam", "false" },
     { "admin_console.logging.admin_action", "true" },
@@ -122,9 +117,6 @@ const Util::UnorderedStringMap<std::string> DefAppConfig = {
     { "fetch_update_check", "10" },
     { "fonts_missing.handling", "log" },
     { "file_server_root_path", "browser/.." },
-#if !MOBILEAPP
-    { "help_url", HELP_URL },
-#endif
     { "hexify_embedded_urls", "false" },
     { "hide_legacy_script_warning", "false" },
     { "home_mode.enable", "false" },
@@ -140,50 +132,6 @@ const Util::UnorderedStringMap<std::string> DefAppConfig = {
     { "languagetool.rest_protocol", "" },
     { "languagetool.ssl_verification", "true" },
     { "languagetool.user_name", "" },
-#if !MOBILEAPP
-    // { "logging.anonymize.anonymize_user_data", "false" }, // Do not set to fallback on filename/username.
-    { "logging.anonymize.anonymization_salt", "82589933" },
-    { "logging.anonymize.high_strength", "false" },
-    { "logging.color", "true" },
-    { "logging.disable_server_audit", "false" },
-    { "logging.disabled_areas", "Socket,WebSocket,Admin,Pixel" },
-    { "logging.docstats", "false" },
-    { "logging.file.property[@name]", "path" },
-    { "logging.file.property", COOLWSD_LOGFILE },
-    { "logging.file.property[1][@name]", "rotation" },
-    { "logging.file.property[1]", "never" },
-    { "logging.file.property[2][@name]", "archive" },
-    { "logging.file.property[2]", "timestamp" },
-    { "logging.file.property[3][@name]", "compress" },
-    { "logging.file.property[3]", "true" },
-    { "logging.file.property[4][@name]", "purgeAge" },
-    { "logging.file.property[4]", "10 days" },
-    { "logging.file.property[5][@name]", "purgeCount" },
-    { "logging.file.property[5]", "10" },
-    { "logging.file.property[6][@name]", "rotateOnOpen" },
-    { "logging.file.property[6]", "true" },
-    { "logging.file.property[7][@name]", "flush" },
-    { "logging.file.property[7]", "false" },
-    { "logging.file[@enable]", "false" },
-    { "logging.least_verbose_level_settable_from_client", "fatal" },
-    { "logging.level", COOLWSD_LOGLEVEL },
-    { "logging.level_startup", "trace" },
-    { "logging.lokit_sal_log", "-INFO-WARN" },
-    { "logging.most_verbose_level_settable_from_client", "notice" },
-    { "logging.protocol", "false" },
-    { "logging.userstats", "false" },
-    { "logging_ui_cmd.file.property[@name]", "path" },
-    { "logging_ui_cmd.file.property", COOLWSD_LOGFILE_UICMD },
-    { "logging_ui_cmd.file.property[1][@name]", "purgeCount" },
-    { "logging_ui_cmd.file.property[1]", "10" },
-    { "logging_ui_cmd.file.property[2][@name]", "rotateOnOpen" },
-    { "logging_ui_cmd.file.property[2]", "true" },
-    { "logging_ui_cmd.file.property[3][@name]", "flush" },
-    { "logging_ui_cmd.file.property[3]", "false" },
-    { "logging_ui_cmd.file[@enable]", "false" },
-    { "logging_ui_cmd.merge", "true" },
-    { "logging_ui_cmd.merge_display_end_time", "false" },
-#endif
     { "memproportion", "80.0" },
     { "mount_jail_tree", "true" },
     { "net.connection_timeout_secs", "30" },
@@ -277,9 +225,6 @@ const Util::UnorderedStringMap<std::string> DefAppConfig = {
     { "ssl.hpkp[@report_only]", "false" },
     { "ssl.key_file_path", COOLWSD_CONFIGDIR "/key.pem" },
     { "ssl.min_protocol_version", "TLSv1.2" },
-#if !MOBILEAPP
-    { "ssl.ssl_verification", SSL_VERIFY },
-#endif
     { "ssl.sts.enabled", "false" },
     { "ssl.sts.max_age", "31536000" },
     { "ssl.termination", "false" },
@@ -306,10 +251,6 @@ const Util::UnorderedStringMap<std::string> DefAppConfig = {
     { "trace.path[@compress]", "true" },
     { "trace.path[@snapshot]", "false" },
     { "trace[@enable]", "false" },
-#if !MOBILEAPP
-    { "trace_event.path", COOLWSD_TRACEEVENTFILE },
-    { "trace_event[@enable]", "false" },
-#endif
     { "user_interface.default_zoom", "100" },
     { "user_interface.mode", "default" },
     { "user_interface.smart_zoom", "true" },
@@ -325,16 +266,73 @@ const Util::UnorderedStringMap<std::string> DefAppConfig = {
     { "zotero.enable", "true" },
 };
 
+// The defaults the server adds to the set above.
+const Util::UnorderedStringMap<std::string> DefServerConfig = {
+#if !MOBILEAPP
+    { "help_url", HELP_URL },
+    // { "logging.anonymize.anonymize_user_data", "false" }, // Do not set to fallback on filename/username.
+    { "logging.anonymize.anonymization_salt", "82589933" },
+    { "logging.anonymize.high_strength", "false" },
+    { "logging.color", "true" },
+    { "logging.disable_server_audit", "false" },
+    { "logging.disabled_areas", "Socket,WebSocket,Admin,Pixel" },
+    { "logging.docstats", "false" },
+    { "logging.file.property[@name]", "path" },
+    { "logging.file.property", COOLWSD_LOGFILE },
+    { "logging.file.property[1][@name]", "rotation" },
+    { "logging.file.property[1]", "never" },
+    { "logging.file.property[2][@name]", "archive" },
+    { "logging.file.property[2]", "timestamp" },
+    { "logging.file.property[3][@name]", "compress" },
+    { "logging.file.property[3]", "true" },
+    { "logging.file.property[4][@name]", "purgeAge" },
+    { "logging.file.property[4]", "10 days" },
+    { "logging.file.property[5][@name]", "purgeCount" },
+    { "logging.file.property[5]", "10" },
+    { "logging.file.property[6][@name]", "rotateOnOpen" },
+    { "logging.file.property[6]", "true" },
+    { "logging.file.property[7][@name]", "flush" },
+    { "logging.file.property[7]", "false" },
+    { "logging.file[@enable]", "false" },
+    { "logging.least_verbose_level_settable_from_client", "fatal" },
+    { "logging.level", COOLWSD_LOGLEVEL },
+    { "logging.level_startup", "trace" },
+    { "logging.lokit_sal_log", "-INFO-WARN" },
+    { "logging.most_verbose_level_settable_from_client", "notice" },
+    { "logging.protocol", "false" },
+    { "logging.userstats", "false" },
+    { "logging_ui_cmd.file.property[@name]", "path" },
+    { "logging_ui_cmd.file.property", COOLWSD_LOGFILE_UICMD },
+    { "logging_ui_cmd.file.property[1][@name]", "purgeCount" },
+    { "logging_ui_cmd.file.property[1]", "10" },
+    { "logging_ui_cmd.file.property[2][@name]", "rotateOnOpen" },
+    { "logging_ui_cmd.file.property[2]", "true" },
+    { "logging_ui_cmd.file.property[3][@name]", "flush" },
+    { "logging_ui_cmd.file.property[3]", "false" },
+    { "logging_ui_cmd.file[@enable]", "false" },
+    { "logging_ui_cmd.merge", "true" },
+    { "logging_ui_cmd.merge_display_end_time", "false" },
+    { "ssl.ssl_verification", SSL_VERIFY },
+    { "trace_event.path", COOLWSD_TRACEEVENTFILE },
+    { "trace_event[@enable]", "false" },
+#endif
+};
+
+Util::UnorderedStringMap<std::string> buildDefaultAppConfig()
+{
+    Util::UnorderedStringMap<std::string> config = DefAppConfig;
+    config.emplace("accessibility.enable", Util::isMobileApp() ? "true" : "false");
+    if (!Util::isMobileApp())
+        config.insert(DefServerConfig.begin(), DefServerConfig.end());
+    return config;
+}
+
 void initialize(const Poco::Util::AbstractConfiguration* config)
 {
     assert(config && "Cannot initialize with invalid config instance");
-#if !MOBILEAPP
-    assert(!Config && "Config is already initialized.");
-#else
-    // The apps run a fresh COOLWSD in a loop, each with its own configuration
-    // that dies with it. Adopt the current run's rather than leaving Config
-    // dangling at the previous run's.
-#endif
+    // The apps run a fresh COOLWSD in a loop, each with its own configuration that dies with it.
+    // Adopt the current run's rather than leaving Config dangling at the previous run's.
+    assert((Util::isMobileApp() || !Config) && "Config is already initialized.");
     Config = config;
 
 #if ENABLE_SSL
@@ -378,7 +376,11 @@ void initializeFromFile(const std::string& filename)
 
 bool isInitialized() { return Config != nullptr; }
 
-const Util::UnorderedStringMap<std::string>& getDefaultAppConfig() { return DefAppConfig; }
+const Util::UnorderedStringMap<std::string>& getDefaultAppConfig()
+{
+    static const Util::UnorderedStringMap<std::string> config = buildDefaultAppConfig();
+    return config;
+}
 
 /// Recursively extract the sub-keys of the given parent key.
 static void extract(const std::string& parentKey, const Poco::Util::AbstractConfiguration& config,
@@ -457,8 +459,9 @@ std::string getLoggableConfig(const Poco::Util::AbstractConfiguration& config)
     std::ostringstream ossConfig;
     for (const auto& pair : allConfigs)
     {
-        const auto it = DefAppConfig.find(pair.first);
-        if (it == DefAppConfig.end() || it->second != pair.second)
+        const auto& defAppConfig = getDefaultAppConfig();
+        const auto it = defAppConfig.find(pair.first);
+        if (it == defAppConfig.end() || it->second != pair.second)
         {
             if (pair.first == "admin_console.username" || pair.first == "admin_console.password" ||
                 pair.first == "admin_console.secure_password" ||
