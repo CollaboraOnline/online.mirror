@@ -77,6 +77,8 @@
 	--color-quickfind-border: #444;
 	--scrollbar-color: #c0bfbc transparent;
 	--color-background-hover: #363636;
+	--opacity-icon-disabled: 0.65;
+	--opacity-text-disabled: 0.8; /* a label has to stay readable while it is dimmed */
 }
 
 [data-bg-theme='dark'] {

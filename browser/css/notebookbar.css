@@ -427,7 +427,10 @@ label.notebookbar.ui-checkbox-label {
 }
 
 .unotoolbutton.notebookbar.disabled:not(.unospan-shortcutstoolbox),
-.unotoolbutton[disabled]:not(.unospan-shortcutstoolbox),
+.unotoolbutton[disabled]:not(.unospan-shortcutstoolbox) {
+	cursor: not-allowed;
+}
+
 .mobile-wizard-widebutton.disabled,
 .locking-disabled {
 	opacity: 0.65;
@@ -447,6 +450,18 @@ label.notebookbar.ui-checkbox-label {
 .unotoolbutton[disabled] img {
 	-webkit-filter: grayscale(100%) brightness(100%);
 	filter: grayscale(100%) brightness(100%);
+}
+
+.unotoolbutton.notebookbar.disabled img,
+.unotoolbutton.notebookbar.disabled .unoarrow,
+.unotoolbutton[disabled] img,
+.unotoolbutton[disabled] .unoarrow {
+	opacity: var(--opacity-icon-disabled);
+}
+
+.unotoolbutton.notebookbar.disabled .unolabel,
+.unotoolbutton[disabled] .unolabel {
+	opacity: var(--opacity-text-disabled);
 }
 
 .unotoolbutton:not(.disabled) * {
