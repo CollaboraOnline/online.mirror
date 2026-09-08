@@ -575,7 +575,26 @@ class UIManager extends window.L.Control {
 				this.backgroundSentToCore = window.themeSentWithLoad.background;
 		}
 
+		// The engine has no document to apply either of these to until the load
+		// finishes, and one that arrives earlier is answered with an error.
+		if (!this.map._docLoaded) {
+			this.map.on('docloaded', this.pushThemeOnDocumentLoad, this);
+			this.applyInvert(true);
+			return;
+		}
+
 		this.pushThemeToCore(inDarkTheme);
+	}
+
+	/**
+	 * The theme is resolved at the moment this runs, because the settings can be
+	 * answered again while the document is still loading.
+	 */
+	pushThemeOnDocumentLoad(e: { status: boolean }): void {
+		if (!e.status) return;
+
+		this.map.off('docloaded', this.pushThemeOnDocumentLoad, this);
+		this.pushThemeToCore(window.prefs.seedDarkModeDefault());
 	}
 
 	/**
