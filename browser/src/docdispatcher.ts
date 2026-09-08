@@ -437,32 +437,47 @@ class Dispatcher {
 			focus: () => this.focusTopBar(),
 		};
 
+		const formulaBarRow = () => document.getElementById('formulabar-row');
+
+		const formulaBarWidgets = () => {
+			const row = formulaBarRow();
+			if (!row) return [];
+			return Array.from(
+				row.querySelectorAll<HTMLElement>(
+					'input:not([disabled]), button:not([disabled]), [tabindex="0"]',
+				),
+			).filter((element) => element.offsetParent !== null);
+		};
+
+		// The formula bar is two stops, and the input is the first: it holds
+		// the caret in the document's hidden input, the way a click on it
+		// does, so it is not in the row's tab order and it never reports the
+		// row as focused.
 		const formulaBar = {
 			available: () =>
 				!app.isReadOnly() &&
 				isVisible(document.getElementById('sc_input_window')),
 			hasFocus: () =>
-				contains(document.getElementById('formulabar-row')) ||
-				app.map.calcInputBarHasFocus(),
-			focus: () => {
-				const row = document.getElementById('formulabar-row');
-				const focusables = row
-					? Array.from(
-							row.querySelectorAll<HTMLElement>(
-								'input:not([disabled]), button:not([disabled]), [tabindex="0"]',
-							),
-						)
-					: [];
-				for (const element of focusables) {
-					if (element.offsetParent !== null) {
-						element.focus();
-						return true;
-					}
-				}
-				return false;
-			},
+				app.map.calcInputBarHasFocus() && !contains(formulaBarRow()),
+			focus: () => !!(app.map.formulabar && app.map.formulabar.focus()),
 			blur: () => {
 				if (app.map.formulabar) app.map.onFormulaBarBlur();
+			},
+		};
+
+		// The second stop is the row beside the input: the Name Box, the
+		// function wizard and accept/cancel. Keys typed at the input go to the
+		// document, where Tab means confirm and move on, so without a stop of
+		// their own these have no way in from the keyboard. It is also the
+		// only stop a view that cannot edit gets.
+		const formulaBarToolbar = {
+			available: () => formulaBarWidgets().length > 0,
+			hasFocus: () => contains(formulaBarRow()),
+			focus: () => {
+				const widgets = formulaBarWidgets();
+				if (!widgets.length) return false;
+				widgets[0].focus();
+				return true;
 			},
 		};
 
@@ -541,7 +556,10 @@ class Dispatcher {
 		};
 
 		const regions = [topBar];
-		if (docType === 'spreadsheet') regions.push(formulaBar);
+		if (docType === 'spreadsheet') {
+			regions.push(formulaBar);
+			regions.push(formulaBarToolbar);
+		}
 		regions.push(navigationSidebar);
 		regions.push(documentArea);
 		regions.push(sidebar);
