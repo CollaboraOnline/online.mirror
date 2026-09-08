@@ -279,7 +279,7 @@ DocumentBroker::DocumentBroker(ChildType type, const std::string& uri, const Poc
     assert(!_docKey.empty());
     assert(!COOLWSD::ChildRoot.empty());
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
         assert(_mobileAppDocId == 0 && "Unexpected to have mobileAppDocId in the non-mobile build");
 #if DOCS_SHARE_PROCESS
     assert(_mobileAppDocId > 0 && "Unexpected to have no mobileAppDocId in a mobile app");
@@ -296,7 +296,7 @@ pid_t DocumentBroker::getPid() const { return _childProcess ? _childProcess->get
 
 void DocumentBroker::setupPriorities()
 {
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
         return;
     if (_type == ChildType::Batch)
     {
@@ -1197,7 +1197,7 @@ bool DocumentBroker::download(
                     // message for "view file extension" document types
                     session->sendFileMode(session->isReadOnly(), session->isAllowChangeComments(), session->isAllowManageRedlines());
                 }
-                else if constexpr (Util::isMobileApp())
+                else if (Util::isMobileApp())
                 {
                     // Fix issue #5887 by assuming that documents are writable on iOS and Android
                     // The iOS and Android app saves directly to local disk so, other than for
@@ -1458,7 +1458,7 @@ bool DocumentBroker::doDownloadDocument(const Authorization& auth,
     }
 
     _filename = filename;
-    if constexpr (!Util::isMobileApp())
+    if constexpr (!Util::isMobileAppBuild())
     {
         _quarantine = std::make_unique<Quarantine>(*this, _filename);
     }
@@ -3047,7 +3047,7 @@ void DocumentBroker::handleSaveResponse(const std::shared_ptr<ClientSession>& se
                                                     << DocumentState::name(_docState.activity())
                                                     << ") in " << _saveManager.lastSaveDuration());
 
-    if constexpr (!Util::isMobileApp())
+    if constexpr (!Util::isMobileAppBuild())
     {
         // Create the 'upload' file regardless of success or failure,
         // because we don't know if the last upload worked or not.
@@ -3075,7 +3075,7 @@ void DocumentBroker::handleSaveResponse(const std::shared_ptr<ClientSession>& se
         }
     }
 
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
     {
         // The engine writes the user's own file here, so the file's new modified time is the
         // document's new time in storage.
@@ -3211,7 +3211,7 @@ void DocumentBroker::checkAndUploadToStorage(const std::shared_ptr<ClientSession
         break;
     }
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         // Avoid multiple uploads during unloading if we know we need to save a new version.
         const bool unloading = isUnloading();
@@ -3287,7 +3287,7 @@ void DocumentBroker::uploadAfterLoadingTemplate(const std::shared_ptr<ClientSess
 {
     LOG_ASSERT_MSG(session, "Must have a valid ClientSession");
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         // Create the 'upload' file as it gets created only when
         // handling .uno:Save, which isn't issued for templates
@@ -4461,7 +4461,7 @@ bool DocumentBroker::sendUnoSave(const std::shared_ptr<ClientSession>& session,
 
 std::string DocumentBroker::getJailRoot() const
 {
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         if (!_jailId.empty())
         {
@@ -5547,7 +5547,7 @@ bool DocumentBroker::handleInput(const std::shared_ptr<Message>& message)
 {
     LOG_TRC("DocumentBroker handling child message: [" << message->abbr() << ']');
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         if (COOLWSD::TraceDumper)
             COOLWSD::dumpOutgoingTrace(getJailId(), "0", message->abbr());
@@ -6028,7 +6028,7 @@ bool DocumentBroker::handlePersistentClipboardRequest(ClipboardRequest type,
     if (!sendError)
         return false;
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         // Bad request.
         HttpHelper::sendError(http::StatusCode::BadRequest, socket, "Failed to find this clipboard",
@@ -7090,7 +7090,7 @@ void DocumentBroker::dumpState(std::ostream& os)
     os << "\n  Total PSS: " << ProcUtil::getProcessTreePss(ProcUtil::getProcessId()) << " KB";
     if (childPid)
         os << "\n  Doc PSS: " << ProcUtil::getProcessTreePss(childPid) << " KB";
-    if constexpr (!Util::isMobileApp())
+    if constexpr (!Util::isMobileAppBuild())
     {
         os << "\n  last quarantined version: "
            << (_quarantine && Quarantine::isEnabled() ? _quarantine->lastQuarantinedFilePath()
@@ -7143,7 +7143,7 @@ void DocumentBroker::dumpState(std::ostream& os)
     os << '\n';
     _poll->dumpState(os);
 
-    if constexpr (!Util::isMobileApp())
+    if constexpr (!Util::isMobileAppBuild())
     {
         // Bit nasty - need a cleaner way to dump state.
         if (!_sessions.empty())

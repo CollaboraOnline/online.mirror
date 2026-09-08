@@ -183,7 +183,7 @@ inline bool impl_encodeSubBufferToPNG(unsigned char* pixmap, size_t startX, size
         return false;
     }
 
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
         png_set_compression_level(png_ptr, Z_BEST_SPEED);
     else
     {

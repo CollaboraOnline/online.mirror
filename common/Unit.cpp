@@ -129,7 +129,7 @@ void UnitBase::selfTest()
 
 bool UnitBase::init([[maybe_unused]] UnitType type, [[maybe_unused]] const std::string& unitLibPath)
 {
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
         LOG_ASSERT(GlobalArray == nullptr);
     else
     {
@@ -630,7 +630,7 @@ void UnitWSD::onExitTest(TestResult result, const std::string&)
         if (result != TestResult::Ok && !GlobalTestOptions.getKeepgoing())
         {
             TST_LOG("Failing fast per options, even though there are more tests");
-            if constexpr (!Util::isMobileApp())
+            if (!Util::isMobileApp())
             {
                 TST_LOG("Setting TerminationFlag as the Test Suite failed");
                 SigUtil::setTerminationFlag(); // and wake-up world.
@@ -657,7 +657,7 @@ void UnitWSD::onExitTest(TestResult result, const std::string&)
                                  << " was the last test. Finishing "
                                  << (GlobalResult == TestResult::Ok ? "SUCCESS" : "FAILED"));
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         TST_LOG("Setting TerminationFlag as there are no more tests");
         SigUtil::setTerminationFlag(); // and wake-up world.
@@ -689,7 +689,7 @@ void UnitKit::onExitTest(TestResult, const std::string&)
     //                              << " was the last test. Finishing "
     //                              << (GlobalResult == TestResult::Ok ? "SUCCESS" : "FAILED"));
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         // TST_LOG("Setting TerminationFlag as there are no more tests");
         SigUtil::setTerminationFlag(); // and wake-up world.

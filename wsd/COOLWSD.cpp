@@ -286,7 +286,7 @@ void COOLWSD::appendAllowedAliasGroups(const LayeredConfiguration& conf, std::ve
 /// connected to any document.
 void COOLWSD::alertAllUsersInternal(const std::string& msg)
 {
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
         return;
     std::lock_guard<std::mutex> docBrokersLock(DocBrokersMutex);
 
@@ -306,7 +306,7 @@ void COOLWSD::alertAllUsersInternal(const std::string& msg)
 #if !MOBILEAPP
 void COOLWSD::syncUsersBrowserSettings(const std::string& userId, const pid_t childPid, const std::string& json)
 {
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
         return;
     std::lock_guard<std::mutex> docBrokersLock(DocBrokersMutex);
 
@@ -325,7 +325,7 @@ void COOLWSD::syncUsersBrowserSettings(const std::string& userId, const pid_t ch
 
 void COOLWSD::alertUserInternal(const std::string& dockey, const std::string& msg)
 {
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
         return;
     std::lock_guard<std::mutex> docBrokersLock(DocBrokersMutex);
 
@@ -1424,7 +1424,7 @@ void COOLWSD::setupChildRoot(const bool UseMountNamespaces)
     (void) UseMountNamespaces;
 #endif
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         // The TMPDIR that coolwsd, forkit and anything they spawn inherit. Library code that
         // honours TMPDIR lands its files here, in the phase before any jail exists. It sits above
@@ -2643,7 +2643,7 @@ void COOLWSD::initializeSSL()
 
 void COOLWSD::defineOptions(Poco::Util::OptionSet& optionSet)
 {
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
         return;
     ServerApplication::defineOptions(optionSet);
 
@@ -3069,7 +3069,7 @@ void COOLWSD::setLogLevelsOfKits(const std::string& level)
 /// Really do the house-keeping
 void PrisonPoll::wakeupHook()
 {
-    if constexpr (!Util::isMobileApp())
+    if constexpr (!Util::isMobileAppBuild())
     {
         THREAD_UNSAFE_DUMP_BEGIN
         LOG_TRC("PrisonerPoll - wakes up with " << NewChildren.size() << " new children and "
@@ -3543,7 +3543,7 @@ private:
 
             auto child = std::make_shared<ChildProcess>(pid, jailId, configId, socket, request, admsProps);
 
-            if constexpr (!Util::isMobileApp())
+            if (!Util::isMobileApp())
                 UNITWSD_CALL(newChild(child));
 
             _pid = pid;
@@ -4470,7 +4470,7 @@ void COOLWSD::innerMain()
     JailUtil::cleanupJails(UnitWSD::isUnitTesting() ? ChildRoot : CleanupChildRoot);
 #endif // !MOBILEAPP
 
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
     {
         LOG_INF("Process [coolwsd] finished with exit status: " << EXIT_OK);
         Util::forcedExit(EXIT_OK);

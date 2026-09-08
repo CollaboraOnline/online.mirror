@@ -220,7 +220,7 @@ public:
             if (!_isShutdown)
             {
                 setShutdown();
-                if constexpr (Util::isMobileApp())
+                if (Util::isMobileApp())
                     fakeSocketShutdown(_fd);
 #ifndef _WIN32
                 else
@@ -251,7 +251,7 @@ public:
     void setNoDelay()
     {
 #ifndef _WIN32
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
             const int val = 1;
             if (::setsockopt(_fd, IPPROTO_TCP, TCP_NODELAY, &val, sizeof(val)) == -1)
@@ -280,7 +280,7 @@ public:
 #ifdef _WIN32
         return false;
 #else
-        if constexpr (Util::isMobileApp())
+        if (Util::isMobileApp())
             return false;
 
         int rc = ::setsockopt(_fd, SOL_SOCKET, SO_SNDBUF, &size, sizeof(size));
@@ -313,7 +313,7 @@ public:
 #ifdef _WIN32
         return -1;
 #else
-        if constexpr (Util::isMobileApp())
+        if (Util::isMobileApp())
             return -1;
 
         int size;
@@ -477,7 +477,7 @@ private:
         _owner = ProcUtil::getThreadId();
         LOG_DBG("Created socket #" << _fd << ". Thread affinity set to " << _owner);
 
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
 #if ENABLE_DEBUG
             if (std::getenv("COOL_ZERO_BUFFER_SIZE") && _fd >= 0)
@@ -499,7 +499,7 @@ private:
             return;
 
             // Doesn't block on sockets; no error handling needed.
-        if constexpr (Util::isMobileApp())
+        if (Util::isMobileApp())
             fakeSocketClose(_fd);
 #ifndef _WIN32
         else
@@ -839,7 +839,7 @@ public:
     {
         LOG_DBG("Stopping " << logInfo());
         _stop = true;
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
             // We don't want to risk some callbacks in _newCallbacks being invoked when we start
             // running a thread for this SocketPoll again.
@@ -933,7 +933,7 @@ public:
         // wakeup the main-loop.
         int rc;
         do {
-            if constexpr (Util::isMobileApp())
+            if (Util::isMobileApp())
                 rc = fakeSocketWrite(fd, "w", 1);
 #ifndef _WIN32
             else
@@ -1511,7 +1511,7 @@ public:
         }
 
         ssize_t len = 0;
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
             // SSL decodes blocks of 16Kb, so for efficiency we use the same.
             char buf[16 * 1024];
@@ -1717,7 +1717,7 @@ public:
     /// buffer for an optimal transmission.
     int getSendBufferCapacity() const
     {
-        if constexpr (Util::isMobileApp())
+        if (Util::isMobileApp())
             return INT_MAX; // We want to always send a single record in one go
         const int capacity = getSendBufferSize();
         return std::max<int>(0, capacity - _outBuffer.size());
@@ -2057,7 +2057,7 @@ protected:
         if (ignoringInput())
             return -1;
 
-        if constexpr (Util::isMobileApp())
+        if (Util::isMobileApp())
             return fakeSocketRead(getFD(), buf, len);
 
 #ifdef _WIN32
@@ -2081,7 +2081,7 @@ protected:
         ASSERT_CORRECT_SOCKET_THREAD(this);
         assert((getFD() >= 0 || isShutdown()) && "Socket is closed but not marked correctly");
 
-        if constexpr (Util::isMobileApp())
+        if (Util::isMobileApp())
             return fakeSocketWrite(getFD(), buf, len);
 
 #ifdef _WIN32

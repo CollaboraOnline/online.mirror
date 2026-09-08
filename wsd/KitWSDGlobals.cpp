@@ -22,6 +22,8 @@
 #include <wsd/WSDGlobals.hpp>
 
 // This is the globals set of the binary that holds both the server and the kit.
+const bool Util::MobileApp = Util::isMobileAppBuild();
+
 const bool Util::KitInProcess = true;
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

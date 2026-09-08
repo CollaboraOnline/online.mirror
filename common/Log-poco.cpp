@@ -279,7 +279,7 @@ namespace Log
         // The PID has changed after the fork.
         std::ostringstream oss;
         oss << Static.getName();
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
             oss << '-' << std::setw(5) << std::setfill('0') << ProcUtil::getProcessId();
         Static.setId(oss.str());
     }
@@ -490,7 +490,7 @@ namespace Log
         Static.setName(name);
         std::ostringstream oss;
         oss << Static.getName();
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
             oss << '-' << std::setw(5) << std::setfill('0') << ProcUtil::getProcessId();
         Static.setId(oss.str());
 
@@ -662,7 +662,7 @@ namespace Log
 
     void shutdown()
     {
-        if constexpr (Util::isMobileApp())
+        if (Util::isMobileApp())
             return;
 
         if (!Util::isKitInProcess())

@@ -1178,7 +1178,7 @@ bool ChildSession::loadDocument(const StringVector& tokens)
             return false;
         }
 
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
             copyForUpload(url);
     }
 
@@ -1238,7 +1238,7 @@ bool ChildSession::loadDocument(const StringVector& tokens)
 // attempt to shutdown threads, fork and execute in the background
 bool ChildSession::saveDocumentBackground([[maybe_unused]] const StringVector& tokens)
 {
-    if constexpr (!Util::isMobileApp())
+    if constexpr (!Util::isMobileAppBuild())
     {
         LOG_TRC("Attempting background save");
         _logUiSaveBackGroundTimeStart = std::chrono::steady_clock::now();
@@ -1643,7 +1643,7 @@ bool ChildSession::downloadAs(const StringVector& tokens)
 
     const std::string jailDoc = getJailDocRoot();
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
         consistencyCheckJail();
 
     // The file is removed upon downloading.
@@ -2275,7 +2275,7 @@ bool ChildSession::insertFile(const StringVector& tokens)
     int multimedia_width = 0;
     int multimedia_height = 0;
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         if (tokens.size() < 3 || !getTokenString(tokens[1], "name", name) ||
             !getTokenString(tokens[2], "type", type))
@@ -2330,7 +2330,7 @@ bool ChildSession::insertFile(const StringVector& tokens)
     {
         std::string url;
 
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
             if (type == "graphic" || type == "selectbackground" || type == "multimedia" ||
                 type == "comparedocuments")
@@ -4194,7 +4194,7 @@ bool ChildSession::saveAs(const StringVector& tokens)
         // url is already encoded
         encodedURL = url;
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
         consistencyCheckJail();
 
     std::string encodedWopiFilename;
@@ -5048,7 +5048,7 @@ void ChildSession::loKitCallback(const COKitCallbackType type, const std::string
 
         if (!commandName.isEmpty() && commandName.toString() == ".uno:Save")
         {
-            if constexpr (!Util::isMobileApp())
+            if (!Util::isMobileApp())
             {
                 consistencyCheckJail();
 
@@ -5289,7 +5289,7 @@ void ChildSession::loKitCallback(const COKitCallbackType type, const std::string
         sendTextFrame("printranges: " + payload);
         break;
     case COKitCallbackType::FONTS_MISSING:
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
             // This environment variable is always set in COOLWSD::innerInitialize().
             static std::string fontsMissingHandling(std::getenv("FONTS_MISSING_HANDLING"));
@@ -5491,7 +5491,7 @@ void ChildSession::saveLogUiBackground()
 
 void LogUiCommands::logLine(LogUiCommandsLine &line, bool isUndoChange)
 {
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
         return;
 
     // log command
@@ -5545,7 +5545,7 @@ void LogUiCommands::logLine(LogUiCommandsLine &line, bool isUndoChange)
 
 void LogUiCommands::logSaveLoad(std::string cmd, const std::string & path, std::chrono::steady_clock::time_point timeStart)
 {
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
         return;
 
     LogUiCommandsLine uiLogLine;
@@ -5578,7 +5578,7 @@ void LogUiCommands::logSaveLoad(std::string cmd, const std::string & path, std::
 LogUiCommands::LogUiCommands(ChildSession& session, const StringVector* tokens)
     : _session(session), _tokens(tokens)
 {
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
         return;
 
     if (_session._isDocLoaded)
@@ -5587,7 +5587,7 @@ LogUiCommands::LogUiCommands(ChildSession& session, const StringVector* tokens)
 
 LogUiCommands::~LogUiCommands()
 {
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
         return;
 
     auto document = _document.lock();

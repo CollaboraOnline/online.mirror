@@ -216,7 +216,7 @@ protected:
                      << static_cast<unsigned>(statusCode) << ", message: " << statusMessage);
             _shuttingDown = true;
 
-            if constexpr (!Util::isMobileApp())
+            if (!Util::isMobileApp())
             {
                 const size_t len = statusMessage.size();
                 std::vector<char> buf(2 + len);
@@ -314,7 +314,7 @@ private:
         if (len == 0)
             return false; // avoid logging.
 
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
             if (len < 2) // partial read
             {
@@ -568,7 +568,7 @@ protected:
         ASSERT_CORRECT_THREAD();
         std::shared_ptr<StreamSocket> socket = _socket.lock();
 
-        if constexpr (Util::isMobileApp())
+        if (Util::isMobileApp())
         {
             // No separate "upgrade" is going on
             if (socket && !socket->isWebSocket())
@@ -581,7 +581,7 @@ protected:
             return;
         }
 
-        if constexpr (!Util::isMobileApp())
+        if constexpr (!Util::isMobileAppBuild())
         {
             if (_isClient && !socket->isWebSocket())
             {
@@ -606,7 +606,7 @@ protected:
                       int64_t& timeoutMaxMicroS) override
     {
         ASSERT_CORRECT_THREAD();
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
             if (!_isClient)
             {
@@ -669,7 +669,7 @@ public:
     bool checkTimeout(std::chrono::steady_clock::time_point now) override
     {
         ASSERT_CORRECT_THREAD();
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
             if (_isClient)
                 return false;
@@ -887,7 +887,7 @@ protected:
         // TraceEvent::emitInstantEvent("WebSocketHandler::sendFrame", { { "length", std::to_string(len) } });
 
         size_t size;
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
             const size_t oldSize = out.size();
 
@@ -1011,7 +1011,7 @@ protected:
         assert(!socket->isWebSocket());
         assert(!_isClient && "Accepting upgrade requests are done by servers only.");
 
-        if constexpr (!Util::isMobileApp())
+        if constexpr (!Util::isMobileAppBuild())
         {
             // create our websocket goodness ...
             const int wsVersion = NumUtil::stoi(req.get("Sec-WebSocket-Version", "13"));

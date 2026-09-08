@@ -356,7 +356,7 @@ void ClientSession::handleClipboardRequest(DocumentBroker::ClipboardRequest     
             return; // the getclipboard already completed.
         if (type == DocumentBroker::CLIP_REQUEST_SET)
         {
-            if constexpr (!Util::isMobileApp())
+            if (!Util::isMobileApp())
                 HttpHelper::sendErrorAndShutdown(http::StatusCode::BadRequest, socket);
         }
         else // will be handled during shutdown
@@ -554,7 +554,7 @@ void ClientSession::handleClipboardRequest(DocumentBroker::ClipboardRequest     
         else
         {
             LOG_DBG("clipboardcontent produced no output in '" << clipFile << "'");
-            if constexpr (!Util::isMobileApp())
+            if (!Util::isMobileApp())
                 HttpHelper::sendErrorAndShutdown(http::StatusCode::BadRequest, socket);
         }
     }
@@ -893,7 +893,7 @@ bool ClientSession::_handleInput(const char *buffer, int length)
         if (COOLWSD::EnableTraceEventLogging)
             sendTextFrame("enabletraceeventlogging yes");
 
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
             // If it is not mobile, it must be Linux (for now).
             std::string osVersionInfo(
@@ -3133,7 +3133,7 @@ bool ClientSession::handleKitToClientMessage(const std::shared_ptr<Message>& pay
 
     std::shared_ptr<StreamSocket> saveAsSocket = _saveAsSocket.lock();
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
         COOLWSD::dumpOutgoingTrace(docBroker->getJailId(), getId(), firstLine);
 
     const auto& tokens = payload->tokens();

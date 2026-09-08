@@ -1061,7 +1061,8 @@ int main(int argc, char**argv)
 #endif
     }
 
-    constexpr bool isMobileApp()
+    /// Resolved at compile time, so the branch not taken never reaches the link.
+    constexpr bool isMobileAppBuild()
     {
 #ifdef MOBILEAPP
         return MOBILEAPP;
@@ -1074,7 +1075,7 @@ int main(int argc, char**argv)
     /// a remote WOPI host. False in the app build, which opens local files only.
     constexpr bool isWopiSupported()
     {
-        return !isMobileApp();
+        return !isMobileAppBuild();
     }
 
     constexpr bool isDebugEnabled()
@@ -1091,6 +1092,11 @@ int main(int argc, char**argv)
     extern const bool KitInProcess;
 
     inline bool isKitInProcess() { return KitInProcess; }
+
+    /// Defined once per binary, next to the other globals.
+    extern const bool MobileApp;
+
+    inline bool isMobileApp() { return MobileApp; }
 
     /**
      * Splits string into vector<string>. Does not accept referenced variables for easy

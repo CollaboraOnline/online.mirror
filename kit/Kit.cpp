@@ -1638,7 +1638,7 @@ void Document::finishBackgroundForkProcess()
 bool Document::forkToSave(const std::function<void()>& childSave, int viewId,
                           BackgroundForkPurpose purpose)
 {
-    if constexpr (Util::isMobileApp())
+    if (Util::isMobileApp())
         return false;
 
     if (_isBgSaveProcess)
@@ -2212,7 +2212,7 @@ std::shared_ptr<COKitDocument> Document::load(const std::shared_ptr<ChildSession
     const std::string& originalDocUrl = session->getOriginalDocUrl();
     const std::string& filterOption = session->getInFilterOption();
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
         consistencyCheckFileExists(uri);
 
     // The options string is comma-separated and the value is a URL that may
@@ -2250,7 +2250,7 @@ std::shared_ptr<COKitDocument> Document::load(const std::shared_ptr<ChildSession
     if (FileUtil::Stat(wopiCertDir).exists())
         ::setenv("LO_CERTIFICATE_AUTHORITY_PATH", wopiCertDir.c_str(), 1);
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         // if ssl client verification was disabled in online for the wopi server,
         // and this is a https connection then also exempt that host from ssl host
@@ -2942,13 +2942,13 @@ void Document::drainQueue()
     catch (const std::exception& exc)
     {
         LOG_FTL("drainQueue: Exception: " << exc.what());
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
             flushAndExit(EX_SOFTWARE);
     }
     catch (...)
     {
         LOG_FTL("drainQueue: Unknown exception");
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
             flushAndExit(EX_SOFTWARE);
     }
 }
@@ -3445,7 +3445,7 @@ int KitSocketPoll::kitPoll(int timeoutMicroS)
     if (_document)
         _document->trimAfterInactivity();
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         flushTraceEventRecordings();
 

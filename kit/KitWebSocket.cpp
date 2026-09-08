@@ -122,7 +122,7 @@ void KitWebSocketHandler::handleMessage(const std::vector<char>& data)
     }
     else if (!Util::isFuzzing() && tokens.equals(0, "exit"))
     {
-        if constexpr (!Util::isMobileApp())
+        if (!Util::isMobileApp())
         {
             LOG_INF("Terminating immediately due to parent 'exit' command.");
             flushTraceEventRecordings();
@@ -216,7 +216,7 @@ void KitWebSocketHandler::onDisconnect()
         return;
     }
 
-    if constexpr (!Util::isMobileApp())
+    if (!Util::isMobileApp())
     {
         //FIXME: We could try to recover.
         LOG_ERR("Kit for DocBroker ["
@@ -495,7 +495,7 @@ void BgSaveParentWebSocketHandler::onDisconnect()
 {
     LOG_TRC("Disconnected background web socket to child " << _childPid);
 
-    if constexpr (!Util::isMobileApp())
+    if constexpr (!Util::isMobileAppBuild())
     {
         // reap and de-zombify children.
         const auto [ret, sig] = SigUtil::reapZombieChild(_childPid, /*sighandler=*/false);
