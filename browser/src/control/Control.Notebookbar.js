@@ -1133,11 +1133,13 @@ window.L.Control.Notebookbar = window.L.Control.extend({
 	},
 
 	onAccessibilityToggleChange: function() {
-		if (window.prefs.getBoolean('accessibilityState')) {
+		const on = window.prefs.getBoolean('accessibilityState');
+		if (on) {
 			$('#togglea11ystate').addClass('selected');
 		} else {
 			$('#togglea11ystate').removeClass('selected');
 		}
+		$('#togglea11ystate-button').attr('aria-pressed', on);
 		if (this._map && this._map._lockAccessibilityOn) {
 			$('#togglea11ystate').addClass('disabled');
 			$('#togglea11ystate').attr('disabled', true);
