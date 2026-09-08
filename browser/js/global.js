@@ -2464,6 +2464,10 @@ function showWelcomeSVG() {
 				const darkBackground = window.prefs.getBoolean('darkBackgroundForTheme.' + (darkTheme ? 'dark' : 'light'), darkTheme);
 				msg += ' darkBackground=' + darkBackground;
 
+				// The interface is not built yet, so leave the two values the engine
+				// is being given here for it to pick up.
+				global.themeSentWithLoad = { theme: darkTheme, background: darkBackground };
+
 				msg += ' timezone=' + Intl.DateTimeFormat().resolvedOptions().timeZone;
 				msg += ' clientvisiblearea=' + window.makeClientVisibleArea();
 

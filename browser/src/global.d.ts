@@ -388,6 +388,9 @@ interface Window {
 	};
 	KeyboardShortcuts: KeyboardShortcuts;
 
+	// The theme and the document background the load message carried.
+	themeSentWithLoad?: { theme: boolean; background: boolean };
+
 	starterScreen: boolean;
 	aiEthicalRatingMessage: boolean;
 	allowUpdateNotification: boolean;

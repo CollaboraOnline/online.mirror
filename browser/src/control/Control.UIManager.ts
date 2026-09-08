@@ -566,6 +566,15 @@ class UIManager extends window.L.Control {
 			return;
 		}
 
+		// In a browser the load message is composed before this object exists, so
+		// the values it carried are left on the window.
+		if (window.themeSentWithLoad) {
+			if (this.themeSentToCore === undefined)
+				this.themeSentToCore = window.themeSentWithLoad.theme;
+			if (this.backgroundSentToCore === undefined)
+				this.backgroundSentToCore = window.themeSentWithLoad.background;
+		}
+
 		// On the desktop the load-time render option doesn't reliably override the
 		// engine's persisted theme, so apply it to the engine here too.
 		//
