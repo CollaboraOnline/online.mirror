@@ -1880,7 +1880,7 @@ window.L.Control.JSDialogBuilder = window.L.Control.extend({
 
 		var mouseLeaveFunction = function () {
 			if (builder.map.tooltip)
-				builder.map.tooltip.beginHide(div);
+				builder.map.tooltip.beginHide();
 		};
 
 		$(controls.button).on('click', clickFunction);
