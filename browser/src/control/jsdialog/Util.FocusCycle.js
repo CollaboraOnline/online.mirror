@@ -123,9 +123,11 @@ function findFocusableElement(element, direction) {
 // Helper function to find the first focusable element within an element
 function findFocusableWithin(element, direction){
 	const focusableElements = Array.from(element.querySelectorAll('*'));
-	return direction === 'next'
-		? (focusableElements.find(isFocusable))
-		: (focusableElements.reverse().find(isFocusable));
+	const found =
+		direction === 'next'
+			? focusableElements.find(isFocusable)
+			: focusableElements.reverse().find(isFocusable);
+	return found || null;
 }
 
 function findNextFocusableSiblingElement(element, direction) {
