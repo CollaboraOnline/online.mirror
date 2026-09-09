@@ -455,21 +455,23 @@ bool SwDoc::DeleteSelection( SwDrawView& rDrawView )
     if( rMrkList.GetMarkCount() )
     {
         GetIDocumentUndoRedo().StartUndo(SwUndoId::EMPTY, nullptr);
-        bool bDelMarked = true;
 
-        if( 1 == rMrkList.GetMarkCount() )
+        // Fly frames are deleted through their format. Collect the formats first, as each
+        // deleted fly frame leaves the mark list while its frames are destroyed.
+        std::vector<SwFlyFrameFormat*> aFlyFormats;
+        for( size_t i = 0; i < rMrkList.GetMarkCount(); ++i )
         {
-            SdrObject *pObj = rMrkList.GetMark( 0 )->GetMarkedSdrObj();
-            if( auto pDrawObj = DynCastSwVirtFlyDrawObj( pObj) )
+            SdrObject *pObject = rMrkList.GetMark( i )->GetMarkedSdrObj();
+            if( auto pFlyDrawObject = DynCastSwVirtFlyDrawObj( pObject ) )
             {
-                SwFlyFrameFormat* pFrameFormat = pDrawObj->GetFlyFrame()->GetFormat();
-                if( pFrameFormat )
-                {
-                    getIDocumentLayoutAccess().DelLayoutFormat( pFrameFormat );
-                    bDelMarked = false;
-                }
+                // A format shown on several pages has a fly frame on each of them.
+                SwFlyFrameFormat* pFrameFormat = pFlyDrawObject->GetFlyFrame()->GetFormat();
+                if( pFrameFormat && std::find( aFlyFormats.begin(), aFlyFormats.end(), pFrameFormat ) == aFlyFormats.end() )
+                    aFlyFormats.push_back( pFrameFormat );
             }
         }
+        for( SwFlyFrameFormat* pFlyFormat : aFlyFormats )
+            getIDocumentLayoutAccess().DelLayoutFormat( pFlyFormat );
 
         for( size_t i = 0; i < rMrkList.GetMarkCount(); ++i )
         {
@@ -490,7 +492,7 @@ bool SwDoc::DeleteSelection( SwDrawView& rDrawView )
             }
         }
 
-        if( rMrkList.GetMarkCount() && bDelMarked )
+        if( rMrkList.GetMarkCount() )
         {
             SdrObject *pObj = rMrkList.GetMark( 0 )->GetMarkedSdrObj();
             if( !pObj->getParentSdrObjectFromSdrObject() )

@@ -507,28 +507,36 @@ void SwFlyFrame::FinitDrawObj()
         if(p1St)
         {
             for(SwViewShell& rCurrentShell : p1St->GetRingContainer())
-            {   // At the moment the Drawing can do just do an Unmark on everything,
-                // as the Object was already removed
-                if (rCurrentShell.HasDrawView() &&
-                    rCurrentShell.Imp()->GetDrawView()->GetMarkedObjectList().GetMarkCount())
+            {
+                if (!rCurrentShell.HasDrawView())
+                    continue;
+                SwDrawView* pDrawView = rCurrentShell.Imp()->GetDrawView();
+                if (!pDrawView->IsObjMarked(GetVirtDrawObj()))
+                    continue;
+
+                // The first marked object is the one that holds the text cursor. When that is
+                // this fly frame the whole selection goes and the cursor moves to the anchor.
+                // Any other fly frame only leaves the mark list, and the rest stay selected.
+                const SdrMarkList& rMarkList = pDrawView->GetMarkedObjectList();
+                const bool bHoldsCursor = rMarkList.GetMark(0)->GetMarkedSdrObj() == GetVirtDrawObj();
+                if (bHoldsCursor)
                 {
-                    SwFlyFrame const*const pOldSelFly = ::GetFlyFromMarked(nullptr, &rCurrentShell);
-                    if (pOldSelFly == this)
-                    {
-                        assert(rCurrentShell.Imp()->GetDrawView()->GetMarkedObjectList().GetMarkCount() == 1);
-                        if (SwFEShell *const pFEShell = dynamic_cast<SwFEShell*>(&rCurrentShell))
-                        {   // tdf#131679 move any cursor out of fly
-                            rCurrentShell.Imp()->GetDrawView()->UnmarkAll();
-                            SwPaM const temp(ResolveFlyAnchor(*pOldSelFly->GetFormat()));
-                            pFEShell->SetSelection(temp);
-                            // could also call SetCursor() like SwFEShell::SelectObj()
-                            // does, but that would access layout a bit much...
-                        }
-                        else
-                        {
-                            rCurrentShell.Imp()->GetDrawView()->UnmarkAll();
-                        }
+                    pDrawView->UnmarkAll();
+                    if (SwFEShell *const pFEShell = dynamic_cast<SwFEShell*>(&rCurrentShell))
+                    {   // tdf#131679 move any cursor out of fly
+                        SwPaM const temp(ResolveFlyAnchor(*GetFormat()));
+                        pFEShell->SetSelection(temp);
+                        // could also call SetCursor() like SwFEShell::SelectObj()
+                        // does, but that would access layout a bit much...
                     }
+                }
+                else
+                {
+                    pDrawView->MarkObj(GetVirtDrawObj(), rCurrentShell.Imp()->GetPageView(), true);
+                    // An object that cannot be marked cannot be unmarked one at a time either,
+                    // so the whole list goes in that case.
+                    if (pDrawView->IsObjMarked(GetVirtDrawObj()))
+                        pDrawView->UnmarkAll();
                 }
             }
         }

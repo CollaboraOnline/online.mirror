@@ -26,6 +26,7 @@
 #include <unobaseclass.hxx>
 #include <fmtanchr.hxx>
 #include <flyfrm.hxx>
+#include <svx/svdview.hxx>
 #include <ndtxt.hxx>
 #include <txtfld.hxx>
 #include <docufld.hxx>
@@ -429,6 +430,31 @@ bool SwWrtShell::DelRight(bool const isReplaceHeuristic)
     case SelectionType::DrawObjectEditMode:
     case SelectionType::DbForm:
         {
+            // Several selected fly frames are deleted one at a time, each through the single
+            // frame path below, so the tracked deletion and the comment removal apply to each
+            // of them. The formats outlive the frames, which the layout may replace meanwhile.
+            if (IsMultipleFlyFramesSelected())
+            {
+                std::vector<SwFlyFrameFormat*> aFormats;
+                for (SwFlyFrame* pSelectedFly : GetSelectedFlyFrames())
+                    aFormats.push_back(pSelectedFly->GetFormat());
+
+                mxDoc->GetIDocumentUndoRedo().StartUndo(SwUndoId::EMPTY, nullptr);
+                for (SwFlyFrameFormat* pFlyFormat : aFormats)
+                {
+                    SwFlyFrame* pFlyFrame = pFlyFormat->GetFrame();
+                    if (!pFlyFrame)
+                        continue;
+                    // The marks go first, so that the fly frame is selected on its own.
+                    GetDrawView()->UnmarkAll();
+                    SelectFlyFrame(*pFlyFrame);
+                    DelRight();
+                }
+                mxDoc->GetIDocumentUndoRedo().EndUndo(SwUndoId::EMPTY, nullptr);
+                bRet = true;
+                break;
+            }
+
             // Group deletion of the object and its comment together
             // (also as-character anchor conversion at track changes)
             mxDoc->GetIDocumentUndoRedo().StartUndo(SwUndoId::EMPTY, nullptr);

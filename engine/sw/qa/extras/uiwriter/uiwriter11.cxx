@@ -26,6 +26,7 @@
 #include <comphelper/configuration.hxx>
 
 #include <svx/svdpage.hxx>
+#include <svx/svdview.hxx>
 #include <sfx2/bindings.hxx>
 #include <sfx2/request.hxx>
 #include <com/sun/star/text/XText.hpp>
@@ -41,6 +42,7 @@
 #include <drawdoc.hxx>
 #include <edtwin.hxx>
 #include <fmtfsize.hxx>
+#include <frameformats.hxx>
 #include <i18nutil/paper.hxx>
 #include <itabenum.hxx>
 #include <names.hxx>
@@ -1230,6 +1232,57 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testTdf124442)
     // - Expected: Test
     // - Actual  :
     CPPUNIT_ASSERT_EQUAL(sSearchString, sText);
+}
+
+CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testDeleteSeveralSelectedImagesTracked)
+{
+    // With change tracking on, deleting two selected images records a deletion for each and
+    // keeps both images in the document until the change is accepted.
+    createSwDoc("two-images.fodt");
+    SwDoc* pDoc = getSwDoc();
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->SetRedlineFlags(RedlineFlags::On | RedlineFlags::ShowInsert | RedlineFlags::ShowDelete);
+    CPPUNIT_ASSERT(pDoc->getIDocumentRedlineAccess().IsRedlineOn());
+
+    SdrPage* pPage = pDoc->getIDocumentDrawModelAccess().GetDrawModel()->GetPage(0);
+    SdrView* pView = pWrtShell->GetDrawView();
+    pView->MarkObj(pPage->GetObj(0), pView->GetSdrPageView());
+    pView->MarkObj(pPage->GetObj(1), pView->GetSdrPageView());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), pWrtShell->GetSelectedFlyFrames().size());
+
+    pWrtShell->DelRight();
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), pDoc->GetSpzFrameFormats()->size());
+    CPPUNIT_ASSERT_EQUAL(static_cast<SwRedlineTable::size_type>(2),
+                         pDoc->getIDocumentRedlineAccess().GetRedlineTable().size());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testDeleteSeveralSelectedImages)
+{
+    // Deleting a selection that holds two images removes both, and one undo brings both back.
+    createSwDoc("two-images.fodt");
+    SwDoc* pDoc = getSwDoc();
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    SdrPage* pPage = pDoc->getIDocumentDrawModelAccess().GetDrawModel()->GetPage(0);
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), pPage->GetObjCount());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), pDoc->GetSpzFrameFormats()->size());
+
+    // Mark both images on the draw view, as a multi-selection would.
+    SdrView* pView = pWrtShell->GetDrawView();
+    pView->MarkObj(pPage->GetObj(0), pView->GetSdrPageView());
+    pView->MarkObj(pPage->GetObj(1), pView->GetSdrPageView());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), pWrtShell->GetSelectedFlyFrames().size());
+
+    pWrtShell->DelSelectedObj();
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), pView->GetMarkedObjectList().GetMarkCount());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), pPage->GetObjCount());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(0), pDoc->GetSpzFrameFormats()->size());
+
+    pWrtShell->Undo();
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), pPage->GetObjCount());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), pDoc->GetSpzFrameFormats()->size());
 }
 
 } // end of anonymous namespace
