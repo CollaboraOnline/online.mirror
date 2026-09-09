@@ -32,21 +32,35 @@ function isAnyInputFocused() {
 		|| commentHasFocus || inputHasFocus;
 }
 
+const focusableSelector = [
+	'a[href]',
+	'button',
+	'input',
+	'select',
+	'textarea',
+	'[tabindex]',
+	'[contenteditable="true"]',
+]
+	.map(function (selector) {
+		return selector + ':not([disabled]):not(.hidden)';
+	})
+	.join(', ');
+
 function getFocusableElements(container) {
-	if (!container)
-		return null;
+	if (!container) return null;
 
-	var ret = container.querySelectorAll('[tabIndex="0"]:not(.jsdialog-begin-marker, .jsdialog-end-marker):not([disabled]):not(.hidden)');
-	if (!ret.length)
-		ret = container.querySelectorAll('input:not([disabled]):not(.hidden)');
-	if (!ret.length)
-		ret = container.querySelectorAll('textarea:not([disabled]):not(.hidden)');
-	if (!ret.length)
-		ret = container.querySelectorAll('select:not([disabled]):not(.hidden)');
-	if (!ret.length)
-		ret = container.querySelectorAll('button:not([disabled]):not(.hidden)');
+	const candidates = container.querySelectorAll(focusableSelector);
 
-	return Array.from(ret).filter(function (elem) {
+	return Array.from(candidates).filter(function (elem) {
+		if (
+			elem.classList.contains('jsdialog-begin-marker') ||
+			elem.classList.contains('jsdialog-end-marker')
+		)
+			return false;
+
+		const tabIndex = elem.getAttribute('tabindex');
+		if (tabIndex !== null && parseInt(tabIndex, 10) < 0) return false;
+
 		return elem.checkVisibility({
 			visibilityProperty: true,
 			contentVisibilityAuto: true,
