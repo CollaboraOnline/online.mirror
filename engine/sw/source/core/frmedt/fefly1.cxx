@@ -368,6 +368,14 @@ std::vector<SwFlyFrame*> SwFEShell::GetSelectedFlyFrames() const
     return aFlyFrames;
 }
 
+bool SwFEShell::CanAddGraphicToSelection( const Point& rPt ) const
+{
+    if ( !Imp()->HasDrawView() || !::IsGraphicFlyMarkList( Imp()->GetDrawView()->GetMarkedObjectList() ) )
+        return false;
+    SdrObject* pObject = nullptr;
+    return GetObjCntType( rPt, pObject ) == OBJCNT_GRF;
+}
+
 bool SwFEShell::IsMultipleFlyFramesSelected() const
 {
     // The list is only built once the mark count alone cannot answer.

@@ -40,6 +40,7 @@
 #include <cmdid.h>
 #include <docufld.hxx>
 #include <drawdoc.hxx>
+#include <dflyobj.hxx>
 #include <edtwin.hxx>
 #include <flyfrm.hxx>
 #include <fmtfsize.hxx>
@@ -1365,6 +1366,52 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testCopySeveralSelectedImages)
 
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(4), pDoc->GetSpzFrameFormats()->size());
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(4), pPage->GetObjCount());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testSelectSeveralImages)
+{
+    // A second image added to a selected image keeps both selected as one graphic selection,
+    // adding a selected image again takes it out, and a plain selection replaces the set.
+    createSwDoc("two-images.fodt");
+    SwDoc* pDoc = getSwDoc();
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    SdrPage* pPage = pDoc->getIDocumentDrawModelAccess().GetDrawModel()->GetPage(0);
+    SdrObject* pFirst = pPage->GetObj(0);
+    SdrObject* pSecond = pPage->GetObj(1);
+
+    CPPUNIT_ASSERT(pWrtShell->SelectObj(Point(), 0, pFirst));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), pWrtShell->GetSelectedFlyFrames().size());
+    CPPUNIT_ASSERT(!pWrtShell->IsMultipleFlyFramesSelected());
+
+    CPPUNIT_ASSERT(pWrtShell->SelectObj(Point(), SW_ADD_SELECT, pSecond));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), pWrtShell->GetSelectedFlyFrames().size());
+    CPPUNIT_ASSERT(pWrtShell->IsFrameSelected());
+    CPPUNIT_ASSERT(pWrtShell->IsMultipleFlyFramesSelected());
+    CPPUNIT_ASSERT_EQUAL(static_cast<int>(SelectionType::Graphic),
+                         static_cast<int>(pWrtShell->GetSelectionType()));
+    // The first image stands for the selection.
+    CPPUNIT_ASSERT_EQUAL(DynCastSwVirtFlyDrawObj(pFirst)->GetFlyFrame(),
+                         pWrtShell->GetSelectedFlyFrame());
+
+    // Adding the first image again removes it, and the second one stays selected alone.
+    CPPUNIT_ASSERT(pWrtShell->SelectObj(Point(), SW_ADD_SELECT, pFirst));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), pWrtShell->GetSelectedFlyFrames().size());
+    CPPUNIT_ASSERT_EQUAL(DynCastSwVirtFlyDrawObj(pSecond)->GetFlyFrame(),
+                         pWrtShell->GetSelectedFlyFrame());
+
+    // Removing the last image leaves nothing selected and the cursor in the text.
+    CPPUNIT_ASSERT(!pWrtShell->SelectObj(Point(), SW_ADD_SELECT, pSecond));
+    CPPUNIT_ASSERT(!pWrtShell->IsFrameSelected());
+    CPPUNIT_ASSERT_EQUAL(static_cast<int>(SelectionType::Text),
+                         static_cast<int>(pWrtShell->GetSelectionType()));
+
+    // A selection without the add flag replaces a set of images.
+    CPPUNIT_ASSERT(pWrtShell->SelectObj(Point(), 0, pFirst));
+    CPPUNIT_ASSERT(pWrtShell->SelectObj(Point(), SW_ADD_SELECT, pSecond));
+    CPPUNIT_ASSERT(pWrtShell->SelectObj(Point(), 0, pSecond));
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), pWrtShell->GetSelectedFlyFrames().size());
+    CPPUNIT_ASSERT_EQUAL(DynCastSwVirtFlyDrawObj(pSecond)->GetFlyFrame(),
+                         pWrtShell->GetSelectedFlyFrame());
 }
 
 } // end of anonymous namespace

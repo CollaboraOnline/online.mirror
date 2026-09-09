@@ -1234,13 +1234,22 @@ void SwNoTextFrame::ImplPaintPictureGraphic( vcl::RenderContext* pOut,
         return;
     }
 
-    const bool bAnimate = rGrfObj.IsAnimated() &&
+    bool bAnimate = rGrfObj.IsAnimated() &&
                              !pShell->IsPreview() &&
                              !pShell->GetAccessibilityOptions()->IsStopAnimatedGraphics() &&
     // #i9684# Stop animation during printing/pdf export
                               pShell->GetWin();
-    if( bAnimate &&
-        FindFlyFrame() != ::GetFlyFromMarked( nullptr, pShell ))
+    if( bAnimate )
+    {
+        // A selected image stands still. Any number of images may be selected, so the draw
+        // view says whether this one is among them.
+        const SwFlyFrame* pFly = FindFlyFrame();
+        const bool bSelected = pFly && pShell->HasDrawView() &&
+            pShell->Imp()->GetDrawView()->IsObjMarked( pFly->GetVirtDrawObj() );
+        if( bSelected )
+            bAnimate = false;
+    }
+    if( bAnimate )
     {
         ImplPaintPictureAnimate(pOut, pShell, pGrfNd, rAlignedGrfArea);
         return;

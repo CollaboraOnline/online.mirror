@@ -420,6 +420,10 @@ public:
     // True when more than one fly frame is selected.
     SW_DLLPUBLIC bool IsMultipleFlyFramesSelected() const;
 
+    // True when the object at the given point is a graphic fly frame and the selection holds
+    // only graphic fly frames, so the object may join the selection.
+    bool CanAddGraphicToSelection( const Point& rPt ) const;
+
     // Get current fly in which the cursor is positioned
     SW_DLLPUBLIC SwFlyFrame* GetCurrFlyFrame(const bool bCalcFrame = true) const;
 

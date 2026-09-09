@@ -181,89 +181,96 @@ bool SwFEShell::SelectObj( const Point& rPt, sal_uInt8 nFlag, SdrObject *pObj )
     SwFlyFrame* pOldSelFly = nullptr;
     const Point aOldPos( pDView->GetAllMarkedRect().TopLeft() );
 
+    // A graphic fly frame may join a selection that holds only graphic fly frames. Every other
+    // combination replaces the old selection.
+    bool bAddGraphic = false;
+    if ( bAddSelect && bHadSelection )
+    {
+        bAddGraphic = pObj
+            ? ( ::IsGraphicFlyMarkList( rMrkList ) && GetObjCntType( *pObj ) == OBJCNT_GRF )
+            : CanAddGraphicToSelection( rPt );
+    }
+
     if( bHadSelection )
     {
         // call Unmark when !bAddSelect or if fly was selected
         bool bUnmark = !bAddSelect;
 
-        if ( rMrkList.GetMarkCount() == 1 )
+        // if fly was selected, deselect it first
+        pOldSelFly = ::GetFlyFromMarked( &rMrkList, this );
+        if ( pOldSelFly && !bAddGraphic )
         {
-            // if fly was selected, deselect it first
-            pOldSelFly = ::GetFlyFromMarked( &rMrkList, this );
-            if ( pOldSelFly )
+            const sal_uInt16 nType = GetCntType();
+            if( nType != CNT_TXT || (SW_LEAVE_FRAME & nFlag) ||
+                ( pOldSelFly->GetFormat()->GetProtect().IsContentProtected()
+                 && !IsReadOnlyAvailable() ))
             {
-                const sal_uInt16 nType = GetCntType();
-                if( nType != CNT_TXT || (SW_LEAVE_FRAME & nFlag) ||
-                    ( pOldSelFly->GetFormat()->GetProtect().IsContentProtected()
-                     && !IsReadOnlyAvailable() ))
-                {
-                    SdrObject *pOldObj = rMrkList.GetMark(0)->GetMarkedSdrObj();
-                    // If a fly is deselected, which contains graphic, OLE or
-                    // otherwise, the cursor should be removed from it.
-                    // Similar if a fly with protected content is deselected.
-                    // For simplicity we put the cursor next to the upper-left
-                    // corner.
-                    Point aPt( pOldSelFly->getFrameArea().Pos() );
-                    aPt.setX(aPt.getX() - 1);
-                    bool bUnLockView = !IsViewLocked();
-                    LockView( true );
-                    SetCursor( aPt, true );
+                SdrObject *pOldObj = rMrkList.GetMark(0)->GetMarkedSdrObj();
+                // If a fly is deselected, which contains graphic, OLE or
+                // otherwise, the cursor should be removed from it.
+                // Similar if a fly with protected content is deselected.
+                // For simplicity we put the cursor next to the upper-left
+                // corner.
+                Point aPt( pOldSelFly->getFrameArea().Pos() );
+                aPt.setX(aPt.getX() - 1);
+                bool bUnLockView = !IsViewLocked();
+                LockView( true );
+                SetCursor( aPt, true );
 
-                    // in tables, fix lost position, when the selected image was
-                    // anchored as character at beginning of the table row:
-                    // in this case, the text cursor was positionated after the
-                    // floating table, and not before the image, as in other positions
-                    // in the table row (and if the table wasn't a floating one,
-                    // the text cursor lost completely)
-                    if ( SW_LEAVE_FRAME & nFlag )
+                // in tables, fix lost position, when the selected image was
+                // anchored as character at beginning of the table row:
+                // in this case, the text cursor was positionated after the
+                // floating table, and not before the image, as in other positions
+                // in the table row (and if the table wasn't a floating one,
+                // the text cursor lost completely)
+                if ( SW_LEAVE_FRAME & nFlag )
+                {
+                    const SwContact* pContact = GetUserCall(pOldObj);
+                    if ( pContact && pContact->ObjAnchoredAsChar() &&
+                            pOldSelFly->GetAnchorFrame() &&
+                            pOldSelFly->GetAnchorFrame()->GetUpper() )
                     {
-                        const SwContact* pContact = GetUserCall(pOldObj);
-                        if ( pContact && pContact->ObjAnchoredAsChar() &&
-                                pOldSelFly->GetAnchorFrame() &&
-                                pOldSelFly->GetAnchorFrame()->GetUpper() )
+                        const SwNode * pOldNd = pContact->GetAnchorNode().FindTableNode();
+                        const SwNode * pNewNd = GetCursor()->GetPointNode().FindTableNode();
+                        // the original image was in a table, but the cursor is not in that
+                        if ( pOldNd && pOldNd != pNewNd )
                         {
-                            const SwNode * pOldNd = pContact->GetAnchorNode().FindTableNode();
-                            const SwNode * pNewNd = GetCursor()->GetPointNode().FindTableNode();
-                            // the original image was in a table, but the cursor is not in that
-                            if ( pOldNd && pOldNd != pNewNd )
-                            {
-                                const SwRect& rCellFrame =
-                                    pOldSelFly->GetAnchorFrame()->GetUpper()->getFrameArea();
-                                Point aPtCellTopRight( rCellFrame.Pos() );
-                                aPtCellTopRight.setX( aPtCellTopRight.X() + rCellFrame.Width() );
-                                if ( SwWrtShell* pWrtShell = dynamic_cast<SwWrtShell*>(this) )
-                                    // put the text cursor in the same cell
-                                    pWrtShell->SelectTableRowCol( aPtCellTopRight );
-                            }
-                            // same table, but not in the same cell
-                            else if ( pOldNd && pOldNd == pNewNd &&
-                                    GetCursor()->GetPointNode().GetTextNode() &&
-                                    pContact->GetAnchorNode().GetTableBox() !=
-                                    GetCursor()->GetPointNode().GetTextNode()->GetTableBox() )
-                            {
-                                aPt.setX( aPt.getX() + 2 + pOldSelFly->getFrameArea().Width() );
-                                // put the text cursor after the object
-                                SetCursor( aPt, true );
-                            }
+                            const SwRect& rCellFrame =
+                                pOldSelFly->GetAnchorFrame()->GetUpper()->getFrameArea();
+                            Point aPtCellTopRight( rCellFrame.Pos() );
+                            aPtCellTopRight.setX( aPtCellTopRight.X() + rCellFrame.Width() );
+                            if ( SwWrtShell* pWrtShell = dynamic_cast<SwWrtShell*>(this) )
+                                // put the text cursor in the same cell
+                                pWrtShell->SelectTableRowCol( aPtCellTopRight );
+                        }
+                        // same table, but not in the same cell
+                        else if ( pOldNd && pOldNd == pNewNd &&
+                                GetCursor()->GetPointNode().GetTextNode() &&
+                                pContact->GetAnchorNode().GetTableBox() !=
+                                GetCursor()->GetPointNode().GetTextNode()->GetTableBox() )
+                        {
+                            aPt.setX( aPt.getX() + 2 + pOldSelFly->getFrameArea().Width() );
+                            // put the text cursor after the object
+                            SetCursor( aPt, true );
                         }
                     }
-
-                    if( bUnLockView )
-                        LockView( false );
-                }
-                if ( nType & CNT_GRF &&
-                     static_cast<SwNoTextFrame*>(pOldSelFly->Lower())->HasAnimation() )
-                {
-                    GetWin()->Invalidate( pOldSelFly->getFrameArea().SVRect() );
                 }
 
-                // Cancel crop mode
-                if ( SdrDragMode::Crop == GetDragMode() )
-                    SetDragMode( SdrDragMode::Move );
-
-                bUnmark = true;
+                if( bUnLockView )
+                    LockView( false );
             }
+            if ( nType & CNT_GRF &&
+                 static_cast<SwNoTextFrame*>(pOldSelFly->Lower())->HasAnimation() )
+            {
+                GetWin()->Invalidate( pOldSelFly->getFrameArea().SVRect() );
+            }
+
+            bUnmark = true;
         }
+        // Cancel crop mode
+        if ( pOldSelFly && SdrDragMode::Crop == GetDragMode() )
+            SetDragMode( SdrDragMode::Move );
+
         if ( bUnmark )
         {
             pDView->UnmarkAll();
@@ -294,7 +301,9 @@ bool SwFEShell::SelectObj( const Point& rPt, sal_uInt8 nFlag, SdrObject *pObj )
     if ( pObj )
     {
         OSL_ENSURE( !bEnterGroup, "SW_ENTER_GROUP is not supported" );
-        pDView->MarkObj( pObj, Imp()->GetPageView() );
+        // Adding an image that is already selected removes it from the selection instead, the
+        // way the hit test below toggles a marked object.
+        pDView->MarkObj( pObj, Imp()->GetPageView(), bAddGraphic && pDView->IsObjMarked( pObj ) );
     }
     else
     {
@@ -311,10 +320,10 @@ bool SwFEShell::SelectObj( const Point& rPt, sal_uInt8 nFlag, SdrObject *pObj )
 
     const bool bRet = 0 != rMrkList.GetMarkCount();
 
-    if ( rMrkList.GetMarkCount() > 1 )
+    if ( rMrkList.GetMarkCount() > 1 && !::IsGraphicFlyMarkList( rMrkList ) )
     {
-        // It sucks if Drawing objects were selected and now
-        // additionally a fly is selected.
+        // Several graphic fly frames may stay selected together. Any other selection that
+        // holds a fly frame collapses to that fly frame.
         for ( size_t i = 0; i < rMrkList.GetMarkCount(); ++i )
         {
             SdrObject *pTmpObj = rMrkList.GetMark( i )->GetMarkedSdrObj();
@@ -349,12 +358,8 @@ bool SwFEShell::SelectObj( const Point& rPt, sal_uInt8 nFlag, SdrObject *pObj )
         }
     }
 
-    if ( rMrkList.GetMarkCount() == 1 )
-    {
-        SwFlyFrame *pSelFly = ::GetFlyFromMarked( &rMrkList, this );
-        if (pSelFly)
-            pSelFly->SelectionHasChanged(this);
-    }
+    for ( SwFlyFrame* pSelectedFly : GetSelectedFlyFrames() )
+        pSelectedFly->SelectionHasChanged(this);
 
     SwFrameFormat* pNewDrawFormat = nullptr;
     if (!(nFlag & SW_ALLOW_TEXTBOX))
@@ -385,16 +390,21 @@ bool SwFEShell::SelectObj( const Point& rPt, sal_uInt8 nFlag, SdrObject *pObj )
     if ( bRet )
     {
         ::lcl_GrabCursor(this, pOldSelFly, pNewDrawFormat);
-        if ( GetCntType() & CNT_GRF )
+        // An animated image stands still while it is selected.
+        for ( const SwFlyFrame* pSelectedFly : GetSelectedFlyFrames() )
         {
-            const SwFlyFrame *pTmp = GetFlyFromMarked( &rMrkList, this );
-            OSL_ENSURE( pTmp, "Graphic without Fly" );
-            if ( pTmp && static_cast<const SwNoTextFrame*>(pTmp->Lower())->HasAnimation() )
-                static_cast<const SwNoTextFrame*>(pTmp->Lower())->StopAnimation( GetOut() );
+            const SwFrame* pLower = pSelectedFly->Lower();
+            if ( pLower && pLower->IsNoTextFrame() &&
+                 static_cast<const SwNoTextFrame*>(pLower)->HasAnimation() )
+                static_cast<const SwNoTextFrame*>(pLower)->StopAnimation( GetOut() );
         }
     }
-    else if ( !pOldSelFly && bHadSelection )
+    else if ( bHadSelection && ( !pOldSelFly || bAddGraphic ) )
+    {
+        // Nothing is selected any more. When the last image was removed from the selection the
+        // text cursor is still inside it, so it goes back next to the old selection.
         SetCursor( aOldPos, true);
+    }
 
     if( bRet || !bHadSelection )
         CallChgLnk();
@@ -2321,12 +2331,12 @@ bool SwFEShell::EndMark()
         {
             bool bShowHdl = false;
             SwDrawView* pDView = Imp()->GetDrawView();
-            // frames are not selected this way, except when
-            // it is only one frame
+            // Fly frames are not selected this way, except when the band holds one fly frame
+            // alone or only graphic fly frames.
             SdrMarkList &rMrkList = const_cast<SdrMarkList&>(pDView->GetMarkedObjectList());
             SwFlyFrame* pOldSelFly = ::GetFlyFromMarked( &rMrkList, this );
 
-            if ( rMrkList.GetMarkCount() > 1 )
+            if ( rMrkList.GetMarkCount() > 1 && !::IsGraphicFlyMarkList( rMrkList ) )
             {
                 size_t i = 0;
                 while (i < rMrkList.GetMarkCount())

@@ -3890,8 +3890,9 @@ void SwEditWin::MouseButtonDown(const MouseEvent& _rMEvt)
                         if (nNumberOfClicks == 2)
                         {
                             // Left mouse button, shift, double-click: see if we have a graphic and
-                            // dispatch its dialog in this case.
-                            if (rSh.GetSelectionType() == SelectionType::Graphic)
+                            // dispatch its dialog in this case. The dialog is for one image.
+                            if (rSh.GetSelectionType() == SelectionType::Graphic &&
+                                !rSh.IsMultipleFlyFramesSelected())
                             {
                                 GetView().GetViewFrame().GetBindings().Execute(
                                     FN_FORMAT_GRAFIC_DLG, nullptr,
@@ -3900,7 +3901,12 @@ void SwEditWin::MouseButtonDown(const MouseEvent& _rMEvt)
                             }
                         }
 
-                        if ( !m_bInsDraw && IsDrawObjSelectable( rSh, aDocPos ) )
+                        // Shift-click adds a draw object to the selection, and also an image
+                        // when only images are selected. A shift-click on the only selected
+                        // image still arms a drag of it further down.
+                        const bool bAddGraphic = rSh.CanAddGraphicToSelection( aDocPos ) &&
+                            ( rSh.IsMultipleFlyFramesSelected() || !rSh.IsInsideSelectedObj( aDocPos ) );
+                        if ( !m_bInsDraw && ( IsDrawObjSelectable( rSh, aDocPos ) || bAddGraphic ) )
                         {
                             m_rView.NoRotate();
                             rSh.HideCursor();

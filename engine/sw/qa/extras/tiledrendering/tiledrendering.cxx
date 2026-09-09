@@ -86,6 +86,8 @@
 #include <docsh.hxx>
 #include <itabenum.hxx>
 #include <wrtsh.hxx>
+#include <flyfrm.hxx>
+#include <o3tl/string_view.hxx>
 #include <unotxdoc.hxx>
 #include <textcontentcontrol.hxx>
 #include <swtestviewcallback.hxx>
@@ -4384,6 +4386,63 @@ CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testSetClientZoomWithoutView)
 
     // Without the fix, this crashed
     pXTextDocument->setClientZoom(256, 256, 1920, 1920);
+}
+
+namespace
+{
+// Reads the "x, y, w, h" that opens a graphic selection payload.
+tools::Rectangle lcl_getSelectionRectangle(std::string_view rSelection)
+{
+    sal_Int32 nIndex = 0;
+    const tools::Long nX = o3tl::toInt32(o3tl::getToken(rSelection, 0, ',', nIndex));
+    const tools::Long nY = o3tl::toInt32(o3tl::getToken(rSelection, 0, ',', nIndex));
+    const tools::Long nWidth = o3tl::toInt32(o3tl::getToken(rSelection, 0, ',', nIndex));
+    const tools::Long nHeight = o3tl::toInt32(o3tl::getToken(rSelection, 0, ',', nIndex));
+    return tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight));
+}
+}
+
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testSeveralImagesGraphicSelection)
+{
+    // With two images selected the graphic selection callback carries the rectangle around
+    // both, and moving the selection moves that rectangle.
+    createDoc("two-images.fodt");
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    setupCOKitViewCallback(pWrtShell->GetSfxViewShell());
+    SdrPage* pPage = pWrtShell->GetDoc()->getIDocumentDrawModelAccess().GetDrawModel()->GetPage(0);
+    pWrtShell->SelectObj(Point(), 0, pPage->GetObj(0));
+    pWrtShell->SelectObj(Point(), SW_ADD_SELECT, pPage->GetObj(1));
+    Scheduler::ProcessEventsToIdle();
+
+    std::vector<SwFlyFrame*> aFlyFrames = pWrtShell->GetSelectedFlyFrames();
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), aFlyFrames.size());
+    tools::Rectangle aUnion(aFlyFrames[0]->getFrameArea().SVRect());
+    aUnion.Union(aFlyFrames[1]->getFrameArea().SVRect());
+
+    CPPUNIT_ASSERT(!m_ShapeSelection.isEmpty());
+    tools::Rectangle aSelection = lcl_getSelectionRectangle(m_ShapeSelection);
+    CPPUNIT_ASSERT_EQUAL(aUnion.Left(), aSelection.Left());
+    CPPUNIT_ASSERT_EQUAL(aUnion.Top(), aSelection.Top());
+    // The payload width and height may be one twip off the frame areas.
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aUnion.GetWidth(), aSelection.GetWidth(), 1);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aUnion.GetHeight(), aSelection.GetHeight(), 1);
+
+    // The frame shell handles the transform command. The view switches to it on a timer
+    // after a selection change, so do that switch here.
+    pWrtShell->GetView().SelectShell();
+    const tools::Long nDeltaX = 500;
+    const tools::Long nDeltaY = 300;
+    dispatchCommand(mxComponent, u".uno:TransformDialog"_ustr,
+                    comphelper::InitPropertySequence(
+                        { { u"TransformPosX"_ustr, cpo::uno::Any(sal_Int32(aSelection.Left() + nDeltaX)) },
+                          { u"TransformPosY"_ustr, cpo::uno::Any(sal_Int32(aSelection.Top() + nDeltaY)) } }));
+    Scheduler::ProcessEventsToIdle();
+
+    tools::Rectangle aMovedSelection = lcl_getSelectionRectangle(m_ShapeSelection);
+    CPPUNIT_ASSERT_EQUAL(aSelection.Left() + nDeltaX, aMovedSelection.Left());
+    CPPUNIT_ASSERT_EQUAL(aSelection.Top() + nDeltaY, aMovedSelection.Top());
+    CPPUNIT_ASSERT_EQUAL(aSelection.GetWidth(), aMovedSelection.GetWidth());
+    CPPUNIT_ASSERT_EQUAL(aSelection.GetHeight(), aMovedSelection.GetHeight());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
