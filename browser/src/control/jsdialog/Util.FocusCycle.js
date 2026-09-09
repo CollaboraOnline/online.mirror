@@ -46,9 +46,12 @@ function getFocusableElements(container) {
 	if (!ret.length)
 		ret = container.querySelectorAll('button:not([disabled]):not(.hidden)');
 
-	ret = Array.from(ret).filter(function(elem) { return elem.checkVisibility() });
-
-	return ret;
+	return Array.from(ret).filter(function (elem) {
+		return elem.checkVisibility({
+			visibilityProperty: true,
+			contentVisibilityAuto: true,
+		});
+	});
 }
 
 // Utility function to check if an element is focusable

@@ -251,6 +251,21 @@ interface Document {
 	webkitFullscreenElement: Element | null;
 }
 
+// Extend the global Element interface with checkVisibility, which the DOM
+// types of the TypeScript release in use do not declare yet. It answers
+// whether the element is rendered, so a display: none ancestor makes it false.
+// Every option defaults to false, so visibility: hidden and a skipped
+// content-visibility subtree only count as invisible when asked for.
+interface CheckVisibilityOptions {
+	contentVisibilityAuto?: boolean;
+	opacityProperty?: boolean;
+	visibilityProperty?: boolean;
+}
+
+interface Element {
+	checkVisibility(options?: CheckVisibilityOptions): boolean;
+}
+
 // Extend StringConstructor
 interface StringConstructor {
 	locale: string; // from cool-src.js
