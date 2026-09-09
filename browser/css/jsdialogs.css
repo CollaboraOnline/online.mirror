@@ -2527,6 +2527,17 @@ img.ui-combobox-value-preview {
 	box-sizing: border-box;
 }
 
+/* Drop the 1px/3px inline padding .ui-treeview gives itself, so a highlighted row spans the full width of its list. */
+.autofilter-popup .ui-treeview,
+.autofilter-submenu-popup .ui-treeview {
+	padding-inline: 0;
+}
+
+/* A date tree entry is 100% of the list wide, so its borders have to count inside that or the row overflows by 2px. */
+.autofilter-popup #check_tree_box.ui-treeview .ui-treeview-entry {
+	box-sizing: border-box;
+}
+
 /* Once the user drags the resize handle the browser writes an inline height on
    .ui-dialog-content; drop the cap so the listbox fills the enlarged dialog. */
 .autofilter-popup .jsdialog.lokdialog.ui-dialog-content[style*='height'] #check_list_box.ui-treeview,

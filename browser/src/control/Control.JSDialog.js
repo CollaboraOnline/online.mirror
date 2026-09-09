@@ -475,8 +475,11 @@ window.L.Control.JSDialog = window.L.Control.extend({
 			window.L.DomUtil.addClass(instance.container, 'jsdialog-popout-measuring');
 		}
 
-		if (instance.isAutofilter && !this.isChildAutoFilter(instance))
-			window.L.DomUtil.addClass(instance.container, 'autofilter-popup');
+		if (instance.isAutofilter) {
+			// The submenus (Sort/Filter by Color, Filter by Condition) open as their own popups, so they get their own class.
+			window.L.DomUtil.addClass(instance.container, this.isChildAutoFilter(instance) ?
+				'autofilter-submenu-popup' : 'autofilter-popup');
+		}
 
 		if (instance.isModalPopUp && !instance.popupParent) // Special case for menu popups (they are also modal dialogues).
 			instance.overlay.classList.add('dimmed');
