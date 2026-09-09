@@ -411,8 +411,14 @@ public:
     SwFrameFormat* GetSelectedFrameFormat() const; ///< If frame then frame style, else 0.
     void SetFrameFormat( SwFrameFormat *pFormat, bool bKeepOrient = false, Point const * pDocPos = nullptr ); ///< If frame then set frame style.
 
-    // Get selected fly
+    // Get selected fly. With several graphic fly frames selected this is the first one.
     SW_DLLPUBLIC SwFlyFrame* GetSelectedFlyFrame() const;
+
+    // Every selected fly frame in mark order. Empty when any marked object is not a fly frame.
+    SW_DLLPUBLIC std::vector<SwFlyFrame*> GetSelectedFlyFrames() const;
+
+    // True when more than one fly frame is selected.
+    SW_DLLPUBLIC bool IsMultipleFlyFramesSelected() const;
 
     // Get current fly in which the cursor is positioned
     SW_DLLPUBLIC SwFlyFrame* GetCurrFlyFrame(const bool bCalcFrame = true) const;

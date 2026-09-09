@@ -133,6 +133,12 @@ void PaintCharacterBorder(const SwFont& rFont, const SwRect& rPaintArea, const b
 // Implementation in feshview.cxx
 SwFlyFrame *GetFlyFromMarked( const SdrMarkList *pLst, SwViewShell *pSh );
 
+// True when the list is not empty and every marked object is a fly frame that shows a
+// graphic, each with a format of its own. Such a list is the only kind of selection that may
+// hold more than one fly frame.
+// Implementation in fefly1.cxx
+bool IsGraphicFlyMarkList( const SdrMarkList& rList );
+
 // Get the fly frame of the given format that is anchored at the given frame, if there is one.
 SwFlyFrame *FindFlyFrameOfFormat(const SwFrame& rAnchorFrame, const SwFrameFormat& rFormat);
 

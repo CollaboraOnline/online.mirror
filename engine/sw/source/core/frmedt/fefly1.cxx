@@ -18,6 +18,7 @@
  */
 
 #include <hintids.hxx>
+#include <algorithm>
 #include <o3tl/any.hxx>
 #include <svl/itemiter.hxx>
 #include <vcl/imapobj.hxx>
@@ -60,6 +61,7 @@
 #include <swtable.hxx>
 #include <ndgrf.hxx>
 #include <flyfrms.hxx>
+#include <frmtool.hxx>
 #include <fldbas.hxx>
 #include <fmtfld.hxx>
 #include <swundo.hxx>
@@ -338,17 +340,40 @@ SwFlyFrame* SwFEShell::GetSelectedFlyFrame() const
     if ( Imp()->HasDrawView() )
     {
         // A Fly is only accessible if it is selected
-        const SdrMarkList &rMrkList = Imp()->GetDrawView()->GetMarkedObjectList();
-        if( rMrkList.GetMarkCount() != 1 )
-            return nullptr;
-
-        SdrObject *pO = rMrkList.GetMark( 0 )->GetMarkedSdrObj();
-
-        SwVirtFlyDrawObj *pFlyObj = DynCastSwVirtFlyDrawObj(pO);
-
-        return pFlyObj ? pFlyObj->GetFlyFrame() : nullptr;
+        return ::GetFlyFromMarked( &Imp()->GetDrawView()->GetMarkedObjectList(),
+                                   const_cast<SwFEShell*>(this) );
     }
     return nullptr;
+}
+
+std::vector<SwFlyFrame*> SwFEShell::GetSelectedFlyFrames() const
+{
+    std::vector<SwFlyFrame*> aFlyFrames;
+    if ( !Imp()->HasDrawView() )
+        return aFlyFrames;
+
+    const SdrMarkList &rMarkList = Imp()->GetDrawView()->GetMarkedObjectList();
+    const size_t nCount = rMarkList.GetMarkCount();
+    aFlyFrames.reserve( nCount );
+    for ( size_t i = 0; i < nCount; ++i )
+    {
+        SwVirtFlyDrawObj *pFlyObject = DynCastSwVirtFlyDrawObj( rMarkList.GetMark( i )->GetMarkedSdrObj() );
+        if ( !pFlyObject )
+        {
+            aFlyFrames.clear();
+            break;
+        }
+        aFlyFrames.push_back( pFlyObject->GetFlyFrame() );
+    }
+    return aFlyFrames;
+}
+
+bool SwFEShell::IsMultipleFlyFramesSelected() const
+{
+    // The list is only built once the mark count alone cannot answer.
+    if ( !Imp()->HasDrawView() || Imp()->GetDrawView()->GetMarkedObjectList().GetMarkCount() < 2 )
+        return false;
+    return GetSelectedFlyFrames().size() > 1;
 }
 
 // Get current fly in which the cursor is positioned
@@ -1874,30 +1899,56 @@ ObjCntType SwFEShell::GetObjCntType( const Point &rPt, SdrObject *&rpObj ) const
     return eType;
 }
 
+// The content type shared by every object of a mark list, OBJCNT_DONTCARE when they differ.
+static ObjCntType lcl_GetObjCntTypeOfMarkList( const SdrMarkList& rMarkList )
+{
+    ObjCntType eType = OBJCNT_NONE;
+    for( size_t i = 0, nE = rMarkList.GetMarkCount(); i < nE; ++i )
+    {
+        SdrObject* pObject = rMarkList.GetMark( i )->GetMarkedSdrObj();
+        if( !pObject )
+            continue;
+        ObjCntType eTmp = SwFEShell::GetObjCntType( *pObject );
+        if( !i )
+        {
+            eType = eTmp;
+        }
+        else if( eTmp != eType )
+        {
+            eType = OBJCNT_DONTCARE;
+            // once DontCare, always DontCare!
+            break;
+        }
+    }
+    return eType;
+}
+
+bool IsGraphicFlyMarkList( const SdrMarkList& rList )
+{
+    if( lcl_GetObjCntTypeOfMarkList( rList ) != OBJCNT_GRF )
+        return false;
+
+    // A format that is shown on several pages, as a header image is, has one fly frame per
+    // page. Such a list holds a format twice and does not count as a list of distinct images.
+    std::vector<const SwFrameFormat*> aFormats;
+    for( size_t i = 0, nE = rList.GetMarkCount(); i < nE; ++i )
+    {
+        const SwVirtFlyDrawObj* pFlyObject = DynCastSwVirtFlyDrawObj( rList.GetMark( i )->GetMarkedSdrObj() );
+        const SwFrameFormat* pFormat = pFlyObject ? pFlyObject->GetFlyFrame()->GetFormat() : nullptr;
+        if( std::find( aFormats.begin(), aFormats.end(), pFormat ) != aFormats.end() )
+            return false;
+        aFormats.push_back( pFormat );
+    }
+    return true;
+}
+
 ObjCntType SwFEShell::GetObjCntTypeOfSelection() const
 {
     ObjCntType eType = OBJCNT_NONE;
 
     if( Imp()->HasDrawView() )
     {
-        const SdrMarkList &rMrkList = Imp()->GetDrawView()->GetMarkedObjectList();
-        for( size_t i = 0, nE = rMrkList.GetMarkCount(); i < nE; ++i )
-        {
-            SdrObject* pObj = rMrkList.GetMark( i )->GetMarkedSdrObj();
-            if( !pObj )
-                continue;
-            ObjCntType eTmp = GetObjCntType( *pObj );
-            if( !i )
-            {
-                eType = eTmp;
-            }
-            else if( eTmp != eType )
-            {
-                eType = OBJCNT_DONTCARE;
-                // once DontCare, always DontCare!
-                break;
-            }
-        }
+        eType = lcl_GetObjCntTypeOfMarkList( Imp()->GetDrawView()->GetMarkedObjectList() );
     }
     return eType;
 }

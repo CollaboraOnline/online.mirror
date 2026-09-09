@@ -116,7 +116,9 @@ SwFlyFrame *GetFlyFromMarked( const SdrMarkList *pLst, SwViewShell *pSh )
     if ( !pLst )
         pLst = pSh->HasDrawView() ? &pSh->Imp()->GetDrawView()->GetMarkedObjectList():nullptr;
 
-    if ( pLst && pLst->GetMarkCount() == 1 )
+    // A single marked fly frame is the selected fly. When several graphic fly frames are
+    // marked together, the first one stands for the selection.
+    if ( pLst && ( pLst->GetMarkCount() == 1 || ::IsGraphicFlyMarkList( *pLst ) ) )
     {
         SdrObject *pO = pLst->GetMark( 0 )->GetMarkedSdrObj();
         if (SwVirtFlyDrawObj* pVirtO = DynCastSwVirtFlyDrawObj(pO))
