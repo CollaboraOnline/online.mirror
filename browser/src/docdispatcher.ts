@@ -437,6 +437,18 @@ class Dispatcher {
 			focus: () => this.focusTopBar(),
 		};
 
+		const topToolbar = {
+			available: () => {
+				if (app.map.uiManager.getCurrentMode() === 'notebookbar') return false;
+				const bar = document.getElementById('toolbar-up');
+				if (!isVisible(bar)) return false;
+				const focusables = JSDialog.GetFocusableElements(bar);
+				return !!focusables && focusables.length > 0;
+			},
+			hasFocus: () => contains(document.getElementById('toolbar-up')),
+			focus: () => focusFirstIn(document.getElementById('toolbar-up')),
+		};
+
 		const formulaBarRow = () => document.getElementById('formulabar-row');
 
 		const formulaBarWidgets = () => {
@@ -556,6 +568,7 @@ class Dispatcher {
 		};
 
 		const regions = [topBar];
+		regions.push(topToolbar);
 		if (docType === 'spreadsheet') {
 			regions.push(formulaBar);
 			regions.push(formulaBarToolbar);
