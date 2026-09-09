@@ -709,7 +709,14 @@ window.L.Control.NotebookbarImpress = window.L.Control.NotebookbarWriter.extend(
 				'text': _UNO('.uno:Sidebar'),
 				'command': '.uno:SidebarDeck.PropertyDeck',
 				'accessibility': { focusBack: true, combination: 'SD', de: null }
-			}
+			},
+			{
+				'id': 'view-shapes-deck',
+				'type': 'bigtoolitem',
+				'text': _UNO('.uno:SidebarDeck.ShapesDeck', 'presentation'),
+				'command': '.uno:SidebarDeck.ShapesDeck',
+				'accessibility': { focusBack: true, combination: 'SH', de: null }
+			},
 		];
 
 		return this.getTabPage('View', content);

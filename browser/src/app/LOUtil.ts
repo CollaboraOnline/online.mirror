@@ -349,6 +349,7 @@ class LOUtil {
 			// lc_closemobile.svg is generated when loading in NB mode then
 			// switch to compact mode: 1st hidden element in the top toolbar
 			closemobile: 'closedocmobile',
+			'sidebardeck.shapesdeck': 'basicshapes',
 			'file-saveas': 'saveas',
 			'home-search': 'recsearch',
 			searchdialog3finitialfocusreplace3abool3dtrue: 'searchreplace',

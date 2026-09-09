@@ -585,6 +585,7 @@ var unoCommandsArray = {
 	'Sidebar':{global:{menu:_('Sidebar'),},},
 	'SidebarDeck.A11yCheckDeck':{text:{menu:_('Open the Accessibility Check Deck'),},},
 	'SidebarDeck.ElementsDeck':{global:{menu:_('Open the Elements Deck'),},},
+	'SidebarDeck.ShapesDeck':{presentation:{menu:_('Open the Shapes Deck'),},},
 	'SidebarDeck.StyleListDeck':{global:{menu:_('Open the Styles Deck'),},},
 	'Signature':{global:{menu:_('Digital Signatu~res...'),},},
 	'SlideChangeWindow':{presentation:{menu:_('Slide Transition'),},},
