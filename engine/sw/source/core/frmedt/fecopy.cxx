@@ -128,51 +128,56 @@ void SwFEShell::Copy( SwDoc& rClpDoc, const OUString* pNewClpText, bool bDeleteR
     // do we want to copy a FlyFrame?
     if( IsFrameSelected() )
     {
-        // get the FlyFormat
-        SwFlyFrame* pFly = GetSelectedFlyFrame();
-        SwFrameFormat* pFlyFormat = pFly->GetFormat();
-        SwFormatAnchor aAnchor( pFlyFormat->GetAnchor() );
-
-        if ((RndStdIds::FLY_AT_PARA == aAnchor.GetAnchorId()) ||
-            (RndStdIds::FLY_AT_CHAR == aAnchor.GetAnchorId()) ||
-            (RndStdIds::FLY_AT_FLY  == aAnchor.GetAnchorId()) ||
-            (RndStdIds::FLY_AS_CHAR == aAnchor.GetAnchorId()))
+        // Every selected fly frame goes into the clipboard document, anchored at its first
+        // paragraph. The first one copied is the "RootFormat" of the clipboard document.
+        bool bFirstFly = true;
+        for( SwFlyFrame* pFly : GetSelectedFlyFrames() )
         {
-            SwPosition aPos( aSttIdx );
+            SwFrameFormat* pFlyFormat = pFly->GetFormat();
+            SwFormatAnchor aAnchor( pFlyFormat->GetAnchor() );
+
+            if ((RndStdIds::FLY_AT_PARA == aAnchor.GetAnchorId()) ||
+                (RndStdIds::FLY_AT_CHAR == aAnchor.GetAnchorId()) ||
+                (RndStdIds::FLY_AT_FLY  == aAnchor.GetAnchorId()) ||
+                (RndStdIds::FLY_AS_CHAR == aAnchor.GetAnchorId()))
+            {
+                SwPosition aPos( aSttIdx );
+                if ( RndStdIds::FLY_AS_CHAR == aAnchor.GetAnchorId() )
+                {
+                    aPos.SetContent( 0 );
+                }
+                aAnchor.SetAnchor( &aPos );
+            }
+            pFlyFormat = rClpDoc.getIDocumentLayoutAccess().CopyLayoutFormat( *pFlyFormat, aAnchor, true, true );
+
+            // assure the "RootFormat" is the first element in Spz-Array
+            // (if necessary Flys were copied in Flys)
+            sw::SpzFrameFormats& rSpzFrameFormats = *rClpDoc.GetSpzFrameFormats();
+            if( bFirstFly && rSpzFrameFormats[ 0 ] != pFlyFormat )
+            {
+#ifndef NDEBUG
+                bool inserted =
+#endif
+                rSpzFrameFormats.newDefault(static_cast<sw::SpzFrameFormat*>(pFlyFormat));
+                assert( !inserted && "Fly not contained in Spz-Array" );
+            }
+            bFirstFly = false;
+
             if ( RndStdIds::FLY_AS_CHAR == aAnchor.GetAnchorId() )
             {
-                aPos.SetContent( 0 );
-            }
-            aAnchor.SetAnchor( &aPos );
-        }
-        pFlyFormat = rClpDoc.getIDocumentLayoutAccess().CopyLayoutFormat( *pFlyFormat, aAnchor, true, true );
-
-        // assure the "RootFormat" is the first element in Spz-Array
-        // (if necessary Flys were copied in Flys)
-        sw::SpzFrameFormats& rSpzFrameFormats = *rClpDoc.GetSpzFrameFormats();
-        if( rSpzFrameFormats[ 0 ] != pFlyFormat )
-        {
-#ifndef NDEBUG
-            bool inserted =
-#endif
-            rSpzFrameFormats.newDefault(static_cast<sw::SpzFrameFormat*>(pFlyFormat));
-            assert( !inserted && "Fly not contained in Spz-Array" );
-        }
-
-        if ( RndStdIds::FLY_AS_CHAR == aAnchor.GetAnchorId() )
-        {
-            // JP 13.02.99  Bug 61863: if a frameselection is passed to the
-            //              clipboard, it should be found at pasting. Therefore
-            //              the copied TextAttribute should be removed in the node
-            //              otherwise it will be recognised as TextSelection
-            const SwPosition& rPos = *pFlyFormat->GetAnchor().GetContentAnchor();
-            SwTextFlyCnt *const pTextFly = static_cast<SwTextFlyCnt *>(
-                pTextNd->GetTextAttrForCharAt(
-                    rPos.GetContentIndex(), RES_TXTATR_FLYCNT));
-            if( pTextFly )
-            {
-                const_cast<SwFormatFlyCnt&>(pTextFly->GetFlyCnt()).SetFlyFormat();
-                pTextNd->EraseText( rPos, 1 );
+                // JP 13.02.99  Bug 61863: if a frameselection is passed to the
+                //              clipboard, it should be found at pasting. Therefore
+                //              the copied TextAttribute should be removed in the node
+                //              otherwise it will be recognised as TextSelection
+                const SwPosition& rPos = *pFlyFormat->GetAnchor().GetContentAnchor();
+                SwTextFlyCnt *const pTextFly = static_cast<SwTextFlyCnt *>(
+                    pTextNd->GetTextAttrForCharAt(
+                        rPos.GetContentIndex(), RES_TXTATR_FLYCNT));
+                if( pTextFly )
+                {
+                    const_cast<SwFormatFlyCnt&>(pTextFly->GetFlyCnt()).SetFlyFormat();
+                    pTextNd->EraseText( rPos, 1 );
+                }
             }
         }
     }

@@ -50,6 +50,7 @@
 #include <pagedesc.hxx>
 #include <pagefrm.hxx>
 #include <rootfrm.hxx>
+#include <swdtflvr.hxx>
 #include <PostItMgr.hxx>
 #include <translatehelper.hxx>
 #include <view.hxx>
@@ -1338,6 +1339,32 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testTransformSeveralSelectedImages)
     pWrtShell->Undo();
     CPPUNIT_ASSERT_EQUAL(aOldFirst.Left(), aFlyFrames[0]->getFrameArea().Left());
     CPPUNIT_ASSERT_EQUAL(aOldSecond.Left(), aFlyFrames[1]->getFrameArea().Left());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testCopySeveralSelectedImages)
+{
+    // Copying a selection of two images and pasting it adds two more images to the document.
+    createSwDoc("two-images.fodt");
+    SwDoc* pDoc = getSwDoc();
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    SdrPage* pPage = pDoc->getIDocumentDrawModelAccess().GetDrawModel()->GetPage(0);
+    SdrView* pView = pWrtShell->GetDrawView();
+    pView->MarkObj(pPage->GetObj(0), pView->GetSdrPageView());
+    pView->MarkObj(pPage->GetObj(1), pView->GetSdrPageView());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), pWrtShell->GetSelectedFlyFrames().size());
+
+    rtl::Reference<SwTransferable> xTransfer = new SwTransferable(*pWrtShell);
+    xTransfer->Copy();
+
+    // Paste into the text behind the anchor paragraph, with no image selected.
+    pWrtShell->UnSelectFrame();
+    pWrtShell->LeaveSelFrameMode();
+    pWrtShell->EndOfSection();
+    TransferableDataHelper aHelper(xTransfer);
+    SwTransferable::Paste(*pWrtShell, aHelper);
+
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(4), pDoc->GetSpzFrameFormats()->size());
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(4), pPage->GetObjCount());
 }
 
 } // end of anonymous namespace
