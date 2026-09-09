@@ -41,6 +41,7 @@
 #include <docufld.hxx>
 #include <drawdoc.hxx>
 #include <edtwin.hxx>
+#include <flyfrm.hxx>
 #include <fmtfsize.hxx>
 #include <frameformats.hxx>
 #include <i18nutil/paper.hxx>
@@ -1283,6 +1284,60 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testDeleteSeveralSelectedImages)
 
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), pPage->GetObjCount());
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), pDoc->GetSpzFrameFormats()->size());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testTransformSeveralSelectedImages)
+{
+    // A position sent for a selection of two images moves both by the same distance, and a
+    // width sent for it scales both.
+    createSwDoc("two-images.fodt");
+    SwDoc* pDoc = getSwDoc();
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    SdrPage* pPage = pDoc->getIDocumentDrawModelAccess().GetDrawModel()->GetPage(0);
+    SdrView* pView = pWrtShell->GetDrawView();
+    pView->MarkObj(pPage->GetObj(0), pView->GetSdrPageView());
+    pView->MarkObj(pPage->GetObj(1), pView->GetSdrPageView());
+    // The frame shell handles the transform command. The view switches to it on a timer
+    // after a selection change, so do that switch here.
+    pWrtShell->GetView().SelectShell();
+
+    std::vector<SwFlyFrame*> aFlyFrames = pWrtShell->GetSelectedFlyFrames();
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(2), aFlyFrames.size());
+    const SwRect aOldFirst(aFlyFrames[0]->getFrameArea());
+    const SwRect aOldSecond(aFlyFrames[1]->getFrameArea());
+    const tools::Rectangle aOldUnion(pView->GetMarkedObjRect());
+
+    // The requested position is the new top left corner of the whole selection.
+    const tools::Long nDeltaX = 500;
+    const tools::Long nDeltaY = 300;
+    dispatchCommand(mxComponent, u".uno:TransformDialog"_ustr,
+                    { comphelper::makePropertyValue(u"TransformPosX"_ustr,
+                                                    sal_Int32(aOldUnion.Left() + nDeltaX)),
+                      comphelper::makePropertyValue(u"TransformPosY"_ustr,
+                                                    sal_Int32(aOldUnion.Top() + nDeltaY)) });
+
+    CPPUNIT_ASSERT_EQUAL(aOldFirst.Left() + nDeltaX, aFlyFrames[0]->getFrameArea().Left());
+    CPPUNIT_ASSERT_EQUAL(aOldFirst.Top() + nDeltaY, aFlyFrames[0]->getFrameArea().Top());
+    CPPUNIT_ASSERT_EQUAL(aOldSecond.Left() + nDeltaX, aFlyFrames[1]->getFrameArea().Left());
+    CPPUNIT_ASSERT_EQUAL(aOldSecond.Top() + nDeltaY, aFlyFrames[1]->getFrameArea().Top());
+
+    // Doubling the width of the whole selection doubles the width of each image.
+    const tools::Rectangle aMovedUnion(pView->GetMarkedObjRect());
+    dispatchCommand(mxComponent, u".uno:TransformDialog"_ustr,
+                    { comphelper::makePropertyValue(u"TransformWidth"_ustr,
+                                                    sal_uInt32(aMovedUnion.GetWidth() * 2)) });
+
+    // The scaled width may be one twip off after the fraction is applied.
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOldFirst.Width() * 2.0, aFlyFrames[0]->getFrameArea().Width(), 1.0);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOldSecond.Width() * 2.0, aFlyFrames[1]->getFrameArea().Width(), 1.0);
+    CPPUNIT_ASSERT_EQUAL(aOldFirst.Height(), aFlyFrames[0]->getFrameArea().Height());
+
+    // One undo step takes the resize back, a second one the move.
+    pWrtShell->Undo();
+    CPPUNIT_ASSERT_EQUAL(aOldFirst.Width(), aFlyFrames[0]->getFrameArea().Width());
+    pWrtShell->Undo();
+    CPPUNIT_ASSERT_EQUAL(aOldFirst.Left(), aFlyFrames[0]->getFrameArea().Left());
+    CPPUNIT_ASSERT_EQUAL(aOldSecond.Left(), aFlyFrames[1]->getFrameArea().Left());
 }
 
 } // end of anonymous namespace

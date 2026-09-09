@@ -42,6 +42,7 @@
 #include <sal/log.hxx>
 
 #include <doc.hxx>
+#include <IDocumentUndoRedo.hxx>
 #include <drawdoc.hxx>
 #include <IDocumentSettingAccess.hxx>
 #include <IDocumentDrawModelAccess.hxx>
@@ -154,6 +155,28 @@ static void lcl_UpdateSizePercent(SwWrtShell& rSh, SwFlyFrameAttrMgr& rMgr, cons
         aFrameSize.SetHeightPercent(sal_uInt8(std::clamp(fPercent, 1.0, 254.0)));
     }
     rMgr.GetAttrSet().Put(aFrameSize);
+}
+
+// Moves and resizes every selected fly frame together through the draw view, the way a set of
+// shapes is moved and resized. The requested position and size describe the rectangle around
+// the whole selection. The draw view's protection against moving or resizing holds. A request
+// that carries a rotation is left alone, as a set of images cannot be rotated.
+static void lcl_TransformSelectedFlyFrames(SwWrtShell& rSh, const SfxItemSet* pArgs)
+{
+    if (!pArgs || pArgs->HasItem(SID_ATTR_TRANSFORM_ANGLE)
+        || pArgs->HasItem(SID_ATTR_TRANSFORM_DELTA_ANGLE))
+        return;
+
+    // Moving a fly frame switches drawing layer undo off, so it goes back to what it was.
+    IDocumentUndoRedo& rUndoRedo = rSh.GetDoc()->GetIDocumentUndoRedo();
+    const bool bDrawUndo = rUndoRedo.DoesDrawUndo();
+    rSh.StartAllAction();
+    rSh.StartUndo();
+    rSh.GetDrawView()->SetGeoAttrToMarked(*pArgs);
+    rSh.EndUndo();
+    rSh.EndAllAction();
+    rUndoRedo.DoDrawUndo(bDrawUndo);
+    rSh.SetModified();
 }
 
 void SwFrameShell::Execute(SfxRequest &rReq)
@@ -401,6 +424,13 @@ void SwFrameShell::Execute(SfxRequest &rReq)
 
         case SID_ATTR_TRANSFORM:
         {
+            if (rSh.IsMultipleFlyFramesSelected())
+            {
+                lcl_TransformSelectedFlyFrames(rSh, pArgs);
+                bUpdateMgr = false;
+                break;
+            }
+
             bool bApplyNewPos = false;
             bool bApplyNewSize = false;
 

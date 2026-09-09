@@ -1359,11 +1359,17 @@ void SwEditWin::ChangeDrawing( sal_uInt8 nDir )
                 bool bDummy1, bDummy2;
                 const bool bVertAnchor = rSh.IsFrameVertical( true, bDummy1, bDummy2 );
                 bool bHoriMove = !bVertAnchor == !( nDir % 2 );
-                bool bMoveAllowed =
-                    !bHoriMove || (rSh.GetAnchorId() != RndStdIds::FLY_AS_CHAR);
+                // The draw view also refuses the move when the selection holds an object
+                // anchored as character beside other objects.
+                bool bMoveAllowed = pSdrView->IsMoveAllowed() &&
+                    (!bHoriMove || (rSh.GetAnchorId() != RndStdIds::FLY_AS_CHAR));
                 if ( bMoveAllowed )
                 {
+                    // Moving a fly frame switches drawing layer undo off, so it goes back to
+                    // what it was.
+                    const bool bDrawUndo = rSh.GetDoc()->GetIDocumentUndoRedo().DoesDrawUndo();
                     pSdrView->MoveAllMarked(Size(nX, nY));
+                    rSh.GetDoc()->GetIDocumentUndoRedo().DoDrawUndo(bDrawUndo);
                     rSh.SetModified();
                 }
             }
@@ -2908,7 +2914,9 @@ KEYINPUT_CHECKTABLE_INSDEL:
             {
                 SdrView *pSdrView = rSh.GetDrawView();
                 const SdrHdlList& rHdlList = pSdrView->GetHdlList();
-                if(rHdlList.GetFocusHdl())
+                // Several selected fly frames move together through the draw view, the way
+                // draw objects do.
+                if(rHdlList.GetFocusHdl() || rSh.IsMultipleFlyFramesSelected())
                     ChangeDrawing( nDir );
                 else
                     ChangeFly( nDir, dynamic_cast<const SwWebView*>( &m_rView) !=  nullptr );
