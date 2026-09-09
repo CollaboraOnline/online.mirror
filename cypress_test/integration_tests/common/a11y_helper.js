@@ -839,7 +839,27 @@ function getAXNodes() {
 /// against. DOM.getDocument returns the runner's document, and the cool one is
 /// two frames down from it. Document nodes carry documentURL, not frameId --
 /// that sits on the IFRAME element above them.
+let coolDocumentNode = null;
+
+/// DOM.getDocument walks the whole tree with pierce, which is far too much to
+/// pay once per widget: the id stays valid while the frame does, so keep it.
+let axEnabled = false;
+
+/// Enabling the domain makes Chrome compute the page's whole accessibility
+/// tree, so it is paid once and not per widget.
+function enableAX() {
+	if (axEnabled) return cy.wrap(null, { log: false });
+
+	return cy.then(function () {
+		return cdp('Accessibility.enable');
+	}).then(function () {
+		axEnabled = true;
+	});
+}
+
 function coolDocumentNodeId() {
+	if (coolDocumentNode !== null) return cy.wrap(coolDocumentNode, { log: false });
+
 	return cy.then(function () {
 		return cdp('DOM.enable');
 	}).then(function () {
@@ -858,19 +878,33 @@ function coolDocumentNodeId() {
 
 		expect(found, 'the cool.html document node in the DOM tree')
 			.to.not.equal(null);
+		coolDocumentNode = found;
 		return found;
 	});
 }
 
 /// The accessibility subtree of one container, so an assertion names the
 /// surface it actually read.
-function getAXNodesWithin(selector) {
+function queryCoolDocument(selector) {
 	return coolDocumentNodeId().then(function (documentNodeId) {
-		return cdp('DOM.querySelector', {
-			nodeId: documentNodeId,
-			selector: selector,
-		});
+		return cdp('DOM.querySelector', { nodeId: documentNodeId, selector: selector });
 	}).then(function (res) {
+		if (res.nodeId !== 0) return res;
+
+		// The kept node id belongs to the document that was loaded when it was
+		// resolved, so a reload leaves it pointing at nothing: drop it and ask
+		// again rather than making every caller remember.
+		coolDocumentNode = null;
+		axEnabled = false;
+
+		return coolDocumentNodeId().then(function (documentNodeId) {
+			return cdp('DOM.querySelector', { nodeId: documentNodeId, selector: selector });
+		});
+	});
+}
+
+function getAXNodesWithin(selector) {
+	return queryCoolDocument(selector).then(function (res) {
 		expect(res.nodeId, 'a node matching ' + selector).to.not.equal(0);
 
 		return cdp('Accessibility.enable').then(function () {
@@ -1045,17 +1079,64 @@ function relativeLuminance(color) {
 	return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
 }
 
-/// The colour actually behind an element: a transparent background shows the
-/// nearest painted ancestor, and that is the colour a contrast check compares.
-function effectiveBackground(win, element) {
-	for (let node = element; node; node = node.parentElement) {
-		const color = win.getComputedStyle(node).backgroundColor;
-		const parts = String(color).match(/[\d.]+/g);
+function channels(color) {
+	const parts = String(color).match(/[\d.]+/g);
 
-		if (parts && (parts.length < 4 || parseFloat(parts[3]) > 0)) return color;
+	// A plain throw, not an assertion: this runs once per ancestor of every
+	// widget swept, and each chai assertion is one more entry in cypress's
+	// command log, which a hook never releases.
+	if (parts === null) throw new Error('a color with channels in ' + color);
+
+	const values = parts.slice(0, 3).map(parseFloat);
+	return values.concat(parts.length > 3 ? parseFloat(parts[3]) : 1);
+}
+
+function over(top, bottom) {
+	const alpha = top[3];
+	const mixed = [0, 1, 2].map(function (i) {
+		return top[i] * alpha + bottom[i] * (1 - alpha);
+	});
+
+	return mixed.concat(Math.min(1, alpha + bottom[3] * (1 - alpha)));
+}
+
+function rgb(color) {
+	return 'rgb(' + color.slice(0, 3).map(Math.round).join(', ') + ')';
+}
+
+/// The colour actually behind an element: a transparent background shows what
+/// is behind it, a translucent one mixes with it, and the result of stacking
+/// them is the colour a contrast check compares.
+function effectiveBackground(win, element) {
+	let seat = null;
+
+	for (let node = element; node; node = node.parentElement) {
+		const color = channels(win.getComputedStyle(node).backgroundColor);
+
+		if (color[3] === 0) continue;
+
+		seat = seat === null ? color : over(seat, color);
+		if (seat[3] >= 1) return rgb(seat);
 	}
 
-	expect.fail('nothing paints a background behind ' + element.tagName);
+	throw new Error('nothing paints a background behind ' + element.tagName);
+}
+
+/// The colour an element's text is drawn in, which is not its computed color
+/// when an ancestor is translucent: opacity dims the text towards whatever it
+/// sits on, and that mix is what a reader has to make out.
+function renderedTextColor(win, element) {
+	const seat = channels(effectiveBackground(win, element));
+	let opacity = 1;
+
+	for (let node = element; node; node = node.parentElement) {
+		opacity *= parseFloat(win.getComputedStyle(node).opacity);
+	}
+
+	const color = channels(win.getComputedStyle(element).color);
+	color[3] *= opacity;
+
+	return rgb(over(color, seat));
 }
 
 /// The contrast ratio WCAG's 3:1 and 4.5:1 are written against. Opaque colors.
@@ -1080,3 +1161,4 @@ module.exports.describeFocusable = describeFocusable;
 module.exports.openSidebarPropertyDeck = openSidebarPropertyDeck;
 module.exports.sidebarKeyboard = sidebarKeyboard;
 module.exports.assertDropdownButtonNamesItsList = assertDropdownButtonNamesItsList;
+module.exports.renderedTextColor = renderedTextColor;
