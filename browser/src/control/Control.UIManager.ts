@@ -455,14 +455,22 @@ class UIManager extends window.L.Control {
 			this.loadDarkMode();
 		else
 			this.loadLightMode();
-		this.activateDarkModeInCore(dark);
+
+		// The engine has no document to apply the theme to until the load
+		// finishes, and a command that arrives earlier is answered with an error,
+		// so the push waits for the document and the interface follows at once.
+		const hasDocument = this.map._docLoaded;
+		if (hasDocument)
+			this.activateDarkModeInCore(dark);
+		else
+			this.map.on('docloaded', this.pushThemeOnDocumentLoad, this);
 
 		// On the desktop the native app owns the saved dark-mode setting
 		// (persists it and broadcasts it to the other windows).
 		if (persist && window.mode.isCODesktop())
 			window.postMobileMessage('SETDARKMODE ' + dark);
 
-		this.applyInvert();
+		this.applyInvert(!hasDocument);
 		this.setCanvasColorAfterModeChange();
 		this.refreshUIAfterThemeChange();
 	}
