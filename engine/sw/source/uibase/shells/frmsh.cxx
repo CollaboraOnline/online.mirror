@@ -165,6 +165,14 @@ void SwFrameShell::Execute(SfxRequest &rReq)
     const SfxPoolItem* pItem;
     sal_uInt16 nSlot = rReq.GetSlot();
 
+    // Only the transform slot acts on several selected fly frames at once. The other frame
+    // commands are written for a single fly frame, so with several selected they do nothing.
+    if (rSh.IsMultipleFlyFramesSelected() && nSlot != SID_ATTR_TRANSFORM)
+    {
+        rReq.Ignore();
+        return;
+    }
+
     switch ( nSlot )
     {
         case FN_FRAME_TO_ANCHOR:
@@ -797,6 +805,13 @@ void SwFrameShell::GetState(SfxItemSet& rSet)
     bool bHtmlMode = 0 != ::GetHtmlMode(rSh.GetView().GetDocShell());
     if (!rSh.IsFrameSelected())
         return;
+
+    // The frame commands act on one fly frame, so with several selected they are all disabled.
+    if (rSh.IsMultipleFlyFramesSelected())
+    {
+        StateDisableItems(rSet);
+        return;
+    }
 
     SfxItemSetFixed<
             RES_LR_SPACE, RES_UL_SPACE,

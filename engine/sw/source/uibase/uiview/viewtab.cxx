@@ -229,6 +229,9 @@ static void ResizeFrameCols(SwFormatCol& rCol,
 void SwView::ExecTabWin( SfxRequest const & rReq )
 {
     SwWrtShell &rSh         = GetWrtShell();
+    // The ruler reads and writes one fly frame, so with several selected it changes nothing.
+    if (rSh.IsMultipleFlyFramesSelected())
+        return;
     const FrameTypeFlags nFrameType   = rSh.GetSelectedObjCount() ?
                                     FrameTypeFlags::DRAWOBJ :
                                         rSh.GetFrameType(nullptr,true);

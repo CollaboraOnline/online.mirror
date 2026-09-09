@@ -113,6 +113,14 @@ void SwGrfShell::Execute(SfxRequest &rReq)
 {
     SwWrtShell &rSh = GetShell();
 
+    // The graphic commands act on one image. With several images selected every state is
+    // disabled and every request is ignored.
+    if (rSh.IsMultipleFlyFramesSelected())
+    {
+        rReq.Ignore();
+        return;
+    }
+
     sal_uInt16 nSlot = rReq.GetSlot();
     switch(nSlot)
     {
@@ -591,6 +599,9 @@ void SwGrfShell::Execute(SfxRequest &rReq)
 
 void SwGrfShell::ExecAttr( SfxRequest const &rReq )
 {
+    if (GetShell().IsMultipleFlyFramesSelected())
+        return;
+
     GraphicType nGrfType = GraphicType::NONE;
     if (CNT_GRF == GetShell().GetCntType())
         nGrfType = GetShell().GetGraphicType();
@@ -776,6 +787,12 @@ namespace
 void SwGrfShell::GetAttrState(SfxItemSet &rSet)
 {
     SwWrtShell &rSh = GetShell();
+    if (rSh.IsMultipleFlyFramesSelected())
+    {
+        StateDisableItems(rSet);
+        return;
+    }
+
     SfxItemSet aCoreSet( GetPool(), aNoTextNodeSetRange );
     rSh.GetCurAttr( aCoreSet );
     bool bParentCntProt = FlyProtectFlags::NONE != rSh.IsSelObjProtected( FlyProtectFlags::Content|FlyProtectFlags::Parent );
@@ -994,6 +1011,9 @@ void SwGrfShell::GetAttrState(SfxItemSet &rSet)
 
 void SwGrfShell::ExecuteRotation(SfxRequest const &rReq)
 {
+    if (GetShell().IsMultipleFlyFramesSelected())
+        return;
+
     // RotGrfFlyFrame: Modify rotation attribute instead of manipulating the graphic
     Degree10 aRotation;
 
@@ -1035,6 +1055,12 @@ void SwGrfShell::ExecuteRotation(SfxRequest const &rReq)
 void SwGrfShell::GetAttrStateForRotation(SfxItemSet &rSet)
 {
     SwWrtShell& rShell = GetShell();
+    if (rShell.IsMultipleFlyFramesSelected())
+    {
+        StateDisableItems(rSet);
+        return;
+    }
+
     bool bIsParentContentProtected = FlyProtectFlags::NONE != rShell.IsSelObjProtected( FlyProtectFlags::Content|FlyProtectFlags::Parent );
 
     SetGetStateSet( &rSet );

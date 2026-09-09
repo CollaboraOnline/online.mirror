@@ -3371,8 +3371,10 @@ void SwEditWin::MouseButtonDown(const MouseEvent& _rMEvt)
                             rSh.EnterSelFrameMode( &aDocPos );
                             if ( !m_pApplyTempl )
                             {
-                                // only if no position to size was hit.
-                                if (!bHitHandle)
+                                // only if no position to size was hit. Several selected fly
+                                // frames move by the frame drag alone, as the drag and drop
+                                // copy handles one fly frame.
+                                if (!bHitHandle && !rSh.IsMultipleFlyFramesSelected())
                                 {
                                     StartDDTimer();
                                     s_aDDStartPos = aDocPos;

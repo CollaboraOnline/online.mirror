@@ -89,9 +89,12 @@ void SwEditWin::StartDrag( sal_Int8 /*nAction*/, const Point& rPosPixel )
     if (!bInSelect && rSh.TestCurrPam(aDocPos, true))
         //We are not selecting and aren't at a selection
         bStartDragging = true;
+    // Several selected fly frames move by the frame drag alone, as the drag and drop copy
+    // handles one fly frame.
     else if ( !g_bFrameDrag && rSh.IsSelFrameMode() &&
                 rSh.IsInsideSelectedObj( aDocPos ) &&
-                nullptr == m_pAnchorMarker)
+                nullptr == m_pAnchorMarker &&
+                !rSh.IsMultipleFlyFramesSelected() )
     {
         //We are not dragging internally and are not at an
         //object (frame, draw object)

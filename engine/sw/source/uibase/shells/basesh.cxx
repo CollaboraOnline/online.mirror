@@ -1478,6 +1478,10 @@ void SwBaseShell::Execute(SfxRequest &rReq)
         case FN_TOOL_ANCHOR_AT_CHAR:
         case FN_TOOL_ANCHOR_FRAME:
         {
+            // The anchor change below is written for one fly frame.
+            if (rSh.IsMultipleFlyFramesSelected())
+                break;
+
             RndStdIds eSet = nSlot == FN_TOOL_ANCHOR_PAGE
                                 ? RndStdIds::FLY_AT_PAGE
                                 : nSlot == FN_TOOL_ANCHOR_PARAGRAPH
@@ -2049,7 +2053,9 @@ void SwBaseShell::GetState( SfxItemSet &rSet )
                 bool bObj = 0 != rSh.GetSelectedObjCount();
                 bool bParentCntProt = rSh.IsSelObjProtected( FlyProtectFlags::Content|FlyProtectFlags::Parent ) != FlyProtectFlags::NONE;
 
-                if( !bParentCntProt && (bObj || rSh.IsFrameSelected()))
+                // The attributes below are read from and written to one fly frame.
+                if( !bParentCntProt && !rSh.IsMultipleFlyFramesSelected() &&
+                    (bObj || rSh.IsFrameSelected()))
                 {
                     SfxItemSet aSet(SfxItemSet::makeFixedSfxItemSet<RES_ANCHOR, RES_ANCHOR>(GetPool()));
                     if(bObj)
@@ -2100,7 +2106,9 @@ void SwBaseShell::GetState( SfxItemSet &rSet )
                 bool bObj = 0 != rSh.GetSelectedObjCount();
                 bool bParentCntProt = rSh.IsSelObjProtected( FlyProtectFlags::Content|FlyProtectFlags::Parent ) != FlyProtectFlags::NONE;
 
-                if( !bParentCntProt && (bObj || rSh.IsFrameSelected()))
+                // The attributes below are read from and written to one fly frame.
+                if( !bParentCntProt && !rSh.IsMultipleFlyFramesSelected() &&
+                    (bObj || rSh.IsFrameSelected()))
                 {
                     SfxItemSet aSet(SfxItemSet::makeFixedSfxItemSet<RES_OPAQUE, RES_ANCHOR>(GetPool()));
                     RndStdIds nAnchorType;
@@ -2336,6 +2344,10 @@ void SwBaseShell::SetWrapMode( sal_uInt16 nSlot )
     SwWrtShell &rSh = GetShell();
     bool bObj = 0 != rSh.GetSelectedObjCount();
     if( !bObj && !rSh.IsFrameSelected())
+        return;
+
+    // The wrap mode below is read from and written to one fly frame.
+    if( rSh.IsMultipleFlyFramesSelected() )
         return;
 
     SfxItemSet aSet(SfxItemSet::makeFixedSfxItemSet<RES_OPAQUE, RES_SURROUND>(GetPool()));
