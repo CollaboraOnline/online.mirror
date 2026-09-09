@@ -128,6 +128,12 @@ class StatusBar extends JSDialog.Toolbar {
 		}
 	}
 
+	// The button shows the bare number; on its own that is what a screen
+	// reader announces.
+	_zoomAriaLabel(zoomPercent) {
+		return { label: _('Zoom') + ': ' + zoomPercent + '%' };
+	}
+
 	onZoomEnd() {
 		var zoomPercent = this.map.getZoomPercent();
 		var zoomSelected = 'zoom' + zoomPercent;
@@ -137,6 +143,7 @@ class StatusBar extends JSDialog.Toolbar {
 				id: 'zoom',
 				type: 'menubutton',
 				text: '' + zoomPercent,
+				aria: this._zoomAriaLabel(zoomPercent),
 				selected: zoomSelected,
 				menu: this._generateZoomItems(),
 				image: false
@@ -257,7 +264,7 @@ class StatusBar extends JSDialog.Toolbar {
 			{type: 'customtoolitem',  id: 'fitwidthzoom', command: 'fitwidthzoom', text: _('Zoom to Fit Page Width'), icon: 'pagewidth.svg', dataPriority: 8, visible: false},
 			{type: 'customtoolitem',  id: 'zoomreset', command: 'zoomreset', text: _('Reset zoom'), icon: 'zoomreset.svg', dataPriority: 8},
 			{type: 'customtoolitem',  id: 'zoomout', command: 'zoomout', text: _UNO('.uno:ZoomMinus'), icon: 'minus.svg'},
-			{type: 'menubutton', id: 'zoom', text: '100', selected: 'zoom100', menu: this._generateZoomItems(), image: false},
+			{type: 'menubutton', id: 'zoom', text: '100', aria: this._zoomAriaLabel('100'), selected: 'zoom100', menu: this._generateZoomItems(), image: false},
 			{type: 'customtoolitem',  id: 'zoomin', command: 'zoomin', text: _UNO('.uno:ZoomPlus'), icon: 'plus.svg'}
 		]);
 	}
