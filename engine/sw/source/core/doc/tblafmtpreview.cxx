@@ -17,6 +17,9 @@
 #include <editeng/colritem.hxx>
 #include <svx/sdr/table/TableStylePreviewPaint.hxx>
 #include <tools/color.hxx>
+#include <map>
+#include <docmodel/theme/ColorSet.hxx>
+#include <ThemeColorChanger.hxx>
 
 namespace sw
 {
@@ -34,15 +37,41 @@ sal_uInt8 GetPreviewCellPos(sal_Int32 nRow, sal_Int32 nCol, const SwTableStyleSe
 }
 
 OString CreateTableStylePreviewDataUri(const SwTableAutoFormat& rStyle,
-                                       const SwTableStyleSettings& rSettings, bool bIsPageDark)
+                                       const SwTableStyleSettings& rSettings, bool bIsPageDark,
+                                       const model::ColorSet* pThemeColors)
 {
+    // A theme color the style gives is shown with the document theme's value for it. The box
+    // items with resolved line colors live here, one per role position, for the paint call.
+    std::map<sal_uInt8, SvxBoxItem> aResolvedBoxes;
     const Bitmap aBitmap = sdr::table::PaintTableStylePreview(
-        [&rStyle, &rSettings](sal_Int32 nRow, sal_Int32 nCol) -> sdr::table::TableStylePreviewCell
+        [&rStyle, &rSettings, pThemeColors, &aResolvedBoxes](
+            sal_Int32 nRow, sal_Int32 nCol) -> sdr::table::TableStylePreviewCell
         {
-            const SwAutoFormatProps& rProps
-                = rStyle.GetBoxFormat(GetPreviewCellPos(nRow, nCol, rSettings)).GetProps();
-            return { rProps.GetBackground().GetColor(), rProps.GetColor().GetValue(),
-                     &rProps.GetBox() };
+            const sal_uInt8 nPos = GetPreviewCellPos(nRow, nCol, rSettings);
+            const SwAutoFormatProps& rProps = rStyle.GetBoxFormat(nPos).GetProps();
+            sdr::table::TableStylePreviewCell aCell{ rProps.GetBackground().GetColor(),
+                                                     rProps.GetColor().GetValue(),
+                                                     &rProps.GetBox() };
+            if (!pThemeColors)
+                return aCell;
+
+            const model::ComplexColor& rFill = rProps.GetBackground().getComplexColor();
+            if (rFill.isValidThemeType())
+                aCell.aBackColor = pThemeColors->resolveColor(rFill);
+            const model::ComplexColor& rText = rProps.GetColor().getComplexColor();
+            if (rText.isValidThemeType())
+                aCell.aTextColor = pThemeColors->resolveColor(rText);
+
+            auto it = aResolvedBoxes.find(nPos);
+            if (it == aResolvedBoxes.end())
+            {
+                SvxBoxItem aBox(rProps.GetBox());
+                if (sw::ResolveThemeColors(aBox, *pThemeColors))
+                    it = aResolvedBoxes.emplace(nPos, aBox).first;
+            }
+            if (it != aResolvedBoxes.end())
+                aCell.pBorder = &it->second;
+            return aCell;
         },
         bIsPageDark);
 

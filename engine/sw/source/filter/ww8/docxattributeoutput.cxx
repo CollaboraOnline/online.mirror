@@ -436,6 +436,22 @@ void lclAddThemeColorAttributes(rtl::Reference<sax_fastparser::FastAttributeList
     lclAddThemeValuesToCustomAttributes(pAttrList, rComplexColor, XML_themeColor, XML_themeTint, XML_themeShade);
 }
 
+} // end anonymous namespace
+
+void DocxAttributeOutput::AddThemeColorAttributes(rtl::Reference<sax_fastparser::FastAttributeList>& pAttrList,
+                                                  model::ComplexColor const& rComplexColor)
+{
+    lclAddThemeColorAttributes(pAttrList, rComplexColor);
+}
+
+void DocxAttributeOutput::AddThemeFillColorAttributes(rtl::Reference<sax_fastparser::FastAttributeList>& pAttrList,
+                                                      model::ComplexColor const& rComplexColor)
+{
+    lclAddThemeFillColorAttributes(pAttrList, rComplexColor);
+}
+
+namespace {
+
 bool lclHasSolidFillTransformations(const model::ComplexColor& aComplexColor)
 {
     const std::vector<model::Transformation>& transformations = aComplexColor.getTransformations();

@@ -9,6 +9,11 @@
  */
 
 #include <ThemeColorChanger.hxx>
+#include <editeng/colritem.hxx>
+#include <editeng/brushitem.hxx>
+#include <frameformats.hxx>
+#include <swtable.hxx>
+#include <svx/ColorSets.hxx>
 #include <ModelTraverser.hxx>
 #include <txtftn.hxx>
 #include <txtfrm.hxx>
@@ -54,13 +59,13 @@ bool changeBorderLine(editeng::SvxBorderLine* pBorderLine, model::ColorSet const
         return false;
 
     model::ComplexColor const& rComplexColor = pBorderLine->getComplexColor();
-    if (rComplexColor.isValidThemeType())
-    {
-        Color aColor = rColorSet.resolveColor(rComplexColor);
-        pBorderLine->SetColor(aColor);
-        return true;
-    }
-    return false;
+    if (!rComplexColor.isValidThemeType())
+        return false;
+    Color aColor = rColorSet.resolveColor(rComplexColor);
+    if (aColor == pBorderLine->GetColor())
+        return false;
+    pBorderLine->SetColor(aColor);
+    return true;
 }
 
 /** Handler for ModelTraverser that recalculates and updates the theme colors.
@@ -315,6 +320,86 @@ bool changeBox(SwAttrSet const& rSet, SfxItemSet& rNewSet, model::ColorSet const
 
 } // end anonymous namespace
 
+model::ColorSet const& GetDocumentThemeColors(const SwDoc& rDoc)
+{
+    if (const SwDrawModel* pModel = rDoc.getIDocumentDrawModelAccess().GetDrawModel())
+    {
+        if (pModel->getTheme() && pModel->getTheme()->getColorSet())
+            return *pModel->getTheme()->getColorSet();
+    }
+    return *svx::ColorSets::getDefault();
+}
+
+bool ResolveThemeColors(SvxBoxItem& rBox, model::ColorSet const& rColorSet)
+{
+    bool bChange = false;
+    bChange = changeBorderLine(rBox.GetBottom(), rColorSet) || bChange;
+    bChange = changeBorderLine(rBox.GetTop(), rColorSet) || bChange;
+    bChange = changeBorderLine(rBox.GetLeft(), rColorSet) || bChange;
+    bChange = changeBorderLine(rBox.GetRight(), rColorSet) || bChange;
+    return bChange;
+}
+
+bool ResolveThemeColors(SfxItemSet& rSet, model::ColorSet const& rColorSet)
+{
+    bool bChange = false;
+    if (const SvxBrushItem* pBrush = rSet.GetItemIfSet(RES_BACKGROUND, false))
+    {
+        model::ComplexColor const& rComplexColor = pBrush->getComplexColor();
+        if (rComplexColor.isValidThemeType())
+        {
+            const Color aColor = rColorSet.resolveColor(rComplexColor);
+            if (aColor != pBrush->GetColor())
+            {
+                SvxBrushItem aBrush(*pBrush);
+                aBrush.SetColor(aColor);
+                rSet.Put(aBrush);
+                bChange = true;
+            }
+        }
+    }
+    if (const SvxBoxItem* pBox = rSet.GetItemIfSet(RES_BOX, false))
+    {
+        SvxBoxItem aBox(*pBox);
+        if (ResolveThemeColors(aBox, rColorSet))
+        {
+            rSet.Put(aBox);
+            bChange = true;
+        }
+    }
+    if (const SvxColorItem* pColor = rSet.GetItemIfSet(RES_CHRATR_COLOR, false))
+    {
+        model::ComplexColor const& rComplexColor = pColor->getComplexColor();
+        if (rComplexColor.isValidThemeType())
+        {
+            const Color aValue = rColorSet.resolveColor(rComplexColor);
+            if (aValue != pColor->GetValue())
+            {
+                SvxColorItem aColor(*pColor);
+                aColor.SetValue(aValue);
+                rSet.Put(aColor);
+                bChange = true;
+            }
+        }
+    }
+    return bChange;
+}
+
+void ResolveLiveTableStyles(SwDoc& rDoc)
+{
+    // The formats that a live table style builds for its roles record no undo actions, so
+    // undo and redo of a theme change call this again after they put the color set back.
+    for (SwTableFormat* pTableFormat : *rDoc.GetTableFrameFormats())
+    {
+        SwTable* pTable = SwTable::FindTable(pTableFormat);
+        if (!pTable || pTable->GetTableStyleName().isEmpty())
+            continue;
+        if (SwTableNode* pTableNode = pTable->GetTableNode())
+            rDoc.ApplyTableStyleLive(*pTableNode, /*bResetCellFormatting=*/false,
+                                     /*bStyleDefinitionChanged=*/true);
+    }
+}
+
 ThemeColorChanger::ThemeColorChanger(SwDocShell* pDocSh)
     : mpDocSh(pDocSh)
 {
@@ -440,6 +525,23 @@ void ThemeColorChanger::doApply(std::shared_ptr<model::ColorSet> const& pColorSe
     sw::ModelTraverser aModelTraverser(pDocument);
     aModelTraverser.addNodeHandler(pHandler);
     aModelTraverser.traverse();
+
+    // Table cells: a fill or border a cell has as its own theme color takes the new value.
+    // A format that several boxes share has the new value after the first of them.
+    for (SwTableFormat* pTableFormat : *pDocument->GetTableFrameFormats())
+    {
+        SwTable* pTable = SwTable::FindTable(pTableFormat);
+        if (!pTable)
+            continue;
+        for (SwTableBox* pBox : pTable->GetTabSortBoxes())
+        {
+            SwFrameFormat* pBoxFormat = pBox->GetFrameFormat();
+            SwAttrSet aNewSet = pBoxFormat->GetAttrSet().CloneAsValue();
+            if (ResolveThemeColors(aNewSet, *pColorSet))
+                pDocument->ChgFormat(*pBoxFormat, aNewSet);
+        }
+    }
+    ResolveLiveTableStyles(*pDocument);
 
     mpDocSh->Broadcast(SfxHint(SfxHintId::ThemeColorsChanged));
 

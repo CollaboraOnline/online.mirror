@@ -21,6 +21,7 @@ $(eval $(call gb_CppunitTest_use_libraries,sw_odfexport4, \
     comphelper \
     cppu \
     cppuhelper \
+    docmodel \
     editeng \
     sal \
     sfx \

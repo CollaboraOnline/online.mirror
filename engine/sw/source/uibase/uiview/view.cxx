@@ -51,6 +51,7 @@
 #include <svx/fmview.hxx>
 #include <unotxvw.hxx>
 #include <cmdid.h>
+#include <svx/svxids.hrc>
 #include <svl/hint.hxx>
 #include <swmodule.hxx>
 #include <inputwin.hxx>
@@ -1916,6 +1917,10 @@ void SwView::Notify( SfxBroadcaster& rBC, const SfxHint& rHint )
                     ResetSubShell();
                 }
             }
+            break;
+        case SfxHintId::ThemeColorsChanged:
+            // The table style gallery draws its previews in the document's theme colors.
+            GetViewFrame().GetBindings().Invalidate(SID_TABLE_STYLE_LIST);
             break;
         case SfxHintId::ModeChanged:
             {

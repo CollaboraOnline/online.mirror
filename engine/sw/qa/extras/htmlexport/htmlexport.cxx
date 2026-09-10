@@ -41,6 +41,8 @@
 #include <doc.hxx>
 #include <swtable.hxx>
 #include <tblafmt.hxx>
+#include <docmodel/theme/ColorSet.hxx>
+#include <ThemeColorChanger.hxx>
 #include <itabenum.hxx>
 #include <frmfmt.hxx>
 
@@ -1704,13 +1706,17 @@ CPPUNIT_TEST_FIXTURE(HtmlExportTest, testTableStyleLiveExport)
     pWrtShell->GotoTable(rMutableTable.GetFrameFormat()->GetName());
     pWrtShell->Insert(u"header"_ustr);
 
+    // The fill is the document theme's accent 1, the value the style's theme color resolves to.
+    const Color aAccent1 = sw::GetDocumentThemeColors(*pDoc).getColor(model::ThemeColorType::Accent1);
+    const OUString aAccent1Hex = "#" + aAccent1.AsRGBHexString().toAsciiLowerCase();
+
     save(TestFilter::HTML_WRITER);
 
     // HTML has no table styles, so the header cell carries the fill and its paragraph the
     // text color as their own formatting. This is also what a paste from the clipboard sees.
     htmlDocUniquePtr pHtmlDoc = parseHtml(maTempFile);
     CPPUNIT_ASSERT(pHtmlDoc);
-    assertXPath(pHtmlDoc, "(//td)[1]", "bgcolor", u"#4472c4");
+    assertXPath(pHtmlDoc, "(//td)[1]", "bgcolor", aAccent1Hex);
     assertXPath(pHtmlDoc, "(//td)[1]/p/font", "color", u"#ffffff");
     assertXPath(pHtmlDoc, "(//td)[1]/p/font/b", 1);
 }

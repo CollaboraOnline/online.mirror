@@ -71,6 +71,7 @@
 #include <uiitems.hxx>
 #include <tabsh.hxx>
 #include <tblafmt.hxx>
+#include <ThemeColorChanger.hxx>
 #include <tblafmtpreview.hxx>
 #include <swtablerep.hxx>
 #include <tablemgr.hxx>
@@ -2032,7 +2033,7 @@ void SwTableShell::GetTableDesignStyleState(SfxItemSet &rSet)
                     // A used style is listed twice, so each preview is kept for the second
                     // entry.
                     std::unordered_map<OUString, OUString> aPreviews;
-                    auto aPutStyle = [&aJson, &aSettings, bIsPageDark,
+                    auto aPutStyle = [&aJson, &aSettings, bIsPageDark, &rDoc,
                                       &aPreviews](const SwTableAutoFormat& rStyle)
                     {
                         auto aStyleStruct = aJson.startStruct();
@@ -2047,8 +2048,9 @@ void SwTableShell::GetTableDesignStyleState(SfxItemSet &rSet)
                             OString aDataUri;
                             try
                             {
-                                aDataUri = sw::CreateTableStylePreviewDataUri(rStyle, aSettings,
-                                                                              bIsPageDark);
+                                aDataUri = sw::CreateTableStylePreviewDataUri(
+                                    rStyle, aSettings, bIsPageDark,
+                                    &sw::GetDocumentThemeColors(rDoc));
                             }
                             catch (...)
                             {

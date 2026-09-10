@@ -30,6 +30,7 @@
 #include <editeng/shaditem.hxx>
 #include <editeng/brushitem.hxx>
 #include <editeng/colritem.hxx>
+#include <ThemeColorChanger.hxx>
 #include <fmtfsize.hxx>
 #include <formatflysplit.hxx>
 #include <fmtornt.hxx>
@@ -3825,6 +3826,8 @@ SwTableBoxFormat* lcl_GetOrCreateTableStyleRoleFormat(SwDoc& rDoc, SwTable& rTab
 
     SfxItemSet aBoxSet(rDoc.GetAttrPool(), aTableBoxSetRange);
     rStyle.UpdateToSet(nPos, bSingleRow, bSingleCol, aBoxSet, SwTableAutoFormatUpdateFlags::Box, nullptr);
+    // A theme color the style gives takes the document theme's value for it.
+    sw::ResolveThemeColors(aBoxSet, sw::GetDocumentThemeColors(rDoc));
 
     SwTableBoxFormat* pRoleFormat = rDoc.MakeTableBoxFormat();
     // Only the box border and background resolve live for now; leave every other item unset
@@ -3857,6 +3860,8 @@ SwTextFormatColl* lcl_GetOrCreateTableStyleRoleColl(SwDoc& rDoc, SwTable& rTable
             nullptr);
     if (!aTextSet.Count())
         return nullptr;
+    // A theme color the style gives takes the document theme's value for it.
+    sw::ResolveThemeColors(aTextSet, sw::GetDocumentThemeColors(rDoc));
 
     SwTextFormatColl* pRoleColl = rDoc.MakeTableStyleRoleColl(rBase);
     pRoleColl->SetFormatAttr(aTextSet);
@@ -4196,6 +4201,8 @@ void SwDoc::StripBakedTableStyleFormatting(SwTableNode& rTableNode, bool bComple
             SfxItemSet aBakedBoxSet(GetAttrPool(), aTableBoxSetRange);
             pStyle->UpdateToSet(nPos, nRows == 1, nCols == 1, aBakedBoxSet,
                                 SwTableAutoFormatUpdateFlags::Box, GetNumberFormatter());
+            // The values to compare with are the ones the style resolves to in this document.
+            sw::ResolveThemeColors(aBakedBoxSet, sw::GetDocumentThemeColors(*this));
             SfxItemSet aBakedTextSet(GetAttrPool(), aTextFormatCollSetRange);
             pStyle->UpdateToSet(nPos, nRows == 1, nCols == 1, aBakedTextSet,
                                 bCompleteStyleBoxes
@@ -4203,6 +4210,7 @@ void SwDoc::StripBakedTableStyleFormatting(SwTableNode& rTableNode, bool bComple
                                     : SwTableAutoFormatUpdateFlags::Char
                                           | SwTableAutoFormatUpdateFlags::DefinedOnly,
                                 nullptr);
+            sw::ResolveThemeColors(aBakedTextSet, sw::GetDocumentThemeColors(*this));
 
             SwTableBoxFormat* pOwnFormat = pBox->GetFrameFormat();
             for (sal_uInt16 nWhich : { sal_uInt16(RES_BOX), sal_uInt16(RES_BACKGROUND) })

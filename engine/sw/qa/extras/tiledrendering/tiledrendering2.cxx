@@ -61,6 +61,10 @@
 #include <dview.hxx>
 #include <AnnotationWin.hxx>
 #include <editeng/outliner.hxx>
+#include <itabenum.hxx>
+#include <ThemeColorChanger.hxx>
+#include <svx/ColorSets.hxx>
+#include <docmodel/theme/ColorSet.hxx>
 
 using namespace css;
 using namespace ::cpo;
@@ -402,6 +406,54 @@ std::vector<OString> FilterStateChanges(const std::vector<OString>& rChanges,
         }
     }
     return aRet;
+}
+
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testTableStyleListFollowsThemeChange)
+{
+    // Given a document with the cursor in a table, so the table style list is being reported:
+    SwXTextDocument* pXTextDocument = createDoc();
+    CPPUNIT_ASSERT(pXTextDocument);
+    SwTestViewCallback aView;
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->InsertTable(SwInsertTableOptions(SwInsertTableFlags::DefaultBorder, 0), 2, 2);
+    pWrtShell->SttEndDoc(/*bStt=*/true);
+    if (!pWrtShell->IsCursorInTable())
+        pWrtShell->Down(/*bSelect=*/false, 1);
+    CPPUNIT_ASSERT(pWrtShell->IsCursorInTable());
+    // The view rebuilds its shell stack from a timer. Do it now, so the table shell that serves
+    // the table style list is in place.
+    pWrtShell->GetView().SelectShell();
+    {
+        // Listen to the table style list, as the kit does for every command it shows:
+        SfxViewFrame& rFrame = pWrtShell->GetView().GetViewFrame();
+        SfxSlotPool& rSlotPool = SfxSlotPool::GetSlotPool(&rFrame);
+        uno::Reference<util::XURLTransformer> xParser(util::URLTransformer::create(m_xContext));
+        util::URL aCommandURL;
+        aCommandURL.Complete = u".uno:TableStyleList"_ustr;
+        xParser->parseStrict(aCommandURL);
+        const SfxSlot* pSlot = rSlotPool.GetUnoSlot(aCommandURL.Path);
+        CPPUNIT_ASSERT(pSlot);
+        rFrame.GetBindings().GetDispatch(pSlot, aCommandURL, false);
+    }
+    // The bindings report states from their timer. A freshly registered slot reports once on
+    // the first run, so let that pass before recording. Twice, so the second run also covers
+    // the case where the first one only found the message list dirty.
+    pWrtShell->GetView().GetViewFrame().GetBindings().GetTimer().Invoke();
+    pWrtShell->GetView().GetViewFrame().GetBindings().GetTimer().Invoke();
+    CPPUNIT_ASSERT(!FilterStateChanges(aView.m_aStateChanges, ".uno:TableStyleList").empty());
+    aView.m_aStateChanges.clear();
+
+    // When the document gets another theme:
+    model::ColorSet const* pForest = svx::ColorSets::get().getColorSet(u"Forest");
+    CPPUNIT_ASSERT(pForest);
+    sw::ThemeColorChanger aChanger(getSwDocShell());
+    aChanger.apply(std::make_shared<model::ColorSet>(*pForest));
+    pWrtShell->GetView().GetViewFrame().GetBindings().GetTimer().Invoke();
+    pWrtShell->GetView().GetViewFrame().GetBindings().GetTimer().Invoke();
+
+    // Then the table style list is reported again, so the previews show the new colors:
+    std::vector<OString> aChanges = FilterStateChanges(aView.m_aStateChanges, ".uno:TableStyleList");
+    CPPUNIT_ASSERT(!aChanges.empty());
 }
 
 CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testTrackChangesPerViewEnableOne)

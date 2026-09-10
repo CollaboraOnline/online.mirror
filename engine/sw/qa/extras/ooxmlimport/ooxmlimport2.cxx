@@ -57,6 +57,8 @@
 #include <ftnidx.hxx>
 #include <unotxdoc.hxx>
 #include <swtable.hxx>
+#include <docmodel/theme/ColorSet.hxx>
+#include <ThemeColorChanger.hxx>
 #include <frmfmt.hxx>
 #include <frmatr.hxx>
 #include <frameformats.hxx>
@@ -1677,10 +1679,12 @@ CPPUNIT_TEST_FIXTURE(Test, testBuiltInTableStyleReference)
     // i.e. an undefined style reference left the table without any style.
     CPPUNIT_ASSERT_EQUAL(u"Grid Table 4 Accent 1"_ustr, pTable->GetTableStyleName().toString());
 
-    // ...and the style shows in the cells: the header row is filled with the accent color.
+    // ...and the style shows in the cells: the header row is filled with the accent color of
+    // the document's theme.
     const SwTableBox* pHeaderBox = pTable->GetTabLines()[0]->GetTabBoxes()[0];
-    CPPUNIT_ASSERT_EQUAL(Color(0x4472C4),
-                         pHeaderBox->GetFrameFormat()->GetAttrSet().GetBackground().GetColor());
+    CPPUNIT_ASSERT_EQUAL(
+        sw::GetDocumentThemeColors(*pDoc).getColor(model::ThemeColorType::Accent1),
+        pHeaderBox->GetFrameFormat()->GetAttrSet().GetBackground().GetColor());
 }
 
 CPPUNIT_TEST_FIXTURE(Test, testLinkedPictureNotReadOnLoad)

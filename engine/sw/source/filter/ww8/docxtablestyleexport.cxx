@@ -21,6 +21,9 @@
 #include <editeng/adjustitem.hxx>
 #include <editeng/borderline.hxx>
 #include <editeng/boxitem.hxx>
+#include "docxattributeoutput.hxx"
+#include <docmodel/theme/ColorSet.hxx>
+#include <ThemeColorChanger.hxx>
 #include <editeng/brushitem.hxx>
 #include <editeng/colritem.hxx>
 #include <editeng/crossedoutitem.hxx>
@@ -934,6 +937,7 @@ void DocxTableStyleExport::Impl::synthesizeBorderLine(sal_Int32 nToken,
     pAttributeList->add(FSNS(XML_w, XML_val), sVal);
     pAttributeList->add(FSNS(XML_w, XML_sz), OString::number(nWidth));
     pAttributeList->add(FSNS(XML_w, XML_color), msfilter::util::ConvertColor(pLine->GetColor()));
+    DocxAttributeOutput::AddThemeColorAttributes(pAttributeList, pLine->getComplexColor());
     m_pSerializer->singleElementNS(XML_w, nToken, pAttributeList);
 }
 
@@ -941,9 +945,17 @@ void DocxTableStyleExport::Impl::synthesizeTblStylePr(const OUString& rType,
                                                        const SwBoxAutoFormat& rBoxFormat)
 {
     const SwAutoFormatProps& rProps = rBoxFormat.GetProps();
-    const SvxBoxItem& rBox = rProps.GetBox();
-    const SvxBrushItem& rBackground = rProps.GetBackground();
-    const SvxColorItem& rColor = rProps.GetColor();
+    // The values written are the ones the style's theme colors resolve to in this document;
+    // the theme references go next to them, so a reader with the theme follows it.
+    SfxItemSetFixed<RES_CHRATR_COLOR, RES_CHRATR_COLOR, RES_BACKGROUND, RES_BOX> aResolved(
+        m_rDoc.GetAttrPool());
+    aResolved.Put(rProps.GetBox());
+    aResolved.Put(rProps.GetBackground());
+    aResolved.Put(rProps.GetColor());
+    sw::ResolveThemeColors(aResolved, sw::GetDocumentThemeColors(m_rDoc));
+    const SvxBoxItem& rBox = aResolved.Get(RES_BOX);
+    const SvxBrushItem& rBackground = aResolved.Get(RES_BACKGROUND);
+    const SvxColorItem& rColor = aResolved.Get(RES_CHRATR_COLOR);
 
     const bool bHasBorder
         = rBox.GetTop() || rBox.GetBottom() || rBox.GetLeft() || rBox.GetRight();
@@ -1035,8 +1047,13 @@ void DocxTableStyleExport::Impl::synthesizeTblStylePr(const OUString& rType,
             m_pSerializer->singleElementNS(XML_w, XML_strike, FSNS(XML_w, XML_val),
                                            rProps.GetCrossedOut().GetStrikeout() != STRIKEOUT_NONE ? "1" : "0");
         if (bHasColor)
-            m_pSerializer->singleElementNS(XML_w, XML_color, FSNS(XML_w, XML_val),
-                                           msfilter::util::ConvertColor(rColor.GetValue()));
+        {
+            rtl::Reference<sax_fastparser::FastAttributeList> pColorAttributes
+                = sax_fastparser::FastSerializerHelper::createAttrList();
+            pColorAttributes->add(FSNS(XML_w, XML_val), msfilter::util::ConvertColor(rColor.GetValue()));
+            DocxAttributeOutput::AddThemeColorAttributes(pColorAttributes, rColor.getComplexColor());
+            m_pSerializer->singleElementNS(XML_w, XML_color, pColorAttributes);
+        }
         // Half-points, from twips.
         if (defined(AutoFormatItem::Height))
             m_pSerializer->singleElementNS(XML_w, XML_sz, FSNS(XML_w, XML_val),
@@ -1076,9 +1093,16 @@ void DocxTableStyleExport::Impl::synthesizeTblStylePr(const OUString& rType,
             m_pSerializer->endElementNS(XML_w, XML_tcBorders);
         }
         if (bHasBackground)
-            m_pSerializer->singleElementNS(XML_w, XML_shd, FSNS(XML_w, XML_val), "clear",
-                                           FSNS(XML_w, XML_fill),
-                                           msfilter::util::ConvertColor(rBackground.GetColor()));
+        {
+            rtl::Reference<sax_fastparser::FastAttributeList> pShadingAttributes
+                = sax_fastparser::FastSerializerHelper::createAttrList();
+            pShadingAttributes->add(FSNS(XML_w, XML_val), "clear");
+            pShadingAttributes->add(FSNS(XML_w, XML_fill),
+                                    msfilter::util::ConvertColor(rBackground.GetColor()));
+            DocxAttributeOutput::AddThemeFillColorAttributes(pShadingAttributes,
+                                                             rBackground.getComplexColor());
+            m_pSerializer->singleElementNS(XML_w, XML_shd, pShadingAttributes);
+        }
         m_pSerializer->endElementNS(XML_w, XML_tcPr);
     }
 

@@ -56,6 +56,9 @@
 #include <redline.hxx>
 #include <UndoRedline.hxx>
 #include <tblafmt.hxx>
+#include <docmodel/theme/ColorSet.hxx>
+#include <tblafmtpreview.hxx>
+#include <ThemeColorChanger.hxx>
 #include <docmodel/color/ComplexColor.hxx>
 #include <editeng/brushitem.hxx>
 #include <editeng/colritem.hxx>
@@ -1288,6 +1291,67 @@ CPPUNIT_TEST_FIXTURE(SwCoreDocTest, testCloseDocWithFillBitmapLinkTracker)
     mxComponent.clear();
 }
 
+CPPUNIT_TEST_FIXTURE(SwCoreDocTest, testTableStyleFollowsDocumentTheme)
+{
+    // A table with the built-in "Grid Table 4 Accent 1", whose colors are theme colors, in a
+    // new document.
+    createSwDoc();
+    SwDoc* pDoc = getSwDoc();
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    const TableStyleName aStyleName(u"Grid Table 4 Accent 1"_ustr);
+    SwInsertTableOptions aOptions(SwInsertTableFlags::DefaultBorder, 0);
+    const SwTable& rTable = pWrtShell->InsertTable(aOptions, /*nRows=*/2, /*nCols=*/2);
+    SwTable& rMutableTable = rTable.GetTableNode()->GetTable();
+    SwTableStyleSettings aSettings;
+    aSettings.m_bUseFirstRowStyle = true;
+    rMutableTable.SetTableStyleName(aStyleName);
+    rMutableTable.SetTableStyleSettings(aSettings);
+    pDoc->ApplyTableStyleLive(*rTable.GetTableNode(), /*bResetCellFormatting=*/true);
+
+    // The header takes the fill and text color the document's own theme has for accent 1 and
+    // the first light color, not the values the catalog was made with.
+    const model::ColorSet& rTheme = sw::GetDocumentThemeColors(*pDoc);
+    const Color aAccent1 = rTheme.getColor(model::ThemeColorType::Accent1);
+    CPPUNIT_ASSERT(aAccent1 != Color(0x4472C4));
+    const SwTableBox* pHeaderBox = rMutableTable.GetTabLines()[0]->GetTabBoxes()[0];
+    CPPUNIT_ASSERT_EQUAL(aAccent1,
+                         pHeaderBox->GetFrameFormat()->GetAttrSet().Get(RES_BACKGROUND).GetColor());
+    const SwTextNode* pHeaderNode = pDoc->GetNodes()[pHeaderBox->GetSttIdx() + 1]->GetTextNode();
+    CPPUNIT_ASSERT(pHeaderNode);
+    CPPUNIT_ASSERT_EQUAL(rTheme.getColor(model::ThemeColorType::Light1),
+                         pHeaderNode->GetSwAttrSet().Get(RES_CHRATR_COLOR).GetValue());
+
+    // A body cell shaded by hand keeps its own color through everything that follows.
+    SwTableBox* pBodyBox = rMutableTable.GetTabLines()[1]->GetTabBoxes()[0];
+    pBodyBox->ClaimFrameFormat()->SetFormatAttr(SvxBrushItem(COL_LIGHTGREEN, RES_BACKGROUND));
+
+    // Changing the theme's accent 1 recolors the header at once.
+    auto pNewTheme = std::make_shared<model::ColorSet>(rTheme);
+    pNewTheme->add(model::ThemeColorType::Accent1, Color(0x123456));
+    sw::ThemeColorChanger aChanger(getSwDocShell());
+    aChanger.apply(pNewTheme);
+    CPPUNIT_ASSERT_EQUAL(Color(0x123456),
+                         pHeaderBox->GetFrameFormat()->GetAttrSet().Get(RES_BACKGROUND).GetColor());
+    CPPUNIT_ASSERT_EQUAL(COL_LIGHTGREEN,
+                         pBodyBox->GetFrameFormat()->GetAttrSet().Get(RES_BACKGROUND).GetColor());
+
+    // Undo of the theme change gives the header the old accent 1 back, and redo the new one.
+    pWrtShell->Undo();
+    CPPUNIT_ASSERT_EQUAL(aAccent1,
+                         pHeaderBox->GetFrameFormat()->GetAttrSet().Get(RES_BACKGROUND).GetColor());
+    pWrtShell->Redo();
+    CPPUNIT_ASSERT_EQUAL(Color(0x123456),
+                         pHeaderBox->GetFrameFormat()->GetAttrSet().Get(RES_BACKGROUND).GetColor());
+    CPPUNIT_ASSERT_EQUAL(COL_LIGHTGREEN,
+                         pBodyBox->GetFrameFormat()->GetAttrSet().Get(RES_BACKGROUND).GetColor());
+
+    // The gallery preview of the style is rendered with the same theme.
+    const OString aPreview = sw::CreateTableStylePreviewDataUri(
+        *pDoc->GetTableStyles().FindAutoFormat(aStyleName), aSettings, /*bIsPageDark=*/false,
+        &sw::GetDocumentThemeColors(*pDoc));
+    CPPUNIT_ASSERT(aPreview.startsWith("data:image/png;base64,"));
+}
+
 CPPUNIT_TEST_FIXTURE(SwCoreDocTest, testBuiltInWordTableStyleCatalog)
 {
     // Given a new document in a profile with no autotbl.fmt of its own, which is the
@@ -1453,7 +1517,9 @@ CPPUNIT_TEST_FIXTURE(SwCoreDocTest, testStripBakedTableStyleComparesThemeAndLine
     createSwDoc();
     SwDoc* pDoc = getSwDoc();
     SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
-    const Color aFill(COL_LIGHTBLUE);
+    // The style's theme colors resolve against the document theme, so a fill that repeats the
+    // style's has the theme's value for accent 1.
+    const Color aFill = sw::GetDocumentThemeColors(*pDoc).getColor(model::ThemeColorType::Accent1);
     model::ComplexColor aAccent1Theme;
     aAccent1Theme.setThemeColor(model::ThemeColorType::Accent1);
     SvxBrushItem aPlainBrush(aFill, RES_BACKGROUND);

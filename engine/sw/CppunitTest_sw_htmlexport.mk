@@ -21,6 +21,7 @@ $(eval $(call gb_CppunitTest_use_libraries,sw_htmlexport, \
     comphelper \
     cppu \
 	cppuhelper \
+	docmodel \
 	editeng \
 	i18nlangtag \
 	msfilter \

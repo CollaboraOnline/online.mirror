@@ -32,6 +32,7 @@
 
 #include <editeng/boxitem.hxx>
 #include <sax/fshelper.hxx>
+#include <docmodel/color/ComplexColor.hxx>
 #include <sax/fastattribs.hxx>
 #include <vcl/vclenum.hxx>
 #include <svx/xenum.hxx>
@@ -1214,6 +1215,14 @@ public:
     static OString convertToOOXMLVertOrientRel(sal_Int16 nOrientRel);
     static OString convertToOOXMLHoriOrientRel(sal_Int16 nOrientRel);
     static void ImplCellMargins( sax_fastparser::FSHelperPtr const & pSerializer, const SvxBoxItem& rBox, sal_Int32 tag, bool bUseStartEnd, const SvxBoxItem* pDefaultMargins = nullptr);
+    /// Add the theme color attributes (w:themeColor with tint or shade) of a theme color to a
+    /// color or border attribute list; a color that is no theme color adds nothing.
+    static void AddThemeColorAttributes(rtl::Reference<sax_fastparser::FastAttributeList>& pAttrList,
+                                        model::ComplexColor const& rComplexColor);
+    /// The same with the fill attributes (w:themeFill with tint or shade) of a shading.
+    static void AddThemeFillColorAttributes(rtl::Reference<sax_fastparser::FastAttributeList>& pAttrList,
+                                            model::ComplexColor const& rComplexColor);
+
     template <class... Args>
     static void AddToAttrList(rtl::Reference<sax_fastparser::FastAttributeList>& pAttrList, Args&&... args)
     {

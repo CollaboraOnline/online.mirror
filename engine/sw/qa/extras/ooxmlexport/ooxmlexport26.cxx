@@ -998,6 +998,15 @@ CPPUNIT_TEST_FIXTURE(Test, testTableStyleLiveDocxRoundTrip)
                 "/w:styles/w:style[@w:styleId='GridTable4-Accent1']"
                 "/w:tblStylePr[@w:type='firstRow']/w:rPr/w:color",
                 "val", u"FFFFFF");
+    // The style's colors are theme colors and are written as such, next to their values.
+    assertXPath(pXmlDoc,
+                "/w:styles/w:style[@w:styleId='GridTable4-Accent1']"
+                "/w:tblStylePr[@w:type='firstRow']/w:rPr/w:color",
+                "themeColor", u"background1");
+    assertXPath(pXmlDoc,
+                "/w:styles/w:style[@w:styleId='GridTable4-Accent1']"
+                "/w:tblStylePr[@w:type='firstRow']/w:tcPr/w:shd",
+                "themeFill", u"accent1");
     xmlDocUniquePtr pDocumentXml = parseExport(u"word/document.xml"_ustr);
     assertXPath(pDocumentXml, "/w:document/w:body/w:tbl/w:tblPr/w:tblStyle", "val",
                 u"GridTable4-Accent1");

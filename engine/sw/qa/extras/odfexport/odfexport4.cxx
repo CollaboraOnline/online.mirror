@@ -40,6 +40,8 @@
 #include <ndtxt.hxx>
 #include <swtable.hxx>
 #include <tblafmt.hxx>
+#include <docmodel/theme/ColorSet.hxx>
+#include <ThemeColorChanger.hxx>
 #include <docmodel/color/ComplexColor.hxx>
 #include <itabenum.hxx>
 #include <frameformats.hxx>
@@ -1887,6 +1889,9 @@ CPPUNIT_TEST_FIXTURE(Test, testTableStyleLiveRoundTrip)
         CPPUNIT_ASSERT_EQUAL(beans::PropertyState_DEFAULT_VALUE,
                              xHeaderState->getPropertyState(u"CharColor"_ustr));
     }
+    // The fill is the document theme's accent 1, the value the style's theme color resolves to.
+    const Color aAccent1 = sw::GetDocumentThemeColors(*pDoc).getColor(model::ThemeColorType::Accent1);
+    const OUString aAccent1Hex = "#" + aAccent1.AsRGBHexString().toAsciiLowerCase();
 
     saveAndReload(TestFilter::ODT);
 
@@ -1906,7 +1911,7 @@ CPPUNIT_TEST_FIXTURE(Test, testTableStyleLiveRoundTrip)
                 OUStringToOString(Concat2View("//office:automatic-styles/style:style[@style:name='"
                                               + aCellStyle + "']/style:table-cell-properties"),
                                   RTL_TEXTENCODING_UTF8),
-                "background-color", u"#4472c4");
+                "background-color", aAccent1Hex);
 
     // Loaded back, the table follows its style live again: the color and the fill still
     // apply, but neither sits on the paragraph or the cell itself.
@@ -1946,8 +1951,7 @@ CPPUNIT_TEST_FIXTURE(Test, testTableStyleLiveRoundTrip)
     const SwFrameFormat* pHeaderFormat = pHeaderBox->GetFrameFormat();
     CPPUNIT_ASSERT(SfxItemState::SET
                    != pHeaderFormat->GetAttrSet().GetItemState(RES_BACKGROUND, false));
-    CPPUNIT_ASSERT_EQUAL(Color(0x4472C4),
-                         pHeaderFormat->GetAttrSet().Get(RES_BACKGROUND).GetColor());
+    CPPUNIT_ASSERT_EQUAL(aAccent1, pHeaderFormat->GetAttrSet().Get(RES_BACKGROUND).GetColor());
 }
 
 } // end of anonymous namespace

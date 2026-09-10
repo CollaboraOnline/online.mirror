@@ -13,6 +13,7 @@
 #include <rtl/string.hxx>
 
 class SwTableAutoFormat;
+namespace model { class ColorSet; }
 struct SwTableStyleSettings;
 
 namespace sw
@@ -22,7 +23,8 @@ namespace sw
 /// JSON sent to the Online browser.
 SW_DLLPUBLIC OString CreateTableStylePreviewDataUri(const SwTableAutoFormat& rStyle,
                                                     const SwTableStyleSettings& rSettings,
-                                                    bool bIsPageDark);
+                                                    bool bIsPageDark,
+                                                    const model::ColorSet* pThemeColors);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

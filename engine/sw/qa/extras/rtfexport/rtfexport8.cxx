@@ -43,6 +43,8 @@
 #include <doc.hxx>
 #include <swtable.hxx>
 #include <tblafmt.hxx>
+#include <docmodel/theme/ColorSet.hxx>
+#include <ThemeColorChanger.hxx>
 #include <frmfmt.hxx>
 #include <frmmgr.hxx>
 #include <formatflysplit.hxx>
@@ -1402,6 +1404,9 @@ CPPUNIT_TEST_FIXTURE(Test, testTableStyleLiveExport)
     pWrtShell->GotoTable(rMutableTable.GetFrameFormat()->GetName());
     pWrtShell->Insert(u"header"_ustr);
 
+    // The fill is the document theme's accent 1, the value the style's theme color resolves to.
+    const Color aAccent1 = sw::GetDocumentThemeColors(*pDoc).getColor(model::ThemeColorType::Accent1);
+
     saveAndReload(TestFilter::RTF);
 
     // RTF has no table styles, so the header comes back with the text color on its run and
@@ -1412,7 +1417,7 @@ CPPUNIT_TEST_FIXTURE(Test, testTableStyleLiveExport)
     CPPUNIT_ASSERT_EQUAL(sal_Int32(1), xTables->getCount());
     uno::Reference<text::XTextTable> xTable(xTables->getByIndex(0), uno::UNO_QUERY);
     uno::Reference<text::XText> xCell(xTable->getCellByName(u"A1"_ustr), uno::UNO_QUERY);
-    CPPUNIT_ASSERT_EQUAL(Color(0x4472C4), getProperty<Color>(xCell, u"BackColor"_ustr));
+    CPPUNIT_ASSERT_EQUAL(aAccent1, getProperty<Color>(xCell, u"BackColor"_ustr));
     uno::Reference<text::XTextRange> xParagraph = getParagraphOfText(1, xCell, u"header"_ustr);
     CPPUNIT_ASSERT_EQUAL(COL_WHITE, getProperty<Color>(getRun(xParagraph, 1), u"CharColor"_ustr));
 }

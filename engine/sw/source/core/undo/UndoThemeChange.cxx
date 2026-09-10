@@ -13,6 +13,7 @@
 #include <doc.hxx>
 #include <drawdoc.hxx>
 #include <IDocumentDrawModelAccess.hxx>
+#include <ThemeColorChanger.hxx>
 
 #include <memory>
 
@@ -35,6 +36,7 @@ void UndoThemeChange::UndoImpl(UndoRedoContext& /*rUndoRedoContext*/)
     SdrModel* pModel = mrDocument.getIDocumentDrawModelAccess().GetDrawModel();
     auto pTheme = pModel->getTheme();
     pTheme->setColorSet(mpOldColorSet);
+    ResolveLiveTableStyles(mrDocument);
 }
 
 void UndoThemeChange::RedoImpl(UndoRedoContext& /*rUndoRedoContext*/)
@@ -42,6 +44,7 @@ void UndoThemeChange::RedoImpl(UndoRedoContext& /*rUndoRedoContext*/)
     SdrModel* pModel = mrDocument.getIDocumentDrawModelAccess().GetDrawModel();
     auto pTheme = pModel->getTheme();
     pTheme->setColorSet(mpNewColorSet);
+    ResolveLiveTableStyles(mrDocument);
 }
 }
 
