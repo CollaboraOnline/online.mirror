@@ -76,6 +76,9 @@ class SlideImportPane {
   // The source the selection and the insert belong to, by key, or empty when
   // no slide is picked yet.
   private activeKey: string = '';
+  // What the reader typed into the filter, which appears once the list is
+  // longer than a screenful.
+  private filterText: string = '';
   // The row to put at the top of the list after the next render, so a
   // reader who opens one source after another finds the same layout each
   // time: the row at the top and its slides below it.
@@ -905,6 +908,49 @@ class SlideImportPane {
     );
   }
 
+  // Above eight sources the roster is longer than the pane, so finding a
+  // speaker becomes its own task.
+  private static readonly filterFrom = 8;
+
+  private shownSources(): SlideImportPaneSource[] {
+    const text = this.filterText.trim().toLowerCase();
+    if (!text) return this.sources;
+    return this.sources.filter((source) =>
+      source.name.toLowerCase().includes(text),
+    );
+  }
+
+  private renderFilter(): HTMLElement | null {
+    if (this.sources.length <= SlideImportPane.filterFrom) return null;
+    return (
+      <div class="slide-import-filter">
+        <input
+          type="text"
+          class="slide-import-filter-input"
+          value={this.filterText}
+          placeholder={_('Filter presentations')}
+          aria-label={_('Filter presentations')}
+          onInput={(e: Event) => {
+            this.filterText = (e.target as HTMLInputElement).value;
+            this.render();
+            const box = this.panel.querySelector(
+              '.slide-import-filter-input',
+            ) as HTMLInputElement | null;
+            if (box) {
+              box.focus();
+              box.setSelectionRange(box.value.length, box.value.length);
+            }
+          }}
+          onKeyDown={(e: KeyboardEvent) => {
+            if (e.key !== 'Escape' || !this.filterText) return;
+            this.filterText = '';
+            this.render();
+          }}
+        />
+      </div>
+    );
+  }
+
   private renderBody(): HTMLElement {
     const session = this.session;
     const status = this.statusText();
@@ -915,11 +961,12 @@ class SlideImportPane {
             {_('Recently imported from')}
           </div>
           {this.renderAddButton('ui-linkbutton slide-import-add-link')}
+          {this.renderFilter()}
           <ul
             class="slide-import-source-list"
             aria-label={_('Presentations to import from')}
           >
-            {this.sources.map((source) => this.renderSourceRow(source))}
+            {this.shownSources().map((source) => this.renderSourceRow(source))}
           </ul>
         </div>
         <div

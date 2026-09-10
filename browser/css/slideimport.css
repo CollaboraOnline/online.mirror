@@ -58,10 +58,10 @@
 	max-height: 40%;
 	display: grid;
 	grid-template-columns: 1fr auto;
-	/* The list takes what is left of the block, and minmax lets that track
-	 * shrink under its content, which is what gives the list a height to
-	 * scroll inside. */
-	grid-template-rows: auto minmax(0, 1fr);
+	/* Label and link, then the filter when there is one, then the list.
+	 * minmax lets the list track shrink under its content, which is what
+	 * gives it a height to scroll inside. */
+	grid-template-rows: auto auto minmax(0, 1fr);
 	align-items: center;
 	row-gap: 6px;
 	overflow: hidden;
