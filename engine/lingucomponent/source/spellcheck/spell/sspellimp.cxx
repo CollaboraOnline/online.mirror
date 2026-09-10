@@ -128,7 +128,7 @@ PropertyHelper_Spelling & SpellChecker::GetPropHelper_Impl()
     return *m_pPropHelper;
 }
 
-Sequence< Locale > SAL_CALL SpellChecker::getLocales()
+Sequence< Locale > SpellChecker::getLocales()
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -250,7 +250,7 @@ Sequence< Locale > SAL_CALL SpellChecker::getLocales()
     return m_aSuppLocales;
 }
 
-bool SAL_CALL SpellChecker::hasLocale(const Locale& rLocale)
+bool SpellChecker::hasLocale(const Locale& rLocale)
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -385,7 +385,7 @@ sal_Int16 SpellChecker::GetSpellFailure(const OUString &rWord, const Locale &rLo
     return nRes;
 }
 
-bool SAL_CALL SpellChecker::isValid( const OUString& rWord, const Locale& rLocale,
+bool SpellChecker::isValid( const OUString& rWord, const Locale& rLocale,
             const cpo::uno::Sequence< css::beans::PropertyValue >& rProperties )
 {
     MutexGuard  aGuard( GetLinguMutex() );
@@ -540,7 +540,7 @@ Reference< XSpellAlternatives >
     return xRes;
 }
 
-Reference< XSpellAlternatives > SAL_CALL SpellChecker::spell(
+Reference< XSpellAlternatives > SpellChecker::spell(
         const OUString& rWord, const Locale& rLocale,
         const cpo::uno::Sequence< css::beans::PropertyValue >& rProperties )
 {
@@ -560,7 +560,7 @@ Reference< XSpellAlternatives > SAL_CALL SpellChecker::spell(
     return xAlt;
 }
 
-bool SAL_CALL SpellChecker::addLinguServiceEventListener(
+bool SpellChecker::addLinguServiceEventListener(
         const Reference< XLinguServiceEventListener >& rxLstnr )
 {
     MutexGuard  aGuard( GetLinguMutex() );
@@ -573,7 +573,7 @@ bool SAL_CALL SpellChecker::addLinguServiceEventListener(
     return bRes;
 }
 
-bool SAL_CALL SpellChecker::removeLinguServiceEventListener(
+bool SpellChecker::removeLinguServiceEventListener(
         const Reference< XLinguServiceEventListener >& rxLstnr )
 {
     MutexGuard  aGuard( GetLinguMutex() );
@@ -586,13 +586,13 @@ bool SAL_CALL SpellChecker::removeLinguServiceEventListener(
     return bRes;
 }
 
-OUString SAL_CALL SpellChecker::getServiceDisplayName(const Locale& rLocale)
+OUString SpellChecker::getServiceDisplayName(const Locale& rLocale)
 {
     std::locale loc(Translate::Create("svt", LanguageTag(rLocale)));
     return Translate::get(STR_DESCRIPTION_HUNSPELL, loc);
 }
 
-void SAL_CALL SpellChecker::initialize( const Sequence< Any >& rArguments )
+void SpellChecker::initialize( const Sequence< Any >& rArguments )
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -618,7 +618,7 @@ void SAL_CALL SpellChecker::initialize( const Sequence< Any >& rArguments )
     }
 }
 
-void SAL_CALL SpellChecker::dispose()
+void SpellChecker::dispose()
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -635,7 +635,7 @@ void SAL_CALL SpellChecker::dispose()
     }
 }
 
-void SAL_CALL SpellChecker::addEventListener( const Reference< XEventListener >& rxListener )
+void SpellChecker::addEventListener( const Reference< XEventListener >& rxListener )
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -643,7 +643,7 @@ void SAL_CALL SpellChecker::addEventListener( const Reference< XEventListener >&
         m_aEvtListeners.addInterface( rxListener );
 }
 
-void SAL_CALL SpellChecker::removeEventListener( const Reference< XEventListener >& rxListener )
+void SpellChecker::removeEventListener( const Reference< XEventListener >& rxListener )
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -652,17 +652,17 @@ void SAL_CALL SpellChecker::removeEventListener( const Reference< XEventListener
 }
 
 // Service specific part
-OUString SAL_CALL SpellChecker::getImplementationName()
+OUString SpellChecker::getImplementationName()
 {
     return u"org.openoffice.lingu.MySpellSpellChecker"_ustr;
 }
 
-bool SAL_CALL SpellChecker::supportsService( const OUString& ServiceName )
+bool SpellChecker::supportsService( const OUString& ServiceName )
 {
     return cppu::supportsService(this, ServiceName);
 }
 
-Sequence< OUString > SAL_CALL SpellChecker::getSupportedServiceNames()
+Sequence< OUString > SpellChecker::getSupportedServiceNames()
 {
     return { SN_SPELLCHECKER };
 }

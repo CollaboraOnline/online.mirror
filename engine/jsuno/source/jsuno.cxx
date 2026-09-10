@@ -2692,12 +2692,12 @@ public:
     {
     }
 
-    css::uno::Reference<css::beans::XIntrospectionAccess> SAL_CALL getIntrospection() override
+    css::uno::Reference<css::beans::XIntrospectionAccess> getIntrospection() override
     {
         return {};
     }
 
-    cpo::uno::Any SAL_CALL invoke(OUString const& aFunctionName,
+    cpo::uno::Any invoke(OUString const& aFunctionName,
                                   cpo::uno::Sequence<cpo::uno::Any> const& aParams,
                                   cpo::uno::Sequence<sal_Int16>& aOutParamIndex,
                                   cpo::uno::Sequence<cpo::uno::Any>& aOutParam) override
@@ -2797,13 +2797,13 @@ public:
         return comphelper::parseJsonToAny(jsonResult, returnType);
     }
 
-    void SAL_CALL setValue(OUString const&, cpo::uno::Any const&) override {}
+    void setValue(OUString const&, cpo::uno::Any const&) override {}
 
-    cpo::uno::Any SAL_CALL getValue(OUString const&) override { return {}; }
+    cpo::uno::Any getValue(OUString const&) override { return {}; }
 
-    bool SAL_CALL hasMethod(OUString const&) override { return true; }
+    bool hasMethod(OUString const&) override { return true; }
 
-    bool SAL_CALL hasProperty(OUString const&) override { return false; }
+    bool hasProperty(OUString const&) override { return false; }
 
 private:
     cpo::uno::Type m_interfaceType;

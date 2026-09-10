@@ -40,8 +40,8 @@ public:
     virtual ~Meaning() override;
 
     // XMeaning
-    virtual OUString SAL_CALL getMeaning() override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL querySynonyms() override;
+    virtual OUString getMeaning() override;
+    virtual cpo::uno::Sequence< OUString > querySynonyms() override;
 
     // non-interface specific functions
     void    SetSynonyms( const cpo::uno::Sequence< OUString > &rSyn );

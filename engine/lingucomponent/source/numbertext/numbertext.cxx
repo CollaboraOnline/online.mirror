@@ -66,14 +66,14 @@ public:
     NumberText_Impl& operator=(const NumberText_Impl&) = delete;
 
     // XServiceInfo implementation
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual Sequence<OUString> SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual Sequence<OUString> getSupportedServiceNames() override;
 
     // XNumberText implementation
-    virtual OUString SAL_CALL getNumberText(const OUString& aText,
+    virtual OUString getNumberText(const OUString& aText,
                                             const ::css::lang::Locale& rLocale) override;
-    virtual cpo::uno::Sequence<css::lang::Locale> SAL_CALL getAvailableLanguages() override;
+    virtual cpo::uno::Sequence<css::lang::Locale> getAvailableLanguages() override;
 };
 }
 
@@ -106,7 +106,7 @@ void NumberText_Impl::EnsureInitialized()
     m_aNumberText.set_prefix(std::string(path));
 }
 
-OUString SAL_CALL NumberText_Impl::getNumberText(const OUString& rText, const Locale& rLocale)
+OUString NumberText_Impl::getNumberText(const OUString& rText, const Locale& rLocale)
 {
     std::scoped_lock aGuard(GetNumberTextMutex());
     EnsureInitialized();
@@ -136,7 +136,7 @@ OUString SAL_CALL NumberText_Impl::getNumberText(const OUString& rText, const Lo
     return aResult;
 }
 
-cpo::uno::Sequence<Locale> SAL_CALL NumberText_Impl::getAvailableLanguages()
+cpo::uno::Sequence<Locale> NumberText_Impl::getAvailableLanguages()
 {
     std::scoped_lock aGuard(GetNumberTextMutex());
     // TODO
@@ -144,17 +144,17 @@ cpo::uno::Sequence<Locale> SAL_CALL NumberText_Impl::getAvailableLanguages()
     return aRes;
 }
 
-OUString SAL_CALL NumberText_Impl::getImplementationName()
+OUString NumberText_Impl::getImplementationName()
 {
     return u"com.sun.star.lingu2.NumberText"_ustr;
 }
 
-bool SAL_CALL NumberText_Impl::supportsService(const OUString& ServiceName)
+bool NumberText_Impl::supportsService(const OUString& ServiceName)
 {
     return cppu::supportsService(this, ServiceName);
 }
 
-Sequence<OUString> SAL_CALL NumberText_Impl::getSupportedServiceNames()
+Sequence<OUString> NumberText_Impl::getSupportedServiceNames()
 {
     return { u"com.sun.star.linguistic2.NumberText"_ustr };
 }

@@ -214,14 +214,14 @@ void Hyphenator::ensureLocales()
     }
 }
 
-Sequence< Locale > SAL_CALL Hyphenator::getLocales()
+Sequence< Locale > Hyphenator::getLocales()
 {
     MutexGuard aGuard(GetLinguMutex());
     ensureLocales();
     return aSuppLocales;
 }
 
-bool SAL_CALL Hyphenator::hasLocale(const Locale& rLocale)
+bool Hyphenator::hasLocale(const Locale& rLocale)
 {
     MutexGuard  aGuard( GetLinguMutex() );
     ensureLocales();
@@ -378,7 +378,7 @@ const HDInfo* Hyphenator::getMatchingDict(const css::lang::Locale& aLocale)
     return &*it;
 }
 
-Reference< XHyphenatedWord > SAL_CALL Hyphenator::hyphenate( const OUString& aWord,
+Reference< XHyphenatedWord > Hyphenator::hyphenate( const OUString& aWord,
        const css::lang::Locale& aLocale,
        sal_Int16 nMaxLeading,
        const cpo::uno::Sequence< css::beans::PropertyValue >& aProperties )
@@ -676,7 +676,7 @@ Reference< XHyphenatedWord > SAL_CALL Hyphenator::hyphenate( const OUString& aWo
     return nullptr;
 }
 
-Reference < XHyphenatedWord > SAL_CALL Hyphenator::queryAlternativeSpelling(
+Reference < XHyphenatedWord > Hyphenator::queryAlternativeSpelling(
         const OUString& aWord,
         const css::lang::Locale& aLocale,
         sal_Int16 nIndex,
@@ -692,7 +692,7 @@ Reference < XHyphenatedWord > SAL_CALL Hyphenator::queryAlternativeSpelling(
     return nullptr;
 }
 
-Reference< XPossibleHyphens > SAL_CALL Hyphenator::createPossibleHyphens( const OUString& aWord,
+Reference< XPossibleHyphens > Hyphenator::createPossibleHyphens( const OUString& aWord,
         const css::lang::Locale& aLocale,
         const cpo::uno::Sequence< css::beans::PropertyValue >& aProperties )
 {
@@ -763,7 +763,7 @@ Reference< XPossibleHyphens > SAL_CALL Hyphenator::createPossibleHyphens( const 
     return nullptr;
 }
 
-bool SAL_CALL Hyphenator::addLinguServiceEventListener(
+bool Hyphenator::addLinguServiceEventListener(
         const Reference< XLinguServiceEventListener >& rxLstnr )
 {
     MutexGuard  aGuard( GetLinguMutex() );
@@ -776,7 +776,7 @@ bool SAL_CALL Hyphenator::addLinguServiceEventListener(
     return bRes;
 }
 
-bool SAL_CALL Hyphenator::removeLinguServiceEventListener(
+bool Hyphenator::removeLinguServiceEventListener(
         const Reference< XLinguServiceEventListener >& rxLstnr )
 {
     MutexGuard  aGuard( GetLinguMutex() );
@@ -789,13 +789,13 @@ bool SAL_CALL Hyphenator::removeLinguServiceEventListener(
     return bRes;
 }
 
-OUString SAL_CALL Hyphenator::getServiceDisplayName(const Locale& rLocale)
+OUString Hyphenator::getServiceDisplayName(const Locale& rLocale)
 {
     std::locale loc(Translate::Create("svt", LanguageTag(rLocale)));
     return Translate::get(STR_DESCRIPTION_LIBHYPHEN, loc);
 }
 
-void SAL_CALL Hyphenator::initialize( const Sequence< Any >& rArguments )
+void Hyphenator::initialize( const Sequence< Any >& rArguments )
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -821,7 +821,7 @@ void SAL_CALL Hyphenator::initialize( const Sequence< Any >& rArguments )
     }
 }
 
-void SAL_CALL Hyphenator::dispose()
+void Hyphenator::dispose()
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -838,7 +838,7 @@ void SAL_CALL Hyphenator::dispose()
     }
 }
 
-void SAL_CALL Hyphenator::addEventListener( const Reference< XEventListener >& rxListener )
+void Hyphenator::addEventListener( const Reference< XEventListener >& rxListener )
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -846,7 +846,7 @@ void SAL_CALL Hyphenator::addEventListener( const Reference< XEventListener >& r
         aEvtListeners.addInterface( rxListener );
 }
 
-void SAL_CALL Hyphenator::removeEventListener( const Reference< XEventListener >& rxListener )
+void Hyphenator::removeEventListener( const Reference< XEventListener >& rxListener )
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -855,17 +855,17 @@ void SAL_CALL Hyphenator::removeEventListener( const Reference< XEventListener >
 }
 
 // Service specific part
-OUString SAL_CALL Hyphenator::getImplementationName()
+OUString Hyphenator::getImplementationName()
 {
     return u"org.openoffice.lingu.LibHnjHyphenator"_ustr;
 }
 
-bool SAL_CALL Hyphenator::supportsService( const OUString& ServiceName )
+bool Hyphenator::supportsService( const OUString& ServiceName )
 {
     return cppu::supportsService(this, ServiceName);
 }
 
-Sequence< OUString > SAL_CALL Hyphenator::getSupportedServiceNames()
+Sequence< OUString > Hyphenator::getSupportedServiceNames()
 {
     return { SN_HYPHENATOR };
 }

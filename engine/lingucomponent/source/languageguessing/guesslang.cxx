@@ -79,17 +79,17 @@ public:
     LangGuess_Impl& operator=(const LangGuess_Impl&) = delete;
 
     // XServiceInfo implementation
-    virtual OUString SAL_CALL getImplementationName(  ) override;
-    virtual bool SAL_CALL supportsService( const OUString& ServiceName ) override;
-    virtual Sequence< OUString > SAL_CALL getSupportedServiceNames(  ) override;
+    virtual OUString getImplementationName(  ) override;
+    virtual bool supportsService( const OUString& ServiceName ) override;
+    virtual Sequence< OUString > getSupportedServiceNames(  ) override;
 
     // XLanguageGuessing implementation
-    virtual css::lang::Locale SAL_CALL guessPrimaryLanguage( const OUString& aText, ::sal_Int32 nStartPos, ::sal_Int32 nLen ) override;
-    virtual void SAL_CALL disableLanguages( const cpo::uno::Sequence< css::lang::Locale >& aLanguages ) override;
-    virtual void SAL_CALL enableLanguages( const cpo::uno::Sequence< css::lang::Locale >& aLanguages ) override;
-    virtual cpo::uno::Sequence< css::lang::Locale > SAL_CALL getAvailableLanguages(  ) override;
-    virtual cpo::uno::Sequence< css::lang::Locale > SAL_CALL getEnabledLanguages(  ) override;
-    virtual cpo::uno::Sequence< css::lang::Locale > SAL_CALL getDisabledLanguages(  ) override;
+    virtual css::lang::Locale guessPrimaryLanguage( const OUString& aText, ::sal_Int32 nStartPos, ::sal_Int32 nLen ) override;
+    virtual void disableLanguages( const cpo::uno::Sequence< css::lang::Locale >& aLanguages ) override;
+    virtual void enableLanguages( const cpo::uno::Sequence< css::lang::Locale >& aLanguages ) override;
+    virtual cpo::uno::Sequence< css::lang::Locale > getAvailableLanguages(  ) override;
+    virtual cpo::uno::Sequence< css::lang::Locale > getEnabledLanguages(  ) override;
+    virtual cpo::uno::Sequence< css::lang::Locale > getDisabledLanguages(  ) override;
 
     // implementation specific
     /// @throws RuntimeException
@@ -155,7 +155,7 @@ void LangGuess_Impl::EnsureInitialized()
 #endif
 }
 
-Locale SAL_CALL LangGuess_Impl::guessPrimaryLanguage(
+Locale LangGuess_Impl::guessPrimaryLanguage(
         const OUString& rText,
         ::sal_Int32 nStartPos,
         ::sal_Int32 nLen )
@@ -187,7 +187,7 @@ void LangGuess_Impl::SetFingerPrintsDB(
     m_aGuesser.SetDBPath(conf_file_path.getStr(), path.getStr());
 }
 
-cpo::uno::Sequence< Locale > SAL_CALL LangGuess_Impl::getAvailableLanguages(  )
+cpo::uno::Sequence< Locale > LangGuess_Impl::getAvailableLanguages(  )
 {
     std::scoped_lock aGuard( GetLangGuessMutex() );
 
@@ -209,7 +209,7 @@ cpo::uno::Sequence< Locale > SAL_CALL LangGuess_Impl::getAvailableLanguages(  )
     return aRes;
 }
 
-cpo::uno::Sequence< Locale > SAL_CALL LangGuess_Impl::getEnabledLanguages(  )
+cpo::uno::Sequence< Locale > LangGuess_Impl::getEnabledLanguages(  )
 {
     std::scoped_lock aGuard( GetLangGuessMutex() );
 
@@ -231,7 +231,7 @@ cpo::uno::Sequence< Locale > SAL_CALL LangGuess_Impl::getEnabledLanguages(  )
     return aRes;
 }
 
-cpo::uno::Sequence< Locale > SAL_CALL LangGuess_Impl::getDisabledLanguages(  )
+cpo::uno::Sequence< Locale > LangGuess_Impl::getDisabledLanguages(  )
 {
     std::scoped_lock aGuard( GetLangGuessMutex() );
 
@@ -253,7 +253,7 @@ cpo::uno::Sequence< Locale > SAL_CALL LangGuess_Impl::getDisabledLanguages(  )
     return aRes;
 }
 
-void SAL_CALL LangGuess_Impl::disableLanguages(
+void LangGuess_Impl::disableLanguages(
         const cpo::uno::Sequence< Locale >& rLanguages )
 {
     std::scoped_lock aGuard( GetLangGuessMutex() );
@@ -274,7 +274,7 @@ void SAL_CALL LangGuess_Impl::disableLanguages(
     }
 }
 
-void SAL_CALL LangGuess_Impl::enableLanguages(
+void LangGuess_Impl::enableLanguages(
         const cpo::uno::Sequence< Locale >& rLanguages )
 {
     std::scoped_lock aGuard( GetLangGuessMutex() );
@@ -295,17 +295,17 @@ void SAL_CALL LangGuess_Impl::enableLanguages(
     }
 }
 
-OUString SAL_CALL LangGuess_Impl::getImplementationName(  )
+OUString LangGuess_Impl::getImplementationName(  )
 {
     return u"com.sun.star.lingu2.LanguageGuessing"_ustr;
 }
 
-bool SAL_CALL LangGuess_Impl::supportsService( const OUString& ServiceName )
+bool LangGuess_Impl::supportsService( const OUString& ServiceName )
 {
     return cppu::supportsService(this, ServiceName);
 }
 
-Sequence<OUString> SAL_CALL LangGuess_Impl::getSupportedServiceNames(  )
+Sequence<OUString> LangGuess_Impl::getSupportedServiceNames(  )
 {
     return { u"com.sun.star.linguistic2.LanguageGuessing"_ustr };
 }

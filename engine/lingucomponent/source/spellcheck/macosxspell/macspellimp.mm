@@ -95,7 +95,7 @@ PropertyHelper_Spell & MacSpellChecker::GetPropHelper_Impl()
 }
 
 
-Sequence< Locale > SAL_CALL MacSpellChecker::getLocales()
+Sequence< Locale > MacSpellChecker::getLocales()
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -346,7 +346,7 @@ Sequence< Locale > SAL_CALL MacSpellChecker::getLocales()
 
 
 
-bool SAL_CALL MacSpellChecker::hasLocale(const Locale& rLocale)
+bool MacSpellChecker::hasLocale(const Locale& rLocale)
 {
     MutexGuard  aGuard( GetLinguMutex() );
 
@@ -427,7 +427,7 @@ sal_Int16 MacSpellChecker::GetSpellFailure( const OUString &rWord, const Locale 
 
 
 
-bool SAL_CALL
+bool
     MacSpellChecker::isValid( const OUString& rWord, const Locale& rLocale,
             const cpo::uno::Sequence<PropertyValue>& rProperties )
 {
@@ -532,7 +532,7 @@ Reference< XSpellAlternatives >
 
 }
 
-Reference< XSpellAlternatives > SAL_CALL
+Reference< XSpellAlternatives >
     MacSpellChecker::spell( const OUString& rWord, const Locale& rLocale,
             const cpo::uno::Sequence<PropertyValue>& rProperties )
 {
@@ -552,7 +552,7 @@ Reference< XSpellAlternatives > SAL_CALL
     return xAlt;
 }
 
-bool SAL_CALL
+bool
     MacSpellChecker::addLinguServiceEventListener(
             const Reference< XLinguServiceEventListener >& rxLstnr )
 {
@@ -567,7 +567,7 @@ bool SAL_CALL
 }
 
 
-bool SAL_CALL
+bool
     MacSpellChecker::removeLinguServiceEventListener(
             const Reference< XLinguServiceEventListener >& rxLstnr )
 {
@@ -583,7 +583,7 @@ bool SAL_CALL
 }
 
 
-OUString SAL_CALL
+OUString
     MacSpellChecker::getServiceDisplayName( const Locale& /*rLocale*/ )
 {
     MutexGuard  aGuard( GetLinguMutex() );
@@ -591,7 +591,7 @@ OUString SAL_CALL
 }
 
 
-void SAL_CALL
+void
     MacSpellChecker::initialize( const Sequence< Any >& rArguments )
 {
     MutexGuard  aGuard( GetLinguMutex() );
@@ -619,7 +619,7 @@ void SAL_CALL
 }
 
 
-void SAL_CALL
+void
     MacSpellChecker::dispose()
 {
     MutexGuard  aGuard( GetLinguMutex() );
@@ -633,7 +633,7 @@ void SAL_CALL
 }
 
 
-void SAL_CALL
+void
     MacSpellChecker::addEventListener( const Reference< XEventListener >& rxListener )
 {
     MutexGuard  aGuard( GetLinguMutex() );
@@ -643,7 +643,7 @@ void SAL_CALL
 }
 
 
-void SAL_CALL
+void
     MacSpellChecker::removeEventListener( const Reference< XEventListener >& rxListener )
 {
     MutexGuard  aGuard( GetLinguMutex() );
@@ -653,17 +653,17 @@ void SAL_CALL
 }
 
 // Service specific part
-OUString SAL_CALL MacSpellChecker::getImplementationName()
+OUString MacSpellChecker::getImplementationName()
 {
     return u"org.openoffice.lingu.MacOSXSpellChecker"_ustr;
 }
 
-bool SAL_CALL MacSpellChecker::supportsService( const OUString& ServiceName )
+bool MacSpellChecker::supportsService( const OUString& ServiceName )
 {
     return cppu::supportsService(this, ServiceName);
 }
 
-Sequence< OUString > SAL_CALL MacSpellChecker::getSupportedServiceNames()
+Sequence< OUString > MacSpellChecker::getSupportedServiceNames()
 {
     return { SN_SPELLCHECKER };
 }

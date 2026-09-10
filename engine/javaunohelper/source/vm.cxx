@@ -41,7 +41,7 @@ class SingletonFactory : public cppu::BaseMutex, public t_impl
     ::rtl::Reference< ::jvmaccess::UnoVirtualMachine > m_vm_access;
 
 protected:
-    virtual void SAL_CALL disposing() override;
+    virtual void disposing() override;
 
 public:
     explicit SingletonFactory( ::rtl::Reference< ::jvmaccess::UnoVirtualMachine > vm_access )
@@ -50,9 +50,9 @@ public:
         {}
 
     // XSingleComponentFactory impl
-    virtual css::uno::Reference< cpo::uno::XInterface > SAL_CALL createInstanceWithContext(
+    virtual css::uno::Reference< cpo::uno::XInterface > createInstanceWithContext(
         css::uno::Reference< cpo::uno::XComponentContext > const & xContext ) override;
-    virtual css::uno::Reference< cpo::uno::XInterface > SAL_CALL createInstanceWithArgumentsAndContext(
+    virtual css::uno::Reference< cpo::uno::XInterface > createInstanceWithArgumentsAndContext(
         cpo::uno::Sequence< cpo::uno::Any > const & args, css::uno::Reference< cpo::uno::XComponentContext > const & xContext ) override;
 };
 
