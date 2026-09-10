@@ -52,7 +52,7 @@
 	/* Dropdown arrows */
 	.unoarrow, .menubutton .arrow, .ui-listbox-arrow {
 		forced-color-adjust: none;
-		border-top-color: #e9e9ed !important;
+		border-top-color: ButtonText !important;
 	}
 
 	/* Restore original Sidebar expanders */
@@ -120,12 +120,6 @@
 	[data-theme='dark'] .cool-redline-accept-button,
 	[data-theme='dark'] .cool-redline-reject-button {
 		background-color: #1E1E1E !important;
-	}
-
-	[data-theme='dark'] .unoarrow,
-	[data-theme='dark'] .menubutton .arrow,
-	[data-theme='dark'] .ui-listbox-arrow {
-		border-top-color: #FFFF;
 	}
 
 	/* Dark mode: restore brightness for sidebar expanders (filter: none
