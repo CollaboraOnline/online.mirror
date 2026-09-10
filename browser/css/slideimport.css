@@ -236,20 +236,18 @@ span.slide-import-source-main {
 }
 
 .slide-import-source-count {
-	flex: 0 1 auto;
-	min-width: 0;
-	overflow: hidden;
+	flex: 0 0 auto;
 	color: var(--color-text-light);
-	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
 
 .slide-import-source-name {
 	flex: 1 1 auto;
-	/* Room for a name of about sixteen characters before it ellipsises, so
-	 * the count and the chip give way before the name does. */
-	min-width: 96px;
+	/* A name may end in an ellipsis and still be read, and it keeps the
+	 * whole of the row's spare width to put that off. A number cannot: it
+	 * is whole or it is wrong, so the count never shrinks. */
+	min-width: 40px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;

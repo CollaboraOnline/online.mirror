@@ -775,12 +775,28 @@ class SlideImportPane {
   }
 
   // How many slides a source holds, and how many of them are picked.
+  // What the row says on hover: the file, and what the document already took
+  // from it.
+  private sourceTooltip(source: SlideImportPaneSource): string {
+    const taken = this.takenCount(source);
+    if (!taken) return source.name;
+    return (
+      source.name +
+      ' - ' +
+      _('{0} of {1} slides taken')
+        .replace('{0}', String(taken))
+        .replace('{1}', String(source.slides.length))
+    );
+  }
+
   private slideCountText(source: SlideImportPaneSource): string {
     const count = source.slides.length;
     if (!count) return '';
     const taken = this.takenCount(source);
+    // A row 342px wide holds the name, the chip and the menu btn first, so
+    // the short form is what fits; the row's tooltip carries the sentence.
     if (taken)
-      return _('{0} of {1} taken')
+      return _('{0} of {1}')
         .replace('{0}', String(taken))
         .replace('{1}', String(count));
     return _('{0} slides').replace('{0}', String(count));
@@ -1066,13 +1082,16 @@ class SlideImportPane {
               class="slide-import-source-main"
               aria-expanded={source.expanded ? 'true' : 'false'}
               aria-controls={panelId}
-              title={source.name}
+              title={this.sourceTooltip(source)}
               onClick={() => this.toggleSource(source)}
             >
               {inside}
             </button>
           ) : (
-            <span class="slide-import-source-main" title={source.name}>
+            <span
+              class="slide-import-source-main"
+              title={this.sourceTooltip(source)}
+            >
               {inside}
             </span>
           )}
