@@ -828,10 +828,7 @@ class SlideImportPane {
       <div class="slide-import-empty">
         <div class="slide-import-empty-box">
           <span class="slide-import-empty-icon" aria-hidden="true">
-            <img
-              src={app.LOUtil.getImageURL('lc_presentinwindow.svg')}
-              alt=""
-            />
+            <img src={app.LOUtil.getImageURL('slide-deck-large.svg')} alt="" />
           </span>
           <div class="slide-import-empty-title">
             {_('No presentations yet')}
