@@ -299,13 +299,13 @@ span.slide-import-source-main {
 
 .slide-import-source-menu {
 	flex-shrink: 0;
-	width: var(--btn-size-m);
-	height: var(--btn-size-m);
+	width: 24px;
+	height: 24px;
 	padding: 0;
 	border: 1px solid transparent;
 	border-radius: var(--border-radius);
 	background: transparent url('images/lc_more.svg') no-repeat center;
-	background-size: 16px 16px;
+	background-size: 20px 20px;
 	cursor: pointer;
 }
 
