@@ -29,9 +29,9 @@ class ZipPackageSink final : public ::cppu::WeakImplHelper<css::io::XActiveDataS
 public:
     ZipPackageSink();
     virtual ~ZipPackageSink() override;
-    virtual void SAL_CALL
+    virtual void
     setInputStream(const css::uno::Reference<css::io::XInputStream>& aStream) override;
-    virtual css::uno::Reference<css::io::XInputStream> SAL_CALL getInputStream() override;
+    virtual css::uno::Reference<css::io::XInputStream> getInputStream() override;
 };
 #endif
 

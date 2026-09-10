@@ -63,7 +63,7 @@ static bool CheckPackageSignature_Impl( const uno::Reference< io::XInputStream >
 
 
 
-uno::Reference< cpo::uno::XInterface > SAL_CALL OStorageFactory::createInstance()
+uno::Reference< cpo::uno::XInterface > OStorageFactory::createInstance()
 {
     // TODO: reimplement TempStream service to support XStream interface
     uno::Reference < io::XStream > xTempStream(new utl::TempFileFastService);
@@ -73,7 +73,7 @@ uno::Reference< cpo::uno::XInterface > SAL_CALL OStorageFactory::createInstance(
                                                   embed::StorageFormats::PACKAGE));
 }
 
-uno::Reference< cpo::uno::XInterface > SAL_CALL OStorageFactory::createInstanceWithArguments(
+uno::Reference< cpo::uno::XInterface > OStorageFactory::createInstanceWithArguments(
             const cpo::uno::Sequence< cpo::uno::Any >& aArguments )
 {
     // The request for storage can be done with up to three arguments
@@ -259,17 +259,17 @@ uno::Reference< cpo::uno::XInterface > SAL_CALL OStorageFactory::createInstanceW
     throw cpo::uno::Exception(u"no input stream or regular stream"_ustr, nullptr); // general error during creation
 }
 
-OUString SAL_CALL OStorageFactory::getImplementationName()
+OUString OStorageFactory::getImplementationName()
 {
     return u"com.sun.star.comp.embed.StorageFactory"_ustr;
 }
 
-bool SAL_CALL OStorageFactory::supportsService( const OUString& ServiceName )
+bool OStorageFactory::supportsService( const OUString& ServiceName )
 {
     return cppu::supportsService(this, ServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL OStorageFactory::getSupportedServiceNames()
+cpo::uno::Sequence< OUString > OStorageFactory::getSupportedServiceNames()
 {
     return  { u"com.sun.star.embed.StorageFactory"_ustr,
                 u"com.sun.star.comp.embed.StorageFactory"_ustr };

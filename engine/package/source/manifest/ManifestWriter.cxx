@@ -46,7 +46,7 @@ ManifestWriter::~ManifestWriter()
 }
 
 // XManifestWriter methods
-void SAL_CALL ManifestWriter::writeManifestSequence( const Reference< XOutputStream >& rStream, const Sequence< Sequence< PropertyValue > >& rSequence )
+void ManifestWriter::writeManifestSequence( const Reference< XOutputStream >& rStream, const Sequence< Sequence< PropertyValue > >& rSequence )
 {
     Reference < XWriter > xSource = Writer::create( m_xContext );
     xSource->setOutputStream ( rStream );
@@ -65,7 +65,7 @@ OUString ManifestWriter::getImplementationName()
     return u"com.sun.star.packages.manifest.comp.ManifestWriter"_ustr;
 }
 
-bool SAL_CALL ManifestWriter::supportsService(OUString const & rServiceName)
+bool ManifestWriter::supportsService(OUString const & rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }

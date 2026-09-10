@@ -909,7 +909,7 @@ void ZipPackageStream::SetPackageMember( bool bNewValue )
 }
 
 // XActiveDataSink
-void SAL_CALL ZipPackageStream::setInputStream( const uno::Reference< io::XInputStream >& aStream )
+void ZipPackageStream::setInputStream( const uno::Reference< io::XInputStream >& aStream )
 {
     // if seekable access is required the wrapping will be done on demand
     m_xStream = aStream;
@@ -953,7 +953,7 @@ uno::Reference< io::XInputStream > ZipPackageStream::getRawData()
     }
 }
 
-uno::Reference< io::XInputStream > SAL_CALL ZipPackageStream::getInputStream()
+uno::Reference< io::XInputStream > ZipPackageStream::getInputStream()
 {
     try
     {
@@ -987,7 +987,7 @@ uno::Reference< io::XInputStream > SAL_CALL ZipPackageStream::getInputStream()
 }
 
 // XDataSinkEncrSupport
-uno::Reference< io::XInputStream > SAL_CALL ZipPackageStream::getDataStream()
+uno::Reference< io::XInputStream > ZipPackageStream::getDataStream()
 {
     // There is no stream attached to this object
     if ( m_nStreamMode == PACKAGE_STREAM_NOTSET )
@@ -1079,7 +1079,7 @@ uno::Reference< io::XInputStream > SAL_CALL ZipPackageStream::getDataStream()
         return uno::Reference< io::XInputStream >();
 }
 
-uno::Reference< io::XInputStream > SAL_CALL ZipPackageStream::getRawStream()
+uno::Reference< io::XInputStream > ZipPackageStream::getRawStream()
 {
     // There is no stream attached to this object
     if ( m_nStreamMode == PACKAGE_STREAM_NOTSET )
@@ -1110,13 +1110,13 @@ uno::Reference< io::XInputStream > SAL_CALL ZipPackageStream::getRawStream()
     throw packages::NoEncryptionException();
 }
 
-void SAL_CALL ZipPackageStream::setDataStream( const uno::Reference< io::XInputStream >& aStream )
+void ZipPackageStream::setDataStream( const uno::Reference< io::XInputStream >& aStream )
 {
     setInputStream( aStream );
     m_nStreamMode = PACKAGE_STREAM_DATA;
 }
 
-void SAL_CALL ZipPackageStream::setRawStream( const uno::Reference< io::XInputStream >& aStream )
+void ZipPackageStream::setRawStream( const uno::Reference< io::XInputStream >& aStream )
 {
     // wrap the stream in case it is not seekable
     uno::Reference< io::XInputStream > xNewStream = ::comphelper::OSeekableInputWrapper::CheckSeekableCanWrap( aStream, m_xContext );
@@ -1138,7 +1138,7 @@ void SAL_CALL ZipPackageStream::setRawStream( const uno::Reference< io::XInputSt
     m_nStreamMode = PACKAGE_STREAM_RAW;
 }
 
-uno::Reference< io::XInputStream > SAL_CALL ZipPackageStream::getPlainRawStream()
+uno::Reference< io::XInputStream > ZipPackageStream::getPlainRawStream()
 {
     // There is no stream attached to this object
     if ( m_nStreamMode == PACKAGE_STREAM_NOTSET )
@@ -1173,7 +1173,7 @@ uno::Reference< io::XInputStream > SAL_CALL ZipPackageStream::getPlainRawStream(
 }
 
 // XPropertySet
-void SAL_CALL ZipPackageStream::setPropertyValue( const OUString& aPropertyName, const Any& aValue )
+void ZipPackageStream::setPropertyValue( const OUString& aPropertyName, const Any& aValue )
 {
     if ( aPropertyName == "MediaType" )
     {
@@ -1321,7 +1321,7 @@ void SAL_CALL ZipPackageStream::setPropertyValue( const OUString& aPropertyName,
         throw beans::UnknownPropertyException(aPropertyName);
 }
 
-Any SAL_CALL ZipPackageStream::getPropertyValue( const OUString& PropertyName )
+Any ZipPackageStream::getPropertyValue( const OUString& PropertyName )
 {
     if ( PropertyName == "MediaType" )
     {
@@ -1370,7 +1370,7 @@ Sequence< OUString > ZipPackageStream::getSupportedServiceNames()
     return { u"com.sun.star.packages.PackageStream"_ustr };
 }
 
-bool SAL_CALL ZipPackageStream::supportsService( OUString const & rServiceName )
+bool ZipPackageStream::supportsService( OUString const & rServiceName )
 {
     return cppu::supportsService(this, rServiceName);
 }

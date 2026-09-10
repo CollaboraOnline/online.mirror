@@ -52,12 +52,12 @@ void OSelfTerminateFileStream::CloseStreamDeleteFile()
     m_oTempFile.reset();
 }
 
-sal_Int32 SAL_CALL OSelfTerminateFileStream::readBytes( cpo::uno::Sequence< sal_Int8 >& aData, sal_Int32 nBytesToRead )
+sal_Int32 OSelfTerminateFileStream::readBytes( cpo::uno::Sequence< sal_Int8 >& aData, sal_Int32 nBytesToRead )
 {
     return m_xStreamWrapper->readBytes( aData, nBytesToRead );
 }
 
-sal_Int32 SAL_CALL OSelfTerminateFileStream::readSomeBytes( cpo::uno::Sequence< sal_Int8 >& aData, sal_Int32 nMaxBytesToRead )
+sal_Int32 OSelfTerminateFileStream::readSomeBytes( cpo::uno::Sequence< sal_Int8 >& aData, sal_Int32 nMaxBytesToRead )
 {
     return m_xStreamWrapper->readSomeBytes( aData, nMaxBytesToRead );
 }
@@ -67,32 +67,32 @@ sal_Int32 OSelfTerminateFileStream::readSomeBytes( sal_Int8* aData, sal_Int32 nM
     return m_xStreamWrapper->readSomeBytes( aData, nMaxBytesToRead );
 }
 
-void SAL_CALL OSelfTerminateFileStream::skipBytes( sal_Int32 nBytesToSkip )
+void OSelfTerminateFileStream::skipBytes( sal_Int32 nBytesToSkip )
 {
     return m_xStreamWrapper->skipBytes( nBytesToSkip );
 }
 
-sal_Int32 SAL_CALL OSelfTerminateFileStream::available(  )
+sal_Int32 OSelfTerminateFileStream::available(  )
 {
     return m_xStreamWrapper->available();
 }
 
-void SAL_CALL OSelfTerminateFileStream::closeInput(  )
+void OSelfTerminateFileStream::closeInput(  )
 {
     CloseStreamDeleteFile();
 }
 
-void SAL_CALL OSelfTerminateFileStream::seek( sal_Int64 location )
+void OSelfTerminateFileStream::seek( sal_Int64 location )
 {
     m_xStreamWrapper->seek( location );
 }
 
-sal_Int64 SAL_CALL OSelfTerminateFileStream::getPosition()
+sal_Int64 OSelfTerminateFileStream::getPosition()
 {
     return m_xStreamWrapper->getPosition();
 }
 
-sal_Int64 SAL_CALL OSelfTerminateFileStream::getLength()
+sal_Int64 OSelfTerminateFileStream::getLength()
 {
     return m_xStreamWrapper->getLength();
 }

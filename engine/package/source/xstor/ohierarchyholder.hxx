@@ -82,13 +82,13 @@ public:
     void RemoveStreamHierarchically( std::vector<OUString>& aListPath );
 
     // XEventListener
-    virtual void SAL_CALL disposing( const css::lang::EventObject& Source ) override;
+    virtual void disposing( const css::lang::EventObject& Source ) override;
 
     // XTransactionListener
-    virtual void SAL_CALL preCommit( const css::lang::EventObject& aEvent ) override;
-    virtual void SAL_CALL commited( const css::lang::EventObject& aEvent ) override;
-    virtual void SAL_CALL preRevert( const css::lang::EventObject& aEvent ) override;
-    virtual void SAL_CALL reverted( const css::lang::EventObject& aEvent ) override;
+    virtual void preCommit( const css::lang::EventObject& aEvent ) override;
+    virtual void commited( const css::lang::EventObject& aEvent ) override;
+    virtual void preRevert( const css::lang::EventObject& aEvent ) override;
+    virtual void reverted( const css::lang::EventObject& aEvent ) override;
 
 };
 

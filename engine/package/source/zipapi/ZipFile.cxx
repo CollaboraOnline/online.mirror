@@ -635,7 +635,7 @@ public:
         }
     }
 
-    virtual sal_Int32 SAL_CALL readBytes( cpo::uno::Sequence<sal_Int8>& rData, sal_Int32 nBytesToRead ) override
+    virtual sal_Int32 readBytes( cpo::uno::Sequence<sal_Int8>& rData, sal_Int32 nBytesToRead ) override
     {
         if (!hasBytes())
             return 0;
@@ -669,12 +669,12 @@ public:
         return nReadSize;
     }
 
-    virtual sal_Int32 SAL_CALL readSomeBytes( ::cpo::uno::Sequence<sal_Int8>& rData, sal_Int32 nMaxBytesToRead ) override
+    virtual sal_Int32 readSomeBytes( ::cpo::uno::Sequence<sal_Int8>& rData, sal_Int32 nMaxBytesToRead ) override
     {
         return readBytes(rData, nMaxBytesToRead);
     }
 
-    virtual void SAL_CALL skipBytes( sal_Int32 nBytesToSkip ) override
+    virtual void skipBytes( sal_Int32 nBytesToSkip ) override
     {
         if (!hasBytes())
             return;
@@ -682,7 +682,7 @@ public:
         mnPos += nBytesToSkip;
     }
 
-    virtual sal_Int32 SAL_CALL available() override
+    virtual sal_Int32 available() override
     {
         if (!hasBytes())
             return 0;
@@ -690,21 +690,21 @@ public:
         return remainingSize();
     }
 
-    virtual void SAL_CALL closeInput() override
+    virtual void closeInput() override
     {
     }
     // XSeekable
-    virtual void SAL_CALL seek( sal_Int64 location ) override
+    virtual void seek( sal_Int64 location ) override
     {
         if ( location < 0 || o3tl::make_unsigned(location) > maBytes.size() )
             throw IllegalArgumentException(u""_ustr, uno::Reference< cpo::uno::XInterface >(), 1 );
         mnPos = location;
     }
-    virtual sal_Int64 SAL_CALL getPosition() override
+    virtual sal_Int64 getPosition() override
     {
         return mnPos;
     }
-    virtual sal_Int64 SAL_CALL getLength() override
+    virtual sal_Int64 getLength() override
     {
         return maBytes.size();
     }

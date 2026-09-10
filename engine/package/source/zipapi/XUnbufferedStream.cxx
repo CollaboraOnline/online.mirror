@@ -164,7 +164,7 @@ XUnbufferedStream::~XUnbufferedStream()
 {
 }
 
-sal_Int32 SAL_CALL XUnbufferedStream::readBytes( Sequence< sal_Int8 >& aData, sal_Int32 nBytesToRead )
+sal_Int32 XUnbufferedStream::readBytes( Sequence< sal_Int8 >& aData, sal_Int32 nBytesToRead )
 {
     ::osl::MutexGuard aGuard( maMutexHolder->GetMutex() );
 
@@ -305,11 +305,11 @@ sal_Int32 SAL_CALL XUnbufferedStream::readBytes( Sequence< sal_Int8 >& aData, sa
     return nTotal;
 }
 
-sal_Int32 SAL_CALL XUnbufferedStream::readSomeBytes( Sequence< sal_Int8 >& aData, sal_Int32 nMaxBytesToRead )
+sal_Int32 XUnbufferedStream::readSomeBytes( Sequence< sal_Int8 >& aData, sal_Int32 nMaxBytesToRead )
 {
     return readBytes ( aData, nMaxBytesToRead );
 }
-void SAL_CALL XUnbufferedStream::skipBytes( sal_Int32 nBytesToSkip )
+void XUnbufferedStream::skipBytes( sal_Int32 nBytesToSkip )
 {
     if ( nBytesToSkip )
     {
@@ -318,13 +318,13 @@ void SAL_CALL XUnbufferedStream::skipBytes( sal_Int32 nBytesToSkip )
     }
 }
 
-sal_Int32 SAL_CALL XUnbufferedStream::available(  )
+sal_Int32 XUnbufferedStream::available(  )
 {
     //available size must include the prepended header in case of wrapped raw stream
     return static_cast< sal_Int32 > ( std::min< sal_Int64 >( SAL_MAX_INT32, (mnZipSize + mnHeaderToRead - mnMyCurrent) ) );
 }
 
-void SAL_CALL XUnbufferedStream::closeInput(  )
+void XUnbufferedStream::closeInput(  )
 {
 }
 

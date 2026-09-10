@@ -60,7 +60,7 @@ BlowfishCFB8CipherContext::~BlowfishCFB8CipherContext()
     }
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL BlowfishCFB8CipherContext::convertWithCipherContext( const cpo::uno::Sequence< ::sal_Int8 >& aData )
+cpo::uno::Sequence< sal_Int8 > BlowfishCFB8CipherContext::convertWithCipherContext( const cpo::uno::Sequence< ::sal_Int8 >& aData )
 {
     std::scoped_lock aGuard( m_aMutex );
     if ( !m_pCipher )
@@ -94,7 +94,7 @@ cpo::uno::Sequence< sal_Int8 > SAL_CALL BlowfishCFB8CipherContext::convertWithCi
     return aResult;
 }
 
-cpo::uno::Sequence< ::sal_Int8 > SAL_CALL BlowfishCFB8CipherContext::finalizeCipherContextAndDispose()
+cpo::uno::Sequence< ::sal_Int8 > BlowfishCFB8CipherContext::finalizeCipherContextAndDispose()
 {
     std::scoped_lock aGuard( m_aMutex );
     if ( !m_pCipher )

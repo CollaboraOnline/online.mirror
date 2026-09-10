@@ -316,212 +316,212 @@ public:
 
     //  XInterface
 
-    virtual cpo::uno::Any SAL_CALL queryInterface( const cpo::uno::Type& rType ) override;
+    virtual cpo::uno::Any queryInterface( const cpo::uno::Type& rType ) override;
 
-    virtual void SAL_CALL acquire() noexcept override;
+    virtual void acquire() noexcept override;
 
-    virtual void SAL_CALL release() noexcept override;
+    virtual void release() noexcept override;
 
     //  XTypeProvider
 
-    virtual cpo::uno::Sequence< cpo::uno::Type > SAL_CALL getTypes() override;
+    virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() override;
 
-    virtual cpo::uno::Sequence< sal_Int8 > SAL_CALL getImplementationId() override;
+    virtual cpo::uno::Sequence< sal_Int8 > getImplementationId() override;
 
     //  XStorage
 
-    virtual void SAL_CALL copyToStorage( const css::uno::Reference< css::embed::XStorage >& xDest ) override;
+    virtual void copyToStorage( const css::uno::Reference< css::embed::XStorage >& xDest ) override;
 
-    virtual css::uno::Reference< css::io::XStream > SAL_CALL openStreamElement(
+    virtual css::uno::Reference< css::io::XStream > openStreamElement(
             const OUString& aStreamName, sal_Int32 nOpenMode ) override;
 
-    virtual css::uno::Reference< css::io::XStream > SAL_CALL openEncryptedStreamElement(
+    virtual css::uno::Reference< css::io::XStream > openEncryptedStreamElement(
             const OUString& aStreamName, sal_Int32 nOpenMode, const OUString& aPass ) override;
 
-    virtual css::uno::Reference< css::embed::XStorage > SAL_CALL openStorageElement(
+    virtual css::uno::Reference< css::embed::XStorage > openStorageElement(
             const OUString& aStorName, sal_Int32 nStorageMode ) override final;
 
     rtl::Reference< OStorage > openStorageElement2(
             const OUString& aStorName, sal_Int32 nStorageMode );
 
-    virtual css::uno::Reference< css::io::XStream > SAL_CALL cloneStreamElement(
+    virtual css::uno::Reference< css::io::XStream > cloneStreamElement(
             const OUString& aStreamName ) override;
 
-    virtual css::uno::Reference< css::io::XStream > SAL_CALL cloneEncryptedStreamElement(
+    virtual css::uno::Reference< css::io::XStream > cloneEncryptedStreamElement(
             const OUString& aStreamName, const OUString& aPass ) override;
 
-    virtual void SAL_CALL copyLastCommitTo(
+    virtual void copyLastCommitTo(
             const css::uno::Reference< css::embed::XStorage >& xTargetStorage ) override;
 
-    virtual void SAL_CALL copyStorageElementLastCommitTo(
+    virtual void copyStorageElementLastCommitTo(
             const OUString& aStorName,
             const css::uno::Reference< css::embed::XStorage >& xTargetStorage ) override;
 
-    virtual bool SAL_CALL isStreamElement( const OUString& aElementName ) override;
+    virtual bool isStreamElement( const OUString& aElementName ) override;
 
-    virtual bool SAL_CALL isStorageElement( const OUString& aElementName ) override;
+    virtual bool isStorageElement( const OUString& aElementName ) override;
 
-    virtual void SAL_CALL removeElement( const OUString& aElementName ) override;
+    virtual void removeElement( const OUString& aElementName ) override;
 
-    virtual void SAL_CALL renameElement( const OUString& rEleName, const OUString& rNewName ) override;
+    virtual void renameElement( const OUString& rEleName, const OUString& rNewName ) override;
 
-    virtual void SAL_CALL copyElementTo(    const OUString& aElementName,
+    virtual void copyElementTo(    const OUString& aElementName,
                                         const css::uno::Reference< css::embed::XStorage >& xDest,
                                         const OUString& aNewName ) override;
 
-    virtual void SAL_CALL moveElementTo(    const OUString& aElementName,
+    virtual void moveElementTo(    const OUString& aElementName,
                                         const css::uno::Reference< css::embed::XStorage >& xDest,
                                         const OUString& rNewName ) override;
 
     //  XStorage2
 
-    virtual css::uno::Reference< css::io::XStream > SAL_CALL openEncryptedStream( const OUString& sStreamName, ::sal_Int32 nOpenMode, const cpo::uno::Sequence< css::beans::NamedValue >& aEncryptionData ) override;
+    virtual css::uno::Reference< css::io::XStream > openEncryptedStream( const OUString& sStreamName, ::sal_Int32 nOpenMode, const cpo::uno::Sequence< css::beans::NamedValue >& aEncryptionData ) override;
 
-    virtual css::uno::Reference< css::io::XStream > SAL_CALL cloneEncryptedStream( const OUString& sStreamName, const cpo::uno::Sequence< css::beans::NamedValue >& aEncryptionData ) override;
+    virtual css::uno::Reference< css::io::XStream > cloneEncryptedStream( const OUString& sStreamName, const cpo::uno::Sequence< css::beans::NamedValue >& aEncryptionData ) override;
 
     //  XStorageRawAccess
 
-    virtual css::uno::Reference< css::io::XInputStream > SAL_CALL getPlainRawStreamElement(
+    virtual css::uno::Reference< css::io::XInputStream > getPlainRawStreamElement(
             const OUString& sStreamName ) override;
 
-    virtual css::uno::Reference< css::io::XInputStream > SAL_CALL getRawEncrStreamElement(
+    virtual css::uno::Reference< css::io::XInputStream > getRawEncrStreamElement(
             const OUString& sStreamName ) override;
 
-    virtual void SAL_CALL insertRawEncrStreamElement( const OUString& aStreamName,
+    virtual void insertRawEncrStreamElement( const OUString& aStreamName,
                                 const css::uno::Reference< css::io::XInputStream >& xInStream ) override;
 
     // XTransactedObject
-    virtual void SAL_CALL commit() override;
+    virtual void commit() override;
 
-    virtual void SAL_CALL revert() override;
+    virtual void revert() override;
 
     // XTransactionBroadcaster
-    virtual void SAL_CALL addTransactionListener(
+    virtual void addTransactionListener(
             const css::uno::Reference< css::embed::XTransactionListener >& aListener ) override;
 
-    virtual void SAL_CALL removeTransactionListener(
+    virtual void removeTransactionListener(
             const css::uno::Reference< css::embed::XTransactionListener >& aListener ) override;
 
     //  XModifiable
 
-    virtual bool SAL_CALL isModified() override;
+    virtual bool isModified() override;
 
-    virtual void SAL_CALL setModified( bool bModified ) override;
+    virtual void setModified( bool bModified ) override;
 
-    virtual void SAL_CALL addModifyListener(
+    virtual void addModifyListener(
             const css::uno::Reference< css::util::XModifyListener >& aListener ) override;
 
-    virtual void SAL_CALL removeModifyListener(
+    virtual void removeModifyListener(
             const css::uno::Reference< css::util::XModifyListener >& aListener ) override;
 
     //  XNameAccess
 
-    virtual cpo::uno::Any SAL_CALL getByName( const OUString& aName ) override;
+    virtual cpo::uno::Any getByName( const OUString& aName ) override;
 
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames() override;
+    virtual cpo::uno::Sequence< OUString > getElementNames() override;
 
-    virtual bool SAL_CALL hasByName( const OUString& aName ) override;
+    virtual bool hasByName( const OUString& aName ) override;
 
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
+    virtual cpo::uno::Type getElementType() override;
 
-    virtual bool SAL_CALL hasElements() override;
+    virtual bool hasElements() override;
 
     //  XComponent
 
-    virtual void SAL_CALL dispose() override;
+    virtual void dispose() override;
 
-    virtual void SAL_CALL addEventListener(
+    virtual void addEventListener(
             const css::uno::Reference< css::lang::XEventListener >& xListener ) override;
 
-    virtual void SAL_CALL removeEventListener(
+    virtual void removeEventListener(
             const css::uno::Reference< css::lang::XEventListener >& xListener ) override;
 
     //  XEncryptionProtectedSource
 
-    virtual void SAL_CALL setEncryptionPassword( const OUString& aPass ) override;
+    virtual void setEncryptionPassword( const OUString& aPass ) override;
 
-    virtual void SAL_CALL removeEncryption() override;
+    virtual void removeEncryption() override;
 
     //  XEncryptionProtectedSource2
 
-    virtual void SAL_CALL setEncryptionData(
+    virtual void setEncryptionData(
             const cpo::uno::Sequence< css::beans::NamedValue >& aEncryptionData ) override;
 
-    virtual bool SAL_CALL hasEncryptionData() override;
+    virtual bool hasEncryptionData() override;
 
     //  XEncryptionProtectedStorage
 
-    virtual void SAL_CALL setEncryptionAlgorithms( const cpo::uno::Sequence< css::beans::NamedValue >& aAlgorithms ) override;
+    virtual void setEncryptionAlgorithms( const cpo::uno::Sequence< css::beans::NamedValue >& aAlgorithms ) override;
 
-    virtual cpo::uno::Sequence< css::beans::NamedValue > SAL_CALL getEncryptionAlgorithms() override;
+    virtual cpo::uno::Sequence< css::beans::NamedValue > getEncryptionAlgorithms() override;
 
     //  XPropertySet
 
-    virtual css::uno::Reference< css::beans::XPropertySetInfo > SAL_CALL getPropertySetInfo() override;
+    virtual css::uno::Reference< css::beans::XPropertySetInfo > getPropertySetInfo() override;
 
-    virtual void SAL_CALL setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue ) override;
+    virtual void setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue ) override;
 
-    virtual cpo::uno::Any SAL_CALL getPropertyValue( const OUString& PropertyName ) override;
+    virtual cpo::uno::Any getPropertyValue( const OUString& PropertyName ) override;
 
-    virtual void SAL_CALL addPropertyChangeListener(
+    virtual void addPropertyChangeListener(
             const OUString& aPropertyName,
             const css::uno::Reference< css::beans::XPropertyChangeListener >& xListener ) override;
 
-    virtual void SAL_CALL removePropertyChangeListener(
+    virtual void removePropertyChangeListener(
             const OUString& aPropertyName,
             const css::uno::Reference< css::beans::XPropertyChangeListener >& aListener ) override;
 
-    virtual void SAL_CALL addVetoableChangeListener(
+    virtual void addVetoableChangeListener(
             const OUString& PropertyName,
             const css::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
 
-    virtual void SAL_CALL removeVetoableChangeListener( const OUString& PropertyName, const css::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
+    virtual void removeVetoableChangeListener( const OUString& PropertyName, const css::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
 
     //  XOptimizedStorage
-    virtual void SAL_CALL insertRawNonEncrStreamElementDirect( const OUString& sStreamName, const css::uno::Reference< css::io::XInputStream >& xInStream ) override;
+    virtual void insertRawNonEncrStreamElementDirect( const OUString& sStreamName, const css::uno::Reference< css::io::XInputStream >& xInStream ) override;
 
-    virtual void SAL_CALL insertStreamElementDirect( const OUString& sStreamName, const css::uno::Reference< css::io::XInputStream >& xInStream, const cpo::uno::Sequence< css::beans::PropertyValue >& aProps ) override;
+    virtual void insertStreamElementDirect( const OUString& sStreamName, const css::uno::Reference< css::io::XInputStream >& xInStream, const cpo::uno::Sequence< css::beans::PropertyValue >& aProps ) override;
 
-    virtual void SAL_CALL copyElementDirectlyTo( const OUString& sSourceName, const css::uno::Reference< css::embed::XOptimizedStorage >& xTargetStorage, const OUString& sTargetName ) override;
+    virtual void copyElementDirectlyTo( const OUString& sSourceName, const css::uno::Reference< css::embed::XOptimizedStorage >& xTargetStorage, const OUString& sTargetName ) override;
 
-    virtual void SAL_CALL writeAndAttachToStream( const css::uno::Reference< css::io::XStream >& xStream ) override;
+    virtual void writeAndAttachToStream( const css::uno::Reference< css::io::XStream >& xStream ) override;
 
-    virtual void SAL_CALL attachToURL( const OUString& sURL, bool bReadOnly ) override;
+    virtual void attachToURL( const OUString& sURL, bool bReadOnly ) override;
 
-    virtual cpo::uno::Any SAL_CALL getElementPropertyValue( const OUString& sElementName, const OUString& sPropertyName ) override;
+    virtual cpo::uno::Any getElementPropertyValue( const OUString& sElementName, const OUString& sPropertyName ) override;
 
-    virtual void SAL_CALL copyStreamElementData( const OUString& sStreamName, const css::uno::Reference< css::io::XStream >& xTargetStream ) override;
+    virtual void copyStreamElementData( const OUString& sStreamName, const css::uno::Reference< css::io::XStream >& xTargetStream ) override;
 
     // XRelationshipAccess
-    virtual bool SAL_CALL hasByID( const OUString& sID ) override;
+    virtual bool hasByID( const OUString& sID ) override;
 
-    virtual OUString SAL_CALL getTargetByID( const OUString& sID ) override;
+    virtual OUString getTargetByID( const OUString& sID ) override;
 
-    virtual OUString SAL_CALL getTypeByID( const OUString& sID ) override;
+    virtual OUString getTypeByID( const OUString& sID ) override;
 
-    virtual cpo::uno::Sequence< css::beans::StringPair > SAL_CALL getRelationshipByID( const OUString& sID ) override;
+    virtual cpo::uno::Sequence< css::beans::StringPair > getRelationshipByID( const OUString& sID ) override;
 
-    virtual cpo::uno::Sequence< cpo::uno::Sequence< css::beans::StringPair > > SAL_CALL getRelationshipsByType( const OUString& sType ) override;
+    virtual cpo::uno::Sequence< cpo::uno::Sequence< css::beans::StringPair > > getRelationshipsByType( const OUString& sType ) override;
 
-    virtual cpo::uno::Sequence< cpo::uno::Sequence< css::beans::StringPair > > SAL_CALL getAllRelationships(  ) override;
+    virtual cpo::uno::Sequence< cpo::uno::Sequence< css::beans::StringPair > > getAllRelationships(  ) override;
 
-    virtual void SAL_CALL insertRelationshipByID( const OUString& sID, const cpo::uno::Sequence< css::beans::StringPair >& aEntry, bool bReplace ) override;
+    virtual void insertRelationshipByID( const OUString& sID, const cpo::uno::Sequence< css::beans::StringPair >& aEntry, bool bReplace ) override;
 
-    virtual void SAL_CALL removeRelationshipByID( const OUString& sID ) override;
+    virtual void removeRelationshipByID( const OUString& sID ) override;
 
-    virtual void SAL_CALL insertRelationships( const cpo::uno::Sequence< cpo::uno::Sequence< css::beans::StringPair > >& aEntries, bool bReplace ) override;
+    virtual void insertRelationships( const cpo::uno::Sequence< cpo::uno::Sequence< css::beans::StringPair > >& aEntries, bool bReplace ) override;
 
-    virtual void SAL_CALL clearRelationships(  ) override;
+    virtual void clearRelationships(  ) override;
 
     // XHierarchicalStorageAccess
-    virtual css::uno::Reference< css::embed::XExtendedStorageStream > SAL_CALL openStreamElementByHierarchicalName( const OUString& sStreamPath, ::sal_Int32 nOpenMode ) override;
+    virtual css::uno::Reference< css::embed::XExtendedStorageStream > openStreamElementByHierarchicalName( const OUString& sStreamPath, ::sal_Int32 nOpenMode ) override;
 
-    virtual css::uno::Reference< css::embed::XExtendedStorageStream > SAL_CALL openEncryptedStreamElementByHierarchicalName( const OUString& sStreamName, ::sal_Int32 nOpenMode, const OUString& sPassword ) override;
+    virtual css::uno::Reference< css::embed::XExtendedStorageStream > openEncryptedStreamElementByHierarchicalName( const OUString& sStreamName, ::sal_Int32 nOpenMode, const OUString& sPassword ) override;
 
-    virtual void SAL_CALL removeStreamElementByHierarchicalName( const OUString& sElementPath ) override;
+    virtual void removeStreamElementByHierarchicalName( const OUString& sElementPath ) override;
 
     // XHierarchicalStorageAccess2
-    virtual css::uno::Reference< css::embed::XExtendedStorageStream > SAL_CALL openEncryptedStreamByHierarchicalName( const OUString& sStreamName, ::sal_Int32 nOpenMode, const cpo::uno::Sequence< css::beans::NamedValue >& aEncryptionData ) override;
+    virtual css::uno::Reference< css::embed::XExtendedStorageStream > openEncryptedStreamByHierarchicalName( const OUString& sStreamName, ::sal_Int32 nOpenMode, const cpo::uno::Sequence< css::beans::NamedValue >& aEncryptionData ) override;
 };
 
 #endif

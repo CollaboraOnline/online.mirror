@@ -152,26 +152,26 @@ public:
     void successfullyWritten( ZipEntry const *pEntry );
 
     // XActiveDataSink
-    virtual void SAL_CALL setInputStream( const css::uno::Reference< css::io::XInputStream >& aStream ) override;
-    virtual css::uno::Reference< css::io::XInputStream > SAL_CALL getInputStream(  ) override;
+    virtual void setInputStream( const css::uno::Reference< css::io::XInputStream >& aStream ) override;
+    virtual css::uno::Reference< css::io::XInputStream > getInputStream(  ) override;
 
     // XDataSinkEncrSupport
-    virtual css::uno::Reference< css::io::XInputStream > SAL_CALL getDataStream() override;
-    virtual css::uno::Reference< css::io::XInputStream > SAL_CALL getRawStream() override;
-    virtual void SAL_CALL setDataStream(
+    virtual css::uno::Reference< css::io::XInputStream > getDataStream() override;
+    virtual css::uno::Reference< css::io::XInputStream > getRawStream() override;
+    virtual void setDataStream(
                     const css::uno::Reference< css::io::XInputStream >& aStream ) override;
-    virtual void SAL_CALL setRawStream(
+    virtual void setRawStream(
                     const css::uno::Reference< css::io::XInputStream >& aStream ) override;
-    virtual css::uno::Reference< css::io::XInputStream > SAL_CALL getPlainRawStream() override;
+    virtual css::uno::Reference< css::io::XInputStream > getPlainRawStream() override;
 
     // XPropertySet
-    virtual void SAL_CALL setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue ) override;
-    virtual cpo::uno::Any SAL_CALL getPropertyValue( const OUString& PropertyName ) override;
+    virtual void setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue ) override;
+    virtual cpo::uno::Any getPropertyValue( const OUString& PropertyName ) override;
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName(  ) override;
-    virtual bool SAL_CALL supportsService( const OUString& ServiceName ) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames(  ) override;
+    virtual OUString getImplementationName(  ) override;
+    virtual bool supportsService( const OUString& ServiceName ) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames(  ) override;
 };
 #endif
 

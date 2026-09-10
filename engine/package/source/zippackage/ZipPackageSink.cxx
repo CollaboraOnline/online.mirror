@@ -24,12 +24,12 @@ ZipPackageSink::ZipPackageSink()
 {
 }
 ZipPackageSink::~ZipPackageSink() {}
-void SAL_CALL
+void
 ZipPackageSink::setInputStream(const css::uno::Reference<css::io::XInputStream>& aStream)
 {
     xStream = aStream;
 }
-css::uno::Reference<css::io::XInputStream> SAL_CALL ZipPackageSink::getInputStream()
+css::uno::Reference<css::io::XInputStream> ZipPackageSink::getInputStream()
 {
     return xStream;
 }

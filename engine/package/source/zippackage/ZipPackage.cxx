@@ -108,28 +108,28 @@ class ActiveDataStreamer : public ::cppu::WeakImplHelper< XActiveDataStreamer >
     uno::Reference< XStream > mStream;
 public:
 
-    virtual uno::Reference< XStream > SAL_CALL getStream() override
+    virtual uno::Reference< XStream > getStream() override
             { return mStream; }
 
-    virtual void SAL_CALL setStream( const uno::Reference< XStream >& stream ) override
+    virtual void setStream( const uno::Reference< XStream >& stream ) override
             { mStream = stream; }
 };
 
 class DummyInputStream : public ::cppu::WeakImplHelper< XInputStream >
 {
-    virtual sal_Int32 SAL_CALL readBytes( cpo::uno::Sequence< sal_Int8 >&, sal_Int32 ) override
+    virtual sal_Int32 readBytes( cpo::uno::Sequence< sal_Int8 >&, sal_Int32 ) override
         { return 0; }
 
-    virtual sal_Int32 SAL_CALL readSomeBytes( cpo::uno::Sequence< sal_Int8 >&, sal_Int32 ) override
+    virtual sal_Int32 readSomeBytes( cpo::uno::Sequence< sal_Int8 >&, sal_Int32 ) override
         { return 0; }
 
-    virtual void SAL_CALL skipBytes( sal_Int32 ) override
+    virtual void skipBytes( sal_Int32 ) override
         {}
 
-    virtual sal_Int32 SAL_CALL available() override
+    virtual sal_Int32 available() override
         { return 0; }
 
-    virtual void SAL_CALL closeInput() override
+    virtual void closeInput() override
         {}
 };
 
@@ -637,7 +637,7 @@ void ZipPackage::getZipFileContents()
     }
 }
 
-void SAL_CALL ZipPackage::initialize( const cpo::uno::Sequence< Any >& aArguments )
+void ZipPackage::initialize( const cpo::uno::Sequence< Any >& aArguments )
 {
     beans::NamedValue aNamedValue;
 
@@ -849,7 +849,7 @@ void SAL_CALL ZipPackage::initialize( const cpo::uno::Sequence< Any >& aArgument
     }
 }
 
-Any SAL_CALL ZipPackage::getByHierarchicalName( const OUString& aName )
+Any ZipPackage::getByHierarchicalName( const OUString& aName )
 {
     OUString sDirName;
     sal_Int32 nOldIndex, nStreamIndex;
@@ -942,7 +942,7 @@ Any SAL_CALL ZipPackage::getByHierarchicalName( const OUString& aName )
     throw NoSuchElementException();
 }
 
-bool SAL_CALL ZipPackage::hasByHierarchicalName( const OUString& aName )
+bool ZipPackage::hasByHierarchicalName( const OUString& aName )
 {
     if (aName == "/")
         // root directory
@@ -1035,13 +1035,13 @@ bool SAL_CALL ZipPackage::hasByHierarchicalName( const OUString& aName )
     return false;
 }
 
-uno::Reference< XInterface > SAL_CALL ZipPackage::createInstance()
+uno::Reference< XInterface > ZipPackage::createInstance()
 {
     uno::Reference < XInterface > xRef = *( new ZipPackageStream( *this, m_xContext, m_nFormat, m_bAllowRemoveOnInsert ) );
     return xRef;
 }
 
-uno::Reference< XInterface > SAL_CALL ZipPackage::createInstanceWithArguments( const cpo::uno::Sequence< Any >& aArguments )
+uno::Reference< XInterface > ZipPackage::createInstanceWithArguments( const cpo::uno::Sequence< Any >& aArguments )
 {
     bool bArg = false;
     uno::Reference < XInterface > xRef;
@@ -1450,7 +1450,7 @@ uno::Reference< XActiveDataStreamer > ZipPackage::openOriginalForOutput()
     return xSink;
 }
 
-void SAL_CALL ZipPackage::commitChanges()
+void ZipPackage::commitChanges()
 {
     // lock the component for the time of committing
     ::osl::MutexGuard aGuard( m_aMutexHolder->GetMutex() );
@@ -1695,11 +1695,11 @@ cpo::uno::Sequence< sal_Int8 > ZipPackage::GetEncryptionKey()
     return aResult;
 }
 
-bool SAL_CALL ZipPackage::hasPendingChanges()
+bool ZipPackage::hasPendingChanges()
 {
     return false;
 }
-Sequence< ElementChange > SAL_CALL ZipPackage::getPendingChanges()
+Sequence< ElementChange > ZipPackage::getPendingChanges()
 {
     return cpo::uno::Sequence < ElementChange > ();
 }
@@ -1715,17 +1715,17 @@ Sequence< OUString > ZipPackage::getSupportedServiceNames()
     return { u"com.sun.star.packages.Package"_ustr };
 }
 
-bool SAL_CALL ZipPackage::supportsService( OUString const & rServiceName )
+bool ZipPackage::supportsService( OUString const & rServiceName )
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-uno::Reference< XPropertySetInfo > SAL_CALL ZipPackage::getPropertySetInfo()
+uno::Reference< XPropertySetInfo > ZipPackage::getPropertySetInfo()
 {
     return uno::Reference < XPropertySetInfo > ();
 }
 
-void SAL_CALL ZipPackage::setPropertyValue( const OUString& aPropertyName, const Any& aValue )
+void ZipPackage::setPropertyValue( const OUString& aPropertyName, const Any& aValue )
 {
     if ( m_nFormat != embed::StorageFormats::PACKAGE )
         throw UnknownPropertyException(aPropertyName);
@@ -1826,7 +1826,7 @@ void SAL_CALL ZipPackage::setPropertyValue( const OUString& aPropertyName, const
         throw UnknownPropertyException(aPropertyName);
 }
 
-Any SAL_CALL ZipPackage::getPropertyValue( const OUString& PropertyName )
+Any ZipPackage::getPropertyValue( const OUString& PropertyName )
 {
     // TODO/LATER: Activate the check when zip-ucp is ready
     // if ( m_nFormat != embed::StorageFormats::PACKAGE )
@@ -1878,16 +1878,16 @@ Any SAL_CALL ZipPackage::getPropertyValue( const OUString& PropertyName )
     }
     throw UnknownPropertyException(PropertyName);
 }
-void SAL_CALL ZipPackage::addPropertyChangeListener( const OUString& /*aPropertyName*/, const uno::Reference< XPropertyChangeListener >& /*xListener*/ )
+void ZipPackage::addPropertyChangeListener( const OUString& /*aPropertyName*/, const uno::Reference< XPropertyChangeListener >& /*xListener*/ )
 {
 }
-void SAL_CALL ZipPackage::removePropertyChangeListener( const OUString& /*aPropertyName*/, const uno::Reference< XPropertyChangeListener >& /*aListener*/ )
+void ZipPackage::removePropertyChangeListener( const OUString& /*aPropertyName*/, const uno::Reference< XPropertyChangeListener >& /*aListener*/ )
 {
 }
-void SAL_CALL ZipPackage::addVetoableChangeListener( const OUString& /*PropertyName*/, const uno::Reference< XVetoableChangeListener >& /*aListener*/ )
+void ZipPackage::addVetoableChangeListener( const OUString& /*PropertyName*/, const uno::Reference< XVetoableChangeListener >& /*aListener*/ )
 {
 }
-void SAL_CALL ZipPackage::removeVetoableChangeListener( const OUString& /*PropertyName*/, const uno::Reference< XVetoableChangeListener >& /*aListener*/ )
+void ZipPackage::removeVetoableChangeListener( const OUString& /*PropertyName*/, const uno::Reference< XVetoableChangeListener >& /*aListener*/ )
 {
 }
 

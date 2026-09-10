@@ -60,11 +60,11 @@ ManifestImport::~ManifestImport()
 {
 }
 
-void SAL_CALL ManifestImport::startDocument(  )
+void ManifestImport::startDocument(  )
 {
 }
 
-void SAL_CALL ManifestImport::endDocument(  )
+void ManifestImport::endDocument(  )
 {
 }
 
@@ -250,7 +250,7 @@ void ManifestImport::doStartKeyAlg(StringHashMap &rConvertedAttribs)
         bIgnoreEncryptData = true;
 }
 
-void SAL_CALL ManifestImport::startElement( const OUString& aName, const uno::Reference< xml::sax::XAttributeList >& xAttribs )
+void ManifestImport::startElement( const OUString& aName, const uno::Reference< xml::sax::XAttributeList >& xAttribs )
 {
     StringHashMap aConvertedAttribs;
     OUString aConvertedName = PushNameAndNamespaces( aName, xAttribs, aConvertedAttribs );
@@ -315,7 +315,7 @@ bool isEmpty(const css::beans::PropertyValue &rProp)
 }
 }
 
-void SAL_CALL ManifestImport::endElement( const OUString& aName )
+void ManifestImport::endElement( const OUString& aName )
 {
     assert(aStack.size() >= 1);
 
@@ -347,20 +347,20 @@ void SAL_CALL ManifestImport::endElement( const OUString& aName )
     aStack.pop_back();
 }
 
-void SAL_CALL ManifestImport::characters( const OUString& aChars )
+void ManifestImport::characters( const OUString& aChars )
 {
     aCurrentCharacters.append(aChars);
 }
 
-void SAL_CALL ManifestImport::ignorableWhitespace( const OUString& /*aWhitespaces*/ )
+void ManifestImport::ignorableWhitespace( const OUString& /*aWhitespaces*/ )
 {
 }
 
-void SAL_CALL ManifestImport::processingInstruction( const OUString& /*aTarget*/, const OUString& /*aData*/ )
+void ManifestImport::processingInstruction( const OUString& /*aTarget*/, const OUString& /*aData*/ )
 {
 }
 
-void SAL_CALL ManifestImport::setDocumentLocator( const uno::Reference< xml::sax::XLocator >& /*xLocator*/ )
+void ManifestImport::setDocumentLocator( const uno::Reference< xml::sax::XLocator >& /*xLocator*/ )
 {
 }
 

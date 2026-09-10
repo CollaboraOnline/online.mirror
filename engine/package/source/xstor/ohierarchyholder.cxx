@@ -246,7 +246,7 @@ void OHierarchyElement_Impl::TestForClosing()
     }
 }
 
-void SAL_CALL OHierarchyElement_Impl::disposing( const lang::EventObject& Source )
+void OHierarchyElement_Impl::disposing( const lang::EventObject& Source )
 {
     try
     {
@@ -287,11 +287,11 @@ void OHierarchyElement_Impl::RemoveElement( const ::rtl::Reference< OHierarchyEl
 }
 
 // XTransactionListener
-void SAL_CALL OHierarchyElement_Impl::preCommit( const css::lang::EventObject& /*aEvent*/ )
+void OHierarchyElement_Impl::preCommit( const css::lang::EventObject& /*aEvent*/ )
 {
 }
 
-void SAL_CALL OHierarchyElement_Impl::commited( const css::lang::EventObject& /*aEvent*/ )
+void OHierarchyElement_Impl::commited( const css::lang::EventObject& /*aEvent*/ )
 {
     try
     {
@@ -307,11 +307,11 @@ void SAL_CALL OHierarchyElement_Impl::commited( const css::lang::EventObject& /*
     }
 }
 
-void SAL_CALL OHierarchyElement_Impl::preRevert( const css::lang::EventObject& /*aEvent*/ )
+void OHierarchyElement_Impl::preRevert( const css::lang::EventObject& /*aEvent*/ )
 {
 }
 
-void SAL_CALL OHierarchyElement_Impl::reverted( const css::lang::EventObject& /*aEvent*/ )
+void OHierarchyElement_Impl::reverted( const css::lang::EventObject& /*aEvent*/ )
 {
 }
 

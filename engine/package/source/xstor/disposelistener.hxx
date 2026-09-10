@@ -36,7 +36,7 @@ public:
 
     void OwnerIsDisposed();
 
-    virtual void SAL_CALL disposing(const css::lang::EventObject& Source) override;
+    virtual void disposing(const css::lang::EventObject& Source) override;
 };
 
 #endif

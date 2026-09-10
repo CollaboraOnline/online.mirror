@@ -47,7 +47,7 @@ StarOfficeSHA1DigestContext::~StarOfficeSHA1DigestContext()
     }
 }
 
-void SAL_CALL StarOfficeSHA1DigestContext::updateDigest(const cpo::uno::Sequence<::sal_Int8>& aData)
+void StarOfficeSHA1DigestContext::updateDigest(const cpo::uno::Sequence<::sal_Int8>& aData)
 {
     std::scoped_lock aGuard( m_aMutex );
     if ( !m_pDigest )
@@ -62,7 +62,7 @@ void SAL_CALL StarOfficeSHA1DigestContext::updateDigest(const cpo::uno::Sequence
     }
 }
 
-cpo::uno::Sequence<::sal_Int8> SAL_CALL StarOfficeSHA1DigestContext::finalizeDigestAndDispose()
+cpo::uno::Sequence<::sal_Int8> StarOfficeSHA1DigestContext::finalizeDigestAndDispose()
 {
     std::scoped_lock aGuard( m_aMutex );
     if ( !m_pDigest )
@@ -96,7 +96,7 @@ CorrectSHA1DigestContext::~CorrectSHA1DigestContext()
 {
 }
 
-void SAL_CALL CorrectSHA1DigestContext::updateDigest(const cpo::uno::Sequence<::sal_Int8>& rData)
+void CorrectSHA1DigestContext::updateDigest(const cpo::uno::Sequence<::sal_Int8>& rData)
 {
     std::scoped_lock aGuard(m_Mutex);
     if (m_bDisposed)
@@ -105,7 +105,7 @@ void SAL_CALL CorrectSHA1DigestContext::updateDigest(const cpo::uno::Sequence<::
     m_Hash.update(rData.getConstArray(), rData.getLength());
 }
 
-cpo::uno::Sequence<::sal_Int8> SAL_CALL CorrectSHA1DigestContext::finalizeDigestAndDispose()
+cpo::uno::Sequence<::sal_Int8> CorrectSHA1DigestContext::finalizeDigestAndDispose()
 {
     std::scoped_lock aGuard(m_Mutex);
     if (m_bDisposed)

@@ -44,7 +44,7 @@ ManifestReader::ManifestReader( const Reference < XComponentContext > & xContext
 ManifestReader::~ManifestReader()
 {
 }
-Sequence< Sequence< PropertyValue > > SAL_CALL ManifestReader::readManifestSequence( const Reference< XInputStream >& rStream )
+Sequence< Sequence< PropertyValue > > ManifestReader::readManifestSequence( const Reference< XInputStream >& rStream )
 {
     Sequence < Sequence < PropertyValue > > aManifestSequence;
     Reference < XParser > xParser  = Parser::create(m_xContext);
@@ -82,7 +82,7 @@ OUString ManifestReader::getImplementationName()
     return u"com.sun.star.packages.manifest.comp.ManifestReader"_ustr;
 }
 
-bool SAL_CALL ManifestReader::supportsService(OUString const & rServiceName)
+bool ManifestReader::supportsService(OUString const & rServiceName)
 {
     return cppu::supportsService(this, rServiceName );
 }

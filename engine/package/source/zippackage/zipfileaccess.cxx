@@ -157,7 +157,7 @@ bool OZipFileAccess::StringGoodForPattern_Impl( std::u16string_view aString,
 }
 
 // XInitialization
-void SAL_CALL OZipFileAccess::initialize( const cpo::uno::Sequence< cpo::uno::Any >& aArguments )
+void OZipFileAccess::initialize( const cpo::uno::Sequence< cpo::uno::Any >& aArguments )
 {
     ::osl::MutexGuard aGuard( m_aMutexHolder->GetMutex() );
 
@@ -242,7 +242,7 @@ void SAL_CALL OZipFileAccess::initialize( const cpo::uno::Sequence< cpo::uno::An
 }
 
 // XNameAccess
-cpo::uno::Any SAL_CALL OZipFileAccess::getByName( const OUString& aName )
+cpo::uno::Any OZipFileAccess::getByName( const OUString& aName )
 {
     ::osl::MutexGuard aGuard( m_aMutexHolder->GetMutex() );
 
@@ -289,7 +289,7 @@ cpo::uno::Any SAL_CALL OZipFileAccess::getByName( const OUString& aName )
     return cpo::uno::Any ( xEntryStream );
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL OZipFileAccess::getElementNames()
+cpo::uno::Sequence< OUString > OZipFileAccess::getElementNames()
 {
     ::osl::MutexGuard aGuard( m_aMutexHolder->GetMutex() );
 
@@ -324,7 +324,7 @@ cpo::uno::Sequence< OUString > SAL_CALL OZipFileAccess::getElementNames()
     return aNames;
 }
 
-bool SAL_CALL OZipFileAccess::hasByName( const OUString& aName )
+bool OZipFileAccess::hasByName( const OUString& aName )
 {
     ::osl::MutexGuard aGuard( m_aMutexHolder->GetMutex() );
 
@@ -339,7 +339,7 @@ bool SAL_CALL OZipFileAccess::hasByName( const OUString& aName )
     return ( aIter != m_pZipFile->GetEntryHash().end() );
 }
 
-cpo::uno::Type SAL_CALL OZipFileAccess::getElementType()
+cpo::uno::Type OZipFileAccess::getElementType()
 {
     ::osl::MutexGuard aGuard( m_aMutexHolder->GetMutex() );
 
@@ -352,7 +352,7 @@ cpo::uno::Type SAL_CALL OZipFileAccess::getElementType()
     return cppu::UnoType<io::XInputStream>::get();
 }
 
-bool SAL_CALL OZipFileAccess::hasElements()
+bool OZipFileAccess::hasElements()
 {
     ::osl::MutexGuard aGuard( m_aMutexHolder->GetMutex() );
 
@@ -366,7 +366,7 @@ bool SAL_CALL OZipFileAccess::hasElements()
 }
 
 // XZipFileAccess
-uno::Reference< io::XInputStream > SAL_CALL OZipFileAccess::getStreamByPattern( const OUString& aPatternString )
+uno::Reference< io::XInputStream > OZipFileAccess::getStreamByPattern( const OUString& aPatternString )
 {
     ::osl::MutexGuard aGuard( m_aMutexHolder->GetMutex() );
 
@@ -397,7 +397,7 @@ uno::Reference< io::XInputStream > SAL_CALL OZipFileAccess::getStreamByPattern( 
 }
 
 // XComponent
-void SAL_CALL OZipFileAccess::dispose()
+void OZipFileAccess::dispose()
 {
     ::osl::MutexGuard aGuard( m_aMutexHolder->GetMutex() );
 
@@ -422,7 +422,7 @@ void SAL_CALL OZipFileAccess::dispose()
     m_bDisposed = true;
 }
 
-void SAL_CALL OZipFileAccess::addEventListener( const uno::Reference< lang::XEventListener >& xListener )
+void OZipFileAccess::addEventListener( const uno::Reference< lang::XEventListener >& xListener )
 {
     ::osl::MutexGuard aGuard( m_aMutexHolder->GetMutex() );
 
@@ -434,7 +434,7 @@ void SAL_CALL OZipFileAccess::addEventListener( const uno::Reference< lang::XEve
     m_pListenersContainer->addInterface( xListener );
 }
 
-void SAL_CALL OZipFileAccess::removeEventListener( const uno::Reference< lang::XEventListener >& xListener )
+void OZipFileAccess::removeEventListener( const uno::Reference< lang::XEventListener >& xListener )
 {
     ::osl::MutexGuard aGuard( m_aMutexHolder->GetMutex() );
 
@@ -445,17 +445,17 @@ void SAL_CALL OZipFileAccess::removeEventListener( const uno::Reference< lang::X
         m_pListenersContainer->removeInterface( xListener );
 }
 
-OUString SAL_CALL OZipFileAccess::getImplementationName()
+OUString OZipFileAccess::getImplementationName()
 {
     return u"com.sun.star.comp.package.zip.ZipFileAccess"_ustr;
 }
 
-bool SAL_CALL OZipFileAccess::supportsService( const OUString& ServiceName )
+bool OZipFileAccess::supportsService( const OUString& ServiceName )
 {
     return cppu::supportsService(this, ServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL OZipFileAccess::getSupportedServiceNames()
+cpo::uno::Sequence< OUString > OZipFileAccess::getSupportedServiceNames()
 {
     return { u"com.sun.star.packages.zip.ZipFileAccess"_ustr,
     u"com.sun.star.comp.packages.zip.ZipFileAccess"_ustr };

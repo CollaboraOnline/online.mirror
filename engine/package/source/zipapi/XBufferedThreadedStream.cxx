@@ -128,7 +128,7 @@ void XBufferedThreadedStream::setTerminateThread()
     maBufferConsumeResume.notify_one();
 }
 
-sal_Int32 SAL_CALL XBufferedThreadedStream::readBytes( Sequence< sal_Int8 >& rData, sal_Int32 nBytesToRead )
+sal_Int32 XBufferedThreadedStream::readBytes( Sequence< sal_Int8 >& rData, sal_Int32 nBytesToRead )
 {
     if( !hasBytes() )
         return 0;
@@ -185,11 +185,11 @@ sal_Int32 XBufferedThreadedStream::readSomeBytes( sal_Int8* pData, sal_Int32 nBy
     return nAvailableSize;
 }
 
-sal_Int32 SAL_CALL XBufferedThreadedStream::readSomeBytes( Sequence< sal_Int8 >& aData, sal_Int32 nMaxBytesToRead )
+sal_Int32 XBufferedThreadedStream::readSomeBytes( Sequence< sal_Int8 >& aData, sal_Int32 nMaxBytesToRead )
 {
     return readBytes( aData, nMaxBytesToRead );
 }
-void SAL_CALL XBufferedThreadedStream::skipBytes( sal_Int32 nBytesToSkip )
+void XBufferedThreadedStream::skipBytes( sal_Int32 nBytesToSkip )
 {
     if( nBytesToSkip )
     {
@@ -198,7 +198,7 @@ void SAL_CALL XBufferedThreadedStream::skipBytes( sal_Int32 nBytesToSkip )
     }
 }
 
-sal_Int32 SAL_CALL XBufferedThreadedStream::available()
+sal_Int32 XBufferedThreadedStream::available()
 {
     if( !hasBytes() )
         return 0;
@@ -206,7 +206,7 @@ sal_Int32 SAL_CALL XBufferedThreadedStream::available()
     return static_cast< sal_Int32 > ( std::min< sal_Int64 >( SAL_MAX_INT32, remainingSize() ) );
 }
 
-void SAL_CALL XBufferedThreadedStream::closeInput()
+void XBufferedThreadedStream::closeInput()
 {
     setTerminateThread();
     mxUnzippingThread->join();

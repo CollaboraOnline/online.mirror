@@ -198,7 +198,7 @@ void SwitchablePersistenceStream::CloseAll_Impl()
 }
 
 // css::io::XStream
-uno::Reference< io::XInputStream > SAL_CALL SwitchablePersistenceStream::getInputStream(  )
+uno::Reference< io::XInputStream > SwitchablePersistenceStream::getInputStream(  )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -207,7 +207,7 @@ uno::Reference< io::XInputStream > SAL_CALL SwitchablePersistenceStream::getInpu
     return static_cast< io::XInputStream* >( this );
 }
 
-uno::Reference< io::XOutputStream > SAL_CALL SwitchablePersistenceStream::getOutputStream(  )
+uno::Reference< io::XOutputStream > SwitchablePersistenceStream::getOutputStream(  )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -217,7 +217,7 @@ uno::Reference< io::XOutputStream > SAL_CALL SwitchablePersistenceStream::getOut
 }
 
 // css::io::XInputStream
-::sal_Int32 SAL_CALL SwitchablePersistenceStream::readBytes( cpo::uno::Sequence< ::sal_Int8 >& aData, ::sal_Int32 nBytesToRead )
+::sal_Int32 SwitchablePersistenceStream::readBytes( cpo::uno::Sequence< ::sal_Int8 >& aData, ::sal_Int32 nBytesToRead )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -231,7 +231,7 @@ uno::Reference< io::XOutputStream > SAL_CALL SwitchablePersistenceStream::getOut
     return m_pStreamData->m_xOrigInStream->readBytes( aData, nBytesToRead );
 }
 
-::sal_Int32 SAL_CALL SwitchablePersistenceStream::readSomeBytes( cpo::uno::Sequence< ::sal_Int8 >& aData, ::sal_Int32 nMaxBytesToRead )
+::sal_Int32 SwitchablePersistenceStream::readSomeBytes( cpo::uno::Sequence< ::sal_Int8 >& aData, ::sal_Int32 nMaxBytesToRead )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -267,7 +267,7 @@ uno::Reference< io::XOutputStream > SAL_CALL SwitchablePersistenceStream::getOut
     }
 }
 
-void SAL_CALL SwitchablePersistenceStream::skipBytes( ::sal_Int32 nBytesToSkip )
+void SwitchablePersistenceStream::skipBytes( ::sal_Int32 nBytesToSkip )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -281,7 +281,7 @@ void SAL_CALL SwitchablePersistenceStream::skipBytes( ::sal_Int32 nBytesToSkip )
     m_pStreamData->m_xOrigInStream->skipBytes( nBytesToSkip );
 }
 
-::sal_Int32 SAL_CALL SwitchablePersistenceStream::available(  )
+::sal_Int32 SwitchablePersistenceStream::available(  )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -295,7 +295,7 @@ void SAL_CALL SwitchablePersistenceStream::skipBytes( ::sal_Int32 nBytesToSkip )
     return m_pStreamData->m_xOrigInStream->available();
 }
 
-void SAL_CALL SwitchablePersistenceStream::closeInput()
+void SwitchablePersistenceStream::closeInput()
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -308,7 +308,7 @@ void SAL_CALL SwitchablePersistenceStream::closeInput()
 }
 
 // css::io::XOutputStream
-void SAL_CALL SwitchablePersistenceStream::writeBytes( const cpo::uno::Sequence< ::sal_Int8 >& aData )
+void SwitchablePersistenceStream::writeBytes( const cpo::uno::Sequence< ::sal_Int8 >& aData )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -325,7 +325,7 @@ void SAL_CALL SwitchablePersistenceStream::writeBytes( const cpo::uno::Sequence<
     m_pStreamData->m_xOrigOutStream->writeBytes( aData );
 }
 
-void SAL_CALL SwitchablePersistenceStream::flush(  )
+void SwitchablePersistenceStream::flush(  )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -345,7 +345,7 @@ void SAL_CALL SwitchablePersistenceStream::flush(  )
     m_pStreamData->m_xOrigOutStream->flush();
 }
 
-void SAL_CALL SwitchablePersistenceStream::closeOutput(  )
+void SwitchablePersistenceStream::closeOutput(  )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -358,7 +358,7 @@ void SAL_CALL SwitchablePersistenceStream::closeOutput(  )
 }
 
 // css::io::XTruncate
-void SAL_CALL SwitchablePersistenceStream::truncate(  )
+void SwitchablePersistenceStream::truncate(  )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -376,7 +376,7 @@ void SAL_CALL SwitchablePersistenceStream::truncate(  )
 }
 
 // css::io::XSeekable
-void SAL_CALL SwitchablePersistenceStream::seek( ::sal_Int64 location )
+void SwitchablePersistenceStream::seek( ::sal_Int64 location )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -390,7 +390,7 @@ void SAL_CALL SwitchablePersistenceStream::seek( ::sal_Int64 location )
     m_pStreamData->m_xOrigSeekable->seek( location );
 }
 
-::sal_Int64 SAL_CALL SwitchablePersistenceStream::getPosition(  )
+::sal_Int64 SwitchablePersistenceStream::getPosition(  )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -404,7 +404,7 @@ void SAL_CALL SwitchablePersistenceStream::seek( ::sal_Int64 location )
     return m_pStreamData->m_xOrigSeekable->getPosition();
 }
 
-::sal_Int64 SAL_CALL SwitchablePersistenceStream::getLength(  )
+::sal_Int64 SwitchablePersistenceStream::getLength(  )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -418,7 +418,7 @@ void SAL_CALL SwitchablePersistenceStream::seek( ::sal_Int64 location )
     return m_pStreamData->m_xOrigSeekable->getLength();
 }
 
-void SAL_CALL SwitchablePersistenceStream::waitForCompletion()
+void SwitchablePersistenceStream::waitForCompletion()
 {
     if ( !m_pStreamData )
         throw io::NotConnectedException();

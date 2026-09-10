@@ -35,7 +35,7 @@ void OChildDispListener_Impl::OwnerIsDisposed()
     m_pStorage = nullptr;
 }
 
-void SAL_CALL OChildDispListener_Impl::disposing( const lang::EventObject& Source )
+void OChildDispListener_Impl::disposing( const lang::EventObject& Source )
 {
     std::scoped_lock aGuard( m_aMutex );
     // ObjectIsDisposed must not contain any locking!

@@ -42,9 +42,9 @@ public:
     virtual ~OInputSeekStream() override;
 
     //XSeekable
-    virtual void SAL_CALL seek( sal_Int64 location ) override;
-    virtual sal_Int64 SAL_CALL getPosition() override;
-    virtual sal_Int64 SAL_CALL getLength() override;
+    virtual void seek( sal_Int64 location ) override;
+    virtual sal_Int64 getPosition() override;
+    virtual sal_Int64 getLength() override;
 };
 
 #endif

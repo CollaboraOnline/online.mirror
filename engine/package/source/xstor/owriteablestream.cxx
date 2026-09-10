@@ -1677,7 +1677,7 @@ void OWriteStream::ModifyParentUnlockMutex_Impl(osl::ClearableMutexGuard& aGuard
     }
 }
 
-cpo::uno::Any SAL_CALL OWriteStream::queryInterface( const cpo::uno::Type& rType )
+cpo::uno::Any OWriteStream::queryInterface( const cpo::uno::Type& rType )
 {
     // common interfaces
     cpo::uno::Any aReturn = ::cppu::queryInterface
@@ -1726,17 +1726,17 @@ cpo::uno::Any SAL_CALL OWriteStream::queryInterface( const cpo::uno::Type& rType
     return OWeakObject::queryInterface( rType );
 }
 
-void SAL_CALL OWriteStream::acquire() noexcept
+void OWriteStream::acquire() noexcept
 {
     OWeakObject::acquire();
 }
 
-void SAL_CALL OWriteStream::release() noexcept
+void OWriteStream::release() noexcept
 {
     OWeakObject::release();
 }
 
-cpo::uno::Sequence< cpo::uno::Type > SAL_CALL OWriteStream::getTypes()
+cpo::uno::Sequence< cpo::uno::Type > OWriteStream::getTypes()
 {
     if (! m_oTypeCollection)
     {
@@ -1846,13 +1846,13 @@ cpo::uno::Sequence< cpo::uno::Type > SAL_CALL OWriteStream::getTypes()
     return m_oTypeCollection->getTypes() ;
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL OWriteStream::getImplementationId()
+cpo::uno::Sequence< sal_Int8 > OWriteStream::getImplementationId()
 {
     static const comphelper::UnoIdInit lcl_ImplId;
     return lcl_ImplId.getSeq();
 }
 
-sal_Int32 SAL_CALL OWriteStream::readBytes( cpo::uno::Sequence< sal_Int8 >& aData, sal_Int32 nBytesToRead )
+sal_Int32 OWriteStream::readBytes( cpo::uno::Sequence< sal_Int8 >& aData, sal_Int32 nBytesToRead )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -1864,7 +1864,7 @@ sal_Int32 SAL_CALL OWriteStream::readBytes( cpo::uno::Sequence< sal_Int8 >& aDat
     return m_xInStream->readBytes( aData, nBytesToRead );
 }
 
-sal_Int32 SAL_CALL OWriteStream::readSomeBytes( cpo::uno::Sequence< sal_Int8 >& aData, sal_Int32 nMaxBytesToRead )
+sal_Int32 OWriteStream::readSomeBytes( cpo::uno::Sequence< sal_Int8 >& aData, sal_Int32 nMaxBytesToRead )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -1895,7 +1895,7 @@ sal_Int32 OWriteStream::readSomeBytes(sal_Int8* pData, sal_Int32 nBytesToRead)
     return nRead;
 }
 
-void SAL_CALL OWriteStream::skipBytes( sal_Int32 nBytesToSkip )
+void OWriteStream::skipBytes( sal_Int32 nBytesToSkip )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -1907,7 +1907,7 @@ void SAL_CALL OWriteStream::skipBytes( sal_Int32 nBytesToSkip )
     m_xInStream->skipBytes( nBytesToSkip );
 }
 
-sal_Int32 SAL_CALL OWriteStream::available(  )
+sal_Int32 OWriteStream::available(  )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -1920,7 +1920,7 @@ sal_Int32 SAL_CALL OWriteStream::available(  )
 
 }
 
-void SAL_CALL OWriteStream::closeInput(  )
+void OWriteStream::closeInput(  )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -1937,7 +1937,7 @@ void SAL_CALL OWriteStream::closeInput(  )
         dispose();
 }
 
-uno::Reference< io::XInputStream > SAL_CALL OWriteStream::getInputStream()
+uno::Reference< io::XInputStream > OWriteStream::getInputStream()
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -1947,7 +1947,7 @@ uno::Reference< io::XInputStream > SAL_CALL OWriteStream::getInputStream()
     return this;
 }
 
-uno::Reference< io::XOutputStream > SAL_CALL OWriteStream::getOutputStream()
+uno::Reference< io::XOutputStream > OWriteStream::getOutputStream()
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2020,7 +2020,7 @@ void OWriteStream::CheckInitOnWriteDemand(sal_Int32 dataSize)
     }
 }
 
-void SAL_CALL OWriteStream::writeBytes( const cpo::uno::Sequence< sal_Int8 >& aData )
+void OWriteStream::writeBytes( const cpo::uno::Sequence< sal_Int8 >& aData )
 {
     osl::ClearableMutexGuard aGuard(m_xSharedMutex->GetMutex());
 
@@ -2058,7 +2058,7 @@ void OWriteStream::writeBytes( const sal_Int8* pData, sal_Int32 nBytesToWrite )
     ModifyParentUnlockMutex_Impl( aGuard );
 }
 
-void SAL_CALL OWriteStream::flush()
+void OWriteStream::flush()
 {
     // In case stream is flushed its current version becomes visible
     // to the parent storage. Usually parent storage flushes the stream
@@ -2105,7 +2105,7 @@ void OWriteStream::CloseOutput_Impl()
     }
 }
 
-void SAL_CALL OWriteStream::closeOutput()
+void OWriteStream::closeOutput()
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2120,7 +2120,7 @@ void SAL_CALL OWriteStream::closeOutput()
         dispose();
 }
 
-void SAL_CALL OWriteStream::seek( sal_Int64 location )
+void OWriteStream::seek( sal_Int64 location )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2132,7 +2132,7 @@ void SAL_CALL OWriteStream::seek( sal_Int64 location )
     m_xSeekable->seek( location );
 }
 
-sal_Int64 SAL_CALL OWriteStream::getPosition()
+sal_Int64 OWriteStream::getPosition()
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2144,7 +2144,7 @@ sal_Int64 SAL_CALL OWriteStream::getPosition()
     return m_xSeekable->getPosition();
 }
 
-sal_Int64 SAL_CALL OWriteStream::getLength()
+sal_Int64 OWriteStream::getLength()
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2156,7 +2156,7 @@ sal_Int64 SAL_CALL OWriteStream::getLength()
     return m_xSeekable->getLength();
 }
 
-void SAL_CALL OWriteStream::truncate()
+void OWriteStream::truncate()
 {
     osl::ClearableMutexGuard aGuard(m_xSharedMutex->GetMutex());
 
@@ -2173,7 +2173,7 @@ void SAL_CALL OWriteStream::truncate()
     ModifyParentUnlockMutex_Impl( aGuard );
 }
 
-void SAL_CALL OWriteStream::dispose()
+void OWriteStream::dispose()
 {
     // should be an internal method since it can be called only from parent storage
     {
@@ -2233,7 +2233,7 @@ void SAL_CALL OWriteStream::dispose()
     m_aListenersContainer.disposeAndClear( aSource );
 }
 
-void SAL_CALL OWriteStream::addEventListener(
+void OWriteStream::addEventListener(
             const uno::Reference< lang::XEventListener >& xListener )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
@@ -2248,7 +2248,7 @@ void SAL_CALL OWriteStream::addEventListener(
                                                  xListener );
 }
 
-void SAL_CALL OWriteStream::removeEventListener(
+void OWriteStream::removeEventListener(
             const uno::Reference< lang::XEventListener >& xListener )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
@@ -2263,7 +2263,7 @@ void SAL_CALL OWriteStream::removeEventListener(
                                                     xListener );
 }
 
-void SAL_CALL OWriteStream::setEncryptionPassword( const OUString& aPass )
+void OWriteStream::setEncryptionPassword( const OUString& aPass )
 {
     osl::ClearableMutexGuard aGuard(m_xSharedMutex->GetMutex());
 
@@ -2276,7 +2276,7 @@ void SAL_CALL OWriteStream::setEncryptionPassword( const OUString& aPass )
     ModifyParentUnlockMutex_Impl( aGuard );
 }
 
-void SAL_CALL OWriteStream::removeEncryption()
+void OWriteStream::removeEncryption()
 {
     osl::ClearableMutexGuard aGuard(m_xSharedMutex->GetMutex());
 
@@ -2289,7 +2289,7 @@ void SAL_CALL OWriteStream::removeEncryption()
     ModifyParentUnlockMutex_Impl( aGuard );
 }
 
-void SAL_CALL OWriteStream::setEncryptionData( const cpo::uno::Sequence< beans::NamedValue >& aEncryptionData )
+void OWriteStream::setEncryptionData( const cpo::uno::Sequence< beans::NamedValue >& aEncryptionData )
 {
     osl::ClearableMutexGuard aGuard(m_xSharedMutex->GetMutex());
 
@@ -2302,7 +2302,7 @@ void SAL_CALL OWriteStream::setEncryptionData( const cpo::uno::Sequence< beans::
     ModifyParentUnlockMutex_Impl( aGuard );
 }
 
-bool SAL_CALL OWriteStream::hasEncryptionData()
+bool OWriteStream::hasEncryptionData()
 {
     osl::ClearableMutexGuard aGuard(m_xSharedMutex->GetMutex());
 
@@ -2335,7 +2335,7 @@ bool SAL_CALL OWriteStream::hasEncryptionData()
     return bRet;
 }
 
-bool SAL_CALL OWriteStream::hasByID(  const OUString& sID )
+bool OWriteStream::hasByID(  const OUString& sID )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2361,7 +2361,7 @@ bool SAL_CALL OWriteStream::hasByID(  const OUString& sID )
     return false;
 }
 
-OUString SAL_CALL OWriteStream::getTargetByID(  const OUString& sID  )
+OUString OWriteStream::getTargetByID(  const OUString& sID  )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2382,7 +2382,7 @@ OUString SAL_CALL OWriteStream::getTargetByID(  const OUString& sID  )
     return OUString();
 }
 
-OUString SAL_CALL OWriteStream::getTypeByID(  const OUString& sID  )
+OUString OWriteStream::getTypeByID(  const OUString& sID  )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2403,7 +2403,7 @@ OUString SAL_CALL OWriteStream::getTypeByID(  const OUString& sID  )
     return OUString();
 }
 
-cpo::uno::Sequence< beans::StringPair > SAL_CALL OWriteStream::getRelationshipByID(  const OUString& sID  )
+cpo::uno::Sequence< beans::StringPair > OWriteStream::getRelationshipByID(  const OUString& sID  )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2428,7 +2428,7 @@ cpo::uno::Sequence< beans::StringPair > SAL_CALL OWriteStream::getRelationshipBy
     throw container::NoSuchElementException();
 }
 
-cpo::uno::Sequence< cpo::uno::Sequence< beans::StringPair > > SAL_CALL OWriteStream::getRelationshipsByType(  const OUString& sType  )
+cpo::uno::Sequence< cpo::uno::Sequence< beans::StringPair > > OWriteStream::getRelationshipsByType(  const OUString& sType  )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2454,7 +2454,7 @@ cpo::uno::Sequence< cpo::uno::Sequence< beans::StringPair > > SAL_CALL OWriteStr
     return comphelper::containerToSequence(aResult);
 }
 
-cpo::uno::Sequence< cpo::uno::Sequence< beans::StringPair > > SAL_CALL OWriteStream::getAllRelationships()
+cpo::uno::Sequence< cpo::uno::Sequence< beans::StringPair > > OWriteStream::getAllRelationships()
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2470,7 +2470,7 @@ cpo::uno::Sequence< cpo::uno::Sequence< beans::StringPair > > SAL_CALL OWriteStr
     return m_pImpl->GetAllRelationshipsIfAny();
 }
 
-void SAL_CALL OWriteStream::insertRelationshipByID(  const OUString& sID, const cpo::uno::Sequence< beans::StringPair >& aEntry, bool bReplace  )
+void OWriteStream::insertRelationshipByID(  const OUString& sID, const cpo::uno::Sequence< beans::StringPair >& aEntry, bool bReplace  )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2520,7 +2520,7 @@ void SAL_CALL OWriteStream::insertRelationshipByID(  const OUString& sID, const 
     m_pImpl->m_nRelInfoStatus = RELINFO_CHANGED;
 }
 
-void SAL_CALL OWriteStream::removeRelationshipByID(  const OUString& sID  )
+void OWriteStream::removeRelationshipByID(  const OUString& sID  )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2554,7 +2554,7 @@ void SAL_CALL OWriteStream::removeRelationshipByID(  const OUString& sID  )
     throw container::NoSuchElementException();
 }
 
-void SAL_CALL OWriteStream::insertRelationships(  const cpo::uno::Sequence< cpo::uno::Sequence< beans::StringPair > >& aEntries, bool bReplace  )
+void OWriteStream::insertRelationships(  const cpo::uno::Sequence< cpo::uno::Sequence< beans::StringPair > >& aEntries, bool bReplace  )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2607,7 +2607,7 @@ void SAL_CALL OWriteStream::insertRelationships(  const cpo::uno::Sequence< cpo:
     m_pImpl->m_nRelInfoStatus = RELINFO_CHANGED;
 }
 
-void SAL_CALL OWriteStream::clearRelationships()
+void OWriteStream::clearRelationships()
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2625,7 +2625,7 @@ void SAL_CALL OWriteStream::clearRelationships()
     m_pImpl->m_nRelInfoStatus = RELINFO_CHANGED;
 }
 
-uno::Reference< beans::XPropertySetInfo > SAL_CALL OWriteStream::getPropertySetInfo()
+uno::Reference< beans::XPropertySetInfo > OWriteStream::getPropertySetInfo()
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2633,7 +2633,7 @@ uno::Reference< beans::XPropertySetInfo > SAL_CALL OWriteStream::getPropertySetI
     return uno::Reference< beans::XPropertySetInfo >();
 }
 
-void SAL_CALL OWriteStream::setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue )
+void OWriteStream::setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue )
 {
     osl::ClearableMutexGuard aGuard(m_xSharedMutex->GetMutex());
 
@@ -2748,7 +2748,7 @@ void SAL_CALL OWriteStream::setPropertyValue( const OUString& aPropertyName, con
     ModifyParentUnlockMutex_Impl( aGuard );
 }
 
-cpo::uno::Any SAL_CALL OWriteStream::getPropertyValue( const OUString& aProp )
+cpo::uno::Any OWriteStream::getPropertyValue( const OUString& aProp )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -2804,7 +2804,7 @@ cpo::uno::Any SAL_CALL OWriteStream::getPropertyValue( const OUString& aProp )
     throw beans::UnknownPropertyException(aPropertyName); // TODO
 }
 
-void SAL_CALL OWriteStream::addPropertyChangeListener(
+void OWriteStream::addPropertyChangeListener(
     const OUString& /*aPropertyName*/,
     const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/ )
 {
@@ -2819,7 +2819,7 @@ void SAL_CALL OWriteStream::addPropertyChangeListener(
     //TODO:
 }
 
-void SAL_CALL OWriteStream::removePropertyChangeListener(
+void OWriteStream::removePropertyChangeListener(
     const OUString& /*aPropertyName*/,
     const uno::Reference< beans::XPropertyChangeListener >& /*aListener*/ )
 {
@@ -2834,7 +2834,7 @@ void SAL_CALL OWriteStream::removePropertyChangeListener(
     //TODO:
 }
 
-void SAL_CALL OWriteStream::addVetoableChangeListener(
+void OWriteStream::addVetoableChangeListener(
     const OUString& /*PropertyName*/,
     const uno::Reference< beans::XVetoableChangeListener >& /*aListener*/ )
 {
@@ -2849,7 +2849,7 @@ void SAL_CALL OWriteStream::addVetoableChangeListener(
     //TODO:
 }
 
-void SAL_CALL OWriteStream::removeVetoableChangeListener(
+void OWriteStream::removeVetoableChangeListener(
     const OUString& /*PropertyName*/,
     const uno::Reference< beans::XVetoableChangeListener >& /*aListener*/ )
 {
@@ -2911,7 +2911,7 @@ void OWriteStream::BroadcastTransaction( sal_Int8 nMessage )
         }
     }
 }
-void SAL_CALL OWriteStream::commit()
+void OWriteStream::commit()
 {
     SAL_INFO( "package.xstor", "package (mv76033) OWriteStream::commit" );
 
@@ -2967,7 +2967,7 @@ void SAL_CALL OWriteStream::commit()
     BroadcastTransaction( STOR_MESS_COMMITTED );
 }
 
-void SAL_CALL OWriteStream::revert()
+void OWriteStream::revert()
 {
     SAL_INFO( "package.xstor", "package (mv76033) OWriteStream::revert" );
 
@@ -3026,7 +3026,7 @@ void SAL_CALL OWriteStream::revert()
 
 //  XTransactionBroadcaster
 
-void SAL_CALL OWriteStream::addTransactionListener( const uno::Reference< embed::XTransactionListener >& aListener )
+void OWriteStream::addTransactionListener( const uno::Reference< embed::XTransactionListener >& aListener )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 
@@ -3043,7 +3043,7 @@ void SAL_CALL OWriteStream::addTransactionListener( const uno::Reference< embed:
                                                 aListener );
 }
 
-void SAL_CALL OWriteStream::removeTransactionListener( const uno::Reference< embed::XTransactionListener >& aListener )
+void OWriteStream::removeTransactionListener( const uno::Reference< embed::XTransactionListener >& aListener )
 {
     ::osl::MutexGuard aGuard( m_xSharedMutex->GetMutex() );
 

@@ -42,7 +42,7 @@ ZipPackageBuffer::~ZipPackageBuffer()
 {
 }
 
-sal_Int32 SAL_CALL ZipPackageBuffer::readBytes( Sequence< sal_Int8 >& aData, sal_Int32 nBytesToRead )
+sal_Int32 ZipPackageBuffer::readBytes( Sequence< sal_Int8 >& aData, sal_Int32 nBytesToRead )
 {
     if (nBytesToRead < 0)
         throw BufferSizeExceededException(u""_ustr, *this );
@@ -56,11 +56,11 @@ sal_Int32 SAL_CALL ZipPackageBuffer::readBytes( Sequence< sal_Int8 >& aData, sal
     return nBytesToRead;
 }
 
-sal_Int32 SAL_CALL ZipPackageBuffer::readSomeBytes( Sequence< sal_Int8 >& aData, sal_Int32 nMaxBytesToRead )
+sal_Int32 ZipPackageBuffer::readSomeBytes( Sequence< sal_Int8 >& aData, sal_Int32 nMaxBytesToRead )
 {
     return readBytes(aData, nMaxBytesToRead);
 }
-void SAL_CALL ZipPackageBuffer::skipBytes( sal_Int32 nBytesToSkip )
+void ZipPackageBuffer::skipBytes( sal_Int32 nBytesToSkip )
 {
     if (nBytesToSkip < 0)
         throw BufferSizeExceededException(u""_ustr, *this );
@@ -70,14 +70,14 @@ void SAL_CALL ZipPackageBuffer::skipBytes( sal_Int32 nBytesToSkip )
 
     m_nCurrent+=nBytesToSkip;
 }
-sal_Int32 SAL_CALL ZipPackageBuffer::available(  )
+sal_Int32 ZipPackageBuffer::available(  )
 {
     return std::min<sal_Int64>(SAL_MAX_INT32, m_nEnd - m_nCurrent);
 }
-void SAL_CALL ZipPackageBuffer::closeInput(  )
+void ZipPackageBuffer::closeInput(  )
 {
 }
-void SAL_CALL ZipPackageBuffer::writeBytes( const Sequence< sal_Int8 >& aData )
+void ZipPackageBuffer::writeBytes( const Sequence< sal_Int8 >& aData )
 {
     sal_Int64 nDataLen = aData.getLength(), nCombined = m_nEnd + nDataLen;
 
@@ -99,23 +99,23 @@ void SAL_CALL ZipPackageBuffer::writeBytes( const Sequence< sal_Int8 >& aData )
     if (m_nCurrent>m_nEnd)
         m_nEnd = m_nCurrent;
 }
-void SAL_CALL ZipPackageBuffer::flush(  )
+void ZipPackageBuffer::flush(  )
 {
 }
-void SAL_CALL ZipPackageBuffer::closeOutput(  )
+void ZipPackageBuffer::closeOutput(  )
 {
 }
-void SAL_CALL ZipPackageBuffer::seek( sal_Int64 location )
+void ZipPackageBuffer::seek( sal_Int64 location )
 {
     if ( location > m_nEnd || location < 0 )
         throw IllegalArgumentException(u""_ustr, uno::Reference< cpo::uno::XInterface >(), 1 );
     m_nCurrent = location;
 }
-sal_Int64 SAL_CALL ZipPackageBuffer::getPosition(  )
+sal_Int64 ZipPackageBuffer::getPosition(  )
 {
     return m_nCurrent;
 }
-sal_Int64 SAL_CALL ZipPackageBuffer::getLength(  )
+sal_Int64 ZipPackageBuffer::getLength(  )
 {
     return m_nEnd;
 }

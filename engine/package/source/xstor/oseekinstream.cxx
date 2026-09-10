@@ -51,7 +51,7 @@ OInputSeekStream::~OInputSeekStream()
 {
 }
 
-void SAL_CALL OInputSeekStream::seek( sal_Int64 location )
+void OInputSeekStream::seek( sal_Int64 location )
 {
     ::osl::MutexGuard aGuard( m_xMutex->GetMutex() );
     if ( m_bDisposed )
@@ -69,7 +69,7 @@ void SAL_CALL OInputSeekStream::seek( sal_Int64 location )
     m_xSeekable->seek( location );
 }
 
-sal_Int64 SAL_CALL OInputSeekStream::getPosition()
+sal_Int64 OInputSeekStream::getPosition()
 {
     ::osl::MutexGuard aGuard( m_xMutex->GetMutex() );
     if ( m_bDisposed )
@@ -87,7 +87,7 @@ sal_Int64 SAL_CALL OInputSeekStream::getPosition()
     return m_xSeekable->getPosition();
 }
 
-sal_Int64 SAL_CALL OInputSeekStream::getLength()
+sal_Int64 OInputSeekStream::getLength()
 {
     ::osl::MutexGuard aGuard( m_xMutex->GetMutex() );
     if ( m_bDisposed )
