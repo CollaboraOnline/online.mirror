@@ -155,8 +155,7 @@ describe(['tagmobile', 'tagnextcloud'], 'Impress insertion wizard.', function() 
 		helper.expectTextForClipboard('Tap to edit text');
 	});
 
-	// TODO: https://github.com/CollaboraOnline/online/issues/11339
-	it.skip('Insert date field (fixed).', function() {
+	it('Insert date field (fixed).', function() {
 		helper.setDummyClipboardForCopy();
 		mobileHelper.openInsertionWizard();
 		cy.cGet('body').contains('.menu-entry-with-icon', 'More Fields...').click();
@@ -171,8 +170,7 @@ describe(['tagmobile', 'tagnextcloud'], 'Impress insertion wizard.', function() 
 		helper.matchClipboardText(regex);
 	});
 
-	// TODO: https://github.com/CollaboraOnline/online/issues/11339
-	it.skip('Insert date field (variable).', function() {
+	it('Insert date field (variable).', function() {
 		helper.setDummyClipboardForCopy();
 		mobileHelper.openInsertionWizard();
 		cy.cGet('body').contains('.menu-entry-with-icon', 'More Fields...').click();
@@ -187,8 +185,7 @@ describe(['tagmobile', 'tagnextcloud'], 'Impress insertion wizard.', function() 
 		helper.matchClipboardText(regex);
 	});
 
-	// TODO: https://github.com/CollaboraOnline/online/issues/11339
-	it.skip('Insert time field (fixed).', function() {
+	it('Insert time field (fixed).', function() {
 		helper.setDummyClipboardForCopy();
 		mobileHelper.openInsertionWizard();
 		cy.cGet('body').contains('.menu-entry-with-icon', 'More Fields...').click();
@@ -203,8 +200,7 @@ describe(['tagmobile', 'tagnextcloud'], 'Impress insertion wizard.', function() 
 		helper.matchClipboardText(regex);
 	});
 
-	// TODO: https://github.com/CollaboraOnline/online/issues/11339
-	it.skip('Insert time field (variable).', function() {
+	it('Insert time field (variable).', function() {
 		helper.setDummyClipboardForCopy();
 		mobileHelper.openInsertionWizard();
 		cy.cGet('body').contains('.menu-entry-with-icon', 'More Fields...').click();
@@ -219,8 +215,7 @@ describe(['tagmobile', 'tagnextcloud'], 'Impress insertion wizard.', function() 
 		helper.matchClipboardText(regex);
 	});
 
-	// TODO: https://github.com/CollaboraOnline/online/issues/11339
-	it.skip('Insert slide number.', function() {
+	it('Insert slide number.', function() {
 		helper.setDummyClipboardForCopy();
 		mobileHelper.openInsertionWizard();
 		cy.cGet('body').contains('.menu-entry-with-icon', 'More Fields...').click();
@@ -233,8 +228,7 @@ describe(['tagmobile', 'tagnextcloud'], 'Impress insertion wizard.', function() 
 		helper.expectTextForClipboard('1');
 	});
 
-	// TODO: https://github.com/CollaboraOnline/online/issues/11339
-	it.skip('Insert slide title.', function() {
+	it('Insert slide title.', function() {
 		helper.setDummyClipboardForCopy();
 		mobileHelper.openInsertionWizard();
 		cy.cGet('body').contains('.menu-entry-with-icon', 'More Fields...').click();
