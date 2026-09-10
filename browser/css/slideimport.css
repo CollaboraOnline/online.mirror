@@ -153,6 +153,7 @@
  * reads as a plain list of files. The transparent border is there to keep
  * the rows where they are once one shows. */
 .slide-import-source {
+	position: relative;
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-m);
@@ -198,6 +199,14 @@
 	cursor: pointer;
 }
 
+/* The whole row shows and hides the slides, so the button that names the
+ * file reaches across it. The chip and the menu button sit above. */
+button.slide-import-source-main::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+}
+
 /* The name of a file whose slides cannot be read is not a button: there is
  * nothing to show or hide. */
 span.slide-import-source-main {
@@ -238,9 +247,10 @@ span.slide-import-source-main {
 }
 
 /* What the pane says of a source: a dot and a word, in the colour of what it
- * says. */
+ * says. It reports and does nothing, so a click on it reaches the row. */
 .slide-import-source-badge {
 	flex-shrink: 0;
+	pointer-events: none;
 	display: inline-flex;
 	align-items: center;
 	gap: 5px;
@@ -293,6 +303,7 @@ span.slide-import-source-main {
 
 .slide-import-source-menu {
 	flex-shrink: 0;
+	position: relative;
 	width: 24px;
 	height: 24px;
 	padding: 0;
