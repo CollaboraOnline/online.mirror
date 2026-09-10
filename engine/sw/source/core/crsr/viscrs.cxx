@@ -294,7 +294,8 @@ std::optional<OString> SwVisibleCursor::getKitPayload(COKitCallbackType eType, i
         OString sRect = aSVRect.toString();
 
         if(eType == COKitCallbackType::INVALIDATE_VIEW_CURSOR)
-            return KitHelper::makePayloadJSON(m_pCursorShell->GetSfxViewShell(), nViewId, "rectangle", sRect);
+            return KitHelper::makeViewCursorInvalidation(m_pCursorShell->GetSfxViewShell(), nViewId,
+                                                         sRect, m_nLastKitCursorEditorViewId);
 
         // is cursor at a misspelled word ?
         bool bIsWrong = false;

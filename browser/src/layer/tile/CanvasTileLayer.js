@@ -1885,7 +1885,12 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 		// tracks parts by index.
 		TextCursorSection.addOrUpdateOtherViewCursor(viewId, username, rectangle, this.getIndexFromPart(obj.part), mode);
 
-		this._moveFollowingToActiveView(viewId);
+		// The message names the view that moved this caret, which is another view
+		// when its own change moved the text the caret sits in. A server that
+		// doesn't name one leaves the move with the view it belongs to.
+		const editorViewId = obj.editorViewId !== undefined ? parseInt(obj.editorViewId) : -1;
+		if (editorViewId === -1 || editorViewId === viewId)
+			this._moveFollowingToActiveView(viewId);
 
 		if (app.getFollowedViewId() === viewId && (app.isFollowingEditor() || app.isFollowingUser())) {
 			if (this.isWriter() || this.isImpress() || this.isDraw()) {

@@ -249,6 +249,9 @@ public:
                                              bool bMispelledWord = false, const OString& rHyperlink = ""_ostr,
                                              int nEditorViewId = -1);
 
+    static OString makeViewCursorInvalidation(const SfxViewShell* pThisView, int nViewId,
+                                              std::string_view rRectangle, int nEditorViewId = -1);
+
     /// Helper for posting async key event
     static void postKeyEventAsync(const VclPtr<vcl::Window> &xWindow,
                                   COKitKeyEventType eType, int nCharCode, int nKeyCode,

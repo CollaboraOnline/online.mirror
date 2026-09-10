@@ -32,6 +32,8 @@ public:
     bool m_bOwnCursorAtOrigin;
     tools::Rectangle m_aOwnCursor;
     bool m_bViewCursorInvalidated;
+    /// The view named as having moved the other view's caret, or -1 when none was named.
+    int m_nViewCursorMovedBy;
     tools::Rectangle m_aViewCursor;
     bool m_bOwnSelectionSet;
     bool m_bViewSelectionSet;

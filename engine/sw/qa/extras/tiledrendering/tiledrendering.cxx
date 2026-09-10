@@ -2760,6 +2760,42 @@ CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testVisCursorInvalidationViewIdNotCur
     CPPUNIT_ASSERT_EQUAL(nView1, aView1.m_nOwnCursorInvalidatedBy);
 }
 
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testViewCursorCarriesTheViewThatMovedIt)
+{
+    // A view is told which view moved another view's caret, so a caret that moved only because
+    // someone else's edit shifted the text under it is told apart from its owner working there.
+    SwXTextDocument* pXTextDocument = createDoc("dummy.fodt");
+    SwTestViewCallback aView1;
+    int nView1 = KitHelper::getCurrentView();
+
+    KitHelper::createView();
+    SwTestViewCallback aView2;
+    int nView2 = KitHelper::getCurrentView();
+    CPPUNIT_ASSERT(nView1 != nView2);
+    Scheduler::ProcessEventsToIdle();
+
+    // The first view moves its own caret.
+    KitHelper::setView(nView1);
+    Scheduler::ProcessEventsToIdle();
+    aView2.m_nViewCursorMovedBy = -1;
+
+    pXTextDocument->postKeyEvent(COKitKeyEventType::DOWN, 0, KEY_RIGHT);
+    pXTextDocument->postKeyEvent(COKitKeyEventType::UP, 0, KEY_RIGHT);
+    Scheduler::ProcessEventsToIdle();
+
+    CPPUNIT_ASSERT_EQUAL(nView1, aView2.m_nViewCursorMovedBy);
+
+    // The second view types on the same line, which shifts the first view's caret.
+    KitHelper::setView(nView2);
+    Scheduler::ProcessEventsToIdle();
+    aView2.m_nViewCursorMovedBy = -1;
+
+    emulateTyping(u"x");
+
+    // The caret belongs to the first view, and the second view is the one that moved it.
+    CPPUNIT_ASSERT_EQUAL(nView2, aView2.m_nViewCursorMovedBy);
+}
+
 CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testDeselectCustomShape)
 {
     SwXTextDocument* pXTextDocument = createDoc("dummy.fodt");

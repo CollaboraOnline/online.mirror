@@ -25,6 +25,7 @@ SwTestViewCallback::SwTestViewCallback(
     , m_nOwnCursorInvalidatedBy(-1)
     , m_bOwnCursorAtOrigin(false)
     , m_bViewCursorInvalidated(false)
+    , m_nViewCursorMovedBy(-1)
     , m_bOwnSelectionSet(false)
     , m_bViewSelectionSet(false)
     , m_bTilesInvalidated(false)
@@ -102,6 +103,7 @@ void SwTestViewCallback::callbackImpl(COKitCallbackType eType, const char* pPayl
             boost::property_tree::ptree aTree;
             boost::property_tree::read_json(aStream, aTree);
             OString aRect(aTree.get_child("rectangle").get_value<std::string>());
+            m_nViewCursorMovedBy = aTree.get("editorViewId", -1);
 
             cpo::uno::Sequence<OUString> aSeq
                 = comphelper::string::convertCommaSeparated(OUString::fromUtf8(aRect));
