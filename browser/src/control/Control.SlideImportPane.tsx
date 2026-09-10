@@ -1349,13 +1349,11 @@ class SlideImportPane {
       >
         {this.renderLinkModeOption(
           'slide',
-          _('Update from the same slide'),
-          _('The slide keeps its link if the source is reordered.'),
+          _('Keep the link to this slide if the source is reordered'),
         )}
         {this.renderLinkModeOption(
           'position',
-          _('Update from the same slide position'),
-          _('The update takes the slide that holds this position.'),
+          _('Take whichever slide holds this position later'),
         )}
       </div>
     ) as HTMLElement;
@@ -1363,29 +1361,19 @@ class SlideImportPane {
     return group;
   }
 
-  private renderLinkModeOption(
-    key: string,
-    label: string,
-    consequence: string,
-  ): HTMLElement {
+  private renderLinkModeOption(key: string, label: string): HTMLElement {
     const id = 'slide-import-linkmode-' + key;
     const byPosition = key === 'position';
     return (
-      <div class="slide-import-linkmode-option">
-        <div class="radiobutton ui-radiobutton jsdialog">
-          <input
-            type="radio"
-            id={id}
-            name="slide-import-linkmode"
-            checked={this.session.linkByPosition === byPosition}
-            aria-describedby={id + '-why'}
-            onChange={() => this.session.setLinkByPosition(byPosition)}
-          />
-          <label for={id}>{label}</label>
-        </div>
-        <div class="slide-import-linkmode-why" id={id + '-why'}>
-          {consequence}
-        </div>
+      <div class="radiobutton ui-radiobutton jsdialog">
+        <input
+          type="radio"
+          id={id}
+          name="slide-import-linkmode"
+          checked={this.session.linkByPosition === byPosition}
+          onChange={() => this.session.setLinkByPosition(byPosition)}
+        />
+        <label for={id}>{label}</label>
       </div>
     );
   }

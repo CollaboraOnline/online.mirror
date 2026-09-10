@@ -503,21 +503,11 @@ span.slide-import-source-main {
 .slide-import-linkmode {
 	display: flex;
 	flex-direction: column;
-	gap: var(--spacing-m);
+	gap: var(--spacing-s);
 	margin-block-start: var(--spacing-s);
 	padding-inline-start: 26px;
 }
 
-.slide-import-linkmode-option {
-	display: flex;
-	flex-direction: column;
-}
-
-/* Under the label it belongs to: the glyph is 20 wide with 8 to the label. */
-.slide-import-linkmode-why {
-	padding-inline-start: 28px;
-	color: var(--color-text-light);
-}
 
 .slide-import-linkmode[hidden] {
 	display: none;
