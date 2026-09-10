@@ -549,8 +549,8 @@ span.slide-import-source-main {
 }
 
 .slide-import-checkbox.checked::before {
-	border-color: var(--color-primary);
-	background: var(--color-primary);
+	border-color: rgba(var(--doc-type), 1);
+	background: rgba(var(--doc-type), 1);
 }
 
 /* The tick: the bottom and end edges of a small rectangle, turned 45
