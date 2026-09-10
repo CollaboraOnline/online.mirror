@@ -272,7 +272,7 @@ class SlideImportPane {
     }
 
     for (const source of this.sources)
-      if (source.expanded) this.askSource(source);
+      if (source.expanded || this.isActive(source)) this.askSource(source);
   }
 
   // Drops what a source answered about its slides.
@@ -321,6 +321,9 @@ class SlideImportPane {
     source.expanded = true;
     this.activate(source);
     this.askSource(source);
+    // A source that answered before it was opened has its slides already,
+    // and askSource answers once, so the pictures are asked for here.
+    this.requestRemoteThumbnails(source);
   }
 
   private toggleSource(source: SlideImportPaneSource): void {
@@ -761,7 +764,11 @@ class SlideImportPane {
       );
 
     const newList = this.panel.querySelector('.slide-import-source-list');
-    if (newList) newList.scrollTop = scrollTop;
+    if (newList)
+      newList.scrollTop = Math.min(
+        scrollTop,
+        Math.max(0, newList.scrollHeight - newList.clientHeight),
+      );
   }
 
   // The header carries the slide navigator's header classes, so both panels
