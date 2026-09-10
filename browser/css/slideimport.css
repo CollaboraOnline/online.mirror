@@ -137,11 +137,10 @@
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	grid-area: 2 / 1 / 3 / 3;
+	grid-area: 3 / 1 / 4 / 3;
 	align-self: stretch;
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
 	min-height: 0;
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -186,9 +185,10 @@
 	outline: none;
 }
 
-.slide-import-source-main {
+#slide-import-panel .slide-import-source-main {
 	flex: 1;
 	min-width: 0;
+	width: auto;
 	height: 100%;
 	display: flex;
 	align-items: center;
@@ -215,10 +215,20 @@ span.slide-import-source-main {
 	width: var(--btn-img-size-s);
 	height: var(--btn-img-size-s);
 	flex-shrink: 0;
-	background: var(--color-text-light);
-	mask: url('images/lc_iconviewexpander.svg') no-repeat center / contain;
-	-webkit-mask: url('images/lc_iconviewexpander.svg') no-repeat center / contain;
+	position: relative;
 	transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.slide-import-source-chevron::before {
+	content: '';
+	position: absolute;
+	inset-block-start: 4px;
+	inset-inline-start: 5px;
+	width: 6px;
+	height: 6px;
+	border: solid var(--color-text-light);
+	border-width: 1.5px 1.5px 0 0;
+	transform: rotate(45deg);
 }
 
 .slide-import-source.expanded .slide-import-source-chevron {
@@ -226,17 +236,20 @@ span.slide-import-source-main {
 }
 
 .slide-import-source-count {
-	flex-shrink: 0;
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
 	color: var(--color-text-light);
+	text-overflow: ellipsis;
 	white-space: nowrap;
 }
 
-.slide-import-source-spacer {
-	flex: 1;
-}
 
 .slide-import-source-name {
-	font-size: var(--medium-font-size);
+	flex: 1 1 auto;
+	/* Room for a name of about sixteen characters before it ellipsises, so
+	 * the count and the chip give way before the name does. */
+	min-width: 96px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
