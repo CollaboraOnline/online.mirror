@@ -919,11 +919,7 @@ class SlideImportPane {
       </span>
     );
     const inside = [
-      <img
-        class="slide-import-source-icon"
-        src={app.LOUtil.getImageURL('slide-deck.svg')}
-        alt=""
-      />,
+      <span class="slide-import-source-chevron" aria-hidden="true" />,
       <span class="slide-import-source-name">{source.name}</span>,
       <span class="slide-import-source-count">
         {this.slideCountText(source)}

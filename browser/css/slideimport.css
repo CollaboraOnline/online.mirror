@@ -209,6 +209,22 @@ span.slide-import-source-main {
 	cursor: default;
 }
 
+/* The chevron is the one mark on a row that differs from the row above it,
+ * and it says what a click will do. */
+.slide-import-source-chevron {
+	width: var(--btn-img-size-s);
+	height: var(--btn-img-size-s);
+	flex-shrink: 0;
+	background: var(--color-text-light);
+	mask: url('images/lc_iconviewexpander.svg') no-repeat center / contain;
+	-webkit-mask: url('images/lc_iconviewexpander.svg') no-repeat center / contain;
+	transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.slide-import-source.expanded .slide-import-source-chevron {
+	transform: rotate(90deg);
+}
+
 .slide-import-source-icon {
 	width: 18px;
 	height: 18px;
