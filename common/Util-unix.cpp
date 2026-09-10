@@ -22,6 +22,11 @@
 
 #include <o3tl/safeint.hxx>
 
+#include <cctype>
+#include <chrono>
+#include <cstdlib>
+#include <string>
+
 #include <fcntl.h>
 #include <time.h>
 #include <unistd.h>
@@ -84,6 +89,68 @@ namespace Util
     std::tm *time_t_to_gmtime(std::time_t t, std::tm& tm)
     {
         return gmtime_r(&t, &tm);
+    }
+
+    // strptime and timegm are not in the MSVC runtime.
+    bool isIso8601(const std::string& iso8601Time)
+    {
+        if (iso8601Time.empty())
+            return false;
+
+        std::tm tm;
+        const char* trailing = strptime(iso8601Time.c_str(), "%Y-%m-%dT%H:%M:%S", &tm);
+        if (!trailing)
+            return false;
+
+        // Accept what iso8601ToTimestamp can read: the bare second-precision
+        // form, and the fractional-second form which requires at least one
+        // digit after the dot.
+        if (trailing[0] == '\0')
+            return true;
+
+        return trailing[0] == '.' && std::isdigit(static_cast<unsigned char>(trailing[1]));
+    }
+
+    std::chrono::system_clock::time_point iso8601ToTimestamp(const std::string& iso8601Time,
+                                                             const std::string& logName)
+    {
+        std::chrono::system_clock::time_point timestamp;
+        std::tm tm;
+        const char* cstr = iso8601Time.c_str();
+        const char* trailing;
+        if (!(trailing = strptime(cstr, "%Y-%m-%dT%H:%M:%S", &tm)))
+        {
+            LOG_WRN(logName << " [" << iso8601Time << "] is in invalid format."
+                               "Returning " << timestamp.time_since_epoch().count());
+            return timestamp;
+        }
+
+        timestamp += std::chrono::seconds(timegm(&tm));
+        if (trailing[0] == '\0')
+            return timestamp;
+
+        if (trailing[0] != '.')
+        {
+            LOG_WRN(logName << " [" << iso8601Time << "] is in invalid format."
+                               ". Returning " << timestamp.time_since_epoch().count());
+            return timestamp;
+        }
+
+        char* end = nullptr;
+        const std::size_t us = strtoul(trailing + 1, &end, 10); // Skip the '.' and read as integer.
+
+        std::size_t denominator = 1;
+        for (const char* i = trailing + 1; i != end; i++)
+        {
+            denominator *= 10;
+        }
+
+        const std::size_t seconds_us = us * std::chrono::system_clock::period::den
+                                       / std::chrono::system_clock::period::num / denominator;
+
+        timestamp += std::chrono::system_clock::duration(seconds_us);
+
+        return timestamp;
     }
 } // namespace Util
 
