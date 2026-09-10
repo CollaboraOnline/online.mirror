@@ -384,8 +384,20 @@ span.slide-import-source-main {
 	overflow-y: auto;
 	scrollbar-width: var(--scrollbar-width);
 	scrollbar-color: var(--scrollbar-color);
-	border-block-start: 1px solid var(--color-toolbar-border);
 	background: var(--color-background-lighter);
+}
+
+/* The second section of the pane, on the divider that closes the first. The
+ * name of the file and how many of its slides are picked stay on the panel
+ * header below, so the label carries neither. */
+.slide-import-slides-title {
+	flex: 0 0 auto;
+	margin-inline: calc(-1 * var(--spacing-m) * 2);
+	padding: var(--spacing-m) calc(var(--spacing-m) * 2) 0;
+	border-block-start: 1px solid var(--color-toolbar-border);
+	color: var(--color-text-dark);
+	font-size: 12px;
+	font-weight: 600;
 }
 
 /* The panel header is a slide section header, so the file and the sections

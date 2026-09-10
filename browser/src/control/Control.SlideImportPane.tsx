@@ -862,6 +862,7 @@ class SlideImportPane {
             {this.sources.map((source) => this.renderSourceRow(source))}
           </ul>
         </div>
+        <div class="slide-import-slides-title">{_('Slides')}</div>
         <div class="slide-import-panels">
           {this.sources
             .filter((source) => this.canShowSlides(source))
