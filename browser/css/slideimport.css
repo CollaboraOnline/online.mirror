@@ -54,8 +54,8 @@
  * done with it. The list keeps to a third of the pane so the slides below it
  * stay in sight, and scrolls when it holds more than that. */
 .slide-import-sources {
-	flex: 0 0 auto;
-	max-height: 40%;
+	flex: 1;
+	min-height: 0;
 	display: grid;
 	grid-template-columns: 1fr auto;
 	/* Label and link, then the filter when there is one, then the list.
