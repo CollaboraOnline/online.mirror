@@ -1603,7 +1603,12 @@ window.L.Control.JSDialogBuilder = window.L.Control.extend({
 			else if (hasImage !== false){
 				if (data.icon) {
 					buttonImage = window.L.DomUtil.create('img', '', button);
-					this._isStringCloseToURL(data.icon) ? buttonImage.src = data.icon : app.LOUtil.setImage(buttonImage, data.icon, builder.map);
+					if (this._isStringCloseToURL(data.icon)) {
+						buttonImage.src = data.icon;
+						app.LOUtil.publishIconURL(buttonImage, data.icon);
+					} else {
+						app.LOUtil.setImage(buttonImage, data.icon, builder.map);
+					}
 				}
 				else if (data.image) {
 					buttonImage = window.L.DomUtil.create('img', '', button);

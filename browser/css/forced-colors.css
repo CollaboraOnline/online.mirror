@@ -141,4 +141,18 @@
 		mask: url('images/closedoc.svg') no-repeat center / contain;
 	}
 
+	/* An icon that published its URL can be recoloured, so it takes the palette
+	   instead of the plate above, which is for the ones that cannot. */
+	.unotoolbutton img.icon-maskable,
+	.unobutton img.icon-maskable,
+	.ui-tabs-content .unobutton > img.icon-maskable,
+	.unotoolbutton.notebookbar .unobutton > img.icon-maskable,
+	.savemodified.unotoolbutton .unobutton img.icon-maskable {
+		forced-color-adjust: none;
+		content: linear-gradient(transparent, transparent);
+		background-color: ButtonText !important;
+		-webkit-mask: var(--icon-url) no-repeat center / contain;
+		mask: var(--icon-url) no-repeat center / contain;
+	}
+
 }
