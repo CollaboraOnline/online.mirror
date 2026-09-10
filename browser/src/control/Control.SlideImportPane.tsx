@@ -1011,13 +1011,13 @@ class SlideImportPane {
         <div class="slide-import-footer">
           <button
             class="button slide-import-insert"
+            title={this.insertLandsText()}
             disabled={session.selection.size === 0 || session.state !== 'ready'}
             onClick={() => session.insertSelected()}
           >
             {this.insertButtonLabel()}
           </button>
         </div>
-        <div class="slide-import-lands">{this.insertLandsText()}</div>
       </div>
     );
   }

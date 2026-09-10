@@ -672,14 +672,9 @@ span.slide-import-source-main {
 
 .slide-import-footer {
 	display: flex;
+	padding-block-end: var(--spacing-l);
 }
 
-.slide-import-lands {
-	flex: 0 0 auto;
-	padding-block: var(--spacing-s) var(--spacing-l);
-	color: var(--color-text-light);
-	text-align: center;
-}
 
 .slide-import-insert {
 	width: 100%;
