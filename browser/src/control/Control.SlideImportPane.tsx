@@ -656,7 +656,6 @@ class SlideImportPane {
           if (checkbox) checkbox.classList.toggle('checked', selected);
         });
       this.updateSectionSelection(source);
-      this.updateSlideCount(source);
     }
     this.updateInsertButton();
   }
@@ -728,20 +727,7 @@ class SlideImportPane {
   private slideCountText(source: SlideImportPaneSource): string {
     const count = source.slides.length;
     if (!count) return '';
-    const slides = _('{0} slides').replace('{0}', String(count));
-    const picked = this.isActive(source) ? this.session.selection.size : 0;
-    if (!picked) return slides;
-    return slides + ' - ' + _('{0} selected').replace('{0}', String(picked));
-  }
-
-  private updateSlideCount(source: SlideImportPaneSource): void {
-    const panel = this.panel.querySelector(
-      '.slide-import-source-panel[data-source-id="' + source.id + '"]',
-    );
-    const count = panel
-      ? panel.querySelector('.slide-import-panel-count')
-      : null;
-    if (count) count.textContent = this.slideCountText(source);
+    return _('{0} slides').replace('{0}', String(count));
   }
 
   private statusText(): string {
@@ -751,8 +737,8 @@ class SlideImportPane {
   }
 
   private render(): void {
-    const frame = this.panel.querySelector('.slide-import-panels');
-    const scrollTop = frame ? frame.scrollTop : 0;
+    const list = this.panel.querySelector('.slide-import-source-list');
+    const scrollTop = list ? list.scrollTop : 0;
 
     const active = this.activeSource();
     const slideCount = active ? active.slides.length : 0;
@@ -774,8 +760,8 @@ class SlideImportPane {
         window.L.control.attachTooltipEventListener(button, this.map),
       );
 
-    const newFrame = this.panel.querySelector('.slide-import-panels');
-    if (newFrame) newFrame.scrollTop = scrollTop;
+    const newList = this.panel.querySelector('.slide-import-source-list');
+    if (newList) newList.scrollTop = scrollTop;
   }
 
   // The header carries the slide navigator's header classes, so both panels
@@ -871,12 +857,6 @@ class SlideImportPane {
             {this.sources.map((source) => this.renderSourceRow(source))}
           </ul>
         </div>
-        <div class="slide-import-slides-title">{_('Slides')}</div>
-        <div class="slide-import-panels">
-          {this.sources
-            .filter((source) => this.canShowSlides(source))
-            .map((source) => this.renderSourcePanel(source))}
-        </div>
         <div
           class="slide-import-status"
           role="status"
@@ -923,13 +903,26 @@ class SlideImportPane {
   // slides to show or hide, and the name alone when there are none.
   private renderSourceRow(source: SlideImportPaneSource): HTMLElement {
     const badge = this.sourceBadge(source);
-    const file = [
+    const shows = this.canShowSlides(source);
+    const panelId = 'slide-import-panel-' + source.id;
+    const chip = (
+      <span class={'slide-import-source-badge ' + badge.kind}>
+        <span class="slide-import-source-dot" aria-hidden="true" />
+        {badge.label}
+      </span>
+    );
+    const inside = [
       <img
         class="slide-import-source-icon"
         src={app.LOUtil.getImageURL('slide-deck.svg')}
         alt=""
       />,
       <span class="slide-import-source-name">{source.name}</span>,
+      <span class="slide-import-source-count">
+        {this.slideCountText(source)}
+      </span>,
+      <span class="slide-import-source-spacer" />,
+      chip,
     ];
     return (
       <li
@@ -939,30 +932,39 @@ class SlideImportPane {
           (this.isActive(source) ? ' active' : '')
         }
         data-state={source.state}
+        data-key={source.key}
       >
-        {this.canShowSlides(source) ? (
+        <div class="slide-import-source-row">
+          {shows ? (
+            <button
+              class="slide-import-source-main"
+              aria-expanded={source.expanded ? 'true' : 'false'}
+              aria-controls={panelId}
+              title={source.name}
+              onClick={() => this.toggleSource(source)}
+            >
+              {inside}
+            </button>
+          ) : (
+            <span class="slide-import-source-main" title={source.name}>
+              {inside}
+            </span>
+          )}
           <button
-            class="slide-import-source-main"
-            aria-expanded={source.expanded ? 'true' : 'false'}
-            title={source.name}
-            onClick={() => this.toggleSource(source)}
-          >
-            {file}
-          </button>
-        ) : (
-          <span class="slide-import-source-main" title={source.name}>
-            {file}
-          </span>
-        )}
-        <span class={'slide-import-source-badge ' + badge.kind}>
-          {badge.label}
-        </span>
-        <button
-          class="slide-import-source-menu"
-          aria-label={_('Actions for {0}').replace('{0}', source.name)}
-          aria-haspopup="true"
-          onClick={(e: MouseEvent) => this.openSourceMenu(e, source)}
-        />
+            class="slide-import-source-menu"
+            aria-label={_('Actions for {0}').replace('{0}', source.name)}
+            aria-haspopup="true"
+            onClick={(e: MouseEvent) => this.openSourceMenu(e, source)}
+          />
+        </div>
+        <div
+          id={panelId}
+          class="slide-import-source-panel"
+          role="region"
+          data-source-id={source.id}
+        >
+          {source.expanded && shows && this.renderPanelBody(source)}
+        </div>
       </li>
     );
   }
@@ -1078,38 +1080,6 @@ class SlideImportPane {
 
   // One source's slides under an expander, so several presentations are
   // browsed one after another without losing sight of the others.
-  private renderSourcePanel(source: SlideImportPaneSource): HTMLElement {
-    return (
-      <div class="slide-import-source-panel" data-source-id={source.id}>
-        <div
-          class={
-            'slide-section-header slide-import-panel-header' +
-            (source.expanded ? '' : ' collapsed')
-          }
-          onClick={() => this.toggleSource(source)}
-        >
-          <button
-            type="button"
-            class="slide-section-toggle ui-expander-btn"
-            aria-expanded={source.expanded ? 'true' : 'false'}
-            aria-label={_('Toggle {0}').replace('{0}', source.name)}
-            onClick={(event: MouseEvent) => {
-              event.stopPropagation();
-              this.toggleSource(source);
-            }}
-          />
-          <span class="slide-section-name" title={source.name}>
-            {source.name}
-          </span>
-          <span class="slide-import-panel-count">
-            {this.slideCountText(source)}
-          </span>
-        </div>
-        {source.expanded && this.renderPanelBody(source)}
-      </div>
-    );
-  }
-
   private renderPanelBody(source: SlideImportPaneSource): HTMLElement {
     const message = this.sourceMessage(source);
     if (message) return <div class="slide-import-panel-message">{message}</div>;

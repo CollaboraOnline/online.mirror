@@ -153,29 +153,32 @@
  * reads as a plain list of files. The transparent border is there to keep
  * the rows where they are once one shows. */
 .slide-import-source {
-	position: relative;
-	display: flex;
-	align-items: center;
-	gap: var(--spacing-m);
-	min-height: 40px;
-	padding: 0 6px 0 10px;
-	box-sizing: border-box;
-	border: 1px solid transparent;
-	border-radius: var(--border-radius);
 	background: var(--color-background-lighter);
 }
 
-.slide-import-source:hover {
-	border-color: var(--color-border);
+/* The row is the header of the slides under it, so the two live in one
+ * list item and the row carries what marks it: the hover, the accent and,
+ * while its slides are on show, the sticky position. */
+.slide-import-source-row {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-m);
+	height: var(--list-row-height);
+	padding-inline: var(--spacing-xl);
+	box-sizing: border-box;
+	background: var(--color-background-lighter);
+}
+
+.slide-import-source-row:hover {
 	background: var(--color-background-hover);
 }
 
-/* The keyboard marks the whole row, which is what the buttons inside it act
- * on. An outline rather than the border, so the mark also shows on the open
- * row, which already carries a border of its own. */
-.slide-import-source:focus-within {
+.slide-import-source-row:focus-within {
 	outline: 2px solid var(--color-primary);
-	outline-offset: -1px;
+	outline-offset: -2px;
 }
 
 .slide-import-source-main:focus-visible,
@@ -186,6 +189,7 @@
 .slide-import-source-main {
 	flex: 1;
 	min-width: 0;
+	height: 100%;
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-m);
@@ -197,14 +201,6 @@
 	font: inherit;
 	text-align: start;
 	cursor: pointer;
-}
-
-/* The whole row shows and hides the slides, so the button that names the
- * file reaches across it. The chip and the menu button sit above. */
-button.slide-import-source-main::after {
-	content: '';
-	position: absolute;
-	inset: 0;
 }
 
 /* The name of a file whose slides cannot be read is not a button: there is
@@ -219,6 +215,16 @@ span.slide-import-source-main {
 	flex-shrink: 0;
 }
 
+.slide-import-source-count {
+	flex-shrink: 0;
+	color: var(--color-text-light);
+	white-space: nowrap;
+}
+
+.slide-import-source-spacer {
+	flex: 1;
+}
+
 .slide-import-source-name {
 	font-size: var(--medium-font-size);
 	overflow: hidden;
@@ -226,9 +232,7 @@ span.slide-import-source-main {
 	white-space: nowrap;
 }
 
-.slide-import-source.active {
-	border-color: var(--color-border);
-	padding-inline-start: 12px;
+.slide-import-source.active > .slide-import-source-row {
 	box-shadow: inset 3px 0 0 0 rgba(var(--doc-type), 1);
 }
 
@@ -253,54 +257,60 @@ span.slide-import-source-main {
 	pointer-events: none;
 	display: inline-flex;
 	align-items: center;
-	gap: 5px;
-	padding: 0 8px 0 7px;
-	height: 20px;
+	gap: var(--spacing-s);
+	padding-inline: var(--spacing-m);
+	height: var(--btn-size-m);
 	box-sizing: border-box;
-	border: 1px solid var(--color-border);
-	border-radius: 10px;
+	border: 1px solid currentColor;
+	border-radius: var(--border-radius-pill);
 	background: var(--color-background-lighter);
-	color: var(--color-status-badge);
+	color: var(--color-status-neutral);
 	font-weight: 500;
 	white-space: nowrap;
 }
 
-.slide-import-source-badge::before {
-	content: '';
+/* Colour says good, neutral or bad and the word says which. The marker adds
+ * a third channel: filled when the pane has checked the file, hollow when it
+ * has not, so Not checked and Not linked never share both colour and shape. */
+.slide-import-source-dot {
 	width: 6px;
 	height: 6px;
+	flex-shrink: 0;
 	border-radius: 50%;
-	background: var(--color-status-badge);
+	background: currentColor;
 }
 
-.slide-import-source-badge.unlinked {
-	color: var(--color-border-dark);
-	border-color: var(--color-border-dark);
-}
-
-.slide-import-source-badge.unlinked::before {
-	background: var(--color-border-dark);
+.slide-import-source-badge.unchecked .slide-import-source-dot {
+	width: 8px;
+	height: 8px;
+	box-sizing: border-box;
+	border: 2px solid currentColor;
+	background: none;
 }
 
 .slide-import-source-badge.linked {
-	color: var(--color-primary);
-	border-color: var(--color-primary);
+	color: var(--color-status-linked);
 }
 
-.slide-import-source-badge.linked::before {
-	background: var(--color-primary);
+.slide-import-source-badge.outdated {
+	color: var(--color-status-warning);
 }
 
 .slide-import-source-badge.missing {
-	color: var(--color-error);
-	border-color: var(--color-error);
+	color: var(--color-status-error);
 }
 
-.slide-import-source-badge.missing::before {
-	background: var(--color-error);
-}
 
-.slide-import-source-menu {
+
+
+
+
+
+
+/* The row is a div, so btns.css:179 now matches this button and sizes it
+ * like a dialog button. An id outweighs that selector's fourteen classes
+ * without an !important war. */
+#slide-import-panel .slide-import-source-menu {
 	flex-shrink: 0;
 	position: relative;
 	width: 24px;
@@ -370,20 +380,8 @@ span.slide-import-source-main {
 	color: var(--color-text-light);
 }
 
-/* The scrolling frame of source panels, between the source list and the
- * options. A line across the whole pane marks each end of it: the frame
- * reaches past the body's padding for them, and puts that padding back
- * inside so the panels stay where they are. */
-.slide-import-panels {
-	flex: 1;
-	min-height: 0;
-	margin-inline: calc(-1 * var(--spacing-m));
-	padding-inline: var(--spacing-m);
-	overflow-x: hidden;
-	overflow-y: auto;
-	scrollbar-width: var(--scrollbar-width);
-	scrollbar-color: var(--scrollbar-color);
-	background: var(--color-background-lighter);
+.slide-import-source-panel:empty {
+	display: none;
 }
 
 /* The second section of the pane, on the divider that closes the first. The
@@ -399,27 +397,8 @@ span.slide-import-source-main {
 	font-weight: 600;
 }
 
-/* The panel header is a slide section header, so the file and the sections
- * inside it carry the same chevron and name. The file's own row stands out
- * by its weight and by the slide count at its end. */
-.slide-import-panel-header.slide-section-header {
-	margin-inline: var(--spacing-m);
-}
-
-.slide-import-panel-header .slide-section-name {
-	font-size: var(--medium-font-size);
-	font-weight: 600;
-}
-
 .slide-import-list .slide-section-name {
 	font-size: var(--default-font-size);
-}
-
-.slide-import-panel-count {
-	flex-shrink: 0;
-	margin-inline-start: var(--spacing-m);
-	color: var(--color-text-light);
-	white-space: nowrap;
 }
 
 .slide-import-panel-message {
