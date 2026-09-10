@@ -56,18 +56,21 @@
 .slide-import-sources {
 	flex: 0 0 auto;
 	max-height: 40%;
-	display: flex;
-	flex-direction: column;
-	gap: var(--spacing-s);
+	display: grid;
+	grid-template-columns: 1fr auto;
+	/* The list takes what is left of the block, and minmax lets that track
+	 * shrink under its content, which is what gives the list a height to
+	 * scroll inside. */
+	grid-template-rows: auto minmax(0, 1fr);
+	align-items: center;
+	row-gap: 6px;
 	overflow: hidden;
 }
 
-/* The title lines up with the icons below it: a row insets its contents by
- * its own padding, its border and the border its button keeps room for. */
 .slide-import-sources-title {
-	flex-shrink: 0;
-	padding-inline: calc(var(--spacing-m) + 2px);
+	grid-area: 1 / 1;
 	color: var(--color-text-dark);
+	font-size: 12px;
 	font-weight: 600;
 }
 
@@ -77,14 +80,12 @@
  * plain button off it; the colour of a link comes from here, over the dark
  * text that class paints. */
 .slide-import-add-link {
+	grid-area: 1 / 2;
 	display: inline-flex;
-	align-self: end;
 	align-items: center;
 	gap: var(--spacing-s);
 	flex-shrink: 0;
-	/* Its text ends where the rows above it end: the difference between the
-	 * inset of a row and the button's own padding. */
-	margin: 0 calc(var(--spacing-m) - var(--spacing-s));
+	margin: 0;
 	padding: var(--spacing-xs) var(--spacing-s);
 	/* A hovered button takes a border of its own from the desktop rules. The
 	 * room for it is there from the start, so nothing below moves when the
@@ -131,6 +132,8 @@
 	list-style: none;
 	margin: 0;
 	padding: 0;
+	grid-area: 2 / 1 / 3 / 3;
+	align-self: stretch;
 	display: flex;
 	flex-direction: column;
 	gap: var(--spacing-xs);

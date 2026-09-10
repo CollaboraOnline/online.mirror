@@ -856,13 +856,13 @@ class SlideImportPane {
           <div class="slide-import-sources-title">
             {_('Recently imported from')}
           </div>
+          {this.renderAddButton('ui-linkbutton slide-import-add-link')}
           <ul
             class="slide-import-source-list"
             aria-label={_('Presentations to import from')}
           >
             {this.sources.map((source) => this.renderSourceRow(source))}
           </ul>
-          {this.renderAddButton('ui-linkbutton slide-import-add-link')}
         </div>
         <div class="slide-import-panels">
           {this.sources
