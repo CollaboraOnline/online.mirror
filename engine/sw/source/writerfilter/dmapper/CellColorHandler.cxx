@@ -297,6 +297,14 @@ TablePropertyMapPtr  CellColorHandler::getProperties()
         if (m_OutputFormat == Form)
         {
             pPropertyMap->Insert(PROP_BACK_COLOR, cpo::uno::Any(nApplyColor));
+            // A fill given as a theme color keeps that reference next to its value, so the
+            // cell can follow the document theme.
+            auto aComplexColor = getFillComplexColor();
+            if (aComplexColor.getType() != model::ColorType::Unused)
+            {
+                auto xComplexColor = model::color::createXComplexColor(aComplexColor);
+                pPropertyMap->Insert(PROP_BACK_COMPLEX_COLOR, cpo::uno::Any(xComplexColor));
+            }
         }
         else
         {

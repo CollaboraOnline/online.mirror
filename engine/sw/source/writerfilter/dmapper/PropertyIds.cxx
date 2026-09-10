@@ -197,7 +197,7 @@ const OUString & getPropertyName( PropertyIds eId )
         { PROP_CONTOUR_POLY_POLYGON, u"ContourPolyPolygon"_ustr},
         { PROP_PAGE_TOGGLE, u"PageToggle"_ustr},
         { PROP_BACK_COLOR, u"BackColor"_ustr},
-        { PROP_BACK_COMPLEX_COLOR, u"BackComplexColor"_ustr},
+        { PROP_BACK_COMPLEX_COLOR, u"BackgroundComplexColor"_ustr},
         { PROP_BACK_COLOR_TRANSPARENCY, u"BackColorTransparency"_ustr},
         { PROP_ALLOW_OVERLAP, u"AllowOverlap"_ustr},
         { PROP_ALTERNATIVE_TEXT, u"AlternativeText"_ustr},

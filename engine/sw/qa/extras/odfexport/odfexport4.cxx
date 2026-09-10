@@ -9,6 +9,8 @@
 
 #include <swmodeltestbase.hxx>
 
+#include <editeng/boxitem.hxx>
+
 #include <com/sun/star/awt/FontSlant.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
@@ -38,6 +40,7 @@
 #include <ndtxt.hxx>
 #include <swtable.hxx>
 #include <tblafmt.hxx>
+#include <docmodel/color/ComplexColor.hxx>
 #include <itabenum.hxx>
 #include <frameformats.hxx>
 #include <editeng/brushitem.hxx>
@@ -1910,6 +1913,24 @@ CPPUNIT_TEST_FIXTURE(Test, testTableStyleLiveRoundTrip)
     pDoc = getSwDoc();
     const SwTable* pLoadedTable = SwTable::FindTable((*pDoc->GetTableFrameFormats())[0]);
     CPPUNIT_ASSERT(pLoadedTable);
+
+    // The style the file carries keeps the theme colors behind its values: the header fill
+    // is the theme's accent 1 and the header text its first light color, so the table can
+    // follow a theme change after the round trip as well.
+    const SwTableAutoFormat* pLoadedStyle = pDoc->GetTableStyles().FindAutoFormat(aStyleName);
+    CPPUNIT_ASSERT(pLoadedStyle);
+    const sal_uInt8 nHeaderCorner
+        = static_cast<sal_uInt8>(SwTableAutoFormat::RowColRole::First) * SwTableAutoFormat::nRoleCount
+          + static_cast<sal_uInt8>(SwTableAutoFormat::RowColRole::First);
+    const SwAutoFormatProps& rLoadedHeader = pLoadedStyle->GetBoxFormat(nHeaderCorner).GetProps();
+    CPPUNIT_ASSERT_EQUAL(int(model::ThemeColorType::Accent1),
+                         int(rLoadedHeader.GetBackground().getComplexColor().getThemeColorType()));
+    CPPUNIT_ASSERT_EQUAL(int(model::ThemeColorType::Light1),
+                         int(rLoadedHeader.GetColor().getComplexColor().getThemeColorType()));
+    const editeng::SvxBorderLine* pLoadedTop = rLoadedHeader.GetBox().GetTop();
+    CPPUNIT_ASSERT(pLoadedTop);
+    CPPUNIT_ASSERT_EQUAL(int(model::ThemeColorType::Accent1),
+                         int(pLoadedTop->getComplexColor().getThemeColorType()));
     CPPUNIT_ASSERT(pLoadedTable->GetTableStyleSettings().m_bUseFirstRowStyle);
     CPPUNIT_ASSERT(!pLoadedTable->GetTableStyleSettings().m_bUseLastRowStyle);
     const SwTableBox* pHeaderBox = pLoadedTable->GetTabLines()[0]->GetTabBoxes()[0];
@@ -1920,6 +1941,8 @@ CPPUNIT_TEST_FIXTURE(Test, testTableStyleLiveRoundTrip)
                    || SfxItemState::SET
                           != pHeaderNode->GetpSwAttrSet()->GetItemState(RES_CHRATR_COLOR, false));
     CPPUNIT_ASSERT_EQUAL(COL_WHITE, pHeaderNode->GetSwAttrSet().Get(RES_CHRATR_COLOR).GetValue());
+    // The cell's automatic style keeps no theme reference for its fill, and its value is the
+    // one the style gives, so the load dropped the fill.
     const SwFrameFormat* pHeaderFormat = pHeaderBox->GetFrameFormat();
     CPPUNIT_ASSERT(SfxItemState::SET
                    != pHeaderFormat->GetAttrSet().GetItemState(RES_BACKGROUND, false));

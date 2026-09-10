@@ -725,7 +725,7 @@ std::span<const SfxItemPropertyMapEntry> SwUnoPropertyMapProvider::GetRangePrope
         COMMON_CRSR_PARA_PROPERTIES_WITHOUT_FN_01
         TABSTOPS_MAP_ENTRY
         { UNO_NAME_BACK_COLOR, FN_UNO_TABLE_CELL_BACKGROUND, cppu::UnoType<sal_Int32>::get(), PropertyAttribute::MAYBEVOID, MID_BACK_COLOR  },
-        { UNO_NAME_BACKGROUND_COMPLEX_COLOR, FN_UNO_TABLE_CELL_BACKGROUND, cppu::UnoType<sal_Int32>::get(), PropertyAttribute::MAYBEVOID, MID_BACKGROUND_COMPLEX_COLOR  },
+        { UNO_NAME_BACKGROUND_COMPLEX_COLOR, FN_UNO_TABLE_CELL_BACKGROUND, cppu::UnoType<css::util::XComplexColor>::get(), PropertyAttribute::MAYBEVOID, MID_BACKGROUND_COMPLEX_COLOR  },
         { UNO_NAME_BACK_GRAPHIC_URL, RES_BACKGROUND,      cppu::UnoType<OUString>::get(), PropertyAttribute::MAYBEVOID ,MID_GRAPHIC_URL    },
         { UNO_NAME_BACK_GRAPHIC, RES_BACKGROUND, cppu::UnoType<graphic::XGraphic>::get(), PROPERTY_NONE, MID_GRAPHIC },
         { UNO_NAME_BACK_GRAPHIC_FILTER, RES_BACKGROUND,       cppu::UnoType<OUString>::get(), PropertyAttribute::MAYBEVOID ,MID_GRAPHIC_FILTER    },

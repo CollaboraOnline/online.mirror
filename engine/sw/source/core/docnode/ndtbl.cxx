@@ -29,6 +29,7 @@
 #include <svl/itemiter.hxx>
 #include <editeng/shaditem.hxx>
 #include <editeng/brushitem.hxx>
+#include <editeng/colritem.hxx>
 #include <fmtfsize.hxx>
 #include <formatflysplit.hxx>
 #include <fmtornt.hxx>
@@ -4071,6 +4072,83 @@ bool SwDoc::ApplyTableStyleLiveWithUndo(SwTableNode& rTableNode,
 
 namespace {
 
+/// Whether an own color means the same as the style's color: the same value and, when the
+/// own color carries a theme color, the same theme reference with the same transformations
+/// on the style's side. An own color without a theme reference compares by its value alone,
+/// since a file format that keeps no theme reference for it cannot say more than the value.
+/// An own theme reference over a style color without one is a link the style does not give,
+/// so the two differ. The other fields a complex color records on the way through a file
+/// format do not matter here.
+bool lcl_SameColor(const Color& rColor, const model::ComplexColor& rComplexColor,
+                   const Color& rOtherColor, const model::ComplexColor& rOtherComplexColor)
+{
+    if (rColor != rOtherColor)
+        return false;
+    if (!rComplexColor.isValidThemeType())
+        return true;
+    if (!rOtherComplexColor.isValidThemeType())
+        return false;
+    return rComplexColor.getThemeColorType() == rOtherComplexColor.getThemeColorType()
+           && rComplexColor.getTransformations() == rOtherComplexColor.getTransformations();
+}
+
+bool lcl_SameBorderLine(const editeng::SvxBorderLine* pLine, const editeng::SvxBorderLine* pOther)
+{
+    if (!pLine || !pOther)
+        return pLine == pOther;
+    // A double line can split the same total width into different parts.
+    return *pLine == *pOther
+           || (pLine->GetBorderLineStyle() == pOther->GetBorderLineStyle()
+               && pLine->GetWidth() == pOther->GetWidth()
+               && pLine->GetOutWidth() == pOther->GetOutWidth()
+               && pLine->GetInWidth() == pOther->GetInWidth()
+               && pLine->GetDistance() == pOther->GetDistance()
+               && lcl_SameColor(pLine->GetColor(), pLine->getComplexColor(), pOther->GetColor(),
+                                pOther->getComplexColor()));
+}
+
+/// Whether a paragraph's or cell's own item repeats what the table style gives it. Colors
+/// compare by what they mean, see lcl_SameColor, since a loaded item and the style's item
+/// can differ in the fields a complex color carries along without looking any different.
+bool lcl_ItemRepeatsStyle(const SfxPoolItem& rOwn, const SfxPoolItem& rBaked)
+{
+    if (rOwn == rBaked)
+        return true;
+    switch (rOwn.Which())
+    {
+        case RES_CHRATR_COLOR:
+        {
+            const auto& rOwnColor = static_cast<const SvxColorItem&>(rOwn);
+            const auto& rBakedColor = static_cast<const SvxColorItem&>(rBaked);
+            return lcl_SameColor(rOwnColor.GetValue(), rOwnColor.getComplexColor(),
+                                 rBakedColor.GetValue(), rBakedColor.getComplexColor());
+        }
+        case RES_BACKGROUND:
+        {
+            const auto& rOwnBrush = static_cast<const SvxBrushItem&>(rOwn);
+            const auto& rBakedBrush = static_cast<const SvxBrushItem&>(rBaked);
+            return !rOwnBrush.GetGraphicObject() && !rBakedBrush.GetGraphicObject()
+                   && lcl_SameColor(rOwnBrush.GetColor(), rOwnBrush.getComplexColor(),
+                                    rBakedBrush.GetColor(), rBakedBrush.getComplexColor());
+        }
+        case RES_BOX:
+        {
+            const auto& rOwnBox = static_cast<const SvxBoxItem&>(rOwn);
+            const auto& rBakedBox = static_cast<const SvxBoxItem&>(rBaked);
+            for (SvxBoxItemLine eLine : { SvxBoxItemLine::TOP, SvxBoxItemLine::BOTTOM,
+                                          SvxBoxItemLine::LEFT, SvxBoxItemLine::RIGHT })
+            {
+                if (!lcl_SameBorderLine(rOwnBox.GetLine(eLine), rBakedBox.GetLine(eLine))
+                    || rOwnBox.GetDistance(eLine) != rBakedBox.GetDistance(eLine))
+                    return false;
+            }
+            return true;
+        }
+        default:
+            return false;
+    }
+}
+
 /// The which ids of the items in rOwnSet that are also in rBakedSet with the same value.
 std::vector<sal_uInt16> lcl_GetItemsRepeating(const SfxItemSet& rOwnSet, const SfxItemSet& rBakedSet)
 {
@@ -4083,7 +4161,7 @@ std::vector<sal_uInt16> lcl_GetItemsRepeating(const SfxItemSet& rOwnSet, const S
     {
         const SfxPoolItem* pOwnItem = nullptr;
         if (SfxItemState::SET == rOwnSet.GetItemState(pBakedItem->Which(), false, &pOwnItem)
-            && *pOwnItem == *pBakedItem)
+            && lcl_ItemRepeatsStyle(*pOwnItem, *pBakedItem))
             aRepeated.push_back(pBakedItem->Which());
     }
     return aRepeated;
@@ -4133,7 +4211,7 @@ void SwDoc::StripBakedTableStyleFormatting(SwTableNode& rTableNode, bool bComple
                 const SfxPoolItem* pBakedItem = nullptr;
                 if (SfxItemState::SET == pOwnFormat->GetItemState(nWhich, false, &pOwnItem)
                     && SfxItemState::SET == aBakedBoxSet.GetItemState(nWhich, false, &pBakedItem)
-                    && *pOwnItem == *pBakedItem)
+                    && lcl_ItemRepeatsStyle(*pOwnItem, *pBakedItem))
                 {
                     pOwnFormat = pBox->ClaimFrameFormat();
                     pOwnFormat->ResetFormatAttr(nWhich);

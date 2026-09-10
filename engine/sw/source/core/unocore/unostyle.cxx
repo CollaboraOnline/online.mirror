@@ -5030,7 +5030,7 @@ void SAL_CALL SwXTextCellStyle::setPropertyValue(const OUString& rPropertyName, 
             case RES_BACKGROUND:
             {
                 SvxBrushItem rBrush = rBoxProps.GetBackground();
-                rBrush.PutValue(aValue, 0);
+                rBrush.PutValue(aValue, pEntry->nMemberId);
                 rBoxProps.SetBackground(rBrush);
                 return;
             }
@@ -5221,7 +5221,7 @@ cpo::uno::Any SAL_CALL SwXTextCellStyle::getPropertyValue(const OUString& rPrope
             case RES_BACKGROUND:
             {
                 const SvxBrushItem& rBrush = rBoxProps.GetBackground();
-                rBrush.QueryValue(aRet);
+                rBrush.QueryValue(aRet, pEntry->nMemberId);
                 return aRet;
             }
             case RES_BOX:

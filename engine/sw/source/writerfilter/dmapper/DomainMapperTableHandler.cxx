@@ -66,6 +66,8 @@
 #include <editeng/boxitem.hxx>
 #include <editeng/brushitem.hxx>
 #include <editeng/colritem.hxx>
+#include <docmodel/uno/UnoComplexColor.hxx>
+#include <com/sun/star/util/XComplexColor.hpp>
 #include <editeng/adjustitem.hxx>
 #include <editeng/crossedoutitem.hxx>
 #include <editeng/fhgtitem.hxx>
@@ -1660,13 +1662,30 @@ void lcl_FillBoxAutoFormat(SwBoxAutoFormat& rBoxFormat, const PropertyMapPtr& pP
     lcl_PutTextItem(pProps, PROP_PARA_ADJUST, SvxAdjustItem(SvxAdjust::Left, RES_PARATR_ADJUST),
                     MID_PARA_ADJUST, rProps, &AutoFormatBase::SetAdjust);
 
+    // A color the style gives as a theme color keeps that reference next to its value, so
+    // the style can follow the document theme.
+    auto aComplexColorOf = [&pProps](PropertyIds eId)
+    {
+        model::ComplexColor aComplexColor;
+        const std::optional<PropertyMap::Property> oProp = pProps->getProperty(eId);
+        uno::Reference<util::XComplexColor> xComplexColor;
+        if (oProp && (oProp->second >>= xComplexColor) && xComplexColor.is())
+            aComplexColor = model::color::getFromXComplexColor(xComplexColor);
+        return aComplexColor;
+    };
+
     SvxBoxItem aBox(RES_BOX);
     bool bHasBorder = false;
-    static const struct { PropertyIds eId; SvxBoxItemLine eLine; } aBorders[] = {
-        { PROP_TOP_BORDER, SvxBoxItemLine::TOP },
-        { PROP_BOTTOM_BORDER, SvxBoxItemLine::BOTTOM },
-        { PROP_LEFT_BORDER, SvxBoxItemLine::LEFT },
-        { PROP_RIGHT_BORDER, SvxBoxItemLine::RIGHT },
+    static const struct
+    {
+        PropertyIds eId;
+        PropertyIds eComplexColorId;
+        SvxBoxItemLine eLine;
+    } aBorders[] = {
+        { PROP_TOP_BORDER, PROP_BORDER_TOP_COMPLEX_COLOR, SvxBoxItemLine::TOP },
+        { PROP_BOTTOM_BORDER, PROP_BORDER_BOTTOM_COMPLEX_COLOR, SvxBoxItemLine::BOTTOM },
+        { PROP_LEFT_BORDER, PROP_BORDER_LEFT_COMPLEX_COLOR, SvxBoxItemLine::LEFT },
+        { PROP_RIGHT_BORDER, PROP_BORDER_RIGHT_COMPLEX_COLOR, SvxBoxItemLine::RIGHT },
     };
     for (const auto& rBorder : aBorders)
     {
@@ -1677,6 +1696,9 @@ void lcl_FillBoxAutoFormat(SwBoxAutoFormat& rBoxFormat, const PropertyMapPtr& pP
             ::editeng::SvxBorderLine aSvxLine;
             if (SvxBoxItem::LineToSvxLine(aLine, aSvxLine, true))
             {
+                model::ComplexColor aComplexColor = aComplexColorOf(rBorder.eComplexColorId);
+                if (aComplexColor.getType() != model::ColorType::Unused)
+                    aSvxLine.setComplexColor(aComplexColor);
                 aBox.SetLine(&aSvxLine, rBorder.eLine);
                 bHasBorder = true;
             }
@@ -1688,12 +1710,18 @@ void lcl_FillBoxAutoFormat(SwBoxAutoFormat& rBoxFormat, const PropertyMapPtr& pP
     const std::optional<PropertyMap::Property> oBackColor = pProps->getProperty(PROP_BACK_COLOR);
     sal_Int32 nBackColor = 0;
     if (oBackColor && (oBackColor->second >>= nBackColor))
-        rProps.SetBackground(SvxBrushItem(Color(ColorTransparency, nBackColor), RES_BACKGROUND));
+    {
+        rProps.SetBackground(SvxBrushItem(Color(ColorTransparency, nBackColor),
+                                          aComplexColorOf(PROP_BACK_COMPLEX_COLOR), RES_BACKGROUND));
+    }
 
     const std::optional<PropertyMap::Property> oCharColor = pProps->getProperty(PROP_CHAR_COLOR);
     sal_Int32 nCharColor = 0;
     if (oCharColor && (oCharColor->second >>= nCharColor))
-        rProps.SetColor(SvxColorItem(Color(ColorTransparency, nCharColor), RES_CHRATR_COLOR));
+    {
+        rProps.SetColor(SvxColorItem(Color(ColorTransparency, nCharColor),
+                                     aComplexColorOf(PROP_CHAR_COMPLEX_COLOR), RES_CHRATR_COLOR));
+    }
 }
 
 /// Convert a DOCX table style into an equivalent named Writer table style, the first time it's

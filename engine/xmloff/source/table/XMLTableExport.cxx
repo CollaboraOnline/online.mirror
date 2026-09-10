@@ -44,6 +44,7 @@
 #include <xmloff/maptype.hxx>
 #include <xmloff/prhdlfac.hxx>
 #include <xmloff/txtprmap.hxx>
+#include <xmloff/XMLComplexColorExport.hxx>
 #include "table.hxx"
 #include <xmlprop.hxx>
 
@@ -159,14 +160,36 @@ namespace {
 
 class XMLCellExportPropertyMapper : public SvXMLExportPropertyMapper
 {
+    XMLComplexColorExport maComplexColorExport;
+
 public:
-    using SvXMLExportPropertyMapper::SvXMLExportPropertyMapper;
+    XMLCellExportPropertyMapper(const rtl::Reference<XMLPropertySetMapper>& rMapper, SvXMLExport& rExport)
+        : SvXMLExportPropertyMapper(rMapper)
+        , maComplexColorExport(rExport)
+    {
+    }
+
     /** this method is called for every item that has the
     MID_FLAG_SPECIAL_ITEM_EXPORT flag set */
     virtual void handleSpecialItem(comphelper::AttributeList&, const XMLPropertyState&, const SvXMLUnitConverter&,
         const SvXMLNamespaceMap&, const std::vector<XMLPropertyState>*, sal_uInt32) const override
     {
         // the SpecialItem NumberFormat must not be handled by this method
+    }
+
+    /** A theme color behind a cell's fill, border or text color is written as a child element
+        of the properties element, next to the plain color value. */
+    virtual void handleElementItem(SvXMLExport& rExport, const XMLPropertyState& rProperty, SvXmlExportFlags nFlags,
+        const std::vector<XMLPropertyState>* pProperties, sal_uInt32 nIdx) const override
+    {
+        if (getPropertySetMapper()->GetEntryContextId(rProperty.mnIndex) == CTF_COMPLEX_COLOR)
+        {
+            const_cast<XMLCellExportPropertyMapper*>(this)->maComplexColorExport.exportXML(rProperty.maValue,
+                getPropertySetMapper()->GetEntryNameSpace(rProperty.mnIndex),
+                getPropertySetMapper()->GetEntryXMLName(rProperty.mnIndex));
+            return;
+        }
+        SvXMLExportPropertyMapper::handleElementItem(rExport, rProperty, nFlags, pProperties, nIdx);
     }
 };
 
@@ -197,13 +220,13 @@ XMLTableExport::XMLTableExport(SvXMLExport& rExp, const rtl::Reference< SvXMLExp
 
     if (mbWriter)
     {
-        mxCellExportPropertySetMapper = new XMLCellExportPropertyMapper(new XMLTextPropertySetMapper(TextPropMap::CELL, true));
+        mxCellExportPropertySetMapper = new XMLCellExportPropertyMapper(new XMLTextPropertySetMapper(TextPropMap::CELL, true), rExp);
     }
     else
     {
         mxCellExportPropertySetMapper = xExportPropertyMapper;
         mxCellExportPropertySetMapper->ChainExportMapper(XMLTextParagraphExport::CreateParaExtPropMapper(rExp));
-        mxCellExportPropertySetMapper->ChainExportMapper(new XMLCellExportPropertyMapper(new XMLPropertySetMapper(getCellPropertiesMap(), xFactoryRef, true)));
+        mxCellExportPropertySetMapper->ChainExportMapper(new XMLCellExportPropertyMapper(new XMLPropertySetMapper(getCellPropertiesMap(), xFactoryRef, true), rExp));
     }
 
     mxRowExportPropertySetMapper = new SvXMLExportPropertyMapper( new XMLPropertySetMapper( getRowPropertiesMap(), xFactoryRef, true ) );

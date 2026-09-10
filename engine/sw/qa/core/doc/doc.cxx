@@ -9,6 +9,9 @@
 
 #include <swmodeltestbase.hxx>
 
+#include <editeng/borderline.hxx>
+#include <editeng/boxitem.hxx>
+
 #include <com/sun/star/text/XTextTable.hpp>
 #include <com/sun/star/view/XSelectionSupplier.hpp>
 #include <com/sun/star/document/UpdateDocMode.hpp>
@@ -53,7 +56,9 @@
 #include <redline.hxx>
 #include <UndoRedline.hxx>
 #include <tblafmt.hxx>
+#include <docmodel/color/ComplexColor.hxx>
 #include <editeng/brushitem.hxx>
+#include <editeng/colritem.hxx>
 
 using namespace css;
 using namespace ::cpo;
@@ -1369,6 +1374,23 @@ CPPUNIT_TEST_FIXTURE(SwCoreDocTest, testBuiltInWordTableStyleCatalog)
     CPPUNIT_ASSERT(aBandFill.GetBlue() > aBandFill.GetRed());
     CPPUNIT_ASSERT(aBandFill.GetLuminance() > aHeaderFill.GetLuminance());
 
+    // The catalog's colors are theme colors: the header fill is the theme's accent 1, the
+    // band a tint of it and the header text the theme's first light color. The style keeps
+    // those references next to the resolved values, so it can follow a document theme.
+    const model::ComplexColor& rHeaderFill
+        = pGridTable4->GetBoxFormat(nHeaderCorner).GetProps().GetBackground().getComplexColor();
+    CPPUNIT_ASSERT_EQUAL(int(model::ThemeColorType::Accent1), int(rHeaderFill.getThemeColorType()));
+    CPPUNIT_ASSERT(rHeaderFill.getTransformations().empty());
+    const model::ComplexColor& rBandFill
+        = pGridTable4->GetBoxFormat(nBandCell).GetProps().GetBackground().getComplexColor();
+    CPPUNIT_ASSERT_EQUAL(int(model::ThemeColorType::Accent1), int(rBandFill.getThemeColorType()));
+    CPPUNIT_ASSERT(!rBandFill.getTransformations().empty());
+    CPPUNIT_ASSERT_EQUAL(int(model::TransformationType::Tint),
+                         int(rBandFill.getTransformations()[0].meType));
+    CPPUNIT_ASSERT_EQUAL(int(model::ThemeColorType::Light1),
+                         int(pGridTable4->GetBoxFormat(nHeaderCorner).GetProps().GetColor()
+                                 .getComplexColor().getThemeColorType()));
+
     // A converted style defines only what the document's style did: the header text color,
     // not a font. Asking for the defined text attributes must give exactly that, while the
     // full set still carries the constructed default font for the old bake.
@@ -1423,6 +1445,84 @@ CPPUNIT_TEST_FIXTURE(SwCoreDocTest, testExternalDatabaseFormLoadsOnlyAfterLinkUp
     // When the user then allows link updates, the form connects and loads.
     pDocShell->AllowLinkUpdate();
     CPPUNIT_ASSERT(xLoadable->isLoaded());
+}
+
+CPPUNIT_TEST_FIXTURE(SwCoreDocTest, testStripBakedTableStyleComparesThemeAndLineSplit)
+{
+    // Given a document with two one-cell tables:
+    createSwDoc();
+    SwDoc* pDoc = getSwDoc();
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    const Color aFill(COL_LIGHTBLUE);
+    model::ComplexColor aAccent1Theme;
+    aAccent1Theme.setThemeColor(model::ThemeColorType::Accent1);
+    SvxBrushItem aPlainBrush(aFill, RES_BACKGROUND);
+    SvxBrushItem aThemeBrush(aFill, RES_BACKGROUND);
+    aThemeBrush.setComplexColor(aAccent1Theme);
+    editeng::SvxBorderLine aEvenLine(nullptr, 0, SvxBorderLineStyle::DOUBLE);
+    aEvenLine.GuessLinesWidths(SvxBorderLineStyle::DOUBLE, 20, 20, 20);
+    editeng::SvxBorderLine aUnevenLine(nullptr, 0, SvxBorderLineStyle::DOUBLE);
+    aUnevenLine.GuessLinesWidths(SvxBorderLineStyle::DOUBLE, 10, 30, 20);
+    CPPUNIT_ASSERT_EQUAL(aEvenLine.GetWidth(), aUnevenLine.GetWidth());
+
+    // Each table has a style whose cells all have the given fill and a double top border split
+    // 20, 20, 20, and its cell has the given own fill and own top border.
+    auto aInsertTable = [&](const OUString& rStyleName, const SvxBrushItem& rStyleBrush,
+                            const SvxBrushItem& rOwnBrush, const editeng::SvxBorderLine& rOwnLine)
+    {
+        SwInsertTableOptions aOptions(SwInsertTableFlags::NONE, 0);
+        const SwTable& rTable = pWrtShell->InsertTable(aOptions, /*nRows=*/1, /*nCols=*/1);
+        SwTable& rMutableTable = rTable.GetTableNode()->GetTable();
+        SwTableBox* pBox = rMutableTable.GetTabLines()[0]->GetTabBoxes()[0];
+        SfxItemSet aStyleSet(pBox->GetFrameFormat()->GetAttrSet());
+        aStyleSet.Put(rStyleBrush);
+        SvxBoxItem aStyleBox(RES_BOX);
+        aStyleBox.SetLine(&aEvenLine, SvxBoxItemLine::TOP);
+        aStyleSet.Put(aStyleBox);
+        SwTableAutoFormat aStyle((TableStyleName(rStyleName)));
+        for (sal_uInt8 nPos = 0; nPos < 16; ++nPos)
+            aStyle.UpdateFromSet(nPos, aStyleSet, SwTableAutoFormatUpdateFlags::Box, nullptr);
+        pDoc->GetTableStyles().AddAutoFormat(aStyle);
+        rMutableTable.SetTableStyleName(TableStyleName(rStyleName));
+
+        SvxBoxItem aOwnBox(RES_BOX);
+        aOwnBox.SetLine(&rOwnLine, SvxBoxItemLine::TOP);
+        SwFrameFormat* pBoxFormat = pBox->ClaimFrameFormat();
+        pBoxFormat->SetFormatAttr(rOwnBrush);
+        pBoxFormat->SetFormatAttr(aOwnBox);
+        pWrtShell->SttEndDoc(/*bStt=*/false);
+        return std::pair<SwTableNode*, SwTableBox*>(rTable.GetTableNode(), pBox);
+    };
+    // In the first, the style's fill is a plain value, and the cell's own fill has the same
+    // value but links to the theme's accent 1; the cell's border splits the same total width
+    // 10, 30, 20.
+    auto [pFirstNode, pFirstBox]
+        = aInsertTable(u"Plain Fill"_ustr, aPlainBrush, aThemeBrush, aUnevenLine);
+    // In the second, the style's fill and the cell's own fill both link to accent 1, and the
+    // borders are the same.
+    auto [pSecondNode, pSecondBox]
+        = aInsertTable(u"Theme Fill"_ustr, aThemeBrush, aThemeBrush, aEvenLine);
+
+    // When the formatting that only repeats the style is dropped, as on load:
+    pDoc->StripBakedTableStyleFormatting(*pFirstNode, /*bCompleteStyleBoxes=*/true);
+    pDoc->StripBakedTableStyleFormatting(*pSecondNode, /*bCompleteStyleBoxes=*/true);
+
+    // Then the first cell keeps both: the fill's theme link and the border's split are things
+    // its style does not give.
+    const SwAttrSet& rFirstSet = pFirstBox->GetFrameFormat()->GetAttrSet();
+    CPPUNIT_ASSERT_EQUAL(SfxItemState::SET, rFirstSet.GetItemState(RES_BACKGROUND, false));
+    CPPUNIT_ASSERT_EQUAL(
+        int(model::ThemeColorType::Accent1),
+        int(rFirstSet.Get(RES_BACKGROUND).getComplexColor().getThemeColorType()));
+    CPPUNIT_ASSERT_EQUAL(SfxItemState::SET, rFirstSet.GetItemState(RES_BOX, false));
+    const editeng::SvxBorderLine* pTop = rFirstSet.Get(RES_BOX).GetTop();
+    CPPUNIT_ASSERT(pTop);
+    CPPUNIT_ASSERT_EQUAL(aUnevenLine.GetOutWidth(), pTop->GetOutWidth());
+
+    // And the second cell loses both, since they only repeat what its style gives.
+    const SwAttrSet& rSecondSet = pSecondBox->GetFrameFormat()->GetAttrSet();
+    CPPUNIT_ASSERT(SfxItemState::SET != rSecondSet.GetItemState(RES_BACKGROUND, false));
+    CPPUNIT_ASSERT(SfxItemState::SET != rSecondSet.GetItemState(RES_BOX, false));
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
