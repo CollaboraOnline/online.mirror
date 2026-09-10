@@ -58,8 +58,8 @@
 
 	/* Restore original Sidebar expanders */
 	.ui-expander-label.expanded::before,
-	.ui-treeview-expandable:not(.collapsed) > div > .ui-treeview-expander::before,
-	.ui-treeview div[aria-expanded='true'] > div > .ui-treeview-expander::before {
+	.ui-treeview-expandable > div > .ui-treeview-expander::before,
+	.ui-treeview div[aria-expanded] > div > .ui-treeview-expander::before {
 		forced-color-adjust: none;
 		filter: none;
 	}
@@ -133,8 +133,8 @@
 	/* Dark mode: restore brightness for sidebar expanders (filter: none
 	   overrides dark mode's brightness(1), leaving dark chevron on dark bg) */
 	[data-theme='dark'] .ui-expander-label.expanded::before,
-	[data-theme='dark'] .ui-treeview-expandable:not(.collapsed) > div > .ui-treeview-expander::before,
-	[data-theme='dark'] .ui-treeview div[aria-expanded='true'] > div > .ui-treeview-expander::before {
+	[data-theme='dark'] .ui-treeview-expandable > div > .ui-treeview-expander::before,
+	[data-theme='dark'] .ui-treeview div[aria-expanded] > div > .ui-treeview-expander::before {
 		filter: brightness(1);
 	}
 
