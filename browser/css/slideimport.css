@@ -154,6 +154,7 @@
 	align-self: stretch;
 	display: flex;
 	flex-direction: column;
+	gap: var(--spacing-s);
 	min-height: 0;
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -179,8 +180,10 @@
 	align-items: center;
 	gap: var(--spacing-m);
 	height: var(--list-row-height);
-	padding-inline: var(--spacing-xl);
+	padding-inline: var(--spacing-m);
 	box-sizing: border-box;
+	border: 1px solid var(--color-border);
+	border-radius: var(--border-radius);
 	background: var(--color-background-lighter);
 }
 
