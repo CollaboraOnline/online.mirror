@@ -447,8 +447,7 @@ span.slide-import-source-main {
 }
 
 .slide-import-keepdesign,
-.slide-import-linksource,
-.slide-import-linkposition {
+.slide-import-linksource {
 	display: flex;
 	align-items: center;
 	gap: 8px;
@@ -461,21 +460,63 @@ span.slide-import-source-main {
 	margin: 0;
 }
 
-.slide-import-linkposition {
-	padding-inline-start: 26px;
-}
-
-.slide-import-linkposition input[type='checkbox'] {
-	width: 16px;
-	height: 16px;
-}
-
 .slide-import-keepdesign:has(input:disabled),
-.slide-import-linksource:has(input:disabled),
-.slide-import-linkposition:has(input:disabled) {
+.slide-import-linksource:has(input:disabled) {
 	opacity: 0.5;
 	cursor: default;
 }
+
+/* Which slide an update reads. The group sits under the checkbox that turns
+ * linking on, indented to it, and each option carries what happens after
+ * someone edits the source. */
+.slide-import-linkmode {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-m);
+	margin-block-start: var(--spacing-s);
+	padding-inline-start: 26px;
+}
+
+.slide-import-linkmode-option {
+	display: flex;
+	flex-direction: column;
+}
+
+/* Under the label it belongs to: the glyph is 20 wide with 8 to the label. */
+.slide-import-linkmode-why {
+	padding-inline-start: 28px;
+	color: var(--color-text-light);
+}
+
+.slide-import-linkmode[hidden] {
+	display: none;
+}
+
+.slide-import-linkmode .radiobutton {
+	min-height: 22px;
+}
+
+/* mobilewizard.css:806 is unscoped, so it hands every radio label in the
+ * product a 44px line and 4% of the row as padding. The percentage grows
+ * with the pane and lands on the wrong side in a right-to-left locale.
+ * Scoping that rule is the real fix. */
+.slide-import-linkmode .radiobutton label {
+	padding-inline-start: 0;
+	line-height: 1.2;
+}
+
+/* The shared rule spaces a radio on both sides, and it carries a :not()
+ * class, so the selector here needs the same weight to drop the space on
+ * the left. The group's own indent carries it instead, and the glyph then
+ * lines up with the consequence line below it. */
+.slide-import-linkmode .radiobutton.jsdialog input[type='radio'] {
+	margin: 1px 8px 1px 0;
+}
+
+.slide-import-linkmode label {
+	cursor: pointer;
+}
+
 
 /* The slides carry the slide navigator's preview classes, so
  * partsPreviewControl.css styles the thumbnails of both panels; the rules

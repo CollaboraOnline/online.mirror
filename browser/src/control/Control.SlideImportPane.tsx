@@ -707,11 +707,12 @@ class SlideImportPane {
       this.session.selection.size === 0 || this.session.state !== 'ready';
   }
 
-  private updateLinkByPosition(): void {
-    const checkbox = this.panel.querySelector(
-      '.slide-import-linkposition input',
-    ) as HTMLInputElement | null;
-    if (checkbox) checkbox.disabled = !this.session.linkToSource;
+  private updateLinkMode(): void {
+    const group = this.panel.querySelector(
+      '.slide-import-linkmode',
+    ) as HTMLElement | null;
+    if (group)
+      group.hidden = !(this.session.linkToSource && this.session.canLink);
   }
 
   // How many slides a source holds, and how many of them are picked.
@@ -1134,22 +1135,67 @@ class SlideImportPane {
             disabled={!session.canLink}
             onChange={(e: Event) => {
               session.setLinkToSource((e.target as HTMLInputElement).checked);
-              this.updateLinkByPosition();
+              this.updateLinkMode();
             }}
           />
-          {_('Link to the source file')}
+          <span id="slide-import-linksource-label">
+            {_('Link to the source file')}
+          </span>
         </label>
-        <label class="slide-import-linkposition">
+        {this.renderLinkMode()}
+      </div>
+    );
+  }
+
+  // What Update reads: the slide itself, or whatever stands in its place.
+  // Both are links, so the group belongs under the checkbox that turns
+  // linking on, and it is absent rather than disabled while that is off.
+  private renderLinkMode(): HTMLElement {
+    const group = (
+      <div
+        class="slide-import-linkmode"
+        role="radiogroup"
+        aria-labelledby="slide-import-linksource-label"
+      >
+        {this.renderLinkModeOption(
+          'slide',
+          _('Update from the same slide'),
+          _('The slide keeps its link if the source is reordered.'),
+        )}
+        {this.renderLinkModeOption(
+          'position',
+          _('Update from the same slide position'),
+          _('The update takes the slide that holds this position.'),
+        )}
+      </div>
+    ) as HTMLElement;
+    group.hidden = !(this.session.linkToSource && this.session.canLink);
+    return group;
+  }
+
+  private renderLinkModeOption(
+    key: string,
+    label: string,
+    consequence: string,
+  ): HTMLElement {
+    const id = 'slide-import-linkmode-' + key;
+    const byPosition = key === 'position';
+    return (
+      <div class="slide-import-linkmode-option">
+        <div class="radiobutton ui-radiobutton jsdialog">
           <input
-            type="checkbox"
-            checked={session.linkByPosition}
-            disabled={!session.canLink || !session.linkToSource}
-            onChange={(e: Event) =>
-              session.setLinkByPosition((e.target as HTMLInputElement).checked)
-            }
+            type="radio"
+            id={id}
+            name="slide-import-linkmode"
+            checked={this.session.linkByPosition === byPosition}
+            aria-describedby={id + '-why'}
+            onChange={() => this.session.setLinkByPosition(byPosition)}
           />
-          {_('Link slides to the position in a source file')}
-        </label>
+          <label for={id}>{label}</label>
+        </div>
+        <div class="slide-import-linkmode-why" id={id + '-why'}>
+          {consequence}
+        </div>
       </div>
     );
   }
