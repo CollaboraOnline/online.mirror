@@ -13,6 +13,13 @@
 	--color-text-light: #696969; /* secondard text, disabled */
 	--color-text-calc-header: #e8e8e8;
 	--color-status-badge: #616161;
+
+	/* What the pane knows of a linked file. Each clears 4.5:1 on the pane. */
+	--color-status-neutral: #696969;
+	--color-status-linked: #0063b1;
+	--color-status-warning: #876900;
+	--color-status-error: #b62723;
+
 	--color-slideshow: #A8A8A8;
 	--color-date-text: #555555;
 	--color-annotation-line: #000000;

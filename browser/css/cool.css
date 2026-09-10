@@ -25,6 +25,7 @@
 
 	--border-radius-s: 2px;
 	--border-radius: 4px; /* buttons, widgets, dialog windows */
+	--border-radius-pill: 999px; /* chips and other fully round shapes */
 	--border-radius-large: 10px; /* large surfaces: backstage, welcome screen, sidebar, popups, tab groups */
 
 	/* Spacing scale for gap/padding/margin */
@@ -33,6 +34,14 @@
 	--spacing-m: 8px;
 	--spacing-l: 12px;
 	--spacing-xl: 16px;
+
+	/* One row of a list the user reads down: source lists, backstage lists,
+	   the sidebar's own lists. */
+	--list-row-height: 40px;
+
+	/* The smallest a slide thumbnail may be drawn, shared by the slide
+	   navigator and the import pane so the two agree. */
+	--slide-thumb-min-width: 160px;
 
 	/* Black overlay tints for borders, scrims and shadow components */
 	--color-black-5: rgba(0, 0, 0, 0.05);
