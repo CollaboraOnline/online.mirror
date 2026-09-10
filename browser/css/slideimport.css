@@ -165,9 +165,11 @@
 }
 
 /* The keyboard marks the whole row, which is what the buttons inside it act
- * on. */
+ * on. An outline rather than the border, so the mark also shows on the open
+ * row, which already carries a border of its own. */
 .slide-import-source:focus-within {
-	border-color: rgba(var(--doc-type), 1);
+	outline: 2px solid var(--color-primary);
+	outline-offset: -1px;
 }
 
 .slide-import-source-main:focus-visible,
@@ -219,6 +221,12 @@ span.slide-import-source-main {
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
+}
+
+.slide-import-source.expanded {
+	border-color: var(--color-border);
+	padding-inline-start: 12px;
+	box-shadow: inset 3px 0 0 0 rgba(var(--doc-type), 1);
 }
 
 .slide-import-source.expanded .slide-import-source-name {
