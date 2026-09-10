@@ -1484,6 +1484,24 @@ img.context-menu-icon {
 	color: var(--color-text-dark);
 	opacity: 1;
 }
+
+/* The placeholder goes as soon as there is text, so the field says what it is
+   with the same glyph the combobox search beside it uses. */
+.ui-treeview-search-input {
+	background-image: url('images/lc_recsearch.svg');
+	background-repeat: no-repeat;
+	background-position: 8px center;
+	background-size: 16px;
+	padding-inline-start: 28px !important;
+}
+
+[data-theme='dark'] .ui-treeview-search-input {
+	background-image: url('images/dark/lc_recsearch.svg');
+}
+
+[dir='rtl'] .ui-treeview-search-input {
+	background-position: right 8px center;
+}
 .autofilter .ui-treeview-search-input.jsdialog.ui-edit,
 .autofilter .ui-treeview-search-input.jsdialog.ui-edit:hover {
 	width: 100%;
