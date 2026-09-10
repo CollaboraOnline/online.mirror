@@ -45,11 +45,41 @@ describe(['tagdesktop'], 'Search placeholder', { testIsolation: false }, functio
 		assertReadable('light');
 	});
 
+	function assertMarked(theme) {
+		const found = fields();
+		expect(found.length, theme + ': the dialog has search fields').to.be.greaterThan(0);
+
+		found.forEach(function (field) {
+			field.focus();
+			field.value = 'arial';
+			field.dispatchEvent(new win.Event('input', { bubbles: true }));
+
+			const style = win.getComputedStyle(field);
+			const where = theme + ': ' + field.id + ', ';
+
+			expect(field.value, where + 'the placeholder is no longer shown').to.not.equal('');
+			expect(style.backgroundImage,
+				where + 'the field still carries a mark of its own').to.not.equal('none');
+			expect(parseFloat(style.paddingInlineStart),
+				where + 'and the text is kept clear of it').to.be.greaterThan(16);
+
+			field.value = '';
+			field.dispatchEvent(new win.Event('input', { bubbles: true }));
+		});
+	}
+
+	it('says what it is once the placeholder is gone', function () {
+		cy.then(function () { assertMarked('light'); });
+	});
+
 	it('and in dark mode too', function () {
 		cy.then(function () { win.app.map.uiManager.toggleDarkMode(); });
 		cy.cframe().find('html').should('have.attr', 'data-theme', 'dark');
 		cy.then(function () { return helper.processToIdle(win); });
 
-		cy.then(function () { assertReadable('dark'); });
+		cy.then(function () {
+			assertReadable('dark');
+			assertMarked('dark');
+		});
 	});
 });
