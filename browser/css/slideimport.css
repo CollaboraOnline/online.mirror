@@ -79,8 +79,15 @@
  * The link carries the shared ui-linkbutton class, which keeps the box of a
  * plain button off it; the colour of a link comes from here, over the dark
  * text that class paints. */
-.slide-import-add-link {
+/* The label row's own controls, right of the label. */
+.slide-import-sources-actions {
 	grid-area: 1 / 2;
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-s);
+}
+
+.slide-import-add-link {
 	display: inline-flex;
 	align-items: center;
 	gap: var(--spacing-s);

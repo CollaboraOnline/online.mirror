@@ -171,7 +171,11 @@ class SlideImportPane {
   }
 
   private toggleExpand(): void {
-    if (this.map.paneExpander) this.map.paneExpander.toggle();
+    if (!this.map.paneExpander) return;
+    this.map.paneExpander.toggle();
+    // The pane offers different things at the two widths, so it is drawn
+    // again rather than left with the controls of the layout it just left.
+    if (this.visible) this.render();
   }
 
   public toggle(): void {
@@ -984,6 +988,35 @@ class SlideImportPane {
     );
   }
 
+  // Opening every deck is a state the docked pane cannot hold, since one
+  // deck of slides is taller than it is, so the control belongs to the
+  // expanded pane alone. "Hide slides" is the word the source menu uses.
+  private renderShowAll(): HTMLElement | null {
+    if (!this.paneExpanded() || this.sources.length < 2) return null;
+    const anyOpen = this.sources.some((source) => source.expanded);
+    return (
+      <button
+        class="ui-linkbutton slide-import-show-all"
+        onClick={() => this.toggleAll(!anyOpen)}
+      >
+        {anyOpen ? _('Hide all slides') : _('Show all slides')}
+      </button>
+    );
+  }
+
+  private toggleAll(open: boolean): void {
+    for (const source of this.sources) {
+      source.expanded = open && this.canShowSlides(source);
+      if (source.expanded) this.askSource(source);
+    }
+    // The active source stays the one it was, so the accent, the picks and
+    // the Insert btn do not move when the slides come and go.
+    this.render();
+    if (open)
+      for (const source of this.sources)
+        if (source.expanded) this.requestRemoteThumbnails(source);
+  }
+
   private renderFilter(): HTMLElement | null {
     if (this.sources.length <= SlideImportPane.filterFrom) return null;
     return (
@@ -1024,7 +1057,10 @@ class SlideImportPane {
           <div class="slide-import-sources-title">
             {_('Recently imported from')}
           </div>
-          {this.renderAddButton('ui-linkbutton slide-import-add-link')}
+          <span class="slide-import-sources-actions">
+            {this.renderShowAll()}
+            {this.renderAddButton('ui-linkbutton slide-import-add-link')}
+          </span>
           {this.renderFilter()}
           <ul
             class="slide-import-source-list"
