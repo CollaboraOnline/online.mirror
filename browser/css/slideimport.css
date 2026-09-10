@@ -70,7 +70,7 @@
 .slide-import-sources-title {
 	grid-area: 1 / 1;
 	color: var(--color-text-dark);
-	font-size: 12px;
+	font-size: var(--default-font-size);
 	font-weight: 600;
 }
 
@@ -220,7 +220,7 @@ span.slide-import-source-main {
 }
 
 .slide-import-source-name {
-	font-size: 13px;
+	font-size: var(--medium-font-size);
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
@@ -261,7 +261,6 @@ span.slide-import-source-main {
 	border-radius: 10px;
 	background: var(--color-background-lighter);
 	color: var(--color-status-badge);
-	font-size: 11px;
 	font-weight: 500;
 	white-space: nowrap;
 }
@@ -396,7 +395,7 @@ span.slide-import-source-main {
 	padding: var(--spacing-m) calc(var(--spacing-m) * 2) 0;
 	border-block-start: 1px solid var(--color-toolbar-border);
 	color: var(--color-text-dark);
-	font-size: 12px;
+	font-size: var(--default-font-size);
 	font-weight: 600;
 }
 
@@ -420,7 +419,6 @@ span.slide-import-source-main {
 	flex-shrink: 0;
 	margin-inline-start: var(--spacing-m);
 	color: var(--color-text-light);
-	font-size: 11px;
 	white-space: nowrap;
 }
 
