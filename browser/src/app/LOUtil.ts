@@ -319,7 +319,6 @@ class LOUtil {
 		'serverauditok',
 		'serverauditerror',
 		'compact_customanimation',
-		'slide-deck-large',
 		'slideshow-exit',
 		'slideshow-slideNext',
 		'slideshow-slidePrevious',
