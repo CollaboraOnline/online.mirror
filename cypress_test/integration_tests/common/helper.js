@@ -1356,6 +1356,21 @@ function processToIdle(win) {
 	});
 }
 
+// Retry an action until a condition holds. Re-runs the action each poll
+// (cy.should only re-checks), so the action must be idempotent.
+function retryUntil(action, condition, options) {
+	var opts = Object.assign(
+		{ timeout: Cypress.config('defaultCommandTimeout'),
+			errorMsg: 'retryUntil: condition never met' },
+		options || {});
+	return cy.waitUntil(function() {
+		action();
+		return cy.wrap(null, { log: false }).then(function() {
+			return condition();
+		});
+	}, opts);
+}
+
 // Waits for a map stateChangeHandler item to reach the expected value.
 // Useful after sending uno commands where the state change message from
 // core may arrive asynchronously based on a state change timer from core
@@ -1460,6 +1475,7 @@ module.exports.getMenuEntry = getMenuEntry;
 module.exports.waitUntilCoreIsIdle = waitUntilCoreIsIdle;
 module.exports.waitUntilLayoutingIsIdle = waitUntilLayoutingIsIdle;
 module.exports.processToIdle = processToIdle;
+module.exports.retryUntil = retryUntil;
 module.exports.waitForMapState = waitForMapState;
 module.exports.waitForTimers = waitForTimers;
 module.exports.maxScreenshotableViewportHeight = maxScreenshotableViewportHeight;
