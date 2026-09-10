@@ -107,3 +107,20 @@ html[data-bg-theme='dark'] {
 	--color-background-document: #121212;
 	--color-calc-grid: #474747;
 }
+
+/* The accent of each app, lightened for the dark pane. The light values sit
+   between 2.3:1 and 2.9:1 on #262626, under the 3:1 that a mark carrying
+   meaning needs, and the accent is the only thing marking an open row in
+   the import pane. */
+[data-doctype='text'] {
+	--doc-type: 91, 168, 224;
+}
+[data-doctype='spreadsheet'] {
+	--doc-type: 106, 186, 106;
+}
+[data-doctype='presentation'] {
+	--doc-type: 217, 119, 63;
+}
+[data-doctype='drawing'] {
+	--doc-type: 216, 178, 58;
+}
