@@ -777,6 +777,14 @@ class SlideImportPane {
     return _('{0} slides').replace('{0}', String(count));
   }
 
+  // Where the slides will go, which the slide sorter decides and the pane
+  // only reports.
+  private insertLandsText(): string {
+    const after = this.session.insertAfter();
+    if (!after) return _('Inserts at the end');
+    return _('Inserts after slide {0}').replace('{0}', String(after));
+  }
+
   private statusText(): string {
     if (this.session.state === 'opening') return _('Opening file...');
     if (this.session.state === 'inserting') return _('Inserting slides...');
@@ -1000,6 +1008,7 @@ class SlideImportPane {
             {this.insertButtonLabel()}
           </button>
         </div>
+        <div class="slide-import-lands">{this.insertLandsText()}</div>
       </div>
     );
   }

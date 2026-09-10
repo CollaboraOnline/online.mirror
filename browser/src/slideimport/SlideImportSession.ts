@@ -184,6 +184,14 @@ class SlideImportSession {
 		this.fireEvent('slideimport:selection', {});
 	}
 
+	// The slide the next insert lands after, counted from one, or 0 for the
+	// end of the document. insertSelected takes the same route.
+	public insertAfter(): number {
+		const docLayer = this.map._docLayer;
+		if (!docLayer || docLayer._selectedPart === undefined) return 0;
+		return docLayer._selectedPart + 1;
+	}
+
 	// Inserts the selected slides after the slide the user is on.
 	public insertSelected(): void {
 		if (this.state !== 'ready' || this.selection.size === 0) return;
