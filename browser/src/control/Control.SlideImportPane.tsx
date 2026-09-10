@@ -978,9 +978,11 @@ class SlideImportPane {
   }
 
   // Several decks stay open at once, so the reader needs one gesture for
-  // the whole roster and one for the whole lot of slides.
+  // the whole roster and one for the whole lot of slides. Only the expanded
+  // pane offers it: at 384px one deck is already taller than the pane, so
+  // opening every deck there is not somewhere to send anybody.
   private renderShowAll(): HTMLElement | null {
-    if (this.sources.length < 2) return null;
+    if (this.sources.length < 2 || !this.paneExpanded()) return null;
     const anyOpen = this.sources.some((source) => source.expanded);
     return (
       <button
@@ -1003,6 +1005,12 @@ class SlideImportPane {
     if (open)
       for (const source of this.sources)
         if (source.expanded) this.requestRemoteThumbnails(source);
+  }
+
+  private paneExpanded(): boolean {
+    return !!(
+      this.map.paneExpander && this.map.paneExpander.getMode() === 'expanded'
+    );
   }
 
   private renderFilter(): HTMLElement | null {
