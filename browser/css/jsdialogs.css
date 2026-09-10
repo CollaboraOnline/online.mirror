@@ -1075,6 +1075,12 @@ img.context-menu-icon {
 .ui-treeview-search-input.jsdialog.ui-edit {
 	line-height: var(--default-height);
 }
+
+/* The user agent's own grey is 3.76:1 on this field's background. */
+.ui-treeview-search-input::placeholder {
+	color: var(--color-text-dark);
+	opacity: 1;
+}
 .autofilter .ui-treeview-search-input.jsdialog.ui-edit,
 .autofilter .ui-treeview-search-input.jsdialog.ui-edit:hover {
 	width: 100%;
