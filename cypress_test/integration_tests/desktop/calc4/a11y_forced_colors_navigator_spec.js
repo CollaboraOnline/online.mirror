@@ -3,8 +3,9 @@
 const helper = require('../../common/helper');
 
 // With forced colours the user picks the palette, and anything that keeps a
-// colour of its own is what they cannot read. The expander chevron of a
-// collapsed row was darkened by a filter, and it is read off the page under
+// colour of its own is what they cannot read. The Navigator kept two: the
+// expander chevron of a collapsed row, darkened by a filter, and the close
+// button, whose icon is a background image. Both are read off the page under
 // the emulated media query rather than trusted from the stylesheet.
 describe(['tagdesktop'], 'Navigator under forced colours', { testIsolation: false }, function () {
 	let win;
@@ -51,17 +52,38 @@ describe(['tagdesktop'], 'Navigator under forced colours', { testIsolation: fals
 		});
 	}
 
+	function assertCloseButton(theme) {
+		const close = win.document.querySelector('.close-navigation-button');
+		expect(close, theme + ': the Navigator has a close button').to.not.be.null;
+
+		const style = win.getComputedStyle(close);
+		const mask = style.maskImage || style.webkitMaskImage;
+
+		expect(style.backgroundImage, theme + ': the icon is no longer a background image')
+			.to.equal('none');
+		expect(mask, theme + ': it is a mask instead').to.not.equal('none');
+		expect(style.backgroundColor, theme + ': and it takes a colour of the palette')
+			.to.not.equal('rgba(0, 0, 0, 0)');
+	}
+
 	it('every collapsed row keeps its chevron out of the filter', function () {
 		cy.then(function () { assertChevrons('light'); });
 	});
 
-	// The rule carries a [data-theme='dark'] variant that sets a filter of its
-	// own, so the dark pass is not a formality.
+	it('the close button is painted in the user colour, not its own', function () {
+		cy.then(function () { assertCloseButton('light'); });
+	});
+
+	// Both rules carry a [data-theme='dark'] variant, and the dark one for the
+	// chevron sets a filter of its own, so the dark pass is not a formality.
 	it('and in dark mode too', function () {
 		cy.then(function () { win.app.map.uiManager.toggleDarkMode(); });
 		cy.cframe().find('html').should('have.attr', 'data-theme', 'dark');
 		cy.then(function () { return helper.processToIdle(win); });
 
-		cy.then(function () { assertChevrons('dark'); });
+		cy.then(function () {
+			assertChevrons('dark');
+			assertCloseButton('dark');
+		});
 	});
 });
