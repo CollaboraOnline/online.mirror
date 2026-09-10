@@ -336,9 +336,6 @@ class SlideImportPane {
   // insert reads from. Collapsing it keeps it active, so a selection survives
   // hiding the slides it was made from.
   private expandSource(source: SlideImportPaneSource): void {
-    if (!this.paneExpanded())
-      for (const other of this.sources)
-        if (other !== source) other.expanded = false;
     source.expanded = true;
     this.scrollRowToTop = source.key;
     this.activate(source);
@@ -793,14 +790,6 @@ class SlideImportPane {
       this.session.selection.size === 0 || this.session.state !== 'ready';
   }
 
-  // The docked pane holds one deck of slides at a time, so opening a source
-  // closes the one before it. The expanded pane has the room for several.
-  private paneExpanded(): boolean {
-    return !!(
-      this.map.paneExpander && this.map.paneExpander.getMode() === 'expanded'
-    );
-  }
-
   private updateLinkMode(): void {
     const group = this.panel.querySelector(
       '.slide-import-linkmode',
@@ -988,11 +977,10 @@ class SlideImportPane {
     );
   }
 
-  // Opening every deck is a state the docked pane cannot hold, since one
-  // deck of slides is taller than it is, so the control belongs to the
-  // expanded pane alone. "Hide slides" is the word the source menu uses.
+  // Several decks stay open at once, so the reader needs one gesture for
+  // the whole roster and one for the whole lot of slides.
   private renderShowAll(): HTMLElement | null {
-    if (!this.paneExpanded() || this.sources.length < 2) return null;
+    if (this.sources.length < 2) return null;
     const anyOpen = this.sources.some((source) => source.expanded);
     return (
       <button
