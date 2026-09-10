@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-08-23 10:59+0200\n"
+"POT-Creation-Date: 2026-09-10 07:45+0200\n"
 "PO-Revision-Date: 2026-08-14 06:16+0000\n"
 "Last-Translator: Nioh <niohiguess@mailfence.com>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/collabora-online/"
@@ -270,8 +270,9 @@ msgstr "Niveaux de journalisation"
 #: src/control/Control.AlertDialog.js:32
 #: src/control/Control.AlertDialog.js:103
 #: src/control/backstage/CloudDialogs.tsx:232
-#: src/control/Control.UIManager.ts:2940 src/control/Control.Zotero.js:191
-#: src/app/Socket.ts:985 src/app/Socket.ts:2480 src/app/Socket.ts:2491
+#: src/control/Control.UIManager.ts:2973 src/control/Control.Zotero.js:191
+#: src/control/jsdialog/Widget.SidebarContainers.tsx:48 src/app/Socket.ts:990
+#: src/app/Socket.ts:2485 src/app/Socket.ts:2496
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.div:51-7
 msgid "Close"
 msgstr "Fermer"
@@ -553,6 +554,10 @@ msgstr "Lecteur d'écran intégré dans le document"
 msgid "Dark Mode"
 msgstr "Mode sombre"
 
+#: admin/src/integrator/AdminIntegratorSettings.ts:614
+msgid "Automatic Spell Checking"
+msgstr "Correction orthographique automatique"
+
 #: admin/src/integrator/AdminIntegratorSettings.ts:613
 msgid "Smart Zoom"
 msgstr "Zoom intelligent"
@@ -728,19 +733,8 @@ msgstr "Pages cachées"
 msgid "From printer setup"
 msgstr "À partir de la configuration de l'imprimante"
 
-#: admin/src/integrator/AdminIntegratorSettings.ts:656
-#: src/control/Control.BackstageView.ts:823 templates/templates.js:80
-#: templates/templates.js:90 templates/templates.js:100
-#: templates/templates.js:110 templates/templates.js:120
-#: templates/templates.js:130 templates/templates.js:140
-#: templates/templates.js:150 templates/templates.js:160
-#: templates/templates.js:170 templates/templates.js:180
-#: templates/templates.js:190 templates/templates.js:200
-#: templates/templates.js:210 templates/templates.js:220
-#: templates/templates.js:230 templates/templates.js:240
-#: templates/templates.js:250 templates/templates.js:260
-#: templates/templates.js:270 templates/templates.js:279
-#: templates/templates.js:290 templates/templates.js:300
+#: admin/src/integrator/AdminIntegratorSettings.ts:658
+#: src/control/Control.BackstageView.ts:851
 msgid "Presentation"
 msgstr "Présentation"
 
@@ -2565,8 +2559,7 @@ msgstr "Exporter le Document"
 msgid "export your documents in different formats"
 msgstr "exporter vos documents dans différents formats"
 
-#: src/control/Control.BackstageView.ts:821 templates/templates.js:50
-#: templates/templates.js:60 templates/templates.js:70
+#: src/control/Control.BackstageView.ts:849
 msgid "Text Document"
 msgstr "Document Texte"
 
@@ -6487,7 +6480,8 @@ msgstr "Augmenter la valeur"
 msgid "Decrement value"
 msgstr "Diminuer la valeur"
 
-#: src/control/jsdialog/Widget.SidebarContainers.ts:72
+#: src/control/jsdialog/Widget.SidebarContainers.tsx:104
+#: src/control/jsdialog/Widget.SidebarContainers.tsx:164
 msgid "More options for {1}"
 msgstr "Plus d’options pour {1}"
 

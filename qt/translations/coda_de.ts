@@ -137,8 +137,7 @@
         <translation type="vanished">Präsentationen (*.odp);;Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../Bridge.cpp" line="737"/>
-        <location filename="../Bridge.cpp" line="805"/>
+        <location filename="../DocumentOperations.cpp" line="293"/>
         <source>All Files (*)</source>
         <translation>Alle Dateien (*)</translation>
     </message>
@@ -189,9 +188,38 @@
         <translation>Zeichnung</translation>
     </message>
     <message>
-        <location filename="../WebView.cpp" line="304"/>
         <source>Presenting</source>
-        <translation>Präsentation</translation>
+        <translation type="vanished">Präsentation</translation>
+    </message>
+    <message>
+        <location filename="../Bridge.cpp" line="339"/>
+        <source>Export Error</source>
+        <translation>Exportfehler</translation>
+    </message>
+    <message>
+        <location filename="../Bridge.cpp" line="340"/>
+        <source>Failed to export the document.</source>
+        <translation>Das Dokument konnte nicht exportiert werden.</translation>
+    </message>
+    <message>
+        <location filename="../Bridge.cpp" line="939"/>
+        <source>Cannot open remote document</source>
+        <translation>Entferntes Dokument kann nicht geöffnet werden</translation>
+    </message>
+    <message>
+        <location filename="../Bridge.cpp" line="942"/>
+        <source>the Collabora Online server</source>
+        <translation>der Collabora Online-Server</translation>
+    </message>
+    <message>
+        <location filename="../DBusService.cpp" line="79"/>
+        <source>Template Error</source>
+        <translation>Vorlagenfehler</translation>
+    </message>
+    <message>
+        <location filename="../DBusService.cpp" line="80"/>
+        <source>Could not create a new document from this template.</source>
+        <translation>Aus dieser Vorlage konnte kein neues Dokument erstellt werden.</translation>
     </message>
 </context>
 <context>
