@@ -379,7 +379,7 @@ span.slide-import-source-main {
 	overflow-y: auto;
 	scrollbar-width: var(--scrollbar-width);
 	scrollbar-color: var(--scrollbar-color);
-	border-block: 1px solid var(--color-border);
+	border-block-start: 1px solid var(--color-toolbar-border);
 	background: var(--color-background-lighter);
 }
 
