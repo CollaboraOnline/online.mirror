@@ -615,6 +615,10 @@ class SlideImportPane {
 
   // What the pane says of a source: whether pages of this document are
   // linked to it, and when it cannot be reached, why.
+  // What the pane knows of a source. The colour says good, neutral or bad
+  // and the word says which; the marker is hollow while the pane has not
+  // reached the file, so Not checked and Not linked never share both a
+  // colour and a shape.
   private sourceBadge(source: SlideImportPaneSource): {
     kind: string;
     label: string;
@@ -624,10 +628,37 @@ class SlideImportPane {
     if (source.state === 'noaccess')
       return { kind: 'missing', label: _('No access') };
     if (source.state === 'failed')
-      return { kind: 'missing', label: _('Failed') };
-    if (this.linkedSource(source))
+      return { kind: 'missing', label: _('Could not open') };
+    if (source.opening) return { kind: 'unchecked', label: _('Checking...') };
+    if (this.linkedSource(source)) {
+      const changed = this.outdatedCount(source);
+      if (changed)
+        return {
+          kind: 'outdated',
+          label: _('{0} changed').replace('{0}', String(changed)),
+        };
       return { kind: 'linked', label: _('Linked') };
+    }
+    if (!source.asked) return { kind: 'unchecked', label: _('Not checked') };
     return { kind: 'unlinked', label: _('Not linked') };
+  }
+
+  // How many pages linked to this source report the source as changed.
+  private outdatedCount(source: SlideImportPaneSource): number {
+    const links = this.map.slideLinks;
+    const linked = this.linkedSource(source);
+    if (!links || !linked) return 0;
+    return links.countOutdatedPagesFrom(linked);
+  }
+
+  // How many pages this document already took from a source. A plain copy
+  // records no source, so the count speaks for linked pages alone and says
+  // nothing at all when there are none.
+  private takenCount(source: SlideImportPaneSource): number {
+    const links = this.map.slideLinks;
+    const linked = this.linkedSource(source);
+    if (!links || !linked) return 0;
+    return links.countPagesFrom(linked);
   }
 
   // Why a source shows no slides, or an empty string when it shows some.
@@ -730,6 +761,11 @@ class SlideImportPane {
   private slideCountText(source: SlideImportPaneSource): string {
     const count = source.slides.length;
     if (!count) return '';
+    const taken = this.takenCount(source);
+    if (taken)
+      return _('{0} of {1} taken')
+        .replace('{0}', String(taken))
+        .replace('{1}', String(count));
     return _('{0} slides').replace('{0}', String(count));
   }
 

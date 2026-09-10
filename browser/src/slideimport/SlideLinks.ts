@@ -128,6 +128,25 @@ class SlideLinks {
 		return current !== null && current !== link.lastModifiedTime;
 	}
 
+	// How many pages of this document came from one source, and how many of
+	// those the source has changed since. Only linked pages are counted,
+	// because a plain copy records nothing to count.
+	public countPagesFrom(source: string): number {
+		let count = 0;
+		this.pages.forEach((link) => {
+			if (link.source === source) count++;
+		});
+		return count;
+	}
+
+	public countOutdatedPagesFrom(source: string): number {
+		let count = 0;
+		this.pages.forEach((link, part) => {
+			if (link.source === source && this.isPageOutdated(part)) count++;
+		});
+		return count;
+	}
+
 	public isPageBroken(part: string): boolean {
 		const link = this.pages.get(part);
 		if (!link) return false;
