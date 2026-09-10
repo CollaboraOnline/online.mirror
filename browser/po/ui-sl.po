@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Collabora Online UI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-01 16:27+0200\n"
-"PO-Revision-Date: 2026-09-04 13:27+0000\n"
+"PO-Revision-Date: 2026-09-11 07:54+0000\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian <https://hosted.weblate.org/projects/collabora-"
 "online/collabora-ui/sl/>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
 "n%100==4 ? 2 : 3;\n"
 "X-Accelerator-Marker: ~\n"
-"X-Generator: Weblate 2026.9\n"
+"X-Generator: Weblate 2026.10.dev0\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
 #: admin/admin.strings.js:15
@@ -516,7 +516,7 @@ msgstr ""
 #: admin/src/integrator/AdminIntegratorSettings.ts:549
 #: src/control/Control.AIChatSidebar.ts:2192
 msgid "Rate limited - please wait a moment and retry"
-msgstr ""
+msgstr "Omejena hitrost – počakajte trenutek in poskusite znova"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:550
 #: src/control/Control.AIChatSidebar.ts:2193
@@ -951,6 +951,8 @@ msgid ""
 "When on, text documents open at the zoom this server chooses. Turn it off "
 "to choose the zoom yourself."
 msgstr ""
+"Če je ta možnost vklopljena, se besedilni dokumenti odprejo s povečavo, ki "
+"jo izbere ta strežnik. Izklopite jo, če želite povečavo izbrati sami."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1530
 msgid ""
@@ -1993,11 +1995,11 @@ msgstr "Neveljavna oblika zahteve"
 
 #: src/control/Control.AIChatSidebar.ts:2146
 msgid "Request superseded by a newer request"
-msgstr ""
+msgstr "Zahtevo je nadomestila novejša zahteva"
 
 #: src/control/Control.AIChatSidebar.ts:2147
 msgid "No messages provided"
-msgstr ""
+msgstr "Ni podanih sporočil"
 
 #: src/control/Control.AIChatSidebar.ts:2148
 msgid "Message too long"
@@ -2005,7 +2007,7 @@ msgstr "Sporočilo je predolgo"
 
 #: src/control/Control.AIChatSidebar.ts:2149
 msgid "AI features are disabled by the administrator"
-msgstr ""
+msgstr "Funkcionalnosti UI je onemogočil skrbnik"
 
 #: src/control/Control.AIChatSidebar.ts:2150
 msgid "AI is not available for guests"
@@ -2013,7 +2015,7 @@ msgstr "UI gostom ni na voljo"
 
 #: src/control/Control.AIChatSidebar.ts:2152
 msgid "AI features are disabled for this document"
-msgstr ""
+msgstr "Funkcionalnosti UI so za ta dokument onemogočene"
 
 #: src/control/Control.AIChatSidebar.ts:2153
 msgid "AI settings not configured"
@@ -2021,11 +2023,11 @@ msgstr "Nastavitve UI niso določene"
 
 #: src/control/Control.AIChatSidebar.ts:2155
 msgid "The AI provider URL is invalid, check the AI settings"
-msgstr ""
+msgstr "URL ponudnika UI ni veljaven, preverite nastavitve UI"
 
 #: src/control/Control.AIChatSidebar.ts:2157
 msgid "The AI image provider URL is invalid, check the AI settings"
-msgstr ""
+msgstr "URL ponudnika slik UI ni veljaven, preverite nastavitve UI"
 
 #: src/control/Control.AIChatSidebar.ts:2160
 msgid ""
