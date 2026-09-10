@@ -1482,6 +1482,7 @@ window.L.Control.JSDialogBuilder = window.L.Control.extend({
 				if (isIconURL) {
 					buttonImage = window.L.DomUtil.create('img', '', button);
 					buttonImage.src = data.icon;
+					app.LOUtil.publishIconURL(buttonImage, data.icon);
 				}
 				else if (coreIconName) {
 					buttonImage = window.L.DomUtil.create('img', '', button);

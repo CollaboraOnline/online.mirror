@@ -369,6 +369,14 @@ class LOUtil {
 		return url;
 	}
 
+	// Forced colours cannot reach the colours inside an <img>, so an icon that is
+	// a plain shape publishes its URL for the stylesheet to use as a mask.
+	public static publishIconURL(element: HTMLImageElement, url: string): void {
+		if (!url || !url.endsWith('.svg')) return;
+		element.style.setProperty('--icon-url', 'url("' + url + '")');
+		element.classList.add('icon-maskable');
+	}
+
 	public static setImage(
 		element: HTMLImageElement | HTMLElement,
 		name: string,
@@ -379,6 +387,7 @@ class LOUtil {
 			const url = LOUtil.getImageURL(name);
 			if (element instanceof HTMLImageElement) {
 				element.src = url;
+				LOUtil.publishIconURL(element, url);
 				LOUtil.checkIfImageExists(element, imageIsLayoutCritical);
 			} else {
 				element.style.backgroundImage = 'url("' + url + '")';
