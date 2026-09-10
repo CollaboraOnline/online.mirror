@@ -190,9 +190,7 @@
 	gap: var(--spacing-s);
 	margin: 0;
 	padding: 0;
-	/* Room for the border a hovered button takes from the desktop rules, so
-	 * the row's contents do not move when the pointer arrives. */
-	border: 1px solid transparent;
+	border: none;
 	background: transparent;
 	color: var(--color-text-dark);
 	font: inherit;
@@ -204,15 +202,6 @@
  * nothing to show or hide. */
 span.slide-import-source-main {
 	cursor: default;
-}
-
-/* The row's own hover marks the whole row, so the button that fills most of
- * it shows nothing of its own: it keeps the row's surface and its text
- * colour. */
-.slide-import-source-main:hover {
-	border-color: transparent !important;
-	background-color: transparent !important;
-	color: var(--color-text-dark) !important;
 }
 
 .slide-import-source-icon {
