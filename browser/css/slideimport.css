@@ -136,7 +136,7 @@
 	align-self: stretch;
 	display: flex;
 	flex-direction: column;
-	gap: var(--spacing-xs);
+	gap: 6px;
 	min-height: 0;
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -150,8 +150,9 @@
 .slide-import-source {
 	display: flex;
 	align-items: center;
-	gap: var(--spacing-s);
-	padding: var(--spacing-s) var(--spacing-m);
+	gap: var(--spacing-m);
+	min-height: 40px;
+	padding: 0 6px 0 10px;
 	box-sizing: border-box;
 	border: 1px solid transparent;
 	border-radius: var(--border-radius);
@@ -208,12 +209,13 @@ span.slide-import-source-main {
 }
 
 .slide-import-source-icon {
-	width: 16px;
-	height: 16px;
+	width: 18px;
+	height: 18px;
 	flex-shrink: 0;
 }
 
 .slide-import-source-name {
+	font-size: 13px;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
