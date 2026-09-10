@@ -33,12 +33,6 @@
  * jssidebar.css and both panels stay in step. Only the pane's own content
  * below it is styled here. */
 
-/* The pane keeps its own compact title size on the shared header. */
-.navigation-title.slide-import-title {
-	font-size: 1.15em;
-	color: var(--color-text-dark);
-}
-
 .slide-import {
 	display: flex;
 	flex-direction: column;
