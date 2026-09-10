@@ -241,6 +241,14 @@ span.slide-import-source-main {
 	transform: rotate(90deg);
 }
 
+/* What is picked in this source and not yet inserted. */
+.slide-import-source-picked {
+	flex: 0 0 auto;
+	color: rgba(var(--doc-type), 1);
+	font-weight: 600;
+	white-space: nowrap;
+}
+
 .slide-import-source-count {
 	flex: 0 0 auto;
 	color: var(--color-text-light);

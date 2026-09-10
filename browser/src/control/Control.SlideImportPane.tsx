@@ -83,6 +83,10 @@ class SlideImportPane {
   // reader who opens one source after another finds the same layout each
   // time: the row at the top and its slides below it.
   private scrollRowToTop: string = '';
+  // The slides picked in each source, by source key. An insert reads one
+  // file, so the pane submits the active source's set and holds the rest:
+  // moving between decks costs the reader nothing.
+  private picks: Map<string, Set<number>> = new Map();
   // Whether the pane has already opened a source of its own accord, which it
   // does for the first one of the list.
   private openedFirstSource: boolean = false;
@@ -256,6 +260,11 @@ class SlideImportPane {
 
     this.sources = kept;
 
+    // A source that is gone takes its picks with it.
+    for (const key of Array.from(this.picks.keys()))
+      if (!this.sources.some((source) => source.key === key))
+        this.picks.delete(key);
+
     // The selection belongs to a source that is gone, or to one the pane
     // cannot read any more; there is nothing left to insert. A source that
     // has not answered yet keeps its place, because opening it is what made
@@ -358,10 +367,13 @@ class SlideImportPane {
   // slides out of a single file.
   private activate(source: SlideImportPaneSource): void {
     if (this.isActive(source)) return;
+    const leaving = this.activeSource();
+    if (leaving) this.picks.set(leaving.key, new Set(this.session.selection));
     this.activeKey = source.key;
     this.focusIndex = 0;
     this.anchorIndex = 0;
-    this.session.clearSelection();
+    const kept = this.picks.get(source.key);
+    this.session.setSelection(kept ? Array.from(kept) : []);
     this.session.slideCount = source.slides.length;
     // The pages of a link insert record the document they came from, as the
     // user knows it.
@@ -660,6 +672,15 @@ class SlideImportPane {
     return links.countOutdatedPagesFrom(linked);
   }
 
+  // How many slides are picked in a source the insert is not reading from.
+  // The active source's count is on the Insert btn, where it drives
+  // something, so the row says nothing about it.
+  private pickedCount(source: SlideImportPaneSource): number {
+    if (this.isActive(source)) return 0;
+    const kept = this.picks.get(source.key);
+    return kept ? kept.size : 0;
+  }
+
   // How many pages this document already took from a source. A plain copy
   // records no source, so the count speaks for linked pages alone and says
   // nothing at all when there are none.
@@ -743,9 +764,19 @@ class SlideImportPane {
 
   private insertButtonLabel(): string {
     const count = this.session.selection.size;
+    if (!count) return _('Insert slides');
+    // With several decks open more than one may hold picks, so the button
+    // names the file whose picks it will send.
+    const elsewhere = Array.from(this.picks.entries()).some(
+      ([key, set]) => key !== this.activeKey && set.size,
+    );
+    const active = this.activeSource();
+    if (active && elsewhere)
+      return _('Insert {0} from {1}')
+        .replace('{0}', String(count))
+        .replace('{1}', active.name);
     if (count === 1) return _('Insert 1 slide');
-    if (count > 1) return _('Insert {0} slides').replace('{0}', String(count));
-    return _('Insert slides');
+    return _('Insert {0} slides').replace('{0}', String(count));
   }
 
   private updateInsertButton(): void {
@@ -1063,7 +1094,13 @@ class SlideImportPane {
       <span class="slide-import-source-count">
         {this.slideCountText(source)}
       </span>,
-      <span class="slide-import-source-spacer" />,
+      this.pickedCount(source) ? (
+        <span class="slide-import-source-picked">
+          {_('{0} picked').replace('{0}', String(this.pickedCount(source)))}
+        </span>
+      ) : (
+        ''
+      ),
       chip,
     ];
     return (
