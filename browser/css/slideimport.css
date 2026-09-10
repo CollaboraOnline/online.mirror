@@ -187,7 +187,7 @@
 	min-width: 0;
 	display: flex;
 	align-items: center;
-	gap: var(--spacing-s);
+	gap: var(--spacing-m);
 	margin: 0;
 	padding: 0;
 	border: none;
