@@ -76,6 +76,10 @@ class SlideImportPane {
   // The source the selection and the insert belong to, by key, or empty when
   // no slide is picked yet.
   private activeKey: string = '';
+  // The row to put at the top of the list after the next render, so a
+  // reader who opens one source after another finds the same layout each
+  // time: the row at the top and its slides below it.
+  private scrollRowToTop: string = '';
   // Whether the pane has already opened a source of its own accord, which it
   // does for the first one of the list.
   private openedFirstSource: boolean = false;
@@ -319,6 +323,7 @@ class SlideImportPane {
     for (const other of this.sources)
       if (other !== source) other.expanded = false;
     source.expanded = true;
+    this.scrollRowToTop = source.key;
     this.activate(source);
     this.askSource(source);
     // A source that answered before it was opened has its slides already,
@@ -799,12 +804,29 @@ class SlideImportPane {
         window.L.control.attachTooltipEventListener(button, this.map),
       );
 
-    const newList = this.panel.querySelector('.slide-import-source-list');
-    if (newList)
-      newList.scrollTop = Math.min(
-        scrollTop,
-        Math.max(0, newList.scrollHeight - newList.clientHeight),
-      );
+    const newList = this.panel.querySelector(
+      '.slide-import-source-list',
+    ) as HTMLElement | null;
+    if (newList) {
+      const row = this.scrollRowToTop
+        ? (newList.querySelector(
+            '.slide-import-source[data-key="' +
+              CSS.escape(this.scrollRowToTop) +
+              '"]',
+          ) as HTMLElement | null)
+        : null;
+      const wanted = row
+        ? newList.scrollTop +
+          (row.getBoundingClientRect().top -
+            newList.getBoundingClientRect().top)
+        : scrollTop;
+      const furthest = Math.max(0, newList.scrollHeight - newList.clientHeight);
+      newList.scrollTop = Math.min(wanted, furthest);
+      // The slides of the source arrive after the click, so the list is
+      // still too short to put its row at the top. Keep asking until the
+      // grid below it makes the room.
+      if (!row || wanted <= furthest) this.scrollRowToTop = '';
+    }
   }
 
   // The header carries the slide navigator's header classes, so both panels
