@@ -225,12 +225,6 @@ span.slide-import-source-main {
 	transform: rotate(90deg);
 }
 
-.slide-import-source-icon {
-	width: 18px;
-	height: 18px;
-	flex-shrink: 0;
-}
-
 .slide-import-source-count {
 	flex-shrink: 0;
 	color: var(--color-text-light);
