@@ -249,10 +249,17 @@ class SlideImportPane {
 
     this.sources = kept;
 
-    // The selection belongs to a source that is gone or out of reach; there
-    // is nothing left to insert.
+    // The selection belongs to a source that is gone, or to one the pane
+    // cannot read any more; there is nothing left to insert. A source that
+    // has not answered yet keeps its place, because opening it is what made
+    // it the active one.
     const active = this.activeSource();
-    if (this.activeKey && (!active || active.state !== 'connected')) {
+    const unreadable =
+      active &&
+      (active.state === 'missing' ||
+        active.state === 'noaccess' ||
+        active.state === 'failed');
+    if (this.activeKey && (!active || unreadable)) {
       this.activeKey = '';
       this.session.close();
     }
@@ -305,8 +312,14 @@ class SlideImportPane {
     SlideImportSession.subscribeRelatedDocument(source.wopiSrc);
   }
 
+  // One source shows its slides at a time, and the one on show is the one an
+  // insert reads from. Collapsing it keeps it active, so a selection survives
+  // hiding the slides it was made from.
   private expandSource(source: SlideImportPaneSource): void {
+    for (const other of this.sources)
+      if (other !== source) other.expanded = false;
     source.expanded = true;
+    this.activate(source);
     this.askSource(source);
   }
 
@@ -485,11 +498,7 @@ class SlideImportPane {
       return;
     }
 
-    // The slides of the first source that answers are the ones an insert
-    // takes, until the user picks slides of another source.
-    if (!this.activeKey) {
-      this.activate(source);
-    } else if (this.isActive(source)) {
+    if (this.isActive(source)) {
       this.session.slideCount = source.slides.length;
       // The slides are on show, so they can be chosen and inserted.
       this.session.slidesShown();
@@ -924,7 +933,11 @@ class SlideImportPane {
     ];
     return (
       <li
-        class={'slide-import-source' + (source.expanded ? ' expanded' : '')}
+        class={
+          'slide-import-source' +
+          (source.expanded ? ' expanded' : '') +
+          (this.isActive(source) ? ' active' : '')
+        }
         data-state={source.state}
       >
         {this.canShowSlides(source) ? (

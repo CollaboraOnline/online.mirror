@@ -226,13 +226,13 @@ span.slide-import-source-main {
 	white-space: nowrap;
 }
 
-.slide-import-source.expanded {
+.slide-import-source.active {
 	border-color: var(--color-border);
 	padding-inline-start: 12px;
 	box-shadow: inset 3px 0 0 0 rgba(var(--doc-type), 1);
 }
 
-.slide-import-source.expanded .slide-import-source-name {
+.slide-import-source.active .slide-import-source-name {
 	font-weight: 600;
 }
 
