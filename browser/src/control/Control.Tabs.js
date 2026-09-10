@@ -351,6 +351,24 @@ window.L.Control.Tabs = window.L.Control.extend({
 
 	_onTabKeyDown: function (e) {
 		var key = e.key;
+
+		// Rename is hidden for a protected sheet, so F2 is too.
+		if (key === 'F2') {
+			if (this._map.isReadOnlyMode())
+				return;
+			const match = e.currentTarget.id.match(/\d+/);
+			if (!match)
+				return;
+			const part = parseInt(match[0]);
+			if (this._isProtectedSheet(part))
+				return;
+
+			window.L.DomEvent.stop(e);
+			this._tabForContextMenu = part;
+			this._renameSheet();
+			return;
+		}
+
 		if (key !== 'ArrowLeft' && key !== 'ArrowRight' &&
 			key !== 'Home' && key !== 'End' &&
 			key !== 'Enter' && key !== ' ' && key !== 'Spacebar')
