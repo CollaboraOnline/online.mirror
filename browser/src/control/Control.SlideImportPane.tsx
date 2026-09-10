@@ -323,8 +323,9 @@ class SlideImportPane {
   // insert reads from. Collapsing it keeps it active, so a selection survives
   // hiding the slides it was made from.
   private expandSource(source: SlideImportPaneSource): void {
-    for (const other of this.sources)
-      if (other !== source) other.expanded = false;
+    if (!this.paneExpanded())
+      for (const other of this.sources)
+        if (other !== source) other.expanded = false;
     source.expanded = true;
     this.scrollRowToTop = source.key;
     this.activate(source);
@@ -755,6 +756,14 @@ class SlideImportPane {
     button.textContent = this.insertButtonLabel();
     button.disabled =
       this.session.selection.size === 0 || this.session.state !== 'ready';
+  }
+
+  // The docked pane holds one deck of slides at a time, so opening a source
+  // closes the one before it. The expanded pane has the room for several.
+  private paneExpanded(): boolean {
+    return !!(
+      this.map.paneExpander && this.map.paneExpander.getMode() === 'expanded'
+    );
   }
 
   private updateLinkMode(): void {
