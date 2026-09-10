@@ -918,7 +918,7 @@ class SlideImportPane {
     const file = [
       <img
         class="slide-import-source-icon"
-        src={app.LOUtil.getImageURL('lc_presentinwindow.svg')}
+        src={app.LOUtil.getImageURL('slide-deck.svg')}
         alt=""
       />,
       <span class="slide-import-source-name">{source.name}</span>,
