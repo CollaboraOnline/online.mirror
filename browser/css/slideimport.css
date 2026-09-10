@@ -403,6 +403,7 @@ span.slide-import-source-main {
 	flex-shrink: 0;
 	margin-inline-start: var(--spacing-m);
 	color: var(--color-text-light);
+	font-size: 11px;
 	white-space: nowrap;
 }
 
@@ -466,9 +467,9 @@ span.slide-import-source-main {
  * height of its slides. */
 .slide-import-list {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(min(120px, 100%), 1fr));
+	grid-template-columns: repeat(auto-fill, minmax(min(148px, 100%), 1fr));
 	align-content: start;
-	gap: var(--spacing-m);
+	gap: 16px;
 	padding: var(--spacing-m);
 	white-space: normal;
 }
