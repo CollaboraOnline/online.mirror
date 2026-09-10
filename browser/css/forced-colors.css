@@ -30,8 +30,7 @@
 	.unotoolbutton img,
 	.formulabar.ui-pushbutton,
 	.formulabar .unobutton,
-	#formulabar-buttons-toolbox .unobutton,
-	.close-navigation-button {
+	#formulabar-buttons-toolbox .unobutton {
 		forced-color-adjust: none;
 		background-color: #e9e9ed !important;
 	}
@@ -111,8 +110,7 @@
 	[data-theme='dark'] .unotoolbutton img,
 	[data-theme='dark'] .formulabar.ui-pushbutton,
 	[data-theme='dark'] .formulabar .unobutton,
-	[data-theme='dark'] #formulabar-buttons-toolbox .unobutton,
-	[data-theme='dark'] .close-navigation-button {
+	[data-theme='dark'] #formulabar-buttons-toolbox .unobutton {
 		background-color: #1E1E1E !important;
 	}
 
@@ -136,6 +134,17 @@
 	[data-theme='dark'] .ui-treeview-expandable > div > .ui-treeview-expander::before,
 	[data-theme='dark'] .ui-treeview div[aria-expanded] > div > .ui-treeview-expander::before {
 		filter: brightness(1);
+	}
+
+	/* The close icon is a background image, so keeping it keeps its own colour
+	   on the user's background. Paint it as a mask in their button colour. */
+	.close-navigation-button,
+	[data-theme='dark'] .close-navigation-button {
+		forced-color-adjust: none;
+		background-image: none;
+		background-color: ButtonText !important;
+		-webkit-mask: url('images/closedoc.svg') no-repeat center / contain;
+		mask: url('images/closedoc.svg') no-repeat center / contain;
 	}
 
 }
