@@ -79,6 +79,29 @@
  * The link carries the shared ui-linkbutton class, which keeps the box of a
  * plain button off it; the colour of a link comes from here, over the dark
  * text that class paints. */
+/* The same shape as the add link beside it: the room for the border the
+ * desktop rules add on hover is there from the start, so the row does not
+ * move under the pointer, and the two words it swaps between are the same
+ * length so the box never changes size. */
+.slide-import-show-all {
+	display: inline-flex;
+	align-items: center;
+	flex-shrink: 0;
+	margin: 0;
+	padding: var(--spacing-xs) var(--spacing-s);
+	border: 1px solid transparent;
+	border-radius: var(--border-radius);
+	background: transparent;
+	color: var(--color-primary);
+	font: inherit;
+	cursor: pointer;
+}
+
+#slide-import-panel .slide-import-show-all:hover {
+	color: var(--color-primary-dark);
+	background-color: var(--color-btn-primary-hover-bg);
+}
+
 /* The label row's own controls, right of the label. */
 .slide-import-sources-actions {
 	grid-area: 1 / 2;
