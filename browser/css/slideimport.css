@@ -116,9 +116,14 @@
 	margin: 0;
 }
 
-.slide-import-add:disabled,
-.slide-import-insert:disabled {
+.slide-import-add:disabled {
 	opacity: 0.5;
+	cursor: default;
+}
+
+.slide-import-insert:disabled {
+	background: var(--color-background-lighter);
+	color: var(--color-text-light);
 	cursor: default;
 }
 
@@ -621,7 +626,6 @@ span.slide-import-source-main {
 	width: 100%;
 	max-width: none;
 	margin: 0;
-	font-weight: 600;
 }
 
 /* The divider between the two maximized slide grids. It sits on their

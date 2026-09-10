@@ -893,7 +893,7 @@ class SlideImportPane {
         {this.renderOptions()}
         <div class="slide-import-footer">
           <button
-            class="button button-primary slide-import-insert"
+            class="button slide-import-insert"
             disabled={session.selection.size === 0 || session.state !== 'ready'}
             onClick={() => session.insertSelected()}
           >
