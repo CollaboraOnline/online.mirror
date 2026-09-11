@@ -52,12 +52,27 @@ if test "$enable_androidapp" = "yes"; then
 fi
 AC_SUBST(ANDROID_PACKAGE_VERSIONCODE)
 
-COOLWSD_VERSION="$COOLWSD_VERSION_MAJOR.$COOLWSD_VERSION_MINOR.$COOLWSD_VERSION_MICRO.$COOLWSD_VERSION_NANO"
+COOLWSD_VERSION_BUILD_ID=
+AC_MSG_CHECKING([for build ID])
+if test -n "$with_build_id"; then
+    COOLWSD_VERSION_BUILD_ID=$with_build_id
+    case "$COOLWSD_VERSION_BUILD_ID" in
+        *@<:@!0-9@:>@*)
+            AC_MSG_ERROR([--with-build-id should be numerical, got "$with_build_id"])
+            ;;
+    esac
+    AC_MSG_RESULT([$COOLWSD_VERSION_BUILD_ID])
+    COOLWSD_VERSION="$COOLWSD_VERSION_MAJOR.$COOLWSD_VERSION_MINOR.$COOLWSD_VERSION_MICRO.$COOLWSD_VERSION_NANO-$COOLWSD_VERSION_BUILD_ID"
+else
+    AC_MSG_RESULT([not set, skipping...])
+    COOLWSD_VERSION="$COOLWSD_VERSION_MAJOR.$COOLWSD_VERSION_MINOR.$COOLWSD_VERSION_MICRO.$COOLWSD_VERSION_NANO"
+fi
 
 AC_SUBST([COOLWSD_VERSION_MAJOR])
 AC_SUBST([COOLWSD_VERSION_MINOR])
 AC_SUBST([COOLWSD_VERSION_MICRO])
 AC_SUBST([COOLWSD_VERSION_NANO])
+AC_SUBST([COOLWSD_VERSION_BUILD_ID])
 AC_SUBST([COOLWSD_VERSION])
 
 AC_DEFINE_UNQUOTED([COOLWSD_VERSION],[["$COOLWSD_VERSION"]],[Collabora Online WebSocket server version])
@@ -313,6 +328,10 @@ AC_ARG_WITH(android-package-versioncode,
             AS_HELP_STRING([--with-android-package-versioncode=6.7.8-23],
                            [Set the versionCode for the Android package.]),
 ,)
+
+AC_ARG_WITH(build-id,
+            AS_HELP_STRING([--with-build-id=23],
+                           [Set the build ID, which will appear after the version with a dash (e.g. 26.04.0.0-23)]))
 
 AC_ARG_WITH(android-abi,
             AS_HELP_STRING([--with-android-abi=x86_64],
