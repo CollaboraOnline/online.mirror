@@ -44,7 +44,7 @@
 	min-height: 0;
 	display: flex;
 	flex-direction: column;
-	padding: 8px 16px;
+	padding: 4px 16px;
 	box-sizing: border-box;
 	gap: 8px;
 }
@@ -766,7 +766,6 @@ span.slide-import-source-main {
 
 .slide-import-footer {
 	display: flex;
-	padding-block-end: var(--spacing-l);
 }
 
 
