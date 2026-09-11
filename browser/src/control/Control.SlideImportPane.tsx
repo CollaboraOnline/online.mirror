@@ -261,6 +261,9 @@ class SlideImportPane {
       }
       source.name = name;
       source.state = doc.state;
+      // The source answered, so it is not opening any more.
+      if (source.state !== 'available' && source.state !== 'disconnected')
+        source.opening = false;
       if (source.state !== 'connected' && source.asked) this.forget(source);
       kept.push(source);
     }
