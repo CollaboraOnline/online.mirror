@@ -1742,7 +1742,7 @@ bool ChildSession::exportCopy(const std::string& path, const std::string& format
 // attempt to shutdown threads, fork and export in the background
 bool ChildSession::downloadAsBackground([[maybe_unused]] const DownloadAsRequest& request)
 {
-    if constexpr (!Util::isMobileApp())
+    if constexpr (!Util::isMobileAppBuild())
     {
         if (!ConfigUtil::getBool("per_document.background_downloadas", true))
             return false;
