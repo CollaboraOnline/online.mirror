@@ -74,7 +74,21 @@ class ServerAuditDialog {
 					'SDK: nocaps',
 					'',
 				],
-				ok: [_('Each document is securely contained'), 'SDK: nocaps', ''],
+				ok_landlock: [
+					_('Each document is securely contained (landlock)'),
+					'SDK: nocaps',
+					'',
+				],
+				ok_namespaces: [
+					_('Each document is securely contained (Linux namespaces)'),
+					'SDK: nocaps',
+					'',
+				],
+				ok_capabilities: [
+					_('Each document is securely contained (capabilities and chroot)'),
+					'SDK: nocaps',
+					'',
+				],
 			},
 			seccomp: {
 				priority: 3,
@@ -112,6 +126,11 @@ class ServerAuditDialog {
 				],
 				ok: [
 					_('Fast kit jail bind mounting enabled'),
+					'SDK: bindmount',
+					'https://sdk.collaboraonline.com/docs/installation/Configuration.html#performance',
+				],
+				ok_landlock: [
+					_('Fast kit jail setup with landlock, nothing to copy or mount'),
 					'SDK: bindmount',
 					'https://sdk.collaboraonline.com/docs/installation/Configuration.html#performance',
 				],
@@ -178,12 +197,6 @@ class ServerAuditDialog {
 					'SDK: post-message-initialization',
 					'https://sdk.collaboraonline.com/docs/postmessage_api.html#initialization',
 				],
-			},
-
-			info_namespaces: {
-				priority: 30,
-				true: [_('Using namespaces'), 'SDK: nocaps', ''],
-				false: [_('Not using namespaces'), 'SDK: nocaps', ''],
 			},
 		};
 	}
@@ -389,11 +402,16 @@ class ServerAuditDialog {
 		return entry.status === 'not_recommended';
 	}
 
+	/// A status of 'ok', or an 'ok_' one naming the mechanism in use, is fine.
+	private isOkEntry(entry: AuditEntry): boolean {
+		return entry.status.startsWith('ok');
+	}
+
 	private isErrorEntry(entry: AuditEntry): boolean {
 		return (
 			!this.isInfoEntry(entry) &&
 			!this.isWarnEntry(entry) &&
-			entry.status !== 'ok'
+			!this.isOkEntry(entry)
 		);
 	}
 

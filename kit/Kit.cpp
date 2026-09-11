@@ -4664,20 +4664,22 @@ void lokit_main(
         // Are we using seccomp ?
         pathAndQuery.append(std::string("&adms_seccomp=") +
                             (hasSeccomp ? "ok" : "none"));
-        // Are we bind mounting ?
+        // How is the jail built ? A landlock jail has no tree of its own, so there is
+        // nothing to copy and nothing to bind-mount, and it is at least as fast as a
+        // bind-mounted one.
         pathAndQuery.append(std::string("&adms_bindmounted=") +
-                            (!JailUtil::isBindMountingConfigured()
+                            (hasLandlock ? "ok_landlock"
+                             : !JailUtil::isBindMountingConfigured()
                                  ? "not_recommended"
                                  : (JailUtil::isBindMountingEnabled() ? "ok" : "slow")));
-        // Are we using a container - either chroot or namespace ?
+        // What contains the document - landlock, namespaces or a capability-built chroot ?
         pathAndQuery.append(std::string("&adms_contained=") +
-                            ((ChildSession::NoCapsForKit && !hasLandlock) ? "uncontained" : "ok"));
+                            (ChildSession::NoCapsForKit
+                                 ? (hasLandlock ? "ok_landlock" : "uncontained")
+                                 : (usingMountNamespace ? "ok_namespaces" : "ok_capabilities")));
         // How slow was the jail setup ?
         pathAndQuery.append(std::string("&adms_info_setup_ms=") +
                             std::to_string(jailSetupTime.count()));
-        // Are we using namespaces (or CAP_SYS_CHROOT etc.)
-        pathAndQuery.append(std::string("&adms_info_namespaces=") +
-                            (useMountNamespaces ? "true" : "false"));
 
 #endif // !MOBILEAPP
 

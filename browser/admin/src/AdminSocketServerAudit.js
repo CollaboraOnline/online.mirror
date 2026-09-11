@@ -79,8 +79,9 @@ var AdminSocketServerAudit = AdminSocketBase.extend({
 		var empty = document.getElementById('server-audit-empty');
 		body.replaceChildren();
 
+		// 'ok', or an 'ok_' status naming the mechanism in use, is not an issue
 		var issues = entries.filter(function (entry) {
-			return entry.status !== 'ok';
+			return !entry.status.startsWith('ok');
 		});
 		empty.style.display = issues.length ? 'none' : '';
 
