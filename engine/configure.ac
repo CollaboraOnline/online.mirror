@@ -2693,12 +2693,6 @@ AC_ARG_WITH(branding,
 ,)
 
 
-AC_ARG_WITH(extra-buildid,
-    AS_HELP_STRING([--with-extra-buildid="Tinderbox: Win-x86@6, Branch:master, Date:2012-11-26_00.29.34"],
-        [Show addition build identification in about dialog.]),
-,)
-
-
 AC_ARG_WITH(vendor,
     AS_HELP_STRING([--with-vendor="John the Builder"],
         [Set vendor of the build.]),
@@ -13224,22 +13218,6 @@ AC_SUBST(PROGRESSFRAMECOLOR)
 AC_SUBST(PROGRESSTEXTCOLOR)
 AC_SUBST(PROGRESSTEXTBASELINE)
 
-
-dnl ===================================================================
-dnl Custom build version
-dnl ===================================================================
-AC_MSG_CHECKING([for extra build ID])
-if test -n "$with_extra_buildid" -a "$with_extra_buildid" != "yes" ; then
-    EXTRA_BUILDID="$with_extra_buildid"
-fi
-# in tinderboxes, it is easier to set EXTRA_BUILDID via the environment variable instead of configure switch
-if test -n "$EXTRA_BUILDID" ; then
-    AC_MSG_RESULT([$EXTRA_BUILDID])
-else
-    AC_MSG_RESULT([not set])
-fi
-AC_DEFINE_UNQUOTED([EXTRA_BUILDID], ["$EXTRA_BUILDID"])
-
 OOO_VENDOR=
 AC_MSG_CHECKING([for vendor])
 if test -z "$with_vendor" -o "$with_vendor" = "no"; then
@@ -14167,7 +14145,6 @@ AC_CONFIG_FILES([vs-code.code-workspace.template:.vscode/vs-code-template.code-w
 
 AC_CONFIG_HEADERS([config_host/config_afdko.h])
 AC_CONFIG_HEADERS([config_host/config_buildconfig.h])
-AC_CONFIG_HEADERS([config_host/config_buildid.h])
 AC_CONFIG_HEADERS([config_host/config_clang.h])
 AC_CONFIG_HEADERS([config_host/config_cpdb.h])
 AC_CONFIG_HEADERS([config_host/config_crypto.h])
