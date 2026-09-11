@@ -364,8 +364,8 @@ bool BgSaveParentWebSocketHandler::isBenignBgSaveJSDialog(const std::string& jsd
 
     // allow-list of jsdialog messages in bgsave
     return jsontype == "notebookbar" || jsontype == "sidebar" ||
-           jsontype == "formulabar" || jsontype == "quickfind" ||
-           bClosing || bDismissedMenu;
+           jsontype == "formulabar" || jsontype == "addressinputfield" ||
+           jsontype == "quickfind" || bClosing || bDismissedMenu;
 }
 
 void BgSaveParentWebSocketHandler::handleMessage(const std::vector<char>& data)
