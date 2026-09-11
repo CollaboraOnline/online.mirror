@@ -1482,6 +1482,55 @@ class SlideImportPane {
     return section !== null && source.collapsedSections.has(section.name);
   }
 
+  private sectionSlideIndices(
+    source: SlideImportPaneSource,
+    sectionIndex: number,
+  ): number[] {
+    const section = source.sections[sectionIndex];
+    if (!section || section.slideCount <= 0) return [];
+    const indices: number[] = [];
+    for (
+      let i = section.startIndex;
+      i < section.startIndex + section.slideCount;
+      i++
+    )
+      indices.push(i);
+    return indices;
+  }
+
+  private isSectionPartlySelected(
+    source: SlideImportPaneSource,
+    sectionIndex: number,
+  ): boolean {
+    if (!this.isActive(source)) return false;
+    const indices = this.sectionSlideIndices(source, sectionIndex);
+    if (!indices.length) return false;
+    const picked = indices.filter((index) =>
+      this.session.selection.has(index),
+    ).length;
+    return picked > 0 && picked < indices.length;
+  }
+
+  // The checkbox on a section row takes that section's slides into the
+  // selection or out of it. The selection of the other sections stays, so a
+  // reader can build an insert out of several of them.
+  private toggleSectionPick(
+    source: SlideImportPaneSource,
+    sectionIndex: number,
+  ): void {
+    const section = source.sections[sectionIndex];
+    if (!section || section.slideCount <= 0) return;
+    this.activate(source);
+    const indices = this.sectionSlideIndices(source, sectionIndex);
+    const take = !this.isSectionFullySelected(source, sectionIndex);
+    this.session.setSelected(indices, take);
+    if (take) {
+      this.anchorIndex = section.startIndex;
+      if (!this.isSlideCollapsed(source, section.startIndex))
+        this.setFocusIndex(section.startIndex, false);
+    }
+  }
+
   private isSectionFullySelected(
     source: SlideImportPaneSource,
     sectionIndex: number,
@@ -1515,6 +1564,15 @@ class SlideImportPane {
         onSelect: () => this.selectSection(source, sectionIndex),
       },
       _('{0} slides').replace('{0}', String(section.slideCount)),
+      {
+        rowToggles: true,
+        pick: {
+          checked: this.isSectionFullySelected(source, sectionIndex),
+          partial: this.isSectionPartlySelected(source, sectionIndex),
+          label: _('Select the slides of {0}').replace('{0}', section.name),
+          onPick: () => this.toggleSectionPick(source, sectionIndex),
+        },
+      },
     );
     if (this.isSectionFullySelected(source, sectionIndex))
       header.querySelector('.slide-section-name').classList.add('selected');
@@ -1572,8 +1630,9 @@ class SlideImportPane {
     if (!this.isSlideCollapsed(source, start)) this.setFocusIndex(start, false);
   }
 
-  // A section whose slides are all selected shows its name highlighted,
-  // like the slide navigator does.
+  // A section whose slides are all selected shows its name highlighted, like
+  // the slide navigator does, and its checkbox answers for the slides under
+  // it: checked while every one is picked, half checked while some are.
   private updateSectionSelection(source: SlideImportPaneSource): void {
     const list = this.slideList(source);
     if (!list) return;
@@ -1584,12 +1643,19 @@ class SlideImportPane {
           (header as HTMLElement).dataset.sectionIndex as string,
           10,
         );
+        const full = this.isSectionFullySelected(source, sectionIndex);
         const nameSpan = header.querySelector('.slide-section-name');
-        if (!nameSpan) return;
-        nameSpan.classList.toggle(
-          'selected',
-          this.isSectionFullySelected(source, sectionIndex),
-        );
+        if (nameSpan) nameSpan.classList.toggle('selected', full);
+        const pick = header.querySelector(
+          '.slide-section-pick',
+        ) as HTMLInputElement | null;
+        if (pick) {
+          pick.checked = full;
+          pick.indeterminate = this.isSectionPartlySelected(
+            source,
+            sectionIndex,
+          );
+        }
       });
   }
 

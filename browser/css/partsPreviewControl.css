@@ -256,6 +256,18 @@
 	white-space: nowrap;
 }
 
+/* Selecting a whole section is a checkbox, the way selecting one slide is,
+ * so the row itself is free to do what the row above it does and open or
+ * close the section. Only the slide import pane asks for it. */
+.slide-section-pick {
+	flex: 0 0 auto;
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	margin-inline-start: 8px;
+	cursor: pointer;
+}
+
 .slide-section-name.selected {
 	color: rgb(var(--doc-type));
 	font-weight: 600;

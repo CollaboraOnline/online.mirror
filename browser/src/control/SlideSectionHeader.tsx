@@ -19,6 +19,21 @@ interface SlideSectionHeaderCallbacks {
   onSelect: () => void;
 }
 
+interface SlideSectionHeaderOptions {
+  // The row toggles the section, the way the source row above it does,
+  // rather than selecting the section's slides. The slide import pane wants
+  // this; the navigator selects on the row and renames on a second press.
+  rowToggles?: boolean;
+  // A checkbox at the end of the row that takes the section's slides into
+  // the selection or out of it. Partial means some but not all of them.
+  pick?: {
+    checked: boolean;
+    partial: boolean;
+    label: string;
+    onPick: () => void;
+  };
+}
+
 /*
  * A header row for a slide section: a chevron toggle, the section name and,
  * when one is given, how many slides the section holds. The slide navigator
@@ -31,8 +46,10 @@ function buildSlideSectionHeader(
   collapsed: boolean,
   callbacks: SlideSectionHeaderCallbacks,
   count?: string,
+  options?: SlideSectionHeaderOptions,
 ): HTMLElement {
-  return (
+  const pick = options && options.pick ? options.pick : null;
+  const header = (
     <div
       class={'slide-section-header' + (collapsed ? ' collapsed' : '')}
       data-section-index={sectionIndex}
@@ -40,7 +57,8 @@ function buildSlideSectionHeader(
       onClick={(e: MouseEvent) => {
         e.stopPropagation();
         e.preventDefault();
-        callbacks.onSelect();
+        if (options && options.rowToggles) callbacks.onToggle();
+        else callbacks.onSelect();
       }}
     >
       <button
@@ -58,6 +76,27 @@ function buildSlideSectionHeader(
         {name}
       </span>
       {count && <span class="slide-section-count">{count}</span>}
+      {pick && (
+        <input
+          type="checkbox"
+          class="slide-section-pick"
+          checked={pick.checked}
+          aria-label={pick.label}
+          onClick={(e: MouseEvent) => e.stopPropagation()}
+          onChange={() => pick.onPick()}
+        />
+      )}
     </div>
-  );
+  ) as HTMLElement;
+
+  // indeterminate is a property and not an attribute, so it is set here
+  // rather than in the markup above.
+  if (pick && pick.partial) {
+    const box = header.querySelector(
+      '.slide-section-pick',
+    ) as HTMLInputElement | null;
+    if (box) box.indeterminate = true;
+  }
+
+  return header;
 }

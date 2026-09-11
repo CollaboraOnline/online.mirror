@@ -171,6 +171,16 @@ class SlideImportSession {
 		this.fireEvent('slideimport:selection', {});
 	}
 
+	// Takes the given slides into the selection or out of it, and leaves the
+	// rest of the selection as it is.
+	public setSelected(indices: number[], selected: boolean): void {
+		for (const index of indices) {
+			if (selected) this.selection.add(index);
+			else this.selection.delete(index);
+		}
+		this.fireEvent('slideimport:selection', {});
+	}
+
 	public selectRange(anchor: number, index: number): void {
 		const from = Math.max(0, Math.min(anchor, index));
 		const to = Math.min(this.slideCount - 1, Math.max(anchor, index));
