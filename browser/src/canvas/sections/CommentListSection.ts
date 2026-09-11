@@ -180,11 +180,11 @@ window.L.Map.include({
 	},
 
 	showComments: function(on: boolean = false) {
-		// Resolved comments are a part of the comments, so their own choice is
-		// switched off along with them.
+		// The list holds whether they are on, because the
+		// engine's own answer arrives a moment later.
 		if (!on) {
-			const resolved = this.stateChangeHandler.getItemValue('.uno:ShowResolvedAnnotations');
-			if (resolved === 'true' || resolved === true)
+			const section = app.sectionContainer.getSectionWithName(app.CSections.CommentList.name);
+			if (section && section.sectionProperties.showResolved)
 				this.showResolvedComments(false);
 		}
 

@@ -1047,10 +1047,15 @@ class Dispatcher {
 
 	private addWriterCommands() {
 		this.actionsMap['.uno:ShowResolvedAnnotations'] = function () {
-			const items = app.map['stateChangeHandler'];
-			let val = items.getItemValue('.uno:ShowResolvedAnnotations');
-			val = val === 'true' || val === true;
-			app.map.showResolvedComments(!val);
+			// The list holds whether they are on, because
+			// the engine answers a moment later.
+			const section = app.sectionContainer.getSectionWithName(
+				app.CSections.CommentList.name,
+			);
+			const shown = section
+				? section.sectionProperties.showResolved === true
+				: false;
+			app.map.showResolvedComments(!shown);
 		};
 
 		this.actionsMap['showannotations'] = function () {
