@@ -162,9 +162,7 @@ unpremultiply_rgba_data (png_structp /*png*/, png_row_infop row_info, png_bytep 
 /// error: variable ‘__capacity’ might be clobbered by ‘longjmp’ or ‘vfork’ [-Werror=clobbered]
 /// In practice, this is bogus, since __capacity is has a trivial type, but this error
 /// shows up with the sanitizers. But technically we shouldn't mix C++ objects with setjmp.
-/// Sadly, older libpng headers don't use const for the pixmap pointer parameter to
-/// png_write_row(), so can't use const here for pixmap.
-inline bool impl_encodeSubBufferToPNG(unsigned char* pixmap, size_t startX, size_t startY,
+inline bool impl_encodeSubBufferToPNG(unsigned const char* pixmap, size_t startX, size_t startY,
                                       int width, int height, int bufferWidth, int bufferHeight,
                                       std::vector<char>& output, COKitTileMode mode)
 {
@@ -225,9 +223,7 @@ inline bool impl_encodeSubBufferToPNG(unsigned char* pixmap, size_t startX, size
     return true;
 }
 
-/// Sadly, older libpng headers don't use const for the pixmap pointer parameter to
-/// png_write_row(), so can't use const here for pixmap.
-inline bool encodeSubBufferToPNG(unsigned char* pixmap, size_t startX, size_t startY, int width,
+inline bool encodeSubBufferToPNG(unsigned const char* pixmap, size_t startX, size_t startY, int width,
                                  int height, int bufferWidth, int bufferHeight,
                                  std::vector<char>& output, COKitTileMode mode)
 {
@@ -267,7 +263,7 @@ inline bool encodeSubBufferToPNG(unsigned char* pixmap, size_t startX, size_t st
 }
 
 inline
-bool encodeBufferToPNG(unsigned char* pixmap, int width, int height,
+bool encodeBufferToPNG(unsigned const char* pixmap, int width, int height,
                        std::vector<char>& output, COKitTileMode mode)
 {
     return encodeSubBufferToPNG(pixmap, 0, 0, width, height, width, height, output, mode);

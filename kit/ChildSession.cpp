@@ -3312,7 +3312,7 @@ bool ChildSession::renderSearchResult(const char* buffer, int length, const Stri
 
     const auto tileMode = getLOKitDocument()->getTileMode();
 
-    COKitBitmap aResult = getLOKitDocument()->renderSearchResult(arguments.c_str());
+    const COKitBitmap aResult = getLOKitDocument()->renderSearchResult(arguments.c_str());
 
     if (!aResult.aPixels.empty())
     {
