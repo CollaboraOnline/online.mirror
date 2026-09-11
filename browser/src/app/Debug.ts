@@ -302,6 +302,10 @@ class DebugManager {
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const self = this; // easier than using (function (){}).bind(this) each time
 
+		// A document drawn from vector primitives has no tiles, so the switches that watch or
+		// steer the tiles are left out of its panel.
+		const tilesDrawn = !RenderManager.isVectorRendering();
+
 		this._addDebugTool({
 			name: 'Data Overlay',
 			category: 'Display',
@@ -321,21 +325,23 @@ class DebugManager {
 			},
 		});
 
-		this._addDebugTool({
-			name: 'Tile Overlays',
-			category: 'Display',
-			startsOn: false,
-			onAdd: function () {
-				Util.ensureValue(self._painter);
-				self.tileOverlaysOn = true;
-				self._painter.update();
-			},
-			onRemove: function () {
-				Util.ensureValue(self._painter);
-				self.tileOverlaysOn = false;
-				self._painter.update();
-			},
-		});
+		if (tilesDrawn) {
+			this._addDebugTool({
+				name: 'Tile Overlays',
+				category: 'Display',
+				startsOn: false,
+				onAdd: function () {
+					Util.ensureValue(self._painter);
+					self.tileOverlaysOn = true;
+					self._painter.update();
+				},
+				onRemove: function () {
+					Util.ensureValue(self._painter);
+					self.tileOverlaysOn = false;
+					self._painter.update();
+				},
+			});
+		}
 
 		// The geometry of each object is a Draw and Impress thing, and it is drawn from the
 		// vector rendering cache, so the tool is offered only where that cache exists. The tool
@@ -360,45 +366,49 @@ class DebugManager {
 				},
 			});
 
-		this._addDebugTool({
-			name: 'Tile Invalidations',
-			category: 'Display',
-			startsOn: false,
-			onAdd: function () {
-				self.tileInvalidationsOn = true;
-				self._tileInvalidationMessages = new Map();
-				self._tileInvalidationId = 0;
-				self._tileInvalidationKeypressQueue = [];
-				self._tileInvalidationKeypressTimes = self.getTimeArray();
-				self._tileInvalidationTimeout();
-			},
-			onRemove: function () {
-				Util.ensureValue(self._painter);
-				self.tileInvalidationsOn = false;
-				self.clearOverlayMessage('tileInvalidationMessages');
-				self.clearOverlayMessage('tileInvalidationTime');
-				clearTimeout(self._tileInvalidationTimeoutId);
-				self._painter.update();
-			},
-		});
+		if (tilesDrawn) {
+			this._addDebugTool({
+				name: 'Tile Invalidations',
+				category: 'Display',
+				startsOn: false,
+				onAdd: function () {
+					self.tileInvalidationsOn = true;
+					self._tileInvalidationMessages = new Map();
+					self._tileInvalidationId = 0;
+					self._tileInvalidationKeypressQueue = [];
+					self._tileInvalidationKeypressTimes = self.getTimeArray();
+					self._tileInvalidationTimeout();
+				},
+				onRemove: function () {
+					Util.ensureValue(self._painter);
+					self.tileInvalidationsOn = false;
+					self.clearOverlayMessage('tileInvalidationMessages');
+					self.clearOverlayMessage('tileInvalidationTime');
+					clearTimeout(self._tileInvalidationTimeoutId);
+					self._painter.update();
+				},
+			});
+		}
 
-		this._addDebugTool({
-			name: 'Tile data',
-			category: 'Display',
-			startsOn: true,
-			onAdd: function () {
-				self.tileDataOn = true;
-				self._tileDataTotalMessages = 0;
-				self._tileDataTotalLoads = 0;
-				self._tileDataTotalUpdates = 0;
-				self._tileDataTotalDeltas = 0;
-				self._tileDataTotalInvalidates = 0;
-			},
-			onRemove: function () {
-				self.tileDataOn = false;
-				self.clearOverlayMessage('top-tileData');
-			},
-		});
+		if (tilesDrawn) {
+			this._addDebugTool({
+				name: 'Tile data',
+				category: 'Display',
+				startsOn: true,
+				onAdd: function () {
+					self.tileDataOn = true;
+					self._tileDataTotalMessages = 0;
+					self._tileDataTotalLoads = 0;
+					self._tileDataTotalUpdates = 0;
+					self._tileDataTotalDeltas = 0;
+					self._tileDataTotalInvalidates = 0;
+				},
+				onRemove: function () {
+					self.tileDataOn = false;
+					self.clearOverlayMessage('top-tileData');
+				},
+			});
+		}
 
 		/*
 		 * Doesn't seem to do anything
@@ -428,33 +438,37 @@ class DebugManager {
 			},
 		});
 
-		this._addDebugTool({
-			name: 'Tile pixel grid section',
-			category: 'Display',
-			startsOn: false,
-			onAdd: function () {
-				Util.ensureValue(self._painter);
-				self._painter._addTilePixelGridSection();
-			},
-			onRemove: function () {
-				Util.ensureValue(self._painter);
-				self._painter._removeTilePixelGridSection();
-			},
-		});
+		if (tilesDrawn) {
+			this._addDebugTool({
+				name: 'Tile pixel grid section',
+				category: 'Display',
+				startsOn: false,
+				onAdd: function () {
+					Util.ensureValue(self._painter);
+					self._painter._addTilePixelGridSection();
+				},
+				onRemove: function () {
+					Util.ensureValue(self._painter);
+					self._painter._removeTilePixelGridSection();
+				},
+			});
+		}
 
-		this._addDebugTool({
-			name: 'Tile preload map',
-			category: 'Display',
-			startsOn: false,
-			onAdd: function () {
-				Util.ensureValue(self._painter);
-				self._painter._addPreloadMap();
-			},
-			onRemove: function () {
-				Util.ensureValue(self._painter);
-				self._painter._removePreloadMap();
-			},
-		});
+		if (tilesDrawn) {
+			this._addDebugTool({
+				name: 'Tile preload map',
+				category: 'Display',
+				startsOn: false,
+				onAdd: function () {
+					Util.ensureValue(self._painter);
+					self._painter._addPreloadMap();
+				},
+				onRemove: function () {
+					Util.ensureValue(self._painter);
+					self._painter._removePreloadMap();
+				},
+			});
+		}
 
 		if (this._docLayer.isCalc()) {
 			this._addDebugTool({
@@ -590,29 +604,31 @@ class DebugManager {
 			},
 		});
 
-		this._addDebugTool({
-			name: 'Tile Dumping',
-			category: 'Logging',
-			startsOn: false,
-			onAdd: function () {
-				app.socket.sendMessage('toggletiledumping true');
-			},
-			onRemove: function () {
-				app.socket.sendMessage('toggletiledumping false');
-			},
-		});
+		if (tilesDrawn) {
+			this._addDebugTool({
+				name: 'Tile Dumping',
+				category: 'Logging',
+				startsOn: false,
+				onAdd: function () {
+					app.socket.sendMessage('toggletiledumping true');
+				},
+				onRemove: function () {
+					app.socket.sendMessage('toggletiledumping false');
+				},
+			});
 
-		this._addDebugTool({
-			name: 'Debug Deltas',
-			category: 'Logging',
-			startsOn: false,
-			onAdd: function () {
-				RenderManager.setDebugDeltas(true);
-			},
-			onRemove: function () {
-				RenderManager.setDebugDeltas(false);
-			},
-		});
+			this._addDebugTool({
+				name: 'Debug Deltas',
+				category: 'Logging',
+				startsOn: false,
+				onAdd: function () {
+					RenderManager.setDebugDeltas(true);
+				},
+				onRemove: function () {
+					RenderManager.setDebugDeltas(false);
+				},
+			});
+		}
 
 		this._addDebugTool({
 			name: 'Event delay watchdog',
@@ -703,17 +719,19 @@ class DebugManager {
 			},
 		});
 
-		this._addDebugTool({
-			name: 'Test refetching tiles',
-			category: 'Functionality',
-			startsOn: false,
-			onAdd: function () {
-				BitmapTileManager.setLimitedCacheSize();
-			},
-			onRemove: function () {
-				BitmapTileManager.setDefaultCacheSize();
-			},
-		});
+		if (tilesDrawn) {
+			this._addDebugTool({
+				name: 'Test refetching tiles',
+				category: 'Functionality',
+				startsOn: false,
+				onAdd: function () {
+					BitmapTileManager.setLimitedCacheSize();
+				},
+				onRemove: function () {
+					BitmapTileManager.setDefaultCacheSize();
+				},
+			});
+		}
 
 		this._addDebugTool({
 			name: 'Randomize user settings',
