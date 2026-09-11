@@ -307,6 +307,7 @@ window.L.Control.Tabs = window.L.Control.extend({
 
 			var scrollCont = document.getElementById('spreadsheet-tab-scroll');
 			var focusInTablist = scrollCont && scrollCont.contains(document.activeElement);
+			var documentContainer = document.getElementById('document-container');
 			for (var key in this._spreadsheetTabs) {
 				var part =  parseInt(key.match(/\d+/g)[0]);
 				var tabEl = this._spreadsheetTabs[key];
@@ -317,8 +318,13 @@ window.L.Control.Tabs = window.L.Control.extend({
 					this._map.fire('closeAutoFilterDialog');
 					this._map.fire('closepopups');
 					window.L.DomUtil.addClass(tabEl, 'spreadsheet-tab-selected');
+					if (documentContainer) {
+						documentContainer.setAttribute('role', 'tabpanel');
+						documentContainer.setAttribute('aria-labelledby', tabEl.id);
+					}
 				}
 				tabEl.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+				tabEl.setAttribute('aria-controls', 'document-container');
 				if (!focusInTablist)
 					tabEl.setAttribute('tabindex', isSelected ? '0' : '-1');
 			}
