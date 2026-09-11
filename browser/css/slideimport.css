@@ -301,7 +301,8 @@ span.slide-import-source-main {
 }
 
 .slide-import-source.active > .slide-import-source-row {
-	box-shadow: inset 3px 0 0 0 rgba(var(--doc-type), 1);
+	border-inline-start: 3px solid rgba(var(--doc-type), 1);
+	padding-inline-start: calc(var(--spacing-m) - 2px);
 }
 
 .slide-import-source.active .slide-import-source-name {
