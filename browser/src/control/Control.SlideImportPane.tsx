@@ -90,6 +90,9 @@ class SlideImportPane {
   // Whether the pane has already opened a source of its own accord, which it
   // does for the first one of the list.
   private openedFirstSource: boolean = false;
+  // Whether the options show their controls or only the line that says what
+  // they are set to. The reader's choice, kept for the session.
+  private optionsOpen: boolean = false;
 
   // Index of the slide frame that holds the roving tab stop, in the active
   // source's panel.
@@ -1307,17 +1310,52 @@ class SlideImportPane {
     );
   }
 
+  // What the options are set to, for the line that stands in for them while
+  // they are closed. A setting left at its default is not named, so the line
+  // says what someone chose and nothing else.
+  private optionsSummary(): string {
+    const session = this.session;
+    const parts: string[] = [];
+    if (session.keepDesign) parts.push(_('Original design'));
+    if (!session.linkToSource || !session.canLink) parts.push(_('Not linked'));
+    else if (session.linkByPosition)
+      parts.push(_('Linked, follows the slide number'));
+    else parts.push(_('Linked, follows the slide'));
+    return parts.join(' \u00b7 ');
+  }
+
+  private updateOptionsSummary(): void {
+    const state = this.panel.querySelector(
+      '.slide-import-options-state',
+    ) as HTMLElement | null;
+    if (state) state.textContent = this.optionsSummary();
+  }
+
+  private toggleOptions(): void {
+    this.optionsOpen = !this.optionsOpen;
+    const summary = this.panel.querySelector(
+      '.slide-import-options-summary',
+    ) as HTMLElement | null;
+    const body = this.panel.querySelector(
+      '.slide-import-options-body',
+    ) as HTMLElement | null;
+    if (summary)
+      summary.setAttribute('aria-expanded', String(this.optionsOpen));
+    if (body) body.hidden = !this.optionsOpen;
+  }
+
   private renderOptions(): HTMLElement {
     const session = this.session;
-    return (
-      <div class="slide-import-options">
+    const body = (
+      <div class="slide-import-options-body" id="slide-import-options-body">
         <label class="slide-import-keepdesign">
           <input
             type="checkbox"
             checked={session.keepDesign}
-            onChange={(e: Event) =>
-              session.setKeepDesign((e.target as HTMLInputElement).checked)
-            }
+            onChange={(e: Event) => {
+              session.setKeepDesign((e.target as HTMLInputElement).checked);
+              this.updateOptionsSummary();
+            }}
           />
           {_('Keep original design')}
         </label>
@@ -1329,6 +1367,7 @@ class SlideImportPane {
             onChange={(e: Event) => {
               session.setLinkToSource((e.target as HTMLInputElement).checked);
               this.updateLinkMode();
+              this.updateOptionsSummary();
             }}
           />
           <span id="slide-import-linksource-label">
@@ -1336,6 +1375,24 @@ class SlideImportPane {
           </span>
         </label>
         {this.renderLinkMode()}
+      </div>
+    ) as HTMLElement;
+    body.hidden = !this.optionsOpen;
+    return (
+      <div class="slide-import-options">
+        <button
+          class="slide-import-options-summary"
+          aria-expanded={String(this.optionsOpen)}
+          aria-controls="slide-import-options-body"
+          onClick={() => this.toggleOptions()}
+        >
+          <span class="slide-import-source-chevron" aria-hidden="true"></span>
+          <span class="slide-import-options-name">{_('Options')}</span>
+          <span class="slide-import-options-state">
+            {this.optionsSummary()}
+          </span>
+        </button>
+        {body}
       </div>
     );
   }
@@ -1371,7 +1428,10 @@ class SlideImportPane {
           id={id}
           name="slide-import-linkmode"
           checked={this.session.linkByPosition === byPosition}
-          onChange={() => this.session.setLinkByPosition(byPosition)}
+          onChange={() => {
+            this.session.setLinkByPosition(byPosition);
+            this.updateOptionsSummary();
+          }}
         />
         <label for={id}>{label}</label>
       </div>

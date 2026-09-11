@@ -508,6 +508,68 @@ span.slide-import-source-main {
 	color: var(--color-text-dark);
 }
 
+/* The options stand behind one row while they are closed, and that row says
+ * what they are set to, so nothing the insert btn acts on is out of sight.
+ * The id carries the button styling past device-desktop.css, jsdialogs.css
+ * and btns.css, which dress any bare button between them. */
+#slide-import-panel .slide-import-options-summary {
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-m);
+	width: 100%;
+	height: auto;
+	margin: 0;
+	padding: 0;
+	background: none;
+	border: 0;
+	border-radius: 0;
+	color: var(--color-text-dark);
+	font: inherit;
+	text-align: start;
+	cursor: pointer;
+}
+
+#slide-import-panel .slide-import-options-summary:hover {
+	background: none;
+	color: var(--color-text-dark);
+}
+
+#slide-import-panel .slide-import-options-summary:focus-visible {
+	outline: 2px solid var(--color-primary-dark);
+	outline-offset: 2px;
+}
+
+#slide-import-panel
+.slide-import-options-summary[aria-expanded='true']
+.slide-import-source-chevron {
+	transform: rotate(90deg);
+}
+
+.slide-import-options-name {
+	flex: 0 0 auto;
+}
+
+/* The line is the whole of what a closed block says, so it shortens rather
+ * than pushes the row. */
+.slide-import-options-state {
+	flex: 1 1 auto;
+	min-width: 0;
+	color: var(--color-text-light);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.slide-import-options-body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--spacing-m);
+}
+
+.slide-import-options-body[hidden] {
+	display: none;
+}
+
 .slide-import-options input[type='checkbox'] {
 	width: 18px;
 	height: 18px;
