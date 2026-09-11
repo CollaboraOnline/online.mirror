@@ -639,8 +639,13 @@ span.slide-import-source-main {
 	white-space: normal;
 }
 
+/* The shared rule insets the row by 16px, which the navigator's strip needs
+ * for a gutter. Here the grid's own padding is the gutter, so the inset put
+ * the header 16px inside the slides it heads, and its rule stopped short of
+ * both edges. */
 .slide-import-list .slide-section-header {
 	grid-column: 1 / -1;
+	margin-inline: 0;
 }
 
 /* The picture fills its column and keeps the slide's shape, in place of the
