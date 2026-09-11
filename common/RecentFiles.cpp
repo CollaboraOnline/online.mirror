@@ -12,6 +12,7 @@
 #include <config.h>
 
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <sstream>
 
@@ -110,7 +111,7 @@ std::string RecentFiles::serialiseFiltered(std::set<std::string> dropTheseURIs)
 
     result = "[ ";
     int n = 0;
-    for (int i = 0; i < _mostRecentlyUsed.size(); i++)
+    for (std::size_t i = 0; i < _mostRecentlyUsed.size(); i++)
     {
         if (dropTheseURIs.contains(_mostRecentlyUsed[i].uri))
             continue;
