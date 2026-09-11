@@ -94,7 +94,7 @@ app.map = map;
 
 map.uiManager = new UIManager();
 map.addControl(map.uiManager);
-if (!window.L.Browser.cypressTest)
+if (!window.L.Browser.cypressTest || global.coolParams.get('tooltips') === 'true')
 	map.tooltip = window.L.control.tooltip();
 
 app.idleHandler.map = map;
