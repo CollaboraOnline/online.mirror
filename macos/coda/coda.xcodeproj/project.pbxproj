@@ -87,6 +87,7 @@
 		BEA264942CBE986C0007435A /* ChildSession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEA2648D2CBE986C0007435A /* ChildSession.cpp */; };
 		BEA264962CBE986C0007435A /* DeltaSimd.c in Sources */ = {isa = PBXBuildFile; fileRef = BEA2648C2CBE986C0007435A /* DeltaSimd.c */; };
 		BEA264A12CBE98CD0007435A /* Socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEA2649E2CBE98CD0007435A /* Socket.cpp */; };
+		BE5C4E022F13A0000007435A /* Socket-unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE5C4E012F13A0000007435A /* Socket-unix.cpp */; };
 		BEA264A32CBE98CD0007435A /* FakeSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEA264982CBE98CD0007435A /* FakeSocket.cpp */; };
 		BEA264AD2CBE99340007435A /* Storage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEA264AB2CBE99340007435A /* Storage.cpp */; };
 		BEA264AE2CBE99340007435A /* TileCache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEA264AC2CBE99340007435A /* TileCache.cpp */; };
@@ -326,6 +327,7 @@
 		BEA264982CBE98CD0007435A /* FakeSocket.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = FakeSocket.cpp; path = FakeSocket.cpp; sourceTree = "<group>"; };
 		BEA2649D2CBE98CD0007435A /* Socket.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Socket.hpp; path = Socket.hpp; sourceTree = "<group>"; };
 		BEA2649E2CBE98CD0007435A /* Socket.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Socket.cpp; path = Socket.cpp; sourceTree = "<group>"; };
+		BE5C4E012F13A0000007435A /* Socket-unix.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "Socket-unix.cpp"; path = "Socket-unix.cpp"; sourceTree = "<group>"; };
 		BEA264A52CBE99340007435A /* ClientSession.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = ClientSession.cpp; path = ClientSession.cpp; sourceTree = "<group>"; };
 		BEA264A62CBE99340007435A /* COOLWSD.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = COOLWSD.cpp; path = COOLWSD.cpp; sourceTree = "<group>"; };
 		BEA264A72CBE99340007435A /* DocumentBroker.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DocumentBroker.cpp; path = DocumentBroker.cpp; sourceTree = "<group>"; };
@@ -593,6 +595,7 @@
 				BEA264982CBE98CD0007435A /* FakeSocket.cpp */,
 				BEA2649D2CBE98CD0007435A /* Socket.hpp */,
 				BEA2649E2CBE98CD0007435A /* Socket.cpp */,
+				BE5C4E012F13A0000007435A /* Socket-unix.cpp */,
 			);
 			path = net;
 			sourceTree = "<group>";
@@ -973,6 +976,7 @@
 				BE44ACD12D7F073000BFA3B2 /* Unit-mobile.cpp in Sources */,
 				BEF881392EA62DBF0080A631 /* dumpWsdState.cpp in Sources */,
 				BEA264A12CBE98CD0007435A /* Socket.cpp in Sources */,
+				BE5C4E022F13A0000007435A /* Socket-unix.cpp in Sources */,
 				BE9115B02CECBECF00C597B2 /* Util-unix.cpp in Sources */,
 				5C02902E606BD6410CA7B24A /* ProcUtil.cpp in Sources */,
 				5E7715000000000000000001 /* SettingsStorage.cpp in Sources */,

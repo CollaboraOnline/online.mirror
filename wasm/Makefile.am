@@ -64,6 +64,7 @@ online_SOURCES = \
 	../kit/KitWebSocket.cpp \
 	../kit/DeltaSimd.c \
 	../net/FakeSocket.cpp \
+	../net/Socket-unix.cpp \
 	../net/Socket.cpp \
 	../wsd/ClientSession.cpp \
 	../wsd/DocumentBroker.cpp \

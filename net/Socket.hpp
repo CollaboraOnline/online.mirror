@@ -39,6 +39,7 @@
 #include <cerrno>
 #include <chrono>
 #include <climits>
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <functional>
@@ -70,6 +71,23 @@ namespace Poco
         class HTTPResponse;
     }
     class URI;
+}
+
+namespace net
+{
+    /// Shut down both directions of a socket that has a real descriptor underneath.
+    void shutdownDescriptor(int descriptor);
+
+    /// Close a descriptor that has a real pipe or socket underneath.
+    void closeDescriptor(int descriptor);
+
+    /// Write to a descriptor that has a real pipe or socket underneath. Returns the number of
+    /// bytes written, or -1 with errno set.
+    ssize_t writeDescriptor(int descriptor, const void* buffer, std::size_t length);
+
+    /// Send each packet on a real socket as soon as it is ready, without waiting to aggregate
+    /// several of them.
+    void disableNagleAlgorithm(int descriptor);
 }
 
 class Socket;
@@ -222,10 +240,8 @@ public:
                 setShutdown();
                 if (Util::isMobileApp())
                     fakeSocketShutdown(_fd);
-#ifndef _WIN32
                 else
-                    ::shutdown(_fd, SHUT_RDWR);
-#endif
+                    net::shutdownDescriptor(_fd);
             }
         }
     }
@@ -250,18 +266,8 @@ public:
     /// manage latency issues around packet aggregation
     void setNoDelay()
     {
-#ifndef _WIN32
         if (!Util::isMobileApp())
-        {
-            const int val = 1;
-            if (::setsockopt(_fd, IPPROTO_TCP, TCP_NODELAY, &val, sizeof(val)) == -1)
-            {
-                LOG_WRN_ONCE("Failed setsockopt TCP_NODELAY. Will not report further "
-                             "failures to set TCP_NODELAY: "
-                             << strerror(errno));
-            }
-        }
-#endif
+            net::disableNagleAlgorithm(_fd);
     }
 
     /// Uses peercreds to get prisoner PID if present or -1
@@ -501,10 +507,8 @@ private:
             // Doesn't block on sockets; no error handling needed.
         if (Util::isMobileApp())
             fakeSocketClose(_fd);
-#ifndef _WIN32
         else
-            ::close(_fd);
-#endif
+            net::closeDescriptor(_fd);
 
         LOG_DBG("Closed socket " << toStringImpl()); // Should be logged exactly once.
 
@@ -935,10 +939,8 @@ public:
         do {
             if (Util::isMobileApp())
                 rc = fakeSocketWrite(fd, "w", 1);
-#ifndef _WIN32
             else
-                rc = ::write(fd, "w", 1);
-#endif
+                rc = net::writeDescriptor(fd, "w", 1);
         } while (rc == -1 && errno == EINTR);
 
         if (rc == -1 && errno != EAGAIN && errno != EWOULDBLOCK)

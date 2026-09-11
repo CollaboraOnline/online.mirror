@@ -260,6 +260,7 @@ common_sources = \
 	../net/HttpHelper.cpp \
 	../net/HttpRequest.cpp \
 	../net/NetUtil.cpp \
+	../net/Socket-unix.cpp \
 	../net/Socket.cpp \
 	../wsd/Exceptions.cpp
 

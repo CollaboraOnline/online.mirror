@@ -110,6 +110,9 @@
     <ClCompile Include="..\..\..\net\FakeSocket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\net\Socket-windows.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\net\Socket.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

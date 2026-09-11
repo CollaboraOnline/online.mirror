@@ -63,6 +63,7 @@ cmake_list= \
             ../kit/LogUI.cpp \
             ../kit/KitWebSocket.cpp \
             ../net/FakeSocket.cpp \
+            ../net/Socket-unix.cpp \
             ../net/Socket.cpp \
             ../wsd/AIChatSession.cpp \
             ../wsd/AIUtil.cpp \

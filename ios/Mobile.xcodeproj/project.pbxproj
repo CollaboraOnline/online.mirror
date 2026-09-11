@@ -84,6 +84,7 @@
 		BEA283582146945500848631 /* ChildSession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEA283572146945500848631 /* ChildSession.cpp */; };
 		BEA2835A21470A1C00848631 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BEA2835921470A1C00848631 /* WebKit.framework */; };
 		BEA2835D21498AD400848631 /* Socket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEA2835C21498AD400848631 /* Socket.cpp */; };
+		BE5C4E022F13A00000848631 /* Socket-unix.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE5C4E012F13A00000848631 /* Socket-unix.cpp */; };
 		BEA28360214ACA8500848631 /* FakeSocket.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEA2835F214ACA8500848631 /* FakeSocket.cpp */; };
 		BEA28377214FFD8C00848631 /* Unit.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEA28376214FFD8C00848631 /* Unit.cpp */; };
 		BEABFC6824AC94C3004DE339 /* Authorization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BEABFC6624AC94C3004DE339 /* Authorization.cpp */; };
@@ -1147,6 +1148,7 @@
 		BEA283572146945500848631 /* ChildSession.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ChildSession.cpp; sourceTree = "<group>"; };
 		BEA2835921470A1C00848631 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		BEA2835C21498AD400848631 /* Socket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Socket.cpp; path = ../net/Socket.cpp; sourceTree = "<group>"; };
+		BE5C4E012F13A00000848631 /* Socket-unix.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "Socket-unix.cpp"; path = "../net/Socket-unix.cpp"; sourceTree = "<group>"; };
 		BEA2835E214A8E2000848631 /* Socket.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Socket.hpp; sourceTree = "<group>"; };
 		BEA2835F214ACA8500848631 /* FakeSocket.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FakeSocket.cpp; sourceTree = "<group>"; };
 		BEA28376214FFD8C00848631 /* Unit.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Unit.cpp; sourceTree = "<group>"; };
@@ -3063,6 +3065,7 @@
 				3F3B54DC2A39288500063C01 /* HttpRequest.hpp */,
 				3F3B54DF2A392C9C00063C02 /* Uri.hpp */,
 				BEA2835C21498AD400848631 /* Socket.cpp */,
+				BE5C4E012F13A00000848631 /* Socket-unix.cpp */,
 				BEA2835E214A8E2000848631 /* Socket.hpp */,
 				BE636210215101D000F4237E /* WebSocketHandler.hpp */,
 			);
@@ -3850,6 +3853,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BEA2835D21498AD400848631 /* Socket.cpp in Sources */,
+				BE5C4E022F13A00000848631 /* Socket-unix.cpp in Sources */,
 				BE5EB5C4213FE29900E0826C /* Util.cpp in Sources */,
 				BE5EB5C4213FE29901E0826C /* RegexUtil.cpp in Sources */,
 				BE5EB5C4214FE29900E0826C /* Uri.cpp in Sources */,

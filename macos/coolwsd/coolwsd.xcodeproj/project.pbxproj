@@ -112,6 +112,7 @@
 		BE74B21A2D3F971C009786DF /* ServerSocket.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = ServerSocket.hpp; path = ../../../net/ServerSocket.hpp; sourceTree = "<group>"; };
 		BE74B21B2D3F971C009786DF /* Socket.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Socket.hpp; path = ../../../net/Socket.hpp; sourceTree = "<group>"; };
 		BE74B21C2D3F971C009786DF /* Socket.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Socket.cpp; path = ../../../net/Socket.cpp; sourceTree = "<group>"; };
+		BE5C4E012F13A000009786DF /* Socket-unix.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "Socket-unix.cpp"; path = "../../../net/Socket-unix.cpp"; sourceTree = "<group>"; };
 		BE74B21D2D3F971C009786DF /* Ssl.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Ssl.hpp; path = ../../../net/Ssl.hpp; sourceTree = "<group>"; };
 		BE74B21E2D3F971C009786DF /* Ssl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Ssl.cpp; path = ../../../net/Ssl.cpp; sourceTree = "<group>"; };
 		BE74B21F2D3F971C009786DF /* SslSocket.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = SslSocket.hpp; path = ../../../net/SslSocket.hpp; sourceTree = "<group>"; };
@@ -306,6 +307,7 @@
 				BE74B21A2D3F971C009786DF /* ServerSocket.hpp */,
 				BE74B21B2D3F971C009786DF /* Socket.hpp */,
 				BE74B21C2D3F971C009786DF /* Socket.cpp */,
+				BE5C4E012F13A000009786DF /* Socket-unix.cpp */,
 				BE74B21D2D3F971C009786DF /* Ssl.hpp */,
 				BE74B21E2D3F971C009786DF /* Ssl.cpp */,
 				BE74B21F2D3F971C009786DF /* SslSocket.hpp */,
