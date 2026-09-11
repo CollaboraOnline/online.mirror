@@ -163,10 +163,6 @@
 	cursor: default;
 }
 
-.slide-import-add-plus {
-	font-weight: 600;
-}
-
 /* The rows scroll inside the list, so the title above them and the button
  * below them stay where they are however many files are listed. */
 .slide-import-source-list {

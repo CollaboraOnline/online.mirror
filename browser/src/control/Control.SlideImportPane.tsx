@@ -382,7 +382,7 @@ class SlideImportPane {
     if (source.slides.length) this.session.slidesShown();
   }
 
-  // The "Add presentation..." button asks the integration to open its own
+  // The "Add presentation…" button asks the integration to open its own
   // file chooser, filtered to presentations, and to add the picked file as a
   // related document. The integration registers it with a POST to
   // /cool/relateddocument using the one-time token below. The added file then
@@ -934,10 +934,7 @@ class SlideImportPane {
         disabled={!app.relatedDocumentToken}
         onClick={() => this.browseForImport()}
       >
-        <span class="slide-import-add-plus" aria-hidden="true">
-          +
-        </span>
-        {_('Add presentation...')}
+        {_('Add presentation…')}
       </button>
     );
   }
@@ -1050,9 +1047,7 @@ class SlideImportPane {
     return (
       <div class="slide-import-body">
         <div class="slide-import-sources">
-          <div class="slide-import-sources-title">
-            {_('Recently imported from')}
-          </div>
+          <div class="slide-import-sources-title">{_('Slide sources')}</div>
           <span class="slide-import-sources-actions">
             {this.renderShowAll()}
             {this.renderAddButton('ui-linkbutton slide-import-add-link')}
@@ -1337,7 +1332,7 @@ class SlideImportPane {
             }}
           />
           <span id="slide-import-linksource-label">
-            {_('Link to the source file')}
+            {_('Stay linked to the source file')}
           </span>
         </label>
         {this.renderLinkMode()}
@@ -1357,12 +1352,9 @@ class SlideImportPane {
       >
         {this.renderLinkModeOption(
           'slide',
-          _('Keep the link to this slide if the source is reordered'),
+          _('Follow the slide, wherever it moves'),
         )}
-        {this.renderLinkModeOption(
-          'position',
-          _('Take whichever slide holds this position later'),
-        )}
+        {this.renderLinkModeOption('position', _('Follow the slide number'))}
       </div>
     ) as HTMLElement;
     group.hidden = !(this.session.linkToSource && this.session.canLink);
