@@ -82,6 +82,7 @@ SwVisibleCursor::SwVisibleCursor(::sw::VisibleCursorState const& rState,
     , m_pCursorShell(pCShell)
     , m_nPageLastTime(0)
     , m_nLastKitCursorEditorViewId(-1)
+    , m_nPendingKitCursorEditorViewId(-1)
 {
     if (&rState == pCShell)
     {
@@ -241,6 +242,9 @@ void SwVisibleCursor::SetPosAndShow(SfxViewShell const * pViewShell)
         // This may get called often, so instead of sending data on each update, just notify
         // that there's been an update, and the other side will pull the data using
         // getKitPayload() when it decides to.
+        // The client pulls the rectangle and the view that moved the caret there as one pair.
+        if (m_aLastKitRect != aRect)
+            m_nLastKitCursorEditorViewId = m_nPendingKitCursorEditorViewId;
         m_aLastKitRect = aRect;
         if (pViewShell)
         {

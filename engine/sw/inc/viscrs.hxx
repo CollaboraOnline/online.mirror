@@ -58,6 +58,8 @@ class SW_DLLPUBLIC SwVisibleCursor
     /// owns the cursor, because one view's edit reflows the text and shifts
     /// another view's cursor.
     int m_nLastKitCursorEditorViewId;
+    /// For COKit only - the view to record against the next rectangle the caret reaches.
+    int m_nPendingKitCursorEditorViewId;
 
     bool m_bIsVisible;
     bool m_bIsDragCursor;
@@ -73,9 +75,8 @@ public:
     void SetDragCursor( bool bFlag = true ) { m_bIsDragCursor = bFlag; }
     SwRect SetPos();
     void SetPosAndShow(SfxViewShell const * pViewShell);
-    /// Record the view whose change moved this cursor. Set while that view is
-    /// current, at the point the cursor is repositioned.
-    void SetKitEditorViewId(int nViewId) { m_nLastKitCursorEditorViewId = nViewId; }
+    /// Hold the view whose change is moving this cursor.
+    void SetKitEditorViewId(int nViewId) { m_nPendingKitCursorEditorViewId = nViewId; }
     const vcl::Cursor& GetTextCursor() const;
 
     std::optional<OString> getKitPayload(COKitCallbackType eType, int nViewId) const;
