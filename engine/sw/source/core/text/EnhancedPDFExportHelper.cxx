@@ -3215,7 +3215,7 @@ void SwEnhancedPDFExportHelper::ExportAuthorityEntryLinks()
                    && pIteratedTOX->GetType() == TOX_AUTHORITIES)
             {
                 if (const SwNode& rCurrentNode = mrSh.GetCursor()->GetPoint()->GetNode();
-                    rCurrentNode.GetNodeType() == SwNodeType::Text)
+                    rCurrentNode.IsTextNode())
                 {
                     if (mrSh.GetCursor()->GetPoint()->GetNode().FindSectionNode()->GetSection().GetType()
                         == SectionType::ToxContent) // this checks it's not a heading
