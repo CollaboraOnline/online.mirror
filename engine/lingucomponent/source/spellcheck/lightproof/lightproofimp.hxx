@@ -33,6 +33,12 @@
 
 namespace lightproof
 {
+// The paragraph filter: one bit per hashed three-character sequence, which a
+// rule's literal has to be among for the rule to be worth trying. Sized so
+// that a paragraph sets far fewer bits than there are buckets.
+constexpr sal_uInt32 FILTER_BUCKETS = 8191;
+
+
 // A rule with its ICU pattern built. Patterns are compiled on a rule's first
 // use rather than at load, because most rules in a package are never reached
 // by a given document.
