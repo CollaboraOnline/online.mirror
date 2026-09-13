@@ -669,6 +669,7 @@ $(eval $(call gb_Helper_register_packages_for_install,ure,\
 
 $(eval $(call gb_Helper_register_packages_for_install,ooo,\
 	$(if $(SYSTEM_LIBEXTTEXTCAT),,libexttextcat_fingerprint) \
+	dictionaries_config \
 	lingucomponent_lightproof \
 	officecfg_misc \
 	$(if $(filter $(OS),MACOSX), \

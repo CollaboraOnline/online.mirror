@@ -30,6 +30,9 @@ $(eval $(call gb_CppunitTest_use_api,lingucomponent_spell,\
     offapi \
 ))
 
+# The bundled dictionaries are registered by a layer installed with them.
+$(eval $(call gb_CppunitTest_use_package,lingucomponent_spell,dictionaries_config))
+
 $(eval $(call gb_CppunitTest_use_configuration,lingucomponent_spell))
 
 $(eval $(call gb_CppunitTest_use_ure,lingucomponent_spell))
