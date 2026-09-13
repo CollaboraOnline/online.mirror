@@ -39,6 +39,12 @@ namespace Desktop
 
     void syncSettings(const std::function<void(const std::vector<char>&)>& sendFileCallback);
 
+    // Copies the user's configuration presets into a kit's jail, the way the
+    // online build copies down what the settings host holds. Returns whether
+    // anything was placed there, so the caller knows whether to ask the kit
+    // to apply it.
+    bool installPresets(const std::string& jailPresetsPath);
+
     // Native-owned per-user UI preferences (preferences.json in the config dir).
     // getDarkMode() returns nullopt when the user has not chosen yet.
     std::optional<bool> getDarkMode();

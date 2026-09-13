@@ -17,6 +17,7 @@
 #include <config.h>
 
 #include "DocumentBroker.hpp"
+#include "SettingsStorage.hpp"
 
 #include <common/Anonymizer.hpp>
 #include <common/Authorization.hpp>
@@ -4552,6 +4553,20 @@ std::size_t DocumentBroker::addSession(const std::shared_ptr<ClientSession>& ses
                          << _mobileAppDocId << "] to have " << count << " sessions.");
 
         UNITWSD_CALL_INSTANCE(_unitWsd, onDocBrokerAddSession(_docKey, session));
+
+#if MOBILEAPP
+        // The desktop apps have no settings host to fetch presets from, so
+        // the user's own configuration directory is the store. Stage it into
+        // the jail the first time a view arrives, and let the same message
+        // the online build sends apply it.
+        if (count == 1)
+        {
+            const std::string jailPresetsPath = FileUtil::buildLocalPathToJail(
+                COOLWSD::EnableMountNamespaces, getJailRoot(), JAILED_CONFIG_ROOT);
+            if (Desktop::installPresets(jailPresetsPath))
+                forwardToChild(session, "addconfig");
+        }
+#endif
 
         // Sent unconditionally - anonymous sessions explicitly say "false"
         // rather than relying on signal absence.

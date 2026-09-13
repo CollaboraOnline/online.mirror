@@ -220,6 +220,43 @@ void syncSettings(const std::function<void(const std::vector<char>&)>& sendFileC
     }
 }
 
+bool installPresets(const std::string& jailPresetsPath)
+{
+    // Only the xcu group is carried over. The others are either unused on the
+    // desktop apps or, like autotext and wordbook, things the user puts in
+    // their profile themselves.
+    try
+    {
+        Poco::Path source = getConfigPath();
+        source.append("settings").append("xcu");
+        if (!Poco::File(source).exists())
+            return false;
+
+        Poco::Path target(jailPresetsPath);
+        target.append("xcu");
+        Poco::File(target).createDirectories();
+
+        bool installed = false;
+        Poco::DirectoryIterator end;
+        for (Poco::DirectoryIterator it(source); it != end; ++it)
+        {
+            if (!it->isFile())
+                continue;
+            it->copyTo(target.toString());
+            installed = true;
+        }
+
+        LOG_TRC("installPresets: " << (installed ? "installed" : "found no") << " xcu presets in "
+                                   << target.toString());
+        return installed;
+    }
+    catch (const std::exception& ex)
+    {
+        LOG_ERR("installPresets failed: " << ex.what());
+        return false;
+    }
+}
+
 static Poco::Path preferencesPath()
 {
     Poco::Path path = getConfigPath();
