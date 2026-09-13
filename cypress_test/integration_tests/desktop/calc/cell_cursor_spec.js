@@ -125,6 +125,8 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Test jumping on large cell
 
 		cy.cGet('#busypopup').should('not.exist');
 
+		helper.waitForCanvasAnimation(this.win);
+
 		cy.cGet('#document-container').compareSnapshot('text-selection', 0.03);
 	});
 
@@ -185,6 +187,8 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Test Cell Selections', fun
 
 		helper.processToIdle(this.win);
 
+		helper.waitForCanvasAnimation(this.win);
+
 		cy.cGet('#document-container').compareSnapshot('selections', 0.02);
 	});
 
@@ -213,6 +217,8 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Test Cell Selections', fun
 		});
 
 		cy.wait(1000);
+
+		helper.waitForCanvasAnimation(this.win);
 
 		// This doesn't pass without the fix in this commit.
 		cy.cGet('#document-container').compareSnapshot('scroll-check', 0.02);
@@ -268,6 +274,8 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Test triple click content 
 
 		helper.waitForTimers(this.win, 'clicktimer');
 		helper.processToIdle(this.win);
+
+		helper.waitForCanvasAnimation(this.win);
 
 		cy.cGet('#document-container').compareSnapshot('triple-click', 0.03);
 
