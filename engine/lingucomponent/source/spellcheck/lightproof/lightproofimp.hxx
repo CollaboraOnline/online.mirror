@@ -15,6 +15,7 @@
 #include <com/sun/star/linguistic2/ProofreadingResult.hpp>
 #include <com/sun/star/linguistic2/XLinguServiceEventBroadcaster.hpp>
 #include <com/sun/star/linguistic2/XProofreader.hpp>
+#include <com/sun/star/linguistic2/XNumberText.hpp>
 #include <com/sun/star/linguistic2/XSpellChecker.hpp>
 #include <com/sun/star/linguistic2/XSupportedLocales.hpp>
 #include <com/sun/star/util/XChangesListener.hpp>
@@ -100,7 +101,12 @@ public:
                    const OUString& rPattern, bool bAll, bool bOnlyAffix) override;
     OUString measurement(const OUString& rNumber, const OUString& rFrom, const OUString& rTo,
                          const OUString& rSuffix, const OUString& rDecimal,
-                         const OUString& rRemove) override;
+                         const OUString& rRemove, bool bLongForm) override;
+    std::vector<OUString> stem(const css::lang::Locale& rLocale, const OUString& rWord) override;
+    std::vector<OUString> generate(const css::lang::Locale& rLocale, const OUString& rWord,
+                                   const OUString& rExample) override;
+    OUString suggest(const css::lang::Locale& rLocale, const OUString& rWord) override;
+    OUString numberText(const OUString& rNumber, const OUString& rLanguage) override;
     icu::RegexMatcher* getConstantMatcher(sal_uInt32 nConstantIndex) override;
 
     // XServiceInfo
@@ -125,6 +131,8 @@ private:
     const std::vector<OUString>& getAnalyses(const css::lang::Locale& rLocale,
                                              const OUString& rWord);
     icu::RegexMatcher* getMorphMatcher(const OUString& rPattern);
+    // One SPELLML query, whose answer the caller splits.
+    std::vector<OUString> query(const css::lang::Locale& rLocale, const OUString& rQuery);
 
     // The package whose rules are running, which owns the pattern constants
     // the expressions reach for.
@@ -132,6 +140,10 @@ private:
     css::uno::Reference<css::linguistic2::XSpellChecker> m_xSpellChecker;
     bool m_bSpellCheckerTried = false;
     std::map<OUString, std::vector<OUString>> m_aAnalyses;
+    std::map<OUString, std::vector<OUString>> m_aStems;
+    std::map<OUString, OUString> m_aSuggestions;
+    css::uno::Reference<css::linguistic2::XNumberText> m_xNumberText;
+    bool m_bNumberTextTried = false;
     std::map<OUString, std::unique_ptr<icu::RegexMatcher>> m_aMorphMatchers;
 
     css::uno::Reference<css::container::XNameAccess> m_xConfigNode;
