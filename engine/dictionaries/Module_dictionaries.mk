@@ -14,6 +14,8 @@ $(eval $(call gb_Module_add_targets,dictionaries,\
 	Configuration_hu \
 	Configuration_pt_BR \
 	Configuration_ru \
+	CustomTarget_registry \
+	Package_config \
 ))
 
 $(eval $(call gb_Module_add_l10n_targets,dictionaries,\
