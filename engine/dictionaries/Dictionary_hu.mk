@@ -15,7 +15,6 @@ $(eval $(call gb_Dictionary_add_root_files,dict-hu,\
 	dictionaries/hu_HU/hyph_hu_HU.dic \
 	dictionaries/hu_HU/Lightproof.components \
 	dictionaries/hu_HU/Lightproof.py \
-	dictionaries/hu_HU/Linguistic.xcu \
 	dictionaries/hu_HU/README_hu_HU.txt \
 	dictionaries/hu_HU/README_hyph_hu_HU.txt \
 	dictionaries/hu_HU/README_lightproof_hu_HU.txt \
@@ -53,10 +52,6 @@ $(eval $(call gb_Dictionary_add_generated_file,dict-hu,dialog/OptionsDialog.xcs,
 
 $(eval $(call gb_Dictionary_add_localized_xcu_file,dict-hu,dialog,\
 	dictionaries/hu_HU/dialog/registry/data/org/openoffice/Office/OptionsDialog.xcu \
-))
-
-$(eval $(call gb_Dictionary_add_propertyfiles,dict-hu,dialog,\
-	dictionaries/hu_HU/dialog/hu_HU_en_US.properties \
 ))
 
 $(eval $(call gb_Dictionary_add_thesauri,dict-hu,\

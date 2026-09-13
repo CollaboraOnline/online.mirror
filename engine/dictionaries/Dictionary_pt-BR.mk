@@ -15,7 +15,6 @@ $(eval $(call gb_Dictionary_add_root_files,dict-pt-BR,\
     dictionaries/pt_BR/pt_BR.dic \
     dictionaries/pt_BR/Lightproof.components \
     dictionaries/pt_BR/Lightproof.py \
-    dictionaries/pt_BR/Linguistic.xcu \
     dictionaries/pt_BR/README_Lightproof_pt_BR.txt \
     dictionaries/pt_BR/README_en.txt \
     dictionaries/pt_BR/README_hyph_pt_BR.txt \
@@ -50,10 +49,6 @@ $(eval $(call gb_Dictionary_add_generated_file,dict-pt-BR,dialog/OptionsDialog.x
 
 $(eval $(call gb_Dictionary_add_localized_xcu_file,dict-pt-BR,dialog,\
     dictionaries/pt_BR/dialog/registry/data/org/openoffice/Office/OptionsDialog.xcu \
-))
-
-$(eval $(call gb_Dictionary_add_propertyfiles,dict-pt-BR,dialog,\
-    dictionaries/pt_BR/dialog/pt_BR_en_US.properties \
 ))
 
 $(eval $(call gb_Dictionary_add_thesauri,dict-pt-BR,\

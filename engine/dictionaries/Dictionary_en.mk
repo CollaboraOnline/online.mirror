@@ -28,7 +28,6 @@ $(eval $(call gb_Dictionary_add_root_files,dict-en,\
 	dictionaries/en/license.txt \
 	dictionaries/en/Lightproof.components \
 	dictionaries/en/Lightproof.py \
-	dictionaries/en/Linguistic.xcu \
 	dictionaries/en/package-description.txt \
 	dictionaries/en/README_en_AU.txt \
 	dictionaries/en/README_en_CA.txt \
@@ -59,10 +58,6 @@ $(eval $(call gb_Dictionary_add_generated_file,dict-en,dialog/OptionsDialog.xcs,
 
 $(eval $(call gb_Dictionary_add_localized_xcu_file,dict-en,dialog,\
 	dictionaries/en/dialog/registry/data/org/openoffice/Office/OptionsDialog.xcu \
-))
-
-$(eval $(call gb_Dictionary_add_propertyfiles,dict-en,dialog,\
-	dictionaries/en/dialog/en_en_US.properties \
 ))
 
 $(eval $(call gb_Dictionary_add_thesaurus,dict-en,dictionaries/en/th_en_US_v2.dat))
