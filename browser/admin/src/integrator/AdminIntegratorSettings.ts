@@ -28,6 +28,7 @@ interface Window {
 	enableDebug?: boolean;
 	disableAISettings?: boolean;
 	wopiSettingBaseUrl?: string;
+	sentenceCheckingPackages?: Array<{ id: string; locale: string }>;
 	iframeType?: string;
 	cssVars?: string;
 	serviceRoot?: string;
@@ -701,6 +702,100 @@ class SettingIframe {
 		RightPage: _('Right pages'),
 		Brochure: _('Brochure'),
 		BrochureRightToLeft: _('Brochure Right to Left'),
+
+		// Sentence checking. The key is the package and the option, because
+		// packages share option names; regenerate with lpcompile.py
+		// --emit-labels when a package is added.
+		en: _('English'),
+		hu_HU: _('Hungarian'),
+		pt_BR: _('Portuguese (Brazil)'),
+		ru_RU: _('Russian'),
+		// en
+		'en-grammar': _('Possible mistakes'),
+		'en-cap': _('Capitalization'),
+		'en-dup': _('Word duplication'),
+		'en-pair': _('Parentheses'),
+		'en-spaces': _('Word spacing'),
+		'en-mdash': _('Em dash'),
+		'en-quotation': _('Quotation marks'),
+		'en-times': _('Multiplication sign'),
+		'en-spaces2': _('Sentence spacing'),
+		'en-ndash': _('En dash'),
+		'en-apostrophe': _('Apostrophe'),
+		'en-ellipsis': _('Ellipsis'),
+		'en-spaces3': _('More spaces'),
+		'en-minus': _('Minus sign'),
+		'en-metric': _('Convert to metric (°C, km/h, m, kg, l)'),
+		'en-numsep': _('Thousand separation of large numbers'),
+		'en-nonmetric': _('Convert to non-metric (°F, mph, ft, lb, gal)'),
+		// hu_HU
+		'hu_HU-cap': _('Capitalization'),
+		'hu_HU-par': _('Parentheses'),
+		'hu_HU-quot': _('Quotation marks'),
+		'hu_HU-wordpart': _('Word parts of compounds'),
+		'hu_HU-dash': _('En dash'),
+		'hu_HU-comma': _('Comma usage'),
+		'hu_HU-numpart': _('Thousand separation of numbers'),
+		'hu_HU-grammar': _('Possible mistakes'),
+		'hu_HU-style': _('Style checking'),
+		'hu_HU-dup0': _('Word duplication'),
+		'hu_HU-compound': _('Underline typo-like compound words'),
+		'hu_HU-dup': _('Duplication within clauses'),
+		'hu_HU-allcompound': _('Underline all generated compound words'),
+		'hu_HU-dup2': _('Duplication within sentences'),
+		'hu_HU-money': _('Consistency of money amounts'),
+		'hu_HU-dup3': _('Allow previous checkings with affixes'),
+		'hu_HU-SI': _('Measurements'),
+		'hu_HU-hyphen': _('Hyphenation of ambiguous words'),
+		'hu_HU-apost': _('Apostrophe'),
+		'hu_HU-spaces': _('Double spaces'),
+		'hu_HU-frac': _('Fractions'),
+		'hu_HU-ligature': _('Ligature suggestion'),
+		'hu_HU-elli': _('Ellipsis'),
+		'hu_HU-spaces2': _('More spaces'),
+		'hu_HU-thin': _('Thin space'),
+		'hu_HU-noligature': _('Underline ligatures'),
+		'hu_HU-idx': _('Indices'),
+		'hu_HU-minus': _('Minus'),
+		// pt_BR
+		'pt_BR-grammar': _('Grave accent'),
+		'pt_BR-cap': _('Capitalization'),
+		'pt_BR-dup': _('Word duplication'),
+		'pt_BR-pair': _('Parentheses'),
+		'pt_BR-spaces': _('Word spacing'),
+		'pt_BR-mdash': _('Em-dash'),
+		'pt_BR-quotation': _('Quotation marks'),
+		'pt_BR-times': _('Multiplication sign'),
+		'pt_BR-spaces2': _('Sentence spacing'),
+		'pt_BR-ndash': _('En-dash'),
+		'pt_BR-apostrophe': _('Apostrophes'),
+		'pt_BR-ellipsis': _('Ellipsis'),
+		'pt_BR-spaces3': _('More spaces'),
+		'pt_BR-minus': _('Minus sign'),
+		'pt_BR-metric': _('Pleonasms'),
+		'pt_BR-gerund': _('Gerundisms'),
+		'pt_BR-nonmetric': _('Cacophonous sound'),
+		'pt_BR-paronimo': _('Paronyms'),
+		'pt_BR-composto': _('Compound terms'),
+		'pt_BR-malmau': _('"Mal" or "Mau"'),
+		'pt_BR-aha': _('"Há" or "a"'),
+		'pt_BR-meiameio': _('"Meia" or "meio"'),
+		'pt_BR-verbo': _('Verbal agreement'),
+		'pt_BR-pronominal': _('Pronominal placement'),
+		'pt_BR-pronome': _('Use of pronouns'),
+		'pt_BR-porque': _('Use of "porquê"'),
+		// ru_RU
+		'ru_RU-hyphen': _('Compound words with hyphen'),
+		'ru_RU-comma': _('Comma usage'),
+		'ru_RU-multiword': _('Multiword expressions'),
+		'ru_RU-together': _('Together/separately'),
+		'ru_RU-common': _('General error'),
+		'ru_RU-space': _('Space mistake'),
+		'ru_RU-abbreviation': _('Abbreviation'),
+		'ru_RU-dup': _('Word duplication'),
+		'ru_RU-numsep': _('Separation of large numbers (ISO)'),
+		'ru_RU-typographica': _('Typographical'),
+		'ru_RU-quotation': _('Quotation'),
 		// Add more as needed
 	};
 
@@ -721,6 +816,7 @@ class SettingIframe {
 	private _browserSettingSection: HTMLElement | null = null;
 	private _zoomSection: HTMLElement | null = null;
 	private _xcuSection: HTMLElement | null = null;
+	private _sentenceCheckerSection: HTMLElement | null = null;
 	private _aiSection: HTMLElement | null = null;
 	private _docSigningSection: HTMLElement | null = null;
 	private _zoteroSection: HTMLElement | null = null;
@@ -904,6 +1000,13 @@ class SettingIframe {
 			read('disableAiSettings', 'disable_ai_settings') === 'true';
 		window.showLeftNav = read('showLeftNav', 'show_left_nav') === 'true';
 		window.scrollTarget = read('scrollTarget', 'scroll_target');
+		try {
+			window.sentenceCheckingPackages = JSON.parse(
+				read('sentenceChecking', 'sentence_checking') || '[]',
+			);
+		} catch {
+			window.sentenceCheckingPackages = [];
+		}
 		window.wopiSettingBaseUrl = read(
 			'wopiSettingBaseUrl',
 			'wopi_setting_base_url',
@@ -1855,7 +1958,8 @@ class SettingIframe {
 			fieldset.classList.add('grid-options-fieldset');
 		}
 		const legend = document.createElement('legend');
-		legend.textContent = this.settingLabels[key] || key;
+		legend.textContent =
+			this.settingLabels[uniqueId] || this.settingLabels[key] || key;
 		fieldset.appendChild(legend);
 		const childContent = this.renderSettingsOption(value, uniqueId);
 		fieldset.appendChild(childContent);
@@ -1957,7 +2061,8 @@ class SettingIframe {
 		uniqueId: string,
 		data: any,
 	): HTMLSpanElement {
-		const labelText = this.settingLabels[key] || key;
+		const labelText =
+			this.settingLabels[uniqueId] || this.settingLabels[key] || key;
 		let isDisabled = false;
 		let warningText: string | null = null;
 
@@ -3497,6 +3602,62 @@ class SettingIframe {
 	// sections (heading only) so the left navbar can be built straight away,
 	// then with the real data to fill each section in. The headings are there
 	// from the start, so the navbar doesn't change as each section loads.
+	/**!
+	 * One panel per installed rule package. A package the engine does not have
+	 * gets no panel, which is why the list comes from the engine rather than
+	 * from the option table the labels live in.
+	 *
+	 * Named for the checker rather than for the job, because it is not the
+	 * only sentence checker the dialog will carry: the remote ones get
+	 * sections of their own.
+	 */
+	private createSentenceCheckerSection(): HTMLElement | null {
+		if (!this.xcuEditor) return null;
+
+		const panels: HTMLElement[] = [];
+		for (const entry of window.sentenceCheckingPackages || []) {
+			const group = this.xcuEditor.getSentenceCheckingGroup(entry.id);
+			if (!group) continue;
+			const rendered = this.renderSettingsOption(group, entry.id);
+			rendered.classList.add('xcu-settings-grid');
+			panels.push(
+				this.createFieldsetFor(
+					this.settingLabels[entry.id] || entry.id,
+					rendered,
+				),
+			);
+		}
+
+		// A heading over nothing is worse than no heading: with no rule
+		// package installed there is nothing here to choose.
+		if (!panels.length) return null;
+
+		const section = document.createElement('div');
+		section.id = 'lightproof';
+		section.className = 'section';
+		section.appendChild(this.createHeading(_('Lightproof Sentence Checker')));
+		section.appendChild(
+			this.createParagraph(
+				_('Choose what the sentence checker looks for as you type.'),
+			),
+		);
+		for (const panel of panels) section.appendChild(panel);
+		return section;
+	}
+
+	private createFieldsetFor(
+		legendText: string,
+		content: HTMLElement,
+	): HTMLElement {
+		const fieldset = document.createElement('fieldset');
+		fieldset.classList.add('xcu-settings-fieldset');
+		const legend = document.createElement('legend');
+		legend.textContent = legendText;
+		fieldset.appendChild(legend);
+		fieldset.appendChild(content);
+		return fieldset;
+	}
+
 	private async populateSharedConfigUI(data: ConfigData | null): Promise<void> {
 		const settingsContainer = this._allConfigSection;
 		if (!settingsContainer) return;
@@ -3551,54 +3712,84 @@ class SettingIframe {
 			}
 		}
 
-		// Document settings (xcu)
-		if (!isCODesktop) {
+		// Document settings (xcu), and the sentence checker options, which are
+		// kept in the same file. The apps show the second but not the first:
+		// their document settings are reached from the menus instead.
+		{
 			if (!data) {
-				this._xcuSection = this.createEmptySection(
-					this._xcuSection,
-					'xcu-section',
-					_('Document Settings'),
-				);
-			} else if (data.xcu && data.xcu.length > 0) {
-				const xcuFileContent = await this.settingsStorage.fetchSettingFile(
-					data.xcu[0].uri,
-				);
-				this.xcuEditor = new (window as any).Xcu(
-					this.getFilename(data.xcu[0].uri, false),
-					xcuFileContent,
-				);
-
-				const xcuContainer = document.createElement('div');
-				xcuContainer.id = 'xcu-section';
-				xcuContainer.classList.add('section');
-				const xcuSection = this.xcuEditor.createXcuEditorUI(xcuContainer);
-				this.appendXcuDebugUploadControls(xcuContainer, data);
-
-				this._xcuSection = this.mountConfigSection(
-					settingsContainer,
-					this._xcuSection,
-					xcuSection,
-				);
+				if (!isCODesktop)
+					this._xcuSection = this.createEmptySection(
+						this._xcuSection,
+						'xcu-section',
+						_('Document Settings'),
+					);
 			} else {
-				// If user doesn't have any xcu file, we generate with default settings...
-				try {
-					if (!this.xcuInitializationAttempted) {
-						this.xcuInitializationAttempted = true;
-						this.xcuEditor = new (window as any).Xcu('documentView.xcu', null);
-						await this.xcuEditor.generateXcuAndUpload();
-						return await this.fetchAndPopulateSharedConfigs();
-					} else {
+				if (data.xcu && data.xcu.length > 0) {
+					const xcuFileContent = await this.settingsStorage.fetchSettingFile(
+						data.xcu[0].uri,
+					);
+					this.xcuEditor = new (window as any).Xcu(
+						this.getFilename(data.xcu[0].uri, false),
+						xcuFileContent,
+					);
+
+					if (!isCODesktop) {
+						const xcuContainer = document.createElement('div');
+						xcuContainer.id = 'xcu-section';
+						xcuContainer.classList.add('section');
+						const xcuSection = this.xcuEditor.createXcuEditorUI(xcuContainer);
+						this.appendXcuDebugUploadControls(xcuContainer, data);
+
+						this._xcuSection = this.mountConfigSection(
+							settingsContainer,
+							this._xcuSection,
+							xcuSection,
+						);
+					}
+				} else if (!isCODesktop) {
+					// If user doesn't have any xcu file, we generate with default settings...
+					try {
+						if (!this.xcuInitializationAttempted) {
+							this.xcuInitializationAttempted = true;
+							this.xcuEditor = new (window as any).Xcu(
+								'documentView.xcu',
+								null,
+							);
+							await this.xcuEditor.generateXcuAndUpload();
+							return await this.fetchAndPopulateSharedConfigs();
+						} else {
+							this._xcuSection?.remove();
+							this._xcuSection = null;
+							console.warn('XCU file not found and automatic creation failed.');
+						}
+					} catch (error) {
+						console.error(
+							'Something went wrong while generating or uploading xcu file:',
+							error,
+						);
 						this._xcuSection?.remove();
 						this._xcuSection = null;
-						console.warn('XCU file not found and automatic creation failed.');
 					}
-				} catch (error) {
-					console.error(
-						'Something went wrong while generating or uploading xcu file:',
-						error,
+				} else {
+					// The apps have no xcu until something writes one, and their
+					// upload is a one-way message to the shell, so writing one
+					// here and reloading would race it. Edit in memory instead;
+					// saving writes the file through the same message.
+					this.xcuEditor = new (window as any).Xcu('documentView.xcu', null);
+				}
+
+				// The sentence checker options do not need the file to exist:
+				// an option nobody has set yet falls back to its schema default.
+				const sentenceChecker = this.createSentenceCheckerSection();
+				if (sentenceChecker) {
+					this._sentenceCheckerSection = this.mountConfigSection(
+						settingsContainer,
+						this._sentenceCheckerSection,
+						sentenceChecker,
 					);
-					this._xcuSection?.remove();
-					this._xcuSection = null;
+				} else {
+					this._sentenceCheckerSection?.remove();
+					this._sentenceCheckerSection = null;
 				}
 			}
 		}

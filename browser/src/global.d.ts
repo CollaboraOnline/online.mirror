@@ -227,6 +227,8 @@ interface AppInterface {
 		size: null | cool.SimplePoint;
 	};
 	languages: Array<{ translated: string; neutral: string; iso: string }>;
+	// The sentence checking rule packages the engine reports as installed.
+	sentenceCheckingPackages?: Array<{ id: string; locale: string }>;
 	favouriteLanguages: Array<string>;
 	tableStyles: TableStylesService;
 	impressTableStyles: ImpressTableStylesService;
