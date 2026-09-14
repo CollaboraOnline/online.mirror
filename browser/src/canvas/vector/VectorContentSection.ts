@@ -185,8 +185,9 @@ namespace cool {
 				this.context.save();
 				this.context.translate(offsetX, offsetY);
 				this.context.scale(scale, scale);
-				RenderManager.renderInto(this.context, cached, { editView: true });
-				RenderManager.renderPlaceholderAids(this.context, cached);
+				// Nobody edits a page in this view, so it draws the page without the
+				// content an editing view adds and without the placeholder outlines.
+				RenderManager.renderInto(this.context, cached);
 				this.context.restore();
 			}
 		}
