@@ -541,6 +541,7 @@ class LOUtil {
 			tablesort: 'datasort',
 			spellcheckignoreall: 'spelling',
 			spellonline: 'autospellcheck-on',
+			onlineautoformat: 'autocorrectdlg',
 			deleterowbreak: 'delbreakmenu',
 			alignmentpropertypanel: 'alignvcenter',
 			cellvertcenter: 'alignvcenter',
