@@ -12,6 +12,10 @@
 namespace cool {
 	/// Vector representation of a slide.
 	export interface VectorPrimitivesData {
+		/// The version space the version counts in, as the engine named it.
+		/// Versions with two different epochs come from two different models
+		/// and say nothing about each other.
+		epoch?: number;
 		/// Content version the engine reported for this part. It counts
 		/// up each time the part changes, so two trees with the same
 		/// version describe the same content.

@@ -16,7 +16,15 @@ namespace cool {
 		/// The page list the part index addresses: 0 the slides, 1 the
 		/// master pages, 2 the notes pages. Defaults to the slides.
 		mode?: number;
+		/// The version space the versions below count in. It is drawn once per document
+		/// in the engine, so versions carrying two different epochs describe two different
+		/// documents and mean nothing to each other.
+		epoch?: number;
+		/// The version the part is at once everything in this response is applied.
 		version?: number;
+		/// In a delta, the version it was compared against. The delta carries the objects that
+		/// changed after that version.
+		from?: number;
 		/// Every painted object in paint order in a full response, the
 		/// entry for the page itself first. In a delta only the changed
 		/// ones, the page entry among them when its content changed.

@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <chrono>
 #include <memory>
 #include <set>
 
@@ -79,6 +80,7 @@
 #include <comphelper/kit.hxx>
 #include <comphelper/propertysequence.hxx>
 #include <comphelper/propertyvalue.hxx>
+#include <comphelper/random.hxx>
 #include <comphelper/scopeguard.hxx>
 #include <comphelper/sequence.hxx>
 #include <comphelper/servicehelper.hxx>
@@ -106,6 +108,7 @@
 #include <editeng/UnoForbiddenCharsTable.hxx>
 #include <svx/svdoutl.hxx>
 #include <o3tl/any.hxx>
+#include <o3tl/hash_combine.hxx>
 #include <o3tl/safeint.hxx>
 #include <o3tl/string_view.hxx>
 #include <o3tl/test_info.hxx>
@@ -2244,6 +2247,25 @@ cpo::uno::Sequence< sal_Int8 > SdXImpressDocument::getImplementationId(  )
     return cpo::uno::Sequence<sal_Int8>();
 }
 
+sal_Int32 SdXImpressDocument::newVectorEpoch()
+{
+    // Every model counts its versions up from 0, so each draws its own epoch. The clock is mixed
+    // in because a fixed random seed makes a restarted kit draw the same number again.
+    sal_uInt32 nEpoch = sal_uInt32(comphelper::rng::uniform_int_distribution(1, SAL_MAX_INT32));
+    o3tl::hash_combine(nEpoch, std::chrono::steady_clock::now().time_since_epoch().count());
+    nEpoch &= SAL_MAX_INT32;
+    return nEpoch == 0 ? 1 : sal_Int32(nEpoch);
+}
+
+sal_Int32 SdXImpressDocument::getVectorEpoch() const
+{
+    // The epoch is drawn on first use, so only a model that serves vector content draws from the
+    // shared random sequence.
+    if (mnVectorEpoch == 0)
+        mnVectorEpoch = newVectorEpoch();
+    return mnVectorEpoch;
+}
+
 sal_uInt64 SdXImpressDocument::getVectorPartVersion(sal_Int32 nPart, sal_Int32 nMode) const
 {
     auto aIterator = maVectorParts.find({ nPart, nMode });
@@ -2964,9 +2986,17 @@ private:
     /// and an answer it can read lets it drop the request and ask again.
     void writeMissingPage(tools::JsonWriter& rWriter)
     {
-        rWriter.put("type", "vectorprimitives");
-        rWriter.put("part", mnPart);
+        writeCommonHeader(rWriter, "vectorprimitives", mnPart);
+    }
+
+    /// The fields every payload opens with: its type, the part and the mode it describes, and
+    /// the epoch its versions count in.
+    void writeCommonHeader(tools::JsonWriter& rWriter, std::string_view aType, sal_Int32 nPart)
+    {
+        rWriter.put("type", aType);
+        rWriter.put("part", nPart);
         rWriter.put("mode", mnMode);
+        rWriter.put("epoch", mpModel->getVectorEpoch());
     }
 
     /// The page the request names, or nullptr for a mode this writer does
@@ -3019,9 +3049,14 @@ private:
 
     void writeHeader(tools::JsonWriter& rWriter)
     {
-        rWriter.put("type", isDelta() ? "vectorprimitivesdelta" : "vectorprimitives");
-        rWriter.put("part", sal_Int32(mnResolvedPage));
-        rWriter.put("mode", mnMode);
+        writeCommonHeader(rWriter, isDelta() ? "vectorprimitivesdelta" : "vectorprimitives",
+                          sal_Int32(mnResolvedPage));
+
+        // A delta names the version it was compared against and the version it brings the part
+        // to. Only the objects that moved between those two versions are in it.
+        if (isDelta())
+            rWriter.put("from", mnSinceVersion);
+
         rWriter.put("version", sal_Int64(mpModel->getVectorPartVersion(mnResolvedPage, mnMode)));
     }
 

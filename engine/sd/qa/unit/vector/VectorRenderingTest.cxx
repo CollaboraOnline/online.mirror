@@ -498,6 +498,20 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testPartVersionRisesOnObjectChange)
     CPPUNIT_ASSERT_EQUAL(nBefore + 1, nAfter);
 }
 
+CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testEachModelNamesItsOwnEpoch)
+{
+    // Every model counts its versions up from the same start, so two documents loaded one after
+    // the other report different epochs.
+    createBlankDoc();
+    const sal_Int64 nFirst = getVectorPrimitives(u"testEpochFirst").getInt("/epoch").value_or(-1);
+    CPPUNIT_ASSERT_GREATER(sal_Int64(0), nFirst);
+
+    createBlankDoc();
+    const sal_Int64 nSecond = getVectorPrimitives(u"testEpochSecond").getInt("/epoch").value_or(-1);
+    CPPUNIT_ASSERT_GREATER(sal_Int64(0), nSecond);
+    CPPUNIT_ASSERT(nFirst != nSecond);
+}
+
 CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testSlideNamesItsMaster)
 {
     // A slide draws under itself the master it names rather than carrying a
@@ -1593,6 +1607,10 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testDeltaCarriesChangedBackground)
 
     auto aDelta = getVectorPrimitives(u"testBackgroundDelta", nVersion);
     assertJsonPath(aDelta, "/type", "vectorprimitivesdelta");
+    // The delta names the version it was compared against, and both payloads count their
+    // versions in the same space.
+    assertJsonPath(aDelta, "/from", nVersion);
+    assertJsonPath(aDelta, "/epoch", aFull.getInt("/epoch").value_or(-1));
     // The slide object itself is unchanged, so the only entry is the page,
     // with the new background.
     CPPUNIT_ASSERT_EQUAL(size_t(1), aDelta.getSize("/objects").value_or(SIZE_MAX));

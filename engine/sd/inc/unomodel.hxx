@@ -202,6 +202,10 @@ public:
         }
     };
 
+    /// Names the version space the part versions count in. Two versions stand for the content
+    /// of the same model only when they carry the same epoch.
+    sal_Int32 getVectorEpoch() const;
+
     /// Content version of a part, counted up on each object change. 0 when
     /// nothing changed since the document was opened.
     sal_uInt64 getVectorPartVersion(sal_Int32 nPart, sal_Int32 nMode) const;
@@ -296,6 +300,14 @@ private:
 
     /// Vector content state, keyed by part index and mode.
     std::unordered_map<VectorPartKey, VectorPartState, VectorPartKey::Hash> maVectorParts;
+
+    /// The version space the part versions count in, drawn once for this model. 0 until it is
+    /// first asked for.
+    mutable sal_Int32 mnVectorEpoch = 0;
+
+    /// A number that names one model's version space, different from the number every other
+    /// model draws.
+    static sal_Int32 newVectorEpoch();
 
     /// Last version pushed to each view, keyed by view id then part and mode.
     /// A push takes its delta since this, then advances it.

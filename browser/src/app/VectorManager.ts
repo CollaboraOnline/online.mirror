@@ -384,6 +384,7 @@ class VectorManager extends RenderManagerBase {
 
 		const [nWidth, nHeight] = VectorManager.pageBoundsOf(received);
 		const data: cool.VectorPrimitivesData = {
+			epoch: values.epoch,
 			version: values.version,
 			slideWidth: nWidth,
 			slideHeight: nHeight,
@@ -420,14 +421,22 @@ class VectorManager extends RenderManagerBase {
 
 	/// Apply a delta to a cached part. The objects it carries replace
 	/// theirs and the rest keep what was cached. A delta not newer than
-	/// the cache is ignored. A part that is not cached, or an order that
-	/// names content the client never had, falls back to a full re-fetch.
+	/// the cache is ignored. A part that is not cached, a delta that starts
+	/// above the version held, or an order that names content the client
+	/// never had, falls back to a full re-fetch.
 	handleVectorPrimitivesDelta(values: cool.VectorPrimitivesResponse): void {
 		const { part, mode } = this._pageFor(values);
 		const partId = cool.vectorPartId(part, mode);
 
 		const cached = this._cache.get(partId);
 		if (!cached) return;
+
+		// A delta from another epoch counts its versions from another start, so
+		// it says nothing about what is cached and the part is fetched whole.
+		if (cached.epoch !== values.epoch) {
+			this.clearCachedPart(part, mode);
+			return;
+		}
 
 		// A delta computed against an older version can arrive after a
 		// newer full response. Its order describes that older state, so
@@ -438,6 +447,19 @@ class VectorManager extends RenderManagerBase {
 			values.version <= cached.version
 		)
 			return;
+
+		// A delta that starts at or below the version held carries every object that changed
+		// since, and each entry replaces a whole object, so it is applied as it is. A delta that
+		// starts above the version held leaves out the objects that changed in between, and no
+		// later delta carries them, so the part is dropped and the next draw asks for it whole.
+		if (
+			cached.version !== undefined &&
+			values.from !== undefined &&
+			values.from > cached.version
+		) {
+			this.clearCachedPart(part, mode);
+			return;
+		}
 
 		const carried = values.objects || [];
 		for (const object of carried) {

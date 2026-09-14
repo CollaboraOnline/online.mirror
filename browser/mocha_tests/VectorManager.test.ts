@@ -195,6 +195,123 @@ describe('VectorManager', function () {
 		nodeassert.strictEqual(data.objects.size, 2);
 	});
 
+	// A client that comes back to a new model keeps drawing what it holds until each page
+	// arrives again.
+	it('keeps drawing the other cached parts when a full response has a new epoch', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			part: 0,
+			epoch: 100,
+			version: 5,
+			objects: [{ id: 11, primitives: [] }],
+		});
+
+		manager.handleVectorPrimitivesResponse({
+			part: 1,
+			epoch: 200,
+			version: 1,
+			objects: [{ id: 22, primitives: [] }],
+		});
+
+		const held: any = manager.requestPart(0, cool.VectorMode.Slides);
+		nodeassert.strictEqual(held.version, 5);
+		const data: any = manager.requestPart(1, cool.VectorMode.Slides);
+		nodeassert.strictEqual(data.version, 1);
+	});
+
+	// A delta from a new epoch counts from another start, so it is not applied on top of the
+	// content cached for its own part.
+	it('drops a cached part instead of applying a delta from a new epoch', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			part: 0,
+			epoch: 100,
+			version: 5,
+			objects: [{ id: 11, primitives: [] }],
+		});
+
+		manager.handleVectorPrimitivesDelta({
+			part: 0,
+			epoch: 200,
+			from: 5,
+			version: 6,
+			objects: [{ id: 22, primitives: [] }],
+		});
+
+		nodeassert.strictEqual(
+			manager.requestPart(0, cool.VectorMode.Slides),
+			undefined,
+		);
+	});
+
+	// A delta that starts below the version held carries more objects than are needed. Each of
+	// them replaces a whole object, so the delta is applied as it is.
+	it('applies a delta that starts below the version held', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			part: 0,
+			version: 5,
+			objects: [
+				{ id: 11, primitives: [] },
+				{ id: 22, primitives: [] },
+			],
+		});
+
+		const delta: any = {
+			part: 0,
+			from: 2,
+			version: 6,
+			objects: [{ id: 22, primitives: [], width: 400 }],
+		};
+		manager.handleVectorPrimitivesDelta(delta);
+
+		const data: any = manager.requestPart(0, cool.VectorMode.Slides);
+		nodeassert.strictEqual(data.version, 6);
+		nodeassert.strictEqual(data.objects.get(22).width, 400);
+	});
+
+	// A delta that starts above the version held leaves out the changes in between, and no
+	// later delta carries them, so the part is dropped and fetched whole.
+	it('drops the part when a delta starts above the version held', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			part: 0,
+			version: 5,
+			objects: [{ id: 11, primitives: [] }],
+		});
+
+		const delta: any = { part: 0, from: 7, version: 8, objects: [] };
+		manager.handleVectorPrimitivesDelta(delta);
+
+		nodeassert.strictEqual(
+			manager.requestPart(0, cool.VectorMode.Slides),
+			undefined,
+		);
+	});
+
+	// Versions count in a space the engine names. A model that started counting again can
+	// answer with a lower version, and its page still replaces what is cached.
+	it('takes a full response from a new epoch whatever its version', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			part: 0,
+			epoch: 100,
+			version: 5,
+			objects: [{ id: 11, primitives: [] }],
+		});
+
+		manager.handleVectorPrimitivesResponse({
+			part: 0,
+			epoch: 200,
+			version: 1,
+			objects: [{ id: 22, primitives: [] }],
+		});
+
+		const data: any = manager.requestPart(0, cool.VectorMode.Slides);
+		nodeassert.strictEqual(data.version, 1);
+		nodeassert.ok(data.objects.has(22), 'the new page is cached');
+	});
+
 	// The page rectangle rides on the page entry rather than on a field of
 	// its own, so it arrives with a full response and a delta that carries
 	// that entry updates it, which is how a resized page reaches the client.
