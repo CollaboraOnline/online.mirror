@@ -23,6 +23,7 @@
 #include <com/sun/star/drawing/ModuleDispatcher.hpp>
 #include <com/sun/star/frame/DispatchHelper.hpp>
 #include <ooo/vba/word/XDocument.hpp>
+#include <comphelper/kit.hxx>
 #include <comphelper/fileformat.h>
 #include <comphelper/processfactory.hxx>
 #include <comphelper/propertyvalue.hxx>
@@ -414,8 +415,11 @@ void SwDocShell::Execute(SfxRequest& rReq)
 
             rACW.SetLockWordLstLocked( true );
 
-            editeng::SortedAutoCompleteStrings aTmpLst( rACW.GetWordList().createNonOwningCopy() );
-            pAFlags->m_pAutoCompleteList = &aTmpLst;
+            // The dialog runs asynchronously, so the temporary word list has to
+            // outlive this call; pAFlags points into it until the callback runs.
+            auto pTmpLst = std::make_shared<editeng::SortedAutoCompleteStrings>(
+                rACW.GetWordList().createNonOwningCopy() );
+            pAFlags->m_pAutoCompleteList = pTmpLst.get();
 
             SfxApplication* pApp = SfxGetpApp();
             SfxRequest aAppReq(SID_AUTO_CORRECT_DLG, SfxCallMode::SYNCHRON, pApp->GetPool());
@@ -433,36 +437,51 @@ void SwDocShell::Execute(SfxRequest& rReq)
 
             SfxAbstractDialogFactory* pFact = SfxAbstractDialogFactory::Create();
             VclPtr<SfxAbstractTabDialog> pDlg = pFact->CreateAutoCorrTabDialog(GetView()->GetFrameWeld(), &aSet);
-            pDlg->Execute();
-            pDlg.disposeAndClear();
-
-
-            rACW.SetLockWordLstLocked( bOldLocked );
-
-            SwEditShell::SetAutoFormatFlags( pAFlags );
-            rACW.SetMinWordLen( pAFlags->nAutoCmpltWordLen );
-            rACW.SetMaxCount( pAFlags->nAutoCmpltListLen );
-            if (pAFlags->m_pAutoCompleteList)  // any changes?
+            // Asynchronous: the kit cannot block its main loop on a dialog, and a
+            // synchronous one is refused there with "This dialog is non-async".
+            pDlg->StartExecuteAsync(
+                [pDlg, pAFlags, pTmpLst, bOldLocked, bOldAutoCmpltCollectWords](sal_Int32 nResult)
             {
-                rACW.CheckChangedList( aTmpLst );
-                // clear the temp WordList pointer
-                pAFlags->m_pAutoCompleteList = nullptr;
-            }
+                SwAutoCompleteWord& rWords = SwDoc::GetAutoCompleteWords();
+                rWords.SetLockWordLstLocked( bOldLocked );
 
-            if( !bOldAutoCmpltCollectWords && bOldAutoCmpltCollectWords !=
-                pAFlags->bAutoCmpltCollectWords )
-            {
-                // call on all Docs the idle formatter to start
-                // the collection of Words
-                for( SwDocShell *pDocSh = static_cast<SwDocShell*>(SfxObjectShell::GetFirst(checkSfxObjectShell<SwDocShell>));
-                     pDocSh;
-                     pDocSh = static_cast<SwDocShell*>(SfxObjectShell::GetNext( *pDocSh, checkSfxObjectShell<SwDocShell> )) )
+                SwEditShell::SetAutoFormatFlags( pAFlags );
+                rWords.SetMinWordLen( pAFlags->nAutoCmpltWordLen );
+                rWords.SetMaxCount( pAFlags->nAutoCmpltListLen );
+                if (pAFlags->m_pAutoCompleteList)  // any changes?
                 {
-                    SwDoc* pTmp = pDocSh->GetDoc();
-                    if ( pTmp->getIDocumentLayoutAccess().GetCurrentViewShell() )
-                        pTmp->InvalidateAutoCompleteFlag();
+                    rWords.CheckChangedList( *pTmpLst );
+                    // clear the temp WordList pointer
+                    pAFlags->m_pAutoCompleteList = nullptr;
                 }
-            }
+
+                if( !bOldAutoCmpltCollectWords && bOldAutoCmpltCollectWords !=
+                    pAFlags->bAutoCmpltCollectWords )
+                {
+                    // call on all Docs the idle formatter to start
+                    // the collection of Words
+                    for( SwDocShell *pDocSh = static_cast<SwDocShell*>(SfxObjectShell::GetFirst(checkSfxObjectShell<SwDocShell>));
+                         pDocSh;
+                         pDocSh = static_cast<SwDocShell*>(SfxObjectShell::GetNext( *pDocSh, checkSfxObjectShell<SwDocShell> )) )
+                    {
+                        SwDoc* pTmp = pDocSh->GetDoc();
+                        if ( pTmp->getIDocumentLayoutAccess().GetCurrentViewShell() )
+                            pTmp->InvalidateAutoCompleteFlag();
+                    }
+                }
+
+                if (nResult == RET_OK)
+                {
+                    // Last, once SetAutoFormatFlags() above has put the Writer
+                    // flags into the configuration: the kit holds that in memory
+                    // only, so write it out to let the settings outlive the
+                    // session. The Replace and Exception lists are files in the
+                    // user profile and need nothing here.
+                    comphelper::COKit::persistUserSettings();
+                }
+
+                pDlg->disposeOnce();
+            });
         }
         break;
 

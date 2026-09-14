@@ -6306,6 +6306,8 @@ static void updateConfig(const OUString& rConfigPath)
                     u"/org.openoffice.Office.Writer/Content/Display/GraphicObject"_ustr,
                     u"/org.openoffice.Office.Writer/Content/Display/ShowBoundaries"_ustr,
                     u"/org.openoffice.Office.Writer/Content/NonprintingCharacter"_ustr,
+                    u"/org.openoffice.Office.Common/AutoCorrect"_ustr,
+                    u"/org.openoffice.Office.Writer/AutoFunction"_ustr,
                     u"/org.openoffice.Office.Common/BulletsNumbering"_ustr,
                     u"/org.openoffice.Office.Common/I18N/CTL"_ustr
                 };

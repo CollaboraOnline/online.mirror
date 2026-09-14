@@ -2018,6 +2018,9 @@ const std::vector<std::string>& getUploadableXcuPaths()
         "/org.openoffice.Office.Writer/Content/Display/ShowBoundaries",
         "/org.openoffice.Office.Writer/Content/NonprintingCharacter",
 
+        "/org.openoffice.Office.Common/AutoCorrect",
+        "/org.openoffice.Office.Writer/AutoFunction",
+
         "/org.openoffice.Office.Common/BulletsNumbering",
         "/org.openoffice.Office.Common/I18N/CTL",
     };

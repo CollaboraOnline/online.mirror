@@ -426,7 +426,8 @@ class Menubar extends window.L.Control {
 				{uno: '.uno:SidebarDeck.A11yCheckDeck'},
 				{type: 'separator'},
 				{name: _UNO('.uno:AutoFormatMenu', 'text'), type: 'menu', menu: [
-					{uno: '.uno:OnlineAutoFormat'}]},
+					{uno: '.uno:OnlineAutoFormat'},
+					{uno: '.uno:AutoCorrectDlg'}]},
 				{type: 'separator'},
 				{uno: '.uno:ChapterNumberingDialog'},
 				{uno: '.uno:LineNumberingDialog'},

@@ -16,6 +16,11 @@
 #include <tools/globname.hxx>
 #include <svtools/embedhlp.hxx>
 #include <editeng/acorrcfg.hxx>
+#include <editeng/swafopt.hxx>
+#include <comphelper/kit.hxx>
+#include <unotools/tempfile.hxx>
+#include <osl/file.hxx>
+#include <tools/stream.hxx>
 #include <editeng/frmdiritem.hxx>
 #include <editeng/svxacorr.hxx>
 #include <vcl/errinf.hxx>
@@ -169,6 +174,50 @@ CPPUNIT_TEST_FIXTURE(SwCoreDocTest, testBulletsOnSpace)
     // '- ' was converted into bullet
     CPPUNIT_ASSERT_EQUAL(u"a"_ustr, pTextNode->GetText());
     ErrorRegistry::Reset();
+}
+
+CPPUNIT_TEST_FIXTURE(SwCoreDocTest, testAutoCorrectSettingsPersist)
+{
+    // Given a kit that has somewhere to persist user settings:
+    utl::TempFileNamed aTempDir(nullptr, /*bDirectory=*/true);
+    aTempDir.EnableKillingFile();
+    OUString aDirUrl = aTempDir.GetURL();
+    osl::Directory::create(aDirUrl + "/xcu");
+
+    comphelper::COKit::setActive(true);
+    comphelper::COKit::setUserSettingsPersistenceAvailable(true);
+    comphelper::COKit::setUserConfigDir(aDirUrl);
+
+    // When changing an AutoCorrect setting the way the dialog does:
+    SvxAutoCorrCfg& rCfg = SvxAutoCorrCfg::Get();
+    SvxSwAutoFormatFlags& rFlags = rCfg.GetAutoCorrect()->GetSwFlags();
+    const bool bOrig = rFlags.bAutoCmpltCollectWords;
+    comphelper::ScopeGuard aRestore([&rCfg, &rFlags, bOrig] {
+        rFlags.bAutoCmpltCollectWords = bOrig;
+        rCfg.SetModified();
+        rCfg.Commit();
+        comphelper::COKit::setActive(false);
+    });
+    rFlags.bAutoCmpltCollectWords = !bOrig;
+    rCfg.SetModified();
+    rCfg.Commit();
+
+    // Then persisting has to capture it:
+    CPPUNIT_ASSERT(comphelper::COKit::persistUserSettings());
+
+    SvFileStream aStream(aDirUrl + "/xcu/registrymodifications.xcu", StreamMode::READ);
+    OStringBuffer aBuf;
+    while (!aStream.eof())
+    {
+        OString aLine;
+        aStream.ReadLine(aLine);
+        aBuf.append(aLine);
+    }
+    OString aContent = aBuf.makeStringAndClear();
+
+    // Without this, the AutoCorrect settings were committed into the kit's
+    // in-memory configuration only and were lost when the session ended.
+    CPPUNIT_ASSERT(aContent.indexOf("/org.openoffice.Office.Writer/AutoFunction") != -1);
 }
 
 CPPUNIT_TEST_FIXTURE(SwCoreDocTest, testEmojiShortcodeIsLanguageIndependent)

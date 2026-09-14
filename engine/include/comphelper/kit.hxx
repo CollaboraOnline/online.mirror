@@ -85,6 +85,12 @@ COMPHELPER_DLLPUBLIC bool isUserSettingsPersistenceAvailable();
 COMPHELPER_DLLPUBLIC void setUserConfigDir(const OUString& rUrl);
 COMPHELPER_DLLPUBLIC OUString getUserConfigDir();
 
+/// Write the configuration changes made so far into the per-user config tree,
+/// so that they outlive the kit. A no-op, returning false, when the kit is not
+/// active, the host gave us nowhere to write, or nothing round-trips anyway.
+/// Call it once a dialog that changes persistent settings is accepted.
+COMPHELPER_DLLPUBLIC bool persistUserSettings();
+
 /// Directory URL (file://...) of the read-only, admin-provisioned system config
 /// tree; empty when the client did not provide one. Sibling of the per-user tree
 /// above: COOL mounts the WOPI host's shared presets there, so a group lives at

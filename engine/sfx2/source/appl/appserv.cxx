@@ -1722,8 +1722,20 @@ void SfxApplication::OfaExec_Impl( SfxRequest& rReq )
             if ( pSet && pSet->GetItemState( SID_AUTO_CORRECT_DLG, false, &pItem ) == SfxItemState::SET )
                 aSet.Put( *pItem );
 
-            ScopedVclPtr<SfxAbstractTabDialog> pDlg(pFact->CreateAutoCorrTabDialog(rReq.GetFrameWeld(), &aSet));
-            pDlg->Execute();
+            // Asynchronous: the kit cannot block its main loop on a dialog, and
+            // a synchronous one is refused there with "This dialog is non-async".
+            VclPtr<SfxAbstractTabDialog> pDlg(pFact->CreateAutoCorrTabDialog(rReq.GetFrameWeld(), &aSet));
+            pDlg->StartExecuteAsync([pDlg](sal_Int32 nResult) {
+                if (nResult == RET_OK)
+                {
+                    // The pages have committed into the configuration, which the
+                    // kit holds in memory only. Write it out so that the settings
+                    // outlive the session; the Replace and Exception lists are
+                    // files in the user profile and need nothing here.
+                    comphelper::COKit::persistUserSettings();
+                }
+                pDlg->disposeOnce();
+            });
 
             break;
         }
@@ -1804,9 +1816,6 @@ void SfxApplication::OfaState_Impl(SfxItemSet &rSet)
         rSet.DisableItem( FN_BUSINESS_CARD );
         rSet.DisableItem( FN_XFORMS_INIT );
     }
-    if ( comphelper::COKit::isActive() )
-        rSet.DisableItem( SID_AUTO_CORRECT_DLG );
-
     if (SvtSecurityOptions::IsMacroDisabled())
     {
         rSet.DisableItem(SID_RUNMACRO);
