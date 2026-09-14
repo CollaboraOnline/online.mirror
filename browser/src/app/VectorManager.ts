@@ -250,6 +250,9 @@ class VectorManager extends RenderManagerBase {
 	/// The text edit entries to draw, one per edited object: this view's own
 	/// where it has one, otherwise the first in the order. Several views can
 	/// edit one object, and drawing every entry would paint the text twice.
+	/// One entry is always drawn, whichever view is editing, because an object
+	/// under edit carries none of its own text, so the edit entry is the only
+	/// source of that text.
 	private _textEditEntriesToDraw(data: cool.VectorPrimitivesData): Set<number> {
 		const ownViewId = this._ownViewId;
 		const chosen = new Map<number, cool.SlideObject>();
