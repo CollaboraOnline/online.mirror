@@ -19,6 +19,13 @@
 
 void ChildSession::loKitCallback(const COKitCallbackType /* type */,
                                  const std::string& /* payload */) {}
+std::vector<char> ChildSession::zstdFrame(std::string_view /* headerName */,
+                                          const char* /* data */, size_t /* size */)
+{
+    return {};
+}
+void ChildSession::sendVectorDelta(const std::vector<char>& /* frame */,
+                                   const std::string& /* payload */) {}
 void ChildSession::disconnect() {}
 int ChildSession::getSpeed() { return 0; }
 bool ChildSession::_handleInput(const char* /*buffer*/, int /*length*/) { return false; }

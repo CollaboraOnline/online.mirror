@@ -398,6 +398,25 @@ protected:
                && pProbeDevice->GetFontMetric().GetWeight() >= WEIGHT_SEMIBOLD;
     }
 
+    /// The raw answer of the document to a .uno:VectorPrimitives command.
+    OString requestVectorPrimitivesRaw(const OString& rCommand)
+    {
+        SdXImpressDocument* pDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+        CPPUNIT_ASSERT(pDocument);
+        tools::JsonWriter aJsonWriter;
+        pDocument->getCommandValues(aJsonWriter,
+                                    std::string_view(rCommand.getStr(), rCommand.getLength()));
+        return aJsonWriter.finishAndGetAsOString();
+    }
+
+    /// The answer of the document to a .uno:VectorPrimitives command, parsed. Nothing when the
+    /// answer is no JSON document.
+    std::optional<tools::JsonPath> requestVectorPrimitives(const OString& rCommand)
+    {
+        const OString aResult = requestVectorPrimitivesRaw(rCommand);
+        return tools::JsonPath::parse(std::string_view(aResult.getStr(), aResult.getLength()));
+    }
+
     /// Request for part 0 of the page list nMode names. The raw JSON is
     /// written as a reference. A non-negative nSince asks for a delta against
     /// that version instead of the full page.
@@ -1617,11 +1636,40 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testDeltaCarriesChangedBackground)
     assertJsonPath(aDelta, "/objects/0/kind", "page");
 }
 
-CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testPullSetsPushBaseline)
+CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testPushAfterAnotherPullStillCarriesTheChange)
 {
-    // A full pull records the requesting view's content version as that
-    // view's push baseline. The first push to the view then carries only
-    // later changes, not the whole slide the view already pulled.
+    // The mark says where the readers stand. A reader that pulled the part whole before any
+    // change holds it at version zero, and a pull by another reader that runs after a change
+    // but before the push counts the version up for itself alone. The push that follows still
+    // steps from zero, so the first reader is given the change.
+    createBlankDoc();
+    addRectangle(tools::Rectangle(Point(1000, 1000), Size(3000, 2000)), Color(0x4472c4), COL_BLACK);
+
+    // The first reader holds the part at the version the first response left it at.
+    auto aFirst = getVectorPrimitives(u"testLaterPullFirst");
+    const sal_Int64 nFirst = aFirst.getInt("/version").value_or(-1);
+    CPPUNIT_ASSERT(nFirst >= 0);
+
+    moveObject(page(1)->GetObj(0), Size(500, 500));
+
+    // A second reader pulls before the push and sees the moved object at a later version.
+    auto aSecond = getVectorPrimitives(u"testLaterPullSecond");
+    CPPUNIT_ASSERT_GREATER(nFirst, aSecond.getInt("/version").value_or(-1));
+
+    // The push steps from where the first reader stands and carries the object it has not
+    // seen.
+    auto oDelta = requestVectorPrimitives(".uno:VectorPrimitives?part=0&pushdelta=1"_ostr);
+    CPPUNIT_ASSERT(oDelta.has_value());
+    assertJsonPath(*oDelta, "/type", "vectorprimitivesdelta");
+    assertJsonPath(*oDelta, "/from", nFirst);
+    CPPUNIT_ASSERT(carriesObject(*oDelta, page(1)->GetObj(0)->GetUniqueID()));
+}
+
+CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testPushCarriesOnlyTheChangesSinceTheFirstServe)
+{
+    // A push carries what changed since the part was last served and names the version it
+    // starts from. The mark belongs to the part rather than to whoever asked, and the first
+    // response to serve the part sets it, since nothing holds the part before that.
 
     createBlankDoc();
     addRectangle(tools::Rectangle(Point(1000, 1000), Size(3000, 2000)), Color(0x4472c4), COL_BLACK);
@@ -1629,31 +1677,41 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testPullSetsPushBaseline)
     page(1)->GetObj(0)->BroadcastObjectChange();
     page(1)->GetObj(1)->BroadcastObjectChange();
 
-    // The full pull gives the view the page and both objects and sets its
-    // baseline.
-    auto aFull = getVectorPrimitives(u"testPullBaseline");
+    static constexpr OString aPushCommand = ".uno:VectorPrimitives?part=0&pushdelta=1"_ostr;
+
+    // The pull gives the page and both objects. Comparing them for the first time is what
+    // counts the part's version up, and the response carries where that left it.
+    auto aFull = getVectorPrimitives(u"testPushMark");
     CPPUNIT_ASSERT_EQUAL(size_t(3), aFull.getSize("/objects").value_or(0));
+    const sal_Int64 nServed = aFull.getInt("/version").value_or(-1);
+    CPPUNIT_ASSERT(nServed > 0);
 
-    const SfxViewShell* pView = SfxViewShell::Current();
-    CPPUNIT_ASSERT(pView);
-    const sal_Int32 nViewId = static_cast<sal_Int32>(pView->GetViewShellId().get());
+    // The payload says which version space its versions count in.
+    const sal_Int64 nEpoch = aFull.getInt("/epoch").value_or(-1);
+    CPPUNIT_ASSERT(nEpoch > 0);
 
-    SdXImpressDocument* pDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
-    CPPUNIT_ASSERT(pDocument);
-    const OString aCommand
-        = ".uno:VectorPrimitives?part=0&pushdelta=1&viewid=" + OString::number(nViewId);
-    tools::JsonWriter aJsonWriter;
-    pDocument->getCommandValues(aJsonWriter,
-                                std::string_view(aCommand.getStr(), aCommand.getLength()));
-    const OString aResult = aJsonWriter.finishAndGetAsOString();
-    auto oDelta = tools::JsonPath::parse(std::string_view(aResult.getStr(), aResult.getLength()));
+    // Nothing held the part before that response, so the mark starts where the response left
+    // the part and a push right after it has nothing to carry.
+    auto oQuiet = requestVectorPrimitives(aPushCommand);
+    CPPUNIT_ASSERT(oQuiet.has_value());
+    CPPUNIT_ASSERT(!oQuiet->has("/type"));
+    CPPUNIT_ASSERT(!oQuiet->has("/order"));
+    CPPUNIT_ASSERT(!oQuiet->has("/objects"));
+
+    // A later change is a step from there, and the only object that travels is the one
+    // that moved.
+    moveObject(page(1)->GetObj(0), Size(500, 500));
+    auto oDelta = requestVectorPrimitives(aPushCommand);
     CPPUNIT_ASSERT(oDelta.has_value());
+    assertJsonPath(*oDelta, "/type", "vectorprimitivesdelta");
+    assertJsonPath(*oDelta, "/epoch", nEpoch);
+    assertJsonPath(*oDelta, "/from", nServed);
+    CPPUNIT_ASSERT_EQUAL(size_t(1), oDelta->getSize("/objects").value_or(0));
 
-    // Nothing changed since the pull, so the push has nothing to carry and
-    // the response is empty.
-    CPPUNIT_ASSERT(!oDelta->has("/type"));
-    CPPUNIT_ASSERT(!oDelta->has("/order"));
-    CPPUNIT_ASSERT(!oDelta->has("/objects"));
+    // The mark moved with it, so the push after it has nothing left to carry.
+    auto oAfter = requestVectorPrimitives(aPushCommand);
+    CPPUNIT_ASSERT(oAfter.has_value());
+    CPPUNIT_ASSERT(!oAfter->has("/type"));
 }
 
 CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testEditedTextAppearsInPrimitives)

@@ -4095,19 +4095,13 @@ void SdXImpressDocument::getCommandValues(::tools::JsonWriter& rJsonWriter,
         if (aSinceIterator != aMap.end())
             nSinceVersion = aSinceIterator->second.toInt64();
 
-        // A push asks for the delta since the version last pushed to the
-        // given view, then advances that mark, so the caller keeps no
-        // version state of its own.
-        const bool bPushDelta = aMap.find(u"pushdelta"_ustr) != aMap.end();
-        sal_Int32 nViewId = -1;
+        // A push asks for the delta since the version the part was last pushed at, then
+        // advances that mark, so a push request names no version. One delta is written for the
+        // part and every client that holds the part reads that same one.
+        const bool bPushDelta = nPart >= 0 && aMap.find(u"pushdelta"_ustr) != aMap.end();
         if (bPushDelta)
-        {
-            auto aViewIterator = aMap.find(u"viewid"_ustr);
-            if (aViewIterator != aMap.end())
-                nViewId = aViewIterator->second.toInt32();
             nSinceVersion
-                = static_cast<sal_Int64>(maVectorPushedVersions[nViewId][{ nPart, nMode }]);
-        }
+                = sal_Int64(maVectorParts[{ nPart, nMode }].mnLastSentVersion);
 
         if (mpDoc)
         {
@@ -4126,33 +4120,26 @@ void SdXImpressDocument::getCommandValues(::tools::JsonWriter& rJsonWriter,
 
             if (bPushDelta)
             {
-                maVectorPushedVersions[nViewId][{ nPart, nMode }]
+                maVectorParts[{ nPart, nMode }].mnLastSentVersion
                     = getVectorPartVersion(nPart, nMode);
-
-                // Views come and go over the document's life, so drop the
-                // push marks of views that no longer exist.
-                std::unordered_set<sal_Int32> aLiveViewIds;
-                const SfxViewShell* pShell = SfxViewShell::GetFirst(false);
-                while (pShell)
-                {
-                    aLiveViewIds.insert(sal_Int32(pShell->GetViewShellId().get()));
-                    pShell = SfxViewShell::GetNext(*pShell, false);
-                }
-                std::erase_if(maVectorPushedVersions,
-                              [&aLiveViewIds](const auto& rEntry)
-                              { return aLiveViewIds.find(rEntry.first) == aLiveViewIds.end(); });
             }
             else if (nPart >= 0)
             {
-                // A pull leaves the requesting view holding the slide at this
-                // version. Record it as that view's push baseline so the
-                // first push to the view carries only later changes instead
-                // of the whole slide again.
-                if (const SfxViewShell* pCurrentView = SfxViewShell::Current())
+                // A pull moves the mark only when nothing has served the part yet. Nothing
+                // holds the part at that point, so no reader has a step to make, and starting
+                // the mark at what this response carries keeps the delta after it down to what
+                // moved after it.
+                //
+                // A later pull leaves the mark where it is. It serves the one reader that
+                // asked, while the mark stands for where all of them are, and the readers
+                // behind it still need the step from there written for them. That holds when
+                // the pull itself counted the version up: the readers were not told, so the
+                // step from where they stand is still to be written.
+                VectorPartState& rState = maVectorParts[{ nPart, nMode }];
+                if (!rState.mbServed)
                 {
-                    const sal_Int32 nCurrentViewId = sal_Int32(pCurrentView->GetViewShellId().get());
-                    maVectorPushedVersions[nCurrentViewId][{ nPart, nMode }]
-                        = getVectorPartVersion(nPart, nMode);
+                    rState.mbServed = true;
+                    rState.mnLastSentVersion = getVectorPartVersion(nPart, nMode);
                 }
             }
         }

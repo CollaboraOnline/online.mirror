@@ -289,6 +289,10 @@ private:
         _queue->putCallback(-1, type, payload);
     }
 
+    /// Hands a vector primitives delta to every session that draws vector content, compressed
+    /// once for all of them.
+    void deliverVectorDelta(const std::string& payload);
+
     /// Cleanup bgSave child processes.
     static void reapZombieChildren();
 

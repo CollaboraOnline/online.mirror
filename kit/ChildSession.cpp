@@ -1504,24 +1504,43 @@ void insertUserNames(const std::map<int, UserInfo>& viewInfo, std::string& json)
 // between compression ratio and speed.
 constexpr int zstdCompressionLevel = 3;
 
-bool ChildSession::sendZstdFrame(std::string_view headerName, const char* data, size_t size)
+std::vector<char> ChildSession::zstdFrame(std::string_view headerName, const char* data,
+                                          size_t size)
 {
-    const std::string header(headerName);
     const size_t bound = ZSTD_COMPRESSBOUND(size);
-    std::vector<char> output(header.size() + bound);
-    std::memcpy(output.data(), header.data(), header.size());
+    std::vector<char> output(headerName.size() + bound);
+    std::memcpy(output.data(), headerName.data(), headerName.size());
 
-    const size_t compressedSize
-        = ZSTD_compress(output.data() + header.size(), bound, data, size, zstdCompressionLevel);
+    const size_t compressedSize =
+        ZSTD_compress(output.data() + headerName.size(), bound, data, size, zstdCompressionLevel);
     if (ZSTD_isError(compressedSize))
     {
-        LOG_WRN("Failed to zstd-compress " << headerName << ": "
-                                           << ZSTD_getErrorName(compressedSize));
-        return false;
+        LOG_WRN_S("Failed to zstd-compress " << headerName << ": "
+                                             << ZSTD_getErrorName(compressedSize));
+        return {};
     }
 
-    output.resize(header.size() + compressedSize);
+    output.resize(headerName.size() + compressedSize);
+    return output;
+}
+
+bool ChildSession::sendZstdFrame(std::string_view headerName, const char* data, size_t size)
+{
+    const std::vector<char> output = zstdFrame(headerName, data, size);
+    if (output.empty())
+        return false;
     return sendBinaryFrame(output.data(), output.size());
+}
+
+void ChildSession::sendVectorDelta(const std::vector<char>& frame, const std::string& payload)
+{
+    // Without a compressed frame the JSON goes as a command values text frame.
+    const bool sent = frame.empty() ? sendTextFrame("commandvalues: " + payload)
+                                    : sendBinaryFrame(frame.data(), frame.size());
+    // The engine moved the mark for the part when it wrote the delta, so a failed send is
+    // logged.
+    if (!sent)
+        LOG_WRN("Failed to send a vector primitives delta to session [" << getId() << ']');
 }
 
 bool ChildSession::getCommandValues(const StringVector& tokens)
@@ -1564,6 +1583,11 @@ bool ChildSession::getCommandValues(const StringVector& tokens)
         // them with zstd. Fall back to an uncompressed text frame if
         // compression fails.
         const bool isFont = command.rfind(".uno:VectorRenderingFont", 0) == 0;
+
+        // A client that asks for primitives draws the document from them from here on.
+        if (!isFont)
+            _isVectorRendering = true;
+
         std::string json(getLOKitDocument()->getCommandValues(command.c_str()));
         if (json.empty())
             json = "{}";
@@ -5107,20 +5131,8 @@ void ChildSession::loKitCallback(const COKitCallbackType type, const std::string
     switch (type)
     {
     case COKitCallbackType::VECTOR_PRIMITIVES_DELTA:
-        // A background save forwards only text messages to the process that
-        // forked it, so it sends no content of its own.
-        if (_docManager->isBackgroundSaveProcess())
-        {
-            LOG_TRC("Skipping callback [" << typeName << "] in the background save process");
-            return;
-        }
-        // Push the delta to the client as a zstd binary frame, the same
-        // shape the .uno:VectorPrimitives command response uses. When
-        // compression fails, send the JSON as a command values text
-        // frame, which the client routes by its type field, so the
-        // delta still arrives.
-        if (!sendZstdFrame("zstdvectorprimitivesdelta:\n", payload.data(), payload.size()))
-            sendTextFrame("commandvalues: " + payload);
+        // A delta describes the part rather than one view, so a session has nothing of its own
+        // to send for it.
         break;
     case COKitCallbackType::PRESENTATION_INFO:
         // The engine signalled that the presentation info changed. Rebuild

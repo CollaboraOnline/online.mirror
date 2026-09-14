@@ -106,6 +106,7 @@ Util::LoadTimings KitLoadTimings;
 #include <iostream>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <thread>
@@ -1390,15 +1391,25 @@ void Document::trimAfterInactivity()
         return;
     }
 
-    // The core already delivers this to every view that needs it: either
-    // naturally, since each view's own window reacts to the same document
-    // change and reports its own invalidation, or explicitly, when a change
-    // is not tied to any one view's zoom and the core calls back once per
-    // view on purpose. Broadcasting it to every session here on top of that
-    // duplicated the delivery, and in Calc, where the affected area is in
-    // per-view zoomed screen coordinates, delivered one view's rectangle to
-    // views it did not apply to.
-    queue->putCallback(descriptor->getViewId(), eType, payload);
+    if (eType == COKitCallbackType::VECTOR_PRIMITIVES_DELTA)
+    {
+        // The delta describes the part and carries no view state, so one frame goes to every
+        // session.
+        if (Document* document = descriptor->getDoc())
+            document->broadcastCallbackToClients(eType, payload);
+    }
+    else
+    {
+        // The core already delivers this to every view that needs it: either
+        // naturally, since each view's own window reacts to the same document
+        // change and reports its own invalidation, or explicitly, when a change
+        // is not tied to any one view's zoom and the core calls back once per
+        // view on purpose. Broadcasting it to every session here on top of that
+        // duplicated the delivery, and in Calc, where the affected area is in
+        // per-view zoomed screen coordinates, delivered one view's rectangle to
+        // views it did not apply to.
+        queue->putCallback(descriptor->getViewId(), eType, payload);
+    }
 
     LOG_TRC("Document::ViewCallback end.");
 }
@@ -2834,6 +2845,30 @@ bool Document::processInputEnabled() const
     return enabled;
 }
 
+void Document::deliverVectorDelta(const std::string& payload)
+{
+    // A background save forwards only text messages to the process that forked it, so it
+    // sends no content of its own.
+    if (isBackgroundSaveProcess())
+        return;
+
+    // Every session reads the same delta, so it is compressed once, for the first session that
+    // takes it, and the frame is handed to each of them. A session that draws bitmap tiles has
+    // no use for it. An inactive or disconnected session is sent no delta.
+    std::optional<std::vector<char>> frame;
+    for (const auto& it : _sessions)
+    {
+        ChildSession& session = *it.second;
+        if (session.isCloseFrame() || session.isDisconnected() || !session.isActive() ||
+            !session.isVectorRendering())
+            continue;
+        if (!frame)
+            frame = ChildSession::zstdFrame("zstdvectorprimitivesdelta:\n", payload.data(),
+                                            payload.size());
+        session.sendVectorDelta(*frame, payload);
+    }
+}
+
 void Document::drainCallbacks()
 {
     KitQueue::Callback cb;
@@ -2855,6 +2890,12 @@ void Document::drainCallbacks()
 
         const COKitCallbackType eType = cb._type;
         const std::string &payload = cb._payload;
+
+        if (eType == COKitCallbackType::VECTOR_PRIMITIVES_DELTA)
+        {
+            deliverVectorDelta(payload);
+            continue;
+        }
 
         // Forward the callback to the same view, demultiplexing is done by the CollaboraOffice core.
         bool isFound = false;

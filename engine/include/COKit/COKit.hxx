@@ -1278,13 +1278,17 @@ enum class COKitCallbackType
     /**
      * A vector-primitives delta for a slide that changed.
      *
-     * Pushed to a vector-rendering view so it does not have to request the
-     * delta after an invalidation. The payload is the same JSON the
+     * Pushed after an invalidation, with the delta for the part that changed.
+     * The payload is the same JSON the
      * .uno:VectorPrimitives command returns for a delta: a vectorprimitivesdelta
      * with the part, the version space it counts in, the version it starts from,
      * the version it brings the part to, the object order and the changed
      * objects. The page itself is the first object. Its entry comes along when
      * the background or the master page content changed.
+     *
+     * The delta describes the part rather than the view whose flush wrote it,
+     * and it carries no view state, so one delta stands for every reader of
+     * that part.
      */
     VECTOR_PRIMITIVES_DELTA = 75,
 

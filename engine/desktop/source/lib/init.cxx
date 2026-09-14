@@ -1655,18 +1655,22 @@ void CallbackFlushHandler::flushVectorPrimitivesDeltas()
     for (const auto& [nPart, nMode] : aParts)
     {
         // Computing the delta at delivery time reads the document after the change that triggered
-        // the invalidation has fully landed. The command returns the delta since the version last
-        // pushed to this view, and moves that mark to the version it just read.
+        // the invalidation has fully landed. The command tracks the version the part was last
+        // pushed at and returns the delta since it, so the mark advances only for a delta that is
+        // handed out.
+        //
+        // The delta describes the part, not this view. So the first handler to flush a part writes
+        // the one delta for the change, and a handler that flushes the same part after that gets
+        // an empty delta.
         const OString aCommand = ".uno:VectorPrimitives?part=" + OString::number(nPart)
-                                 + "&mode=" + OString::number(nMode)
-                                 + "&pushdelta=1&viewid=" + OString::number(m_viewId);
+                                 + "&mode=" + OString::number(nMode) + "&pushdelta=1";
         tools::JsonWriter aJsonWriter;
         pDocument->getCommandValues(aJsonWriter,
                                     std::string_view(aCommand.getStr(), aCommand.getLength()));
         const OString aDelta = aJsonWriter.finishAndGetAsOString();
 
-        // The command writes nothing when the comparison found the client already holds what
-        // the part looks like, and an empty document is not worth a frame of its own.
+        // The command writes nothing when the comparison found the part unchanged since it was last
+        // pushed, and an empty document is not worth a frame of its own.
         if (aDelta.indexOf("\"type\"") < 0)
             continue;
 

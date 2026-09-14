@@ -255,9 +255,9 @@ public:
     /// than nSince.
     bool isVectorMasterChangedSince(sal_Int32 nPart, sal_Int32 nMode, sal_uInt64 nSince) const;
 
-    /// Content state of one vector-rendering part: its current version,
-    /// the version at which its master page last changed, and, per object
-    /// unique id, the version at which that object last changed.
+    /// Content state of one vector-rendering part: its current version, the version the last
+    /// delta written for it was computed up to, the version at which its master page last
+    /// changed, and, per object unique id, the version at which that object last changed.
     ///
     /// maObjectContent holds what was last written per object, and maDirtyObjects the objects a
     /// change asked for a fresh look at. An object stays in maDirtyObjects until a write
@@ -265,6 +265,15 @@ public:
     struct VectorPartState
     {
         sal_uInt64 mnVersion = 0;
+        /// Where the readers of the part stand: a delta written for the part steps from here
+        /// and ends at the version it carries. The first response to serve the part sets it,
+        /// since nothing holds the part before that. One delta is written per part rather than
+        /// one per reader, so the mark counts for the part.
+        sal_uInt64 mnLastSentVersion = 0;
+        /// True once a response has served the part, so a reader may hold it. The first full
+        /// response leaves the version where it found it, which can be zero, so the version
+        /// alone does not say whether anyone holds the part.
+        bool mbServed = false;
         sal_uInt64 mnMasterChangeVersion = 0;
         /// The version at which the set of objects on the part, or the order they paint in,
         /// last changed. A client whose content is newer than this already holds the order.
@@ -308,12 +317,6 @@ private:
     /// A number that names one model's version space, different from the number every other
     /// model draws.
     static sal_Int32 newVectorEpoch();
-
-    /// Last version pushed to each view, keyed by view id then part and mode.
-    /// A push takes its delta since this, then advances it.
-    std::unordered_map<sal_Int32,
-                       std::unordered_map<VectorPartKey, sal_uInt64, VectorPartKey::Hash>>
-        maVectorPushedVersions;
 
     cpo::uno::Reference<cpo::uno::XInterface> create(
         OUString const & aServiceSpecifier, OUString const & referer);
