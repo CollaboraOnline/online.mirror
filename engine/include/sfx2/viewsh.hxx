@@ -406,9 +406,9 @@ public:
     virtual void viewInvalidateTilesCallback(const tools::Rectangle* pRect, int nPart, int nMode) const override;
     virtual void viewUpdatedCallback(COKitCallbackType eType) const override;
     virtual void viewUpdatedCallbackPerViewId(COKitCallbackType eType, int nViewId, int nSourceViewId) const override;
-    // Tells the view's callback handler that the vector content of the
-    // given part changed, in the page list the mode names.
-    void viewVectorPartChanged(int nPart, int nMode) const;
+    // Tells the view's callback handler that the vector content of the part with the given
+    // id changed, in the page list the mode names. The id is the page GUID.
+    void viewVectorPartChanged(const OString& rPartId, int nMode) const;
     /// A text edit running in this view shows something other than it did, which is every
     /// keystroke. Only what the edit shows changed, not the shapes around it. The default
     /// does nothing, so a document type that mirrors no edit needs no override.

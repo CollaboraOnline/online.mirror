@@ -3743,10 +3743,10 @@ void SfxViewShell::viewInvalidateTilesCallback(const tools::Rectangle* pRect, in
             "SfxViewShell::viewInvalidateTilesCallback no callback set!");
 }
 
-void SfxViewShell::viewVectorPartChanged(int nPart, int nMode) const
+void SfxViewShell::viewVectorPartChanged(const OString& rPartId, int nMode) const
 {
     if (pImpl->m_pCOKitViewCallback)
-        pImpl->m_pCOKitViewCallback->viewVectorPartChanged(nPart, nMode);
+        pImpl->m_pCOKitViewCallback->viewVectorPartChanged(rPartId, nMode);
     else
         SAL_INFO(
             "sfx.view",

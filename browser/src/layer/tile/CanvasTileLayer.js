@@ -1234,12 +1234,12 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 			// may be a structural change, so drop the cached part and
 			// re-fetch it in full. Without a part, drop every part. The
 			// part is named by its identifier here, which is a page guid,
-			// so an empty one is what stands for no part at all. The
-			// vector cache is keyed by part index and mode.
+			// so an empty one means no part, and the vector cache is keyed
+			// by that same identifier.
 			if (!command.part)
 				RenderManager.clearAllParts();
-			else if (command.width === Number.MAX_SAFE_INTEGER && partIndex >= 0)
-				RenderManager.clearCachedPart(partIndex, command.mode);
+			else if (command.width === Number.MAX_SAFE_INTEGER)
+				RenderManager.clearCachedPart(command.part);
 
 			const topLeftTwips = new cool.Point(command.x, command.y);
 			const offset = new cool.Point(command.width, command.height);

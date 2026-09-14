@@ -27,15 +27,18 @@ class VectorManager extends RenderManagerBase {
 			(fontId) => this._fonts.has(fontId),
 		);
 
-	// Cached parsed JSON primitive tree keyed by part id.
-	private _cache: Map<cool.VectorPartId, cool.VectorPrimitivesData> = new Map();
-
-	// Previews waiting for a JSON primitive tree response, keyed by part id.
-	private _pendingPreviews: Map<cool.VectorPartId, cool.PendingPreview[]> =
+	// Cached parsed JSON primitive tree keyed by page id. The id names the
+	// page wherever it sits in its list, so a slide inserted or removed
+	// before a cached page leaves that page's content valid.
+	private _cache: Map<cool.VectorPartGuid, cool.VectorPrimitivesData> =
 		new Map();
 
-	// Parts for which a JSON primitive tree request is in flight.
-	private _inFlightParts: Set<cool.VectorPartId> = new Set();
+	// Previews waiting for a JSON primitive tree response, keyed by page id.
+	private _pendingPreviews: Map<cool.VectorPartGuid, cool.PendingPreview[]> =
+		new Map();
+
+	// Pages a JSON primitive tree request is in flight for, keyed by page id.
+	private _inFlightParts: Set<cool.VectorPartGuid> = new Set();
 
 	// Decoded bitmap images keyed by their checksum.
 	private _bitmaps = new VectorResourceTracker<number, HTMLImageElement>(
@@ -93,22 +96,58 @@ class VectorManager extends RenderManagerBase {
 		for (const callback of this._changeListeners) callback();
 	}
 
-	/// Return the cached primitive tree for a part, or undefined while a
-	/// request is sent. Subscribers registered with onVectorChanged are
-	/// notified once the data arrives.
+	/// The id of the page at the given index of the page list on screen, or
+	/// undefined when the list on screen is of another mode or holds no page
+	/// at the index. The status message names every page of that list by id.
+	partIdAt(part: number, mode: number): cool.VectorPartGuid | undefined {
+		const entry = app.impress?.partList?.[part];
+		if (entry && entry.mode === mode && typeof entry.part === 'string')
+			return entry.part;
+		return undefined;
+	}
+
+	/// The index of the page with the given id in the page list on screen, or
+	/// -1 when the list on screen is of another mode or does not hold the page.
+	private _indexOf(partId: cool.VectorPartGuid, mode: number): number {
+		const list = app.impress?.partList;
+		if (!list) return -1;
+		return list.findIndex(
+			(entry: any) => entry.mode === mode && entry.part === partId,
+		);
+	}
+
+	/// Return the cached primitive tree for the page at the given index of
+	/// the page list on screen, or undefined while a request is sent or while
+	/// the list does not name the page. Subscribers registered with
+	/// onVectorChanged are notified once the data arrives, and again when the
+	/// page list is replaced.
 	requestPart(
 		part: number,
 		mode: number,
 	): cool.VectorPrimitivesData | undefined {
-		const partId = cool.vectorPartId(part, mode);
+		const partId = this.partIdAt(part, mode);
+		if (partId === undefined) return undefined;
+		return this.requestPartById(partId, mode);
+	}
+
+	/// Return the cached primitive tree for the page with the given id, or
+	/// undefined while a request is sent.
+	requestPartById(
+		partId: cool.VectorPartGuid,
+		mode: number,
+	): cool.VectorPrimitivesData | undefined {
 		const cached = this._cache.get(partId);
 		if (cached) return cached;
 
-		if (!this._inFlightParts.has(partId)) {
-			this._inFlightParts.add(partId);
-			this._sendVectorPrimitivesRequest(part, mode);
-		}
+		this._request(partId, mode);
 		return undefined;
+	}
+
+	/// Send for a page unless a request for it is already out.
+	private _request(partId: cool.VectorPartGuid, mode: number): void {
+		if (this._inFlightParts.has(partId)) return;
+		this._inFlightParts.add(partId);
+		this._sendVectorPrimitivesRequest(partId, mode);
 	}
 
 	/// Listen for the layers this view hides. The engine reports them as a
@@ -163,9 +202,9 @@ class VectorManager extends RenderManagerBase {
 		data: cool.VectorPrimitivesData,
 		page: cool.SlideObject,
 	): void {
-		data.masterPart = page.masterPart;
-		if (data.masterPart !== undefined)
-			this.requestPart(data.masterPart, cool.VectorMode.MasterPages);
+		data.masterPartId = page.masterPartId;
+		if (data.masterPartId !== undefined)
+			this.requestPartById(data.masterPartId, cool.VectorMode.MasterPages);
 	}
 
 	/// True when the part and the master it names are both cached. Fetches
@@ -176,10 +215,18 @@ class VectorManager extends RenderManagerBase {
 		return this._isDrawable(data);
 	}
 
+	/// True when the page with the given id and the master it names are both
+	/// cached. Fetches whatever is missing.
+	isPartDrawableById(partId: cool.VectorPartGuid, mode: number): boolean {
+		const data = this.requestPartById(partId, mode);
+		if (!data) return false;
+		return this._isDrawable(data);
+	}
+
 	private _isDrawable(data: cool.VectorPrimitivesData): boolean {
-		if (data.masterPart === undefined) return true;
+		if (data.masterPartId === undefined) return true;
 		return (
-			this.requestPart(data.masterPart, cool.VectorMode.MasterPages) !==
+			this.requestPartById(data.masterPartId, cool.VectorMode.MasterPages) !==
 			undefined
 		);
 	}
@@ -222,10 +269,8 @@ class VectorManager extends RenderManagerBase {
 		context: CanvasRenderingContext2D,
 		data: cool.VectorPrimitivesData,
 	): void {
-		if (data.masterPart === undefined) return;
-		const master = this._cache.get(
-			cool.vectorPartId(data.masterPart, cool.VectorMode.MasterPages),
-		);
+		if (data.masterPartId === undefined) return;
+		const master = this._cache.get(data.masterPartId);
 		if (!master) return;
 
 		const textEdits = this._textEditEntriesToDraw(master);
@@ -292,7 +337,9 @@ class VectorManager extends RenderManagerBase {
 		}
 	}
 
-	/// Request a thumbnail for a preview.
+	/// Request a thumbnail for a preview of the page at the given index of
+	/// the page list on screen. Nothing is drawn while the list does not name
+	/// the page.
 	requestThumbnail(
 		id: cool.PreviewId,
 		part: number,
@@ -300,10 +347,11 @@ class VectorManager extends RenderManagerBase {
 		maxWidth: number,
 		maxHeight: number,
 	): void {
-		const partId = cool.vectorPartId(part, mode);
+		const partId = this.partIdAt(part, mode);
+		if (partId === undefined) return;
 		const cached = this._cache.get(partId);
 		if (cached && this._isDrawable(cached)) {
-			this._renderAndFire(id, part, mode, maxWidth, maxHeight, cached);
+			this._renderAndFire(id, maxWidth, maxHeight, cached);
 			return;
 		}
 
@@ -316,39 +364,25 @@ class VectorManager extends RenderManagerBase {
 		}
 		queue.push({ id: id, maxWidth: maxWidth, maxHeight: maxHeight });
 
-		if (!cached && !this._inFlightParts.has(partId)) {
-			this._inFlightParts.add(partId);
-			this._sendVectorPrimitivesRequest(part, mode);
-		}
+		if (!cached) this._request(partId, mode);
 	}
 
-	private _sendVectorPrimitivesRequest(part: number, mode: number): void {
+	private _sendVectorPrimitivesRequest(
+		partId: cool.VectorPartGuid,
+		mode: number,
+	): void {
 		app.socket.sendMessage(
-			'commandvalues command=.uno:VectorPrimitives?part=' +
-				String(part) +
+			'commandvalues command=.uno:VectorPrimitives?partid=' +
+				partId +
 				'&mode=' +
 				String(mode),
 		);
 	}
 
-	/// Page a response applies to: the part it names, or the selected
-	/// part when it names none, in the mode it names. A response that
-	/// names no mode is for the slides.
-	private _pageFor(values: cool.VectorPrimitivesResponse): {
-		part: number;
-		mode: number;
-	} {
-		return {
-			part:
-				values.part !== undefined ? values.part : this._docLayer._selectedPart,
-			mode: values.mode !== undefined ? values.mode : cool.VectorMode.Slides,
-		};
-	}
-
 	/// Collect the bitmap checksums and font ids the walk visits,
 	/// remember the part uses them and request the missing ones.
 	private _collectResources(
-		partId: cool.VectorPartId,
+		partId: cool.VectorPartGuid,
 		walk: (walker: cool.VectorResourceWalker) => void,
 	): void {
 		const checksums = new Set<number>();
@@ -362,9 +396,11 @@ class VectorManager extends RenderManagerBase {
 
 	/// Handle a vector primitives response.
 	handleVectorPrimitivesResponse(values: cool.VectorPrimitivesResponse): void {
-		const { part, mode } = this._pageFor(values);
-		const partId = cool.vectorPartId(part, mode);
-
+		const mode =
+			values.mode !== undefined ? values.mode : cool.VectorMode.Slides;
+		// Every request names its page by id, and the answer names it back.
+		const partId = values.partId;
+		if (partId === undefined) return;
 		this._inFlightParts.delete(partId);
 
 		// A response with no objects names a part the document does not
@@ -387,6 +423,8 @@ class VectorManager extends RenderManagerBase {
 
 		const [nWidth, nHeight] = VectorManager.pageBoundsOf(received);
 		const data: cool.VectorPrimitivesData = {
+			partId: partId,
+			mode: mode,
 			epoch: values.epoch,
 			version: values.version,
 			slideWidth: nWidth,
@@ -404,8 +442,8 @@ class VectorManager extends RenderManagerBase {
 			walker.walkObjects(received);
 		});
 
-		this._drainDrawable(partId, part, mode);
-		if (mode === cool.VectorMode.MasterPages) this._onMasterArrived(part);
+		this._drainDrawable(partId);
+		if (mode === cool.VectorMode.MasterPages) this._onMasterArrived(partId);
 		this._fireChanged();
 		this.setVisualsReady();
 	}
@@ -413,11 +451,10 @@ class VectorManager extends RenderManagerBase {
 	/// A master arrived or changed, so every page drawing under it can be
 	/// drawn now, and every preview showing such a page is drawn again. Which
 	/// pages those are is read off the cache.
-	private _onMasterArrived(masterPart: number): void {
+	private _onMasterArrived(masterPartId: cool.VectorPartGuid): void {
 		for (const [partId, data] of this._cache) {
-			if (data.masterPart !== masterPart) continue;
-			const [mode, part] = cool.splitVectorPartId(partId);
-			this._drainDrawable(partId, part, mode);
+			if (data.masterPartId !== masterPartId) continue;
+			this._drainDrawable(partId);
 			this._redrawRenderedPreviews(partId);
 		}
 	}
@@ -428,8 +465,8 @@ class VectorManager extends RenderManagerBase {
 	/// above the version held, or an order that names content the client
 	/// never had, falls back to a full re-fetch.
 	handleVectorPrimitivesDelta(values: cool.VectorPrimitivesResponse): void {
-		const { part, mode } = this._pageFor(values);
-		const partId = cool.vectorPartId(part, mode);
+		const partId = values.partId;
+		if (partId === undefined) return;
 
 		const cached = this._cache.get(partId);
 		if (!cached) return;
@@ -437,7 +474,7 @@ class VectorManager extends RenderManagerBase {
 		// A delta from another epoch counts its versions from another start, so
 		// it says nothing about what is cached and the part is fetched whole.
 		if (cached.epoch !== values.epoch) {
-			this.clearCachedPart(part, mode);
+			this.clearCachedPart(partId);
 			return;
 		}
 
@@ -460,7 +497,7 @@ class VectorManager extends RenderManagerBase {
 			values.from !== undefined &&
 			values.from > cached.version
 		) {
-			this.clearCachedPart(part, mode);
+			this.clearCachedPart(partId);
 			return;
 		}
 
@@ -486,7 +523,7 @@ class VectorManager extends RenderManagerBase {
 		if (values.order) {
 			for (const id of values.order) {
 				if (!cached.objects.has(id)) {
-					this.clearCachedPart(part, mode);
+					this.clearCachedPart(partId);
 					return;
 				}
 			}
@@ -506,7 +543,8 @@ class VectorManager extends RenderManagerBase {
 		});
 
 		this._redrawRenderedPreviews(partId);
-		if (mode === cool.VectorMode.MasterPages) this._onMasterArrived(part);
+		if (cached.mode === cool.VectorMode.MasterPages)
+			this._onMasterArrived(partId);
 		this._fireChanged();
 	}
 
@@ -562,7 +600,7 @@ class VectorManager extends RenderManagerBase {
 		this._bitmaps.setUnavailable(checksum);
 	}
 
-	private _redrawPartsUsing(parts: Set<cool.VectorPartId> | undefined): void {
+	private _redrawPartsUsing(parts: Set<cool.VectorPartGuid> | undefined): void {
 		if (!parts) return;
 		for (const partId of parts) {
 			this._redrawRenderedPreviews(partId);
@@ -571,19 +609,12 @@ class VectorManager extends RenderManagerBase {
 
 	/// Re-render every preview already shown for a part against its
 	/// current cached data.
-	private _redrawRenderedPreviews(partId: cool.VectorPartId): void {
+	private _redrawRenderedPreviews(partId: cool.VectorPartGuid): void {
 		const data = this._cache.get(partId);
 		if (!data) return;
 		for (const [id, info] of this._renderedPreviews) {
-			if (cool.vectorPartId(info.part, info.mode) !== partId) continue;
-			this._renderAndFire(
-				id,
-				info.part,
-				info.mode,
-				info.maxWidth,
-				info.maxHeight,
-				data,
-			);
+			if (info.partId !== partId) continue;
+			this._renderAndFire(id, info.maxWidth, info.maxHeight, data);
 		}
 	}
 
@@ -628,18 +659,15 @@ class VectorManager extends RenderManagerBase {
 		return bytes.buffer;
 	}
 
-	/// The page list the part indexes address has been replaced, so a
-	/// request made against the old list names a page that may not exist.
-	/// Drop what is in flight and tell the views, which then ask again for
-	/// the part they now want.
+	/// The page list on screen has been replaced, so an index may name
+	/// another page than it did. The cache and the requests in flight are
+	/// keyed by page id and stay. The change listeners are notified.
 	partListChanged(): void {
-		this._inFlightParts.clear();
 		this._fireChanged();
 	}
 
-	/// Drop cached data for a part and any in-flight state.
-	clearCachedPart(part: number, mode: number): void {
-		const partId = cool.vectorPartId(part, mode);
+	/// Drop cached data for a page and any in-flight state.
+	clearCachedPart(partId: cool.VectorPartGuid): void {
 		this._cache.delete(partId);
 		this._inFlightParts.delete(partId);
 		this._fireChanged();
@@ -681,22 +709,10 @@ class VectorManager extends RenderManagerBase {
 
 	/// Draw the previews waiting for a part once the part and the master it
 	/// names are both cached.
-	private _drainDrawable(
-		partId: cool.VectorPartId,
-		part: number,
-		mode: number,
-	): void {
+	private _drainDrawable(partId: cool.VectorPartGuid): void {
 		const data = this._cache.get(partId);
 		if (!data || !this._isDrawable(data)) return;
-		this._drainPending(partId, part, mode, data);
-	}
 
-	private _drainPending(
-		partId: cool.VectorPartId,
-		part: number,
-		mode: number,
-		data: cool.VectorPrimitivesData,
-	): void {
 		const queue = this._pendingPreviews.get(partId);
 		if (!queue) return;
 		this._pendingPreviews.delete(partId);
@@ -704,8 +720,6 @@ class VectorManager extends RenderManagerBase {
 		for (const pending of queue) {
 			this._renderAndFire(
 				pending.id,
-				part,
-				mode,
 				pending.maxWidth,
 				pending.maxHeight,
 				data,
@@ -716,8 +730,6 @@ class VectorManager extends RenderManagerBase {
 	/// Render to an offscreen canvas and trigger rendering of the thumbnail.
 	private _renderAndFire(
 		id: cool.PreviewId,
-		partIndex: number,
-		mode: number,
 		maxWidth: number,
 		maxHeight: number,
 		data: cool.VectorPrimitivesData,
@@ -725,8 +737,8 @@ class VectorManager extends RenderManagerBase {
 		if (data.slideWidth <= 0 || data.slideHeight <= 0) return;
 
 		this._renderedPreviews.set(id, {
-			part: partIndex,
-			mode: mode,
+			partId: data.partId,
+			mode: data.mode,
 			maxWidth: maxWidth,
 			maxHeight: maxHeight,
 		});
@@ -747,7 +759,7 @@ class VectorManager extends RenderManagerBase {
 		// its thumbnail draws the prompt text of an empty placeholder. A slide
 		// stands on its own, and its thumbnail leaves the prompts out.
 		this.renderInto(context, data, {
-			editView: mode === cool.VectorMode.MasterPages,
+			editView: data.mode === cool.VectorMode.MasterPages,
 		});
 
 		const previewImage = new Image();
@@ -755,16 +767,16 @@ class VectorManager extends RenderManagerBase {
 		previewImage.height = maxHeight;
 		previewImage.src = canvas.toDataURL('image/png');
 
-		// A vector preview renders locally at fire time, so the slide now at
-		// this index is the one the image shows.
+		// The image shows the page with this id, at the index the page list on
+		// screen gives it now, or -1 when that list does not hold the page.
 		app.map.fire('tilepreview', {
 			tile: previewImage,
 			id: id,
 			width: maxWidth,
 			height: maxHeight,
-			part: app.impress.partList?.[partIndex]?.part,
-			partIndex: partIndex,
-			mode: mode,
+			part: data.partId,
+			partIndex: this._indexOf(data.partId, data.mode),
+			mode: data.mode,
 			docType: this._docLayer._docType,
 		});
 	}

@@ -39,12 +39,12 @@ namespace cool {
 		private _offscreen: HTMLCanvasElement = null;
 		private _offscreenCtx: CanvasRenderingContext2D = null;
 		private _lastRenderKey: string = '';
-		// Part whose pixels are in the offscreen canvas, so a blit reuses
-		// them only for that same part.
-		private _offscreenPart: cool.VectorPartId = '';
+		// Id of the page whose pixels are in the offscreen canvas, so a blit
+		// reuses them only for that same page.
+		private _offscreenPart = '';
 		// Part the last draw reported, so the report comes once per page
 		// rather than once per frame.
-		private _reportedPartId: cool.VectorPartId = '';
+		private _reportedPartId = '';
 
 		constructor() {
 			super(app.CSections.VectorContent.name);
@@ -89,7 +89,9 @@ namespace cool {
 			// The mode says which page list the selected part indexes, so a
 			// switch to master view draws the master page at that index.
 			const mode = app.activeDocument.activeModes[0];
-			const partId = cool.vectorPartId(part, mode);
+			// The key names the page on screen by where it sits, which is what
+			// the view asks by, so a switch of part or mode reads as a new page.
+			const partId = cool.vectorIndexKey(part, mode);
 			// A page is drawn only once the master it names has arrived too.
 			const cached = RenderManager.isPartDrawable(part, mode)
 				? RenderManager.requestPart(part, mode)
@@ -107,9 +109,14 @@ namespace cool {
 			}
 			if (!cached) {
 				// Data not ready. Blit the prior frame only when it holds
-				// the part we want, so the view keeps the current part
-				// until its fresh data arrives.
-				if (this._offscreen && this._offscreenPart === partId) {
+				// the page now at this index, so the view keeps the current
+				// page until its fresh data arrives.
+				const pageId = RenderManager.partIdAt(part, mode);
+				if (
+					this._offscreen &&
+					pageId !== undefined &&
+					this._offscreenPart === pageId
+				) {
 					this.context.drawImage(this._offscreen, 0, 0);
 				}
 				return;
@@ -128,7 +135,7 @@ namespace cool {
 			this._ensureOffscreen(w, h);
 
 			const renderKey =
-				partId +
+				cached.partId +
 				':' +
 				scale +
 				':' +
@@ -151,7 +158,7 @@ namespace cool {
 				RenderManager.renderPlaceholderAids(this._offscreenCtx, cached);
 				this._offscreenCtx.restore();
 				this._lastRenderKey = renderKey;
-				this._offscreenPart = partId;
+				this._offscreenPart = cached.partId;
 			}
 			this.context.drawImage(this._offscreen, 0, 0);
 		}

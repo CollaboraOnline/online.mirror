@@ -102,21 +102,25 @@ class VectorCompositor extends SlideCompositor {
 	private _fetchAllSlides(): void {
 		this._metaPresentation.getMetaSlides().forEach((_metaSlide, hash) => {
 			const info = this._metaPresentation.getSlideInfo(hash);
-			if (info) RenderManager.requestPart(info.index, cool.VectorMode.Slides);
+			if (info) {
+				RenderManager.requestPartById(info.part, cool.VectorMode.Slides);
+			}
 		});
 	}
 
-	private _partForSlide(slideNumber: number): number {
+	/// The id of the page that shows the slide. The slideshow can run from
+	/// any view, and the slide info names each slide by its id.
+	private _partIdForSlide(slideNumber: number): cool.VectorPartGuid | null {
 		const hash = this._metaPresentation.getSlideHash(slideNumber);
 		const info = hash ? this._metaPresentation.getSlideInfo(hash) : null;
-		return info ? info.index : null;
+		return info ? info.part : null;
 	}
 
 	private _runWhenReady(slideNumber: number, ready: VoidFunction): void {
-		const part = this._partForSlide(slideNumber);
+		const partId = this._partIdForSlide(slideNumber);
 		if (
-			part !== null &&
-			RenderManager.isPartDrawable(part, cool.VectorMode.Slides)
+			partId !== null &&
+			RenderManager.isPartDrawableById(partId, cool.VectorMode.Slides)
 		) {
 			ready();
 			return;
@@ -129,10 +133,10 @@ class VectorCompositor extends SlideCompositor {
 		if (this.disposed) return;
 		if (this.pendingReady === null) return;
 
-		const part = this._partForSlide(this.pendingSlideNumber);
+		const partId = this._partIdForSlide(this.pendingSlideNumber);
 		if (
-			part === null ||
-			!RenderManager.isPartDrawable(part, cool.VectorMode.Slides)
+			partId === null ||
+			!RenderManager.isPartDrawableById(partId, cool.VectorMode.Slides)
 		)
 			return;
 
@@ -147,10 +151,10 @@ class VectorCompositor extends SlideCompositor {
 	private _composeSlide(slideNumber: number): ImageBitmap {
 		if (this.disposed || !this.offscreenContext) return null;
 
-		const part = this._partForSlide(slideNumber);
-		if (part === null) return null;
+		const partId = this._partIdForSlide(slideNumber);
+		if (partId === null) return null;
 
-		const data = RenderManager.requestPart(part, cool.VectorMode.Slides);
+		const data = RenderManager.requestPartById(partId, cool.VectorMode.Slides);
 		if (!data || data.slideWidth <= 0 || data.slideHeight <= 0) return null;
 
 		const context = this.offscreenContext;

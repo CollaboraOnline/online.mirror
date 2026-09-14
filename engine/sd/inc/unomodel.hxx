@@ -38,7 +38,6 @@
 #include <drawinglayer/primitive2d/Primitive2DContainer.hxx>
 #include <drawinglayer/processor2d/Primitive2dJsonProcessor.hxx>
 #include <tools/gen.hxx>
-#include <o3tl/hash_combine.hxx>
 #include <rtl/ref.hxx>
 #include <unotools/weakref.hxx>
 
@@ -66,6 +65,7 @@ namespace avmedia { struct MediaTempFile; }
 
 class SdrGrafObj;
 class SdrObject;
+class SdrPage;
 class SdDrawDocument;
 class SdPage;
 class SvxItemPropertySet;
@@ -127,30 +127,6 @@ public:
         return maVectorFontFaceByKey;
     }
 
-    /// Names one vector-rendering part: a 0-based index, and the mode that
-    /// says which page list the index addresses.
-    struct VectorPartKey
-    {
-        sal_Int32 mnPart = 0;
-        sal_Int32 mnMode = 0;
-
-        bool operator==(const VectorPartKey& rOther) const
-        {
-            return mnPart == rOther.mnPart && mnMode == rOther.mnMode;
-        }
-
-        struct Hash
-        {
-            size_t operator()(const VectorPartKey& rKey) const
-            {
-                size_t nSeed = 0;
-                o3tl::hash_combine(nSeed, rKey.mnPart);
-                o3tl::hash_combine(nSeed, rKey.mnMode);
-                return nSeed;
-            }
-        };
-    };
-
     /// What was last written for one object. A change that leaves none of this different is a
     /// change nobody can see, so it need not travel. The box and the transformation are held
     /// alongside the primitives because an object can move without its primitives changing.
@@ -206,45 +182,44 @@ public:
     /// of the same model only when they carry the same epoch.
     sal_Int32 getVectorEpoch() const;
 
-    /// Content version of a part, counted up on each object change. 0 when
-    /// nothing changed since the document was opened.
-    sal_uInt64 getVectorPartVersion(sal_Int32 nPart, sal_Int32 nMode) const;
+    /// Content version of the part that stands for the page, counted up on each object
+    /// change. 0 when nothing changed since the document was opened.
+    sal_uInt64 getVectorPartVersion(const SdrPage& rPage) const;
 
     /// True when the object with the given unique id last changed on the
     /// part at a version later than nSince.
-    bool isVectorObjectChangedSince(sal_Int32 nPart, sal_Int32 nMode, sal_uInt64 nObjectId,
+    bool isVectorObjectChangedSince(const SdrPage& rPage, sal_uInt64 nObjectId,
                                     sal_uInt64 nSince) const;
 
     /// True when the set of objects on the part, or the order they paint in, changed after the
     /// given version.
-    bool isVectorOrderChangedSince(sal_Int32 nPart, sal_Int32 nMode, sal_uInt64 nSince) const;
+    bool isVectorOrderChangedSince(const SdrPage& rPage, sal_uInt64 nSince) const;
 
     /// The objects a change asked for a fresh look at, taken out of the part's state.
-    std::unordered_set<sal_uInt64> takeVectorDirtyObjects(sal_Int32 nPart, sal_Int32 nMode);
+    std::unordered_set<sal_uInt64> takeVectorDirtyObjects(const SdrPage& rPage);
 
     /// Records what is being written for one object. Counts the part's version up and returns
     /// true when the content differs from what was recorded before, false when the object looks
     /// the same and sits where it did.
-    bool recordVectorObjectContent(sal_Int32 nPart, sal_Int32 nMode, sal_uInt64 nObjectId,
+    bool recordVectorObjectContent(const SdrPage& rPage, sal_uInt64 nObjectId,
                                    const VectorObjectContent& rContent);
 
     /// Records what is being written for one object without touching any version. Writing an
     /// object is what makes it the content the client holds, whether the write was a full
     /// response or a delta.
-    void noteVectorObjectWritten(sal_Int32 nPart, sal_Int32 nMode, sal_uInt64 nObjectId,
+    void noteVectorObjectWritten(const SdrPage& rPage, sal_uInt64 nObjectId,
                                  const VectorObjectContent& rContent);
 
     /// Drops what was recorded for an object that is no longer on the part.
-    void forgetVectorObject(sal_Int32 nPart, sal_Int32 nMode, sal_uInt64 nObjectId);
+    void forgetVectorObject(const SdrPage& rPage, sal_uInt64 nObjectId);
 
     /// The ids everything the part has recorded is keyed by, in no particular order.
-    std::vector<sal_uInt64> getVectorRecordedIds(sal_Int32 nPart, sal_Int32 nMode) const;
+    std::vector<sal_uInt64> getVectorRecordedIds(const SdrPage& rPage) const;
 
     /// Records the order the objects of the part paint in. When it differs from the order
     /// recorded before, counts the part's version up, remembers that version as the one the
     /// order last moved at, and returns true. The first order recorded moves nothing.
-    bool recordVectorPaintOrder(sal_Int32 nPart, sal_Int32 nMode,
-                                const std::vector<sal_uInt64>& rOrder);
+    bool recordVectorPaintOrder(const SdrPage& rPage, const std::vector<sal_uInt64>& rOrder);
 
     /// The text edit running on rEdited shows something other than it did. Tells the views of
     /// the part it sits on, and the write that follows counts the version up if the text really
@@ -253,7 +228,7 @@ public:
 
     /// True when the part's master page last changed at a version later
     /// than nSince.
-    bool isVectorMasterChangedSince(sal_Int32 nPart, sal_Int32 nMode, sal_uInt64 nSince) const;
+    bool isVectorMasterChangedSince(const SdrPage& rPage, sal_uInt64 nSince) const;
 
     /// Content state of one vector-rendering part: its current version, the version the last
     /// delta written for it was computed up to, the version at which its master page last
@@ -307,8 +282,10 @@ private:
     /// Extracted animated GIF files, keyed by the graphic object's unique id.
     mutable std::unordered_map<sal_uInt64, AnimatedGifTempFile> maAnimatedGifCache;
 
-    /// Vector content state, keyed by part index and mode.
-    std::unordered_map<VectorPartKey, VectorPartState, VectorPartKey::Hash> maVectorParts;
+    /// Vector content state, keyed by the part id of the page it belongs to. The part id is
+    /// the page GUID, so the state stays with the page when pages are inserted, removed or
+    /// moved and its index in the page list changes.
+    std::unordered_map<OString, VectorPartState> maVectorParts;
 
     /// The version space the part versions count in, drawn once for this model. 0 until it is
     /// first asked for.

@@ -1617,18 +1617,18 @@ void CallbackFlushHandler::viewCallbackWithViewId(COKitCallbackType eType, const
     queue(eType, callbackData);
 }
 
-void CallbackFlushHandler::viewVectorPartChanged(int nPart, int nMode)
+void CallbackFlushHandler::viewVectorPartChanged(const OString& rPartId, int nMode)
 {
     // Only a vector-rendering view consumes deltas, and only in a mode it
     // asked in.
-    if (!m_bVectorRendering || nPart < 0)
+    if (!m_bVectorRendering || rPartId.isEmpty())
         return;
     if (m_aVectorRenderingModes.find(nMode) == m_aVectorRenderingModes.end())
         return;
 
     // Repeated changes of the same part between two flushes collapse
     // into a single delta, computed at flush time.
-    m_vectorDeltaParts.insert({ nPart, nMode });
+    m_vectorDeltaParts.insert({ rPartId, nMode });
     scheduleFlush();
 }
 
@@ -1637,7 +1637,7 @@ void CallbackFlushHandler::flushVectorPrimitivesDeltas()
     if (m_vectorDeltaParts.empty())
         return;
 
-    std::set<std::pair<int, int>> aParts;
+    std::set<std::pair<OString, int>> aParts;
     aParts.swap(m_vectorDeltaParts);
 
     // A background save sends no content. The parent process pushes the
@@ -1652,7 +1652,7 @@ void CallbackFlushHandler::flushVectorPrimitivesDeltas()
     if (!pDocument)
         return;
 
-    for (const auto& [nPart, nMode] : aParts)
+    for (const auto& [rPartId, nMode] : aParts)
     {
         // Computing the delta at delivery time reads the document after the change that triggered
         // the invalidation has fully landed. The command tracks the version the part was last
@@ -1662,7 +1662,7 @@ void CallbackFlushHandler::flushVectorPrimitivesDeltas()
         // The delta describes the part, not this view. So the first handler to flush a part writes
         // the one delta for the change, and a handler that flushes the same part after that gets
         // an empty delta.
-        const OString aCommand = ".uno:VectorPrimitives?part=" + OString::number(nPart)
+        const OString aCommand = ".uno:VectorPrimitives?partid=" + rPartId
                                  + "&mode=" + OString::number(nMode) + "&pushdelta=1";
         tools::JsonWriter aJsonWriter;
         pDocument->getCommandValues(aJsonWriter,

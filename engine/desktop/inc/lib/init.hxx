@@ -149,9 +149,10 @@ namespace desktop {
         DESKTOP_DLLPUBLIC virtual void viewInvalidateTilesCallback(const tools::Rectangle* pRect, int nPart, int nMode) override;
         virtual void viewUpdatedCallback(COKitCallbackType eType) override;
         virtual void viewUpdatedCallbackPerViewId(COKitCallbackType eType, int nViewId, int nSourceViewId) override;
-        /// Records that a slide part changed, so the next flush pushes
-        /// that part's vector-primitives delta to the client.
-        DESKTOP_DLLPUBLIC virtual void viewVectorPartChanged(int nPart, int nMode) override;
+        /// Records that a part changed, so the next flush pushes that part's vector-primitives
+        /// delta to the client. The part is named by its id, the page GUID.
+        DESKTOP_DLLPUBLIC virtual void viewVectorPartChanged(const OString& rPartId,
+                                                             int nMode) override;
         virtual void viewAddPendingInvalidateTiles() override;
         virtual void dumpState(rtl::OStringBuffer &rState) override;
 
@@ -269,9 +270,9 @@ namespace desktop {
         /// Modes the view asked for primitives in. A change in another mode
         /// pushes nothing.
         std::set<int> m_aVectorRenderingModes;
-        /// Parts whose vector-primitives delta is still to be pushed,
-        /// collected between two flushes.
-        std::set<std::pair<int, int>> m_vectorDeltaParts;
+        /// Parts whose vector-primitives delta is still to be pushed, collected between two
+        /// flushes, each as its part id and the mode it is served in.
+        std::set<std::pair<OString, int>> m_vectorDeltaParts;
         COKitCallback m_pCallback;
         ImplSVEvent* m_pFlushEvent;
         void *m_pData;

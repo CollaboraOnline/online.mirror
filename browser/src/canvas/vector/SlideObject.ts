@@ -41,10 +41,10 @@ namespace cool {
 		layer?: number;
 		/// True for a placeholder that holds no content of its own yet.
 		emptyPlaceholder?: boolean;
-		/// On the entry of kind "page" of a slide: the index of the master
-		/// part the slide draws under itself. Absent when the page carries
-		/// its master content inline.
-		masterPart?: number;
+		/// On the entry of kind "page" of a slide: the id of the master part
+		/// the slide draws under itself. Absent when the page carries its
+		/// master content inline.
+		masterPartId?: VectorPartGuid;
 		/// On an object of a slide: it is the slide's own copy of a master
 		/// placeholder, rendered for this slide.
 		masterContent?: boolean;

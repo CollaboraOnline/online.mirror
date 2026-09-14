@@ -197,6 +197,10 @@ class RenderManagerBase {
 		return undefined;
 	}
 
+	partIdAt(_part: number, _mode: number): cool.VectorPartGuid | undefined {
+		return undefined;
+	}
+
 	renderInto(
 		_context: CanvasRenderingContext2D,
 		_data: cool.VectorPrimitivesData,
@@ -214,6 +218,17 @@ class RenderManagerBase {
 	setHiddenLayers(_layers: unknown): void {}
 
 	isPartDrawable(_part: number, _mode: number): boolean {
+		return false;
+	}
+
+	requestPartById(
+		_partId: cool.VectorPartGuid,
+		_mode: number,
+	): cool.VectorPrimitivesData | undefined {
+		return undefined;
+	}
+
+	isPartDrawableById(_partId: cool.VectorPartGuid, _mode: number): boolean {
 		return false;
 	}
 
@@ -246,7 +261,7 @@ class RenderManagerBase {
 	partListChanged(): void {}
 
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	clearCachedPart(_part: number, _mode: number): void {}
+	clearCachedPart(_partId: cool.VectorPartGuid): void {}
 
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	clearAllParts(): void {}

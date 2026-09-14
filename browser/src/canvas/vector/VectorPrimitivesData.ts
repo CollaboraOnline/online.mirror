@@ -12,6 +12,11 @@
 namespace cool {
 	/// Vector representation of a slide.
 	export interface VectorPrimitivesData {
+		/// The id of the page this is the content of.
+		partId: VectorPartGuid;
+		/// The page list the page belongs to: 0 the slides, 1 the master
+		/// pages, 2 the notes pages.
+		mode: number;
 		/// The version space the version counts in, as the engine named it.
 		/// Versions with two different epochs come from two different models
 		/// and say nothing about each other.
@@ -30,8 +35,8 @@ namespace cool {
 		/// The ids in paint order, the page entry first and the members of
 		/// a group right after it.
 		order: number[];
-		/// Index of the master part the page draws under itself, or
-		/// undefined when the page carries its master content inline.
-		masterPart?: number;
+		/// Id of the master part the page draws under itself, or undefined
+		/// when the page carries its master content inline.
+		masterPartId?: VectorPartGuid;
 	}
 }

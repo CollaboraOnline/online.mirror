@@ -40,7 +40,7 @@ public:
                                              int nMode) override;
     virtual void viewUpdatedCallback(COKitCallbackType eType) override;
     virtual void viewUpdatedCallbackPerViewId(COKitCallbackType eType, int nViewId, int nSourceViewId) override;
-    void viewVectorPartChanged(int, int) override {}
+    void viewVectorPartChanged(const rtl::OString&, int) override {}
     virtual void viewAddPendingInvalidateTiles() override;
     virtual void dumpState(rtl::OStringBuffer&) override{};
 

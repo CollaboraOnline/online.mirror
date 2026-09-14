@@ -17,17 +17,15 @@ namespace cool {
 		NotesPages = 2,
 	}
 
-	/// A part index paired with the mode that says which page list it
-	/// addresses. The same index names a different page in each mode.
-	export type VectorPartId = string;
+	/// The id of a vector-rendering part: the globally unique id (GUID) of
+	/// the page, the same value the status message names a page by. It names
+	/// the page wherever the page sits in its list, so it survives a slide
+	/// being inserted, removed or moved.
+	export type VectorPartGuid = string;
 
-	export function vectorPartId(part: number, mode: number): VectorPartId {
+	/// The key a page is filed under while it is known by its place in a
+	/// list only: the mode and the index, joined with a colon.
+	export function vectorIndexKey(part: number, mode: number): string {
 		return String(mode) + ':' + String(part);
-	}
-
-	/// The mode and part a part id was made from, in that order.
-	export function splitVectorPartId(id: VectorPartId): [number, number] {
-		const [mode, part] = id.split(':');
-		return [Number(mode), Number(part)];
 	}
 }

@@ -245,6 +245,10 @@ class RenderManager {
 		return RenderManager.ensureInstance().requestPart(part, mode);
 	}
 
+	static partIdAt(part: number, mode: number): cool.VectorPartGuid | undefined {
+		return RenderManager.ensureInstance().partIdAt(part, mode);
+	}
+
 	static renderInto(
 		context: CanvasRenderingContext2D,
 		data: cool.VectorPrimitivesData,
@@ -266,6 +270,20 @@ class RenderManager {
 
 	static isPartDrawable(part: number, mode: number): boolean {
 		return RenderManager.ensureInstance().isPartDrawable(part, mode);
+	}
+
+	static requestPartById(
+		partId: cool.VectorPartGuid,
+		mode: number,
+	): cool.VectorPrimitivesData | undefined {
+		return RenderManager.ensureInstance().requestPartById(partId, mode);
+	}
+
+	static isPartDrawableById(
+		partId: cool.VectorPartGuid,
+		mode: number,
+	): boolean {
+		return RenderManager.ensureInstance().isPartDrawableById(partId, mode);
 	}
 
 	static isLayerVisible(layer: number): boolean {
@@ -306,8 +324,8 @@ class RenderManager {
 		RenderManager.ensureInstance().partListChanged();
 	}
 
-	static clearCachedPart(part: number, mode: number): void {
-		RenderManager.ensureInstance().clearCachedPart(part, mode);
+	static clearCachedPart(partId: cool.VectorPartGuid): void {
+		RenderManager.ensureInstance().clearCachedPart(partId);
 	}
 
 	static clearAllParts(): void {

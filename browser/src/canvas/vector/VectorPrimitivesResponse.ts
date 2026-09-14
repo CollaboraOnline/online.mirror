@@ -12,10 +12,12 @@
 namespace cool {
 	/// Interface for the vector primitives response from core.
 	export interface VectorPrimitivesResponse {
-		part?: number;
-		/// The page list the part index addresses: 0 the slides, 1 the
-		/// master pages, 2 the notes pages. Defaults to the slides.
+		/// The page list the page belongs to: 0 the slides, 1 the master
+		/// pages, 2 the notes pages. Defaults to the slides.
 		mode?: number;
+		/// The id of the page, its GUID. Absent only when the request named no
+		/// page.
+		partId?: VectorPartGuid;
 		/// The version space the versions below count in. It is drawn once per document
 		/// in the engine, so versions carrying two different epochs describe two different
 		/// documents and mean nothing to each other.

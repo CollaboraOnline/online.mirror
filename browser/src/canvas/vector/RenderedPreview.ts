@@ -10,11 +10,11 @@
  */
 
 namespace cool {
-	/// Snapshot of a thumbnail render. part and mode name the page the
-	/// preview points to, maxWidth and maxHeight are the size requested at
-	/// the last render in CSS pixels.
+	/// Snapshot of a thumbnail render. partId is the page the preview shows,
+	/// mode the page list it belongs to, maxWidth and maxHeight the size
+	/// requested at the last render in CSS pixels.
 	export interface RenderedPreview {
-		part: number;
+		partId: VectorPartGuid;
 		mode: number;
 		maxWidth: number;
 		maxHeight: number;

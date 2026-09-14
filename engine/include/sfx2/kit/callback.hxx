@@ -51,7 +51,7 @@ public:
     virtual void viewUpdatedCallbackPerViewId(COKitCallbackType eType, int nViewId, int nSourceViewId) = 0;
     // The vector content of the part changed. Mode names the page list the
     // index addresses: 0 slides, 1 master pages, 2 notes pages.
-    virtual void viewVectorPartChanged(int nPart, int nMode) = 0;
+    virtual void viewVectorPartChanged(const rtl::OString& rPartId, int nMode) = 0;
     // There are pending invalidate tiles calls that need to be processed.
     // A call to SfxViewShell::flushPendingKitInvalidateTiles() should be scheduled.
     virtual void viewAddPendingInvalidateTiles() = 0;

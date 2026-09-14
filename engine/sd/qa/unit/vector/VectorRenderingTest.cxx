@@ -417,6 +417,23 @@ protected:
         return tools::JsonPath::parse(std::string_view(aResult.getStr(), aResult.getLength()));
     }
 
+    /// The id of the first page of the list the mode names: 1 the master pages, 2 the notes
+    /// pages, and the slides for any other mode.
+    OString firstPartId(sal_Int32 nMode = 0)
+    {
+        SdDrawDocument* pDrawDoc = getSdDocShell()->GetDoc();
+        CPPUNIT_ASSERT(pDrawDoc);
+        SdPage* pPage = nullptr;
+        if (nMode == 1)
+            pPage = pDrawDoc->GetMasterSdPage(0, PageKind::Standard);
+        else if (nMode == 2)
+            pPage = pDrawDoc->GetSdPage(0, PageKind::Notes);
+        else
+            pPage = pDrawDoc->GetSdPage(0, PageKind::Standard);
+        CPPUNIT_ASSERT(pPage);
+        return pPage->GetGuid().getString();
+    }
+
     /// Request for part 0 of the page list nMode names. The raw JSON is
     /// written as a reference. A non-negative nSince asks for a delta against
     /// that version instead of the full page.
@@ -427,8 +444,9 @@ protected:
         CPPUNIT_ASSERT(pDoc);
 
         tools::JsonWriter aJsonWriter;
-        // Explicitly get only part 0 -> first page of the mode's list.
-        OString aCommand = ".uno:VectorPrimitives?part=0&mode=" + OString::number(nMode);
+        // The first page of the mode's list.
+        OString aCommand = ".uno:VectorPrimitives?partid=" + firstPartId(nMode)
+                           + "&mode=" + OString::number(nMode);
         if (nSince >= 0)
             aCommand = aCommand + "&since=" + OString::number(nSince);
         pDoc->getCommandValues(aJsonWriter,
@@ -465,7 +483,7 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testSingleRectangle)
     auto aJson = getVectorPrimitives(u"testSingleRectangle");
 
     assertJsonPath(aJson, "/type", "vectorprimitives");
-    assertJsonPath(aJson, "/part", sal_Int64(0));
+    assertJsonPath(aJson, "/partId", firstPartId());
 
     // The page comes first. Its master page has been cleared, so it
     // contributes only the page background fill and the page fill itself.
@@ -556,7 +574,8 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testSlideNamesItsMaster)
     const auto oPage = aSlide.at("/objects/0");
     CPPUNIT_ASSERT(oPage.has_value());
     assertJsonPath(*oPage, "kind", "page");
-    CPPUNIT_ASSERT_EQUAL(sal_Int64(0), oPage->getInt("masterPart").value_or(-1));
+    // The master is named by its part id, so the reference holds however the master list moves.
+    assertJsonPath(*oPage, "masterPartId", pMasterPage->GetGuid().getString());
     // The rectangle is the master's to carry, so the slide's own content has none of it.
     CPPUNIT_ASSERT(!hasNodeWithColor(*oPage, "polyPolygonColor"_ostr, "#c00000"_ostr));
 
@@ -1097,17 +1116,89 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testMissingPageStillAnswers)
     tools::JsonWriter aJsonWriter;
     SdXImpressDocument* pDoc = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
     CPPUNIT_ASSERT(pDoc);
-    static constexpr OString aCommand = ".uno:VectorPrimitives?part=12&mode=1"_ostr;
+    static constexpr OString aCommand
+        = ".uno:VectorPrimitives?partid={6F1D3C9A-2B4E-4F8A-9C1D-0E7B5A3F2D61}&mode=1"_ostr;
     pDoc->getCommandValues(aJsonWriter, std::string_view(aCommand.getStr(), aCommand.getLength()));
     const OString aResult = aJsonWriter.finishAndGetAsOString();
 
     auto oJson = tools::JsonPath::parse(std::string_view(aResult.getStr(), aResult.getLength()));
     CPPUNIT_ASSERT_MESSAGE("JSON parse error", oJson.has_value());
     assertJsonPath(*oJson, "/type", "vectorprimitives");
-    CPPUNIT_ASSERT_EQUAL(sal_Int64(12), oJson->getInt("/part").value_or(-1));
+    assertJsonPath(*oJson, "/partId", "{6F1D3C9A-2B4E-4F8A-9C1D-0E7B5A3F2D61}");
     CPPUNIT_ASSERT_EQUAL(sal_Int64(1), oJson->getInt("/mode").value_or(-1));
     // No page means no content, so nothing describes one.
     CPPUNIT_ASSERT(!oJson->has("/order"));
+    CPPUNIT_ASSERT(!oJson->has("/objects"));
+}
+
+CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testPartStateFollowsThePage)
+{
+    // A part is the page, wherever it sits in the list. Removing the slide in front of one leaves
+    // the page, its id and the version the client holds for it as they were, and a request that
+    // names the page by its id still finds it.
+    createBlankDoc();
+    uno::Reference<drawing::XDrawPagesSupplier> xSupplier(mxComponent, uno::UNO_QUERY_THROW);
+    uno::Reference<drawing::XDrawPages> xPages = xSupplier->getDrawPages();
+    xPages->insertNewByIndex(0);
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(2), xPages->getCount());
+
+    // The rectangle goes on the second slide, page 3 in the document's own list.
+    SdrPage* pSecondSlide = page(3);
+    rtl::Reference<SdrRectObj> pRect
+        = new SdrRectObj(pSecondSlide->getSdrModelFromSdrPage(),
+                         tools::Rectangle(Point(1000, 1000), Size(3000, 2000)));
+    pRect->SetMergedItem(XFillStyleItem(drawing::FillStyle_SOLID));
+    pRect->SetMergedItem(XFillColorItem(OUString(), Color(0x4472c4)));
+    pSecondSlide->NbcInsertObject(pRect.get());
+    const OString aPartId = pSecondSlide->GetGuid().getString();
+    const OString aRemovedPartId = page(1)->GetGuid().getString();
+
+    auto oFull = requestVectorPrimitives(".uno:VectorPrimitives?partid=" + aPartId + "&mode=0");
+    CPPUNIT_ASSERT(oFull.has_value());
+    assertJsonPath(*oFull, "/partId", aPartId);
+    CPPUNIT_ASSERT_EQUAL(size_t(2), oFull->getSize("/objects").value_or(0));
+    const sal_Int64 nVersion = oFull->getInt("/version").value_or(-1);
+    CPPUNIT_ASSERT(nVersion >= 0);
+
+    // Removing the first slide moves the slide with the rectangle to index 0.
+    uno::Reference<drawing::XDrawPage> xFirstSlide(xPages->getByIndex(0), uno::UNO_QUERY_THROW);
+    xPages->remove(xFirstSlide);
+
+    // Named by its id, the page answers with the rectangle still on it.
+    auto oById = requestVectorPrimitives(".uno:VectorPrimitives?partid=" + aPartId + "&mode=0");
+    CPPUNIT_ASSERT(oById.has_value());
+    assertJsonPath(*oById, "/partId", aPartId);
+    CPPUNIT_ASSERT_EQUAL(size_t(2), oById->getSize("/objects").value_or(0));
+
+    // Nothing on the page changed, so a delta against the version the client holds is empty.
+    auto oDelta = requestVectorPrimitives(".uno:VectorPrimitives?partid=" + aPartId
+                                          + "&mode=0&since=" + OString::number(nVersion));
+    CPPUNIT_ASSERT(oDelta.has_value());
+    CPPUNIT_ASSERT(!oDelta->has("/type"));
+
+    // The id of the removed slide names no page any more.
+    auto oGone
+        = requestVectorPrimitives(".uno:VectorPrimitives?partid=" + aRemovedPartId + "&mode=0");
+    CPPUNIT_ASSERT(oGone.has_value());
+    CPPUNIT_ASSERT(!oGone->has("/objects"));
+}
+
+CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testPartIdOfAnotherListNamesNoPage)
+{
+    // A page id names one page, and the mode says which list it is asked from. The id of a
+    // slide asked for in master mode names no page there, so the answer is the header alone,
+    // with the id so the asker can tell which request it answers.
+    createBlankDoc();
+
+    auto aFull = getVectorPrimitives(u"testPartIdOfAnotherList");
+    const OString aPartId = aFull.getString("/partId").value_or(OString());
+    CPPUNIT_ASSERT(!aPartId.isEmpty());
+
+    auto oJson = requestVectorPrimitives(".uno:VectorPrimitives?partid=" + aPartId + "&mode=1");
+    CPPUNIT_ASSERT(oJson.has_value());
+    assertJsonPath(*oJson, "/type", "vectorprimitives");
+    assertJsonPath(*oJson, "/partId", aPartId);
+    CPPUNIT_ASSERT_EQUAL(sal_Int64(1), oJson->getInt("/mode").value_or(-1));
     CPPUNIT_ASSERT(!oJson->has("/objects"));
 }
 
@@ -1181,7 +1272,7 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testGivingASlideAnotherMasterMovesItsV
 
     auto aFull = getVectorPrimitives(u"testMasterSwapFull");
     const sal_Int64 nVersion = aFull.getInt("/version").value_or(-1);
-    CPPUNIT_ASSERT_EQUAL(sal_Int64(0), aFull.getInt("/objects/0/masterPart").value_or(-1));
+    assertJsonPath(aFull, "/objects/0/masterPartId", pOldMaster->GetGuid().getString());
 
     uno::Reference<drawing::XDrawPagesSupplier> xPagesSupplier(mxComponent, uno::UNO_QUERY_THROW);
     uno::Reference<drawing::XMasterPageTarget> xTarget(
@@ -1192,7 +1283,7 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testGivingASlideAnotherMasterMovesItsV
     assertJsonPath(aDelta, "/type", "vectorprimitivesdelta");
     const auto oPage = findEntryOfKind(aDelta, "page"_ostr);
     CPPUNIT_ASSERT(oPage.has_value());
-    CPPUNIT_ASSERT_EQUAL(sal_Int64(1), oPage->getInt("masterPart").value_or(-1));
+    assertJsonPath(*oPage, "masterPartId", pNewMaster->GetGuid().getString());
 }
 
 CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testUnservedModeCarriesNoPage)
@@ -1658,7 +1749,8 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testPushAfterAnotherPullStillCarriesTh
 
     // The push steps from where the first reader stands and carries the object it has not
     // seen.
-    auto oDelta = requestVectorPrimitives(".uno:VectorPrimitives?part=0&pushdelta=1"_ostr);
+    auto oDelta
+        = requestVectorPrimitives(".uno:VectorPrimitives?partid=" + firstPartId() + "&pushdelta=1");
     CPPUNIT_ASSERT(oDelta.has_value());
     assertJsonPath(*oDelta, "/type", "vectorprimitivesdelta");
     assertJsonPath(*oDelta, "/from", nFirst);
@@ -1677,7 +1769,7 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testPushCarriesOnlyTheChangesSinceTheF
     page(1)->GetObj(0)->BroadcastObjectChange();
     page(1)->GetObj(1)->BroadcastObjectChange();
 
-    static constexpr OString aPushCommand = ".uno:VectorPrimitives?part=0&pushdelta=1"_ostr;
+    const OString aPushCommand = ".uno:VectorPrimitives?partid=" + firstPartId() + "&pushdelta=1";
 
     // The pull gives the page and both objects. Comparing them for the first time is what
     // counts the part's version up, and the response carries where that left it.
@@ -1733,7 +1825,8 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testEditedTextAppearsInPrimitives)
     SdXImpressDocument* pDoc = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
     CPPUNIT_ASSERT(pDoc);
     tools::JsonWriter aJsonWriter;
-    pDoc->getCommandValues(aJsonWriter, ".uno:VectorPrimitives?part=0");
+    const OString aCommand = ".uno:VectorPrimitives?partid=" + firstPartId();
+    pDoc->getCommandValues(aJsonWriter, std::string_view(aCommand.getStr(), aCommand.getLength()));
     const OString aResult = aJsonWriter.finishAndGetAsOString();
 
     pView->SdrEndTextEdit();
@@ -1924,7 +2017,9 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testRealBoldFaceNeedsNoThickening)
     SdXImpressDocument* pDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
     CPPUNIT_ASSERT(pDocument);
     tools::JsonWriter aJsonWriter;
-    pDocument->getCommandValues(aJsonWriter, ".uno:VectorPrimitives?part=0");
+    const OString aCommand = ".uno:VectorPrimitives?partid=" + firstPartId();
+    pDocument->getCommandValues(aJsonWriter,
+                                std::string_view(aCommand.getStr(), aCommand.getLength()));
     const OString aResult = aJsonWriter.finishAndGetAsOString();
 
     pView->SdrEndTextEdit();
@@ -1960,7 +2055,9 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testTextPortionCarriesFont)
     SdXImpressDocument* pDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
     CPPUNIT_ASSERT(pDocument);
     tools::JsonWriter aJsonWriter;
-    pDocument->getCommandValues(aJsonWriter, ".uno:VectorPrimitives?part=0");
+    const OString aCommand = ".uno:VectorPrimitives?partid=" + firstPartId();
+    pDocument->getCommandValues(aJsonWriter,
+                                std::string_view(aCommand.getStr(), aCommand.getLength()));
     const OString aResult = aJsonWriter.finishAndGetAsOString();
 
     pView->SdrEndTextEdit();

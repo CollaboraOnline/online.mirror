@@ -28,6 +28,32 @@ describe('VectorManager', function () {
 		(globalThis as any).Path2D = originalPath2D;
 	});
 
+	// The page list on screen, as the status message names it: one entry per
+	// page of the list the mode names, each with the id of its page.
+	function pageList(mode: number, count: number): any[] {
+		const prefix =
+			mode === cool.VectorMode.MasterPages
+				? 'M'
+				: mode === cool.VectorMode.NotesPages
+					? 'N'
+					: 'S';
+		const list: any[] = [];
+		for (let i = 0; i < count; i++)
+			list.push({ part: prefix + String(i), mode: mode });
+		return list;
+	}
+
+	// A page is asked for by the id the page list on screen names it by, so
+	// every test starts with ten slides on screen.
+	let originalImpressForTest: any;
+	beforeEach(function () {
+		originalImpressForTest = (app as any).impress;
+		(app as any).impress = { partList: pageList(cool.VectorMode.Slides, 10) };
+	});
+	afterEach(function () {
+		(app as any).impress = originalImpressForTest;
+	});
+
 	function countCalls(recorder: CanvasRecorder, method: string): number {
 		return recorder.calls.filter((call) => call.method === method).length;
 	}
@@ -40,7 +66,7 @@ describe('VectorManager', function () {
 
 		// Two objects with empty primitive lists.
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			objects: [
 				{ id: 11, primitives: [] },
 				{ id: 22, primitives: [] },
@@ -61,7 +87,7 @@ describe('VectorManager', function () {
 		const manager = new VectorManager();
 
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 7,
 			objects: [],
 		});
@@ -77,7 +103,7 @@ describe('VectorManager', function () {
 	it('applies a delta, reusing cached content for unchanged objects', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 1,
 			objects: [
 				{ id: 11, primitives: [] },
@@ -88,7 +114,7 @@ describe('VectorManager', function () {
 		// Object 22 changed and now carries one primitive. The order is
 		// reversed. Object 11 is unchanged.
 		const delta: any = {
-			part: 0,
+			partId: 'S0',
 			version: 2,
 			order: [22, 11],
 			objects: [{ id: 22, primitives: [{ type: 'polygonHairline' }] }],
@@ -108,7 +134,7 @@ describe('VectorManager', function () {
 	it('applies a delta that carries no order', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 1,
 			objects: [
 				{ id: 11, primitives: [] },
@@ -117,7 +143,7 @@ describe('VectorManager', function () {
 		});
 
 		const delta: any = {
-			part: 0,
+			partId: 'S0',
 			version: 2,
 			objects: [{ id: 22, primitives: [{ type: 'polygonHairline' }] }],
 		};
@@ -134,7 +160,7 @@ describe('VectorManager', function () {
 	it('drops an object the delta order no longer names', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 1,
 			objects: [
 				{ id: 11, primitives: [] },
@@ -142,7 +168,12 @@ describe('VectorManager', function () {
 			],
 		});
 
-		const delta: any = { part: 0, version: 2, order: [11], objects: [] };
+		const delta: any = {
+			partId: 'S0',
+			version: 2,
+			order: [11],
+			objects: [],
+		};
 		manager.handleVectorPrimitivesDelta(delta);
 
 		const data: any = manager.requestPart(0, cool.VectorMode.Slides);
@@ -156,12 +187,17 @@ describe('VectorManager', function () {
 	it('drops the part when a delta order names unknown content', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 1,
 			objects: [{ id: 11, primitives: [] }],
 		});
 
-		const delta: any = { part: 0, version: 2, order: [99], objects: [] };
+		const delta: any = {
+			partId: 'S0',
+			version: 2,
+			order: [99],
+			objects: [],
+		};
 		manager.handleVectorPrimitivesDelta(delta);
 
 		// The cache was dropped, so the next request starts a fresh full
@@ -178,7 +214,7 @@ describe('VectorManager', function () {
 	it('ignores a delta that is not newer than the cache', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 5,
 			objects: [
 				{ id: 11, primitives: [] },
@@ -187,7 +223,12 @@ describe('VectorManager', function () {
 		});
 
 		// A stale delta from version 3 no longer lists object 22.
-		const delta: any = { part: 0, version: 3, order: [11], objects: [] };
+		const delta: any = {
+			partId: 'S0',
+			version: 3,
+			order: [11],
+			objects: [],
+		};
 		manager.handleVectorPrimitivesDelta(delta);
 
 		const data: any = manager.requestPart(0, cool.VectorMode.Slides);
@@ -200,14 +241,14 @@ describe('VectorManager', function () {
 	it('keeps drawing the other cached parts when a full response has a new epoch', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			epoch: 100,
 			version: 5,
 			objects: [{ id: 11, primitives: [] }],
 		});
 
 		manager.handleVectorPrimitivesResponse({
-			part: 1,
+			partId: 'S1',
 			epoch: 200,
 			version: 1,
 			objects: [{ id: 22, primitives: [] }],
@@ -224,14 +265,14 @@ describe('VectorManager', function () {
 	it('drops a cached part instead of applying a delta from a new epoch', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			epoch: 100,
 			version: 5,
 			objects: [{ id: 11, primitives: [] }],
 		});
 
 		manager.handleVectorPrimitivesDelta({
-			part: 0,
+			partId: 'S0',
 			epoch: 200,
 			from: 5,
 			version: 6,
@@ -249,7 +290,7 @@ describe('VectorManager', function () {
 	it('applies a delta that starts below the version held', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 5,
 			objects: [
 				{ id: 11, primitives: [] },
@@ -258,7 +299,7 @@ describe('VectorManager', function () {
 		});
 
 		const delta: any = {
-			part: 0,
+			partId: 'S0',
 			from: 2,
 			version: 6,
 			objects: [{ id: 22, primitives: [], width: 400 }],
@@ -275,12 +316,17 @@ describe('VectorManager', function () {
 	it('drops the part when a delta starts above the version held', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 5,
 			objects: [{ id: 11, primitives: [] }],
 		});
 
-		const delta: any = { part: 0, from: 7, version: 8, objects: [] };
+		const delta: any = {
+			partId: 'S0',
+			from: 7,
+			version: 8,
+			objects: [],
+		};
 		manager.handleVectorPrimitivesDelta(delta);
 
 		nodeassert.strictEqual(
@@ -294,14 +340,14 @@ describe('VectorManager', function () {
 	it('takes a full response from a new epoch whatever its version', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			epoch: 100,
 			version: 5,
 			objects: [{ id: 11, primitives: [] }],
 		});
 
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			epoch: 200,
 			version: 1,
 			objects: [{ id: 22, primitives: [] }],
@@ -318,7 +364,7 @@ describe('VectorManager', function () {
 	it('takes the page rectangle from the page entry', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 1,
 			objects: [
 				{ id: 0, kind: 'page', width: 1000, height: 800, primitives: [] },
@@ -331,7 +377,7 @@ describe('VectorManager', function () {
 		nodeassert.strictEqual(data.slideHeight, 800);
 
 		manager.handleVectorPrimitivesDelta({
-			part: 0,
+			partId: 'S0',
 			version: 2,
 			order: [0, 11],
 			objects: [
@@ -350,7 +396,7 @@ describe('VectorManager', function () {
 	it('replaces the page entry when a delta carries it', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 1,
 			objects: [
 				{ id: 5, kind: 'page', primitives: [] },
@@ -359,7 +405,7 @@ describe('VectorManager', function () {
 		});
 
 		const delta: any = {
-			part: 0,
+			partId: 'S0',
 			version: 2,
 			order: [5, 11],
 			objects: [
@@ -381,7 +427,7 @@ describe('VectorManager', function () {
 	it('keeps the geometry and grouping of each object', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			objects: [
 				{ id: 11, parent: 0, layer: 0, primitives: [] },
 				{
@@ -419,7 +465,7 @@ describe('VectorManager', function () {
 		const manager = new VectorManager();
 		const hairline = { type: 'polygonHairline', path: 'M0 0 L1 1' };
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			objects: [
 				{ id: 11, layer: 0, primitives: [hairline] },
 				{ id: 22, layer: 5, primitives: [hairline] },
@@ -448,7 +494,7 @@ describe('VectorManager', function () {
 		const hairline = (path: string): any => ({ type: 'polygonHairline', path });
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'M0',
 			mode: cool.VectorMode.MasterPages,
 			version: 1,
 			objects: [
@@ -466,7 +512,7 @@ describe('VectorManager', function () {
 			],
 		});
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			mode: cool.VectorMode.Slides,
 			version: 1,
 			objects: [
@@ -475,7 +521,7 @@ describe('VectorManager', function () {
 					kind: 'page',
 					width: 100,
 					height: 100,
-					masterPart: 0,
+					masterPartId: 'M0',
 					primitives: [hairline('M0 0 L6 6')],
 				},
 				{ id: 3, masterContent: true, primitives: [hairline('M0 0 L5 5')] },
@@ -484,7 +530,7 @@ describe('VectorManager', function () {
 		});
 
 		const slide: any = manager.requestPart(0, cool.VectorMode.Slides);
-		nodeassert.strictEqual(slide.masterPart, 0);
+		nodeassert.strictEqual(slide.masterPartId, 'M0');
 		nodeassert.strictEqual(
 			manager.isPartDrawable(0, cool.VectorMode.Slides),
 			true,
@@ -510,7 +556,7 @@ describe('VectorManager', function () {
 		const hairline = (path: string): any => ({ type: 'polygonHairline', path });
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'M0',
 			mode: cool.VectorMode.MasterPages,
 			version: 1,
 			objects: [
@@ -526,7 +572,7 @@ describe('VectorManager', function () {
 			],
 		});
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			mode: cool.VectorMode.Slides,
 			version: 1,
 			objects: [
@@ -535,7 +581,7 @@ describe('VectorManager', function () {
 					kind: 'page',
 					width: 100,
 					height: 100,
-					masterPart: 0,
+					masterPartId: 'M0',
 					primitives: [],
 				},
 			],
@@ -561,7 +607,7 @@ describe('VectorManager', function () {
 		};
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 2,
+			partId: 'S2',
 			mode: cool.VectorMode.Slides,
 			version: 1,
 			objects: [
@@ -570,7 +616,7 @@ describe('VectorManager', function () {
 					kind: 'page',
 					width: 100,
 					height: 100,
-					masterPart: 1,
+					masterPartId: 'M1',
 					primitives: [],
 				},
 			],
@@ -582,13 +628,13 @@ describe('VectorManager', function () {
 		nodeassert.ok(
 			sent.some(
 				(message) =>
-					message.indexOf('.uno:VectorPrimitives?part=1&mode=1') >= 0,
+					message.indexOf('.uno:VectorPrimitives?partid=M1&mode=1') >= 0,
 			),
-			'the master the page names is fetched',
+			'the master the page names is fetched by its id',
 		);
 
 		manager.handleVectorPrimitivesResponse({
-			part: 1,
+			partId: 'M1',
 			mode: cool.VectorMode.MasterPages,
 			version: 1,
 			objects: [
@@ -636,7 +682,7 @@ describe('VectorManager', function () {
 			children: [{ type: 'polygonHairline', path: 'M0 0 L1 1' }],
 		};
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			objects: [
 				{ id: 0, kind: 'page', width: 1000, height: 800, primitives: [] },
 				{ id: 11, primitives: [prompt] },
@@ -661,7 +707,7 @@ describe('VectorManager', function () {
 
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			objects: [
 				{
 					id: 1,
@@ -689,7 +735,7 @@ describe('VectorManager', function () {
 
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 1,
 			objects: [{ id: 11, primitives: [] }],
 		});
@@ -701,7 +747,8 @@ describe('VectorManager', function () {
 		);
 		nodeassert.ok(
 			sent.some(
-				(message) => message.indexOf('.uno:VectorPrimitives?part=0') >= 0,
+				(message) =>
+					message.indexOf('.uno:VectorPrimitives?partid=S0&mode=0') >= 0,
 			),
 			'the dropped part is fetched afresh',
 		);
@@ -713,7 +760,7 @@ describe('VectorManager', function () {
 	it('drops cached parts and notifies on graphics memory reclaim', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			version: 1,
 			objects: [{ id: 11, primitives: [] }],
 		});
@@ -735,13 +782,13 @@ describe('VectorManager', function () {
 		const manager = new VectorManager();
 
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'S0',
 			mode: cool.VectorMode.Slides,
 			version: 1,
 			objects: [{ id: 11, primitives: [] }],
 		});
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'M0',
 			mode: cool.VectorMode.MasterPages,
 			version: 1,
 			objects: [
@@ -751,7 +798,7 @@ describe('VectorManager', function () {
 		});
 
 		const slide = manager.requestPart(0, cool.VectorMode.Slides);
-		const master = manager.requestPart(0, cool.VectorMode.MasterPages);
+		const master = manager.requestPartById('M0', cool.VectorMode.MasterPages);
 		nodeassert.deepStrictEqual(slide.order, [11]);
 		nodeassert.deepStrictEqual(master.order, [22, 33]);
 	});
@@ -766,7 +813,7 @@ describe('VectorManager', function () {
 
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'M0',
 			mode: cool.VectorMode.MasterPages,
 			version: 1,
 			objects: [],
@@ -779,7 +826,7 @@ describe('VectorManager', function () {
 		nodeassert.ok(
 			sent.some(
 				(message) =>
-					message.indexOf('.uno:VectorPrimitives?part=0&mode=0') >= 0,
+					message.indexOf('.uno:VectorPrimitives?partid=S0&mode=0') >= 0,
 			),
 			'the slide at the same index is fetched on its own',
 		);
@@ -798,20 +845,20 @@ describe('VectorManager', function () {
 
 		const manager = new VectorManager();
 		nodeassert.strictEqual(
-			manager.requestPart(4, cool.VectorMode.MasterPages),
+			manager.requestPartById('M4', cool.VectorMode.MasterPages),
 			undefined,
 		);
 		nodeassert.strictEqual(sent.length, 1, 'the part is asked for once');
 
 		// The engine answers that it holds no such page.
 		manager.handleVectorPrimitivesResponse({
-			part: 4,
 			mode: cool.VectorMode.MasterPages,
+			partId: 'M4',
 		});
 
 		// Asking again sends a fresh request instead of waiting on the first.
 		nodeassert.strictEqual(
-			manager.requestPart(4, cool.VectorMode.MasterPages),
+			manager.requestPartById('M4', cool.VectorMode.MasterPages),
 			undefined,
 		);
 		nodeassert.strictEqual(sent.length, 2, 'the part is asked for again');
@@ -826,8 +873,8 @@ describe('VectorManager', function () {
 		const response = loadVectorRenderingReference('testMasterAreaName');
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse(response);
-		const master = manager.requestPart(
-			response.part,
+		const master = manager.requestPartById(
+			response.partId,
 			cool.VectorMode.MasterPages,
 		);
 		nodeassert.ok(master, 'the master part is cached');
@@ -867,7 +914,7 @@ describe('VectorManager', function () {
 		const hairline = (path: string): any => ({ type: 'polygonHairline', path });
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 0,
+			partId: 'M0',
 			mode: cool.VectorMode.MasterPages,
 			version: 1,
 			objects: [
@@ -878,7 +925,10 @@ describe('VectorManager', function () {
 				},
 			],
 		});
-		const master: any = manager.requestPart(0, cool.VectorMode.MasterPages);
+		const master: any = manager.requestPartById(
+			'M0',
+			cool.VectorMode.MasterPages,
+		);
 		nodeassert.ok(master, 'the master part is cached');
 
 		const content = new CanvasRecorder();
@@ -894,7 +944,7 @@ describe('VectorManager', function () {
 	it('treats a response with no mode as a slide', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
-			part: 2,
+			partId: 'S2',
 			version: 1,
 			objects: [{ id: 11, primitives: [] }],
 		});
@@ -902,13 +952,95 @@ describe('VectorManager', function () {
 		nodeassert.ok(manager.requestPart(2, cool.VectorMode.Slides));
 	});
 
+	// A page is cached under its id, so a slide inserted in front of it moves
+	// its index and nothing else: the page list names the page at the new
+	// index and the cache answers for it without asking the engine again.
+	it('keeps a cached page when its index moves', function () {
+		const sent: string[] = [];
+		(app as any).socket.sendMessage = function (message: string) {
+			sent.push(message);
+		};
+		const originalImpress = (app as any).impress;
+		try {
+			const manager = new VectorManager();
+			manager.handleVectorPrimitivesResponse({
+				partId: 'S0',
+				mode: cool.VectorMode.Slides,
+				version: 3,
+				objects: [{ id: 11, primitives: [] }],
+			});
+
+			// A new slide is inserted before it, and the status carries the new list.
+			(app as any).impress = {
+				partList: [
+					{ part: 'S9', mode: cool.VectorMode.Slides },
+					{ part: 'S0', mode: cool.VectorMode.Slides },
+				],
+			};
+			manager.partListChanged();
+
+			const moved: any = manager.requestPart(1, cool.VectorMode.Slides);
+			nodeassert.ok(moved, 'the page is still cached at its new index');
+			nodeassert.strictEqual(moved.version, 3);
+			nodeassert.deepStrictEqual(moved.order, [11]);
+			nodeassert.strictEqual(sent.length, 0, 'nothing was asked for again');
+
+			// The new slide at the old index is another page, asked for by its id.
+			nodeassert.strictEqual(
+				manager.requestPart(0, cool.VectorMode.Slides),
+				undefined,
+			);
+			nodeassert.ok(
+				sent.some(
+					(message) =>
+						message.indexOf('.uno:VectorPrimitives?partid=S9&mode=0') >= 0,
+				),
+				'the inserted page is fetched by its id',
+			);
+		} finally {
+			(app as any).impress = originalImpress;
+			(app as any).socket.sendMessage = function () {};
+		}
+	});
+
+	// A delta names the page by its id, so it reaches the page wherever the
+	// page now sits in its list.
+	it('applies a delta to a page whose index moved', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			partId: 'S0',
+			version: 1,
+			objects: [{ id: 11, primitives: [] }],
+		});
+
+		// Two slides are inserted before it, and the status carries the new list.
+		(app as any).impress = {
+			partList: [
+				{ part: 'S7', mode: cool.VectorMode.Slides },
+				{ part: 'S8', mode: cool.VectorMode.Slides },
+				{ part: 'S0', mode: cool.VectorMode.Slides },
+			],
+		};
+		manager.partListChanged();
+
+		manager.handleVectorPrimitivesDelta({
+			partId: 'S0',
+			version: 2,
+			objects: [{ id: 11, primitives: [{ type: 'polygonHairline' }] }],
+		});
+
+		const data: any = manager.requestPart(2, cool.VectorMode.Slides);
+		nodeassert.ok(data, 'the page is found at its new index');
+		nodeassert.strictEqual(data.version, 2);
+		nodeassert.strictEqual(data.objects.get(11).primitives.length, 1);
+	});
 	// Two views can edit the same text box at once, each with an entry of its
 	// own carrying the same text. Only one of them is drawn: this view's own
 	// where it is one of the two, and otherwise the first.
 	it('draws one text edit entry per edited object', function () {
 		const hairline = (path: string): any => ({ type: 'polygonHairline', path });
 		const response: any = {
-			part: 0,
+			partId: 'S0',
 			version: 1,
 			objects: [
 				{ id: 0, kind: 'page', width: 100, height: 100, primitives: [] },
@@ -1015,7 +1147,9 @@ describe('VectorManager', function () {
 					if (name === 'tilepreview') drawn.push(event);
 				},
 			};
-			(app as any).impress = { partList: [] };
+			(app as any).impress = {
+				partList: pageList(cool.VectorMode.Slides, 10),
+			};
 		});
 
 		afterEach(function () {
@@ -1029,8 +1163,8 @@ describe('VectorManager', function () {
 		// A response for a page with a page entry of the given size and the
 		// given objects on it.
 		const page = (part: number, mode: number, objects: any[]): any => ({
-			part: part,
 			mode: mode,
+			partId: (mode === cool.VectorMode.MasterPages ? 'M' : 'S') + String(part),
 			version: 1,
 			objects: [
 				{ id: 0, kind: 'page', width: 100, height: 100, primitives: [] },
@@ -1046,6 +1180,9 @@ describe('VectorManager', function () {
 		// placeholders are what there is to see on it. A thumbnail of one
 		// draws them, prompt text and all.
 		it('draws the prompt text of a master page thumbnail', function () {
+			(app as any).impress = {
+				partList: pageList(cool.VectorMode.MasterPages, 5),
+			};
 			const manager = new VectorManager();
 			manager.requestThumbnail(0, 0, cool.VectorMode.MasterPages, 100, 100);
 			manager.handleVectorPrimitivesResponse(
@@ -1056,6 +1193,10 @@ describe('VectorManager', function () {
 
 			nodeassert.strictEqual(drawn.length, 1);
 			nodeassert.strictEqual(drawn[0].mode, cool.VectorMode.MasterPages);
+			// The preview names the page it shows by its id and by its index at
+			// render time.
+			nodeassert.strictEqual(drawn[0].part, 'M0');
+			nodeassert.strictEqual(drawn[0].partIndex, 0);
 			nodeassert.ok(
 				drawnText(drawn[0]).indexOf('Click to edit') >= 0,
 				'the master thumbnail drew no prompt text',
@@ -1067,12 +1208,15 @@ describe('VectorManager', function () {
 		// up at that index later is not drawn into a preview that has since
 		// stopped asking for it.
 		it('drops a thumbnail of a part the document does not hold', function () {
+			(app as any).impress = {
+				partList: pageList(cool.VectorMode.MasterPages, 5),
+			};
 			const manager = new VectorManager();
 			manager.requestThumbnail(0, 4, cool.VectorMode.MasterPages, 100, 100);
 
 			manager.handleVectorPrimitivesResponse({
-				part: 4,
 				mode: cool.VectorMode.MasterPages,
+				partId: 'M4',
 			});
 			nodeassert.strictEqual(drawn.length, 0);
 

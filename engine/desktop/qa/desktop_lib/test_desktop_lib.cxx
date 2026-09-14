@@ -62,6 +62,7 @@
 #include <o3tl/string_view.hxx>
 
 #include <lib/init.hxx>
+#include <vcl/ITiledRenderable.hxx>
 #include <svx/svxids.hrc>
 
 #include <cppunit/TestAssert.h>
@@ -1957,10 +1958,17 @@ void DesktopKitTest::testVectorDeltaPushCoalescing()
     handler->setViewId(KitHelper::getCurrentView());
     handler->setVectorRendering(0);
 
+    // A part is named by its id, the page GUID, the same value the status message names it by.
+    vcl::ITiledRenderable* pTiledRenderable
+        = dynamic_cast<vcl::ITiledRenderable*>(pDocument->mxComponent.get());
+    CPPUNIT_ASSERT(pTiledRenderable);
+    const OString aPartId = pTiledRenderable->getPartId(0, 0);
+    CPPUNIT_ASSERT(!aPartId.isEmpty());
+
     tools::Rectangle aRectangle1(Point(10, 10), Size(20, 10));
     handler->viewInvalidateTilesCallback(&aRectangle1, 0, 0);
-    handler->viewVectorPartChanged(0, 0);
-    handler->viewVectorPartChanged(0, 0);
+    handler->viewVectorPartChanged(aPartId, 0);
+    handler->viewVectorPartChanged(aPartId, 0);
 
     Scheduler::ProcessEventsToIdle();
 

@@ -5646,9 +5646,12 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testPaintVectorPrimitives)
     SdXImpressDocument* pXImpressDocument = createDoc("SlideExample.odp");
     CPPUNIT_ASSERT(pXImpressDocument);
 
-    // Request vector content for the current slide
+    // Request vector content for the first slide, named by its page id.
+    const SdPage* pSlide = pXImpressDocument->GetDoc()->GetSdPage(0, PageKind::Standard);
+    const OString aCommand = ".uno:VectorPrimitives?partid=" + pSlide->GetGuid().getString();
     tools::JsonWriter aJsonWriter;
-    pXImpressDocument->getCommandValues(aJsonWriter, ".uno:VectorPrimitives");
+    pXImpressDocument->getCommandValues(aJsonWriter,
+                                        std::string_view(aCommand.getStr(), aCommand.getLength()));
     OString aResult = aJsonWriter.finishAndGetAsOString();
 
     // Is JSON empty
@@ -5762,8 +5765,11 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testPaintVectorPrimitivesMasterPagePl
     SdXImpressDocument* pXImpressDocument = createDoc("MasterPagePlaceholderTest.fodp");
     CPPUNIT_ASSERT(pXImpressDocument);
 
+    const SdPage* pSlide = pXImpressDocument->GetDoc()->GetSdPage(0, PageKind::Standard);
+    const OString aCommand = ".uno:VectorPrimitives?partid=" + pSlide->GetGuid().getString();
     tools::JsonWriter aJsonWriter;
-    pXImpressDocument->getCommandValues(aJsonWriter, ".uno:VectorPrimitives");
+    pXImpressDocument->getCommandValues(aJsonWriter,
+                                        std::string_view(aCommand.getStr(), aCommand.getLength()));
     OString aResult = aJsonWriter.finishAndGetAsOString();
     CPPUNIT_ASSERT(!aResult.isEmpty());
 
@@ -5866,7 +5872,10 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testOpenEditRaisesTheVectorVersion)
 
     auto aPartVersion = [pXImpressDocument]() -> sal_Int64 {
         tools::JsonWriter aJsonWriter;
-        pXImpressDocument->getCommandValues(aJsonWriter, ".uno:VectorPrimitives?part=0");
+        const SdPage* pSlide = pXImpressDocument->GetDoc()->GetSdPage(0, PageKind::Standard);
+        const OString aCommand = ".uno:VectorPrimitives?partid=" + pSlide->GetGuid().getString();
+        pXImpressDocument->getCommandValues(
+            aJsonWriter, std::string_view(aCommand.getStr(), aCommand.getLength()));
         const OString aResult = aJsonWriter.finishAndGetAsOString();
         auto oJson
             = tools::JsonPath::parse(std::string_view(aResult.getStr(), aResult.getLength()));
