@@ -324,6 +324,14 @@ class RenderManager {
 		RenderManager.ensureInstance().partListChanged();
 	}
 
+	static revalidateCachedParts(): void {
+		RenderManager.ensureInstance().revalidateCachedParts();
+	}
+
+	static forgetRequestsInFlight(): void {
+		RenderManager.ensureInstance().forgetRequestsInFlight();
+	}
+
 	static clearCachedPart(partId: cool.VectorPartGuid): void {
 		RenderManager.ensureInstance().clearCachedPart(partId);
 	}

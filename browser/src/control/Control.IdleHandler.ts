@@ -81,6 +81,12 @@ class IdleHandler {
 				app.socket.sendMessage('useractive');
 				this._active = true;
 
+				// Vector content is pushed, and a view that is away is sent none
+				// of it. Nothing marks the cache as stale, so ask for every
+				// cached part again. A view that is still loading the document
+				// asks once the load is done.
+				if (this.map._docLoaded) RenderManager.revalidateCachedParts();
+
 				/*
 				  If we have the docLayer then refresh annotations now. If not then
 				  postpone until we do have the docLayer so we know if this is calc

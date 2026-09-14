@@ -40,6 +40,10 @@ class VectorManager extends RenderManagerBase {
 	// Pages a JSON primitive tree request is in flight for, keyed by page id.
 	private _inFlightParts: Set<cool.VectorPartGuid> = new Set();
 
+	// Pages the document said it does not hold. Asking again is pointless
+	// until the page list is replaced.
+	private _missingParts: Set<cool.VectorPartGuid> = new Set();
+
 	// Decoded bitmap images keyed by their checksum.
 	private _bitmaps = new VectorResourceTracker<number, HTMLImageElement>(
 		(checksum) =>
@@ -145,7 +149,8 @@ class VectorManager extends RenderManagerBase {
 
 	/// Send for a page unless a request for it is already out.
 	private _request(partId: cool.VectorPartGuid, mode: number): void {
-		if (this._inFlightParts.has(partId)) return;
+		if (this._inFlightParts.has(partId) || this._missingParts.has(partId))
+			return;
 		this._inFlightParts.add(partId);
 		this._sendVectorPrimitivesRequest(partId, mode);
 	}
@@ -368,7 +373,11 @@ class VectorManager extends RenderManagerBase {
 			queue = [];
 			this._pendingPreviews.set(partId, queue);
 		}
-		queue.push({ id: id, maxWidth: maxWidth, maxHeight: maxHeight });
+		// One preview waits once, at the size it last asked for.
+		const pending = { id: id, maxWidth: maxWidth, maxHeight: maxHeight };
+		const waiting = queue.findIndex((entry) => entry.id === id);
+		if (waiting >= 0) queue[waiting] = pending;
+		else queue.push(pending);
 
 		if (!cached) this._request(partId, mode);
 	}
@@ -411,10 +420,14 @@ class VectorManager extends RenderManagerBase {
 
 		// A response with no objects names a part the document does not
 		// hold. It happens while the page list is catching up with a mode
-		// switch, so nothing is cached, the previews queued for a page that
-		// is not there are dropped, and the next draw asks again.
+		// switch, or when the page was removed while the client was away. So
+		// nothing stays cached for it, the previews queued for a page that
+		// is not there are dropped, and the page is not asked for again until
+		// the page list is replaced.
 		if (values.objects === undefined) {
+			this._cache.delete(partId);
 			this._pendingPreviews.delete(partId);
+			this._missingParts.add(partId);
 			return;
 		}
 
@@ -448,7 +461,12 @@ class VectorManager extends RenderManagerBase {
 			walker.walkObjects(received);
 		});
 
-		this._drainDrawable(partId);
+		// A preview already shown for the page is drawn again from the new
+		// content. This is how a client that asked for its cached pages again
+		// after being away gets fresh thumbnails. A preview that was waiting
+		// for this response is drawn by the drain alone.
+		const drained = this._drainDrawable(partId);
+		if (this._isDrawable(data)) this._redrawRenderedPreviews(partId, drained);
 		if (mode === cool.VectorMode.MasterPages) this._onMasterArrived(partId);
 		this._fireChanged();
 		this.setVisualsReady();
@@ -614,12 +632,15 @@ class VectorManager extends RenderManagerBase {
 	}
 
 	/// Re-render every preview already shown for a part against its
-	/// current cached data.
-	private _redrawRenderedPreviews(partId: cool.VectorPartGuid): void {
+	/// current cached data, leaving out the ones named.
+	private _redrawRenderedPreviews(
+		partId: cool.VectorPartGuid,
+		except?: Set<cool.PreviewId>,
+	): void {
 		const data = this._cache.get(partId);
 		if (!data) return;
 		for (const [id, info] of this._renderedPreviews) {
-			if (info.partId !== partId) continue;
+			if (info.partId !== partId || except?.has(id)) continue;
 			this._renderAndFire(id, info.maxWidth, info.maxHeight, data);
 		}
 	}
@@ -669,7 +690,25 @@ class VectorManager extends RenderManagerBase {
 	/// another page than it did. The cache and the requests in flight are
 	/// keyed by page id and stay. The change listeners are notified.
 	partListChanged(): void {
+		this._missingParts.clear();
 		this._fireChanged();
+	}
+
+	/// Ask for every cached part again, keeping what is drawn until the answer arrives. A
+	/// client that was away while a part changed has nothing that marks its cache as stale,
+	/// so it would not ask on its own.
+	revalidateCachedParts(): void {
+		for (const [partId, data] of Array.from(this._cache.entries())) {
+			if (this._inFlightParts.has(partId)) continue;
+			this._inFlightParts.add(partId);
+			this._sendVectorPrimitivesRequest(partId, data.mode);
+		}
+	}
+
+	/// Forget the requests in flight. A request sent before the connection dropped gets no
+	/// answer, so the next draw or revalidation asks for the page again.
+	forgetRequestsInFlight(): void {
+		this._inFlightParts.clear();
 	}
 
 	/// Drop cached data for a page and any in-flight state.
@@ -714,13 +753,14 @@ class VectorManager extends RenderManagerBase {
 	}
 
 	/// Draw the previews waiting for a part once the part and the master it
-	/// names are both cached.
-	private _drainDrawable(partId: cool.VectorPartGuid): void {
+	/// names are both cached. Returns the ids of the previews drawn.
+	private _drainDrawable(partId: cool.VectorPartGuid): Set<cool.PreviewId> {
+		const drawn = new Set<cool.PreviewId>();
 		const data = this._cache.get(partId);
-		if (!data || !this._isDrawable(data)) return;
+		if (!data || !this._isDrawable(data)) return drawn;
 
 		const queue = this._pendingPreviews.get(partId);
-		if (!queue) return;
+		if (!queue) return drawn;
 		this._pendingPreviews.delete(partId);
 
 		for (const pending of queue) {
@@ -730,7 +770,9 @@ class VectorManager extends RenderManagerBase {
 				pending.maxHeight,
 				data,
 			);
+			drawn.add(pending.id);
 		}
+		return drawn;
 	}
 
 	/// Render to an offscreen canvas and trigger rendering of the thumbnail.

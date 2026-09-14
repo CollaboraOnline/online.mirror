@@ -261,6 +261,12 @@ class RenderManagerBase {
 	partListChanged(): void {}
 
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	revalidateCachedParts(): void {}
+
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	forgetRequestsInFlight(): void {}
+
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	clearCachedPart(_partId: cool.VectorPartGuid): void {}
 
 	// eslint-disable-next-line @typescript-eslint/no-empty-function

@@ -1128,6 +1128,12 @@ class Socket {
 			// we are reconnecting ...
 			this._map._docLayer._resetClientVisArea();
 			RenderManager.refreshTilesInBackground();
+			// Vector content is pushed, and nothing was pushed here while the
+			// connection was down. Nothing marks the cache as stale, so ask for it
+			// again. The requests sent before the connection dropped get no answer,
+			// so they are forgotten first.
+			RenderManager.forgetRequestsInFlight();
+			RenderManager.revalidateCachedParts();
 			this._map.fire('statusindicator', { statusType: 'reconnected' });
 
 			const darkTheme = window.prefs.getBoolean('darkTheme');

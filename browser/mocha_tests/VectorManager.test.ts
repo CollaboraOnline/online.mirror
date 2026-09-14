@@ -358,6 +358,91 @@ describe('VectorManager', function () {
 		nodeassert.ok(data.objects.has(22), 'the new page is cached');
 	});
 
+	// A client that was away was sent none of the changes made while it was, and nothing
+	// marks its cache as stale, so it asks for every cached part again. The cache stays
+	// drawable until the answer arrives.
+	it('asks for the cached parts again and keeps drawing them', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			partId: 'S0',
+			version: 5,
+			objects: [{ id: 11, primitives: [] }],
+		});
+
+		const sent: string[] = [];
+		const socket: any = (app as any).socket;
+		const originalSendMessage = socket.sendMessage;
+		socket.sendMessage = function (message: string) {
+			sent.push(message);
+		};
+		try {
+			manager.revalidateCachedParts();
+		} finally {
+			socket.sendMessage = originalSendMessage;
+		}
+
+		nodeassert.strictEqual(sent.length, 1);
+		nodeassert.ok(
+			sent[0].indexOf('.uno:VectorPrimitives?partid=S0&mode=0') >= 0,
+			'the request does not name the cached page: ' + sent[0],
+		);
+		nodeassert.ok(
+			manager.requestPart(0, cool.VectorMode.Slides),
+			'the part stopped being drawable while it was asked for again',
+		);
+	});
+
+	// A request sent before the connection dropped gets no answer, so a reconnect forgets it
+	// and asks for the part again. A request still in flight is not sent twice.
+	it('asks again for a cached part once its request is forgotten', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			partId: 'S0',
+			epoch: 100,
+			version: 5,
+			objects: [{ id: 11, primitives: [] }],
+		});
+
+		const sent: string[] = [];
+		const socket: any = (app as any).socket;
+		const originalSendMessage = socket.sendMessage;
+		socket.sendMessage = function (message: string) {
+			sent.push(message);
+		};
+		try {
+			manager.revalidateCachedParts();
+			manager.revalidateCachedParts();
+			nodeassert.strictEqual(sent.length, 1);
+			manager.forgetRequestsInFlight();
+			manager.revalidateCachedParts();
+		} finally {
+			socket.sendMessage = originalSendMessage;
+		}
+
+		nodeassert.strictEqual(sent.length, 2);
+	});
+
+	// A page removed while the client was away is answered with the header
+	// alone, and its cache entry is dropped.
+	it('drops a cached part when the answer says the page is gone', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			partId: 'S3',
+			version: 5,
+			objects: [{ id: 11, primitives: [] }],
+		});
+
+		manager.handleVectorPrimitivesResponse({
+			mode: 0,
+			partId: 'S3',
+		});
+
+		nodeassert.strictEqual(
+			manager.requestPart(3, cool.VectorMode.Slides),
+			undefined,
+		);
+	});
+
 	// The page rectangle rides on the page entry rather than on a field of
 	// its own, so it arrives with a full response and a delta that carries
 	// that entry updates it, which is how a resized page reaches the client.
@@ -879,9 +964,9 @@ describe('VectorManager', function () {
 	});
 
 	// A part the document does not hold is answered with the header alone.
-	// The manager must drop the request rather than hold it open, so the next
-	// draw asks again once the page list has caught up.
-	it('retries a part the document did not have', function () {
+	// The request is closed, and the page is not asked for again until the
+	// page list is replaced, which is when the answer could differ.
+	it('asks again for a missing part once the page list is replaced', function () {
 		const sent: string[] = [];
 		(app as any).socket.sendMessage = function (message: string) {
 			sent.push(message);
@@ -900,7 +985,18 @@ describe('VectorManager', function () {
 			partId: 'M4',
 		});
 
-		// Asking again sends a fresh request instead of waiting on the first.
+		// Asking again sends nothing while the page list is the one that did
+		// not hold the page, and asks again once the list is replaced.
+		nodeassert.strictEqual(
+			manager.requestPartById('M4', cool.VectorMode.MasterPages),
+			undefined,
+		);
+		nodeassert.strictEqual(
+			sent.length,
+			1,
+			'a page the document lacks was asked again',
+		);
+		manager.partListChanged();
 		nodeassert.strictEqual(
 			manager.requestPartById('M4', cool.VectorMode.MasterPages),
 			undefined,
@@ -1268,6 +1364,36 @@ describe('VectorManager', function () {
 				page(4, cool.VectorMode.MasterPages, []),
 			);
 			nodeassert.strictEqual(drawn.length, 0);
+		});
+
+		// A page asked for again after being away answers with a full response,
+		// and a preview already shown for it is drawn again from that.
+		it('draws a shown preview again when its page arrives anew', function () {
+			const manager = new VectorManager();
+			manager.requestThumbnail(0, 0, cool.VectorMode.Slides, 100, 100);
+			manager.handleVectorPrimitivesResponse(
+				page(0, cool.VectorMode.Slides, [{ id: 1, primitives: [] }]),
+			);
+			nodeassert.strictEqual(drawn.length, 1);
+
+			const again = page(0, cool.VectorMode.Slides, [
+				{ id: 1, primitives: [] },
+			]);
+			again.version = 2;
+			manager.handleVectorPrimitivesResponse(again);
+			nodeassert.strictEqual(drawn.length, 2);
+		});
+
+		// A preview asked for twice while its page is pending is drawn once.
+		it('draws a waiting preview once however often it asked', function () {
+			const manager = new VectorManager();
+			manager.requestThumbnail(0, 0, cool.VectorMode.Slides, 100, 100);
+			manager.requestThumbnail(0, 0, cool.VectorMode.Slides, 120, 120);
+			manager.handleVectorPrimitivesResponse(
+				page(0, cool.VectorMode.Slides, [{ id: 1, primitives: [] }]),
+			);
+			nodeassert.strictEqual(drawn.length, 1);
+			nodeassert.strictEqual(drawn[0].width, 120);
 		});
 
 		// A slide stands on its own, so the prompt that invites an edit is
