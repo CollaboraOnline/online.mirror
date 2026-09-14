@@ -385,12 +385,21 @@ class VectorManager extends RenderManagerBase {
 	private _sendVectorPrimitivesRequest(
 		partId: cool.VectorPartGuid,
 		mode: number,
+		held?: cool.VectorPrimitivesData,
 	): void {
+		// A client that holds the page says at which version, and in which
+		// version space, so the answer is the step from there rather than
+		// the whole page.
+		const since =
+			held?.version !== undefined && held.epoch !== undefined
+				? '&since=' + String(held.version) + '&epoch=' + String(held.epoch)
+				: '';
 		app.socket.sendMessage(
 			'commandvalues command=.uno:VectorPrimitives?partid=' +
 				partId +
 				'&mode=' +
-				String(mode),
+				String(mode) +
+				since,
 		);
 	}
 
@@ -494,6 +503,10 @@ class VectorManager extends RenderManagerBase {
 
 		const cached = this._cache.get(partId);
 		if (!cached) return;
+
+		// A delta is also what answers a request that said which version the
+		// client holds, and only a client that holds the page says that.
+		this._inFlightParts.delete(partId);
 
 		// A delta from another epoch counts its versions from another start, so
 		// it says nothing about what is cached and the part is fetched whole.
@@ -696,12 +709,13 @@ class VectorManager extends RenderManagerBase {
 
 	/// Ask for every cached part again, keeping what is drawn until the answer arrives. A
 	/// client that was away while a part changed has nothing that marks its cache as stale,
-	/// so it would not ask on its own.
+	/// so it would not ask on its own. Each request names the version the client holds, so
+	/// the answer is a delta from there, or a header alone when nothing changed.
 	revalidateCachedParts(): void {
 		for (const [partId, data] of Array.from(this._cache.entries())) {
 			if (this._inFlightParts.has(partId)) continue;
 			this._inFlightParts.add(partId);
-			this._sendVectorPrimitivesRequest(partId, data.mode);
+			this._sendVectorPrimitivesRequest(partId, data.mode, data);
 		}
 	}
 

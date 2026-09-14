@@ -2993,6 +2993,10 @@ public:
 
     bool isDelta() const { return mnSinceVersion >= 0; }
 
+    /// True when the delta is pushed rather than pulled. A push with nothing changed writes no
+    /// document. A pull always writes the header.
+    void setPush(bool bPush) { mbPush = bPush; }
+
     /// The page the request names, or nullptr when the document holds no such page or the mode
     /// is one this writer does not serve. Resolved once, and later calls return the same page.
     SdPage* resolvePage()
@@ -3010,9 +3014,9 @@ public:
         SdPage* pPage = resolvePage();
         if (!pPage)
         {
-            // A delta with nothing to say writes nothing, and a page that is not there has
-            // nothing to say. A full request gets the header, so the client can drop it.
-            if (!isDelta())
+            // A push writes nothing for a page that is not there. A pull gets the header
+            // alone.
+            if (!isDelta() || !mbPush)
                 writeMissingPage(rWriter);
             return;
         }
@@ -3026,10 +3030,10 @@ public:
         resolvePageContent(pPage);
         resolveTextEditEntry(pPage);
 
-        // A trigger only says that something may have changed. Once the comparison has had its
-        // say there is often nothing left to tell the client, and then the response carries
-        // nothing at all rather than a header with empty arrays under it.
-        if (isDelta() && !hasContentToSend(pPage))
+        // A trigger only says that something may have changed. When the comparison finds
+        // nothing changed, a push writes nothing at all and a pull is answered with the header
+        // alone.
+        if (isDelta() && mbPush && !hasContentToSend(pPage))
             return;
 
         writeHeader(rWriter, pPage);
@@ -3976,6 +3980,7 @@ private:
     OString maPartId;
     sal_Int32 mnMode;
     sal_Int64 mnSinceVersion = -1;
+    bool mbPush = false;
     bool mbResolved = false;
     SdPage* mpPage = nullptr;
     drawinglayer::geometry::ViewInformation2D maViewInformation;
@@ -4269,6 +4274,12 @@ void SdXImpressDocument::getCommandValues(::tools::JsonWriter& rJsonWriter,
         if (aSinceIterator != aMap.end())
             nSinceVersion = aSinceIterator->second.toInt64();
 
+        // The epoch names the version space the client's version counts in. A version from
+        // another epoch says nothing about this model, so the client is served the page whole.
+        auto aEpochIterator = aMap.find(u"epoch"_ustr);
+        if (aEpochIterator != aMap.end() && aEpochIterator->second.toInt32() != getVectorEpoch())
+            nSinceVersion = -1;
+
         writeVectorPrimitives(rJsonWriter, aPartId, nMode, nSinceVersion, /*bPush*/ false);
     }
 }
@@ -4300,6 +4311,11 @@ void SdXImpressDocument::writeVectorPrimitives(::tools::JsonWriter& rJsonWriter,
     VectorContentWriter aContentWriter(mpDoc, this, rPartId, nMode);
     SdPage* pPage = aContentWriter.resolvePage();
 
+    // A version above the part's own comes from content this model never served, so the page
+    // is sent whole.
+    if (pPage && nSinceVersion > sal_Int64(getVectorPartVersion(*pPage)))
+        nSinceVersion = -1;
+
     // A push steps from the version the part was last pushed at, then advances that mark. One
     // delta is written for the part and every client that holds the part reads that same one. A
     // page the document does not hold has no mark to move.
@@ -4311,6 +4327,7 @@ void SdXImpressDocument::writeVectorPrimitives(::tools::JsonWriter& rJsonWriter,
     }
 
     aContentWriter.setSinceVersion(nSinceVersion);
+    aContentWriter.setPush(bPush);
     aContentWriter.write(rJsonWriter);
 
     if (!pPage)

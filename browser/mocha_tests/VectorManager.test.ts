@@ -365,6 +365,7 @@ describe('VectorManager', function () {
 		const manager = new VectorManager();
 		manager.handleVectorPrimitivesResponse({
 			partId: 'S0',
+			epoch: 100,
 			version: 5,
 			objects: [{ id: 11, primitives: [] }],
 		});
@@ -383,13 +384,67 @@ describe('VectorManager', function () {
 
 		nodeassert.strictEqual(sent.length, 1);
 		nodeassert.ok(
-			sent[0].indexOf('.uno:VectorPrimitives?partid=S0&mode=0') >= 0,
-			'the request does not name the cached page: ' + sent[0],
+			sent[0].indexOf(
+				'.uno:VectorPrimitives?partid=S0&mode=0&since=5&epoch=100',
+			) >= 0,
+			'the request does not say what the client holds: ' + sent[0],
 		);
 		nodeassert.ok(
 			manager.requestPart(0, cool.VectorMode.Slides),
 			'the part stopped being drawable while it was asked for again',
 		);
+
+		// The answer is a delta, or a header alone when nothing changed. Either
+		// way it closes the request, so the part can be asked for again later.
+		manager.handleVectorPrimitivesDelta({
+			partId: 'S0',
+			epoch: 100,
+			from: 5,
+			version: 5,
+			objects: [],
+		});
+		sent.length = 0;
+		socket.sendMessage = function (message: string) {
+			sent.push(message);
+		};
+		try {
+			manager.revalidateCachedParts();
+		} finally {
+			socket.sendMessage = originalSendMessage;
+		}
+		nodeassert.strictEqual(
+			sent.length,
+			1,
+			'the closed request blocked the next',
+		);
+	});
+
+	// A pushed delta for a page that is not cached yet answers no request, so
+	// the full request for the page stays the one in flight.
+	it('keeps the request for a page open when a delta for it arrives first', function () {
+		const manager = new VectorManager();
+		const sent: string[] = [];
+		const socket: any = (app as any).socket;
+		const originalSendMessage = socket.sendMessage;
+		socket.sendMessage = function (message: string) {
+			sent.push(message);
+		};
+		try {
+			manager.requestPartById('M0', cool.VectorMode.MasterPages);
+			manager.handleVectorPrimitivesDelta({
+				mode: cool.VectorMode.MasterPages,
+				partId: 'M0',
+				epoch: 100,
+				from: 1,
+				version: 2,
+				objects: [],
+			});
+			manager.requestPartById('M0', cool.VectorMode.MasterPages);
+		} finally {
+			socket.sendMessage = originalSendMessage;
+		}
+
+		nodeassert.strictEqual(sent.length, 1);
 	});
 
 	// A request sent before the connection dropped gets no answer, so a reconnect forgets it
