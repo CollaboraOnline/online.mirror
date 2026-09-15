@@ -13,6 +13,11 @@ namespace cool {
 	/// Return true if the vector rendering should be enabled
 	export namespace VectorRenderingConfig {
 		export function isEnabled(): boolean {
+			// The debug panel's switch decides once there is a map to hold it. It starts out at
+			// the parameter the document was opened with, so the parameter answers only while
+			// the map is still on its way.
+			if (app.map && app.map._debug) return app.map._debug.vectorOn;
+
 			return window.coolParams.get('vector') === 'true';
 		}
 	}

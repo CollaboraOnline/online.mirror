@@ -25,7 +25,7 @@
 	than asked of the engine, and the object under the pointer is outlined along the geometry that
 	answered. The section is there whenever the document is drawn from vector primitives, so both
 	always are. The rectangles per object and the name of what was hit are drawn only while the
-	debug panel's "Render Geometry" tool is on.
+	debug panel's "Vector Overlays" tool is on.
 */
 
 /* global app RenderManager Cursor */
@@ -307,7 +307,7 @@ class RenderGeometrySection extends CanvasSectionObject {
 		this.outlineHitUnderMouse(data, xDiff, yDiff);
 
 		// The rectangles and the name of the hit are feedback about the geometry the client holds,
-		// so they follow the debug panel's "Render Geometry" tool.
+		// so they follow the debug panel's "Vector Overlays" tool.
 		if (!app.map._debug.renderGeometryOn) return;
 
 		this.context.save();

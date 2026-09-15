@@ -41,6 +41,9 @@ interface DocLayerInterface {
 	_docType: string;
 	_coreMousePointer: string;
 
+	/// Drops the tiles that are held and asks for the ones the view needs now.
+	_requestNewTiles(): void;
+
 	isCalc(): boolean;
 	isWriter(): boolean;
 	isImpress(): boolean;

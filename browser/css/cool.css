@@ -1802,7 +1802,10 @@ body.slideshow-presenting-in-window .jsdialog-window.modalpopup {
 #debug-panel .debug-panel-group legend { font-weight: 600; font-size: 12px; padding: 0 3px; }
 
 #debug-panel label { display: block; cursor: pointer; padding: 1px 0; }
+/* a tool that belongs under the one above it */
+#debug-panel label.debug-panel-subtool { padding-left: 18px; }
 #debug-panel input[type='checkbox'] { margin-right: 5px; }
+#debug-panel input[type='checkbox']:disabled + span { color: #888; }
 #debug-panel .debug-panel-number { width: 5.5em; margin-left: 5px; font: inherit; }
 
 /* the debug tile preload map, drawn above the document canvas it is a

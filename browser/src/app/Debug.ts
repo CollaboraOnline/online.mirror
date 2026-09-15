@@ -39,6 +39,11 @@ interface DebugTool {
 	onAdd: () => void;
 	onRemove: () => void;
 	input?: DebugToolInput;
+	/// Name of the tool this one belongs under. It is drawn indented and is offered only while
+	/// that tool is on.
+	dependsOn?: string;
+	/// Left running when the debug panel closes, instead of being switched off with it.
+	keepOnClose?: boolean;
 }
 
 interface DebugTimeArray {
@@ -69,6 +74,7 @@ class DebugManager {
 
 	private tileOverlaysOn: boolean;
 	public renderGeometryOn: boolean;
+	public vectorOn: boolean;
 
 	public tileInvalidationsOn: boolean;
 	private _tileInvalidationMessages: Map<number, string>;
@@ -123,6 +129,10 @@ class DebugManager {
 		this._painter = null;
 		this.debugOn = false;
 		this.debugNeverStarted = true;
+
+		// The vector switch starts out at what the document was opened with, and is what the
+		// rendering follows from then on.
+		this.vectorOn = window.coolParams.get('vector') === 'true';
 	}
 
 	public toggle(): void {
@@ -191,9 +201,10 @@ class DebugManager {
 	private _stop(): void {
 		this.debugOn = false;
 
-		// Deactivate all checked tools
+		// Deactivate the checked tools, apart from the ones that are kept: what those draw
+		// stays as it is until the panel is opened again and they are switched off there.
 		for (const entry of this._toolEntries) {
-			if (entry.checkbox.checked) {
+			if (entry.checkbox.checked && !entry.tool.keepOnClose) {
 				entry.tool.onRemove();
 			}
 		}
@@ -238,6 +249,45 @@ class DebugManager {
 		}
 	}
 
+	/*
+		The sections that draw a page from primitives and answer for the mouse are added while a
+		document loads, and only when the vector rendering was on then. The switch turns it on
+		while the document is open, so they are added and removed with it instead.
+	*/
+	private static updateVectorSections(): void {
+		const wanted = RenderManager.isVectorRendering();
+		const present = app.sectionContainer.doesSectionExist(
+			app.CSections.VectorContent.name,
+		);
+		if (wanted === present) return;
+
+		if (wanted) {
+			app.sectionContainer.addSection(new cool.VectorContentSection());
+			app.sectionContainer.addSection(new RenderGeometrySection());
+		} else {
+			app.sectionContainer.removeSection(app.CSections.VectorContent.name);
+			app.sectionContainer.removeSection(app.CSections.RenderGeometry.name);
+		}
+
+		// The objects the client holds answer what lies under the mouse while they are there,
+		// so the engine is asked for the pointer only while they are not.
+		RenderGeometrySection.requestPointerFromServer(!wanted);
+	}
+
+	/// Offer the tools that belong under the given one, or take the offer away. One that is on
+	/// when the offer goes is switched off first, so what it draws goes with it.
+	private setDependentToolsEnabled(name: string, enabled: boolean): void {
+		for (const entry of this._toolEntries) {
+			if (entry.tool.dependsOn !== name) continue;
+
+			if (!enabled && entry.checkbox.checked) {
+				entry.checkbox.checked = false;
+				entry.tool.onRemove();
+			}
+			entry.checkbox.disabled = !enabled;
+		}
+	}
+
 	private _addDebugTool(tool: DebugTool) {
 		// Create category fieldset if it doesn't exist
 		let fieldset = this._panel.querySelector(
@@ -279,6 +329,14 @@ class DebugManager {
 				toolInput.onChange(value);
 			});
 		}
+		if (tool.dependsOn) {
+			label.className = 'debug-panel-subtool';
+			const owner = this._toolEntries.find(
+				(entry) => entry.tool.name === tool.dependsOn,
+			);
+			checkbox.disabled = owner === undefined || !owner.checkbox.checked;
+		}
+
 		fieldset.appendChild(label);
 
 		this._toolEntries.push({ tool, checkbox });
@@ -325,6 +383,60 @@ class DebugManager {
 			},
 		});
 
+		// The vector rendering is a Draw and Impress thing: the engine sends the primitives for
+		// those documents only, and switching it in a text document or a spreadsheet would drop
+		// every tile for nothing.
+		const docType = self._docLayer._docType;
+		const vectorDocument = docType === 'presentation' || docType === 'drawing';
+
+		if (vectorDocument)
+			this._addDebugTool({
+				name: 'Vector',
+				category: 'Display',
+				startsOn: cool.VectorRenderingConfig.isEnabled(),
+				keepOnClose: true,
+				onAdd: function () {
+					self.vectorOn = true;
+					RenderManager.reinitialize(self._docLayer._docType);
+					DebugManager.updateVectorSections();
+					self.setDependentToolsEnabled('Vector', true);
+					app.sectionContainer.requestReDraw();
+				},
+				onRemove: function () {
+					self.setDependentToolsEnabled('Vector', false);
+					self.vectorOn = false;
+					RenderManager.reinitialize(self._docLayer._docType);
+					DebugManager.updateVectorSections();
+
+					// The manager that draws tiles starts out holding none, and the next
+					// request for them waits for something to change the view. Ask now.
+					if (!RenderManager.isVectorRendering())
+						self._docLayer._requestNewTiles();
+
+					app.sectionContainer.requestReDraw();
+				},
+			});
+
+		// The geometry of each object is drawn from the vector rendering cache. The tool turns
+		// the drawing of that geometry on. The section that holds it is there whenever the
+		// document is drawn from vector primitives.
+		if (vectorDocument)
+			this._addDebugTool({
+				name: 'Vector Overlays',
+				category: 'Display',
+				startsOn: self.renderGeometryOn,
+				dependsOn: 'Vector',
+				keepOnClose: true,
+				onAdd: function () {
+					self.renderGeometryOn = true;
+					RenderGeometrySection.update();
+				},
+				onRemove: function () {
+					self.renderGeometryOn = false;
+					RenderGeometrySection.update();
+				},
+			});
+
 		if (tilesDrawn) {
 			this._addDebugTool({
 				name: 'Tile Overlays',
@@ -342,29 +454,6 @@ class DebugManager {
 				},
 			});
 		}
-
-		// The geometry of each object is a Draw and Impress thing, and it is drawn from the
-		// vector rendering cache, so the tool is offered only where that cache exists. The tool
-		// turns the drawing of that geometry on. The section that holds it is there whenever
-		// the document is drawn from vector primitives.
-		const docType = self._docLayer._docType;
-		if (
-			(docType === 'presentation' || docType === 'drawing') &&
-			RenderManager.isVectorRendering()
-		)
-			this._addDebugTool({
-				name: 'Render Geometry',
-				category: 'Display',
-				startsOn: false,
-				onAdd: function () {
-					self.renderGeometryOn = true;
-					RenderGeometrySection.update();
-				},
-				onRemove: function () {
-					self.renderGeometryOn = false;
-					RenderGeometrySection.update();
-				},
-			});
 
 		if (tilesDrawn) {
 			this._addDebugTool({
