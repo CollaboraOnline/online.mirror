@@ -2632,15 +2632,12 @@ void recordObjectChange(SdXImpressDocument::VectorPartState& rState, const SdrOb
         rState.maDirtyObjects.insert(pParent->GetUniqueID());
 }
 
-/// Count the part's version up and remember it as the version the master
-/// content last changed at.
+/// Marks the page entry for comparison. The next write compares it against what was written
+/// last and counts the version up only when it differs, so a property set to its current value
+/// is not sent.
 void recordMasterChange(SdXImpressDocument::VectorPartState& rState)
 {
-    ++rState.mnVersion;
-    rState.mnMasterChangeVersion = rState.mnVersion;
-    // A page whose place in the document moved also carries a different set of objects, so the
-    // client is given the order again.
-    rState.mnOrderChangeVersion = rState.mnVersion;
+    rState.mbPageDirty = true;
 }
 
 // A slide's presentation info changed, so tell every view of the document.
@@ -2760,6 +2757,35 @@ void SdXImpressDocument::notifyTextEditChanged(const SdrObject& rEdited)
     // The write that follows looks at the text and counts the version up when it moved, which
     // is what makes the client take the delta rather than drop it as one it already holds.
     notifyViewsVectorPartChanged(mpDocShell, *pPage, oPart->mnMode);
+}
+
+bool SdXImpressDocument::takeVectorPageDirty(const SdrPage& rPage)
+{
+    auto aIterator = maVectorParts.find(vectorPartKeyOf(rPage));
+    if (aIterator == maVectorParts.end())
+        return true;
+    VectorPartState& rState = aIterator->second;
+    const bool bDirty = rState.mbPageDirty || !rState.moPageContent;
+    rState.mbPageDirty = false;
+    return bDirty;
+}
+
+bool SdXImpressDocument::recordVectorPageContent(const SdrPage& rPage,
+                                                 const VectorObjectContent& rContent,
+                                                 const OString& rMasterPartId)
+{
+    VectorPartState& rState = maVectorParts[vectorPartKeyOf(rPage)];
+    const bool bMoved = rState.moPageContent
+                        && (!(*rState.moPageContent == rContent)
+                            || rState.maPageMasterPartId != rMasterPartId);
+    rState.moPageContent = rContent;
+    rState.maPageMasterPartId = rMasterPartId;
+    if (bMoved)
+    {
+        ++rState.mnVersion;
+        rState.mnMasterChangeVersion = rState.mnVersion;
+    }
+    return bMoved;
 }
 
 bool SdXImpressDocument::isVectorMasterChangedSince(const SdrPage& rPage, sal_uInt64 nSince) const
@@ -2994,6 +3020,7 @@ public:
         // what was written last is what decides whether the part's version moves at all, so it
         // happens before the version is reported.
         resolveDirtyObjects(pPage);
+        resolvePageContent(pPage);
         resolveTextEditEntry(pPage);
 
         // A trigger only says that something may have changed. Once the comparison has had its
@@ -3148,18 +3175,75 @@ private:
             rWriter.putSimpleValue(0.0);
         }
 
-        drawinglayer::primitive2d::Primitive2DContainer aContent;
-        if (const SdPage* pMasterPage = servedMasterOf(pPage))
-        {
-            pageOwnPrimitives(pPage, aContent);
-            rWriter.put("masterPartId", vectorPartKeyOf(*pMasterPage));
-        }
-        else
-            pageContentPrimitives(pPage, aContent);
+        if (!maPageMasterPartId.isEmpty())
+            rWriter.put("masterPartId", maPageMasterPartId);
 
+        const drawinglayer::primitive2d::Primitive2DContainer& rContent
+            = pageContent(pPage).maPrimitives;
         auto aPrimArray = rWriter.startArray("primitives");
-        if (!aContent.empty())
-            maProcessor->decomposeAndWrite(aContent);
+        if (!rContent.empty())
+            maProcessor->decomposeAndWrite(rContent);
+    }
+
+    /// What the page entry carries behind the objects, built once per write: the page's own
+    /// background and fill, and the master content inline for a page whose master is not
+    /// served as a part. The master a slide draws under is remembered by its part id.
+    const SdXImpressDocument::VectorObjectContent& pageContent(SdPage* pPage)
+    {
+        if (!moPageContent)
+        {
+            SdXImpressDocument::VectorObjectContent aContent;
+            if (const SdPage* pMasterPage = servedMasterOf(pPage))
+            {
+                pageOwnPrimitives(pPage, aContent.maPrimitives);
+                maPageMasterPartId = vectorPartKeyOf(*pMasterPage);
+            }
+            else
+                pageContentPrimitives(pPage, aContent.maPrimitives);
+
+            decomposeForComparison(aContent);
+            aContent.maPaintedBox
+                = tools::Rectangle(Point(0, 0), Size(pPage->GetWidth(), pPage->GetHeight()));
+            moPageContent = std::move(aContent);
+        }
+        return *moPageContent;
+    }
+
+    /// Fills in what the primitives of the content decompose to, which is what is compared. A
+    /// primitive that decomposes to nothing is a leaf, a fill or a background color, and is
+    /// drawn itself, so it is compared itself.
+    void decomposeForComparison(SdXImpressDocument::VectorObjectContent& rContent) const
+    {
+        for (const auto& rPrimitive : rContent.maPrimitives)
+        {
+            // A page preview shows another page, and a field inside it reads against that page
+            // rather than against the one being drawn, so the preview names the page it shows
+            // as the visualized one.
+            drawinglayer::geometry::ViewInformation2D aViewInformation(maViewInformation);
+            if (const auto* pPreview
+                = dynamic_cast<const drawinglayer::primitive2d::PagePreviewPrimitive2D*>(
+                    rPrimitive.get()))
+                aViewInformation.setVisualizedPage(pPreview->getXDrawPage());
+
+            drawinglayer::primitive2d::Primitive2DContainer aDecomposed;
+            rPrimitive->get2DDecomposition(aDecomposed, aViewInformation);
+            if (aDecomposed.empty())
+                rContent.maDrawn.push_back(rPrimitive);
+            else
+                rContent.maDrawn.append(std::move(aDecomposed));
+        }
+    }
+
+    /// Compares the page entry when a change marked it, or for a full response, and counts the
+    /// part's version up only when it differs from what was written last.
+    void resolvePageContent(SdPage* pPage)
+    {
+        // A full response also repairs a page the client holds, so the entry is compared again.
+        const bool bDirty = mpModel->takeVectorPageDirty(*pPage);
+        if (!bDirty && isDelta())
+            return;
+        const SdXImpressDocument::VectorObjectContent& rContent = pageContent(pPage);
+        mpModel->recordVectorPageContent(*pPage, rContent, maPageMasterPartId);
     }
 
     /// True when the object is drawn behind the page the part stands for rather than being an
@@ -3461,24 +3545,7 @@ private:
             aContent.maAids
                 = sd::createPlaceholderDecoration(rObject, isBehindThePage(rObject));
 
-            for (const auto& rPrimitive : aContent.maPrimitives)
-            {
-                // A page preview shows another page, and a field inside it reads against that
-                // page rather than against the one being drawn, so the preview names the page
-                // it shows as the visualized one.
-                const auto* pPreview
-                    = dynamic_cast<const drawinglayer::primitive2d::PagePreviewPrimitive2D*>(
-                        rPrimitive.get());
-                if (!pPreview)
-                {
-                    rPrimitive->get2DDecomposition(aContent.maDrawn, maViewInformation);
-                    continue;
-                }
-
-                drawinglayer::geometry::ViewInformation2D aShownPage(maViewInformation);
-                aShownPage.setVisualizedPage(pPreview->getXDrawPage());
-                rPrimitive->get2DDecomposition(aContent.maDrawn, aShownPage);
-            }
+            decomposeForComparison(aContent);
         }
 
         aContent.maPaintedBox = paintedRectangleInTwips(rObject, aContent.maPrimitives);
@@ -3876,6 +3943,9 @@ private:
     std::unordered_map<sal_Int32, SdXImpressDocument::VectorObjectContent> maTextEditContent;
     /// The content built for an object in this write, by object id.
     std::unordered_map<sal_uInt64, SdXImpressDocument::VectorObjectContent> maResolvedContent;
+    /// The page entry's content and the master part it names, built once per write.
+    std::optional<SdXImpressDocument::VectorObjectContent> moPageContent;
+    OString maPageMasterPartId;
     /// The painted objects of the part and the views of the document, collected once per write.
     std::optional<std::vector<SdrObject*>> moPartObjects;
     std::optional<std::vector<EditingView>> moViews;

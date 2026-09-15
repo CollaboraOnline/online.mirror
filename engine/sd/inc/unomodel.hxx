@@ -234,6 +234,17 @@ public:
     /// than nSince.
     bool isVectorMasterChangedSince(const SdrPage& rPage, sal_uInt64 nSince) const;
 
+    /// True when a change marked the page entry, or nothing was recorded for it yet. Clears
+    /// the mark.
+    bool takeVectorPageDirty(const SdrPage& rPage);
+
+    /// Records what is written for the page entry: the content behind the objects and the id
+    /// of the master part the page names. When that differs from the last record, counts the
+    /// part's version up, remembers it as the version the entry last changed at, and returns
+    /// true. The first record for a part moves nothing.
+    bool recordVectorPageContent(const SdrPage& rPage, const VectorObjectContent& rContent,
+                                 const OString& rMasterPartId);
+
     /// Content state of one vector-rendering part: its current version, the version the last
     /// delta written for it was computed up to, the version at which its master page last
     /// changed, and, per object unique id, the version at which that object last changed.
@@ -253,10 +264,18 @@ public:
         /// response leaves the version where it found it, which can be zero, so the version
         /// alone does not say whether anyone holds the part.
         bool mbServed = false;
+        /// The version at which the page entry last changed: the page's own properties, its
+        /// background, the master it names or the master content it carries inline.
         sal_uInt64 mnMasterChangeVersion = 0;
         /// The version at which the set of objects on the part, or the order they paint in,
         /// last changed. A client whose content is newer than this already holds the order.
         sal_uInt64 mnOrderChangeVersion = 0;
+        /// True while a change marked the page entry for comparison.
+        bool mbPageDirty = false;
+        /// What was last written for the page entry, and the id of the master part it named.
+        /// Nothing before the part was first written.
+        std::optional<VectorObjectContent> moPageContent;
+        OString maPageMasterPartId;
         std::unordered_map<sal_uInt64, sal_uInt64> maObjectChangeVersions;
         std::unordered_map<sal_uInt64, VectorObjectContent> maObjectContent;
         std::unordered_set<sal_uInt64> maDirtyObjects;

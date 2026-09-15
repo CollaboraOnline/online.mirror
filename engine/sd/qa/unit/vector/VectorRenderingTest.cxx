@@ -1711,6 +1711,27 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testDeltaCarriesAutoColorTextOnBackgro
     assertJsonPath(*oPortion, "fontcolor", "#ffffff");
 }
 
+CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testSameBackgroundAgainSendsNothing)
+{
+    // A page property set to the value it already has announces a change like any other. The
+    // page entry is compared against what was written last, so a delta after such a write is
+    // empty.
+    createBlankDoc();
+    addRectangle(tools::Rectangle(Point(1000, 1000), Size(3000, 2000)), Color(0x4472c4), COL_BLACK);
+
+    SdrPageProperties& rProperties = page(1)->getSdrPageProperties();
+    rProperties.PutItem(XFillStyleItem(drawing::FillStyle_SOLID));
+    rProperties.PutItem(XFillColorItem(OUString(), Color(0xc00000)));
+
+    auto aFull = getVectorPrimitives(u"testSameBackgroundFull");
+    const sal_Int64 nVersion = aFull.getInt("/version").value_or(-1);
+
+    rProperties.PutItem(XFillColorItem(OUString(), Color(0xc00000)));
+
+    auto aDelta = getVectorPrimitives(u"testSameBackgroundDelta", nVersion);
+    CPPUNIT_ASSERT(!aDelta.has("/type"));
+}
+
 CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testDeltaCarriesChangedBackground)
 {
     // The slide background is serialized with the master page content, so
