@@ -2087,7 +2087,9 @@ void DomainMapper::sprmWithProps( Sprm& rSprm, const PropertyMapPtr& rContext )
     }
     break;  // sprmPFWidowControl
     case NS_ooxml::LN_CT_PPrBase_overflowPunct:
-        rContext->Insert(PROP_PARA_IS_HANGING_PUNCTUATION, cpo::uno::Any( nIntValue == 0 ));
+        // The element says whether punctuation may reach past the end of the line, which is what
+        // hanging punctuation is, so the two say the same thing and neither turns the other over.
+        rContext->Insert(PROP_PARA_IS_HANGING_PUNCTUATION, cpo::uno::Any( nIntValue != 0 ));
         break;
     case NS_ooxml::LN_CT_PPrBase_topLinePunct:
         break;
