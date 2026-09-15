@@ -138,7 +138,7 @@ function _menubuttonControl (parentContainer, data, builder) {
 			if (freshMenu.length === 1) {
 				callback(null, 'selected', null, null, freshMenu[0]);
 			} else {
-				JSDialog.OpenDropdown(dropdownId, control.container, freshMenu, callback);
+				JSDialog.OpenDropdown(dropdownId, control.container, freshMenu, callback, '', false, true);
 			}
 		};
 
