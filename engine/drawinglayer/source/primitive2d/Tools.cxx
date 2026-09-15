@@ -39,6 +39,11 @@ getB2DRangeFromPrimitive2DReference(const Primitive2DReference& rCandidate,
 
 bool arePrimitive2DReferencesEqual(const Primitive2DReference& rxA, const Primitive2DReference& rxB)
 {
+    // Two references to the same primitive are equal. A primitive does not change once it is
+    // made, so one object stands for one and the same content.
+    if (rxA.get() == rxB.get())
+        return true;
+
     const bool bAIs(rxA.is());
 
     if (bAIs != rxB.is())
@@ -57,6 +62,9 @@ bool arePrimitive2DReferencesEqual(const Primitive2DReference& rxA, const Primit
 bool arePrimitive2DReferencesEqual(const cpo::uno::Reference<css::graphic::XPrimitive2D>& rxA,
                                    const cpo::uno::Reference<css::graphic::XPrimitive2D>& rxB)
 {
+    if (rxA.get() == rxB.get())
+        return true;
+
     const bool bAIs(rxA.is());
 
     if (bAIs != rxB.is())
