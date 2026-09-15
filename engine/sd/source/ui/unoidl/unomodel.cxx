@@ -2319,6 +2319,16 @@ bool SdXImpressDocument::recordVectorObjectContent(const SdrPage& rPage, sal_uIn
     return true;
 }
 
+const SdXImpressDocument::VectorObjectContent*
+SdXImpressDocument::findVectorObjectContent(const SdrPage& rPage, sal_uInt64 nObjectId) const
+{
+    auto aIterator = maVectorParts.find(vectorPartKeyOf(rPage));
+    if (aIterator == maVectorParts.end())
+        return nullptr;
+    auto aContent = aIterator->second.maObjectContent.find(nObjectId);
+    return aContent != aIterator->second.maObjectContent.end() ? &aContent->second : nullptr;
+}
+
 void SdXImpressDocument::noteVectorObjectWritten(const SdrPage& rPage, sal_uInt64 nObjectId,
                                                  const VectorObjectContent& rContent)
 {
@@ -3309,28 +3319,6 @@ private:
         collectPaintedObjects(*pPage, rObjects);
     }
 
-    /// The order array lists every live object id on the page in paint order: the page entry
-    /// first, then each object with the objects inside a group right after the group. It is
-    /// the authoritative object set and ordering for the part.
-    void writeObjectOrder(tools::JsonWriter& rWriter, SdPage* pPage)
-    {
-        std::vector<SdrObject*> aObjects;
-        collectPartObjects(pPage, aObjects);
-
-        auto aOrderArray = rWriter.startArray("order");
-        rWriter.putSimpleValue(constPageEntryId);
-        for (const SdrObject* pObject : aObjects)
-            rWriter.putSimpleValue(sal_Int64(pObject->GetUniqueID()));
-
-        // The text of a running edit is last, so it draws over the object it runs on. Several
-        // views can be editing at once, so there is one entry for each of them.
-        for (const EditingView& rView : viewsOfDocument(pPage))
-        {
-            if (rView.mpView)
-                rWriter.putSimpleValue(textEditEntryId(rView.mnViewId));
-        }
-    }
-
     /// One entry per view of the document, saying which of them is running a text edit on the
     /// page. A view that is not editing it is named too, so what it last had recorded can be
     /// forgotten.
@@ -3339,6 +3327,46 @@ private:
         sal_Int32 mnViewId = -1;
         SdrObjEditView* mpView = nullptr;
     };
+
+    /// The painted objects of the part, collected once per write.
+    const std::vector<SdrObject*>& partObjects(SdPage* pPage)
+    {
+        if (!moPartObjects)
+        {
+            moPartObjects.emplace();
+            collectPartObjects(pPage, *moPartObjects);
+        }
+        return *moPartObjects;
+    }
+
+    /// The views of the document and the edit each runs on this page, collected once per write.
+    const std::vector<EditingView>& views(SdPage* pPage)
+    {
+        if (!moViews)
+            moViews = viewsOfDocument(pPage);
+        return *moViews;
+    }
+
+    /// The order array lists every live object id on the page in paint order: the page entry
+    /// first, then each object with the objects inside a group right after the group. It is
+    /// the authoritative object set and ordering for the part.
+    void writeObjectOrder(tools::JsonWriter& rWriter, SdPage* pPage)
+    {
+        const std::vector<SdrObject*>& rObjects = partObjects(pPage);
+
+        auto aOrderArray = rWriter.startArray("order");
+        rWriter.putSimpleValue(constPageEntryId);
+        for (const SdrObject* pObject : rObjects)
+            rWriter.putSimpleValue(sal_Int64(pObject->GetUniqueID()));
+
+        // The text of a running edit is last, so it draws over the object it runs on. Several
+        // views can be editing at once, so there is one entry for each of them.
+        for (const EditingView& rView : views(pPage))
+        {
+            if (rView.mpView)
+                rWriter.putSimpleValue(textEditEntryId(rView.mnViewId));
+        }
+    }
 
     std::vector<EditingView> viewsOfDocument(SdPage* pPage) const
     {
@@ -3378,10 +3406,10 @@ private:
     }
 
     /// True when any view is running a text edit on the page.
-    bool anyViewIsEditing(SdPage* pPage) const
+    bool anyViewIsEditing(SdPage* pPage)
     {
-        const std::vector<EditingView> aViews = viewsOfDocument(pPage);
-        return std::any_of(aViews.begin(), aViews.end(),
+        const std::vector<EditingView>& rViews = views(pPage);
+        return std::any_of(rViews.begin(), rViews.end(),
                            [](const EditingView& rView) { return rView.mpView != nullptr; });
     }
 
@@ -3477,19 +3505,29 @@ private:
         std::unordered_set<sal_uInt64> aDirty
             = mpModel->takeVectorDirtyObjects(*pPage);
 
-        std::vector<SdrObject*> aObjects;
-        collectPartObjects(pPage, aObjects);
+        const std::vector<SdrObject*>& rObjects = partObjects(pPage);
+
+        // A full response also repairs a page the client holds, so every recorded object is
+        // compared again. That also catches a change that came without a hint.
+        if (!isDelta())
+        {
+            for (const SdrObject* pObject : rObjects)
+            {
+                if (mpModel->findVectorObjectContent(*pPage, pObject->GetUniqueID()))
+                    aDirty.insert(pObject->GetUniqueID());
+            }
+        }
 
         // The paint order is compared as a whole. Raising an object above another announces a
         // change on that object alone and its own content stands still, so the order is the
         // only place the move shows. A group that lost or gained a member is looked at with it.
         std::vector<sal_uInt64> aOrder;
-        aOrder.reserve(aObjects.size());
-        for (const SdrObject* pObject : aObjects)
+        aOrder.reserve(rObjects.size());
+        for (const SdrObject* pObject : rObjects)
             aOrder.push_back(pObject->GetUniqueID());
         if (mpModel->recordVectorPaintOrder(*pPage, aOrder))
         {
-            for (const SdrObject* pObject : aObjects)
+            for (const SdrObject* pObject : rObjects)
             {
                 const SdrObjList* pChildren = pObject->GetSubList();
                 if (pChildren && pChildren->GetObjCount() > 0)
@@ -3498,7 +3536,7 @@ private:
         }
 
         std::unordered_map<sal_uInt64, SdrObject*> aObjectById;
-        for (SdrObject* pObject : aObjects)
+        for (SdrObject* pObject : rObjects)
             aObjectById.emplace(pObject->GetUniqueID(), pObject);
 
         // An object under edit is compared like any other, because what is typed rides on the
@@ -3512,7 +3550,9 @@ private:
                 continue;
             }
 
-            mpModel->recordVectorObjectContent(*pPage, nObjectId, contentOf(*aFound->second));
+            const auto aInserted
+                = maResolvedContent.emplace(nObjectId, contentOf(*aFound->second));
+            mpModel->recordVectorObjectContent(*pPage, nObjectId, aInserted.first->second);
         }
     }
 
@@ -3527,7 +3567,7 @@ private:
         }
 
         // The text of a running edit, when a keystroke moved it.
-        for (const EditingView& rView : viewsOfDocument(pPage))
+        for (const EditingView& rView : views(pPage))
         {
             if (mpModel->isVectorObjectChangedSince(*pPage, textEditEntryKey(rView.mnViewId),
                                                     sal_uInt64(mnSinceVersion)))
@@ -3536,10 +3576,9 @@ private:
             }
         }
 
-        std::vector<SdrObject*> aObjects;
-        collectPartObjects(pPage, aObjects);
+        const std::vector<SdrObject*>& rObjects = partObjects(pPage);
 
-        for (const SdrObject* pObject : aObjects)
+        for (const SdrObject* pObject : rObjects)
         {
             if (mpModel->isVectorObjectChangedSince(*pPage, pObject->GetUniqueID(),
                                                     sal_uInt64(mnSinceVersion)))
@@ -3555,7 +3594,7 @@ private:
     /// The object it runs on hides its own text, so this is what shows what has been typed.
     void writeTextEditEntry(tools::JsonWriter& rWriter, SdPage* pPage)
     {
-        for (const EditingView& rView : viewsOfDocument(pPage))
+        for (const EditingView& rView : views(pPage))
         {
             if (!rView.mpView)
                 continue;
@@ -3614,7 +3653,7 @@ private:
     void resolveTextEditEntry(SdPage* pPage)
     {
         std::unordered_set<sal_uInt64> aLiveKeys;
-        for (const EditingView& rView : viewsOfDocument(pPage))
+        for (const EditingView& rView : views(pPage))
         {
             const sal_uInt64 nKey = textEditEntryKey(rView.mnViewId);
             aLiveKeys.insert(nKey);
@@ -3651,10 +3690,9 @@ private:
     /// paint visits them.
     void writePageObjects(tools::JsonWriter& rWriter, SdPage* pPage)
     {
-        std::vector<SdrObject*> aObjects;
-        collectPartObjects(pPage, aObjects);
+        const std::vector<SdrObject*>& rObjects = partObjects(pPage);
 
-        for (SdrObject* pObject : aObjects)
+        for (SdrObject* pObject : rObjects)
         {
             // A delta carries full content only for the objects that changed after the client's
             // version. The rest stay in the order list. An object a text edit runs on says so in
@@ -3666,14 +3704,27 @@ private:
                 continue;
             }
 
-            const SdXImpressDocument::VectorObjectContent aContent(contentOf(*pObject));
-            const SdrObject* pParent = pObject->getParentSdrObjectFromSdrObject();
-            writeObjectEntry(rWriter, *pObject, pParent ? pParent->GetUniqueID() : 0, aContent);
+            // The content compared in this write is written. An object not compared is
+            // unchanged since its record, so the record is written. Only an object with no
+            // record is built here.
+            const sal_uInt64 nObjectId = pObject->GetUniqueID();
+            const SdXImpressDocument::VectorObjectContent* pContent = nullptr;
+            const auto aResolved = maResolvedContent.find(nObjectId);
+            if (aResolved != maResolvedContent.end())
+                pContent = &aResolved->second;
+            else
+                pContent = mpModel->findVectorObjectContent(*pPage, nObjectId);
+            if (!pContent)
+            {
+                pContent
+                    = &maResolvedContent.emplace(nObjectId, contentOf(*pObject)).first->second;
+                // What was written is what the client holds from here on, so a later change to
+                // the object is compared against this.
+                mpModel->noteVectorObjectWritten(*pPage, nObjectId, *pContent);
+            }
 
-            // What was written is what the client holds from here on, so a later change to the
-            // object is compared against this.
-            mpModel->noteVectorObjectWritten(*pPage, pObject->GetUniqueID(),
-                                             aContent);
+            const SdrObject* pParent = pObject->getParentSdrObjectFromSdrObject();
+            writeObjectEntry(rWriter, *pObject, pParent ? pParent->GetUniqueID() : 0, *pContent);
         }
     }
 
@@ -3823,6 +3874,11 @@ private:
     std::optional<drawinglayer::Primitive2dJsonProcessor> maProcessor;
     /// The content of the text edit entry of each editing view, by view id, for this write.
     std::unordered_map<sal_Int32, SdXImpressDocument::VectorObjectContent> maTextEditContent;
+    /// The content built for an object in this write, by object id.
+    std::unordered_map<sal_uInt64, SdXImpressDocument::VectorObjectContent> maResolvedContent;
+    /// The painted objects of the part and the views of the document, collected once per write.
+    std::optional<std::vector<SdrObject*>> moPartObjects;
+    std::optional<std::vector<EditingView>> moViews;
 };
 
 } // anonymous namespace

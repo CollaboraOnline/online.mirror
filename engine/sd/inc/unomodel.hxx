@@ -204,6 +204,10 @@ public:
     bool recordVectorObjectContent(const SdrPage& rPage, sal_uInt64 nObjectId,
                                    const VectorObjectContent& rContent);
 
+    /// What was last written for the object on the part, or nullptr when nothing was.
+    const VectorObjectContent* findVectorObjectContent(const SdrPage& rPage,
+                                                       sal_uInt64 nObjectId) const;
+
     /// Records what is being written for one object without touching any version. Writing an
     /// object is what makes it the content the client holds, whether the write was a full
     /// response or a delta.
