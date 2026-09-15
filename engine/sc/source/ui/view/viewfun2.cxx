@@ -18,6 +18,7 @@
  */
 
 #include <scitems.hxx>
+#include <drawview.hxx>
 
 #include <algorithm>
 

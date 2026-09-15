@@ -18,6 +18,7 @@
  */
 
 #include <editeng/editeng.hxx>
+#include <vcl/ptrstyle.hxx>
 #include <editeng/outlobj.hxx>
 #include <svx/svdobj.hxx>
 #include <svx/svdoole2.hxx>

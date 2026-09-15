@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <uiobject.hxx>
+#include <drawview.hxx>
 
 #include <rangeutl.hxx>
 #include <gridwin.hxx>

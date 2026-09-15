@@ -18,6 +18,8 @@
  */
 
 #include <sfx2/app.hxx>
+#include <com/sun/star/drawing/XShapes.hpp>
+#include <com/sun/star/drawing/XShape.hpp>
 #include <sfx2/bindings.hxx>
 #include <sfx2/dispatch.hxx>
 #include <sfx2/event.hxx>

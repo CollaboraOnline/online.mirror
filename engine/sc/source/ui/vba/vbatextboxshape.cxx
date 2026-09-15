@@ -18,6 +18,8 @@
  */
 
 #include "excelvbahelper.hxx"
+#include <com/sun/star/drawing/XShape.hpp>
+#include <com/sun/star/drawing/XShapes.hpp>
 #include "vbatextboxshape.hxx"
 #include "vbacharacters.hxx"
 #include <com/sun/star/drawing/XShape.hpp>

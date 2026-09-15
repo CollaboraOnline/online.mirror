@@ -20,6 +20,7 @@
 #include <sal/config.h>
 
 #include <scitems.hxx>
+#include <drawview.hxx>
 
 #include <comphelper/SetFlagContextHelper.hxx>
 #include <sfx2/app.hxx>

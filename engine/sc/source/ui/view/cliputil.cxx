@@ -8,6 +8,7 @@
  */
 
 #include <cliputil.hxx>
+#include <drawview.hxx>
 #include <drwlayer.hxx>
 #include <attrib.hxx>
 #include <viewdata.hxx>

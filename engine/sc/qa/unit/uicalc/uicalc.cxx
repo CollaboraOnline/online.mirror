@@ -9,6 +9,7 @@
 
 #include "../helper/qahelper.hxx"
 #include <COKit/COKit.hxx>
+#include <drawview.hxx>
 #include <docuno.hxx>
 #include <drwlayer.hxx>
 #include <unotools/syslocaleoptions.hxx>

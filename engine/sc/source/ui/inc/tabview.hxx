@@ -23,14 +23,15 @@
 #include <array>
 #include <memory>
 #include <svtools/scrolladaptor.hxx>
+#include <svx/sdr/overlay/overlayobjectlist.hxx>
 #include <vcl/help.hxx>
 
 #include "hiranges.hxx"
 #include "viewutil.hxx"
 #include "select.hxx"
 #include "gridwin.hxx"
-#include "drawview.hxx"
 
+class ScDrawView;
 class ScEditEngineDefaulter;
 class ScOutlineWindow;
 class ScRowBar;

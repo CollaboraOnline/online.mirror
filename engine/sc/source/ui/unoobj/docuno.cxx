@@ -20,6 +20,7 @@
 #include <config_feature_opencl.h>
 
 #include <scitems.hxx>
+#include <drawview.hxx>
 
 #include <comphelper/dispatchcommand.hxx>
 #include <comphelper/propertysequence.hxx>

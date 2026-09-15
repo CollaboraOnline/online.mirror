@@ -20,6 +20,7 @@
 #include <sal/config.h>
 
 #include <o3tl/unit_conversion.hxx>
+#include <drawview.hxx>
 #include <svx/svdoutl.hxx>
 #include <svx/svdpagv.hxx>
 #include <svx/svdview.hxx>

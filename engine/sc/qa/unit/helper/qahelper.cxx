@@ -10,6 +10,7 @@
 #include <config_feature_opencl.h>
 
 #include "qahelper.hxx"
+#include <drawview.hxx>
 #include <docuno.hxx>
 #include <COKit/COKit.hxx>
 #include <comphelper/kit.hxx>

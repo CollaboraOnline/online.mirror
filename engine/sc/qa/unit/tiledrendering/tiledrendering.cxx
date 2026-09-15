@@ -8,6 +8,7 @@
  */
 
 #include <sctiledrenderingtest.hxx>
+#include <drawview.hxx>
 
 #include <boost/property_tree/json_parser.hpp>
 

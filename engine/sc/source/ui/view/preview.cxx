@@ -18,6 +18,7 @@
  */
 
 #include <scitems.hxx>
+#include <vcl/ptrstyle.hxx>
 #include <editeng/eeitem.hxx>
 
 #include <officecfg/Office/Common.hxx>

@@ -18,6 +18,7 @@
  */
 
 #include <stlpool.hxx>
+#include <drawview.hxx>
 #include <scitems.hxx>
 #include <editeng/eeitem.hxx>
 #include <framework/windowstatehelper.hxx>

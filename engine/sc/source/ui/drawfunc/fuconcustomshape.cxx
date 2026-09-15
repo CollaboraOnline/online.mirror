@@ -18,6 +18,7 @@
  */
 
 #include <fuconcustomshape.hxx>
+#include <vcl/ptrstyle.hxx>
 #include <editeng/svxenum.hxx>
 #include <svx/gallery.hxx>
 #include <sfx2/request.hxx>

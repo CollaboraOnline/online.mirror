@@ -18,6 +18,7 @@
  */
 
 #include <sfx2/dispatch.hxx>
+#include <vcl/ptrstyle.hxx>
 #include <vcl/commandevent.hxx>
 #include <vcl/help.hxx>
 #include <vcl/ptrstyle.hxx>

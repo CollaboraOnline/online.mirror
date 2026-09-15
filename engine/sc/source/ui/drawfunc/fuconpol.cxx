@@ -18,6 +18,7 @@
  */
 
 #include <fuconpol.hxx>
+#include <vcl/ptrstyle.hxx>
 #include <tabvwsh.hxx>
 #include <drawview.hxx>
 

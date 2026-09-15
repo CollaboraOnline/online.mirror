@@ -19,6 +19,7 @@
 
 #include <com/sun/star/table/BorderLineStyle.hpp>
 #include <officecfg/Office/Calc.hxx>
+#include <drawview.hxx>
 #include <docuno.hxx>
 
 #include <comphelper/kit.hxx>

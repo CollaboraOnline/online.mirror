@@ -18,6 +18,7 @@
  */
 
 #include <officecfg/Office/Calc.hxx>
+#include <drawview.hxx>
 #include <docuno.hxx>
 #include <rangelst.hxx>
 #include <scitems.hxx>

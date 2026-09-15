@@ -22,6 +22,7 @@
 #include <string_view>
 
 #include <unotools/localedatawrapper.hxx>
+#include <svx/svdtrans.hxx>
 #include <vcl/fieldvalues.hxx>
 
 #include <colrowba.hxx>

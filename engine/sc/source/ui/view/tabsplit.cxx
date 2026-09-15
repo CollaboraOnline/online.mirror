@@ -18,6 +18,7 @@
  */
 
 #include <tabsplit.hxx>
+#include <vcl/ptrstyle.hxx>
 #include <viewdata.hxx>
 
 #include <vcl/ptrstyle.hxx>

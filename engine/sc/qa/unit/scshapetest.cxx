@@ -10,6 +10,7 @@
 #include <sal/config.h>
 
 #include "helper/qahelper.hxx"
+#include <drawview.hxx>
 
 #include <comphelper/propertyvalue.hxx>
 #include <sfx2/dispatch.hxx>

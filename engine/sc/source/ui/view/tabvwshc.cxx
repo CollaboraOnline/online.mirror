@@ -18,6 +18,8 @@
  */
 
 #include <scitems.hxx>
+#include <sfx2/viewfrm.hxx>
+#include <drawview.hxx>
 #include <sfx2/childwin.hxx>
 #include <sfx2/dispatch.hxx>
 #include <svx/theme/ThemeColorChangerCommon.hxx>

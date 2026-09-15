@@ -18,6 +18,7 @@
  */
 
 #include <svx/svddef.hxx>
+#include <vcl/ptrstyle.hxx>
 #include <svx/svdoutl.hxx>
 #include <editeng/outlobj.hxx>
 #include <svx/sdtaaitm.hxx>

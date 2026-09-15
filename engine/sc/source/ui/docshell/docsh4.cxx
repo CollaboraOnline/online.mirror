@@ -22,6 +22,8 @@
 #include <com/sun/star/frame/Desktop.hpp>
 
 #include <scitems.hxx>
+#include <sfx2/viewfrm.hxx>
+#include <drawview.hxx>
 #include <editeng/flstitem.hxx>
 #include <sfx2/fcontnr.hxx>
 #include <sfx2/linkmgr.hxx>

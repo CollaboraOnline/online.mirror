@@ -22,6 +22,7 @@
 #include <string_view>
 
 #include <editeng/eeitem.hxx>
+#include <vcl/ptrstyle.hxx>
 
 #include <sfx2/app.hxx>
 #include <editeng/adjustitem.hxx>

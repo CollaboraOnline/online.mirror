@@ -20,6 +20,7 @@
 #undef SC_DLLIMPLEMENTATION
 
 #include "scdlgfact.hxx"
+#include <drawview.hxx>
 
 #include <scuiasciiopt.hxx>
 #include <scuiautofmt.hxx>

@@ -18,6 +18,7 @@
  */
 
 #include <svx/imapdlg.hxx>
+#include <drawview.hxx>
 #include <svx/svdmark.hxx>
 #include <svx/svdview.hxx>
 #include <svx/ImageMapInfo.hxx>
