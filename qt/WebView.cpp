@@ -1152,6 +1152,8 @@ void WebView::load(const Poco::URI& fileURL, bool newFile, bool isStarterMode, b
             "permission", CodaConfig::instance().isForcedReadOnly() ? "readonly" : "edit");
         urlAndQuery.addQueryParameter("appdocid", std::to_string(_document._appDocId));
         urlAndQuery.addQueryParameter("userinterfacemode", "notebookbar");
+        if (CodaConfig::instance().wantsVector())
+            urlAndQuery.addQueryParameter("vector", "true");
     }
 
     // Dark mode: the user's saved choice wins, otherwise follow the system theme.
@@ -1216,6 +1218,8 @@ void coda::addRemoteCoolParams(QUrl& url,
     q.addQueryItem("appdocid",
         QString::number(document._appDocId));
     q.addQueryItem("userinterfacemode", "notebookbar");
+    if (CodaConfig::instance().wantsVector())
+        q.addQueryItem("vector", "true");
     if (portalPrefersDark())
         q.addQueryItem("darkTheme", "true");
     url.setQuery(q);

@@ -31,6 +31,18 @@ public:
     bool isForcedReadOnly() const { return _forcedReadOnly; }
     void setForcedReadOnly(bool value) { _forcedReadOnly = value; }
 
+    // Whether a Draw or Impress document is drawn from vector primitives instead of tiles.
+    // CODA_VECTOR asks for that when it holds anything.
+    bool wantsVector() const
+    {
+        static const bool wanted = []
+        {
+            const char* env = std::getenv("CODA_VECTOR");
+            return env && *env;
+        }();
+        return wanted;
+    }
+
     // How many document views may hold a web engine renderer at once. A window keeps
     // the most recently used views and drops the renderers of the others, which stays
     // within one process's memory as more documents are opened. Zero means no limit.
