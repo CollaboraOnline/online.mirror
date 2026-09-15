@@ -18,6 +18,7 @@
  */
 
 #include <xiescher.hxx>
+#include <docuno.hxx>
 
 #include <com/sun/star/beans/NamedValue.hpp>
 #include <com/sun/star/container/XIndexContainer.hpp>

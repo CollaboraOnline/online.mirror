@@ -8,6 +8,7 @@
  */
 
 #include "helper/qahelper.hxx"
+#include <com/sun/star/beans/XPropertySet.hpp>
 
 #include <docsh.hxx>
 #include <scitems.hxx>

@@ -21,6 +21,7 @@
 #include <sal/config.h>
 
 #include <comphelper/kit.hxx>
+#include <docuno.hxx>
 #include <comphelper/string.hxx>
 
 #include <scitems.hxx>

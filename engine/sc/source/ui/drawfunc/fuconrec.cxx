@@ -28,6 +28,7 @@
 #include <svx/svdocapt.hxx>
 #include <svx/svxids.hrc>
 #include <svx/svdomeas.hxx>
+#include <vcl/ptrstyle.hxx>
 #include <osl/diagnose.h>
 
 #include <basegfx/polygon/b2dpolygon.hxx>

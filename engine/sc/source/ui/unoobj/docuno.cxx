@@ -5945,4 +5945,19 @@ bool ScScenariosObj::hasByName( const OUString& aName )
     return GetScenarioIndex_Impl( aName, nIndex );
 }
 
+void HelperNotifyChanges::NotifyIfChangesListeners(const ScDocShell &rDocShell, const ScRange &rRange,
+    const OUString &rType)
+{
+    ScModelObj* pModelObj = rDocShell.GetModel();
+    ScRangeList aChangeRanges(rRange);
+
+    if (getMustPropagateChangesModel(pModelObj))
+        Notify(*pModelObj, aChangeRanges, rType);
+    else if (pModelObj) // possibly need to invalidate getCellArea results
+    {
+        Notify(*pModelObj, aChangeRanges, isDataAreaInvalidateType(rType)
+            ? u"data-area-invalidate"_ustr : u"data-area-extend"_ustr);
+    }
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

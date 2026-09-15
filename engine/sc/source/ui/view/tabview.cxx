@@ -18,6 +18,7 @@
  */
 
 #include <scitems.hxx>
+#include <docuno.hxx>
 #include <sfx2/viewfrm.hxx>
 #include <sfx2/bindings.hxx>
 #include <vcl/commandevent.hxx>

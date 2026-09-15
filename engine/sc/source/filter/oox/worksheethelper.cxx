@@ -20,6 +20,7 @@
 #include <memory>
 #include <utility>
 #include <worksheethelper.hxx>
+#include <docuno.hxx>
 
 #include <algorithm>
 #include <cmath>

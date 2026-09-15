@@ -18,6 +18,7 @@
  */
 
 #include <o3tl/safeint.hxx>
+#include <docuno.hxx>
 #include <osl/security.hxx>
 #include <osl/diagnose.h>
 #include <sfx2/dialoghelper.hxx>

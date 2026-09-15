@@ -26,6 +26,7 @@
 #include <com/sun/star/beans/XPropertySet.hpp>
 
 #include <svx/svdpage.hxx>
+#include <docuno.hxx>
 #include <svx/svdotext.hxx>
 #include <svx/svdobj.hxx>
 #include <svx/svdoole2.hxx>

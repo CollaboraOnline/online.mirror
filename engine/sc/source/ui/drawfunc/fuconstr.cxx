@@ -23,6 +23,7 @@
 #include <sfx2/dispatch.hxx>
 #include <sfx2/sfxsids.hrc>
 #include <svl/eitem.hxx>
+#include <vcl/ptrstyle.hxx>
 
 #include <fuconstr.hxx>
 #include <fudraw.hxx>

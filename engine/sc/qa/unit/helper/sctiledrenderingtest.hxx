@@ -10,6 +10,7 @@
 #pragma once
 
 #include <test/unoapixml_test.hxx>
+#include <docuno.hxx>
 
 #include <osl/conditn.hxx>
 #include <test/kitcallback.hxx>

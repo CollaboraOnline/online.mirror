@@ -44,6 +44,7 @@
 #include <com/sun/star/sheet/FormulaLanguage.hpp>
 #include <com/sun/star/i18n/KParseTokens.hpp>
 #include <com/sun/star/i18n/KParseType.hpp>
+#include <com/sun/star/script/XStorageBasedLibraryContainer.hpp>
 #include <comphelper/processfactory.hxx>
 #include <comphelper/string.hxx>
 #include <unotools/transliterationwrapper.hxx>

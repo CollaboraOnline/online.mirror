@@ -20,6 +20,7 @@
 #include <com/sun/star/datatransfer/clipboard/SystemClipboard.hpp>
 #include <com/sun/star/ui/dialogs/XSLTFilterDialog.hpp>
 #include <comphelper/kit.hxx>
+#include <docuno.hxx>
 #include <comphelper/processfactory.hxx>
 #include <scitems.hxx>
 #include <sfx2/app.hxx>

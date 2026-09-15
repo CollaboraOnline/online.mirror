@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <fielduno.hxx>
+#include <svl/itemprop.hxx>
 #include <textuno.hxx>
 #include <miscuno.hxx>
 #include <docsh.hxx>

@@ -32,6 +32,7 @@
 #include <svx/svxids.hrc>
 #include <editeng/eeitem.hxx>
 #include <svl/itemset.hxx>
+#include <vcl/ptrstyle.hxx>
 #include <osl/diagnose.h>
 
 #include <futext.hxx>

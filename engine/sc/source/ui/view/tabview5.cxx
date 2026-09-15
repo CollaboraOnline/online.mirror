@@ -18,6 +18,7 @@
  */
 
 #include <svx/fmshell.hxx>
+#include <docuno.hxx>
 #include <svx/svdobj.hxx>
 #include <svx/svdocapt.hxx>
 #include <svx/svdoutl.hxx>

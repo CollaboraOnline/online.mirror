@@ -18,6 +18,7 @@
  */
 
 #include <sfx2/sfxmodelfactory.hxx>
+#include <docuno.hxx>
 
 #include <scdll.hxx>
 #include <vcl/svapp.hxx>

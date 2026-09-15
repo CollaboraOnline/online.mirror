@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <xistyle.hxx>
+#include <docuno.hxx>
 #include <sfx2/objsh.hxx>
 #include <svtools/ctrltool.hxx>
 #include <editeng/editobj.hxx>

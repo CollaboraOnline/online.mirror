@@ -17,6 +17,9 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 #include "vbapagesetup.hxx"
+#include <com/sun/star/awt/Size.hpp>
+#include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/beans/UnknownPropertyException.hpp>
 #include <convuno.hxx>
 #include <rangelst.hxx>
 #include <docsh.hxx>

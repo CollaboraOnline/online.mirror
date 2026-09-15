@@ -37,6 +37,9 @@
 #include <memory>
 #include <map>
 
+namespace com::sun::star::drawing { class XShapes; }
+namespace com::sun::star::table { struct CellRangeAddress; }
+
 class SdrObject;
 class SdrOle2Obj;
 class SfxAbstractTabDialog;
@@ -68,6 +71,7 @@ class ScDrawTransferObj;
 class ScCondFormatDlgData;
 class ScDispatchProviderInterceptor;
 class ScTableShell;
+class ScTableSheetObj;
 
 namespace sc {
     class SparklineShell;

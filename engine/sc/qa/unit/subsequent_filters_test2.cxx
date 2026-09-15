@@ -11,6 +11,8 @@
 
 #include <osl/thread.h>
 #include <svl/numformat.hxx>
+#include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/drawing/XDrawPagesSupplier.hpp>
 #include <drwlayer.hxx>
 #include <svl/zformat.hxx>
 #include <svx/svdograf.hxx>

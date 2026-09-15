@@ -46,6 +46,7 @@
 #include <inputwin.hxx>
 #include <scresid.hxx>
 #include <docsh.hxx>
+#include <docuno.hxx>
 #include <rangeutl.hxx>
 #include <reffact.hxx>
 #include <tabprotection.hxx>

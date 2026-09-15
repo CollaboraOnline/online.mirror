@@ -16,6 +16,7 @@
 #include <com/sun/star/lang/IndexOutOfBoundsException.hpp>
 
 #include <tools/gen.hxx>
+#include <docuno.hxx>
 #include <svx/svdoole2.hxx>
 #include <svx/svdpage.hxx>
 #include <svx/svdundo.hxx>

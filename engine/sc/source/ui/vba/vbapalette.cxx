@@ -18,6 +18,7 @@
  */
 
 #include "vbapalette.hxx"
+#include <docuno.hxx>
 
 #include <sal/macros.h>
 #include <cppuhelper/implbase.hxx>

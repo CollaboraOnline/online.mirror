@@ -11,6 +11,9 @@
 #include <memory>
 
 #include <sfx2/docfile.hxx>
+#include <com/sun/star/sheet/XCellRangesAccess.hpp>
+#include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/drawing/XDrawPagesSupplier.hpp>
 
 #include <svl/sharedstringpool.hxx>
 #include <svx/svdpage.hxx>

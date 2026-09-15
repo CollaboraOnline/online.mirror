@@ -20,6 +20,7 @@
 #include <config_features.h>
 
 #include <excimp8.hxx>
+#include <docuno.hxx>
 
 #include <scitems.hxx>
 #include <comphelper/processfactory.hxx>

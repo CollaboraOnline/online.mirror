@@ -25,6 +25,7 @@
 #include <com/sun/star/embed/XEmbeddedObject.hpp>
 
 #include <svx/svditer.hxx>
+#include <docuno.hxx>
 #include <svx/svdoole2.hxx>
 #include <svtools/embedhlp.hxx>
 

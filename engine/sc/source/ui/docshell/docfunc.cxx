@@ -18,6 +18,7 @@
  */
 
 #include <scitems.hxx>
+#include <docuno.hxx>
 
 #include <comphelper/kit.hxx>
 #include <o3tl/safeint.hxx>

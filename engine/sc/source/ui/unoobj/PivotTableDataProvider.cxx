@@ -12,6 +12,7 @@
 #include <sal/config.h>
 
 #include <PivotTableDataProvider.hxx>
+#include <docuno.hxx>
 #include <PivotTableDataSource.hxx>
 #include <PivotTableDataSequence.hxx>
 

@@ -791,4 +791,44 @@ public:
     virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 };
 
+//#i97876# Spreadsheet data changes are not notified
+namespace HelperNotifyChanges
+{
+    inline bool isDataAreaInvalidateType(std::u16string_view rType)
+    {
+        if (rType == u"delete-content")
+            return true;
+        if (rType == u"delete-rows")
+            return true;
+        if (rType == u"delete-columns")
+            return true;
+        if (rType == u"undo")
+            return true;
+        if (rType == u"redo")
+            return true;
+        if (rType == u"paste")
+            return true;
+        if (rType == u"note")
+            return true;
+
+        return false;
+    }
+
+    inline bool getMustPropagateChangesModel(const ScModelObj* pModelObj)
+    {
+        return pModelObj && pModelObj->HasChangesListeners();
+    }
+
+    inline void Notify(ScModelObj &rModelObj, const ScRangeList &rChangeRanges,
+        const OUString &rType = u"cell-change"_ustr,
+        const cpo::uno::Sequence< css::beans::PropertyValue >& rProperties =
+            cpo::uno::Sequence< css::beans::PropertyValue >())
+    {
+        rModelObj.NotifyChanges(rType, rChangeRanges, rProperties);
+    }
+
+    SC_DLLPUBLIC void NotifyIfChangesListeners(const ScDocShell &rDocShell, const ScRange &rRange,
+        const OUString &rType = u"cell-change"_ustr);
+};
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

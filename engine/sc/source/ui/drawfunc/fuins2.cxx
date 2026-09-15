@@ -24,6 +24,7 @@
 #include <cpo/uno/XComponentContext.hpp>
 
 #include <toolkit/helper/vclunohelper.hxx>
+#include <docuno.hxx>
 #include <sot/exchange.hxx>
 #include <svl/globalnameitem.hxx>
 #include <sfx2/viewfrm.hxx>

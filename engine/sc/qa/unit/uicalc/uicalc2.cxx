@@ -10,6 +10,7 @@
 #include "../helper/qahelper.hxx"
 
 #include <comphelper/compbase.hxx>
+#include <docuno.hxx>
 #include <comphelper/kit.hxx>
 #include <editeng/brushitem.hxx>
 #include <editeng/editobj.hxx>

@@ -18,6 +18,7 @@
  */
 
 #include <o3tl/safeint.hxx>
+#include <svl/itemprop.hxx>
 #include <svl/hint.hxx>
 #include <utility>
 #include <vcl/svapp.hxx>

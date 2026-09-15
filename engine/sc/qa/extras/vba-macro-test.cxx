@@ -9,6 +9,9 @@
 
 #include <sal/config.h>
 #include <comphelper/kit.hxx>
+#include <com/sun/star/document/XEmbeddedScripts.hpp>
+#include <com/sun/star/sheet/XSpreadsheetDocument.hpp>
+#include <com/sun/star/frame/XStorable.hpp>
 #include <test/unoapi_test.hxx>
 #include <osl/file.hxx>
 #include <sal/log.hxx>

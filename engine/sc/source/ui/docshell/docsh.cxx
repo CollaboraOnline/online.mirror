@@ -3181,6 +3181,11 @@ ScDocShell::ScDocShell( const SfxModelFlags i_nSfxCreationFlags, const std::shar
     // InitItems and CalcOutputFactor are called now in Load/ConvertFrom/InitNew
 }
 
+ScModelObj* ScDocShell::GetModel() const
+{
+    return static_cast<ScModelObj*>(SfxObjectShell::GetModel().get());
+}
+
 ScDocShell::~ScDocShell()
 {
     ResetDrawObjectShell(); // If the Drawing Layer still tries to access it, access it

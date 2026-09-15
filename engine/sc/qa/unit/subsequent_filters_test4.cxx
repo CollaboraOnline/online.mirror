@@ -10,6 +10,7 @@
 #include <config_fonts.h>
 
 #include <svx/svdpage.hxx>
+#include <com/sun/star/beans/XPropertySet.hpp>
 #include <svx/svdocapt.hxx>
 #include <svx/svdoole2.hxx>
 #include <editeng/eeitem.hxx>

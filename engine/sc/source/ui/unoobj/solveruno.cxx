@@ -9,6 +9,7 @@
  */
 
 #include <rtl/math.hxx>
+#include <docuno.hxx>
 #include <vcl/svapp.hxx>
 #include <solveruno.hxx>
 #include <docsh.hxx>

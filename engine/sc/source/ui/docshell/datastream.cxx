@@ -8,6 +8,7 @@
  */
 
 #include <datastream.hxx>
+#include <com/sun/star/beans/XPropertySet.hpp>
 #include <datastreamgettime.hxx>
 
 #include <com/sun/star/frame/XLayoutManager.hpp>

@@ -8,6 +8,8 @@
  */
 
 #include "helper/qahelper.hxx"
+#include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/sheet/XSpreadsheetDocument.hpp>
 
 #include <formulacell.hxx>
 #include <userdat.hxx>

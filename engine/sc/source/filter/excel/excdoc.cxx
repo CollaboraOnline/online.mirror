@@ -18,6 +18,7 @@
  */
 
 #include <sfx2/objsh.hxx>
+#include <docuno.hxx>
 #include <drwlayer.hxx>
 #include <rtl/ustring.hxx>
 

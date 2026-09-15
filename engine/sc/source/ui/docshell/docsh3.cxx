@@ -21,6 +21,7 @@
 #include <com/sun/star/document/XDocumentProperties.hpp>
 
 #include <scitems.hxx>
+#include <docuno.hxx>
 #include <rangelst.hxx>
 #include <editeng/flstitem.hxx>
 #include <editeng/paperinf.hxx>

@@ -8,6 +8,7 @@
  */
 
 #include <test/unoapi_test.hxx>
+#include <docuno.hxx>
 #include <test/document/xlinktargetsupplier.hxx>
 #include <test/sheet/spreadsheetdocumentsettings.hxx>
 #include <test/sheet/xcalculatable.hxx>

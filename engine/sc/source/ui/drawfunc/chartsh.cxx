@@ -18,6 +18,7 @@
  */
 
 #include <svx/svdoole2.hxx>
+#include <docuno.hxx>
 #include <svx/svdobj.hxx>
 #include <svx/graphichelper.hxx>
 

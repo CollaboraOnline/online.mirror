@@ -18,6 +18,7 @@
  */
 
 #include <officecfg/Office/Common.hxx>
+#include <docuno.hxx>
 #include <rtl/random.h>
 #include <sal/log.hxx>
 #include <sfx2/docfile.hxx>

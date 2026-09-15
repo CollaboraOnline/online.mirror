@@ -18,6 +18,8 @@
  */
 
 #include <AccessibleDocument.hxx>
+#include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/container/XEnumerationAccess.hpp>
 #include <AccessibleSpreadsheet.hxx>
 #include <tabvwsh.hxx>
 #include <AccessibilityHints.hxx>

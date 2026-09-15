@@ -18,6 +18,7 @@
  */
 
 #include <svx/svxdlg.hxx>
+#include <docuno.hxx>
 #include <svx/dialogs.hrc>
 #include <sc.hrc>
 

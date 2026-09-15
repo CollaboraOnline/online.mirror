@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 #include "vbaformat.hxx"
+#include <docuno.hxx>
 #include <ooo/vba/excel/XFont.hpp>
 #include <ooo/vba/excel/XStyle.hpp>
 #include <ooo/vba/excel/XlVAlign.hpp>

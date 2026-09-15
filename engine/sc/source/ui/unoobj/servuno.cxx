@@ -22,6 +22,7 @@
 
 #include <sal/macros.h>
 #include <svtools/unoimap.hxx>
+#include <docuno.hxx>
 #include <svx/unofill.hxx>
 #include <vcl/svapp.hxx>
 #include <com/sun/star/sheet/XSpreadsheetDocument.hpp>

@@ -9,6 +9,7 @@
 
 #include <sal/config.h>
 #include "helper/qahelper.hxx"
+#include <docuno.hxx>
 #include <drwlayer.hxx>
 #include <COKit/COKit.hxx>
 #include <vcl/scheduler.hxx>

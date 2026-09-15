@@ -18,6 +18,7 @@
  */
 
 #include <cpo/uno/Reference.hxx>
+#include <docuno.hxx>
 #include <com/sun/star/chart/XChartDocument.hpp>
 #include <com/sun/star/chart2/XChartDocument.hpp>
 #include <com/sun/star/embed/XClassifiedObject.hpp>

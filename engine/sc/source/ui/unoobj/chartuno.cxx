@@ -29,6 +29,7 @@
 
 #include <osl/diagnose.h>
 #include <svx/svditer.hxx>
+#include <docuno.hxx>
 #include <svx/svdoole2.hxx>
 #include <svx/svdpage.hxx>
 #include <svx/svdundo.hxx>

@@ -22,6 +22,7 @@
 #include <memory>
 
 #include <scitems.hxx>
+#include <docuno.hxx>
 #include <editeng/boxitem.hxx>
 #include <editeng/justifyitem.hxx>
 #include <svl/srchitem.hxx>

@@ -12,6 +12,8 @@
 #include <config_vclplug.h>
 
 #include <helper/qahelper.hxx>
+#include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/sheet/XSpreadsheetDocument.hpp>
 #include <drwlayer.hxx>
 #include <sal/log.hxx>
 #include <sfx2/dispatch.hxx>

@@ -20,6 +20,7 @@
 #include <sal/config.h>
 
 #include <formdata.hxx>
+#include <docuno.hxx>
 
 #include <sfx2/app.hxx>
 #include <svx/dialogs.hrc>

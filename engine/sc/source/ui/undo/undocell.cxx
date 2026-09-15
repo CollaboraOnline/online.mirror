@@ -18,6 +18,7 @@
  */
 
 #include <undocell.hxx>
+#include <docuno.hxx>
 
 #include <scitems.hxx>
 #include <editeng/editobj.hxx>

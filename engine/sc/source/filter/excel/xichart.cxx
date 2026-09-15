@@ -18,6 +18,7 @@
  */
 
 #include <xichart.hxx>
+#include <docuno.hxx>
 
 #include <algorithm>
 #include <memory>

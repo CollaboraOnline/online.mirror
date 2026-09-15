@@ -43,6 +43,8 @@
 
 #include <vcl/jsdialog/executor.hxx>
 
+#include <com/sun/star/drawing/XShape.hpp>
+#include <com/sun/star/drawing/XShapes.hpp>
 #include <cpo/uno/Reference.hxx>
 
 using namespace com::sun::star;

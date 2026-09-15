@@ -20,6 +20,8 @@
 #include <config_features.h>
 
 #include <officecfg/Office/Common.hxx>
+#include <docuno.hxx>
+#include <com/sun/star/frame/XModel.hpp>
 #include <editeng/sizeitem.hxx>
 #include <sal/log.hxx>
 #include <sfx2/kit/helper.hxx>

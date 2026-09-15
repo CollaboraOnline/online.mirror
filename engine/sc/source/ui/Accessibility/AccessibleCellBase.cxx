@@ -18,6 +18,7 @@
  */
 
 #include <AccessibleCellBase.hxx>
+#include <docuno.hxx>
 #include <document.hxx>
 #include <docfunc.hxx>
 #include <docsh.hxx>

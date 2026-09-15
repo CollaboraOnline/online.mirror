@@ -20,6 +20,8 @@
 #include <sal/config.h>
 
 #include <comphelper/propertyvalue.hxx>
+#include <svl/itemprop.hxx>
+#include <com/sun/star/container/XIndexContainer.hpp>
 #include <comphelper/sequence.hxx>
 #include <svtools/unoevent.hxx>
 #include <svtools/unoimap.hxx>

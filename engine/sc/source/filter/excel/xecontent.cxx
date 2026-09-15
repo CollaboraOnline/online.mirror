@@ -20,6 +20,7 @@
 #include <memory>
 #include <utility>
 #include <xecontent.hxx>
+#include <docuno.hxx>
 
 #include <vector>
 #include <algorithm>

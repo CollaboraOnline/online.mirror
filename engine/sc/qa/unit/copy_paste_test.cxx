@@ -10,6 +10,7 @@
 #include <sal/config.h>
 
 #include "helper/qahelper.hxx"
+#include <docuno.hxx>
 #include <comphelper/servicehelper.hxx>
 #include <cppu/unotype.hxx>
 

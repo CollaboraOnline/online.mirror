@@ -20,6 +20,7 @@
 #include <memory>
 #include <sal/config.h>
 #include <sal/log.hxx>
+#include <docuno.hxx>
 
 #include <algorithm>
 #include <utility>

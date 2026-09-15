@@ -8,6 +8,9 @@
  */
 
 #include "helper/qahelper.hxx"
+#include <com/sun/star/style/XStyleFamiliesSupplier.hpp>
+#include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/drawing/XDrawPagesSupplier.hpp>
 #include <drwlayer.hxx>
 
 #include <docsh.hxx>

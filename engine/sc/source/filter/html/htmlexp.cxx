@@ -22,6 +22,7 @@
 #include <string_view>
 
 #include <scitems.hxx>
+#include <docuno.hxx>
 #include <editeng/eeitem.hxx>
 
 #include <utility>

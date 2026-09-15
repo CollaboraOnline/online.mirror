@@ -22,6 +22,7 @@
 #include <string_view>
 
 #include <address.hxx>
+#include <docuno.hxx>
 #include <rangelst.hxx>
 #include <global.hxx>
 #include <compiler.hxx>

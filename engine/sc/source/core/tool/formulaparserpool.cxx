@@ -18,6 +18,7 @@
  */
 
 #include <formulaparserpool.hxx>
+#include <docuno.hxx>
 #include <com/sun/star/container/XContentEnumerationAccess.hpp>
 #include <com/sun/star/frame/XModel.hpp>
 #include <com/sun/star/lang/XComponent.hpp>

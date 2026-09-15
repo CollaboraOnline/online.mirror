@@ -18,6 +18,7 @@
  */
 
 #include <macromgr.hxx>
+#include <com/sun/star/script/XStorageBasedLibraryContainer.hpp>
 #include <document.hxx>
 #include <docsh.hxx>
 #include <basic/basmgr.hxx>

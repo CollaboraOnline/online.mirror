@@ -10,6 +10,8 @@
 #include <config_fonts.h>
 
 #include "helper/debughelper.hxx"
+#include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/sheet/XSpreadsheetDocument.hpp>
 
 #include "helper/qahelper.hxx"
 

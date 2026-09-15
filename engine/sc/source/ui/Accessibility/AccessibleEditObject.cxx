@@ -23,6 +23,7 @@
 #include <utility>
 
 #include <AccessibleEditObject.hxx>
+#include <docuno.hxx>
 #include <AccessibleText.hxx>
 #include <editsrc.hxx>
 #include <scmod.hxx>

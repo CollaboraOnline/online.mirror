@@ -24,6 +24,7 @@
 #include <ooo/vba/excel/XlChartType.hpp>
 
 #include "vbachartobjects.hxx"
+#include <docuno.hxx>
 #include "vbachartobject.hxx"
 #include <docsh.hxx>
 #include <cellsuno.hxx>

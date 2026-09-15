@@ -13,6 +13,10 @@
 
 #include <test/pdftesttools.hxx>
 #include <test/unoapi_test.hxx>
+#include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/sheet/XSpreadsheetDocument.hpp>
+#include <com/sun/star/sheet/XSpreadsheets.hpp>
+#include <com/sun/star/style/XStyleFamiliesSupplier.hpp>
 
 #include <com/sun/star/frame/XStorable.hpp>
 #include <com/sun/star/lang/XComponent.hpp>

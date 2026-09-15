@@ -24,6 +24,9 @@
 
 #include <osl/diagnose.h>
 #include <vcl/svapp.hxx>
+#include <com/sun/star/script/XStorageBasedLibraryContainer.hpp>
+#include <com/sun/star/script/XLibraryContainer.hpp>
+#include <com/sun/star/container/XNameContainer.hpp>
 #include <vcl/weld.hxx>
 #include <sfx2/app.hxx>
 #include <sfx2/bindings.hxx>

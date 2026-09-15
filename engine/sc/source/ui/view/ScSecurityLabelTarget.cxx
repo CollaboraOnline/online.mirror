@@ -10,6 +10,7 @@
 #include <ScSecurityLabelTarget.hxx>
 
 #include <docsh.hxx>
+#include <docuno.hxx>
 #include <document.hxx>
 #include <tabvwsh.hxx>
 #include <unonames.hxx>
