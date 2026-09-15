@@ -4679,16 +4679,19 @@ void DrawingML::WriteText(const Reference<XInterface>& rXIface, bool bBodyPr, bo
                 nTextHeight = convertTwipToMm100(nTextHeight);
         }
 
-        // A shape that states no height of its own has no text area to normalize against, and
-        // taking the indents from a height of zero turns them negative.
+        // A shape that states no height of its own has no text area to measure against.
         if (nTextHeight > 0 && nTop + nBottom >= nTextHeight)
         {
-            // Effective bottom would be above effective top of text area. LO normalizes the
-            // effective text area in such case implicitly for rendering. MS needs indents so that
-            // the result is the normalized effective text area.
-            std::swap(nTop, nBottom);
-            nTop = nTextHeight - nTop;
-            nBottom = nTextHeight - nBottom;
+            // Where the two distances together reach further than the text area, the slide is
+            // drawn by taking half of what they reach past it off each of them. The reading of a
+            // presentation does the same, so a document written this way comes back as it went.
+            // One of them can go below nothing that way, and is written so, because reading a
+            // PPTX file gives such a distance wherever the insets in the file reach past the
+            // shape. Half of an odd excess is rounded to the nearest, as the drawing takes the
+            // exact half.
+            const sal_Int32 nExcess = (nTop + nBottom - nTextHeight + 1) / 2;
+            nTop -= nExcess;
+            nBottom -= nExcess;
         }
     }
 

@@ -378,11 +378,13 @@ void ShapeImportExportTest::testTextDistancesODP_OOXML_Export()
     xmlDocUniquePtr pXmlDoc = parseExport(u"ppt/slides/slide1.xml"_ustr);
     CPPUNIT_ASSERT(pXmlDoc);
 
-    // The text ends 5cm below the top edge of the shape.
+    // The shape is 12cm tall with 5cm spacing above the text and 10cm below it. Impress takes
+    // half of the 3cm the spacing reaches past the shape off each side, so the text ends 3.5cm
+    // below the top edge of the shape, and the PPTX file has to state the same.
     // Without the fix we exported tIns="3600000" and bIns="5400000".
     // The text had ended about 3.3cm below the top edge in PowerPoint.
     assertXPathAttrs(pXmlDoc, "/p:sld/p:cSld/p:spTree/p:sp[1]/p:txBody/a:bodyPr",
-                     { { "tIns", u"720000" }, { "bIns", u"2520000" } });
+                     { { "tIns", u"1260000" }, { "bIns", u"3060000" } });
 }
 
 /* Test text distances (insets) with text area rotation */

@@ -232,6 +232,34 @@ CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testTextInsetsOfAShapeWithNoHeight)
     CPPUNIT_ASSERT_EQUAL(nBefore, aTopInset());
 }
 
+// A shape 1cm tall holding 2cm of spacing above and below its text. The slide is drawn with half
+// of what the spacing reaches past the shape taken off each side, so the file states that.
+CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testCrossedTextInsets)
+{
+    createSdImpressDoc("odp/crossed-text-insets.odp");
+    save(TestFilter::PPTX);
+
+    xmlDocUniquePtr pSlide = parseExport(u"ppt/slides/slide1.xml"_ustr);
+    assertXPath(pSlide, "//p:sp[2]/p:txBody/a:bodyPr", "tIns", u"180000");
+    assertXPath(pSlide, "//p:sp[2]/p:txBody/a:bodyPr", "bIns", u"180000");
+}
+
+// The line on the master of this one has no height at all and goes into every layout, so the
+// spacing on it reaches past the shape wherever it lands.
+CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testCrossedTextInsetsOfALineWithNoHeight)
+{
+    createSdImpressDoc("pptx/tdf169088.pptx");
+    save(TestFilter::PPTX);
+
+    for (sal_Int32 i = 1; i <= 11; ++i)
+    {
+        xmlDocUniquePtr pLayout = parseExport(u"ppt/slideLayouts/slideLayout"_ustr
+                                              + OUString::number(i) + u".xml"_ustr);
+        assertXPath(pLayout, "//a:bodyPr[starts-with(@tIns, '-')]", 0);
+        assertXPath(pLayout, "//a:bodyPr[starts-with(@bIns, '-')]", 0);
+    }
+}
+
 // The pages of a Draw document keep their identity across sessions the same way the slides of
 // a presentation do.
 CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testPageGuidODG)
