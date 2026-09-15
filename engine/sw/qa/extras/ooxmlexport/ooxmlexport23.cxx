@@ -710,6 +710,19 @@ CPPUNIT_TEST_FIXTURE(Test, testTdf165354)
                 u"except that it has an at");
 }
 
+// A document whose style suppresses hyphenation hyphenates nowhere, whatever the setting of the
+// whole document says. Writing that setting back would put hyphenation properties on the default
+// paragraph style, which the document never had.
+CPPUNIT_TEST_FIXTURE(Test, testNoHyphenationWhereNothingHyphenates)
+{
+    createSwDoc("comment-annotationref.docx");
+    save(TestFilter::DOCX);
+
+    xmlDocUniquePtr pXmlSettings = parseExport(u"word/settings.xml"_ustr);
+    CPPUNIT_ASSERT(pXmlSettings);
+    assertXPath(pXmlSettings, "/w:settings/w:autoHyphenation", 0);
+}
+
 CPPUNIT_TEST_FIXTURE(Test, testHyphenationAuto)
 {
     createSwDoc("hyphenation.odt");

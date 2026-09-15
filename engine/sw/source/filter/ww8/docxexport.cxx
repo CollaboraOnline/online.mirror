@@ -1274,6 +1274,38 @@ WriteCompat(SwDoc const& rDoc, ::sax_fastparser::FSHelperPtr const& rpFS) -> voi
 
 }
 
+namespace
+{
+/// True when the document, one of its styles or one of its paragraphs asks for hyphenated text.
+bool lcl_hasAnyHyphenation(const SwDoc& rDoc)
+{
+    if (rDoc.GetDefault(RES_PARATR_HYPHENZONE).IsHyphen())
+        return true;
+
+    for (const SwTextFormatColl* pColl : *rDoc.GetTextFormatColls())
+    {
+        if (const SvxHyphenZoneItem* pItem = pColl->GetItemIfSet(RES_PARATR_HYPHENZONE, false);
+            pItem && pItem->IsHyphen())
+            return true;
+    }
+
+    const SwNodes& rNodes = rDoc.GetNodes();
+    for (SwNodeOffset nNode(0); nNode < rNodes.Count(); ++nNode)
+    {
+        const SwTextNode* pTextNode = rNodes[nNode]->GetTextNode();
+        if (!pTextNode)
+            continue;
+        const SwAttrSet* pSet = pTextNode->GetpSwAttrSet();
+        if (!pSet)
+            continue;
+        if (const SvxHyphenZoneItem* pItem = pSet->GetItemIfSet(RES_PARATR_HYPHENZONE, false);
+            pItem && pItem->IsHyphen())
+            return true;
+    }
+    return false;
+}
+}
+
 void DocxExport::WriteSettings()
 {
     SwViewShell *pViewShell(m_rDoc.getIDocumentLayoutAccess().GetCurrentViewShell());
@@ -1612,9 +1644,13 @@ void DocxExport::WriteSettings()
         pFS->singleElementNS( XML_w, XML_defaultTabStop, FSNS( XML_w, XML_val ),
             OString::number(m_aSettings.defaultTabStop) );
 
-    // Automatic hyphenation: it's a global setting in Word, it's a paragraph setting in Writer.
-    // Set it's value to "auto" and disable on paragraph level, if no hyphenation is used there.
-    pFS->singleElementNS(XML_w, XML_autoHyphenation, FSNS(XML_w, XML_val), "true");
+    /*  Automatic hyphenation is a setting of the whole document in OOXML and a setting of each
+        paragraph in Writer, so it goes out as true and is turned off again on the paragraphs
+        that do not hyphenate. A document where nothing hyphenates says nothing at all, because
+        reading w:autoHyphenation puts the hyphenation properties on the default paragraph
+        style, so a round trip would add properties the document never had. */
+    if (lcl_hasAnyHyphenation(m_rDoc))
+        pFS->singleElementNS(XML_w, XML_autoHyphenation, FSNS(XML_w, XML_val), "true");
 
     // Hyphenation details set depending on default style, otherwise on body style
     SwTextFormatColl* pColl = m_rDoc.getIDocumentStylePoolAccess().GetTextCollFromPool(SwPoolFormatId::COLL_STANDARD, /*bRegardLanguage=*/false);
