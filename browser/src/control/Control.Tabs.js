@@ -356,6 +356,10 @@ window.L.Control.Tabs = window.L.Control.extend({
 	},
 
 	_onTabKeyDown: function (e) {
+		// While the context menu is open the plugin owns the arrows and Enter.
+		if (e.currentTarget.classList.contains('context-menu-active'))
+			return;
+
 		var key = e.key;
 
 		// Rename is hidden for a protected sheet, so F2 is too.
