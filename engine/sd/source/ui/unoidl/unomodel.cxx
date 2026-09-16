@@ -2772,14 +2772,17 @@ bool SdXImpressDocument::takeVectorPageDirty(const SdrPage& rPage)
 
 bool SdXImpressDocument::recordVectorPageContent(const SdrPage& rPage,
                                                  const VectorObjectContent& rContent,
-                                                 const OString& rMasterPartId)
+                                                 const OString& rMasterPartId,
+                                                 const std::vector<sal_Int32>& rMasterHiddenLayers)
 {
     VectorPartState& rState = maVectorParts[vectorPartKeyOf(rPage)];
     const bool bMoved = rState.moPageContent
                         && (!(*rState.moPageContent == rContent)
-                            || rState.maPageMasterPartId != rMasterPartId);
+                            || rState.maPageMasterPartId != rMasterPartId
+                            || rState.maPageMasterHiddenLayers != rMasterHiddenLayers);
     rState.moPageContent = rContent;
     rState.maPageMasterPartId = rMasterPartId;
+    rState.maPageMasterHiddenLayers = rMasterHiddenLayers;
     if (bMoved)
     {
         ++rState.mnVersion;
@@ -3175,11 +3178,20 @@ private:
             rWriter.putSimpleValue(0.0);
         }
 
-        if (!maPageMasterPartId.isEmpty())
-            rWriter.put("masterPartId", maPageMasterPartId);
-
         const drawinglayer::primitive2d::Primitive2DContainer& rContent
             = pageContent(pPage).maPrimitives;
+        if (!maPageMasterPartId.isEmpty())
+        {
+            rWriter.put("masterPartId", maPageMasterPartId);
+            // The master layers this page hides. The document keeps them as the set of master
+            // layers the page shows.
+            if (!maPageMasterHiddenLayers.empty())
+            {
+                auto aLayerArray = rWriter.startArray("masterHiddenLayers");
+                for (const sal_Int32 nLayer : maPageMasterHiddenLayers)
+                    rWriter.putSimpleValue(nLayer);
+            }
+        }
         auto aPrimArray = rWriter.startArray("primitives");
         if (!rContent.empty())
             maProcessor->decomposeAndWrite(rContent);
@@ -3197,6 +3209,7 @@ private:
             {
                 pageOwnPrimitives(pPage, aContent.maPrimitives);
                 maPageMasterPartId = vectorPartKeyOf(*pMasterPage);
+                maPageMasterHiddenLayers = hiddenMasterLayersOf(pPage);
             }
             else
                 pageContentPrimitives(pPage, aContent.maPrimitives);
@@ -3243,7 +3256,27 @@ private:
         if (!bDirty && isDelta())
             return;
         const SdXImpressDocument::VectorObjectContent& rContent = pageContent(pPage);
-        mpModel->recordVectorPageContent(*pPage, rContent, maPageMasterPartId);
+        mpModel->recordVectorPageContent(*pPage, rContent, maPageMasterPartId,
+                                         maPageMasterHiddenLayers);
+    }
+
+    /// The ids of the master layers the page does not show. Turning the master background or
+    /// the master objects off for a page removes their layer from the set the page shows.
+    std::vector<sal_Int32> hiddenMasterLayersOf(const SdPage* pPage) const
+    {
+        std::vector<sal_Int32> aHidden;
+        if (!pPage->TRG_HasMasterPage())
+            return aHidden;
+        const SdrLayerIDSet& rVisible = pPage->TRG_GetMasterPageVisibleLayers();
+        const SdrLayerAdmin& rLayerAdmin = mpDocument->GetLayerAdmin();
+        for (sal_uInt16 nLayerPosition = 0; nLayerPosition < rLayerAdmin.GetLayerCount();
+             ++nLayerPosition)
+        {
+            const SdrLayerID nId = rLayerAdmin.GetLayer(nLayerPosition)->GetID();
+            if (!rVisible.IsSet(nId))
+                aHidden.push_back(sal_Int32(nId.get()));
+        }
+        return aHidden;
     }
 
     /// True when the object is drawn behind the page the part stands for rather than being an
@@ -3285,8 +3318,13 @@ private:
         // PageFill: always produces a solid fill for the slide background
         pPage->GetViewContact().GetViewContact(2).getViewIndependentPrimitive2DContainer(rContent);
 
-        // MasterPageDescriptor: adds a background fill if the master page defines one.
-        if (pPage->TRG_HasMasterPage())
+        // MasterPageDescriptor: adds a background fill if the master page defines one. The
+        // master background is drawn only while the page shows the background layer of its
+        // master, which "Display Master Background" toggles.
+        const SdrLayerID nBackgroundLayer
+            = pPage->getSdrModelFromSdrPage().GetLayerAdmin().GetLayerID(sUNO_LayerName_background);
+        if (pPage->TRG_HasMasterPage()
+            && pPage->TRG_GetMasterPageVisibleLayers().IsSet(nBackgroundLayer))
             pPage->GetViewContact().GetViewContact(3).getViewIndependentPrimitive2DContainer(
                 rContent);
     }
@@ -3305,10 +3343,13 @@ private:
         if (!pMasterPage)
             return;
 
+        // A page shows the master objects on the layers it keeps of its master, which
+        // "Display Master Objects" toggles.
+        const SdrLayerIDSet& rVisible = pPage->TRG_GetMasterPageVisibleLayers();
         for (size_t i = 0; i < pMasterPage->GetObjCount(); ++i)
         {
             SdrObject* pObject = pMasterPage->GetObj(i);
-            if (!pObject || isHiddenBehindSlide(*pObject)
+            if (!pObject || isHiddenBehindSlide(*pObject) || !rVisible.IsSet(pObject->GetLayer())
                 || !slideShowsPlaceholder(*pPage, pMasterPage->GetPresObjKind(pObject)))
                 continue;
 
@@ -3943,9 +3984,11 @@ private:
     std::unordered_map<sal_Int32, SdXImpressDocument::VectorObjectContent> maTextEditContent;
     /// The content built for an object in this write, by object id.
     std::unordered_map<sal_uInt64, SdXImpressDocument::VectorObjectContent> maResolvedContent;
-    /// The page entry's content and the master part it names, built once per write.
+    /// The page entry's content, the master part it names and the layers of that master it
+    /// leaves out, built once per write.
     std::optional<SdXImpressDocument::VectorObjectContent> moPageContent;
     OString maPageMasterPartId;
+    std::vector<sal_Int32> maPageMasterHiddenLayers;
     /// The painted objects of the part and the views of the document, collected once per write.
     std::optional<std::vector<SdrObject*>> moPartObjects;
     std::optional<std::vector<EditingView>> moViews;

@@ -213,6 +213,10 @@ public:
         belongs to no page yet, so the caller decides how it takes the old object's place. */
     rtl::Reference<SdrObject> MakePresObjPlaceholder(SdrObject& rObj);
 
+    /** Sets the layers of its master that the page shows. When they differ from the layers it
+        showed, the model announces a change of the page, the same as for a new background. */
+    void SetMasterPageVisibleLayers(const SdrLayerIDSet& rVisibleLayers);
+
     SD_DLLPUBLIC void SetAutoLayout(AutoLayout eLayout, bool bInit=false, bool bCreate=false);
     AutoLayout      GetAutoLayout() const { return meAutoLayout; }
     void            CreateTitleAndLayout(bool bInit=false, bool bCreate=false);

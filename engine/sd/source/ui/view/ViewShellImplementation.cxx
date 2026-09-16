@@ -192,7 +192,7 @@ void ViewShell::Implementation::ProcessModifyPageSlot (
                 SdrLayerID aBckgrndObj = rLayerAdmin.GetLayerID(sUNO_LayerName_background_objects);
                 aVisibleLayers.Set(aBckgrnd, bBVisible);
                 aVisibleLayers.Set(aBckgrndObj, bBObjsVisible);
-                pCurrentPage->TRG_SetMasterPageVisibleLayers(aVisibleLayers);
+                pCurrentPage->SetMasterPageVisibleLayers(aVisibleLayers);
             }
             else
             {

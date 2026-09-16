@@ -549,6 +549,50 @@ describe('VectorManager', function () {
 		);
 	});
 
+	// A slide can turn the master's objects off. The page entry names the
+	// master layers it hides, and the objects on them are not drawn under
+	// that slide while another slide still shows them.
+	it('leaves out the master layers a page hides', function () {
+		const hairline = (path: string): any => ({ type: 'polygonHairline', path });
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			partId: 'M0',
+			mode: cool.VectorMode.MasterPages,
+			version: 1,
+			objects: [
+				{ id: 0, kind: 'page', width: 100, height: 100, primitives: [] },
+				{ id: 2, layer: 2, primitives: [hairline('M0 0 L2 2')] },
+				{ id: 3, layer: 1, primitives: [hairline('M0 0 L3 3')] },
+			],
+		});
+		manager.handleVectorPrimitivesResponse({
+			partId: 'S0',
+			mode: cool.VectorMode.Slides,
+			version: 1,
+			objects: [
+				{
+					id: 0,
+					kind: 'page',
+					width: 100,
+					height: 100,
+					masterPartId: 'M0',
+					masterHiddenLayers: [2],
+					primitives: [],
+				},
+			],
+		});
+
+		const slide: any = manager.requestPart(0, cool.VectorMode.Slides);
+		const recorder = new CanvasRecorder();
+		manager.renderInto(recorder as any, slide);
+		nodeassert.deepStrictEqual(
+			recorder.calls
+				.filter((call: any) => call.method === 'stroke')
+				.map((call: any) => (call.args[0] as any).path),
+			['M0 0 L3 3'],
+		);
+	});
+
 	// An edit running on a master object hides the object's own text, and the
 	// entry that carries what is typed is on the master part. A slide drawing
 	// under that master draws the entry, so the typed text shows on the slide.

@@ -780,7 +780,7 @@ void SdGenericDrawPage::setPropertyValue( const OUString& aPropertyName, const A
             if( ! ( aValue >>= bVisible ) )
                 throw lang::IllegalArgumentException();
 
-            SdrPage* pPage = GetPage();
+            SdPage* pPage = GetPage();
             if( pPage )
             {
                 SdDrawDocument& rDoc(static_cast< SdDrawDocument& >(pPage->getSdrModelFromSdrPage()));
@@ -789,7 +789,7 @@ void SdGenericDrawPage::setPropertyValue( const OUString& aPropertyName, const A
                     SdrLayerAdmin& rLayerAdmin = rDoc.GetLayerAdmin();
                     SdrLayerIDSet aVisibleLayers = pPage->TRG_GetMasterPageVisibleLayers();
                     aVisibleLayers.Set(rLayerAdmin.GetLayerID(sUNO_LayerName_background), bVisible);
-                    pPage->TRG_SetMasterPageVisibleLayers(aVisibleLayers);
+                    pPage->SetMasterPageVisibleLayers(aVisibleLayers);
                 }
             }
             break;
@@ -800,7 +800,7 @@ void SdGenericDrawPage::setPropertyValue( const OUString& aPropertyName, const A
             if( ! ( aValue >>= bVisible ) )
                 throw lang::IllegalArgumentException();
 
-            SdrPage* pPage = GetPage();
+            SdPage* pPage = GetPage();
             if( pPage )
             {
                 SdDrawDocument& rDoc(static_cast< SdDrawDocument& >(pPage->getSdrModelFromSdrPage()));
@@ -809,7 +809,7 @@ void SdGenericDrawPage::setPropertyValue( const OUString& aPropertyName, const A
                     SdrLayerAdmin& rLayerAdmin = rDoc.GetLayerAdmin();
                     SdrLayerIDSet aVisibleLayers = pPage->TRG_GetMasterPageVisibleLayers();
                     aVisibleLayers.Set(rLayerAdmin.GetLayerID(sUNO_LayerName_background_objects), bVisible);
-                    pPage->TRG_SetMasterPageVisibleLayers(aVisibleLayers);
+                    pPage->SetMasterPageVisibleLayers(aVisibleLayers);
                 }
             }
 

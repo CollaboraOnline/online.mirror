@@ -35,6 +35,8 @@
 #include <svx/svdopage.hxx>
 #include <svx/svdpage.hxx>
 #include <svx/svdorect.hxx>
+#include <svx/svdlayer.hxx>
+#include <svx/svdsob.hxx>
 #include <svx/svdview.hxx>
 #include <svx/xfillit0.hxx>
 #include <svx/xflclit.hxx>
@@ -1298,6 +1300,42 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testGivingASlideAnotherMasterMovesItsV
     const auto oPage = findEntryOfKind(aDelta, "page"_ostr);
     CPPUNIT_ASSERT(oPage.has_value());
     assertJsonPath(*oPage, "masterPartId", pNewMaster->GetGuid().getString());
+}
+
+CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testSlideNamesTheMasterLayersItHides)
+{
+    // A slide can turn its master's objects off. The document keeps that as the set of master
+    // layers the slide shows, and the page entry names the hidden ones, so a reader drawing the
+    // shared master under the slide skips them.
+    createBlankDoc();
+    SdPage* pSlide = static_cast<SdPage*>(page(1));
+    CPPUNIT_ASSERT(pSlide);
+    CPPUNIT_ASSERT(pSlide->TRG_HasMasterPage());
+    SdrPage& rMasterPage = pSlide->TRG_GetMasterPage();
+    rtl::Reference<SdrRectObj> pRect = new SdrRectObj(
+        rMasterPage.getSdrModelFromSdrPage(), tools::Rectangle(Point(0, 0), Size(4000, 2000)));
+    rMasterPage.NbcInsertObject(pRect.get());
+    const SdrLayerID nObjectsLayer
+        = getSdDocShell()->GetDoc()->GetLayerAdmin().GetLayerID(u"backgroundobjects"_ustr);
+    pRect->NbcSetLayer(nObjectsLayer);
+
+    auto aFull = getVectorPrimitives(u"testMasterLayersFull");
+    CPPUNIT_ASSERT(!aFull.has("/objects/0/masterHiddenLayers"));
+    const sal_Int64 nVersion = aFull.getInt("/version").value_or(-1);
+
+    // Turn the master objects off for this slide, the way the menu entry does.
+    SdrLayerIDSet aVisible = pSlide->TRG_GetMasterPageVisibleLayers();
+    aVisible.Set(nObjectsLayer, false);
+    pSlide->TRG_SetMasterPageVisibleLayers(aVisible);
+    getSdDocShell()->GetDoc()->Broadcast(SdrHint(SdrHintKind::PageOrderChange, pSlide));
+
+    auto aDelta = getVectorPrimitives(u"testMasterLayersDelta", nVersion);
+    assertJsonPath(aDelta, "/type", "vectorprimitivesdelta");
+    const auto oPage = findEntryOfKind(aDelta, "page"_ostr);
+    CPPUNIT_ASSERT(oPage.has_value());
+    CPPUNIT_ASSERT_EQUAL(size_t(1), oPage->getSize("masterHiddenLayers").value_or(0));
+    CPPUNIT_ASSERT_EQUAL(sal_Int64(nObjectsLayer.get()),
+                         oPage->getInt("masterHiddenLayers/0").value_or(-1));
 }
 
 CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testUnservedModeCarriesNoPage)

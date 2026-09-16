@@ -203,6 +203,9 @@ class VectorManager extends RenderManagerBase {
 		page: cool.SlideObject,
 	): void {
 		data.masterPartId = page.masterPartId;
+		data.masterHiddenLayers = page.masterHiddenLayers
+			? new Set(page.masterHiddenLayers)
+			: undefined;
 		if (data.masterPartId !== undefined)
 			this.requestPartById(data.masterPartId, cool.VectorMode.MasterPages);
 	}
@@ -262,9 +265,10 @@ class VectorManager extends RenderManagerBase {
 
 	/// Draw the master that a page names under it, in the master's order. A
 	/// shared object comes from the master, a per-slide one from the page's
-	/// own copy, if it has one. The master's page entry is skipped, since the
-	/// page draws its own background. A text edit on a master object is drawn
-	/// from its edit entry, since the object hides its text during the edit.
+	/// own copy, if it has one. An object on a layer the page hides is left
+	/// out. The master's page entry is skipped, since the page draws its own
+	/// background. A text edit on a master object is drawn from its edit
+	/// entry, since the object hides its text during the edit.
 	private _renderMaster(
 		context: CanvasRenderingContext2D,
 		data: cool.VectorPrimitivesData,
@@ -283,6 +287,8 @@ class VectorManager extends RenderManagerBase {
 				if (parent?.hiddenBehindSlide) continue;
 			}
 			if (obj.layer !== undefined && this._hiddenLayers.has(obj.layer))
+				continue;
+			if (obj.layer !== undefined && data.masterHiddenLayers?.has(obj.layer))
 				continue;
 			const drawn = obj.slideDependent ? data.objects.get(id) : obj;
 			if (!drawn?.primitives) continue;

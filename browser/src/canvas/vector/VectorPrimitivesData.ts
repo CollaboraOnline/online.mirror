@@ -38,5 +38,7 @@ namespace cool {
 		/// Id of the master part the page draws under itself, or undefined
 		/// when the page carries its master content inline.
 		masterPartId?: VectorPartGuid;
+		/// The ids of the layers of that master the page does not show.
+		masterHiddenLayers?: Set<number>;
 	}
 }

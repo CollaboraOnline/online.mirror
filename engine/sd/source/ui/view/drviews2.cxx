@@ -5454,7 +5454,7 @@ void DrawViewShell::FuTemporary(SfxRequest& rReq)
                 else
                     aLayerId = rLayerAdmin.GetLayerID(sUNO_LayerName_background_objects);
                 aVisibleLayers.Set(aLayerId, !aVisibleLayers.IsSet(aLayerId));
-                pPage->TRG_SetMasterPageVisibleLayers(aVisibleLayers);
+                pPage->SetMasterPageVisibleLayers(aVisibleLayers);
             }
             Cancel();
             rReq.Done(); // Mark task as done to auto-update the state of each buttons tdf#132816

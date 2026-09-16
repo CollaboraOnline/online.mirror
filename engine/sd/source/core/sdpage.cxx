@@ -1776,6 +1776,18 @@ static void findAutoLayoutShapesImpl( SdPage& rPage, const LayoutDescriptor& rDe
     }
 }
 
+void SdPage::SetMasterPageVisibleLayers(const SdrLayerIDSet& rVisibleLayers)
+{
+    if (!TRG_HasMasterPage() || !(TRG_GetMasterPageVisibleLayers() != rVisibleLayers))
+        return;
+
+    TRG_SetMasterPageVisibleLayers(rVisibleLayers);
+
+    // What the page shows of its master is part of the page, the same as its background.
+    if (IsInserted())
+        getSdrModelFromSdrPage().Broadcast(SdrHint(SdrHintKind::PageOrderChange, this));
+}
+
 void SdPage::SetAutoLayout(AutoLayout eLayout, bool bInit, bool bCreate )
 {
     sd::ScopeLockGuard aGuard( maLockAutoLayoutArrangement );

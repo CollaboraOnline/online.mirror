@@ -45,6 +45,9 @@ namespace cool {
 		/// the slide draws under itself. Absent when the page carries its
 		/// master content inline.
 		masterPartId?: VectorPartGuid;
+		/// On the entry of kind "page" of a slide: the ids of the layers of
+		/// its master the slide does not show. Absent when it shows them all.
+		masterHiddenLayers?: number[];
 		/// On an object of a slide: it is the slide's own copy of a master
 		/// placeholder, rendered for this slide.
 		masterContent?: boolean;

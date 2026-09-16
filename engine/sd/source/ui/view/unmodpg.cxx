@@ -117,7 +117,7 @@ void ModifyPageUndoAction::Undo()
         SdrLayerIDSet aVisibleLayers;
         aVisibleLayers.Set(aBckgrnd, mbOldBckgrndVisible);
         aVisibleLayers.Set(aBckgrndObj, mbOldBckgrndObjsVisible);
-        mpPage->TRG_SetMasterPageVisibleLayers(aVisibleLayers);
+        mpPage->SetMasterPageVisibleLayers(aVisibleLayers);
     }
 
     // Redisplay
@@ -161,7 +161,7 @@ void ModifyPageUndoAction::Redo()
         SdrLayerIDSet aVisibleLayers;
         aVisibleLayers.Set(aBckgrnd, mbNewBckgrndVisible);
         aVisibleLayers.Set(aBckgrndObj, mbNewBckgrndObjsVisible);
-        mpPage->TRG_SetMasterPageVisibleLayers(aVisibleLayers);
+        mpPage->SetMasterPageVisibleLayers(aVisibleLayers);
     }
 
     // Redisplay

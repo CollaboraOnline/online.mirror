@@ -243,7 +243,8 @@ public:
     /// part's version up, remembers it as the version the entry last changed at, and returns
     /// true. The first record for a part moves nothing.
     bool recordVectorPageContent(const SdrPage& rPage, const VectorObjectContent& rContent,
-                                 const OString& rMasterPartId);
+                                 const OString& rMasterPartId,
+                                 const std::vector<sal_Int32>& rMasterHiddenLayers);
 
     /// Content state of one vector-rendering part: its current version, the version the last
     /// delta written for it was computed up to, the version at which its master page last
@@ -276,6 +277,8 @@ public:
         /// Nothing before the part was first written.
         std::optional<VectorObjectContent> moPageContent;
         OString maPageMasterPartId;
+        /// The layers of the master the page leaves out, as last written.
+        std::vector<sal_Int32> maPageMasterHiddenLayers;
         std::unordered_map<sal_uInt64, sal_uInt64> maObjectChangeVersions;
         std::unordered_map<sal_uInt64, VectorObjectContent> maObjectContent;
         std::unordered_set<sal_uInt64> maDirtyObjects;
