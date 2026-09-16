@@ -264,10 +264,6 @@ class RenderManager {
 		RenderManager.ensureInstance().renderPlaceholderAids(context, data);
 	}
 
-	static setHiddenLayers(layers: unknown): void {
-		RenderManager.ensureInstance().setHiddenLayers(layers);
-	}
-
 	static isPartDrawable(part: number, mode: number): boolean {
 		return RenderManager.ensureInstance().isPartDrawable(part, mode);
 	}
