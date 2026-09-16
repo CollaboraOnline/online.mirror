@@ -8051,11 +8051,15 @@ std::string COKitDocumentImpl::getCommandValues(const char* pCommand)
         if (auto aModeIterator = aParameters.find(u"mode"_ustr); aModeIterator != aParameters.end())
             nRequestedMode = aModeIterator->second.toInt32();
 
-        if (const SfxViewShell* pViewShell = SfxViewShell::Current())
+        if (SfxViewShell* pViewShell = SfxViewShell::Current())
         {
             auto it = mpCallbackFlushHandlers.find(pViewShell->GetViewShellId().get());
             if (it != mpCallbackFlushHandlers.end() && it->second)
                 it->second->setVectorRendering(nRequestedMode);
+
+            // Such a view draws the page from the objects it holds, which decides among other
+            // things how the handles of a selection of several objects are laid out.
+            pViewShell->setDrawsFromObjects(true);
         }
     }
 

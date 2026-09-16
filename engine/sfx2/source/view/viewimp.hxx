@@ -61,6 +61,9 @@ struct SfxViewShell_Impl
     /// One bit per COKitCallbackType value, set for the kinds the client of this view asked
     /// not to be sent, for example the mouse pointer when the client computes it itself.
     std::bitset<256> m_aUnwantedCallbacks;
+    /// True when the client of this view draws the document from the objects it holds rather than
+    /// from bitmap tiles.
+    bool m_bDrawsFromObjects = false;
     static sal_uInt32 m_nLastViewShellId;
     const ViewShellId m_nViewShellId;
     const ViewShellDocId m_nDocId;

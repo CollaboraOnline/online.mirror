@@ -450,6 +450,13 @@ public:
      * would have carried it.
      */
     void setCallbackWanted(COKitCallbackType eType, bool bWanted);
+
+    /** Says that the client of this view draws the document from the objects it holds, rather
+     * than from the bitmap tiles the view paints.
+     */
+    void setDrawsFromObjects(bool bDrawsFromObjects);
+    /// See setDrawsFromObjects().
+    bool drawsFromObjects() const;
     /// ICOKitNotifier. Emits a COKitCallbackType::INVALIDATE_TILES.
     virtual void notifyInvalidation(tools::Rectangle const *) const override;
     /// ICOKitNotifier.

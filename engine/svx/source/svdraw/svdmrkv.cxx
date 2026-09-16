@@ -682,6 +682,19 @@ bool SdrMarkView::ImpIsFrameHandles() const
         }
     }
 
+    /*
+        A client that draws the document from the objects it holds shows one frame around a
+        selection of several objects, so that a drag on a handle scales every object in it and
+        there is one set of handles to draw. A single object keeps its own handles, which is where
+        the interaction points of a shape sit.
+    */
+    if (!bFrmHdl && nMarkCount > 1)
+    {
+        const SfxViewShell* pViewShell = GetSfxViewShell();
+        if (pViewShell && pViewShell->drawsFromObjects())
+            bFrmHdl = true;
+    }
+
     // no FrameHdl for crop
     if(bFrmHdl && SdrDragMode::Crop == meDragMode)
     {

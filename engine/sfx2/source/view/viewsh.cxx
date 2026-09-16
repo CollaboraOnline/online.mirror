@@ -3786,6 +3786,13 @@ void SfxViewShell::setCallbackWanted(COKitCallbackType eType, bool bWanted)
     pImpl->m_aUnwantedCallbacks.set(size_t(eType), !bWanted);
 }
 
+void SfxViewShell::setDrawsFromObjects(bool bDrawsFromObjects)
+{
+    pImpl->m_bDrawsFromObjects = bDrawsFromObjects;
+}
+
+bool SfxViewShell::drawsFromObjects() const { return pImpl->m_bDrawsFromObjects; }
+
 bool SfxViewShell::acceptsViewCallback(COKitCallbackType eType) const
 {
     return !ignoreCOKitViewCallback(eType, pImpl.get()) && pImpl->m_pCOKitViewCallback != nullptr;
