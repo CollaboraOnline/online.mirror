@@ -1150,6 +1150,28 @@ CPPUNIT_TEST_FIXTURE(OoxShapeTest, testTdf170095SoftEdge3D)
     CPPUNIT_ASSERT_EQUAL(static_cast<sal_Int32>(0), nSoftEdgeRad);
 }
 
+CPPUNIT_TEST_FIXTURE(OoxShapeTest, testPieTextArea)
+{
+    // OOXMl presetShapeDefinitions.xml has an error in text area of shape "Pie" (as of Sept 2026).
+    // To be compatible with PowerPoint, we immediately use a corrected version of that file without
+    // waiting for a fix by ISO.
+    loadFromFile(u"tdf149918_pie_textarea.pptx");
+    uno::Reference<drawing::XDrawPagesSupplier> xDrawPagesSupplier(mxComponent, uno::UNO_QUERY);
+    uno::Reference<drawing::XDrawPage> xDrawPage(xDrawPagesSupplier->getDrawPages()->getByIndex(0),
+                                                 uno::UNO_QUERY);
+    uno::Reference<beans::XPropertySet> xShapeProps(xDrawPage->getByIndex(0), uno::UNO_QUERY);
+    css::awt::Rectangle aBoundRect;
+    xShapeProps->getPropertyValue(u"BoundRect"_ustr) >>= aBoundRect;
+    // Without fix, size was 12009 x 7844, and position was 2008|2172.
+    // The text began in the upper-left corner of the logical rectangle. However it should be inside
+    // the underlaying ellipse of the pie.
+    // A BoundRect can vary depending on the system and font and therefore requires a wide tolerance.
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(sal_Int32(10247), aBoundRect.Width,10);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(sal_Int32(6673), aBoundRect.Height, 10);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(sal_Int32(3770), aBoundRect.X, 10);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(sal_Int32(3343), aBoundRect.Y, 10);
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

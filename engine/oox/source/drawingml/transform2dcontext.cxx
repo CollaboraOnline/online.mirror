@@ -70,6 +70,7 @@ bool ConstructPresetTextRectangle(Shape& rShape, awt::Rectangle& rRect)
     switch (nType)
     {
         case XML_ellipse:
+        case XML_pie:
             // The preset text rectangle touches the perimeter of the ellipse at 45deg.
             rRect.X = rShape.getPosition().X + rShape.getSize().Width * ((1.0 - M_SQRT1_2) / 2.0);
             rRect.Y = rShape.getPosition().Y + rShape.getSize().Height * ((1.0 - M_SQRT1_2) / 2.0);
@@ -124,11 +125,9 @@ bool ConstructPresetTextRectangle(Shape& rShape, awt::Rectangle& rRect)
             rRect.Height = rShape.getSize().Height;
             return true;
         }
-        case XML_pie:
         case XML_rect:
         case XML_wedgeRectCallout:
         {
-            // When tdf#149918 is fixed, pie will need its own case
             rRect.X = rShape.getPosition().X;
             rRect.Y = rShape.getPosition().Y;
             rRect.Width = rShape.getSize().Width;
