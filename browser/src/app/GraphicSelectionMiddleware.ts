@@ -14,6 +14,18 @@
 declare var JSDialog: any;
 
 class GraphicSelection {
+	/*
+		The drawing objects the selection stands on, by the unique ids the engine gives them, empty
+		while nothing is selected. They all sit at the same level: directly on the page, or in one
+		and the same group.
+	*/
+	public static selectedObjectIDs: number[] = [];
+
+	/*
+		True when the selection that arrived last was made somewhere other than here - the
+		keyboard, an undo, another user - and false when it is the one this client asked for.
+	*/
+	public static selectionCameFromElsewhere: boolean = false;
 	public static rectangle: cool.SimpleRectangle | null = null;
 	public static extraInfo: any = null;
 	public static selectionAngle: number = 0;
@@ -34,7 +46,52 @@ class GraphicSelection {
 		this.updateGraphicSelection();
 	}
 
+	/*
+		Marks the drawing objects with the given unique ids, and nothing else. The engine is told
+		which objects they are rather than where the click was, so what the client hit and what the
+		engine marks are one thing. An empty list asks for no selection at all.
+	*/
+	public static selectObjects(objectIds: number[]) {
+		this.selectedObjectIDs = objectIds.slice();
+		app.socket.sendMessage('selectobjects ids=' + objectIds.join(','));
+	}
+
+	/*
+		Takes up the selection the engine reports and says whether it is another one than the
+		client holds. It is the same one whenever the client asked for it, since the answer names
+		the objects it named itself.
+	*/
+	public static selectionChanged(objectIds: number[]): boolean {
+		const changed =
+			objectIds.length !== this.selectedObjectIDs.length ||
+			objectIds.some(
+				(objectId: number, index: number) =>
+					objectId !== this.selectedObjectIDs[index],
+			);
+
+		this.selectedObjectIDs = objectIds.slice();
+		this.selectionCameFromElsewhere = changed;
+		return changed;
+	}
+
+	/// The objects the engine says are selected, in the order it marked them.
+	private static selectedObjectIDsOf(extraInfo: any): number[] {
+		const objectIds = extraInfo?.uniqueIds;
+		return Array.isArray(objectIds) ? objectIds : [];
+	}
+
+	/*
+		What tells one selection from another: the objects it stands on, so a selection of two
+		shapes differs from a selection of one of them. The engine names every marked object, and
+		the first of them again on its own, which is what a payload from an older engine carries.
+	*/
+	private static selectionKeyOf(extraInfo: any): string {
+		const objectIds = GraphicSelection.selectedObjectIDsOf(extraInfo);
+		return objectIds.length ? String(objectIds) : String(extraInfo?.id);
+	}
+
 	static resetSelectionRanges() {
+		this.selectionChanged([]);
 		this.rectangle = null;
 		this.extraInfo = null;
 
@@ -240,7 +297,12 @@ class GraphicSelection {
 			let addHandlesSection = false;
 
 			if (!this.handlesSection) addHandlesSection = true;
-			else if (extraInfo.id !== this.handlesSection.sectionProperties.info.id) {
+			else if (
+				GraphicSelection.selectionKeyOf(extraInfo) !==
+				GraphicSelection.selectionKeyOf(
+					this.handlesSection.sectionProperties.info,
+				)
+			) {
 				// Another shape is selected.
 				this.handlesSection.removeSubSections();
 				app.sectionContainer.removeSection(this.handlesSection.name);
@@ -405,6 +467,18 @@ class GraphicSelection {
 			this.transformGraphicSelection(msgData);
 
 			this.extractAndSetGraphicSelection(msgData);
+
+			/*
+				Which objects the selection is about. A selection the client asked for names the
+				objects it named itself, so it arrives unchanged; one that differs was made
+				elsewhere, by the keyboard, an undo or another user. Everything below is set up
+				from the message either way, until the client builds it from what it holds.
+			*/
+			this.selectionChanged(
+				GraphicSelection.selectedObjectIDsOf(
+					msgData.length > 5 ? msgData[5] : null,
+				),
+			);
 
 			// Update the dark overlay on zooming & scrolling
 			if (!app.map._docLayer._oleCSelections.empty()) {

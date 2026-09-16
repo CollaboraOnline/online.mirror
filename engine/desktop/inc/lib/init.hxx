@@ -433,6 +433,7 @@ namespace desktop {
                               const char* pPart) override;
         bool breakSlideLink(const char* pPart) override;
         bool exportPages(const char* pParts, const char* pUrl) override;
+        void selectObjects(const char* pObjectIds) override;
     };
 
     struct DESKTOP_DLLPUBLIC COKitImpl : public COKit

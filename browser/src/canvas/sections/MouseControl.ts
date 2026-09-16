@@ -591,6 +591,69 @@ class MouseControl extends CanvasSectionObject {
 		);
 	}
 
+	/*
+		The selection a click asks for, from the objects the client holds. A plain click asks for
+		the object it meets alone, and none where it meets no object. A click with Shift or Ctrl
+		asks for the object to join what is selected, or to leave it when it is in there already.
+
+		The objects of one selection all sit at the same level, so an object from another group, or
+		from the page while a group's members are selected, starts a selection of its own instead
+		of joining one.
+	*/
+	private selectionForClick(
+		objectId: number | undefined,
+		extending: boolean,
+	): number[] {
+		const selected = GraphicSelection.selectedObjectIDs;
+
+		if (objectId === undefined) return [];
+		if (!extending) return [objectId];
+
+		if (selected.includes(objectId))
+			return selected.filter((selectedId: number) => selectedId !== objectId);
+
+		const parent = RenderGeometrySection.parentOf(objectId);
+		const sameLevel = selected.every(
+			(selectedId: number) =>
+				RenderGeometrySection.parentOf(selectedId) === parent,
+		);
+
+		return sameLevel ? selected.concat(objectId) : [objectId];
+	}
+
+	/*
+		Answers a click from the geometry the client holds, by naming the objects to the engine
+		instead of sending the click for it to hit test. The hit test is asked at the position of
+		this click, so what is marked is what the click met and not what the mouse passed over
+		earlier. A click that meets no object asks for no selection at all, which is how the
+		engine is told to drop the one it holds.
+
+		False where the click is not one for selecting: another button, a modifier other than
+		Shift or Ctrl, a document not drawn from objects, or a click that meets nothing while
+		nothing is selected. Those take the click path to the engine, as does a click while a text
+		edit runs, which the engine ends on its own.
+	*/
+	private selectObjectAt(
+		point: cool.SimplePoint,
+		buttons: number,
+		modifier: number,
+	): boolean {
+		if (buttons !== app.LOButtons.left) return false;
+		if (!RenderGeometrySection.answersPointer()) return false;
+		if (app.file.textCursor.visible) return false;
+
+		const extending =
+			modifier === app.UNOModifier.SHIFT || modifier === app.UNOModifier.CTRL;
+		if (modifier !== 0 && !extending) return false;
+
+		const objectId = RenderGeometrySection.objectIdAt(point.x, point.y);
+		if (objectId === undefined && !GraphicSelection.selectedObjectIDs.length)
+			return false;
+
+		GraphicSelection.selectObjects(this.selectionForClick(objectId, extending));
+		return true;
+	}
+
 	onClick(point: cool.SimplePoint, e: MouseEvent): void {
 		app.map.fire('closepopups');
 		app.map.fire('editorgotfocus');
@@ -622,8 +685,11 @@ class MouseControl extends CanvasSectionObject {
 
 		if (this.clickTimer) app.timerRegistry.clearTimeout(this.clickTimer);
 		else {
-			// Old code always sends the first click, so do we.
-			this.sendClick(clickInfo, 1);
+			// Old code always sends the first click, so do we, unless the client marks the
+			// object itself. A second click within the timer is sent either way, so a double
+			// click still reaches the engine and enters the text of the object.
+			if (!this.selectObjectAt(sendingPosition, buttons, modifier))
+				this.sendClick(clickInfo, 1);
 
 			// For future: Here, we are checking the window size to determine the view mode, we can also check the event type (touch/click).
 			app.map.focus(

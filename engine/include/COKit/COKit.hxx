@@ -2765,6 +2765,18 @@ struct COKitDocument
      */
     virtual bool exportPages(const char* pParts, const char* pUrl) = 0;
 
+    /**
+     * Marks the given objects in this view, and nothing else, as a click on them would.
+     *
+     * @param pObjectIds the objects to mark, as a comma separated list of the ids
+     *        SdrObject::GetUniqueID() answers, empty to mark nothing.
+     *
+     * The objects of one selection all sit at the same level: directly on the page, or in one and
+     * the same group. An id naming an object somewhere else, or naming nothing on the page the
+     * view shows, is left out.
+     */
+    virtual void selectObjects(const char* pObjectIds) = 0;
+
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

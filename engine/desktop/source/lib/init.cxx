@@ -60,6 +60,7 @@
 #include <algorithm>
 #include <limits>
 #include <memory>
+#include <vector>
 #include <iostream>
 #include <mutex>
 #include <string_view>
@@ -6461,6 +6462,107 @@ COKitSlideLayer COKitDocumentImpl::renderNextSlideLayer(std::span<unsigned char>
     aLayer.bIsDone = pDoc->renderNextSlideLayer(aBuffer.data(), aLayer.bIsBitmapLayer,
                                                 aLayer.fScale, aLayer.aJsonMessage);
     return aLayer;
+}
+
+namespace
+{
+/// The object of the list carrying the given unique id, looking inside every group on the way.
+SdrObject* findObjectByUniqueID(const SdrObjList* pList, sal_uInt64 nObjectId)
+{
+    if (!pList)
+        return nullptr;
+
+    for (size_t nObject = 0; nObject < pList->GetObjCount(); ++nObject)
+    {
+        SdrObject* pObject = pList->GetObj(nObject);
+        if (!pObject)
+            continue;
+
+        if (pObject->GetUniqueID() == nObjectId)
+            return pObject;
+
+        if (SdrObject* pFound = findObjectByUniqueID(pObject->GetSubList(), nObjectId))
+            return pFound;
+    }
+
+    return nullptr;
+}
+}
+
+void COKitDocumentImpl::selectObjects(const char* pObjectIds)
+{
+    comphelper::ProfileZone aZone("COKitDocumentImpl::selectObjects");
+
+    SolarMutexGuard aGuard;
+    SetLastExceptionMsg();
+
+    SfxViewShell* pViewShell = SfxViewShell::Current();
+    SdrView* pView = pViewShell ? pViewShell->GetDrawView() : nullptr;
+    SdrPageView* pPageView = pView ? pView->GetSdrPageView() : nullptr;
+
+    if (!pPageView)
+    {
+        SetLastExceptionMsg(u"The view shows no page to select objects on"_ustr);
+        return;
+    }
+
+    // The objects to mark are gathered first, so that putting the marks on can report the change
+    // once, at its last step, rather than once per object.
+    const OString aObjectIds(pObjectIds ? pObjectIds : "");
+    const SdrObjList* pLevel = nullptr;
+    std::vector<SdrObject*> aWanted;
+
+    for (sal_Int32 nPosition = 0; nPosition >= 0;)
+    {
+        const OString aId(aObjectIds.getToken(0, ',', nPosition));
+        if (aId.isEmpty())
+            continue;
+
+        SdrObject* pObject = findObjectByUniqueID(pPageView->GetPage(), aId.toUInt64());
+        if (!pObject || !pView->IsObjMarkable(pObject, pPageView))
+        {
+            SAL_WARN("kit", "selectObjects: nothing to mark for the id " << aId);
+            continue;
+        }
+
+        // The objects of one selection sit at one level, so the first object says which level
+        // that is and an object from anywhere else is left out.
+        if (aWanted.empty())
+            pLevel = pObject->getParentSdrObjListFromSdrObject();
+        else if (pObject->getParentSdrObjListFromSdrObject() != pLevel)
+        {
+            SAL_WARN("kit", "selectObjects: the object " << aId << " sits at another level");
+            continue;
+        }
+
+        aWanted.push_back(pObject);
+    }
+
+    const SdrMarkList& rMarkList = pView->GetMarkedObjectList();
+    std::vector<SdrObject*> aMarked;
+    for (size_t nMark = 0; nMark < rMarkList.GetMarkCount(); ++nMark)
+        aMarked.push_back(rMarkList.GetMark(nMark)->GetMarkedSdrObj());
+
+    // The objects asked for are the ones already marked, so the selection stands as it is and
+    // nothing is reported.
+    if (aMarked == aWanted)
+        return;
+
+    if (aWanted.empty())
+    {
+        // Unmarking reports the empty selection itself.
+        pView->UnmarkAllObj(pPageView);
+        return;
+    }
+
+    // The marks that go are taken off without a word, and the last mark that arrives reports what
+    // the selection is now, so one change is one message.
+    for (SdrObject* pMarked : aMarked)
+        pView->MarkObj(pMarked, pPageView, /*bUnmark*/ true, /*bDoNoSetMarkHdl*/ true);
+
+    for (size_t nObject = 0; nObject < aWanted.size(); ++nObject)
+        pView->MarkObj(aWanted[nObject], pPageView, /*bUnmark*/ false,
+                       /*bDoNoSetMarkHdl*/ nObject + 1 < aWanted.size());
 }
 
 void COKitDocumentImpl::setViewOption(const char* pOption, const char* pValue)

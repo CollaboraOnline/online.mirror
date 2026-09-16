@@ -1616,6 +1616,7 @@ bool ClientSession::_handleInput(const char *buffer, int length)
 #endif // !MOBILEAPP
     else if (tokens.equals(0, "outlinestate") ||
              tokens.equals(0, "reportmousepointer") ||
+             tokens.equals(0, "selectobjects") ||
              tokens.equals(0, "downloadas") ||
              tokens.equals(0, "getchildid") ||
              tokens.equals(0, "gettextselection") ||

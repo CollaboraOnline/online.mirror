@@ -1020,15 +1020,30 @@ void SdrMarkView::SetMarkHandlesForKit(tools::Rectangle const & rRect, const Sfx
 
             OString handleArrayStr;
 
+            // The first marked object, by the unique id it keeps for as long as it lives. It
+            // used to be the address of the object, which says nothing a reader can act on and
+            // is given to another object once this one is gone.
             aExtraInfo.append("{\"id\":\""
-                + OString::number(reinterpret_cast<sal_IntPtr>(pO))
+                + OString::number(pO->GetUniqueID())
                 + "\",\"type\":"
                 + OString::number(static_cast<sal_Int32>(pO->GetObjIdentifier()))
                 + ",\"typeString\":\"");
             aExtraInfo.append(SdrObjKindToString(pO->GetObjIdentifier()));
             aExtraInfo.append("\",\"OrdNum\":" + OString::number(pO->GetOrdNum()));
 
-            aExtraInfo.append(", \"isMathObject\": " + OString::boolean(lcl_isStarMath(pO)));
+            // Every marked object, by the unique id it keeps for as long as it lives. The order is
+            // the order they were marked in, and one entry stands for one object, so a reader can
+            // tell which objects the selection is about and whether that set moved.
+            aExtraInfo.append(",\"uniqueIds\":[");
+            for (size_t nMark = 0; nMark < rMarkList.GetMarkCount(); ++nMark)
+            {
+                if (nMark > 0)
+                    aExtraInfo.append(",");
+
+                const SdrObject* pMarked = rMarkList.GetMark(nMark)->GetMarkedSdrObj();
+                aExtraInfo.append(OString::number(pMarked ? pMarked->GetUniqueID() : 0));
+            }
+            aExtraInfo.append("], \"isMathObject\": " + OString::boolean(lcl_isStarMath(pO)));
             aExtraInfo.append(", \"isDiagram\": " + OString::boolean(pO->isDiagram()));
 
             if (mpMarkedObj && !pOtherShell)

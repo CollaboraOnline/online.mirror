@@ -572,6 +572,14 @@ outlinestate type=<type> level=<level> index=<index> state=<state>
 
     Invokes  lok::Document::setOutlineState().
 
+selectobjects ids=<ids>
+
+    <ids> is a comma separated list of the unique ids of drawing objects, the ones the render
+    geometry of a page names its objects by, and it is empty to ask for no selection at all.
+    Marks those objects in this view and nothing else, the way a click on them would. The objects
+    of one selection all sit at the same level, directly on the page or in one and the same group;
+    an id naming an object elsewhere, or naming nothing on the page the view shows, is left out.
+
 reportmousepointer wanted=<wanted>
 
     <wanted> is 'true' or 'false'. Says whether this client wants to be told the mouse pointer the

@@ -210,6 +210,10 @@ private:
 
     /// Says whether this client wants to be told the mouse pointer the document asks for.
     bool reportMousePointer(const StringVector& tokens);
+
+    /// Marks the objects the client names, which it worked out from the geometry it holds. An
+    /// empty list marks nothing, which is how the client asks for no selection at all.
+    bool selectObjects(const StringVector& tokens);
     bool downloadAs(const StringVector& tokens);
     /// Whether core will put a question to the person while writing the document out in
     /// this format.
