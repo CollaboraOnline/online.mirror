@@ -362,6 +362,7 @@ bool ImpEditEngine::Command( const CommandEvent& rCEvt, EditView* pView )
     {
         if (!pView->IsReadOnly())
         {
+            UndoActionStart( EDITUNDO_INSERT );
             pView->DeleteSelected();
             mpIMEInfos.reset();
             EditPaM aPaM = pView->getImpl().GetEditSelection().Max();
@@ -371,7 +372,6 @@ bool ImpEditEngine::Command( const CommandEvent& rCEvt, EditView* pView )
                 aOldTextAfterStartPos = aOldTextAfterStartPos.copy( 0, nMax );
             mpIMEInfos.reset( new ImplIMEInfos( aPaM, aOldTextAfterStartPos ) );
             mpIMEInfos->bWasCursorOverwrite = !pView->IsInsertMode();
-            UndoActionStart( EDITUNDO_INSERT );
         }
     }
     else if ( rCEvt.GetCommand() == CommandEventId::EndExtTextInput )
