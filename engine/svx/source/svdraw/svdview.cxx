@@ -54,6 +54,7 @@
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
 #include <basegfx/numeric/ftools.hxx>
 #include <o3tl/unit_conversion.hxx>
+#include <o3tl/string_view.hxx>
 #include <rtl/strbuf.hxx>
 
 
@@ -1468,7 +1469,28 @@ bool SdrView::BegMark(const Point& rPnt, bool bAddMark, bool bUnmark)
 // drag overlay: the drag is applied to a clone of the shape, the document
 // stays untouched. A connector clone re-routes its line, so the reported
 // polygon is the real line the drop would produce.
-void SdrView::SendShapeDragPreview(const sal_uInt32 handleNum)
+/** What a handle is called: the kind, the polygon and the point it belongs to, with "behind"
+    added for the weight that sits behind its point.
+
+    A handle keeps that name however many handles the object has and whatever else is selected,
+    where the place it has in a list holds only for one object on its own.
+ */
+static OString handleName(const SdrHdl* pHandle)
+{
+    if (!pHandle)
+        return OString();
+
+    OString aName = OString::number(static_cast<sal_Int32>(pHandle->GetKind())) + "."
+                    + OString::number(pHandle->GetPolyNum()) + "."
+                    + OString::number(pHandle->GetPointNum());
+
+    if (pHandle->IsPlusHdl())
+        aName += ".behind";
+
+    return aName;
+}
+
+void SdrView::SendShapeDragPreview()
 {
     if (!comphelper::COKit::isActive())
         return;
@@ -1496,7 +1518,9 @@ void SdrView::SendShapeDragPreview(const sal_uInt32 handleNum)
     if (const OutputDevice* pOutputDevice = GetFirstOutputDevice())
         bConvertMapMode = pOutputDevice->GetMapMode().GetMapUnit() == MapUnit::Map100thMM;
 
-    OStringBuffer aPayload("{ \"handle\": \"" + OString::number(handleNum) + "\", \"polygons\": [");
+    // The handle by what it is, the same name a caller uses to move it, so that a reader can
+    // tell whether the preview answers what it asked for.
+    OStringBuffer aPayload("{ \"handle\": \"" + handleName(pHdl) + "\", \"polygons\": [");
     for (sal_uInt32 nPoly = 0; nPoly < aPolyPolygon.count(); ++nPoly)
     {
         const basegfx::B2DPolygon& rPolygon = aPolyPolygon.getB2DPolygon(nPoly);
@@ -1518,6 +1542,46 @@ void SdrView::SendShapeDragPreview(const sal_uInt32 handleNum)
     aPayload.append("] }");
 
     pViewShell->viewCallback(COKitCallbackType::SHAPE_DRAG_PREVIEW, aPayload.makeStringAndClear());
+}
+
+SdrHdl* SdrView::GetHandleByName(std::u16string_view rHandleName) const
+{
+    sal_Int32 nPosition = 0;
+
+    const sal_Int32 nKind = o3tl::toInt32(o3tl::getToken(rHandleName, 0, '.', nPosition));
+    const sal_uInt32 nPolygon
+        = nPosition < 0 ? 0 : o3tl::toUInt32(o3tl::getToken(rHandleName, 0, '.', nPosition));
+    const sal_uInt32 nPoint
+        = nPosition < 0 ? 0 : o3tl::toUInt32(o3tl::getToken(rHandleName, 0, '.', nPosition));
+    const bool bBehindThePoint
+        = nPosition >= 0 && o3tl::getToken(rHandleName, 0, '.', nPosition) == u"behind";
+
+    const SdrHdlList& rHandles = GetHdlList();
+    for (size_t nHandle = 0; nHandle < rHandles.GetHdlCount(); ++nHandle)
+    {
+        SdrHdl* pHandle = rHandles.GetHdl(nHandle);
+        if (!pHandle || static_cast<sal_Int32>(pHandle->GetKind()) != nKind)
+            continue;
+
+        if (pHandle->GetPolyNum() != nPolygon || pHandle->GetPointNum() != nPoint
+            || pHandle->IsPlusHdl() != bBehindThePoint)
+            continue;
+
+        return pHandle;
+    }
+
+    return nullptr;
+}
+
+bool SdrView::MoveShapeHandle(std::u16string_view rHandleName, const Point& rEndPoint,
+                              const sal_Int32 nObjectOrdNum, const bool bPreview)
+{
+    SdrHdl* pHandle = GetHandleByName(rHandleName);
+    if (!pHandle)
+        return false;
+
+    return MoveShapeHandle(static_cast<sal_uInt32>(GetHdlList().GetHdlNum(pHandle)), rEndPoint,
+                           nObjectOrdNum, bPreview);
 }
 
 bool SdrView::MoveShapeHandle(const sal_uInt32 handleNum, const Point& aEndPoint, const sal_Int32 aObjectOrdNum, const bool bPreview)
@@ -1556,7 +1620,7 @@ bool SdrView::MoveShapeHandle(const sal_uInt32 handleNum, const Point& aEndPoint
 
     if (bPreview)
     {
-        SendShapeDragPreview(handleNum);
+        SendShapeDragPreview();
         BrkDragObj();
     }
     else

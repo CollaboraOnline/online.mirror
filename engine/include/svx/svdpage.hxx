@@ -92,6 +92,11 @@ public:
     SAL_DLLPRIVATE void CopyObjects(const SdrObjList& rSrcList);
     static OString GetObjectRectangles(const SdrObjList& rSrcList);
 
+    /** The object of this list carrying the given unique id, looked for inside every group on
+        the way, or nothing when the list holds no such object.
+     */
+    SdrObject* FindObjectByUniqueID(sal_uInt64 nUniqueID) const;
+
     // tdf#116879 clean up everything (without Undo), plus broadcasting
     // changes. Split to this call and a private one (impClearSdrObjList)
     // that allows cleanup without broadcasting in the destructor

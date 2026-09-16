@@ -6464,31 +6464,6 @@ COKitSlideLayer COKitDocumentImpl::renderNextSlideLayer(std::span<unsigned char>
     return aLayer;
 }
 
-namespace
-{
-/// The object of the list carrying the given unique id, looking inside every group on the way.
-SdrObject* findObjectByUniqueID(const SdrObjList* pList, sal_uInt64 nObjectId)
-{
-    if (!pList)
-        return nullptr;
-
-    for (size_t nObject = 0; nObject < pList->GetObjCount(); ++nObject)
-    {
-        SdrObject* pObject = pList->GetObj(nObject);
-        if (!pObject)
-            continue;
-
-        if (pObject->GetUniqueID() == nObjectId)
-            return pObject;
-
-        if (SdrObject* pFound = findObjectByUniqueID(pObject->GetSubList(), nObjectId))
-            return pFound;
-    }
-
-    return nullptr;
-}
-}
-
 void COKitDocumentImpl::selectObjects(const char* pObjectIds)
 {
     comphelper::ProfileZone aZone("COKitDocumentImpl::selectObjects");
@@ -6518,7 +6493,8 @@ void COKitDocumentImpl::selectObjects(const char* pObjectIds)
         if (aId.isEmpty())
             continue;
 
-        SdrObject* pObject = findObjectByUniqueID(pPageView->GetPage(), aId.toUInt64());
+        const SdrPage* pPage = pPageView->GetPage();
+        SdrObject* pObject = pPage ? pPage->FindObjectByUniqueID(aId.toUInt64()) : nullptr;
         if (!pObject || !pView->IsObjMarkable(pObject, pPageView))
         {
             SAL_WARN("kit", "selectObjects: nothing to mark for the id " << aId);

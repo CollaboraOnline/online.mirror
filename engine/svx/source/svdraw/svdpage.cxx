@@ -135,6 +135,27 @@ SdrObject* SdrObjList::getSdrObjectFromSdrObjList() const
     return nullptr;
 }
 
+SdrObject* SdrObjList::FindObjectByUniqueID(sal_uInt64 nUniqueID) const
+{
+    for (size_t nObject = 0; nObject < GetObjCount(); ++nObject)
+    {
+        SdrObject* pObject = GetObj(nObject);
+        if (!pObject)
+            continue;
+
+        if (pObject->GetUniqueID() == nUniqueID)
+            return pObject;
+
+        if (const SdrObjList* pChildren = pObject->GetSubList())
+        {
+            if (SdrObject* pFound = pChildren->FindObjectByUniqueID(nUniqueID))
+                return pFound;
+        }
+    }
+
+    return nullptr;
+}
+
 OString SdrObjList::GetObjectRectangles(const SdrObjList& rSrcList)
 {
     tools::JsonWriter jsWriter;

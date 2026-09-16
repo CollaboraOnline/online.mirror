@@ -3387,13 +3387,37 @@ void DrawViewShell::FuTemporary(SfxRequest& rReq)
                 const SfxUInt32Item* newPosYTwips = rReq.GetArg<SfxUInt32Item>(FN_PARAM_3);
                 const SfxInt32Item* OrdNum = rReq.GetArg<SfxInt32Item>(FN_PARAM_4);
                 const SfxBoolItem* pPreview = rReq.GetArg<SfxBoolItem>(FN_PARAM_5);
+                // A caller that works the handles out for itself says which handle it means by
+                // what that handle is, rather than by the place it has in the view's list, and
+                // names the object by the id it keeps rather than by where it sits in the page.
+                const SfxStringItem* pHandleName = rReq.GetArg<SfxStringItem>(FN_PARAM_6);
+                const SfxStringItem* pObjectId = rReq.GetArg<SfxStringItem>(FN_PARAM_7);
 
-                const sal_uInt32 handleNum = handleNumItem->GetValue();
-                const ::tools::Long newPosX = convertTwipToMm100(newPosXTwips->GetValue());
-                const ::tools::Long newPosY = convertTwipToMm100(newPosYTwips->GetValue());
+                if ((handleNumItem || pHandleName) && newPosXTwips && newPosYTwips)
+                {
+                    const Point aNewPosition(convertTwipToMm100(newPosXTwips->GetValue()),
+                                             convertTwipToMm100(newPosYTwips->GetValue()));
+                    sal_Int32 nObjectOrdNum = OrdNum ? OrdNum->GetValue() : -1;
+                    if (pObjectId)
+                    {
+                        const SdrPageView* pPageView = mpDrawView->GetSdrPageView();
+                        const SdrPage* pPage = pPageView ? pPageView->GetPage() : nullptr;
+                        const SdrObject* pObject
+                            = pPage ? pPage->FindObjectByUniqueID(pObjectId->GetValue().toUInt64())
+                                    : nullptr;
+                        nObjectOrdNum = pObject ? sal_Int32(pObject->GetOrdNum()) : -1;
+                    }
 
-                mpDrawView->MoveShapeHandle(handleNum, Point(newPosX, newPosY), OrdNum ? OrdNum->GetValue() : -1,
-                                            pPreview && pPreview->GetValue());
+                    const bool bPreview = pPreview && pPreview->GetValue();
+
+                    if (pHandleName)
+                        mpDrawView->MoveShapeHandle(pHandleName->GetValue(), aNewPosition,
+                                                    nObjectOrdNum, bPreview);
+                    else
+                        mpDrawView->MoveShapeHandle(handleNumItem->GetValue(), aNewPosition,
+                                                    nObjectOrdNum, bPreview);
+                }
+
                 Cancel();
             }
             break;

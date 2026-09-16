@@ -28,6 +28,7 @@
 #include <vcl/event.hxx>
 #include <unotools/options.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <string_view>
 
 #include <COKit/COKit.hxx>
 
@@ -241,8 +242,23 @@ public:
     // on a drag clone and reported via COKitCallbackType::SHAPE_DRAG_PREVIEW.
     bool MoveShapeHandle(const sal_uInt32 handleNum, const Point& aEndPoint, const sal_Int32 aObjectOrdNum = -1, const bool bPreview = false);
 
+    /** Moves the handle of the marked objects that carries the given name to the given point.
+
+        The name says what the handle means rather than where it sits in a list, so a caller that
+        works the handles out for itself can name one without counting the handles it never saw.
+        It reads "<kind>.<polygon>.<point>", the kind being the number of SdrHdlKind, with
+        ".behind" added for the weight that sits behind its point. Moves nothing and answers false
+        when the marked objects have no such handle.
+     */
+    bool MoveShapeHandle(std::u16string_view rHandleName, const Point& rEndPoint,
+                         const sal_Int32 nObjectOrdNum = -1, const bool bPreview = false);
+
+    /// The handle of the marked objects carrying the given name, or nothing when they have none.
+    SAL_RET_MAYBENULL SdrHdl* GetHandleByName(std::u16string_view rHandleName) const;
+
 private:
-    void SendShapeDragPreview(const sal_uInt32 handleNum);
+    /// Sends what the shape would look like if the drag that runs now ended here.
+    void SendShapeDragPreview();
 };
 
 // First of all the app creates a SdrModel.
