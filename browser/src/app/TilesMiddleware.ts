@@ -294,6 +294,10 @@ class RenderManager {
 		RenderManager.ensureInstance().onVectorChanged(callback);
 	}
 
+	static offVectorChanged(callback: () => void): void {
+		RenderManager.ensureInstance().offVectorChanged(callback);
+	}
+
 	static handleVectorPrimitivesResponse(
 		values: cool.VectorPrimitivesResponse,
 	): void {

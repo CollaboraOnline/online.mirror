@@ -36,6 +36,8 @@ class VectorCompositor extends SlideCompositor {
 	private canvasHeight = 0;
 
 	private disposed = false;
+	// The listener registered on the render manager, kept to remove it.
+	private onDataChanged: (() => void) | null = null;
 
 	// The slide the initial fetchAndRun is waiting on, and the callback to
 	// fire once its primitive tree is in the cache.
@@ -53,13 +55,13 @@ class VectorCompositor extends SlideCompositor {
 		// The shared cache fires this when a tree or an embedded bitmap
 		// arrives. Use it to release the initial fetchAndRun once its
 		// slide is ready.
-		RenderManager.onVectorChanged(() => this._onDataChanged());
+		this.onDataChanged = () => this._onDataChanged();
+		RenderManager.onVectorChanged(this.onDataChanged);
 	}
 
 	public removeHooks(): void {
-		// RenderManager.onVectorChanged keeps the callback for the life of
-		// the page, so the disposed flag guards against acting after the
-		// slideshow has closed.
+		if (this.onDataChanged) RenderManager.offVectorChanged(this.onDataChanged);
+		this.onDataChanged = null;
 	}
 
 	public onUpdatePresentationInfo(): void {

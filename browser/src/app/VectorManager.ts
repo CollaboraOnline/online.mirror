@@ -96,6 +96,13 @@ class VectorManager extends RenderManagerBase {
 		this._changeListeners.push(callback);
 	}
 
+	/// Forget a callback registered with onVectorChanged.
+	offVectorChanged(callback: () => void): void {
+		this._changeListeners = this._changeListeners.filter(
+			(listener) => listener !== callback,
+		);
+	}
+
 	private _fireChanged(): void {
 		for (const callback of this._changeListeners) callback();
 	}

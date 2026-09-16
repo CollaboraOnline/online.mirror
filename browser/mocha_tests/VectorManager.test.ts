@@ -555,6 +555,19 @@ describe('VectorManager', function () {
 		);
 	});
 
+	// A listener that is no longer wanted is not called again.
+	it('forgets a listener that was removed', function () {
+		const manager = new VectorManager();
+		let notified = 0;
+		const listener = () => notified++;
+		manager.onVectorChanged(listener);
+		manager.setHiddenLayers([1]);
+		nodeassert.strictEqual(notified, 1);
+		manager.offVectorChanged(listener);
+		manager.setHiddenLayers([2]);
+		nodeassert.strictEqual(notified, 1);
+	});
+
 	// The page rectangle rides on the page entry rather than on a field of
 	// its own, so it arrives with a full response and a delta that carries
 	// that entry updates it, which is how a resized page reaches the client.

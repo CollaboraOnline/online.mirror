@@ -239,6 +239,9 @@ class RenderManagerBase {
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	onVectorChanged(_callback: () => void): void {}
 
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	offVectorChanged(_callback: () => void): void {}
+
 	handleVectorPrimitivesResponse(
 		_values: cool.VectorPrimitivesResponse,
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
