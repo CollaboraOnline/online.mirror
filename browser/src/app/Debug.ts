@@ -95,6 +95,8 @@ class DebugManager {
 	private _pingTimes: DebugTimeArray;
 	private _pingTimeoutId: TimeoutHdl;
 
+	private _keyWatch: ((event: KeyboardEvent) => void) | undefined;
+
 	public logIncomingMessages: boolean;
 	private logOutgoingMessages: boolean;
 	private logKeyboardEvents: boolean;
@@ -286,6 +288,46 @@ class DebugManager {
 			}
 			entry.checkbox.disabled = !enabled;
 		}
+	}
+
+	/*
+		Every key event of the whole page, with the element it went to and the element that has the
+		focus. The document's own handler sees only what reaches the document container, so a key
+		that goes somewhere else - a toolbar, a dialog, a panel - shows up here and nowhere else.
+	*/
+	private watchKeysAtTheDocument(wanted: boolean): void {
+		if (wanted === (this._keyWatch !== undefined)) return;
+
+		if (!wanted) {
+			document.removeEventListener('keydown', this._keyWatch, true);
+			document.removeEventListener('keyup', this._keyWatch, true);
+			this._keyWatch = undefined;
+			return;
+		}
+
+		const nameOf = (element: Element | null): string =>
+			element
+				? element.tagName +
+					(element.id ? '#' + element.id : '') +
+					(element.className
+						? '.' + String(element.className).split(' ')[0]
+						: '')
+				: 'none';
+
+		this._keyWatch = (event: KeyboardEvent): void => {
+			app.console.log(
+				'key at the document:',
+				event.type,
+				event.key,
+				'to',
+				nameOf(event.target as Element),
+				'focus',
+				nameOf(document.activeElement),
+			);
+		};
+
+		document.addEventListener('keydown', this._keyWatch, true);
+		document.addEventListener('keyup', this._keyWatch, true);
 	}
 
 	private _addDebugTool(tool: DebugTool) {
@@ -663,9 +705,11 @@ class DebugManager {
 			startsOn: true,
 			onAdd: function () {
 				self.logKeyboardEvents = true;
+				self.watchKeysAtTheDocument(true);
 			},
 			onRemove: function () {
 				self.logKeyboardEvents = false;
+				self.watchKeysAtTheDocument(false);
 			},
 		});
 
