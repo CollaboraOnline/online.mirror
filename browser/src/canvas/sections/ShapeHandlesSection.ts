@@ -965,6 +965,23 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		if (queued) this.sendShapeDragPreviewRequest(queued.handleInfo, queued.point);
 	}
 
+	/*
+		The drag is off, so what was shown of it goes: the copy of the shape that followed the
+		mouse, the outline the engine answered with, and the lines it was snapping to. The shape
+		itself never moved, the engine breaks its own drag on the same key.
+	*/
+	onDragCancel(): void {
+		this.sectionProperties.lastDragDistance = [0, 0];
+		this.sectionProperties.closestX = null;
+		this.sectionProperties.closestY = null;
+		this.sectionProperties.centerSnapX = null;
+		this.sectionProperties.centerSnapY = null;
+		this.sectionProperties.draggedCenter = null;
+
+		this.hideSVG();
+		this.clearShapeDragPreview();
+	}
+
 	public clearShapeDragPreview() {
 		this.sectionProperties.shapeDragPreviewPolygons = null;
 		this.sectionProperties.shapeDragPreviewRequestTime = null;

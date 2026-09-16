@@ -58,6 +58,8 @@ class CanvasSectionObject {
 	onMouseMove(point: cool.SimplePoint, dragDistance: Array<number>, e: MouseEvent): void { return; }
 	onMouseDown(point: cool.SimplePoint, e: MouseEvent): void { return; }
 	onMouseUp(point: cool.SimplePoint, e: MouseEvent): void { return; }
+	/// The drag this section started is off, and what it was showing of it goes.
+	onDragCancel(): void { return; }
 
 	setShowSection(show: boolean): void {
 		this.showSection = show;

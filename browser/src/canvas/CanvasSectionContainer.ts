@@ -520,6 +520,30 @@ class CanvasSectionContainer {
 		return this.draggingSomething;
 	}
 
+	/*
+		Ends a drag that is under way without waiting for the button to come up, as Escape does.
+		The section that started it is told, so what it shows of the drag goes with it.
+	*/
+	public cancelDragging (): void {
+		if (!this.draggingSomething)
+			return;
+
+		const section = this.getSectionWithName(this.sectionOnMouseDown);
+		this.clearMousePositions();
+
+		if (section) {
+			// A drag reaches the sections bound to the one it started on, and each of them may be
+			// showing something of it, so each of them is told that it is off.
+			section.onDragCancel();
+			for (let i = 0; i < section.boundsList.length; i++) {
+				if (section.boundsList[i] !== section)
+					section.boundsList[i].onDragCancel();
+			}
+		}
+
+		this.requestReDraw();
+	}
+
 	// Capture/release can throw if the pointer is gone or was never captured;
 	// we ignore that and carry on.
 	public capturePointerForDrag(): void {

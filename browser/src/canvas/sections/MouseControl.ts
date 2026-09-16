@@ -466,6 +466,23 @@ class MouseControl extends CanvasSectionObject {
 		handles.showSVG();
 	}
 
+	/// Whether the document was told to drag as well, which it then has to be told to stop.
+	public startedDocumentDrag(): boolean {
+		return this.mouseDownSent;
+	}
+
+	/*
+		The drag is off: the copy of the shape that followed the mouse goes back, and nothing more
+		of this press is sent to the document - the button coming up would otherwise finish a drag
+		that is no longer wanted.
+	*/
+	onDragCancel(): void {
+		this.hideShapeDragPreview();
+		this.mouseDownSent = false;
+		this.positionOnMouseDown = null;
+		this.lastDragLocalPoint = null;
+	}
+
 	private hideShapeDragPreview(): void {
 		const handles = GraphicSelection.handlesSection;
 		if (!handles?.sectionProperties?.svg) return;

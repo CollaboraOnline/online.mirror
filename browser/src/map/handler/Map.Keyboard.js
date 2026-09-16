@@ -703,6 +703,22 @@ window.L.Map.Keyboard = window.L.Handler.extend({
 		// if any key is pressed, we stop the following other users
 		if (docLayer && !window.mode.isInteractivePreview()) this._map.userList.followUser(docLayer._viewId, false);
 
+		// A drag that is under way is called off by Escape, as it is in the office. The key
+		// travels on to the document, which breaks the drag it runs of its own.
+		if (ev.type === 'keydown' && ev.keyCode === 27 && app.sectionContainer
+			&& app.sectionContainer.isDraggingSomething()) {
+			const mouseControl = app.sectionContainer.getSectionWithName(app.CSections.MouseControl.name);
+			const documentDrags = mouseControl && mouseControl.startedDocumentDrag();
+
+			app.sectionContainer.cancelDragging();
+
+			// The document breaks a drag of its own on this key. Where it has none, because the
+			// client drew the whole drag, the key would drop the selection instead, and a
+			// canceled drag is no reason to lose it.
+			if (!documentDrags)
+				return;
+		}
+
 		if (window.KeyboardShortcuts.processEvent(app.UI.language.fromURL, ev)) {
 			ev.shortCutActivated = true;
 			return;
