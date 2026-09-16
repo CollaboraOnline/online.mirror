@@ -498,6 +498,63 @@ describe('VectorManager', function () {
 		);
 	});
 
+	// A delta without a version cannot be checked against later ones, so the
+	// cache keeps what it held.
+	it('leaves a delta without a version unapplied', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			partId: 'S0',
+			version: 5,
+			objects: [{ id: 11, primitives: [] }],
+		});
+		manager.handleVectorPrimitivesDelta({
+			partId: 'S0',
+			objects: [{ id: 11, primitives: [{ type: 'polygonHairline' }] }],
+		});
+		const data: any = manager.requestPart(0, cool.VectorMode.Slides);
+		nodeassert.strictEqual(data.version, 5);
+		nodeassert.strictEqual(data.objects.get(11).primitives.length, 0);
+	});
+
+	// A full response older than a delta already applied does not roll the
+	// cache back.
+	it('ignores a full response older than the cache', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			partId: 'S0',
+			version: 6,
+			objects: [{ id: 11, primitives: [{ type: 'polygonHairline' }] }],
+		});
+		manager.handleVectorPrimitivesResponse({
+			partId: 'S0',
+			version: 5,
+			objects: [{ id: 11, primitives: [] }],
+		});
+		const data: any = manager.requestPart(0, cool.VectorMode.Slides);
+		nodeassert.strictEqual(data.version, 6);
+		nodeassert.strictEqual(data.objects.get(11).primitives.length, 1);
+	});
+
+	// A delta that brings a new object without an order has no place to draw
+	// it, so the part is fetched whole.
+	it('drops the part when a delta brings a new object without an order', function () {
+		const manager = new VectorManager();
+		manager.handleVectorPrimitivesResponse({
+			partId: 'S0',
+			version: 1,
+			objects: [{ id: 11, primitives: [] }],
+		});
+		manager.handleVectorPrimitivesDelta({
+			partId: 'S0',
+			version: 2,
+			objects: [{ id: 22, primitives: [] }],
+		});
+		nodeassert.strictEqual(
+			manager.requestPart(0, cool.VectorMode.Slides),
+			undefined,
+		);
+	});
+
 	// The page rectangle rides on the page entry rather than on a field of
 	// its own, so it arrives with a full response and a delta that carries
 	// that entry updates it, which is how a resized page reaches the client.

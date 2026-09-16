@@ -440,6 +440,21 @@ class VectorManager extends RenderManagerBase {
 			return;
 		}
 
+		// A full response older than the cache would roll it back, so the
+		// cache keeps its newer version and the waiting previews are drawn
+		// from that. Versions from two epochs cannot be compared, so a
+		// response from another epoch always replaces the cache.
+		const held = this._cache.get(partId);
+		if (
+			held?.epoch === values.epoch &&
+			held?.version !== undefined &&
+			values.version !== undefined &&
+			values.version < held.version
+		) {
+			this._drainDrawable(partId);
+			return;
+		}
+
 		const received = values.objects;
 		const objects = new Map<number, cool.SlideObject>();
 		const arrived: number[] = [];
@@ -515,6 +530,10 @@ class VectorManager extends RenderManagerBase {
 			return;
 		}
 
+		// Every later delta is checked against the version, so a delta without
+		// one cannot be applied.
+		if (values.version === undefined) return;
+
 		// A delta computed against an older version can arrive after a
 		// newer full response. Its order describes that older state, so
 		// applying it would roll the cache backwards.
@@ -539,6 +558,19 @@ class VectorManager extends RenderManagerBase {
 		}
 
 		const carried = values.objects || [];
+		// The order is the paint order, so an object it does not name has no
+		// place to be drawn. Without a new order the part is fetched whole.
+		if (!values.order) {
+			const known = new Set(cached.order);
+			if (
+				carried.some(
+					(object) => object.id !== undefined && !known.has(object.id),
+				)
+			) {
+				this.clearCachedPart(partId);
+				return;
+			}
+		}
 		for (const object of carried) {
 			if (object.id !== undefined) cached.objects.set(object.id, object);
 		}
