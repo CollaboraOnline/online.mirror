@@ -484,6 +484,38 @@ class RenderGeometrySection extends CanvasSectionObject {
 	}
 
 	/*
+		The box every object of the page paints into, in twips, by the id of the object. An object
+		on a layer the view hides is left out, as is the page itself, a running text edit and the
+		page's copy of a master placeholder, none of which are objects to reckon with.
+	*/
+	public static objectBoxes(): Map<number, number[]> {
+		const boxes = new Map<number, number[]>();
+		const data = RenderGeometrySection.currentPart();
+		if (!data) return boxes;
+
+		for (const id of data.order) {
+			const object = data.objects.get(id);
+			if (!object || object.kind !== undefined || object.masterContent)
+				continue;
+			if (
+				object.layer !== undefined &&
+				!RenderManager.isLayerVisible(object.layer)
+			)
+				continue;
+			if (object.width === undefined || object.height === undefined) continue;
+
+			boxes.set(id, [
+				object.x ?? 0,
+				object.y ?? 0,
+				object.width,
+				object.height,
+			]);
+		}
+
+		return boxes;
+	}
+
+	/*
 		The group the object sits in, 0 for an object directly on the page, or nothing when the
 		page holds no such object. Two objects belong in one selection when this answers the same
 		for both of them.

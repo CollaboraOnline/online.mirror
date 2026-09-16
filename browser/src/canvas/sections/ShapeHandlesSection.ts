@@ -1011,13 +1011,10 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		let snapOffset = 0;
 		let centerSnap = null;
 		let centerToCenter = false;
-		if (GraphicSelection.extraInfo.ObjectRectangles) {
-			const ordNum = GraphicSelection.extraInfo.OrdNum;
-			const rectangles = GraphicSelection.extraInfo.ObjectRectangles;
+		{
+			const rectangles = GraphicSelection.snapRectangles();
 
 			for (let i = 0; i < rectangles.length; i++) {
-				if (rectangles[i][4] === ordNum) continue; // Don't compare it with itself.
-
 				// Candidate snap ordinates of the other object: left edge, center, right edge.
 				const targets = [
 					rectangles[i][0],
@@ -1063,13 +1060,10 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		let snapOffset = 0;
 		let centerSnap = null;
 		let centerToCenter = false;
-		if (GraphicSelection.extraInfo.ObjectRectangles) {
-			const ordNum = GraphicSelection.extraInfo.OrdNum;
-			const rectangles = GraphicSelection.extraInfo.ObjectRectangles;
+		{
+			const rectangles = GraphicSelection.snapRectangles();
 
 			for (let i = 0; i < rectangles.length; i++) {
-				if (rectangles[i][4] === ordNum) continue; // Don't compare it with itself.
-
 				// Candidate snap ordinates of the other object: top edge, center, bottom edge.
 				const targets = [
 					rectangles[i][1],

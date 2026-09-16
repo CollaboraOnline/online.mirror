@@ -81,6 +81,36 @@ class GraphicSelection {
 	}
 
 	/*
+		The boxes of the other objects of the page, in pixels, for a drag to snap to. While the
+		document is drawn from objects the client works them out from what it holds; otherwise they
+		are the ones the engine sends along with the selection. What is being dragged is left out,
+		since a drag does not snap to itself.
+	*/
+	public static snapRectangles(): number[][] {
+		if (RenderManager.isVectorRendering()) {
+			// The boxes the client holds are twips already, where the ones the engine sends are
+			// hundredths of a millimetre and are corrected on their way in.
+			const scale = app.twipsToPixels;
+			const rectangles: number[][] = [];
+
+			RenderGeometrySection.objectBoxes().forEach(
+				(box: number[], objectId: number) => {
+					if (this.selectedObjectIDs.includes(objectId)) return;
+					rectangles.push(box.map((value: number) => value * scale));
+				},
+			);
+
+			return rectangles;
+		}
+
+		const rectangles = this.extraInfo?.ObjectRectangles;
+		if (!Array.isArray(rectangles)) return [];
+
+		const ordNum = this.extraInfo.OrdNum;
+		return rectangles.filter((rectangle: number[]) => rectangle[4] !== ordNum);
+	}
+
+	/*
 		What tells one selection from another: the objects it stands on, so a selection of two
 		shapes differs from a selection of one of them. The engine names every marked object, and
 		the first of them again on its own, which is what a payload from an older engine carries.
