@@ -124,6 +124,7 @@
 #include <svx/unoapi.hxx>
 #include <svx/svdopage.hxx>
 #include <svx/svdtext.hxx>
+#include <svx/svdhdl.hxx>
 #include <svtools/colorcfg.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
 #include <drawinglayer/primitive2d/PolygonHairlinePrimitive2D.hxx>
@@ -3590,6 +3591,8 @@ private:
             aContent.maAids
                 = sd::createPlaceholderDecoration(rObject, isBehindThePage(rObject));
 
+            aContent.maHandles = shapingHandlesOf(rObject);
+
             decomposeForComparison(aContent);
         }
 
@@ -3840,6 +3843,47 @@ private:
         }
     }
 
+    /** The handles that shape an object, in twips: the corner radius of a rectangle and the
+        points a custom shape is shaped by.
+
+        A reader works the rest out from what it draws - the points of a polygon and the weights
+        of a curve are in the geometry it already has - while these two say nothing about the
+        drawing and cannot be found in it. Each handle is named by what it means, the kind with
+        the polygon and the point it belongs to, so that a reader can say which handle it moves
+        without counting the handles it was never sent.
+     */
+    static std::vector<SdXImpressDocument::VectorObjectContent::Handle>
+    shapingHandlesOf(const SdrObject& rObject)
+    {
+        SdrHdlList aHandleList(nullptr);
+        rObject.AddToHdlList(aHandleList);
+
+        std::vector<SdXImpressDocument::VectorObjectContent::Handle> aHandles;
+        for (size_t nHandle = 0; nHandle < aHandleList.GetHdlCount(); ++nHandle)
+        {
+            const SdrHdl* pHandle = aHandleList.GetHdl(nHandle);
+            if (!pHandle)
+                continue;
+
+            const SdrHdlKind eKind = pHandle->GetKind();
+            if (eKind != SdrHdlKind::Circle && eKind != SdrHdlKind::CustomShape1)
+                continue;
+
+            const Point aPosition(pHandle->GetPos());
+            SdXImpressDocument::VectorObjectContent::Handle aOne;
+            aOne.mnKind = static_cast<sal_Int32>(eKind);
+            aOne.mnPolygon = pHandle->GetPolyNum();
+            aOne.mnPoint = pHandle->GetPointNum();
+            aOne.mbBehindThePoint = pHandle->IsPlusHdl();
+            aOne.maPosition = Point(
+                basegfx::fround<tools::Long>(aPosition.X() * constTwipConversionFactor),
+                basegfx::fround<tools::Long>(aPosition.Y() * constTwipConversionFactor));
+            aHandles.push_back(aOne);
+        }
+
+        return aHandles;
+    }
+
     /// The range as an upright box in twips, empty for an empty range.
     static tools::Rectangle rangeInTwips(const basegfx::B2DRange& rRange)
     {
@@ -3972,6 +4016,23 @@ private:
         {
             auto aAidArray = rWriter.startArray("aids");
             maProcessor->decomposeAndWrite(rContent.maAids);
+        }
+        if (!rContent.maHandles.empty())
+        {
+            auto aHandleArray = rWriter.startArray("handles");
+            for (const auto& rHandle : rContent.maHandles)
+            {
+                auto aHandleNode = rWriter.startStruct();
+                rWriter.put("kind", rHandle.mnKind);
+                if (rHandle.mnPolygon)
+                    rWriter.put("polygon", sal_Int64(rHandle.mnPolygon));
+                if (rHandle.mnPoint)
+                    rWriter.put("point", sal_Int64(rHandle.mnPoint));
+                if (rHandle.mbBehindThePoint)
+                    rWriter.put("behindThePoint", true);
+                rWriter.put("x", sal_Int64(rHandle.maPosition.X()));
+                rWriter.put("y", sal_Int64(rHandle.maPosition.Y()));
+            }
         }
     }
 

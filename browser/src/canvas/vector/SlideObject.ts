@@ -10,6 +10,21 @@
  */
 
 namespace cool {
+	/** One handle of an object that a reader cannot work out from what the object draws: the
+	 * corner radius of a rectangle, kind 11, and the points a custom shape is shaped by, kind 22.
+	 *
+	 * The kind, with the polygon and the point it belongs to and whether it is the weight behind
+	 * that point, is what names the handle wherever it is spoken about. The position is in twips.
+	 */
+	export interface ObjectHandle {
+		kind: number;
+		polygon?: number;
+		point?: number;
+		behindThePoint?: boolean;
+		x: number;
+		y: number;
+	}
+
 	/// One drawable object on a slide, carrying its primitive tree.
 	export interface SlideObject {
 		/// Stable identity of the object: the engine's SdrObject unique
@@ -70,6 +85,8 @@ namespace cool {
 		/// Mapping of the unit square onto the object, in twips, as the
 		/// six canvas matrix values [a, b, c, d, e, f].
 		transform?: number[];
+		/// The handles that shape the object, empty for an object that has none of them.
+		handles?: ObjectHandle[];
 		primitives?: Primitive[];
 	}
 }
