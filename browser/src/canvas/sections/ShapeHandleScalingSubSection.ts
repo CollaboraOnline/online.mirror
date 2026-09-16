@@ -216,7 +216,10 @@ class ShapeHandleScalingSubSection extends ShapeHandleSubSection {
 			this.stopPropagating();
 			e.stopPropagation();
 
-			const handleId = this.sectionProperties.ownInfo.id;
+			const ownInfo = this.sectionProperties.ownInfo;
+			// The handles are counted from zero here, where a handle that names itself counts the
+			// kinds from one, so the maths below works on the number either way.
+			const handleId = ownInfo.name ? Number(ownInfo.kind) - 1 : ownInfo.id;
 			const parentHandlerSection = this.sectionProperties.parentHandlerSection;
 
 			const p = point.clone();
@@ -246,7 +249,10 @@ class ShapeHandleScalingSubSection extends ShapeHandleSubSection {
 			}
 
 			const parameters = {
-				HandleNum: { type: 'long', value: committedHandleId },
+				...ShapeHandlesSection.handleParameters(
+					ownInfo.name
+						? { name: String(Number(committedHandleId) + 1) + '.0.0' }
+						: { id: committedHandleId }),
 				NewPosX: { type: 'long', value: newPoint[0] },
 				NewPosY: { type: 'long', value: newPoint[1] }
 			};

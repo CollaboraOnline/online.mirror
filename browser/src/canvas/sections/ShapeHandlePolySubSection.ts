@@ -25,7 +25,7 @@ class ShapeHandlePolySubSection extends ShapeHandleCustomSubSection {
 			const mousePoint = point.clone();
 			mousePoint.pX += this.position[0];
 			mousePoint.pY += this.position[1];
-			this.sectionProperties.parentHandlerSection.requestShapeDragPreview(this.sectionProperties.ownInfo.id, mousePoint);
+			this.sectionProperties.parentHandlerSection.requestShapeDragPreview(this.sectionProperties.ownInfo, mousePoint);
 		}
 	}
 

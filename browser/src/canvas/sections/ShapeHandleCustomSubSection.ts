@@ -40,7 +40,7 @@ class ShapeHandleCustomSubSection extends ShapeHandleSubSection {
 			const isRTL = app.map._docLayer.isCalcRTL();
 			const docX = isRTL ? this.position[0] - point.pX : this.position[0] + point.pX;
 			const parameters = {
-				HandleNum: { type: 'long', value: this.sectionProperties.ownInfo.id },
+				...ShapeHandlesSection.handleParameters(this.sectionProperties.ownInfo),
 				NewPosX: { type: 'long', value: Math.round(docX * app.pixelsToTwips) },
 				NewPosY: { type: 'long', value: Math.round((point.pY + this.position[1]) * app.pixelsToTwips) }
 			};

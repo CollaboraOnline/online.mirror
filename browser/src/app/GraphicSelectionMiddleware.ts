@@ -111,6 +111,201 @@ class GraphicSelection {
 	}
 
 	/*
+		The eight handles that frame what is selected, in the order the engine numbers them: upper
+		left, upper, upper right, left, right, lower left, lower, lower right. One object is framed
+		by its own shape, so a rotated object is framed at its rotated corners; several objects are
+		framed by the upright box around all of them, which is what a drag on such a handle scales.
+	*/
+	private static framingHandles(objectIds: number[]): any[] | undefined {
+		const corners: number[][] = [];
+
+		if (objectIds.length === 1) {
+			const transform = RenderGeometrySection.objectOf(objectIds[0])?.transform;
+			if (!transform) return undefined;
+
+			const unitSquare = RenderGeometrySection.unitRectangleCorners(transform);
+			// The unit rectangle answers its four corners, and a framing handle sits on each of
+			// them and halfway along each side.
+			const [upperLeft, upperRight, lowerRight, lowerLeft] = unitSquare;
+			const middle = (one: number[], other: number[]) => [
+				(one[0] + other[0]) / 2,
+				(one[1] + other[1]) / 2,
+			];
+
+			corners.push(
+				upperLeft,
+				middle(upperLeft, upperRight),
+				upperRight,
+				middle(upperLeft, lowerLeft),
+				middle(upperRight, lowerRight),
+				lowerLeft,
+				middle(lowerLeft, lowerRight),
+				lowerRight,
+			);
+		} else {
+			let left = Infinity;
+			let top = Infinity;
+			let right = -Infinity;
+			let bottom = -Infinity;
+
+			for (const objectId of objectIds) {
+				const object = RenderGeometrySection.objectOf(objectId);
+				if (!object || object.x === undefined || object.y === undefined)
+					return undefined;
+
+				left = Math.min(left, object.x);
+				top = Math.min(top, object.y);
+				right = Math.max(right, object.x + (object.width ?? 0));
+				bottom = Math.max(bottom, object.y + (object.height ?? 0));
+			}
+
+			const middleX = (left + right) / 2;
+			const middleY = (top + bottom) / 2;
+			corners.push(
+				[left, top],
+				[middleX, top],
+				[right, top],
+				[left, middleY],
+				[right, middleY],
+				[left, bottom],
+				[middleX, bottom],
+				[right, bottom],
+			);
+		}
+
+		// The pointer the engine asks for at each of the eight, in the same order.
+		const pointers = [11, 7, 12, 9, 10, 13, 8, 14];
+
+		/*
+			An object without width or height would have handles on top of each other, so only the
+			ones that stand apart are made: the corners go where there is both width and height,
+			the handle in the middle of a side where the side has a length, and an object that is
+			a point keeps the upper left one alone. The engine draws them by the same rule.
+		*/
+		const [upperLeft, upperRight, lowerLeft] = [
+			corners[0],
+			corners[2],
+			corners[5],
+		];
+		const hasWidth =
+			upperLeft[0] !== upperRight[0] || upperLeft[1] !== upperRight[1];
+		const hasHeight =
+			upperLeft[0] !== lowerLeft[0] || upperLeft[1] !== lowerLeft[1];
+
+		const wanted = (kind: number): boolean => {
+			if (!hasWidth && !hasHeight) return kind === 1;
+			// The corners, and the middle of a side across the direction that has a length.
+			if (kind === 2 || kind === 7) return hasWidth;
+			if (kind === 4 || kind === 5) return hasHeight;
+			return hasWidth && hasHeight;
+		};
+
+		/*
+			What draws the handles expects the whole set of eight and reads them by kind, so an
+			object that would have fewer of them is left to the engine, which sends the handles
+			that object really has.
+		*/
+		if (![1, 2, 3, 4, 5, 6, 7, 8].every(wanted)) return undefined;
+
+		return corners.map((corner: number[], index: number) => ({
+			id: String(index + 1) + '.0.0',
+			name: String(index + 1) + '.0.0',
+			kind: String(index + 1),
+			pointer: String(pointers[index]),
+			point: { x: Math.round(corner[0]), y: Math.round(corner[1]) },
+		}));
+	}
+
+	/*
+		The handles of the selection, worked out from the objects the client holds: the eight that
+		frame it, and the ones that shape a single object, its corner radius and the points a
+		custom shape is shaped by. Each of them is named by what it is, which is how the engine is
+		told which handle a drag moved. Nothing where the client holds no geometry for what is
+		selected, so that the engine's own handles are used instead.
+	*/
+	public static localHandles(): any | undefined {
+		const objectIds = this.selectedObjectIDs;
+		if (!objectIds.length) return undefined;
+
+		const framing = GraphicSelection.framingHandles(objectIds);
+		if (!framing) return undefined;
+
+		const rectangle: any = {};
+		framing.forEach((handle: any) => {
+			rectangle[handle.kind] = [handle];
+		});
+
+		const shaping: any[] = [];
+		if (objectIds.length === 1) {
+			const object = RenderGeometrySection.objectOf(objectIds[0]);
+			for (const handle of object?.handles ?? []) {
+				const name =
+					String(handle.kind) +
+					'.' +
+					String(handle.polygon ?? 0) +
+					'.' +
+					String(handle.point ?? 0) +
+					(handle.behindThePoint ? '.behind' : '');
+
+				shaping.push({
+					id: name,
+					name: name,
+					kind: String(handle.kind),
+					pointer: '28',
+					point: { x: handle.x, y: handle.y },
+				});
+			}
+		}
+
+		const kinds: any = {
+			rectangle: rectangle,
+			poly: '',
+			anchor: '',
+			others: '',
+		};
+		if (shaping.length) kinds.custom = { '22': shaping };
+
+		return { kinds: kinds };
+	}
+
+	/// The handles the client last worked out, as text, to tell a set that moved from one that
+	/// did not.
+	private static lastLocalHandles: string | null = null;
+
+	/*
+		Puts the handles the client works out into the selection, and says whether they differ from
+		the ones drawn now.
+	*/
+	public static applyLocalHandles(): boolean {
+		if (!RenderManager.isVectorRendering() || !this.extraInfo) return false;
+
+		const handles = GraphicSelection.localHandles();
+		if (!handles) return false;
+
+		this.extraInfo.handles = handles;
+
+		const shape = JSON.stringify(handles);
+		const moved = shape !== this.lastLocalHandles;
+		this.lastLocalHandles = shape;
+		return moved;
+	}
+
+	/*
+		Works the handles out again from the objects as they stand now. The engine reports a
+		selection as soon as it changes, while the objects it stands on arrive with the update
+		that follows, so the handles of a shape that was just dragged are worked out once more when
+		that update lands. Without it they would show where the shape was before.
+
+		Objects change far more often than a selection does - one update per keystroke while
+		someone types - so the sections that draw the handles are built again only when the
+		handles really moved.
+	*/
+	public static refreshLocalHandles(): void {
+		if (GraphicSelection.applyLocalHandles() && this.handlesSection)
+			this.handlesSection.refreshInfo(this.extraInfo);
+	}
+
+	/*
 		What tells one selection from another: the objects it stands on, so a selection of two
 		shapes differs from a selection of one of them. The engine names every marked object, and
 		the first of them again on its own, which is what a payload from an older engine carries.
@@ -122,6 +317,7 @@ class GraphicSelection {
 
 	static resetSelectionRanges() {
 		this.selectionChanged([]);
+		this.lastLocalHandles = null;
 		this.rectangle = null;
 		this.extraInfo = null;
 
@@ -509,6 +705,13 @@ class GraphicSelection {
 					msgData.length > 5 ? msgData[5] : null,
 				),
 			);
+
+			/*
+				While the document is drawn from objects, the handles are worked out here from the
+				geometry the client holds and named by what they are. The ones the engine sent are
+				used where the client holds nothing for what is selected.
+			*/
+			GraphicSelection.applyLocalHandles();
 
 			// Update the dark overlay on zooming & scrolling
 			if (!app.map._docLayer._oleCSelections.empty()) {

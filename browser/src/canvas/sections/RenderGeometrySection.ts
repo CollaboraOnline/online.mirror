@@ -86,6 +86,9 @@ class RenderGeometrySection extends CanvasSectionObject {
 			RenderGeometrySection._listening = true;
 			RenderManager.onVectorChanged(() => {
 				RenderGeometrySection._lastHit = undefined;
+				// The handles of a selection are worked out from the objects, so they follow
+				// what arrives as well.
+				GraphicSelection.refreshLocalHandles();
 				if (app.sectionContainer) app.sectionContainer.requestReDraw();
 			});
 		}
@@ -377,6 +380,10 @@ class RenderGeometrySection extends CanvasSectionObject {
 			: '';
 		if (!hit) return;
 
+		// An object that is selected is marked out by its handles already, so the outline under
+		// the pointer is kept for the objects that are not selected.
+		if (GraphicSelection.selectedObjectIDs.includes(hit.id)) return;
+
 		const object = data.objects.get(hit.id);
 		if (!object?.transform) return;
 
@@ -521,8 +528,13 @@ class RenderGeometrySection extends CanvasSectionObject {
 		for both of them.
 	*/
 	public static parentOf(objectId: number): number | undefined {
-		const object = RenderGeometrySection.currentPart()?.objects.get(objectId);
+		const object = RenderGeometrySection.objectOf(objectId);
 		return object ? (object.parent ?? 0) : undefined;
+	}
+
+	/// The object of the page with the given id, or nothing when the page holds no such object.
+	public static objectOf(objectId: number): cool.SlideObject | undefined {
+		return RenderGeometrySection.currentPart()?.objects.get(objectId);
 	}
 
 	/*

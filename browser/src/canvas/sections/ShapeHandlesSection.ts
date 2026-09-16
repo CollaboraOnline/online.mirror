@@ -808,7 +808,7 @@ class ShapeHandlesSection extends CanvasSectionObject {
 				newSubSection = this.checkRotationSubSection(this.sectionProperties.handles[i]);
 			else if (this.sectionProperties.handles[i].info.kind === 'DiagramHandle')
 				newSubSection = this.checkDiagramSubSection(this.sectionProperties.handles[i]);
-			else if (this.sectionProperties.handles[i].info.kind === '22')
+			else if (['11', '22'].includes(this.sectionProperties.handles[i].info.kind))
 				newSubSection = this.checkCustomSubSection(this.sectionProperties.handles[i]);
 			else if (this.sectionProperties.handles[i].info.kind === '9')
 				newSubSection = this.checkPolySubSection(this.sectionProperties.handles[i]);
@@ -895,22 +895,36 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		shapedragpreview message. At most one request is in flight, newer
 		positions replace the queued one until the answer arrives.
 	*/
-	public requestShapeDragPreview(handleId: any, point: cool.SimplePoint) {
+	public requestShapeDragPreview(handleInfo: any, point: cool.SimplePoint) {
 		const requestTime = this.sectionProperties.shapeDragPreviewRequestTime;
 		if (requestTime !== null && Date.now() - requestTime < 250) {
-			this.sectionProperties.queuedShapeDragPreview = { handleId: handleId, point: point };
+			this.sectionProperties.queuedShapeDragPreview = {
+				handleInfo: handleInfo,
+				point: point,
+			};
 			return;
 		}
 
-		this.sendShapeDragPreviewRequest(handleId, point);
+		this.sendShapeDragPreviewRequest(handleInfo, point);
 	}
 
-	private sendShapeDragPreviewRequest(handleId: any, point: cool.SimplePoint) {
+	/*
+		How a handle is named to the engine: by what it is, where the client worked the handles out
+		for itself, and otherwise by the place the engine gave it in its own list.
+	*/
+	public static handleParameters(handleInfo: any): any {
+		if (handleInfo?.name)
+			return { HandleName: { type: 'string', value: String(handleInfo.name) } };
+
+		return { HandleNum: { type: 'long', value: handleInfo?.id } };
+	}
+
+	private sendShapeDragPreviewRequest(handleInfo: any, point: cool.SimplePoint) {
 		this.sectionProperties.shapeDragPreviewRequestTime = Date.now();
 		this.sectionProperties.queuedShapeDragPreview = null;
 
 		const parameters = {
-			HandleNum: { type: 'long', value: handleId },
+			...ShapeHandlesSection.handleParameters(handleInfo),
 			NewPosX: { type: 'long', value: Math.round(point.x) },
 			NewPosY: { type: 'long', value: Math.round(point.y) },
 			Preview: { type: 'boolean', value: true }
@@ -948,7 +962,7 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		this.containerObject.requestReDraw();
 
 		const queued = this.sectionProperties.queuedShapeDragPreview;
-		if (queued) this.sendShapeDragPreviewRequest(queued.handleId, queued.point);
+		if (queued) this.sendShapeDragPreviewRequest(queued.handleInfo, queued.point);
 	}
 
 	public clearShapeDragPreview() {

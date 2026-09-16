@@ -53,10 +53,7 @@ class ShapeHandleAnchorSubSection extends HTMLObjectSection {
 
 	shapeMouseUp(point: cool.SimplePoint, e: MouseEvent) {
 		const parameters = {
-			'HandleNum': {
-				'type': 'long',
-				'value': this.sectionProperties.ownInfo.id
-			},
+			...ShapeHandlesSection.handleParameters(this.sectionProperties.ownInfo),
 			'NewPosX': {
 				'type': 'long',
 				'value': Math.round((point.pX + this.position[0]) * app.pixelsToTwips)
