@@ -183,8 +183,14 @@ namespace cool {
 			const offsetX = -viewedRectangle.pX1;
 
 			for (let part = topVisible; part <= bottomVisible; part++) {
-				// The file-based view scrolls the slides, never a master page.
-				const cached = RenderManager.requestPart(part, cool.VectorMode.Slides);
+				// The file-based view scrolls the slides, never a master page. A slide is
+				// drawn once the master it names has arrived too.
+				const cached = RenderManager.isPartDrawable(
+					part,
+					cool.VectorMode.Slides,
+				)
+					? RenderManager.requestPart(part, cool.VectorMode.Slides)
+					: undefined;
 				if (!cached) continue;
 
 				const offsetY = -viewedRectangle.pY1 + part * partHeightPixels;

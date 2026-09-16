@@ -154,6 +154,10 @@ class VectorCompositor extends SlideCompositor {
 		const partId = this._partIdForSlide(slideNumber);
 		if (partId === null) return null;
 
+		// A slide is composed only once the master it draws under is cached
+		// too, since the master holds the slide's background and footers.
+		if (!RenderManager.isPartDrawableById(partId, cool.VectorMode.Slides))
+			return null;
 		const data = RenderManager.requestPartById(partId, cool.VectorMode.Slides);
 		if (!data || data.slideWidth <= 0 || data.slideHeight <= 0) return null;
 
