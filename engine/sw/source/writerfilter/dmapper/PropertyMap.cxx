@@ -796,9 +796,28 @@ void SectionPropertyMap::ApplySectionProperties( const rtl::Reference< SwXTextSe
     {
         if ( xSection.is() )
         {
+            /*  A text section reads the way its page reads where it names no direction of its
+                own. The direction stated beside a section is the direction of its page, so a
+                section is given one of its own only where it reads another way than its page. */
             std::optional< PropertyMap::Property > pProp = getProperty( PROP_WRITING_MODE );
             if ( pProp )
-                xSection->setPropertyValue( u"WritingMode"_ustr, pProp->second );
+            {
+                sal_Int16 nSectionMode = text::WritingMode2::LR_TB;
+                pProp->second >>= nSectionMode;
+
+                bool bPageStatesOne = false;
+                sal_Int16 nPageMode = text::WritingMode2::LR_TB;
+                if ( !m_sPageStyleName.isEmpty() )
+                {
+                    const rtl::Reference<SwXPageStyle> xPageStyle = GetPageStyle( rDM_Impl );
+                    if ( xPageStyle.is() )
+                        bPageStatesOne = ( xPageStyle->getPropertyValue(
+                                               getPropertyName(PROP_WRITING_MODE) ) >>= nPageMode );
+                }
+
+                if ( !bPageStatesOne || nPageMode != nSectionMode )
+                    xSection->setPropertyValue( u"WritingMode"_ustr, pProp->second );
+            }
 
             if (rDM_Impl.GetSettingsTable()->GetEndnoteIsCollectAtSectionEnd())
             {

@@ -11,6 +11,8 @@
 
 #include <com/sun/star/beans/XPropertyState.hpp>
 #include <com/sun/star/document/XEmbeddedObjectSupplier2.hpp>
+#include <com/sun/star/text/WritingMode2.hpp>
+#include <com/sun/star/text/XTextSectionsSupplier.hpp>
 #include <com/sun/star/drawing/ShadingPattern.hpp>
 #include <com/sun/star/frame/XStorable.hpp>
 #include <com/sun/star/style/DropCapFormat.hpp>
@@ -781,6 +783,58 @@ CPPUNIT_TEST_FIXTURE(Test, testParagraphFollowingThePageInARightToLeftStyle)
 
     xmlDocUniquePtr pXmlDoc = parseExport(u"word/document.xml"_ustr);
     assertXPath(pXmlDoc, "/w:document/w:body/w:p[2]/w:pPr/w:bidi", "val", u"0");
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testSectionKeepsUnstatedDirection)
+{
+    // The document names no direction for its sections, so they read the way the page reads.
+    createSwDoc("default-sect-break-cols.docx");
+    saveAndReload(TestFilter::DOCX);
+
+    uno::Reference<text::XTextSectionsSupplier> xSupplier(mxComponent, uno::UNO_QUERY_THROW);
+    uno::Reference<container::XIndexAccess> xSections(xSupplier->getTextSections(),
+                                                      uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT(xSections->getCount() > 0);
+    for (sal_Int32 i = 0; i < xSections->getCount(); ++i)
+    {
+        uno::Reference<beans::XPropertySet> xSection(xSections->getByIndex(i), uno::UNO_QUERY_THROW);
+        // Saving states the direction of the page, and reading that back used to pin every
+        // section to it, where the sections had said nothing of their own.
+        CPPUNIT_ASSERT_EQUAL(sal_Int16(text::WritingMode2::CONTEXT),
+                             getProperty<sal_Int16>(xSection, u"WritingMode"_ustr));
+    }
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testSectionKeepsUnstatedDirectionOnARightToLeftPage)
+{
+    // The same document on a page that reads right to left. The sections still name no direction
+    // of their own, so they read the way the page reads.
+    createSwDoc("default-sect-break-cols.docx");
+
+    uno::Reference<beans::XPropertySet> xPageStyle(
+        getStyles(u"PageStyles"_ustr)->getByName(u"Standard"_ustr), uno::UNO_QUERY_THROW);
+    xPageStyle->setPropertyValue(u"WritingMode"_ustr,
+                                 uno::Any(sal_Int16(text::WritingMode2::RL_TB)));
+
+    saveAndReload(TestFilter::DOCX);
+
+    uno::Reference<beans::XPropertySet> xSavedPageStyle(
+        getStyles(u"PageStyles"_ustr)->getByName(u"Standard"_ustr), uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT_EQUAL(sal_Int16(text::WritingMode2::RL_TB),
+                         getProperty<sal_Int16>(xSavedPageStyle, u"WritingMode"_ustr));
+
+    uno::Reference<text::XTextSectionsSupplier> xSupplier(mxComponent, uno::UNO_QUERY_THROW);
+    uno::Reference<container::XIndexAccess> xSections(xSupplier->getTextSections(),
+                                                      uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT(xSections->getCount() > 0);
+    for (sal_Int32 i = 0; i < xSections->getCount(); ++i)
+    {
+        uno::Reference<beans::XPropertySet> xSection(xSections->getByIndex(i), uno::UNO_QUERY_THROW);
+        // Saving a right to left page states that direction in every section, and reading it
+        // back used to pin each section to it.
+        CPPUNIT_ASSERT_EQUAL(sal_Int16(text::WritingMode2::CONTEXT),
+                             getProperty<sal_Int16>(xSection, u"WritingMode"_ustr));
+    }
 }
 
 } // end of anonymous namespace
