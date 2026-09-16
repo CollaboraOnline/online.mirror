@@ -2981,6 +2981,23 @@ void MSWordExportBase::OutputTextNode( SwTextNode& rNode )
         if ( !bFlyInTable )
         {
             std::optional<SfxItemSet> oTmpSet;
+            /*  Starts from what the paragraph states itself, with what it inherits from its
+                style behind it. Reading a value still finds the inherited one, and what is
+                written out is what the paragraph states, because a paragraph that states
+                nothing has nothing of its own to write. */
+            auto startFromOwnAttributes = [&rNode, &oTmpSet]()
+            {
+                const SwAttrSet& rAttrSet = rNode.GetSwAttrSet();
+                if (rNode.GetpSwAttrSet())
+                {
+                    oTmpSet.emplace(rAttrSet);
+                }
+                else
+                {
+                    oTmpSet.emplace(*rAttrSet.GetPool(), rAttrSet.GetRanges());
+                    oTmpSet->SetParent(&rAttrSet);
+                }
+            };
             const sal_uInt8 nPrvNxtNd = rNode.HasPrevNextLayNode();
 
             if( (ND_HAS_PREV_LAYNODE|ND_HAS_NEXT_LAYNODE ) != nPrvNxtNd )
@@ -2991,7 +3008,7 @@ void MSWordExportBase::OutputTextNode( SwTextNode& rNode )
                     ( ( !( ND_HAS_PREV_LAYNODE & nPrvNxtNd ) && pSpaceItem->GetUpper()) ||
                       ( !( ND_HAS_NEXT_LAYNODE & nPrvNxtNd ) && pSpaceItem->GetLower()) ))
                 {
-                    oTmpSet.emplace( rNode.GetSwAttrSet() );
+                    startFromOwnAttributes();
                     SvxULSpaceItem aUL( *pSpaceItem );
                     // #i25901#- consider compatibility option
                     if (!m_rDoc.getIDocumentSettingAccess().get(DocumentSettingId::PARA_SPACE_MAX_AT_PAGES))
@@ -3023,7 +3040,7 @@ void MSWordExportBase::OutputTextNode( SwTextNode& rNode )
                     pFormat = &pRule->Get( nLvl );
 
                 if( !oTmpSet )
-                    oTmpSet.emplace( rNode.GetSwAttrSet() );
+                    startFromOwnAttributes();
 
                 SvxFirstLineIndentItem firstLine(oTmpSet->Get(RES_MARGIN_FIRSTLINE));
                 SvxTextLeftMarginItem leftMargin(oTmpSet->Get(RES_MARGIN_TEXTLEFT));
@@ -3118,7 +3135,7 @@ void MSWordExportBase::OutputTextNode( SwTextNode& rNode )
                )
             {
                 if ( !oTmpSet )
-                    oTmpSet.emplace(rNode.GetSwAttrSet());
+                    startFromOwnAttributes();
 
                 oTmpSet->Put(SvxFrameDirectionItem(SvxFrameDirection::Horizontal_RL_TB, RES_FRAMEDIR));
 
@@ -3142,7 +3159,7 @@ void MSWordExportBase::OutputTextNode( SwTextNode& rNode )
                 // visually.
 
                 if ( !oTmpSet )
-                    oTmpSet.emplace(rNode.GetSwAttrSet());
+                    startFromOwnAttributes();
 
                 // create new LRSpace item, based on the current (if present)
                 const SvxFirstLineIndentItem *const pFirstLineIndent(oTmpSet->GetItemIfSet(RES_MARGIN_FIRSTLINE));
@@ -3212,7 +3229,7 @@ void MSWordExportBase::OutputTextNode( SwTextNode& rNode )
                 if (rBreakAtParaStyle.GetBreak() == SvxBreak::PageAfter)
                 {
                     if ( !oTmpSet )
-                        oTmpSet.emplace(rNode.GetSwAttrSet());
+                        startFromOwnAttributes();
                     oTmpSet->Put(rBreakAtParaStyle);
                 }
                 else if( oTmpSet )
@@ -3267,7 +3284,7 @@ void MSWordExportBase::OutputTextNode( SwTextNode& rNode )
                                     if ( bSetAtPara )
                                     {
                                         if ( !oTmpSet )
-                                            oTmpSet.emplace(rNode.GetSwAttrSet());
+                                            startFromOwnAttributes();
 
                                         const SvxFormatKeepItem aKeepItem( true, RES_KEEP );
                                         oTmpSet->Put( aKeepItem );

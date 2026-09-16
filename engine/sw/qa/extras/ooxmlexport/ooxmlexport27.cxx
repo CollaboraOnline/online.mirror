@@ -837,6 +837,23 @@ CPPUNIT_TEST_FIXTURE(Test, testSectionKeepsUnstatedDirectionOnARightToLeftPage)
     }
 }
 
+CPPUNIT_TEST_FIXTURE(Test, testFirstParagraphStatesOnlyItsOwn)
+{
+    // The first paragraph of this document states no formatting of its own and takes all of it
+    // from its style.
+    createSwDoc("AnchorId.docx");
+    save(TestFilter::DOCX);
+
+    xmlDocUniquePtr pXmlDoc = parseExport(u"word/document.xml"_ustr);
+    // Setting the space that the first paragraph of a document keeps above it used to write out
+    // everything its style states as well, as formatting of the paragraph itself.
+    assertXPath(pXmlDoc, "/w:document/w:body/w:p[1]/w:pPr/w:suppressAutoHyphens", 0);
+    assertXPath(pXmlDoc, "/w:document/w:body/w:p[1]/w:pPr/w:widowControl", 0);
+    assertXPath(pXmlDoc, "/w:document/w:body/w:p[1]/w:pPr/w:jc", 0);
+    // The space itself is still stated.
+    assertXPath(pXmlDoc, "/w:document/w:body/w:p[1]/w:pPr/w:spacing", 1);
+}
+
 } // end of anonymous namespace
 CPPUNIT_PLUGIN_IMPLEMENT();
 
