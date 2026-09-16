@@ -3680,6 +3680,17 @@ void SfxViewShell::dumpCOKitViewState(rtl::OStringBuffer &rState)
     rState.append(OUStringToOString(GetKitLanguageTag().getBcp47(), RTL_TEXTENCODING_UTF8));
     rState.append("\n\tA11y:\t");
     rState.append(GetKitAccessibilityState() ? "enabled" : "disabled");
+    rState.append("\n\tUnwantedCallbacks:");
+    for (size_t nKind = 0; nKind < pImpl->m_aUnwantedCallbacks.size(); ++nKind)
+    {
+        if (!pImpl->m_aUnwantedCallbacks.test(nKind))
+            continue;
+        rState.append(' ');
+        if (const char* pName = kitCallbackTypeToString(COKitCallbackType(nKind)))
+            rState.append(pName);
+        else
+            rState.append(sal_Int32(nKind));
+    }
 
     if (pImpl->m_pCOKitViewCallback)
         pImpl->m_pCOKitViewCallback->dumpState(rState);
@@ -3691,7 +3702,7 @@ static bool ignoreCOKitViewCallback(COKitCallbackType eType, const SfxViewShell_
         return true;
 
     // A client that works out this kind of payload for itself is not sent it.
-    if (pImpl->m_aUnwantedCallbacks.contains(eType))
+    if (pImpl->m_aUnwantedCallbacks.test(size_t(eType)))
         return true;
 
     if (comphelper::COKit::isTiledPaintingOf(pImpl->m_nDocId))
@@ -3772,10 +3783,7 @@ ViewShellDocId SfxViewShell::getKitDocId() const { return GetDocId(); }
 
 void SfxViewShell::setCallbackWanted(COKitCallbackType eType, bool bWanted)
 {
-    if (bWanted)
-        pImpl->m_aUnwantedCallbacks.erase(eType);
-    else
-        pImpl->m_aUnwantedCallbacks.insert(eType);
+    pImpl->m_aUnwantedCallbacks.set(size_t(eType), !bWanted);
 }
 
 bool SfxViewShell::acceptsViewCallback(COKitCallbackType eType) const

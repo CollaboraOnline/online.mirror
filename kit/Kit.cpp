@@ -2924,7 +2924,9 @@ void Document::drainCallbacks()
                     break;
             }
         }
-        if (!isFound)
+        // A broadcast finds no open session while the document closes, which is normal. A
+        // callback aimed at one view that is gone is still an error.
+        if (!isFound && !broadcast)
             LOG_ERR("Document::ViewCallback. Session [" << viewId <<
                     "] is no longer active to process [" << kitCallbackTypeToString(eType) <<
                     "] [" << COOLProtocol::getAbbreviatedMessage(payload) <<

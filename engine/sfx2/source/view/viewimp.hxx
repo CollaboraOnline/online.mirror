@@ -22,7 +22,7 @@
 
 #include <com/sun/star/ui/XContextMenuInterceptor.hpp>
 #include <memory>
-#include <set>
+#include <bitset>
 #include <sfx2/viewsh.hxx>
 #include <mutex>
 #include <comphelper/interfacecontainer4.hxx>
@@ -58,8 +58,9 @@ struct SfxViewShell_Impl
     CoKitCallbackInterface* m_pCOKitViewCallback;
     /// Set if we are in the middle of a tiled search.
     bool m_bTiledSearching;
-    /// The kinds of payload the client of this view has said it does not want.
-    std::set<COKitCallbackType> m_aUnwantedCallbacks;
+    /// One bit per COKitCallbackType value, set for the kinds the client of this view asked
+    /// not to be sent, for example the mouse pointer when the client computes it itself.
+    std::bitset<256> m_aUnwantedCallbacks;
     static sal_uInt32 m_nLastViewShellId;
     const ViewShellId m_nViewShellId;
     const ViewShellDocId m_nDocId;
