@@ -4291,7 +4291,7 @@ void WW8AttributeOutput::SectionBreak( sal_uInt8 nC, bool /*bBreakAfter*/, const
     m_rWW8Export.ReplaceCr( nC );
 }
 
-sal_uInt32 AttributeOutputBase::GridCharacterPitch( const SwTextGridItem& rGrid ) const
+sal_Int32 AttributeOutputBase::GridCharacterPitch( const SwTextGridItem& rGrid ) const
 {
     MSWordStyles * pStyles = GetExport().m_pStyles.get();
     const SwFormat * pSwFormat = pStyles->GetSwFormat(0);
@@ -4318,7 +4318,7 @@ sal_uInt32 AttributeOutputBase::GridCharacterPitch( const SwTextGridItem& rGrid 
     nMain = nMain * 0x1000;
     nMain = ( nMain & 0xFFFFF000 );
 
-    return sal_uInt32( nFraction + nMain );
+    return nFraction + nMain;
 }
 
 void WW8AttributeOutput::FormatTextGrid( const SwTextGridItem& rGrid )

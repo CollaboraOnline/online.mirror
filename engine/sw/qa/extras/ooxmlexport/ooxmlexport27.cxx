@@ -854,6 +854,18 @@ CPPUNIT_TEST_FIXTURE(Test, testFirstParagraphStatesOnlyItsOwn)
     assertXPath(pXmlDoc, "/w:document/w:body/w:p[1]/w:pPr/w:spacing", 1);
 }
 
+CPPUNIT_TEST_FIXTURE(Test, testDocGridCharSpaceStaysANumber)
+{
+    createSwDoc("cell-border-theme-color.docx");
+    save(TestFilter::DOCX);
+
+    xmlDocUniquePtr pXmlDoc = parseExport(u"word/document.xml"_ustr);
+    // The width of a character cell is a whole number that may be below zero, and it was written
+    // as the very large number the same pattern of bits stands for without a sign, which is out
+    // of the range the format allows. Reading it back gave a grid of a different width.
+    CPPUNIT_ASSERT_EQUAL(u"-4097"_ustr, getXPath(pXmlDoc, "//w:docGrid", "charSpace"));
+}
+
 } // end of anonymous namespace
 CPPUNIT_PLUGIN_IMPLEMENT();
 
