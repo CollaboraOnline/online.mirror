@@ -757,10 +757,13 @@ class VectorManager extends RenderManagerBase {
 		this._inFlightParts.clear();
 	}
 
-	/// Drop cached data for a page and any in-flight state.
+	/// Drop cached data for a page and any in-flight state, and the bitmaps
+	/// no other cached page uses.
 	clearCachedPart(partId: cool.VectorPartGuid): void {
 		this._cache.delete(partId);
 		this._inFlightParts.delete(partId);
+		this._bitmaps.releasePart(partId);
+		this._fonts.forgetPart(partId);
 		this._fireChanged();
 	}
 
@@ -770,6 +773,8 @@ class VectorManager extends RenderManagerBase {
 	clearAllParts(): void {
 		this._cache.clear();
 		this._inFlightParts.clear();
+		this._bitmaps.forgetAllParts();
+		this._fonts.forgetAllParts();
 		this._fireChanged();
 	}
 

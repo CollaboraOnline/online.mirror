@@ -55,6 +55,28 @@ class VectorResourceTracker<K, V> {
 		return this._idToParts.get(id);
 	}
 
+	/// Forget that the part uses anything, and drop the values nothing uses
+	/// any more.
+	releasePart(partId: cool.VectorPartGuid): void {
+		for (const [id, parts] of Array.from(this._idToParts.entries())) {
+			if (!parts.delete(partId) || parts.size > 0) continue;
+			this._idToParts.delete(id);
+			this._cache.delete(id);
+		}
+	}
+
+	/// Forget that the part uses anything, keeping the values.
+	forgetPart(partId: cool.VectorPartGuid): void {
+		for (const [id, parts] of Array.from(this._idToParts.entries())) {
+			if (parts.delete(partId) && parts.size === 0) this._idToParts.delete(id);
+		}
+	}
+
+	/// Forget which parts use what, keeping the values.
+	forgetAllParts(): void {
+		this._idToParts.clear();
+	}
+
 	/// Request every id that is neither loaded, nor in flight, nor
 	/// unavailable.
 	requestMissing(ids: Set<K>): void {
