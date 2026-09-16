@@ -393,6 +393,7 @@ interface Window {
 
 	starterScreen: boolean;
 	aiEthicalRatingMessage: boolean;
+	showAISidebar: boolean;
 	allowUpdateNotification: boolean;
 	autoShowWelcome: boolean;
 	bundlejsLoaded: boolean;
