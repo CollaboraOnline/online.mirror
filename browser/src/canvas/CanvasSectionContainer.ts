@@ -1347,6 +1347,25 @@ class CanvasSectionContainer {
 				this.sectionOnMouseDown = section.name;
 				this.propagateOnMouseDown(section, this.convertPositionToSectionLocale(section, this.positionOnMouseDown), e);
 			}
+
+			/*
+				Pressing a button on something that cannot take the keyboard focus leaves the focus
+				on the document body, and the handler that sends keys to the document listens
+				inside the document container, so a key pressed before the button comes up goes
+				nowhere. Escape during a drag is the case that shows it.
+
+				The browser moves the focus as what it does after this handler, so the state to
+				look at is the one right afterwards. Take the focus back where it has fallen out of
+				the document, and leave it where it sits somewhere on purpose, in a dialog or a
+				sidebar.
+			*/
+			app.timerRegistry.setTimeout(
+				'focusafterpress',
+				() => {
+					if (document.activeElement === document.body) app.map.focus();
+				},
+				0,
+			);
 		}
 	}
 
