@@ -8036,6 +8036,20 @@ std::string COKitDocumentImpl::getCommandValues(const char* pCommand)
             // Such a view draws the page from the objects it holds, which decides among other
             // things how the handles of a selection of several objects are laid out.
             pViewShell->setDrawsFromObjects(true);
+
+            /*
+                How long a cursor stays shown and then hidden here, as the desktop of the person
+                using it says. A client that draws something of its own that blinks - the handle
+                the keyboard works on - reads it, so that everything on the page blinks together
+                and at the speed that person set.
+            */
+            const sal_uInt64 nBlinkTime
+                = Application::GetSettings().GetStyleSettings().GetCursorBlinkTime();
+            if (nBlinkTime != STYLE_CURSOR_NOBLINKTIME)
+            {
+                pViewShell->viewCallback(COKitCallbackType::STATE_CHANGED,
+                                         ".uno:CursorBlinkTime=" + OString::number(nBlinkTime));
+            }
         }
     }
 

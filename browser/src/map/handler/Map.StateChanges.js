@@ -3,7 +3,7 @@
  * window.L.Map.StateChanges stores the state changes commands coming from core
  * LOK_CALLBACK_STATE_CHANGED callback
  */
-/* global $ app cool _ RenderManager */
+/* global $ app cool _ RenderManager GraphicSelection */
 /*eslint no-extend-native:0*/
 window.L.Map.mergeOptions({
 	stateChangeHandler: true
@@ -53,6 +53,13 @@ window.L.Map.StateChangeHandler = window.L.Handler.extend({
 			}
 		}
 		const commandName = this.ensureUnoCommandPrefix(e.commandName);
+
+		// How fast a cursor blinks on the desktop of the person using this, which whatever the
+		// client draws blinking follows, so that it all blinks together.
+		if (commandName === '.uno:CursorBlinkTime') {
+			GraphicSelection.setBlinkTime(parseInt(state, 10));
+			return;
+		}
 
 		this._items[commandName] = state;
 		if (e.commandName === '.uno:CurrentTrackedChangeId') {

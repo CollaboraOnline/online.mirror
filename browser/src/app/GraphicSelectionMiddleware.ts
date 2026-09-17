@@ -69,6 +69,9 @@ class GraphicSelection {
 					objectId !== this.selectedObjectIDs[index],
 			);
 
+		// The keyboard works on a handle of what is selected, so another selection leaves it.
+		if (changed) GraphicSelection.leaveHandleMode();
+
 		this.selectedObjectIDs = objectIds.slice();
 		this.selectionCameFromElsewhere = changed;
 		return changed;
@@ -306,6 +309,61 @@ class GraphicSelection {
 	}
 
 	/*
+		The handle the keyboard works on, by the name that says what it is, or null while the
+		keyboard is not on a handle. A name outlives the handles being built again after every
+		move, where a place in a list would not.
+	*/
+	public static activeHandleName: string | null = null;
+
+	/*
+		Whether the active handle is drawn in this moment. It blinks at the speed the text cursor
+		blinks, half a second shown and half a second not, so that the handle the keyboard works on
+		is the one thing moving on the page.
+	*/
+	public static activeHandleVisible: boolean = true;
+	private static activeHandleBlink: ReturnType<typeof setInterval> | null =
+		null;
+
+	/*
+		How long the active handle stays shown, and then hidden, in milliseconds. The engine says
+		what the desktop of the person using it asks for; half a second stands in until it does,
+		which is what the text cursor of this client does anyway.
+	*/
+	public static blinkTime: number = 500;
+
+	/// Takes the blink speed the engine reports, and blinks at it from now on.
+	public static setBlinkTime(milliseconds: number): void {
+		if (!(milliseconds > 0) || milliseconds === this.blinkTime) return;
+
+		this.blinkTime = milliseconds;
+
+		// Start again at the new speed where the handle is blinking now.
+		if (this.activeHandleBlink !== null) {
+			GraphicSelection.blinkActiveHandle(false);
+			GraphicSelection.blinkActiveHandle(true);
+		}
+	}
+
+	/// Starts the active handle blinking, or stops it and leaves it shown.
+	private static blinkActiveHandle(wanted: boolean): void {
+		if (wanted === (this.activeHandleBlink !== null)) return;
+
+		if (!wanted) {
+			clearInterval(this.activeHandleBlink);
+			this.activeHandleBlink = null;
+			this.activeHandleVisible = true;
+			return;
+		}
+
+		this.activeHandleVisible = true;
+		this.activeHandleBlink = setInterval(() => {
+			GraphicSelection.activeHandleVisible =
+				!GraphicSelection.activeHandleVisible;
+			app.sectionContainer?.requestReDraw();
+		}, this.blinkTime);
+	}
+
+	/*
 		How far the view scrolls along one axis to show a stretch of the document that starts at
 		start and is length long, where the view shows viewStart and is viewLength long. Returns
 		the new start of the view.
@@ -379,6 +437,189 @@ class GraphicSelection {
 	}
 
 	/*
+		Brings a handle at that point on screen. What is kept on screen is the box the handle is
+		drawn as with one more box around it, so the handle itself is never up against an edge of
+		the view.
+	*/
+	private static scrollToHandleAt(x: number, y: number): void {
+		const size = ShapeHandlesSection.handleSize() * app.pixelsToTwips;
+
+		GraphicSelection.scrollRectangleIntoView(
+			new cool.SimpleRectangle(
+				x - 1.5 * size,
+				y - 1.5 * size,
+				3 * size,
+				3 * size,
+			),
+		);
+	}
+
+	/// Brings the handle the keyboard is on on screen.
+	private static scrollToActiveHandle(): void {
+		const handle = GraphicSelection.activeHandle();
+		if (!handle) return;
+
+		GraphicSelection.scrollToHandleAt(handle.point.x, handle.point.y);
+	}
+
+	/// The handle the keyboard works on, by name, with the blinking that shows which one it is.
+	private static setActiveHandle(name: string | null): void {
+		this.activeHandleName = name;
+		GraphicSelection.blinkActiveHandle(name !== null);
+		app.sectionContainer?.requestReDraw();
+		if (name !== null) GraphicSelection.scrollToActiveHandle();
+	}
+
+	/// The handles the keyboard can travel, in the order they are drawn, empty where the client
+	/// did not work them out itself and so cannot name them.
+	private static travelableHandles(): any[] {
+		/*
+			The handles as they are drawn: the eight that frame the selection and the ones that
+			shape the object, the corner radius of a rectangle among them. Only the ones the
+			client named are traveled, because a name is what the engine is told to move. The
+			handle that turns the selection carries none of it yet.
+		*/
+		return (GraphicSelection.handlesSection?.handleInfos() ?? []).filter(
+			(handle: any) => handle?.name,
+		);
+	}
+
+	/// The handle the keyboard works on, or nothing while it is on none.
+	public static activeHandle(): any | undefined {
+		return GraphicSelection.travelableHandles().find(
+			(handle: any) => handle.name === this.activeHandleName,
+		);
+	}
+
+	/*
+		Moves the keyboard from one handle of the selection to the next, or to the one before. It
+		starts at the first handle, or at the last one going backwards, and between the last and
+		the first it rests once on no handle at all, where the object is selected as it was. That
+		is the round the office goes.
+	*/
+	private static travelHandles(forward: boolean): boolean {
+		const handles = GraphicSelection.travelableHandles();
+		if (!handles.length) return false;
+
+		const at = handles.findIndex(
+			(handle: any) => handle.name === this.activeHandleName,
+		);
+
+		if (at < 0) {
+			GraphicSelection.setActiveHandle(
+				handles[forward ? 0 : handles.length - 1].name,
+			);
+			return true;
+		}
+
+		const next = at + (forward ? 1 : -1);
+
+		GraphicSelection.setActiveHandle(
+			next < 0 || next >= handles.length ? null : handles[next].name,
+		);
+		return true;
+	}
+
+	/// Puts the keyboard on the first handle of the selection, or on the last one.
+	private static travelToEnd(first: boolean): boolean {
+		const handles = GraphicSelection.travelableHandles();
+		if (!handles.length) return false;
+
+		GraphicSelection.setActiveHandle(
+			handles[first ? 0 : handles.length - 1].name,
+		);
+		return true;
+	}
+
+	/// Takes the keyboard off the handle it was on.
+	public static leaveHandleMode(): boolean {
+		if (this.activeHandleName === null) return false;
+
+		GraphicSelection.setActiveHandle(null);
+		return true;
+	}
+
+	/*
+		Moves the handle the keyboard is on, as dragging it with the mouse would. The step is the
+		one the office takes: a millimetre, ten of them with Shift, and the width of one pixel with
+		Alt, which is as fine as the screen goes.
+	*/
+	private static moveActiveHandle(
+		towards: number[],
+		event: KeyboardEvent,
+	): boolean {
+		const handle = GraphicSelection.activeHandle();
+		if (!handle) return false;
+
+		const step = GraphicSelection.keyboardStep(event);
+		const x = Math.round(handle.point.x + towards[0] * step);
+		const y = Math.round(handle.point.y + towards[1] * step);
+
+		app.map.sendUnoCommand('.uno:MoveShapeHandle', {
+			...ShapeHandlesSection.handleParameters(handle),
+			NewPosX: { type: 'long', value: x },
+			NewPosY: { type: 'long', value: y },
+		});
+
+		// The handle goes where it was asked to go, and the view follows it there. Where it lands
+		// is known here, while the handles the engine answers with arrive later.
+		GraphicSelection.scrollToHandleAt(x, y);
+
+		return true;
+	}
+
+	/*
+		How far a key moves what it works on, in twips: a millimetre, ten of them with Shift, and
+		the width of one pixel with Alt, which is as fine as the screen goes. These are the steps
+		the office takes, and moving an object from the keyboard should take them as well once the
+		client does that itself.
+	*/
+	public static keyboardStep(event: KeyboardEvent): number {
+		const millimetre = 1440 / 25.4;
+
+		if (event.shiftKey) return 10 * millimetre;
+		if (event.altKey) return app.pixelsToTwips;
+		return millimetre;
+	}
+
+	/*
+		What the keyboard does with the handles of a selection, which is what it does in the
+		office: Ctrl+Tab goes from one to the next and Shift with it goes back, Ctrl+Home and
+		Ctrl+End go to the first and the last, Escape leaves them again, and the cursor keys move
+		the one it is on. True when the key was used up here.
+
+		It answers for nothing while the document is not drawn from objects: the engine travels a
+		handle of its own then, and draws it too.
+	*/
+	public static handleKeyboard(event: KeyboardEvent): boolean {
+		if (!RenderManager.isVectorRendering()) return false;
+		if (!this.hasActiveSelection()) return false;
+
+		const towards: { [key: string]: number[] } = {
+			ArrowUp: [0, -1],
+			ArrowDown: [0, 1],
+			ArrowLeft: [-1, 0],
+			ArrowRight: [1, 0],
+		};
+
+		if (event.key === 'Tab' && (event.ctrlKey || event.altKey))
+			return GraphicSelection.travelHandles(!event.shiftKey);
+
+		if (event.key === 'Home' && event.ctrlKey)
+			return GraphicSelection.travelToEnd(true);
+
+		if (event.key === 'End' && event.ctrlKey)
+			return GraphicSelection.travelToEnd(false);
+
+		if (event.key === 'Escape') return GraphicSelection.leaveHandleMode();
+
+		if (towards[event.key] && this.activeHandleName !== null)
+			return GraphicSelection.moveActiveHandle(towards[event.key], event);
+
+		return false;
+	}
+
+	/*
 		What tells one selection from another: the objects it stands on, so a selection of two
 		shapes differs from a selection of one of them. The engine names every marked object, and
 		the first of them again on its own, which is what a payload from an older engine carries.
@@ -390,6 +631,7 @@ class GraphicSelection {
 
 	static resetSelectionRanges() {
 		this.selectionChanged([]);
+		GraphicSelection.leaveHandleMode();
 		this.lastLocalHandles = null;
 		this.rectangle = null;
 		this.extraInfo = null;
@@ -919,6 +1161,9 @@ class GraphicSelection {
 			* Users can select text, click, double click, triple click, quadruple click etc.
 	*/
 	public static onTextCursorVisibility(event: any) {
+		// Text is being edited, so the keyboard belongs to the text and no longer to a handle.
+		if (event.detail.visible) GraphicSelection.leaveHandleMode();
+
 		if (this.hasActiveSelection()) {
 			if (event.detail.visible) this.handlesSection.interactable = false;
 			else this.handlesSection.interactable = true;

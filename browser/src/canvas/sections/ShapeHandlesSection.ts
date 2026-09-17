@@ -63,6 +63,16 @@ class ShapeHandlesSection extends CanvasSectionObject {
 	documentObject: boolean = true;
 	showSection: boolean = false;
 
+	/// How wide and how high a handle is drawn, in core pixels.
+	public static handleSize(): number {
+		return 12 * app.dpiScale;
+	}
+
+	/// What every handle of the selection is, in the order they are drawn.
+	public handleInfos(): any[] {
+		return this.sectionProperties.handles.map((handle: any) => handle.info);
+	}
+
 	constructor (info: any) {
 		super(app.CSections.ShapeHandlesSection.name);
 
@@ -70,8 +80,8 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		this.sectionProperties.handles = [];
 		this.sectionProperties.subSections = [];
 		this.sectionProperties.activeHandleIndex = null;
-		this.sectionProperties.handleWidth = 12 * app.dpiScale;
-		this.sectionProperties.handleHeight = 12 * app.dpiScale;
+		this.sectionProperties.handleWidth = ShapeHandlesSection.handleSize();
+		this.sectionProperties.handleHeight = ShapeHandlesSection.handleSize();
 		this.sectionProperties.anchorWidth = 20 * app.dpiScale;
 		this.sectionProperties.anchorHeight = 20 * app.dpiScale;
 		this.sectionProperties.rotationHandleWidth = 15 * app.dpiScale;

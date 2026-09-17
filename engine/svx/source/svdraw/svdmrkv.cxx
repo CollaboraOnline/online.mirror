@@ -2438,10 +2438,20 @@ bool SdrMarkView::MarkNextObj(bool bPrev)
         return false;
     }
 
-    if (nChgMarkNum!=SAL_MAX_SIZE)
+    /*
+        What is walked to is marked on its own, whatever was marked before. The search set off
+        from the topmost of the marked objects going forward and from the lowest going back, so
+        the object it arrived at carries on from the end of the selection it started with.
+    */
+    if (nMarkCount > 1)
+    {
+        GetMarkedObjectListWriteAccess().Clear();
+    }
+    else if (nChgMarkNum!=SAL_MAX_SIZE)
     {
         GetMarkedObjectListWriteAccess().DeleteMark(nChgMarkNum);
     }
+
     MarkObj(pMarkObj,pPageView); // also calls MarkListHasChanged(), AdjustMarkHdl()
     return true;
 }

@@ -703,6 +703,14 @@ window.L.Map.Keyboard = window.L.Handler.extend({
 		// if any key is pressed, we stop the following other users
 		if (docLayer && !window.mode.isInteractivePreview()) this._map.userList.followUser(docLayer._viewId, false);
 
+		// The handles of a selection are traveled and moved with the keyboard, the way the
+		// office does it, while the document is drawn from objects. A key used up there is not
+		// sent on, or the document would travel a handle of its own beside it.
+		if (ev.type === 'keydown' && GraphicSelection.handleKeyboard(ev)) {
+			ev.preventDefault();
+			return;
+		}
+
 		// A drag that is under way is called off by Escape, as it is in the office. The key
 		// travels on to the document, which breaks the drag it runs of its own.
 		if (ev.type === 'keydown' && ev.keyCode === 27 && app.sectionContainer
