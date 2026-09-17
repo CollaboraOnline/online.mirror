@@ -36,9 +36,8 @@ class ShapeHandleScalingSubSection extends ShapeHandleSubSection {
 		its size, so what blinks is which handle is meant, not whether there is one.
 	*/
 	private isTheActiveHandle(): boolean {
-		return (
-			GraphicSelection.activeHandleName === this.sectionProperties.ownInfo?.name &&
-			GraphicSelection.activeHandleVisible
+		return GraphicSelection.handleTravel.showsAsActive(
+			this.sectionProperties.ownInfo?.name,
 		);
 	}
 

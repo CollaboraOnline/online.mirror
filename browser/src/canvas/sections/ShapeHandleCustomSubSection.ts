@@ -23,9 +23,9 @@ class ShapeHandleCustomSubSection extends ShapeHandleSubSection {
 	onDraw(frameCount?: number, elapsedTime?: number): void {
 		// Larger while the handle the keyboard works on is at the larger half of its blink. It
 		// stays on the page throughout and changes only its size.
-		const active =
-			GraphicSelection.activeHandleName === this.sectionProperties.ownInfo?.name &&
-			GraphicSelection.activeHandleVisible;
+		const active = GraphicSelection.handleTravel.showsAsActive(
+			this.sectionProperties.ownInfo?.name,
+		);
 
 		const rtlShift = app.map._docLayer.isCalcRTL() ? this.size[0] : 0;
 		this.context.fillStyle = 'yellow';

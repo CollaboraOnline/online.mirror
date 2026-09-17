@@ -377,6 +377,7 @@ COOL_JS_LST =\
 	src/core/geometry.ts \
 	src/core/TimerRegistry.ts \
 	src/core/DPIChangeListener.ts \
+	src/app/HandleTravel.ts \
 	src/app/GraphicSelectionMiddleware.ts \
 	src/app/TextSelectionMiddleware.ts \
 	src/app/CellSelectionMarkerMiddleware.ts \
