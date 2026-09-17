@@ -58,15 +58,13 @@ describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
 		bubbleOf(1).should('be.visible');
 		cy.cGet('#comment-container-1').should('be.not.visible');
 
-		// On the edge the page ends at, mostly inside the margin
-		// and hanging a little past it.
+		// In the margin at the end of the page, clear of the
+		// edge rather than sitting on it.
 		pageEdges().then(function(page) {
 			bubbleOf(1).should(function($bubble) {
 				const box = $bubble[0].getBoundingClientRect();
-				expect(box.left, 'the near edge of the bubble against the end of the page')
-					.to.be.lessThan(page.right);
 				expect(box.right, 'the far edge of the bubble against the end of the page')
-					.to.be.greaterThan(page.right);
+					.to.be.lessThan(page.right);
 				expect(box.left, 'the near edge of the bubble against the middle of the page')
 					.to.be.greaterThan(page.left + (page.right - page.left) * 0.8);
 			});
@@ -138,7 +136,7 @@ describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
 		bubbleOf(2).should('be.not.visible');
 	});
 
-	it('bubbles of comments written close together are drawn at half size', function() {
+	it('bubbles of comments written close together are drawn smaller', function() {
 		desktopHelper.insertComment('the first comment here');
 
 		// A bubble that has the margin to itself is drawn at
@@ -147,7 +145,7 @@ describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
 			const fullHeight = $alone[0].getBoundingClientRect().height;
 
 			// The second comment is written at the same place,
-			// so the two bubbles are drawn at half size.
+			// so the two bubbles are drawn smaller.
 			desktopHelper.insertComment('the second comment here');
 
 			cy.cGet('body').should(function($body) {
@@ -157,9 +155,9 @@ describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
 					.getBoundingClientRect();
 
 				expect(first.height, 'the height of a crowded bubble')
-					.to.be.closeTo(fullHeight / 2, 2);
+					.to.be.closeTo(fullHeight * 0.6, 2);
 				expect(second.height, 'the height of the bubble under it')
-					.to.be.closeTo(fullHeight / 2, 2);
+					.to.be.closeTo(fullHeight * 0.6, 2);
 
 				// Room is left between the two, so they read as
 				// two comments rather than one long shape.
@@ -217,15 +215,15 @@ describe(['tagdesktop'], 'Comment bubbles in the page margin', function() {
 					.to.be.closeTo(fullHeight / 2, 2);
 			});
 
-			// It is still on the edge of the page it belongs to,
+			// It is still in the margin at the end of the page,
 			// the same way round as before.
 			pageEdges().then(function(page) {
 				bubbleOf(1).should(function($smaller) {
 					const box = $smaller[0].getBoundingClientRect();
-					expect(box.left, 'the near edge of the bubble against the end of the page')
-						.to.be.lessThan(page.right);
 					expect(box.right, 'the far edge of the bubble against the end of the page')
-						.to.be.greaterThan(page.right);
+						.to.be.lessThan(page.right);
+					expect(box.left, 'the near edge of the bubble against the middle of the page')
+						.to.be.greaterThan(page.left + (page.right - page.left) * 0.8);
 				});
 			});
 		});

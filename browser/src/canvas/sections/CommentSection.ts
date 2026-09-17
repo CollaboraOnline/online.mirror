@@ -536,10 +536,10 @@ export class Comment extends CanvasSectionObject {
 		};
 	}
 
-	// A bubble is drawn at half size while it shares its page
-	// margin with the bubbles of comments written close by.
-	public setBubbleHalfSize(halfSize: boolean): void {
-		this.sectionProperties.container.classList.toggle('half-size-bubble', halfSize);
+	// A bubble is drawn smaller while it shares its page margin
+	// with the bubbles of comments written close by.
+	public setBubbleCrowded(crowded: boolean): void {
+		this.sectionProperties.container.classList.toggle('crowded-bubble', crowded);
 	}
 
 	// How big the bubble is drawn against its size at a zoom of

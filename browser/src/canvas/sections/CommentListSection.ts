@@ -291,9 +291,13 @@ export class CommentSection extends CanvasSectionObject {
 	private placementOverlay: HTMLDivElement | null = null;
 	private static readonly DRAG_THRESHOLD_PX = 5;
 
-	// How far a bubble hangs past the edge of its page, in CSS
-	// pixels. The page draws controls of its own in the margin.
-	private static readonly bubbleOverhangPastThePageEdge = 9;
+	// How far a bubble sits inside the edge of its page, from
+	// that edge to the near side of the bubble, in CSS pixels.
+	private static readonly bubbleInsetFromThePageEdge = 4;
+
+	// How much of a full bubble a crowded one is drawn at. The
+	// stylesheet draws it at this share too.
+	private static readonly crowdedBubbleShare = 0.6;
 
 	// The room left between one bubble and the next, in CSS
 	// pixels at a zoom of one hundred percent.
@@ -2796,13 +2800,13 @@ export class CommentSection extends CanvasSectionObject {
 		];
 	}
 
-	// Where the left side of a bubble goes, in CSS pixels. A
-	// smaller bubble hangs out by as much less.
+	// Where the left side of a bubble goes, in CSS pixels. It
+	// keeps clear of the page edge by the inset above.
 	private static bubbleLeftOf (edgeX: number, size: number, scale: number): number {
 		const rightToLeft = document.documentElement.dir === 'rtl';
-		const overhang = CommentSection.bubbleOverhangPastThePageEdge * scale;
+		const inset = CommentSection.bubbleInsetFromThePageEdge * scale;
 
-		return Math.round(rightToLeft ? edgeX - overhang : edgeX + overhang - size);
+		return Math.round(rightToLeft ? edgeX + inset : edgeX - inset - size);
 	}
 
 	// Put every bubble on the edge of the page it was written
@@ -2817,7 +2821,7 @@ export class CommentSection extends CanvasSectionObject {
 		// measured. The zoom is worked out once for all.
 		const scale = CommentSection.bubbleScaleForTheZoom();
 		for (const comment of bubbles) {
-			comment.setBubbleHalfSize(false);
+			comment.setBubbleCrowded(false);
 			comment.setBubbleScale(scale);
 		}
 
@@ -2855,15 +2859,16 @@ export class CommentSection extends CanvasSectionObject {
 		let free = Number.NEGATIVE_INFINITY;
 
 		for (const run of CommentSection.runsOfCrowdedBubbles(beside, anchorOf, bubble.size + gap)) {
-			const halfSize = run.length > 1;
-			const size = halfSize ? bubble.size / 2 : bubble.size;
+			const crowded = run.length > 1;
+			const size = crowded
+				? bubble.size * CommentSection.crowdedBubbleShare : bubble.size;
 
 			for (const comment of run) {
 				const anchor = anchorOf.get(comment);
 				const top = Math.max(anchor[1], free);
 				const left = CommentSection.bubbleLeftOf(anchor[0], size, scale);
 
-				comment.setBubbleHalfSize(halfSize);
+				comment.setBubbleCrowded(crowded);
 				comment.setBubblePos([left, top, size]);
 				comment.setContainerPos(true, this.sectionProperties.canvasContainerBounds,
 					left - bubble.insetX, top - bubble.insetY);
