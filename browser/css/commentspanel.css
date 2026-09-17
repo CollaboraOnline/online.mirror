@@ -360,11 +360,17 @@
 }
 
 .comments-panel-comment:hover {
-	background: var(--color-background-dark);
+	background: var(--color-background-lighter);
+}
+
+/* The row paints the hover, so a button inside it stays clear
+   and the whole comment lights up as one. */
+#comments-panel .comments-panel-comment-button:hover {
+	background: transparent !important;
 }
 
 .comments-panel-comment.is-selected {
-	background: var(--color-background-dark);
+	background: rgba(var(--doc-type, 11, 135, 231), 0.16);
 	border-inline-start: 3px solid rgb(var(--doc-type, 11, 135, 231));
 	padding-inline-start: 0;
 }
