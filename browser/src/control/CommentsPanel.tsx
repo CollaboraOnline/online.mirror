@@ -1503,8 +1503,8 @@ class CommentsPanel {
     requestAnimationFrame(step);
   }
 
-  // Where the list has to stand for a row to be on it, with a
-  // little room left above and below.
+  // Where the list has to stand for a row to be read. A row it
+  // has to move for goes to the middle, not against an edge.
   private static whereTheListHasToBe(
     list: HTMLElement,
     row: HTMLElement,
@@ -1515,17 +1515,23 @@ class CommentsPanel {
     const listBox = list.getBoundingClientRect();
     const rowBox = row.getBoundingClientRect();
     const top = rowBox.top - listBox.top + list.scrollTop;
-    const bottom = top + rowBox.height;
+    const height = rowBox.height;
 
     // A list shorter than the room it is given has nowhere to go,
     // so the furthest it can stand is never below nothing.
     const furthest = Math.max(0, list.scrollHeight - list.clientHeight);
     const held = (where: number) => Math.min(furthest, Math.max(0, where));
 
-    if (top - room < list.scrollTop) return held(top - room);
-    if (bottom + room > list.scrollTop + list.clientHeight)
-      return held(bottom + room - list.clientHeight);
-    return list.scrollTop;
+    // A row already standing clear of both edges is left alone.
+    const clear =
+      top >= list.scrollTop + room &&
+      top + height <= list.scrollTop + list.clientHeight - room;
+    if (clear) return list.scrollTop;
+
+    // One taller than the list can only have its start on show.
+    if (height + room * 2 > list.clientHeight) return held(top - room);
+
+    return held(top - (list.clientHeight - height) / 2);
   }
 
   // Whether the reader has asked for as little movement as the
