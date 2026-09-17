@@ -313,6 +313,7 @@ class CommentsPanel {
       <label class="comments-panel-filter-check">
         <input
           type="checkbox"
+          value={author}
           checked={this.filters.authors.has(author)}
           onChange={(event: Event) => {
             if ((event.target as HTMLInputElement).checked)
