@@ -26,10 +26,13 @@ class HandleScaling {
 		ask for it, and for an image or a video they ask for the opposite, because keeping the
 		ratio is what those do on their own.
 	*/
-	public static keepsRatio(event: MouseEvent, cropMode: boolean): boolean {
+	public static keepsRatio(
+		event: MouseEvent | undefined,
+		cropMode: boolean,
+	): boolean {
 		if (cropMode) return false;
 
-		let keep = event.ctrlKey && event.shiftKey;
+		let keep = event !== undefined && event.ctrlKey && event.shiftKey;
 
 		const context = app.map.context?.context;
 		if (context === 'Graphic' || context === 'Media') keep = !keep;

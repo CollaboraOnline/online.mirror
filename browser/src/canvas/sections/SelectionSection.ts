@@ -339,8 +339,10 @@ abstract class SelectionSection extends CanvasSectionObject {
 	/// Where the mouse is in the document, in core pixels, from a point this section was given.
 	private inTheDocument(point: cool.SimplePoint): cool.SimplePoint {
 		const inDocument = point.clone();
+
 		inDocument.pX += this.position[0];
 		inDocument.pY += this.position[1];
+
 		return inDocument;
 	}
 
@@ -481,16 +483,15 @@ abstract class SelectionSection extends CanvasSectionObject {
 
 		this.interaction.move(this.inTheDocument(point), e);
 
-		// A drag that reaches past the edge of the view pulls the view after it.
-		if (!this.containerObject.isMouseInside()) {
-			const outside = point.clone();
-			outside.pX += this.myTopLeft[0];
-			outside.pY += this.myTopLeft[1];
-			app.map.fire('handleautoscroll', {
-				pos: { x: outside.cX, y: outside.cY },
-				map: app.map,
-			});
-		}
+		/*
+			The view follows the point the drag is led by, so that a drag which reaches past the
+			edge brings the view with it. It is scrolled by the shortest way that shows that
+			point again, once for each move the mouse makes: a view that scrolled on by itself
+			would move the document under a mouse that is standing still, and the drag would run
+			away from under it.
+		*/
+		const leading = this.interaction.leadingPoint();
+		if (leading) GraphicSelection.scrollPointIntoView(leading);
 	}
 
 	onMouseUp(point: cool.SimplePoint, e: MouseEvent): void {

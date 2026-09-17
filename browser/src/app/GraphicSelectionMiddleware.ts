@@ -258,6 +258,23 @@ class GraphicSelection {
 		return scrolled;
 	}
 
+	/*
+		Brings a point on screen, with the room around it a handle is drawn in, so that whatever
+		sits there is never up against an edge of the view.
+	*/
+	public static scrollPointIntoView(point: cool.SimplePoint): void {
+		const size = ShapeHandlesSection.handleSize() * app.pixelsToTwips;
+
+		GraphicSelection.scrollRectangleIntoView(
+			new cool.SimpleRectangle(
+				point.x - 1.5 * size,
+				point.y - 1.5 * size,
+				3 * size,
+				3 * size,
+			),
+		);
+	}
+
 	/// Scrolls so that the whole rectangle is seen, the way a presentation scrolls to what it
 	/// marks. A rectangle that is seen already leaves the view where it is.
 	public static scrollRectangleIntoView(rectangle: cool.SimpleRectangle): void {

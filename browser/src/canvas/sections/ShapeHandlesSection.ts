@@ -1359,13 +1359,20 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		if (this.containerObject.isDraggingSomething() && canDrag) {
 			this.constrainDragToSheetArea(dragDistance);
 
-			// The handles of a view that draws from objects travel with the object.
+			/*
+				The handles of a view that draws from objects travel with the object. Where the
+				mouse is in the document is where it was pressed, plus how far it has been
+				dragged across the canvas, plus how far the view itself has scrolled underneath
+				since the press.
+			*/
+			const viewed = app.activeDocument.activeLayout.viewedRectangle;
+			const atPress = this.sectionProperties.viewedRectangleOnMouseDown;
+			const pressed = this.sectionProperties.positionOnMouseDown;
+
 			GraphicSelection.selectionSection?.followTheMove(
 				new cool.SimplePoint(
-					(this.sectionProperties.positionOnMouseDown.pX + dragDistance[0]) *
-						app.pixelsToTwips,
-					(this.sectionProperties.positionOnMouseDown.pY + dragDistance[1]) *
-						app.pixelsToTwips,
+					pressed.x + dragDistance[0] * app.pixelsToTwips + viewed.x1 - atPress.x1,
+					pressed.y + dragDistance[1] * app.pixelsToTwips + viewed.y1 - atPress.y1,
 				),
 			);
 

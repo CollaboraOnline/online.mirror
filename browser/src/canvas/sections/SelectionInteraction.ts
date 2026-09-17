@@ -49,4 +49,10 @@ abstract class SelectionInteraction {
 	public handles(known: SelectionHandle[]): SelectionHandle[] {
 		return known;
 	}
+
+	/// The point it is being led by, in twips, which the view keeps in sight. Nothing where it
+	/// is led by no single point.
+	public leadingPoint(): cool.SimplePoint | null {
+		return null;
+	}
 }

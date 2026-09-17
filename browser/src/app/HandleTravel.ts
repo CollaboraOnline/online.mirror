@@ -144,30 +144,14 @@ class HandleTravel {
 		if (name !== null) this.scrollToActive();
 	}
 
-	/*
-		Brings a handle at that point on screen. What is kept on screen is the box the handle is
-		drawn as with one more box around it, so the handle itself is never up against an edge of
-		the view.
-	*/
-	private scrollToHandleAt(at: cool.SimplePoint): void {
-		const size = ShapeHandlesSection.handleSize() * app.pixelsToTwips;
-
-		GraphicSelection.scrollRectangleIntoView(
-			new cool.SimpleRectangle(
-				at.x - 1.5 * size,
-				at.y - 1.5 * size,
-				3 * size,
-				3 * size,
-			),
-		);
-	}
-
 	/// Brings the handle the keyboard is on on screen.
 	private scrollToActive(): void {
 		const handle = this.activeHandle();
 		if (!handle) return;
 
-		this.scrollToHandleAt(new cool.SimplePoint(handle.point.x, handle.point.y));
+		GraphicSelection.scrollPointIntoView(
+			new cool.SimplePoint(handle.point.x, handle.point.y),
+		);
 	}
 
 	/*
@@ -226,7 +210,7 @@ class HandleTravel {
 
 		// The handle goes where it was asked to go, and the view follows it there. Where it lands
 		// is known already, while the handles that come back arrive later.
-		if (landed) this.scrollToHandleAt(landed);
+		if (landed) GraphicSelection.scrollPointIntoView(landed);
 
 		return true;
 	}

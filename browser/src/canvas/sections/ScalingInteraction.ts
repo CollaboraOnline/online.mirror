@@ -76,9 +76,7 @@ class ScalingInteraction extends SelectionInteraction {
 
 		// What may snap to another object of the page is the handle being dragged, taken where
 		// the drag has it now.
-		const dragged = this.handles(this.selection.knownHandles()).find(
-			(one: SelectionHandle) => one.name === this.handle.name,
-		);
+		const dragged = this.draggedHandle();
 		if (dragged) this.selection.lookForASnap(dragged);
 
 		this.selection.redraw();
@@ -119,6 +117,21 @@ class ScalingInteraction extends SelectionInteraction {
 			NewPosX: { type: 'long', value: point[0] },
 			NewPosY: { type: 'long', value: point[1] },
 		});
+	}
+
+	/// The handle being dragged, where the drag has it now.
+	private draggedHandle(): SelectionHandle | undefined {
+		return this.handles(this.selection.knownHandles()).find(
+			(one: SelectionHandle) => one.name === this.handle.name,
+		);
+	}
+
+	public leadingPoint(): cool.SimplePoint | null {
+		const dragged = this.draggedHandle();
+
+		return dragged
+			? new cool.SimplePoint(dragged.point.x, dragged.point.y)
+			: null;
 	}
 
 	public transformation(): cool.Matrix2D | null {
