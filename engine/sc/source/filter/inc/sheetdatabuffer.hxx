@@ -39,6 +39,7 @@ struct CellModel
     ScAddress           maCellAddr;         /// The address of the current cell.
     sal_Int32           mnCellType;         /// Data type of the cell value.
     sal_Int32           mnXfId;             /// XF (cell formatting) identifier.
+    sal_Int32           mnValueMetadata;    /// Value metadata index counting from one, 0 for none.
     bool                mbShowPhonetic;     /// True = show phonetic text.
 
     explicit            CellModel();
@@ -93,6 +94,9 @@ public:
     void                setDateTimeCell( const CellModel& rModel, const css::util::DateTime& rDateTime );
     /** Inserts a boolean cell into the sheet and adjusts number format. */
     void                setBooleanCell( const CellModel& rModel, bool bValue );
+    /** Inserts a cell that holds a picture. The cell itself stays blank and keeps its formatting,
+        and the picture is noted for the drawing layer. */
+    void                setImageCell( const CellModel& rModel );
     /** Inserts an error cell from the passed error code into the sheet. */
     void                setErrorCell( const CellModel& rModel, const OUString& rErrorCode );
     /** Inserts an error cell from the passed BIFF error code into the sheet. */
@@ -130,6 +134,17 @@ public:
     void                setCellFormula(
                             const ScAddress& rCellAddr,
                             const ApiTokenSequence& rTokens );
+
+    /** The address of a cell that holds a picture, and the value metadata index that leads to the
+        picture. The index counts from one. */
+    struct InCellImage
+    {
+        ScAddress           maCellAddr;
+        sal_Int32           mnValueMetadata;
+    };
+
+    /** Returns the cells of this sheet that hold a picture. */
+    const std::vector< InCellImage >& getInCellImages() const { return maInCellImages; }
 private:
 
     /** Creates a formula token array representing the shared formula with the
@@ -204,6 +219,8 @@ private:
     typedef ::std::vector< MergedRange > MergedRangeVector;
 
     ColStyles           maStylesPerColumn;      /// Stores cell styles by column ( in row ranges )
+    std::vector< InCellImage >
+                        maInCellImages;         /// All cells of the sheet that hold a picture.
     ArrayFormulaVector  maArrayFormulas;        /// All array formulas in the sheet.
     std::vector< TableOperation >
                         maTableOperations;      /// All table operations in the sheet.

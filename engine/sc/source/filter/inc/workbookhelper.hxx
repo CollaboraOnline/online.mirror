@@ -95,6 +95,7 @@ class PageSettingsConverter;
 class PivotCacheBuffer;
 class PivotTableBuffer;
 class ScenarioBuffer;
+class RichValueBuffer;
 class SharedStringsBuffer;
 class StylesBuffer;
 class TableBuffer;
@@ -266,6 +267,8 @@ public:
     StylesBuffer&       getStyles() const;
     /** Returns the shared strings read from the shared strings substream. */
     SharedStringsBuffer& getSharedStrings() const;
+    /** Returns the rich values read from the rich data parts. */
+    RichValueBuffer& getRichValues() const;
     /** Returns the external links read from the external links substream. */
     ExternalLinkBuffer& getExternalLinks() const;
     /** Returns the defined names read from the workbook globals. */

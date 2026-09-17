@@ -20,6 +20,7 @@
 #pragma once
 
 #include <map>
+#include <set>
 #include <stack>
 #include <string_view>
 
@@ -30,9 +31,11 @@
 #include <tools/stream.hxx>
 #include <formula/errorcodes.hxx>
 #include "ftools.hxx"
+#include <address.hxx>
 #include <types.hxx>
 
 #include <filter/msfilter/mscodec.hxx>
+#include <vcl/graph.hxx>
 #include <vector>
 
 namespace com::sun::star::beans { struct NamedValue; }
@@ -335,6 +338,20 @@ public:
     void NoteDynamicArrayFormula() { mbHasDynamicArrayFormula = true; }
     bool HasDynamicArrayFormula() const { return mbHasDynamicArrayFormula; }
 
+    /** Notes a picture that sits in a cell and returns the value metadata index the cell writes.
+        The index counts from one. */
+    sal_Int32 NoteInCellImage( const ScAddress& rAddress, const Graphic& rGraphic )
+    {
+        maInCellImages.push_back( rGraphic );
+        maInCellImageAddresses.insert( rAddress );
+        return static_cast< sal_Int32 >( maInCellImages.size() );
+    }
+    /** Returns the pictures that sit in cells, in the order their value metadata indexes count. */
+    const std::vector< Graphic >& GetInCellImages() const { return maInCellImages; }
+    /** Returns true when the passed cell was written as a picture. */
+    bool HasInCellImageAt( const ScAddress& rAddress ) const
+        { return maInCellImageAddresses.find( rAddress ) != maInCellImageAddresses.end(); }
+
 private:
     virtual ::oox::ole::VbaProject* implCreateVbaProject() const override;
     virtual OUString getImplementationName() override;
@@ -367,6 +384,8 @@ private:
     bool mbExportVBA;
     bool mbExportTemplate;
     bool mbHasDynamicArrayFormula = false;
+    std::vector< Graphic > maInCellImages;
+    std::set< ScAddress > maInCellImageAddresses;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -61,6 +61,7 @@ using namespace ::com::sun::star::util;
 CellModel::CellModel() :
     mnCellType( XML_TOKEN_INVALID ),
     mnXfId( -1 ),
+    mnValueMetadata( 0 ),
     mbShowPhonetic( false )
 {
 }
@@ -173,6 +174,14 @@ void SheetDataBuffer::setBooleanCell( const CellModel& rModel, bool bValue )
 
     // #108770# set 'Standard' number format for all Boolean cells
     setCellFormat( rModel );
+}
+
+void SheetDataBuffer::setImageCell( const CellModel& rModel )
+{
+    // The cell keeps its formatting and stays blank, and the picture is placed over it once the
+    // column widths and row heights of the sheet are known.
+    setBlankCell( rModel );
+    maInCellImages.push_back( InCellImage{ rModel.maCellAddr, rModel.mnValueMetadata } );
 }
 
 void SheetDataBuffer::setErrorCell( const CellModel& rModel, const OUString& rErrorCode )

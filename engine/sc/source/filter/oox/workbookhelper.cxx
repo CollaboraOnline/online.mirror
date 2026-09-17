@@ -49,6 +49,7 @@
 #include <pagesettings.hxx>
 #include <pivotcachebuffer.hxx>
 #include <pivottablebuffer.hxx>
+#include <richvaluebuffer.hxx>
 #include <scenariobuffer.hxx>
 #include <sharedstringsbuffer.hxx>
 #include <stylesbuffer.hxx>
@@ -187,6 +188,8 @@ public:
     StylesBuffer& getStyles() const { return *mxStyles; }
     /** Returns the shared strings read from the shared strings substream. */
     SharedStringsBuffer& getSharedStrings() const { return *mxSharedStrings; }
+    /** Returns the rich values read from the rich data parts. */
+    RichValueBuffer& getRichValues() const { return *mxRichValues; }
     /** Returns the external links read from the external links substream. */
     ExternalLinkBuffer& getExternalLinks() const { return *mxExtLinks; }
     /** Returns the defined names read from the workbook globals. */
@@ -247,6 +250,7 @@ private:
     typedef ::std::shared_ptr< ThemeBuffer >          ThemeBfrRef;
     typedef ::std::unique_ptr< StylesBuffer >           StylesBfrPtr;
     typedef ::std::unique_ptr< SharedStringsBuffer >    SharedStrBfrPtr;
+    typedef ::std::unique_ptr< RichValueBuffer >        RichValueBfrPtr;
     typedef ::std::unique_ptr< ExternalLinkBuffer >     ExtLinkBfrPtr;
     typedef ::std::unique_ptr< DefinedNamesBuffer >     DefNamesBfrPtr;
     typedef ::std::unique_ptr< TableBuffer >            TableBfrPtr;
@@ -281,6 +285,7 @@ private:
     ThemeBfrRef         mxTheme;                /// Formatting theme from theme substream.
     StylesBfrPtr        mxStyles;               /// All cell style objects from styles substream.
     SharedStrBfrPtr     mxSharedStrings;        /// All strings from shared strings substream.
+    RichValueBfrPtr     mxRichValues;           /// All rich values from the rich data parts.
     ExtLinkBfrPtr       mxExtLinks;             /// All external links.
     DefNamesBfrPtr      mxDefNames;             /// All defined names.
     TableBfrPtr         mxTables;               /// All tables (database ranges).
@@ -585,6 +590,7 @@ void WorkbookGlobals::initialize()
     mxTheme = std::make_shared<ThemeBuffer>( *this );
     mxStyles.reset( new StylesBuffer( *this ) );
     mxSharedStrings.reset( new SharedStringsBuffer( *this ) );
+    mxRichValues.reset( new RichValueBuffer( *this ) );
     mxExtLinks.reset( new ExternalLinkBuffer( *this ) );
     mxDefNames.reset( new DefinedNamesBuffer( *this ) );
     mxTables.reset( new TableBuffer( *this ) );
@@ -965,6 +971,11 @@ StylesBuffer& WorkbookHelper::getStyles() const
 SharedStringsBuffer& WorkbookHelper::getSharedStrings() const
 {
     return mrBookGlob.getSharedStrings();
+}
+
+RichValueBuffer& WorkbookHelper::getRichValues() const
+{
+    return mrBookGlob.getRichValues();
 }
 
 ExternalLinkBuffer& WorkbookHelper::getExternalLinks() const

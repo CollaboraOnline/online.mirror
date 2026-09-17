@@ -29,6 +29,7 @@
 #include <oox/ole/olestorage.hxx>
 #include <oox/token/namespaces.hxx>
 #include <oox/token/tokens.hxx>
+#include <oox/token/relationship.hxx>
 
 #include <chartsheetfragment.hxx>
 #include <connectionsfragment.hxx>
@@ -38,6 +39,7 @@
 #include <formulabuffer.hxx>
 #include <pivotcachebuffer.hxx>
 #include <sharedstringsfragment.hxx>
+#include <richvaluefragment.hxx>
 #include <revisionfragment.hxx>
 #include <stylesfragment.hxx>
 #include <tablebuffer.hxx>
@@ -395,6 +397,25 @@ void WorkbookFragment::finalizeImport()
         if (!importOoxFragment( new SharedStringsFragment( *this, aSstFragmentPath ) ))
             importOoxFragment(new SharedStringsFragment(*this, aSstFragmentPath.replaceFirst("sharedStrings","SharedStrings")));
     xGlobalSegment->setPosition( 0.75 );
+
+    /*  Read the rich data parts. A cell that holds a picture keeps the error value #VALUE! and a
+        value metadata index, and that index leads through the metadata part and the rich value
+        parts to a picture in the media folder. */
+    const OUString aRichValueStructurePath
+        = getFragmentPathFromFirstType(getRelationship(Relationship::RDRICHVALUESTRUCTURE));
+    const OUString aRichValuePath
+        = getFragmentPathFromFirstType(getRelationship(Relationship::RDRICHVALUE));
+    const OUString aRichValueRelPath
+        = getFragmentPathFromFirstType(getRelationship(Relationship::RICHVALUEREL));
+    const OUString aMetadataPath = getFragmentPathFromFirstTypeFromOfficeDoc(u"sheetMetadata");
+    if (!aRichValueStructurePath.isEmpty() && !aRichValuePath.isEmpty()
+        && !aRichValueRelPath.isEmpty() && !aMetadataPath.isEmpty())
+    {
+        importOoxFragment(new RichValueStructureFragment(*this, aRichValueStructurePath));
+        importOoxFragment(new RichValueFragment(*this, aRichValuePath));
+        importOoxFragment(new RichValueRelFragment(*this, aRichValueRelPath));
+        importOoxFragment(new MetadataFragment(*this, aMetadataPath));
+    }
 
     // read the persons substream (for threaded comments)
     OUString aPersonsFragmentPath = getFragmentPathFromFirstType(

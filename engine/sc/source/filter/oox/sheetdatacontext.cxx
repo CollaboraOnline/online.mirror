@@ -28,6 +28,7 @@
 #include <biffhelper.hxx>
 #include <formulaparser.hxx>
 #include <richstringcontext.hxx>
+#include <richvaluebuffer.hxx>
 #include <sal/log.hxx>
 #include <o3tl/string_view.hxx>
 
@@ -221,7 +222,11 @@ void SheetDataContext::onEndElement()
             }
         break;
         case XML_e:
-            mrSheetData.setErrorCell( maCellData, maCellValue );
+            if( maCellData.mnValueMetadata > 0
+                && getRichValues().isImage( maCellData.mnValueMetadata ) )
+                mrSheetData.setImageCell( maCellData );
+            else
+                mrSheetData.setErrorCell( maCellData, maCellValue );
         break;
         case XML_str:
             mrSheetData.setStringCell( maCellData, maCellValue );
@@ -375,6 +380,10 @@ bool SheetDataContext::importCell( const AttributeList& rAttribs )
         // is irrelevant for us currently - we only need to know it's a dynamic
         //  array master.
         mbCellMetadata = rAttribs.getInteger(XML_cm, 0) > 0;
+        /*  The vm attribute names an entry of the value metadata of the workbook, counting from
+            one. A cell that holds a picture carries the error value #VALUE! and points that way at
+            the rich value that names the picture. */
+        maCellData.mnValueMetadata = rAttribs.getInteger(XML_vm, 0);
 
         // reset cell value, formula settings, and inline string
         maCellValue.clear();

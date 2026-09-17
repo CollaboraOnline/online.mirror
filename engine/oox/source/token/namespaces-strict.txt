@@ -115,6 +115,9 @@ asvg                    http://schemas.microsoft.com/office/drawing/2016/SVG/mai
 xnsv                    http://schemas.microsoft.com/office/spreadsheetml/2019/namedsheetviews
 xthreaded               http://schemas.microsoft.com/office/spreadsheetml/2018/threadedcomments
 xda                     http://schemas.microsoft.com/office/spreadsheetml/2017/dynamicarray
+xlrd                    http://schemas.microsoft.com/office/spreadsheetml/2017/richdata
+xlrd2                   http://schemas.microsoft.com/office/spreadsheetml/2017/richdata2
+xlrvr                   http://schemas.microsoft.com/office/spreadsheetml/2022/richvaluerel
 
 # xls14Lst for features introduced by excel 2010
 xls14Lst               http://schemas.microsoft.com/office/spreadsheetml/2009/9/main

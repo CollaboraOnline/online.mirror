@@ -28,8 +28,12 @@
 #include <svl/stritem.hxx>
 #include <tools/UnitConversion.hxx>
 #include <editeng/flditem.hxx>
+#include <svx/svdograf.hxx>
+#include <svx/svdpage.hxx>
 #include <document.hxx>
 #include <dociter.hxx>
+#include <drwlayer.hxx>
+#include <userdat.hxx>
 #include <olinetab.hxx>
 #include <formulacell.hxx>
 #include <patattr.hxx>
@@ -688,6 +692,37 @@ void XclExpBooleanCell::SaveXml( XclExpXmlStream& rStrm )
 void XclExpBooleanCell::WriteContents( XclExpStream& rStrm )
 {
     rStrm << sal_uInt16( mbValue ? 1 : 0 ) << EXC_BOOLERR_BOOL;
+}
+
+XclExpRichValueCell::XclExpRichValueCell(
+        const XclExpRoot& rRoot, const XclAddress& rXclPos, const ScAddress& rScPos,
+        const ScPatternAttr* pPattern, sal_uInt32 nForcedXFId, const Graphic& rGraphic ) :
+    // #i41210# always use latin script for error cells
+    XclExpSingleCellBase( rRoot, EXC_ID3_BOOLERR, 2, rXclPos, pPattern, ApiScriptType::LATIN, nForcedXFId ),
+    maScPos( rScPos ),
+    maGraphic( rGraphic )
+{
+}
+
+void XclExpRichValueCell::SaveXml( XclExpXmlStream& rStrm )
+{
+    const sal_Int32 nValueMetadata = rStrm.NoteInCellImage( maScPos, maGraphic );
+
+    sax_fastparser::FSHelperPtr& rWorksheet = rStrm.GetCurrentStream();
+    rWorksheet->startElement( XML_c,
+            XML_r, XclXmlUtils::ToOString(rStrm.GetRoot().GetStringBuf(), GetXclPos()).getStr(),
+            XML_s, lcl_GetStyleId(rStrm, *this),
+            XML_t, "e",
+            XML_vm, OString::number( nValueMetadata ) );
+    rWorksheet->startElement( XML_v );
+    rWorksheet->write( "#VALUE!" );
+    rWorksheet->endElement( XML_v );
+    rWorksheet->endElement( XML_c );
+}
+
+void XclExpRichValueCell::WriteContents( XclExpStream& rStrm )
+{
+    rStrm << EXC_ERR_VALUE << EXC_BOOLERR_ERROR;
 }
 
 XclExpLabelCell::XclExpLabelCell(
@@ -2688,8 +2723,13 @@ std::vector< XclExpColDefault > lcl_GetColumnDefaults(
     its own columns. XclExpRow::Finalize drops the records of such cells again, so the row can
     go without any. */
 bool lcl_RowWritesNoCell( const std::vector< XclExpUsedArea >& rRowAreas,
-        const std::vector< XclExpColDefault >& rColDefaults, const XclExpColinfoBuffer& rColInfoBuffer )
+        const std::vector< XclExpColDefault >& rColDefaults, const XclExpColinfoBuffer& rColInfoBuffer,
+        bool bRowHasInCellImage )
 {
+    // A picture that sits in a cell is written as the content of that cell, so the row has cells.
+    if( bRowHasInCellImage )
+        return false;
+
     for( const XclExpUsedArea& rArea : rRowAreas )
     {
         if( (rArea.aScCell.getType() != CELLTYPE_NONE)
@@ -2701,6 +2741,35 @@ bool lcl_RowWritesNoCell( const std::vector< XclExpUsedArea >& rRowAreas,
             return false;
     }
     return true;
+}
+
+/** The pictures that sit in the cells of one sheet, by row and then by column. */
+typedef std::map< SCCOL, Graphic > XclExpInCellImageRow;
+typedef std::map< SCROW, XclExpInCellImageRow > XclExpInCellImages;
+
+/** Returns the pictures that sit in the cells of the passed sheet, by row and then by column. */
+XclExpInCellImages lclGetInCellImages( const ScDocument& rDoc, SCTAB nScTab )
+{
+    XclExpInCellImages aImages;
+    const ScDrawLayer* pModel = rDoc.GetDrawLayer();
+    const SdrPage* pPage = pModel ? pModel->GetPage( static_cast< sal_uInt16 >( nScTab ) ) : nullptr;
+    if( !pPage )
+        return aImages;
+
+    for( size_t nObject = 0, nObjectCount = pPage->GetObjCount(); nObject < nObjectCount; ++nObject )
+    {
+        SdrObject* pObject = pPage->GetObj( nObject );
+        const SdrGrafObj* pGrafObj = dynamic_cast< const SdrGrafObj* >( pObject );
+        if( !pGrafObj || !ScDrawLayer::IsInCellImage( *pGrafObj ) )
+            continue;
+
+        const ScDrawObjData* pObjData = ScDrawLayer::GetObjDataTab( pObject, nScTab );
+        if( !pObjData || !pObjData->maStart.IsValid() )
+            continue;
+
+        aImages[ pObjData->maStart.Row() ][ pObjData->maStart.Col() ] = pGrafObj->GetGraphic();
+    }
+    return aImages;
 }
 
 } // namespace
@@ -2793,6 +2862,12 @@ XclExpCellTable::XclExpCellTable( const XclExpRoot& rRoot ) :
     // a row is judged as a whole, so its areas are collected before any record is made
     std::vector< XclExpUsedArea > aRowAreas;
 
+    /*  Pictures that sit in a cell are written as the content of that cell, and only the OOXML
+        export knows how to write them. The BIFF export leaves those cells blank and writes the
+        pictures as ordinary drawings. */
+    const XclExpInCellImages aInCellImages = (GetOutput() == EXC_OUTPUT_XML_2007)
+        ? lclGetInCellImages( rDoc, nScTab ) : XclExpInCellImages();
+
     /*  The last row of a block of rows that write no cell record. Such rows still take part in
         the default row format, and one call for the last of them inserts the few ROW records
         that the block needs. */
@@ -2809,7 +2884,9 @@ XclExpCellTable::XclExpCellTable( const XclExpRoot& rRoot ) :
         }
         while( bIt && (aIt.GetRow() == nScRow) );
 
-        if( lcl_RowWritesNoCell( aRowAreas, aColDefaults, maColInfoBfr ) )
+        const auto aImageRow = aInCellImages.find( nScRow );
+        if( lcl_RowWritesNoCell( aRowAreas, aColDefaults, maColInfoBfr,
+                                 aImageRow != aInCellImages.end() ) )
         {
             nPendingEmptyScRow = nScRow;
             // the cells still belong to the data validation ranges that their columns carry
@@ -2842,6 +2919,9 @@ XclExpCellTable::XclExpCellTable( const XclExpRoot& rRoot ) :
 
             const ScRefCellValue& rScCell = rArea.aScCell;
             XclExpCellRef xCell;
+            /*  A blank run that holds a picture is written as several records: the picture cells
+                and the runs of blank cells between them. */
+            std::vector< XclExpCellRef > aSplitCells;
 
             const ScPatternAttr* pPattern = rArea.aPattern.getScPatternAttr();
 
@@ -2962,16 +3042,57 @@ XclExpCellTable::XclExpCellTable( const XclExpRoot& rRoot ) :
                     [[fallthrough]];
                 case CELLTYPE_NONE:
                 {
-                    xCell = new XclExpBlankCell(
-                        GetRoot(), aXclPos, nLastXclCol, pPattern, nMergeBaseXFId );
+                    SCCOL nRunFirstScCol = nScCol;
+                    if( aImageRow != aInCellImages.end() )
+                    {
+                        for( const auto& [ nImageScCol, rGraphic ] : aImageRow->second )
+                        {
+                            if( nImageScCol < nScCol || nImageScCol > nLastScCol )
+                                continue;
+
+                            if( nImageScCol > nRunFirstScCol )
+                                aSplitCells.push_back( new XclExpBlankCell(
+                                    GetRoot(),
+                                    XclAddress( static_cast< sal_uInt16 >( nRunFirstScCol ),
+                                                static_cast< sal_uInt32 >( nScRow ) ),
+                                    static_cast< sal_uInt16 >( nImageScCol - 1 ),
+                                    pPattern, nMergeBaseXFId ) );
+
+                            aSplitCells.push_back( new XclExpRichValueCell(
+                                GetRoot(),
+                                XclAddress( static_cast< sal_uInt16 >( nImageScCol ),
+                                            static_cast< sal_uInt32 >( nScRow ) ),
+                                ScAddress( nImageScCol, nScRow, nScTab ),
+                                pPattern, nMergeBaseXFId, rGraphic ) );
+                            nRunFirstScCol = nImageScCol + 1;
+                        }
+                    }
+
+                    if( aSplitCells.empty() )
+                        xCell = new XclExpBlankCell(
+                            GetRoot(), aXclPos, nLastXclCol, pPattern, nMergeBaseXFId );
+                    else if( nRunFirstScCol <= nLastScCol )
+                        aSplitCells.push_back( new XclExpBlankCell(
+                            GetRoot(),
+                            XclAddress( static_cast< sal_uInt16 >( nRunFirstScCol ),
+                                        static_cast< sal_uInt32 >( nScRow ) ),
+                            nLastXclCol, pPattern, nMergeBaseXFId ) );
                 }
                 break;
             }
 
-            assert(xCell && "can only reach here with xCell set");
-
-            // insert the cell into the current row
-            maRowBfr.AppendCell( xCell, bIsMergedBase );
+            // insert the cell or cells into the current row
+            if( aSplitCells.empty() )
+            {
+                assert(xCell && "can only reach here with xCell set");
+                maRowBfr.AppendCell( xCell, bIsMergedBase );
+            }
+            else
+            {
+                for( size_t nSplit = 0; nSplit < aSplitCells.size(); ++nSplit )
+                    maRowBfr.AppendCell( aSplitCells[ nSplit ], bIsMergedBase && nSplit == 0 );
+                xCell = aSplitCells.front();
+            }
 
             if ( !aAddNoteText.isEmpty()  )
                 mxNoteList->AppendNewRecord( new XclExpNote( GetRoot(), aScPos, nullptr, aAddNoteText ) );

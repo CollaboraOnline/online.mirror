@@ -22,6 +22,7 @@
 #include <worksheethelper.hxx>
 
 #include <algorithm>
+#include <cmath>
 #include <com/sun/star/awt/Point.hpp>
 #include <com/sun/star/awt/Size.hpp>
 #include <com/sun/star/drawing/XDrawPageSupplier.hpp>
@@ -41,6 +42,7 @@
 #include <osl/diagnose.h>
 #include <rtl/ustrbuf.hxx>
 #include <oox/core/filterbase.hxx>
+#include <oox/helper/graphichelper.hxx>
 #include <oox/helper/propertyset.hxx>
 #include <oox/token/properties.hxx>
 #include <oox/token/tokens.hxx>
@@ -50,9 +52,11 @@
 #include <condformatbuffer.hxx>
 #include <document.hxx>
 #include <drawingfragment.hxx>
+#include <drwlayer.hxx>
 #include <threadedcommentsfragment.hxx>
 #include <pagesettings.hxx>
 #include <querytablebuffer.hxx>
+#include <richvaluebuffer.hxx>
 #include <sheetdatabuffer.hxx>
 #include <stylesbuffer.hxx>
 #include <tokenuno.hxx>
@@ -80,7 +84,11 @@
 #include <editeng/eeitem.hxx>
 #include <editeng/editobj.hxx>
 #include <editeng/flditem.hxx>
+#include <svx/svdograf.hxx>
+#include <svx/svdpage.hxx>
 #include <tools/gen.hxx>
+#include <userdat.hxx>
+#include <vcl/graph.hxx>
 
 namespace oox::xls {
 
@@ -100,6 +108,23 @@ void lclUpdateProgressBar( const ISegmentProgressBarRef& rxProgressBar, double f
 {
     if( rxProgressBar )
         rxProgressBar->setPosition( fPosition );
+}
+
+/** Returns the largest rectangle with the proportions of the passed size that fits into the cell,
+    centred in it. A picture with no size of its own fills the cell. */
+tools::Rectangle lclFitIntoCell( const Size& rGraphicSize, const tools::Rectangle& rCellRect )
+{
+    if( rGraphicSize.Width() <= 0 || rGraphicSize.Height() <= 0 )
+        return rCellRect;
+
+    const double fScale = std::min(
+        static_cast<double>(rCellRect.GetWidth()) / rGraphicSize.Width(),
+        static_cast<double>(rCellRect.GetHeight()) / rGraphicSize.Height() );
+    const Size aSize( std::max<tools::Long>( 1, std::lround( rGraphicSize.Width() * fScale ) ),
+                      std::max<tools::Long>( 1, std::lround( rGraphicSize.Height() * fScale ) ) );
+    const Point aTopLeft( rCellRect.Left() + (rCellRect.GetWidth() - aSize.Width()) / 2,
+                          rCellRect.Top() + (rCellRect.GetHeight() - aSize.Height()) / 2 );
+    return tools::Rectangle( aTopLeft, aSize );
 }
 
 // TODO Needed because input might be >32-bit (in 64-bit builds),
@@ -378,6 +403,9 @@ private:
 
     /** Imports the drawings of the sheet (DML, VML, DFF) and updates the used area. */
     void                finalizeDrawings();
+
+    /** Places a picture over every cell of the sheet that holds one. */
+    void                insertInCellImages();
 
     /** Update the row import progress bar */
     void UpdateRowProgress( const ScRange& rUsedArea, SCROW nRow );
@@ -1004,9 +1032,47 @@ void WorksheetGlobals::finalizeNamedSheetViews()
 void WorksheetGlobals::finalizeDrawingImport()
 {
     finalizeDrawings();
+    insertInCellImages();
 
     // forget current sheet index in global data
     setCurrentSheetIndex( -1 );
+}
+
+void WorksheetGlobals::insertInCellImages()
+{
+    const std::vector<SheetDataBuffer::InCellImage>& rImages = maSheetData.getInCellImages();
+    if (rImages.empty())
+        return;
+
+    ScDocument& rDoc = getScDocument();
+    ScDrawLayer* pModel = rDoc.GetDrawLayer();
+    SdrPage* pPage = pModel ? pModel->GetPage(static_cast<sal_uInt16>(getSheetIndex())) : nullptr;
+    if (!pPage)
+        return;
+
+    const GraphicHelper& rGraphicHelper = getBaseFilter().getGraphicHelper();
+    for (const SheetDataBuffer::InCellImage& rImage : rImages)
+    {
+        const Graphic aGraphic = getRichValues().getImage(rImage.mnValueMetadata);
+        if (aGraphic.IsNone())
+            continue;
+
+        const tools::Rectangle aCellRect = ScDrawLayer::GetCellRect(rDoc, rImage.maCellAddr, true);
+        if (aCellRect.IsEmpty())
+            continue;
+
+        const awt::Size aOriginalSize = rGraphicHelper.getOriginalSize(aGraphic.GetXGraphic());
+        const tools::Rectangle aObjectRect = lclFitIntoCell(
+            Size(aOriginalSize.Width, aOriginalSize.Height), aCellRect);
+
+        rtl::Reference<SdrGrafObj> xObject(new SdrGrafObj(*pModel, aGraphic, aObjectRect));
+        xObject->SetName(pModel->GetNewGraphicName());
+        pPage->InsertObject(xObject.get());
+
+        ScDrawLayer::SetCellAnchoredFromPosition(*xObject, rDoc, getSheetIndex(), true);
+        if (ScDrawObjData* pObjData = ScDrawLayer::GetOrCreateObjData(xObject.get(), true))
+            pObjData->mbInCellImage = true;
+    }
 }
 
 // private --------------------------------------------------------------------

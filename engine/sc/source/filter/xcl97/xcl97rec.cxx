@@ -35,6 +35,7 @@
 #include <rtl/uuid.h>
 #include <sal/log.hxx>
 #include <drwlayer.hxx>
+#include <userdat.hxx>
 
 #include <root.hxx>
 #include <utility>
@@ -193,6 +194,26 @@ sal_Int32 GetVmlObjectCount( XclExpObjList& rList )
         [](const std::unique_ptr<XclObj>& rxObj) { return IsVmlObject( rxObj.get() ) || IsFormControlObject( rxObj.get() ); }));
 }
 
+/** Returns true when the object is a picture that was written as the content of a cell. Such a
+    picture stands for the value of its cell and is not written a second time as a drawing. */
+bool IsInCellImageObject( const XclObj& rObj, const XclExpXmlStream& rStrm )
+{
+    const XclObjAny* pObjAny = dynamic_cast<const XclObjAny*>(&rObj);
+    if (!pObjAny)
+        return false;
+
+    SdrObject* pSdrObj = SdrObject::getSdrObjectFromXShape(pObjAny->GetShape());
+    if (!pSdrObj || !ScDrawLayer::IsInCellImage(*pSdrObj))
+        return false;
+
+    const ScDrawObjData* pObjData = ScDrawLayer::GetOrCreateObjData(pSdrObj);
+    if (!pObjData || !pObjData->maStart.IsValid())
+        return false;
+
+    return rStrm.HasInCellImageAt(ScAddress(pObjData->maStart.Col(), pObjData->maStart.Row(),
+                                            rStrm.GetRoot().GetCurrScTab()));
+}
+
 bool IsValidObject( const XclObj& rObj )
 {
     if (rObj.GetObjType() == EXC_OBJTYPE_CHART)
@@ -242,7 +263,8 @@ void SaveDrawingMLObjects( XclExpObjList& rList, XclExpXmlStream& rStrm )
     for (const auto& rxObj : rList)
     {
         // FIXME: Can DrawingML objects be grouped with VML or not valid objects?
-        if (IsVmlObject(rxObj.get()) || !IsValidObject(*rxObj))
+        if (IsVmlObject(rxObj.get()) || !IsValidObject(*rxObj)
+            || IsInCellImageObject(*rxObj, rStrm))
             continue;
 
         const auto pObj = dynamic_cast<XclObjAny*>(rxObj.get());

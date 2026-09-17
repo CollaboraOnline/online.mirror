@@ -168,6 +168,8 @@ const Sequence< beans::Pair< OUString, sal_Int32 > >& NamespaceIds()
             {u"http://schemas.microsoft.com/office/spreadsheetml/2019/namedsheetviews"_ustr, NMSP_xnsv},
             {u"http://schemas.microsoft.com/office/spreadsheetml/2018/threadedcomments"_ustr, NMSP_xthreaded},
             {u"http://schemas.microsoft.com/office/spreadsheetml/2017/dynamicarray"_ustr, NMSP_xda},
+            {u"http://schemas.microsoft.com/office/spreadsheetml/2017/richdata"_ustr, NMSP_xlrd},
+            {u"http://schemas.microsoft.com/office/spreadsheetml/2022/richvaluerel"_ustr, NMSP_xlrvr},
         };
     return SINGLETON;
 };

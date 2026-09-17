@@ -2690,6 +2690,15 @@ bool ScDrawLayer::IsResizeWithCell( const SdrObject& rObj )
     return pDrawObjData->mbResizeWithCell;
 }
 
+bool ScDrawLayer::IsInCellImage( const SdrObject& rObj )
+{
+    ScDrawObjData* pDrawObjData = GetOrCreateObjData(const_cast<SdrObject*>(&rObj));
+    if (!pDrawObjData)
+        return false;
+
+    return pDrawObjData->mbInCellImage;
+}
+
 void ScDrawLayer::SetPageAnchored( SdrObject &rObj )
 {
     rObj.deleteUserData(UserDataID::ID_ScDrawObjData);

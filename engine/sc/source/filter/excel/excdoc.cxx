@@ -61,12 +61,125 @@
 #include <oox/token/namespaces.hxx>
 #include <oox/token/relationship.hxx>
 #include <oox/export/ThemeExport.hxx>
+#include <oox/export/drawingml.hxx>
+#include <vcl/graph.hxx>
 #include <docmodel/theme/Theme.hxx>
 #include <svx/svdpage.hxx>
 #include <memory>
 
 using namespace oox;
 using namespace ::cpo;
+
+/*  Writes the rich data parts of the workbook. Together those parts say that a cell holds a
+    picture: the value metadata index of the cell leads to a rich value of the "_localImage"
+    structure, that rich value holds the position of an entry in the relationship part, and that
+    entry names a picture in the media folder of the package. */
+static void lcl_WriteRichDataParts( XclExpXmlStream& rStrm, const std::vector<Graphic>& rImages )
+{
+    const cpo::uno::Reference<css::io::XOutputStream> xWorkbook
+        = rStrm.GetCurrentStream()->getOutputStream();
+    const OUString sRichDataNamespace = rStrm.getNamespaceURL(OOX_NS(xlrd));
+    const OString sImageCount = OString::number(static_cast<sal_Int32>(rImages.size()));
+
+    // xl/richData/rdrichvaluestructure.xml
+    sax_fastparser::FSHelperPtr pStructure = rStrm.CreateOutputStream(
+        u"xl/richData/rdrichvaluestructure.xml"_ustr,
+        u"richData/rdrichvaluestructure.xml",
+        xWorkbook,
+        "application/vnd.ms-excel.rdrichvaluestructure+xml",
+        oox::getRelationship(Relationship::RDRICHVALUESTRUCTURE));
+    pStructure->startElement(XML_rvStructures,
+        XML_xmlns, sRichDataNamespace,
+        XML_count, "1");
+    pStructure->startElement(XML_s, XML_t, "_localImage");
+    pStructure->singleElement(XML_k, XML_n, "_rvRel:LocalImageIdentifier", XML_t, "i");
+    pStructure->singleElement(XML_k, XML_n, "CalcOrigin", XML_t, "i");
+    pStructure->endElement(XML_s);
+    pStructure->endElement(XML_rvStructures);
+
+    // xl/richData/rdrichvalue.xml
+    sax_fastparser::FSHelperPtr pValues = rStrm.CreateOutputStream(
+        u"xl/richData/rdrichvalue.xml"_ustr,
+        u"richData/rdrichvalue.xml",
+        xWorkbook,
+        "application/vnd.ms-excel.rdrichvalue+xml",
+        oox::getRelationship(Relationship::RDRICHVALUE));
+    pValues->startElement(XML_rvData,
+        XML_xmlns, sRichDataNamespace,
+        XML_count, sImageCount);
+    for (size_t nImage = 0; nImage < rImages.size(); ++nImage)
+    {
+        pValues->startElement(XML_rv, XML_s, "0");
+        pValues->startElement(XML_v);
+        pValues->write(OString::number(static_cast<sal_Int32>(nImage)));
+        pValues->endElement(XML_v);
+        // The second value is the calculation origin, which is 5 for a picture that was
+        // inserted from a file.
+        pValues->startElement(XML_v);
+        pValues->write("5");
+        pValues->endElement(XML_v);
+        pValues->endElement(XML_rv);
+    }
+    pValues->endElement(XML_rvData);
+
+    // xl/richData/rdRichValueTypes.xml: the flags that hold for every rich value type.
+    sax_fastparser::FSHelperPtr pTypes = rStrm.CreateOutputStream(
+        u"xl/richData/rdRichValueTypes.xml"_ustr,
+        u"richData/rdRichValueTypes.xml",
+        xWorkbook,
+        "application/vnd.ms-excel.rdrichvaluetypes+xml",
+        oox::getRelationship(Relationship::RDRICHVALUETYPES));
+    pTypes->startElement(XML_rvTypesInfo, XML_xmlns, rStrm.getNamespaceURL(OOX_NS(xlrd2)));
+    pTypes->startElement(XML_global);
+    pTypes->startElement(XML_keyFlags);
+    static constexpr struct
+    {
+        const char* pKeyName;
+        bool bExcludeFromFile;
+    } aKeyFlags[] = {
+        { "_Self", true },
+        { "_DisplayString", false },
+        { "_Flags", false },
+        { "_Format", false },
+        { "_SubLabel", false },
+        { "_Attribution", false },
+        { "_Icon", false },
+        { "_Display", false },
+        { "_CanonicalPropertyNames", false },
+        { "_ClassificationId", false },
+    };
+    for (const auto& rKeyFlag : aKeyFlags)
+    {
+        pTypes->startElement(XML_key, XML_name, rKeyFlag.pKeyName);
+        if (rKeyFlag.bExcludeFromFile)
+            pTypes->singleElement(XML_flag, XML_name, "ExcludeFromFile", XML_value, "1");
+        pTypes->singleElement(XML_flag, XML_name, "ExcludeFromCalcComparison", XML_value, "1");
+        pTypes->endElement(XML_key);
+    }
+    pTypes->endElement(XML_keyFlags);
+    pTypes->endElement(XML_global);
+    pTypes->endElement(XML_rvTypesInfo);
+
+    // xl/richData/richValueRel.xml, and the pictures themselves in xl/media
+    sax_fastparser::FSHelperPtr pRelations = rStrm.CreateOutputStream(
+        u"xl/richData/richValueRel.xml"_ustr,
+        u"richData/richValueRel.xml",
+        xWorkbook,
+        "application/vnd.ms-excel.richvaluerel+xml",
+        oox::getRelationship(Relationship::RICHVALUEREL));
+    pRelations->startElement(XML_richValueRels,
+        XML_xmlns, rStrm.getNamespaceURL(OOX_NS(xlrvr)),
+        FSNS(XML_xmlns, XML_r), rStrm.getNamespaceURL(OOX_NS(officeRel)));
+    oox::drawingml::GraphicExport aGraphicExport(pRelations, &rStrm, oox::drawingml::DOCUMENT_XLSX);
+    for (const Graphic& rGraphic : rImages)
+    {
+        // The relationship of this part carries a path that starts one folder up, because the
+        // pictures sit next to the rich data folder rather than inside it.
+        const OUString sRelationId = aGraphicExport.writeToStorage(rGraphic, true);
+        pRelations->singleElement(XML_rel, FSNS(XML_r, XML_id), sRelationId.toUtf8());
+    }
+    pRelations->endElement(XML_richValueRels);
+}
 
 static OUString lcl_GetVbaTabName( SCTAB n )
 {
@@ -920,9 +1033,19 @@ void ExcDocument::WriteXml( XclExpXmlStream& rStrm )
             maTableList.GetRecord( nTab )->WriteXml( rStrm );
         }
 
-        // xl/metadata.xml: emit the dynamic array property metadata block.
-        if (rStrm.HasDynamicArrayFormula())
+        /*  xl/metadata.xml: the dynamic array property block, and one rich value for every
+            picture that sits in a cell. */
+        const std::vector<Graphic>& rInCellImages = rStrm.GetInCellImages();
+        const bool bDynamicArray = rStrm.HasDynamicArrayFormula();
+        const bool bRichValues = !rInCellImages.empty();
+        if (bDynamicArray || bRichValues)
         {
+            // A metadata entry names its type by the position of that type in the list of types,
+            // counting from one.
+            const sal_Int32 nRichValueType = bDynamicArray ? 2 : 1;
+            const sal_Int32 nTypeCount = (bDynamicArray ? 1 : 0) + (bRichValues ? 1 : 0);
+            const sal_Int32 nImageCount = static_cast<sal_Int32>(rInCellImages.size());
+
             sax_fastparser::FSHelperPtr pMetadata = rStrm.CreateOutputStream(
                 u"xl/metadata.xml"_ustr,
                 u"metadata.xml",
@@ -932,39 +1055,93 @@ void ExcDocument::WriteXml( XclExpXmlStream& rStrm )
 
             pMetadata->startElement(XML_metadata,
                 XML_xmlns, rStrm.getNamespaceURL(OOX_NS(xls)),
-                FSNS(XML_xmlns, XML_xda), rStrm.getNamespaceURL(OOX_NS(xda)));
+                FSNS(XML_xmlns, XML_xda),
+                sax_fastparser::UseIf(rStrm.getNamespaceURL(OOX_NS(xda)), bDynamicArray),
+                FSNS(XML_xmlns, XML_xlrd),
+                sax_fastparser::UseIf(rStrm.getNamespaceURL(OOX_NS(xlrd)), bRichValues));
 
-            pMetadata->startElement(XML_metadataTypes, XML_count, "1");
-            pMetadata->singleElement(XML_metadataType,
-                XML_name, "XLDAPR",
-                XML_minSupportedVersion, "120000",
-                XML_copy, "1", XML_pasteAll, "1", XML_pasteValues, "1",
-                XML_merge, "1", XML_splitFirst, "1", XML_rowColShift, "1",
-                XML_clearFormats, "1", XML_clearComments, "1",
-                XML_assign, "1", XML_coerce, "1", XML_cellMeta, "1");
+            pMetadata->startElement(XML_metadataTypes, XML_count, OString::number(nTypeCount));
+            if (bDynamicArray)
+                pMetadata->singleElement(XML_metadataType,
+                    XML_name, "XLDAPR",
+                    XML_minSupportedVersion, "120000",
+                    XML_copy, "1", XML_pasteAll, "1", XML_pasteValues, "1",
+                    XML_merge, "1", XML_splitFirst, "1", XML_rowColShift, "1",
+                    XML_clearFormats, "1", XML_clearComments, "1",
+                    XML_assign, "1", XML_coerce, "1", XML_cellMeta, "1");
+            if (bRichValues)
+                pMetadata->singleElement(XML_metadataType,
+                    XML_name, "XLRICHVALUE",
+                    XML_minSupportedVersion, "120000",
+                    XML_copy, "1", XML_pasteAll, "1", XML_pasteValues, "1",
+                    XML_merge, "1", XML_splitFirst, "1", XML_rowColShift, "1",
+                    XML_clearFormats, "1", XML_clearComments, "1",
+                    XML_assign, "1", XML_coerce, "1");
             pMetadata->endElement(XML_metadataTypes);
 
-            pMetadata->startElement(XML_futureMetadata,
-                XML_name, "XLDAPR", XML_count, "1");
-            pMetadata->startElement(XML_bk);
-            pMetadata->startElement(XML_extLst);
-            pMetadata->startElement(XML_ext,
-                XML_uri, "{bdbb8cdc-fa1e-496e-a857-3c3f30c029c3}");
-            pMetadata->singleElement(FSNS(XML_xda, XML_dynamicArrayProperties),
-                XML_fDynamic, "1", XML_fCollapsed, "0");
-            pMetadata->endElement(XML_ext);
-            pMetadata->endElement(XML_extLst);
-            pMetadata->endElement(XML_bk);
-            pMetadata->endElement(XML_futureMetadata);
+            if (bDynamicArray)
+            {
+                pMetadata->startElement(XML_futureMetadata,
+                    XML_name, "XLDAPR", XML_count, "1");
+                pMetadata->startElement(XML_bk);
+                pMetadata->startElement(XML_extLst);
+                pMetadata->startElement(XML_ext,
+                    XML_uri, "{bdbb8cdc-fa1e-496e-a857-3c3f30c029c3}");
+                pMetadata->singleElement(FSNS(XML_xda, XML_dynamicArrayProperties),
+                    XML_fDynamic, "1", XML_fCollapsed, "0");
+                pMetadata->endElement(XML_ext);
+                pMetadata->endElement(XML_extLst);
+                pMetadata->endElement(XML_bk);
+                pMetadata->endElement(XML_futureMetadata);
+            }
 
-            pMetadata->startElement(XML_cellMetadata, XML_count, "1");
-            pMetadata->startElement(XML_bk);
-            pMetadata->singleElement(XML_rc, XML_t, "1", XML_v, "0");
-            pMetadata->endElement(XML_bk);
-            pMetadata->endElement(XML_cellMetadata);
+            if (bRichValues)
+            {
+                pMetadata->startElement(XML_futureMetadata,
+                    XML_name, "XLRICHVALUE", XML_count, OString::number(nImageCount));
+                for (sal_Int32 nImage = 0; nImage < nImageCount; ++nImage)
+                {
+                    pMetadata->startElement(XML_bk);
+                    pMetadata->startElement(XML_extLst);
+                    pMetadata->startElement(XML_ext,
+                        XML_uri, "{3e2802c4-a4d2-4d8b-9148-e3be6c30e623}");
+                    pMetadata->singleElement(FSNS(XML_xlrd, XML_rvb),
+                        XML_i, OString::number(nImage));
+                    pMetadata->endElement(XML_ext);
+                    pMetadata->endElement(XML_extLst);
+                    pMetadata->endElement(XML_bk);
+                }
+                pMetadata->endElement(XML_futureMetadata);
+            }
+
+            if (bDynamicArray)
+            {
+                pMetadata->startElement(XML_cellMetadata, XML_count, "1");
+                pMetadata->startElement(XML_bk);
+                pMetadata->singleElement(XML_rc, XML_t, "1", XML_v, "0");
+                pMetadata->endElement(XML_bk);
+                pMetadata->endElement(XML_cellMetadata);
+            }
+
+            if (bRichValues)
+            {
+                pMetadata->startElement(XML_valueMetadata, XML_count, OString::number(nImageCount));
+                for (sal_Int32 nImage = 0; nImage < nImageCount; ++nImage)
+                {
+                    pMetadata->startElement(XML_bk);
+                    pMetadata->singleElement(XML_rc,
+                        XML_t, OString::number(nRichValueType),
+                        XML_v, OString::number(nImage));
+                    pMetadata->endElement(XML_bk);
+                }
+                pMetadata->endElement(XML_valueMetadata);
+            }
 
             pMetadata->endElement(XML_metadata);
         }
+
+        if (bRichValues)
+            lcl_WriteRichDataParts(rStrm, rInCellImages);
     }
 
     if( m_xExpChangeTrack )

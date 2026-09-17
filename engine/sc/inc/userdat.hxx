@@ -35,6 +35,9 @@ public:
     Type                meType;
     bool                mbResizeWithCell = false;
     bool                mbWasInHiddenRow = false;
+    /** True when the object is a picture that sits in the cell maStart names, rather than a picture
+        that floats over the sheet. */
+    bool                mbInCellImage = false;
 
     explicit            ScDrawObjData()
     :   maStart( ScAddress::INITIALIZE_INVALID ),

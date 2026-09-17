@@ -208,6 +208,8 @@ $(eval $(call gb_Library_add_exception_objects,scfilt,\
 	sc/source/filter/oox/revisionfragment \
 	sc/source/filter/oox/richstringcontext \
 	sc/source/filter/oox/richstring \
+	sc/source/filter/oox/richvaluebuffer \
+	sc/source/filter/oox/richvaluefragment \
 	sc/source/filter/oox/scenariobuffer \
 	sc/source/filter/oox/scenariocontext \
 	sc/source/filter/oox/sharedstringsbuffer \

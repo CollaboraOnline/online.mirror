@@ -31,6 +31,7 @@
 #include <map>
 #include <memory>
 #include <patattr.hxx>
+#include <vcl/graph.hxx>
 #include <unordered_map>
 #include <o3tl/sorted_vector.hxx>
 
@@ -383,6 +384,27 @@ private:
 
 private:
     bool                mbValue;        /// The cell value.
+};
+
+/** Represents a cell that holds a picture.
+
+    The cell carries the error value #VALUE! together with a value metadata index. That index leads
+    through the metadata part and the rich value parts of the workbook to the picture. Readers that
+    do not know rich values show the error value, which is what the format intends. */
+class XclExpRichValueCell : public XclExpSingleCellBase
+{
+public:
+    explicit            XclExpRichValueCell( const XclExpRoot& rRoot, const XclAddress& rXclPos,
+                            const ScAddress& rScPos, const ScPatternAttr* pPattern,
+                            sal_uInt32 nForcedXFId, const Graphic& rGraphic );
+
+    virtual void        SaveXml( XclExpXmlStream& rStrm ) override;
+private:
+    virtual void        WriteContents( XclExpStream& rStrm ) override;
+
+private:
+    ScAddress           maScPos;        /// The address of the cell in the Calc document.
+    Graphic             maGraphic;      /// The picture that sits in the cell.
 };
 
 class XclExpHyperlinkHelper;

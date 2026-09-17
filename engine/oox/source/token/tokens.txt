@@ -2365,6 +2365,7 @@ fitpath
 fitshape
 fixed
 fixedVal
+flag
 flash
 flat
 flatBorders
@@ -2592,6 +2593,7 @@ ghostRow
 ghostWhite
 gingerbreadMan
 glitter
+global
 glossaryDocument
 glow
 goal
@@ -3062,6 +3064,7 @@ keepNext
 kern
 key
 keyAttribute
+keyFlags
 keywords
 khaki
 kinsoku
@@ -4514,6 +4517,7 @@ ribbon2
 riblet
 rich
 richText
+richValueRels
 rig
 right
 rightArrow
@@ -4600,6 +4604,11 @@ ruby
 rubyAlign
 rubyBase
 rubyPr
+rv
+rvb
+rvData
+rvStructures
+rvTypesInfo
 rule
 ruleLst
 rules
@@ -6044,6 +6053,7 @@ xfrmType
 xl2000
 xl97
 xlm
+xlrd
 xm
 xml
 xmlBased

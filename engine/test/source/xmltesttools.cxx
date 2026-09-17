@@ -552,6 +552,10 @@ void XmlTestTools::registerOOXMLNamespaces(xmlXPathContextPtr& pXmlXpathCtx)
                        BAD_CAST("http://schemas.microsoft.com/office/excel/2006/main"));
     xmlXPathRegisterNs(pXmlXpathCtx, BAD_CAST("x12ac"),
                        BAD_CAST("http://schemas.microsoft.com/office/spreadsheetml/2011/1/ac"));
+    xmlXPathRegisterNs(pXmlXpathCtx, BAD_CAST("xlrd"),
+                       BAD_CAST("http://schemas.microsoft.com/office/spreadsheetml/2017/richdata"));
+    xmlXPathRegisterNs(pXmlXpathCtx, BAD_CAST("xlrvr"),
+                       BAD_CAST("http://schemas.microsoft.com/office/spreadsheetml/2022/richvaluerel"));
     xmlXPathRegisterNs(pXmlXpathCtx, BAD_CAST("o"),
                        BAD_CAST("urn:schemas-microsoft-com:office:office"));
     xmlXPathRegisterNs(pXmlXpathCtx, BAD_CAST("w10"),
