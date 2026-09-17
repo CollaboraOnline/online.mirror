@@ -426,54 +426,6 @@
 	background-color: transparent;
 }
 
-/* Settles the thread, or opens it again. It comes out for the
-   card under the pointer, and stays out once it is settled. */
-#comments-panel .comments-panel-thread-resolve {
-	position: absolute;
-	inset-block-start: var(--spacing-m);
-	inset-inline-end: var(--spacing-s);
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	box-sizing: border-box;
-	width: 22px;
-	height: 22px;
-	margin: 0;
-	padding: 0;
-	border: none;
-	border-radius: var(--border-radius);
-	background: transparent;
-	color: var(--color-status-badge);
-	opacity: 0;
-	vertical-align: baseline;
-	cursor: pointer;
-}
-
-.comments-panel-thread-resolve .comments-panel-icon {
-	width: 15px;
-	height: 15px;
-}
-
-.comments-panel-thread:hover .comments-panel-thread-resolve,
-.comments-panel-thread:focus-within .comments-panel-thread-resolve,
-#comments-panel .comments-panel-thread-resolve.is-done {
-	opacity: 1;
-}
-
-#comments-panel .comments-panel-thread-resolve.is-done {
-	color: var(--color-resolved);
-}
-
-#comments-panel .comments-panel-thread-resolve:hover {
-	background: var(--color-background-hover);
-	color: var(--color-resolved);
-}
-
-.comments-panel-thread-resolve:focus-visible {
-	outline: 2px solid var(--color-primary);
-	outline-offset: 1px;
-}
-
 /* The words that say a thread is settled take the same green. */
 .comments-panel-comment-resolved {
 	color: var(--color-resolved);
@@ -586,6 +538,7 @@
 
 /* What the reader acts on directly stands above that reach. */
 .comments-panel-comment-menu,
+.comments-panel-thread-resolve,
 .comments-panel-comment-open,
 .cool-annotation-edit.comment-editor-in-the-list {
 	position: relative;
@@ -653,11 +606,111 @@
 	outline-offset: -2px;
 }
 
+/* The author line is a grid, so the date and the control that
+   settles the thread can share one cell. */
 .comments-panel-comment-head {
-	display: flex;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr);
+	grid-auto-flow: column;
+	grid-auto-columns: auto;
 	align-items: center;
-	gap: var(--spacing-s);
+	column-gap: var(--spacing-s);
 	margin-bottom: var(--spacing-s);
+}
+
+/* One cell for two things: the column is as wide as the wider
+   of them, so neither state moves the name. */
+.comments-panel-comment-end {
+	display: grid;
+	align-items: center;
+	justify-items: end;
+}
+
+.comments-panel-comment-end > * {
+	grid-area: 1 / 1;
+}
+
+/* Settles the thread, or opens it again, in the place the date
+   holds while the card is at rest. */
+#comments-panel .comments-panel-thread-resolve {
+	position: relative;
+	z-index: 1;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 24px;
+	height: 24px;
+	margin: 0;
+	padding: 0;
+	border: 1px solid transparent;
+	border-radius: var(--border-radius);
+	background: transparent;
+	color: var(--color-status-badge);
+	opacity: 0;
+	pointer-events: none;
+	vertical-align: baseline;
+	cursor: pointer;
+	transition: opacity 120ms linear;
+}
+
+.comments-panel-thread-resolve .comments-panel-icon {
+	width: 15px;
+	height: 15px;
+}
+
+/* The id carries through from the rule above, which an id-less
+   selector would lose to. */
+#comments-panel .comments-panel-thread:hover .comments-panel-thread-resolve,
+#comments-panel .comments-panel-thread:focus-within .comments-panel-thread-resolve {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+#comments-panel .comments-panel-thread-resolve.is-done {
+	color: var(--color-resolved);
+}
+
+#comments-panel .comments-panel-thread-resolve:hover {
+	border-color: var(--color-border-darker);
+	background: var(--color-background-hover);
+	color: var(--color-resolved);
+}
+
+.comments-panel-thread-resolve:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 1px;
+}
+
+#comments-panel .comments-panel-thread:hover .comments-panel-comment-date,
+#comments-panel .comments-panel-thread:focus-within .comments-panel-comment-date {
+	opacity: 0;
+	pointer-events: none;
+}
+
+/* A pointer that cannot hover never reaches a control that only
+   hover brings out, so both stand side by side. */
+@media (hover: none) {
+	.comments-panel-comment-end {
+		grid-auto-flow: column;
+		column-gap: var(--spacing-s);
+	}
+
+	.comments-panel-comment-end > * {
+		grid-area: auto;
+	}
+
+	#comments-panel .comments-panel-thread-resolve {
+		opacity: 1;
+		pointer-events: auto;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.comments-panel-comment-date,
+	#comments-panel .comments-panel-thread-resolve {
+		transition: none;
+	}
 }
 
 /* The author, as a picture or as the letters of their name. */
@@ -693,7 +746,6 @@
 }
 
 .comments-panel-comment-author {
-	flex: 1 1 auto;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
@@ -709,11 +761,15 @@
 
 /* How long ago the comment was written, at the end of the line
    the author's name starts. */
+/* How long ago the comment was written. It stands above the
+   reach of the row button so its own tooltip comes up. */
 .comments-panel-comment-date {
-	flex: 0 0 auto;
+	position: relative;
+	z-index: 1;
 	color: var(--color-status-badge);
 	font-size: 0.6875rem;
 	white-space: nowrap;
+	transition: opacity 120ms linear;
 }
 
 /* A long comment is cut off after three lines. All of the text
@@ -797,17 +853,44 @@
 	cursor: pointer;
 }
 
-/* Drops down the menu of actions for the comment. It comes out
-   at the end of the author line for the thread under the pointer. */
-.comments-panel-comment-menu {
-	flex: 0 0 auto;
-	opacity: 0;
+/* The menu of actions for the comment, at the end of the author
+   line at all times, so the line ends on the edge. */
+#comments-panel .comments-panel-comment-menu {
+	display: grid !important;
+	place-items: center;
+	box-sizing: border-box;
+	width: 24px !important;
+	height: 24px !important;
+	border: 1px solid transparent !important;
+	border-radius: var(--border-radius);
+	background: none !important;
+	color: var(--color-status-badge);
 	cursor: pointer;
 }
 
-.comments-panel-thread:hover .comments-panel-comment-menu,
-.comments-panel-thread:focus-within .comments-panel-comment-menu {
-	opacity: 1;
+/* The three dots take the colour of the button. The background
+   image of the shared class carries its own colour instead. */
+#comments-panel .comments-panel-comment-menu::before {
+	content: '';
+	display: block;
+	width: 15px;
+	height: 15px;
+	background-color: currentcolor;
+	mask-image: url('images/lc_more.svg');
+	mask-size: contain;
+	mask-repeat: no-repeat;
+	mask-position: center;
+}
+
+#comments-panel .comments-panel-comment-menu:hover {
+	border-color: var(--color-border-darker) !important;
+	background: var(--color-background-hover) !important;
+	color: var(--color-main-text);
+}
+
+.comments-panel-comment-menu:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 1px;
 }
 
 .comments-panel-comment-open:hover {

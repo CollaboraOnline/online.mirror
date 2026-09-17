@@ -1144,7 +1144,6 @@ class CommentsPanel {
       >
         {this.buildCommentRow(thread, thread.root)}
         {thread.replies.length > 0 && this.buildRepliesToggle(thread, rootId, open)}
-        {this.buildResolveButton(thread)}
         {open && thread.replies.map((reply) => this.buildCommentRow(thread, reply))}
       </li>
     );
@@ -1280,11 +1279,14 @@ class CommentsPanel {
         <div class="comments-panel-comment-head">
           {this.buildAvatar(data, comment === thread.root)}
           <span class="comments-panel-comment-author">{data.author}</span>
-          <span
-            class="comments-panel-comment-date"
-            title={this.fullDate(data.dateTime)}
-          >
-            {this.shortDate(data.dateTime)}
+          <span class="comments-panel-comment-end">
+            <span
+              class="comments-panel-comment-date"
+              title={this.fullDate(data.dateTime)}
+            >
+              {this.shortDate(data.dateTime)}
+            </span>
+            {comment === thread.root && this.buildResolveButton(thread)}
           </span>
           {app.isCommentEditingAllowed() &&
             id !== 'new' &&
