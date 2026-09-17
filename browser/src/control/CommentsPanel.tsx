@@ -701,12 +701,14 @@ class CommentsPanel {
     );
     const direction = this.sortDirectionNode;
     if (direction && way) {
-      const says = _('Reverse the order. Now: {way}.').replace(
-        '{way}',
-        way.label.toLowerCase(),
+      direction.setAttribute(
+        'aria-label',
+        _('Reverse the order. Now: {way}.').replace(
+          '{way}',
+          way.label.toLowerCase(),
+        ),
       );
-      direction.setAttribute('aria-label', says);
-      direction.setAttribute('data-title', says);
+      direction.setAttribute('data-title', way.label);
     }
 
     const arrow = this.sortArrowNode;

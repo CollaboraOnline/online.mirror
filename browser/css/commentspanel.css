@@ -25,6 +25,16 @@
 }
 
 /* The order the rows are in, on a line above the filters. */
+/* A tooltip is laid out in the flow it is written in, and only
+   hidden, so a long one widened the panel and it could be
+   scrolled sideways. It is taken out of the flow and opened
+   inward, where the room is. */
+.comments-panel [data-title]::after {
+	position: absolute;
+	left: auto;
+	right: 0;
+}
+
 /* One bar above the list: how much of it there is, what is
    holding it back, and the order it runs in. */
 .comments-panel-toolbar {
