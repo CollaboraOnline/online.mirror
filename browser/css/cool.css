@@ -875,7 +875,7 @@ input, button {
 	content: '';
 	position: absolute;
 	inset: 0;
-	background-color: var(--color-primary);
+	background-color: rgb(var(--doc-type, 11, 135, 231));
 	mask-image: url('images/comment-marker.svg');
 	mask-size: contain;
 	mask-repeat: no-repeat;
