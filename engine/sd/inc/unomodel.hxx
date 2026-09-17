@@ -35,6 +35,7 @@
 #include <com/sun/star/beans/XPropertySet.hpp>
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <drawinglayer/primitive2d/Primitive2DContainer.hxx>
 #include <drawinglayer/processor2d/Primitive2dJsonProcessor.hxx>
 #include <tools/gen.hxx>
@@ -179,6 +180,14 @@ public:
         /// none of that kind.
         std::vector<Handle> maHandles;
 
+        /** The path of an object that is drawn from one, in twips: the polygons and the points
+            the model holds, with the control points of a curve as they stand there. They keep
+            the order the model has them in, which is the order a handle is named by, so that a
+            point spoken about here is the point the engine will look up. Empty for an object
+            that has no path.
+         */
+        basegfx::B2DPolyPolygon maPath;
+
         tools::Rectangle maPaintedBox;
         basegfx::B2DHomMatrix maTransformation;
         /// The name the object carries, empty for an entry that stands for no object.
@@ -206,7 +215,8 @@ public:
                    && moLayer == rOther.moLayer && mbEmptyPlaceholder == rOther.mbEmptyPlaceholder
                    && mbTextEdit == rOther.mbTextEdit && mnParentId == rOther.mnParentId
                    && maAutoColor == rOther.maAutoColor && maDrawn == rOther.maDrawn
-                   && maAids == rOther.maAids && maHandles == rOther.maHandles;
+                   && maAids == rOther.maAids && maHandles == rOther.maHandles
+                   && maPath == rOther.maPath;
         }
     };
 

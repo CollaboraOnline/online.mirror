@@ -25,6 +25,26 @@ namespace cool {
 		y: number;
 	}
 
+	/** One point of a path, in twips, with the weights of the curve it lies on where they are
+	 * in use: the one behind the point and the one ahead of it, named as a handle names them.
+	 */
+	export interface ObjectPathPoint {
+		x: number;
+		y: number;
+		behindX?: number;
+		behindY?: number;
+		aheadX?: number;
+		aheadY?: number;
+	}
+
+	/** One polygon of the path of an object, as the model holds it. The polygons and their
+	 * points keep the model's order, which is the order that names a point when it is moved.
+	 */
+	export interface ObjectPathPolygon {
+		closed?: boolean;
+		points: ObjectPathPoint[];
+	}
+
 	/// One drawable object on a slide, carrying its primitive tree.
 	export interface SlideObject {
 		/// Stable identity of the object: the engine's SdrObject unique
@@ -87,6 +107,9 @@ namespace cool {
 		transform?: number[];
 		/// The handles that shape the object, empty for an object that has none of them.
 		handles?: ObjectHandle[];
+		/// The path the object is drawn from, as the model holds it. Absent for an object
+		/// that has no path of its own.
+		path?: ObjectPathPolygon[];
 		primitives?: Primitive[];
 	}
 }
