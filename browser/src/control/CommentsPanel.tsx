@@ -1219,7 +1219,21 @@ class CommentsPanel {
   private letGoOfTheHeldThread(card: HTMLElement): void {
     card.addEventListener(
       'mouseleave',
-      () => {
+      () => this.releaseTheHeldThread(card),
+      { once: true },
+    );
+    card.addEventListener(
+      'focusout',
+      (event: FocusEvent) => {
+        const to = event.relatedTarget as Node | null;
+        if (to && card.contains(to)) return;
+        this.releaseTheHeldThread(card);
+      },
+      { once: true },
+    );
+  }
+
+  private releaseTheHeldThread(card: HTMLElement): void {
         if (this.heldThread === null) return;
 
         const held = this.heldThread;
@@ -1234,21 +1248,16 @@ class CommentsPanel {
           return;
         }
         this.closeTheCardAway(card, () => this.render());
-      },
-      { once: true },
-    );
   }
 
   // Take a card out by closing the room it stands in, so the
   // cards under it come up rather than jump.
   private closeTheCardAway(card: HTMLElement, gone: () => void): void {
-    if (!CommentsPanel.motionIsWanted()) {
-      gone();
-      return;
-    }
-
-    card.style.height = card.offsetHeight + 'px';
-    // Reading the height fixes it before the closing starts.
+    // The card is laid out content box, so it is held at its
+    // outer height with the box rule changed to match.
+    card.style.boxSizing = 'border-box';
+    card.style.height = card.getBoundingClientRect().height + 'px';
+    // Reading the layout fixes the height before it closes.
     void card.offsetHeight;
 
     card.classList.add('is-leaving');
@@ -1260,9 +1269,14 @@ class CommentsPanel {
       done = true;
       gone();
     };
-    card.addEventListener('transitionend', finish, { once: true });
+
+    // The controls in the card fade on their own clock and their
+    // end reaches the card too, so only the card's own counts.
+    card.addEventListener('transitionend', (event: TransitionEvent) => {
+      if (event.target === card && event.propertyName === 'height') finish();
+    });
     // A card the reader never sees closing still has to go.
-    setTimeout(finish, 400);
+    setTimeout(finish, 600);
   }
 
   private toggleThread(rootId: string): void {
