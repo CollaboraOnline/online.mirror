@@ -530,12 +530,6 @@
 	background-color: transparent;
 }
 
-/* The words that say a thread is settled take the same green. */
-.comments-panel-comment-resolved {
-	color: var(--color-success);
-	font-weight: 600;
-}
-
 .comments-panel-popover-separator {
 	height: 1px;
 	margin: var(--spacing-s) var(--spacing-m);
@@ -646,9 +640,10 @@
 	box-shadow: none;
 }
 
-/* A thread nobody has anything left to say about steps back. */
-.comments-panel-thread.is-resolved {
-	opacity: 0.72;
+/* A thread nobody has anything left to say about keeps its
+   marks and lets its words go quiet. */
+.comments-panel-thread.is-resolved .comments-panel-comment-text {
+	color: var(--color-status-badge);
 }
 
 .comments-panel-comment {
@@ -790,8 +785,18 @@
 	color: var(--color-success);
 }
 
-#comments-panel .comments-panel-thread-resolve:hover {
-	background: var(--color-background-hover);
+/* A bare button takes a hover colour and fill from the shared
+   rules, so the panel states its own over them. */
+#comments-panel .comments-panel-thread-resolve:hover,
+#comments-panel .comments-panel-thread-resolve:focus-visible {
+	background-color: var(--color-background-hover) !important;
+	color: var(--color-status-badge) !important;
+	border: none !important;
+}
+
+#comments-panel .comments-panel-thread-resolve.is-done:hover,
+#comments-panel .comments-panel-thread-resolve.is-done:focus-visible {
+	color: var(--color-success) !important;
 }
 
 .comments-panel-thread-resolve:focus-visible {
@@ -901,13 +906,6 @@
 	margin-top: var(--spacing-s);
 }
 
-.comments-panel-comment-tags {
-	display: flex;
-	gap: var(--spacing-s);
-	font-size: 0.6875rem;
-	color: var(--color-status-badge);
-}
-
 /* Shows and hides the replies to a thread, and says how many
    there are while they are hidden. */
 #comments-panel .comments-panel-thread-replies {
@@ -966,10 +964,11 @@
 	display: grid !important;
 	place-items: center;
 	box-sizing: border-box;
-	width: 12px !important;
+	width: 22px !important;
 	height: 24px !important;
 	margin: 0 !important;
-	margin-inline-end: -4px !important;
+	margin-inline-start: -2px !important;
+	margin-inline-end: -3px !important;
 	padding: 0 !important;
 	border: none !important;
 	border-radius: var(--border-radius);
@@ -984,8 +983,8 @@
 #comments-panel .comments-panel-comment-menu::before {
 	content: '';
 	display: block;
-	width: 4px;
-	height: 16px;
+	width: 16px;
+	height: 4px;
 	background-color: currentcolor;
 	mask-image: url('images/comment-menu.svg');
 	mask-size: contain;
@@ -993,18 +992,11 @@
 	mask-position: center;
 }
 
-/* The mark is narrow. The part that answers the pointer is
-   widened without the tint or the dots growing. */
-#comments-panel .comments-panel-comment-menu::after {
-	content: '';
-	position: absolute;
-	inset-block: 0;
-	inset-inline: -4px -8px;
-}
-
-#comments-panel .comments-panel-comment-menu:hover {
-	background: var(--color-background-hover) !important;
-	color: var(--color-main-text);
+#comments-panel .comments-panel-comment-menu:hover,
+#comments-panel .comments-panel-comment-menu:focus-visible {
+	background-color: var(--color-background-hover) !important;
+	color: var(--color-status-badge) !important;
+	border: none !important;
 }
 
 .comments-panel-comment-menu:focus-visible {

@@ -101,6 +101,10 @@ class CommentsPanel {
   // comment each thread starts with.
   private openedThreads: Set<string> = new Set<string>();
 
+  // Where the pointer was last seen, so a box that moves can be
+  // told from a reader who walked away from it.
+  private static wherethePointerIs: { x: number; y: number } | null = null;
+
   // A thread the reader has just settled or opened again, kept
   // in the list until the pointer leaves it, and the state the
   // list is still showing it in.
@@ -159,6 +163,10 @@ class CommentsPanel {
         this.openPopover === 'filter' ? this.filterButtonNode : this.sortKeyNode;
       this.closePopovers();
       button?.focus();
+    });
+
+    document.addEventListener('pointermove', (event: PointerEvent) => {
+      CommentsPanel.wherethePointerIs = { x: event.clientX, y: event.clientY };
     });
 
     document.addEventListener('pointerdown', (event: PointerEvent) => {
@@ -1384,19 +1392,43 @@ class CommentsPanel {
   // Let go of the card the pointer has left, so the filters
   // hold again from the next pass.
   private letGoOfTheHeldThread(card: HTMLElement): void {
-    card.addEventListener(
-      'mouseleave',
-      () => this.releaseTheHeldThread(card),
-      { once: true },
-    );
+    const leaving = () => {
+      // The card can move out from under a pointer that never
+      // moved, which is the card leaving rather than the reader.
+      if (CommentsPanel.thePointerIsOver(card)) {
+        card.addEventListener('mouseleave', leaving, { once: true });
+        return;
+      }
+      this.releaseTheHeldThread(card);
+    };
+    card.addEventListener('mouseleave', leaving, { once: true });
+
     card.addEventListener(
       'focusout',
       (event: FocusEvent) => {
         const to = event.relatedTarget as Node | null;
         if (to && card.contains(to)) return;
+        // A pass of our own takes the focus to nowhere. A reader
+        // leaving by keyboard always says where they went.
+        if (to === null && CommentsPanel.thePointerIsOver(card)) return;
         this.releaseTheHeldThread(card);
       },
       { once: true },
+    );
+  }
+
+  // Whether the pointer, wherever it was last seen, is inside a
+  // box as that box stands now.
+  private static thePointerIsOver(card: HTMLElement): boolean {
+    const at = CommentsPanel.wherethePointerIs;
+    if (!at) return false;
+
+    const box = card.getBoundingClientRect();
+    return (
+      at.x >= box.left &&
+      at.x <= box.right &&
+      at.y >= box.top &&
+      at.y <= box.bottom
     );
   }
 
@@ -1555,10 +1587,7 @@ class CommentsPanel {
         >
           {!beingModified && textNode}
         </button>
-        <div class="comments-panel-comment-footer">
-          {this.buildCommentTags(thread, comment)}
-          {openNode}
-        </div>
+        <div class="comments-panel-comment-footer">{openNode}</div>
         {editor}
       </div>
     );
@@ -1674,20 +1703,6 @@ class CommentsPanel {
     for (let i = 0; i < name.length; i++)
       hash = (hash * 31 + name.charCodeAt(i)) & 0xffff;
     return CommentsPanel.avatarColours[hash % CommentsPanel.avatarColours.length];
-  }
-
-  // What a row says besides the words. Only the comment a thread
-  // starts with says that the thread is done with.
-  private buildCommentTags(thread: CommentThread, comment: any): HTMLElement {
-    const resolved = comment === thread.root && this.threadIsResolved(thread);
-
-    return (
-      <span class="comments-panel-comment-tags">
-        {resolved && (
-          <span class="comments-panel-comment-resolved">{_('Resolved')}</span>
-        )}
-      </span>
-    );
   }
 
   private goToComment(comment: any): void {

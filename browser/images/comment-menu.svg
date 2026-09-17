@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 16" fill="currentColor">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 4" fill="currentColor">
 	<circle cx="2" cy="2" r="2"/>
-	<circle cx="2" cy="8" r="2"/>
-	<circle cx="2" cy="14" r="2"/>
+	<circle cx="8" cy="2" r="2"/>
+	<circle cx="14" cy="2" r="2"/>
 </svg>
