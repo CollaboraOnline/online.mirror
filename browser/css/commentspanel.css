@@ -29,12 +29,24 @@
    hidden, so a long one widened the panel and it could be
    scrolled sideways. It is taken out of the flow and opened
    inward, where the room is. */
-.comments-panel [data-title]::after {
+/* A tooltip in the list is clipped by the list and covers the
+   words the control acts on, so only the bar carries one. */
+.comments-panel-list [data-title]::after,
+.comments-panel-list [data-title]::before {
+	content: none;
+}
+
+.comments-panel-toolbar [data-title]::after {
 	position: absolute;
 	left: auto;
 	right: 0;
 	bottom: auto;
-	top: calc(100% + 10px);
+	top: calc(100% + var(--spacing-s));
+}
+
+/* The menu a button opened says what the button was for. */
+.comments-panel-toolbar [aria-expanded='true'][data-title]::after {
+	content: none;
 }
 
 /* One bar above the list: how much of it there is, what is
@@ -456,6 +468,8 @@
 
 .comments-panel-list {
 	flex: 1 1 auto;
+	padding-block-start: var(--spacing-m);
+	scroll-padding-block-start: var(--spacing-m);
 	overflow-y: auto;
 	scrollbar-width: var(--scrollbar-width);
 	scrollbar-color: var(--scrollbar-color);
@@ -482,7 +496,7 @@
 	flex-direction: column;
 	margin: 0 var(--spacing-m) var(--spacing-m);
 	padding: var(--spacing-m) 0;
-	border: 1px solid var(--color-border-lighter);
+	border: 1px solid var(--color-border-dark-63);
 	border-radius: var(--border-radius);
 	background: var(--color-background-lighter);
 }
@@ -669,8 +683,8 @@
 	height: 24px;
 	margin: 0;
 	padding: 0;
-	border: 1px solid transparent;
-	border-radius: var(--border-radius);
+	border: none;
+	border-radius: 50%;
 	background: transparent;
 	color: var(--color-status-badge);
 	opacity: 0;
@@ -698,14 +712,12 @@
 }
 
 #comments-panel .comments-panel-thread-resolve:hover {
-	border-color: var(--color-border-darker);
 	background: var(--color-background-hover);
-	color: var(--color-resolved);
 }
 
 .comments-panel-thread-resolve:focus-visible {
 	outline: 2px solid var(--color-primary);
-	outline-offset: 1px;
+	outline-offset: 0;
 }
 
 #comments-panel .comments-panel-thread:hover .comments-panel-comment-date,
@@ -873,12 +885,13 @@
 	border: none;
 	border-radius: 0;
 	background: transparent;
-	color: var(--color-primary);
+	color: var(--color-date-text);
 	font: inherit;
 	font-size: 0.6875rem;
 	line-height: 1;
 	vertical-align: baseline;
 	white-space: nowrap;
+	text-decoration: underline;
 	cursor: pointer;
 }
 
@@ -890,8 +903,8 @@
 	box-sizing: border-box;
 	width: 24px !important;
 	height: 24px !important;
-	border: 1px solid transparent !important;
-	border-radius: var(--border-radius);
+	border: none !important;
+	border-radius: 50%;
 	background: none !important;
 	color: var(--color-status-badge);
 	cursor: pointer;
@@ -912,14 +925,13 @@
 }
 
 #comments-panel .comments-panel-comment-menu:hover {
-	border-color: var(--color-border-darker) !important;
 	background: var(--color-background-hover) !important;
 	color: var(--color-main-text);
 }
 
 .comments-panel-comment-menu:focus-visible {
 	outline: 2px solid var(--color-primary);
-	outline-offset: 1px;
+	outline-offset: 0;
 }
 
 .comments-panel-comment-open:hover {
