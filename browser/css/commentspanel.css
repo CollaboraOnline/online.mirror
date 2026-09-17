@@ -360,7 +360,7 @@
 }
 
 .comments-panel-comment:hover {
-	background: var(--color-background-lighter);
+	background: var(--color-background-hover);
 }
 
 /* The row paints the hover, so a button inside it stays clear
