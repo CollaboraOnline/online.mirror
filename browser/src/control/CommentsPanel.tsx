@@ -828,6 +828,16 @@ class CommentsPanel {
     if ([thread.root, ...thread.replies].some((comment) => comment.isEdit()))
       return true;
 
+    // So is the thread the reader has just picked, so that a
+    // marker on the page always leads to a row here.
+    if (
+      this.selectedId !== null &&
+      [thread.root, ...thread.replies].some(
+        (comment) => String(comment.sectionProperties.data.id) === this.selectedId,
+      )
+    )
+      return true;
+
     if (release !== 'status') {
       const resolved = this.threadIsResolved(thread);
       if (this.filters.status === 'resolved' && !resolved) return false;
@@ -1441,7 +1451,10 @@ class CommentsPanel {
   // Bring a comment's row up and mark it, for a reader who
   // reached the comment somewhere else. A filtered row waits.
   public showComment(id: string): void {
-    if (this.stale) this.render();
+    // The mark goes on before the pass, because a filter lets
+    // the thread the reader picked through on the strength of it.
+    this.selectedId = id;
+    if (this.stale || !this.rowOf(id)) this.render();
     this.markSelectedRow(id);
 
     // The panel takes a moment to come up, and a row not on the
@@ -1454,6 +1467,14 @@ class CommentsPanel {
             row.scrollIntoView({ block: 'nearest' });
         });
     });
+  }
+
+  private rowOf(id: string): HTMLElement | null {
+    return (
+      this.listNode?.querySelector<HTMLElement>(
+        '.comments-panel-comment[data-comment-id="' + id + '"]',
+      ) ?? null
+    );
   }
 
   private markSelectedRow(id: string): void {
