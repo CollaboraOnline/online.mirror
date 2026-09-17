@@ -171,6 +171,87 @@
 	outline-offset: -1px;
 }
 
+/* The count is a row of cells, one per character, so that a
+   digit that changes can move without the rest of it. */
+#comments-panel .comments-panel-status-count {
+	display: flex;
+	align-items: center;
+}
+
+/* One character. The clip sits proud of the line so a glyph is
+   not cut off at the ends of its travel. */
+.comments-panel-status-digit {
+	display: block;
+	padding-block: 2px;
+	margin-block: -2px;
+	line-height: 1;
+}
+
+.comments-panel-status-digit.is-rolling {
+	overflow: hidden;
+	mask-image: linear-gradient(
+		to bottom,
+		transparent 0,
+		#000 13%,
+		#000 87%,
+		transparent 100%
+	);
+}
+
+/* The two glyphs a rolling cell moves between, stacked. */
+.comments-panel-status-roll {
+	display: block;
+}
+
+.comments-panel-status-roll > span {
+	display: block;
+	line-height: 1;
+}
+
+/* The roll runs with the gap the card leaves behind, and
+   settles a moment before the gap has finished closing. */
+.comments-panel-status-digit.is-rolling .comments-panel-status-roll {
+	transition: transform var(--duration-normal) var(--ease-standard)
+		var(--duration-instant);
+}
+
+/* A count that gains or loses a character widens or narrows
+   rather than snapping to the new width. */
+.comments-panel-status-digit.is-growing,
+.comments-panel-status-digit.is-shrinking {
+	overflow: hidden;
+	transition: width var(--duration-normal) var(--ease-standard)
+		var(--duration-instant),
+		opacity var(--duration-fast) var(--ease-standard) var(--duration-instant);
+}
+
+.comments-panel-status-digit.is-growing {
+	width: 0;
+	opacity: 0;
+}
+
+.comments-panel-status-digit.is-growing.is-open {
+	width: 1ch;
+	opacity: 1;
+}
+
+.comments-panel-status-digit.is-shrinking {
+	width: 1ch;
+	opacity: 1;
+}
+
+.comments-panel-status-digit.is-shrinking.is-closed {
+	width: 0;
+	opacity: 0;
+}
+
+/* A step to or from the cap is not a step to the next number,
+   so the whole count changes at once. */
+#comments-panel .comments-panel-status-count.is-swapping {
+	transition: opacity var(--duration-fast) var(--ease-standard);
+	opacity: 0;
+}
+
 /* The authors and the reply filter, with a count of the ones
    that hold. */
 #comments-panel .comments-panel-filter-button {

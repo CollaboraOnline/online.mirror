@@ -98,8 +98,10 @@ class CommentsPanel {
   private openedThreads: Set<string> = new Set<string>();
 
   // A thread the reader has just settled or opened again, kept
-  // in the list until the pointer leaves it.
+  // in the list until the pointer leaves it, and the state the
+  // list is still showing it in.
   private heldThread: string | null = null;
+  private heldAsResolved = false;
 
   // The colours an author's letters sit on. Every one of them
   // carries white letters at the contrast the guidelines ask.
@@ -667,7 +669,7 @@ class CommentsPanel {
     this.countResolved = 0;
     for (const thread of threads) {
       if (!this.matchesFilters(thread, 'status')) continue;
-      if (this.threadIsResolved(thread)) this.countResolved++;
+      if (this.theStatusTheListIsShowing(thread)) this.countResolved++;
       else this.countUnresolved++;
     }
 
@@ -724,6 +726,150 @@ class CommentsPanel {
     }
   }
 
+  // The characters of a count, one cell each, so that only the
+  // ones that change have to move.
+  private setTheCount(node: HTMLElement, says: string): void {
+    const was = node.dataset.count ?? '';
+    if (was === says) return;
+    node.dataset.count = says;
+
+    const digits = /^[0-9]+$/;
+    if (was === '' || !digits.test(was) || !digits.test(says)) {
+      CommentsPanel.swapTheCount(node, says);
+      return;
+    }
+
+    const up = Number(says) > Number(was);
+    // The counts line up on their last character, so a number
+    // that grew gains its cells at the start.
+    const offset = says.length - was.length;
+
+    const cells: HTMLElement[] = [];
+    const starters: Array<() => void> = [];
+
+    for (let i = -Math.max(0, -offset); i < says.length; i++) {
+      const to = i < 0 ? null : says[i];
+      const from = i - offset >= 0 ? was[i - offset] : null;
+
+      if (to === null) cells.push(CommentsPanel.shrinkACell(from, starters));
+      else if (from === null) cells.push(CommentsPanel.growACell(to, starters));
+      else if (from === to) cells.push(CommentsPanel.restingCell(to));
+      else cells.push(CommentsPanel.rollACell(from, to, up, starters));
+    }
+
+    node.replaceChildren(...cells);
+    // Reading the layout fixes where every cell starts before
+    // any of them moves.
+    void node.offsetWidth;
+    for (const start of starters) start();
+  }
+
+  private static restingCell(glyph: string): HTMLElement {
+    return (
+      <span class="comments-panel-status-digit">{glyph}</span>
+    ) as HTMLElement;
+  }
+
+  private static rollACell(
+    from: string,
+    to: string,
+    up: boolean,
+    starters: Array<() => void>,
+  ): HTMLElement {
+    // Going up, the digit that leaves sits above the one that
+    // arrives, so the column rises. Going down it is the other
+    // way round.
+    const column = (
+      <span class="comments-panel-status-roll">
+        <span>{up ? from : to}</span>
+        <span>{up ? to : from}</span>
+      </span>
+    ) as HTMLElement;
+
+    const cell = (
+      <span class="comments-panel-status-digit is-rolling">{column}</span>
+    ) as HTMLElement;
+
+    column.style.transform = up ? 'none' : 'translateY(-50%)';
+    starters.push(() => {
+      column.style.transform = up ? 'translateY(-50%)' : 'none';
+    });
+    CommentsPanel.settleTheCell(cell, column, 'transform', to);
+    return cell;
+  }
+
+  private static growACell(
+    glyph: string,
+    starters: Array<() => void>,
+  ): HTMLElement {
+    const cell = (
+      <span class="comments-panel-status-digit is-growing">{glyph}</span>
+    ) as HTMLElement;
+    starters.push(() => cell.classList.add('is-open'));
+    CommentsPanel.settleTheCell(cell, cell, 'width', glyph);
+    return cell;
+  }
+
+  private static shrinkACell(
+    glyph: string | null,
+    starters: Array<() => void>,
+  ): HTMLElement {
+    const cell = (
+      <span class="comments-panel-status-digit is-shrinking">{glyph ?? ''}</span>
+    ) as HTMLElement;
+    starters.push(() => cell.classList.add('is-closed'));
+    CommentsPanel.settleTheCell(cell, cell, 'width', null);
+    return cell;
+  }
+
+  // A step to or from the cap is not a step to the next number,
+  // so the whole count changes at once.
+  private static swapTheCount(node: HTMLElement, says: string): void {
+    node.classList.add('is-swapping');
+    const settle = () => {
+      node.classList.remove('is-swapping');
+      node.replaceChildren(
+        ...Array.from(says).map((glyph) => CommentsPanel.restingCell(glyph)),
+      );
+    };
+    setTimeout(settle, 150);
+  }
+
+  // Once a cell has finished moving it holds one glyph again,
+  // so nothing is left clipping or transforming.
+  private static settleTheCell(
+    cell: HTMLElement,
+    moving: HTMLElement,
+    property: string,
+    glyph: string | null,
+  ): void {
+    let done = false;
+    const settle = () => {
+      if (done || !cell.isConnected) return;
+      done = true;
+      if (glyph === null) cell.remove();
+      else {
+        cell.className = 'comments-panel-status-digit';
+        cell.replaceChildren(glyph);
+        cell.style.width = '';
+      }
+    };
+
+    moving.addEventListener('transitionend', (event: TransitionEvent) => {
+      if (event.target === moving && event.propertyName === property) settle();
+    });
+    // A cell the reader never sees moving still has to settle.
+    setTimeout(settle, 600);
+  }
+
+  // How the list is showing a thread's state. One held in place
+  // keeps the state it was let in with.
+  private theStatusTheListIsShowing(thread: CommentThread): boolean {
+    if (String(thread.root.sectionProperties.data.id) === this.heldThread)
+      return this.heldAsResolved;
+    return this.threadIsResolved(thread);
+  }
+
   private markStatusChoice(
     status: 'unresolved' | 'resolved',
     count: number,
@@ -733,8 +879,10 @@ class CommentsPanel {
 
     const on = this.filters.status === status;
     const shown = count > 99 ? '99+' : String(count);
-    const countNode = button.querySelector('.comments-panel-status-count');
-    if (countNode) countNode.textContent = shown;
+    const countNode = button.querySelector<HTMLElement>(
+      '.comments-panel-status-count',
+    );
+    if (countNode) this.setTheCount(countNode, shown);
 
     button.classList.toggle('is-on', on);
     button.classList.toggle('is-empty', count === 0 && !on);
@@ -1203,6 +1351,9 @@ class CommentsPanel {
     // as nothing having happened. It is held until the pointer
     // leaves it.
     this.heldThread = String(thread.root.sectionProperties.data.id);
+    // The bar counts the thread the way the list is still
+    // showing it, so the number waits for the card.
+    this.heldAsResolved = this.threadIsResolved(thread);
 
     // The engine answers in its own time, so the card takes the
     // new state now and the answer confirms it.
@@ -1238,6 +1389,9 @@ class CommentsPanel {
 
         const held = this.heldThread;
         this.heldThread = null;
+        // The bar says what the list holds, so the numbers start
+        // moving as the card starts leaving.
+        this.drawTheControlsFromTheFilters(this.threads);
         // A card the filters still keep stays where it is, so
         // only one on its way out is closed away.
         const thread = this.threads.find(
