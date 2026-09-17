@@ -97,6 +97,10 @@ class CommentsPanel {
   // comment each thread starts with.
   private openedThreads: Set<string> = new Set<string>();
 
+  // A thread the reader has just settled or opened again, kept
+  // in the list until the pointer leaves it.
+  private heldThread: string | null = null;
+
   // The colours an author's letters sit on. Every one of them
   // carries white letters at the contrast the guidelines ask.
   private static readonly avatarColours = [
@@ -830,6 +834,9 @@ class CommentsPanel {
     if ([thread.root, ...thread.replies].some((comment) => comment.isEdit()))
       return true;
 
+    if (String(thread.root.sectionProperties.data.id) === this.heldThread)
+      return true;
+
     if (release !== 'status') {
       const resolved = this.threadIsResolved(thread);
       if (this.filters.status === 'resolved' && !resolved) return false;
@@ -1125,9 +1132,11 @@ class CommentsPanel {
   private buildThreadRow(thread: CommentThread): HTMLElement {
     const rootId = String(thread.root.sectionProperties.data.id);
     const open = this.openedThreads.has(rootId);
+    const held = rootId === this.heldThread;
 
     return (
       <li
+        ref={(node: HTMLElement) => held && this.letGoOfTheHeldThread(node)}
         class={
           'comments-panel-thread' + (this.threadIsResolved(thread) ? ' is-resolved' : '')
         }
@@ -1189,7 +1198,26 @@ class CommentsPanel {
   }
 
   private resolveThread(thread: CommentThread): void {
+    // Settling a thread can take it out of what the filters
+    // leave, and a card going out from under the pointer reads
+    // as nothing having happened. It is held until the pointer
+    // leaves it.
+    this.heldThread = String(thread.root.sectionProperties.data.id);
     this.getCommentSection()?.resolveThread(thread.root);
+  }
+
+  // Let go of the card the pointer has left, so the filters
+  // hold again from the next pass.
+  private letGoOfTheHeldThread(card: HTMLElement): void {
+    card.addEventListener(
+      'mouseleave',
+      () => {
+        if (this.heldThread === null) return;
+        this.heldThread = null;
+        this.render();
+      },
+      { once: true },
+    );
   }
 
   private toggleThread(rootId: string): void {

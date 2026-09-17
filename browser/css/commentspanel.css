@@ -813,7 +813,7 @@
 	margin: var(--spacing-s) var(--spacing-l) 0;
 	padding: 2px var(--spacing-m);
 	border: 1px solid var(--color-border-lighter);
-	border-radius: 999px;
+	border-radius: var(--border-radius);
 	background: transparent;
 	color: var(--color-status-badge);
 	font: inherit;
