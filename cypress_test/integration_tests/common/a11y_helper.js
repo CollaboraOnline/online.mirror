@@ -852,7 +852,7 @@ function axNode(node) {
 /// getAXNodesWithin sweeps one container; getFocusedAXNode is a single widget.
 function getAXNodes() {
 	return coolFrameId().then(function (frameId) {
-		return cdp('Accessibility.enable').then(function () {
+		return enableAX().then(function () {
 			return cdp('Accessibility.getFullAXTree', { depth: -1, frameId: frameId });
 		});
 	}).then(function (res) {
@@ -932,7 +932,7 @@ function getAXNodesWithin(selector) {
 	return queryCoolDocument(selector).then(function (res) {
 		expect(res.nodeId, 'a node matching ' + selector).to.not.equal(0);
 
-		return cdp('Accessibility.enable').then(function () {
+		return enableAX().then(function () {
 			return cdp('Accessibility.queryAXTree', { nodeId: res.nodeId });
 		});
 	}).then(function (res) {
@@ -988,7 +988,7 @@ function assertDropdownButtonNamesItsList(id) {
 /// The document root reports itself as focused too, so take the deepest one.
 function getFocusedAXNode() {
 	return coolFrameId().then(function (frameId) {
-		return cdp('Accessibility.enable').then(function () {
+		return enableAX().then(function () {
 			return cdp('Accessibility.getFullAXTree', { depth: -1, frameId: frameId });
 		});
 	}).then(function (res) {
