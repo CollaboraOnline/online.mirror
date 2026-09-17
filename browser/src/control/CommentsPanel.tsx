@@ -863,6 +863,17 @@ class CommentsPanel {
     this.render();
   }
 
+  // The name on the comment that this one answers. An answer
+  // whose comment is gone falls back to an empty name.
+  private parentAuthorOf(comment: any): string {
+    const section = this.getCommentSection();
+    if (!section) return '';
+    const parent = section.getComment(
+      String(comment.sectionProperties.data.parent),
+    );
+    return parent ? parent.sectionProperties.data.author : '';
+  }
+
   // Whether every comment of a thread is resolved. The list
   // section holds the rule the page markers are drawn from.
   private threadIsResolved(thread: CommentThread): boolean {
@@ -907,12 +918,14 @@ class CommentsPanel {
     // so the row does not show them twice over.
     const editor = this.editorOf(comment);
     const beingModified = editor !== null && comment.isModifying();
+    const depth = thread.depthOfId.get(id) ?? 0;
 
     return (
       <div
         class={
           'comments-panel-comment' +
-          (comment === thread.root ? ' is-first' : ' is-reply') +
+          (depth === 0 ? ' is-first' : ' is-reply') +
+          (depth > 1 ? ' is-inner-reply' : '') +
           (id === this.selectedId ? ' is-selected' : '') +
           (editor !== null ? ' is-being-written' : '')
         }
@@ -934,10 +947,16 @@ class CommentsPanel {
         <button
           class="comments-panel-comment-button"
           type="button"
-          aria-label={_('Go to the comment by {author}').replace(
-            '{author}',
-            data.author,
-          )}
+          aria-label={
+            depth > 1
+              ? _('Go to the reply by {author} to {parent}')
+                  .replace('{author}', data.author)
+                  .replace('{parent}', this.parentAuthorOf(comment))
+              : _('Go to the comment by {author}').replace(
+                  '{author}',
+                  data.author,
+                )
+          }
           onClick={() => this.goToComment(comment)}
         >
           {!beingModified && textNode}

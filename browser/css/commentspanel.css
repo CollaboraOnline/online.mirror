@@ -381,13 +381,28 @@
 	z-index: 1;
 }
 
-/* Every reply sits one step in behind one rail, however deep in
-   the thread it answers. */
+/* A reply sits one step in behind a rail. A reply that answers
+   another reply sits one step further, and no deeper. */
 .comments-panel-comment.is-reply {
 	margin-top: var(--spacing-s);
 	margin-inline-start: var(--spacing-l);
 	padding-inline-start: var(--spacing-m);
-	border-inline-start: 2px solid var(--color-border-lighter);
+	border-inline-start: 2px solid var(--color-border-dark);
+}
+
+.comments-panel-comment.is-inner-reply {
+	margin-inline-start: calc(var(--spacing-l) * 2);
+}
+
+/* The rail of the branch carries on down the side of the
+   answers that hang off it. */
+.comments-panel-comment.is-inner-reply::before {
+	content: '';
+	position: absolute;
+	inset-block: calc(-1 * var(--spacing-s));
+	inset-inline-start: calc(-1 * (var(--spacing-l) + 2px));
+	width: 2px;
+	background: var(--color-border-dark);
 }
 
 /* The card carries the hover, so nothing inside it lights on
