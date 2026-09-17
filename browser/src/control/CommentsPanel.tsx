@@ -830,16 +830,6 @@ class CommentsPanel {
     if ([thread.root, ...thread.replies].some((comment) => comment.isEdit()))
       return true;
 
-    // So is the thread the reader has just picked, so that a
-    // marker on the page always leads to a row here.
-    if (
-      this.selectedId !== null &&
-      [thread.root, ...thread.replies].some(
-        (comment) => String(comment.sectionProperties.data.id) === this.selectedId,
-      )
-    )
-      return true;
-
     if (release !== 'status') {
       const resolved = this.threadIsResolved(thread);
       if (this.filters.status === 'resolved' && !resolved) return false;
@@ -1455,9 +1445,8 @@ class CommentsPanel {
   // Bring a comment's row up and mark it, for a reader who
   // reached the comment somewhere else. A filtered row waits.
   public showComment(id: string): void {
-    // The mark goes on before the pass, because a filter lets
-    // the thread the reader picked through on the strength of it.
     this.selectedId = id;
+    this.takeOffTheFiltersHidingTheComment(id);
     if (this.stale || !this.rowOf(id)) this.render();
     this.markSelectedRow(id);
 
@@ -1559,6 +1548,28 @@ class CommentsPanel {
       () => card.classList.remove('has-arrived'),
       { once: true },
     );
+  }
+
+  // A marker stands on the page for every comment, so one the
+  // filters hold back takes the filters off rather than walk
+  // past them, and the bar says what the list now holds.
+  private takeOffTheFiltersHidingTheComment(id: string): void {
+    const thread = this.threads.find((held) =>
+      [held.root, ...held.replies].some(
+        (comment) => String(comment.sectionProperties.data.id) === id,
+      ),
+    );
+    if (!thread || this.matchesFilters(thread)) return;
+
+    if (!this.matchesFilters(thread, 'status')) this.filters.status = 'all';
+    if (!this.matchesFilters(thread, 'replies'))
+      this.filters.onlyWithReplies = false;
+    if (!this.matchesFilters(thread, 'authors')) this.filters.authors.clear();
+    if (!this.matchesFilters(thread)) {
+      this.filters.search = '';
+      this.clearTheSearchBox();
+    }
+    this.stale = true;
   }
 
   private rowOf(id: string): HTMLElement | null {
