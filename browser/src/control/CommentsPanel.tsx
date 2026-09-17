@@ -58,6 +58,10 @@ class CommentsPanel {
   private countUnresolved = 0;
   private countResolved = 0;
 
+  // Whether the pass about to run is answering something the
+  // reader did. Only such a pass may move the numbers.
+  private theReaderAskedForThisPass = false;
+
   // The words of a comment, kept by the data object they were
   // read out of. A stale entry becomes unreachable on its own.
   private textOfData: WeakMap<object, { html: string; text: string }> =
@@ -278,13 +282,21 @@ class CommentsPanel {
     return button;
   }
 
+  // The next pass is answering something the reader did, so the
+  // numbers on the bar may move for it.
+  private theReaderAsked(): void {
+    this.theReaderAskedForThisPass = true;
+  }
+
   private pickStatus(status: 'unresolved' | 'resolved'): void {
     this.filters.status = this.filters.status === status ? 'all' : status;
+    this.theReaderAsked();
     this.render();
   }
 
   private turnTheOrderRound(): void {
     this.sortDescending = !this.sortDescending;
+    this.theReaderAsked();
     this.render();
   }
 
@@ -497,6 +509,7 @@ class CommentsPanel {
           act: () => {
             if (on) this.filters.authors.delete(author);
             else this.filters.authors.add(author);
+            this.theReaderAsked();
             this.render();
             this.fillTheFilterPopover();
           },
@@ -521,6 +534,7 @@ class CommentsPanel {
         ) as HTMLElement,
         act: () => {
           this.filters.onlyWithReplies = !this.filters.onlyWithReplies;
+          this.theReaderAsked();
           this.render();
           this.fillTheFilterPopover();
         },
@@ -645,6 +659,7 @@ class CommentsPanel {
     if (this.filters.search === search) return;
 
     this.filters.search = search;
+    this.theReaderAsked();
     this.render();
   }
 
@@ -665,6 +680,11 @@ class CommentsPanel {
   // The counts and the states the bar shows, read from the
   // threads the other filters leave and from the filters.
   private drawTheControlsFromTheFilters(threads: CommentThread[]): void {
+    // A pass the reader asked for may move the numbers. One that
+    // only reports the document lands without motion.
+    const mayMove = this.theReaderAskedForThisPass;
+    this.theReaderAskedForThisPass = false;
+
     this.countUnresolved = 0;
     this.countResolved = 0;
     for (const thread of threads) {
@@ -673,8 +693,8 @@ class CommentsPanel {
       else this.countUnresolved++;
     }
 
-    this.markStatusChoice('unresolved', this.countUnresolved);
-    this.markStatusChoice('resolved', this.countResolved);
+    this.markStatusChoice('unresolved', this.countUnresolved, mayMove);
+    this.markStatusChoice('resolved', this.countResolved, mayMove);
 
     const holding = this.howManyFiltersHold();
     const badge = this.filterBadgeNode;
@@ -728,33 +748,41 @@ class CommentsPanel {
 
   // The characters of a count, one cell each, so that only the
   // ones that change have to move.
-  private setTheCount(node: HTMLElement, says: string): void {
+  private setTheCount(
+    node: HTMLElement,
+    says: string,
+    mayMove: boolean,
+  ): void {
     const was = node.dataset.count ?? '';
     if (was === says) return;
     node.dataset.count = says;
 
-    const digits = /^[0-9]+$/;
-    if (was === '' || !digits.test(was) || !digits.test(says)) {
-      CommentsPanel.swapTheCount(node, says);
+    // Nothing to change from, a pass the reader did not ask for,
+    // or a change on top of one still running: the count is
+    // simply set. A change arriving faster than it can be shown
+    // has stopped being worth showing.
+    if (was === '' || !mayMove || node.querySelector('.is-folding') !== null) {
+      CommentsPanel.setTheCountAtOnce(node, says);
       return;
     }
 
-    const up = Number(says) > Number(was);
-    // The counts line up on their last character, so a number
-    // that grew gains its cells at the start.
-    const offset = says.length - was.length;
+    // The cap shares its leading digits with the number below
+    // it, so those line up at the start and the mark at the end
+    // comes and goes. Plain numbers line up at the end.
+    const capped = was.endsWith('+') || says.endsWith('+');
+    const offset = capped ? 0 : says.length - was.length;
 
     const cells: HTMLElement[] = [];
     const starters: Array<() => void> = [];
 
-    for (let i = -Math.max(0, -offset); i < says.length; i++) {
+    for (let i = Math.min(0, offset); i < says.length; i++) {
       const to = i < 0 ? null : says[i];
-      const from = i - offset >= 0 ? was[i - offset] : null;
+      const from = i - offset >= 0 ? (was[i - offset] ?? null) : null;
 
       if (to === null) cells.push(CommentsPanel.shrinkACell(from, starters));
       else if (from === null) cells.push(CommentsPanel.growACell(to, starters));
       else if (from === to) cells.push(CommentsPanel.restingCell(to));
-      else cells.push(CommentsPanel.rollACell(from, to, up, starters));
+      else cells.push(CommentsPanel.foldACell(from, to, starters));
     }
 
     node.replaceChildren(...cells);
@@ -770,31 +798,25 @@ class CommentsPanel {
     ) as HTMLElement;
   }
 
-  private static rollACell(
+  // One glyph turning into another where it stands. The old one
+  // folds away and the new one opens out of the fold.
+  private static foldACell(
     from: string,
     to: string,
-    up: boolean,
     starters: Array<() => void>,
   ): HTMLElement {
-    // Going up, the digit that leaves sits above the one that
-    // arrives, so the column rises. Going down it is the other
-    // way round.
-    const column = (
-      <span class="comments-panel-status-roll">
-        <span>{up ? from : to}</span>
-        <span>{up ? to : from}</span>
+    const going = (<span class="is-going">{from}</span>) as HTMLElement;
+    const coming = (<span class="is-coming">{to}</span>) as HTMLElement;
+    const cell = (
+      <span class="comments-panel-status-digit is-folding">
+        {going}
+        {coming}
       </span>
     ) as HTMLElement;
 
-    const cell = (
-      <span class="comments-panel-status-digit is-rolling">{column}</span>
-    ) as HTMLElement;
-
-    column.style.transform = up ? 'none' : 'translateY(-50%)';
-    starters.push(() => {
-      column.style.transform = up ? 'translateY(-50%)' : 'none';
-    });
-    CommentsPanel.settleTheCell(cell, column, 'transform', to);
+    starters.push(() => cell.classList.add('is-turned'));
+    // The glyph arriving is the last thing to settle.
+    CommentsPanel.settleTheCell(cell, coming, 'transform', to);
     return cell;
   }
 
@@ -822,17 +844,10 @@ class CommentsPanel {
     return cell;
   }
 
-  // A step to or from the cap is not a step to the next number,
-  // so the whole count changes at once.
-  private static swapTheCount(node: HTMLElement, says: string): void {
-    node.classList.add('is-swapping');
-    const settle = () => {
-      node.classList.remove('is-swapping');
-      node.replaceChildren(
-        ...Array.from(says).map((glyph) => CommentsPanel.restingCell(glyph)),
-      );
-    };
-    setTimeout(settle, 150);
+  private static setTheCountAtOnce(node: HTMLElement, says: string): void {
+    node.replaceChildren(
+      ...Array.from(says).map((glyph) => CommentsPanel.restingCell(glyph)),
+    );
   }
 
   // Once a cell has finished moving it holds one glyph again,
@@ -873,6 +888,7 @@ class CommentsPanel {
   private markStatusChoice(
     status: 'unresolved' | 'resolved',
     count: number,
+    mayMove: boolean,
   ): void {
     const button = this.statusChoiceNodes.get(status);
     if (!button) return;
@@ -882,7 +898,7 @@ class CommentsPanel {
     const countNode = button.querySelector<HTMLElement>(
       '.comments-panel-status-count',
     );
-    if (countNode) this.setTheCount(countNode, shown);
+    if (countNode) this.setTheCount(countNode, shown, mayMove);
 
     button.classList.toggle('is-on', on);
     button.classList.toggle('is-empty', count === 0 && !on);
@@ -1391,6 +1407,7 @@ class CommentsPanel {
         this.heldThread = null;
         // The bar says what the list holds, so the numbers start
         // moving as the card starts leaving.
+        this.theReaderAsked();
         this.drawTheControlsFromTheFilters(this.threads);
         // A card the filters still keep stays where it is, so
         // only one on its way out is closed away.
