@@ -532,8 +532,11 @@
 	background: var(--color-background-lighter);
 }
 
+/* The card is not repainted under the pointer: a lighter ground
+   costs the words a fifth of their contrast. It lifts instead. */
 .comments-panel-thread:hover {
-	background: var(--color-background-hover);
+	border-color: var(--color-border-dark);
+	box-shadow: 0 1px 3px var(--color-box-shadow-light);
 }
 
 /* A thread nobody has anything left to say about steps back. */
