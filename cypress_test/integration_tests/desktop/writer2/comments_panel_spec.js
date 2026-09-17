@@ -324,6 +324,22 @@ describe(['tagdesktop'], 'Comments panel', function() {
 			.should('have.attr', 'aria-pressed', 'false');
 	});
 
+	it('a comment the filters hold back is reached from its marker', function() {
+		desktopHelper.insertComment('a comment about apples');
+
+		openCommentsTab();
+		pickTheStatus('Resolved');
+		cy.cGet('.comments-panel-thread').should('have.length', 0);
+
+		// The marker stands on the page whatever the list holds,
+		// so picking it has to lead somewhere.
+		cy.cGet('#comment-container-1 .cool-annotation-img').click();
+
+		cy.cGet('.comments-panel-comment[data-comment-id="1"]').should('exist');
+		cy.cGet('.comments-panel-status-choice:has(.is-done)')
+			.should('have.attr', 'aria-pressed', 'false');
+	});
+
 	it('the filters are reset from the menu that holds them', function() {
 		desktopHelper.insertComment('a comment about apples');
 		desktopHelper.insertComment('a comment about pears');

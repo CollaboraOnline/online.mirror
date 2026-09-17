@@ -1648,11 +1648,16 @@ class CommentsPanel {
     );
     if (!thread || this.matchesFilters(thread)) return;
 
-    if (!this.matchesFilters(thread, 'status')) this.filters.status = 'all';
-    if (!this.matchesFilters(thread, 'replies'))
+    // Each one is taken off only while the comment is still
+    // held back, so the reader keeps the filters that are
+    // letting it through.
+    if (!this.matchesFilters(thread) && this.filters.status !== 'all')
+      this.filters.status = 'all';
+    if (!this.matchesFilters(thread) && this.filters.onlyWithReplies)
       this.filters.onlyWithReplies = false;
-    if (!this.matchesFilters(thread, 'authors')) this.filters.authors.clear();
-    if (!this.matchesFilters(thread)) {
+    if (!this.matchesFilters(thread) && this.filters.authors.size > 0)
+      this.filters.authors.clear();
+    if (!this.matchesFilters(thread) && this.filters.search !== '') {
       this.filters.search = '';
       this.clearTheSearchBox();
     }
