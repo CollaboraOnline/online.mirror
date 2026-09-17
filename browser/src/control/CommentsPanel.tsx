@@ -35,10 +35,6 @@ interface CommentFilters {
 type CommentSortKey = 'position' | 'date' | 'author';
 
 class CommentsPanel {
-  // How far a reply is stepped in from the comment it answers,
-  // in pixels, and how many steps deep the stepping goes.
-  private static readonly stepWidth = 14;
-  private static readonly deepestStep = 4;
 
   private map: any;
   private listNode: HTMLElement | null = null;
@@ -86,6 +82,17 @@ class CommentsPanel {
   // The comments the user opened to read in full, by id. A
   // rebuilt list keeps the open ones open.
   private openedIds: Set<string> = new Set<string>();
+
+  // The threads whose replies are on show, by the id of the
+  // comment each thread starts with.
+  private openedThreads: Set<string> = new Set<string>();
+
+  // The colours an author's letters sit on. Every one of them
+  // carries white letters at the contrast the guidelines ask.
+  private static readonly avatarColours = [
+    '#1F6F8B', '#7A4E9E', '#A8432B', '#2E7D4F',
+    '#8A5A00', '#38618C', '#9B2F5F', '#4A5D23',
+  ];
 
   // The parts of each row as it stands, in the order the rows
   // are in. The measuring pass and the open control read them.
@@ -804,15 +811,64 @@ class CommentsPanel {
     }
   }
 
-  // A thread: the comment it starts with, then the replies under
-  // it, each stepped in one level further than what it answers.
+  // A thread: the comment it starts with, the control that opens
+  // the replies, and the replies once it has been asked for.
   private buildThreadRow(thread: CommentThread): HTMLElement {
+    const rootId = String(thread.root.sectionProperties.data.id);
+    const open = this.openedThreads.has(rootId);
+
     return (
-      <li class="comments-panel-thread">
+      <li
+        class={
+          'comments-panel-thread' + (this.threadIsResolved(thread) ? ' is-resolved' : '')
+        }
+      >
         {this.buildCommentRow(thread, thread.root)}
-        {thread.replies.map((reply) => this.buildCommentRow(thread, reply))}
+        {thread.replies.length > 0 && this.buildRepliesToggle(thread, rootId, open)}
+        {open && thread.replies.map((reply) => this.buildCommentRow(thread, reply))}
       </li>
     );
+  }
+
+  // The control that shows and hides the replies to a thread,
+  // and says how many there are while they are hidden.
+  private buildRepliesToggle(
+    thread: CommentThread,
+    rootId: string,
+    open: boolean,
+  ): HTMLElement {
+    const count = thread.replies.length;
+    const label = open
+      ? _('Hide replies')
+      : (count === 1 ? _('{count} reply') : _('{count} replies')).replace(
+          '{count}',
+          String(count),
+        );
+
+    return (
+      <button
+        class={'comments-panel-thread-replies' + (open ? ' is-open' : '')}
+        type="button"
+        aria-expanded={String(open)}
+        onClick={() => this.toggleThread(rootId)}
+      >
+        {label}
+      </button>
+    );
+  }
+
+  private toggleThread(rootId: string): void {
+    if (this.openedThreads.has(rootId)) this.openedThreads.delete(rootId);
+    else this.openedThreads.add(rootId);
+    this.render();
+  }
+
+  // Whether every comment of a thread is resolved. The list
+  // section holds the rule the page markers are drawn from.
+  private threadIsResolved(thread: CommentThread): boolean {
+    const section = this.getCommentSection();
+    if (!section) return thread.root.sectionProperties.data.resolved === 'true';
+    return section.isThreadResolved(thread.root) === true;
   }
 
   private buildCommentRow(thread: CommentThread, comment: any): HTMLElement {
@@ -820,7 +876,6 @@ class CommentsPanel {
     const id = String(data.id);
     const opened = this.openedIds.has(id);
     const textId = 'comments-panel-text-' + id;
-    const depth = thread.depthOfId.get(id) ?? 0;
 
     const textNode = (
       <span
@@ -853,10 +908,6 @@ class CommentsPanel {
     const editor = this.editorOf(comment);
     const beingModified = editor !== null && comment.isModifying();
 
-    // Beyond this depth the steps would leave no room to read
-    // in, so the deeper replies line up with the last step.
-    const step = Math.min(depth, CommentsPanel.deepestStep);
-
     return (
       <div
         class={
@@ -865,26 +916,35 @@ class CommentsPanel {
           (id === this.selectedId ? ' is-selected' : '') +
           (editor !== null ? ' is-being-written' : '')
         }
-        style={{ marginInlineStart: step * CommentsPanel.stepWidth + 'px' }}
         data-comment-id={id}
       >
+        <div class="comments-panel-comment-head">
+          {this.buildAvatar(data, comment === thread.root)}
+          <span class="comments-panel-comment-author">{data.author}</span>
+          <span
+            class="comments-panel-comment-date"
+            title={this.fullDate(data.dateTime)}
+          >
+            {this.shortDate(data.dateTime)}
+          </span>
+          {app.isCommentEditingAllowed() &&
+            id !== 'new' &&
+            this.buildMenuButton(comment)}
+        </div>
         <button
           class="comments-panel-comment-button"
           type="button"
+          aria-label={_('Go to the comment by {author}').replace(
+            '{author}',
+            data.author,
+          )}
           onClick={() => this.goToComment(comment)}
         >
-          <span class="comments-panel-comment-head">
-            {this.buildAvatar(data)}
-            <span class="comments-panel-comment-author">{data.author}</span>
-          </span>
           {!beingModified && textNode}
         </button>
         <div class="comments-panel-comment-footer">
           {this.buildCommentTags(thread, comment)}
           {openNode}
-          {app.isCommentEditingAllowed() &&
-            id !== 'new' &&
-            this.buildMenuButton(comment)}
         </div>
         {editor}
       </div>
@@ -907,22 +967,23 @@ class CommentsPanel {
     );
   }
 
-  // What the control that opens a row says. Three dots stand for
-  // the words the row is holding back.
   private static openLabel(opened: boolean): string {
-    return opened ? _('Show less') : '...';
+    return opened ? _('Show less') : _('Show more');
   }
 
   // Offer the open control on the rows whose comment does not
   // fit the three lines a row gives it.
   private offerToOpenTheCutRows(): void {
-    for (const row of this.builtRows) {
-      const cutShort = row.textNode.scrollHeight > row.textNode.clientHeight;
+    const cutShort = this.builtRows.map(
+      (row) => row.textNode.scrollHeight > row.textNode.clientHeight,
+    );
+
+    this.builtRows.forEach((row, i) => {
       row.openNode.classList.toggle(
         'hidden',
-        !cutShort && !this.openedIds.has(row.id),
+        !cutShort[i] && !this.openedIds.has(row.id),
       );
-    }
+    });
   }
 
   private toggleOpened(id: string): void {
@@ -949,57 +1010,68 @@ class CommentsPanel {
       if (!present.has(id)) this.openedIds.delete(id);
   }
 
-  // The picture of the author, in the round frame and the colour
-  // of their view. A missing one falls back to a plain figure.
-  private buildAvatar(data: any): HTMLElement {
-    const image = (
-      <img class="avatar-img" alt={data.author} />
-    ) as HTMLImageElement;
-
+  // The author, as the picture the host gave for them or as the
+  // letters of their name on a colour that name always takes.
+  private buildAvatar(data: any, isRoot: boolean): HTMLElement {
+    const size = isRoot ? ' is-root' : ' is-reply';
     const hostAvatar = this.map['wopi']
       ? this.map['wopi'].CommentAvatarUrl
       : null;
-    if (hostAvatar) image.setAttribute('src', hostAvatar);
-    else if (data.avatar) image.setAttribute('src', data.avatar);
-    else {
-      app.LOUtil.setUserImage(image, this.map, this.map.getViewId(data.author));
-      image.classList.add('comments-panel-comment-avatar-figure');
+    const picture = hostAvatar || data.avatar;
+
+    if (picture) {
+      const image = (
+        <img class="avatar-img" alt="" src={picture} />
+      ) as HTMLImageElement;
+      return (
+        <span class={'comments-panel-comment-avatar' + size} aria-hidden="true">
+          {image}
+        </span>
+      );
     }
 
-    const color = this.authorColor(data.author);
     return (
       <span
-        class="comments-panel-comment-avatar cool-annotation-img"
-        style={color ? { borderColor: color } : {}}
+        class={'comments-panel-comment-avatar is-letters' + size}
+        style={{ backgroundColor: this.avatarColour(data.author) }}
+        aria-hidden="true"
       >
-        {image}
+        {CommentsPanel.initialsOf(data.author)}
       </span>
     );
   }
 
-  // What a row says besides the words: when the comment was
-  // written, whether it is resolved, and the reply count.
+  // At most two letters, from the first and last word of a name.
+  private static initialsOf(author: string): string {
+    const words = String(author || '').trim().split(/\s+/).filter(Boolean);
+    if (words.length === 0) return '?';
+    const first = words[0][0];
+    const last = words.length > 1 ? words[words.length - 1][0] : '';
+    return (first + last).toUpperCase();
+  }
+
+  // The colour an author's letters sit on: the colour of their
+  // view while they are here, and one their name picks otherwise.
+  private avatarColour(author: string): string {
+    const own = this.authorColor(author);
+    if (own) return own;
+
+    let hash = 0;
+    const name = String(author || '');
+    for (let i = 0; i < name.length; i++)
+      hash = (hash * 31 + name.charCodeAt(i)) & 0xffff;
+    return CommentsPanel.avatarColours[hash % CommentsPanel.avatarColours.length];
+  }
+
+  // What a row says besides the words. Only the comment a thread
+  // starts with says that the thread is done with.
   private buildCommentTags(thread: CommentThread, comment: any): HTMLElement {
-    const data = comment.sectionProperties.data;
-    const resolved = data.resolved === 'true';
-    const replyCount = comment === thread.root ? thread.replies.length : 0;
+    const resolved = comment === thread.root && this.threadIsResolved(thread);
 
     return (
       <span class="comments-panel-comment-tags">
-        <span class="comments-panel-comment-date cool-annotation-date">
-          {this.formatDate(data.dateTime)}
-        </span>
-        {replyCount > 0 && (
-          <span class="comments-panel-comment-replies">
-            {replyCount === 1
-              ? replyCount + ' ' + _('reply')
-              : replyCount + ' ' + _('replies')}
-          </span>
-        )}
         {resolved && (
-          <span class="comments-panel-comment-resolved cool-annotation-content-resolved">
-            {_('Resolved')}
-          </span>
+          <span class="comments-panel-comment-resolved">{_('Resolved')}</span>
         )}
       </span>
     );
@@ -1073,16 +1145,44 @@ class CommentsPanel {
     return app.LOUtil.rgbToHex(this.map.getViewColor(viewId));
   }
 
-  private formatDate(dateTime: string): string {
-    if (!dateTime) return '';
-
-    // dateTime is already in UTC, so no Z is appended: that
-    // would go wrong when the date is converted.
+  // dateTime is already in UTC, so no Z is appended: that would
+  // go wrong when the date is converted.
+  private static parseDate(dateTime: string): Date | null {
+    if (!dateTime) return null;
     const date = new Date(dateTime.replace(/,.*/, ''));
-    if (isNaN(date.getTime())) return dateTime;
+    return isNaN(date.getTime()) ? null : date;
+  }
 
-    // The same fields the document writes under a comment on the
-    // page.
+  // How long ago a comment was written, short enough to sit on
+  // one line beside the name of its author.
+  private shortDate(dateTime: string): string {
+    const date = CommentsPanel.parseDate(dateTime);
+    if (!date) return dateTime || '';
+
+    const locale = (String as any).locale;
+    const minutes = Math.floor((Date.now() - date.getTime()) / 60000);
+    if (minutes < 1) return _('now');
+    if (minutes < 60) return _('{count}m').replace('{count}', String(minutes));
+
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return _('{count}h').replace('{count}', String(hours));
+    if (hours < 24 * 7)
+      return date.toLocaleDateString(locale, { weekday: 'short' });
+
+    const thisYear = date.getFullYear() === new Date().getFullYear();
+    return date.toLocaleDateString(
+      locale,
+      thisYear
+        ? { day: 'numeric', month: 'short' }
+        : { day: 'numeric', month: 'short', year: 'numeric' },
+    );
+  }
+
+  // The whole moment, for the tooltip over the short form.
+  private fullDate(dateTime: string): string {
+    const date = CommentsPanel.parseDate(dateTime);
+    if (!date) return dateTime || '';
+
     return date.toLocaleDateString((String as any).locale, {
       weekday: 'short',
       year: 'numeric',

@@ -7,7 +7,7 @@
 	z-index: 990;
 	max-width: 350px;
 	height: 100%;
-	background: var(--color-background-lighter);
+	background: var(--color-main-background);
 	overflow: hidden;
 }
 
@@ -337,42 +337,68 @@
 	display: none;
 }
 
-/* One thread: the comment it starts with, then its replies. The
-   line between threads tells one from the next. */
+/* A thread is a card on the panel. The space around it, rather
+   than a rule between, is what tells one thread from the next. */
 .comments-panel-thread {
 	display: flex;
 	flex-direction: column;
-	border-bottom: 1px solid var(--color-border);
-	padding-block: var(--spacing-xs);
+	margin: 0 var(--spacing-m) var(--spacing-m);
+	padding: var(--spacing-m) 0;
+	border: 1px solid var(--color-border-lighter);
+	border-radius: var(--border-radius);
+	background: var(--color-background-lighter);
 }
 
-/* One comment of a thread. A reply is stepped in, and the line
-   down its leading edge ties it to the comment above. */
-.comments-panel-comment {
-	display: flex;
-	flex-direction: column;
-	border-inline-start: 3px solid transparent;
-}
-
-.comments-panel-comment.is-reply {
-	border-inline-start: 1px dashed var(--color-annotation-line);
-	padding-inline-start: 2px;
-}
-
-.comments-panel-comment:hover {
+.comments-panel-thread:hover {
 	background: var(--color-background-hover);
 }
 
-/* The row paints the hover, so a button inside it stays clear
-   and the whole comment lights up as one. */
+/* A thread nobody has anything left to say about steps back. */
+.comments-panel-thread.is-resolved {
+	opacity: 0.72;
+}
+
+.comments-panel-comment {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	padding-inline: var(--spacing-l);
+}
+
+/* The whole comment goes to it, not only the words: the button
+   reaches over the box it sits in. */
+.comments-panel-comment-button::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+}
+
+/* What the reader acts on directly stands above that reach. */
+.comments-panel-comment-menu,
+.comments-panel-comment-open,
+.cool-annotation-edit.comment-editor-in-the-list {
+	position: relative;
+	z-index: 1;
+}
+
+/* Every reply sits one step in behind one rail, however deep in
+   the thread it answers. */
+.comments-panel-comment.is-reply {
+	margin-top: var(--spacing-s);
+	margin-inline-start: var(--spacing-l);
+	padding-inline-start: var(--spacing-m);
+	border-inline-start: 2px solid var(--color-border-lighter);
+}
+
+/* The card carries the hover, so nothing inside it lights on
+   its own and the whole thread reads as one. */
 #comments-panel .comments-panel-comment-button:hover {
 	background: transparent !important;
 }
 
-.comments-panel-comment.is-selected {
-	background: rgba(var(--doc-type, 11, 135, 231), 0.16);
-	border-inline-start: 3px solid rgb(var(--doc-type, 11, 135, 231));
-	padding-inline-start: 0;
+.comments-panel-thread:has(.comments-panel-comment.is-selected) {
+	border-color: var(--color-primary);
+	box-shadow: inset 3px 0 0 0 var(--color-primary);
 }
 
 /* btns.css gives a plain button in a div the look of a dialog
@@ -384,7 +410,7 @@
 	width: 100%;
 	height: auto;
 	margin: 0;
-	padding: var(--spacing-m) var(--spacing-l) var(--spacing-s);
+	padding: 0;
 	border: none;
 	border-radius: 0;
 	background: transparent;
@@ -397,7 +423,7 @@
 }
 
 .comments-panel-comment-button:focus-visible {
-	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
+	outline: 2px solid var(--color-primary);
 	outline-offset: -2px;
 }
 
@@ -405,19 +431,39 @@
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-s);
+	margin-bottom: var(--spacing-s);
 }
 
-/* The round frame around an author's picture. It carries the
-   author's view colour, or the neutral one set here. */
+/* The author, as a picture or as the letters of their name. */
 .comments-panel-comment-avatar {
 	flex: 0 0 auto;
-	border-color: var(--color-border-dark);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	border: none;
+	border-radius: 50%;
+	color: #fff;
+	font-weight: 600;
+	line-height: 1;
 }
 
-/* The figure that stands in for a missing picture is drawn to
-   the edges of its box, so it needs room inside the frame. */
-.comments-panel-comment-avatar-figure {
-	padding: 1.8px;
+.comments-panel-comment-avatar.is-root {
+	width: 20px;
+	height: 20px;
+	font-size: 0.625rem;
+}
+
+.comments-panel-comment-avatar.is-reply {
+	width: 16px;
+	height: 16px;
+	font-size: 0.5625rem;
+}
+
+.comments-panel-comment-avatar > .avatar-img {
+	width: 100%;
+	height: 100%;
+	border: none;
 }
 
 .comments-panel-comment-author {
@@ -425,14 +471,23 @@
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
-	font-weight: bold;
-	font-size: 0.83rem;
+	font-weight: 600;
+	font-size: 0.8125rem;
 }
 
 /* A reply is a smaller thing than the comment that started the
    thread. */
 .comments-panel-comment.is-reply .comments-panel-comment-author {
-	font-weight: normal;
+	font-weight: 500;
+}
+
+/* How long ago the comment was written, at the end of the line
+   the author's name starts. */
+.comments-panel-comment-date {
+	flex: 0 0 auto;
+	color: var(--color-status-badge);
+	font-size: 0.6875rem;
+	white-space: nowrap;
 }
 
 /* A long comment is cut off after three lines. All of the text
@@ -440,8 +495,8 @@
 .comments-panel-comment-text {
 	overflow: hidden;
 	max-height: 3.9em;
-	line-height: 1.3;
-	font-size: 0.83rem;
+	line-height: 1.45;
+	font-size: 0.8125rem;
 }
 
 /* An open row gives the comment all the lines it needs. */
@@ -453,15 +508,47 @@
 	display: flex;
 	align-items: baseline;
 	gap: var(--spacing-s);
-	padding: 0 var(--spacing-l) var(--spacing-m);
+	padding: 0;
+}
+
+.comments-panel-comment-footer:not(:empty) {
+	margin-top: var(--spacing-s);
 }
 
 .comments-panel-comment-tags {
 	display: flex;
-	flex-wrap: wrap;
 	gap: var(--spacing-s);
-	font-size: 0.75rem;
-	color: var(--color-text-light);
+	font-size: 0.6875rem;
+	color: var(--color-status-badge);
+}
+
+/* Shows and hides the replies to a thread, and says how many
+   there are while they are hidden. */
+#comments-panel .comments-panel-thread-replies {
+	align-self: flex-start;
+	width: auto;
+	height: auto;
+	margin: var(--spacing-s) var(--spacing-l) 0;
+	padding: 2px var(--spacing-m);
+	border: 1px solid var(--color-border-lighter);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--color-status-badge);
+	font: inherit;
+	font-size: 0.6875rem;
+	line-height: 1.4;
+	vertical-align: baseline;
+	cursor: pointer;
+}
+
+#comments-panel .comments-panel-thread-replies:hover {
+	border-color: var(--color-border-dark);
+	color: var(--color-main-text);
+}
+
+.comments-panel-thread-replies:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 1px;
 }
 
 /* Opens the row to read the rest of a comment, and closes it
@@ -475,20 +562,26 @@
 	border: none;
 	border-radius: 0;
 	background: transparent;
-	color: rgb(var(--doc-type, 11, 135, 231));
+	color: var(--color-primary);
 	font: inherit;
-	font-size: 0.75rem;
+	font-size: 0.6875rem;
 	line-height: 1;
 	vertical-align: baseline;
 	white-space: nowrap;
 	cursor: pointer;
 }
 
-/* Drops down the menu of actions for the comment. Only its place
-   in the footer line is set here. */
+/* Drops down the menu of actions for the comment. It comes out
+   at the end of the author line for the thread under the pointer. */
 .comments-panel-comment-menu {
 	flex: 0 0 auto;
+	opacity: 0;
 	cursor: pointer;
+}
+
+.comments-panel-thread:hover .comments-panel-comment-menu,
+.comments-panel-thread:focus-within .comments-panel-comment-menu {
+	opacity: 1;
 }
 
 .comments-panel-comment-open:hover {
@@ -496,7 +589,7 @@
 }
 
 .comments-panel-comment-open:focus-visible {
-	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
+	outline: 2px solid var(--color-primary);
 	outline-offset: 1px;
 }
 
