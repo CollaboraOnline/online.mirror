@@ -599,12 +599,12 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public setCollapsed(): void {
-		// The list counts as closed whether or not the comments
-		// are on show, so a comment arriving then is closed too.
-		this.isCollapsed = true;
 		if (this.sectionProperties.show != true || this.isEditing()) {
 			return;
 		}
+		// The list counts as closed whether or not the comments
+		// are on show, so a comment arriving then is closed too.
+		this.isCollapsed = true;
 		this.unselect();
 		this.closeEveryThread();
 	}
@@ -674,7 +674,7 @@ export class CommentSection extends CanvasSectionObject {
 		// A slide leaves the comments the room beside it. They
 		// close once that room is too narrow to read one in.
 		const availableSpace = this.calculateAvailableSpace();
-		return availableSpace < this.sectionProperties.commentWidth && availableSpace >= 0;
+		return availableSpace < this.sectionProperties.commentWidth;
 	}
 
 	public hideAllComments (): void {
