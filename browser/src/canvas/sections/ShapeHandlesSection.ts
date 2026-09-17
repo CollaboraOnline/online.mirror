@@ -807,8 +807,25 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		}
 	}
 
+	/*
+		Whether a handle of that kind gets a section of its own. A view that draws from objects
+		draws the handles that frame and shape the selection in one section of its own, which
+		knows them as a list, and leaves the rest here: the anchor, the glue points and the
+		handles of a diagram. Cropping an image is done with the whole set of handles here, so
+		while it runs they are all made as they always were.
+	*/
+	private handleGetsItsOwnSection(kind: string): boolean {
+		if (!RenderManager.isVectorRendering()) return true;
+		if (GraphicSelection.extraInfo?.isCropMode) return true;
+
+		return ['16', 'GluePoint', 'DiagramHandle'].includes(kind);
+	}
+
 	addSubSections() {
 		for (let i = 0; i < this.sectionProperties.handles.length; i++) {
+			if (!this.handleGetsItsOwnSection(this.sectionProperties.handles[i].info.kind))
+				continue;
+
 			let newSubSection: any = null;
 			if (this.sectionProperties.handles[i].info.kind === '16')
 				newSubSection = this.checkAnchorSubSection(this.sectionProperties.handles[i]);
@@ -1554,6 +1571,26 @@ class ShapeHandlesSection extends CanvasSectionObject {
 			else
 				this.drawShapeAlignmentHelperLines();
 		}
+	}
+
+	/*
+		Shows what a scaling drag would do to the shape, by taking the picture of it to the size
+		and the place the drag leads to. Does nothing while there is no picture to take.
+	*/
+	public scalePreviewTo(shapeRecProps: any): void {
+		const svg = this.sectionProperties.svg;
+		if (!svg) return;
+
+		const shape = this.sectionProperties.shapeRectangleProperties;
+		const scaleX = shapeRecProps.width / shape.width;
+		const scaleY = shapeRecProps.height / shape.height;
+
+		const diffX = (shapeRecProps.center.pX - shape.center.pX) / app.dpiScale;
+		const diffY = (shapeRecProps.center.pY - shape.center.pY) / app.dpiScale;
+
+		svg.children[0].style.transform = 'translate(' + Math.round(diffX) + 'px, ' + Math.round(diffY) + 'px)' + 'rotate(' + -shapeRecProps.angleRadian + 'rad) scale(' + scaleX + ', ' + scaleY + ') rotate(' + shapeRecProps.angleRadian + 'rad)';
+
+		this.showSVG();
 	}
 
 	removeSubSections(): void {

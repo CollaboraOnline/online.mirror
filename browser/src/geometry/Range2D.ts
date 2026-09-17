@@ -43,6 +43,26 @@ namespace cool {
 			return (this.minY + this.maxY) / 2;
 		}
 
+		/// The smallest range that holds all the points, which must be at least one.
+		static fromPoints(points: { x: number; y: number }[]): Range2D {
+			return new Range2D(
+				Math.min(...points.map((point) => point.x)),
+				Math.min(...points.map((point) => point.y)),
+				Math.max(...points.map((point) => point.x)),
+				Math.max(...points.map((point) => point.y)),
+			);
+		}
+
+		/// The range grown by that much on the left and the right, and on the top and the bottom.
+		expand(across: number, down: number): Range2D {
+			return new Range2D(
+				this.minX - across,
+				this.minY - down,
+				this.maxX + across,
+				this.maxY + down,
+			);
+		}
+
 		/// The smallest range that holds both this one and the other.
 		union(other: Range2D): Range2D {
 			return new Range2D(

@@ -30,6 +30,20 @@ describe('Range2D', function () {
 		assert.strictEqual(cool.Range2D.fromArray(undefined), null);
 	});
 
+	it('holds all the points it is made from', function () {
+		const range = cool.Range2D.fromPoints([
+			{ x: 30, y: 5 },
+			{ x: 10, y: 40 },
+			{ x: 20, y: 20 },
+		]);
+		assert.deepStrictEqual(range.toArray(), [10, 5, 30, 40]);
+	});
+
+	it('grows by as much on each side as it is asked', function () {
+		const grown = new cool.Range2D(10, 20, 30, 40).expand(5, 2);
+		assert.deepStrictEqual(grown.toArray(), [5, 18, 35, 42]);
+	});
+
 	it('holds both ranges in their union', function () {
 		const union = new cool.Range2D(10, 20, 30, 40).union(
 			new cool.Range2D(0, 25, 20, 50),

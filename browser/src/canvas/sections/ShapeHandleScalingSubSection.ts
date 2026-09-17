@@ -36,8 +36,10 @@ class ShapeHandleScalingSubSection extends ShapeHandleSubSection {
 		its size, so what blinks is which handle is meant, not whether there is one.
 	*/
 	private isTheActiveHandle(): boolean {
-		return GraphicSelection.handleTravel.showsAsActive(
-			this.sectionProperties.ownInfo?.name,
+		return (
+			GraphicSelection.travel()?.showsAsActive(
+				this.sectionProperties.ownInfo?.name,
+			) ?? false
 		);
 	}
 
@@ -243,25 +245,6 @@ class ShapeHandleScalingSubSection extends ShapeHandleSubSection {
 		}
 	}
 
-	adjustSVGProperties(shapeRecProps: any) {
-		if (this.sectionProperties.parentHandlerSection.sectionProperties.svg) {
-			const svg = this.sectionProperties.parentHandlerSection.sectionProperties.svg;
-
-			const scaleX = shapeRecProps.width / this.sectionProperties.parentHandlerSection.sectionProperties.shapeRectangleProperties.width;
-			const scaleY = shapeRecProps.height / this.sectionProperties.parentHandlerSection.sectionProperties.shapeRectangleProperties.height;
-
-			let diffX = shapeRecProps.center.pX - this.sectionProperties.parentHandlerSection.sectionProperties.shapeRectangleProperties.center.pX;
-			let diffY = shapeRecProps.center.pY - this.sectionProperties.parentHandlerSection.sectionProperties.shapeRectangleProperties.center.pY;
-
-			diffX = diffX / app.dpiScale;
-			diffY = diffY / app.dpiScale;
-
-			svg.children[0].style.transform = 'translate(' + Math.round(diffX) + 'px, ' + Math.round(diffY) + 'px)' + 'rotate(' + -shapeRecProps.angleRadian + 'rad) scale(' + scaleX + ', ' + scaleY + ') rotate(' + shapeRecProps.angleRadian + 'rad)';
-
-			this.sectionProperties.parentHandlerSection.showSVG();
-		}
-	}
-
 	// While dragging a handle, we want to simulate handles to their final positions.
 	moveHandlesOnDrag(point: cool.SimplePoint, e: MouseEvent) {
 		Util.ensureValue(app.activeDocument);
@@ -294,7 +277,7 @@ class ShapeHandleScalingSubSection extends ShapeHandleSubSection {
 		}
 
 		if (!this.sectionProperties.cropModeEnabled)
-			this.adjustSVGProperties(shapeRecProps);
+			this.sectionProperties.parentHandlerSection.scalePreviewTo(shapeRecProps);
 	}
 
 	onMouseMove(point: cool.SimplePoint, dragDistance: Array<number>, e: MouseEvent) {

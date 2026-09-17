@@ -70,7 +70,7 @@ class GraphicSelection {
 			);
 
 		// The keyboard works on a handle of what is selected, so another selection leaves it.
-		if (changed) GraphicSelection.handleTravel.leave();
+		if (changed) GraphicSelection.travel()?.leave();
 
 		this.selectedObjectIDs = objectIds.slice();
 		this.selectionCameFromElsewhere = changed;
@@ -148,24 +148,68 @@ class GraphicSelection {
 		handles really moved.
 	*/
 	public static refreshLocalHandles(): void {
-		if (GraphicSelection.applyLocalHandles() && this.handlesSection)
-			this.handlesSection.refreshInfo(this.extraInfo);
+		if (!GraphicSelection.applyLocalHandles()) return;
+
+		// The section that draws the selection works its handles out from the objects, so it is
+		// told as soon as they stand somewhere else.
+		this.selectionSection?.refresh();
+
+		if (this.handlesSection) this.handlesSection.refreshInfo(this.extraInfo);
 	}
 
-	/*
-		The keyboard on the handles of what is selected. The handles it travels are the ones the
-		section that draws them holds, which are worked out again after every move.
-	*/
-	public static handleTravel: HandleTravel = new HandleTravel(
-		() => GraphicSelection.handlesSection?.handleInfos() ?? [],
-	);
+	/// The section that draws what is selected while the client draws it itself, null while it
+	/// draws from tiles or while nothing is selected.
+	public static selectionSection: SelectionSection | null = null;
+
+	/// The keyboard on the handles of what is selected, where the client holds them itself.
+	public static travel(): HandleTravel | undefined {
+		return GraphicSelection.selectionSection?.travel;
+	}
 
 	/// What the keyboard does to the handles, while the client draws the selection itself.
 	public static handleKeyboard(event: KeyboardEvent): boolean {
-		if (!RenderManager.isVectorRendering()) return false;
 		if (!this.hasActiveSelection()) return false;
 
-		return GraphicSelection.handleTravel.keyboard(event);
+		return GraphicSelection.travel()?.keyboard(event) ?? false;
+	}
+
+	/*
+		Makes the section that draws what is selected, or takes it away again. A single object
+		has a section of its own, which knows the object by its id; several of them are held
+		together by one section that frames them all.
+	*/
+	public static updateSelectionSection(): void {
+		const objectIds = this.selectedObjectIDs;
+		const several = objectIds.length > 1;
+		const wanted =
+			RenderManager.isVectorRendering() && objectIds.length
+				? several
+					? MultiSelectionSection.sectionName
+					: ObjectSelectionSection.nameFor(objectIds[0])
+				: null;
+
+		if (this.selectionSection && this.selectionSection.name !== wanted) {
+			app.sectionContainer.removeSection(this.selectionSection.name);
+			this.selectionSection = null;
+		}
+
+		if (wanted === null) return;
+
+		if (!this.selectionSection) {
+			this.selectionSection = several
+				? new MultiSelectionSection(objectIds)
+				: new ObjectSelectionSection(objectIds[0]);
+
+			// A section takes its place among the others only once it is in the container, so
+			// the handles are worked out after it has been added and not before.
+			app.sectionContainer.addSection(this.selectionSection as any);
+			this.selectionSection.refresh();
+			return;
+		}
+
+		if (several)
+			(this.selectionSection as MultiSelectionSection).setObjects(objectIds);
+		else this.selectionSection.refresh();
 	}
 
 	/*
@@ -253,7 +297,8 @@ class GraphicSelection {
 
 	static resetSelectionRanges() {
 		this.selectionChanged([]);
-		GraphicSelection.handleTravel.leave();
+		GraphicSelection.updateSelectionSection();
+		GraphicSelection.travel()?.leave();
 		this.lastLocalHandles = null;
 		this.rectangle = null;
 		this.extraInfo = null;
@@ -485,6 +530,8 @@ class GraphicSelection {
 
 			this.handlesSection.refreshInfo(this.extraInfo);
 			this.handlesSection.setShowSection(editMode);
+			GraphicSelection.updateSelectionSection();
+			this.selectionSection?.setShowSection(editMode);
 			app.sectionContainer.requestReDraw();
 		} else if (
 			this.handlesSection &&
@@ -784,7 +831,7 @@ class GraphicSelection {
 	*/
 	public static onTextCursorVisibility(event: any) {
 		// Text is being edited, so the keyboard belongs to the text and no longer to a handle.
-		if (event.detail.visible) GraphicSelection.handleTravel.leave();
+		if (event.detail.visible) GraphicSelection.travel()?.leave();
 
 		if (this.hasActiveSelection()) {
 			if (event.detail.visible) this.handlesSection.interactable = false;
