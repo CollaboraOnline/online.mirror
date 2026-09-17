@@ -16,6 +16,7 @@
 }
 
 .comments-panel {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	height: 100%;
@@ -24,297 +25,414 @@
 }
 
 /* The order the rows are in, on a line above the filters. */
-.comments-panel-sort {
+/* One bar above the list: how much of it there is, what is
+   holding it back, and the order it runs in. */
+.comments-panel-toolbar {
+	--comments-panel-track: var(--color-border-lighter);
+	--comments-panel-raised: var(--color-background-lighter);
 	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: var(--spacing-xs);
 	flex: 0 0 auto;
-	padding: var(--spacing-m) var(--spacing-l);
-	font-size: 0.83rem;
-}
-
-.comments-panel-sort-label {
-	margin-inline-end: var(--spacing-xs);
-	color: var(--color-text-light);
-	font-size: 0.75rem;
-}
-
-/* A row of choices where one holds at a time. The one that holds
-   is filled in. */
-.comments-panel-sort-choice,
-.comments-panel-filter-choice {
-	display: inline-flex;
+	flex-wrap: nowrap;
 	align-items: center;
-	padding: 1px var(--spacing-s);
-	border: 1px solid var(--color-border);
-	border-radius: var(--border-radius);
-	background: transparent;
-	color: var(--color-main-text);
-	font: inherit;
-	font-size: 0.75rem;
-	line-height: 1.5;
-	white-space: nowrap;
-	cursor: pointer;
+	gap: var(--spacing-s);
+	box-sizing: border-box;
+	height: 40px;
+	padding: 0 var(--spacing-m);
+	border-bottom: 1px solid var(--color-border-lighter);
 }
 
-.comments-panel-sort-choice:hover,
-.comments-panel-filter-choice:hover {
-	background: var(--color-background-dark);
+/* The raised part of a control has to sit above the recess it
+   is in, which is a lighter colour in either theme. */
+[data-theme='dark'] .comments-panel-toolbar {
+	--comments-panel-track: var(--color-background-dark);
+	--comments-panel-raised: var(--color-border-lighter);
 }
 
-.comments-panel-sort-choice.is-picked,
-.comments-panel-filter-choice.is-picked {
-	background: rgb(var(--doc-type, 11, 135, 231));
-	border-color: rgb(var(--doc-type, 11, 135, 231));
-	color: var(--color-primary-text);
-}
-
-.comments-panel-sort-choice:focus-visible,
-.comments-panel-filter-choice:focus-visible {
-	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
-	outline-offset: 1px;
-}
-
-/* Turns the order round. The triangle points the way the order
-   runs and turns over when the order does. */
-.comments-panel-sort-direction {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 22px;
-	height: 20px;
-	padding: 0;
-	border: 1px solid var(--color-border);
-	border-radius: var(--border-radius);
-	background: transparent;
-	cursor: pointer;
-}
-
-.comments-panel-sort-direction::after {
-	content: '';
-	width: 0;
-	height: 0;
-	border-inline-start: 4px solid transparent;
-	border-inline-end: 4px solid transparent;
-	border-top: 5px solid var(--color-main-text);
-	transition: transform 150ms ease-out;
-}
-
-.comments-panel-sort-direction.is-turned::after {
-	transform: rotate(180deg);
-}
-
-.comments-panel-sort-direction:hover {
-	background: var(--color-background-dark);
-}
-
-.comments-panel-sort-direction:focus-visible {
-	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
-	outline-offset: 1px;
-}
-
-/* What is narrowing the list: one chip per filter, each with a
-   cross that takes that one away. */
-.comments-panel-applied {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--spacing-xs);
-	flex: 0 0 auto;
-	padding: var(--spacing-s) var(--spacing-l);
-	border-bottom: 1px solid var(--color-border);
-}
-
-.comments-panel-applied.hidden {
+.comments-panel-toolbar.hidden {
 	display: none;
 }
 
-.comments-panel-applied-chip {
-	display: inline-flex;
+/* One flat colour under a mask, so one file serves every state
+   the icon is drawn in. */
+.comments-panel-icon {
+	flex: 0 0 auto;
+	display: block;
+	width: 12px;
+	height: 12px;
+	background-color: currentcolor;
+	mask-size: contain;
+	mask-repeat: no-repeat;
+	mask-position: center;
+}
+
+.comments-panel-icon.is-open { mask-image: url('images/comment-open.svg'); }
+.comments-panel-icon.is-done { mask-image: url('images/comment-done.svg'); }
+.comments-panel-icon.is-filter { mask-image: url('images/list-filter.svg'); }
+.comments-panel-icon.is-down { mask-image: url('images/arrow-down.svg'); }
+.comments-panel-icon.is-up { mask-image: url('images/arrow-up.svg'); }
+.comments-panel-icon.is-check { mask-image: url('images/check.svg'); }
+.comments-panel-icon.is-replies { mask-image: url('images/messages-square.svg'); }
+.comments-panel-icon.is-reset { mask-image: url('images/rotate-ccw.svg'); }
+
+/* How many threads are still open and how many are done, in one
+   recessed track. The number that holds is raised out of it. */
+.comments-panel-status {
+	display: flex;
+	flex: 0 0 auto;
 	align-items: center;
 	gap: var(--spacing-xs);
-	max-width: 100%;
-	padding: 1px var(--spacing-xs) 1px var(--spacing-s);
-	border-radius: 999px;
-	background: rgb(var(--doc-type, 11, 135, 231));
-	color: var(--color-primary-text);
-	font-size: 0.75rem;
-	line-height: 1.5;
+	box-sizing: border-box;
+	height: 28px;
+	margin-inline-end: auto;
+	padding: var(--spacing-xs);
+	border-radius: 6px;
+	background: var(--comments-panel-track);
 }
 
-.comments-panel-applied-name {
-	overflow: hidden;
-	white-space: nowrap;
-	text-overflow: ellipsis;
-}
-
-/* The cross is two bars turned against each other, so it takes
-   the colour of the chip. */
-.comments-panel-applied-remove {
-	position: relative;
-	flex: 0 0 auto;
-	width: 14px;
-	height: 14px;
-	padding: 0;
+#comments-panel .comments-panel-status-choice {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--spacing-s);
+	box-sizing: border-box;
+	width: auto;
+	height: 24px;
+	margin: 0;
+	padding: 0 6px;
 	border: none;
-	border-radius: 50%;
+	border-radius: var(--border-radius);
 	background: transparent;
+	color: var(--color-status-badge);
+	font: inherit;
+	font-size: 0.6875rem;
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+	line-height: 1;
+	vertical-align: baseline;
 	cursor: pointer;
 }
 
-.comments-panel-applied-remove::before,
-.comments-panel-applied-remove::after {
-	content: '';
-	position: absolute;
-	inset-inline-start: 3px;
-	inset-block-start: 6px;
-	width: 8px;
-	height: 1px;
-	background: currentcolor;
+#comments-panel .comments-panel-status-choice:hover {
+	background: var(--color-background-hover);
 }
 
-.comments-panel-applied-remove::before {
-	transform: rotate(45deg);
+#comments-panel .comments-panel-status-choice.is-on {
+	background: var(--comments-panel-raised);
+	box-shadow: 0 1px 2px var(--color-box-shadow-light);
+	color: var(--color-main-text);
 }
 
-.comments-panel-applied-remove::after {
-	transform: rotate(-45deg);
+/* A thread nobody has anything left to say about is green here,
+   on its marker in the page, and on its card. */
+#comments-panel .comments-panel-status-choice.is-done-choice {
+	color: var(--color-resolved);
 }
 
-.comments-panel-applied-remove:hover {
-	background: rgba(0, 0, 0, 0.2);
+#comments-panel .comments-panel-status-choice.is-done-choice.is-on {
+	color: var(--color-resolved);
 }
 
-.comments-panel-applied-remove:focus-visible {
-	outline: 2px solid var(--color-primary-text);
+/* A state no thread is in steps back and stops answering, so
+   the numbers that are left read as the whole document. */
+#comments-panel .comments-panel-status-choice.is-empty {
+	opacity: 0.45;
+	cursor: default;
+}
+
+#comments-panel .comments-panel-status-choice.is-empty:hover {
+	background: transparent;
+}
+
+.comments-panel-status-choice:focus-visible {
+	outline: 2px solid var(--color-primary);
 	outline-offset: -1px;
 }
 
-/* The controls give the rest of the panel to the list of
-   threads and scroll on their own. */
-.comments-panel-filters {
-	display: flex;
-	flex-direction: column;
-	flex: 0 1 auto;
-	max-height: 60%;
-	border-bottom: 1px solid var(--color-border);
-	font-size: 0.83rem;
-}
-
-.comments-panel-filters-summary {
-	display: flex;
+/* The authors and the reply filter, with a count of the ones
+   that hold. */
+#comments-panel .comments-panel-filter-button {
+	position: relative;
+	display: inline-flex;
+	flex: 0 0 auto;
 	align-items: center;
-	gap: var(--spacing-s);
-	padding: var(--spacing-m) var(--spacing-l);
+	justify-content: center;
+	box-sizing: border-box;
+	width: 28px;
+	height: 28px;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: var(--border-radius);
+	background: transparent;
+	color: var(--color-status-badge);
+	vertical-align: baseline;
 	cursor: pointer;
-	/* Drops the triangle the browser draws before the label, so
-	   the arrow below is the only marker. */
-	list-style: none;
 }
 
-.comments-panel-filters-summary:hover {
-	background: var(--color-background-dark);
+.comments-panel-filter-button .comments-panel-icon {
+	width: 16px;
+	height: 16px;
 }
 
-.comments-panel-filters-summary:focus-visible {
-	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
-	outline-offset: -2px;
+#comments-panel .comments-panel-filter-button:hover {
+	background: var(--color-background-hover);
 }
 
-.comments-panel-filters-label {
-	font-weight: bold;
+#comments-panel .comments-panel-filter-button.is-on,
+#comments-panel .comments-panel-filter-button[aria-expanded='true'] {
+	background: var(--comments-panel-raised);
+	color: var(--color-main-text);
 }
 
-/* Points at the label while the fold is closed, and turns a
-   quarter to point down once it is open. */
-.comments-panel-filters-arrow {
-	width: 0;
-	height: 0;
-	margin-inline-start: auto;
-	border-top: 4px solid transparent;
-	border-bottom: 4px solid transparent;
-	border-inline-start: 5px solid currentcolor;
-	transition: transform 150ms ease-out;
+.comments-panel-filter-button:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 1px;
 }
 
-.comments-panel-filters[open] .comments-panel-filters-arrow {
-	transform: rotate(90deg);
+/* How many of the filters behind the button hold. */
+.comments-panel-filter-badge {
+	position: absolute;
+	inset-block-start: 1px;
+	inset-inline-end: 1px;
+	box-sizing: border-box;
+	min-width: 13px;
+	height: 13px;
+	padding: 0 3px;
+	border-radius: 999px;
+	background: var(--color-primary);
+	color: var(--color-primary-text);
+	font-size: 0.5625rem;
+	font-weight: 700;
+	line-height: 13px;
+	text-align: center;
 }
 
-.comments-panel-filters-body {
-	display: flex;
-	flex-direction: column;
-	gap: var(--spacing-m);
-	padding: 0 var(--spacing-l) var(--spacing-l);
+/* The order the rows run in: what it is read from, and which
+   way round it goes, in one shell. */
+.comments-panel-sort {
+	display: inline-flex;
+	flex: 0 1 auto;
+	align-items: stretch;
+	min-width: 0;
+	height: 28px;
+	border-radius: var(--border-radius);
+}
+
+#comments-panel .comments-panel-sort-key {
+	display: inline-flex;
+	align-items: center;
+	box-sizing: border-box;
+	width: auto;
+	height: 100%;
+	min-width: 0;
+	margin: 0;
+	padding: 0 var(--spacing-m);
+	border: none;
+	border-radius: 0;
+	border-start-start-radius: var(--border-radius);
+	border-end-start-radius: var(--border-radius);
+	background: transparent;
+	color: var(--color-main-text);
+	font: inherit;
+	font-size: 0.6875rem;
+	font-weight: 500;
+	line-height: 1;
+	vertical-align: baseline;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	cursor: pointer;
+}
+
+#comments-panel .comments-panel-sort-direction {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 24px;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-inline-start: 1px solid transparent;
+	border-radius: 0;
+	border-start-end-radius: var(--border-radius);
+	border-end-end-radius: var(--border-radius);
+	background: transparent;
+	color: var(--color-main-text);
+	vertical-align: baseline;
+	cursor: pointer;
+}
+
+.comments-panel-sort-direction .comments-panel-icon {
+	width: 14px;
+	height: 14px;
+}
+
+/* The rule between the two halves comes out once the pointer or
+   the focus is on the control, and stays out of the way until. */
+.comments-panel-sort:hover .comments-panel-sort-direction,
+.comments-panel-sort:focus-within .comments-panel-sort-direction {
+	border-inline-start-color: var(--color-border);
+}
+
+#comments-panel .comments-panel-sort-key:hover,
+#comments-panel .comments-panel-sort-direction:hover,
+#comments-panel .comments-panel-sort-key[aria-expanded='true'] {
+	background: var(--color-background-hover);
+}
+
+.comments-panel-sort-key:focus-visible,
+.comments-panel-sort-direction:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 1px;
+}
+
+/* The filters and the orders on offer, over the list rather
+   than above it, so the list keeps its height. */
+.comments-panel-popover {
+	position: fixed;
+	z-index: 1000;
+	box-sizing: border-box;
+	width: 200px;
+	max-height: min(320px, 60vh);
+	padding: var(--spacing-s);
+	border: 1px solid var(--color-border-lighter);
+	border-radius: 6px;
+	background: var(--color-background-lighter);
+	box-shadow: 0 6px 16px var(--color-box-shadow-light);
 	overflow-y: auto;
 	scrollbar-width: var(--scrollbar-width);
 	scrollbar-color: var(--scrollbar-color);
 }
 
-.comments-panel-filter-group {
-	display: flex;
-	flex-wrap: wrap;
-	gap: var(--spacing-xs) var(--spacing-m);
-	margin: 0;
-	padding: 0;
-	border: none;
+.comments-panel-popover[hidden] {
+	display: none;
 }
 
-.comments-panel-filter-group > legend {
-	padding: 0;
-	color: var(--color-text-light);
-	font-size: 0.75rem;
+.comments-panel-popover-label {
+	padding: 6px var(--spacing-m) var(--spacing-s);
+	color: var(--color-status-badge);
+	font-size: 0.625rem;
+	font-weight: 600;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
 }
 
-.comments-panel-filter-check {
+/* One row for an author, for the reply filter and for an order.
+   The tick at the end says whether it holds. */
+#comments-panel .comments-panel-popover-row {
 	display: flex;
 	align-items: center;
-	gap: var(--spacing-s);
+	gap: var(--spacing-m);
+	box-sizing: border-box;
+	width: 100%;
+	height: 28px;
+	margin: 0;
+	padding: 0 var(--spacing-m);
+	border: none;
+	border-radius: var(--border-radius);
+	background: transparent;
+	color: var(--color-main-text);
+	font: inherit;
+	font-size: 0.75rem;
+	line-height: 1;
+	vertical-align: baseline;
+	text-align: start;
 	cursor: pointer;
 }
 
-.comments-panel-filter-check > input {
-	margin: 0;
+#comments-panel .comments-panel-popover-row:hover,
+#comments-panel .comments-panel-popover-row.is-on {
+	background: var(--color-background-hover);
 }
 
-.comments-panel-filter-author {
+.comments-panel-popover-row:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: -2px;
+}
+
+/* The letters of an author's name, on the colour the list draws
+   that author in. */
+.comments-panel-popover-avatar {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	color: #fff;
+	font-size: 0.5625rem;
+	font-weight: 600;
+	line-height: 1;
+}
+
+/* Holds an icon where a row has no author to show. */
+.comments-panel-popover-slot {
+	display: inline-flex;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	color: var(--color-status-badge);
+}
+
+.comments-panel-popover-slot .comments-panel-icon {
+	width: 15px;
+	height: 15px;
+}
+
+.comments-panel-popover-name {
+	flex: 1 1 auto;
+	min-width: 0;
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;
 }
 
-/* The authors of a document can outgrow the panel, so the
-   choices scroll. */
-.comments-panel-filter-authors {
-	display: flex;
-	flex-direction: column;
-	gap: var(--spacing-xs);
-	max-height: 120px;
-	overflow-y: auto;
+.comments-panel-popover-count {
+	flex: 0 0 auto;
+	color: var(--color-status-badge);
+	font-size: 0.6875rem;
+	font-variant-numeric: tabular-nums;
 }
 
-/* Takes every filter away at once, offered once there is more
-   than one. */
-.comments-panel-applied-clear {
-	padding: 1px var(--spacing-s);
-	border: none;
-	border-radius: 999px;
-	background: transparent;
-	color: var(--color-text-light);
-	font: inherit;
-	font-size: 0.75rem;
-	line-height: 1.5;
-	text-decoration: underline;
-	cursor: pointer;
+.comments-panel-popover-tick {
+	flex: 0 0 auto;
+	width: 14px;
+	height: 14px;
+	background-color: var(--color-primary);
+	mask-image: url('images/check.svg');
+	mask-size: contain;
+	mask-repeat: no-repeat;
+	mask-position: center;
 }
 
-.comments-panel-applied-clear:hover {
-	color: var(--color-main-text);
+.comments-panel-popover-tick.is-off {
+	background-color: transparent;
 }
 
-.comments-panel-applied-clear:focus-visible {
-	outline: 2px solid rgb(var(--doc-type, 11, 135, 231));
-	outline-offset: 1px;
+.comments-panel-popover-separator {
+	height: 1px;
+	margin: var(--spacing-s) var(--spacing-m);
+	background: var(--color-border-lighter);
+}
+
+/* Says what the list holds after a pass, for a reader who
+   cannot see the numbers on the bar. */
+.comments-panel-live {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
 }
 
 .comments-panel-list {
@@ -329,8 +447,8 @@
 
 .comments-panel-placeholder {
 	padding: var(--spacing-xl);
-	color: var(--color-text-light);
-	font-size: 0.83rem;
+	color: var(--color-status-badge);
+	font-size: 0.8125rem;
 }
 
 .comments-panel-placeholder.hidden {
@@ -340,6 +458,7 @@
 /* A thread is a card on the panel. The space around it, rather
    than a rule between, is what tells one thread from the next. */
 .comments-panel-thread {
+	position: relative;
 	display: flex;
 	flex-direction: column;
 	margin: 0 var(--spacing-m) var(--spacing-m);

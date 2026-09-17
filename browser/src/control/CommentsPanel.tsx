@@ -39,9 +39,24 @@ class CommentsPanel {
   private map: any;
   private listNode: HTMLElement | null = null;
   private placeholderNode: HTMLElement | null = null;
-  private authorsNode: HTMLElement | null = null;
-  private repliesNode: HTMLInputElement | null = null;
-  private appliedNode: HTMLElement | null = null;
+  private toolbarNode: HTMLElement | null = null;
+  private filterButtonNode: HTMLElement | null = null;
+  private filterBadgeNode: HTMLElement | null = null;
+  private filterPopoverNode: HTMLElement | null = null;
+  private sortPopoverNode: HTMLElement | null = null;
+  private sortKeyNode: HTMLElement | null = null;
+  private sortDirectionNode: HTMLElement | null = null;
+  private sortArrowNode: HTMLElement | null = null;
+  private liveNode: HTMLElement | null = null;
+
+  // Which of the two menus is open, and none while both are shut.
+  private openPopover: 'filter' | 'sort' | null = null;
+
+  // The threads the last pass collected, which the counts in the
+  // bar are worked out over.
+  private threads: CommentThread[] = [];
+  private countUnresolved = 0;
+  private countResolved = 0;
 
   // The words of a comment, kept by the data object they were
   // read out of. A stale entry becomes unreachable on its own.
@@ -53,11 +68,6 @@ class CommentsPanel {
   // Which way round the order runs. False is the way the thing
   // it is read from runs by itself, down the document or A to Z.
   private sortDescending: boolean = false;
-
-  // The button that picks each order and the one that turns it
-  // round, so the row can be marked without being built again.
-  private sortChoiceNodes: Map<CommentSortKey, HTMLElement> = new Map();
-  private sortDirectionNode: HTMLElement | null = null;
 
   // The button that adds each state filter, so the one that
   // holds can be marked from the filters themselves.
@@ -115,7 +125,10 @@ class CommentsPanel {
     this.map = map;
 
     const panel = document.getElementById('comments-panel');
-    if (panel) this.build(panel);
+    if (panel) {
+      this.build(panel);
+      this.steerTheToolbar();
+    }
 
     // A comment added, removed or edited, and the full set that
     // arrives after a load or an undo.
@@ -127,18 +140,33 @@ class CommentsPanel {
     // Whether a reader may write comments decides whether the
     // rows offer the menu, so a change of it reaches the rows.
     app.events.on('updatepermission', () => this.markStale());
+
+    // A menu is shut by the key that shuts a menu, and by
+    // acting anywhere that is not inside it.
+    document.addEventListener('keydown', (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || !this.openPopover) return;
+      const button =
+        this.openPopover === 'filter' ? this.filterButtonNode : this.sortKeyNode;
+      this.closePopovers();
+      button?.focus();
+    });
+
+    document.addEventListener('pointerdown', (event: PointerEvent) => {
+      if (!this.openPopover) return;
+      const at = event.target as HTMLElement;
+      if (at.closest('.comments-panel-popover')) return;
+      if (at.closest('.comments-panel-filter-button')) return;
+      if (at.closest('.comments-panel-sort-key')) return;
+      this.closePopovers();
+    });
   }
 
   private build(panel: HTMLElement): void {
     panel.replaceChildren(
       <div class="comments-panel">
-        {this.buildSortRow()}
-        {this.buildFilters()}
-        <div
-          class="comments-panel-applied"
-          aria-label={_('Filters in force')}
-          ref={(node: HTMLElement) => (this.appliedNode = node)}
-        ></div>
+        {this.buildToolbar()}
+        {this.buildFilterPopover()}
+        {this.buildSortPopover()}
         <ul
           class="comments-panel-list"
           aria-label={_('Comments')}
@@ -150,164 +178,93 @@ class CommentsPanel {
         >
           {_('This document has no comments.')}
         </div>
+        <p
+          class="comments-panel-live"
+          role="status"
+          aria-live="polite"
+          ref={(node: HTMLElement) => (this.liveNode = node)}
+        ></p>
       </div>,
     );
   }
 
-  // The order the rows are in: what it is read from, and which
-  // way round it runs. Both sit on a line of their own.
-  private buildSortRow(): HTMLElement {
-    const choices: Array<{ key: CommentSortKey; label: string }> = [
-      { key: 'position', label: _('Position') },
-      { key: 'date', label: _('Date') },
-      { key: 'author', label: _('Author') },
-    ];
-
-    this.sortChoiceNodes.clear();
-
+  // One bar over the list: how much of it there is, what is
+  // holding it back, and the order it runs in.
+  private buildToolbar(): HTMLElement {
     return (
-      <div class="comments-panel-sort" role="group" aria-label={_('Sort by')}>
-        <span class="comments-panel-sort-label">{_('Sort')}</span>
-        {choices.map((choice) => {
-          const picked = this.sortKey === choice.key;
-          const button = (
-            <button
-              class={
-                'comments-panel-sort-choice' + (picked ? ' is-picked' : '')
-              }
-              type="button"
-              aria-pressed={String(picked)}
-              onClick={() => this.pickSortKey(choice.key)}
-            >
-              {choice.label}
-            </button>
-          ) as HTMLElement;
-          this.sortChoiceNodes.set(choice.key, button);
-          return button;
-        })}
-        {this.buildSortDirection()}
+      <div
+        class="comments-panel-toolbar"
+        role="toolbar"
+        aria-label={_('Comment list controls')}
+        ref={(node: HTMLElement) => (this.toolbarNode = node)}
+      >
+        <div class="comments-panel-status" role="group" aria-label={_('Status')}>
+          {this.buildStatusChoice('unresolved', 'is-open')}
+          {this.buildStatusChoice('resolved', 'is-done')}
+        </div>
+        <button
+          class="comments-panel-filter-button"
+          type="button"
+          aria-haspopup="true"
+          aria-expanded="false"
+          aria-controls="comments-panel-filter-popover"
+          tabindex="-1"
+          onClick={() => this.togglePopover('filter')}
+          ref={(node: HTMLElement) => (this.filterButtonNode = node)}
+        >
+          <span class="comments-panel-icon is-filter"></span>
+          <span
+            class="comments-panel-filter-badge"
+            hidden
+            ref={(node: HTMLElement) => (this.filterBadgeNode = node)}
+          ></span>
+        </button>
+        <div class="comments-panel-sort">
+          <button
+            class="comments-panel-sort-key"
+            type="button"
+            aria-haspopup="true"
+            aria-expanded="false"
+            aria-controls="comments-panel-sort-popover"
+            tabindex="-1"
+            onClick={() => this.togglePopover('sort')}
+            ref={(node: HTMLElement) => (this.sortKeyNode = node)}
+          ></button>
+          <button
+            class="comments-panel-sort-direction"
+            type="button"
+            tabindex="-1"
+            onClick={() => this.turnTheOrderRound()}
+            ref={(node: HTMLElement) => (this.sortDirectionNode = node)}
+          >
+            <span
+              class="comments-panel-icon"
+              ref={(node: HTMLElement) => (this.sortArrowNode = node)}
+            ></span>
+          </button>
+        </div>
       </div>
     );
   }
 
-  // Turns the order round. It carries what the order becomes
-  // when it is pressed, which is what a reader wants to know.
-  private buildSortDirection(): HTMLElement {
-    const button = (
-      <button
-        class={
-          'comments-panel-sort-direction' +
-          (this.sortDescending ? ' is-turned' : '')
-        }
-        type="button"
-        onClick={() => {
-          this.sortDescending = !this.sortDescending;
-          this.markTheSortRow();
-          this.render();
-        }}
-      ></button>
-    ) as HTMLElement;
-
-    this.sortDirectionNode = button;
-    this.sayWhatTurningTheOrderDoes();
-    return button;
-  }
-
-  // What the order becomes if the direction is pressed, in the
-  // words of the thing the order is read from.
-  private sayWhatTurningTheOrderDoes(): void {
-    if (!this.sortDirectionNode) return;
-
-    let label = this.sortDescending
-      ? _('From the top of the document')
-      : _('From the bottom of the document');
-    if (this.sortKey === 'date')
-      label = this.sortDescending ? _('Oldest first') : _('Newest first');
-    else if (this.sortKey === 'author')
-      label = this.sortDescending ? _('A to Z') : _('Z to A');
-
-    this.sortDirectionNode.setAttribute('aria-label', label);
-    this.sortDirectionNode.dataset.title = label;
-  }
-
-  private pickSortKey(key: CommentSortKey): void {
-    if (this.sortKey === key) return;
-
-    this.sortKey = key;
-    this.markTheSortRow();
-    this.render();
-  }
-
-  private markTheSortRow(): void {
-    this.sortChoiceNodes.forEach((button, held) => {
-      const picked = held === this.sortKey;
-      button.classList.toggle('is-picked', picked);
-      button.setAttribute('aria-pressed', String(picked));
-    });
-    this.sortDirectionNode?.classList.toggle('is-turned', this.sortDescending);
-    this.sayWhatTurningTheOrderDoes();
-  }
-
-  // The controls that add a filter, behind a fold that starts
-  // closed. What they added is on show below it either way.
-  private buildFilters(): HTMLElement {
-    return (
-      <details class="comments-panel-filters">
-        <summary class="comments-panel-filters-summary">
-          <span class="comments-panel-filters-label">{_('Filters')}</span>
-          <span class="comments-panel-filters-arrow" aria-hidden="true"></span>
-        </summary>
-        <div class="comments-panel-filters-body">
-          <fieldset class="comments-panel-filter-group">
-            <legend>{_('Status')}</legend>
-            {this.buildStatusChoice('unresolved', _('Unresolved'))}
-            {this.buildStatusChoice('resolved', _('Resolved'))}
-          </fieldset>
-          <label class="comments-panel-filter-check">
-            <input
-              class="comments-panel-filter-replies"
-              type="checkbox"
-              ref={(node: HTMLElement) =>
-                (this.repliesNode = node as HTMLInputElement)
-              }
-              onChange={(event: Event) => {
-                this.filters.onlyWithReplies = (
-                  event.target as HTMLInputElement
-                ).checked;
-                this.render();
-              }}
-            />
-            {_('Only threads with replies')}
-          </label>
-          <fieldset class="comments-panel-filter-group">
-            <legend>{_('Author')}</legend>
-            <div
-              class="comments-panel-filter-authors"
-              ref={(node: HTMLElement) => (this.authorsNode = node)}
-            ></div>
-          </fieldset>
-        </div>
-      </details>
-    );
-  }
-
-  // One of the two states a thread can be in. Picking the one
-  // that holds lets it go again, leaving both states in.
+  // One state of a thread, as the count of the threads in it.
   private buildStatusChoice(
-    status: CommentFilters['status'],
-    label: string,
+    status: 'unresolved' | 'resolved',
+    icon: string,
   ): HTMLElement {
     const button = (
       <button
-        class="comments-panel-filter-choice"
+        class={
+          'comments-panel-status-choice' +
+          (status === 'resolved' ? ' is-done-choice' : '')
+        }
         type="button"
-        data-status={status}
-        onClick={() => {
-          this.filters.status = this.filters.status === status ? 'all' : status;
-          this.render();
-        }}
+        aria-pressed="false"
+        tabindex="-1"
+        onClick={() => this.pickStatus(status)}
       >
-        {label}
+        <span class={'comments-panel-icon ' + icon}></span>
+        <span class="comments-panel-status-count"></span>
       </button>
     ) as HTMLElement;
 
@@ -315,23 +272,363 @@ class CommentsPanel {
     return button;
   }
 
-  private buildAuthorChoice(author: string): HTMLElement {
+  private pickStatus(status: 'unresolved' | 'resolved'): void {
+    this.filters.status = this.filters.status === status ? 'all' : status;
+    this.render();
+  }
+
+  private turnTheOrderRound(): void {
+    this.sortDescending = !this.sortDescending;
+    this.render();
+  }
+
+  private pickSortKey(key: CommentSortKey): void {
+    this.sortKey = key;
+    this.closePopovers();
+    this.render();
+  }
+
+  // The authors and the reply filter, over the list rather than
+  // above it, so the list keeps the height it had.
+  private buildFilterPopover(): HTMLElement {
     return (
-      <label class="comments-panel-filter-check">
-        <input
-          type="checkbox"
-          value={author}
-          checked={this.filters.authors.has(author)}
-          onChange={(event: Event) => {
-            if ((event.target as HTMLInputElement).checked)
-              this.filters.authors.add(author);
-            else this.filters.authors.delete(author);
-            this.render();
-          }}
-        />
-        <span class="comments-panel-filter-author">{author}</span>
-      </label>
+      <div
+        class="comments-panel-popover"
+        id="comments-panel-filter-popover"
+        role="menu"
+        aria-label={_('Filter')}
+        hidden
+        ref={(node: HTMLElement) => (this.filterPopoverNode = node)}
+      ></div>
     );
+  }
+
+  private buildSortPopover(): HTMLElement {
+    return (
+      <div
+        class="comments-panel-popover"
+        id="comments-panel-sort-popover"
+        role="menu"
+        aria-label={_('Sort by')}
+        hidden
+        ref={(node: HTMLElement) => (this.sortPopoverNode = node)}
+      ></div>
+    );
+  }
+
+  private togglePopover(which: 'filter' | 'sort'): void {
+    const open = this.openPopover === which ? null : which;
+    this.closePopovers();
+    this.openPopover = open;
+    if (!open) return;
+
+    if (open === 'filter') this.fillTheFilterPopover();
+    else this.fillTheSortPopover();
+
+    const popover =
+      open === 'filter' ? this.filterPopoverNode : this.sortPopoverNode;
+    const button =
+      open === 'filter' ? this.filterButtonNode : this.sortKeyNode;
+    if (popover) {
+      popover.hidden = false;
+      this.placeThePopover(popover, button);
+    }
+    if (button) button.setAttribute('aria-expanded', 'true');
+
+    popover?.querySelector<HTMLElement>('.comments-panel-popover-row')?.focus();
+  }
+
+  // The bar is one stop on the way to the list, and the arrows
+  // move between the controls once the focus is on it.
+  private steerTheToolbar(): void {
+    const bar = this.toolbarNode;
+    if (!bar) return;
+
+    bar.addEventListener('keydown', (event: KeyboardEvent) => {
+      const stops = this.toolbarStops();
+      const at = stops.indexOf(document.activeElement as HTMLElement);
+      if (at < 0) return;
+
+      let to = at;
+      if (event.key === 'ArrowRight') to = (at + 1) % stops.length;
+      else if (event.key === 'ArrowLeft')
+        to = (at - 1 + stops.length) % stops.length;
+      else if (event.key === 'Home') to = 0;
+      else if (event.key === 'End') to = stops.length - 1;
+      else return;
+
+      event.preventDefault();
+      this.restTheToolbarOn(stops[to]);
+      stops[to].focus();
+    });
+
+    bar.addEventListener('focusin', (event: FocusEvent) => {
+      const stop = event.target as HTMLElement;
+      if (this.toolbarStops().includes(stop)) this.restTheToolbarOn(stop);
+    });
+  }
+
+  // The controls the arrows reach. A state no thread is in is
+  // not one of them.
+  private toolbarStops(): HTMLElement[] {
+    const bar = this.toolbarNode;
+    if (!bar) return [];
+
+    return Array.from(
+      bar.querySelectorAll<HTMLElement>(
+        '.comments-panel-status-choice, .comments-panel-filter-button,' +
+          ' .comments-panel-sort-key, .comments-panel-sort-direction',
+      ),
+    ).filter((stop) => stop.getAttribute('aria-disabled') !== 'true');
+  }
+
+  private restTheToolbarOn(stop: HTMLElement): void {
+    for (const other of this.toolbarStops())
+      other.tabIndex = other === stop ? 0 : -1;
+  }
+
+  // The bar keeps one stop on it after a pass, so the order of
+  // the controls does not decide where the focus lands.
+  private keepTheToolbarReachable(): void {
+    const stops = this.toolbarStops();
+    if (stops.length === 0) return;
+    if (stops.some((stop) => stop.tabIndex === 0)) return;
+    this.restTheToolbarOn(stops[0]);
+  }
+
+  // A menu hangs under the control that opened it and keeps to
+  // the window, which it may cross the panel's edge to do.
+  private placeThePopover(
+    popover: HTMLElement,
+    button: HTMLElement | null,
+  ): void {
+    if (!button) return;
+
+    const from = button.getBoundingClientRect();
+    const room = 8;
+    const width = popover.offsetWidth;
+    const rightToLeft = document.documentElement.dir === 'rtl';
+
+    let left = rightToLeft ? from.left : from.right - width;
+    left = Math.max(room, Math.min(left, window.innerWidth - width - room));
+
+    popover.style.left = Math.round(left) + 'px';
+    popover.style.top = Math.round(from.bottom + 4) + 'px';
+  }
+
+  private closePopovers(): void {
+    this.openPopover = null;
+    if (this.filterPopoverNode) this.filterPopoverNode.hidden = true;
+    if (this.sortPopoverNode) this.sortPopoverNode.hidden = true;
+    this.filterButtonNode?.setAttribute('aria-expanded', 'false');
+    this.sortKeyNode?.setAttribute('aria-expanded', 'false');
+  }
+
+  // One row of a popover: who or what it stands for, how many
+  // threads it holds, and whether it is on.
+  private buildPopoverRow(row: {
+    label: string;
+    count: number | null;
+    on: boolean;
+    role: string;
+    slot: HTMLElement;
+    describe: string;
+    act: () => void;
+  }): HTMLElement {
+    return (
+      <button
+        class={'comments-panel-popover-row' + (row.on ? ' is-on' : '')}
+        type="button"
+        role={row.role}
+        aria-checked={String(row.on)}
+        aria-label={row.describe}
+        onClick={() => row.act()}
+      >
+        {row.slot}
+        <span class="comments-panel-popover-name">{row.label}</span>
+        {row.count !== null && (
+          <span class="comments-panel-popover-count">{String(row.count)}</span>
+        )}
+        <span
+          class={'comments-panel-popover-tick' + (row.on ? '' : ' is-off')}
+        ></span>
+      </button>
+    );
+  }
+
+  private fillTheFilterPopover(): void {
+    const node = this.filterPopoverNode;
+    if (!node) return;
+
+    const rows: HTMLElement[] = [
+      (
+        <div class="comments-panel-popover-label">{_('Author')}</div>
+      ) as HTMLElement,
+    ];
+
+    for (const author of this.offeredAuthors) {
+      const on = this.filters.authors.has(author);
+      const count = this.countWithAuthor(author);
+      rows.push(
+        this.buildPopoverRow({
+          label: author,
+          count: count,
+          on: on,
+          role: 'menuitemcheckbox',
+          describe: _('{author}, {count} threads')
+            .replace('{author}', author)
+            .replace('{count}', String(count)),
+          slot: (
+            <span
+              class="comments-panel-popover-avatar"
+              style={{ backgroundColor: this.avatarColour(author) }}
+            >
+              {CommentsPanel.initialsOf(author)}
+            </span>
+          ) as HTMLElement,
+          act: () => {
+            if (on) this.filters.authors.delete(author);
+            else this.filters.authors.add(author);
+            this.render();
+            this.fillTheFilterPopover();
+          },
+        }),
+      );
+    }
+
+    rows.push(
+      (<div class="comments-panel-popover-separator"></div>) as HTMLElement,
+    );
+    rows.push(
+      this.buildPopoverRow({
+        label: _('Only threads with replies'),
+        count: this.countWithReplies(),
+        on: this.filters.onlyWithReplies,
+        role: 'menuitemcheckbox',
+        describe: _('Only threads with replies'),
+        slot: (
+          <span class="comments-panel-popover-slot">
+            <span class="comments-panel-icon is-replies"></span>
+          </span>
+        ) as HTMLElement,
+        act: () => {
+          this.filters.onlyWithReplies = !this.filters.onlyWithReplies;
+          this.render();
+          this.fillTheFilterPopover();
+        },
+      }),
+    );
+
+    if (this.howManyFiltersHold() > 0) {
+      rows.push(
+        (<div class="comments-panel-popover-separator"></div>) as HTMLElement,
+      );
+      rows.push(
+        this.buildPopoverRow({
+          label: _('Reset the filters'),
+          count: null,
+          on: false,
+          role: 'menuitem',
+          describe: _('Reset the filters'),
+          slot: (
+            <span class="comments-panel-popover-slot">
+              <span class="comments-panel-icon is-reset"></span>
+            </span>
+          ) as HTMLElement,
+          act: () => {
+            this.clearFilters();
+            this.closePopovers();
+          },
+        }),
+      );
+    }
+
+    node.replaceChildren(...rows);
+  }
+
+  private fillTheSortPopover(): void {
+    const node = this.sortPopoverNode;
+    if (!node) return;
+
+    const keys: Array<{ key: CommentSortKey; label: string }> = [
+      { key: 'position', label: _('Position') },
+      { key: 'date', label: _('Date') },
+      { key: 'author', label: _('Author') },
+    ];
+
+    const rows: HTMLElement[] = [
+      (
+        <div class="comments-panel-popover-label">{_('Sort by')}</div>
+      ) as HTMLElement,
+    ];
+
+    for (const choice of keys)
+      rows.push(
+        this.buildPopoverRow({
+          label: choice.label,
+          count: null,
+          on: this.sortKey === choice.key,
+          role: 'menuitemradio',
+          describe: choice.label,
+          slot: (<span class="comments-panel-popover-slot"></span>) as HTMLElement,
+          act: () => this.pickSortKey(choice.key),
+        }),
+      );
+
+    rows.push(
+      (<div class="comments-panel-popover-separator"></div>) as HTMLElement,
+    );
+
+    const ways = this.waysTheOrderRuns();
+    for (const way of ways)
+      rows.push(
+        this.buildPopoverRow({
+          label: way.label,
+          count: null,
+          on: this.sortDescending === way.descending,
+          role: 'menuitemradio',
+          describe: way.label,
+          slot: (<span class="comments-panel-popover-slot"></span>) as HTMLElement,
+          act: () => {
+            this.sortDescending = way.descending;
+            this.closePopovers();
+            this.render();
+          },
+        }),
+      );
+
+    node.replaceChildren(...rows);
+  }
+
+  // What the two ways round the order runs are called, which
+  // depends on what the order is read from.
+  private waysTheOrderRuns(): Array<{ label: string; descending: boolean }> {
+    if (this.sortKey === 'date')
+      return [
+        { label: _('Newest first'), descending: true },
+        { label: _('Oldest first'), descending: false },
+      ];
+    if (this.sortKey === 'author')
+      return [
+        { label: _('A to Z'), descending: false },
+        { label: _('Z to A'), descending: true },
+      ];
+    return [
+      { label: _('Top of the document first'), descending: false },
+      { label: _('End of the document first'), descending: true },
+    ];
+  }
+
+  private sortKeyLabel(): string {
+    if (this.sortKey === 'date') return _('Date');
+    if (this.sortKey === 'author') return _('Author');
+    return _('Position');
+  }
+
+  // How many filters hold that the bar cannot show on its own.
+  // The status and the words looked for both show themselves.
+  private howManyFiltersHold(): number {
+    return this.filters.authors.size + (this.filters.onlyWithReplies ? 1 : 0);
   }
 
   // The words to look for, which come from the search box at the
@@ -341,6 +638,10 @@ class CommentsPanel {
 
     this.filters.search = search;
     this.render();
+  }
+
+  private clearTheSearchBox(): void {
+    this.map.navigator?.clearSearchBox();
   }
 
   private clearFilters(): void {
@@ -353,58 +654,128 @@ class CommentsPanel {
     this.render();
   }
 
-  // The controls are drawn from the filters rather than from a
-  // state of their own, so the strip and they are one thing.
-  private drawTheControlsFromTheFilters(): void {
-    this.statusChoiceNodes.forEach((button, status) => {
-      const picked = this.filters.status === status;
-      button.classList.toggle('is-picked', picked);
-      button.setAttribute('aria-pressed', String(picked));
-    });
-
-    const replies = this.repliesNode;
-    if (replies) replies.checked = this.filters.onlyWithReplies;
-
-    this.authorsNode
-      ?.querySelectorAll<HTMLInputElement>('input[type="checkbox"]')
-      .forEach((box) => {
-        box.checked = this.filters.authors.has(box.value);
-      });
-  }
-
-  // The search box at the top of the panel is where the words to
-  // look for are typed, so taking that filter away empties it.
-  private clearTheSearchBox(): void {
-    this.map.navigator?.clearSearchBox();
-  }
-
-  // Offer one checkbox per author who has written a comment. An
-  // author the document lost loses the choice made on them.
-  private updateAuthorFilter(threads: CommentThread[]): void {
-    if (!this.authorsNode) return;
-
-    const authors: string[] = [];
+  // The counts and the states the bar shows, read from the
+  // threads the other filters leave and from the filters.
+  private drawTheControlsFromTheFilters(threads: CommentThread[]): void {
+    this.countUnresolved = 0;
+    this.countResolved = 0;
     for (const thread of threads) {
-      for (const comment of [thread.root, ...thread.replies]) {
-        const author = comment.sectionProperties.data.author;
-        if (typeof author === 'string' && !authors.includes(author))
-          authors.push(author);
-      }
+      if (!this.matchesFilters(thread, 'status')) continue;
+      if (this.threadIsResolved(thread)) this.countResolved++;
+      else this.countUnresolved++;
     }
-    authors.sort((a, b) => a.localeCompare(b));
 
-    const sameAuthors =
-      authors.length === this.offeredAuthors.length &&
-      authors.every((author, index) => author === this.offeredAuthors[index]);
-    if (sameAuthors) return;
+    this.markStatusChoice('unresolved', this.countUnresolved);
+    this.markStatusChoice('resolved', this.countResolved);
 
-    for (const picked of Array.from(this.filters.authors))
-      if (!authors.includes(picked)) this.filters.authors.delete(picked);
+    const holding = this.howManyFiltersHold();
+    const badge = this.filterBadgeNode;
+    if (badge) {
+      badge.textContent = String(holding);
+      badge.hidden = holding === 0;
+    }
 
-    this.offeredAuthors = authors;
-    this.authorsNode.replaceChildren(
-      ...authors.map((author) => this.buildAuthorChoice(author)),
+    const filterButton = this.filterButtonNode;
+    if (filterButton) {
+      filterButton.classList.toggle('is-on', holding > 0);
+      filterButton.setAttribute(
+        'aria-label',
+        holding > 0
+          ? _('Filter, {count} in force').replace('{count}', String(holding))
+          : _('Filter'),
+      );
+      filterButton.setAttribute('data-title', _('Filter'));
+    }
+
+    const key = this.sortKeyNode;
+    if (key) {
+      key.textContent = this.sortKeyLabel();
+      key.setAttribute(
+        'aria-label',
+        _('Sort by: {key}').replace('{key}', this.sortKeyLabel()),
+      );
+    }
+
+    const way = this.waysTheOrderRuns().find(
+      (choice) => choice.descending === this.sortDescending,
     );
+    const direction = this.sortDirectionNode;
+    if (direction && way) {
+      const says = _('Reverse the order. Now: {way}.').replace(
+        '{way}',
+        way.label.toLowerCase(),
+      );
+      direction.setAttribute('aria-label', says);
+      direction.setAttribute('data-title', says);
+    }
+
+    const arrow = this.sortArrowNode;
+    if (arrow) {
+      arrow.classList.toggle('is-up', this.sortDescending);
+      arrow.classList.toggle('is-down', !this.sortDescending);
+    }
+  }
+
+  private markStatusChoice(
+    status: 'unresolved' | 'resolved',
+    count: number,
+  ): void {
+    const button = this.statusChoiceNodes.get(status);
+    if (!button) return;
+
+    const on = this.filters.status === status;
+    const shown = count > 99 ? '99+' : String(count);
+    const countNode = button.querySelector('.comments-panel-status-count');
+    if (countNode) countNode.textContent = shown;
+
+    button.classList.toggle('is-on', on);
+    button.classList.toggle('is-empty', count === 0 && !on);
+    button.setAttribute('aria-pressed', String(on));
+    if (count === 0 && !on) button.setAttribute('aria-disabled', 'true');
+    else button.removeAttribute('aria-disabled');
+
+    const says =
+      status === 'resolved'
+        ? _('Resolved, {count} threads')
+        : _('Unresolved, {count} threads');
+    button.setAttribute('aria-label', says.replace('{count}', String(count)));
+  }
+
+  // How many threads one author wrote in, counted with the
+  // author filter released so the number says what picking gives.
+  private countWithAuthor(author: string): number {
+    let count = 0;
+    for (const thread of this.threads) {
+      if (!this.matchesFilters(thread, 'authors')) continue;
+      const comments = [thread.root, ...thread.replies];
+      if (comments.some((c) => c.sectionProperties.data.author === author))
+        count++;
+    }
+    return count;
+  }
+
+  private countWithReplies(): number {
+    let count = 0;
+    for (const thread of this.threads)
+      if (thread.replies.length > 0 && this.matchesFilters(thread, 'replies'))
+        count++;
+    return count;
+  }
+
+  // The authors who wrote in the document, in the order a reader
+  // would look for them.
+  private updateAuthorFilter(threads: CommentThread[]): void {
+    const seen = new Set<string>();
+    for (const thread of threads)
+      for (const comment of [thread.root, ...thread.replies])
+        seen.add(String(comment.sectionProperties.data.author ?? ''));
+
+    this.offeredAuthors = Array.from(seen)
+      .filter((author) => author.length > 0)
+      .sort((left, right) => left.localeCompare(right));
+
+    for (const author of Array.from(this.filters.authors))
+      if (!seen.has(author)) this.filters.authors.delete(author);
   }
 
   // Threads in the order the sort controls ask for.
@@ -446,21 +817,31 @@ class CommentsPanel {
     return isNaN(time) ? 0 : time;
   }
 
-  private matchesFilters(thread: CommentThread): boolean {
+  private matchesFilters(
+    thread: CommentThread,
+    release: 'status' | 'authors' | 'replies' | null = null,
+  ): boolean {
     // A thread somebody is writing in is always in the list, or
     // a filter would leave the writer nowhere to write.
     if ([thread.root, ...thread.replies].some((comment) => comment.isEdit()))
       return true;
 
-    const resolved = thread.root.sectionProperties.data.resolved === 'true';
-    if (this.filters.status === 'resolved' && !resolved) return false;
-    if (this.filters.status === 'unresolved' && resolved) return false;
+    if (release !== 'status') {
+      const resolved = this.threadIsResolved(thread);
+      if (this.filters.status === 'resolved' && !resolved) return false;
+      if (this.filters.status === 'unresolved' && resolved) return false;
+    }
 
-    if (this.filters.onlyWithReplies && thread.replies.length === 0)
+    if (
+      release !== 'replies' &&
+      this.filters.onlyWithReplies &&
+      thread.replies.length === 0
+    )
       return false;
 
     const comments = [thread.root, ...thread.replies];
     if (
+      release !== 'authors' &&
       this.filters.authors.size > 0 &&
       !comments.some((comment) =>
         this.filters.authors.has(comment.sectionProperties.data.author),
@@ -530,6 +911,7 @@ class CommentsPanel {
     this.stale = false;
 
     const threads = this.collectThreads();
+    this.threads = threads;
     this.updateAuthorFilter(threads);
     this.forgetOpenedCommentsThatAreGone(threads);
     const shown = this.sortThreads(
@@ -568,98 +950,21 @@ class CommentsPanel {
         : _('No comment matches the filters.');
     this.placeholderNode.classList.toggle('hidden', shown.length > 0);
 
-    this.drawTheControlsFromTheFilters();
-    this.showWhatIsNarrowingTheList();
+    this.drawTheControlsFromTheFilters(threads);
+    this.sayWhatTheListHolds(shown.length, held);
+    this.keepTheToolbarReachable();
   }
 
-  // What is narrowing the list, one chip each, with a cross that
-  // takes that one away. It is out of the way while none hold.
-  private showWhatIsNarrowingTheList(): void {
-    if (!this.appliedNode) return;
+  // What the list holds after a pass, for a reader who cannot
+  // see the counts on the bar.
+  private sayWhatTheListHolds(shown: number, held: number): void {
+    const node = this.liveNode;
+    if (!node) return;
 
-    const applied: Array<{ name: string; remove: () => void }> = [];
-
-    const search = this.filters.search.trim();
-    if (search.length > 0)
-      applied.push({
-        name: search,
-        remove: () => {
-          this.filters.search = '';
-          this.clearTheSearchBox();
-          this.render();
-        },
-      });
-
-    if (this.filters.status !== 'all')
-      applied.push({
-        name:
-          this.filters.status === 'resolved' ? _('Resolved') : _('Unresolved'),
-        remove: () => {
-          this.filters.status = 'all';
-          this.render();
-        },
-      });
-
-    if (this.filters.onlyWithReplies)
-      applied.push({
-        name: _('With replies'),
-        remove: () => {
-          this.filters.onlyWithReplies = false;
-          this.render();
-        },
-      });
-
-    for (const author of Array.from(this.filters.authors))
-      applied.push({
-        name: author,
-        remove: () => {
-          this.filters.authors.delete(author);
-          this.render();
-        },
-      });
-
-    const chips: HTMLElement[] = applied.map((filter) =>
-      this.buildAppliedChip(filter),
-    );
-
-    // Taking them away one at a time is a chore once there are
-    // several of them.
-    if (applied.length > 1)
-      chips.push(
-        <button
-          class="comments-panel-applied-clear"
-          type="button"
-          onClick={() => this.clearFilters()}
-        >
-          {_('Clear all')}
-        </button>,
-      );
-
-    this.appliedNode.replaceChildren(...chips);
-    this.appliedNode.classList.toggle('hidden', applied.length === 0);
-  }
-
-  private buildAppliedChip(filter: {
-    name: string;
-    remove: () => void;
-  }): HTMLElement {
-    const away = _('Stop narrowing the list by {name}').replace(
-      '{name}',
-      filter.name,
-    );
-
-    return (
-      <span class="comments-panel-applied-chip">
-        <span class="comments-panel-applied-name">{filter.name}</span>
-        <button
-          class="comments-panel-applied-remove"
-          type="button"
-          aria-label={away}
-          data-title={away}
-          onClick={filter.remove}
-        ></button>
-      </span>
-    );
+    const says = _('{shown} of {total} threads shown')
+      .replace('{shown}', String(shown))
+      .replace('{total}', String(held));
+    if (node.textContent !== says) node.textContent = says;
   }
 
   // Whatever holds the focus inside a box a comment is being
