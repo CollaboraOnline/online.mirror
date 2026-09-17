@@ -55,6 +55,10 @@
 	--color-warning: #eca700;
 	--color-success: #46ba61;
 
+	/* What a resolved comment is drawn in. Darker than success
+	   where the ground is light, so the words hold up. */
+	--color-resolved: rgb(16, 104, 2);
+
 	--color-btn-primary-hover-bg: #e6f3fd;
 	--color-btn-danger-bg: #b62723;
 	--color-btn-danger-hover-bg: #fdeaea;
