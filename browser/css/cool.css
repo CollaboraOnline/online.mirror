@@ -855,6 +855,52 @@ input, button {
 	visibility: visible;
 }
 
+/* In the margin a comment is a message icon rather than the
+   face of whoever wrote it. The list carries the faces. */
+.cool-annotation-collapsed-show.page-margin-marker .cool-annotation-img {
+	position: relative;
+	border: none !important;
+	outline: none;
+	border-radius: 0;
+	background: none;
+}
+
+.cool-annotation-collapsed-show.page-margin-marker .cool-annotation-img > .avatar-img {
+	display: none;
+}
+
+/* The icon is a mask over a flat colour, so one file serves
+   every colour it is drawn in. */
+.cool-annotation-collapsed-show.page-margin-marker .cool-annotation-img::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background-color: var(--color-primary);
+	mask-image: url('images/comment-marker.svg');
+	mask-size: contain;
+	mask-repeat: no-repeat;
+	mask-position: center;
+	-webkit-mask-image: url('images/comment-marker.svg');
+	-webkit-mask-size: contain;
+	-webkit-mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+}
+
+/* The badge rides the lower corner of the icon outline, which
+   the icon draws at 22 and 19 of its 24 units. */
+.cool-annotation-collapsed-show.page-margin-marker .cool-annotation-info-collapsed {
+	position: absolute;
+	left: calc(100% * 22 / 24);
+	top: calc(100% * 19 / 24);
+	transform: translate(-50%, -50%);
+}
+
+/* A thread every comment of which is resolved is drawn green,
+   the colour its badge takes. */
+.cool-annotation-collapsed-show.page-margin-marker.bubble-resolved .cool-annotation-img::before {
+	background-color: var(--color-success);
+}
+
 .cool-dont-break {
 	/* These are technically the same, but use both */
 	overflow-wrap: anywhere;
@@ -957,7 +1003,6 @@ input, button {
 .cool-annotation.collapsed-comment .cool-annotation-img:hover {
 	cursor: pointer;
 	opacity: 1;
-	box-shadow: 0px 4px 10px var(--color-box-shadow);
 }
 
 /* A bubble is drawn against the size it has at a zoom of one
@@ -977,18 +1022,11 @@ input, button {
 	outline-offset: -2px;
 }
 
-.cool-annotation.crowded-bubble .cool-annotation-img > .avatar-img {
-	height: calc(var(--default-height) * 0.6);
-	width: calc(var(--default-width) * 0.6);
-}
-
 .cool-annotation.crowded-bubble .cool-annotation-info-collapsed {
 	min-width: 9px;
 	height: 9px;
 	font-size: 6px;
 	padding: 0 1px;
-	left: -3px;
-	top: -5px;
 }
 
 .cool-annotation.crowded-bubble .cool-annotation-info-collapsed.bubble-badge-tick::after {

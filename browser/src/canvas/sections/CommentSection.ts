@@ -1069,6 +1069,10 @@ export class Comment extends CanvasSectionObject {
 		else
 			this.sectionProperties.container.style.visibility = 'hidden';
 
+		// A Writer comment is marked in the margin of its page,
+		// which is drawn unlike the marker of any other kind.
+		window.L.DomUtil.addClass(this.sectionProperties.container, 'page-margin-marker');
+
 		const onShow = this.sectionProperties.data.resolved !== 'true'
 			|| this.sectionProperties.commentListSection.sectionProperties.showResolved;
 		if (onShow) {
@@ -2339,6 +2343,7 @@ export class Comment extends CanvasSectionObject {
 		const beingWritten = thread.some((comment: Comment) => comment.isEdit());
 		const resolved = !beingWritten && listSection.isThreadResolved(this);
 		const tick = resolved && thread.length === 1;
+		this.sectionProperties.container.classList.toggle('bubble-resolved', resolved);
 
 		let text = '';
 		if (beingWritten)
