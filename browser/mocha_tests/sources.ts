@@ -31,6 +31,7 @@
 /// <reference path="../src/app/Tile.ts" />
 /// <reference path="../src/app/RenderManagerBase.ts" />
 /// <reference path="../src/app/BitmapTileManager.ts" />
+/// <reference path="../src/app/SelectionHandles.ts" />
 /// <reference path="../src/app/HandleTravel.ts" />
 /// <reference path="../src/app/GraphicSelectionMiddleware.ts" />
 /// <reference path="../src/app/TextSelectionMiddleware.ts" />

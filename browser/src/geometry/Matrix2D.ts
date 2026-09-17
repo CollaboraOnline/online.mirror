@@ -30,6 +30,19 @@ namespace cool {
 
 		static readonly IDENTITY = new Matrix2D(1, 0, 0, 1, 0, 0);
 
+		/// The mapping that takes the unit square onto the range: the corner 0, 0 to its minimum
+		/// and the corner 1, 1 to its maximum.
+		static fromRange(range: Range2D): Matrix2D {
+			return new Matrix2D(
+				range.width,
+				0,
+				0,
+				range.height,
+				range.minX,
+				range.minY,
+			);
+		}
+
 		/// From the six values in canvas order [a, b, c, d, e, f]. Null
 		/// when there are fewer than six.
 		static fromArray(values: number[] | undefined): Matrix2D | null {
@@ -81,11 +94,11 @@ namespace cool {
 		}
 
 		/// The point after the transform.
-		apply(x: number, y: number): { x: number; y: number } {
-			return {
-				x: this.a * x + this.c * y + this.e,
-				y: this.b * x + this.d * y + this.f,
-			};
+		apply(x: number, y: number): cool.Point {
+			return new cool.Point(
+				this.a * x + this.c * y + this.e,
+				this.b * x + this.d * y + this.f,
+			);
 		}
 
 		/// Multiply the context's current transform by this one.

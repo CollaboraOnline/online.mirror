@@ -43,6 +43,16 @@ namespace cool {
 			return (this.minY + this.maxY) / 2;
 		}
 
+		/// The smallest range that holds both this one and the other.
+		union(other: Range2D): Range2D {
+			return new Range2D(
+				Math.min(this.minX, other.minX),
+				Math.min(this.minY, other.minY),
+				Math.max(this.maxX, other.maxX),
+				Math.max(this.maxY, other.maxY),
+			);
+		}
+
 		/// True when the range covers no area, including when a corner is
 		/// not a number.
 		isEmpty(): boolean {

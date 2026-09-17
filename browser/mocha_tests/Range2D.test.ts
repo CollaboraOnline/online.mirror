@@ -30,6 +30,13 @@ describe('Range2D', function () {
 		assert.strictEqual(cool.Range2D.fromArray(undefined), null);
 	});
 
+	it('holds both ranges in their union', function () {
+		const union = new cool.Range2D(10, 20, 30, 40).union(
+			new cool.Range2D(0, 25, 20, 50),
+		);
+		assert.deepStrictEqual(union.toArray(), [0, 20, 30, 50]);
+	});
+
 	it('is empty when it has no area', function () {
 		assert.ok(new cool.Range2D(10, 10, 10, 20).isEmpty());
 		assert.ok(new cool.Range2D(10, 10, 20, 10).isEmpty());

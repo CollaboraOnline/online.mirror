@@ -83,6 +83,19 @@ describe('Matrix2D', function () {
 		assertPoint(base.apply(0, 0), 1, 1);
 	});
 
+	it('answers a point it applies to as a cool.Point', function () {
+		const point = cool.Matrix2D.IDENTITY.translate(1, 2).apply(3, 4);
+		assert.ok(point instanceof cool.Point);
+		assertPoint(point, 4, 6);
+	});
+
+	it('takes the unit square onto a range', function () {
+		const onto = cool.Matrix2D.fromRange(new cool.Range2D(10, 20, 40, 30));
+		assertPoint(onto.apply(0, 0), 10, 20);
+		assertPoint(onto.apply(1, 1), 40, 30);
+		assertPoint(onto.apply(0.5, 0.5), 25, 25);
+	});
+
 	it('multiplies its values into a canvas context', function () {
 		const context = new CanvasRecorder(10, 10);
 		cool.Matrix2D.fromArray([1, 2, 3, 4, 5, 6]).applyTo(context as any);
