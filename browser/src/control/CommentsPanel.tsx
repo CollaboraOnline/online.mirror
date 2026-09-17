@@ -1510,15 +1510,13 @@ class CommentsPanel {
         <div class="comments-panel-comment-head">
           {this.buildAvatar(data, comment === thread.root)}
           <span class="comments-panel-comment-author">{data.author}</span>
-          <span class="comments-panel-comment-end">
-            <span
-              class="comments-panel-comment-date"
-              title={this.fullDate(data.dateTime)}
-            >
-              {this.shortDate(data.dateTime)}
-            </span>
-            {comment === thread.root && this.buildResolveButton(thread)}
+          <span
+            class="comments-panel-comment-date"
+            title={this.fullDate(data.dateTime)}
+          >
+            {this.shortDate(data.dateTime)}
           </span>
+          {comment === thread.root && this.buildResolveButton(thread)}
           {app.isCommentEditingAllowed() &&
             id !== 'new' &&
             this.buildMenuButton(comment)}

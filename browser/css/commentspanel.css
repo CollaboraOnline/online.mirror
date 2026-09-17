@@ -739,51 +739,40 @@
 	margin-bottom: var(--spacing-s);
 }
 
-/* One cell for two things: the column is as wide as the wider
-   of them, so neither state moves the name. */
-.comments-panel-comment-end {
-	display: grid;
-	align-items: center;
-	justify-items: end;
-}
-
-.comments-panel-comment-end > * {
-	grid-area: 1 / 1;
-}
-
-/* Settles the thread, or opens it again, in the place the date
-   holds while the card is at rest. */
+/* Settles the thread, or opens it again. The column is held
+   whether the mark is showing or not. */
 #comments-panel .comments-panel-thread-resolve {
 	position: relative;
 	z-index: 1;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
+	display: grid;
+	place-items: center;
 	box-sizing: border-box;
-	width: 24px;
+	width: 22px;
 	height: 24px;
 	margin: 0;
 	padding: 0;
 	border: none;
-	border-radius: 50%;
+	border-radius: var(--border-radius);
 	background: transparent;
 	color: var(--color-status-badge);
 	opacity: 0;
 	pointer-events: none;
 	vertical-align: baseline;
 	cursor: pointer;
-	transition: opacity 120ms linear;
+	transition: opacity var(--duration-fast) var(--ease-standard),
+		background-color var(--duration-instant) var(--ease-standard);
 }
 
 .comments-panel-thread-resolve .comments-panel-icon {
-	width: 15px;
-	height: 15px;
+	width: 16px;
+	height: 16px;
 }
 
-/* The id carries through from the rule above, which an id-less
-   selector would lose to. */
+/* The id is carried through, or the rule above would outweigh
+   these and the mark would never come out. */
 #comments-panel .comments-panel-thread:hover .comments-panel-thread-resolve,
-#comments-panel .comments-panel-thread:focus-within .comments-panel-thread-resolve {
+#comments-panel .comments-panel-thread:focus-within .comments-panel-thread-resolve,
+#comments-panel .comments-panel-thread-resolve.is-done {
 	opacity: 1;
 	pointer-events: auto;
 }
@@ -801,24 +790,9 @@
 	outline-offset: 0;
 }
 
-#comments-panel .comments-panel-thread:hover .comments-panel-comment-date,
-#comments-panel .comments-panel-thread:focus-within .comments-panel-comment-date {
-	opacity: 0;
-	pointer-events: none;
-}
-
-/* A pointer that cannot hover never reaches a control that only
-   hover brings out, so both stand side by side. */
+/* A pointer that cannot hover never brings the mark out, so on
+   those machines it stands there at all times. */
 @media (hover: none) {
-	.comments-panel-comment-end {
-		grid-auto-flow: column;
-		column-gap: var(--spacing-s);
-	}
-
-	.comments-panel-comment-end > * {
-		grid-area: auto;
-	}
-
 	#comments-panel .comments-panel-thread-resolve {
 		opacity: 1;
 		pointer-events: auto;
@@ -826,8 +800,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.comments-panel-comment-date,
-	#comments-panel .comments-panel-thread-resolve {
+	#comments-panel .comments-panel-thread-resolve,
+	#comments-panel .comments-panel-comment-menu {
 		transition: none;
 	}
 }
@@ -881,14 +855,13 @@
 /* How long ago the comment was written, at the end of the line
    the author's name starts. */
 /* How long ago the comment was written. It stands above the
-   reach of the row button so its own tooltip comes up. */
+   reach of the row button, so its own tooltip comes up. */
 .comments-panel-comment-date {
 	position: relative;
 	z-index: 1;
 	color: var(--color-status-badge);
 	font-size: 0.6875rem;
 	white-space: nowrap;
-	transition: opacity 120ms linear;
 }
 
 /* A long comment is cut off after three lines. All of the text
@@ -979,16 +952,22 @@
 /* The menu of actions for the comment, at the end of the author
    line at all times, so the line ends on the edge. */
 #comments-panel .comments-panel-comment-menu {
+	position: relative;
+	z-index: 1;
 	display: grid !important;
 	place-items: center;
 	box-sizing: border-box;
-	width: 24px !important;
+	width: 12px !important;
 	height: 24px !important;
+	margin: 0 !important;
+	margin-inline-end: -4px !important;
+	padding: 0 !important;
 	border: none !important;
-	border-radius: 50%;
+	border-radius: var(--border-radius);
 	background: none !important;
 	color: var(--color-status-badge);
 	cursor: pointer;
+	transition: background-color var(--duration-instant) var(--ease-standard);
 }
 
 /* The three dots take the colour of the button. The background
@@ -996,13 +975,22 @@
 #comments-panel .comments-panel-comment-menu::before {
 	content: '';
 	display: block;
-	width: 24px;
-	height: 24px;
+	width: 4px;
+	height: 16px;
 	background-color: currentcolor;
-	mask-image: url('images/lc_more.svg');
-	mask-size: 24px 24px;
+	mask-image: url('images/comment-menu.svg');
+	mask-size: contain;
 	mask-repeat: no-repeat;
 	mask-position: center;
+}
+
+/* The mark is narrow. The part that answers the pointer is
+   widened without the tint or the dots growing. */
+#comments-panel .comments-panel-comment-menu::after {
+	content: '';
+	position: absolute;
+	inset-block: 0;
+	inset-inline: -4px -8px;
 }
 
 #comments-panel .comments-panel-comment-menu:hover {
