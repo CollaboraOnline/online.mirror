@@ -223,6 +223,10 @@ int main(int argc, char** argv)
         QStringList() << "readonly",
         "Open Collabora Office in read-only mode, only for document viewing."
     );
+    QCommandLineOption editOption(
+        QStringList() << "edit",
+        "Open a document ready to edit, rather than read-only with an Edit button."
+    );
     QCommandLineOption logLevelOption(
         QStringList() << "log-level",
         "Set log level (none, fatal, critical, error, warning, notice, information, debug, trace).",
@@ -253,6 +257,7 @@ int main(int argc, char** argv)
     );
     argParser.addOption(debugOption);
     argParser.addOption(forcedReadOnlyOption);
+    argParser.addOption(editOption);
     argParser.addOption(logLevelOption);
     argParser.addOption(logDisabledAreasOption);
     argParser.addOption(textDocumentOption);
@@ -275,6 +280,7 @@ int main(int argc, char** argv)
 
     bool forcedReadOnly = argParser.isSet(forcedReadOnlyOption);
     CodaConfig::instance().setForcedReadOnly(forcedReadOnly);
+    CodaConfig::instance().setStartInEditMode(argParser.isSet(editOption));
 
     Log::initialize(QApplication::applicationName().toStdString(), logLevel);
     Log::setDisabledAreas(argParser.value(logDisabledAreasOption).toStdString());

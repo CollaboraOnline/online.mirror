@@ -1163,9 +1163,10 @@ void WebView::load(const Poco::URI& fileURL, bool newFile, bool isStarterMode, b
 
     if (!isStarterMode)
     {
-        // A brand new file and a template-based document both open ready to edit;
-        // an existing file opens read-only until the user chooses to edit it.
-        if (!newFile && !requiresSaveAs)
+        // A brand new file and a template-based document both open ready to edit. An existing
+        // file opens read-only until the user chooses to edit it, unless it was asked to open
+        // ready to edit.
+        if (!newFile && !requiresSaveAs && !CodaConfig::instance().startsInEditMode())
             urlAndQuery.addQueryParameter("startreadonly", "true");
         if (_isWelcome)
             urlAndQuery.addQueryParameter("welcome", "true");
