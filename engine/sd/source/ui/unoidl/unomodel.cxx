@@ -216,7 +216,9 @@
 #include <drawinglayer/processor2d/Primitive2dJsonProcessor.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <vcl/canvastools.hxx>
+#include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <basegfx/vector/b2enums.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/gfxlink.hxx>
 #include <vcl/GraphicAttributes.hxx>
@@ -4071,6 +4073,19 @@ private:
                         rWriter.put("aheadX", basegfx::fround<sal_Int64>(aAhead.getX()));
                         rWriter.put("aheadY", basegfx::fround<sal_Int64>(aAhead.getY()));
                     }
+
+                    /*
+                        How the curve carries on through the point: 1 where the two weights lie on
+                        one line through it, 2 where they lie on one line and are the same length
+                        as well. It is worked out here from the points as the model holds them,
+                        which are of a finer grain than the twips that travel, and rounding them
+                        first can turn either answer into the other.
+                    */
+                    const basegfx::B2VectorContinuity eContinuity(
+                        rPolygon.getContinuityInPoint(nPoint));
+                    if (eContinuity != basegfx::B2VectorContinuity::NONE)
+                        rWriter.put("continuity",
+                                    eContinuity == basegfx::B2VectorContinuity::C2 ? 2 : 1);
                 }
             }
         }

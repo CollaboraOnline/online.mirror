@@ -35,6 +35,11 @@ namespace cool {
 		behindY?: number;
 		aheadX?: number;
 		aheadY?: number;
+		/// How the curve carries on through the point: 1 when the two weights lie on one line
+		/// through it, 2 when they lie on one line and are the same length as well. Absent when
+		/// the curve turns a corner there. It is worked out by the engine on the model's own
+		/// numbers, which are finer than the twips here.
+		continuity?: 1 | 2;
 	}
 
 	/** One polygon of the path of an object, as the model holds it. The polygons and their
