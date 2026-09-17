@@ -148,11 +148,11 @@
 /* A thread nobody has anything left to say about is green here,
    on its marker in the page, and on its card. */
 #comments-panel .comments-panel-status-choice.is-done-choice {
-	color: var(--color-resolved);
+	color: var(--color-success);
 }
 
 #comments-panel .comments-panel-status-choice.is-done-choice.is-on {
-	color: var(--color-resolved);
+	color: var(--color-success);
 }
 
 /* A state no thread is in steps back and stops answering, so
@@ -532,7 +532,7 @@
 
 /* The words that say a thread is settled take the same green. */
 .comments-panel-comment-resolved {
-	color: var(--color-resolved);
+	color: var(--color-success);
 	font-weight: 600;
 }
 
@@ -787,7 +787,7 @@
 }
 
 #comments-panel .comments-panel-thread-resolve.is-done {
-	color: var(--color-resolved);
+	color: var(--color-success);
 }
 
 #comments-panel .comments-panel-thread-resolve:hover {
