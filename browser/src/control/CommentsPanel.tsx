@@ -1386,7 +1386,32 @@ class CommentsPanel {
       comment.sectionProperties.data.resolved = settled ? 'true' : 'false';
 
     this.getCommentSection()?.resolveThread(thread.root);
-    this.render();
+
+    // Rebuilding the list would throw this card away and put a
+    // new one in its place, which is a jump under the pointer
+    // and the end of the hold. Only what changed is drawn.
+    this.drawTheSettledState(thread);
+  }
+
+  // What a thread being settled or opened again changes on the
+  // card itself, without the list being built afresh.
+  private drawTheSettledState(thread: CommentThread): void {
+    const rootId = String(thread.root.sectionProperties.data.id);
+    const card = this.rowOf(rootId)?.closest('.comments-panel-thread');
+    if (!card) return;
+
+    const done = this.threadIsResolved(thread);
+    card.classList.toggle('is-resolved', done);
+
+    const tick = card.querySelector<HTMLElement>(
+      '.comments-panel-thread-resolve',
+    );
+    if (!tick) return;
+
+    const says = done ? _('Reopen the thread') : _('Resolve the thread');
+    tick.classList.toggle('is-done', done);
+    tick.setAttribute('aria-pressed', String(done));
+    tick.setAttribute('aria-label', says);
   }
 
   // Let go of the card the pointer has left, so the filters
