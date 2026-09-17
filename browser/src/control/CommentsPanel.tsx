@@ -1132,6 +1132,7 @@ class CommentsPanel {
       >
         {this.buildCommentRow(thread, thread.root)}
         {thread.replies.length > 0 && this.buildRepliesToggle(thread, rootId, open)}
+        {this.buildResolveButton(thread)}
         {open && thread.replies.map((reply) => this.buildCommentRow(thread, reply))}
       </li>
     );
@@ -1162,6 +1163,32 @@ class CommentsPanel {
         {label}
       </button>
     );
+  }
+
+  // Settles a thread, or opens it again, from the card itself.
+  private buildResolveButton(thread: CommentThread): HTMLElement | boolean {
+    if (!app.isCommentEditingAllowed()) return false;
+    if (!thread.root.canModerate || !thread.root.canModerate()) return false;
+
+    const done = this.threadIsResolved(thread);
+    const says = done ? _('Reopen the thread') : _('Resolve the thread');
+
+    return (
+      <button
+        class={'comments-panel-thread-resolve' + (done ? ' is-done' : '')}
+        type="button"
+        aria-pressed={String(done)}
+        aria-label={says}
+        data-title={says}
+        onClick={() => this.resolveThread(thread)}
+      >
+        <span class="comments-panel-icon is-done"></span>
+      </button>
+    );
+  }
+
+  private resolveThread(thread: CommentThread): void {
+    this.getCommentSection()?.resolveThread(thread.root);
   }
 
   private toggleThread(rootId: string): void {

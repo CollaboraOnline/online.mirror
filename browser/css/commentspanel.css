@@ -425,6 +425,60 @@
 	background-color: transparent;
 }
 
+/* Settles the thread, or opens it again. It comes out for the
+   card under the pointer, and stays out once it is settled. */
+#comments-panel .comments-panel-thread-resolve {
+	position: absolute;
+	inset-block-start: var(--spacing-m);
+	inset-inline-end: var(--spacing-s);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 22px;
+	height: 22px;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-radius: var(--border-radius);
+	background: transparent;
+	color: var(--color-status-badge);
+	opacity: 0;
+	vertical-align: baseline;
+	cursor: pointer;
+}
+
+.comments-panel-thread-resolve .comments-panel-icon {
+	width: 15px;
+	height: 15px;
+}
+
+.comments-panel-thread:hover .comments-panel-thread-resolve,
+.comments-panel-thread:focus-within .comments-panel-thread-resolve,
+#comments-panel .comments-panel-thread-resolve.is-done {
+	opacity: 1;
+}
+
+#comments-panel .comments-panel-thread-resolve.is-done {
+	color: var(--color-resolved);
+}
+
+#comments-panel .comments-panel-thread-resolve:hover {
+	background: var(--color-background-hover);
+	color: var(--color-resolved);
+}
+
+.comments-panel-thread-resolve:focus-visible {
+	outline: 2px solid var(--color-primary);
+	outline-offset: 1px;
+}
+
+/* The words that say a thread is settled take the same green. */
+.comments-panel-comment-resolved {
+	color: var(--color-resolved);
+	font-weight: 600;
+}
+
 .comments-panel-popover-separator {
 	height: 1px;
 	margin: var(--spacing-s) var(--spacing-m);
