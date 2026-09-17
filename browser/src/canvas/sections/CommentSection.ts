@@ -538,8 +538,10 @@ export class Comment extends CanvasSectionObject {
 
 	// A bubble is drawn smaller while it shares its page margin
 	// with the bubbles of comments written close by.
-	public setBubbleCrowded(crowded: boolean): void {
-		this.sectionProperties.container.classList.toggle('crowded-bubble', crowded);
+	public setBubbleCrowded(crowded: boolean, share: number): void {
+		const container = this.sectionProperties.container;
+		container.style.setProperty('--crowded-share', String(crowded ? share : 1));
+		container.classList.toggle('crowded-bubble', crowded);
 	}
 
 	// How big the bubble is drawn against its size at a zoom of
@@ -1069,8 +1071,8 @@ export class Comment extends CanvasSectionObject {
 		else
 			this.sectionProperties.container.style.visibility = 'hidden';
 
-		// A Writer comment is marked in the margin of its page,
-		// which is drawn unlike the marker of any other kind.
+		// A comment is marked in the margin of its page, which
+		// no other kind of marker is drawn like.
 		window.L.DomUtil.addClass(this.sectionProperties.container, 'page-margin-marker');
 
 		const onShow = this.sectionProperties.data.resolved !== 'true'
