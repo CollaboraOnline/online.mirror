@@ -33,6 +33,8 @@
 	position: absolute;
 	left: auto;
 	right: 0;
+	bottom: auto;
+	top: calc(100% + 10px);
 }
 
 /* One bar above the list: how much of it there is, what is
@@ -795,9 +797,11 @@
 
 /* A long comment is cut off after three lines. All of the text
    stays in the row, so a search reaches the hidden part too. */
+/* Three whole lines. The height is counted off the line height
+   so the third one is never cut across. */
 .comments-panel-comment-text {
 	overflow: hidden;
-	max-height: 3.9em;
+	max-height: calc(1.45em * 3);
 	line-height: 1.45;
 	font-size: 0.8125rem;
 }
@@ -860,6 +864,9 @@
 	width: auto;
 	height: auto;
 	margin: 0;
+	/* The dots above are a 15 pixel mark in a 24 pixel button,
+	   so their ink stops short of the box by this much. */
+	margin-inline-end: 4.5px;
 	margin-inline-start: auto;
 	padding: 0;
 	border: none;
