@@ -295,9 +295,9 @@ export class CommentSection extends CanvasSectionObject {
 	// that edge to the near side of the bubble, in CSS pixels.
 	private static readonly bubbleInsetFromThePageEdge = 4;
 
-	// How much of a full bubble a crowded one is drawn at. The
-	// stylesheet draws it at this share too.
-	private static readonly crowdedBubbleShare = 0.6;
+	// How much of a full marker a crowded one is drawn at, as
+	// a share of the size it takes on its own.
+	public static readonly crowdedBubbleShare = 0.6;
 
 	// The room left between one bubble and the next, in CSS
 	// pixels at a zoom of one hundred percent.
@@ -2739,6 +2739,9 @@ export class CommentSection extends CanvasSectionObject {
 			return false;
 		if (!comment.isRootComment())
 			return false;
+		if (data.layoutStatus === CommentLayoutStatus.DELETED
+			&& this.map['stateChangeHandler'].getItemValue('.uno:ShowTrackedChanges') !== 'true')
+			return false;
 
 		return data.anchorPos !== undefined && data.anchorPos !== null;
 	}
@@ -2821,11 +2824,16 @@ export class CommentSection extends CanvasSectionObject {
 		// measured. The zoom is worked out once for all.
 		const scale = CommentSection.bubbleScaleForTheZoom();
 		for (const comment of bubbles) {
-			comment.setBubbleCrowded(false);
+			comment.setBubbleCrowded(false, CommentSection.crowdedBubbleShare);
 			comment.setBubbleScale(scale);
 		}
 
-		const bubble = bubbles[0].measureBubble();
+		// A marker with no height is one the page is not drawing,
+		// and its zeros would place every other marker wrongly.
+		const bubble = bubbles.map((comment: Comment) => comment.measureBubble())
+			.find((measure: { size: number }) => measure.size > 0);
+		if (!bubble)
+			return;
 		const gap = CommentSection.gapBetweenBubbles * scale;
 
 		const anchorOf = new Map<Comment, number[]>();
@@ -2868,7 +2876,7 @@ export class CommentSection extends CanvasSectionObject {
 				const top = Math.max(anchor[1], free);
 				const left = CommentSection.bubbleLeftOf(anchor[0], size, scale);
 
-				comment.setBubbleCrowded(crowded);
+				comment.setBubbleCrowded(crowded, CommentSection.crowdedBubbleShare);
 				comment.setBubblePos([left, top, size]);
 				comment.setContainerPos(true, this.sectionProperties.canvasContainerBounds,
 					left - bubble.insetX, top - bubble.insetY);
