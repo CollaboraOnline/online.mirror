@@ -334,12 +334,12 @@
 #comments-panel .comments-panel-popover-row {
 	display: flex;
 	align-items: center;
-	gap: var(--spacing-m);
+	gap: var(--spacing-s);
 	box-sizing: border-box;
 	width: 100%;
 	height: 28px;
 	margin: 0;
-	padding: 0 var(--spacing-m);
+	padding: 0 var(--spacing-s) 0 var(--spacing-m);
 	border: none;
 	border-radius: var(--border-radius);
 	background: transparent;
@@ -398,6 +398,7 @@
 .comments-panel-popover-name {
 	flex: 1 1 auto;
 	min-width: 0;
+	margin-inline-start: var(--spacing-s);
 	overflow: hidden;
 	white-space: nowrap;
 	text-overflow: ellipsis;

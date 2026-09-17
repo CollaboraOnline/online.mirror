@@ -409,7 +409,9 @@ class CommentsPanel {
     const width = popover.offsetWidth;
     const rightToLeft = document.documentElement.dir === 'rtl';
 
-    let left = rightToLeft ? from.left : from.right - width;
+    // The menu hangs from the near edge of its button, the way
+    // a menu hangs from the word that opens it.
+    let left = rightToLeft ? from.right - width : from.left;
     left = Math.max(room, Math.min(left, window.innerWidth - width - room));
 
     popover.style.left = Math.round(left) + 'px';
