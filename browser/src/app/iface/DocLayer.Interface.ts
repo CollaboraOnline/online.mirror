@@ -84,6 +84,8 @@ interface DocLayerInterface {
 	// True while that saved offset still needs to be re-applied to the view.
 	_restoringViewScroll?: boolean;
 	scrollToPos(pos: InternPointLike): void;
+	// Scrolls the view by the offset the point holds.
+	scrollByPoint(offset: cool.SimplePoint): void;
 
 	_selectedPart: number;
 	// The part identifier of the part at the given index: the string the

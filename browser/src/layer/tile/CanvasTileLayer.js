@@ -3050,9 +3050,10 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 		}
 	},
 
-	// Scroll the view by an amount given by a simplePoint
+	// Scroll the view by an amount given by a simplePoint. The scroll is counted in core
+	// pixels, which is what the point holds in pX and pY.
 	scrollByPoint: function(offset) {
-		this._map.fire('scrollby', {x: offset.cX, y: offset.cY});
+		this._map.fire('scrollby', {x: offset.pX, y: offset.pY});
 	},
 
 	// Update cursor layer (blinking cursor).

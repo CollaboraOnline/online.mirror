@@ -306,6 +306,79 @@ class GraphicSelection {
 	}
 
 	/*
+		How far the view scrolls along one axis to show a stretch of the document that starts at
+		start and is length long, where the view shows viewStart and is viewLength long. Returns
+		the new start of the view.
+
+		A stretch that fits in the view is scrolled to in whole steps of the free space, the view
+		minus the stretch, so that there is room left between the stretch and the edge it came in
+		over. A stretch longer than the view is scrolled to by half a view, and only once it lies
+		outside the middle part of the view, which leaves the reader something to recognise. The
+		view only scrolls, it never zooms.
+	*/
+	private static scrolledStart(
+		viewStart: number,
+		viewLength: number,
+		start: number,
+		length: number,
+	): number {
+		const free = Math.min(viewLength - length, length);
+
+		if (viewLength < length) {
+			// A fifteenth-hundredth part of the view on each side is the middle part.
+			const border = Math.round((viewLength * 30) / 200);
+
+			if (viewStart + border > start + length)
+				return viewStart - Math.round(viewLength / 2);
+
+			if (viewStart + viewLength - border < start)
+				return viewStart + Math.round(viewLength / 2);
+
+			return viewStart;
+		}
+
+		if (free <= 0) return viewStart;
+
+		let scrolled = viewStart;
+
+		const beyondEnd = start + length - scrolled - viewLength;
+		if (beyondEnd > 0) scrolled += (Math.floor(beyondEnd / free) + 1) * free;
+
+		const beforeStart = scrolled - start;
+		if (beforeStart > 0)
+			scrolled -= (Math.floor(beforeStart / free) + 1) * free;
+
+		return scrolled;
+	}
+
+	/// Scrolls so that the whole rectangle is seen, the way a presentation scrolls to what it
+	/// marks. A rectangle that is seen already leaves the view where it is.
+	public static scrollRectangleIntoView(rectangle: cool.SimpleRectangle): void {
+		const viewed = app.activeDocument?.activeLayout?.viewedRectangle;
+		if (!viewed || viewed.containsRectangle(rectangle.toArray())) return;
+
+		const x = GraphicSelection.scrolledStart(
+			viewed.x1,
+			viewed.width,
+			rectangle.x1,
+			rectangle.width,
+		);
+
+		const y = GraphicSelection.scrolledStart(
+			viewed.y1,
+			viewed.height,
+			rectangle.y1,
+			rectangle.height,
+		);
+
+		if (x === viewed.x1 && y === viewed.y1) return;
+
+		app.map._docLayer.scrollByPoint(
+			new cool.SimplePoint(x - viewed.x1, y - viewed.y1),
+		);
+	}
+
+	/*
 		What tells one selection from another: the objects it stands on, so a selection of two
 		shapes differs from a selection of one of them. The engine names every marked object, and
 		the first of them again on its own, which is what a payload from an older engine carries.
@@ -753,12 +826,34 @@ class GraphicSelection {
 				app.socket.sendMessage('rendershapeselection mimetype=image/svg+xml');
 			}
 
-			// scroll to selected graphics, if it has no cursor
-			if (
-				!app.map._docLayer.isWriter() &&
-				this.rectangle &&
-				app.map._docLayer._allowViewJump()
-			) {
+			/*
+				Scroll to the object that is selected now, where it does not lie in what is on
+				screen. The view only scrolls, it never zooms, which is what the office does when
+				Tab walks from one object to the next. The two conditions below both hold the view
+				still in a case where the object then stays off screen, so a view that draws from
+				objects reads them differently.
+			*/
+			const drawsFromObjects = RenderManager.isVectorRendering();
+
+			/*
+				A jump waits while a selection is complex, which is about a selection of text that
+				a jump would tear the reader away from. A selection of an object is marked complex
+				a few lines below, so from the second selection on it is complex before it is even
+				looked at.
+			*/
+			const mayJump = drawsFromObjects || app.map._docLayer._allowViewJump();
+
+			/*
+				A jump also waits while the view follows a cursor, so that it stays with the person
+				being watched. A single person editing follows their own view, and there is nobody
+				else to stay with then.
+			*/
+			const followsAnotherView = drawsFromObjects
+				? !app.isFollowingOff() &&
+					Number(app.getFollowedViewId()) !== Number(app.map._docLayer._viewId)
+				: app.isFollowingEditor() || app.isFollowingUser();
+
+			if (!app.map._docLayer.isWriter() && this.rectangle && mayJump) {
 				if (
 					(!app.isPointVisibleInTheDisplayedArea([
 						this.rectangle.x1,
@@ -769,12 +864,20 @@ class GraphicSelection {
 							this.rectangle.y2,
 						])) &&
 					!TextSelections.getEndRectangle() &&
-					!(app.isFollowingEditor() || app.isFollowingUser()) &&
+					!followsAnotherView &&
 					!app.map.calcInputBarHasFocus()
 				) {
-					app.map._docLayer.scrollToPos(
-						new cool.SimplePoint(this.rectangle.x1, this.rectangle.y1),
-					);
+					/*
+						A view that draws from objects scrolls no further than it has to, so that
+						the whole of what is selected lands on screen. The other one has the
+						corner it holds put in the middle of the view.
+					*/
+					if (drawsFromObjects)
+						GraphicSelection.scrollRectangleIntoView(this.rectangle);
+					else
+						app.map._docLayer.scrollToPos(
+							new cool.SimplePoint(this.rectangle.x1, this.rectangle.y1),
+						);
 				}
 			}
 		}
