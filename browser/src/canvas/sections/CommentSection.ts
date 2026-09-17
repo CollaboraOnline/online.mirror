@@ -1068,12 +1068,12 @@ export class Comment extends CanvasSectionObject {
 			this.sectionProperties.container.style.visibility = '';
 			this.sectionProperties.container.style.display = '';
 		}
-		else
+		else {
 			this.sectionProperties.container.style.visibility = 'hidden';
-
-		// A comment is marked in the margin of its page, which
-		// no other kind of marker is drawn like.
-		window.L.DomUtil.addClass(this.sectionProperties.container, 'page-margin-marker');
+			// A comment is marked in the margin of its page, which
+			// no other kind of marker is drawn like.
+			window.L.DomUtil.addClass(this.sectionProperties.container, 'page-margin-marker');
+		}
 
 		const onShow = this.sectionProperties.data.resolved !== 'true'
 			|| this.sectionProperties.commentListSection.sectionProperties.showResolved;
