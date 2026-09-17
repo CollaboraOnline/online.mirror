@@ -173,9 +173,12 @@ window.L.Map.include({
 				this.showComments(true);
 		}
 
-		const unoCommand = '.uno:ShowResolvedAnnotations';
-		this.sendUnoCommand(unoCommand);
-		app.sectionContainer.getSectionWithName(app.CSections.CommentList.name).setViewResolved(on);
+		// The command flips the engine's answer rather than
+		// setting it, so it goes only where the two differ.
+		const section = app.sectionContainer.getSectionWithName(app.CSections.CommentList.name);
+		if (section.sectionProperties.showResolved !== on)
+			this.sendUnoCommand('.uno:ShowResolvedAnnotations');
+		section.setViewResolved(on);
 		this.uiManager.setDocTypePref('ShowResolved', on);
 	},
 
@@ -430,15 +433,12 @@ export class CommentSection extends CanvasSectionObject {
 	public goToComment(annotation: any): void {
 		if (!annotation) return;
 
-		// Asking for these flips the setting, so they are
-		// only asked for while they are off.
-		const states = this.map.stateChangeHandler;
-		const isOn = (value: any) => value === true || value === 'true';
-
-		if (!isOn(states.getItemValue('showannotations')))
+		// The list holds both answers, and the engine echoes
+		// them a moment later, so the list is what is read.
+		if (this.sectionProperties.show !== true)
 			this.map.showComments(true);
 		if (annotation.sectionProperties.data.resolved === 'true'
-			&& !isOn(states.getItemValue('.uno:ShowResolvedAnnotations')))
+			&& this.sectionProperties.showResolved !== true)
 			this.map.showResolvedComments(true);
 
 		// Move the cursor to the comment's anchor
