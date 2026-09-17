@@ -726,10 +726,16 @@ class GraphicSelection {
 				if (extraInfo.isRotatable === undefined) extraInfo.isRotatable = true;
 			}
 
-			// Workaround for tdf#123874. For some reason the handling of the
-			// shapeselectioncontent messages that we get back causes the WebKit process
-			// to crash on iOS.
+			/*
+				A picture of the selection to show while it is dragged. A view that draws from
+				objects draws that picture from the objects themselves and asks for none.
+
+				Workaround for tdf#123874. For some reason the handling of the
+				shapeselectioncontent messages that we get back causes the WebKit process
+				to crash on iOS.
+			*/
 			if (
+				!RenderManager.isVectorRendering() &&
 				!window.ThisIsTheiOSApp &&
 				this.extraInfo.isDraggable &&
 				!this.extraInfo.svg

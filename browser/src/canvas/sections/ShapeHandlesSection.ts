@@ -629,6 +629,10 @@ class ShapeHandlesSection extends CanvasSectionObject {
 	}
 
 	showSVG() {
+		// A view that draws from objects shows what a drag would do by drawing the objects
+		// themselves, so the picture the engine renders stays away.
+		if (RenderManager.isVectorRendering()) return;
+
 		if (this.sectionProperties.svg)
 			this.sectionProperties.svg.style.display = '';
 	}
@@ -810,9 +814,10 @@ class ShapeHandlesSection extends CanvasSectionObject {
 	/*
 		Whether a handle of that kind gets a section of its own. A view that draws from objects
 		draws the handles that frame and shape the selection in one section of its own, which
-		knows them as a list, and leaves the rest here: the anchor, the glue points and the
-		handles of a diagram. Cropping an image is done with the whole set of handles here, so
-		while it runs they are all made as they always were.
+		knows them as a list, and leaves the rest here: the anchor, the glue points, the handles
+		of a diagram.
+		Cropping an image is done with the whole set of handles here, so while it runs they are
+		all made as they always were.
 	*/
 	private handleGetsItsOwnSection(kind: string): boolean {
 		if (!RenderManager.isVectorRendering()) return true;
@@ -997,13 +1002,19 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		mouse, the outline the engine answered with, and the lines it was snapping to. The shape
 		itself never moved, the engine breaks its own drag on the same key.
 	*/
-	onDragCancel(): void {
-		this.sectionProperties.lastDragDistance = [0, 0];
+	/// Forgets what the last look for a snap found, so the lines that marked it are gone.
+	public forgetTheSnap(): void {
 		this.sectionProperties.closestX = null;
 		this.sectionProperties.closestY = null;
 		this.sectionProperties.centerSnapX = null;
 		this.sectionProperties.centerSnapY = null;
 		this.sectionProperties.draggedCenter = null;
+	}
+
+	onDragCancel(): void {
+		GraphicSelection.selectionSection?.endTheMove();
+		this.sectionProperties.lastDragDistance = [0, 0];
+		this.forgetTheSnap();
 
 		this.hideSVG();
 		this.clearShapeDragPreview();
@@ -1044,6 +1055,12 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		this.sectionProperties.positionOnMouseDown = point.clone();
 		this.sectionProperties.positionOnMouseDown.pX += this.position[0];
 		this.sectionProperties.positionOnMouseDown.pY += this.position[1];
+
+		// The handles of a view that draws from objects live in a section of their own, and they
+		// travel with the object while it is carried.
+		GraphicSelection.selectionSection?.beginMoving(
+			this.sectionProperties.positionOnMouseDown,
+		);
 	}
 
 	onMouseUp(point: cool.SimplePoint, e: MouseEvent): void {
@@ -1059,6 +1076,8 @@ class ShapeHandlesSection extends CanvasSectionObject {
 			point.y += app.activeDocument.activeLayout.viewedRectangle.y1 - this.sectionProperties.viewedRectangleOnMouseDown.y1;
 			this.sendTransformCommand(point);
 		}
+
+		GraphicSelection.selectionSection?.endTheMove();
 	}
 
 	// xList holds the dragged shape's [left edge, center, right edge].
@@ -1340,6 +1359,16 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		if (this.containerObject.isDraggingSomething() && canDrag) {
 			this.constrainDragToSheetArea(dragDistance);
 
+			// The handles of a view that draws from objects travel with the object.
+			GraphicSelection.selectionSection?.followTheMove(
+				new cool.SimplePoint(
+					(this.sectionProperties.positionOnMouseDown.pX + dragDistance[0]) *
+						app.pixelsToTwips,
+					(this.sectionProperties.positionOnMouseDown.pY + dragDistance[1]) *
+						app.pixelsToTwips,
+				),
+			);
+
 			if (!app.activeDocument.activeLayout.viewedRectangle.equals(this.sectionProperties.viewedRectangleOnMouseDown.toArray())) {
 				const diff = new cool.SimplePoint(
 					app.activeDocument.activeLayout.viewedRectangle.x1 - this.sectionProperties.viewedRectangleOnMouseDown.x1,
@@ -1561,7 +1590,9 @@ class ShapeHandlesSection extends CanvasSectionObject {
 	}
 
 	public onDraw() {
-		this.drawSelectionFrame();
+		// A view that draws from objects draws the line around the selection in the section that
+		// draws its handles, where it follows everything that is done to the selection.
+		if (!RenderManager.isVectorRendering()) this.drawSelectionFrame();
 		this.drawShapeDragPreview();
 		if (!this.showSection || !this.isVisible)
 			this.hideSVG();

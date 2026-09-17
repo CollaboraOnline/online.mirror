@@ -208,6 +208,14 @@ class RenderManagerBase {
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 	): void {}
 
+	renderObjectsWith(
+		_context: CanvasRenderingContext2D,
+		_data: cool.VectorPrimitivesData,
+		_objectIds: number[],
+		_matrix: cool.Matrix2D,
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
+	): void {}
+
 	renderPlaceholderAids(
 		_context: CanvasRenderingContext2D,
 		_data: cool.VectorPrimitivesData,

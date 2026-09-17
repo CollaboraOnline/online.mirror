@@ -27,25 +27,27 @@ abstract class SelectionSection extends CanvasSectionObject {
 	documentObject: boolean = true;
 
 	/// The keyboard on the handles of this selection.
-	public readonly travel: HandleTravel = new HandleTravel(() => this.handles());
+	public readonly travel: HandleTravel = new HandleTravel(
+		() => this.handles(),
+		(handle: SelectionHandle, towards: cool.Point, event: KeyboardEvent) =>
+			this.moveHandleBy(handle, towards, event),
+	);
 
 	/// The handles as they were last worked out from the objects.
 	private known: SelectionHandle[] = [];
 
-	/// Where the handles stand while a drag is running, which is where the drag would leave
-	/// them. Null while nothing is being dragged.
-	private previewed: SelectionHandle[] | null = null;
+	/// What a drag is doing to the selection, null while nothing is being dragged.
+	private interaction: SelectionInteraction | null = null;
 
-	/// The handle a drag took hold of, null while none is being dragged.
-	private dragged: SelectionHandle | null = null;
+	/*
+		The kind that names the handle which turns the selection. The client makes that handle
+		itself: the engine has no handle of the kind, and what it is told at the end of a turn is
+		a transformation of the objects.
+	*/
+	public static readonly turningKind: string = 'rotate';
 
-	/// The shape the selection had when the drag began, which every step of it works from.
-	private shapeAtStart: any = null;
-
-	/// Where each handle stood when the drag began, as a distance from the middle of the shape
-	/// and the angle it lies at, so that it can be put where the shape now reaches.
-	private placesAtStart: { name: string; distance: number; angle: number }[] =
-		[];
+	/// How far above the selection the handle that turns it sits, in core pixels.
+	private static readonly turningDistance: number = 30;
 
 	/// What has handles here. One object offers its own, a path offers its points.
 	protected abstract sources(): HandleSource[];
@@ -55,16 +57,78 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.known = this.sources().flatMap((source: HandleSource) =>
 			source.handles(),
 		);
-		// A drag that is running keeps its picture of where the handles are going.
-		if (!this.dragged) this.previewed = null;
 
+		const turning = this.turningHandle();
+		if (turning) this.known.push(turning);
 		this.coverTheHandles();
+	}
+
+	/*
+		The middle of what is selected, from the two handles that frame it across the diagonal.
+		Nothing where the client did not work the framing handles out.
+	*/
+	private middle(): cool.SimplePoint | undefined {
+		const upperLeft = this.known.find(
+			(one: SelectionHandle) => one.kind === '1',
+		);
+		const lowerRight = this.known.find(
+			(one: SelectionHandle) => one.kind === '8',
+		);
+		if (!upperLeft || !lowerRight) return undefined;
+
+		return new cool.SimplePoint(
+			(upperLeft.point.x + lowerRight.point.x) * 0.5,
+			(upperLeft.point.y + lowerRight.point.y) * 0.5,
+		);
+	}
+
+	/*
+		The handle that turns the selection, above the middle of its upper side and away from it
+		by the same distance whatever the zoom. It turns with the selection, being placed from
+		the handles that frame it. Nothing where the objects say they cannot be turned.
+	*/
+	private turningHandle(): SelectionHandle | undefined {
+		if (GraphicSelection.extraInfo?.isRotatable === false) return undefined;
+
+		const middle = this.middle();
+		const above = this.known.find((one: SelectionHandle) => one.kind === '2');
+		if (!middle || !above) return undefined;
+
+		const away = SelectionSection.turningDistance * app.dpiScale;
+		const out = new cool.Point(
+			above.point.x - middle.x,
+			above.point.y - middle.y,
+		);
+		const length = out.length();
+		if (!length) return undefined;
+
+		const step = cool.SimplePoint.fromCorePixels([away, away]);
+
+		return {
+			name: SelectionSection.turningKind,
+			kind: SelectionSection.turningKind,
+			pointer: '0',
+			point: new cool.Point(
+				above.point.x + (out.x / length) * step.x,
+				above.point.y + (out.y / length) * step.y,
+			).round(),
+		};
 	}
 
 	/// The handles as they are drawn now: where a drag would leave them while one runs, where
 	/// the objects put them otherwise.
 	public handles(): SelectionHandle[] {
-		return this.previewed ?? this.known;
+		return this.interaction?.handles(this.known) ?? this.known;
+	}
+
+	/// The handles as the objects have them, which is what an interaction works from.
+	public knownHandles(): SelectionHandle[] {
+		return this.known;
+	}
+
+	/// Asks for the page to be drawn again, after something moved under an interaction.
+	public redraw(): void {
+		this.containerObject.requestReDraw();
 	}
 
 	/// Takes in every handle with the box it is drawn as, so that a press on one arrives here.
@@ -124,8 +188,44 @@ abstract class SelectionSection extends CanvasSectionObject {
 		return Number(handle.kind) >= 1 && Number(handle.kind) <= 8;
 	}
 
+	/*
+		Draws the dashed line around what is selected, through the four corners the framing
+		handles sit on. They follow whatever is being done to the selection, so the line turns
+		with a turn and grows with a scale.
+	*/
+	private drawTheFrame(): void {
+		const corners = ['1', '3', '8', '6']
+			.map((kind: string) =>
+				this.handles().find((handle: SelectionHandle) => handle.kind === kind),
+			)
+			.filter((handle): handle is SelectionHandle => handle !== undefined);
+		if (corners.length !== 4) return;
+
+		this.context.save();
+		this.context.setTransform(1, 0, 0, 1, 0, 0);
+		this.context.strokeStyle = app.map.uiManager.isBackgroundDark()
+			? 'white'
+			: 'black';
+		this.context.setLineDash([3, 3]);
+		this.context.beginPath();
+
+		corners.forEach((handle: SelectionHandle, at: number) => {
+			const point = new cool.SimplePoint(handle.point.x, handle.point.y);
+			if (at === 0) this.context.moveTo(point.vX, point.vY);
+			else this.context.lineTo(point.vX, point.vY);
+		});
+
+		this.context.closePath();
+		this.context.stroke();
+		this.context.setLineDash([]);
+		this.context.restore();
+	}
+
 	onDraw(): void {
 		if (this.standsBack()) return;
+
+		this.drawTheInteraction();
+		this.drawTheFrame();
 
 		this.context.save();
 		this.context.setTransform(1, 0, 0, 1, 0, 0);
@@ -133,7 +233,6 @@ abstract class SelectionSection extends CanvasSectionObject {
 		const size = ShapeHandlesSection.handleSize();
 		for (const handle of this.handles()) {
 			const point = new cool.SimplePoint(handle.point.x, handle.point.y);
-			// The handle the keyboard works on is drawn a third larger, at its larger half.
 			const grown = this.travel.showsAsActive(handle.name) ? size / 3 : 0;
 
 			this.context.beginPath();
@@ -148,7 +247,8 @@ abstract class SelectionSection extends CanvasSectionObject {
 					size + 2 * grown,
 				);
 			} else {
-				this.context.fillStyle = 'yellow';
+				this.context.fillStyle =
+					handle.kind === SelectionSection.turningKind ? 'white' : 'yellow';
 				this.context.arc(
 					point.vX,
 					point.vY,
@@ -166,81 +266,49 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.context.restore();
 	}
 
-	/// The section that knows the shape of the selection and shows what a drag would do to it.
-	private shapeSection(): any {
-		return GraphicSelection.handlesSection;
+	/*
+		Draws what a running interaction would leave behind: the objects of the selection, as
+		they draw themselves, with the transformation it stands for over them. Half see-through,
+		so that what lies under them stays readable.
+	*/
+	private drawTheInteraction(): void {
+		const matrix = this.interaction?.transformation();
+		if (!matrix) return;
+
+		const data = RenderGeometrySection.currentPart();
+		if (!data) return;
+
+		this.context.save();
+		this.context.setTransform(1, 0, 0, 1, 0, 0);
+
+		// The point at the very start of the document says where the drawing of the part begins
+		// on the canvas, and a twip is that many pixels wide.
+		const origin = new cool.SimplePoint(0, 0);
+		this.context.translate(origin.vX, origin.vY);
+		this.context.scale(app.twipsToPixels, app.twipsToPixels);
+		this.context.globalAlpha = 0.5;
+
+		RenderManager.renderObjectsWith(
+			this.context,
+			data,
+			this.selectedObjects(),
+			matrix,
+		);
+
+		this.context.restore();
 	}
 
-	/// Where the mouse is in the document, in core pixels, from a point this section was given.
-	private inTheDocument(point: cool.SimplePoint): cool.SimplePoint {
-		const inDocument = point.clone();
-		inDocument.pX += this.position[0];
-		inDocument.pY += this.position[1];
-		return inDocument;
-	}
-
-	onMouseDown(point: cool.SimplePoint, e: MouseEvent): void {
-		this.dragged =
-			this.handleAt(
-				this.myTopLeft[0] + point.pX,
-				this.myTopLeft[1] + point.pY,
-			) ?? null;
-		if (!this.dragged) return;
-
-		const shape =
-			this.shapeSection()?.sectionProperties.shapeRectangleProperties;
-		this.shapeAtStart = shape
-			? { ...shape, center: shape.center.clone() }
-			: null;
-
-		/*
-			Where every handle stands in relation to the middle of the shape. A drag moves the
-			middle and changes the size, and each handle keeps its distance and its angle, which
-			is what carries it along.
-		*/
-		this.placesAtStart = [];
-		if (this.shapeAtStart) {
-			for (const handle of this.known) {
-				const at = new cool.SimplePoint(handle.point.x, handle.point.y);
-				const alongX = at.pX - this.shapeAtStart.center.pX;
-				const alongY = this.shapeAtStart.center.pY - at.pY;
-
-				this.placesAtStart.push({
-					name: handle.name,
-					distance: Math.sqrt(alongX * alongX + alongY * alongY),
-					angle: Math.atan2(alongY, alongX) - this.shapeAtStart.angleRadian,
-				});
-			}
-		}
-
-		this.stopPropagating();
-		e.stopPropagation();
-	}
-
-	/// The handles where the shape the drag leads to would put them.
-	private placedOn(shape: any): SelectionHandle[] {
-		return this.known.map((handle: SelectionHandle) => {
-			const place = this.placesAtStart.find(
-				(one: any) => one.name === handle.name,
-			);
-			if (!place) return handle;
-
-			const angle = place.angle + shape.angleRadian;
-			const moved = cool.SimplePoint.fromCorePixels([
-				shape.center.pX + place.distance * Math.cos(angle),
-				shape.center.pY - place.distance * Math.sin(angle),
-			]);
-
-			return { ...handle, point: new cool.Point(moved.x, moved.y) };
-		});
-	}
+	/// Which objects the selection holds, so that an interaction can draw them.
+	protected abstract selectedObjects(): number[];
 
 	/*
 		The pointer over a handle: the direction that handle scales in, the hand that takes hold
-		of one that shapes the object, and the sign that says no over an object that cannot be
-		resized.
+		of one that shapes the object, the hand that turns the selection, and the sign that says
+		no over an object that cannot be resized.
 	*/
 	private pointerOver(handle: SelectionHandle): string {
+		if (handle.kind === SelectionSection.turningKind) return 'pointer';
+
 		if (!this.framesTheSelection(handle))
 			return (
 				'url(' + app.LOUtil.getURL('images/cursors/grab.svg') + ') 12 12, grab'
@@ -262,8 +330,144 @@ abstract class SelectionSection extends CanvasSectionObject {
 		return byKind[handle.kind] ?? 'default';
 	}
 
+	/// The section that holds what the older path knows about the selection: the shape it has
+	/// and what a drag of it could snap to.
+	private shapeSection(): any {
+		return GraphicSelection.handlesSection;
+	}
+
+	/// Where the mouse is in the document, in core pixels, from a point this section was given.
+	private inTheDocument(point: cool.SimplePoint): cool.SimplePoint {
+		const inDocument = point.clone();
+		inDocument.pX += this.position[0];
+		inDocument.pY += this.position[1];
+		return inDocument;
+	}
+
+	/// Looks for something on the page that the handle could snap to, and marks it.
+	public lookForASnap(handle: SelectionHandle): void {
+		const half = 0.5 * ShapeHandlesSection.handleSize();
+		const at = new cool.SimplePoint(handle.point.x, handle.point.y);
+
+		// A point is asked about, so there is no size to it and no distance left to travel.
+		this.shapeSection()?.checkHelperLinesAndSnapPoints(
+			[0, 0],
+			[at.pX - half, at.pY - half],
+			[0, 0],
+		);
+	}
+
+	/// Where the last look for a snap landed, in core pixels, or nothing on either side that
+	/// found nothing to snap to.
+	public snappedTo(): (number | null)[] | null {
+		const snap = this.shapeSection()?.sectionProperties;
+		if (!snap) return null;
+
+		return [snap.closestX, snap.closestY];
+	}
+
+	/*
+		How far a key turns the selection, in degrees: one of them, fifteen with Shift, which is
+		the step the office holds a turn to, and a tenth with Alt for the finest of it.
+	*/
+	private static turningStep(event: KeyboardEvent): number {
+		if (event.shiftKey) return 15;
+		if (event.altKey) return 0.1;
+		return 1;
+	}
+
+	/*
+		Moves a handle as a key asks: a handle that shapes the selection goes where the key
+		points, the handle that turns it turns the selection around its middle instead. Answers
+		where the handle lands, and nothing where it goes nowhere of its own.
+	*/
+	private moveHandleBy(
+		handle: SelectionHandle,
+		towards: cool.Point,
+		event: KeyboardEvent,
+	): cool.SimplePoint | null {
+		if (handle.kind === SelectionSection.turningKind) {
+			const middle = this.middle();
+			// The keys that point left and up turn against the clock, the others with it.
+			const against = towards.x < 0 || towards.y < 0;
+			if (middle)
+				TurningInteraction.turnObjects(
+					middle,
+					SelectionSection.turningStep(event) * (against ? 1 : -1),
+				);
+			return null;
+		}
+
+		const step = HandleTravel.stepFor(event);
+		const to = new cool.SimplePoint(
+			handle.point.x + towards.x * step,
+			handle.point.y + towards.y * step,
+		);
+
+		app.map.sendUnoCommand('.uno:MoveShapeHandle', {
+			...ShapeHandlesSection.handleParameters(handle),
+			NewPosX: { type: 'long', value: to.x },
+			NewPosY: { type: 'long', value: to.y },
+		});
+
+		return to;
+	}
+
+	/*
+		Begins a move of the whole selection, follows it, and ends it. The press that carries an
+		object still belongs to the section that draws it from tiles, so that section drives the
+		move here and sends the command; what is drawn while it runs is worked out here.
+	*/
+	public beginMoving(at: cool.SimplePoint): void {
+		this.interaction = new MovingInteraction(this, at);
+	}
+
+	public followTheMove(to: cool.SimplePoint): void {
+		this.interaction?.move(to);
+	}
+
+	public endTheMove(): void {
+		this.endTheInteraction();
+	}
+
+	/// The interaction a press on that handle begins, or nothing where the handle begins none.
+	private interactionFor(
+		handle: SelectionHandle,
+		at: cool.SimplePoint,
+	): SelectionInteraction | null {
+		if (handle.kind === SelectionSection.turningKind) {
+			const middle = this.middle();
+			return middle ? new TurningInteraction(this, middle, at) : null;
+		}
+
+		if (!this.framesTheSelection(handle)) return null;
+
+		const shape =
+			this.shapeSection()?.sectionProperties.shapeRectangleProperties;
+
+		return shape
+			? new ScalingInteraction(this, handle, {
+					...shape,
+					center: shape.center.clone(),
+				})
+			: null;
+	}
+
+	onMouseDown(point: cool.SimplePoint, e: MouseEvent): void {
+		const handle = this.handleAt(
+			this.myTopLeft[0] + point.pX,
+			this.myTopLeft[1] + point.pY,
+		);
+		if (!handle) return;
+
+		this.interaction = this.interactionFor(handle, this.inTheDocument(point));
+
+		this.stopPropagating();
+		e.stopPropagation();
+	}
+
 	onMouseMove(point: cool.SimplePoint, dragDistance: number[], e: MouseEvent) {
-		if (!this.containerObject.isDraggingSomething() || !this.dragged) {
+		if (!this.containerObject.isDraggingSomething() || !this.interaction) {
 			const over = this.handleAt(
 				this.myTopLeft[0] + point.pX,
 				this.myTopLeft[1] + point.pY,
@@ -275,117 +479,44 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.stopPropagating();
 		e.stopPropagation();
 
-		if (GraphicSelection.extraInfo?.isResizable === false) return;
+		this.interaction.move(this.inTheDocument(point), e);
 
-		if (this.framesTheSelection(this.dragged) && this.shapeAtStart) {
-			const shape = HandleScaling.shapeAfterDrag(
-				this.inTheDocument(point),
-				this.shapeAtStart,
-				this.dragged.kind,
-				HandleScaling.keepsRatio(e, false),
-			);
-
-			// The handles follow the shape the drag leads to.
-			this.previewed = this.placedOn(shape);
+		// A drag that reaches past the edge of the view pulls the view after it.
+		if (!this.containerObject.isMouseInside()) {
+			const outside = point.clone();
+			outside.pX += this.myTopLeft[0];
+			outside.pY += this.myTopLeft[1];
+			app.map.fire('handleautoscroll', {
+				pos: { x: outside.cX, y: outside.cY },
+				map: app.map,
+			});
 		}
-
-		/*
-			What may snap to another object of the page is the handle being dragged, taken where
-			the drag has it now. It is a point, so there is no size to it and no distance left to
-			travel: it is already where it is being asked about.
-		*/
-		const dragged = this.handles().find(
-			(handle: SelectionHandle) => handle.name === this.dragged?.name,
-		);
-		if (dragged) {
-			const half = 0.5 * ShapeHandlesSection.handleSize();
-			const at = new cool.SimplePoint(dragged.point.x, dragged.point.y);
-			this.shapeSection()?.checkHelperLinesAndSnapPoints(
-				[0, 0],
-				[at.pX - half, at.pY - half],
-				[0, 0],
-			);
-		}
-
-		this.containerObject.requestReDraw();
 	}
 
 	onMouseUp(point: cool.SimplePoint, e: MouseEvent): void {
-		if (!this.containerObject.isDraggingSomething() || !this.dragged) {
-			this.dragged = null;
+		if (!this.containerObject.isDraggingSomething() || !this.interaction) {
+			this.interaction = null;
 			return;
 		}
 
 		this.stopPropagating();
 		e.stopPropagation();
 
-		const handle = this.dragged;
-		const inDocument = this.inTheDocument(point);
-		let parameters: any = {
-			...ShapeHandlesSection.handleParameters(handle),
-			NewPosX: { type: 'long', value: inDocument.x },
-			NewPosY: { type: 'long', value: inDocument.y },
-		};
-
-		if (this.framesTheSelection(handle) && this.shapeAtStart) {
-			const keepRatio = HandleScaling.keepsRatio(e, false);
-			const shape = HandleScaling.shapeAfterDrag(
-				inDocument,
-				this.shapeAtStart,
-				handle.kind,
-				keepRatio,
-			);
-
-			const reached = cool.SimpleRectangle.fromCorePixels([
-				shape.center.pX - shape.width * 0.5,
-				shape.center.pY - shape.height * 0.5,
-				shape.width,
-				shape.height,
-			]);
-
-			// The engine counts the eight from zero, where a name counts the kinds from one.
-			const committed = HandleScaling.committedHandle(
-				String(Number(handle.kind) - 1),
-				keepRatio,
-			);
-			const reachedPoint = HandleScaling.positionOfHandle(committed, reached);
-
-			// Where the ratio is free, the drag ends where the mouse is, or where it snapped to
-			// another object of the page.
-			if (!keepRatio) {
-				const snap = this.shapeSection()?.sectionProperties;
-				reachedPoint[0] = Math.round(
-					(snap?.closestX ?? inDocument.pX) * app.pixelsToTwips,
-				);
-				reachedPoint[1] = Math.round(
-					(snap?.closestY ?? inDocument.pY) * app.pixelsToTwips,
-				);
-			}
-
-			parameters = {
-				...ShapeHandlesSection.handleParameters({
-					name: String(Number(committed) + 1) + '.0.0',
-				}),
-				NewPosX: { type: 'long', value: reachedPoint[0] },
-				NewPosY: { type: 'long', value: reachedPoint[1] },
-			};
-		}
-
-		app.map.sendUnoCommand('.uno:MoveShapeHandle', parameters);
-
-		this.endTheDrag();
+		this.interaction.finish(this.inTheDocument(point), e);
+		this.endTheInteraction();
 	}
 
 	onDragCancel(): void {
-		this.endTheDrag();
+		this.interaction?.cancel();
+		this.endTheInteraction();
 	}
 
-	/// Puts the handles back where the objects have them and takes the picture of the drag away.
-	private endTheDrag(): void {
-		this.dragged = null;
-		this.previewed = null;
-		this.shapeAtStart = null;
-		this.placesAtStart = [];
+	/// Lets the interaction go, puts the handles back where the objects have them and takes the
+	/// lines that marked a snap away with it.
+	private endTheInteraction(): void {
+		this.interaction = null;
+		this.shapeSection()?.forgetTheSnap();
+		app.map.fire('scrollvelocity', { vx: 0, vy: 0 });
 		this.containerObject.requestReDraw();
 	}
 }

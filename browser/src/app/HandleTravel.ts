@@ -58,6 +58,18 @@ class HandleTravel {
 	private handlesOf: () => any[];
 
 	/*
+		What moving a handle means, which is the business of whoever owns the handles: a handle
+		that shapes an object is moved where it is asked to go, a handle that turns the selection
+		turns it instead. Answers where the handle lands, so that the view can follow it there,
+		or nothing where the handle does not go to a place of its own.
+	*/
+	private moveHandle: (
+		handle: any,
+		towards: cool.Point,
+		event: KeyboardEvent,
+	) => cool.SimplePoint | null;
+
+	/*
 		The handle the keyboard works on, by the name that says what it is, or null while the
 		keyboard is on no handle. A name outlives the handles being built again after every move,
 		where a place in a list would not.
@@ -69,8 +81,16 @@ class HandleTravel {
 
 	private timer: ReturnType<typeof setInterval> | null = null;
 
-	constructor(handlesOf: () => any[]) {
+	constructor(
+		handlesOf: () => any[],
+		moveHandle: (
+			handle: any,
+			towards: cool.Point,
+			event: KeyboardEvent,
+		) => cool.SimplePoint | null,
+	) {
 		this.handlesOf = handlesOf;
+		this.moveHandle = moveHandle;
 	}
 
 	/// Whether the handle of that name is the one the keyboard is on and is shown large now.
@@ -202,21 +222,11 @@ class HandleTravel {
 		const handle = this.activeHandle();
 		if (!handle) return false;
 
-		const step = HandleTravel.stepFor(event);
-		const to = new cool.SimplePoint(
-			handle.point.x + towards.x * step,
-			handle.point.y + towards.y * step,
-		);
-
-		app.map.sendUnoCommand('.uno:MoveShapeHandle', {
-			...ShapeHandlesSection.handleParameters(handle),
-			NewPosX: { type: 'long', value: to.x },
-			NewPosY: { type: 'long', value: to.y },
-		});
+		const landed = this.moveHandle(handle, towards, event);
 
 		// The handle goes where it was asked to go, and the view follows it there. Where it lands
-		// is known here, while the handles the engine answers with arrive later.
-		this.scrollToHandleAt(to);
+		// is known already, while the handles that come back arrive later.
+		if (landed) this.scrollToHandleAt(landed);
 
 		return true;
 	}

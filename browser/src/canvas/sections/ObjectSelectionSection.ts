@@ -32,6 +32,10 @@ class ObjectSelectionSection extends SelectionSection {
 	protected sources(): HandleSource[] {
 		return [new ObjectHandles([this.objectId])];
 	}
+
+	protected selectedObjects(): number[] {
+		return [this.objectId];
+	}
 }
 
 app.definitions.objectSelectionSection = ObjectSelectionSection;

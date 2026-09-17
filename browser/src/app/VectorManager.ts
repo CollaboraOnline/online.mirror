@@ -275,6 +275,32 @@ class VectorManager extends RenderManagerBase {
 		}
 	}
 
+	/*
+		Draw the objects named, with a transformation laid over what they draw. It is the picture
+		a drag shows of itself: the objects as they would look where the drag has taken them. The
+		caller sets up the context the same way as for a whole part.
+	*/
+	renderObjectsWith(
+		context: CanvasRenderingContext2D,
+		data: cool.VectorPrimitivesData,
+		objectIds: number[],
+		matrix: cool.Matrix2D,
+	): void {
+		this._renderer.setSlideBounds(data.slideWidth, data.slideHeight);
+		this._renderer.setEditViewContentVisible(true);
+
+		for (const id of objectIds) {
+			const object = data.objects.get(id);
+			if (!object?.primitives) continue;
+
+			this._renderer.renderPrimitive(context, {
+				type: cool.TransformPrimitive.type,
+				matrix: matrix.toArray(),
+				children: object.primitives,
+			} as cool.TransformPrimitive);
+		}
+	}
+
 	/// Draw the master that a page names under it, in the master's order. A
 	/// shared object comes from the master, a per-slide one from the page's
 	/// own copy, if it has one. An object on a layer the page hides is left

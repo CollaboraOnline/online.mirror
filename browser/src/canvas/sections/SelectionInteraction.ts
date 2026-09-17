@@ -1,0 +1,52 @@
+/* -*- js-indent-level: 8 -*- */
+/*
+ * Copyright the Collabora Online contributors.
+ *
+ * SPDX-License-Identifier: MPL-2.0
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+/*
+	One thing a person does to a selection between taking hold of it and letting go: scaling it
+	by a handle, turning it, moving it, moving a point of a path. It begins when it is made,
+	follows the mouse while it moves, and either finishes, which tells the engine what it did,
+	or is called off, which tells it nothing.
+
+	While it runs it says two things about itself: the transformation it stands for, which draws
+	the objects as they would look, and where the handles stand, which draws them along with it.
+	Both are worked out in the client, so nothing is asked of the engine until the end.
+*/
+abstract class SelectionInteraction {
+	/// What is selected: it knows the objects, their handles and the middle of them.
+	protected selection: SelectionSection;
+
+	constructor(selection: SelectionSection) {
+		this.selection = selection;
+	}
+
+	/// Follows the mouse to that point in the document.
+	public abstract move(to: cool.SimplePoint, event?: MouseEvent): void;
+
+	/// Ends it where the mouse is, and hands the engine what it did.
+	public abstract finish(to: cool.SimplePoint, event?: MouseEvent): void;
+
+	/// Ends it with nothing done, so the selection stands as it stood.
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	public cancel(): void {}
+
+	/*
+		The transformation it stands for now, laid over the objects as they are drawn. Nothing while
+		it stands for none, and then the objects are drawn where they are.
+	*/
+	public transformation(): cool.Matrix2D | null {
+		return null;
+	}
+
+	/// Where the handles stand while it runs, from where they stand when nothing runs.
+	public handles(known: SelectionHandle[]): SelectionHandle[] {
+		return known;
+	}
+}

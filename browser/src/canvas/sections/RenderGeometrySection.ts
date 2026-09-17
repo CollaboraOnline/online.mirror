@@ -157,7 +157,7 @@ class RenderGeometrySection extends CanvasSectionObject {
 
 	/// The part the view shows, from the vector rendering cache, or nothing while it is on its
 	/// way or the view shows no part.
-	private static currentPart(): cool.VectorPrimitivesData | undefined {
+	public static currentPart(): cool.VectorPrimitivesData | undefined {
 		// The file based view stacks every page of the document on screen, while these
 		// are the rectangles of the one page a view shows.
 		const docLayer = app.map?._docLayer;

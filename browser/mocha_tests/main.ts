@@ -54,6 +54,7 @@
 /// <reference path="./Shortcuts.test.ts" />
 /// <reference path="./VectorPrimitiveRenderer.test.ts" />
 /// <reference path="./Matrix2D.test.ts" />
+/// <reference path="./Point.test.ts" />
 /// <reference path="./Range2D.test.ts" />
 /// <reference path="./VectorGradientFrame.test.ts" />
 /// <reference path="./VectorGradientPrimitives.test.ts" />

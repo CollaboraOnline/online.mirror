@@ -36,6 +36,10 @@ class MultiSelectionSection extends SelectionSection {
 	protected sources(): HandleSource[] {
 		return [new ObjectHandles(this.objectIds)];
 	}
+
+	protected selectedObjects(): number[] {
+		return this.objectIds;
+	}
 }
 
 app.definitions.multiSelectionSection = MultiSelectionSection;

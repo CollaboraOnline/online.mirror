@@ -114,6 +114,11 @@ export class Point {
 		return this;
 	}
 
+	/// How far the point lies from the origin, which for a direction is its length.
+	public length(): number {
+		return Math.sqrt(this.x * this.x + this.y * this.y);
+	}
+
 	public distanceTo(point: Point): number {
 		point = Point.toPoint(point);
 

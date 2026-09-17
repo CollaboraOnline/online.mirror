@@ -265,6 +265,20 @@ class RenderManager {
 		RenderManager.ensureInstance().renderInto(context, data, options);
 	}
 
+	static renderObjectsWith(
+		context: CanvasRenderingContext2D,
+		data: cool.VectorPrimitivesData,
+		objectIds: number[],
+		matrix: cool.Matrix2D,
+	): void {
+		RenderManager.ensureInstance().renderObjectsWith(
+			context,
+			data,
+			objectIds,
+			matrix,
+		);
+	}
+
 	static renderPlaceholderAids(
 		context: CanvasRenderingContext2D,
 		data: cool.VectorPrimitivesData,
