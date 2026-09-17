@@ -1460,13 +1460,95 @@ class CommentsPanel {
     // The panel takes a moment to come up, and a row not on the
     // page yet cannot be scrolled to, so the scrolling waits.
     app.layoutingService.appendLayoutingTask(() => {
-      this.listNode
-        ?.querySelectorAll<HTMLElement>('.comments-panel-comment')
-        .forEach((row) => {
-          if (row.dataset.commentId === id)
-            row.scrollIntoView({ block: 'nearest' });
-        });
+      const row = this.rowOf(id);
+      if (!row) return;
+
+      this.carryTheListTo(row, () =>
+        CommentsPanel.markTheArrival(row.closest('.comments-panel-thread')),
+      );
     });
+  }
+
+  // Scroll the list so a row is on it, over a moment that grows
+  // with the distance, and slowest as it arrives.
+  private carryTheListTo(row: HTMLElement, arrived: () => void): void {
+    const list = this.listNode;
+    if (!list) return;
+
+    const from = list.scrollTop;
+    const to = CommentsPanel.whereTheListHasToBe(list, row);
+    const distance = to - from;
+
+    if (!CommentsPanel.motionIsWanted() || Math.abs(distance) < 2) {
+      list.scrollTop = to;
+      arrived();
+      return;
+    }
+
+    // Long and short journeys both want to feel deliberate, so
+    // the time grows with the distance between two bounds.
+    const time = Math.min(520, Math.max(240, Math.abs(distance) * 0.6));
+    const started = performance.now();
+
+    const step = (now: number) => {
+      const part = Math.min(1, (now - started) / time);
+      // Fast at first and easing to nothing, so the list settles
+      // rather than stopping.
+      const eased = 1 - Math.pow(1 - part, 3);
+      list.scrollTop = from + distance * eased;
+
+      if (part < 1) requestAnimationFrame(step);
+      else arrived();
+    };
+    requestAnimationFrame(step);
+  }
+
+  // Where the list has to stand for a row to be on it, with a
+  // little room left above and below.
+  private static whereTheListHasToBe(
+    list: HTMLElement,
+    row: HTMLElement,
+  ): number {
+    const room = 12;
+    // Measured against the list rather than against whatever the
+    // row is laid out in, which is the card around it.
+    const listBox = list.getBoundingClientRect();
+    const rowBox = row.getBoundingClientRect();
+    const top = rowBox.top - listBox.top + list.scrollTop;
+    const bottom = top + rowBox.height;
+
+    // A list shorter than the room it is given has nowhere to go,
+    // so the furthest it can stand is never below nothing.
+    const furthest = Math.max(0, list.scrollHeight - list.clientHeight);
+    const held = (where: number) => Math.min(furthest, Math.max(0, where));
+
+    if (top - room < list.scrollTop) return held(top - room);
+    if (bottom + room > list.scrollTop + list.clientHeight)
+      return held(bottom + room - list.clientHeight);
+    return list.scrollTop;
+  }
+
+  // Whether the reader has asked for as little movement as the
+  // machine can manage.
+  private static motionIsWanted(): boolean {
+    return !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  // The card lights for a moment where the scrolling stopped, so
+  // the eye is told which of them was being looked for.
+  private static markTheArrival(card: Element | null): void {
+    if (!card || !CommentsPanel.motionIsWanted()) return;
+
+    card.classList.remove('has-arrived');
+    // Reading the layout starts the animation again for a card
+    // the reader has just come back to.
+    void (card as HTMLElement).offsetWidth;
+    card.classList.add('has-arrived');
+    card.addEventListener(
+      'animationend',
+      () => card.classList.remove('has-arrived'),
+      { once: true },
+    );
   }
 
   private rowOf(id: string): HTMLElement | null {
