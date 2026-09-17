@@ -2976,6 +2976,12 @@ export class CommentSection extends CanvasSectionObject {
 	// Where the room beside the page starts, in canvas pixels
 	// counted from the left edge of the canvas.
 	private roomBesideThePageX (): number {
+		// Where more than one page sits in a row the column
+		// follows the horizontal scroll, as the pages do.
+		if (CommentSection.isMultiColumnLayout())
+			return this.myTopLeft[0] - this.calculateAvailableSpace()
+				- app.activeDocument.activeLayout.scrollProperties.viewX;
+
 		if (document.documentElement.dir === 'rtl')
 			return this.calculateAvailableSpace() - this.sectionProperties.commentWidth;
 
