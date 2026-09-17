@@ -1203,7 +1203,15 @@ class CommentsPanel {
     // as nothing having happened. It is held until the pointer
     // leaves it.
     this.heldThread = String(thread.root.sectionProperties.data.id);
+
+    // The engine answers in its own time, so the card takes the
+    // new state now and the answer confirms it.
+    const settled = !this.threadIsResolved(thread);
+    for (const comment of [thread.root, ...thread.replies])
+      comment.sectionProperties.data.resolved = settled ? 'true' : 'false';
+
     this.getCommentSection()?.resolveThread(thread.root);
+    this.render();
   }
 
   // Let go of the card the pointer has left, so the filters
@@ -1213,11 +1221,48 @@ class CommentsPanel {
       'mouseleave',
       () => {
         if (this.heldThread === null) return;
+
+        const held = this.heldThread;
         this.heldThread = null;
-        this.render();
+        // A card the filters still keep stays where it is, so
+        // only one on its way out is closed away.
+        const thread = this.threads.find(
+          (one) => String(one.root.sectionProperties.data.id) === held,
+        );
+        if (thread && this.matchesFilters(thread)) {
+          this.render();
+          return;
+        }
+        this.closeTheCardAway(card, () => this.render());
       },
       { once: true },
     );
+  }
+
+  // Take a card out by closing the room it stands in, so the
+  // cards under it come up rather than jump.
+  private closeTheCardAway(card: HTMLElement, gone: () => void): void {
+    if (!CommentsPanel.motionIsWanted()) {
+      gone();
+      return;
+    }
+
+    card.style.height = card.offsetHeight + 'px';
+    // Reading the height fixes it before the closing starts.
+    void card.offsetHeight;
+
+    card.classList.add('is-leaving');
+    card.style.height = '0px';
+
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      gone();
+    };
+    card.addEventListener('transitionend', finish, { once: true });
+    // A card the reader never sees closing still has to go.
+    setTimeout(finish, 400);
   }
 
   private toggleThread(rootId: string): void {

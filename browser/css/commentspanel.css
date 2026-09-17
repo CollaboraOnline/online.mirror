@@ -516,6 +516,27 @@
 	}
 }
 
+/* A card on its way out of the list closes the room it stands
+   in, so the cards under it come up rather than jump. */
+.comments-panel-thread.is-leaving {
+	opacity: 0;
+	margin-block-end: 0;
+	padding-block: 0;
+	border-block-width: 0;
+	overflow: hidden;
+	pointer-events: none;
+	transition: height var(--duration-slow) ease,
+		opacity var(--duration-normal) ease,
+		margin var(--duration-slow) ease,
+		padding var(--duration-slow) ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.comments-panel-thread.is-leaving {
+		transition: none;
+	}
+}
+
 /* A thread nobody has anything left to say about steps back. */
 .comments-panel-thread.is-resolved {
 	opacity: 0.72;
