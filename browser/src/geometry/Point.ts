@@ -125,6 +125,12 @@ export class Point {
 		return this.x * point.y - this.y * point.x;
 	}
 
+	/// The dot product with the other one: how far this one reaches along the other, times the
+	/// length of the other.
+	public dot(point: Point): number {
+		return this.x * point.x + this.y * point.y;
+	}
+
 	public distanceTo(point: Point): number {
 		point = Point.toPoint(point);
 

@@ -33,6 +33,72 @@ class ShapingInteraction extends SelectionInteraction {
 		this.at = at.clone();
 	}
 
+	/*
+		The upper side of the object: where it starts and which way it runs. The handle for the
+		corner radius lives on it. Nothing where the client does not hold the framing handles.
+	*/
+	private upperSide(): { from: cool.Point; along: cool.Point } | undefined {
+		const handles = this.selection.knownHandles();
+		const corner = handles.find((one: SelectionHandle) => one.kind === '1');
+		const end = handles.find((one: SelectionHandle) => one.kind === '3');
+		if (!corner || !end) return undefined;
+
+		const upper = end.point.subtract(corner.point);
+		const side = upper.length();
+		if (!side) return undefined;
+
+		return { from: corner.point, along: upper.divideBy(side) };
+	}
+
+	/*
+		How large a corner radius the mouse at that point asks for, in twips: how far along the
+		upper side of the object it has come from the upper left corner, and never less than
+		nothing. That is the rule the object itself reads a drag of this handle by.
+	*/
+	private radiusAsked(to: cool.SimplePoint): number | undefined {
+		if (this.handle.kind !== '11') return undefined;
+
+		const side = this.upperSide();
+		if (!side) return undefined;
+
+		return Math.max(
+			0,
+			new cool.Point(to.x, to.y).subtract(side.from).dot(side.along),
+		);
+	}
+
+	/*
+		Where the handle is drawn while it is dragged. A handle for a corner radius is drawn on
+		the upper side at the radius it asks for, and no further than half the longer side of
+		the object, which is where the object draws it. A handle a custom shape is shaped by
+		follows the mouse, its own bounds being the shape's business and not known here.
+	*/
+	private shownAt(): cool.Point {
+		const radius = this.radiusAsked(this.at);
+		const side = this.upperSide();
+		const shape = this.selection.shapeNow();
+		if (radius === undefined || !side || !shape)
+			return new cool.Point(this.at.x, this.at.y);
+
+		const kept = Math.min(
+			radius,
+			Math.max(shape.width, shape.height) * app.pixelsToTwips * 0.5,
+		);
+
+		return side.from.add(side.along.multiplyBy(kept)).round();
+	}
+
+	/// Where the engine is told the handle was let go: the radius that was asked for, which can
+	/// be larger than the handle is drawn at, or the point itself for a handle without a rule.
+	private letGoAt(): cool.SimplePoint {
+		const radius = this.radiusAsked(this.at);
+		const side = this.upperSide();
+		if (radius === undefined || !side) return this.at.clone();
+
+		const at = side.from.add(side.along.multiplyBy(radius));
+		return new cool.SimplePoint(at.x, at.y);
+	}
+
 	public move(to: cool.SimplePoint): void {
 		this.at = to.clone();
 		this.selection.redraw();
@@ -41,22 +107,25 @@ class ShapingInteraction extends SelectionInteraction {
 	public finish(to: cool.SimplePoint): void {
 		this.move(to);
 
+		const letGo = this.letGoAt();
+
 		app.map.sendUnoCommand('.uno:MoveShapeHandle', {
 			...ShapeHandlesSection.handleParameters(this.handle),
-			NewPosX: { type: 'long', value: this.at.x },
-			NewPosY: { type: 'long', value: this.at.y },
+			NewPosX: { type: 'long', value: letGo.x },
+			NewPosY: { type: 'long', value: letGo.y },
 		});
 	}
 
 	public handles(known: SelectionHandle[]): SelectionHandle[] {
+		const shown = this.shownAt();
+
 		return known.map((one: SelectionHandle) =>
-			one.name === this.handle.name
-				? { ...one, point: new cool.Point(this.at.x, this.at.y) }
-				: one,
+			one.name === this.handle.name ? { ...one, point: shown } : one,
 		);
 	}
 
 	public leadingPoint(): cool.SimplePoint | null {
-		return this.at.clone();
+		const shown = this.shownAt();
+		return new cool.SimplePoint(shown.x, shown.y);
 	}
 }

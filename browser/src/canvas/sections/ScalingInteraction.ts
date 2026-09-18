@@ -11,8 +11,9 @@
 
 /*
 	Scaling the selection by one of the eight handles that frame it. The shape it leads to is
-	worked out from the shape it started with and where the mouse is, and the handles keep their
-	part of that shape while it runs.
+	worked out from the shape it started with and where the mouse is, and everything it shows -
+	the objects and every handle - goes through the one transformation that leads from the one
+	shape to the other.
 */
 class ScalingInteraction extends SelectionInteraction {
 	/// The handle that was taken hold of.
@@ -21,12 +22,15 @@ class ScalingInteraction extends SelectionInteraction {
 	/// The shape the selection had when it began: a middle, a width, a height and an angle.
 	private shapeAtStart: any;
 
-	/// Where each handle stood in the shape's own two directions, as a part of its width and of
-	/// its height, so that it can be put where the shape now reaches.
-	private places: { name: string; acrossPart: number; upPart: number }[] = [];
-
 	/// The shape it would leave behind, null until the mouse has moved.
 	private reached: any = null;
+
+	/*
+		The corner radius of the object, in twips, taken from where its handle stood when the
+		drag began: that handle sits on the upper side, that far from the upper left corner.
+		Null where the object has no such handle.
+	*/
+	private radius: number | null = null;
 
 	constructor(
 		selection: SelectionSection,
@@ -37,25 +41,49 @@ class ScalingInteraction extends SelectionInteraction {
 
 		this.handle = handle;
 		this.shapeAtStart = shapeAtStart;
+		this.radius = ScalingInteraction.radiusOf(selection.knownHandles());
+	}
 
-		if (!shapeAtStart?.width || !shapeAtStart.height) return;
+	/// How far the handle for the corner radius stands from the upper left corner, in twips.
+	private static radiusOf(handles: SelectionHandle[]): number | null {
+		const corner = handles.find((one: SelectionHandle) => one.kind === '1');
+		const radius = handles.find((one: SelectionHandle) => one.kind === '11');
+		if (!corner || !radius) return null;
 
-		const turn = shapeAtStart.angleRadian;
-		const cosine = Math.cos(turn);
-		const sine = Math.sin(turn);
+		return radius.point.subtract(corner.point).length();
+	}
 
-		for (const one of selection.knownHandles()) {
-			const at = new cool.SimplePoint(one.point.x, one.point.y);
-			// Counted from the middle of the shape, with the second one growing upwards.
-			const across = at.pX - shapeAtStart.center.pX;
-			const up = shapeAtStart.center.pY - at.pY;
+	/*
+		The handle for the corner radius, laid out for the shape the drag leads to rather than
+		carried along with the object: the radius keeps the size it has, so the handle stays
+		that far from the upper left corner along the upper side, and it comes no further than
+		half the longer side of the shape. That is the rule the object is drawn by.
+	*/
+	private placedRadius(mapped: SelectionHandle[]): SelectionHandle[] {
+		if (this.radius === null || !this.reached) return mapped;
 
-			this.places.push({
-				name: one.name,
-				acrossPart: (across * cosine + up * sine) / (shapeAtStart.width * 0.5),
-				upPart: (-across * sine + up * cosine) / (shapeAtStart.height * 0.5),
-			});
-		}
+		const corner = mapped.find((one: SelectionHandle) => one.kind === '1');
+		const along = mapped.find((one: SelectionHandle) => one.kind === '3');
+		if (!corner || !along) return mapped;
+
+		const upper = along.point.subtract(corner.point);
+		const side = upper.length();
+		if (!side) return mapped;
+
+		const longer =
+			Math.max(this.reached.width, this.reached.height) * app.pixelsToTwips;
+		const kept = Math.min(this.radius, longer * 0.5);
+
+		return mapped.map((one: SelectionHandle) =>
+			one.kind === '11'
+				? {
+						...one,
+						point: corner.point
+							.add(upper.divideBy(side).multiplyBy(kept))
+							.round(),
+					}
+				: one,
+		);
 	}
 
 	/// The shape the mouse at that point leads to.
@@ -149,39 +177,22 @@ class ScalingInteraction extends SelectionInteraction {
 	}
 
 	/*
-		Where the handles stand while the selection is scaled. Only the eight that frame it are
-		shown: a handle that shapes the object, the corner radius or a point of a custom shape,
-		does not follow the scale in a way that can be worked out here, and showing it somewhere
-		it will not end up says something untrue.
+		Where the handles stand while the selection is scaled: every one of them through the
+		transformation the drag stands for, which is the state the objects would be in when it
+		ends. The eight that frame the selection land exactly where they belong, since they are
+		the corners and the sides of that state, and the drawing of the objects goes through the
+		very same transformation, so the two can never disagree. A handle that does not travel
+		with the object that way is laid out afterwards by the rule of its own kind.
 	*/
 	public handles(known: SelectionHandle[]): SelectionHandle[] {
-		const shape = this.reached;
-		if (!shape) return known;
+		const matrix = this.transformation();
+		if (!matrix) return known;
 
-		known = known.filter((handle: SelectionHandle) => {
-			const kind = Number(handle.kind);
-			return kind >= 1 && kind <= 8;
-		});
+		const mapped = known.map((handle: SelectionHandle) => ({
+			...handle,
+			point: matrix.apply(handle.point.x, handle.point.y).round(),
+		}));
 
-		const turn = shape.angleRadian;
-		const cosine = Math.cos(turn);
-		const sine = Math.sin(turn);
-
-		return known.map((handle: SelectionHandle) => {
-			const place = this.places.find((one: any) => one.name === handle.name);
-			if (!place) return handle;
-
-			// Its part of the shape, on the shape as the drag leaves it, turned back into the
-			// directions of the page.
-			const across = place.acrossPart * shape.width * 0.5;
-			const up = place.upPart * shape.height * 0.5;
-
-			const moved = cool.SimplePoint.fromCorePixels([
-				shape.center.pX + across * cosine - up * sine,
-				shape.center.pY - (across * sine + up * cosine),
-			]);
-
-			return { ...handle, point: new cool.Point(moved.x, moved.y) };
-		});
+		return this.placedRadius(mapped);
 	}
 }

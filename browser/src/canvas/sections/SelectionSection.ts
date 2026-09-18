@@ -169,14 +169,23 @@ abstract class SelectionSection extends CanvasSectionObject {
 		]);
 	}
 
-	/// The handle whose box holds that point, which is where the mouse is on the canvas.
+	/*
+		The handle whose box holds that point, which is where the mouse is on the canvas. The
+		handles are searched from the last one to the first, so that the one lying on top of the
+		others is the one taken hold of - two of them can sit at the same place, the corner
+		radius of a rectangle right next to the upper left corner among them.
+	*/
 	private handleAt(x: number, y: number): SelectionHandle | undefined {
 		const half = 0.5 * ShapeHandlesSection.handleSize();
+		const shown = this.handles();
 
-		return this.handles().find((handle: SelectionHandle) => {
-			const point = new cool.SimplePoint(handle.point.x, handle.point.y);
-			return Math.abs(point.vX - x) <= half && Math.abs(point.vY - y) <= half;
-		});
+		for (let at = shown.length - 1; at >= 0; --at) {
+			const point = new cool.SimplePoint(shown[at].point.x, shown[at].point.y);
+			if (Math.abs(point.vX - x) <= half && Math.abs(point.vY - y) <= half)
+				return shown[at];
+		}
+
+		return undefined;
 	}
 
 	/*
@@ -400,7 +409,9 @@ abstract class SelectionSection extends CanvasSectionObject {
 				: undefined;
 		};
 
-		const middle = this.middle();
+		// The handles as the objects have them, not as a drag shows them: this says what the
+		// selection is now, which is what a drag starts from.
+		const middle = this.middleOf(this.known);
 		const above = handleOfKind('2');
 		const below = handleOfKind('7');
 		const left = handleOfKind('4');

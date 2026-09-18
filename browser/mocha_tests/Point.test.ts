@@ -17,6 +17,11 @@ describe('Point', function () {
 		assert.strictEqual(new cool.Point(0, 0).length(), 0);
 	});
 
+	it('measures how far it reaches along another direction', function () {
+		assert.strictEqual(new cool.Point(3, 4).dot(new cool.Point(1, 0)), 3);
+		assert.strictEqual(new cool.Point(3, 4).dot(new cool.Point(0, -1)), -4);
+	});
+
 	it('tells which side of it another direction lies on', function () {
 		const along = new cool.Point(10, 0);
 		assert.ok(along.cross(new cool.Point(3, 2)) > 0);
