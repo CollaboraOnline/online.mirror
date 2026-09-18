@@ -64,8 +64,6 @@ abstract class SelectionSection extends CanvasSectionObject {
 			source.handles(),
 		);
 
-		const turning = this.turningHandle();
-		if (turning) this.known.push(turning);
 		this.coverTheHandles();
 	}
 
@@ -74,12 +72,13 @@ abstract class SelectionSection extends CanvasSectionObject {
 		Nothing where the client did not work the framing handles out.
 	*/
 	private middle(): cool.SimplePoint | undefined {
-		const upperLeft = this.known.find(
-			(one: SelectionHandle) => one.kind === '1',
-		);
-		const lowerRight = this.known.find(
-			(one: SelectionHandle) => one.kind === '8',
-		);
+		return this.middleOf(this.handles());
+	}
+
+	/// The middle of the selection as those handles frame it.
+	private middleOf(shown: SelectionHandle[]): cool.SimplePoint | undefined {
+		const upperLeft = shown.find((one: SelectionHandle) => one.kind === '1');
+		const lowerRight = shown.find((one: SelectionHandle) => one.kind === '8');
 		if (!upperLeft || !lowerRight) return undefined;
 
 		return new cool.SimplePoint(
@@ -93,11 +92,11 @@ abstract class SelectionSection extends CanvasSectionObject {
 		by the same distance whatever the zoom. It turns with the selection, being placed from
 		the handles that frame it. Nothing where the objects say they cannot be turned.
 	*/
-	private turningHandle(): SelectionHandle | undefined {
+	private turningHandle(shown: SelectionHandle[]): SelectionHandle | undefined {
 		if (GraphicSelection.extraInfo?.isRotatable === false) return undefined;
 
-		const middle = this.middle();
-		const above = this.known.find((one: SelectionHandle) => one.kind === '2');
+		const middle = this.middleOf(shown);
+		const above = shown.find((one: SelectionHandle) => one.kind === '2');
 		if (!middle || !above) return undefined;
 
 		const away = SelectionSection.turningDistance * app.dpiScale;
@@ -124,7 +123,13 @@ abstract class SelectionSection extends CanvasSectionObject {
 	/// The handles as they are drawn now: where a drag would leave them while one runs, where
 	/// the objects put them otherwise.
 	public handles(): SelectionHandle[] {
-		return this.interaction?.handles(this.known) ?? this.known;
+		const shown = this.interaction?.handles(this.known) ?? this.known;
+
+		// The handle that turns the selection keeps its distance from the upper side, whatever
+		// is being done to the selection, so it is placed again from the handles as they stand.
+		const turning = this.turningHandle(shown);
+
+		return turning ? [...shown, turning] : shown;
 	}
 
 	/// The handles as the objects have them, which is what an interaction works from.
@@ -139,14 +144,15 @@ abstract class SelectionSection extends CanvasSectionObject {
 
 	/// Takes in every handle with the box it is drawn as, so that a press on one arrives here.
 	private coverTheHandles(): void {
-		if (!this.known.length) {
+		const shown = this.handles();
+		if (!shown.length) {
 			this.size = [0, 0];
 			return;
 		}
 
 		const box = ShapeHandlesSection.handleSize() * app.pixelsToTwips;
 		const covered = cool.Range2D.fromPoints(
-			this.known.map((handle: SelectionHandle) => handle.point),
+			shown.map((handle: SelectionHandle) => handle.point),
 		).expand(box, box);
 		const area = new cool.SimpleRectangle(
 			covered.minX,
@@ -378,10 +384,36 @@ abstract class SelectionSection extends CanvasSectionObject {
 		return byKind[handle.kind] ?? 'default';
 	}
 
-	/// The section that holds what the older path knows about the selection: the shape it has
-	/// and what a drag of it could snap to.
-	private shapeSection(): any {
-		return GraphicSelection.handlesSection;
+	/*
+		The shape of the selection as the maths of a drag wants it: the middle it turns around,
+		how wide and how high it is in core pixels, and the angle it stands at, counted in
+		radians against the clock. All four come from the handles that frame it, so nothing else
+		has to be asked for them.
+	*/
+	public shapeNow(): any {
+		const handleOfKind = (kind: string): cool.SimplePoint | undefined => {
+			const handle = this.known.find(
+				(one: SelectionHandle) => one.kind === kind,
+			);
+			return handle
+				? new cool.SimplePoint(handle.point.x, handle.point.y)
+				: undefined;
+		};
+
+		const middle = this.middle();
+		const above = handleOfKind('2');
+		const below = handleOfKind('7');
+		const left = handleOfKind('4');
+		const right = handleOfKind('5');
+		if (!middle || !above || !below || !left || !right) return undefined;
+
+		return {
+			center: middle.clone(),
+			width: left.pDistanceTo(right.pToArray()),
+			height: above.pDistanceTo(below.pToArray()),
+			angleRadian:
+				Math.atan2(middle.y - above.y, above.x - middle.x) - Math.PI * 0.5,
+		};
 	}
 
 	/// Where the mouse is in the document, in core pixels, from a point this section was given.
@@ -518,17 +550,12 @@ abstract class SelectionSection extends CanvasSectionObject {
 			return middle ? new TurningInteraction(this, middle, at) : null;
 		}
 
-		if (!this.framesTheSelection(handle)) return null;
+		if (!this.framesTheSelection(handle))
+			return new ShapingInteraction(this, handle, at);
 
-		const shape =
-			this.shapeSection()?.sectionProperties.shapeRectangleProperties;
+		const shape = this.shapeNow();
 
-		return shape
-			? new ScalingInteraction(this, handle, {
-					...shape,
-					center: shape.center.clone(),
-				})
-			: null;
+		return shape ? new ScalingInteraction(this, handle, shape) : null;
 	}
 
 	onMouseDown(point: cool.SimplePoint, e: MouseEvent): void {

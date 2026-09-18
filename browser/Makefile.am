@@ -544,6 +544,7 @@ COOL_JS_LST =\
 	src/canvas/sections/ScalingInteraction.ts \
 	src/canvas/sections/TurningInteraction.ts \
 	src/canvas/sections/MovingInteraction.ts \
+	src/canvas/sections/ShapingInteraction.ts \
 	src/canvas/sections/SelectionSection.ts \
 	src/canvas/sections/ObjectSelectionSection.ts \
 	src/canvas/sections/MultiSelectionSection.ts \

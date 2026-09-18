@@ -148,9 +148,20 @@ class ScalingInteraction extends SelectionInteraction {
 			.translate(to.center.x, to.center.y);
 	}
 
+	/*
+		Where the handles stand while the selection is scaled. Only the eight that frame it are
+		shown: a handle that shapes the object, the corner radius or a point of a custom shape,
+		does not follow the scale in a way that can be worked out here, and showing it somewhere
+		it will not end up says something untrue.
+	*/
 	public handles(known: SelectionHandle[]): SelectionHandle[] {
 		const shape = this.reached;
 		if (!shape) return known;
+
+		known = known.filter((handle: SelectionHandle) => {
+			const kind = Number(handle.kind);
+			return kind >= 1 && kind <= 8;
+		});
 
 		const turn = shape.angleRadian;
 		const cosine = Math.cos(turn);
