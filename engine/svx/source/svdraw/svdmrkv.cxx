@@ -822,6 +822,11 @@ bool SdrMarkView::dumpGluePointsToJSON(boost::property_tree::ptree& rTree)
                 continue;
             if (pObj == rMarkList.GetMark(0)->GetMarkedSdrObj())
                 continue;
+            // A connector is not something a connector is tied to. It has no points of its own
+            // and the four an object falls back on lie where its track happens to run, so they
+            // would be offered as places to tie to that lead nowhere.
+            if (pObj->GetObjIdentifier() == SdrObjKind::Edge)
+                continue;
             const SdrGluePointList* pGPL = pObj->GetGluePointList();
             bool VertexObject = !(pGPL && pGPL->GetCount());
             const size_t count = !VertexObject ? pGPL->GetCount() : 4;
