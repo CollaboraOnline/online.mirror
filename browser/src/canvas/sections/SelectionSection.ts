@@ -39,6 +39,9 @@ abstract class SelectionSection extends CanvasSectionObject {
 	/// What a drag is doing to the selection, null while nothing is being dragged.
 	private interaction: SelectionInteraction | null = null;
 
+	/// A press waiting to be handed to the engine, kept so that a second press can drop it.
+	private pendingClick: any = null;
+
 	/*
 		The kind that names the handle which turns the selection. The client makes that handle
 		itself: the engine has no handle of the kind, and what it is told at the end of a turn is
@@ -175,12 +178,58 @@ abstract class SelectionSection extends CanvasSectionObject {
 		return GraphicSelection.extraInfo?.isCropMode === true;
 	}
 
-	/// A press lands here only where it is on a handle. Anywhere else within the selection
-	/// belongs to whoever draws the object underneath.
+	/*
+		The four corners of the selection, in the order they go round it, in view pixels. Empty
+		where the client did not work the framing handles out.
+	*/
+	private cornersInView(): cool.Point[] {
+		return ['1', '3', '8', '6']
+			.map((kind: string) =>
+				this.handles().find((handle: SelectionHandle) => handle.kind === kind),
+			)
+			.filter((handle): handle is SelectionHandle => handle !== undefined)
+			.map((handle: SelectionHandle) => {
+				const point = new cool.SimplePoint(handle.point.x, handle.point.y);
+				return new cool.Point(point.vX, point.vY);
+			});
+	}
+
+	/*
+		Whether that point lies within the selection. The four corners go round it in order, so
+		a point inside is on the same side of every one of the four edges. It holds for a
+		selection that is turned as well as for one that is upright.
+	*/
+	private within(x: number, y: number): boolean {
+		const corners = this.cornersInView();
+		if (corners.length !== 4) return false;
+
+		const pressed = new cool.Point(x, y);
+		let left = false;
+		let right = false;
+
+		for (let at = 0; at < 4; ++at) {
+			const one = corners[at];
+			const next = corners[(at + 1) % 4];
+			const side = next.subtract(one).cross(pressed.subtract(one));
+
+			if (side > 0) right = true;
+			if (side < 0) left = true;
+		}
+
+		return !(left && right);
+	}
+
+	/*
+		A press lands here where it is on a handle, and where it is on the selection itself,
+		which is what carrying it begins with. Everywhere else it goes to whoever draws the page.
+	*/
 	isHit(point: number[]): boolean {
 		if (this.standsBack()) return false;
 
-		return this.handleAt(point[0], point[1]) !== undefined;
+		return (
+			this.handleAt(point[0], point[1]) !== undefined ||
+			this.within(point[0], point[1])
+		);
 	}
 
 	/// Whether the handle is one of the eight that frame the selection, the ones that scale it.
@@ -194,11 +243,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 		with a turn and grows with a scale.
 	*/
 	private drawTheFrame(): void {
-		const corners = ['1', '3', '8', '6']
-			.map((kind: string) =>
-				this.handles().find((handle: SelectionHandle) => handle.kind === kind),
-			)
-			.filter((handle): handle is SelectionHandle => handle !== undefined);
+		const corners = this.cornersInView();
 		if (corners.length !== 4) return;
 
 		this.context.save();
@@ -209,10 +254,9 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.context.setLineDash([3, 3]);
 		this.context.beginPath();
 
-		corners.forEach((handle: SelectionHandle, at: number) => {
-			const point = new cool.SimplePoint(handle.point.x, handle.point.y);
-			if (at === 0) this.context.moveTo(point.vX, point.vY);
-			else this.context.lineTo(point.vX, point.vY);
+		corners.forEach((corner: cool.Point, at: number) => {
+			if (at === 0) this.context.moveTo(corner.x, corner.y);
+			else this.context.lineTo(corner.x, corner.y);
 		});
 
 		this.context.closePath();
@@ -369,6 +413,51 @@ abstract class SelectionSection extends CanvasSectionObject {
 	}
 
 	/*
+		Looks for something on the page that the whole selection could line up with, from where
+		the move has taken it, and marks it. The distance is in core pixels.
+	*/
+	public lookForASnapOfTheWhole(across: number, down: number): void {
+		this.shapeSection()?.checkHelperLinesAndSnapPoints(
+			this.selectionSize(),
+			this.selectionCorner(),
+			[across, down],
+		);
+	}
+
+	/*
+		Where the upper left corner of the selection ends up, in core pixels: where the move
+		would put it, or where it snapped to another object of the page. What snapped is a point
+		of the selection, its middle or an edge, so the older section says how far that point
+		lies from the corner.
+	*/
+	public snappedCorner(x: number, y: number): number[] {
+		const section = this.shapeSection();
+		const snap = section?.sectionProperties;
+		if (!snap) return [x, y];
+
+		return [
+			snap.closestX !== null && snap.closestX !== undefined
+				? section.adjustSnapTransformCoordinate(snap.closestX, null)
+				: x,
+			snap.closestY !== null && snap.closestY !== undefined
+				? section.adjustSnapTransformCoordinate(null, snap.closestY)
+				: y,
+		];
+	}
+
+	/// The upper left corner of the selection, in core pixels.
+	public selectionCorner(): number[] {
+		const rectangle = GraphicSelection.rectangle;
+		return rectangle ? [rectangle.pX1, rectangle.pY1] : this.position;
+	}
+
+	/// How wide and how high the selection is, in core pixels.
+	private selectionSize(): number[] {
+		const rectangle = GraphicSelection.rectangle;
+		return rectangle ? [rectangle.pWidth, rectangle.pHeight] : this.size;
+	}
+
+	/*
 		How far a key turns the selection, in degrees: one of them, fifteen with Shift, which is
 		the step the office holds a turn to, and a tenth with Alt for the finest of it.
 	*/
@@ -416,19 +505,25 @@ abstract class SelectionSection extends CanvasSectionObject {
 	}
 
 	/*
-		Begins a move of the whole selection, follows it, and ends it. The press that carries an
-		object still belongs to the section that draws it from tiles, so that section drives the
-		move here and sends the command; what is drawn while it runs is worked out here.
+		Carrying the selection through a press that landed before this section was there: on an
+		object nobody had selected, which the press selects. The section that took that press
+		drives it, since the mouse belongs to that one until it is let go.
 	*/
-	public beginMoving(at: cool.SimplePoint): void {
+	public beginCarrying(at: cool.SimplePoint): void {
 		this.interaction = new MovingInteraction(this, at);
 	}
 
-	public followTheMove(to: cool.SimplePoint): void {
+	public carryTo(to: cool.SimplePoint): void {
 		this.interaction?.move(to);
 	}
 
-	public endTheMove(): void {
+	public finishCarrying(to: cool.SimplePoint): void {
+		this.interaction?.finish(to);
+		this.endTheInteraction();
+	}
+
+	public cancelCarrying(): void {
+		this.interaction?.cancel();
 		this.endTheInteraction();
 	}
 
@@ -456,13 +551,15 @@ abstract class SelectionSection extends CanvasSectionObject {
 	}
 
 	onMouseDown(point: cool.SimplePoint, e: MouseEvent): void {
+		const at = this.inTheDocument(point);
 		const handle = this.handleAt(
 			this.myTopLeft[0] + point.pX,
 			this.myTopLeft[1] + point.pY,
 		);
-		if (!handle) return;
 
-		this.interaction = this.interactionFor(handle, this.inTheDocument(point));
+		if (handle) this.interaction = this.interactionFor(handle, at);
+		else if (GraphicSelection.extraInfo?.isDraggable !== false)
+			this.interaction = new MovingInteraction(this, at);
 
 		this.stopPropagating();
 		e.stopPropagation();
@@ -505,6 +602,67 @@ abstract class SelectionSection extends CanvasSectionObject {
 
 		this.interaction.finish(this.inTheDocument(point), e);
 		this.endTheInteraction();
+	}
+
+	/*
+		A press that was not a drag. It is handed to the engine as a press of its own, a moment
+		later, so that a press that turns out to be the first half of a double one can still be
+		called off: the engine would otherwise have selected something else before the text edit
+		of the double press could begin.
+	*/
+	onClick(point: cool.SimplePoint, e: MouseEvent): void {
+		const at = this.inTheDocument(point);
+		const modifier = MouseControl.readModifier(e);
+
+		this.forgetThePendingClick();
+
+		this.pendingClick = app.timerRegistry.setTimeout(
+			'selectionClick',
+			() => {
+				app.map._docLayer._postMouseEvent(
+					'buttondown',
+					at.x,
+					at.y,
+					1,
+					1,
+					modifier,
+				);
+				app.map._docLayer._postMouseEvent(
+					'buttonup',
+					at.x,
+					at.y,
+					1,
+					1,
+					modifier,
+				);
+				this.pendingClick = null;
+			},
+			250,
+		);
+
+		this.stopPropagating();
+		e.stopPropagation();
+	}
+
+	/// A press of two, which starts the text edit of the object underneath.
+	onDoubleClick(point: cool.SimplePoint, e: MouseEvent): void {
+		const at = this.inTheDocument(point);
+
+		this.forgetThePendingClick();
+
+		app.map._docLayer._postMouseEvent('buttondown', at.x, at.y, 2, 1, 0);
+		app.map._docLayer._postMouseEvent('buttonup', at.x, at.y, 2, 1, 0);
+
+		this.stopPropagating();
+		e.stopPropagation();
+	}
+
+	/// Drops a press that is waiting to be handed over, because a second one took its place.
+	private forgetThePendingClick(): void {
+		if (this.pendingClick === null) return;
+
+		app.timerRegistry.clearTimeout(this.pendingClick);
+		this.pendingClick = null;
 	}
 
 	onDragCancel(): void {

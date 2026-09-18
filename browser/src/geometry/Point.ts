@@ -119,6 +119,12 @@ export class Point {
 		return Math.sqrt(this.x * this.x + this.y * this.y);
 	}
 
+	/// The cross product with the other one: positive where the other lies on the side the y axis
+	/// turns to from this one, negative on the other side, zero where both lie on one line.
+	public cross(point: Point): number {
+		return this.x * point.y - this.y * point.x;
+	}
+
 	public distanceTo(point: Point): number {
 		point = Point.toPoint(point);
 

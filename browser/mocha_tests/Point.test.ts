@@ -16,4 +16,11 @@ describe('Point', function () {
 		assert.strictEqual(new cool.Point(3, 4).length(), 5);
 		assert.strictEqual(new cool.Point(0, 0).length(), 0);
 	});
+
+	it('tells which side of it another direction lies on', function () {
+		const along = new cool.Point(10, 0);
+		assert.ok(along.cross(new cool.Point(3, 2)) > 0);
+		assert.ok(along.cross(new cool.Point(3, -2)) < 0);
+		assert.strictEqual(along.cross(new cool.Point(-4, 0)), 0);
+	});
 });

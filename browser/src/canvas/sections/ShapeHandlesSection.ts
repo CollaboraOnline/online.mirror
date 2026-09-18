@@ -1012,7 +1012,6 @@ class ShapeHandlesSection extends CanvasSectionObject {
 	}
 
 	onDragCancel(): void {
-		GraphicSelection.selectionSection?.endTheMove();
 		this.sectionProperties.lastDragDistance = [0, 0];
 		this.forgetTheSnap();
 
@@ -1055,12 +1054,6 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		this.sectionProperties.positionOnMouseDown = point.clone();
 		this.sectionProperties.positionOnMouseDown.pX += this.position[0];
 		this.sectionProperties.positionOnMouseDown.pY += this.position[1];
-
-		// The handles of a view that draws from objects live in a section of their own, and they
-		// travel with the object while it is carried.
-		GraphicSelection.selectionSection?.beginMoving(
-			this.sectionProperties.positionOnMouseDown,
-		);
 	}
 
 	onMouseUp(point: cool.SimplePoint, e: MouseEvent): void {
@@ -1072,12 +1065,18 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		if (this.containerObject.isDraggingSomething()) {
 			app.map.fire('scrollvelocity', { vx: 0, vy: 0 });
 
+			// A view that draws from objects carries the selection in the section that draws the
+			// handles, which works the move out itself. Cropping an image still runs here.
+			if (
+				RenderManager.isVectorRendering() &&
+				GraphicSelection.extraInfo?.isCropMode !== true
+			)
+				return;
+
 			point.x += app.activeDocument.activeLayout.viewedRectangle.x1 - this.sectionProperties.viewedRectangleOnMouseDown.x1;
 			point.y += app.activeDocument.activeLayout.viewedRectangle.y1 - this.sectionProperties.viewedRectangleOnMouseDown.y1;
 			this.sendTransformCommand(point);
 		}
-
-		GraphicSelection.selectionSection?.endTheMove();
 	}
 
 	// xList holds the dragged shape's [left edge, center, right edge].
@@ -1358,23 +1357,6 @@ class ShapeHandlesSection extends CanvasSectionObject {
 
 		if (this.containerObject.isDraggingSomething() && canDrag) {
 			this.constrainDragToSheetArea(dragDistance);
-
-			/*
-				The handles of a view that draws from objects travel with the object. Where the
-				mouse is in the document is where it was pressed, plus how far it has been
-				dragged across the canvas, plus how far the view itself has scrolled underneath
-				since the press.
-			*/
-			const viewed = app.activeDocument.activeLayout.viewedRectangle;
-			const atPress = this.sectionProperties.viewedRectangleOnMouseDown;
-			const pressed = this.sectionProperties.positionOnMouseDown;
-
-			GraphicSelection.selectionSection?.followTheMove(
-				new cool.SimplePoint(
-					pressed.x + dragDistance[0] * app.pixelsToTwips + viewed.x1 - atPress.x1,
-					pressed.y + dragDistance[1] * app.pixelsToTwips + viewed.y1 - atPress.y1,
-				),
-			);
 
 			if (!app.activeDocument.activeLayout.viewedRectangle.equals(this.sectionProperties.viewedRectangleOnMouseDown.toArray())) {
 				const diff = new cool.SimplePoint(

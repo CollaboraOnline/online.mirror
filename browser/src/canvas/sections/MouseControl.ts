@@ -33,6 +33,10 @@ class MouseControl extends CanvasSectionObject {
 	localPositionOnMouseDown: cool.SimplePoint | null = null;
 	mouseDownSent: boolean = false;
 
+	/// The selection this press is carrying, where the press marked the object itself. Null
+	/// while no such drag is running.
+	private carrying: SelectionSection | null = null;
+
 	// The last mouse position during a button-down drag, in canvas-local
 	// coordinates that do not include the scroll offset, together with the
 	// keyboard modifier that was active then. Kept so the drag position can be
@@ -409,6 +413,11 @@ class MouseControl extends CanvasSectionObject {
 			this.lastDragLocalPoint = point.clone();
 			this.lastDragModifier = modifier;
 
+			// A press that landed on an object nobody had selected yet, and became a drag: in a
+			// view that draws from objects the client marks that object and carries it itself,
+			// so no drag of the engine's own is begun.
+			if (this.carryTheObject(modifier)) return;
+
 			// The button-down goes to core only once the drag has started, but with the
 			// modifier held at the press. A key pressed later, such as Ctrl to copy,
 			// reaches core with the moves and the button-up.
@@ -466,6 +475,51 @@ class MouseControl extends CanvasSectionObject {
 		handles.showSVG();
 	}
 
+	/*
+		Carries the object the press landed on, where the client draws the document from objects
+		and the press has turned into a drag. The object is marked first, which puts the section
+		that draws a selection there, and that section is then told where the drag goes. Answers
+		whether the drag is being carried here, so that nothing of it is sent to the engine.
+	*/
+	private carryTheObject(modifier: number): boolean {
+		if (this.mouseDownSent) return false;
+		if (!this.positionOnMouseDown) return false;
+		if (!RenderGeometrySection.answersPointer()) return false;
+		if (app.file.textCursor.visible) return false;
+
+		if (!this.carrying) {
+			if (modifier !== 0) return false;
+
+			const objectId = RenderGeometrySection.objectIdAt(
+				this.positionOnMouseDown.x,
+				this.positionOnMouseDown.y,
+			);
+			if (objectId === undefined) return false;
+			if (GraphicSelection.extraInfo?.isDraggable === false) return false;
+
+			GraphicSelection.selectObjects([objectId]);
+			GraphicSelection.updateSelectionSection();
+
+			this.carrying = GraphicSelection.selectionSection;
+			if (!this.carrying) return false;
+
+			this.carrying.beginCarrying(this.positionOnMouseDown);
+		}
+
+		this.carrying.carryTo(this.currentPosition);
+		return true;
+	}
+
+	/// Lets a carried object go where it now stands, or lets it be, and forgets it either way.
+	private stopCarrying(finish: boolean): void {
+		if (!this.carrying) return;
+
+		if (finish) this.carrying.finishCarrying(this.currentPosition);
+		else this.carrying.cancelCarrying();
+
+		this.carrying = null;
+	}
+
 	/// Whether the document was told to drag as well, which it then has to be told to stop.
 	public startedDocumentDrag(): boolean {
 		return this.mouseDownSent;
@@ -477,6 +531,7 @@ class MouseControl extends CanvasSectionObject {
 		that is no longer wanted.
 	*/
 	onDragCancel(): void {
+		this.stopCarrying(false);
 		this.hideShapeDragPreview();
 		this.mouseDownSent = false;
 		this.positionOnMouseDown = null;
@@ -524,6 +579,8 @@ class MouseControl extends CanvasSectionObject {
 
 	onMouseUp(point: cool.SimplePoint, e: MouseEvent): void {
 		this.refreshPosition(point);
+
+		this.stopCarrying(true);
 
 		this.hideShapeDragPreview();
 
