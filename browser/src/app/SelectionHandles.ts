@@ -32,6 +32,35 @@ interface HandleSource {
 }
 
 /*
+	The points a connector can be tied to. The engine reports them for every object of the page
+	but the selected one, since they are what a connector being dragged could reach for, so
+	nothing that is done to the selection moves them.
+
+	They are shown and no more: there is no name by which one of them could be spoken about, so
+	the keyboard passes them by and the mouse cannot take hold of one.
+*/
+class GluePointHandles implements HandleSource {
+	public handles(): SelectionHandle[] {
+		const shapes = GraphicSelection.extraInfo?.GluePoints?.shapes;
+		if (!Array.isArray(shapes)) return [];
+
+		const handles: SelectionHandle[] = [];
+		for (const shape of shapes) {
+			for (const gluePoint of shape?.gluepoints ?? []) {
+				handles.push({
+					name: '',
+					kind: 'GluePoint',
+					pointer: '0',
+					point: new cool.Point(gluePoint.point.x, gluePoint.point.y),
+				});
+			}
+		}
+
+		return handles;
+	}
+}
+
+/*
 	The handles of a selection of objects, worked out from the geometry the client holds: the
 	eight that frame the selection, and the ones that shape a single object, its corner radius
 	and the points a custom shape is shaped by.

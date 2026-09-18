@@ -33,8 +33,16 @@ abstract class SelectionSection extends CanvasSectionObject {
 			this.moveHandleBy(handle, towards, event),
 	);
 
-	/// The handles as they were last worked out from the objects.
+	/// The handles as they were last worked out from the objects of the selection.
 	private known: SelectionHandle[] = [];
+
+	/*
+		The points a connector can be tied to, which belong to the other objects of the page and
+		not to the selection. They are drawn along with the handles and nothing that is done to
+		the selection moves them.
+	*/
+	private readonly gluePoints: GluePointHandles = new GluePointHandles();
+	private tiePoints: SelectionHandle[] = [];
 
 	/// What a drag is doing to the selection, null while nothing is being dragged.
 	private interaction: SelectionInteraction | null = null;
@@ -63,6 +71,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.known = this.sources().flatMap((source: HandleSource) =>
 			source.handles(),
 		);
+		this.tiePoints = this.gluePoints.handles();
 
 		this.coverTheHandles();
 	}
@@ -129,7 +138,10 @@ abstract class SelectionSection extends CanvasSectionObject {
 		// is being done to the selection, so it is placed again from the handles as they stand.
 		const turning = this.turningHandle(shown);
 
-		return turning ? [...shown, turning] : shown;
+		const drawn = [...shown];
+		if (turning) drawn.push(turning);
+
+		return drawn.concat(this.tiePoints);
 	}
 
 	/// The handles as the objects have them, which is what an interaction works from.
@@ -180,6 +192,8 @@ abstract class SelectionSection extends CanvasSectionObject {
 		const shown = this.handles();
 
 		for (let at = shown.length - 1; at >= 0; --at) {
+			if (!shown[at].name) continue;
+
 			const point = new cool.SimplePoint(shown[at].point.x, shown[at].point.y);
 			if (Math.abs(point.vX - x) <= half && Math.abs(point.vY - y) <= half)
 				return shown[at];
@@ -308,6 +322,16 @@ abstract class SelectionSection extends CanvasSectionObject {
 					point.vY - size * 0.5 - grown,
 					size + 2 * grown,
 					size + 2 * grown,
+				);
+			} else if (handle.kind === 'GluePoint') {
+				// A point a connector can be tied to, smaller than a handle and drawn in red.
+				this.context.fillStyle = '#EE3E3E';
+				this.context.arc(
+					point.vX,
+					point.vY,
+					ShapeHandlesSection.gluePointSize() * 0.5,
+					0,
+					Math.PI * 2,
 				);
 			} else {
 				this.context.fillStyle =

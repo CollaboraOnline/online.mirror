@@ -68,6 +68,11 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		return 12 * app.dpiScale;
 	}
 
+	/// How wide a point that a connector can be tied to is drawn, in core pixels.
+	public static gluePointSize(): number {
+		return 10 * app.dpiScale;
+	}
+
 	/// What every handle of the selection is, in the order they are drawn.
 	public handleInfos(): any[] {
 		return this.sectionProperties.handles.map((handle: any) => handle.info);
@@ -86,7 +91,7 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		this.sectionProperties.anchorHeight = 20 * app.dpiScale;
 		this.sectionProperties.rotationHandleWidth = 15 * app.dpiScale;
 		this.sectionProperties.rotationHandleHeight = 15 * app.dpiScale;
-		this.sectionProperties.gluePointRadius = 10 * app.dpiScale;
+		this.sectionProperties.gluePointRadius = ShapeHandlesSection.gluePointSize();
 		this.sectionProperties.subSectionPrefix = 'shape-handle-';
 		this.sectionProperties.svg = null; // This is for preview of modifications.
 		this.sectionProperties.hasVideo = false; // Don't hide svg when there is video content.
@@ -801,8 +806,7 @@ class ShapeHandlesSection extends CanvasSectionObject {
 	/*
 		Whether a handle of that kind gets a section of its own. A view that draws from objects
 		draws the handles that frame and shape the selection in one section of its own, which
-		knows them as a list, and leaves the rest here: the anchor, the glue points, the handles
-		of a diagram.
+		knows them as a list, and leaves the rest here: the anchor and the handles of a diagram.
 		Cropping an image is done with the whole set of handles here, so while it runs they are
 		all made as they always were.
 	*/
@@ -810,7 +814,7 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		if (!RenderManager.isVectorRendering()) return true;
 		if (GraphicSelection.extraInfo?.isCropMode) return true;
 
-		return ['16', 'GluePoint', 'DiagramHandle'].includes(kind);
+		return ['16', 'DiagramHandle'].includes(kind);
 	}
 
 	addSubSections() {
