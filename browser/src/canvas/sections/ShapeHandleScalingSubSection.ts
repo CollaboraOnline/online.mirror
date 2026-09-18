@@ -227,8 +227,9 @@ class ShapeHandleScalingSubSection extends ShapeHandleSubSection {
 			const newPoint = HandleScaling.positionOfHandle(committedHandleId, tempRectangle);
 
 			if (!keepRatio) {
-				newPoint[0] = Math.round((parentHandlerSection.sectionProperties.closestX ?? this.mouseToDocX(point)) * app.pixelsToTwips);
-				newPoint[1] = Math.round((parentHandlerSection.sectionProperties.closestY ?? point.pY + this.position[1]) * app.pixelsToTwips);
+				const snapped = parentHandlerSection.snappedAt();
+				newPoint[0] = Math.round((snapped[0] ?? this.mouseToDocX(point)) * app.pixelsToTwips);
+				newPoint[1] = Math.round((snapped[1] ?? point.pY + this.position[1]) * app.pixelsToTwips);
 			}
 
 			const parameters = {

@@ -92,8 +92,8 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		this.sectionProperties.hasVideo = false; // Don't hide svg when there is video content.
 		this.sectionProperties.shapeRectangleProperties = null; // Not null when there are scaling handles.
 		this.sectionProperties.lastDragDistance = [0, 0];
-		this.sectionProperties.snapOffsetX = 0; // Distance from the dragged shape's left edge to the point that snapped.
-		this.sectionProperties.snapOffsetY = 0; // Distance from the dragged shape's top edge to the point that snapped.
+		// What the drag could line up with on the page, and the lines that mark it.
+		this.sectionProperties.snap = new SelectionSnap();
 		this.sectionProperties.mathObjectBorderColor = 'red'; // Border color for Math objects.
 		this.sectionProperties.lastTapTime = 0;
 		this.sectionProperties.clickTimer = null;
@@ -108,22 +108,9 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		this.sectionProperties.queuedShapeDragPreview = null;
 
 		// These are for snapping the objects to the same level with others' boundaries.
-		this.sectionProperties.closestX = null;
-		this.sectionProperties.closestY = null;
 
-		// When the snap is a center-to-center match, these hold the [x, y] center
-		// (in pixels) of the other object so we can mark it with a red dot.
-		this.sectionProperties.centerSnapX = null;
-		this.sectionProperties.centerSnapY = null;
 
-		// True when the active object's own center is what snapped to another
-		// object's center on that axis (true center-to-center alignment).
-		this.sectionProperties.centerToCenterX = false;
-		this.sectionProperties.centerToCenterY = false;
 
-		// [x, y] center (in pixels) of the active (dragged or scaled) object,
-		// set when a center-to-center match happens so we can mark it too.
-		this.sectionProperties.draggedCenter = null;
 
 		this.refreshInfo(info);
 
@@ -859,26 +846,20 @@ class ShapeHandlesSection extends CanvasSectionObject {
 			GraphicSelection.extraInfo?.isDraggable === false ? 'not-allowed' : 'move';
 	}
 
+	/// Where the upper left corner of the selection lands, in core pixels, on the axis given.
 	adjustSnapTransformCoordinate(x: number, y: number) {
-		// Transform command accepts the difference from top left corner.
-		// closestX / closestY are the snapped position of the matched point
-		// (left edge, center or right edge), so subtract that point's offset
-		// from the top left corner to get the new top left position.
-
-		if (x !== null) x -= this.sectionProperties.snapOffsetX;
-		if (y !== null) y -= this.sectionProperties.snapOffsetY;
-
-		return x !== null ? x: y;
+		const corner = this.sectionProperties.snap.corner(x, y);
+		return x !== null ? corner[0] : corner[1];
 	}
 
 	sendTransformCommand(point: cool.SimplePoint) {
-		let x = this.sectionProperties.closestX;
-		if (!x) x = this.sectionProperties.lastDragDistance[0] + this.position[0];
-		else x = this.adjustSnapTransformCoordinate(x, null);
+		const corner = this.sectionProperties.snap.corner(
+			this.sectionProperties.lastDragDistance[0] + this.position[0],
+			this.sectionProperties.lastDragDistance[1] + this.position[1],
+		);
 
-		let y = this.sectionProperties.closestY;
-		if (!y) y = this.sectionProperties.lastDragDistance[1] + this.position[1];
-		else y = this.adjustSnapTransformCoordinate(null, y);
+		let x = corner[0];
+		const y = corner[1];
 
 		const docLayer = app.map._docLayer;
 
@@ -1004,11 +985,12 @@ class ShapeHandlesSection extends CanvasSectionObject {
 	*/
 	/// Forgets what the last look for a snap found, so the lines that marked it are gone.
 	public forgetTheSnap(): void {
-		this.sectionProperties.closestX = null;
-		this.sectionProperties.closestY = null;
-		this.sectionProperties.centerSnapX = null;
-		this.sectionProperties.centerSnapY = null;
-		this.sectionProperties.draggedCenter = null;
+		this.sectionProperties.snap.forget();
+	}
+
+	/// Where the last look for a snap landed, in core pixels, null on an axis that found none.
+	public snappedAt(): (number | null)[] {
+		return this.sectionProperties.snap.at();
 	}
 
 	onDragCancel(): void {
@@ -1079,221 +1061,9 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		}
 	}
 
-	// xList holds the dragged shape's [left edge, center, right edge].
-	// We look for the closest left/center/right ordinate of any other object.
-	findClosestX(xList: number[]) {
-		let closest = 1000;
-		let pickX = null;
-		let snapOffset = 0;
-		let centerSnap = null;
-		let centerToCenter = false;
-		{
-			const rectangles = GraphicSelection.snapRectangles();
-
-			for (let i = 0; i < rectangles.length; i++) {
-				// Candidate snap ordinates of the other object: left edge, center, right edge.
-				const targets = [
-					rectangles[i][0],
-					rectangles[i][0] + rectangles[i][2] / 2,
-					rectangles[i][0] + rectangles[i][2],
-				];
-
-				for (let j = 0; j < xList.length; j++) {
-					for (let k = 0; k < targets.length; k++) {
-						const distance = Math.abs(targets[k] - xList[j]);
-						if (distance < closest) {
-							closest = distance;
-							pickX = targets[k];
-							snapOffset = xList[j] - xList[0]; // 0, half width or full width.
-							// k === 1 means the other object's center was the snap target.
-							centerSnap = k === 1 ? [targets[1], rectangles[i][1] + rectangles[i][3] / 2] : null;
-							// Both centers meet when the matched point is the active object's center too.
-							centerToCenter = k === 1 && xList[j] === xList[1];
-						}
-					}
-				}
-			}
-		}
-
-		if (closest < 10 * app.dpiScale) {
-			this.sectionProperties.closestX = pickX;
-			this.sectionProperties.snapOffsetX = snapOffset;
-			this.sectionProperties.centerSnapX = centerSnap;
-			this.sectionProperties.centerToCenterX = centerToCenter;
-		}
-		else {
-			this.sectionProperties.closestX = null;
-			this.sectionProperties.centerSnapX = null;
-			this.sectionProperties.centerToCenterX = false;
-		}
-	}
-
-	// yList holds the dragged shape's [top edge, center, bottom edge].
-	// We look for the closest top/center/bottom ordinate of any other object.
-	findClosestY(yList: number[]) {
-		let closest = 1000;
-		let pickY = null;
-		let snapOffset = 0;
-		let centerSnap = null;
-		let centerToCenter = false;
-		{
-			const rectangles = GraphicSelection.snapRectangles();
-
-			for (let i = 0; i < rectangles.length; i++) {
-				// Candidate snap ordinates of the other object: top edge, center, bottom edge.
-				const targets = [
-					rectangles[i][1],
-					rectangles[i][1] + rectangles[i][3] / 2,
-					rectangles[i][1] + rectangles[i][3],
-				];
-
-				for (let j = 0; j < yList.length; j++) {
-					for (let k = 0; k < targets.length; k++) {
-						const distance = Math.abs(targets[k] - yList[j]);
-						if (distance < closest) {
-							closest = distance;
-							pickY = targets[k];
-							snapOffset = yList[j] - yList[0]; // 0, half height or full height.
-							// k === 1 means the other object's center was the snap target.
-							centerSnap = k === 1 ? [rectangles[i][0] + rectangles[i][2] / 2, targets[1]] : null;
-							// Both centers meet when the matched point is the active object's center too.
-							centerToCenter = k === 1 && yList[j] === yList[1];
-						}
-					}
-				}
-			}
-		}
-
-		if (closest < 10 * app.dpiScale) {
-			this.sectionProperties.closestY = pickY;
-			this.sectionProperties.snapOffsetY = snapOffset;
-			this.sectionProperties.centerSnapY = centerSnap;
-			this.sectionProperties.centerToCenterY = centerToCenter;
-		}
-		else {
-			this.sectionProperties.closestY = null;
-			this.sectionProperties.centerSnapY = null;
-			this.sectionProperties.centerToCenterY = false;
-		}
-	}
-
-	private cloneSelectedPartInfoForGridSnap() {
-		const selectedPart = Object.assign({}, app.impress.partList[app.map._docLayer._selectedPart]);
-		selectedPart.leftBorder *= app.impress.twipsCorrection;
-		selectedPart.upperBorder *= app.impress.twipsCorrection;
-		selectedPart.rightBorder *= app.impress.twipsCorrection;
-		selectedPart.lowerBorder *= app.impress.twipsCorrection;
-		selectedPart.gridCoarseWidth *= app.impress.twipsCorrection;
-		selectedPart.gridCoarseHeight *= app.impress.twipsCorrection;
-
-		return selectedPart;
-	}
-
-	private getInnerRecrangleForGridSnap(selectedPart: any) {
-		return new cool.SimpleRectangle(
-			selectedPart.leftBorder,
-			selectedPart.upperBorder,
-			(selectedPart.width - selectedPart.leftBorder - selectedPart.rightBorder),
-			(selectedPart.height - selectedPart.upperBorder - selectedPart.lowerBorder)
-		);
-	}
-
-	private getCornerPointsForGridSnap(size: number[], position: number[], dragDistance: number[]) {
-		return [
-			new cool.SimplePoint((position[0] + dragDistance[0]) * app.pixelsToTwips, (position[1] + dragDistance[1]) * app.pixelsToTwips),
-			new cool.SimplePoint((size[0] + position[0] + dragDistance[0]) * app.pixelsToTwips, (position[1] + dragDistance[1]) * app.pixelsToTwips),
-			new cool.SimplePoint((position[0] + dragDistance[0]) * app.pixelsToTwips, (size[1] + position[1] + dragDistance[1]) * app.pixelsToTwips),
-			new cool.SimplePoint((size[0] + position[0] + dragDistance[0]) * app.pixelsToTwips, (size[1] + position[1] + dragDistance[1]) * app.pixelsToTwips),
-		];
-	}
-
-	private findClosestGridPoint(size: number[], position: number[], dragDistance: number[]) {
-		// First rule of snap-to-grid: If you enable snap-to-grid, you have to snap.
-
-		const selectedPart = this.cloneSelectedPartInfoForGridSnap();
-
-		// The 4 corners of selected object's rectangle.
-		const checkList = this.getCornerPointsForGridSnap(size, position, dragDistance);
-
-		// The rectangle that is shaped by the page margins.
-		const innerRectangle = this.getInnerRecrangleForGridSnap(selectedPart);
-
-		const gapX = selectedPart.gridCoarseWidth / (selectedPart.innerSpacesX > 0 ? selectedPart.innerSpacesX : 1);
-		const gapY = selectedPart.gridCoarseHeight / (selectedPart.innerSpacesY > 0 ? selectedPart.innerSpacesY : 1);
-
-		let minX = 100000;
-		let minY = 100000;
-		for (let i = 0; i < 1; i++) {
-			if (innerRectangle.containsPoint(checkList[i].toArray())) {
-
-				const countX = Math.round((checkList[i].x - innerRectangle.x1) / gapX);
-				const countY = Math.round((checkList[i].y - innerRectangle.y1) / gapY);
-
-				const diffX = Math.abs(checkList[i].x - innerRectangle.x1 - gapX * countX);
-				const diffY = Math.abs(checkList[i].y - innerRectangle.y1 - gapY * countY);
-
-				if (diffX < minX) {
-					minX = diffX;
-					this.sectionProperties.closestX = innerRectangle.x1 + (countX * gapX);
-					this.sectionProperties.snapOffsetX = [1, 3].includes(i) ? size[0] : 0; // Subtract width when a right corner snapped.
-				}
-				if (diffY < minY) {
-					minY = diffY;
-					this.sectionProperties.closestY = innerRectangle.y1 + (countY * gapY);
-					this.sectionProperties.snapOffsetY = [2, 3].includes(i) ? size[1] : 0; // Subtract height when a bottom corner snapped.
-				}
-			}
-		}
-
-		this.sectionProperties.closestX *= app.twipsToPixels;
-		this.sectionProperties.closestY *= app.twipsToPixels;
-	}
-
-	public checkObjectsBoundaries(xListToCheck: number[], yListToCheck: number[]) {
-		if (app.map._docLayer._docType === 'presentation') {
-			this.findClosestX(xListToCheck);
-			this.findClosestY(yListToCheck);
-
-			// On a center-to-center match, also mark the active object's own center.
-			// The object is not snapped until mouse up, so on a matched axis use the
-			// snapped ordinate (closestX / closestY) to place the dot on the helper
-			// line instead of the still-offset live position (xList[1] / yList[1]).
-			if (this.sectionProperties.centerToCenterX || this.sectionProperties.centerToCenterY) {
-				this.sectionProperties.draggedCenter = [
-					this.sectionProperties.centerToCenterX ? this.sectionProperties.closestX : xListToCheck[1],
-					this.sectionProperties.centerToCenterY ? this.sectionProperties.closestY : yListToCheck[1],
-				];
-			}
-			else
-				this.sectionProperties.draggedCenter = null;
-		}
-	}
-
+	/// Looks for what the drag could line up with, and marks it.
 	public checkHelperLinesAndSnapPoints(size: number[], position: number[], dragDistance: number[]) {
-		/*
-			We will first check if grid-snap is enabled and if we are close to a grid point.
-			If there is a grid point to snap to, then we'll ignore helper lines.
-			Because core side doesn't know about our helper lines, and it'll ignore them if it can snap to a grid point.
-		*/
-
-		this.sectionProperties.closestX = null;
-		this.sectionProperties.closestY = null;
-		this.sectionProperties.centerSnapX = null;
-		this.sectionProperties.centerSnapY = null;
-		this.sectionProperties.draggedCenter = null;
-
-		if (app.map.stateChangeHandler.getItemValue('.uno:GridUse') === 'true') {
-			this.findClosestGridPoint(size, position, dragDistance)
-		}
-		else {
-			const left = position[0] + dragDistance[0];
-			const top = position[1] + dragDistance[1];
-			this.checkObjectsBoundaries(
-				[left, left + size[0] / 2, left + size[0]],
-				[top, top + size[1] / 2, top + size[1]]
-			);
-		}
-
+		this.sectionProperties.snap.look(size, position, dragDistance);
 		this.containerObject.requestReDraw();
 	}
 
@@ -1452,109 +1222,6 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		}
 	}
 
-	drawXAxis(x: number) {
-		this.context.moveTo(x, 0);
-		this.context.lineTo(x, this.context.canvas.height);
-		this.context.stroke();
-	}
-
-	drawYAxis(y: number) {
-		this.context.moveTo(0, y);
-		this.context.lineTo(this.context.canvas.width, y);
-		this.context.stroke();
-	}
-
-	// Marks the center of the other object we are aligning to with a small red dot.
-	// centerPoint is the [x, y] center of that object in pixels.
-	drawCenterSnapDot(centerPoint: number[]) {
-		const x = this.containerObject.getDocumentAnchor()[0] + centerPoint[0] - app.activeDocument.activeLayout.viewedRectangle.pX1;
-		const y = this.containerObject.getDocumentAnchor()[1] + centerPoint[1] - app.activeDocument.activeLayout.viewedRectangle.pY1;
-
-		this.context.beginPath();
-		this.context.fillStyle = 'red';
-		this.context.arc(x, y, 3 * app.dpiScale, 0, 2 * Math.PI);
-		this.context.fill();
-		this.context.closePath();
-	}
-
-	drawShapeAlignmentHelperLines() {
-		this.context.save();
-
-		this.context.setLineDash([4, 3]);
-		this.context.strokeStyle = HelperLineStyles.smartGuidesStyle;
-		this.context.translate(-this.myTopLeft[0], -this.myTopLeft[1]);
-
-		this.context.beginPath();
-
-		if (this.sectionProperties.closestX !== null)
-			this.drawXAxis(this.containerObject.getDocumentAnchor()[0] + this.sectionProperties.closestX - app.activeDocument.activeLayout.viewedRectangle.pX1);
-
-		if (this.sectionProperties.closestY !== null)
-			this.drawYAxis(this.containerObject.getDocumentAnchor()[1] + this.sectionProperties.closestY - app.activeDocument.activeLayout.viewedRectangle.pY1);
-
-		this.context.closePath();
-
-		// When snapping to another object's center, mark that center with a red dot.
-		if (this.sectionProperties.centerSnapX !== null)
-			this.drawCenterSnapDot(this.sectionProperties.centerSnapX);
-
-		if (this.sectionProperties.centerSnapY !== null)
-			this.drawCenterSnapDot(this.sectionProperties.centerSnapY);
-
-		// On a center-to-center match, also mark the active object's own center.
-		if (this.sectionProperties.draggedCenter !== null)
-			this.drawCenterSnapDot(this.sectionProperties.draggedCenter);
-
-		this.context.restore();
-	}
-
-	drawGridHelperLines() {
-		this.context.save();
-
-		this.context.translate(-this.myTopLeft[0], -this.myTopLeft[1]);
-
-		this.context.beginPath();
-
-		if (this.sectionProperties.closestX !== null) {
-			this.context.strokeStyle = HelperLineStyles.gridSolidStyle;
-			this.context.setLineDash([]);
-
-			const x = this.containerObject.getDocumentAnchor()[0] + this.sectionProperties.closestX - app.activeDocument.activeLayout.viewedRectangle.pX1;
-
-			this.drawXAxis(x);
-
-			// Draw a second line on top of solid white-ish line.
-			this.context.setLineDash([4, 3]);
-			this.context.strokeStyle = HelperLineStyles.gridDashedStyle;
-
-			this.drawXAxis(x);
-		}
-
-		if (this.sectionProperties.closestY !== null) {
-			this.context.strokeStyle = HelperLineStyles.gridSolidStyle;
-			this.context.setLineDash([]);
-
-			const y = this.containerObject.getDocumentAnchor()[1] + this.sectionProperties.closestY - app.activeDocument.activeLayout.viewedRectangle.pY1;
-
-			this.drawYAxis(y);
-
-			// Draw a second line on top of solid white-ish line.
-			this.context.setLineDash([4, 3]);
-			this.context.strokeStyle = HelperLineStyles.gridDashedStyle;
-
-			this.drawYAxis(y);
-		}
-
-		this.context.closePath();
-
-		this.context.restore();
-	}
-
-	private anythingToDraw(): boolean {
-		return 	this.sectionProperties.closestX !== null ||
-				this.sectionProperties.closestY !== null;
-	}
-
 	private drawSelectionFrame() {
 		this.context.save();
 		this.context.setTransform(1, 0, 0, 1, 0, 0);
@@ -1585,12 +1252,7 @@ class ShapeHandlesSection extends CanvasSectionObject {
 		this.drawShapeDragPreview();
 		if (!this.showSection || !this.isVisible)
 			this.hideSVG();
-		else if (this.anythingToDraw()) {
-			if (app.map.stateChangeHandler.getItemValue('.uno:GridUse') === 'true')
-				this.drawGridHelperLines();
-			else
-				this.drawShapeAlignmentHelperLines();
-		}
+		else this.sectionProperties.snap.draw(this);
 	}
 
 	/*

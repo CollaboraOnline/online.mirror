@@ -67,7 +67,8 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Shape alignment guides.', 
 			var dragY = other[1] - position[1];
 			section.checkHelperLinesAndSnapPoints(size, position, [dragX, dragY]);
 
-			var p = section.sectionProperties;
+			// What the snap found is kept by the snap object of the section.
+			var p = section.sectionProperties.snap;
 
 			// A guide is drawn on each axis at the other shape's edge.
 			expect(p.closestX, 'closestX').to.be.closeTo(other[0], 1);
@@ -100,7 +101,8 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Shape alignment guides.', 
 			var dragY = otherCenterY - activeCenterY;
 			section.checkHelperLinesAndSnapPoints(size, position, [dragX, dragY]);
 
-			var p = section.sectionProperties;
+			// What the snap found is kept by the snap object of the section.
+			var p = section.sectionProperties.snap;
 
 			// A guide is drawn through the other shape's center on each axis.
 			expect(p.closestX, 'closestX').to.be.closeTo(otherCenterX, 1);

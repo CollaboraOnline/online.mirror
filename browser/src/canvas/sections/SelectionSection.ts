@@ -39,6 +39,9 @@ abstract class SelectionSection extends CanvasSectionObject {
 	/// What a drag is doing to the selection, null while nothing is being dragged.
 	private interaction: SelectionInteraction | null = null;
 
+	/// What a drag of this selection can line up with on the page, and the lines that mark it.
+	public readonly snap: SelectionSnap = new SelectionSnap();
+
 	/// A press waiting to be handed to the engine, kept so that a second press can drop it.
 	private pendingClick: any = null;
 
@@ -269,6 +272,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 		if (this.standsBack()) return;
 
 		this.drawTheInteraction();
+		this.snap.draw(this);
 		this.drawTheFrame();
 
 		this.context.save();
@@ -390,26 +394,19 @@ abstract class SelectionSection extends CanvasSectionObject {
 		return inDocument;
 	}
 
-	/// Looks for something on the page that the handle could snap to, and marks it.
+	/// Looks for something on the page that the handle could line up with, and marks it.
 	public lookForASnap(handle: SelectionHandle): void {
 		const half = 0.5 * ShapeHandlesSection.handleSize();
 		const at = new cool.SimplePoint(handle.point.x, handle.point.y);
 
 		// A point is asked about, so there is no size to it and no distance left to travel.
-		this.shapeSection()?.checkHelperLinesAndSnapPoints(
-			[0, 0],
-			[at.pX - half, at.pY - half],
-			[0, 0],
-		);
+		this.snap.look([0, 0], [at.pX - half, at.pY - half], [0, 0]);
+		this.redraw();
 	}
 
-	/// Where the last look for a snap landed, in core pixels, or nothing on either side that
-	/// found nothing to snap to.
-	public snappedTo(): (number | null)[] | null {
-		const snap = this.shapeSection()?.sectionProperties;
-		if (!snap) return null;
-
-		return [snap.closestX, snap.closestY];
+	/// Where the last look landed, in core pixels, null on an axis that found nothing.
+	public snappedTo(): (number | null)[] {
+		return this.snap.at();
 	}
 
 	/*
@@ -417,32 +414,16 @@ abstract class SelectionSection extends CanvasSectionObject {
 		the move has taken it, and marks it. The distance is in core pixels.
 	*/
 	public lookForASnapOfTheWhole(across: number, down: number): void {
-		this.shapeSection()?.checkHelperLinesAndSnapPoints(
-			this.selectionSize(),
-			this.selectionCorner(),
-			[across, down],
-		);
+		this.snap.look(this.selectionSize(), this.selectionCorner(), [
+			across,
+			down,
+		]);
 	}
 
-	/*
-		Where the upper left corner of the selection ends up, in core pixels: where the move
-		would put it, or where it snapped to another object of the page. What snapped is a point
-		of the selection, its middle or an edge, so the older section says how far that point
-		lies from the corner.
-	*/
+	/// Where the upper left corner of the selection lands, in core pixels: where the move puts
+	/// it, or where it lined up with something on the page.
 	public snappedCorner(x: number, y: number): number[] {
-		const section = this.shapeSection();
-		const snap = section?.sectionProperties;
-		if (!snap) return [x, y];
-
-		return [
-			snap.closestX !== null && snap.closestX !== undefined
-				? section.adjustSnapTransformCoordinate(snap.closestX, null)
-				: x,
-			snap.closestY !== null && snap.closestY !== undefined
-				? section.adjustSnapTransformCoordinate(null, snap.closestY)
-				: y,
-		];
+		return this.snap.corner(x, y);
 	}
 
 	/// The upper left corner of the selection, in core pixels.
@@ -674,7 +655,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 	/// lines that marked a snap away with it.
 	private endTheInteraction(): void {
 		this.interaction = null;
-		this.shapeSection()?.forgetTheSnap();
+		this.snap.forget();
 		app.map.fire('scrollvelocity', { vx: 0, vy: 0 });
 		this.containerObject.requestReDraw();
 	}
