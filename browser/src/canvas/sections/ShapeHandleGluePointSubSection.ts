@@ -19,7 +19,16 @@ class ShapeHandleGluePointSubSection extends CanvasSectionObject {
         super(sectionName);
 
         this.size = size;
+
+        // Where it sits in the document, which is what the container places it by. Setting the
+        // position alone leaves that at the start of the document, and every point of every
+        // object lands in the upper left corner of the page.
         this.position = [documentPosition.pX, documentPosition.pY];
+        this.documentPosition = documentPosition.clone();
+        this.boundingRectangle = cool.SimpleRectangle.fromCorePixels([
+            ...this.position,
+            ...this.size,
+        ]);
 
 		this.sectionProperties.parentHandlerSection = parentHandlerSection;
 		this.sectionProperties.ownInfo = ownInfo;
