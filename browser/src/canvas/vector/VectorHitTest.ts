@@ -243,8 +243,7 @@ namespace cool {
 				}
 
 				case PolygonStrokePrimitive.type:
-				case PolyPolygonStrokePrimitive.type:
-				case 'polygonStrokeArrow': {
+				case PolyPolygonStrokePrimitive.type: {
 					if (walk.textOnly) return undefined;
 					// A line is hit within half its width, which a hairline does not have.
 					const stroke = VectorHitTest.pathOf(fields.path);

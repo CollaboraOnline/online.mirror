@@ -838,16 +838,21 @@ void Primitive2dJsonProcessor::processPrimitive(const BasePrimitive2D& rBasePrim
 
         case PRIMITIVE2D_ID_POLYGONSTROKEARROWPRIMITIVE2D:
         {
-            const auto& rPrimitive
-                = static_cast<const PolygonStrokeArrowPrimitive2D&>(rBasePrimitive);
+            /*
+                A line with an arrow at one end or at both. Where the arrow sits, the line is
+                drawn short of the end and the arrow is a polygon of its own, placed and turned
+                along the line, which is work of the kind a reader should not have to do. So
+                what travels is what it draws: the line as a line and each arrow as a polygon.
+            */
             mrWriter.put("type", "polygonStrokeArrow");
-            const basegfx::B2DPolyPolygon aScaled
-                = scalePolyPolygon(basegfx::B2DPolyPolygon(rPrimitive.getB2DPolygon()));
-            mrWriter.put("path", basegfx::utils::exportToSvgD(aScaled, true, true, false));
-            writeLineAttributeScaled(rPrimitive.getLineAttribute());
-            writeStrokeAttributeScaled(rPrimitive.getStrokeAttribute());
-            writeArrowAttributeScaled("start", rPrimitive.getStart());
-            writeArrowAttributeScaled("end", rPrimitive.getEnd());
+
+            Primitive2DContainer aContainer;
+            rBasePrimitive.get2DDecomposition(aContainer, maViewInformation2D);
+            if (!aContainer.empty())
+            {
+                auto aChildArray = mrWriter.startArray("children");
+                decomposeAndWrite(aContainer);
+            }
         }
         break;
 
