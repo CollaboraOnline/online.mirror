@@ -52,6 +52,10 @@ class CommentsPanel {
   // Which of the two menus is open, and none while both are shut.
   private openPopover: 'filter' | 'sort' | null = null;
 
+  // Whether the press that a click is coming from is the one
+  // that shut a menu.
+  private thePressShutAMenu = false;
+
   // The threads the last pass collected, which the counts in the
   // bar are worked out over.
   private threads: CommentThread[] = [];
@@ -170,13 +174,29 @@ class CommentsPanel {
     });
 
     document.addEventListener('pointerdown', (event: PointerEvent) => {
+      // Only the click this press turns into is in question.
+      this.thePressShutAMenu = false;
       if (!this.openPopover) return;
       const at = event.target as HTMLElement;
       if (at.closest('.comments-panel-popover')) return;
       if (at.closest('.comments-panel-filter-button')) return;
       if (at.closest('.comments-panel-sort-key')) return;
       this.closePopovers();
+      this.thePressShutAMenu = true;
     });
+
+    // Shutting a menu is the whole of what that press does, so
+    // the click it turns into reaches nothing under it.
+    document.addEventListener(
+      'click',
+      (event: MouseEvent) => {
+        if (!this.thePressShutAMenu) return;
+        this.thePressShutAMenu = false;
+        event.stopPropagation();
+        event.preventDefault();
+      },
+      true,
+    );
   }
 
   private build(panel: HTMLElement): void {
