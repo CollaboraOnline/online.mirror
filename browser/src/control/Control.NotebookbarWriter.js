@@ -152,7 +152,7 @@ window.L.Control.NotebookbarWriter = window.L.Control.Notebookbar.extend({
 		var hideDownload = this.map['wopi'].HideExportOption;
 		var hasGroupedSaveAs = window.prefs.get('saveAsMode') === 'group';
 		var hasRunMacro = window.enableMacrosExecution;
-		var hasSave = !this.map['wopi'].HideSaveOption;
+		var hasSave = !this.map['wopi'].HideSaveOption && !this.map.isReadOnlyMode();
 		var content = [];
 
 		if (hasSave) {
