@@ -105,15 +105,16 @@ class CommentsPanel {
   // comment each thread starts with.
   private openedThreads: Set<string> = new Set<string>();
 
-  // Where the pointer was last seen, so a box that moves can be
-  // told from a reader who walked away from it.
-  private static wherethePointerIs: { x: number; y: number } | null = null;
-
   // A thread the reader has just settled or opened again, kept
   // in the list until the pointer leaves it, and the state the
   // list is still showing it in.
   private heldThread: string | null = null;
   private heldAsResolved = false;
+
+  // The card the hold is armed on, and whether a card is
+  // closing itself away.
+  private theWatchedCard: HTMLElement | null = null;
+  private theCardIsLeaving = false;
 
   // The colours an author's letters sit on. Every one of them
   // carries white letters at the contrast the guidelines ask.
@@ -167,10 +168,6 @@ class CommentsPanel {
         this.openPopover === 'filter' ? this.filterButtonNode : this.sortKeyNode;
       this.closePopovers();
       button?.focus();
-    });
-
-    document.addEventListener('pointermove', (event: PointerEvent) => {
-      CommentsPanel.wherethePointerIs = { x: event.clientX, y: event.clientY };
     });
 
     document.addEventListener('pointerdown', (event: PointerEvent) => {
@@ -1082,6 +1079,9 @@ class CommentsPanel {
 
   private markStale(): void {
     this.stale = true;
+    // The list stands still under a card being settled or on
+    // its way out, and is drawn again once that card is done.
+    if (this.heldThread !== null || this.theCardIsLeaving) return;
     if (this.shown) this.render();
   }
 
@@ -1120,6 +1120,17 @@ class CommentsPanel {
     const shown = this.sortThreads(
       threads.filter((thread) => this.matchesFilters(thread)),
     );
+
+    // A hold lasts only while the card it is on is in the list,
+    // so one whose thread has gone ends here.
+    const heldId = this.heldThread;
+    if (
+      heldId !== null &&
+      !shown.some(
+        (thread) => String(thread.root.sectionProperties.data.id) === heldId,
+      )
+    )
+      this.heldThread = null;
 
     // Building the rows moves the box a comment is written in,
     // which takes the focus off it, so the focus goes back.
@@ -1390,14 +1401,14 @@ class CommentsPanel {
   }
 
   private resolveThread(thread: CommentThread): void {
-    // Settling a thread can take it out of what the filters
-    // leave, and a card going out from under the pointer reads
-    // as nothing having happened. It is held until the pointer
-    // leaves it.
-    this.heldThread = String(thread.root.sectionProperties.data.id);
+    const rootId = String(thread.root.sectionProperties.data.id);
+    const held = this.heldThread === rootId;
     // The bar counts the thread the way the list is still
     // showing it, so the number waits for the card.
-    this.heldAsResolved = this.threadIsResolved(thread);
+    if (!held) this.heldAsResolved = this.threadIsResolved(thread);
+    // A hold on this thread comes off, so what the filters say
+    // about it is read afresh.
+    else this.heldThread = null;
 
     // The engine answers in its own time, so the card takes the
     // new state now and the answer confirms it.
@@ -1410,15 +1421,30 @@ class CommentsPanel {
     // Rebuilding the list would throw this card away and put a
     // new one in its place, which is a jump under the pointer
     // and the end of the hold. Only what changed is drawn.
-    this.drawTheSettledState(thread);
+    const card = this.drawTheSettledState(thread);
+
+    // A card the filters still keep stands where it is, so the
+    // numbers move with the click that changed them.
+    if (!card || this.matchesFilters(thread)) {
+      this.theReaderAsked();
+      this.drawTheControlsFromTheFilters(this.threads);
+      return;
+    }
+
+    // A card the filters no longer keep is held under the
+    // pointer, because one going out from under it is missed.
+    this.heldThread = rootId;
+    this.letGoOfTheHeldThread(card);
   }
 
-  // What a thread being settled or opened again changes on the
-  // card itself, without the list being built afresh.
-  private drawTheSettledState(thread: CommentThread): void {
+  // What settling a thread changes on the card itself, with
+  // the list left alone. The card it drew comes back.
+  private drawTheSettledState(thread: CommentThread): HTMLElement | null {
     const rootId = String(thread.root.sectionProperties.data.id);
-    const card = this.rowOf(rootId)?.closest('.comments-panel-thread');
-    if (!card) return;
+    const card = this.rowOf(rootId)?.closest<HTMLElement>(
+      '.comments-panel-thread',
+    );
+    if (!card) return null;
 
     const done = this.threadIsResolved(thread);
     card.classList.toggle('is-resolved', done);
@@ -1426,76 +1452,69 @@ class CommentsPanel {
     const tick = card.querySelector<HTMLElement>(
       '.comments-panel-thread-resolve',
     );
-    if (!tick) return;
+    if (!tick) return card;
 
     const says = done ? _('Reopen the thread') : _('Resolve the thread');
     tick.classList.toggle('is-done', done);
     tick.setAttribute('aria-pressed', String(done));
     tick.setAttribute('aria-label', says);
+    return card;
   }
 
-  // Let go of the card the pointer has left, so the filters
-  // hold again from the next pass.
+  // Let go of the card the reader has left, so the filters hold
+  // again from the next pass.
   private letGoOfTheHeldThread(card: HTMLElement): void {
-    const leaving = () => {
-      // The card can move out from under a pointer that never
-      // moved, which is the card leaving rather than the reader.
-      if (CommentsPanel.thePointerIsOver(card)) {
-        card.addEventListener('mouseleave', leaving, { once: true });
-        return;
-      }
-      this.releaseTheHeldThread(card);
-    };
-    card.addEventListener('mouseleave', leaving, { once: true });
+    if (this.theWatchedCard === card) return;
+    this.theWatchedCard = card;
 
+    // A pen and a finger are pointers too, and each of them
+    // leaves the card the way a mouse does.
     card.addEventListener(
-      'focusout',
-      (event: FocusEvent) => {
-        const to = event.relatedTarget as Node | null;
-        if (to && card.contains(to)) return;
-        // A pass of our own takes the focus to nowhere. A reader
-        // leaving by keyboard always says where they went.
-        if (to === null && CommentsPanel.thePointerIsOver(card)) return;
-        this.releaseTheHeldThread(card);
-      },
+      'pointerleave',
+      () => this.releaseTheHeldThread(card),
       { once: true },
     );
-  }
 
-  // Whether the pointer, wherever it was last seen, is inside a
-  // box as that box stands now.
-  private static thePointerIsOver(card: HTMLElement): boolean {
-    const at = CommentsPanel.wherethePointerIs;
-    if (!at) return false;
-
-    const box = card.getBoundingClientRect();
-    return (
-      at.x >= box.left &&
-      at.x <= box.right &&
-      at.y >= box.top &&
-      at.y <= box.bottom
-    );
+    card.addEventListener('focusout', (event: FocusEvent) => {
+      const to = event.relatedTarget as Node | null;
+      // Focus landing nowhere in particular says nothing about
+      // where the reader is, so the hold waits for a place.
+      if (to === null || card.contains(to)) return;
+      this.releaseTheHeldThread(card);
+    });
   }
 
   private releaseTheHeldThread(card: HTMLElement): void {
-        if (this.heldThread === null) return;
+    // The hold is on one card, and a card taken out of the list
+    // is not a reader walking away from it.
+    if (this.heldThread === null) return;
+    if (this.theWatchedCard !== card || !card.isConnected) return;
 
-        const held = this.heldThread;
-        this.heldThread = null;
-        // The bar says what the list holds, so the numbers start
-        // moving as the card starts leaving.
-        this.theReaderAsked();
-        this.drawTheControlsFromTheFilters(this.threads);
-        // A card the filters still keep stays where it is, so
-        // only one on its way out is closed away.
-        const thread = this.threads.find(
-          (one) => String(one.root.sectionProperties.data.id) === held,
-        );
-        if (thread && this.matchesFilters(thread)) {
-          this.render();
-          return;
-        }
-        this.closeTheCardAway(card, () => this.render());
+    const held = this.heldThread;
+    this.heldThread = null;
+    this.theWatchedCard = null;
+    // The bar says what the list holds, so the numbers start
+    // moving as the card starts leaving.
+    this.theReaderAsked();
+    this.drawTheControlsFromTheFilters(this.threads);
+    // A card the filters still keep stays where it is, so
+    // only one on its way out is closed away.
+    const thread = this.threads.find(
+      (one) => String(one.root.sectionProperties.data.id) === held,
+    );
+    if (thread && this.matchesFilters(thread)) {
+      // The list is drawn again only where a pass is owed.
+      if (this.stale) this.render();
+      return;
+    }
+    this.theCardIsLeaving = true;
+    this.closeTheCardAway(card, () => this.drawTheListAgain());
+  }
+
+  // Draw the list again, with the wait on a settled card over.
+  private drawTheListAgain(): void {
+    this.theCardIsLeaving = false;
+    this.render();
   }
 
   // Take a card out by closing the room it stands in, so the
