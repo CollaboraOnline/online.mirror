@@ -1675,6 +1675,11 @@ export class Comment extends CanvasSectionObject {
 
 	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 	public onLostFocus (e: any): void {
+		// The page itself losing the focus, to another window
+		// or to the desktop, leaves the box as it stands.
+		if (!document.hasFocus())
+			return;
+
 		// Moving the focus about inside the box being written
 		// in, from the words to Save, is not leaving it.
 		const written = this.sectionProperties.nodeReply.contains(e.target)
