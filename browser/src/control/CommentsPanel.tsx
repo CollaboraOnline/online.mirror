@@ -101,6 +101,10 @@ class CommentsPanel {
   // rebuilt list keeps the open ones open.
   private openedIds: Set<string> = new Set<string>();
 
+  // The comments whose open control is on show, by id, as the
+  // last measuring pass left it.
+  private offeringToOpen: Set<string> = new Set<string>();
+
   // The threads whose replies are on show, by the id of the
   // comment each thread starts with.
   private openedThreads: Set<string> = new Set<string>();
@@ -1589,9 +1593,12 @@ class CommentsPanel {
       </span>
     );
 
+    // The control is put up where the last pass found the
+    // words cut short, so the row is built at its full height.
+    const offers = this.offeringToOpen.has(id);
     const openNode = (
       <button
-        class="comments-panel-comment-open hidden"
+        class={'comments-panel-comment-open' + (offers ? '' : ' hidden')}
         type="button"
         aria-controls={textId}
         aria-expanded={String(opened)}
@@ -1685,10 +1692,10 @@ class CommentsPanel {
     );
 
     this.builtRows.forEach((row, i) => {
-      row.openNode.classList.toggle(
-        'hidden',
-        !cutShort[i] && !this.openedIds.has(row.id),
-      );
+      const offers = cutShort[i] || this.openedIds.has(row.id);
+      if (offers) this.offeringToOpen.add(row.id);
+      else this.offeringToOpen.delete(row.id);
+      row.openNode.classList.toggle('hidden', !offers);
     });
   }
 
@@ -1714,6 +1721,9 @@ class CommentsPanel {
 
     for (const id of Array.from(this.openedIds))
       if (!present.has(id)) this.openedIds.delete(id);
+
+    for (const id of Array.from(this.offeringToOpen))
+      if (!present.has(id)) this.offeringToOpen.delete(id);
   }
 
   // The author, as the picture the host gave for them or as the
