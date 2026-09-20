@@ -260,6 +260,11 @@ void Session::parseDocOptions(const StringVector& tokens, int& part, std::string
             _darkTheme = std::move(value);
             ++offset;
         }
+        else if (name == "focusRingColor")
+        {
+            _focusRingColor = std::move(value);
+            ++offset;
+        }
         else if (name == "darkBackground")
         {
             _darkBackground = std::move(value);

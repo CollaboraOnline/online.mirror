@@ -1835,6 +1835,11 @@ bool ClientSession::loadDocument(const char* /*buffer*/, int /*length*/,
             oss << " darkBackground=" << getDarkBackground();
         }
 
+        if (!getFocusRingColor().empty())
+        {
+            oss << " focusRingColor=" << getFocusRingColor();
+        }
+
         if (!getWatermarkText().empty())
         {
             std::string encodedWatermarkText;

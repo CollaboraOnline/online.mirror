@@ -362,6 +362,7 @@ private:
     static std::string makeRenderParams(const std::string& renderOpts, const std::string& userName,
                                         const std::string& spellOnline, const std::string& theme,
                                         const std::string& backgroundTheme,
+                                        const std::string& focusRingColor,
                                         const std::string& userPrivateInfo);
 
     /// Returns true iff at least one session is loaded.

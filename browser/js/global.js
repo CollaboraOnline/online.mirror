@@ -1143,6 +1143,22 @@ function getInitializerClass() {
 		}
 	}, false);
 
+	// The colour as "#rrggbb", or the empty string when it cannot be read.
+	global.getFocusRingColor = function () {
+		const probe = document.createElement('div');
+		probe.style.outlineColor = '-webkit-focus-ring-color';
+		document.documentElement.appendChild(probe);
+		const computed = global.getComputedStyle(probe).outlineColor;
+		probe.remove();
+
+		const parts = computed.match(/\d+/g);
+		if (!parts || parts.length < 3)
+			return '';
+		return '#' + parts.slice(0, 3).map(function (part) {
+			return parseInt(part, 10).toString(16).padStart(2, '0');
+		}).join('');
+	};
+
 	global.fakeWebSocketCounter = 0;
 	global.FakeWebSocket = function () {
 		this.binaryType = 'arraybuffer';
@@ -1942,6 +1958,11 @@ function getInitializerClass() {
 
 				const darkBackground = window.prefs.getBoolean('darkBackgroundForTheme.' + (darkTheme ? 'dark' : 'light'), darkTheme);
 				msg += ' darkBackground=' + darkBackground;
+
+				const focusRingColor = global.getFocusRingColor();
+				if (focusRingColor) {
+					msg += ' focusRingColor=' + focusRingColor;
+				}
 
 				msg += ' timezone=' + Intl.DateTimeFormat().resolvedOptions().timeZone;
 				msg += ' clientvisiblearea=' + window.makeClientVisibleArea();
