@@ -861,9 +861,8 @@ function getAXNodes() {
 }
 
 /// The document node of the cool frame, which is what a selector is resolved
-/// against. DOM.getDocument returns the runner's document, and the cool one is
-/// two frames down from it. Document nodes carry documentURL, not frameId --
-/// that sits on the IFRAME element above them.
+/// against. Document nodes carry documentURL, not frameId -- that sits on the
+/// IFRAME element above them.
 let coolDocumentNode = null;
 
 /// DOM.getDocument walks the whole tree with pierce, which is far too much to
@@ -882,24 +881,39 @@ function enableAX() {
 	});
 }
 
-function coolDocumentNodeId() {
-	if (coolDocumentNode !== null) return cy.wrap(coolDocumentNode, { log: false });
-
+/// The whole DOM tree of the runner, frames included, in one round trip. The root
+/// is the runner's document, and the cool one is two frames down from it.
+function getDomTree() {
 	return cy.then(function () {
 		return cdp('DOM.enable');
 	}).then(function () {
 		return cdp('DOM.getDocument', { depth: -1, pierce: true });
-	}).then(function (res) {
+	}).then(function (result) {
+		return result.root;
+	});
+}
+
+/// Call visit on every node of a DOM tree, including the documents of frames.
+function walkDomTree(node, visit) {
+	visit(node);
+	(node.children || []).forEach(function (child) {
+		walkDomTree(child, visit);
+	});
+	if (node.contentDocument) walkDomTree(node.contentDocument, visit);
+}
+
+function coolDocumentNodeId() {
+	if (coolDocumentNode !== null) return cy.wrap(coolDocumentNode, { log: false });
+
+	return getDomTree().then(function (root) {
 		let found = null;
 
-		(function walk(node) {
+		walkDomTree(root, function (node) {
 			if (found !== null) return;
 			if (node.nodeName === '#document' &&
 					(node.documentURL || '').indexOf('cool.html') !== -1)
 				found = node.nodeId;
-			(node.children || []).forEach(walk);
-			if (node.contentDocument) walk(node.contentDocument);
-		})(res.root);
+		});
 
 		expect(found, 'the cool.html document node in the DOM tree')
 			.to.not.equal(null);
