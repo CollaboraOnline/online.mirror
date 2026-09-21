@@ -657,6 +657,7 @@ bool ChildSession::_handleInput(const char *buffer, int length)
                tokens.equals(0, "selectobjects") ||
                tokens.equals(0, "setobjectpoints") ||
                tokens.equals(0, "setobjectgluepoint") ||
+               tokens.equals(0, "setobjecttransform") ||
                tokens.equals(0, "downloadas") ||
                tokens.equals(0, "getchildid") ||
                tokens.equals(0, "gettextselection") ||
@@ -733,6 +734,10 @@ bool ChildSession::_handleInput(const char *buffer, int length)
         else if (tokens.equals(0, "setobjectgluepoint"))
         {
             return setObjectGluePoint(tokens);
+        }
+        else if (tokens.equals(0, "setobjecttransform"))
+        {
+            return setObjectTransform(tokens);
         }
         else if (tokens.equals(0, "downloadas"))
         {
@@ -1798,6 +1803,24 @@ bool ChildSession::setObjectGluePoint(const StringVector& tokens)
     getLOKitDocument()->setObjectGluePoint(std::strtoull(objectId.c_str(), nullptr, 10), nAt,
                                            std::strtod(across.c_str(), nullptr),
                                            std::strtod(down.c_str(), nullptr));
+    return true;
+}
+
+bool ChildSession::setObjectTransform(const StringVector& tokens)
+{
+    std::string objectIds;
+    std::string change;
+    std::string what;
+
+    if (tokens.size() != 4 || !getTokenString(tokens[1], "ids", objectIds)
+        || !getTokenString(tokens[2], "by", change) || !getTokenString(tokens[3], "as", what))
+    {
+        sendTextFrameAndLogError("error: cmd=setobjecttransform kind=syntax");
+        return false;
+    }
+
+    getLOKitDocument()->setView(_viewId);
+    getLOKitDocument()->setObjectTransform(objectIds.c_str(), change.c_str(), what.c_str());
     return true;
 }
 

@@ -580,6 +580,19 @@ selectobjects ids=<ids>
     of one selection all sit at the same level, directly on the page or in one and the same group;
     an id naming an object elsewhere, or naming nothing on the page the view shows, is left out.
 
+setobjecttransform ids=<ids> by=<change> as=<what>
+
+    <ids> is a comma separated list of the unique ids of drawing objects, the ones the render
+    geometry of a page names its objects by. <change> is what is done to them, in twips, as the
+    six numbers of a matrix - a, b, c, d, e and f - separated by commas, where a point x and y
+    becomes a*x + c*y + e and b*x + d*y + f. <what> is "move", "scale" or "turn", and names the
+    step the change can be undone with.
+
+    Lays that change over every one of those objects: each of them keeps what it is and only its
+    place, its size, its turn and its shear follow the change. The whole of it is one step to
+    undo. A client that works a drag out for itself hands the change over this way rather than
+    asking for a handle of the selection to be moved.
+
 setobjectgluepoint id=<id> at=<at> x=<x> y=<y>
 
     <id> is the unique id of a drawing object, the one the render geometry of a page names it by,

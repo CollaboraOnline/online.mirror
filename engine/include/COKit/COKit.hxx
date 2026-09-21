@@ -2809,6 +2809,19 @@ struct COKitDocument
     virtual void setObjectGluePoint(unsigned long long nObjectId, int nAt, double fX, double fY)
         = 0;
 
+    /**
+     * Lays a change over the drawing objects named, which moves, scales, turns or shears them.
+     *
+     * @param pObjectIds the unique ids of the objects, as the render geometry names them,
+     * separated by commas
+     * @param pChange the change, in twips, as the six numbers of a matrix - a, b, c, d, e and f -
+     * separated by commas, where a point x and y becomes a*x + c*y + e and b*x + d*y + f
+     * @param pWhat what the change was done by, which names the step it can be undone with:
+     * "move", "scale" or "turn"
+     */
+    virtual void setObjectTransform(const char* pObjectIds, const char* pChange, const char* pWhat)
+        = 0;
+
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -6745,6 +6745,93 @@ void COKitDocumentImpl::setObjectGluePoint(unsigned long long nObjectId, int nAt
     rModel.EndUndo();
 }
 
+/*
+    Lays a change over drawing objects: the client works out what a drag does and hands over the
+    change itself, rather than asking for a handle to be moved. Every object keeps what it is and
+    only its place, its size, its turn and its shear follow the change, all of it in one step to
+    undo.
+*/
+void COKitDocumentImpl::setObjectTransform(const char* pObjectIds,
+                                           const char* pChange, const char* pWhat)
+{
+    comphelper::ProfileZone aZone("COKitDocumentImpl::setObjectTransform");
+
+    SolarMutexGuard aGuard;
+    SetLastExceptionMsg();
+
+    SfxViewShell* pViewShell = SfxViewShell::Current();
+    SdrView* pView = pViewShell ? pViewShell->GetDrawView() : nullptr;
+    SdrPageView* pPageView = pView ? pView->GetSdrPageView() : nullptr;
+    const SdrPage* pPage = pPageView ? pPageView->GetPage() : nullptr;
+
+    if (!pPage)
+    {
+        SetLastExceptionMsg(u"The view shows no page to change an object on"_ustr);
+        return;
+    }
+
+    const OString aChange(pChange ? pChange : "");
+    double aNumber[6] = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
+    sal_Int32 nField = 0;
+    for (double& rNumber : aNumber)
+    {
+        if (nField < 0)
+        {
+            SetLastExceptionMsg(u"A change is six numbers"_ustr);
+            return;
+        }
+
+        rNumber = o3tl::toDouble(o3tl::getToken(aChange, 0, ',', nField));
+    }
+
+    /*
+        The change arrives in twips, as the client sees the page, and the model holds the page in
+        its own unit. The same change in that unit is the one with its own units taken off and the
+        model's put on, which leaves what it does to a length as it was and scales what it moves.
+    */
+    const double fToModel(o3tl::convert(1.0, o3tl::Length::twip, o3tl::Length::mm100));
+    basegfx::B2DHomMatrix aChangeInModel(aNumber[0], aNumber[2], aNumber[4] * fToModel,
+                                         aNumber[1], aNumber[3], aNumber[5] * fToModel);
+
+    std::vector<SdrObject*> aObjects;
+    const OString aIds(pObjectIds ? pObjectIds : "");
+    for (sal_Int32 nAt = 0; nAt >= 0;)
+    {
+        const OString aId(aIds.getToken(0, ',', nAt));
+        if (aId.isEmpty())
+            continue;
+
+        if (SdrObject* pObject = pPage->FindObjectByUniqueID(aId.toUInt64()))
+            aObjects.push_back(pObject);
+    }
+
+    if (aObjects.empty())
+    {
+        SetLastExceptionMsg(u"No object of those ids is on the page"_ustr);
+        return;
+    }
+
+    const OString aWhat(pWhat ? pWhat : "");
+    const TranslateId aStep(aWhat == "turn"    ? STR_DragMethRotate
+                            : aWhat == "scale" ? STR_DragMethResize
+                                               : STR_DragMethMove);
+
+    SdrModel& rModel(aObjects.front()->getSdrModelFromSdrObject());
+    rModel.BegUndo(SvxResId(aStep));
+
+    for (SdrObject* pObject : aObjects)
+    {
+        basegfx::B2DHomMatrix aOfTheObject;
+        basegfx::B2DPolyPolygon aOutline;
+        pObject->TRGetBaseGeometry(aOfTheObject, aOutline);
+
+        rModel.AddUndo(rModel.GetSdrUndoFactory().CreateUndoGeoObject(*pObject));
+        pObject->TRSetBaseGeometry(aChangeInModel * aOfTheObject, aOutline);
+    }
+
+    rModel.EndUndo();
+}
+
 void COKitDocumentImpl::setViewOption(const char* pOption, const char* pValue)
 {
     comphelper::ProfileZone aZone("COKitDocumentImpl::setViewOption");
