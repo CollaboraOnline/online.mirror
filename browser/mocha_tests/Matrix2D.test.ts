@@ -96,6 +96,25 @@ describe('Matrix2D', function () {
 		assertPoint(onto.apply(0.5, 0.5), 25, 25);
 	});
 
+	it('says by how much it turns the x axis', function () {
+		const quarter = cool.Matrix2D.IDENTITY.rotateAround(3, 4, Math.PI / 2);
+		assert.ok(Math.abs(quarter.rotation() - Math.PI / 2) < 1e-12);
+		assert.strictEqual(cool.Matrix2D.IDENTITY.scale(2, 5).rotation(), 0);
+	});
+
+	it('takes a point back where it came from under the inverse', function () {
+		const there = cool.Matrix2D.IDENTITY.scale(2, 3)
+			.rotateAround(5, 5, 0.7)
+			.translate(10, -4);
+		const back = there.invert();
+		const moved = there.apply(7, 11);
+		assertPoint(back.apply(moved.x, moved.y), 7, 11);
+	});
+
+	it('has no inverse when it flattens everything onto a line', function () {
+		assert.strictEqual(new cool.Matrix2D(1, 2, 2, 4, 0, 0).invert(), null);
+	});
+
 	it('multiplies its values into a canvas context', function () {
 		const context = new CanvasRecorder(10, 10);
 		cool.Matrix2D.fromArray([1, 2, 3, 4, 5, 6]).applyTo(context as any);

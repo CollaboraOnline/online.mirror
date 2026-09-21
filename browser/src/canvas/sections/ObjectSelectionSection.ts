@@ -29,11 +29,7 @@ class ObjectSelectionSection extends SelectionSection {
 		return 'selected-object-' + String(objectId);
 	}
 
-	protected sources(): HandleSource[] {
-		return [new ObjectHandles([this.objectId])];
-	}
-
-	protected selectedObjects(): number[] {
+	public selectedObjects(): number[] {
 		return [this.objectId];
 	}
 }

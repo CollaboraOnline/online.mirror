@@ -148,13 +148,14 @@ class GraphicSelection {
 		handles really moved.
 	*/
 	public static refreshLocalHandles(): void {
-		if (!GraphicSelection.applyLocalHandles()) return;
-
 		// The section that draws the selection works its handles out from the objects, so it is
-		// told as soon as they stand somewhere else.
+		// told whenever they change, whatever kind of handles they are.
 		this.selectionSection?.refresh();
 
-		if (this.handlesSection) this.handlesSection.refreshInfo(this.extraInfo);
+		// The older section is given the set it reads only when that set is one it can read,
+		// and only when it differs from the one it holds.
+		if (GraphicSelection.applyLocalHandles() && this.handlesSection)
+			this.handlesSection.refreshInfo(this.extraInfo);
 	}
 
 	/// The section that draws what is selected while the client draws it itself, null while it

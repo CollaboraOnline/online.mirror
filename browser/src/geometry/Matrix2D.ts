@@ -93,6 +93,27 @@ namespace cool {
 			);
 		}
 
+		/// The angle in radians the transform turns the x axis by, as the canvas counts angles.
+		rotation(): number {
+			return Math.atan2(this.b, this.a);
+		}
+
+		/// The transform that undoes this one, or null where this one cannot be undone, which is
+		/// a transform that flattens everything onto a line or a point.
+		invert(): Matrix2D | null {
+			const determinant = this.a * this.d - this.b * this.c;
+			if (!determinant) return null;
+
+			return new Matrix2D(
+				this.d / determinant,
+				-this.b / determinant,
+				-this.c / determinant,
+				this.a / determinant,
+				(this.c * this.f - this.d * this.e) / determinant,
+				(this.b * this.e - this.a * this.f) / determinant,
+			);
+		}
+
 		/// The point after the transform.
 		apply(x: number, y: number): cool.Point {
 			return new cool.Point(

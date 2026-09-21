@@ -386,6 +386,8 @@ COOL_JS_LST =\
 	src/app/SelectionSnap.ts \
 	src/app/HandleScaling.ts \
 	src/app/SelectionHandles.ts \
+	src/app/PolyPolygonEditor.ts \
+	src/app/HandleGroups.ts \
 	src/app/HandleTravel.ts \
 	src/app/GraphicSelectionMiddleware.ts \
 	src/app/TextSelectionMiddleware.ts \

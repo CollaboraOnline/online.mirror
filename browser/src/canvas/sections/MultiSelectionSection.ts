@@ -33,11 +33,7 @@ class MultiSelectionSection extends SelectionSection {
 		this.refresh();
 	}
 
-	protected sources(): HandleSource[] {
-		return [new ObjectHandles(this.objectIds)];
-	}
-
-	protected selectedObjects(): number[] {
+	public selectedObjects(): number[] {
 		return this.objectIds;
 	}
 }

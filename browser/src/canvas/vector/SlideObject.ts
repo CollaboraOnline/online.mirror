@@ -13,14 +13,13 @@ namespace cool {
 	/** One handle of an object that a reader cannot work out from what the object draws: the
 	 * corner radius of a rectangle, kind 11, and the points a custom shape is shaped by, kind 22.
 	 *
-	 * The kind, with the polygon and the point it belongs to and whether it is the weight behind
-	 * that point, is what names the handle wherever it is spoken about. The position is in twips.
+	 * The kind, with the polygon and the point it belongs to, is what names the handle wherever it
+	 * is spoken about. The position is in twips.
 	 */
 	export interface ObjectHandle {
 		kind: number;
 		polygon?: number;
 		point?: number;
-		behindThePoint?: boolean;
 		x: number;
 		y: number;
 	}
@@ -115,6 +114,24 @@ namespace cool {
 		/// The path the object is drawn from, as the model holds it. Absent for an object
 		/// that has no path of its own.
 		path?: ObjectPathPolygon[];
+		/// What kind of object it is, as the drawing layer numbers the kinds: 2 a line, 24 a
+		/// connector, 25 a caption, 29 a measurement, 33 a custom shape, 35 a table.
+		objectKind?: number;
+		gluePoints?: { x: number; y: number; keepsItsDistance?: boolean }[];
+		/// True for a connector whose first end is tied to an object, and the same for its last
+		/// end. Absent for anything that is not a connector, and for an end that is free.
+		tiedAtStart?: boolean;
+		tiedAtEnd?: boolean;
+		/** The points someone added to the object for a connector to tie itself to, where they
+		 * lie on the object: 0 and 0 is its upper left corner and 1 and 1 its lower right one, so
+		 * a point follows the object wherever it goes and however it is turned. Absent for an
+		 * object that was given none, and then the four middles of the sides of its box are what
+		 * a connector can reach for.
+		 *
+		 * keepsItsDistance is true for a point the object holds as a distance of its own rather
+		 * than as a share of its size: making the object larger leaves such a point where it is,
+		 * so its place on the object changes.
+		 */
 		primitives?: Primitive[];
 	}
 }

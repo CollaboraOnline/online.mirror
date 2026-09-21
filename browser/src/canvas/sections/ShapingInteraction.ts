@@ -78,7 +78,10 @@ class ShapingInteraction extends SelectionInteraction {
 		const side = this.upperSide();
 		const shape = this.selection.shapeNow();
 		if (radius === undefined || !side || !shape)
-			return new cool.Point(this.at.x, this.at.y);
+			return this.selection.holdTheDrag(
+				this.handle,
+				new cool.Point(this.at.x, this.at.y),
+			);
 
 		const kept = Math.min(
 			radius,
@@ -90,13 +93,13 @@ class ShapingInteraction extends SelectionInteraction {
 
 	/// Where the engine is told the handle was let go: the radius that was asked for, which can
 	/// be larger than the handle is drawn at, or the point itself for a handle without a rule.
-	private letGoAt(): cool.SimplePoint {
+	private letGoAt(): cool.Point {
 		const radius = this.radiusAsked(this.at);
 		const side = this.upperSide();
-		if (radius === undefined || !side) return this.at.clone();
+		if (radius === undefined || !side)
+			return new cool.Point(this.at.x, this.at.y);
 
-		const at = side.from.add(side.along.multiplyBy(radius));
-		return new cool.SimplePoint(at.x, at.y);
+		return side.from.add(side.along.multiplyBy(radius)).round();
 	}
 
 	public move(to: cool.SimplePoint): void {
@@ -104,28 +107,50 @@ class ShapingInteraction extends SelectionInteraction {
 		this.selection.redraw();
 	}
 
+	/*
+		The drag ends where the mouse let go, and what the engine is told about it is the business
+		of the group the handle belongs to: a handle the engine knows is named to it, a point of a
+		path is named as a point of that path, a point to tie a connector to is moved.
+	*/
 	public finish(to: cool.SimplePoint): void {
 		this.move(to);
 
-		const letGo = this.letGoAt();
-
-		app.map.sendUnoCommand('.uno:MoveShapeHandle', {
-			...ShapeHandlesSection.handleParameters(this.handle),
-			NewPosX: { type: 'long', value: letGo.x },
-			NewPosY: { type: 'long', value: letGo.y },
-		});
+		this.selection.handOverTheDrag(this.handle, this.letGoAt());
 	}
 
 	public handles(known: SelectionHandle[]): SelectionHandle[] {
 		const shown = this.shownAt();
+
+		// A point of a path carries its weights, and one weight can swing the other, so the
+		// editor says where all three of them stand.
+		const path = this.selection
+			.pathEditor()
+			?.handlesDuring(this.handle.name, shown, known);
+		if (path) return path;
 
 		return known.map((one: SelectionHandle) =>
 			one.name === this.handle.name ? { ...one, point: shown } : one,
 		);
 	}
 
+	public handleHeld(): SelectionHandle | null {
+		return this.handle;
+	}
+
 	public leadingPoint(): cool.SimplePoint | null {
 		const shown = this.shownAt();
 		return new cool.SimplePoint(shown.x, shown.y);
+	}
+
+	/*
+		The path the object would be drawn along while one of its points is dragged, which the
+		editor of that path works out.
+	*/
+	public outline(): cool.ObjectPathPolygon[] | null {
+		const path = this.selection
+			.pathEditor()
+			?.outlineFor(this.handle.name, this.shownAt());
+
+		return path ?? this.selection.straightLineFrom(this.handle, this.shownAt());
 	}
 }

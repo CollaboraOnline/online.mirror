@@ -10,15 +10,19 @@
  */
 
 /*
-	One handle of a selection. The name is what the handle is called wherever it is spoken
-	about, the engine included: the kind, the polygon and the point it belongs to, and "behind"
-	for the weight that sits behind its point. The point is in twips.
+	One handle of a selection. The name is what the handle is called wherever it is spoken about,
+	and whoever makes the handles says what it is made of: a handle the engine moves carries the
+	kind, the polygon and the point the engine knows it by, a handle of a path carries the place
+	its point has in that path. The point is in twips.
 */
 interface SelectionHandle {
 	name: string;
 	kind: string;
 	pointer: string;
 	point: cool.Point;
+	/// The name of the group of handles it came from, which is what draws it, what a press on it
+	/// asks and what a key on it asks. Absent for a handle that stands outside the groups.
+	group?: string;
 }
 
 /*
@@ -32,31 +36,71 @@ interface HandleSource {
 }
 
 /*
-	The points a connector can be tied to. The engine reports them for every object of the page
-	but the selected one, since they are what a connector being dragged could reach for, so
-	nothing that is done to the selection moves them.
+	The points a connector can tie itself to: the ones someone added to an object, and the four an
+	object falls back on, which lie in the middle of each side of the box around it.
 
-	They are shown and no more: there is no name by which one of them could be spoken about, so
-	the keyboard passes them by and the mouse cannot take hold of one.
+	They are shown and no more: there is no name by which one of them could be spoken about, so the
+	keyboard passes them by and the mouse cannot take hold of one.
 */
-class GluePointHandles implements HandleSource {
-	public handles(): SelectionHandle[] {
-		const shapes = GraphicSelection.extraInfo?.GluePoints?.shapes;
-		if (!Array.isArray(shapes)) return [];
+class GluePointHandles {
+	/// One point to tie to, at that place, of the kind that says where it comes from.
+	private static handleAt(x: number, y: number, kind: string): SelectionHandle {
+		return {
+			name: '',
+			kind: kind,
+			pointer: '0',
+			point: new cool.Point(x, y).round(),
+		};
+	}
 
-		const handles: SelectionHandle[] = [];
-		for (const shape of shapes) {
-			for (const gluePoint of shape?.gluepoints ?? []) {
-				handles.push({
-					name: '',
-					kind: 'GluePoint',
-					pointer: '0',
-					point: new cool.Point(gluePoint.point.x, gluePoint.point.y),
-				});
-			}
-		}
+	/*
+		The points someone added to that object, where the object carries them. They are named by
+		the place they have in the object's own list, so the keyboard can walk them, and the
+		mouse finds them where they lie.
+	*/
+	public static ownPointsOf(objectId: number): SelectionHandle[] {
+		const object = RenderGeometrySection.objectOf(objectId);
+		const transform = RenderGeometrySection.transformOf(objectId);
+		if (!transform) return [];
 
-		return handles;
+		return (object?.gluePoints ?? []).map(
+			(point: { x: number; y: number }, at: number) => {
+				const onThePage = transform.apply(point.x, point.y);
+
+				return {
+					...GluePointHandles.handleAt(onThePage.x, onThePage.y, 'GluePoint'),
+					name: 'GluePoint.' + String(at),
+				};
+			},
+		);
+	}
+
+	/*
+		The four points an object falls back on, in the middle of each side of the box around it.
+		The box is upright, as the drawing layer takes it for these: an object that is turned is
+		reached at the sides of the box it stands in, not at the sides it was given.
+	*/
+	public static defaultPointsOf(objectId: number): SelectionHandle[] {
+		const transform = RenderGeometrySection.transformOf(objectId);
+		if (!transform) return [];
+
+		const box = cool.Range2D.fromPoints(
+			[
+				[0, 0],
+				[1, 0],
+				[1, 1],
+				[0, 1],
+			].map(([x, y]: number[]) => transform.apply(x, y)),
+		);
+
+		const fallback = 'DefaultGluePoint';
+
+		return [
+			GluePointHandles.handleAt(box.centerX, box.minY, fallback),
+			GluePointHandles.handleAt(box.maxX, box.centerY, fallback),
+			GluePointHandles.handleAt(box.centerX, box.maxY, fallback),
+			GluePointHandles.handleAt(box.minX, box.centerY, fallback),
+		];
 	}
 }
 
@@ -75,10 +119,52 @@ class ObjectHandles implements HandleSource {
 	public handles(): SelectionHandle[] {
 		if (!this.objectIds.length) return [];
 
-		const framing = this.framingHandles();
+		if (this.isATiedConnector())
+			return [...this.shapingHandles(), ...this.ownGluePoints()];
+
+		const framing = ObjectHandles.framingOf(this.objectIds);
 		if (!framing) return [];
 
-		return [...framing, ...this.shapingHandles()];
+		return [...framing, ...this.shapingHandles(), ...this.ownGluePoints()];
+	}
+
+	/*
+		The points someone added to the object for a connector to tie itself to. They belong to the
+		object, so they are shown while it is selected, after the handles that shape it and before
+		the points of its path.
+	*/
+	private ownGluePoints(): SelectionHandle[] {
+		if (this.objectIds.length !== 1) return [];
+
+		return GluePointHandles.ownPointsOf(this.objectIds[0]);
+	}
+
+	/// The number the drawing layer gives a connector among the kinds of object.
+	private static readonly connectorKind: number = 24;
+
+	/// Whether the object of that id is a connector.
+	public static isAConnector(objectId: number): boolean {
+		return (
+			RenderGeometrySection.objectOf(objectId)?.objectKind ===
+			ObjectHandles.connectorKind
+		);
+	}
+
+	/// Whether the object of that id is a connector that is tied to an object at either end.
+	public static isATiedConnector(objectId: number): boolean {
+		if (!ObjectHandles.isAConnector(objectId)) return false;
+
+		const object = RenderGeometrySection.objectOf(objectId);
+
+		return object?.tiedAtStart === true || object?.tiedAtEnd === true;
+	}
+
+	/// Whether what is selected is one connector that is tied to an object.
+	private isATiedConnector(): boolean {
+		return (
+			this.objectIds.length === 1 &&
+			ObjectHandles.isATiedConnector(this.objectIds[0])
+		);
 	}
 
 	/*
@@ -88,6 +174,23 @@ class ObjectHandles implements HandleSource {
 		all, and the whole selection is scaled by it. Nothing where the client holds no geometry
 		for what is selected.
 	*/
+	public static framingOf(objectIds: number[]): SelectionHandle[] | undefined {
+		/*
+			A connector that is tied to an object runs from where it is tied, so scaling it or
+			turning it leads nowhere: it is offered the points along its way alone, and neither
+			the eight nor the handle that turns them, which is made from the eight.
+		*/
+		if (objectIds.length === 1 && ObjectHandles.isATiedConnector(objectIds[0]))
+			return undefined;
+
+		return new ObjectHandles(objectIds).framingHandles();
+	}
+
+	/// The handles that shape the objects, which only one object on its own has.
+	public static shapingOf(objectIds: number[]): SelectionHandle[] {
+		return new ObjectHandles(objectIds).shapingHandles();
+	}
+
 	private framingHandles(): SelectionHandle[] | undefined {
 		const mapping = this.framingMapping();
 		if (!mapping) return undefined;
@@ -152,22 +255,13 @@ class ObjectHandles implements HandleSource {
 	*/
 	private framingMapping(): cool.Matrix2D | null {
 		if (this.objectIds.length === 1)
-			return cool.Matrix2D.fromArray(
-				RenderGeometrySection.objectOf(this.objectIds[0])?.transform,
-			);
+			return RenderGeometrySection.transformOf(this.objectIds[0]);
 
 		let box: cool.Range2D | null = null;
 		for (const objectId of this.objectIds) {
-			const object = RenderGeometrySection.objectOf(objectId);
-			if (!object || object.x === undefined || object.y === undefined)
-				return null;
+			const one = RenderGeometrySection.boxOf(objectId);
+			if (!one) return null;
 
-			const one = new cool.Range2D(
-				object.x,
-				object.y,
-				object.x + (object.width ?? 0),
-				object.y + (object.height ?? 0),
-			);
 			box = box ? box.union(one) : one;
 		}
 
@@ -190,8 +284,7 @@ class ObjectHandles implements HandleSource {
 				'.' +
 				String(handle.polygon ?? 0) +
 				'.' +
-				String(handle.point ?? 0) +
-				(handle.behindThePoint ? '.behind' : ''),
+				String(handle.point ?? 0),
 			kind: String(handle.kind),
 			pointer: '28',
 			point: new cool.Point(handle.x, handle.y),
@@ -205,6 +298,17 @@ class ObjectHandles implements HandleSource {
 	*/
 	public static asKinds(handles: SelectionHandle[]): any | undefined {
 		if (!handles.length) return undefined;
+
+		/*
+			That section reads the eight by their kind and stands on their being there, so a set
+			without them is not for it: an object shaped by its own points keeps the set the
+			engine sent, which is what that section was written for.
+		*/
+		const framing = handles.filter((handle: SelectionHandle) => {
+			const kind = Number(handle.kind);
+			return kind >= 1 && kind <= 8;
+		});
+		if (framing.length !== 8) return undefined;
 
 		const withId = (handle: SelectionHandle) => ({
 			...handle,

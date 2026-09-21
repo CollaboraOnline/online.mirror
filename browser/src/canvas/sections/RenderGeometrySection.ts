@@ -292,6 +292,64 @@ class RenderGeometrySection extends CanvasSectionObject {
 		return undefined;
 	}
 
+	/*
+		The mapping that puts a place on the object onto the page, in twips: 0 and 0 is the upper
+		left corner of the object and 1 and 1 the lower right one. Its inverse takes a place on the
+		page back onto the object. Nothing for an object the client does not hold, or one that
+		says no mapping of its own.
+	*/
+	public static transformOf(objectId: number): cool.Matrix2D | null {
+		return cool.Matrix2D.fromArray(
+			RenderGeometrySection.objectOf(objectId)?.transform,
+		);
+	}
+
+	/// The box the object takes up on the page, in twips. Nothing for an object the client does
+	/// not hold.
+	public static boxOf(objectId: number): cool.Range2D | undefined {
+		const object = RenderGeometrySection.objectOf(objectId);
+		if (!object || object.x === undefined || object.y === undefined)
+			return undefined;
+
+		return new cool.Range2D(
+			object.x,
+			object.y,
+			object.x + (object.width ?? 0),
+			object.y + (object.height ?? 0),
+		);
+	}
+
+	/*
+		Whether the object of that id is drawn under the given document point, in twips. It asks
+		the object's own primitives, so a thin line answers for the line and not for the box
+		around it, and it answers for that one object whatever is drawn over it.
+	*/
+	public static objectHitAt(objectId: number, x: number, y: number): boolean {
+		const object = RenderGeometrySection.objectOf(objectId);
+		if (!object) return false;
+
+		const tolerance =
+			RenderGeometrySection.hitTolerancePixels * app.pixelsToTwips;
+
+		return (
+			cool.VectorHitTest.hit(
+				object.primitives ?? [],
+				{ x: x, y: y, toleranceX: tolerance, toleranceY: tolerance },
+				{
+					minX: object.x ?? 0,
+					minY: object.y ?? 0,
+					maxX: (object.x ?? 0) + (object.width ?? 0),
+					maxY: (object.y ?? 0) + (object.height ?? 0),
+				},
+			) !== undefined
+		);
+	}
+
+	/// Whether an object of the page is under the given point.
+	isHit(point: number[]): boolean {
+		return this.hitObject(point) !== undefined;
+	}
+
 	onDraw(): void {
 		// The page section skips the animation frames too, so the two stay lined up.
 		if (this.containerObject.isInZoomAnimation()) return;

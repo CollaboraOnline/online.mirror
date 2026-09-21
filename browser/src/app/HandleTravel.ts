@@ -156,9 +156,9 @@ class HandleTravel {
 
 	/*
 		Moves the keyboard from one handle of the selection to the next, or to the one before. It
-		starts at the first handle, or at the last one going backwards, and between the last and
-		the first it rests once on no handle at all, where the object is selected as it was. That
-		is the round the office goes.
+		starts at the first handle, or at the last one going backwards, and after the last one it
+		goes round to the first. One handle is the one it is on the whole way: walking off the
+		handles is what Escape is for, and walking from one object to the next is what Tab is for.
 	*/
 	public travel(forward: boolean): boolean {
 		const handles = this.handles();
@@ -173,11 +173,21 @@ class HandleTravel {
 			return true;
 		}
 
-		const next = at + (forward ? 1 : -1);
+		const next = (at + (forward ? 1 : -1) + handles.length) % handles.length;
 
-		this.setActive(
-			next < 0 || next >= handles.length ? null : handles[next].name,
-		);
+		this.setActive(handles[next].name);
+		return true;
+	}
+
+	/*
+		Puts the keyboard on the handle of that name, which is what a press that let go where it
+		started does: it is the quickest way onto a handle among hundreds, a point of a polygon
+		among them, without walking there.
+	*/
+	public goTo(name: string): boolean {
+		if (!name || name === this.activeName) return false;
+
+		this.setActive(name);
 		return true;
 	}
 

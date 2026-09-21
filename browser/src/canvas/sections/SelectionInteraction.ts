@@ -50,9 +50,24 @@ abstract class SelectionInteraction {
 		return known;
 	}
 
+	/// The handle it has hold of, for the ones that are led by a handle. Nothing for the others.
+	public handleHeld(): SelectionHandle | null {
+		return null;
+	}
+
 	/// The point it is being led by, in twips, which the view keeps in sight. Nothing where it
 	/// is led by no single point.
 	public leadingPoint(): cool.SimplePoint | null {
+		return null;
+	}
+
+	/*
+		The path the objects would be drawn along, where what the interaction does is not a
+		transformation of them and so cannot be shown by drawing them through one. It is drawn
+		as a thin line while the interaction runs. Nothing where there is nothing to show that
+		way.
+	*/
+	public outline(): cool.ObjectPathPolygon[] | null {
 		return null;
 	}
 }
