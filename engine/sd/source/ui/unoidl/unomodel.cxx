@@ -118,6 +118,8 @@
 #include <svx/svdsob.hxx>
 #include <svx/svdundo.hxx>
 #include <svx/svdomedia.hxx>
+#include <svx/svdoedge.hxx>
+#include <svx/svdglue.hxx>
 #include <svx/svdograf.hxx>
 #include <svx/svditer.hxx>
 #include <svx/seclabel/SecLabelStore.hxx>
@@ -3596,6 +3598,42 @@ private:
 
             aContent.maHandles = shapingHandlesOf(rObject);
             aContent.maPath = pathOf(rObject);
+            aContent.meKind = rObject.GetObjIdentifier();
+
+            if (const SdrEdgeObj* pConnector = dynamic_cast<const SdrEdgeObj*>(&rObject))
+            {
+                aContent.mbTiedAtStart = nullptr != pConnector->GetConnectedNode(true);
+                aContent.mbTiedAtEnd = nullptr != pConnector->GetConnectedNode(false);
+            }
+
+            if (const SdrGluePointList* pGluePoints = rObject.GetGluePointList())
+            {
+                /*
+                    The place of such a point is given on the object, so that the client can move
+                    it, scale it and turn it with the object without asking anything. The way back
+                    from the page to the object is the transformation the entry carries, undone.
+                */
+                basegfx::B2DHomMatrix aFromTheObject(transformationInTwips(rObject));
+                const bool bCanBeUndone(aFromTheObject.invert());
+
+                for (sal_uInt16 nGluePoint = 0; nGluePoint < pGluePoints->GetCount();
+                     ++nGluePoint)
+                {
+                    const SdrGluePoint& rGluePoint((*pGluePoints)[nGluePoint]);
+                    const Point aAt(rGluePoint.GetAbsolutePos(rObject));
+                    basegfx::B2DPoint aOnThePage(aAt.X() * constTwipConversionFactor,
+                                                 aAt.Y() * constTwipConversionFactor);
+
+                    if (bCanBeUndone)
+                        aOnThePage = aFromTheObject * aOnThePage;
+
+                    SdXImpressDocument::VectorObjectContent::GluePoint aOne;
+                    aOne.mfX = aOnThePage.getX();
+                    aOne.mfY = aOnThePage.getY();
+                    aOne.mbShareOfTheSize = rGluePoint.IsPercent();
+                    aContent.maOwnGluePoints.push_back(aOne);
+                }
+            }
 
             decomposeForComparison(aContent);
         }
@@ -3869,8 +3907,18 @@ private:
             if (!pHandle)
                 continue;
 
+            /*
+                The handles a reader cannot work out for itself. The corner radius of a
+                rectangle and the points a custom shape is shaped by say nothing about what is
+                drawn. The points of an object that is shaped by them - the ends of a connector
+                and the lines between them, the tail of a caption - are another such case,
+                unless the object's path travels as well, and then they follow from it.
+            */
             const SdrHdlKind eKind = pHandle->GetKind();
-            if (eKind != SdrHdlKind::Circle && eKind != SdrHdlKind::CustomShape1)
+            const bool bWanted(eKind == SdrHdlKind::Circle || eKind == SdrHdlKind::CustomShape1
+                               || (eKind == SdrHdlKind::Poly
+                                   && nullptr == dynamic_cast<const SdrPathObj*>(&rObject)));
+            if (!bWanted)
                 continue;
 
             const Point aPosition(pHandle->GetPos());
@@ -3878,7 +3926,6 @@ private:
             aOne.mnKind = static_cast<sal_Int32>(eKind);
             aOne.mnPolygon = pHandle->GetPolyNum();
             aOne.mnPoint = pHandle->GetPointNum();
-            aOne.mbBehindThePoint = pHandle->IsPlusHdl();
             aOne.maPosition = Point(
                 basegfx::fround<tools::Long>(aPosition.X() * constTwipConversionFactor),
                 basegfx::fround<tools::Long>(aPosition.Y() * constTwipConversionFactor));
@@ -4042,6 +4089,26 @@ private:
             auto aAidArray = rWriter.startArray("aids");
             maProcessor->decomposeAndWrite(rContent.maAids);
         }
+        if (rContent.meKind != SdrObjKind::NONE)
+            rWriter.put("objectKind", static_cast<sal_Int32>(rContent.meKind));
+        if (rContent.mbTiedAtStart)
+            rWriter.put("tiedAtStart", true);
+        if (rContent.mbTiedAtEnd)
+            rWriter.put("tiedAtEnd", true);
+
+        if (!rContent.maOwnGluePoints.empty())
+        {
+            auto aGlueNode = rWriter.startArray("gluePoints");
+            for (const auto& rGluePoint : rContent.maOwnGluePoints)
+            {
+                auto aOneNode = rWriter.startStruct();
+                rWriter.put("x", rGluePoint.mfX);
+                rWriter.put("y", rGluePoint.mfY);
+                if (!rGluePoint.mbShareOfTheSize)
+                    rWriter.put("keepsItsDistance", true);
+            }
+        }
+
         if (rContent.maPath.count())
         {
             auto aPathArray = rWriter.startArray("path");
@@ -4054,6 +4121,11 @@ private:
                 auto aPointArray = rWriter.startArray("points");
                 for (sal_uInt32 nPoint = 0; nPoint < rPolygon.count(); ++nPoint)
                 {
+                    /*
+                        The points travel in whole twips. A client that edits the path says which
+                        point moved and where to, so nothing of what it was given comes back, and
+                        a path of many thousand points stays short on the way out.
+                    */
                     auto aPointNode = rWriter.startStruct();
                     const basegfx::B2DPoint aPoint(rPolygon.getB2DPoint(nPoint));
                     rWriter.put("x", basegfx::fround<sal_Int64>(aPoint.getX()));
@@ -4100,8 +4172,6 @@ private:
                     rWriter.put("polygon", sal_Int64(rHandle.mnPolygon));
                 if (rHandle.mnPoint)
                     rWriter.put("point", sal_Int64(rHandle.mnPoint));
-                if (rHandle.mbBehindThePoint)
-                    rWriter.put("behindThePoint", true);
                 rWriter.put("x", sal_Int64(rHandle.maPosition.X()));
                 rWriter.put("y", sal_Int64(rHandle.maPosition.Y()));
             }

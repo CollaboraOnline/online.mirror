@@ -6693,6 +6693,58 @@ void COKitDocumentImpl::setObjectPoints(unsigned long long nObjectId,
     rModel.EndUndo();
 }
 
+/*
+    Moves one of the points a drawing object was given for a connector to tie itself to. The place
+    is given on the object, 0 and 0 being its upper left corner and 1 and 1 its lower right one,
+    which is how such a point travels to the client. The object holds it either as a share of its
+    own size or as a distance of its own, and it keeps the way it holds it.
+*/
+void COKitDocumentImpl::setObjectGluePoint(unsigned long long nObjectId, int nAt,
+                                           double fX, double fY)
+{
+    comphelper::ProfileZone aZone("COKitDocumentImpl::setObjectGluePoint");
+
+    SolarMutexGuard aGuard;
+    SetLastExceptionMsg();
+
+    SfxViewShell* pViewShell = SfxViewShell::Current();
+    SdrView* pView = pViewShell ? pViewShell->GetDrawView() : nullptr;
+    SdrPageView* pPageView = pView ? pView->GetSdrPageView() : nullptr;
+    const SdrPage* pPage = pPageView ? pPageView->GetPage() : nullptr;
+
+    if (!pPage)
+    {
+        SetLastExceptionMsg(u"The view shows no page to move a point on"_ustr);
+        return;
+    }
+
+    SdrObject* pObject = pPage->FindObjectByUniqueID(nObjectId);
+    SdrGluePointList* pGluePoints = pObject ? pObject->ForceGluePointList() : nullptr;
+
+    if (!pGluePoints || nAt < 0 || nAt >= static_cast<int>(pGluePoints->GetCount()))
+    {
+        SetLastExceptionMsg(u"No object of that id has a point of that number"_ustr);
+        return;
+    }
+
+    // The place on the object becomes a place on the page through the object's own mapping.
+    basegfx::B2DHomMatrix aOfTheObject;
+    basegfx::B2DPolyPolygon aOutline;
+    pObject->TRGetBaseGeometry(aOfTheObject, aOutline);
+
+    const basegfx::B2DPoint aOnThePage(aOfTheObject * basegfx::B2DPoint(fX, fY));
+    const Point aWhereTo(basegfx::fround<tools::Long>(aOnThePage.getX()),
+                         basegfx::fround<tools::Long>(aOnThePage.getY()));
+
+    SdrModel& rModel(pObject->getSdrModelFromSdrObject());
+    rModel.BegUndo(SvxResId(STR_DragMethMove));
+    rModel.AddUndo(rModel.GetSdrUndoFactory().CreateUndoGeoObject(*pObject));
+    (*pGluePoints)[static_cast<sal_uInt16>(nAt)].SetAbsolutePos(aWhereTo, *pObject);
+    pObject->SetChanged();
+    pObject->BroadcastObjectChange();
+    rModel.EndUndo();
+}
+
 void COKitDocumentImpl::setViewOption(const char* pOption, const char* pValue)
 {
     comphelper::ProfileZone aZone("COKitDocumentImpl::setViewOption");

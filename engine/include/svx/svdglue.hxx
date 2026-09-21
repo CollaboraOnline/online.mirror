@@ -168,7 +168,7 @@ public:
     SAL_DLLPRIVATE bool IsHit(const Point& rPnt, const OutputDevice& rOut, const SdrObject* pObj) const;
     SAL_DLLPRIVATE void Invalidate(vcl::Window& rWin, const SdrObject* pObj) const;
     Point GetAbsolutePos(const SdrObject& rObj) const;
-    SAL_DLLPRIVATE void SetAbsolutePos(const Point& rNewPos, const SdrObject& rObj);
+    void SetAbsolutePos(const Point& rNewPos, const SdrObject& rObj);
     SAL_DLLPRIVATE Degree100 GetAlignAngle() const;
     SAL_DLLPRIVATE void SetAlignAngle(Degree100 nAngle);
     SAL_DLLPRIVATE static Degree100 EscDirToAngle(SdrEscapeDirection nEsc);

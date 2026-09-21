@@ -2795,6 +2795,20 @@ struct COKitDocument
      */
     virtual void setObjectPoints(unsigned long long nObjectId, const char* pChanges) = 0;
 
+    /**
+     * Moves one of the points a drawing object was given for a connector to tie itself to.
+     *
+     * The place is given on the object rather than on the page: 0 and 0 is its upper left corner
+     * and 1 and 1 its lower right one, which is how the render geometry reports such a point.
+     *
+     * @param nObjectId the unique id of the object, as the render geometry names it
+     * @param nAt which of the points of that object, counted from zero as they are listed
+     * @param fX where the point goes on the object, across it
+     * @param fY where the point goes on the object, down it
+     */
+    virtual void setObjectGluePoint(unsigned long long nObjectId, int nAt, double fX, double fY)
+        = 0;
+
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

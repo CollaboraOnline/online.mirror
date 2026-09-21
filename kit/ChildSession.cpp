@@ -656,6 +656,7 @@ bool ChildSession::_handleInput(const char *buffer, int length)
                tokens.equals(0, "reportmousepointer") ||
                tokens.equals(0, "selectobjects") ||
                tokens.equals(0, "setobjectpoints") ||
+               tokens.equals(0, "setobjectgluepoint") ||
                tokens.equals(0, "downloadas") ||
                tokens.equals(0, "getchildid") ||
                tokens.equals(0, "gettextselection") ||
@@ -728,6 +729,10 @@ bool ChildSession::_handleInput(const char *buffer, int length)
         else if (tokens.equals(0, "setobjectpoints"))
         {
             return setObjectPoints(tokens);
+        }
+        else if (tokens.equals(0, "setobjectgluepoint"))
+        {
+            return setObjectGluePoint(tokens);
         }
         else if (tokens.equals(0, "downloadas"))
         {
@@ -1769,6 +1774,30 @@ bool ChildSession::setObjectPoints(const StringVector& tokens)
     getLOKitDocument()->setView(_viewId);
     getLOKitDocument()->setObjectPoints(std::strtoull(objectId.c_str(), nullptr, 10),
                                         changes.c_str());
+    return true;
+}
+
+bool ChildSession::setObjectGluePoint(const StringVector& tokens)
+{
+    std::string objectId;
+    std::string across;
+    std::string down;
+    int nAt = 0;
+
+    if (tokens.size() != 5 || !getTokenString(tokens[1], "id", objectId)
+        || !getTokenInteger(tokens[2], "at", nAt) || !getTokenString(tokens[3], "x", across)
+        || !getTokenString(tokens[4], "y", down))
+    {
+        sendTextFrameAndLogError("error: cmd=setobjectgluepoint kind=syntax");
+        return false;
+    }
+
+    // The id an object is named by counts as far as an unsigned long long does, and the place on
+    // the object is a share of its width and of its height.
+    getLOKitDocument()->setView(_viewId);
+    getLOKitDocument()->setObjectGluePoint(std::strtoull(objectId.c_str(), nullptr, 10), nAt,
+                                           std::strtod(across.c_str(), nullptr),
+                                           std::strtod(down.c_str(), nullptr));
     return true;
 }
 

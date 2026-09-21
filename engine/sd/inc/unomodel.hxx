@@ -35,6 +35,7 @@
 #include <com/sun/star/beans/XPropertySet.hpp>
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <svx/svdobjkind.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <drawinglayer/primitive2d/Primitive2DContainer.hxx>
 #include <drawinglayer/processor2d/Primitive2dJsonProcessor.hxx>
@@ -152,10 +153,9 @@ public:
             the corner radius of a rectangle and the points a custom shape is shaped by.
 
             What names the handle is what it means, not where it sits in a list: the kind, and
-            with it the polygon and the point it belongs to, and for the weight of a curve which
-            of the two sides of that point it is. A handle keeps that name however many handles
-            the object has and whatever else is selected, where a place in a list holds only for
-            one object on its own.
+            with it the polygon and the point it belongs to. A handle keeps that name however
+            many handles the object has and whatever else is selected, where a place in a list
+            holds only for one object on its own.
 
             The position is in twips.
          */
@@ -164,15 +164,12 @@ public:
             sal_Int32 mnKind = 0;
             sal_uInt32 mnPolygon = 0;
             sal_uInt32 mnPoint = 0;
-            bool mbBehindThePoint = false;
             Point maPosition;
 
             bool operator==(const Handle& rOther) const
             {
                 return mnKind == rOther.mnKind && mnPolygon == rOther.mnPolygon
-                       && mnPoint == rOther.mnPoint
-                       && mbBehindThePoint == rOther.mbBehindThePoint
-                       && maPosition == rOther.maPosition;
+                       && mnPoint == rOther.mnPoint && maPosition == rOther.maPosition;
             }
         };
 
@@ -187,6 +184,42 @@ public:
             that has no path.
          */
         basegfx::B2DPolyPolygon maPath;
+
+        /// What kind of object it is, as the drawing layer numbers the kinds.
+        SdrObjKind meKind = SdrObjKind::NONE;
+
+        /// True for a connector whose first end is tied to an object, and the same for its last
+        /// end. A connector runs from where it is tied, so a tied end stays with the object it
+        /// holds on to. False for anything that is not a connector.
+        bool mbTiedAtStart = false;
+        bool mbTiedAtEnd = false;
+
+        /** One of the points someone added to the object for a connector to tie itself to. The
+            place is given on the object rather than on the page: 0 and 0 is the upper left corner
+            of the object and 1 and 1 the lower right one, so the point follows the object
+            wherever it goes and however it is turned.
+
+            A point that is held as a share of the object's size keeps that place when the object
+            is made larger or smaller. One that is held as a distance of its own keeps the
+            distance instead, so its place on the object changes with the size.
+         */
+        struct GluePoint
+        {
+            double mfX = 0.0;
+            double mfY = 0.0;
+            bool mbShareOfTheSize = true;
+
+            bool operator==(const GluePoint& rOther) const
+            {
+                return mfX == rOther.mfX && mfY == rOther.mfY
+                       && mbShareOfTheSize == rOther.mbShareOfTheSize;
+            }
+        };
+
+        /// The points the object was given, in the order it holds them. Empty for an object that
+        /// was given none, and then the four middles of the sides of its box are what a connector
+        /// can reach for.
+        std::vector<GluePoint> maOwnGluePoints;
 
         tools::Rectangle maPaintedBox;
         basegfx::B2DHomMatrix maTransformation;
@@ -216,7 +249,10 @@ public:
                    && mbTextEdit == rOther.mbTextEdit && mnParentId == rOther.mnParentId
                    && maAutoColor == rOther.maAutoColor && maDrawn == rOther.maDrawn
                    && maAids == rOther.maAids && maHandles == rOther.maHandles
-                   && maPath == rOther.maPath;
+                   && maPath == rOther.maPath && meKind == rOther.meKind
+                   && mbTiedAtStart == rOther.mbTiedAtStart
+                   && mbTiedAtEnd == rOther.mbTiedAtEnd
+                   && maOwnGluePoints == rOther.maOwnGluePoints;
         }
     };
 

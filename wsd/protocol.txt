@@ -580,6 +580,16 @@ selectobjects ids=<ids>
     of one selection all sit at the same level, directly on the page or in one and the same group;
     an id naming an object elsewhere, or naming nothing on the page the view shows, is left out.
 
+setobjectgluepoint id=<id> at=<at> x=<x> y=<y>
+
+    <id> is the unique id of a drawing object, the one the render geometry of a page names it by,
+    and <at> counts the points that object was given for a connector to tie itself to, from zero,
+    in the order the render geometry lists them. <x> and <y> are where that point goes on the
+    object: 0 and 0 is its upper left corner and 1 and 1 its lower right one, which is how the
+    render geometry reports such a point. Moves it there in one step that can be undone. The
+    object holds such a point either as a share of its own size or as a distance of its own, and
+    it keeps the way it holds it.
+
 setobjectpoints id=<id> changes=<changes>
 
     <id> is the unique id of a drawing object, the one the render geometry of a page names it by.

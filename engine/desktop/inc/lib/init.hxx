@@ -435,6 +435,8 @@ namespace desktop {
         bool exportPages(const char* pParts, const char* pUrl) override;
         void selectObjects(const char* pObjectIds) override;
         void setObjectPoints(unsigned long long nObjectId, const char* pChanges) override;
+        void setObjectGluePoint(unsigned long long nObjectId, int nAt, double fX,
+                                double fY) override;
     };
 
     struct DESKTOP_DLLPUBLIC COKitImpl : public COKit

@@ -213,6 +213,9 @@ private:
     /// of the path as it stands.
     bool setObjectPoints(const StringVector& tokens);
 
+    /// Moves one of the points a drawing object was given for a connector to tie itself to.
+    bool setObjectGluePoint(const StringVector& tokens);
+
     bool downloadAs(const StringVector& tokens);
     /// Whether core will put a question to the person while writing the document out in
     /// this format.
