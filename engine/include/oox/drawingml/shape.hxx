@@ -168,6 +168,7 @@ public:
     void                            setRotation( sal_Int32 nRotation ) { mnRotation = nRotation; }
     sal_Int32                       getRotation() const { return mnRotation; }
     void                            setDiagramRotation( sal_Int32 nRotation ) { mnDiagramRotation = nRotation; }
+    sal_Int32                       getDiagramRotation() const { return mnDiagramRotation; }
     void                            setFlip( bool bFlipH, bool bFlipV ) { mbFlipH = bFlipH; mbFlipV = bFlipV; }
     bool                            getFlipH() const { return mbFlipH; }
     bool                            getFlipV() const { return mbFlipV; }

@@ -285,7 +285,7 @@ void Shape::propagateDiagramHelper()
     {
         if (mxShape)
         {
-            mpDiagramHelper->doAnchor(mxShape);
+            mpDiagramHelper->doAnchor(mxShape, maPosition, maSize);
             mpDiagramHelper = nullptr;
         }
     }
