@@ -320,6 +320,85 @@ class RenderGeometrySection extends CanvasSectionObject {
 	}
 
 	/*
+		Lays a change over the object the client holds: what it draws, the mapping that places it,
+		the box it takes up and the points it was given to tie a connector to all come out as the
+		change leaves them.
+
+		The client works a drag out itself and sends what it did, so the object it holds is
+		changed here rather than waiting for the engine to answer with its own version of it.
+		That version replaces this one whenever it arrives, so a change the engine made
+		differently puts itself right then.
+	*/
+	public static changeObject(objectId: number, matrix: cool.Matrix2D): void {
+		const object = RenderGeometrySection.objectOf(objectId);
+		if (!object) return;
+
+		/*
+			What it draws is wrapped in the change rather than being written out again point by
+			point: the tree is drawn, reached and measured through it all the same. Where the
+			whole of what it draws already hangs under one change, that one is laid over instead
+			of another wrap around it, so a second drag before the engine answers leaves one
+			change and not a stack of them.
+		*/
+		const drawn = object.primitives ?? [];
+		const only =
+			drawn.length === 1 && drawn[0].type === cool.TransformPrimitive.type
+				? (drawn[0] as cool.TransformPrimitive)
+				: undefined;
+
+		const under = cool.Matrix2D.fromArray(only?.matrix);
+		if (only && under) only.matrix = under.then(matrix).toArray();
+		else if (drawn.length)
+			object.primitives = [
+				{
+					type: cool.TransformPrimitive.type,
+					matrix: matrix.toArray(),
+					children: drawn,
+				} as cool.Primitive,
+			];
+
+		const mapping = cool.Matrix2D.fromArray(object.transform);
+		if (mapping) object.transform = mapping.then(matrix).toArray();
+
+		const box = RenderGeometrySection.boxOf(objectId);
+		if (box) {
+			const reached = cool.Range2D.fromPoints([
+				matrix.apply(box.minX, box.minY),
+				matrix.apply(box.maxX, box.minY),
+				matrix.apply(box.maxX, box.maxY),
+				matrix.apply(box.minX, box.maxY),
+			]);
+
+			object.x = reached.minX;
+			object.y = reached.minY;
+			object.width = reached.width;
+			object.height = reached.height;
+		}
+
+		// The path is held where it lies on the page, so it moves with the object. The points to
+		// tie a connector to are held on the object itself, so they need nothing.
+		for (const polygon of object.path ?? []) {
+			for (const point of polygon.points ?? []) {
+				const at = matrix.apply(point.x, point.y);
+				point.x = at.x;
+				point.y = at.y;
+
+				if (point.behindX !== undefined && point.behindY !== undefined) {
+					const behind = matrix.apply(point.behindX, point.behindY);
+					point.behindX = behind.x;
+					point.behindY = behind.y;
+				}
+
+				if (point.aheadX !== undefined && point.aheadY !== undefined) {
+					const ahead = matrix.apply(point.aheadX, point.aheadY);
+					point.aheadX = ahead.x;
+					point.aheadY = ahead.y;
+				}
+			}
+		}
+	}
+
+	/*
 		Whether the object of that id is drawn under the given document point, in twips. It asks
 		the object's own primitives, so a thin line answers for the line and not for the box
 		around it, and it answers for that one object whatever is drawn over it.

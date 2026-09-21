@@ -803,6 +803,20 @@ abstract class SelectionSection extends CanvasSectionObject {
 		);
 	}
 
+	/*
+		Lays what a drag did over the objects the client holds, so that everything reads them as
+		the drag left them. The engine's own version of an object replaces this one when it
+		arrives, so a change it made differently puts itself right then.
+	*/
+	private leaveTheChangeOnTheObjects(matrix: cool.Matrix2D | null): void {
+		if (!matrix) return;
+
+		for (const objectId of this.selectedObjects())
+			RenderGeometrySection.changeObject(objectId, matrix);
+
+		app.sectionContainer?.requestReDraw();
+	}
+
 	/// What a running drag does to the objects, or nothing while nothing is being dragged.
 	public dragMatrix(): cool.Matrix2D | null {
 		return this.interaction?.transformation() ?? null;
@@ -1036,8 +1050,16 @@ abstract class SelectionSection extends CanvasSectionObject {
 		the objects have them, which is where they belong.
 	*/
 	private endTheInteraction(carriedOut: boolean): void {
-		if (carriedOut && this.interaction)
+		/*
+			What the drag did stays on the objects until the engine answers with its own version of
+			them. The client worked the change out and has already sent it, so waiting for it to
+			come back would mean showing the objects as they were for as long as that takes, and
+			every handle would jump back with them.
+		*/
+		if (carriedOut && this.interaction) {
 			this.known = this.interaction.handles(this.known);
+			this.leaveTheChangeOnTheObjects(this.interaction.transformation());
+		}
 
 		this.interaction = null;
 		this.snap.forget();
