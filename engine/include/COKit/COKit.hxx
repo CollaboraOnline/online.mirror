@@ -2777,6 +2777,24 @@ struct COKitDocument
      */
     virtual void selectObjects(const char* pObjectIds) = 0;
 
+    /**
+     * Moves points of the path an object is drawn along, for an object that is drawn along one.
+     *
+     * @param nObjectId the object, by the id SdrObject::GetUniqueID() answers.
+     * @param pChanges what moved and where to, in twips: one change is the polygon, the point of
+     *        it, which of the three parts of that point moved - 0 the point itself, 1 the weight
+     *        that bends the curve coming in, 2 the weight that bends the one going out - and the
+     *        place it moved to, as "polygon,point,part,x,y", several of them separated by ";".
+     *
+     * Only what is named moves. The rest of the path is left as it stands, so nothing that was
+     * not touched can change. Moving a point takes the weights of its curves along with it, and
+     * moving a weight of a point that a curve runs smoothly or symmetrically through moves the
+     * other weight of that point as much as it takes to keep it so. It is one step to undo. An
+     * id naming nothing on the page the view shows, or naming an object that is not drawn along
+     * a path, does nothing.
+     */
+    virtual void setObjectPoints(unsigned long long nObjectId, const char* pChanges) = 0;
+
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

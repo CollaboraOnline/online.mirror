@@ -11,6 +11,8 @@
 #include <sal/types.h>
 #include <svx/sdr/contact/viewcontact.hxx>
 #include <svx/svdpage.hxx>
+#include <svx/svdopath.hxx>
+#include <basegfx/polygon/b2dpolypolygontools.hxx>
 #include <svx/svdpagv.hxx>
 #include <config_buildconfig.h>
 #include <config_cairo_rgba.h>
@@ -6539,6 +6541,156 @@ void COKitDocumentImpl::selectObjects(const char* pObjectIds)
     for (size_t nObject = 0; nObject < aWanted.size(); ++nObject)
         pView->MarkObj(aWanted[nObject], pPageView, /*bUnmark*/ false,
                        /*bDoNoSetMarkHdl*/ nObject + 1 < aWanted.size());
+}
+
+/*
+    Makes the curve run through a point the way it is said to run: a point a curve goes smoothly
+    through has its two weights on one line, and one it goes symmetrically through has them the
+    same length as well. The weight that was moved stays where it was put, and the other one gives
+    way.
+
+    A polygon holds no continuity of its own, only numbers that happen to line up or not, so the
+    one that is wanted is told rather than measured and is set here exactly. A point whose numbers
+    had drifted a little off the line comes out of this lying on it.
+*/
+static void lcl_makeTheCurveRunThatWay(basegfx::B2DPolygon& rPolygon, sal_uInt32 nPoint,
+                                       basegfx::B2VectorContinuity eWanted,
+                                       bool bMovedTheOneComingIn)
+{
+    if (basegfx::B2VectorContinuity::NONE == eWanted)
+        return;
+
+    const basegfx::B2DPoint aPoint(rPolygon.getB2DPoint(nPoint));
+    const basegfx::B2DPoint aMoved(bMovedTheOneComingIn ? rPolygon.getPrevControlPoint(nPoint)
+                                                        : rPolygon.getNextControlPoint(nPoint));
+    basegfx::B2DVector aAway(aMoved - aPoint);
+
+    if (aAway.equalZero())
+        return;
+
+    const basegfx::B2DPoint aOther(bMovedTheOneComingIn ? rPolygon.getNextControlPoint(nPoint)
+                                                        : rPolygon.getPrevControlPoint(nPoint));
+    const double fLength(basegfx::B2VectorContinuity::C2 == eWanted
+                             ? aAway.getLength()
+                             : basegfx::B2DVector(aOther - aPoint).getLength());
+
+    basegfx::B2DVector aBack(-aAway);
+    aBack.setLength(fLength);
+
+    if (bMovedTheOneComingIn)
+        rPolygon.setNextControlPoint(nPoint, aPoint + aBack);
+    else
+        rPolygon.setPrevControlPoint(nPoint, aPoint + aBack);
+}
+
+/*
+    Moves points of the path an object is drawn along. A client that draws the document from the
+    objects it holds edits the path it was given and says what moved, so a path of many thousand
+    points travels neither way and nothing that was not touched can change.
+
+    The changes arrive in twips as "polygon,point,part,x,y,continuity", several of them separated
+    by ";", where the part is 0 for the point itself, 1 for the weight of the curve coming into it
+    and 2 for the weight of the one going out, and the continuity is 0 for a corner, 1 for a point
+    the curve runs smoothly through and 2 for one it runs symmetrically through.
+*/
+void COKitDocumentImpl::setObjectPoints(unsigned long long nObjectId,
+                                        const char* pChanges)
+{
+    comphelper::ProfileZone aZone("COKitDocumentImpl::setObjectPoints");
+
+    SolarMutexGuard aGuard;
+    SetLastExceptionMsg();
+
+    SfxViewShell* pViewShell = SfxViewShell::Current();
+    SdrView* pView = pViewShell ? pViewShell->GetDrawView() : nullptr;
+    SdrPageView* pPageView = pView ? pView->GetSdrPageView() : nullptr;
+    const SdrPage* pPage = pPageView ? pPageView->GetPage() : nullptr;
+
+    if (!pPage)
+    {
+        SetLastExceptionMsg(u"The view shows no page to move a point on"_ustr);
+        return;
+    }
+
+    SdrPathObj* pPathObject = dynamic_cast<SdrPathObj*>(pPage->FindObjectByUniqueID(nObjectId));
+
+    if (!pPathObject)
+    {
+        SetLastExceptionMsg(u"No object of that id is drawn along a path"_ustr);
+        return;
+    }
+
+    // The changes arrive in twips and the model holds the path in its own unit.
+    const double fToModel(o3tl::convert(1.0, o3tl::Length::twip, o3tl::Length::mm100));
+    basegfx::B2DPolyPolygon aPath(pPathObject->GetPathPoly());
+    bool bMoved(false);
+
+    const OString aChanges(pChanges ? pChanges : "");
+    for (sal_Int32 nAt = 0; nAt >= 0;)
+    {
+        const OString aChange(aChanges.getToken(0, ';', nAt));
+        if (aChange.isEmpty())
+            continue;
+
+        sal_Int32 nField = 0;
+        const sal_uInt32 nPolygon(o3tl::toUInt32(o3tl::getToken(aChange, 0, ',', nField)));
+        const sal_uInt32 nPoint(
+            nField < 0 ? 0 : o3tl::toUInt32(o3tl::getToken(aChange, 0, ',', nField)));
+        const sal_Int32 nPart(nField < 0 ? 0
+                                         : o3tl::toInt32(o3tl::getToken(aChange, 0, ',', nField)));
+        const double fX(
+            nField < 0 ? 0.0 : o3tl::toDouble(o3tl::getToken(aChange, 0, ',', nField)) * fToModel);
+        const double fY(
+            nField < 0 ? 0.0 : o3tl::toDouble(o3tl::getToken(aChange, 0, ',', nField)) * fToModel);
+        const sal_Int32 nContinuity(
+            nField < 0 ? 0 : o3tl::toInt32(o3tl::getToken(aChange, 0, ',', nField)));
+
+        if (nPolygon >= aPath.count())
+            continue;
+
+        basegfx::B2DPolygon aPolygon(aPath.getB2DPolygon(nPolygon));
+        if (nPoint >= aPolygon.count())
+            continue;
+
+        const basegfx::B2DPoint aWhereTo(fX, fY);
+
+        // The client draws the curve at the point the way it says here, and that is the way the
+        // model is made to hold it.
+        const basegfx::B2VectorContinuity eWanted(
+            1 == nContinuity ? basegfx::B2VectorContinuity::C1
+                             : (2 == nContinuity ? basegfx::B2VectorContinuity::C2
+                                                 : basegfx::B2VectorContinuity::NONE));
+
+        if (0 == nPart)
+        {
+            // A weight is held as the way from its point to it, so both of them travel with the
+            // point as it moves.
+            aPolygon.setB2DPoint(nPoint, aWhereTo);
+        }
+        else
+        {
+            const bool bComingIn(1 == nPart);
+
+            if (bComingIn)
+                aPolygon.setPrevControlPoint(nPoint, aWhereTo);
+            else
+                aPolygon.setNextControlPoint(nPoint, aWhereTo);
+
+            lcl_makeTheCurveRunThatWay(aPolygon, nPoint, eWanted, bComingIn);
+        }
+
+        aPath.setB2DPolygon(nPolygon, aPolygon);
+        bMoved = true;
+    }
+
+    if (!bMoved)
+        return;
+
+    SdrModel& rModel(pPathObject->getSdrModelFromSdrObject());
+    rModel.BegUndo(SvxResId(STR_DragMethMove));
+    rModel.AddUndo(rModel.GetSdrUndoFactory().CreateUndoGeoObject(*pPathObject));
+    pPathObject->SetPathPoly(aPath);
+    rModel.EndUndo();
 }
 
 void COKitDocumentImpl::setViewOption(const char* pOption, const char* pValue)

@@ -580,6 +580,27 @@ selectobjects ids=<ids>
     of one selection all sit at the same level, directly on the page or in one and the same group;
     an id naming an object elsewhere, or naming nothing on the page the view shows, is left out.
 
+setobjectpoints id=<id> changes=<changes>
+
+    <id> is the unique id of a drawing object, the one the render geometry of a page names it by.
+    <changes> names the points of that object's path which moved, and where each of them went. It
+    is a list separated by semicolons, and every item of it is six numbers separated by commas:
+
+        <polygon>,<point>,<part>,<x>,<y>,<continuity>
+
+    <polygon> counts the polygons of the path from zero and <point> counts the points of that
+    polygon from zero, in the order the render geometry lists them. <part> is 0 for the point
+    itself, 1 for the weight that bends the curve coming into it and 2 for the weight of the
+    curve going out of it. <x> and <y> are where that point or weight went, in twips.
+    <continuity> says how the curve is to run through that point: 0 for a corner, 1 for a point
+    it runs smoothly through, 2 for one it runs symmetrically through.
+
+    Moves those points and leaves every other point of the path untouched, in one step that can
+    be undone. Moving one weight of a point that is run through smoothly or symmetrically carries
+    the other weight of that point along, and the continuity that is named is then set exactly,
+    so a point whose numbers had drifted a little off comes out lying on the line. A point named
+    twice, or one the path does not have, is left out.
+
 reportmousepointer wanted=<wanted>
 
     <wanted> is 'true' or 'false'. Says whether this client wants to be told the mouse pointer the

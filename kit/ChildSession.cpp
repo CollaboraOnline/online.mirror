@@ -24,6 +24,8 @@
 #include <common/SettingsStorage.hpp>
 #endif
 
+#include <cstdlib>
+
 #include <common/Anonymizer.hpp>
 #include <common/Clipboard.hpp>
 #include <common/CommandControl.hpp>
@@ -653,6 +655,7 @@ bool ChildSession::_handleInput(const char *buffer, int length)
                tokens.equals(0, "outlinestate") ||
                tokens.equals(0, "reportmousepointer") ||
                tokens.equals(0, "selectobjects") ||
+               tokens.equals(0, "setobjectpoints") ||
                tokens.equals(0, "downloadas") ||
                tokens.equals(0, "getchildid") ||
                tokens.equals(0, "gettextselection") ||
@@ -721,6 +724,10 @@ bool ChildSession::_handleInput(const char *buffer, int length)
         else if (tokens.equals(0, "selectobjects"))
         {
             return selectObjects(tokens);
+        }
+        else if (tokens.equals(0, "setobjectpoints"))
+        {
+            return setObjectPoints(tokens);
         }
         else if (tokens.equals(0, "downloadas"))
         {
@@ -1743,6 +1750,25 @@ bool ChildSession::reportMousePointer(const StringVector& tokens)
 
     // A client that works out the pointer from the geometry it holds is sent none.
     getLOKitDocument()->setViewOption("mousepointer", wanted == "true" ? "on" : "off");
+    return true;
+}
+
+bool ChildSession::setObjectPoints(const StringVector& tokens)
+{
+    std::string objectId;
+    std::string changes;
+
+    if (tokens.size() != 3 || !getTokenString(tokens[1], "id", objectId)
+        || !getTokenString(tokens[2], "changes", changes))
+    {
+        sendTextFrameAndLogError("error: cmd=setobjectpoints kind=syntax");
+        return false;
+    }
+
+    // The id an object is named by counts as far as an unsigned long long does.
+    getLOKitDocument()->setView(_viewId);
+    getLOKitDocument()->setObjectPoints(std::strtoull(objectId.c_str(), nullptr, 10),
+                                        changes.c_str());
     return true;
 }
 

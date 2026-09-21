@@ -209,6 +209,10 @@ private:
     /// Marks the objects the client names, which it worked out from the geometry it holds. An
     /// empty list marks nothing, which is how the client asks for no selection at all.
     bool selectObjects(const StringVector& tokens);
+    /// Moves the points of a drawing object's path which the client names, and leaves the rest
+    /// of the path as it stands.
+    bool setObjectPoints(const StringVector& tokens);
+
     bool downloadAs(const StringVector& tokens);
     /// Whether core will put a question to the person while writing the document out in
     /// this format.
