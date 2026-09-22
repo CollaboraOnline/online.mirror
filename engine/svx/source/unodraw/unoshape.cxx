@@ -2037,7 +2037,10 @@ bool SvxShape::setPropertyValueImpl( const OUString&, const SfxItemPropertyMapEn
                 aVclPoint += pSdrObject->GetAnchorPos();
             }
 
-            static_cast<SdrCaptionObj*>(pSdrObject.get())->SetTailPos(aVclPoint);
+            SdrCaptionObj* pCaption = dynamic_cast<SdrCaptionObj*>(pSdrObject.get());
+            if (!pCaption)
+                break;
+            pCaption->SetTailPos(aVclPoint);
 
             return true;
         }
@@ -2553,7 +2556,11 @@ bool SvxShape::getPropertyValueImpl( const OUString&, const SfxItemPropertyMapEn
     {
     case OWN_ATTR_CAPTION_POINT:
     {
-        Point aVclPoint = static_cast<SdrCaptionObj*>(GetSdrObject())->GetTailPos();
+        SdrCaptionObj* pCaption = dynamic_cast<SdrCaptionObj*>(GetSdrObject());
+        if (!pCaption)
+            break;
+
+        Point aVclPoint = pCaption->GetTailPos();
 
         // #88491# make pos relative to anchor
         if( GetSdrObject()->getSdrModelFromSdrObject().IsWriter() )

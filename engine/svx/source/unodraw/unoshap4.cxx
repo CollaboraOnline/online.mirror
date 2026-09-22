@@ -649,7 +649,9 @@ bool SvxMediaShape::setPropertyValueImpl( const OUString& rName, const SfxItemPr
         || (pProperty->nWID == SDRATTR_GRAFCROP))
     {
 #if HAVE_FEATURE_AVMEDIA
-        SdrMediaObj* pMedia = static_cast< SdrMediaObj* >( GetSdrObject() );
+        SdrMediaObj* pMedia = ReferencedSdrObject<SdrMediaObj>(GetSdrObject());
+        if (!pMedia)
+            return false;
         ::avmedia::MediaItem aItem;
         bool bOk = false;
 #endif
@@ -843,7 +845,9 @@ bool SvxMediaShape::getPropertyValueImpl( const OUString& rName, const SfxItemPr
         || (pProperty->nWID == OWN_ATTR_VALUE_GRAPHIC)
         || (pProperty->nWID == SDRATTR_GRAFCROP))
     {
-        SdrMediaObj* pMedia = static_cast< SdrMediaObj* >( GetSdrObject() );
+        SdrMediaObj* pMedia = ReferencedSdrObject<SdrMediaObj>(GetSdrObject());
+        if (!pMedia)
+            return false;
 #if HAVE_FEATURE_AVMEDIA
         const ::avmedia::MediaItem aItem( pMedia->getMediaProperties() );
 #endif
@@ -956,7 +960,9 @@ bool SvxMediaShape::getPropertyStateImpl(const SfxItemPropertyMapEntry* pPropert
 #if HAVE_FEATURE_AVMEDIA
     if (pProperty->nWID == SDRATTR_GRAFCROP)
     {
-        auto pMedia = static_cast<SdrMediaObj*>(GetSdrObject());
+        auto pMedia = ReferencedSdrObject<SdrMediaObj>(GetSdrObject());
+        if (!pMedia)
+            return false;
         const avmedia::MediaItem& rItem = pMedia->getMediaProperties();
         const text::GraphicCrop& rCrop = rItem.getCrop();
         if (rCrop.Bottom > 0 || rCrop.Left > 0 || rCrop.Right > 0 || rCrop.Top > 0)

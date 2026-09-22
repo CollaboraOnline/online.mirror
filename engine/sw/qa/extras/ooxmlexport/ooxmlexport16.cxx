@@ -923,6 +923,15 @@ DECLARE_OOXMLEXPORT_TEST(testTdf105688, "tdf105688.docx")
 {
     // Don't throw exception during load
     CPPUNIT_ASSERT_EQUAL(2, getPages());
+
+    // A shape in a header is drawn again on every later page. Without the accompanying fix in
+    // place, reading a property off one of those later copies took the process down.
+    for (int i = 1; i <= getShapes(); ++i)
+    {
+        uno::Reference<beans::XPropertySet> xShape(getShape(i), uno::UNO_QUERY_THROW);
+        if (xShape->getPropertySetInfo()->hasPropertyByName(u"PolyPolygon"_ustr))
+            CPPUNIT_ASSERT(xShape->getPropertyValue(u"PolyPolygon"_ustr).hasValue());
+    }
 }
 
 CPPUNIT_TEST_FIXTURE(Test, testCommentReply)

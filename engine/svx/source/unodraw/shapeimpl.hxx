@@ -19,8 +19,26 @@
 #ifndef INCLUDED_SVX_SOURCE_UNODRAW_SHAPEIMPL_HXX
 #define INCLUDED_SVX_SOURCE_UNODRAW_SHAPEIMPL_HXX
 
+#include <cassert>
+
+#include <svx/svdovirt.hxx>
 #include <svx/unoprov.hxx>
 #include <svx/unoshape.hxx>
+
+/** The object a shape's content lives on.
+
+    A shape drawn in several places has an SdrVirtObj standing in for it in each of them, and an
+    SdrVirtObj reports the kind of the object it refers to. The UNO wrapper is picked by that
+    kind, so casting the stand-in itself is wrong: read the referenced object. Anything else of
+    another kind is a wrapper over the wrong object, which asserts and gives nullptr. */
+template <class SdrObjectType> SdrObjectType* ReferencedSdrObject(SdrObject* pObject)
+{
+    if (auto* pStandIn = dynamic_cast<SdrVirtObj*>(pObject))
+        pObject = &pStandIn->ReferencedObj();
+    auto* pTyped = dynamic_cast<SdrObjectType*>(pObject);
+    assert((!pObject || pTyped) && "shape wrapped over an object of another kind");
+    return pTyped;
+}
 
 class SvxShapeCaption : public SvxShapeText
 {

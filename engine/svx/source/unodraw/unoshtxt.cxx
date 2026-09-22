@@ -549,7 +549,7 @@ SvxTextForwarder* SvxTextEditSourceImpl::GetBackgroundTextForwarder()
             if (mpText && bTextEditActive && mpObject->IsEmptyPresObj() && pTextObj && pTextObj->IsReallyEdited())
             {
                 mpObject->SetEmptyPresObj( false );
-                static_cast<SdrTextObj*>(mpObject)->NbcSetOutlinerParaObjectForText(std::move(pOutlinerParaObject), mpText);
+                pTextObj->NbcSetOutlinerParaObjectForText(std::move(pOutlinerParaObject), mpText);
             }
         }
         else
