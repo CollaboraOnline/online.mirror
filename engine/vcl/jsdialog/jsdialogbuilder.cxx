@@ -926,6 +926,19 @@ std::unique_ptr<weld::Image> JSInstanceBuilder::weld_image(const OUString& id)
     return pWeldWidget;
 }
 
+std::unique_ptr<weld::ProgressBar> JSInstanceBuilder::weld_progress_bar(const OUString& id)
+{
+    ::ProgressBar* pProgressBar = m_xBuilder->get<::ProgressBar>(id);
+
+    auto pWeldWidget
+        = pProgressBar ? std::make_unique<JSProgressBar>(this, pProgressBar, this, false) : nullptr;
+
+    if (pWeldWidget)
+        RememberWidget(id, pWeldWidget.get());
+
+    return pWeldWidget;
+}
+
 std::unique_ptr<weld::LevelBar> JSInstanceBuilder::weld_level_bar(const OUString& id)
 {
     ::ProgressBar* pLevelBar = m_xBuilder->get<::ProgressBar>(id);
@@ -2304,6 +2317,25 @@ void JSImage::set_image(const cpo::uno::Reference<css::graphic::XGraphic>& rImag
 void JSImage::set_from_icon_name(const OUString& rIconName)
 {
     SalInstanceImage::set_from_icon_name(rIconName);
+    sendUpdate();
+}
+
+JSProgressBar::JSProgressBar(JSDialogSender* pSender, ::ProgressBar* pProgressBar,
+                             SalInstanceBuilder* pBuilder, bool bTakeOwnership)
+    : JSWidget<SalInstanceProgressBar, ::ProgressBar>(pSender, pProgressBar, pBuilder,
+                                                      bTakeOwnership)
+{
+}
+
+void JSProgressBar::set_percentage(int nValue)
+{
+    SalInstanceProgressBar::set_percentage(nValue);
+    sendUpdate();
+}
+
+void JSProgressBar::set_text(const OUString& rText)
+{
+    SalInstanceProgressBar::set_text(rText);
     sendUpdate();
 }
 

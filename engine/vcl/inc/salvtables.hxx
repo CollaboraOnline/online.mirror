@@ -2210,6 +2210,26 @@ public:
     virtual ~SalInstanceScrolledWindow() override;
 };
 
+class SalInstanceProgressBar : public SalInstanceWidget, public virtual weld::ProgressBar
+{
+private:
+    VclPtr<::ProgressBar> m_xProgressBar;
+
+public:
+    SalInstanceProgressBar(::ProgressBar* pProgressBar, SalInstanceBuilder* pBuilder,
+                           bool bTakeOwnership)
+        : SalInstanceWidget(pProgressBar, pBuilder, bTakeOwnership)
+        , m_xProgressBar(pProgressBar)
+    {
+    }
+
+    virtual void set_percentage(int value) override { m_xProgressBar->SetValue(value); }
+
+    virtual OUString get_text() const override { return m_xProgressBar->GetText(); }
+
+    virtual void set_text(const OUString& rText) override { m_xProgressBar->SetText(rText); }
+};
+
 class SalInstanceLevelBar : public SalInstanceWidget, public virtual weld::LevelBar
 {
 private:

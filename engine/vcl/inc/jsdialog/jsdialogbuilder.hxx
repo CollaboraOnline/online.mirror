@@ -214,6 +214,7 @@ public:
     virtual std::unique_ptr<weld::CustomWidget> weld_custom_widget(const OUString& id) override;
     virtual std::unique_ptr<weld::Widget> weld_widget(const OUString& id) override;
     virtual std::unique_ptr<weld::Image> weld_image(const OUString& id) override;
+    virtual std::unique_ptr<weld::ProgressBar> weld_progress_bar(const OUString& id) override;
     virtual std::unique_ptr<weld::LevelBar> weld_level_bar(const OUString& id) override;
     virtual std::unique_ptr<weld::Calendar> weld_calendar(const OUString& id) override;
 
@@ -960,6 +961,15 @@ public:
     virtual void set_image(VirtualDevice* pDevice) override;
     virtual void set_image(const cpo::uno::Reference<css::graphic::XGraphic>& rImage) override;
     virtual void set_from_icon_name(const OUString& rIconName) override;
+};
+
+class JSProgressBar : public JSWidget<SalInstanceProgressBar, ::ProgressBar>
+{
+public:
+    JSProgressBar(JSDialogSender* pSender, ::ProgressBar* pProgressBar,
+                  SalInstanceBuilder* pBuilder, bool bTakeOwnership);
+    virtual void set_percentage(int nValue) override;
+    virtual void set_text(const OUString& rText) override;
 };
 
 class JSLevelBar : public JSWidget<SalInstanceLevelBar, ::ProgressBar>
