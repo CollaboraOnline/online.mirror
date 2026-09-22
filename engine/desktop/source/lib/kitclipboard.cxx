@@ -15,6 +15,7 @@
 #include <comphelper/kit.hxx>
 #include <comphelper/sequence.hxx>
 #include <tools/lazydelete.hxx>
+#include <vcl/remoteclipboard.hxx>
 #include <vcl/svapp.hxx>
 #include <sfx2/kit/helper.hxx>
 #include <COKit/COKit.hxx>
@@ -430,28 +431,10 @@ KitTransferable::KitTransferable()
     m_aContent.push_back(aContent);
 }
 
-// cf. sot/source/base/exchange.cxx for these two exceptional types.
 void KitTransferable::initFlavourFromMime(css::datatransfer::DataFlavor& rFlavor,
                                           OUString aMimeType)
 {
-    if (aMimeType.startsWith("text/plain"))
-    {
-        aMimeType = u"text/plain;charset=utf-16"_ustr;
-        rFlavor.DataType = cppu::UnoType<OUString>::get();
-    }
-    else if (aMimeType.startsWith("text/markdown"))
-    {
-        aMimeType = u"text/markdown"_ustr;
-        rFlavor.DataType = cppu::UnoType<OUString>::get();
-    }
-    else if (aMimeType == "application/x-libreoffice-markdown-annotated")
-        rFlavor.DataType = cppu::UnoType<OUString>::get();
-    else if (aMimeType == "application/x-libreoffice-tsvc")
-        rFlavor.DataType = cppu::UnoType<OUString>::get();
-    else
-        rFlavor.DataType = cppu::UnoType<cpo::uno::Sequence<sal_Int8>>::get();
-    rFlavor.MimeType = aMimeType;
-    rFlavor.HumanPresentableName = aMimeType;
+    vcl::remoteclipboard::initFlavourFromMime(rFlavor, std::move(aMimeType));
 }
 
 KitTransferable::KitTransferable(const size_t nInCount, const char** pInMimeTypes,

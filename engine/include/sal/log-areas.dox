@@ -512,6 +512,7 @@ certain functionality.
 @li @c vcl.plugadapt - the Unix/X11 backend plugin mechanism
 @li @c vcl.qt - Qt
 @li @c vcl.quartz
+@li @c vcl.remoteclipboard
 @li @c vcl.schedule - scheduler / main-loop information
 @li @c vcl.schedule.deinit
 @li @c vcl.sessioninhibitor

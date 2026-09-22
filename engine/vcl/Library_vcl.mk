@@ -314,6 +314,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/treelist/imap2 \
     vcl/source/treelist/imap3 \
     vcl/source/treelist/inetimg \
+    vcl/source/treelist/remoteclipboard \
     vcl/source/treelist/svtabbx \
     vcl/source/treelist/transfer \
     vcl/source/treelist/transfer2 \

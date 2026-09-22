@@ -193,6 +193,7 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
     CppunitTest_vcl_widget_definition_reader_test \
     CppunitTest_vcl_backend_test \
     CppunitTest_vcl_type_serializer_test \
+    CppunitTest_vcl_remoteclipboard \
     CppunitTest_vcl_animation \
     $(call gb_Helper_optional, PDFIUM, \
         CppunitTest_vcl_pdfium_library_test) \
