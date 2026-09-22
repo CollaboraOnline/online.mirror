@@ -332,7 +332,8 @@ bool View::Paste(const SdrModel& rMod, const Point& rPos, SdrObjList* pLst,
 
 void View::DoPaste (::sd::Window* pWindow,bool /*bMergeMasterPagesOnly*/)
 {
-    TransferableDataHelper aDataHelper( TransferableDataHelper::CreateFromSystemClipboard( mpViewSh->GetActiveWindow() ) );
+    TransferableDataHelper aDataHelper( TransferableDataHelper::CreateFromSystemClipboard(
+        mpViewSh->GetActiveWindow(), DownloadRemoteContent::Yes ) );
     if( !aDataHelper.GetTransferable().is() )
         return; // empty clipboard?
 

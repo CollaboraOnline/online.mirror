@@ -954,7 +954,8 @@ bool Clipboard::PasteSlidesFromSystemClipboard()
     if (!pDrawViewShell)
         return false;
     TransferableDataHelper aDataHelper(
-        TransferableDataHelper::CreateFromSystemClipboard(pDrawViewShell->GetActiveWindow()));
+        TransferableDataHelper::CreateFromSystemClipboard(pDrawViewShell->GetActiveWindow(),
+                                                          DownloadRemoteContent::Yes));
 
     {
         // Only attempt to load EMBED_SOURCE, if its descriptor is correct

@@ -236,7 +236,8 @@ rtl::Reference<FuPoor> FuInsertClipboard::Create( ViewShell& rViewSh, ::sd::Wind
 
 void FuInsertClipboard::DoExecute( SfxRequest&  )
 {
-    auto pDataHelper = std::make_shared<TransferableDataHelper>(TransferableDataHelper::CreateFromSystemClipboard(mpWindow));
+    auto pDataHelper = std::make_shared<TransferableDataHelper>(
+        TransferableDataHelper::CreateFromSystemClipboard(mpWindow, DownloadRemoteContent::Yes));
 
     SvxAbstractDialogFactory* pFact = SvxAbstractDialogFactory::Create();
     VclPtr<SfxAbstractPasteDialog> pDlg(pFact->CreatePasteDialog(mrViewShell.GetFrameWeld()));
