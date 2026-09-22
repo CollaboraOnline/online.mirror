@@ -2616,6 +2616,13 @@ void COOLWSD::innerInitialize(Poco::Util::Application& self)
 
 void COOLWSD::setLokitEnvironmentVariables(const Poco::Util::LayeredConfiguration& conf)
 {
+#if MOBILEAPP
+    // The apps run the engine on the user's own machine, as the user, so every host the user
+    // can reach is a legitimate external data source, as in soffice. The allow-list below is
+    // for a shared server, whose kit must not fetch from the server's network on a document's
+    // behalf, so the apps set none and the engine's host filter stays off.
+    (void) conf;
+#else
     // Allowed hosts for being external data source in the documents
     std::vector<std::string> lokAllowedHosts;
     appendAllowedHostsFrom(conf, "net.lok_allow", lokAllowedHosts);
@@ -2651,16 +2658,13 @@ void COOLWSD::setLokitEnvironmentVariables(const Poco::Util::LayeredConfiguratio
 
         setenv("KIT_HOST_ALLOWLIST", allowlist.c_str(), true);
 
-#if !MOBILEAPP
         if (!ConfigUtil::getConfigValue<bool>(conf, "ssl.ssl_verification", true))
         {
             // also disable host verification for allowed hosts
             ::setenv("KIT_HOST_ALLOWLIST_EXEMPT_VERIFY_HOST", "1", true);
         }
-#endif
     }
 
-#if !MOBILEAPP
     setenv("KIT_ALLOWED_EXTREF_PATHS", "", true);
 #endif
 }
