@@ -1017,21 +1017,21 @@ def add_dependencies(files_by_package, files_by_package_extra_deps):
 
     def get_pe_deps(abspath):
         result = set()
-        pe = pefile.PE(abspath, fast_load=True)
+        # Only the directories that name dependencies are loaded.
+        # Loading all would also read every exception and relocation entry.
+        pe = dnfile.dnPE(abspath, fast_load=True)
         pe.parse_data_directories(
             directories = [
                 pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_IMPORT"],
                 pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT"],
+                pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR"],
             ])
         for entry in getattr(pe, "DIRECTORY_ENTRY_IMPORT", []):
             result.add(entry.dll.decode("ascii", "replace"))
         for entry in getattr(pe, "DIRECTORY_ENTRY_DELAY_IMPORT", []):
             result.add(entry.dll.decode("ascii", "replace"))
-        pe.close()
 
-        # Managed metadata only appears once data directories have been parsed
-        managed = dnfile.dnPE(abspath)
-        net = getattr(managed, "net", None)
+        net = getattr(pe, "net", None)
         if net is not None:
             tables = net.mdtables
             if tables.AssemblyRef:
@@ -1046,7 +1046,7 @@ def add_dependencies(files_by_package, files_by_package_extra_deps):
                     name = str(row.Name)
                     if name and name not in result:
                         result.add(name)
-        managed.close()
+        pe.close()
         return result
 
     MACH_O_MAGIC = (
