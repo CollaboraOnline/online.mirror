@@ -13,17 +13,17 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-12 12:52+0000\n"
+"PO-Revision-Date: 2026-09-23 01:27+0000\n"
 "Last-Translator: Matthaiks <kitynska@gmail.com>\n"
 "Language-Team: Polish <https://hosted.weblate.org/projects/collabora-online/"
 "collabora-ui/pl/>\n"
-"Language: \n"
+"Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n"
-"%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n"
-"%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && "
+"(n%100<12 || n%100>14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && "
+"n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 "X-Generator: Weblate 2026.10.dev0\n"
 
 #: admin/admin.strings.js:15
@@ -838,19 +838,19 @@ msgstr "Broszura od prawej do lewej"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:731
 msgid "English"
-msgstr ""
+msgstr "angielski"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:732
 msgid "Hungarian"
-msgstr ""
+msgstr "węgierski"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:733
 msgid "Portuguese (Brazil)"
-msgstr ""
+msgstr "portugalski (Brazylia)"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:734
 msgid "Russian"
-msgstr ""
+msgstr "rosyjski"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1293
 msgid "Invalid JSON file"
@@ -1197,23 +1197,27 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3898
 msgid "Lightproof Sentence Checker"
-msgstr ""
+msgstr "Narzędzie do sprawdzania zdań Lightproof"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3901
 msgid "Choose what the sentence checker looks for as you type."
-msgstr ""
+msgstr "Wybierz, czego ma szukać narzędzie do sprawdzania zdań podczas pisania."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3941
 msgid ""
 "This document is using the document settings it was opened with. What you "
 "change here applies to the next document you open."
 msgstr ""
+"Ten dokument korzysta z ustawień, z jakimi został otwarty. Zmiany "
+"wprowadzone tutaj będą dotyczyć kolejnego otwieranego dokumentu."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3944
 msgid ""
 "This document is open in more than one window, so what you change here "
 "applies to the next document you open rather than this one."
 msgstr ""
+"Ten dokument jest otwarty w więcej niż jednym oknie, więc wprowadzane tu "
+"zmiany będą dotyczyć kolejnego otwieranego dokumentu, a nie tego bieżącego."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:4032
 #: admin/src/integrator/Xcu.ts:439
@@ -2804,30 +2808,30 @@ msgstr ""
 #: src/control/Control.CleanupSidebar.ts:259
 msgid "%1 byte"
 msgid_plural "%1 bytes"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "%1 bajt"
+msgstr[1] "%1 bajty"
+msgstr[2] "%1 bajtów"
+msgstr[3] "%1 bajtów"
 
 #: src/control/Control.CleanupSidebar.ts:267
 msgid "%1 KB"
-msgstr ""
+msgstr "%1 KB"
 
 #: src/control/Control.CleanupSidebar.ts:272
 msgid "%1 MB"
-msgstr ""
+msgstr "%1 MB"
 
 #: src/control/Control.CleanupSidebar.ts:278
 msgid "Fix %1"
-msgstr ""
+msgstr "Napraw %1"
 
 #: src/control/Control.CleanupSidebar.ts:331
 msgid "Master slide"
-msgstr ""
+msgstr "Slajd wzorcowy"
 
 #: src/control/Control.CleanupSidebar.ts:332
 msgid "Master slide, image %1"
-msgstr ""
+msgstr "Slajd wzorcowy, obraz %1"
 
 #: src/control/Control.CleanupSidebar.ts:335
 #: src/control/Control.PartsPreview.js:944
@@ -2836,167 +2840,169 @@ msgstr "Slajd %1"
 
 #: src/control/Control.CleanupSidebar.ts:336
 msgid "Slide %1, image %2"
-msgstr ""
+msgstr "Slajd %1, obraz %2"
 
 #: src/control/Control.CleanupSidebar.ts:340
 msgid "Slide %1 is hidden and can be removed"
-msgstr ""
+msgstr "Slajd %1 jest ukryty i można go usunąć"
 
 #: src/control/Control.CleanupSidebar.ts:342
 msgid "Master slide '%1' is not used by any slide"
-msgstr ""
+msgstr "Slajd wzorcowy „%1” nie jest używany przez żaden slajd"
 
 #: src/control/Control.CleanupSidebar.ts:347
 msgid "Slide %1 has speaker notes"
-msgstr ""
+msgstr "Slajd %1 zawiera notatki prelegenta"
 
 #: src/control/Control.CleanupSidebar.ts:350
 msgid "Slide %1: embedded object"
-msgstr ""
+msgstr "Slajd %1: obiekt osadzony"
 
 #: src/control/Control.CleanupSidebar.ts:351
 msgid "Slide %1: embedded object, no image to replace it with"
-msgstr ""
+msgstr "Slajd %1: obiekt osadzony, brak obrazu, którym można by go zastąpić"
 
 #: src/control/Control.CleanupSidebar.ts:365
 msgid "%1 DPI"
-msgstr ""
+msgstr "%1 dpi"
 
 #: src/control/Control.CleanupSidebar.ts:367
 msgid "%1 at %2 DPI"
-msgstr ""
+msgstr "%1 przy %2 dpi"
 
 #: src/control/Control.CleanupSidebar.ts:426
 msgid "Leave images alone"
-msgstr ""
+msgstr "Nie zmieniaj obrazów"
 
 #: src/control/Control.CleanupSidebar.ts:427
 msgid "96 DPI"
-msgstr ""
+msgstr "96 dpi"
 
 #: src/control/Control.CleanupSidebar.ts:428
 msgid "150 DPI"
-msgstr ""
+msgstr "150 dpi"
 
 #: src/control/Control.CleanupSidebar.ts:429
 msgid "220 DPI"
-msgstr ""
+msgstr "220 dpi"
 
 #: src/control/Control.CleanupSidebar.ts:430
 msgid "300 DPI"
-msgstr ""
+msgstr "300 dpi"
 
 #: src/control/Control.CleanupSidebar.ts:454
 msgid "Scanning..."
-msgstr ""
+msgstr "Skanowanie..."
 
 #: src/control/Control.CleanupSidebar.ts:456
 msgid "Measuring images..."
-msgstr ""
+msgstr "Pomiar obrazów..."
 
 #: src/control/Control.CleanupSidebar.ts:458
 msgid "Preparing cleanup..."
-msgstr ""
+msgstr "Przygotowywanie porządkowania..."
 
 #: src/control/Control.CleanupSidebar.ts:460
 msgid "Cleaning up..."
-msgstr ""
+msgstr "Porządkowanie..."
 
 #: src/control/Control.CleanupSidebar.ts:472
 msgid "Images over %1 DPI (%2)"
-msgstr ""
+msgstr "Obrazy powyżej %1 dpi (%2)"
 
 #: src/control/Control.CleanupSidebar.ts:476
 msgid "Hidden slides (%1)"
-msgstr ""
+msgstr "Ukryte slajdy (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:478
 msgid "Unused master slides (%1)"
-msgstr ""
+msgstr "Nieużywane slajdy wzorcowe (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:480
 msgid "Speaker notes (%1)"
-msgstr ""
+msgstr "Notatki prelegenta (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:482
 msgid "Embedded objects (%1)"
-msgstr ""
+msgstr "Obiekty osadzone (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:490
 msgid "Saved %1"
-msgstr ""
+msgstr "Zapisano %1"
 
 #: src/control/Control.CleanupSidebar.ts:493
 msgid "Estimated saving: %1"
-msgstr ""
+msgstr "Szacowanie zapisywania: %1"
 
 #: src/control/Control.CleanupSidebar.ts:500
 msgid "%1 thing to clean up"
 msgid_plural "%1 things to clean up"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "%1 rzecz do uporządkowania"
+msgstr[1] "%1 rzeczy do uporządkowania"
+msgstr[2] "%1 rzeczy do uporządkowania"
+msgstr[3] "%1 rzeczy do uporządkowania"
 
 #: src/control/Control.CleanupSidebar.ts:525
 msgid "Image resolution"
-msgstr ""
+msgstr "Rozdzielczość obrazu"
 
 #: src/control/Control.CleanupSidebar.ts:547
 msgid "JPEG quality in %"
-msgstr ""
+msgstr "Jakość JPEG w %"
 
 #: src/control/Control.CleanupSidebar.ts:572
 msgid "Prepare for sharing"
-msgstr ""
+msgstr "Przygotuj do udostępnienia"
 
 #: src/control/Control.CleanupSidebar.ts:601
 msgid "%1 of %2"
-msgstr ""
+msgstr "%1 z %2"
 
 #: src/control/Control.CleanupSidebar.ts:614
 msgid "Cleanup progress"
-msgstr ""
+msgstr "Postęp czyszczenia"
 
 #: src/control/Control.CleanupSidebar.ts:647
 msgid "Stop"
-msgstr ""
+msgstr "Zatrzymaj"
 
 #: src/control/Control.CleanupSidebar.ts:668
 msgid "Scan"
-msgstr ""
+msgstr "Skanuj"
 
 #: src/control/Control.CleanupSidebar.ts:701
 msgid "Fix all"
-msgstr ""
+msgstr "Napraw wszystkie"
 
 #: src/control/Control.CleanupSidebar.ts:726
 msgid "This document cannot be changed here, so there is nothing to clean up."
-msgstr ""
+msgstr "Tego dokumentu nie można tutaj zmienić, więc nie ma czego porządkować."
 
 #: src/control/Control.CleanupSidebar.ts:730
 msgid ""
 "Choose a target resolution, then press Scan to find what can be cleaned up."
 msgstr ""
+"Wybierz docelową rozdzielczość, a następnie naciśnij „Skanuj”, aby znaleźć "
+"elementy możliwe do usunięcia."
 
 #: src/control/Control.CleanupSidebar.ts:733
 msgid "Nothing to clean up."
-msgstr ""
+msgstr "Nie ma nic do porządkowania."
 
 #: src/control/Control.CleanupSidebar.ts:791
 msgid "saves %1"
-msgstr ""
+msgstr "zapisuje %1"
 
 #: src/control/Control.CleanupSidebar.ts:801
 msgid "Fix"
-msgstr ""
+msgstr "Napraw"
 
 #: src/control/Control.CleanupSidebar.ts:901
 #: src/control/Control.Menubar.ts:657
 #: src/control/Control.NotebookbarImpress.js:2184
 #: src/control/Control.NotebookbarImpress.js:2185
 msgid "Clean Up"
-msgstr ""
+msgstr "Uporządkuj"
 
 #: src/control/Control.AlertDialog.js:55
 msgid "External link"
@@ -3209,7 +3215,7 @@ msgstr "Pusta prezentacja"
 
 #: src/control/Control.BackstageView.ts:1029
 msgid "Blank Drawing"
-msgstr ""
+msgstr "Pusty rysunek"
 
 #: src/control/Control.BackstageView.ts:1034
 msgid "Blank Document"
@@ -3380,15 +3386,15 @@ msgstr "Nazwa dokumentu"
 
 #: src/control/Control.DocumentNameInput.js:39
 msgid "A document name cannot contain a slash or a backslash."
-msgstr ""
+msgstr "Nazwa dokumentu nie może zawierać ukośnika ani odwrotnego ukośnika."
 
 #: src/control/Control.DocumentNameInput.js:42 src/app/Socket.ts:2531
 msgid "Please enter a valid document name."
-msgstr ""
+msgstr "Wpisz poprawną nazwę dokumentu."
 
 #: src/control/Control.DocumentNameInput.js:55
 msgid "Invalid document name"
-msgstr ""
+msgstr "Nieprawidłowa nazwa dokumentu"
 
 #: src/control/Control.DocumentRepair.js:27
 #: src/control/Control.DocumentRepair.js:28
@@ -4220,17 +4226,17 @@ msgstr "Strony notatek"
 #: src/control/Control.Menubar.ts:523
 #: src/control/Control.NotebookbarImpress.js:743
 msgid "View Notes"
-msgstr ""
+msgstr "Wyświetl notatki"
 
 #: src/control/Control.Menubar.ts:524
 #: src/control/Control.NotebookbarImpress.js:745
 msgid "Bottom Panel"
-msgstr ""
+msgstr "Dolny panel"
 
 #: src/control/Control.Menubar.ts:525
 #: src/control/Control.NotebookbarImpress.js:746
 msgid "Handout Page"
-msgstr ""
+msgstr "Strona z materiałami"
 
 #: src/control/Control.Menubar.ts:526
 #: src/control/Control.NotebookbarImpress.js:747
@@ -5422,6 +5428,7 @@ msgstr "Przejdź do trybu offline"
 #: src/control/Control.NotebookbarWriter.js:481
 msgid "Lets a screen reader follow the cursor and read the document"
 msgstr ""
+"Umożliwia czytnikowi ekranu podążanie za kursorem i odczytywanie dokumentu"
 
 #: src/control/Control.NotebookbarWriter.js:605
 msgid "Validate Sidebar"
@@ -5483,7 +5490,7 @@ msgstr "Przełącz na tryb edycji"
 
 #: src/control/Control.PartsPreview.js:451
 msgid "Show everyone on this slide"
-msgstr ""
+msgstr "Pokaż wszystkich na tym slajdzie"
 
 #: src/control/Control.PartsPreview.js:597
 #: src/control/Control.PartsPreview.js:672 src/map/Clipboard.js:1546
@@ -5501,22 +5508,22 @@ msgstr "Dodaj sekcję"
 #: src/control/Control.PartsPreview.js:875
 msgid "with 1 other"
 msgid_plural "with %n others"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "z 1 innym"
+msgstr[1] "z %n innymi"
+msgstr[2] "z %n innymi"
+msgstr[3] "z %n innymi"
 
 #: src/control/Control.PartsPreview.js:885
 msgid "with %1"
-msgstr ""
+msgstr "z %1"
 
 #: src/control/Control.PartsPreview.js:886
 msgid "with %1 and 1 other"
 msgid_plural "with %1 and %n others"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
-msgstr[3] ""
+msgstr[0] "z %1 i 1 innym"
+msgstr[1] "z %1 i %n innymi"
+msgstr[2] "z %1 i %n innymi"
+msgstr[3] "z %1 i %n innymi"
 
 #: src/control/Control.PartsPreview.js:916
 msgid "preview of page %1, linked to %2 in %3"
@@ -5585,7 +5592,7 @@ msgstr "Zaimportuj slajdy"
 
 #: src/control/Control.SlideImportPane.tsx:673
 msgid "Checking..."
-msgstr ""
+msgstr "Sprawdzanie..."
 
 #: src/control/Control.SlideImportPane.tsx:675
 #: src/control/Control.SlideLinkToolbar.tsx:165
@@ -5599,11 +5606,11 @@ msgstr "Brak dostępu"
 
 #: src/control/Control.SlideImportPane.tsx:679
 msgid "Could not open"
-msgstr ""
+msgstr "Nie można otworzyć"
 
 #: src/control/Control.SlideImportPane.tsx:685
 msgid "{0} changed"
-msgstr ""
+msgstr "{0} zmieniono"
 
 #: src/control/Control.SlideImportPane.tsx:687
 #: src/control/Control.SlideLinkToolbar.tsx:115
@@ -5612,12 +5619,12 @@ msgstr "Połączony"
 
 #: src/control/Control.SlideImportPane.tsx:689
 msgid "Not checked"
-msgstr ""
+msgstr "Nie sprawdzono"
 
 #: src/control/Control.SlideImportPane.tsx:690
 #: src/control/Control.SlideImportPane.tsx:1392
 msgid "Not linked"
-msgstr "Nie połączony"
+msgstr "Niepołączony"
 
 #: src/control/Control.SlideImportPane.tsx:733
 #: src/control/Control.SlideImportPane.tsx:742
@@ -5629,14 +5636,16 @@ msgid ""
 "The slides are in this presentation. The file they came from is no longer "
 "here."
 msgstr ""
+"Slajdy znajdują się w tej prezentacji. Plik, z którego pochodziły, nie jest "
+"już tutaj dostępny."
 
 #: src/control/Control.SlideImportPane.tsx:739
 msgid "This file is here. You do not have permission to open it."
-msgstr ""
+msgstr "Ten plik znajduje się tutaj. Nie masz uprawnień do jego otwarcia."
 
 #: src/control/Control.SlideImportPane.tsx:741
 msgid "This file could not be read this time."
-msgstr ""
+msgstr "Tym razem nie udało się odczytać tego pliku."
 
 #: src/control/Control.SlideImportPane.tsx:750
 #: src/control/Control.SlideImportPane.tsx:1251
@@ -5666,7 +5675,7 @@ msgstr "Wstaw slajdy"
 
 #: src/control/Control.SlideImportPane.tsx:835
 msgid "Insert {0} from {1}"
-msgstr ""
+msgstr "Wstaw {0} z {1}"
 
 #: src/control/Control.SlideImportPane.tsx:838
 msgid "Insert 1 slide"
@@ -5678,7 +5687,7 @@ msgstr "Wstaw slajdy: {0}"
 
 #: src/control/Control.SlideImportPane.tsx:871
 msgid "{0} of {1}"
-msgstr ""
+msgstr "{0} z {1}"
 
 #: src/control/Control.SlideImportPane.tsx:874
 #: src/control/Control.SlideImportPane.tsx:1638
@@ -5687,11 +5696,11 @@ msgstr "Slajdów {0}"
 
 #: src/control/Control.SlideImportPane.tsx:881
 msgid "Inserts at the end"
-msgstr ""
+msgstr "Wstawia na końcu"
 
 #: src/control/Control.SlideImportPane.tsx:882
 msgid "Inserts after slide {0}"
-msgstr ""
+msgstr "Wstawia po slajdzie {0}"
 
 #: src/control/Control.SlideImportPane.tsx:886
 msgid "Opening file..."
@@ -5716,9 +5725,8 @@ msgid "Close slide import"
 msgstr "Zamknij import slajdów"
 
 #: src/control/Control.SlideImportPane.tsx:996
-#, fuzzy
 msgid "Add presentation…"
-msgstr "Dodaj prezentację..."
+msgstr "Dodaj prezentację…"
 
 #: src/control/Control.SlideImportPane.tsx:1011
 msgid "No presentations yet"
@@ -5733,20 +5741,20 @@ msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:1048
 msgid "Hide all slides"
-msgstr ""
+msgstr "Ukryj wszystkie slajdy"
 
 #: src/control/Control.SlideImportPane.tsx:1048
 msgid "Show all slides"
-msgstr ""
+msgstr "Pokaż wszystkie slajdy"
 
 #: src/control/Control.SlideImportPane.tsx:1080
 #: src/control/Control.SlideImportPane.tsx:1081
 msgid "Filter presentations"
-msgstr ""
+msgstr "Filtruj prezentacje"
 
 #: src/control/Control.SlideImportPane.tsx:1109
 msgid "Slide sources"
-msgstr ""
+msgstr "Źródła slajdów"
 
 #: src/control/Control.SlideImportPane.tsx:1117
 msgid "Presentations to import from"
@@ -5754,7 +5762,7 @@ msgstr "Prezentacje, z których importować"
 
 #: src/control/Control.SlideImportPane.tsx:1185
 msgid "{0} picked"
-msgstr ""
+msgstr "{0} wybrano"
 
 #: src/control/Control.SlideImportPane.tsx:1223
 msgid "Actions for {0}"
@@ -5786,15 +5794,15 @@ msgstr "Slajdy w {0}"
 
 #: src/control/Control.SlideImportPane.tsx:1391
 msgid "Original design"
-msgstr ""
+msgstr "Oryginalny projekt"
 
 #: src/control/Control.SlideImportPane.tsx:1394
 msgid "Linked, follows the slide number"
-msgstr ""
+msgstr "Połączone, zgodne z numerem slajdu"
 
 #: src/control/Control.SlideImportPane.tsx:1395
 msgid "Linked, follows the slide"
-msgstr ""
+msgstr "Połączone, zgodne ze slajdem"
 
 #: src/control/Control.SlideImportPane.tsx:1432
 msgid "Keep original design"
@@ -5802,39 +5810,39 @@ msgstr "Zachowaj oryginalny projekt"
 
 #: src/control/Control.SlideImportPane.tsx:1446
 msgid "Stay linked to the source file"
-msgstr ""
+msgstr "Pozostaw połączony z plikiem źródłowym"
 
 #: src/control/Control.SlideImportPane.tsx:1484
 msgid "Follow the slide, wherever it moves"
-msgstr ""
+msgstr "Zgodnie ze slajdem, dokądkolwiek się przenosi"
 
 #: src/control/Control.SlideImportPane.tsx:1486
 msgid "Follow the slide number"
-msgstr ""
+msgstr "Zgodnie z numerem slajdu"
 
 #: src/control/Control.SlideImportPane.tsx:1644
 msgid "Select the slides of {0}"
-msgstr ""
+msgstr "Wybierz slajdy {0}"
 
 #: src/control/Control.SlideLinkToolbar.tsx:102
 msgid "Linked to {0} in {1}"
-msgstr ""
+msgstr "Połączone z {0} w {1}"
 
 #: src/control/Control.SlideLinkToolbar.tsx:126
 msgid "Hide the actions for this linked slide"
-msgstr ""
+msgstr "Ukryj czynności dla tego połączonego slajdu"
 
 #: src/control/Control.SlideLinkToolbar.tsx:127
 msgid "Show the actions for this linked slide"
-msgstr ""
+msgstr "Pokaż czynności dla tego połączonego slajdu"
 
 #: src/control/Control.SlideLinkToolbar.tsx:137
 msgid "Unlink"
-msgstr ""
+msgstr "Rozłącz"
 
 #: src/control/Control.SlideLinkToolbar.tsx:161
 msgid "Not available"
-msgstr ""
+msgstr "Niedostępne"
 
 #: src/control/SlideSectionHeader.tsx:68
 msgid "Toggle section %1"
@@ -5859,7 +5867,7 @@ msgstr "Żaden slajd tej prezentacji nie jest połączony z innym plikiem."
 
 #: src/slideimport/SlideLinks.ts:275
 msgid "This slide is not linked to another file."
-msgstr ""
+msgstr "Ten slajd nie jest połączony z innym plikiem."
 
 #: src/slideimport/SlideLinks.ts:426 src/slideimport/SlideLinks.ts:738
 msgid ""
@@ -5884,7 +5892,7 @@ msgstr "Nie udało się odczytać {0}."
 #: src/slideimport/SlideLinks.ts:562
 msgid "Cannot update the slides of {0}: source lacks the matching slides"
 msgstr ""
-"Nie można zaktualizować slajdów {0}: w źródle brakuje odpowiednich slajdów."
+"Nie można zaktualizować slajdów {0}: w źródle brakuje odpowiednich slajdów"
 
 #: src/slideimport/SlideLinks.ts:565 src/slideimport/SlideLinks.ts:744
 msgid "The slides of {0} could not be read into this presentation."
@@ -5896,9 +5904,8 @@ msgstr ""
 "Nie można zaktualizować slajdu {0}: w źródle brakuje odpowiadającego slajdu"
 
 #: src/slideimport/SlideLinks.ts:684
-#, fuzzy
 msgid "Unlinking the slide failed."
-msgstr "Wstawianie slajdów zakończyło się niepowodzeniem."
+msgstr "Rozłączenie slajdu nie powiodło się."
 
 #: src/slideimport/SlideLinks.ts:695 src/slideimport/SlideLinks.ts:756
 msgid "Updating the slides of {0} failed."
@@ -5942,17 +5949,19 @@ msgid "No problems with SSL verification detected"
 msgstr "Nie wykryto żadnych problemów z weryfikacją SSL"
 
 #: src/control/Control.ServerAuditDialog.ts:78
-#, fuzzy
 msgid "Each document is securely contained (landlock)"
-msgstr "Każdy dokument jest bezpiecznie przechowywany"
+msgstr "Każdy dokument jest bezpiecznie odizolowany (landlock)"
 
 #: src/control/Control.ServerAuditDialog.ts:83
 msgid "Each document is securely contained (Linux namespaces)"
 msgstr ""
+"Każdy dokument jest bezpiecznie odizolowany (przestrzenie nazw systemu Linux)"
 
 #: src/control/Control.ServerAuditDialog.ts:88
 msgid "Each document is securely contained (capabilities and chroot)"
 msgstr ""
+"Każdy dokument jest bezpiecznie odizolowany (mechanizmy capabilities i "
+"chroot)"
 
 #: src/control/Control.ServerAuditDialog.ts:102
 msgid "System call security filtering enabled"
@@ -5969,6 +5978,8 @@ msgstr "Włączono szybkie montowanie izolacji zestawu"
 #: src/control/Control.ServerAuditDialog.ts:133
 msgid "Fast kit jail setup with landlock, nothing to copy or mount"
 msgstr ""
+"Szybka konfiguracja środowiska typu „jail” za pomocą Landlocka – bez "
+"konieczności kopiowania czy montowania plików"
 
 #: src/control/Control.ServerAuditDialog.ts:146
 msgid "Poorly performing proxying of all network requests."
@@ -7416,11 +7427,11 @@ msgstr "Tryb edycji"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:70
 msgid "Last Custom Value"
-msgstr ""
+msgstr "Ostatnia wartość niestandardowa"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:134
 msgid "Custom Line Thickness:"
-msgstr ""
+msgstr "Niestandardowa grubość linii:"
 
 #: src/control/jsdialog/Widget.MobileBorderSelector.js:111
 msgid "Cell borders"
