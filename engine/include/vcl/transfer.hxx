@@ -264,6 +264,18 @@ public:
     static void         ClearPrimarySelection();
 };
 
+/**
+ * Whether reading the system clipboard may download the full content of a clipboard that was
+ * copied in a browser session of Collabora Online. The download goes to that server, can take a
+ * while and may show a progress dialog, so only a paste asks for it; a check whether a paste is
+ * possible must not.
+ */
+enum class DownloadRemoteContent
+{
+    No,
+    Yes
+};
+
 class VCL_DLLPUBLIC TransferableDataHelper final
 {
     friend class DropTargetHelper;
@@ -356,7 +368,15 @@ public:
     cpo::uno::Reference<css::io::XInputStream> GetInputStream( const css::datatransfer::DataFlavor& rFlavor, const OUString& rDestDoc ) const;
 
     static TransferableDataHelper   CreateFromClipboard(const cpo::uno::Reference<css::datatransfer::clipboard::XClipboard>& rClipboard);
-    static TransferableDataHelper   CreateFromSystemClipboard( vcl::Window * pWindow );
+    /**
+     * The system clipboard contents. With DownloadRemoteContent::Yes, and when the clipboard was
+     * copied in a browser session of Collabora Online, the returned helper serves the full
+     * content downloaded from that server instead of the HTML, so a paste picks a rich format.
+     * The download may show a progress dialog parented to pWindow; cancelling it leaves the
+     * helper with the HTML the system clipboard holds.
+     */
+    static TransferableDataHelper CreateFromSystemClipboard(
+        vcl::Window* pWindow, DownloadRemoteContent eDownload = DownloadRemoteContent::No);
     static TransferableDataHelper   CreateFromPrimarySelection();
     static bool                     IsEqual( const css::datatransfer::DataFlavor& rInternalFlavor,
                                              const css::datatransfer::DataFlavor& rRequestFlavor );

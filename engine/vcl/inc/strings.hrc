@@ -29,6 +29,9 @@
 #define SV_MENU_MAC_SHOWALL                          NC_("SV_MENU_MAC_SHOWALL", "Show All")
 #define SV_MENU_MAC_QUITAPP                          NC_("SV_MENU_MAC_QUITAPP", "Quit %PRODUCTNAME")
 
+#define STR_REMOTE_CLIPBOARD_RECEIVED_KB             NC_("STR_REMOTE_CLIPBOARD_RECEIVED_KB", "%1 KB received")
+#define STR_REMOTE_CLIPBOARD_RECEIVED_MB             NC_("STR_REMOTE_CLIPBOARD_RECEIVED_MB", "%1 MB received")
+
 #define SV_HELPTEXT_CLOSE                            NC_("SV_HELPTEXT_CLOSE", "Close")
 #define SV_HELPTEXT_MINIMIZE                         NC_("SV_HELPTEXT_MINIMIZE", "Minimize")
 #define SV_HELPTEXT_MAXIMIZE                         NC_("SV_HELPTEXT_MAXIMIZE", "Maximize")

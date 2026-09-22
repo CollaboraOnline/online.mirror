@@ -61,6 +61,7 @@
 #include <vcl/inetimg.hxx>
 #include <vcl/wmf.hxx>
 #include <vcl/imap.hxx>
+#include <vcl/remoteclipboard.hxx>
 #include <vcl/transfer.hxx>
 #include <rtl/strbuf.hxx>
 #include <cstdio>
@@ -2208,7 +2209,8 @@ TransferableDataHelper TransferableDataHelper::CreateFromClipboard(const cpo::un
     return aRet;
 }
 
-TransferableDataHelper TransferableDataHelper::CreateFromSystemClipboard( vcl::Window * pWindow )
+TransferableDataHelper TransferableDataHelper::CreateFromSystemClipboard(
+    vcl::Window* pWindow, DownloadRemoteContent eDownload)
 {
     DBG_ASSERT( pWindow, "Window pointer is NULL" );
 
@@ -2217,7 +2219,10 @@ TransferableDataHelper TransferableDataHelper::CreateFromSystemClipboard( vcl::W
     if( pWindow )
         xClipboard = pWindow->GetClipboard();
 
-    return CreateFromClipboard(xClipboard);
+    TransferableDataHelper aData = CreateFromClipboard(xClipboard);
+    if (eDownload == DownloadRemoteContent::Yes)
+        vcl::remoteclipboard::resolveForPaste(aData, pWindow ? pWindow->GetFrameWeld() : nullptr);
+    return aData;
 }
 
 TransferableDataHelper TransferableDataHelper::CreateFromPrimarySelection()

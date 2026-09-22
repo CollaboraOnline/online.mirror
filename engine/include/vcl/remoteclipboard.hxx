@@ -18,9 +18,16 @@
 #include <rtl/string.hxx>
 #include <rtl/ustring.hxx>
 
+#include <functional>
 #include <string>
 #include <string_view>
 #include <vector>
+
+class TransferableDataHelper;
+namespace weld
+{
+class Window;
+}
 
 /**
  * A clipboard whose full content lives on a Collabora Online server.
@@ -72,6 +79,46 @@ createTransferable(std::vector<Item>&& rItems);
  * base for their own copies, and that stays where it is.
  */
 VCL_DLLPUBLIC OUString getOrigin(std::string_view rHtml);
+
+/// What resolveForPaste did with the data helper.
+enum class Outcome
+{
+    /// The data helper still serves what the system clipboard holds: the clipboard is not a
+    /// remote one, its content could not be downloaded, or the user cancelled the download.
+    Untouched,
+    /// The data helper now serves the full content downloaded from the server.
+    Resolved
+};
+
+/**
+ * Give a paste the full content of a remote clipboard.
+ *
+ * Reads the HTML the clipboard offers, and when it carries a remote origin, downloads the full
+ * content from that server and rebinds rData to it. The download runs on a worker thread while
+ * the main loop keeps running; a download that takes longer than a moment shows a modal progress
+ * dialog, parented to pParent, whose Cancel button stops the download and lets the paste go
+ * ahead with the reduced copy on the system clipboard. The downloaded content is kept while the
+ * system clipboard holds the same HTML, so the reads one paste makes and repeated pastes of one
+ * copy share a download, while a new copy in the browser, which writes new HTML, downloads
+ * again. A failed download holds back pastes of the same HTML for a short while.
+ *
+ * This is for pastes only. A check whether a paste is possible must not call it, since it reads
+ * the clipboard and may go to the network.
+ */
+VCL_DLLPUBLIC Outcome resolveForPaste(TransferableDataHelper& rData, weld::Window* pParent);
+
+/**
+ * Downloads a URL into rBody and returns whether that worked. Tests install one to stand in for
+ * the network.
+ */
+using Fetcher = std::function<bool(const OUString& rUrl, std::string& rBody)>;
+
+/// Use aFetcher instead of the network for the following downloads. An empty one restores the
+/// network.
+VCL_DLLPUBLIC void setFetcherForTesting(Fetcher aFetcher);
+
+/// Forget the last download, whether in flight, finished or failed.
+VCL_DLLPUBLIC void clearCache();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

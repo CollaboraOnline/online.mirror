@@ -11,6 +11,8 @@
 
 #include <sal/config.h>
 
+#include <regex>
+#include <string>
 #include <string_view>
 
 #include <cppunit/TestAssert.h>
@@ -22,7 +24,9 @@
 #include <com/sun/star/datatransfer/DataFlavor.hpp>
 #include <com/sun/star/datatransfer/XTransferable.hpp>
 #include <cppu/unotype.hxx>
+#include <sot/formats.hxx>
 #include <vcl/remoteclipboard.hxx>
+#include <vcl/transfer.hxx>
 
 using namespace cpo::uno;
 using namespace vcl::remoteclipboard;
@@ -54,6 +58,13 @@ public:
     {
     }
 
+    void tearDown() override
+    {
+        setFetcherForTesting({});
+        clearCache();
+        BootstrapFixture::tearDown();
+    }
+
     void testOriginOfBrowserCopy();
     void testOriginOfInProcessCopy();
     void testOriginNeedsTheWholeShape();
@@ -62,6 +73,11 @@ public:
     void testWireFormatTruncated();
     void testTransferableKeepsDescriptorMime();
     void testTransferableServesPlainTextAsString();
+    void testPasteGetsTheDownloadedContent();
+    void testPasteDoesNotRetryAFailedDownloadAtOnce();
+    void testPasteLeavesOtherClipboardsAlone();
+    void testNewCopyUnderTheSameUrlIsDownloadedAgain();
+    void testLargeSelectionStubIsDownloadedEveryTime();
 
     CPPUNIT_TEST_SUITE(RemoteClipboardTest);
     CPPUNIT_TEST(testOriginOfBrowserCopy);
@@ -72,7 +88,36 @@ public:
     CPPUNIT_TEST(testWireFormatTruncated);
     CPPUNIT_TEST(testTransferableKeepsDescriptorMime);
     CPPUNIT_TEST(testTransferableServesPlainTextAsString);
+    CPPUNIT_TEST(testPasteGetsTheDownloadedContent);
+    CPPUNIT_TEST(testPasteDoesNotRetryAFailedDownloadAtOnce);
+    CPPUNIT_TEST(testPasteLeavesOtherClipboardsAlone);
+    CPPUNIT_TEST(testNewCopyUnderTheSameUrlIsDownloadedAgain);
+    CPPUNIT_TEST(testLargeSelectionStubIsDownloadedEveryTime);
     CPPUNIT_TEST_SUITE_END();
+
+private:
+    /// What a browser session leaves on the system clipboard: the marked HTML and plain text.
+    static Reference<css::datatransfer::XTransferable>
+    createBrowserClipboard(std::string_view rHtml)
+    {
+        std::vector<Item> aItems;
+        aItems.push_back({ "text/html"_ostr, std::string(rHtml) });
+        aItems.push_back({ "text/plain;charset=utf-8"_ostr, "Hello" });
+        return createTransferable(std::move(aItems));
+    }
+
+    /// A fetcher that answers every URL with the same full clipboard and counts the calls.
+    static Fetcher createRichFetcher(int& rCalls, OUString& rLastUrl)
+    {
+        return [&rCalls, &rLastUrl](const OUString& rUrl, std::string& rBody) {
+            ++rCalls;
+            rLastUrl = rUrl;
+            rBody = "text/plain;charset=utf-8\n4\nrich\n"
+                    "application/x-openoffice-embed-source-xml;windows_formatname=\"Star Embed "
+                    "Source (XML)\"\n3\nxml\n";
+            return true;
+        };
+    }
 };
 
 void RemoteClipboardTest::testOriginOfBrowserCopy()
@@ -192,6 +237,117 @@ void RemoteClipboardTest::testTransferableServesPlainTextAsString()
     OUString aText;
     CPPUNIT_ASSERT(xTransferable->getTransferData(aFlavors[0]) >>= aText);
     CPPUNIT_ASSERT_EQUAL(u"h\u00E9llo"_ustr, aText);
+}
+
+void RemoteClipboardTest::testPasteGetsTheDownloadedContent()
+{
+    int nCalls = 0;
+    OUString aLastUrl;
+    setFetcherForTesting(createRichFetcher(nCalls, aLastUrl));
+
+    TransferableDataHelper aData(createBrowserClipboard(aBrowserHtml));
+    CPPUNIT_ASSERT(!aData.HasFormat(SotClipboardFormatId::EMBED_SOURCE));
+
+    // The paste reads the marker and downloads the full clipboard from that URL.
+    CPPUNIT_ASSERT_EQUAL(Outcome::Resolved, resolveForPaste(aData, nullptr));
+    CPPUNIT_ASSERT_EQUAL(1, nCalls);
+    CPPUNIT_ASSERT_EQUAL(aBrowserOrigin, aLastUrl);
+    CPPUNIT_ASSERT(aData.HasFormat(SotClipboardFormatId::EMBED_SOURCE));
+    OUString aText;
+    CPPUNIT_ASSERT(aData.GetString(SotClipboardFormatId::STRING, aText));
+    CPPUNIT_ASSERT_EQUAL(u"rich"_ustr, aText);
+
+    // A second paste of the same clipboard, and the reads one paste makes, are served from what
+    // was downloaded.
+    TransferableDataHelper aAgain(createBrowserClipboard(aBrowserHtml));
+    CPPUNIT_ASSERT_EQUAL(Outcome::Resolved, resolveForPaste(aAgain, nullptr));
+    CPPUNIT_ASSERT_EQUAL(1, nCalls);
+    CPPUNIT_ASSERT(aAgain.HasFormat(SotClipboardFormatId::EMBED_SOURCE));
+}
+
+void RemoteClipboardTest::testPasteDoesNotRetryAFailedDownloadAtOnce()
+{
+    int nCalls = 0;
+    setFetcherForTesting([&nCalls](const OUString&, std::string&) {
+        ++nCalls;
+        return false;
+    });
+
+    // The paste goes ahead with what the system clipboard has.
+    TransferableDataHelper aData(createBrowserClipboard(aBrowserHtml));
+    CPPUNIT_ASSERT_EQUAL(Outcome::Untouched, resolveForPaste(aData, nullptr));
+    CPPUNIT_ASSERT_EQUAL(1, nCalls);
+    CPPUNIT_ASSERT(aData.HasFormat(SotClipboardFormatId::HTML));
+    CPPUNIT_ASSERT(!aData.HasFormat(SotClipboardFormatId::EMBED_SOURCE));
+
+    // A paste right after the failure does not try the server again.
+    TransferableDataHelper aAgain(createBrowserClipboard(aBrowserHtml));
+    CPPUNIT_ASSERT_EQUAL(Outcome::Untouched, resolveForPaste(aAgain, nullptr));
+    CPPUNIT_ASSERT_EQUAL(1, nCalls);
+}
+
+void RemoteClipboardTest::testPasteLeavesOtherClipboardsAlone()
+{
+    int nCalls = 0;
+    OUString aLastUrl;
+    setFetcherForTesting(createRichFetcher(nCalls, aLastUrl));
+
+    // HTML from anywhere else has no marker, so nothing is downloaded.
+    TransferableDataHelper aData(createBrowserClipboard("<html><body><p>Hello</p></body></html>"));
+    CPPUNIT_ASSERT_EQUAL(Outcome::Untouched, resolveForPaste(aData, nullptr));
+    CPPUNIT_ASSERT_EQUAL(0, nCalls);
+
+    TransferableDataHelper aEmpty;
+    CPPUNIT_ASSERT_EQUAL(Outcome::Untouched, resolveForPaste(aEmpty, nullptr));
+    CPPUNIT_ASSERT_EQUAL(0, nCalls);
+}
+
+void RemoteClipboardTest::testNewCopyUnderTheSameUrlIsDownloadedAgain()
+{
+    // The browser session keeps one clipboard URL for minutes, so a second copy made there
+    // carries the same marker while the server already holds the new content. The HTML around
+    // the marker is the copy's own, though.
+    int nCalls = 0;
+    setFetcherForTesting([&nCalls](const OUString&, std::string& rBody) {
+        ++nCalls;
+        rBody = nCalls == 1 ? "text/plain;charset=utf-8\n5\nfirst\n"
+                            : "text/plain;charset=utf-8\n6\nsecond\n";
+        return true;
+    });
+
+    TransferableDataHelper aFirst(createBrowserClipboard(aBrowserHtml));
+    CPPUNIT_ASSERT_EQUAL(Outcome::Resolved, resolveForPaste(aFirst, nullptr));
+    OUString aText;
+    CPPUNIT_ASSERT(aFirst.GetString(SotClipboardFormatId::STRING, aText));
+    CPPUNIT_ASSERT_EQUAL(u"first"_ustr, aText);
+
+    // The paste after the second copy gets the second copy, not the first download.
+    const std::string aSecondHtml = std::regex_replace(std::string(aBrowserHtml),
+                                                       std::regex("<p>Hello</p>"), "<p>Other</p>");
+    CPPUNIT_ASSERT(aSecondHtml != aBrowserHtml);
+    TransferableDataHelper aSecond(createBrowserClipboard(aSecondHtml));
+    CPPUNIT_ASSERT_EQUAL(Outcome::Resolved, resolveForPaste(aSecond, nullptr));
+    CPPUNIT_ASSERT(aSecond.GetString(SotClipboardFormatId::STRING, aText));
+    CPPUNIT_ASSERT_EQUAL(u"second"_ustr, aText);
+    CPPUNIT_ASSERT_EQUAL(2, nCalls);
+}
+
+void RemoteClipboardTest::testLargeSelectionStubIsDownloadedEveryTime()
+{
+    // For a selection too large to put on the clipboard the browser writes a fixed stub around
+    // the marker, so two different copies are indistinguishable and each paste downloads.
+    int nCalls = 0;
+    OUString aLastUrl;
+    setFetcherForTesting(createRichFetcher(nCalls, aLastUrl));
+    const std::string aStubHtml = std::regex_replace(
+        std::string(aBrowserHtml), std::regex("<body"),
+        "<head><title>Stub HTML Message</title></head><body");
+
+    TransferableDataHelper aFirst(createBrowserClipboard(aStubHtml));
+    CPPUNIT_ASSERT_EQUAL(Outcome::Resolved, resolveForPaste(aFirst, nullptr));
+    TransferableDataHelper aSecond(createBrowserClipboard(aStubHtml));
+    CPPUNIT_ASSERT_EQUAL(Outcome::Resolved, resolveForPaste(aSecond, nullptr));
+    CPPUNIT_ASSERT_EQUAL(2, nCalls);
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(RemoteClipboardTest);
