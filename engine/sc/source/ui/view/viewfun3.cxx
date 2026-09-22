@@ -737,7 +737,8 @@ void ScViewFunc::PasteFromSystem(bool useSavedPrefs)
         PasteDraw();
     else
     {
-        TransferableDataHelper aDataHelper( TransferableDataHelper::CreateFromSystemClipboard( pWin ) );
+        TransferableDataHelper aDataHelper( TransferableDataHelper::CreateFromSystemClipboard(
+            pWin, DownloadRemoteContent::Yes ) );
 
         {
             SotClipboardFormatId nBiff12= SotExchange::RegisterFormatName(u"Biff12"_ustr);
@@ -974,7 +975,8 @@ bool ScViewFunc::PasteFromSystem( SotClipboardFormatId nFormatId, bool bApi, boo
     }
     else
     {
-        TransferableDataHelper aDataHelper( TransferableDataHelper::CreateFromSystemClipboard( pWin ) );
+        TransferableDataHelper aDataHelper( TransferableDataHelper::CreateFromSystemClipboard(
+            pWin, DownloadRemoteContent::Yes ) );
         if ( !aDataHelper.GetTransferable().is() )
             return false;
 

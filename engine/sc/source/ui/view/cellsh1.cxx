@@ -1904,8 +1904,12 @@ void ScCellShell::ExecuteEdit( SfxRequest& rReq )
                     {
                         bool bDraw = ( ScDrawTransferObj::GetOwnClipboard(xTransferable) != nullptr );
 
+                        TransferableDataHelper aDataHelper(
+                            TransferableDataHelper::CreateFromSystemClipboard(
+                                pWin, DownloadRemoteContent::Yes));
+
                         SvxClipboardFormatItem aFormats( SID_CLIPBOARD_FORMAT_ITEMS );
-                        GetPossibleClipboardFormats( aFormats );
+                        GetPossibleClipboardFormats( aFormats, aDataHelper );
 
                         sal_uInt16 nFormatCount = aFormats.Count();
                         if ( nFormatCount )
@@ -1930,7 +1934,7 @@ void ScCellShell::ExecuteEdit( SfxRequest& rReq )
                             pDlg->InsertUno(u".uno:PasteTextImportDialog"_ustr, sLabel);
 
                             auto xDatahelper = std::make_shared<TransferableDataHelper>(
-                                TransferableDataHelper::CreateFromSystemClipboard(pWin));
+                                std::move(aDataHelper));
                             pDlg->PreGetFormat(*xDatahelper);
 
                             auto xRequest = std::make_shared<SfxRequest>(rReq);

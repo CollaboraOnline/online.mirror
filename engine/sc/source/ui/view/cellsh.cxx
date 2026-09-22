@@ -484,35 +484,41 @@ static bool lcl_TestFormat( SvxClipboardFormatItem& rFormats, const Transferable
 void ScCellShell::GetPossibleClipboardFormats( SvxClipboardFormatItem& rFormats )
 {
     vcl::Window* pWin = GetViewData().GetActiveWin();
+    TransferableDataHelper aDataHelper( TransferableDataHelper::CreateFromSystemClipboard( pWin ) );
+    GetPossibleClipboardFormats( rFormats, aDataHelper );
+}
+
+void ScCellShell::GetPossibleClipboardFormats( SvxClipboardFormatItem& rFormats,
+                                               const TransferableDataHelper& rDataHelper )
+{
+    vcl::Window* pWin = GetViewData().GetActiveWin();
     bool bDraw = ScDrawTransferObj::GetOwnClipboard(ScTabViewShell::GetClipData(pWin)) != nullptr;
 
-    TransferableDataHelper aDataHelper( TransferableDataHelper::CreateFromSystemClipboard( pWin ) );
-
-    lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::DRAWING );
-    lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::SVXB );
-    lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::GDIMETAFILE );
-    lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::PNG );
-    lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::BITMAP );
-    lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::EMBED_SOURCE );
+    lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::DRAWING );
+    lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::SVXB );
+    lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::GDIMETAFILE );
+    lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::PNG );
+    lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::BITMAP );
+    lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::EMBED_SOURCE );
 
     if ( !bDraw )
     {
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::LINK );
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::STRING );
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::STRING_TSVC );
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::DIF );
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::RTF );
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::RICHTEXT );
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::HTML );
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::HTML_SIMPLE );
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::BIFF_12 );
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::BIFF_8 );
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::BIFF_5 );
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::MARKDOWN );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::LINK );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::STRING );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::STRING_TSVC );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::DIF );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::RTF );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::RICHTEXT );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::HTML );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::HTML_SIMPLE );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::BIFF_12 );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::BIFF_8 );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::BIFF_5 );
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::MARKDOWN );
     }
 
-    if ( !lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::EMBED_SOURCE_OLE ) )
-        lcl_TestFormat( rFormats, aDataHelper, SotClipboardFormatId::EMBEDDED_OBJ_OLE );
+    if ( !lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::EMBED_SOURCE_OLE ) )
+        lcl_TestFormat( rFormats, rDataHelper, SotClipboardFormatId::EMBEDDED_OBJ_OLE );
 }
 
 //  insert, insert contents

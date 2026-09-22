@@ -33,6 +33,7 @@
 
 class SvxClipboardFormatItem;
 class TransferableDataHelper;
+class TransferableDataHelper;
 class TransferableClipboardListener;
 class AbstractScLinkedAreaDlg;
 class ScTransferObj;
@@ -55,6 +56,8 @@ private:
     bool            bPastePossible;
 
     void        GetPossibleClipboardFormats( SvxClipboardFormatItem& rFormats );
+    void        GetPossibleClipboardFormats( SvxClipboardFormatItem& rFormats,
+                                             const TransferableDataHelper& rDataHelper );
     bool        HasClipboardFormat( SotClipboardFormatId nFormatId );
     void        ExecuteExternalSource(
                     const OUString& _rFile, const OUString& _rFilter, const OUString& _rOptions,
