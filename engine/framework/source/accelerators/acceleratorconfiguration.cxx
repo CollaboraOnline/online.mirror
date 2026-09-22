@@ -46,6 +46,7 @@
 #include <com/sun/star/lang/XSingleServiceFactory.hpp>
 #include <comphelper/configurationhelper.hxx>
 #include <comphelper/sequence.hxx>
+#include <i18nlangtag/languagetag.hxx>
 #include <officecfg/Setup.hxx>
 #include <unotools/configpaths.hxx>
 #include <svtools/acceleratorexecute.hxx>
@@ -936,6 +937,24 @@ void XCUBasedAcceleratorConfiguration::disposing(const css::lang::EventObject& /
 {
 }
 
+// The configuration keys a localized shortcut on the bare language, "de",
+// while the office locale can carry a region, "de-DE" under a kit and on a
+// desktop installed that way.  Walk the language tag's own fallback chain,
+// which ends at the language subtag, and then fall back to en-US.  Returns
+// an empty string when the key has a value for neither.
+static OUString lcl_getCommandLocale(const ::std::vector<OUString>& rIsoLangs,
+                                     const cpo::uno::Reference< css::container::XNameAccess >& xCommand)
+{
+    for (auto const& isoLang : rIsoLangs)
+    {
+        if (xCommand->hasByName(isoLang))
+            return isoLang;
+    }
+    if (xCommand->hasByName(u"en-US"_ustr))
+        return u"en-US"_ustr;
+    return OUString();
+}
+
 void XCUBasedAcceleratorConfiguration::impl_ts_load( bool bPreferred, const cpo::uno::Reference< css::container::XNameAccess >& xCfg )
 {
     AcceleratorCache aReadCache;
@@ -949,7 +968,8 @@ void XCUBasedAcceleratorConfiguration::impl_ts_load( bool bPreferred, const cpo:
         xModules->getByName(m_sModuleCFG) >>= xAccess;
     }
 
-    const OUString sIsoLang       = impl_ts_getLocale();
+    const ::std::vector<OUString> aIsoLangs
+        = LanguageTag(impl_ts_getLocale()).getFallbackStrings(true);
 
     cpo::uno::Reference< css::container::XNameAccess > xKey;
     cpo::uno::Reference< css::container::XNameAccess > xCommand;
@@ -963,33 +983,9 @@ void XCUBasedAcceleratorConfiguration::impl_ts_load( bool bPreferred, const cpo:
             xAccess->getByName(sKey) >>= xKey;
             xKey->getByName(CFG_PROP_COMMAND) >>= xCommand;
 
-            const cpo::uno::Sequence< OUString > lLocales = xCommand->getElementNames();
-            ::std::vector< OUString > aLocales { lLocales.begin(), lLocales.end() };
-
-            OUString sLocale;
-            for (auto const& locale : aLocales)
-            {
-                if ( locale == sIsoLang )
-                {
-                    sLocale = locale;
-                    break;
-                }
-            }
-
+            const OUString sLocale = lcl_getCommandLocale(aIsoLangs, xCommand);
             if (sLocale.isEmpty())
-            {
-                for (auto const& locale : aLocales)
-                {
-                    if ( locale == u"en-US"_ustr )
-                    {
-                        sLocale = locale;
-                        break;
-                    }
-                }
-
-                if (sLocale.isEmpty())
-                    continue;
-            }
+                continue;
 
             OUString sCommand;
             xCommand->getByName(sLocale) >>= sCommand;
@@ -1241,10 +1237,11 @@ void XCUBasedAcceleratorConfiguration::reloadChanged( const OUString& sPrimarySe
 
     if (xContainer->hasByName(sKey))
     {
-        OUString sLocale = impl_ts_getLocale();
         xContainer->getByName(sKey)    >>= xKey;
         xKey->getByName(CFG_PROP_COMMAND)  >>= xCommand;
-        if (xCommand->hasByName(sLocale))
+        const OUString sLocale = lcl_getCommandLocale(
+            LanguageTag(impl_ts_getLocale()).getFallbackStrings(true), xCommand);
+        if (!sLocale.isEmpty())
             xCommand->getByName(sLocale) >>= sCommand;
     }
 
