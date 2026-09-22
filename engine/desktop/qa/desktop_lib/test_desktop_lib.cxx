@@ -26,6 +26,7 @@
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/util/XCloseable.hpp>
 
+#include <vcl/remoteclipboard.hxx>
 #include <vcl/scheduler.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/syswin.hxx>
@@ -175,6 +176,8 @@ public:
     void testPasteWriter();
     void testPasteWriterJPEG();
     void testClipboardMarkdownFlavor();
+    void testPasteFromRemoteClipboard();
+    void testPasteFromRemoteClipboardFallsBackToHtml();
     void testUndoWriter();
     void testRowColumnHeaders();
     void testHiddenRowHeaders();
@@ -271,6 +274,8 @@ public:
     CPPUNIT_TEST(testPasteWriter);
     CPPUNIT_TEST(testPasteWriterJPEG);
     CPPUNIT_TEST(testClipboardMarkdownFlavor);
+    CPPUNIT_TEST(testPasteFromRemoteClipboard);
+    CPPUNIT_TEST(testPasteFromRemoteClipboardFallsBackToHtml);
     CPPUNIT_TEST(testUndoWriter);
     CPPUNIT_TEST(testRowColumnHeaders);
     CPPUNIT_TEST(testHiddenRowHeaders);
@@ -991,6 +996,97 @@ void DesktopKitTest::testClipboardMarkdownFlavor()
     // advertised when listing available formats.
     CPPUNIT_ASSERT(bHasMarkdown);
     CPPUNIT_ASSERT_EQUAL(aText, aMarkdownContent);
+}
+
+namespace
+{
+// A platform clipboard holding what a browser session of Collabora Online copied: HTML with the
+// marker of the server's clipboard endpoint, and plain text.
+constexpr std::string_view aRemoteClipboardHtml
+    = "<!DOCTYPE HTML><html><body><div id=\"meta-origin\" data-coolorigin=\""
+      "https%3A%2F%2Fcool.example.com%2Fcool%2Fclipboard%3FWOPISrc%3Dx%26ServerId%3D0123abcd"
+      "%26ViewId%3D7%26Tag%3D00112233445566778899aabbccddeeff\"><p>Hello</p></div></body></html>";
+
+bool remoteClipboardOwnsClipboard() { return false; }
+
+std::vector<std::string> remoteClipboardMimeTypes()
+{
+    return { "text/html", "text/plain;charset=utf-8" };
+}
+
+bool remoteClipboardData(const char* pMimeType, std::vector<char>* pOutData)
+{
+    std::string_view aData;
+    if (std::string_view(pMimeType) == "text/html")
+        aData = aRemoteClipboardHtml;
+    else if (std::string_view(pMimeType) == "text/plain;charset=utf-8")
+        aData = "Hello";
+    else
+        return false;
+    pOutData->assign(aData.begin(), aData.end());
+    return true;
+}
+
+const COKitClipboardProvider aRemoteClipboardProvider
+    = { nullptr, &remoteClipboardOwnsClipboard, &remoteClipboardMimeTypes, &remoteClipboardData };
+}
+
+void DesktopKitTest::testPasteFromRemoteClipboard()
+{
+    // The provider goes in before the document loads, as the apps install it at start-up: a
+    // document takes its clipboard when it is created.
+    COKitImpl aOffice;
+    aOffice.installClipboardProvider(&aRemoteClipboardProvider);
+    int nDownloads = 0;
+    vcl::remoteclipboard::setFetcherForTesting([&nDownloads](const OUString&, std::string& rBody) {
+        ++nDownloads;
+        rBody = "text/plain;charset=utf-8\n4\nrich\n";
+        return true;
+    });
+    comphelper::ScopeGuard aRestore([&aOffice] {
+        vcl::remoteclipboard::setFetcherForTesting({});
+        vcl::remoteclipboard::clearCache();
+        aOffice.installClipboardProvider(nullptr);
+    });
+
+    COKitDocumentImpl* pDocument = loadDoc("blank_text.odt");
+    pDocument->initializeForRendering(nullptr);
+
+    // The paste downloads the full clipboard from the server and pastes that, not the HTML.
+    pDocument->postUnoCommand(".uno:Paste", nullptr, false);
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT_EQUAL(1, nDownloads);
+
+    pDocument->postUnoCommand(".uno:SelectAll", nullptr, false);
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT_EQUAL(std::string("rich"),
+                         pDocument->getTextSelection("text/plain;charset=utf-8"));
+}
+
+void DesktopKitTest::testPasteFromRemoteClipboardFallsBackToHtml()
+{
+    COKitImpl aOffice;
+    aOffice.installClipboardProvider(&aRemoteClipboardProvider);
+    vcl::remoteclipboard::setFetcherForTesting(
+        [](const OUString&, std::string&) { return false; });
+    comphelper::ScopeGuard aRestore([&aOffice] {
+        vcl::remoteclipboard::setFetcherForTesting({});
+        vcl::remoteclipboard::clearCache();
+        aOffice.installClipboardProvider(nullptr);
+    });
+
+    COKitDocumentImpl* pDocument = loadDoc("blank_text.odt");
+    pDocument->initializeForRendering(nullptr);
+
+    // The server did not answer, so the paste goes ahead with the HTML on the clipboard.
+    pDocument->postUnoCommand(".uno:Paste", nullptr, false);
+    Scheduler::ProcessEventsToIdle();
+
+    pDocument->postUnoCommand(".uno:SelectAll", nullptr, false);
+    Scheduler::ProcessEventsToIdle();
+    const std::string aText = pDocument->getTextSelection("text/plain;charset=utf-8");
+    CPPUNIT_ASSERT_MESSAGE(aText, std::string::npos != aText.find("Hello"));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(aText, std::string::npos, aText.find("rich"));
 }
 
 void DesktopKitTest::testUndoWriter()
