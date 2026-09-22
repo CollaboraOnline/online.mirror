@@ -539,7 +539,8 @@ void ChartController::executeDispatch_Paste()
     Point aPos = pChartWindow->PixelToLogic( tools::Rectangle(Point{}, pChartWindow->GetSizePixel()).Center());
 
     // handle different formats
-    TransferableDataHelper aDataHelper( TransferableDataHelper::CreateFromSystemClipboard( pChartWindow ));
+    TransferableDataHelper aDataHelper( TransferableDataHelper::CreateFromSystemClipboard(
+        pChartWindow, DownloadRemoteContent::Yes ));
     if( aDataHelper.GetTransferable().is())
     {
         if ( aDataHelper.HasFormat( SotClipboardFormatId::DRAWING ) )
