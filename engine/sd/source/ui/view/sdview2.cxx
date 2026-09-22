@@ -1029,26 +1029,26 @@ IMPL_LINK(SdHTMLImageCollector, HTMLImportHdl, HtmlImportInfo&, rInfo, void)
         return;
 
     INetURLObject aGraphicURL(aURL);
-    if (comphelper::COKit::isActive())
-    {
-        if (HostFilter::isForbidden(aGraphicURL.GetHost()))
-            KitHelper::sendNetworkAccessError("paste");
-    }
-
     GraphicFilter& rFilter = GraphicFilter::GetGraphicFilter();
     std::optional<Graphic> oGraphic(std::in_place);
     if (aGraphicURL.GetProtocol() == INetProtocol::Data)
     {
+        // The image bytes are in the URL itself, so nothing is fetched.
         std::unique_ptr<SvMemoryStream> pStream(aGraphicURL.getData());
         if (!pStream)
             return;
 
         *oGraphic = rFilter.ImportUnloadedGraphic(*pStream);
     }
-    else if (ERRCODE_NONE != GraphicFilter::LoadGraphic(aURL, OUString(),
-            *oGraphic, &rFilter))
+    else
     {
-        return;
+        // The image is fetched from its host, which the kit allows only for the hosts on its
+        // allow-list.
+        if (comphelper::COKit::isActive() && HostFilter::isForbidden(aGraphicURL.GetHost()))
+            KitHelper::sendNetworkAccessError("paste");
+
+        if (ERRCODE_NONE != GraphicFilter::LoadGraphic(aURL, OUString(), *oGraphic, &rFilter))
+            return;
     }
 
     if (oGraphic && oGraphic->GetType() != GraphicType::NONE)

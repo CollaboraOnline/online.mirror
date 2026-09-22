@@ -1497,33 +1497,32 @@ void ScHTMLLayoutParser::Image( HtmlImportInfo* pInfo )
         return ;
     }
 
-    if (comphelper::COKit::isActive())
-    {
-        INetURLObject aURL(pImage->aURL);
-        if (HostFilter::isForbidden(aURL.GetHost()))
-            KitHelper::sendNetworkAccessError("paste");
-    }
-
     sal_uInt16 nFormat;
     std::optional<Graphic> oGraphic(std::in_place);
     GraphicFilter& rFilter = GraphicFilter::GetGraphicFilter();
     INetURLObject aGraphicURL(pImage->aURL);
     if (aGraphicURL.GetProtocol() == INetProtocol::Data)
     {
+        // The image bytes are in the URL itself, so nothing is fetched.
         std::unique_ptr<SvMemoryStream> const pStream(aGraphicURL.getData());
         if (!pStream)
             return; // Bad luck - malformed data: URL
         *oGraphic = rFilter.ImportUnloadedGraphic(*pStream);
         pImage->aURL.clear();
     }
-    else if ( ERRCODE_NONE == GraphicFilter::LoadGraphic( pImage->aURL, pImage->aFilterName,
-            *oGraphic, &rFilter, &nFormat ) )
-    {
-        pImage->aFilterName = rFilter.GetImportFormatName( nFormat );
-    }
     else
     {
-        return ; // Bad luck
+        // The image is fetched from its host, which the kit allows only for the hosts on its
+        // allow-list.
+        if (comphelper::COKit::isActive() && HostFilter::isForbidden(aGraphicURL.GetHost()))
+            KitHelper::sendNetworkAccessError("paste");
+
+        if ( ERRCODE_NONE != GraphicFilter::LoadGraphic( pImage->aURL, pImage->aFilterName,
+                *oGraphic, &rFilter, &nFormat ) )
+        {
+            return ; // Bad luck
+        }
+        pImage->aFilterName = rFilter.GetImportFormatName( nFormat );
     }
     if (!mxActEntry->bHasGraphic)
     {   // discard any ALT text in this cell if we have any image
