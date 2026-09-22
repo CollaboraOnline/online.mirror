@@ -1428,7 +1428,6 @@ $(DIST_FOLDER)/extensions/%: $(srcdir)/extensions/%
 
 if ENABLE_DEBUG
 install-demo-extensions:
-	ids= && \
 	for dir in $(srcdir)/extensions/*/; do \
 		id=$$(basename $$dir) && \
 		if test -f "$$dir/manifest.json"; then \
@@ -1440,34 +1439,12 @@ install-demo-extensions:
 				lang=$$(basename "$$po" .po) && \
 				mkdir -p $(DIST_FOLDER)/extensions/$$id/l10n && \
 				$(PYTHON) $(srcdir)/util/po2json.py --quiet "$$po" -o $(DIST_FOLDER)/extensions/$$id/l10n/$$lang.json || exit 1; \
-			done && \
-			ids="$$ids$${ids:+,}\"$$id\""; \
+			done; \
 		elif test -f "$$dir/appsscript.json"; then \
 			mkdir -p $(DIST_FOLDER)/extensions/$$id && \
-			cp -r $$dir/. $(DIST_FOLDER)/extensions/$$id/ && \
-			if test "$(ENABLE_MOBILEAPP)" = true || test "$(ENABLE_QTAPP)" = true; then \
-				scripts= && \
-				for gs in "$$dir"/*.gs; do \
-					test -f "$$gs" || continue; \
-					name=$$(basename "$$gs") && \
-					scripts="$$scripts$${scripts:+,}\"$$name\""; \
-				done && \
-				if test -z "$$scripts"; then \
-					for js in "$$dir"/*.js; do \
-						test -f "$$js" || continue; \
-						name=$$(basename "$$js") && \
-						scripts="$$scripts$${scripts:+,}\"$$name\""; \
-					done; \
-				fi && \
-				printf '{"scripts":[%s]}\n' "$$scripts" \
-					> $(DIST_FOLDER)/extensions/$$id/_cool-gas.json; \
-			fi && \
-			ids="$$ids$${ids:+,}\"$$id\""; \
+			cp -r $$dir/. $(DIST_FOLDER)/extensions/$$id/; \
 		fi; \
-	done && \
-	if test "$(ENABLE_MOBILEAPP)" = true || test "$(ENABLE_QTAPP)" = true; then \
-		printf '[%s]\n' "$$ids" > $(DIST_FOLDER)/extensions/index.json; \
-	fi
+	done
 endif
 
 # tsc must compile the .js sources so TypeScript can resolve globals defined in

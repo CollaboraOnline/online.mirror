@@ -264,6 +264,7 @@ coolwsd_sources = \
                   wsd/ContentType.cpp \
                   wsd/DeckSpec.cpp \
                   wsd/DocumentBroker.cpp \
+                  wsd/Extensions.cpp \
                   wsd/FileServer.cpp \
                   wsd/FileServerUtil.cpp \
                   wsd/HealthCheck.cpp \
@@ -363,6 +364,7 @@ wsd_headers = \
               wsd/DocumentToolDescriptions.hpp \
               wsd/DocumentBroker.hpp \
               wsd/Exceptions.hpp \
+              wsd/Extensions.hpp \
               wsd/FileServer.hpp \
               wsd/HealthCheck.hpp \
               wsd/HostUtil.hpp \

@@ -14,11 +14,13 @@
 		AD01AD01AD01AD01AD010105 /* color-palette.css in Resources */ = {isa = PBXBuildFile; fileRef = AD01AD01AD01AD01AD010005 /* color-palette.css */; };
 		AD01AD01AD01AD01AD010106 /* color-palette-dark.css in Resources */ = {isa = PBXBuildFile; fileRef = AD01AD01AD01AD01AD010006 /* color-palette-dark.css */; };
 		AD01AD01AD01AD01AD010107 /* admin in Resources */ = {isa = PBXBuildFile; fileRef = AD01AD01AD01AD01AD010007 /* admin */; };
+		AD01AD01AD01AD01AD010108 /* extensions in Resources */ = {isa = PBXBuildFile; fileRef = AD01AD01AD01AD01AD010008 /* extensions */; };
 		5C02902E606BD6410CA7B24A /* ProcUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EC95AFDE75BD0C4A66FE4558 /* ProcUtil.cpp */; };
 		5E7715000000000000000001 /* SettingsStorage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E7715000000000000000002 /* SettingsStorage.cpp */; };
 		5E7715000000000000000103 /* AIChatSession.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E7715000000000000000003 /* AIChatSession.cpp */; };
 		5E7715000000000000000104 /* AIHttpTransport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E7715000000000000000004 /* AIHttpTransport.cpp */; };
 		5E7715000000000000000105 /* AIUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E7715000000000000000005 /* AIUtil.cpp */; };
+		5E7715000000000000000107 /* Extensions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E7715000000000000000007 /* Extensions.cpp */; };
 		5E7715000000000000000106 /* DeckSpec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5E7715000000000000000006 /* DeckSpec.cpp */; };
 		BE16C9F02CD51F58005E5960 /* hello.odt in Resources */ = {isa = PBXBuildFile; fileRef = BE16C9EF2CD51F58005E5960 /* hello.odt */; };
 		BE178EEA2E5C756000A1FCBF /* Log-common.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BE178EE92E5C756000A1FCBF /* Log-common.cpp */; };
@@ -130,6 +132,7 @@
 		5E7715000000000000000003 /* AIChatSession.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AIChatSession.cpp; path = ../wsd/AIChatSession.cpp; sourceTree = "<group>"; };
 		5E7715000000000000000004 /* AIHttpTransport.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AIHttpTransport.cpp; path = AIHttpTransport.cpp; sourceTree = "<group>"; };
 		5E7715000000000000000005 /* AIUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = AIUtil.cpp; path = ../wsd/AIUtil.cpp; sourceTree = "<group>"; };
+		5E7715000000000000000007 /* Extensions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Extensions.cpp; path = ../wsd/Extensions.cpp; sourceTree = "<group>"; };
 		5E7715000000000000000006 /* DeckSpec.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DeckSpec.cpp; path = ../wsd/DeckSpec.cpp; sourceTree = "<group>"; };
 		BE22492B2CC79AD700385A9C /* cool.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; name = cool.html; path = ../../browser/dist/cool.html; sourceTree = "<group>"; };
 		BE22492D2CC79BAE00385A9C /* bundle.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = bundle.css; path = ../../browser/dist/bundle.css; sourceTree = "<group>"; };
@@ -145,6 +148,7 @@
 		AD01AD01AD01AD01AD010005 /* color-palette.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = "color-palette.css"; path = "../../browser/dist/color-palette.css"; sourceTree = "<group>"; };
 		AD01AD01AD01AD01AD010006 /* color-palette-dark.css */ = {isa = PBXFileReference; lastKnownFileType = text.css; name = "color-palette-dark.css"; path = "../../browser/dist/color-palette-dark.css"; sourceTree = "<group>"; };
 		AD01AD01AD01AD01AD010007 /* admin */ = {isa = PBXFileReference; lastKnownFileType = folder; name = admin; path = ../../browser/dist/admin; sourceTree = "<group>"; };
+		AD01AD01AD01AD01AD010008 /* extensions */ = {isa = PBXFileReference; lastKnownFileType = folder; name = extensions; path = ../../browser/dist/extensions; sourceTree = "<group>"; };
 		BE252C592EC6667400349F71 /* SlideCache.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = SlideCache.hpp; path = SlideCache.hpp; sourceTree = "<group>"; };
 		BE252C5A2EC6667400349F71 /* SlideCache.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SlideCache.cpp; path = SlideCache.cpp; sourceTree = "<group>"; };
 		BE44ACBF2D7EFDE900BFA3B2 /* DummyTraceEventEmitter.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = DummyTraceEventEmitter.cpp; path = DummyTraceEventEmitter.cpp; sourceTree = "<group>"; };
@@ -400,6 +404,7 @@
 				BE22AA9B2CC7AE7400385A9C /* images */,
 				BE862C4C2EB9066E0061664E /* templates */,
 				AD01AD01AD01AD01AD010007 /* admin */,
+				AD01AD01AD01AD01AD010008 /* extensions */,
 				AD01AD01AD01AD01AD010001 /* adminIntegratorSettings.html */,
 				AD01AD01AD01AD01AD010002 /* admin-bundle.js */,
 				AD01AD01AD01AD01AD010003 /* l10n-settings.js */,
@@ -525,6 +530,7 @@
 				5E7715000000000000000004 /* AIHttpTransport.cpp */,
 				5E7715000000000000000005 /* AIUtil.cpp */,
 				5E7715000000000000000006 /* DeckSpec.cpp */,
+				5E7715000000000000000007 /* Extensions.cpp */,
 				BEA263582CBE38E20007435A /* Log-poco.cpp */,
 				BE4C62052D59E85500047DF2 /* MobileApp.hpp */,
 				BE4C62062D59E85500047DF2 /* MobileApp.cpp */,
@@ -830,6 +836,7 @@
 				BEB7CC182F332BF8006FCAE9 /* TestPlan.xctestplan in Resources */,
 				BE862C4D2EB9066E0061664E /* templates in Resources */,
 				AD01AD01AD01AD01AD010107 /* admin in Resources */,
+				AD01AD01AD01AD01AD010108 /* extensions in Resources */,
 				AD01AD01AD01AD01AD010101 /* adminIntegratorSettings.html in Resources */,
 				AD01AD01AD01AD01AD010102 /* admin-bundle.js in Resources */,
 				AD01AD01AD01AD01AD010103 /* l10n-settings.js in Resources */,
@@ -991,6 +998,7 @@
 				5E7715000000000000000104 /* AIHttpTransport.cpp in Sources */,
 				5E7715000000000000000105 /* AIUtil.cpp in Sources */,
 				5E7715000000000000000106 /* DeckSpec.cpp in Sources */,
+				5E7715000000000000000107 /* Extensions.cpp in Sources */,
 				BE4C620E2D59E85500047DF2 /* MobileApp.cpp in Sources */,
 				BE4C620F2D59E85500047DF2 /* Util-macos.cpp in Sources */,
 				BE44ACCF2D7F067500BFA3B2 /* Crypto-stub.cpp in Sources */,

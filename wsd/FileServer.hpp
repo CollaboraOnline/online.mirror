@@ -262,8 +262,6 @@ public:
 
     const std::string& getAdminTemplate(const std::string& name);
 
-    void synthesizeBuiltinExtensionsIndex();
-
     const std::string *getCompressedFile(const std::string &path);
 
     const std::string *getUncompressedFile(const std::string &path);

@@ -59,6 +59,7 @@
 #include <common/StringVector.hpp>
 #include <common/Uri.hpp>
 #include <net/FakeSocket.hpp>
+#include <wsd/Extensions.hpp>
 #include <wsd/COOLWSD.hpp>
 #include <wsd/DocumentBroker.hpp>
 #include <wsd/RequestDetails.hpp>
@@ -4712,6 +4713,11 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int showWindowMode)
     app_installation_path = app_exe_path = Util::wide_string_to_string(std::wstring(fileName));
     app_installation_path.resize(app_installation_path.find_last_of(L'\\') + 1);
     app_installation_uri = Poco::URI(Poco::Path(app_installation_path)).toString();
+
+#if ENABLE_DEBUG
+    // cool/ next to the install root is the vcxproj's robocopy of browser/dist/:
+    Extensions::synthesizeBuiltinExtensionsIndex(app_installation_path + "..\\cool\\extensions");
+#endif
 
     SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 

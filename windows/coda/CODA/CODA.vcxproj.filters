@@ -140,6 +140,9 @@
     <ClCompile Include="..\..\..\wsd\DocumentBroker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\wsd\Extensions.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\..\wsd\RequestDetails.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

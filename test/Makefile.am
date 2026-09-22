@@ -177,6 +177,7 @@ wsd_sources = \
 	../wsd/ContentType.cpp \
 	../wsd/DeckSpec.cpp \
 	../wsd/DocumentBroker.cpp \
+	../wsd/Extensions.cpp \
 	../wsd/FileServer.cpp \
 	../wsd/FileServerUtil.cpp \
 	../wsd/HealthCheck.cpp \

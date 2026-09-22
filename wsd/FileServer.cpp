@@ -41,6 +41,7 @@
 #include <wsd/wopi/StorageConnectionManager.hpp>
 #include <wsd/AIUtil.hpp>
 #include <wsd/Auth.hpp>
+#include <wsd/Extensions.hpp>
 #include <wsd/COOLWSD.hpp>
 #include <wsd/HostUtil.hpp>
 #include <wsd/ContentSecurityPolicy.hpp>
@@ -370,9 +371,11 @@ FileServerRequestHandler::FileServerRequestHandler(const std::string& root)
     // cool files
     try
     {
+#if ENABLE_DEBUG
+        Extensions::synthesizeBuiltinExtensionsIndex(root + "/browser/dist/extensions");
+#endif
         FileHash.reserve(4096); // We have ~3964 files.
         readDirToHash(root, "/browser/dist");
-        synthesizeBuiltinExtensionsIndex();
         readAdminTemplates(root);
     }
     catch (...)
@@ -1061,234 +1064,6 @@ const std::string *FileServerRequestHandler::getCompressedFile(const std::string
     return pair.second.empty() ? &pair.first : &pair.second;
 }
 
-static std::string jsonQuote(std::string const & s) {
-    std::string out;
-    out.reserve(s.size() + 2);
-    out.push_back('"');
-    for (char c : s) {
-        switch (c) {
-        case '"': out.append("\\\""); break;
-        case '\\': out.append("\\\\"); break;
-        case '\b': out.append("\\b"); break;
-        case '\f': out.append("\\f"); break;
-        case '\n': out.append("\\n"); break;
-        case '\r': out.append("\\r"); break;
-        case '\t': out.append("\\t"); break;
-        default:
-            if (static_cast<unsigned char>(c) < 0x20) {
-                char buf[8];
-                std::snprintf(buf, sizeof(buf), "\\u%04x", static_cast<unsigned char>(c));
-                out.append(buf);
-            } else {
-                out.push_back(c);
-            }
-            break;
-        }
-    }
-    out.push_back('"');
-    return out;
-}
-
-// Assemble an Apps Script <id>/_cool-gas.json sidecar body from the extension directory contents:
-//  - `scripts` is a list of (server-side script file name, source text) pairs
-// Besides the script names, the body carries the add-on's display name and the document
-// types it targets, as far as sniffing the source finds
-// them.
-static std::string synthesizeGasSidecar(
-    std::vector<std::pair<std::string, std::string>> const & scripts)
-{
-    // Guess the add-on's target document types from the DocumentApp/SpreadsheetApp/SlidesApp
-    // mentions:
-    std::vector<std::string> supports;
-    auto containsAnySource = [&scripts](std::string_view needle) {
-        for (auto const & [name, src]: scripts) {
-            if (src.find(needle) != std::string::npos) {
-                return true;
-            }
-        }
-        return false;
-    };
-    if (containsAnySource("DocumentApp")) {
-        supports.push_back("text");
-    }
-    if (containsAnySource("SpreadsheetApp")) {
-        supports.push_back("spreadsheet");
-    }
-    if (containsAnySource("SlidesApp")) {
-        supports.push_back("presentation");
-    }
-
-    // Guess a display name from setTitle("..."), a NAME_TITLE = "..." constant, or the name an
-    // addMenu("...", ...) call gives its own menu:
-    std::string displayName;
-    static const std::regex reSetTitle(R"RE(setTitle\s*\(\s*(?:'([^']+)'|"([^"]+)"))RE");
-    static const std::regex reTitleConst(
-        R"RE([A-Za-z_][A-Za-z0-9_]*_TITLE\s*=\s*(?:'([^']+)'|"([^"]+)"))RE");
-    static const std::regex reMenuName(R"RE(addMenu\s*\(\s*(?:'([^']+)'|"([^"]+)"))RE");
-    auto tryMatch = [&scripts](std::regex const & re) -> std::string {
-        for (auto const & [name, src]: scripts) {
-            std::smatch m;
-            if (std::regex_search(src, m, re)) {
-                return m[1].matched ? m[1].str() : m[2].str();
-            }
-        }
-        return std::string();
-    };
-    displayName = tryMatch(reSetTitle);
-    if (displayName.empty()) {
-        displayName = tryMatch(reTitleConst);
-    }
-    if (displayName.empty()) {
-        displayName = tryMatch(reMenuName);
-    }
-
-    std::string body = "{\"scripts\":[";
-    bool firstScript = true;
-    for (auto const & [name, src]: scripts) {
-        if (!firstScript) {
-            body.push_back(',');
-        }
-        firstScript = false;
-        body.append(jsonQuote(name));
-    }
-    body.push_back(']');
-    if (!displayName.empty()) {
-        body.append(",\"name\":");
-        body.append(jsonQuote(displayName));
-    }
-    if (!supports.empty()) {
-        body.append(",\"supports\":[");
-        bool firstSupport = true;
-        for (auto const & s: supports) {
-            if (!firstSupport) {
-                body.push_back(',');
-            }
-            firstSupport = false;
-            body.append(jsonQuote(s));
-        }
-        body.push_back(']');
-    }
-    body.push_back('}');
-    return body;
-}
-
-// For the dev-only "drop a directory into browser/dist/extensions/" feature, emit
-// /browser/dist/extensions/index.json as a JSON array of the <id>s with a cached
-// <id>/manifest.json, plus a <id>/_cool-gas.json sidecar for each Apps Script directory
-// (manifest.json vs. appsscript.json distinguishes the two kinds).  Called once after
-// readDirToHash.
-void FileServerRequestHandler::synthesizeBuiltinExtensionsIndex()
-{
-#if ENABLE_DEBUG
-    static const std::string prefix = "/browser/dist/extensions/";
-    static const std::string manifestSuffix = "/manifest.json";
-    static const std::string gasSuffix = "/appsscript.json";
-
-    // Pre-compress in step with the rest of readDirToHash so the request handler's
-    // gzip path serves correctly-encoded bytes; getCompressedFile silently falls back
-    // to the uncompressed entry on init/deflate failure here, matching readDirToHash.
-    auto installAsset = [this](const std::string& path, std::string body) {
-        std::string gzipped;
-        z_stream strm;
-        strm.zalloc = Z_NULL;
-        strm.zfree = Z_NULL;
-        strm.opaque = Z_NULL;
-        if (deflateInit2(&strm, Z_BEST_COMPRESSION, Z_DEFLATED, 31, 8, Z_DEFAULT_STRATEGY) == Z_OK)
-        {
-            const unsigned long bound = deflateBound(&strm, body.size());
-            gzipped.resize(bound);
-            strm.next_in = reinterpret_cast<unsigned char*>(body.data());
-            strm.avail_in = body.size();
-            strm.next_out = reinterpret_cast<unsigned char*>(gzipped.data());
-            strm.avail_out = bound;
-            if (deflate(&strm, Z_FINISH) == Z_STREAM_END)
-                gzipped.resize(bound - strm.avail_out);
-            else
-                gzipped.clear();
-            deflateEnd(&strm);
-        }
-        FileHash[path] = std::make_pair(std::move(body), std::move(gzipped));
-    };
-
-    std::set<std::string> nativeIds;
-    std::set<std::string> gasIds;
-    for (const auto& entry : FileHash)
-    {
-        const std::string& key = entry.first;
-        if (!key.starts_with(prefix))
-            continue;
-        std::string id;
-        bool isGas = false;
-        if (key.ends_with(manifestSuffix)) {
-            id = key.substr(prefix.size(), key.size() - prefix.size() - manifestSuffix.size());
-        } else if (key.ends_with(gasSuffix)) {
-            id = key.substr(prefix.size(), key.size() - prefix.size() - gasSuffix.size());
-            isGas = true;
-        } else {
-            continue;
-        }
-        if (id.empty() || id.find('/') != std::string::npos)
-            continue;
-        (isGas ? gasIds : nativeIds).insert(id);
-    }
-    // A native manifest.json wins if both markers are present:
-    for (auto const & id: nativeIds) {
-        gasIds.erase(id);
-    }
-
-    std::vector<std::string> allIds;
-    allIds.reserve(nativeIds.size() + gasIds.size());
-    for (auto const & id: nativeIds) {
-        allIds.push_back(id);
-    }
-    for (auto const & id: gasIds) {
-        allIds.push_back(id);
-    }
-    std::sort(allIds.begin(), allIds.end());
-
-    std::string indexJson = "[";
-    bool first = true;
-    for (const auto& id : allIds)
-    {
-        if (!first) indexJson.push_back(',');
-        first = false;
-        indexJson.append(jsonQuote(id));
-    }
-    indexJson.push_back(']');
-    installAsset(prefix + "index.json", std::move(indexJson));
-
-    // Stash a <id>/_cool-gas.json sidecar listing each Apps Script directory's scripts:
-    for (auto const & id: gasIds) {
-        const std::string dirPrefix = prefix + id + "/";
-        std::vector<std::pair<std::string, std::string>> scripts;
-        std::vector<std::pair<std::string, std::string>> jsScripts;
-        for (auto const & entry: FileHash) {
-            auto const & key = entry.first;
-            if (!key.starts_with(dirPrefix)) {
-                continue;
-            }
-            auto const name = key.substr(dirPrefix.size());
-            if (name.empty() || name.find('/') != std::string::npos) {
-                continue;
-            }
-            if (name.ends_with(".gs")) {
-                scripts.emplace_back(name, entry.second.first);
-            } else if (name.ends_with(".js")) {
-                jsScripts.emplace_back(name, entry.second.first);
-            }
-        }
-        // An Apps Script project's server code is .gs in the web editor, which clasp writes out
-        // as .js on disk, so a directory holds one or the other.  Where both are there, the .gs
-        // files are the project's and a .js is something the sidebar loads in the browser:
-        if (scripts.empty()) {
-            scripts = std::move(jsScripts);
-        }
-        std::sort(scripts.begin(), scripts.end());
-        installAsset(dirPrefix + "_cool-gas.json", synthesizeGasSidecar(scripts));
-    }
-#endif
-}
-
 namespace {
 // Pick a Content-Type for a preset-extension file by its name extension (the browser refuses to
 // render anything without one because sendFile sets X-Content-Type-Options: nosniff):
@@ -1460,7 +1235,7 @@ bool FileServerRequestHandler::serveBrowserPresetExtensionFile(
             scripts = std::move(jsScripts);
         }
         std::sort(scripts.begin(), scripts.end());
-        std::string const body = synthesizeGasSidecar(scripts);
+        std::string const body = Extensions::synthesizeGasSidecar(scripts);
         response.setContentType("application/json");
         response.add("X-Content-Type-Options", "nosniff");
         response.set("Content-Length", std::to_string(body.size()));

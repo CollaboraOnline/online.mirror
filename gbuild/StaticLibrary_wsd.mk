@@ -60,6 +60,7 @@ $(eval $(call gb_StaticLibrary_add_generated_exception_objects,wsd, \
     wsd/ContentType \
     wsd/DeckSpec \
     wsd/DocumentBroker \
+    wsd/Extensions \
     wsd/FileServer \
     wsd/FileServerUtil \
     wsd/HealthCheck \

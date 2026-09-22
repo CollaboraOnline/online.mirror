@@ -38,6 +38,7 @@
 #include <common/MobileApp.hpp>
 #include <common/Util.hpp>
 #include <net/FakeSocket.hpp>
+#include <wsd/Extensions.hpp>
 #include <wsd/COOLWSD.hpp>
 #include <wsd/DocumentBroker.hpp>
 
@@ -371,6 +372,11 @@ void install_filepicker_provider(COKit &rOffice)
     fakeSocketSetLoggingCallback([](const std::string& line) {
         LOG_TRC_NOFILE(line);
     });
+
+#if ENABLE_DEBUG
+    // The bundle's Resources directory stands in for browser/dist/:
+    Extensions::synthesizeBuiltinExtensionsIndex(Desktop::getDataDir() + "/extensions");
+#endif
 
     // Start the COOLWSD server in a detached thread
     NSLog(@"CollaboraOffice: Starting the thread");

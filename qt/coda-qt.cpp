@@ -11,6 +11,7 @@
 
 #include <config.h>
 
+#include <wsd/Extensions.hpp>
 #include <wsd/COOLWSD.hpp>
 #include <qt/CodaConfig.hpp>
 #include <qt/CODocumentBroker.hpp>
@@ -335,6 +336,10 @@ int main(int argc, char** argv)
             return std::make_shared<CODocumentBroker>(type, uri, uriPublic, docKey, configId,
                                                       mobileAppDocId);
         });
+
+#if ENABLE_DEBUG
+    Extensions::synthesizeBuiltinExtensionsIndex(getBrowserDistDir() + "/extensions");
+#endif
 
     // COOLWSD in a background thread
     coolwsdThread = std::thread(
