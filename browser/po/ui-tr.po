@@ -14,11 +14,11 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-17 23:35+0000\n"
-"Last-Translator: Halis ŞİMŞEK <halis.simsek@gmail.com>\n"
+"PO-Revision-Date: 2026-09-23 01:27+0000\n"
+"Last-Translator: Muhammet Kara <muhammet.kara@metu.edu.tr>\n"
 "Language-Team: Turkish <https://hosted.weblate.org/projects/collabora-online/"
 "collabora-ui/tr/>\n"
-"Language: \n"
+"Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -713,12 +713,12 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:699
 msgid "Show Boundaries"
-msgstr ""
+msgstr "Sınırları Göster"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:700
 #: src/control/Control.BackstageView.ts:852
 msgid "Drawing"
-msgstr ""
+msgstr "Çizim"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:701
 #: src/control/Control.NotebookbarDraw.js:1272
@@ -838,19 +838,19 @@ msgstr "Sağdan sola broşür"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:731
 msgid "English"
-msgstr ""
+msgstr "İngilizce"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:732
 msgid "Hungarian"
-msgstr ""
+msgstr "Macarca"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:733
 msgid "Portuguese (Brazil)"
-msgstr ""
+msgstr "Portekizce (Brezilya)"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:734
 msgid "Russian"
-msgstr ""
+msgstr "Rusça"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1293
 msgid "Invalid JSON file"
@@ -895,17 +895,19 @@ msgstr "Sözcük Defteri Yükle"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1337
 msgid "Document themes"
-msgstr ""
+msgstr "Belge temaları"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1339
 msgid ""
 "Upload custom document themes (.theme). These define color palettes "
 "available under Format > Theme."
 msgstr ""
+"Özel belge temalarını (.theme) karşıya yükleyin. Bunlar, Biçim > Tema menüsü "
+"altında kullanılabilir renk paletlerini tanımlar."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1345
 msgid "Upload Theme"
-msgstr ""
+msgstr "Tema Yükle"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1351
 #: src/control/Control.Menubar.ts:450 src/control/Control.Menubar.ts:662
@@ -915,35 +917,40 @@ msgstr ""
 #: src/control/Control.NotebookbarImpress.js:170
 #: src/control/Control.NotebookbarWriter.js:109
 msgid "Extensions"
-msgstr ""
+msgstr "Uzantılar"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1353
 msgid ""
 "Upload a packaged extension as a .zip; its contents (manifest.json, ...) "
 "are unpacked on the server."
 msgstr ""
+"Paketlenmiş bir eklentiyi .zip dosyası olarak yükleyin; içindekiler "
+"(manifest.json, ...) sunucuda dışarı çıkarılacaktır."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1359
 msgid "Upload Extension"
-msgstr ""
+msgstr "Uzantı Yükle"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1366
 msgid "Security policies"
-msgstr ""
+msgstr "Güvenlik ilkeleri"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1368
 msgid ""
 "Upload SPIF security policies (.xml). These define the classifications and "
 "categories available when applying a security label to a document."
 msgstr ""
+"SPIF güvenlik ilkelerini (.xml) karşıya yükleyin. Bunlar, bir belgeye "
+"güvenlik etiketi uygulanırken kullanılabilir sınıflandırmaları ve "
+"kategorileri tanımlar."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1374
 msgid "Upload Security Policy"
-msgstr ""
+msgstr "Güvenlik İlkesi Yükle"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1463
 msgid "Settings are only available to signed-in users."
-msgstr ""
+msgstr "Ayarlar, sadece oturum açmış kullanıcılar tarafından kullanılabilir."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1472
 msgid "Something went wrong. Please try to refresh the page."
@@ -969,7 +976,7 @@ msgstr "Varsayılan arayüz tercihlerini ayarlayın."
 #: admin/src/integrator/AdminIntegratorSettings.ts:1753
 #: admin/src/integrator/AdminIntegratorSettings.ts:3998
 msgid "Zoom Behaviour"
-msgstr ""
+msgstr "Yakınlaştırma Davranışı"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1898
 msgid ""
