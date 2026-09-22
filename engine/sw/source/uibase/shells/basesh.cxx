@@ -383,7 +383,8 @@ void SwBaseShell::ExecClpbrd(SfxRequest &rReq)
         case SID_PASTE:
             {
                 TransferableDataHelper aDataHelper(
-                    TransferableDataHelper::CreateFromSystemClipboard( &rSh.GetView().GetEditWin() ) );
+                    TransferableDataHelper::CreateFromSystemClipboard( &rSh.GetView().GetEditWin(),
+                                                                       DownloadRemoteContent::Yes ) );
                 if( aDataHelper.GetXTransferable().is()
                     && SwTransferable::IsPaste( rSh, aDataHelper ) )
                 {
@@ -435,7 +436,8 @@ void SwBaseShell::ExecClpbrd(SfxRequest &rReq)
                 {
                     TransferableDataHelper aDataHelper(
                         TransferableDataHelper::CreateFromSystemClipboard(
-                                            &rSh.GetView().GetEditWin()) );
+                                            &rSh.GetView().GetEditWin(),
+                                            DownloadRemoteContent::Yes) );
                     if( aDataHelper.GetXTransferable().is()
                         /*&& SwTransferable::IsPaste( rSh, aDataHelper )*/ )
                     {
@@ -463,7 +465,8 @@ void SwBaseShell::ExecClpbrd(SfxRequest &rReq)
         case SID_PASTE_UNFORMATTED:
             {
                 TransferableDataHelper aDataHelper(
-                    TransferableDataHelper::CreateFromSystemClipboard( &rSh.GetView().GetEditWin()) );
+                    TransferableDataHelper::CreateFromSystemClipboard( &rSh.GetView().GetEditWin(),
+                                                                       DownloadRemoteContent::Yes) );
                 if( aDataHelper.GetXTransferable().is()
                     && SwTransferable::IsPaste( rSh, aDataHelper ) )
                 {
@@ -499,7 +502,8 @@ void SwBaseShell::ExecClpbrd(SfxRequest &rReq)
         case SID_PASTE_SPECIAL:
             {
                 std::shared_ptr<const TransferableDataHelper> aDataHelper =
-                    std::make_shared<TransferableDataHelper>(TransferableDataHelper::CreateFromSystemClipboard( &rSh.GetView().GetEditWin()));
+                    std::make_shared<TransferableDataHelper>(TransferableDataHelper::CreateFromSystemClipboard(
+                        &rSh.GetView().GetEditWin(), DownloadRemoteContent::Yes));
 
                 if( aDataHelper->GetXTransferable().is()
                     && SwTransferable::IsPaste( rSh, *aDataHelper )
