@@ -15,9 +15,13 @@
 #include <utility>
 #include <vector>
 
+#include <Poco/Path.h>
+
 #include <config.h>
 
 namespace Extensions {
+
+std::vector<std::pair<std::string, std::string>> enumerateGasScripts(Poco::Path const & dir);
 
 // Assemble an Apps Script <id>/_cool-gas.json sidecar body from the extension directory contents:
 //  - `scripts` is a list of (server-side script file name, source text) pairs

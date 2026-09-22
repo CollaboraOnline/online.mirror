@@ -30,6 +30,38 @@
 #include <common/Log.hpp>
 #include <wsd/Extensions.hpp>
 
+std::vector<std::pair<std::string, std::string>> Extensions::enumerateGasScripts(
+    Poco::Path const & dir)
+{
+    std::vector<std::pair<std::string, std::string>> scripts;
+    std::vector<std::pair<std::string, std::string>> jsScripts;
+    for (Poco::DirectoryIterator it(dir), end; it != end; ++it) {
+        if (!it->isFile()) {
+            continue;
+        }
+        std::string const & name = it.name();
+        if (!name.ends_with(".gs") && !name.ends_with(".js")) {
+            continue;
+        }
+        Poco::FileInputStream stream(it->path());
+        std::string src;
+        Poco::StreamCopier::copyToString(stream, src);
+        if (name.ends_with(".gs")) {
+            scripts.emplace_back(name, std::move(src));
+        } else {
+            jsScripts.emplace_back(name, std::move(src));
+        }
+    }
+    // An Apps Script project's server code is .gs in the web editor, which clasp writes out
+    // as .js on disk, so a directory holds one or the other.  Where both are there, the .gs
+    // files are the project's and a .js is something the sidebar loads in the browser:
+    if (scripts.empty()) {
+        scripts = std::move(jsScripts);
+    }
+    std::sort(scripts.begin(), scripts.end());
+    return scripts;
+}
+
 static std::string jsonQuote(std::string const & s) {
     std::string out;
     out.reserve(s.size() + 2);
@@ -203,38 +235,14 @@ void Extensions::synthesizeBuiltinExtensionsIndex(std::string const & distExtens
         Poco::Path dir = Poco::Path::forDirectory(distExtensionsDir);
         dir.pushDirectory(id);
         std::vector<std::pair<std::string, std::string>> scripts;
-        std::vector<std::pair<std::string, std::string>> jsScripts;
         try {
-            for (Poco::DirectoryIterator it(dir), end; it != end; ++it) {
-                if (!it->isFile()) {
-                    continue;
-                }
-                std::string const & name = it.name();
-                if (!name.ends_with(".gs") && !name.ends_with(".js")) {
-                    continue;
-                }
-                Poco::FileInputStream stream(it->path());
-                std::string src;
-                Poco::StreamCopier::copyToString(stream, src);
-                if (name.ends_with(".gs")) {
-                    scripts.emplace_back(name, std::move(src));
-                } else {
-                    jsScripts.emplace_back(name, std::move(src));
-                }
-            }
+            scripts = enumerateGasScripts(dir);
         } catch (Poco::Exception const & e) {
             LOG_WRN(
                 "Extensions: failed to enumerate [" << dir.toString()
                 << "]: " << e.displayText());
             continue;
         }
-        // An Apps Script project's server code is .gs in the web editor, which clasp writes out
-        // as .js on disk, so a directory holds one or the other.  Where both are there, the .gs
-        // files are the project's and a .js is something the sidebar loads in the browser:
-        if (scripts.empty()) {
-            scripts = std::move(jsScripts);
-        }
-        std::sort(scripts.begin(), scripts.end());
         Poco::Path sidecarPath(dir);
         sidecarPath.append("_cool-gas.json");
         try {

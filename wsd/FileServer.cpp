@@ -1203,24 +1203,8 @@ bool FileServerRequestHandler::serveBrowserPresetExtensionFile(
             return true;
         }
         std::vector<std::pair<std::string, std::string>> scripts;
-        std::vector<std::pair<std::string, std::string>> jsScripts;
         try {
-            for (Poco::DirectoryIterator it(dirPath), end; it != end; ++it) {
-                if (!it->isFile()) {
-                    continue;
-                }
-                auto const & name = it.name();
-                if (name.ends_with(".gs") || name.ends_with(".js")) {
-                    Poco::FileInputStream stream(it->path());
-                    std::string src;
-                    Poco::StreamCopier::copyToString(stream, src);
-                    if (name.ends_with(".gs")) {
-                        scripts.emplace_back(name, std::move(src));
-                    } else {
-                        jsScripts.emplace_back(name, std::move(src));
-                    }
-                }
-            }
+            scripts = Extensions::enumerateGasScripts(dirPath);
         } catch (Poco::Exception const & e) {
             LOG_WRN(
                 "Failed to synthesize _cool-gas.json for preset extension ["
@@ -1228,13 +1212,6 @@ bool FileServerRequestHandler::serveBrowserPresetExtensionFile(
             HttpHelper::sendErrorAndShutdown(http::StatusCode::NotFound, socket);
             return true;
         }
-        // An Apps Script project's server code is .gs in the web editor, which clasp writes out
-        // as .js on disk, so a directory holds one or the other.  Where both are there, the .gs
-        // files are the project's and a .js is something the sidebar loads in the browser:
-        if (scripts.empty()) {
-            scripts = std::move(jsScripts);
-        }
-        std::sort(scripts.begin(), scripts.end());
         std::string const body = Extensions::synthesizeGasSidecar(scripts);
         response.setContentType("application/json");
         response.add("X-Content-Type-Options", "nosniff");
