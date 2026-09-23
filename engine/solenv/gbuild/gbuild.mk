@@ -343,8 +343,6 @@ include $(foreach class, \
 	Configuration \
 	HelpTarget \
 	AllLangHelp \
-	Extension \
-	ExtensionPackage \
 	Dictionary \
 	InstallModuleTarget \
 	InstallModule \

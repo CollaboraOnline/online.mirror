@@ -680,7 +680,6 @@ gb_InstallScript_EXT := .inf
 
 # Extension class
 
-gb_Extension_LICENSEFILE_DEFAULT := $(INSTROOT)/license.txt
 
 # UnpackedTarget class
 
