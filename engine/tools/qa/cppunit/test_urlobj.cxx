@@ -410,7 +410,6 @@ namespace tools_urlobj
             CPPUNIT_ASSERT(!INetURLObject(u"webdavs://example.org").IsExoticProtocol());
             CPPUNIT_ASSERT(!INetURLObject(u"ftp://example.org").IsExoticProtocol());
             CPPUNIT_ASSERT(!INetURLObject(u"vnd.libreoffice.image://example.org").IsExoticProtocol());
-            CPPUNIT_ASSERT(!INetURLObject(u"vnd.sun.star.extension://example.org").IsExoticProtocol());
         }
 
         // Change the following lines only, if you add, remove or rename

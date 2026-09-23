@@ -376,7 +376,6 @@ $(eval $(call gb_Helper_register_libraries_for_install,OOOLIBS,ooo, \
 	tk \
 	tl \
 	ucpexpand1 \
-	ucpext \
 	ucpimage \
 	$(if $(ENABLE_LIBCMIS),ucpcmis1) \
 	ucptdoc1 \

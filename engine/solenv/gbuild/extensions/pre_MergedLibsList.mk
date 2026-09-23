@@ -151,7 +151,6 @@ gb_MERGE_LIBRARY_LIST := \
 	$(if $(WITH_WEBDAV),ucpdav1) \
 	ucppkg1 \
 	ucpexpand1 \
-	ucpext \
 	ucphier1 \
 	ucpimage \
 	ucpfile1 \

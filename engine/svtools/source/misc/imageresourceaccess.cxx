@@ -115,8 +115,7 @@ bool isSupportedURL(std::u16string_view rURL)
 {
     return o3tl::starts_with(rURL, u"private:resource/")
         || o3tl::starts_with(rURL, u"private:graphicrepository/")
-        || o3tl::starts_with(rURL, u"private:standardimage/")
-        || o3tl::starts_with(rURL, u"vnd.sun.star.extension://");
+        || o3tl::starts_with(rURL, u"private:standardimage/");
 }
 
 std::unique_ptr<SvStream> getImageStream(uno::Reference<cpo::uno::XComponentContext> const & rxContext, OUString const & rImageResourceURL)

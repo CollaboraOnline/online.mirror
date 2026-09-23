@@ -16,7 +16,6 @@ $(eval $(call gb_Module_add_targets,ucb,\
 	$(if $(ENABLE_LIBCMIS),Library_ucpcmis1) \
 	$(if $(WITH_WEBDAV),Library_ucpdav1) \
 	Library_ucpexpand1 \
-	Library_ucpext \
 	Library_ucpfile1 \
 	Library_ucphier1 \
 	Library_ucpimage \

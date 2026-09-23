@@ -169,17 +169,6 @@
                 <value/>
               </prop>
             </node>
-            <node oor:name="Provider14" oor:op="replace">
-              <prop oor:name="ServiceName">
-                <value>com.sun.star.ucb.ExtensionContentProvider</value>
-              </prop>
-              <prop oor:name="URLTemplate">
-                <value>vnd.sun.star.extension</value>
-              </prop>
-              <prop oor:name="Arguments">
-                <value/>
-              </prop>
-            </node>
             <node oor:name="Provider43" oor:op="replace">
               <prop oor:name="ServiceName">
                 <value>com.sun.star.ucb.CmisContentProvider</value>

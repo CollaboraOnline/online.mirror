@@ -4969,8 +4969,6 @@ bool INetURLObject::IsExoticProtocol() const
             return false;
         else if (isSchemeEqualTo(u"vnd.libreoffice.image"))
             return false;
-        else if (isSchemeEqualTo(u"vnd.sun.star.extension"))
-            return false;
     }
 
     // anything else is exotic
