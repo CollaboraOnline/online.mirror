@@ -48,8 +48,6 @@ gb_MERGE_LIBRARY_LIST := \
 		dbu) \
 	$(call gb_Helper_optional,SCRIPTING,dlgprov) \
 	dbtools \
-	deployment \
-	deploymentmisc \
 	$(if $(filter-out MACOSX WNT,$(OS)),desktopbe1) \
 	docmodel \
 	drawinglayercore \

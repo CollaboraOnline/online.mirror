@@ -65,7 +65,6 @@ fuzzer_core_libraries = \
     dbase \
     dbtools \
     deployment \
-    deploymentmisc \
     docmodel \
     drawinglayer \
     drawinglayercore \

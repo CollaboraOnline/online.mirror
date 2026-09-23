@@ -13,7 +13,6 @@ $(eval $(call gb_Library_set_include,sofficeapp,\
     $$(INCLUDE) \
     -I$(SRCDIR)/desktop/inc \
     -I$(SRCDIR)/desktop/source/inc \
-    -I$(SRCDIR)/desktop/source/deployment/inc \
 ))
 
 $(eval $(call gb_Library_use_externals,sofficeapp, \
@@ -50,7 +49,6 @@ $(eval $(call gb_Library_use_libraries,sofficeapp,\
     comphelper \
     cppu \
     cppuhelper \
-    deploymentmisc \
     drawinglayercore \
     editeng \
     fwk \

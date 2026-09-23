@@ -21,44 +21,6 @@
 
 #define NC_(Context, String) TranslateId(Context, u8##String)
 
-#define RID_STR_COPYING_PACKAGE                             NC_("RID_STR_COPYING_PACKAGE", "Copying: ")
-#define RID_STR_ERROR_WHILE_ADDING                          NC_("RID_STR_ERROR_WHILE_ADDING", "Error while adding: ")
-#define RID_STR_ERROR_WHILE_REMOVING                        NC_("RID_STR_ERROR_WHILE_REMOVING", "Error while removing: ")
-#define RID_STR_PACKAGE_ALREADY_ADDED                       NC_("RID_STR_PACKAGE_ALREADY_ADDED", "Extension has already been added: ")
-#define RID_STR_NO_SUCH_PACKAGE                             NC_("RID_STR_NO_SUCH_PACKAGE", "There is no such extension deployed: ")
-#define RID_STR_SYNCHRONIZING_REPOSITORY                    NC_("RID_STR_SYNCHRONIZING_REPOSITORY", "Synchronizing repository for %NAME extensions")
-
-#define RID_STR_REGISTERING_PACKAGE                         NC_("RID_STR_REGISTERING_PACKAGE", "Enabling: ")
-#define RID_STR_REVOKING_PACKAGE                            NC_("RID_STR_REVOKING_PACKAGE", "Disabling: ")
-#define RID_STR_CANNOT_DETECT_MEDIA_TYPE                    NC_("RID_STR_CANNOT_DETECT_MEDIA_TYPE", "Cannot detect media-type: ")
-#define RID_STR_UNSUPPORTED_MEDIA_TYPE                      NC_("RID_STR_UNSUPPORTED_MEDIA_TYPE", "This media-type is not supported: ")
-#define RID_STR_ERROR_WHILE_REGISTERING                     NC_("RID_STR_ERROR_WHILE_REGISTERING", "An error occurred while enabling: ")
-#define RID_STR_ERROR_WHILE_REVOKING                        NC_("RID_STR_ERROR_WHILE_REVOKING", "An error occurred while disabling: ")
-
-#define RID_STR_CONF_SCHEMA                                 NC_("RID_STR_CONF_SCHEMA", "Configuration Schema")
-#define RID_STR_CONF_DATA                                   NC_("RID_STR_CONF_DATA", "Configuration Data")
-
-#define RID_STR_BASIC_LIB                                   NC_("RID_STR_BASIC_LIB", "Basic Library")
-#define RID_STR_DIALOG_LIB                                  NC_("RID_STR_DIALOG_LIB", "Dialog Library")
-#define RID_STR_CANNOT_DETERMINE_LIBNAME                    NC_("RID_STR_CANNOT_DETERMINE_LIBNAME", "The library name could not be determined.")
-
-#define RID_STR_PACKAGE_BUNDLE                              NC_("RID_STR_PACKAGE_BUNDLE", "Extension")
-
-#define RID_STR_DYN_COMPONENT                               NC_("RID_STR_DYN_COMPONENT", "UNO Dynamic Library Component")
-#define RID_STR_JAVA_COMPONENT                              NC_("RID_STR_JAVA_COMPONENT", "UNO Java Component")
-#define RID_STR_PYTHON_COMPONENT                            NC_("RID_STR_PYTHON_COMPONENT", "UNO Python Component")
-#define RID_STR_COMPONENTS                                  NC_("RID_STR_COMPONENTS", "UNO Components")
-#define RID_STR_RDB_TYPELIB                                 NC_("RID_STR_RDB_TYPELIB", "UNO RDB Type Library")
-#define RID_STR_JAVA_TYPELIB                                NC_("RID_STR_JAVA_TYPELIB", "UNO Java Type Library")
-
-#define RID_STR_SFWK_LIB                                    NC_("RID_STR_SFWK_LIB", "%MACROLANG Library")
-
-#define RID_STR_HELP                                        NC_("RID_STR_HELP", "Help")
-#define RID_STR_HELPPROCESSING_GENERAL_ERROR                NC_("RID_STR_HELPPROCESSING_GENERAL_ERROR", "The extension cannot be installed because:\n")
-#define RID_STR_HELPPROCESSING_XMLPARSING_ERROR             NC_("RID_STR_HELPPROCESSING_XMLPARSING_ERROR", "The extension will not be installed because an error occurred in the Help files:\n")
-
-#define RID_STR_UNSUPPORTED_PLATFORM                        NC_("RID_STR_UNSUPPORTED_PLATFORM", "The extension '%Name' does not work on this computer.")
-
 #define STR_BOOTSTRAP_ERR_CANNOT_START                      NC_("STR_BOOTSTRAP_ERR_CANNOT_START", "The application cannot be started. ")
 #define STR_BOOTSTRAP_ERR_DIR_MISSING                       NC_("STR_BOOTSTRAP_ERR_DIR_MISSING", "The configuration directory \"$1\" could not be found.")
 #define STR_BOOTSTRAP_ERR_PATH_INVALID                      NC_("STR_BOOTSTRAP_ERR_PATH_INVALID", "The installation path is invalid.")

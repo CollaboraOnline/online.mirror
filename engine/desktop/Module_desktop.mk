@@ -10,10 +10,6 @@
 $(eval $(call gb_Module_Module,desktop))
 
 $(eval $(call gb_Module_add_targets,desktop,\
-    CustomTarget_desktop_unopackages_install \
-    GeneratedPackage_desktop_unopackages_install \
-    Library_deployment \
-    Library_deploymentmisc \
     Library_offacc \
     Library_sofficeapp \
     $(if $(or $(DISABLE_GUI),$(ENABLE_WASM_STRIP_SPLASH)),,Library_spl) \
@@ -75,7 +71,6 @@ endif
 
 $(eval $(call gb_Module_add_check_targets,desktop, \
     CppunitTest_desktop_app \
-    CppunitTest_desktop_version \
 ))
 
 ifneq ($(filter LINUX FREEBSD,$(OS))$(filter WNT-TRUE,$(OS)-$(USE_HEADLESS_CODE)),)

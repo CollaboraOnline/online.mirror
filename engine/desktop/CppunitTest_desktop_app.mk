@@ -26,7 +26,6 @@ $(eval $(call gb_CppunitTest_use_libraries,desktop_app, \
     comphelper \
     cppu \
     cppuhelper \
-    deploymentmisc \
     drawinglayercore \
     editeng \
     fwk \

@@ -299,7 +299,6 @@ $(eval $(call gb_Helper_register_libraries_for_install,OOOLIBS,ooo, \
 		dbase \
 		dbaxml) \
 	dbtools \
-	deploymentmisc \
 	$(if $(filter-out MACOSX WNT,$(OS)),desktopbe1) \
 	$(call gb_Helper_optional,SCRIPTING,dlgprov) \
 	docmodel \
@@ -519,7 +518,6 @@ $(eval $(call gb_Helper_register_libraries_for_install,PLAINLIBS_OOO,ooo, \
 	cached1 \
 	comphelper \
 	$(call gb_Helper_optional,DBCONNECTIVITY,dbpool2) \
-	deployment \
 	embobj \
 	i18nutil \
 	$(if $(and $(ENABLE_GTK3), $(filter LINUX %BSD SOLARIS,$(OS))), kitgtk) \

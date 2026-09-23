@@ -24,9 +24,7 @@
 #include <config_feature_desktop.h>
 
 #include <app.hxx>
-#include <comphelper/scopeguard.hxx>
 
-#include <dp_misc.h>
 #include <officepipe.hxx>
 #include "officeipcthread.hxx"
 #include "cmdlineargs.hxx"
@@ -1077,9 +1075,6 @@ bool IpcThread::process(OString const & arguments, bool * waitProcessed) {
 void PipeIpcThread::execute()
 {
     assert(m_handler != nullptr);
-    // Tell the extension manager not to probe the pipe from this thread.
-    dp_misc::setOfficeIpcThreadRunning(true);
-    comphelper::ScopeGuard resetThreadRunning([]() { dp_misc::setOfficeIpcThreadRunning(false); });
     do
     {
         osl::StreamPipe aStreamPipe;

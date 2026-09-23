@@ -48,7 +48,6 @@ $(eval $(call gb_Pagein_add_objects,common,\
     services/services.rdb \
     types/oovbaapi.rdb \
     deployment \
-    deploymentmisc \
     xstor \
     filterconfig \
     uui \
