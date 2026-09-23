@@ -957,23 +957,32 @@ def filter_files(files_by_package):
 def add_dependencies(files_by_package, files_by_package_extra_deps):
     """Add required checksum and dependencies to files."""
 
-    def find_dep(files_by_package, dep, instpath=None):
-        found = None
+    def dep_key(name):
+        return name if sys.platform != "win32" else name.lower()
+
+    def get_files_by_name(files_by_package):
+        """Map each file name to the list of files with that name."""
+        files_by_name = {}
         for package in files_by_package:
             for file in files_by_package[package]:
-                if os.path.basename(file["instpath"]) == dep if sys.platform == "win32" \
-                        else os.path.basename(file["instpath"]).lower() == dep.lower():
-                    if found is None:
+                key = dep_key(os.path.basename(file["instpath"]))
+                files_by_name.setdefault(key, []).append(file)
+        return files_by_name
+
+    def find_dep(files_by_name, dep, instpath=None):
+        found = None
+        for file in files_by_name.get(dep_key(dep), []):
+            if found is None:
+                found = file
+            else:
+                # special case for Python `_ssl` on Windows...
+                if dep.lower() in ("libcrypto-3.dll", "libssl-3.dll"):
+                    if instpath and os.path.dirname(instpath).lower() == os.path.dirname(found["instpath"]).lower():
+                        continue
+                    elif instpath and os.path.dirname(instpath).lower() == os.path.dirname(file["instpath"]).lower():
                         found = file
-                    else:
-                        # special case for Python `_ssl` on Windows...
-                        if dep.lower() in ("libcrypto-3.dll", "libssl-3.dll"):
-                            if instpath and os.path.dirname(instpath).lower() == os.path.dirname(found["instpath"]).lower():
-                                continue
-                            elif instpath and os.path.dirname(instpath).lower() == os.path.dirname(file["instpath"]).lower():
-                                found = file
-                                continue
-                        raise Exception(f"ambiguous dependency {dep}")
+                        continue
+                raise Exception(f"ambiguous dependency {dep}")
         return found
 
     def get_jar_deps(abspath):
@@ -1000,7 +1009,7 @@ def add_dependencies(files_by_package, files_by_package_extra_deps):
                 deps = [item for item in headers.get("Class-Path", "").split()
                         if item != "../" and item != ".."]
                 for dep in deps:
-                    if not(find_dep(files_by_package, dep)): # expect all jars to exist
+                    if not(find_dep(files_by_name, dep)): # expect all jars to exist
                         raise Exception(f"cannot find jar dependency: {dep}")
                 return ("JVM", set(deps))
 
@@ -1114,6 +1123,10 @@ def add_dependencies(files_by_package, files_by_package_extra_deps):
 
     SYSDEPS = set() # just for debugging
 
+    files_by_name = get_files_by_name(files_by_package)
+    extra_deps_by_name = None if files_by_package_extra_deps is None else \
+        get_files_by_name(files_by_package_extra_deps)
+
     for package in files_by_package:
         for file in files_by_package[package]:
             abspath = file["abspath"]
@@ -1130,10 +1143,10 @@ def add_dependencies(files_by_package, files_by_package_extra_deps):
                     else: # bundled interpreters have relative paths
                         deps.append(interpreter)
                 for dep in alldeps:
-                    depfile = find_dep(files_by_package, dep, file["instpath"])
+                    depfile = find_dep(files_by_name, dep, file["instpath"])
                     if depfile is None:
-                        if files_by_package_extra_deps is not None:
-                            depfile = find_dep(files_by_package_extra_deps, dep, file["instpath"])
+                        if extra_deps_by_name is not None:
+                            depfile = find_dep(extra_deps_by_name, dep, file["instpath"])
                     if depfile is None:
                         sysdeps.append(dep)
                     else:
