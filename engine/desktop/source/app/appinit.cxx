@@ -24,7 +24,7 @@
 #include <vector>
 
 #include <app.hxx>
-#include <dp_shared.hxx>
+#include <desktopresid.hxx>
 #include "cmdlineargs.hxx"
 #include <strings.hrc>
 #include <com/sun/star/lang/XInitialization.hpp>
@@ -262,7 +262,7 @@ void Desktop::CreateTemporaryDirectory()
     {
         // Catch runtime exception here: We have to add language dependent info
         // to the exception message. Fallback solution uses hard coded string.
-        OUString aMsg = DpResId(STR_BOOTSTRAP_ERR_NO_PATHSET_SERVICE);
+        OUString aMsg = DesktopResId(STR_BOOTSTRAP_ERR_NO_PATHSET_SERVICE);
         e.Message = aMsg + e.Message;
         throw;
     }

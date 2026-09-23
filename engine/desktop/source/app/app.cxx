@@ -34,7 +34,7 @@
 #include <string_view>
 
 #include <app.hxx>
-#include <dp_shared.hxx>
+#include <desktopresid.hxx>
 #include <strings.hrc>
 #include "cmdlineargs.hxx"
 #include <lockfile.hxx>
@@ -316,7 +316,7 @@ void runGraphicsRenderTests()
 
 OUString MakeStartupErrorMessage(std::u16string_view aErrorMessage)
 {
-    return DpResId(STR_BOOTSTRAP_ERR_CANNOT_START) + "\n" + aErrorMessage;
+    return DesktopResId(STR_BOOTSTRAP_ERR_CANNOT_START) + "\n" + aErrorMessage;
 }
 
 
@@ -640,7 +640,7 @@ OUString    Desktop::CreateErrorMsgString(
         /// the shared installation directory could not be located
         case ::utl::Bootstrap::MISSING_INSTALL_DIRECTORY:
         {
-            aMsg = DpResId(STR_BOOTSTRAP_ERR_PATH_INVALID);
+            aMsg = DesktopResId(STR_BOOTSTRAP_ERR_PATH_INVALID);
             bFileInfo = false;
         }
         break;
@@ -650,7 +650,7 @@ OUString    Desktop::CreateErrorMsgString(
         /// the version locator INI file could not be found or read
         case ::utl::Bootstrap::MISSING_VERSION_FILE:
         {
-            aMsg = DpResId(STR_BOOTSTRAP_ERR_FILE_MISSING);
+            aMsg = DesktopResId(STR_BOOTSTRAP_ERR_FILE_MISSING);
         }
         break;
 
@@ -659,28 +659,28 @@ OUString    Desktop::CreateErrorMsgString(
          case ::utl::Bootstrap::MISSING_BOOTSTRAP_FILE_ENTRY:
          case ::utl::Bootstrap::INVALID_BOOTSTRAP_FILE_ENTRY:
         {
-            aMsg = DpResId(STR_BOOTSTRAP_ERR_FILE_CORRUPT);
+            aMsg = DesktopResId(STR_BOOTSTRAP_ERR_FILE_CORRUPT);
         }
         break;
 
         /// the version locator INI has no entry for this version
         case ::utl::Bootstrap::MISSING_VERSION_FILE_ENTRY:
         {
-            aMsg = DpResId(STR_BOOTSTRAP_ERR_NO_SUPPORT);
+            aMsg = DesktopResId(STR_BOOTSTRAP_ERR_NO_SUPPORT);
         }
         break;
 
         /// the user installation directory does not exist
         case ::utl::Bootstrap::MISSING_USER_DIRECTORY:
         {
-            aMsg = DpResId(STR_BOOTSTRAP_ERR_DIR_MISSING);
+            aMsg = DesktopResId(STR_BOOTSTRAP_ERR_DIR_MISSING);
         }
         break;
 
         /// some bootstrap data was invalid in unexpected ways
         case ::utl::Bootstrap::INVALID_BOOTSTRAP_DATA:
         {
-            aMsg = DpResId(STR_BOOTSTRAP_ERR_INTERNAL);
+            aMsg = DesktopResId(STR_BOOTSTRAP_ERR_INTERNAL);
             bFileInfo = false;
         }
         break;
@@ -807,7 +807,7 @@ void Desktop::HandleBootstrapErrors(
         }
 
         // First sentence. We cannot bootstrap office further!
-        OUString aDiagnosticMessage = DpResId(STR_BOOTSTRAP_ERR_NO_CFG_SERVICE) + "\n";
+        OUString aDiagnosticMessage = DesktopResId(STR_BOOTSTRAP_ERR_NO_CFG_SERVICE) + "\n";
         if ( !aErrorMessage.isEmpty() )
         {
             aDiagnosticMessage += "(\"" + aErrorMessage + "\")\n";
@@ -816,7 +816,7 @@ void Desktop::HandleBootstrapErrors(
         // Due to the fact the we haven't a backup applicat.rdb file anymore it is not possible to
         // repair the installation with the setup executable besides the office executable. Now
         // we have to ask the user to start the setup on CD/installation directory manually!!
-        aDiagnosticMessage += DpResId(STR_ASK_START_SETUP_MANUALLY);
+        aDiagnosticMessage += DesktopResId(STR_ASK_START_SETUP_MANUALLY);
 
         FatalError(MakeStartupErrorMessage(aDiagnosticMessage));
     }
@@ -827,7 +827,7 @@ void Desktop::HandleBootstrapErrors(
         // but end up in a _exit() call
         comphelper::BackupFileHelper::setExitWasCalled();
 
-        OUString msg(DpResId(STR_CONFIG_ERR_ACCESS_GENERAL));
+        OUString msg(DesktopResId(STR_CONFIG_ERR_ACCESS_GENERAL));
         if (!aErrorMessage.isEmpty()) {
             msg += "\n(\"" + aErrorMessage + "\")";
         }
@@ -835,12 +835,12 @@ void Desktop::HandleBootstrapErrors(
     }
     else if ( aBootstrapError == BE_USERINSTALL_FAILED )
     {
-        OUString aDiagnosticMessage = DpResId(STR_BOOTSTRAP_ERR_USERINSTALL_FAILED);
+        OUString aDiagnosticMessage = DesktopResId(STR_BOOTSTRAP_ERR_USERINSTALL_FAILED);
         FatalError(MakeStartupErrorMessage(aDiagnosticMessage));
     }
     else if ( aBootstrapError == BE_LANGUAGE_MISSING )
     {
-        OUString aDiagnosticMessage = DpResId(STR_BOOTSTRAP_ERR_LANGUAGE_MISSING);
+        OUString aDiagnosticMessage = DesktopResId(STR_BOOTSTRAP_ERR_LANGUAGE_MISSING);
         FatalError(MakeStartupErrorMessage(aDiagnosticMessage));
     }
     else if (( aBootstrapError == BE_USERINSTALL_NOTENOUGHDISKSPACE ) ||
@@ -853,16 +853,16 @@ void Desktop::HandleBootstrapErrors(
 
         OUString aDiagnosticMessage;
         if ( aBootstrapError == BE_USERINSTALL_NOTENOUGHDISKSPACE )
-            aDiagnosticMessage = DpResId(STR_BOOTSTRAP_ERR_NOTENOUGHDISKSPACE);
+            aDiagnosticMessage = DesktopResId(STR_BOOTSTRAP_ERR_NOTENOUGHDISKSPACE);
         else
-            aDiagnosticMessage = DpResId(STR_BOOTSTRAP_ERR_NOACCESSRIGHTS);
+            aDiagnosticMessage = DesktopResId(STR_BOOTSTRAP_ERR_NOACCESSRIGHTS);
         aDiagnosticMessage += aUserInstallationPath;
 
         FatalError(MakeStartupErrorMessage(aDiagnosticMessage));
     }
     else if ( aBootstrapError == BE_2NDOFFICE_WITHCAT )
     {
-        OUString aDiagnosticMessage = DpResId(STR_BOOTSTRAP_ERR_2NDOFFICE_WITHCAT);
+        OUString aDiagnosticMessage = DesktopResId(STR_BOOTSTRAP_ERR_2NDOFFICE_WITHCAT);
         FatalError(MakeStartupErrorMessage(aDiagnosticMessage));
     }
 }
@@ -901,7 +901,7 @@ void restartOnMac(bool passArguments) {
     RequestHandler::Disable();
 #if HAVE_FEATURE_MACOSX_SANDBOX
     (void) passArguments; // avoid warnings
-    OUString aMessage = DpResId(STR_LO_MUST_BE_RESTARTED);
+    OUString aMessage = DesktopResId(STR_LO_MUST_BE_RESTARTED);
 
     std::unique_ptr<weld::MessageDialog> xRestartBox(Application::CreateMessageDialog(nullptr,
                                                      VclMessageType::Warning, VclButtonsType::Ok, aMessage));
@@ -1771,7 +1771,7 @@ void Desktop::OpenClients()
             aRequest.aPrintToList.clear();
             std::unique_ptr<weld::MessageDialog> xBox(Application::CreateMessageDialog(nullptr,
                                                       VclMessageType::Warning, VclButtonsType::Ok,
-                                                      DpResId(STR_ERR_PRINTDISABLED)));
+                                                      DesktopResId(STR_ERR_PRINTDISABLED)));
             xBox->run();
         }
 

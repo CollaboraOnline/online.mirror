@@ -19,7 +19,7 @@
 
 #include <vcl/svapp.hxx>
 #include <vcl/weld.hxx>
-#include <dp_shared.hxx>
+#include <desktopresid.hxx>
 #include <strings.hrc>
 #include <tools/config.hxx>
 #include <lockfile.hxx>
@@ -38,9 +38,9 @@ bool Lockfile_execWarning( Lockfile const * that )
 
     // display warning and return response
     std::unique_ptr<weld::MessageDialog> xBox(Application::CreateMessageDialog(nullptr,
-                                              VclMessageType::Question, VclButtonsType::YesNo, DpResId(STR_QUERY_USERDATALOCKED)));
+                                              VclMessageType::Question, VclButtonsType::YesNo, DesktopResId(STR_QUERY_USERDATALOCKED)));
     // set box title
-    OUString aTitle = DpResId(STR_TITLE_USERDATALOCKED);
+    OUString aTitle = DesktopResId(STR_TITLE_USERDATALOCKED);
     xBox->set_title( aTitle );
     // insert values...
     OUString aMsgText = xBox->get_primary_text();

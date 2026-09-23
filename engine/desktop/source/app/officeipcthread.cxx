@@ -24,7 +24,10 @@
 #include <config_feature_desktop.h>
 
 #include <app.hxx>
+#include <comphelper/scopeguard.hxx>
+
 #include <dp_misc.h>
+#include <officepipe.hxx>
 #include "officeipcthread.hxx"
 #include "cmdlineargs.hxx"
 #include <com/sun/star/frame/TerminationVetoException.hpp>
@@ -44,7 +47,6 @@
 #include <rtl/process.h>
 #include <o3tl/string_view.hxx>
 #include <comphelper/diagnose_ex.hxx>
-#include <comphelper/scopeguard.hxx>
 
 #include <cassert>
 #include <cstdlib>
@@ -720,7 +722,7 @@ RequestHandler::Status PipeIpcThread::enable(rtl::Reference<IpcThread> * thread)
     OUString aPipeIdent;
     try
     {
-        aPipeIdent = dp_misc::generateOfficePipeId();
+        aPipeIdent = desktop::generateOfficePipeId();
     }
     catch (const cpo::uno::Exception&)
     {
@@ -1075,6 +1077,7 @@ bool IpcThread::process(OString const & arguments, bool * waitProcessed) {
 void PipeIpcThread::execute()
 {
     assert(m_handler != nullptr);
+    // Tell the extension manager not to probe the pipe from this thread.
     dp_misc::setOfficeIpcThreadRunning(true);
     comphelper::ScopeGuard resetThreadRunning([]() { dp_misc::setOfficeIpcThreadRunning(false); });
     do

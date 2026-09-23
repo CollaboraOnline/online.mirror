@@ -105,7 +105,10 @@ $(eval $(call gb_Library_add_exception_objects,sofficeapp,\
     desktop/source/app/desktopcontext \
     desktop/source/app/dispatchwatcher \
     desktop/source/app/langselect \
+    desktop/source/app/desktopresid \
+    desktop/source/app/lockfile \
     desktop/source/app/lockfile2 \
+    desktop/source/app/officepipe \
     desktop/source/app/officeipcthread \
     desktop/source/app/opencl \
     desktop/source/app/sofficemain \

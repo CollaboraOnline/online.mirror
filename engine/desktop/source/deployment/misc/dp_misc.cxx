@@ -72,18 +72,6 @@ std::shared_ptr<rtl::Bootstrap> & UnoRc()
 };
 
 #if !defined __EMSCRIPTEN__
-
-bool existsOfficePipe()
-{
-    static const OUString OfficePipeId = generateOfficePipeId();
-
-    if (OfficePipeId.isEmpty())
-        return false;
-    ::osl::Security sec;
-    ::osl::Pipe pipe( OfficePipeId, osl_Pipe_OPEN, sec );
-    return pipe.is();
-}
-
 #endif
 
 //get modification time
@@ -186,8 +174,6 @@ bool needToSyncRepository(std::u16string_view name)
 }
 
 // True when IPC thread is running in this process. Set in PipeIpcThread::execute. Used to avoid
-// attempts to open the pipe from office_is_running, which could deadlock.
-std::atomic<bool> s_bOfficeIpcThreadRunning = false;
 
 OUString encodeForRcFile( std::u16string_view str )
 {
@@ -269,65 +255,6 @@ OUString makeRcTerm( OUString const & url )
     else
         return url;
 }
-
-
-OUString expandUnoRcUrl( OUString const & url )
-{
-    if (OUString rcurl; url.startsWithIgnoreAsciiCase("vnd.sun.star.expand:", &rcurl)) {
-        // decode uric class chars:
-        rcurl = ::rtl::Uri::decode(
-            rcurl, rtl_UriDecodeWithCharset, RTL_TEXTENCODING_UTF8 );
-        // expand macro string:
-        UnoRc()->expandMacrosFrom( rcurl );
-        return rcurl;
-    }
-    else {
-        return url;
-    }
-}
-
-OUString generateOfficePipeId()
-{
-    // The name of the named pipe is created with the hashcode of the user installation directory
-    // (without /user). We have to retrieve this information from a unotools implementation.
-
-    OUString userPath;
-    ::utl::Bootstrap::PathStatus aLocateResult =
-    ::utl::Bootstrap::locateUserInstallation( userPath );
-    if (aLocateResult != ::utl::Bootstrap::PATH_EXISTS &&
-        aLocateResult != ::utl::Bootstrap::PATH_VALID)
-    {
-        throw Exception(u"Extension Manager: Could not obtain path for UserInstallation."_ustr, nullptr);
-    }
-
-    sal_uInt8 const * data =
-        reinterpret_cast<sal_uInt8 const *>(userPath.getStr());
-    std::size_t size = userPath.getLength() * sizeof (sal_Unicode);
-
-    std::vector<unsigned char> hash{
-        ::comphelper::Hash::calculateHash(data, size, ::comphelper::HashType::MD5)};
-
-    // create hex-value string from the MD5 value to keep
-    // the string size minimal
-    OUStringBuffer buf( "SingleOfficeIPC_" );
-    for (unsigned char b : hash) {
-        buf.append( static_cast<sal_Int32>(b), 0x10 );
-    }
-    return buf.makeStringAndClear();
-}
-
-bool office_is_running()
-{
-#if defined __EMSCRIPTEN__
-    return true;
-#else
-    // i#82778: We need to check if we run within the office process. Then we must not use the pipe,
-    // because this could cause a deadlock (if called from IPC thread).
-    return s_bOfficeIpcThreadRunning || existsOfficePipe();
-#endif
-}
-
-void setOfficeIpcThreadRunning(bool bRunning) { s_bOfficeIpcThreadRunning = bRunning; }
 
 oslProcess raiseProcess(
     OUString const & appURL, Sequence<OUString> const & args )
@@ -497,6 +424,77 @@ void disposeBridges(Reference<cpo::uno::XComponentContext> const & ctx)
     }
 }
 
+OUString expandUnoRcUrl( OUString const & url )
+{
+    if (OUString rcurl; url.startsWithIgnoreAsciiCase("vnd.sun.star.expand:", &rcurl)) {
+        // decode uric class chars:
+        rcurl = ::rtl::Uri::decode(
+            rcurl, rtl_UriDecodeWithCharset, RTL_TEXTENCODING_UTF8 );
+        // expand macro string:
+        UnoRc()->expandMacrosFrom( rcurl );
+        return rcurl;
+    }
+    else {
+        return url;
+    }
+}
+
+namespace {
+
+// The pipe id is the office's own; the extension manager only asks whether an
+// office is running. This copy goes when the framework does.
+OUString officePipeId()
+{
+    OUString userPath;
+    ::utl::Bootstrap::PathStatus aLocateResult =
+        ::utl::Bootstrap::locateUserInstallation( userPath );
+    if (aLocateResult != ::utl::Bootstrap::PATH_EXISTS &&
+        aLocateResult != ::utl::Bootstrap::PATH_VALID)
+    {
+        throw Exception(u"Could not obtain path for UserInstallation."_ustr, nullptr);
+    }
+
+    sal_uInt8 const * data =
+        reinterpret_cast<sal_uInt8 const *>(userPath.getStr());
+    std::size_t size = userPath.getLength() * sizeof (sal_Unicode);
+
+    std::vector<unsigned char> hash{
+        ::comphelper::Hash::calculateHash(data, size, ::comphelper::HashType::MD5)};
+
+    OUStringBuffer buf( "SingleOfficeIPC_" );
+    for (unsigned char b : hash) {
+        buf.append( static_cast<sal_Int32>(b), 0x10 );
+    }
+    return buf.makeStringAndClear();
+}
+
+bool existsOfficePipe()
+{
+    static const OUString OfficePipeId = officePipeId();
+    if (OfficePipeId.isEmpty())
+        return false;
+    ::osl::Security sec;
+    ::osl::Pipe pipe( OfficePipeId, osl_Pipe_OPEN, sec );
+    return pipe.is();
+}
+
+std::atomic<bool> s_bOfficeIpcThreadRunning = false;
+
+}
+
+bool office_is_running()
+{
+#if defined __EMSCRIPTEN__
+    return true;
+#else
+    // i#82778: We need to check if we run within the office process. Then we must not use the pipe,
+    // because this could cause a deadlock (if called from IPC thread).
+    return s_bOfficeIpcThreadRunning || existsOfficePipe();
+#endif
+}
+
+void setOfficeIpcThreadRunning(bool bRunning) { s_bOfficeIpcThreadRunning = bRunning; }
+
 }
 
 OUString DpResId(TranslateId aId)
@@ -504,6 +502,5 @@ OUString DpResId(TranslateId aId)
     static std::locale SINGLETON = Translate::Create("dkt");
     return Translate::get(aId, SINGLETON);
 }
-
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

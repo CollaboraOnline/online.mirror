@@ -36,7 +36,6 @@
 
 #include <rtl/ustring.hxx>
 
-#include "dp_misc_api.hxx"
 
 #define LOCKFILE_GROUP    "Lockdata"
 #define LOCKFILE_USERKEY  "User"
@@ -50,7 +49,7 @@ namespace desktop {
     class Lockfile;
     bool Lockfile_execWarning( Lockfile const * that );
 
-    class DESKTOP_DEPLOYMENTMISC_DLLPUBLIC Lockfile
+    class Lockfile
     {
     public:
 
