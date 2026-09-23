@@ -255,12 +255,6 @@ sub run {
 
     my $filesinproductarrayref = installer::setupscript::get_all_items_from_script($setupscriptref, "File");
 
-    if (( ! $installer::globals::isrpmbuild ) &&
-        ( ! $installer::globals::isdebbuild ) &&
-        ( $installer::globals::packageformat ne "installed" ) &&
-        ( $installer::globals::packageformat ne "archive" ))
-        { installer::control::check_oxtfiles($filesinproductarrayref); }
-
     if (! $installer::globals::languagepack)
     {
         $filesinproductarrayref = installer::scriptitems::remove_Languagepacklibraries_from_Installset($filesinproductarrayref);

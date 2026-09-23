@@ -336,12 +336,6 @@ void WriteOnlyVars::run()
             return;
         if (loplugin::isSamePathname(fn, SRCDIR "/ucb/source/core/ucbcmds.cxx"))
             return;
-        if (loplugin::isSamePathname(fn,
-                                     SRCDIR "/desktop/source/deployment/manager/dp_manager.cxx"))
-            return;
-        if (loplugin::isSamePathname(fn, SRCDIR
-                                     "/desktop/source/deployment/registry/package/dp_package.cxx"))
-            return;
         if (loplugin::isSamePathname(fn, SRCDIR "/desktop/source/lib/init.cxx"))
             return;
         if (loplugin::isSamePathname(fn, SRCDIR

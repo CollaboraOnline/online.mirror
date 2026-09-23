@@ -1286,20 +1286,6 @@ desktop/source/app/officeipcthread.hxx:85
     enum desktop::RequestHandler::State Starting
 desktop/source/app/userinstall.hxx:32
     enum desktop::userinstall::Status ERROR_OTHER
-desktop/source/deployment/gui/dp_gui_extensioncmdqueue.cxx:238
-    enum dp_gui::ExtensionCmdQueue::Thread::Input START
-desktop/source/deployment/inc/dp_update.hxx:47
-    enum dp_misc::UPDATE_SOURCE UPDATE_SOURCE_ONLINE
-desktop/source/deployment/registry/component/dp_component.cxx:112
-    enum dp_registry::backend::component::(anonymous namespace)::BackendImpl::ComponentPackageImpl::Reg NotRegistered
-desktop/source/deployment/registry/component/dp_component.cxx:244
-    enum dp_registry::backend::component::(anonymous namespace)::BackendImpl::RcItem RCITEM_COMPONENTS
-desktop/source/deployment/registry/inc/dp_backend.h:216
-    enum dp_registry::backend::PackageRegistryBackend::Context Document
-desktop/source/deployment/registry/inc/dp_backend.h:216
-    enum dp_registry::backend::PackageRegistryBackend::Context Tmp
-desktop/source/deployment/registry/inc/dp_backend.h:216
-    enum dp_registry::backend::PackageRegistryBackend::Context Unknown
 desktop/source/lib/init.cxx:6436
     enum (anonymous namespace)::UndoOrRedo REDO
 desktop/source/lib/init.cxx:8046
@@ -7456,8 +7442,6 @@ tools/source/fsys/urlobj.cxx:486
     enum (anonymous namespace)::(unnamed at /home/noel/libo-plugin/tools/source/fsys/urlobj.cxx:469:1) PR
 tools/source/fsys/urlobj.cxx:1725
     enum State STATE_DONE
-ucb/source/ucp/ext/ucpext_content.hxx:42
-    enum ucb::ucp::ext::ExtensionContentType E_UNKNOWN
 ucb/source/ucp/hierarchy/hierarchycontent.hxx:102
     enum hierarchy_ucp::HierarchyContent::ContentState DEAD
 ucb/source/ucp/package/pkgcontent.hxx:92

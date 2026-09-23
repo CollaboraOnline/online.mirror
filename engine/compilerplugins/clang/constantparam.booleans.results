@@ -410,8 +410,6 @@ desktop/qa/desktop_lib/test_desktop_lib.cxx:3575
     void lcl_repeatKeyStroke(struct desktop::LibLODocument_Impl *,int,int,unsigned long)
     int nCharCode
     0
-desktop/source/deployment/gui/dp_gui_updatedialog.hxx:100
-    void dp_gui::UpdateDialog::addAdditional(const struct dp_gui::UpdateDialog::Index *,_Bool)
     _Bool bEnableCheckBox
     0
 desktop/source/lib/init.cxx:8431

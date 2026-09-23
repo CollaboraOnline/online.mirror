@@ -337,8 +337,6 @@ void UseUniquePtr::CheckDeleteLocalVar(const FunctionDecl* functionDecl, const C
         return;
     if (loplugin::hasPathnamePrefix(fn, SRCDIR "/sfx2/qa/"))
         return;
-    if (loplugin::hasPathnamePrefix(fn, SRCDIR "/smoketest/"))
-        return;
     if (loplugin::hasPathnamePrefix(fn, WORKDIR))
         return;
     // linked lists

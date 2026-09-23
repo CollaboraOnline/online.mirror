@@ -360,7 +360,7 @@ def processIWYUOutput(iwyuOutput, moduleRules, fileName, noexclude, checknamespa
                                     'cpp|java|' # for codemaker::
                                     'cppu|'
                                     'dbaccess|dbaui|dbtools|'
-                                    'desktop|dp_misc|'
+                                    'desktop|'
                                     'drawinglayer|attribute|geometry|primitive2d|processor2d|'
                                     'editeng|'
                                     'emscripten|'
@@ -406,7 +406,6 @@ def processIWYUOutput(iwyuOutput, moduleRules, fileName, noexclude, checknamespa
                                     'toolkit|'
                                     'treeview|'
                                     'ucbhelper|'
-                                    'unopkg|'
                                     'util|db|qe|' # for xmlsearch::
                                     'utl|'
                                     'vcl|psp|x11|'

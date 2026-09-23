@@ -87,8 +87,7 @@ public class ParcelBrowseNode extends PropertySet implements
                                       xFac.createInstanceWithContext(
                                           "com.sun.star.ucb.SimpleFileAccess",
                                           xCtx));
-            if ( xSFA != null && ( xSFA.isReadOnly( parcelDirUrl ) ||
-                 container.isUnoPkg() ) )
+            if ( xSFA != null && xSFA.isReadOnly( parcelDirUrl ) )
             {
                 deletable = false;
                 editable  = false;

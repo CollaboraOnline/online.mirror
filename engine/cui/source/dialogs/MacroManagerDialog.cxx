@@ -252,7 +252,6 @@ void ScriptContainersListBox::Fill(const weld::TreeIter* pEntryIter)
 
         OUString user(u"user"_ustr);
         OUString share(u"share"_ustr);
-        OUString uno_packages(u"uno_packages"_ustr);
         if (xNode->getName() == "Root")
         {
             bIsRootNode = true;
@@ -285,8 +284,6 @@ void ScriptContainersListBox::Fill(const weld::TreeIter* pEntryIter)
 
             if (theChild->getType() == css::script::browse::BrowseNodeTypes::SCRIPT)
                 // we only want containers in this list box
-                continue;
-            if (theChild->getName() == uno_packages)
                 continue;
 
             OUString uiName = theChild->getName();

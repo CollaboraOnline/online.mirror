@@ -657,10 +657,8 @@ void SubstitutePathVariables::SetPredefinedPathVariables()
     OUString              sVal;
 
     aState = utl::Bootstrap::locateUserData( sVal );
-    //There can be the valid case that there is no user installation.
-    //TODO: Is that still the case? (With OOo 3.4, "unopkg sync" was run as part
-    // of the setup. Then no user installation was required.)
-    //Therefore we do not assert here.
+    // There can be the valid case that there is no user installation,
+    // so do not assert here.
     // It's not possible to detect when an empty value would actually be used.
     // (note: getenv is a hack to detect if we're running in a unit test)
     // Also, it's okay to have an empty user installation path in case of COKit

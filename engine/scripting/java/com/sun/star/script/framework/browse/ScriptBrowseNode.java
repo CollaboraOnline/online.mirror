@@ -86,8 +86,7 @@ public class ScriptBrowseNode extends PropertySet implements
                 this.editable = true;
 
                 try {
-                    if (!parent.isUnoPkg()
-                        && !xSFA.isReadOnly(parent.getPathToParcel())) {
+                    if (!xSFA.isReadOnly(parent.getPathToParcel())) {
 
                         this.deletable = true;
                         this.renamable = true;

@@ -37,7 +37,6 @@ AccessibleCheckBoxCell::getMinimumIncrement()
 AccessibleCheckBoxCell::getMinimumValue()
 AccessibleCheckBoxCell::implCreateStateSet()
 AccessibleCheckBoxCell::setCurrentValue(cpo::uno::Any const&)
-AdditionsDialogHelper::RunAdditionsDialog(weld::Window*, rtl::OUString const&)
 AllSettings::GetMathLayoutRTL()
 AllSettings::SetMiscSettings(MiscSettings const&)
 AlphaMask::AlphaCombineOr(AlphaMask const&)
@@ -18409,30 +18408,6 @@ displayException(com::sun::star::sdb::SQLContext const&, cpo::uno::Reference<com
 dl_cairo_surface_set_device_scale(_cairo_surface*, double, double)
 dload
 dnormi
-dp_misc::DescriptionInfoset::getDependencies() const
-dp_misc::DescriptionInfoset::getIconURL(bool) const
-dp_misc::DescriptionInfoset::getLocalizedDescriptionURL() const
-dp_misc::DescriptionInfoset::getLocalizedDisplayName() const
-dp_misc::DescriptionInfoset::getLocalizedLicenseURL() const
-dp_misc::DescriptionInfoset::getSimpleLicenseAttributes() const
-dp_misc::DescriptionInfoset::getSupportedPlatforms() const
-dp_misc::DescriptionInfoset::getUpdateInformationUrls() const
-dp_misc::expandUnoRcTerm(rtl::OUString const&)
-dp_misc::expandUnoRcUrl(rtl::OUString const&)
-dp_misc::generateIdentifier(std::optional<rtl::OUString> const&, std::basic_string_view<char16_t, std::char_traits<char16_t> >)
-dp_misc::generateLegacyIdentifier(std::basic_string_view<char16_t, std::char_traits<char16_t> >)
-dp_misc::getDescriptionInfoset(std::basic_string_view<char16_t, std::char_traits<char16_t> >)
-dp_misc::getExtensionDefaultUpdateURL()
-dp_misc::getHighestVersion(rtl::OUString const&, rtl::OUString const&, rtl::OUString const&)
-dp_misc::getOfficeLanguageTag()
-dp_misc::getPlatformString()
-dp_misc::hasValidPlatform(cpo::uno::Sequence<rtl::OUString> const&)
-dp_misc::interactContinuation(cpo::uno::Any const&, cpo::uno::Type const&, cpo::uno::Reference<com::sun::star::ucb::XCommandEnvironment> const&, bool*, bool*)
-dp_misc::makeRcTerm(rtl::OUString const&)
-dp_misc::platform_fits(std::basic_string_view<char16_t, std::char_traits<char16_t> >)
-dp_misc::readFile(ucbhelper::Content&)
-dp_misc::readLine(rtl::OUString*, std::basic_string_view<char16_t, std::char_traits<char16_t> >, ucbhelper::Content&, unsigned short)
-dp_misc::readProperties(std::vector<std::pair<rtl::OUString, rtl::OUString>, std::allocator<std::pair<rtl::OUString, rtl::OUString> > >&, ucbhelper::Content&)
 drawinglayer::Primitive2dJsonProcessor::dumpAsJson(drawinglayer::primitive2d::Primitive2DContainer const&)
 drawinglayer::Primitive2dJsonProcessor::processPrimitive(drawinglayer::primitive2d::BasePrimitive2D const&)
 drawinglayer::Primitive2dJsonProcessor::scalePolyPolygon(basegfx::B2DPolyPolygon const&)

@@ -79,7 +79,6 @@ lib/collaboraoffice/program/libuuresolverlo.so
 lib/collaboraoffice/program/libvbaobjlo.so
 lib/collaboraoffice/program/libvbaswobjlo.so
 lib/collaboraoffice/program/libwriterlo.so
-lib/collaboraoffice/program/lounorc
 lib/collaboraoffice/program/officehelper.py
 lib/collaboraoffice/program/oosplash
 lib/collaboraoffice/program/opencl/cl-test.ods
@@ -1564,8 +1563,6 @@ lib/collaboraoffice/share/config/images_colibre_svg.zip
 lib/collaboraoffice/share/config/soffice.cfg/cui/ui/acorexceptpage.ui
 lib/collaboraoffice/share/config/soffice.cfg/cui/ui/acoroptionspage.ui
 lib/collaboraoffice/share/config/soffice.cfg/cui/ui/acorreplacepage.ui
-lib/collaboraoffice/share/config/soffice.cfg/cui/ui/additionsdialog.ui
-lib/collaboraoffice/share/config/soffice.cfg/cui/ui/additionsfragment.ui
 lib/collaboraoffice/share/config/soffice.cfg/cui/ui/agingdialog.ui
 lib/collaboraoffice/share/config/soffice.cfg/cui/ui/applyautofmtpage.ui
 lib/collaboraoffice/share/config/soffice.cfg/cui/ui/applylocalizedpage.ui
@@ -6603,6 +6600,4 @@ share/metainfo/com.collaboraoffice.Office.metainfo.xml
 @dir lib/collaboraoffice/presets/basic
 @dir lib/collaboraoffice/share/autotext/common
 @dir lib/collaboraoffice/share/autotext/hy
-@dir lib/collaboraoffice/share/extensions
 @dir lib/collaboraoffice/share/template/common/presnt
-@dir lib/collaboraoffice/share/uno_packages/cache/uno_packages

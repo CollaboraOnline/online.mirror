@@ -181,7 +181,6 @@
         del $(OutDir)..\..\Release\program\twain32shim.exe
         del $(OutDir)..\..\Release\program\uno.exe
         del $(OutDir)..\..\Release\program\unoinfo.exe
-        del $(OutDir)..\..\Release\program\unopkg.exe
         rem Delete the libmerged stub DLLs. Their real code is linked into
         rem mergedlo.dll, so each stub file is exactly 21 bytes. Matching that exact
         rem size rather than a fixed name list stays correct when a different set of

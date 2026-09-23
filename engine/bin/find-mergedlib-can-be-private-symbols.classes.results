@@ -285,7 +285,6 @@
 16 lucene::search::MultiSearcher
 16 lucene::search::IndexSearcher
 16 lucene::index::MultipleTermPositions
-16 dp_misc
 16 chart::DataInterpreter
 16 canvas::CanvasCustomSpriteHelper
 16 antlr4::Recognizer

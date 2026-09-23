@@ -184,8 +184,6 @@ public:
             "DocTemplLocker_Impl",
             "DocumentSettingsGuard",
             "DocxTableExportContext",
-            "dp_misc::AbortChannel::Chain",
-            "dp_misc::ProgressLevel",
             "E3DModifySceneSnapRectUpdater",
             "E3dObjFactory",
             "ErrorHdlResetter",

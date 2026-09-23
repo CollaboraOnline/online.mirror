@@ -4,7 +4,6 @@
 # manual installation for hackers, not necessary for users
 # cp mailmerge.py /usr/lib/libreoffice/program
 # cd /usr/lib/libreoffice/program
-# ./unopkg add --shared mailmerge.py
 # edit ~/.openoffice.org2/user/registry/data/org/openoffice/Office/Writer.xcu
 # and change EMailSupported to as follows...
 #  <prop oor:name="EMailSupported" oor:type="xs:boolean">

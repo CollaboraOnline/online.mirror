@@ -134,12 +134,8 @@ dbaccess/source/ui/uno/copytablewizard.cxx:196
     void dbaui::(anonymous namespace)::CopyTableWizard::impl_dialogToAttributes_nothrow(const class dbaui::OCopyTableWizard &)
     const class dbaui::OCopyTableWizard & _rDialog
     impl_getDialog_throw()
-desktop/source/deployment/gui/dp_gui_dependencydialog.hxx:38
-    void dp_gui::DependencyDialog::DependencyDialog(class weld::Window *,const class std::vector<class rtl::OUString> &)
     class weld::Window * parent
     activeDialog()
-desktop/source/deployment/inc/dp_interact.h:58
-    void dp_misc::ProgressLevel::update(const class cpo::uno::Any &) const
     const class cpo::uno::Any & status
     Any()
 drawinglayer/source/processor2d/cairopixelprocessor2d.cxx:69

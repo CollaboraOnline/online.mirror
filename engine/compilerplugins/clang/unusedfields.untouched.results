@@ -38,10 +38,6 @@ cppu/source/threadpool/threadpool.cxx:351
     _uno_ThreadPool dummy sal_Int32
 cppu/source/typelib/typelib.cxx:56
     (anonymous namespace)::AlignSize_Impl nInt16 sal_Int16
-cui/source/inc/AdditionsDialog.hxx:46
-    AdditionInfo sReleaseVersion OUString
-cui/source/inc/AdditionsDialog.hxx:74
-    AdditionsDialog m_xContentWindow std::unique_ptr<weld::ScrolledWindow>
 cui/source/inc/cuioptgenrl.hxx:37
     SvxGeneralTabPage m_xSigningKeyLB std::unique_ptr<weld::Entry>
 cui/source/inc/cuioptgenrl.hxx:38

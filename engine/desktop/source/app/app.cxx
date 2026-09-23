@@ -307,13 +307,6 @@ void Desktop::Init()
 
     const CommandLineArgs& rCmdLineArgs = GetCommandLineArgs();
 
-    // tdf117100: do not try to re-install extensions after the requested restart
-    if (officecfg::Setup::Office::OfficeRestartInProgress::get())
-    {
-        if (!officecfg::Office::Common::Misc::FirstRun::get())
-            GetCommandLineArgs().RemoveFilesFromOpenListEndingWith(u".oxt"_ustr);
-    }
-
     try
     {
         if (!langselect::prepareLocale())

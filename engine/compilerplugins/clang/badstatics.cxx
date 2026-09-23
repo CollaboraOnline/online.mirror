@@ -168,7 +168,6 @@ public:
                 || name == "g_pSfxApplication" // SfxApplication::~SfxApplication()
                 || name == "s_SidebarResourceManagerInstance" // ResourceManager::disposeDecks()
                 || name == "s_pGallery" // this is not entirely clear but apparently the GalleryThemeCacheEntry are deleted by GalleryBrowser2::SelectTheme() or GalleryBrowser2::dispose()
-                || name == "s_ExtMgr" // TheExtensionManager::disposing()
                 || name == "s_pDocLockedInsertingLinks" // not owning
                 || name == "s_pVout" // FrameFinit()
                 || name == "s_pPaintQueue" // SwPaintQueue::Remove()

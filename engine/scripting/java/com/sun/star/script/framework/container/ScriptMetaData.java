@@ -92,16 +92,6 @@ public class ScriptMetaData extends ScriptEntry {
         "vnd.sun.star.expand:${$BRAND_INI_DIR/" + PathUtils.BOOTSTRAP_NAME
         + "::UserInstallation}/user";
 
-    private static final String UNO_USER_PACKAGES1 =
-        "vnd.sun.star.expand:$UNO_USER_PACKAGES_CACHE";
-
-    private static final String UNO_USER_PACKAGES2 = USER + "/uno_packages";
-
-    private static final String UNO_SHARED_PACKAGES1 =
-        "$UNO_SHARED_PACKAGES_CACHE";
-
-    private static final String UNO_SHARED_PACKAGES2 = SHARE + "/uno_packages";
-
     public static String getFileName(URL url) {
         String fileName = url.toExternalForm();
         if (fileName.lastIndexOf(UCBStreamHandler.separator) != -1) {
@@ -111,16 +101,10 @@ public class ScriptMetaData extends ScriptEntry {
         return fileName;
     }
 
-    public static String getLocationPlaceHolder(String url, String pkgname) {
+    public static String getLocationPlaceHolder(String url) {
         String result = "Unknown";
 
-        if (url.contains(UNO_USER_PACKAGES1) ||
-            url.contains(UNO_USER_PACKAGES2)) {
-            result = PathUtils.make_url("user:uno_packages", pkgname);
-        } else if (url.contains(UNO_SHARED_PACKAGES1) ||
-                   url.contains(UNO_SHARED_PACKAGES2)) {
-            result = PathUtils.make_url("share:uno_packages", pkgname);
-        } else if (url.indexOf(SHARE) == 0) {
+        if (url.indexOf(SHARE) == 0) {
             result = "share";
         } else if (url.indexOf(USER) == 0) {
             result = "user";
@@ -135,25 +119,7 @@ public class ScriptMetaData extends ScriptEntry {
         String placeHolder = "Unknown";
         String pathToParcel = parent.getPathToParcel();
 
-        if (pathToParcel.contains(UNO_USER_PACKAGES1) ||
-            pathToParcel.contains(UNO_USER_PACKAGES2)) {
-            // it's a package
-            placeHolder = "user:uno_packages";
-            String unoPkg = parent.parent.getName();
-
-            if (unoPkg != null) {
-                placeHolder = PathUtils.make_url(placeHolder, unoPkg);
-            }
-        } else if (pathToParcel.contains(UNO_SHARED_PACKAGES1) ||
-                   pathToParcel.contains(UNO_SHARED_PACKAGES2)) {
-            //it's a package
-            placeHolder = "share:uno_packages";
-            String unoPkg = parent.parent.getName();
-
-            if (unoPkg != null) {
-                placeHolder = PathUtils.make_url(placeHolder, unoPkg);
-            }
-        } else if (pathToParcel.indexOf(SHARE) == 0) {
+        if (pathToParcel.indexOf(SHARE) == 0) {
             placeHolder = "share";
         } else if (pathToParcel.indexOf(USER) == 0) {
             placeHolder = "user";
@@ -161,10 +127,6 @@ public class ScriptMetaData extends ScriptEntry {
             placeHolder = "document";
         }
 
-        // TODO handling document packages ??? not really sure of package url
-        /*        else
-                {
-                } */
         return placeHolder;
     }
 

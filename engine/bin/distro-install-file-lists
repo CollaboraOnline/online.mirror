@@ -272,12 +272,10 @@ if test "z$OOO_VENDOR" != "zDebian" ; then
             program/pagein-draw \
             program/pagein-impress \
             program/pagein-writer \
-            program/pkgchk.bin \
             program/pluginapp.bin \
             program/setofficelang.bin \
             program/soffice.bin \
             program/uno.bin \
-            program/unopkg.bin \
             program/uri-encode
         do
             mv_file_between_flists core_list.txt common_list.txt "$INSTALLDIR/$f"

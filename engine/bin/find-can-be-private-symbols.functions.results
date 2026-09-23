@@ -11787,9 +11787,6 @@ destroyPQExpBuffer
 dl_cairo_surface_set_device_scale(_cairo_surface*, double, double)
 dload
 dnormi
-dp_misc::AbortChannel::sendAbort()
-dp_misc::DescriptionInfoset::getDependencies() const
-dp_misc::getExtensionDefaultUpdateURL()
 drawinglayer::Primitive2dXmlDump::dump(drawinglayer::primitive2d::Primitive2DContainer const&, rtl::OUString const&)
 drawinglayer::animation::AnimationEntry::AnimationEntry()
 drawinglayer::animation::AnimationEntry::~AnimationEntry()

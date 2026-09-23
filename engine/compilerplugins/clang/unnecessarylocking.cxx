@@ -110,10 +110,6 @@ bool UnnecessaryLocking::VisitCompoundStmt(const CompoundStmt* compoundStmt)
             && !loplugin::isSamePathname(
                    fn, SRCDIR "/chart2/source/controller/accessibility/AccessibleChartView.cxx")
             && !loplugin::isSamePathname(fn, SRCDIR "/desktop/source/offacc/acceptor.cxx")
-            && !loplugin::isSamePathname(
-                   fn, SRCDIR "/desktop/source/deployment/registry/component/dp_component.cxx")
-            && !loplugin::isSamePathname(fn,
-                                         SRCDIR "/desktop/source/deployment/gui/dp_gui_dialog2.cxx")
             && !loplugin::isSamePathname(fn, SRCDIR "/desktop/source/lib/init.cxx")
 
             // needs to lock around access to methods in vcl

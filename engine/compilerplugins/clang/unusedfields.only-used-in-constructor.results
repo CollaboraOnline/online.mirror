@@ -152,8 +152,6 @@ cppu/source/uno/check.cxx:258
     (anonymous namespace)::Char4 chars Char3
 cui/source/factory/dlgfact.cxx:1176
     (anonymous namespace)::SvxMacroAssignDialog_Impl m_aItems SfxItemSet
-cui/source/inc/AdditionsDialog.hxx:46
-    AdditionInfo sReleaseVersion OUString
 cui/source/inc/cfgutil.hxx:244
     SvxScriptSelectorDialog m_aStylesInfo SfxStylesInfo_Impl
 cui/source/inc/cuitabarea.hxx:205

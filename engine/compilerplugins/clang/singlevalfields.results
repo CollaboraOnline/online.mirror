@@ -130,11 +130,7 @@ desktop/source/app/cmdlineargs.hxx:134
 desktop/source/app/dispatchwatcher.hxx:81
     desktop::DispatchWatcher m_nRequestCount
     0
-desktop/source/deployment/gui/license_dialog.cxx:44
-    dp_gui::(anonymous namespace)::LicenseDialogImpl m_aResized
     desktop LicenseDialogImpl m_aResized
-desktop/source/deployment/gui/license_dialog.cxx:45
-    dp_gui::(anonymous namespace)::LicenseDialogImpl m_aRepeat
     LicenseDialogImpl m_aRepeat
 drawinglayer/source/primitive2d/glowprimitive2d.cxx:223
     drawinglayer::primitive2d::GlowPrimitive2D::create2DDecomposition bDoSaveForVisualControl

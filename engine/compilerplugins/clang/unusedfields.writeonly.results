@@ -212,16 +212,6 @@ desktop/source/app/app.cxx:1042
     desktop::(anonymous namespace)::ExecuteGlobals pCTLLanguageOptions std::unique_ptr<SvtCTLOptions>
 desktop/source/app/app.cxx:1043
     desktop::(anonymous namespace)::ExecuteGlobals pPathOptions std::unique_ptr<SvtPathOptions>
-desktop/source/deployment/manager/dp_managerfac.cxx:45
-    dp_manager::factory::(anonymous namespace)::PackageManagerFactoryImpl m_xUserMgr Reference<deployment::XPackageManager>
-desktop/source/deployment/manager/dp_managerfac.cxx:46
-    dp_manager::factory::(anonymous namespace)::PackageManagerFactoryImpl m_xSharedMgr Reference<deployment::XPackageManager>
-desktop/source/deployment/manager/dp_managerfac.cxx:47
-    dp_manager::factory::(anonymous namespace)::PackageManagerFactoryImpl m_xBundledMgr Reference<deployment::XPackageManager>
-desktop/source/deployment/manager/dp_managerfac.cxx:48
-    dp_manager::factory::(anonymous namespace)::PackageManagerFactoryImpl m_xTmpMgr Reference<deployment::XPackageManager>
-desktop/source/deployment/manager/dp_managerfac.cxx:49
-    dp_manager::factory::(anonymous namespace)::PackageManagerFactoryImpl m_xBakMgr Reference<deployment::XPackageManager>
 desktop/unx/source/splashx.c:366
     struct (unnamed at /home/noel/online-plugin/engine/desktop/unx/source/splashx.c:364:5) decorations unsigned long
 desktop/unx/source/splashx.c:366

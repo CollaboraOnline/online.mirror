@@ -54,16 +54,6 @@ public class Parcel implements XNameContainer {
         this.name = parcelName;
     }
 
-    /**
-     * Tests if this <tt>Parcel</tt> is in a UNO package
-     * or within a sub package within a UNO package
-     *
-     * @return    <tt>true</tt> if has parent <tt>false</tt> otherwise
-     */
-    public boolean isUnoPkg() {
-        return parent.isUnoPkg();
-    }
-
     public String getName() {
         return name;
     }

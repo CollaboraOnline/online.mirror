@@ -183,7 +183,6 @@ BEGIN
 
     @installer::globals::packagelistitems = ("module", "packagename", "copyright", "vendor", "description" );
     @installer::globals::featurecollector =();
-    $installer::globals::extensioninstalldir = "gid_Dir_Share_Extension_Install";
     @installer::globals::languagenames = ();
     %installer::globals::componentcondition = ();
     %installer::globals::componentid = ();

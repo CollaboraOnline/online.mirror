@@ -87,7 +87,6 @@ namespace stoc_javaloader {
 
 namespace {
 
-// from desktop/source/deployment/misc/dp_misc.cxx
 OUString generateRandomPipeId()
 {
     // compute some good pipe id:
@@ -118,7 +117,6 @@ std::vector<OUString> getCmdBootstrapVariables()
     return ret;
 }
 
-// from desktop/source/deployment/misc/dp_misc.cxx
 oslProcess raiseProcess(
     OUString const & appURL, Sequence<OUString> const & args )
 {
@@ -194,7 +192,6 @@ Reference<XComponentContext> raise_uno_process(
         throw cpo::uno::RuntimeException(sMsg.makeStringAndClear());
     }
     try {
-        // from desktop/source/deployment/misc/dp_misc.cxx
         Reference<css::bridge::XUnoUrlResolver> const xUnoUrlResolver(
             css::bridge::UnoUrlResolver::create(xContext) );
 

@@ -25,7 +25,7 @@ module com { module sun { module star { module ucb {
 
     <p>
     It provides access to content via macrofied URLs, e.g.
-    vnd.sun.star.expand://$UNO_USER_PACKAGES/abc.
+    vnd.sun.star.expand://$BRAND_BASE_DIR/abc.
 
     Macros which will be expanded using the singleton
     /singletons/com.sun.star.util.theMacroExpander

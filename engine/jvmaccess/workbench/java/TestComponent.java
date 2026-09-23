@@ -27,7 +27,7 @@ import com.sun.star.lang.XTypeProvider;
 import com.sun.star.registry.XRegistryKey;
 import cpo.uno.Type;
 
-/* Deploy this component with pkgchk, and call it with the Basic program
+/* Deploy this component, and call it with the Basic program
 
    Sub Main
      dim args$()

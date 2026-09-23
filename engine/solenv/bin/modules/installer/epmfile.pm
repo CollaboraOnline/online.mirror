@@ -780,29 +780,6 @@ sub set_packager_in_specfile
 }
 
 #####################################################################
-# Setting the requirements in the spec file (i81494)
-# Syntax: PreReq: "requirements" (only for shared extensions)
-#####################################################################
-
-sub set_prereq_in_specfile
-{
-    my ($changefile) = @_;
-
-    my $prereq = "PreReq:";
-
-    for ( my $i = 0; $i <= $#{$changefile}; $i++ )
-    {
-        if ( ${$changefile}[$i] =~ /^\s*Requires:\s*(.+?)\s*$/ )
-        {
-            my $oldstring = ${$changefile}[$i];
-            ${$changefile}[$i] =~ s/Requires:/$prereq/;
-            my $infoline = "Info: Changed requirements in spec file from $oldstring to ${$changefile}[$i]!\n";
-            push( @installer::globals::logfileinfo, $infoline);
-        }
-    }
-}
-
-#####################################################################
 # Setting the Auto[Req]Prov line and __find_requires
 #####################################################################
 
@@ -964,32 +941,6 @@ sub set_tab_into_datafile
 
 }
 
-##########################################################################################
-# Checking, if an extension is included into the package (Linux).
-# All extension files have to be installed into directory
-# share/extension/install
-# %attr(0444,root,root) "/opt/staroffice8/share/extension/install/SunSearchToolbar.oxt"
-##########################################################################################
-
-sub is_extension_package
-{
-    my ($specfile) = @_;
-
-    my $is_extension_package = 0;
-
-    for ( my $i = 0; $i <= $#{$specfile}; $i++ )
-    {
-        my $line = ${$specfile}[$i];
-        if ( $line =~ /share\/extension\/install\/.*?\.oxt\"\s*$/ )
-        {
-            $is_extension_package = 1;
-            last;
-        }
-    }
-
-    return $is_extension_package;
-}
-
 ############################################################
 # Including the relocatable directory into the
 # spec file and setting "topdir" for Linux
@@ -1029,7 +980,6 @@ sub prepare_packages
         set_topdir_in_specfile($changefile, $filename, $newepmdir);
         set_autoprovreq_in_specfile($changefile, $onepackage->{'findrequires'}, "$installer::globals::workpath" . "/bin");
         set_packager_in_specfile($changefile);
-        if ( is_extension_package($changefile) ) { set_prereq_in_specfile($changefile); }
         set_license_in_specfile($changefile, $variableshashref);
         set_tab_into_datafile($changefile, $filesref);
         installer::files::save_file($completefilename, $changefile);

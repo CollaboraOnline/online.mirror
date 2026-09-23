@@ -22,17 +22,14 @@ $(eval $(call gb_Jar_set_packageroot,ScriptFramework,com))
 $(eval $(call gb_Jar_add_sourcefiles,ScriptFramework,\
 	scripting/java/com/sun/star/script/framework/browse/DialogFactory \
 	scripting/java/com/sun/star/script/framework/browse/ParcelBrowseNode \
-	scripting/java/com/sun/star/script/framework/browse/PkgProviderBrowseNode \
 	scripting/java/com/sun/star/script/framework/browse/ProviderBrowseNode \
 	scripting/java/com/sun/star/script/framework/browse/ScriptBrowseNode \
-	scripting/java/com/sun/star/script/framework/container/DeployedUnoPackagesDB \
 	scripting/java/com/sun/star/script/framework/container/ParcelContainer \
 	scripting/java/com/sun/star/script/framework/container/ParcelDescriptor \
 	scripting/java/com/sun/star/script/framework/container/Parcel \
 	scripting/java/com/sun/star/script/framework/container/ParsedScriptUri \
 	scripting/java/com/sun/star/script/framework/container/ScriptEntry \
 	scripting/java/com/sun/star/script/framework/container/ScriptMetaData \
-	scripting/java/com/sun/star/script/framework/container/UnoPkgContainer \
 	scripting/java/com/sun/star/script/framework/container/XMLParserFactory \
 	scripting/java/com/sun/star/script/framework/container/XMLParser \
 	scripting/java/com/sun/star/script/framework/io/UCBStreamHandler \

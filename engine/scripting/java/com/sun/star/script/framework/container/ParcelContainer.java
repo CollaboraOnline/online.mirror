@@ -63,120 +63,6 @@ public class ParcelContainer implements XNameAccess {
     protected String containerUrl;
     private Collection<Parcel> parcels = new ArrayList<Parcel>(10);
     protected XComponentContext m_xCtx;
-    private ParcelContainer parent = null;
-    private final Collection<ParcelContainer> childContainers = new ArrayList<ParcelContainer>(10);
-    private boolean isPkgContainer = false;
-
-    /**
-     * Tests if this <tt>ParcelContainer</tt> represents a UNO package
-     * or sub package within a UNO package
-     *
-     * @return    <tt>true</tt> if has parent <tt>false</tt> otherwise
-     */
-    public boolean isUnoPkg() {
-        return isPkgContainer;
-    }
-
-    /**
-     * Returns this <tt>ParcelContainer</tt>'s  parent
-     *
-     * @return    <tt>ParcelContainer</tt> if has parent null otherwise
-     */
-    public ParcelContainer parent() {
-        return parent;
-    }
-
-    /**
-     * Returns all child <tt>ParcelContainer</tt>
-     * this instance of <tt>ParcelContainer</tt>
-     *
-     * @return    a new array of ParcelContainers. A zero
-     * length array is returned if no child ParcelContainers.
-     */
-    public ParcelContainer[] getChildContainers() {
-        if (childContainers.isEmpty()) {
-            return new ParcelContainer[0];
-        }
-
-        return childContainers.toArray(new ParcelContainer[childContainers.size()]);
-    }
-
-    /**
-     * Removes a child <tt>ParcelContainer</tt>
-     * from this instance.
-     * @param   child  <tt>ParcelContainer</tt> to be added.
-     *
-     * @return    <tt>true</tt> if child successfully removed
-     */
-    public boolean removeChildContainer(ParcelContainer child) {
-        return childContainers.remove(child);
-    }
-
-    /**
-     * Adds a new child <tt>ParcelContainer</tt>
-     * to this instance.
-     * @param   child  <tt>ParcelContainer</tt> to be added.
-     *
-     */
-    public void addChildContainer(ParcelContainer child) {
-        childContainers.add(child);
-    }
-
-    /**
-     * Returns a child <tt>ParcelContainer</tt> whose location
-     * matches the <tt>location</tt> argument passed to this method.
-     * @param    key the <tt>location</tt> which is to
-     *           be matched.
-     *
-     * @return    child <tt>ParcelContainer</tt> or {@code null} if none
-     * found.
-     */
-    public ParcelContainer getChildContainer(String key) {
-        ParcelContainer result = null;
-
-        for (ParcelContainer c : childContainers) {
-
-            String name = c.getName();
-            if (name == null)
-            {
-                continue;
-            }
-
-            String location =
-                ScriptMetaData.getLocationPlaceHolder(c.containerUrl, name);
-
-            if (key.equals(location)) {
-                result = c;
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Returns a child <tt>ParcelContainer</tt> whose member
-     * <tt>containerUrl</tt> matches the <tt>containerUrl</tt>
-     * argument passed to this method.
-     * @param    containerUrl the <tt>containerUrl</tt> which is to
-     *           be matched.
-     *
-     * @return    child <tt>ParcelContainer</tt> or {@code null} if none
-     * found.
-     */
-    public ParcelContainer getChildContainerForURL(String containerUrl) {
-        ParcelContainer result = null;
-
-        for (ParcelContainer c : childContainers) {
-            if (containerUrl.equals(c.containerUrl)) {
-                result = c;
-                break;
-            }
-        }
-
-        return result;
-    }
-
     /**
      * Returns Name of this container. Name of this <tt>ParcelContainer</tt>
      * is determined from the <tt>containerUrl</tt> as the last portion
@@ -218,62 +104,15 @@ public class ParcelContainer implements XNameAccess {
         com.sun.star.lang.IllegalArgumentException,
         com.sun.star.lang.WrappedTargetException {
 
-        this(null, xCtx, containerUrl, language, true);
-    }
-
-    /**
-     * Initializes a newly created <code>ParcelContainer</code> object.
-     * @param    xCtx UNO component context
-     * @param   containerUrl location of this container.
-     * @param   language language for which entries are stored
-     * @param   loadParcels set to <tt>true</tt> if parcels are to be loaded
-     *          on construction.
-     */
-    public ParcelContainer(XComponentContext xCtx, String containerUrl,
-                           String language, boolean loadParcels) throws
-        com.sun.star.lang.IllegalArgumentException,
-        com.sun.star.lang.WrappedTargetException {
-
-        this(null, xCtx, containerUrl, language, loadParcels);
-    }
-
-    /**
-     * Initializes a newly created <code>ParcelContainer</code> object.
-     * @param   parent parent ParcelContainer
-     * @param    xCtx UNO component context
-     * @param   containerUrl location of this container.
-     * @param   language language for which entries are stored
-     * @param   loadParcels set to <tt>true</tt> if parcels are to be loaded
-     *          on construction.
-     */
-    public ParcelContainer(ParcelContainer parent, XComponentContext xCtx,
-                           String containerUrl, String language,
-                           boolean loadParcels) throws
-        com.sun.star.lang.IllegalArgumentException,
-        com.sun.star.lang.WrappedTargetException {
-
         LogUtils.DEBUG("Creating ParcelContainer for " + containerUrl +
-                       " loadParcels = " + loadParcels + " language = " + language);
+                       " language = " + language);
 
         this.m_xCtx = xCtx;
         this.language = language;
-        this.parent = parent;
         this.containerUrl = containerUrl;
 
         initSimpleFileAccess();
-        boolean parentIsPkgContainer = false;
-
-        if (parent != null) {
-            parentIsPkgContainer = parent.isUnoPkg();
-        }
-
-        if (containerUrl.endsWith("uno_packages") || parentIsPkgContainer) {
-            isPkgContainer = true;
-        }
-
-        if (loadParcels) {
-            loadParcels();
-        }
+        loadParcels();
     }
 
 
@@ -303,15 +142,9 @@ public class ParcelContainer implements XNameAccess {
     }
 
     public String getParcelContainerDir() {
-        // If this container does not represent a uno-package
-        // then it is a document, user or share
-        // in each case the convention is to have a Scripts/[language]
-        // dir where scripts reside
-        if (!isUnoPkg()) {
-            return PathUtils.make_url(containerUrl  ,  "Scripts/" + language.toLowerCase());
-        }
-
-        return containerUrl;
+        // A container is a document, user or share, and the convention in
+        // each case is to have a Scripts/[language] dir where scripts reside
+        return PathUtils.make_url(containerUrl  ,  "Scripts/" + language.toLowerCase());
     }
 
     public Object getByName(String aName) throws
