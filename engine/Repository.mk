@@ -156,13 +156,6 @@ $(eval $(call gb_Helper_register_executables_for_install,OOO,brand, \
 	$(call gb_Helper_optional,FUZZERS,zipfuzzer) \
 	$(call gb_Helper_optional,FUZZERS,svgfuzzer) \
 	soffice_bin \
-    $(call gb_CondExeUnopkg, \
-        unopkg_bin \
-        $(if $(filter WNT,$(OS)), \
-            unopkg \
-            unopkg_com \
-        ) \
-    ) \
 	$(if $(filter WNT,$(OS)), \
 		soffice_exe \
 		soffice_com \
@@ -547,7 +540,6 @@ $(eval $(call gb_Helper_register_libraries_for_install,PLAINLIBS_OOO,ooo, \
     $(call gb_Helper_optional,XMLHELP,ucpchelp1) \
 	ucphier1 \
 	ucppkg1 \
-    $(call gb_CondExeUnopkg,unopkgapp) \
 	xmlsecurity \
 	xsec_xmlsec \
 	xstor \

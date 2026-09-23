@@ -417,7 +417,6 @@ ifneq ($(ENABLE_MACOSX_SANDBOX),)
 # no 3rd-party code that would be interested in them would look there
 # anyway.
 	rm $(TESTINSTALLDIR)/$(PRODUCTNAME_WITHOUT_SPACES).app/Contents/MacOS/gengal
-	rm $(TESTINSTALLDIR)/$(PRODUCTNAME_WITHOUT_SPACES).app/Contents/MacOS/unopkg
 	rm $(TESTINSTALLDIR)/$(PRODUCTNAME_WITHOUT_SPACES).app/Contents/MacOS/unoinfo
 endif
 ifneq ($(MACOSX_PROVISIONING_PROFILE),)

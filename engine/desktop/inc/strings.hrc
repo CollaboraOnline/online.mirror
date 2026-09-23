@@ -80,19 +80,4 @@
 #define STR_BOOTSTRAP_ERR_NOTENOUGHDISKSPACE                 NC_("STR_BOOTSTRAP_ERR_NOTENOUGHDISKSPACE", "%PRODUCTNAME user installation could not be completed due to insufficient free disk space. Please free more disc space at the following location and restart %PRODUCTNAME:\n\n")
 #define STR_BOOTSTRAP_ERR_NOACCESSRIGHTS                     NC_("STR_BOOTSTRAP_ERR_NOACCESSRIGHTS", "%PRODUCTNAME user installation could not be processed due to missing access rights. Please make sure that you have sufficient access rights for the following location and restart %PRODUCTNAME:\n\n")
 
-#define RID_STR_UNOPKG_ACCEPT_LIC_1                         NC_("RID_STR_UNOPKG_ACCEPT_LIC_1", "Extension Software License Agreement of $NAME:")
-#define RID_STR_UNOPKG_ACCEPT_LIC_2                         NC_("RID_STR_UNOPKG_ACCEPT_LIC_2", "Read the complete License Agreement displayed above. " \
-                                                               "Accept the License Agreement by typing \"yes\" on the console " \
-                                                               "then press the Return key. Type \"no\" to decline and to abort the " \
-                                                               "extension setup.")
-#define RID_STR_UNOPKG_ACCEPT_LIC_3                         NC_("RID_STR_UNOPKG_ACCEPT_LIC_3", "[Enter \"yes\" or \"no\"]:")
-#define RID_STR_UNOPKG_ACCEPT_LIC_4                         NC_("RID_STR_UNOPKG_ACCEPT_LIC_4", "Your input was not correct. Please enter \"yes\" or \"no\":")
-#define RID_STR_UNOPKG_ACCEPT_LIC_YES                       NC_("RID_STR_UNOPKG_ACCEPT_LIC_YES", "YES")
-#define RID_STR_UNOPKG_ACCEPT_LIC_Y                         NC_("RID_STR_UNOPKG_ACCEPT_LIC_Y", "Y")
-#define RID_STR_UNOPKG_ACCEPT_LIC_NO                        NC_("RID_STR_UNOPKG_ACCEPT_LIC_NO", "NO")
-#define RID_STR_UNOPKG_ACCEPT_LIC_N                         NC_("RID_STR_UNOPKG_ACCEPT_LIC_N", "N")
-#define RID_STR_CONCURRENTINSTANCE                          NC_("RID_STR_CONCURRENTINSTANCE", "unopkg cannot be started. The lock file indicates it is already running. " \
-                                                               "If this does not apply, delete the lock file at:")
-#define RID_STR_UNOPKG_ERROR                                NC_("RID_STR_UNOPKG_ERROR", "ERROR: ")
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -74,7 +74,6 @@ lib/collaboraoffice/program/libswdlo.so
 lib/collaboraoffice/program/libswlo.so
 lib/collaboraoffice/program/libswuilo.so
 lib/collaboraoffice/program/libtestunolo.so
-lib/collaboraoffice/program/libunopkgapp.so
 lib/collaboraoffice/program/libunsafe_uno_uno.so
 lib/collaboraoffice/program/libuuresolverlo.so
 lib/collaboraoffice/program/libvbaobjlo.so
@@ -1395,8 +1394,6 @@ lib/collaboraoffice/program/uno.bin
 lib/collaboraoffice/program/uno.py
 lib/collaboraoffice/program/unohelper.py
 lib/collaboraoffice/program/unoinfo
-lib/collaboraoffice/program/unopkg
-lib/collaboraoffice/program/unopkg.bin
 lib/collaboraoffice/program/unorc
 lib/collaboraoffice/program/uri-encode
 lib/collaboraoffice/program/versionrc

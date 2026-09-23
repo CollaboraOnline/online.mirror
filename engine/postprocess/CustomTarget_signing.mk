@@ -44,7 +44,6 @@ ifeq ($(COM),MSC)
 			$(INSTDIR)/program/*.exe \
 			$(INSTDIR)/program/*.com \
 			$(INSTDIR)/program/soffice.bin \
-			$(INSTDIR)/program/unopkg.bin \
 			$(INSTDIR)/program/pyuno$(if $(MSVC_USE_DEBUG_RUNTIME),_d).pyd \
 			$(INSTDIR)/$(LIBO_BIN_FOLDER)/python-core-$(PYTHON_VERSION)/bin/*.exe \
 			$(INSTDIR)/$(LIBO_BIN_FOLDER)/python-core-$(PYTHON_VERSION)/lib/*.dll \

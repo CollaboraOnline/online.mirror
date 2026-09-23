@@ -24,10 +24,6 @@ define gb_CondExeUno
 $(if $(and $(filter DESKTOP,$(BUILD_TYPE)),$(if $(DISABLE_DYNLOADING),,$(true))),$(1),$(2))
 endef
 
-define gb_CondExeUnopkg
-$(if $(and $(filter DESKTOP,$(BUILD_TYPE)),$(if $(DISABLE_DYNLOADING),,$(true))),$(1),$(2))
-endef
-
 define gb_CondLibSalTextenc
 $(if $(or $(filter ANDROID,$(OS)),$(DISABLE_DYNLOADING)),$(2),$(1))
 endef

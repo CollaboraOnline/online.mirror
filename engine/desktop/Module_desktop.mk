@@ -28,8 +28,6 @@ $(eval $(call gb_Module_add_l10n_targets,desktop,\
 ifneq (,$(filter DESKTOP,$(BUILD_TYPE)))
 $(eval $(call gb_Module_add_targets,desktop,\
     Executable_soffice_bin \
-    $(call gb_CondExeUnopkg,Executable_unopkg_bin) \
-    $(call gb_CondExeUnopkg,Library_unopkgapp) \
     Package_scripts \
     $(if $(ENABLE_PAGEIN), \
         Pagein_calc \
@@ -55,10 +53,6 @@ $(eval $(call gb_Module_add_targets,desktop,\
     Executable_soffice_exe \
     Executable_soffice_com \
     Executable_unoinfo \
-    $(call gb_CondExeUnopkg, \
-        Executable_unopkg \
-        Executable_unopkg_com \
-    ) \
     WinResTarget_soffice \
     WinResTarget_sofficebin \
 ))

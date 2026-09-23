@@ -27,8 +27,6 @@ namespace desktop_win32 {
 // Implementation of the process guarding soffice.bin
 int officeloader_impl(bool bAllowConsole);
 
-// Implementation of the process guarding unopkg.bin
-int unopkgloader_impl(bool bAllowConsole);
 
 }
 
