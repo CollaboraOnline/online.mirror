@@ -112,9 +112,7 @@ class Desktop final : public Application
         }
 
         // first-start (ever) related methods
-        static bool             CheckExtensionDependencies();
 
-        static void             SynchronizeExtensionRepositories(bool bCleanedExtensionCache, Desktop* pDesktop = nullptr);
         void                    SetSplashScreenText( const OUString& rText );
         void                    SetSplashScreenProgress( sal_Int32 );
 
@@ -158,7 +156,6 @@ class Desktop final : public Application
         static void             createAcceptor(const OUString& aDescription);
         static void             destroyAcceptor(const OUString& aDescription);
 
-        bool                    m_bCleanedExtensionCache;
         bool                    m_bServicesRegistered;
         BootstrapError          m_aBootstrapError;
         OUString                m_aBootstrapErrorMessage;

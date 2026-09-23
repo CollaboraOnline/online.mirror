@@ -23,7 +23,6 @@ officecfg_XCSFILES := \
     Office/Draw \
     Office/Embedding \
     Office/Events \
-    Office/ExtensionDependencies \
     Office/Histories \
     Office/Impress \
     Office/Java \

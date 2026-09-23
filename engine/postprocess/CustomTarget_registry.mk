@@ -123,7 +123,6 @@ postprocess_FILES_main := \
 	$(postprocess_XCS)/Office/Draw.xcs \
 	$(postprocess_XCS)/Office/Embedding.xcs \
 	$(postprocess_XCS)/Office/Events.xcs \
-	$(postprocess_XCS)/Office/ExtensionDependencies.xcs \
 	$(postprocess_XCS)/Office/Histories.xcs \
 	$(postprocess_XCS)/Office/Impress.xcs \
 	$(postprocess_XCS)/Office/Java.xcs \
@@ -187,7 +186,6 @@ postprocess_FILES_main := \
 	$(postprocess_XCU)/Office/Compatibility.xcu \
 	$(postprocess_XCU)/Office/DataAccess.xcu \
 	$(postprocess_XCU)/Office/Embedding.xcu \
-	$(postprocess_XCU)/Office/ExtensionDependencies.xcu \
 	$(postprocess_XCU)/Office/Histories.xcu \
 	$(postprocess_XCU)/Office/Impress.xcu \
 	$(postprocess_XCU)/Office/Jobs.xcu \
