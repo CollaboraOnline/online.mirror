@@ -109,12 +109,6 @@ $(eval $(call gb_UnoApi_add_idlfiles_nohdl,offapi,com/sun/star/datatransfer/clip
 	KitClipboard \
 	SystemClipboard \
 ))
-$(eval $(call gb_UnoApi_add_idlfiles_nohdl,offapi,com/sun/star/deployment,\
-	ExtensionManager \
-	PackageInformationProvider \
-	PackageRegistryBackend \
-	thePackageManagerFactory \
-))
 $(eval $(call gb_UnoApi_add_idlfiles_nohdl,offapi,com/sun/star/document,\
 	DocumentProperties \
 	DocumentRevisionListPersistence \
@@ -2017,24 +2011,6 @@ $(eval $(call gb_UnoApi_add_idlfiles,offapi,com/sun/star/datatransfer/dnd,\
 	XDropTargetDragContext \
 	XDropTargetDropContext \
 	XDropTargetListener \
-))
-$(eval $(call gb_UnoApi_add_idlfiles,offapi,com/sun/star/deployment,\
-	DependencyException \
-	DeploymentException \
-	ExtensionRemovedException \
-	InstallException \
-	InvalidRemovedParameterException \
-	LicenseException \
-	PlatformException \
-	Prerequisites \
-	VersionException \
-	XExtensionManager \
-	XPackage \
-	XPackageInformationProvider \
-	XPackageManager \
-	XPackageManagerFactory \
-	XPackageRegistry \
-	XPackageTypeInfo \
 ))
 $(eval $(call gb_UnoApi_add_idlfiles,offapi,com/sun/star/document,\
 	AmbigousFilterRequest \
