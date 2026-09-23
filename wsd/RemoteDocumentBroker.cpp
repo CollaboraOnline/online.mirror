@@ -589,9 +589,7 @@ RemoteDocumentBroker::RemoteDocumentBroker()
 
 bool RemoteDocumentBroker::isEnabled()
 {
-    static const bool enabled =
-        ConfigUtil::getConfigValue<bool>("remote_documents.enable", false);
-    return enabled;
+    return false;
 }
 
 std::string RemoteDocumentBroker::getServerUrl()

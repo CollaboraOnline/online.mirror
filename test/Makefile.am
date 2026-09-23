@@ -72,7 +72,6 @@ all_la_unit_tests = \
 	unit-collab.la \
 	unit-collab-protocol.la \
 	unit-quarantine.la \
-	unit-remote-document.la \
 	unit-wopi.la \
 	unit-each-view.la \
 	unit-copy-paste.la \
