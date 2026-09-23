@@ -169,9 +169,6 @@ local file="$1"
                 */python-core-*/lib/lib-dynload/*)
                     # python modules don't have RPATH
                 ;;
-                */share/extensions/*)
-                    # extension libraries don't have RPATH
-                ;;
                 *)
                     # no NEEDED from instdir, no RPATH needed
                     if test -n "${neededsinternal}" ; then

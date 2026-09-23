@@ -553,7 +553,7 @@ void Test::testSharedOrganizationLayer()
 
     // Throws "insert extension xcs/xcu file into undefined layer" when the layer is gone.
     css::configuration::Update::get(comphelper::getProcessComponentContext())
-        ->insertExtensionXcuFile(true, aUrl);
+        ->insertExtensionXcuFile(aUrl);
 
     cpo::uno::Sequence<OUString> aPaths;
     CPPUNIT_ASSERT(

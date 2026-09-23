@@ -61,11 +61,9 @@ private:
 
     virtual ~Service() override {}
 
-    virtual void insertExtensionXcsFile(
-        bool shared, OUString const & fileUri) override;
+    virtual void insertExtensionXcsFile(OUString const & fileUri) override;
 
-    virtual void insertExtensionXcuFile(
-        bool shared, OUString const & fileUri) override;
+    virtual void insertExtensionXcuFile(OUString const & fileUri) override;
 
     virtual void removeExtensionXcuFile(OUString const & fileUri) override;
 
@@ -92,22 +90,20 @@ private:
     cpo::uno::Reference< cpo::uno::XComponentContext > context_;
 };
 
-void Service::insertExtensionXcsFile(
-    bool shared, OUString const & fileUri)
+void Service::insertExtensionXcsFile(OUString const & fileUri)
 {
     osl::MutexGuard g(*lock_);
-    Components::getSingleton(context_).insertExtensionXcsFile(shared, fileUri);
+    Components::getSingleton(context_).insertExtensionXcsFile(fileUri);
 }
 
-void Service::insertExtensionXcuFile(
-    bool shared, OUString const & fileUri)
+void Service::insertExtensionXcuFile(OUString const & fileUri)
 {
     Broadcaster bc;
     {
         osl::MutexGuard g(*lock_);
         Components & components = Components::getSingleton(context_);
         Modifications mods;
-        components.insertExtensionXcuFile(shared, fileUri, &mods);
+        components.insertExtensionXcuFile(fileUri, &mods);
         components.initGlobalBroadcaster(
             mods, rtl::Reference< RootAccess >(), &bc);
     }

@@ -86,11 +86,10 @@ public:
         // shutdown if writeModifications has ever been called (probably
         // indirectly, via removeExtensionXcuFile)
 
-    void insertExtensionXcsFile(bool shared, OUString const & fileUri);
+    void insertExtensionXcsFile(OUString const & fileUri);
 
     void insertExtensionXcuFile(
-        bool shared, OUString const & fileUri,
-        Modifications * modifications);
+        OUString const & fileUri, Modifications * modifications);
 
     void removeExtensionXcuFile(
         OUString const & fileUri, Modifications * modifications);
@@ -144,7 +143,7 @@ private:
 
     void parseModificationLayer(int layer, OUString const & url);
 
-    int getExtensionLayer(bool shared) const;
+    int getExtensionLayer() const;
 
     typedef
         config_map<
@@ -162,8 +161,10 @@ private:
     o3tl::sorted_vector< RootAccess * > roots_;
     ExternalServices externalServices_;
     rtl::Reference< WriteThread > writeThread_;
+    // The "sharedext" layer. No extension exists any more; the layer now only
+    // carries the shared AutoText, Dictionary and Template preset paths that
+    // desktop/source/lib/init.cxx files into it at run time.
     int sharedExtensionLayer_;
-    int userExtensionLayer_;
     ModificationTarget modificationTarget_;
     OUString modificationFileUrl_;
     std::shared_ptr<osl::Mutex> lock_;

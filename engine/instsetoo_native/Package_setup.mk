@@ -16,7 +16,6 @@ $(eval $(call gb_Package_add_files,instsetoo_native_setup,$(LIBO_ETC_FOLDER),\
 	    $(call gb_Helper_get_rcfile,redirect))) \
 	$(call gb_Helper_get_rcfile,setup) \
 	$(call gb_Helper_get_rcfile,soffice) \
-	$(call gb_Helper_get_rcfile,louno) \
 	$(call gb_Helper_get_rcfile,version) \
 ))
 

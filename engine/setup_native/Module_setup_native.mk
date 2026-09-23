@@ -11,7 +11,6 @@ $(eval $(call gb_Module_Module,setup_native))
 
 $(eval $(call gb_Module_add_targets,setup_native,\
 	CustomTarget_spell \
-	Package_packinfo \
 	$(if $(filter LINUX,$(OS)), \
 		CustomTarget_scripts \
 	) \

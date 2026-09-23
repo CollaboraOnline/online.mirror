@@ -349,10 +349,9 @@ void Components::flushModifications() {
     }
 }
 
-void Components::insertExtensionXcsFile(
-    bool shared, OUString const & fileUri)
+void Components::insertExtensionXcsFile(OUString const & fileUri)
 {
-    int layer = getExtensionLayer(shared);
+    int layer = getExtensionLayer();
     try {
         parseXcsFile(fileUri, layer, data_, nullptr, nullptr, nullptr);
     } catch (css::container::NoSuchElementException & e) {
@@ -362,10 +361,10 @@ void Components::insertExtensionXcsFile(
 }
 
 void Components::insertExtensionXcuFile(
-    bool shared, OUString const & fileUri, Modifications * modifications)
+    OUString const & fileUri, Modifications * modifications)
 {
     assert(modifications != nullptr);
-    int layer = getExtensionLayer(shared) + 1;
+    int layer = getExtensionLayer() + 1;
     Additions * adds = data_.addExtensionXcuAdditions(fileUri, layer);
     try {
         parseXcuFile(fileUri, layer, data_, nullptr, modifications, adds);
@@ -504,7 +503,7 @@ css::beans::Optional< cpo::uno::Any > Components::getExternalValue(
 
 Components::Components(
     cpo::uno::Reference< cpo::uno::XComponentContext > const & context):
-    context_(context), sharedExtensionLayer_(-1), userExtensionLayer_(-1),
+    context_(context), sharedExtensionLayer_(-1),
     modificationTarget_(ModificationTarget::None)
 {
     assert(context.is());
@@ -548,23 +547,12 @@ Components::Components(
             parseXcsXcuLayer(layer, url);
             SAL_INFO("configmgr", "parseXcsXcuLayer() took " << (osl_getGlobalTimer() - nStartTime) << " ms");
             layer += 2;
-        } else if (type == "bundledext") {
-            parseXcsXcuIniLayer(layer, url, false);
-            layer += 2;
         } else if (type == "sharedext") {
             if (sharedExtensionLayer_ != -1) {
                 throw cpo::uno::RuntimeException(
                     u"CONFIGURATION_LAYERS: multiple \"sharedext\" layers"_ustr);
             }
             sharedExtensionLayer_ = layer;
-            parseXcsXcuIniLayer(layer, url, true);
-            layer += 2;
-        } else if (type == "userext") {
-            if (userExtensionLayer_ != -1) {
-                throw cpo::uno::RuntimeException(
-                    u"CONFIGURATION_LAYERS: multiple \"userext\" layers"_ustr);
-            }
-            userExtensionLayer_ = layer;
             parseXcsXcuIniLayer(layer, url, true);
             layer += 2;
         } else if (type == "res") {
@@ -903,8 +891,8 @@ void Components::parseModificationLayer(int layer, OUString const & url) {
     }
 }
 
-int Components::getExtensionLayer(bool shared) const {
-    int layer = shared ? sharedExtensionLayer_ : userExtensionLayer_;
+int Components::getExtensionLayer() const {
+    int layer = sharedExtensionLayer_;
     if (layer == -1) {
         throw cpo::uno::RuntimeException(
             u"insert extension xcs/xcu file into undefined layer"_ustr);

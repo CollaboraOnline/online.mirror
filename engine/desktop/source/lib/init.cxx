@@ -5555,7 +5555,7 @@ static void addOrganizationPath(const OUString& rPathName, const OUString& rDire
     try
     {
         css::configuration::Update::get(comphelper::getProcessComponentContext())
-            ->insertExtensionXcuFile(true, aXcuUrl);
+            ->insertExtensionXcuFile(aXcuUrl);
     }
     catch (const cpo::uno::Exception&)
     {

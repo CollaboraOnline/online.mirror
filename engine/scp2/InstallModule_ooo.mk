@@ -58,7 +58,6 @@ $(eval $(call gb_InstallModule_add_scpfiles,scp2/ooo,\
     scp2/source/ooo/module_help_template \
     scp2/source/ooo/module_hidden_ooo \
     scp2/source/ooo/module_lang_template \
-    scp2/source/ooo/profileitem_ooo \
     $(if $(filter-out MACOSX WNT,$(OS)), \
 		scp2/source/ooo/module_kit \
 	) \
