@@ -8,11 +8,11 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-20 07:56+0000\n"
+"PO-Revision-Date: 2026-09-23 21:07+0000\n"
 "Last-Translator: Stephan Paternotte <stephan@paternottes.net>\n"
 "Language-Team: Dutch <https://hosted.weblate.org/projects/collabora-online/"
 "collabora-ui/nl/>\n"
-"Language: \n"
+"Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -833,19 +833,19 @@ msgstr "Brochure rechts naar links"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:731
 msgid "English"
-msgstr ""
+msgstr "Engels"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:732
 msgid "Hungarian"
-msgstr ""
+msgstr "Hongaars"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:733
 msgid "Portuguese (Brazil)"
-msgstr ""
+msgstr "Portugees (Brazilië)"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:734
 msgid "Russian"
-msgstr ""
+msgstr "Russisch"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1293
 msgid "Invalid JSON file"
@@ -1202,23 +1202,27 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3898
 msgid "Lightproof Sentence Checker"
-msgstr ""
+msgstr "Lightproof Zinscontrole"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3901
 msgid "Choose what the sentence checker looks for as you type."
-msgstr ""
+msgstr "Kies wat de zinscontrole zoekt terwijl u typt."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3941
 msgid ""
 "This document is using the document settings it was opened with. What you "
 "change here applies to the next document you open."
 msgstr ""
+"Dit document maakt gebruik van de documentinstellingen waarmee het is "
+"geopend. Wat u hier wijzigt, geldt voor het volgende document dat u opent."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3944
 msgid ""
 "This document is open in more than one window, so what you change here "
 "applies to the next document you open rather than this one."
 msgstr ""
+"Dit document is in meer dan één venster geopend, dus wat u hier wijzigt, "
+"geldt voor het volgende document dat u opent in plaats van het huidige."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:4032
 #: admin/src/integrator/Xcu.ts:439
@@ -2803,28 +2807,28 @@ msgstr ""
 #: src/control/Control.CleanupSidebar.ts:259
 msgid "%1 byte"
 msgid_plural "%1 bytes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%1 byte"
+msgstr[1] "%1 bytes"
 
 #: src/control/Control.CleanupSidebar.ts:267
 msgid "%1 KB"
-msgstr ""
+msgstr "%1 KB"
 
 #: src/control/Control.CleanupSidebar.ts:272
 msgid "%1 MB"
-msgstr ""
+msgstr "%1 MB"
 
 #: src/control/Control.CleanupSidebar.ts:278
 msgid "Fix %1"
-msgstr ""
+msgstr "%1 corrigeren"
 
 #: src/control/Control.CleanupSidebar.ts:331
 msgid "Master slide"
-msgstr ""
+msgstr "Ontwerpdia"
 
 #: src/control/Control.CleanupSidebar.ts:332
 msgid "Master slide, image %1"
-msgstr ""
+msgstr "Ontwerpdia, afbeelding %1"
 
 #: src/control/Control.CleanupSidebar.ts:335
 #: src/control/Control.PartsPreview.js:944
@@ -2833,165 +2837,168 @@ msgstr "Dia %1"
 
 #: src/control/Control.CleanupSidebar.ts:336
 msgid "Slide %1, image %2"
-msgstr ""
+msgstr "Dia %1, afbeelding %2"
 
 #: src/control/Control.CleanupSidebar.ts:340
 msgid "Slide %1 is hidden and can be removed"
-msgstr ""
+msgstr "Dia %1 is verborgen en kan worden verwijderd"
 
 #: src/control/Control.CleanupSidebar.ts:342
 msgid "Master slide '%1' is not used by any slide"
-msgstr ""
+msgstr "Ontwerpdia '%1' wordt door geen enkele dia gebruikt"
 
 #: src/control/Control.CleanupSidebar.ts:347
 msgid "Slide %1 has speaker notes"
-msgstr ""
+msgstr "Dia %1 heeft sprekernotities"
 
 #: src/control/Control.CleanupSidebar.ts:350
 msgid "Slide %1: embedded object"
-msgstr ""
+msgstr "Dia %1: ingesloten object"
 
 #: src/control/Control.CleanupSidebar.ts:351
 msgid "Slide %1: embedded object, no image to replace it with"
-msgstr ""
+msgstr "Dia %1: ingesloten object, geen afbeelding om het mee te vervangen"
 
 #: src/control/Control.CleanupSidebar.ts:365
 msgid "%1 DPI"
-msgstr ""
+msgstr "%1 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:367
 msgid "%1 at %2 DPI"
-msgstr ""
+msgstr "%1 bij %2 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:426
 msgid "Leave images alone"
-msgstr ""
+msgstr "Laat afbeeldingen met rust"
 
 #: src/control/Control.CleanupSidebar.ts:427
 msgid "96 DPI"
-msgstr ""
+msgstr "96 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:428
 msgid "150 DPI"
-msgstr ""
+msgstr "150 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:429
 msgid "220 DPI"
-msgstr ""
+msgstr "220 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:430
 msgid "300 DPI"
-msgstr ""
+msgstr "300 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:454
 msgid "Scanning..."
-msgstr ""
+msgstr "Scannen…"
 
 #: src/control/Control.CleanupSidebar.ts:456
 msgid "Measuring images..."
-msgstr ""
+msgstr "Afbeeldingen meten…"
 
 #: src/control/Control.CleanupSidebar.ts:458
 msgid "Preparing cleanup..."
-msgstr ""
+msgstr "Opschoning voorbereiden…"
 
 #: src/control/Control.CleanupSidebar.ts:460
 msgid "Cleaning up..."
-msgstr ""
+msgstr "Opschonen…"
 
 #: src/control/Control.CleanupSidebar.ts:472
 msgid "Images over %1 DPI (%2)"
-msgstr ""
+msgstr "Afbeeldingen > %1 DPI (%2)"
 
 #: src/control/Control.CleanupSidebar.ts:476
 msgid "Hidden slides (%1)"
-msgstr ""
+msgstr "Verborgen dia's (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:478
 msgid "Unused master slides (%1)"
-msgstr ""
+msgstr "Niet-gebruikte ontwerpdia's (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:480
 msgid "Speaker notes (%1)"
-msgstr ""
+msgstr "Sprekersnotities (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:482
 msgid "Embedded objects (%1)"
-msgstr ""
+msgstr "Ingesloten objecten (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:490
 msgid "Saved %1"
-msgstr ""
+msgstr "%1 bespaard"
 
 #: src/control/Control.CleanupSidebar.ts:493
 msgid "Estimated saving: %1"
-msgstr ""
+msgstr "Geschatte besparing: %1"
 
 #: src/control/Control.CleanupSidebar.ts:500
 msgid "%1 thing to clean up"
 msgid_plural "%1 things to clean up"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%1 ding om op te schonen"
+msgstr[1] "%1 dingen om op te schonen"
 
 #: src/control/Control.CleanupSidebar.ts:525
 msgid "Image resolution"
-msgstr ""
+msgstr "Afbeeldingsresolutie"
 
 #: src/control/Control.CleanupSidebar.ts:547
 msgid "JPEG quality in %"
-msgstr ""
+msgstr "JPEG-kwaliteit in %"
 
 #: src/control/Control.CleanupSidebar.ts:572
 msgid "Prepare for sharing"
-msgstr ""
+msgstr "Voorbereiden voor delen"
 
 #: src/control/Control.CleanupSidebar.ts:601
 msgid "%1 of %2"
-msgstr ""
+msgstr "%1 van %2"
 
 #: src/control/Control.CleanupSidebar.ts:614
 msgid "Cleanup progress"
-msgstr ""
+msgstr "Opschoningsvoortgang"
 
 #: src/control/Control.CleanupSidebar.ts:647
 msgid "Stop"
-msgstr ""
+msgstr "Stoppen"
 
 #: src/control/Control.CleanupSidebar.ts:668
 msgid "Scan"
-msgstr ""
+msgstr "Scannen"
 
 #: src/control/Control.CleanupSidebar.ts:701
 msgid "Fix all"
-msgstr ""
+msgstr "Alles repareren"
 
 #: src/control/Control.CleanupSidebar.ts:726
 msgid "This document cannot be changed here, so there is nothing to clean up."
 msgstr ""
+"Dit document kan hier niet worden gewijzigd, dus er valt niets op te schonen."
 
 #: src/control/Control.CleanupSidebar.ts:730
 msgid ""
 "Choose a target resolution, then press Scan to find what can be cleaned up."
 msgstr ""
+"Kies een doelresolutie en druk vervolgens op Scannen om te zien wat er kan "
+"worden opgeschoond."
 
 #: src/control/Control.CleanupSidebar.ts:733
 msgid "Nothing to clean up."
-msgstr ""
+msgstr "Niets om op te schonen."
 
 #: src/control/Control.CleanupSidebar.ts:791
 msgid "saves %1"
-msgstr ""
+msgstr "bespaart %1"
 
 #: src/control/Control.CleanupSidebar.ts:801
 msgid "Fix"
-msgstr ""
+msgstr "Repareren"
 
 #: src/control/Control.CleanupSidebar.ts:901
 #: src/control/Control.Menubar.ts:657
 #: src/control/Control.NotebookbarImpress.js:2184
 #: src/control/Control.NotebookbarImpress.js:2185
 msgid "Clean Up"
-msgstr ""
+msgstr "Opschonen"
 
 #: src/control/Control.AlertDialog.js:55
 msgid "External link"
@@ -3209,7 +3216,7 @@ msgstr "Blanco presentatie"
 
 #: src/control/Control.BackstageView.ts:1029
 msgid "Blank Drawing"
-msgstr ""
+msgstr "Blanco tekening"
 
 #: src/control/Control.BackstageView.ts:1034
 msgid "Blank Document"
@@ -3380,15 +3387,15 @@ msgstr "Documentnaam"
 
 #: src/control/Control.DocumentNameInput.js:39
 msgid "A document name cannot contain a slash or a backslash."
-msgstr ""
+msgstr "Een documentnaam mag geen schuine streep of een backslash bevatten."
 
 #: src/control/Control.DocumentNameInput.js:42 src/app/Socket.ts:2531
 msgid "Please enter a valid document name."
-msgstr ""
+msgstr "Voer een geldige documentnaam in."
 
 #: src/control/Control.DocumentNameInput.js:55
 msgid "Invalid document name"
-msgstr ""
+msgstr "Ongeldige documentnaam"
 
 #: src/control/Control.DocumentRepair.js:27
 #: src/control/Control.DocumentRepair.js:28
@@ -4221,17 +4228,17 @@ msgstr "Pagina's met notities"
 #: src/control/Control.Menubar.ts:523
 #: src/control/Control.NotebookbarImpress.js:743
 msgid "View Notes"
-msgstr ""
+msgstr "Notities weergeven"
 
 #: src/control/Control.Menubar.ts:524
 #: src/control/Control.NotebookbarImpress.js:745
 msgid "Bottom Panel"
-msgstr ""
+msgstr "Paneel onderaan"
 
 #: src/control/Control.Menubar.ts:525
 #: src/control/Control.NotebookbarImpress.js:746
 msgid "Handout Page"
-msgstr ""
+msgstr "Handout-pagina"
 
 #: src/control/Control.Menubar.ts:526
 #: src/control/Control.NotebookbarImpress.js:747
@@ -5423,7 +5430,7 @@ msgstr "Ga Offline"
 
 #: src/control/Control.NotebookbarWriter.js:481
 msgid "Lets a screen reader follow the cursor and read the document"
-msgstr ""
+msgstr "Laat een schermlezer de cursor volgen en het document lezen"
 
 #: src/control/Control.NotebookbarWriter.js:605
 msgid "Validate Sidebar"
@@ -5485,7 +5492,7 @@ msgstr "Overschakelen naar bewerken"
 
 #: src/control/Control.PartsPreview.js:451
 msgid "Show everyone on this slide"
-msgstr ""
+msgstr "Laat iedereen op deze dia zien"
 
 #: src/control/Control.PartsPreview.js:597
 #: src/control/Control.PartsPreview.js:672 src/map/Clipboard.js:1546
@@ -5503,18 +5510,18 @@ msgstr "Sectie toevoegen"
 #: src/control/Control.PartsPreview.js:875
 msgid "with 1 other"
 msgid_plural "with %n others"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "met 1 ander"
+msgstr[1] "met %1 anderen"
 
 #: src/control/Control.PartsPreview.js:885
 msgid "with %1"
-msgstr ""
+msgstr "met %1"
 
 #: src/control/Control.PartsPreview.js:886
 msgid "with %1 and 1 other"
 msgid_plural "with %1 and %n others"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "met %1 en 1 ander"
+msgstr[1] "met %1 en %n anderen"
 
 #: src/control/Control.PartsPreview.js:916
 msgid "preview of page %1, linked to %2 in %3"
@@ -5581,7 +5588,7 @@ msgstr "Importeer uw dia's"
 
 #: src/control/Control.SlideImportPane.tsx:673
 msgid "Checking..."
-msgstr ""
+msgstr "Controleren…"
 
 #: src/control/Control.SlideImportPane.tsx:675
 #: src/control/Control.SlideLinkToolbar.tsx:165
@@ -5595,11 +5602,11 @@ msgstr "Geen toegang"
 
 #: src/control/Control.SlideImportPane.tsx:679
 msgid "Could not open"
-msgstr ""
+msgstr "Kon niet openen"
 
 #: src/control/Control.SlideImportPane.tsx:685
 msgid "{0} changed"
-msgstr ""
+msgstr "{0} gewijzigd"
 
 #: src/control/Control.SlideImportPane.tsx:687
 #: src/control/Control.SlideLinkToolbar.tsx:115
@@ -5608,7 +5615,7 @@ msgstr "Gekoppeld"
 
 #: src/control/Control.SlideImportPane.tsx:689
 msgid "Not checked"
-msgstr ""
+msgstr "Niet gecontroleerd"
 
 #: src/control/Control.SlideImportPane.tsx:690
 #: src/control/Control.SlideImportPane.tsx:1392
@@ -5625,14 +5632,16 @@ msgid ""
 "The slides are in this presentation. The file they came from is no longer "
 "here."
 msgstr ""
+"De dia's staan in deze presentatie. Het bestand waar ze vandaan kwamen is er "
+"niet meer."
 
 #: src/control/Control.SlideImportPane.tsx:739
 msgid "This file is here. You do not have permission to open it."
-msgstr ""
+msgstr "Dit bestand staat hier. U bent niet gemachtigd om het te openen."
 
 #: src/control/Control.SlideImportPane.tsx:741
 msgid "This file could not be read this time."
-msgstr ""
+msgstr "Dit bestand kon deze keer niet gelezen worden."
 
 #: src/control/Control.SlideImportPane.tsx:750
 #: src/control/Control.SlideImportPane.tsx:1251
@@ -5662,7 +5671,7 @@ msgstr "Dia's invoegen"
 
 #: src/control/Control.SlideImportPane.tsx:835
 msgid "Insert {0} from {1}"
-msgstr ""
+msgstr "{0} van {1} invoegen"
 
 #: src/control/Control.SlideImportPane.tsx:838
 msgid "Insert 1 slide"
@@ -5674,7 +5683,7 @@ msgstr "Voeg {0} dia's in"
 
 #: src/control/Control.SlideImportPane.tsx:871
 msgid "{0} of {1}"
-msgstr ""
+msgstr "{0} van {1}"
 
 #: src/control/Control.SlideImportPane.tsx:874
 #: src/control/Control.SlideImportPane.tsx:1638
@@ -5683,11 +5692,11 @@ msgstr "{0} dia's"
 
 #: src/control/Control.SlideImportPane.tsx:881
 msgid "Inserts at the end"
-msgstr ""
+msgstr "Invoegen aan het einde"
 
 #: src/control/Control.SlideImportPane.tsx:882
 msgid "Inserts after slide {0}"
-msgstr ""
+msgstr "Invoegen na dia {0}"
 
 #: src/control/Control.SlideImportPane.tsx:886
 msgid "Opening file..."
@@ -5712,9 +5721,8 @@ msgid "Close slide import"
 msgstr "Dia-import sluiten"
 
 #: src/control/Control.SlideImportPane.tsx:996
-#, fuzzy
 msgid "Add presentation…"
-msgstr "Presentatie toevoegen..."
+msgstr "Presentatie toevoegen…"
 
 #: src/control/Control.SlideImportPane.tsx:1011
 msgid "No presentations yet"
@@ -5729,20 +5737,20 @@ msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:1048
 msgid "Hide all slides"
-msgstr ""
+msgstr "Alle dia's verbergen"
 
 #: src/control/Control.SlideImportPane.tsx:1048
 msgid "Show all slides"
-msgstr ""
+msgstr "Alle dia's weergeven"
 
 #: src/control/Control.SlideImportPane.tsx:1080
 #: src/control/Control.SlideImportPane.tsx:1081
 msgid "Filter presentations"
-msgstr ""
+msgstr "Presentaties filteren"
 
 #: src/control/Control.SlideImportPane.tsx:1109
 msgid "Slide sources"
-msgstr ""
+msgstr "Diabronnen"
 
 #: src/control/Control.SlideImportPane.tsx:1117
 msgid "Presentations to import from"
@@ -5750,7 +5758,7 @@ msgstr "Presentaties om vanuit te importeren"
 
 #: src/control/Control.SlideImportPane.tsx:1185
 msgid "{0} picked"
-msgstr ""
+msgstr "{0} gekozen"
 
 #: src/control/Control.SlideImportPane.tsx:1223
 msgid "Actions for {0}"
@@ -5782,15 +5790,15 @@ msgstr "Dia's in {0}"
 
 #: src/control/Control.SlideImportPane.tsx:1391
 msgid "Original design"
-msgstr ""
+msgstr "Origineel ontwerp"
 
 #: src/control/Control.SlideImportPane.tsx:1394
 msgid "Linked, follows the slide number"
-msgstr ""
+msgstr "Gekoppeld, volgt het dianummer"
 
 #: src/control/Control.SlideImportPane.tsx:1395
 msgid "Linked, follows the slide"
-msgstr ""
+msgstr "Gekoppeld, volgt de dia"
 
 #: src/control/Control.SlideImportPane.tsx:1432
 msgid "Keep original design"
@@ -5798,39 +5806,39 @@ msgstr "Behoud het oorspronkelijke ontwerp"
 
 #: src/control/Control.SlideImportPane.tsx:1446
 msgid "Stay linked to the source file"
-msgstr ""
+msgstr "Gekoppeld blijven aan het bronbestand"
 
 #: src/control/Control.SlideImportPane.tsx:1484
 msgid "Follow the slide, wherever it moves"
-msgstr ""
+msgstr "Volg de dia, waarheen deze ook verplaatst"
 
 #: src/control/Control.SlideImportPane.tsx:1486
 msgid "Follow the slide number"
-msgstr ""
+msgstr "Volg het dianummer"
 
 #: src/control/Control.SlideImportPane.tsx:1644
 msgid "Select the slides of {0}"
-msgstr ""
+msgstr "Selecteer de dia's van {0}"
 
 #: src/control/Control.SlideLinkToolbar.tsx:102
 msgid "Linked to {0} in {1}"
-msgstr ""
+msgstr "Gekoppeld naar {0} in {1}"
 
 #: src/control/Control.SlideLinkToolbar.tsx:126
 msgid "Hide the actions for this linked slide"
-msgstr ""
+msgstr "De acties voor deze gekoppelde dia verbergen"
 
 #: src/control/Control.SlideLinkToolbar.tsx:127
 msgid "Show the actions for this linked slide"
-msgstr ""
+msgstr "De acties voor deze gekoppelde dia weergeven"
 
 #: src/control/Control.SlideLinkToolbar.tsx:137
 msgid "Unlink"
-msgstr ""
+msgstr "Koppeling verbreken"
 
 #: src/control/Control.SlideLinkToolbar.tsx:161
 msgid "Not available"
-msgstr ""
+msgstr "Niet beschikbaar"
 
 #: src/control/SlideSectionHeader.tsx:68
 msgid "Toggle section %1"
@@ -5856,7 +5864,7 @@ msgstr ""
 
 #: src/slideimport/SlideLinks.ts:275
 msgid "This slide is not linked to another file."
-msgstr ""
+msgstr "Deze dia is niet gekoppeld aan een ander bestand."
 
 #: src/slideimport/SlideLinks.ts:426 src/slideimport/SlideLinks.ts:738
 msgid ""
@@ -5894,9 +5902,8 @@ msgstr ""
 "Dia {0} kan niet worden bijgewerkt: de bron bevat geen overeenkomende dia"
 
 #: src/slideimport/SlideLinks.ts:684
-#, fuzzy
 msgid "Unlinking the slide failed."
-msgstr "Het invoegen van de dia's is mislukt."
+msgstr "Het loskoppelen van de dia is mislukt."
 
 #: src/slideimport/SlideLinks.ts:695 src/slideimport/SlideLinks.ts:756
 msgid "Updating the slides of {0} failed."
@@ -5941,17 +5948,16 @@ msgid "No problems with SSL verification detected"
 msgstr "Geen problemen ontdekt met SSL-verificatie"
 
 #: src/control/Control.ServerAuditDialog.ts:78
-#, fuzzy
 msgid "Each document is securely contained (landlock)"
-msgstr "Elk document is veilig opgenomen"
+msgstr "Elk document is veilig opgenomen (landlock)"
 
 #: src/control/Control.ServerAuditDialog.ts:83
 msgid "Each document is securely contained (Linux namespaces)"
-msgstr ""
+msgstr "Elk document is veilig opgenomen (Linux-naamruimten)"
 
 #: src/control/Control.ServerAuditDialog.ts:88
 msgid "Each document is securely contained (capabilities and chroot)"
-msgstr ""
+msgstr "Elk document is veilig opgenomen (mogelijkheden en chroot)"
 
 #: src/control/Control.ServerAuditDialog.ts:102
 msgid "System call security filtering enabled"
@@ -5967,7 +5973,7 @@ msgstr "Fast kit jail binden-hechten ingeschakeld"
 
 #: src/control/Control.ServerAuditDialog.ts:133
 msgid "Fast kit jail setup with landlock, nothing to copy or mount"
-msgstr ""
+msgstr "Fast kit jail setup met landlock, niets te kopiëren of aan te koppelen"
 
 #: src/control/Control.ServerAuditDialog.ts:146
 msgid "Poorly performing proxying of all network requests."
@@ -7417,11 +7423,11 @@ msgstr "Bewerkingsmodus"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:70
 msgid "Last Custom Value"
-msgstr ""
+msgstr "Laatste aangepaste waarde"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:134
 msgid "Custom Line Thickness:"
-msgstr ""
+msgstr "Aangepaste lijndikte:"
 
 #: src/control/jsdialog/Widget.MobileBorderSelector.js:111
 msgid "Cell borders"
@@ -7781,7 +7787,7 @@ msgstr ""
 
 #: src/errormessages.ts:54
 msgid "Cleaning up the document from the last session."
-msgstr "Document van de vorige sessie opruimen."
+msgstr "Document van de vorige sessie opschonen."
 
 #: src/errormessages.ts:56
 msgid ""
