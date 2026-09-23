@@ -165,10 +165,6 @@ static oslSignalHandler pSignalHandler = nullptr;
 
 namespace {
 
-#if HAVE_FEATURE_EXTENSIONS
-
-#endif
-
 void SetRestartState() {
     try {
         std::shared_ptr< comphelper::ConfigurationChanges > batch(

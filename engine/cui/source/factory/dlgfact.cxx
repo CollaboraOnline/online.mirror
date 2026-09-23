@@ -17,7 +17,6 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <config_extensions.h>
 #include <config_wasm_strip.h>
 
 #include <vcl/abstdlgimpl.hxx>

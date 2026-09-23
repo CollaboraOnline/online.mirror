@@ -1585,13 +1585,6 @@ AC_ARG_ENABLE(database-connectivity,
         [Disable various database connectivity. Work in progress, use only if you are hacking on it.])
 )
 
-# This doesn't mean not building extensions, it means not supporting
-# any extension mechanism at all
-libo_FUZZ_ARG_ENABLE(extensions,
-    AS_HELP_STRING([--disable-extensions],
-        [Disable all add-on extension functionality. Work in progress, use only if you are hacking on it.])
-)
-
 AC_ARG_ENABLE(scripting,
     AS_HELP_STRING([--disable-scripting],
         [Disable BASIC, Java, Python and .NET. Work in progress, use only if you are hacking on it.]),
@@ -2970,12 +2963,12 @@ if test "$enable_wasm_strip" = "yes"; then
     enable_dbus=no
     enable_dconf=no
     test "${enable_dynamic_loading+set}" = set -o "$_os" != Emscripten || enable_dynamic_loading=no
-    enable_extensions=no
     enable_gio=no
     enable_nss=no
     enable_opencl=no
     enable_pdfimport=no
     enable_randr=no
+    enable_readonly_installset=yes
     enable_scripting=no
     enable_skia=no
     enable_xmlhelp=no
@@ -3010,13 +3003,6 @@ fi
 if test "$enable_database_connectivity" != no; then
     BUILD_TYPE="$BUILD_TYPE DBCONNECTIVITY"
     AC_DEFINE(HAVE_FEATURE_DBCONNECTIVITY)
-fi
-
-if test -z "$enable_extensions"; then
-    # For iOS, disable extensions unless specifically overridden with --enable-extensions.
-    if test $_os != iOS; then
-        enable_extensions=yes
-    fi
 fi
 
 DISABLE_SCRIPTING=''
@@ -3059,11 +3045,6 @@ if test "$enable_customtarget_components" = yes -a "$DISABLE_DYNLOADING" = TRUE;
     fi
 fi
 AC_SUBST(ENABLE_CUSTOMTARGET_COMPONENTS)
-
-if test "$enable_extensions" = yes; then
-    BUILD_TYPE="$BUILD_TYPE EXTENSIONS"
-    AC_DEFINE(HAVE_FEATURE_EXTENSIONS)
-fi
 
 # remember SYSBASE value
 AC_SUBST(SYSBASE)
@@ -3682,9 +3663,7 @@ AC_SUBST(ENABLE_IOS_SIMULATOR)
 
 AC_MSG_CHECKING([whether to treat the installation as read-only])
 
-if test $_os = Darwin; then
-    enable_readonly_installset=yes
-elif test "$enable_extensions" != yes; then
+if test $_os = Darwin -o $_os = iOS; then
     enable_readonly_installset=yes
 fi
 if test "$enable_readonly_installset" = yes; then
@@ -6013,7 +5992,6 @@ if test "$cross_compiling" = "yes"; then
     test "$with_galleries" = "no" -o -z "$WITH_GALLERY_BUILD" && sub_conf_opts="$sub_conf_opts --with-galleries=no --disable-database-connectivity"
     test "$with_templates" = "no" -o -z "$WITH_TEMPLATES" && sub_conf_opts="$sub_conf_opts --with-templates=no"
     test -n "$with_help" -a "$with_help" != "no" && sub_conf_opts="$sub_conf_opts --with-help=$with_help"
-    test "$enable_extensions" = yes || sub_conf_opts="$sub_conf_opts --disable-extensions"
     test "${enable_ld+set}" = set -a "$build_cpu" = "$host_cpu" && sub_conf_opts="$sub_conf_opts --enable-ld=${enable_ld}"
     test "${enable_pch+set}" = set && sub_conf_opts="$sub_conf_opts --enable-pch=${enable_pch}"
     test "$enable_wasm_strip" = "yes" && sub_conf_opts="$sub_conf_opts --enable-wasm-strip"
@@ -12289,11 +12267,6 @@ fi
 AC_MSG_RESULT([$WITH_THEMES])
 AC_SUBST([WITH_THEMES])
 
-dnl Should any extra extensions be included?
-dnl There are standalone tests for each of these below.
-WITH_EXTRA_EXTENSIONS=
-AC_SUBST([WITH_EXTRA_EXTENSIONS])
-
 AC_MSG_CHECKING([whether to build opens___.ttf])
 if test "$enable_build_opensymbol" = "yes"; then
     AC_MSG_RESULT([yes])
@@ -13616,11 +13589,6 @@ if test "$enable_mpl_subset" = "yes"; then
     mpl_error_string=
     newline=$'\n    *'
     warn_report=false
-    # cf. m4/libo_check_extension.m4
-    if test "x$WITH_EXTRA_EXTENSIONS" != "x"; then
-        mpl_error_string="$mpl_error_string$newline Need to disable extra extensions enabled using --enable-ext-XXXX."
-    fi
-
     if test "x$mpl_error_string" != "x"; then
         AC_MSG_ERROR([$mpl_error_string])
     fi
@@ -14105,7 +14073,6 @@ AC_CONFIG_HEADERS([config_host/config_crypto.h])
 AC_CONFIG_HEADERS([config_host/config_cups.h])
 AC_CONFIG_HEADERS([config_host/config_dconf.h])
 AC_CONFIG_HEADERS([config_host/config_eot.h])
-AC_CONFIG_HEADERS([config_host/config_extensions.h])
 AC_CONFIG_HEADERS([config_host/config_cairo_rgba.h])
 AC_CONFIG_HEADERS([config_host/config_collab.h])
 AC_CONFIG_HEADERS([config_host/config_cxxabi.h])
