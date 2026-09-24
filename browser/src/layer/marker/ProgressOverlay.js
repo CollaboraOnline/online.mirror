@@ -30,7 +30,7 @@ L.ProgressOverlay = L.Layer.extend({
 			productName = (typeof brandProductName !== 'undefined') ? brandProductName : 'Collabora Online Development Edition (unbranded)';
 		}
 		this._brandLabel = L.DomUtil.create('div', 'leaflet-progress-label brand-label', this._container);
-		this._brandLabel.innerHTML = productName;
+		this._brandLabel.textContent = productName;
 
 
 		this._label = L.DomUtil.create('div', 'leaflet-progress-label', this._container);
@@ -105,8 +105,8 @@ L.ProgressOverlay = L.Layer.extend({
 	},
 
 	setLabel: function (label) {
-		if (this._container && this._label.innerHTML !== label) {
-			this._label.innerHTML = label;
+		if (this._container && this._label.textContent !== label) {
+			this._label.textContent = label;
 		}
 	},
 
@@ -125,7 +125,7 @@ L.ProgressOverlay = L.Layer.extend({
 		if (this._container) {
 			this._percent = value;
 			this._bar.style.width = value + '%';
-			this._value.innerHTML = value + '%';
+			this._value.textContent = value + '%';
 		}
 	}
 });
