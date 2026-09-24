@@ -40,7 +40,7 @@ L.ProgressOverlay = window.L.Layer.extend({
 			this._spinnerCanvas.style.opacity = '0';
 		}
 		this._brandLabel = window.L.DomUtil.create('div', 'leaflet-progress-label brand-label', this._container);
-		this._brandLabel.innerHTML = productName;
+		this._brandLabel.textContent = productName;
 
 
 		this._label = window.L.DomUtil.create('div', 'leaflet-progress-label', this._container);
@@ -115,8 +115,8 @@ L.ProgressOverlay = window.L.Layer.extend({
 	},
 
 	setLabel: function (label) {
-		if (this._container && this._label.innerHTML !== label) {
-			this._label.innerHTML = label;
+		if (this._container && this._label.textContent !== label) {
+			this._label.textContent = label;
 		}
 	},
 
@@ -135,7 +135,7 @@ L.ProgressOverlay = window.L.Layer.extend({
 		if (this._container) {
 			this._percent = value;
 			this._bar.style.width = value + '%';
-			this._value.innerHTML = value + '%';
+			this._value.textContent = value + '%';
 		}
 	}
 });
