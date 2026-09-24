@@ -1401,6 +1401,12 @@ void SdrObject::addCropHandles(SdrHdlList& /*rTarget*/) const
     // SdrGrafObj and SwVirtFlyDrawObj
 }
 
+bool SdrObject::GetHandleRails(const SdrHdl& /*rHandle*/, SdrHandleRails& /*rRails*/) const
+{
+    // An object that holds none of its handles to anything says nothing here.
+    return false;
+}
+
 void SdrObject::ImpCommonDragCalcRect(const SdrDragStat& rDrag, tools::Rectangle& rTmpRect, const Point& rPos)
 {
     const tools::Rectangle aRect(rTmpRect);

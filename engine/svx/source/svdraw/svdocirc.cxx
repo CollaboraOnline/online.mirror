@@ -490,6 +490,30 @@ void SdrCircObj::AddToHdlList(SdrHdlList& rHdlList) const
 }
 
 
+/*
+    The two handles of a piece of a circle stand for the angles it begins and ends at, so each of
+    them turns about the middle of the object and stays on the ellipse it is drawn along: as far
+    from that middle as it already is, and free to go the whole way round.
+*/
+bool SdrCircObj::GetHandleRails(const SdrHdl& rHandle, SdrHandleRails& rRails) const
+{
+    if (SdrHdlKind::Circle != rHandle.GetKind())
+        return SdrTextObj::GetHandleRails(rHandle, rRails);
+
+    const Point aMiddle(GetSnapRect().Center());
+    const Point aStands(rHandle.GetPos());
+
+    rRails = SdrHandleRails();
+    rRails.meKind = SdrHandleRailKind::Around;
+    rRails.maAround = basegfx::B2DPoint(aMiddle.X(), aMiddle.Y());
+    rRails.mbHasNearest = true;
+    rRails.mbHasFurthest = true;
+    rRails.maNearest = basegfx::B2DPoint(aStands.X(), aStands.Y());
+    rRails.maFurthest = rRails.maNearest;
+
+    return true;
+}
+
 bool SdrCircObj::hasSpecialDrag() const
 {
     return true;

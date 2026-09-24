@@ -38,6 +38,7 @@
 #include <tools/gen.hxx>
 #include <o3tl/typed_flags_set.hxx>
 #include <basegfx/point/b2dpoint.hxx>
+#include <svx/sdrhandlerails.hxx>
 
 #include <memory>
 #include <vector>
@@ -198,6 +199,25 @@ class SVXCORE_DLLPUBLIC EnhancedCustomShape2d final : public SfxItemSet
 
         sal_uInt32              GetHdlCount() const;
         bool                    GetHandlePosition( const sal_uInt32 nIndex, Point& rReturnPosition ) const;
+
+        /// How far the handle of that number may be moved. False where the shape has no such
+        /// handle.
+        /** How far the handle of that number may be moved. False where the shape has no such
+            handle. Working the ends out puts values into the shape, so this is asked of a shape
+            kept for the purpose and never of one that is drawn.
+         */
+        bool GetHandleRails(const sal_uInt32 nIndex, SdrHandleRails& rRails);
+
+        /** Where the handle of that number would stand if the value it is bound to held that
+            one. The shape this is asked of is changed, so it is asked of a shape kept for
+            working places out and never of one that is drawn.
+         */
+        SAL_DLLPRIVATE bool GetHandlePositionAt(const sal_uInt32 nIndex, const sal_Int32 nValue,
+                                                const double fValue, basegfx::B2DPoint& rPosition);
+
+        /// Drops what the formulas were worked out to, so that they are worked out again from
+        /// whatever the values now say.
+        SAL_DLLPRIVATE void ForgetTheFormulaResults();
         bool                    SetHandleControllerPosition( const sal_uInt32 nIndex, const css::awt::Point& rPosition );
 
         EnhancedCustomShape2d(SdrObjCustomShape& rSdrObjCustomShape);

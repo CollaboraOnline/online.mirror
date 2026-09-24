@@ -309,6 +309,46 @@ void SdrRectObj::AddToHdlList(SdrHdlList& rHdlList) const
     }
 }
 
+/*
+    The corner radius runs along the upper side of the rectangle, from the corner as far as half
+    the longer side, which is as far as the object draws such a corner. It is a length the object
+    keeps, so it stays as it is when the object is made larger or smaller.
+*/
+bool SdrRectObj::GetHandleRails(const SdrHdl& rHandle, SdrHandleRails& rRails) const
+{
+    if (SdrHdlKind::Circle != rHandle.GetKind())
+        return SdrTextObj::GetHandleRails(rHandle, rRails);
+
+    auto const& rRectangle = getRectangle();
+
+    // The places are worked out where the handle itself is worked out, and are given the same
+    // shear and turn afterwards.
+    auto aPlaceAlong = [this, &rRectangle](const tools::Long nAlong) -> basegfx::B2DPoint {
+        Point aAt(rRectangle.TopLeft());
+        aAt.AdjustX(nAlong);
+
+        if (maGeo.m_nShearAngle)
+            ShearPoint(aAt, rRectangle.TopLeft(), maGeo.mfTanShearAngle);
+        if (maGeo.m_nRotationAngle)
+            RotatePoint(aAt, rRectangle.TopLeft(), maGeo.mfSinRotationAngle,
+                        maGeo.mfCosRotationAngle);
+
+        return basegfx::B2DPoint(aAt.X(), aAt.Y());
+    };
+
+    rRails = SdrHandleRails();
+    rRails.meKind = SdrHandleRailKind::Along;
+    rRails.mbMovesAcross = true;
+    rRails.mbHasLeastAcross = true;
+    rRails.mbHasMostAcross = true;
+    rRails.maLeastAcross = aPlaceAlong(0);
+    rRails.maMostAcross
+        = aPlaceAlong(std::max(rRectangle.GetWidth(), rRectangle.GetHeight()) / 2);
+    rRails.mbKeepsItsLength = true;
+
+    return true;
+}
+
 bool SdrRectObj::hasSpecialDrag() const
 {
     return true;

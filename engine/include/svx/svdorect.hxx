@@ -89,6 +89,7 @@ public:
 
     virtual sal_uInt32 GetHdlCount() const override;
     virtual void AddToHdlList(SdrHdlList& rHdlList) const override;
+    virtual bool GetHandleRails(const SdrHdl& rHandle, SdrHandleRails& rRails) const override;
 
     // Special drag methods
     virtual bool hasSpecialDrag() const override;

@@ -36,6 +36,7 @@
 #include <tools/link.hxx>
 #include <tools/gen.hxx>
 #include <unotools/resmgr.hxx>
+#include <svx/sdrhandlerails.hxx>
 
 #include <unordered_set>
 
@@ -512,6 +513,16 @@ public:
     virtual void AddToPlusHdlList(SdrHdlList& rHdlList, SdrHdl& rHdl) const;
     virtual void AddToHdlList(SdrHdlList& rHdlList) const;
     virtual void addCropHandles(SdrHdlList& rTarget) const;
+
+    /** How far the given handle of this object may be moved, in the object's own logic
+        coordinates, which is what SdrHdl::GetPos answers in.
+
+        False where the object says nothing about that handle, and then whoever asked may move it
+        wherever it likes. An object that limits a handle says so here rather than only inside the
+        drag it does itself, so that a reader which runs the drag on its own can hold the handle
+        to the same places.
+     */
+    virtual bool GetHandleRails(const SdrHdl& rHandle, SdrHandleRails& rRails) const;
 
     /// The standard transformations (Move,Resize,Rotate,Mirror,Shear) are
     /// taken over by the View (TakeXorPoly(),...).

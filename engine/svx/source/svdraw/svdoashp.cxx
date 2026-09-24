@@ -1880,6 +1880,21 @@ void SdrObjCustomShape::AddToHdlList(SdrHdlList& rHdlList) const
     }
 }
 
+/*
+    A point a custom shape is shaped by is held by the shape itself, which reads the value behind
+    it and works out from its own formulas how far that value may go. The shape is asked, and
+    what comes back is already in this object's own coordinates.
+*/
+bool SdrObjCustomShape::GetHandleRails(const SdrHdl& rHandle, SdrHandleRails& rRails) const
+{
+    if (SdrHdlKind::CustomShape1 != rHandle.GetKind())
+        return SdrTextObj::GetHandleRails(rHandle, rRails);
+
+    EnhancedCustomShape2d aShaping(const_cast<SdrObjCustomShape&>(*this));
+
+    return aShaping.GetHandleRails(rHandle.GetPointNum(), rRails);
+}
+
 bool SdrObjCustomShape::hasSpecialDrag() const
 {
     return true;

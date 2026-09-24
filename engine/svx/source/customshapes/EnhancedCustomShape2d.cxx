@@ -1491,6 +1491,199 @@ static double lcl_getRadiusDistance(double fWR, double fHR, double fX, double fY
     return fD;
 }
 
+void EnhancedCustomShape2d::ForgetTheFormulaResults()
+{
+    for (EquationResult& rResult : m_vEquationResults)
+        rResult.bReady = false;
+}
+
+bool EnhancedCustomShape2d::GetHandlePositionAt(const sal_uInt32 nIndex, const sal_Int32 nValue,
+                                                const double fValue, basegfx::B2DPoint& rPosition)
+{
+    if (nValue < 0)
+        return false;
+
+    /*
+        The value is put in and the place read back. What the formulas were worked out to is kept
+        once it has been worked out, and the value is read through them, so it has to go first or
+        the answer would be the one from before.
+
+        The values are put back afterwards, so that asking this again asks it of the shape as it
+        really stands rather than of the shape the asking before left behind.
+    */
+    const cpo::uno::Sequence<css::drawing::EnhancedCustomShapeAdjustmentValue> aValuesAsTheyWere(
+        m_seqAdjustmentValues);
+
+    if (!SetAdjustValueAsDouble(fValue, nValue))
+        return false;
+
+    ForgetTheFormulaResults();
+
+    Point aPosition;
+    const bool bFound(GetHandlePosition(nIndex, aPosition));
+
+    m_seqAdjustmentValues = aValuesAsTheyWere;
+    ForgetTheFormulaResults();
+
+    if (!bFound)
+        return false;
+
+    rPosition = basegfx::B2DPoint(aPosition.X(), aPosition.Y());
+    return true;
+}
+
+bool EnhancedCustomShape2d::GetHandleRails(const sal_uInt32 nIndex, SdrHandleRails& rRails)
+{
+    if (nIndex >= GetHdlCount())
+        return false;
+
+    Handle aHandle;
+    if (!ConvertSequenceToEnhancedCustomShape2dHandle(m_seqHandles[nIndex], aHandle))
+        return false;
+
+    rRails = SdrHandleRails();
+
+    /*
+        The value a handle moves is not the place it stands at: a shape brought in from OOXML
+        counts its values in hundred-thousandths of its own size and works the place out of them
+        through its formulas, and the ends it names are ends of the value. So the shape is asked
+        where the handle would stand if the value held the end, and that place is the end of the
+        way the handle may take. That answers for every kind of shape, whatever it does with the
+        value on the way.
+    */
+    const sal_uInt32 nIndexOfHandle(nIndex);
+    auto aPlaceAt = [this, nIndexOfHandle](const sal_Int32 nValue, const double fValue,
+                                           bool& rbHas, basegfx::B2DPoint& rPlace) {
+        rbHas = GetHandlePositionAt(nIndexOfHandle, nValue, fValue, rPlace);
+    };
+
+    /// The number of the value an end is given for, or -1 where the place is worked out some
+    /// other way and the handle does not move on that axis at all.
+    auto aValueOf = [](const css::drawing::EnhancedCustomShapeParameter& rParameter,
+                       const bool bHasReference, const sal_Int32 nReference) -> sal_Int32 {
+        if (rParameter.Type == css::drawing::EnhancedCustomShapeParameterType::ADJUSTMENT)
+        {
+            sal_Int32 nValue(-1);
+            rParameter.Value >>= nValue;
+            return nValue;
+        }
+
+        return bHasReference ? nReference : -1;
+    };
+
+    if (aHandle.nFlags & (HandleFlags::POLAR | HandleFlags::REFR | HandleFlags::REFANGLE))
+    {
+        rRails.meKind = SdrHandleRailKind::Around;
+
+        // The point the handle turns about. A shape that names one of its own is asked where the
+        // handle would stand with no way from it at all. One that works the place out through its
+        // formulas turns about its own middle.
+        rRails.maAround = basegfx::B2DPoint(m_aLogicRect.Center().X(), m_aLogicRect.Center().Y());
+
+        const sal_Int32 nAway(aValueOf(aHandle.aPosition.First,
+                                       bool(aHandle.nFlags & HandleFlags::REFR), aHandle.nRefR));
+
+        basegfx::B2DPoint aPole;
+        if ((aHandle.nFlags & HandleFlags::POLAR)
+            && GetHandlePositionAt(nIndex, nAway, 0.0, aPole))
+            rRails.maAround = aPole;
+
+        /*
+            Where the way from that point is not a value the shape can change, the handle only
+            turns about the point and stays as far from it as it stands now. There is no range
+            to read for that, so both ends of the way are put where the handle is.
+        */
+        if (nAway < 0)
+        {
+            Point aWhereItStands;
+            if (GetHandlePosition(nIndex, aWhereItStands))
+            {
+                rRails.mbHasNearest = true;
+                rRails.mbHasFurthest = true;
+                rRails.maNearest
+                    = basegfx::B2DPoint(aWhereItStands.X(), aWhereItStands.Y());
+                rRails.maFurthest = rRails.maNearest;
+            }
+
+            return true;
+        }
+
+        if (aHandle.nFlags & HandleFlags::RADIUS_RANGE_MINIMUM)
+        {
+            double fLeast(0.0);
+            GetParameter(fLeast, aHandle.aRadiusRangeMinimum, false, false);
+            aPlaceAt(nAway, fLeast, rRails.mbHasNearest, rRails.maNearest);
+        }
+
+        if (aHandle.nFlags & HandleFlags::RADIUS_RANGE_MAXIMUM)
+        {
+            double fMost(0.0);
+            GetParameter(fMost, aHandle.aRadiusRangeMaximum, false, false);
+            aPlaceAt(nAway, fMost, rRails.mbHasFurthest, rRails.maFurthest);
+        }
+
+        return true;
+    }
+
+    /*
+        A handle that is switched swaps the shape's two ways round where the shape is taller than
+        it is wide, and everything about it swaps with them: the place it is given at, and the
+        range it is held between. Reading the range off the way it was named would put it on the
+        way the handle does not move on, and then nothing would hold it at all.
+    */
+    css::drawing::EnhancedCustomShapeParameterPair aPosition(aHandle.aPosition);
+    bool bHasLeastAcross(bool(aHandle.nFlags & HandleFlags::RANGE_X_MINIMUM));
+    bool bHasMostAcross(bool(aHandle.nFlags & HandleFlags::RANGE_X_MAXIMUM));
+    bool bHasLeastDown(bool(aHandle.nFlags & HandleFlags::RANGE_Y_MINIMUM));
+    bool bHasMostDown(bool(aHandle.nFlags & HandleFlags::RANGE_Y_MAXIMUM));
+    css::drawing::EnhancedCustomShapeParameter aLeastAcross(aHandle.aXRangeMinimum);
+    css::drawing::EnhancedCustomShapeParameter aMostAcross(aHandle.aXRangeMaximum);
+    css::drawing::EnhancedCustomShapeParameter aLeastDown(aHandle.aYRangeMinimum);
+    css::drawing::EnhancedCustomShapeParameter aMostDown(aHandle.aYRangeMaximum);
+
+    if ((aHandle.nFlags & HandleFlags::SWITCHED)
+        && m_aLogicRect.GetHeight() > m_aLogicRect.GetWidth())
+    {
+        std::swap(aPosition.First, aPosition.Second);
+        std::swap(bHasLeastAcross, bHasLeastDown);
+        std::swap(bHasMostAcross, bHasMostDown);
+        std::swap(aLeastAcross, aLeastDown);
+        std::swap(aMostAcross, aMostDown);
+    }
+
+    const sal_Int32 nAcross(
+        aValueOf(aPosition.First, bool(aHandle.nFlags & HandleFlags::REFX), aHandle.nRefX));
+    const sal_Int32 nDown(
+        aValueOf(aPosition.Second, bool(aHandle.nFlags & HandleFlags::REFY), aHandle.nRefY));
+
+    rRails.mbMovesAcross = nAcross >= 0;
+    rRails.mbMovesDown = nDown >= 0;
+    rRails.meKind = (rRails.mbMovesAcross || rRails.mbMovesDown)
+                        ? SdrHandleRailKind::Inside
+                        : SdrHandleRailKind::Nowhere;
+
+    auto aEndOfTheWay = [this, &aPlaceAt](const bool bHas,
+                                          const css::drawing::EnhancedCustomShapeParameter& rRange,
+                                          const sal_Int32 nValue, bool& rbHas,
+                                          basegfx::B2DPoint& rPlace) {
+        if (!bHas)
+            return;
+
+        double fEnd(0.0);
+        GetParameter(fEnd, rRange, false, false);
+        aPlaceAt(nValue, fEnd, rbHas, rPlace);
+    };
+
+    aEndOfTheWay(bHasLeastAcross, aLeastAcross, nAcross, rRails.mbHasLeastAcross,
+                 rRails.maLeastAcross);
+    aEndOfTheWay(bHasMostAcross, aMostAcross, nAcross, rRails.mbHasMostAcross,
+                 rRails.maMostAcross);
+    aEndOfTheWay(bHasLeastDown, aLeastDown, nDown, rRails.mbHasLeastDown, rRails.maLeastDown);
+    aEndOfTheWay(bHasMostDown, aMostDown, nDown, rRails.mbHasMostDown, rRails.maMostDown);
+
+    return true;
+}
+
 bool EnhancedCustomShape2d::SetHandleControllerPosition( const sal_uInt32 nIndex, const css::awt::Point& rPosition )
 {
     // The method name is misleading. Essentially it calculates the adjustment values from a given

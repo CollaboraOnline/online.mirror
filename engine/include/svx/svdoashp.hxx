@@ -251,6 +251,7 @@ public:
 
     virtual sal_uInt32 GetHdlCount() const override;
     virtual void AddToHdlList(SdrHdlList& rHdlList) const override;
+    virtual bool GetHandleRails(const SdrHdl& rHandle, SdrHandleRails& rRails) const override;
 
     // #i33136#
     static bool doConstructOrthogonal(std::u16string_view rName);
