@@ -151,9 +151,9 @@ L.Control.NotebookbarBuilder = L.Control.JSDialogBuilder.extend({
 		if (commandName === '.uno:CharFontName') {
 			if (window.ThisIsTheiOSApp) {
 				if (state === '')
-					$('#fontnamecomboboxios').html(_('Font Name'));
+					$('#fontnamecomboboxios').text(_('Font Name'));
 				else
-					$('#fontnamecomboboxios').html(state);
+					$('#fontnamecomboboxios').text(state);
 				window.LastSetiOSFontNameButtonFont = state;
 			}
 		} else if (commandName === '.uno:StyleApply') {
