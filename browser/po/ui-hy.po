@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-23 21:07+0000\n"
+"PO-Revision-Date: 2026-09-24 06:16+0000\n"
 "Last-Translator: tigran54 <tigran@flib.sci.am>\n"
 "Language-Team: Armenian <https://hosted.weblate.org/projects/collabora-"
 "online/collabora-ui/hy/>\n"
@@ -5489,18 +5489,18 @@ msgstr "Ավելացնել բաժին"
 #: src/control/Control.PartsPreview.js:875
 msgid "with 1 other"
 msgid_plural "with %n others"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "ևս 1-ի հետ"
+msgstr[1] "ևս %n հետ"
 
 #: src/control/Control.PartsPreview.js:885
 msgid "with %1"
-msgstr ""
+msgstr "%1-ի հետ"
 
 #: src/control/Control.PartsPreview.js:886
 msgid "with %1 and 1 other"
 msgid_plural "with %1 and %n others"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%1-ի և 1 այլի հետ"
+msgstr[1] "%1-ի և %n այլոց հետ"
 
 #: src/control/Control.PartsPreview.js:916
 msgid "preview of page %1, linked to %2 in %3"
@@ -5567,7 +5567,7 @@ msgstr "Ներմուծեք ձեր սահիկները"
 
 #: src/control/Control.SlideImportPane.tsx:673
 msgid "Checking..."
-msgstr ""
+msgstr "Ստուգվում է..."
 
 #: src/control/Control.SlideImportPane.tsx:675
 #: src/control/Control.SlideLinkToolbar.tsx:165
@@ -5581,11 +5581,11 @@ msgstr "Չկա հասանելիություն"
 
 #: src/control/Control.SlideImportPane.tsx:679
 msgid "Could not open"
-msgstr ""
+msgstr "Չհաջողվեց բացել"
 
 #: src/control/Control.SlideImportPane.tsx:685
 msgid "{0} changed"
-msgstr ""
+msgstr "{0} փոխվել է"
 
 #: src/control/Control.SlideImportPane.tsx:687
 #: src/control/Control.SlideLinkToolbar.tsx:115
@@ -5594,7 +5594,7 @@ msgstr "Կապված"
 
 #: src/control/Control.SlideImportPane.tsx:689
 msgid "Not checked"
-msgstr ""
+msgstr "Ստուգված չէ"
 
 #: src/control/Control.SlideImportPane.tsx:690
 #: src/control/Control.SlideImportPane.tsx:1392
@@ -5611,14 +5611,16 @@ msgid ""
 "The slides are in this presentation. The file they came from is no longer "
 "here."
 msgstr ""
+"Սահիկները այս ներկայացման մեջ են։ Նիշքը, որտեղից դրանք վերցված են, այլևս "
+"այստեղ չէ։"
 
 #: src/control/Control.SlideImportPane.tsx:739
 msgid "This file is here. You do not have permission to open it."
-msgstr ""
+msgstr "Այս նիշքը այստեղ է։ Դուք չունեք այն բացելու թույլտվություն։"
 
 #: src/control/Control.SlideImportPane.tsx:741
 msgid "This file could not be read this time."
-msgstr ""
+msgstr "Այս պահին նիշքը հնարավոր չէ կարդալ։"
 
 #: src/control/Control.SlideImportPane.tsx:750
 #: src/control/Control.SlideImportPane.tsx:1251
@@ -5648,7 +5650,7 @@ msgstr "Զետեղեք սահիկներ"
 
 #: src/control/Control.SlideImportPane.tsx:835
 msgid "Insert {0} from {1}"
-msgstr ""
+msgstr "Զետեղեք {0} այստեղից {1}"
 
 #: src/control/Control.SlideImportPane.tsx:838
 msgid "Insert 1 slide"
@@ -5660,7 +5662,7 @@ msgstr "Զետեղեք {0} սահիկ"
 
 #: src/control/Control.SlideImportPane.tsx:871
 msgid "{0} of {1}"
-msgstr ""
+msgstr "{0} ընդ․ {1}"
 
 #: src/control/Control.SlideImportPane.tsx:874
 #: src/control/Control.SlideImportPane.tsx:1638
@@ -5669,11 +5671,11 @@ msgstr "{0} սահիկ"
 
 #: src/control/Control.SlideImportPane.tsx:881
 msgid "Inserts at the end"
-msgstr ""
+msgstr "Զետեղեք վերջում"
 
 #: src/control/Control.SlideImportPane.tsx:882
 msgid "Inserts after slide {0}"
-msgstr ""
+msgstr "Զետեղում է սահիկ {0}-ից հետո"
 
 #: src/control/Control.SlideImportPane.tsx:886
 msgid "Opening file..."
@@ -5698,9 +5700,8 @@ msgid "Close slide import"
 msgstr "Փակեք սահիկի ներմուծումը"
 
 #: src/control/Control.SlideImportPane.tsx:996
-#, fuzzy
 msgid "Add presentation…"
-msgstr "Ավելացնել ներկայացում..."
+msgstr "Ավելացնել ներկայացում…"
 
 #: src/control/Control.SlideImportPane.tsx:1011
 msgid "No presentations yet"
@@ -5715,20 +5716,20 @@ msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:1048
 msgid "Hide all slides"
-msgstr ""
+msgstr "Թաքցնել բոլոր սահիկները"
 
 #: src/control/Control.SlideImportPane.tsx:1048
 msgid "Show all slides"
-msgstr ""
+msgstr "Ցուցադրել բոլոր սահիկները"
 
 #: src/control/Control.SlideImportPane.tsx:1080
 #: src/control/Control.SlideImportPane.tsx:1081
 msgid "Filter presentations"
-msgstr ""
+msgstr "Զտեք ներկայացումները"
 
 #: src/control/Control.SlideImportPane.tsx:1109
 msgid "Slide sources"
-msgstr ""
+msgstr "Սահիկի աղբյուրներ"
 
 #: src/control/Control.SlideImportPane.tsx:1117
 msgid "Presentations to import from"
@@ -5736,7 +5737,7 @@ msgstr "Ներմուծման համար նախատեսված ներկայացո�
 
 #: src/control/Control.SlideImportPane.tsx:1185
 msgid "{0} picked"
-msgstr ""
+msgstr "{0} վերցված է"
 
 #: src/control/Control.SlideImportPane.tsx:1223
 msgid "Actions for {0}"
@@ -5768,15 +5769,15 @@ msgstr "Սահիկներ {0}-ում"
 
 #: src/control/Control.SlideImportPane.tsx:1391
 msgid "Original design"
-msgstr ""
+msgstr "Բնօրինակ դիզայն"
 
 #: src/control/Control.SlideImportPane.tsx:1394
 msgid "Linked, follows the slide number"
-msgstr ""
+msgstr "Կապված է, հետևում է սահիկի թվին"
 
 #: src/control/Control.SlideImportPane.tsx:1395
 msgid "Linked, follows the slide"
-msgstr ""
+msgstr "Կապված է, հետևում է սահիկին"
 
 #: src/control/Control.SlideImportPane.tsx:1432
 msgid "Keep original design"
@@ -5784,19 +5785,19 @@ msgstr "Պահպանեք բնօրինակ դիզայնը"
 
 #: src/control/Control.SlideImportPane.tsx:1446
 msgid "Stay linked to the source file"
-msgstr ""
+msgstr "Մնացեք կապված աղբյուրի նիշքի հետ"
 
 #: src/control/Control.SlideImportPane.tsx:1484
 msgid "Follow the slide, wherever it moves"
-msgstr ""
+msgstr "Հետևեք սահիկին, ուր էլ որ այն շարժվի"
 
 #: src/control/Control.SlideImportPane.tsx:1486
 msgid "Follow the slide number"
-msgstr ""
+msgstr "Հետևեք սահիկի թվին"
 
 #: src/control/Control.SlideImportPane.tsx:1644
 msgid "Select the slides of {0}"
-msgstr ""
+msgstr "Ընտրեք {0}-ի սահիկները"
 
 #: src/control/Control.SlideLinkToolbar.tsx:102
 msgid "Linked to {0} in {1}"
