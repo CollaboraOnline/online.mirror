@@ -72,23 +72,6 @@ public:
     sal_Int32 GetLineNumber() const;
 };
 
-class ExportDialog : public weld::GenericDialogController
-{
-private:
-    bool m_bExportAsPackage;
-
-    std::unique_ptr<weld::RadioButton> m_xExportAsPackageButton;
-    std::unique_ptr<weld::Button> m_xOKButton;
-
-    DECL_LINK(OkButtonHandler, weld::Button&, void);
-
-public:
-    explicit ExportDialog(weld::Window * pParent);
-    virtual ~ExportDialog() override;
-
-    bool isExportAsPackage () const { return m_bExportAsPackage; }
-};
-
 class LibDialog : public weld::GenericDialogController
 {
 private:
@@ -200,8 +183,6 @@ public:
 void implExportLib(const ScriptDocument& rScriptDocument, const OUString& aLibName,
                    const OUString& aTargetURL,
                    const cpo::uno::Reference<css::task::XInteractionHandler>& Handler);
-void ExportAsPackage(const ScriptDocument& rScriptDocument, const OUString& aLibName,
-                     weld::Dialog* pDialog);
 void ExportAsBasic(const ScriptDocument& rScriptDocument, const OUString& aLibName,
                    weld::Dialog* pDialog);
 

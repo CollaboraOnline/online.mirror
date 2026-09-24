@@ -40,7 +40,6 @@ modules/BasicIDE/ui/managebreakpoints.ui
 modules/BasicIDE/ui/basicmacrodialog.ui
 modules/BasicIDE/ui/newlibdialog.ui
 modules/BasicIDE/ui/gotolinedialog.ui
-modules/BasicIDE/ui/exportdialog.ui
 modules/BasicIDE/ui/importlibdialog.ui
 modules/BasicIDE/ui/managelanguages.ui
 modules/BasicIDE/ui/defaultlanguage.ui

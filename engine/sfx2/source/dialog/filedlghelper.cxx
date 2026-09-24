@@ -2374,8 +2374,6 @@ OUString FileDialogHelper::contextToString(Context context)
             return u"AutoRedact"_ustr;
         case BasicExportDialog:
             return u"BasicExportDialog"_ustr;
-        case BasicExportPackage:
-            return u"BasicExportPackage"_ustr;
         case BasicExportSource:
             return u"BasicExportSource"_ustr;
         case BasicImportDialog:

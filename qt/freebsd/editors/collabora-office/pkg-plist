@@ -1799,7 +1799,6 @@ lib/collaboraoffice/share/config/soffice.cfg/modules/BasicIDE/ui/dialogpage.ui
 lib/collaboraoffice/share/config/soffice.cfg/modules/BasicIDE/ui/dockingorganizer.ui
 lib/collaboraoffice/share/config/soffice.cfg/modules/BasicIDE/ui/dockingstack.ui
 lib/collaboraoffice/share/config/soffice.cfg/modules/BasicIDE/ui/dockingwatch.ui
-lib/collaboraoffice/share/config/soffice.cfg/modules/BasicIDE/ui/exportdialog.ui
 lib/collaboraoffice/share/config/soffice.cfg/modules/BasicIDE/ui/gotolinedialog.ui
 lib/collaboraoffice/share/config/soffice.cfg/modules/BasicIDE/ui/importlibdialog.ui
 lib/collaboraoffice/share/config/soffice.cfg/modules/BasicIDE/ui/libpage.ui

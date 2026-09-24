@@ -28,8 +28,6 @@
 #include <basobj.hxx>
 #include <basctl/basctldllpublic.hxx>
 #include <svx/passwd.hxx>
-#include <ucbhelper/content.hxx>
-#include <rtl/uri.hxx>
 #include <sfx2/app.hxx>
 #include <sfx2/dispatch.hxx>
 #include <sfx2/filedlghelper.hxx>
@@ -43,7 +41,6 @@
 #include <vcl/svapp.hxx>
 #include <vcl/weld.hxx>
 
-#include <com/sun/star/io/Pipe.hpp>
 #include <com/sun/star/ui/dialogs/XFilePicker.hpp>
 #include <com/sun/star/ui/dialogs/XFolderPicker.hpp>
 #include <com/sun/star/ui/dialogs/TemplateDescription.hpp>
@@ -52,16 +49,12 @@
 #include <com/sun/star/script/XLibraryContainer.hpp>
 #include <com/sun/star/task/InteractionHandler.hpp>
 #include <com/sun/star/ucb/SimpleFileAccess.hpp>
-#include <com/sun/star/ucb/XCommandEnvironment.hpp>
-#include <com/sun/star/ucb/NameClash.hpp>
-#include <com/sun/star/packages/manifest/ManifestWriter.hpp>
 #include <unotools/pathoptions.hxx>
 
 #include <com/sun/star/util/VetoException.hpp>
 #include <com/sun/star/script/ModuleSizeExceededRequest.hpp>
 
 #include <comphelper/processfactory.hxx>
-#include <comphelper/propertysequence.hxx>
 #include <cppuhelper/implbase.hxx>
 #include <o3tl/string_view.hxx>
 
@@ -197,27 +190,6 @@ IMPL_LINK_NOARG(GotoLineDialog, OkButtonHandler, weld::Button&, void)
         m_xSpinButton->set_value(m_nCurLine);
         m_xSpinButton->select_region(0, -1);
     }
-}
-
-// ExportDialog
-IMPL_LINK_NOARG(ExportDialog, OkButtonHandler, weld::Button&, void)
-{
-    m_bExportAsPackage = m_xExportAsPackageButton->get_active();
-    m_xDialog->response(RET_OK);
-}
-
-ExportDialog::ExportDialog(weld::Window * pParent)
-    : GenericDialogController(pParent, u"modules/BasicIDE/ui/exportdialog.ui"_ustr, u"ExportDialog"_ustr)
-    , m_bExportAsPackage(false)
-    , m_xExportAsPackageButton(m_xBuilder->weld_radio_button(u"extension"_ustr))
-    , m_xOKButton(m_xBuilder->weld_button(u"ok"_ustr))
-{
-    m_xExportAsPackageButton->set_active(true);
-    m_xOKButton->connect_clicked(LINK(this, ExportDialog, OkButtonHandler));
-}
-
-ExportDialog::~ExportDialog()
-{
 }
 
 // LibPage
@@ -965,20 +937,9 @@ void Export(const ScriptDocument& rDocument, const OUString& aLibName, weld::Dia
             return;
     }
 
-    std::unique_ptr<ExportDialog> xNewDlg(new ExportDialog(pDialog));
-    if (xNewDlg->run() != RET_OK)
-        return;
-
     try
     {
-        bool bExportAsPackage = xNewDlg->isExportAsPackage();
-        //tdf#112063 ensure closing xNewDlg is not selected as
-        //parent of file dialog from ExportAs...
-        xNewDlg.reset();
-        if (bExportAsPackage)
-            ExportAsPackage(rDocument, aLibName, pDialog);
-        else
-            ExportAsBasic(rDocument, aLibName, pDialog);
+        ExportAsBasic(rDocument, aLibName, pDialog);
     }
     catch(const util::VetoException& ) // user canceled operation
     {
@@ -1000,142 +961,6 @@ void implExportLib(const ScriptDocument& rScriptDocument, const OUString& aLibNa
     if (!xDlgLibContainerExport->hasByName(aLibName))
         return;
     xDlgLibContainerExport->exportLibrary(aLibName, aTargetURL, Handler);
-}
-
-// Implementation XCommandEnvironment
-
-namespace {
-
-class OLibCommandEnvironment : public cppu::WeakImplHelper< XCommandEnvironment >
-{
-    Reference< task::XInteractionHandler > mxInteraction;
-
-public:
-    explicit OLibCommandEnvironment(const Reference<task::XInteractionHandler>& xInteraction)
-        : mxInteraction( xInteraction )
-    {}
-
-    // Methods
-    virtual Reference< task::XInteractionHandler > getInteractionHandler() override;
-    virtual Reference< XProgressHandler > getProgressHandler() override;
-};
-
-}
-
-Reference< task::XInteractionHandler > OLibCommandEnvironment::getInteractionHandler()
-{
-    return mxInteraction;
-}
-
-Reference< XProgressHandler > OLibCommandEnvironment::getProgressHandler()
-{
-    Reference< XProgressHandler > xRet;
-    return xRet;
-}
-
-void ExportAsPackage(const ScriptDocument& rScriptDocument, const OUString& aLibName,
-                     weld::Dialog* pDialog)
-{
-    EnsureIde();
-    // file open dialog
-    sfx2::FileDialogHelper aDlg(ui::dialogs::TemplateDescription::FILESAVE_SIMPLE,
-                                FileDialogFlags::NONE, pDialog);
-    aDlg.SetContext(sfx2::FileDialogHelper::BasicExportPackage);
-    const Reference <XFilePicker>& xFP = aDlg.GetFilePicker();
-
-    const Reference< cpo::uno::XComponentContext >& xContext( ::comphelper::getProcessComponentContext() );
-    Reference< task::XInteractionHandler2 > xHandler( task::InteractionHandler::createWithParent(xContext, nullptr) );
-    Reference< XSimpleFileAccess > xSFA = SimpleFileAccess::create(xContext);
-
-    xFP->setTitle(IDEResId(RID_STR_EXPORTPACKAGE));
-
-    // filter
-    OUString aTitle(IDEResId(RID_STR_PACKAGE_BUNDLE));
-    xFP->appendFilter( aTitle, u"*.oxt"_ustr ); // library files
-
-    xFP->setCurrentFilter( aTitle );
-
-    if ( xFP->execute() != RET_OK )
-        return;
-
-    GetExtraData()->SetAddLibPath(xFP->getDisplayDirectory());
-
-    Sequence< OUString > aFiles = xFP->getSelectedFiles();
-    INetURLObject aURL( aFiles[0] );
-    if( aURL.getExtension().isEmpty() )
-        aURL.setExtension( u"oxt" );
-
-    OUString aPackageURL( aURL.GetMainURL( INetURLObject::DecodeMechanism::NONE ) );
-
-    OUString aTmpPath = SvtPathOptions().GetTempPath();
-    INetURLObject aInetObj( aTmpPath );
-    aInetObj.insertName( aLibName, true, INetURLObject::LAST_SEGMENT, INetURLObject::EncodeMechanism::All );
-    OUString aSourcePath = aInetObj.GetMainURL( INetURLObject::DecodeMechanism::NONE );
-    if( xSFA->exists( aSourcePath ) )
-        xSFA->kill( aSourcePath );
-    Reference< task::XInteractionHandler > xDummyHandler( new DummyInteractionHandler( xHandler ) );
-    implExportLib(rScriptDocument, aLibName, aTmpPath, xDummyHandler);
-
-    Reference< XCommandEnvironment > xCmdEnv = new OLibCommandEnvironment(xHandler);
-
-    ::ucbhelper::Content sourceContent( aSourcePath, xCmdEnv, comphelper::getProcessComponentContext() );
-
-    OUString destFolder = "vnd.sun.star.zip://" +
-                          ::rtl::Uri::encode( aPackageURL,
-                                              rtl_UriCharClassRegName,
-                                              rtl_UriEncodeIgnoreEscapes,
-                                              RTL_TEXTENCODING_UTF8 ) +
-                          "/";
-
-    if( xSFA->exists( aPackageURL ) )
-        xSFA->kill( aPackageURL );
-
-    ::ucbhelper::Content destFolderContent( destFolder, xCmdEnv, comphelper::getProcessComponentContext() );
-    destFolderContent.transferContent(
-        sourceContent, ::ucbhelper::InsertOperation::Copy,
-        OUString(), NameClash::OVERWRITE );
-
-    INetURLObject aMetaInfInetObj( aTmpPath );
-    aMetaInfInetObj.insertName( u"META-INF",
-        true, INetURLObject::LAST_SEGMENT, INetURLObject::EncodeMechanism::All );
-    OUString aMetaInfFolder = aMetaInfInetObj.GetMainURL( INetURLObject::DecodeMechanism::NONE );
-    if( xSFA->exists( aMetaInfFolder ) )
-        xSFA->kill( aMetaInfFolder );
-    xSFA->createFolder( aMetaInfFolder );
-
-    std::vector< Sequence<beans::PropertyValue> > manifest;
-
-    OUString fullPath = aLibName
-                      + "/" ;
-    auto attribs(::comphelper::InitPropertySequence({
-        { u"FullPath"_ustr, Any(fullPath) },
-        { u"MediaType"_ustr, Any(u"application/vnd.sun.star.basic-library"_ustr) }
-    }));
-    manifest.push_back( attribs );
-
-    // write into pipe:
-    Reference<packages::manifest::XManifestWriter> xManifestWriter = packages::manifest::ManifestWriter::create( xContext );
-    Reference<io::XOutputStream> xPipe( io::Pipe::create( xContext ), UNO_QUERY_THROW );
-    xManifestWriter->writeManifestSequence(
-        xPipe, Sequence< Sequence<beans::PropertyValue> >(
-            manifest.data(), manifest.size() ) );
-
-    aMetaInfInetObj.insertName( u"manifest.xml",
-        true, INetURLObject::LAST_SEGMENT, INetURLObject::EncodeMechanism::All );
-
-    // write buffered pipe data to content:
-    ::ucbhelper::Content manifestContent( aMetaInfInetObj.GetMainURL( INetURLObject::DecodeMechanism::NONE ), xCmdEnv, comphelper::getProcessComponentContext() );
-    manifestContent.writeStream( Reference<io::XInputStream>( xPipe, UNO_QUERY_THROW ), true );
-
-    ::ucbhelper::Content MetaInfContent( aMetaInfFolder, xCmdEnv, comphelper::getProcessComponentContext() );
-    destFolderContent.transferContent(
-        MetaInfContent, ::ucbhelper::InsertOperation::Copy,
-        OUString(), NameClash::OVERWRITE );
-
-    if( xSFA->exists( aSourcePath ) )
-        xSFA->kill( aSourcePath );
-    if( xSFA->exists( aMetaInfFolder ) )
-        xSFA->kill( aMetaInfFolder );
 }
 
 void ExportAsBasic(const ScriptDocument& rScriptDocument, const OUString& aLibName,
