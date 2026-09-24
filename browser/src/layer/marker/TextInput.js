@@ -390,9 +390,10 @@ window.L.TextInput = window.L.Layer.extend({
 	},
 
 	_wrapContent: function(content) {
-		var wrappedContent = this.hasAccessibilitySupport()
-			? '<span id="readable-content" aria-hidden="false">' + content + '</span>'
-			: content;
+		const escapedContent = app.LOUtil.escapeHtml(content);
+		const wrappedContent = this.hasAccessibilitySupport()
+			? '<span id="readable-content" aria-hidden="false">' + escapedContent + '</span>'
+			: escapedContent;
 		return content.length === 0
 			? this._initialContent
 			: this._preSpaceChar + wrappedContent + this._postSpaceChar;
