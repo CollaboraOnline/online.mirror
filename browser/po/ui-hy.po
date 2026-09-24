@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-24 06:16+0000\n"
+"PO-Revision-Date: 2026-09-24 12:52+0000\n"
 "Last-Translator: tigran54 <tigran@flib.sci.am>\n"
 "Language-Team: Armenian <https://hosted.weblate.org/projects/collabora-"
 "online/collabora-ui/hy/>\n"
@@ -5801,23 +5801,23 @@ msgstr "Ընտրեք {0}-ի սահիկները"
 
 #: src/control/Control.SlideLinkToolbar.tsx:102
 msgid "Linked to {0} in {1}"
-msgstr ""
+msgstr "Կապված է {0}-ի հետ {1}-ում"
 
 #: src/control/Control.SlideLinkToolbar.tsx:126
 msgid "Hide the actions for this linked slide"
-msgstr ""
+msgstr "Թաքցնել այս կապված սահիկի գործողությունները"
 
 #: src/control/Control.SlideLinkToolbar.tsx:127
 msgid "Show the actions for this linked slide"
-msgstr ""
+msgstr "Ցուցադրել այս կապված սահիկի գործողությունները"
 
 #: src/control/Control.SlideLinkToolbar.tsx:137
 msgid "Unlink"
-msgstr ""
+msgstr "Հանել կապը"
 
 #: src/control/Control.SlideLinkToolbar.tsx:161
 msgid "Not available"
-msgstr ""
+msgstr "Հասանելի չէ"
 
 #: src/control/SlideSectionHeader.tsx:68
 msgid "Toggle section %1"
@@ -5842,7 +5842,7 @@ msgstr "Այս ներկայացման ոչ մի սահիկ կապված չէ ա�
 
 #: src/slideimport/SlideLinks.ts:275
 msgid "This slide is not linked to another file."
-msgstr ""
+msgstr "Այս սահիկը կապված չէ այլ նիշքի հետ։"
 
 #: src/slideimport/SlideLinks.ts:426 src/slideimport/SlideLinks.ts:738
 msgid ""
@@ -5881,9 +5881,8 @@ msgid "Cannot update slide {0}: the source lacks matching slide"
 msgstr "Հնարավոր չէ թարմացնել սահիկ {0}-ը. աղբյուրում համապատասխան սահիկ չկա"
 
 #: src/slideimport/SlideLinks.ts:684
-#, fuzzy
 msgid "Unlinking the slide failed."
-msgstr "Սահիկների զետեղումը ձախողվեց։"
+msgstr "Սահիկի կապի հանումը ձախողվեց։"
 
 #: src/slideimport/SlideLinks.ts:695 src/slideimport/SlideLinks.ts:756
 msgid "Updating the slides of {0} failed."
@@ -5928,17 +5927,20 @@ msgid "No problems with SSL verification detected"
 msgstr "SSL նույնականացման հետ կապված խնդիրներ չեն հայտնաբերվել"
 
 #: src/control/Control.ServerAuditDialog.ts:78
-#, fuzzy
 msgid "Each document is securely contained (landlock)"
-msgstr "Յուրաքանչյուր փաստաթուղթ անվտանգ կերպով պահվում է"
+msgstr ""
+"Յուրաքանչյուր փաստաթուղթ անվտանգ սահմանափակված է (ցամաքային սահմաններով)"
 
 #: src/control/Control.ServerAuditDialog.ts:83
 msgid "Each document is securely contained (Linux namespaces)"
 msgstr ""
+"Յուրաքանչյուր փաստաթուղթ անվտանգ կերպով պահվում է (Linux անվանատարածքներ)"
 
 #: src/control/Control.ServerAuditDialog.ts:88
 msgid "Each document is securely contained (capabilities and chroot)"
 msgstr ""
+"Յուրաքանչյուր փաստաթուղթ անվտանգ կերպով պարունակվում է (կարողություններ և "
+"chroot)"
 
 #: src/control/Control.ServerAuditDialog.ts:102
 msgid "System call security filtering enabled"
@@ -5955,6 +5957,8 @@ msgstr "Արագ kit jail ամրացման միացումը միացված է"
 #: src/control/Control.ServerAuditDialog.ts:133
 msgid "Fast kit jail setup with landlock, nothing to copy or mount"
 msgstr ""
+"Արագ հավաքածու բանտի տեղադրում ցամաքային փակուղով, պատճենելու կամ տեղադրելու "
+"ոչինչ չկա"
 
 #: src/control/Control.ServerAuditDialog.ts:146
 msgid "Poorly performing proxying of all network requests."
@@ -7404,11 +7408,11 @@ msgstr "Խմբագրման ռեժիմ"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:70
 msgid "Last Custom Value"
-msgstr ""
+msgstr "Վերջին անհատականացված արժեքը"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:134
 msgid "Custom Line Thickness:"
-msgstr ""
+msgstr "Անհատականացված գծի հաստություն:"
 
 #: src/control/jsdialog/Widget.MobileBorderSelector.js:111
 msgid "Cell borders"
