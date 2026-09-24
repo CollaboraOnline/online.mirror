@@ -517,15 +517,13 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		if (children.length >= 3 && children[1].nodeName === '#text') {
 			if (children.length === 3) {
 				// When typing in an empty paragraph, we get <img>H<img>
-				var htmlContent = this.getHTML();
-				htmlContent = htmlContent.slice(this._preSpaceChar.length, -this._postSpaceChar.length);
-				this.setHTML(htmlContent);
+				this.setHTML(children[1].textContent);
 			}
 			else if (children.length === 4 && children[2].id === 'readable-content') {
 				// When typing, let's say 'k', at beginning of a not empty paragraph,
 				// we get: <img>k<span>Hello World</span><img>
 				var newText = children[1].textContent;
-				children[2].innerHTML = newText + children[2].innerHTML;
+				children[2].textContent = newText + children[2].textContent;
 				this._textArea.removeChild(children[1]);
 			}
 		}
