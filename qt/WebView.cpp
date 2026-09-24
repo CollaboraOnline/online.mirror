@@ -392,6 +392,12 @@ void CODAWebEngineView::arrangePresentationWindows()
 namespace
 {
 
+// The file: URL of a local path, in the form the kit parses.
+QString fileUri(const QString& path)
+{
+    return QString::fromStdString(Poco::URI(Poco::Path(path.toStdString())).toString());
+}
+
 // Collect the local filesystem paths of any files dragged in from the OS.
 QStringList droppedLocalFiles(const QMimeData* mimeData)
 {
@@ -443,8 +449,12 @@ QStringList hostDisplayUris(const QStringList& portalFiles, const QMimeData* mim
 
     QHash<QString, QString> hostUriByName;
     for (const QUrl& url : mimeData->urls())
-        if (url.isLocalFile())
-            hostUriByName.insert(QFileInfo(url.toLocalFile()).fileName(), url.toString());
+    {
+        if (!url.isLocalFile())
+            continue;
+        const QString hostPath = url.toLocalFile();
+        hostUriByName.insert(QFileInfo(hostPath).fileName(), fileUri(hostPath));
+    }
 
     QStringList displayUris;
     displayUris.reserve(portalFiles.size());
