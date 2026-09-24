@@ -8,12 +8,12 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-13 08:15+0000\n"
-"Last-Translator: Nobody 12345 <nobody_12345@users.noreply.hosted.weblate.org>"
+"PO-Revision-Date: 2026-09-24 13:47+0000\n"
+"Last-Translator: QuietCedar47 <quietcedar47@users.noreply.hosted.weblate.org>"
 "\n"
 "Language-Team: Chinese (Simplified Han script) <https://hosted.weblate.org/"
 "projects/collabora-online/collabora-ui/zh_Hans/>\n"
-"Language: \n"
+"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -5570,9 +5570,8 @@ msgid "Close slide import"
 msgstr "关闭幻灯片导入面板"
 
 #: src/control/Control.SlideImportPane.tsx:996
-#, fuzzy
 msgid "Add presentation…"
-msgstr "添加演示文稿..."
+msgstr "添加演示文稿…"
 
 #: src/control/Control.SlideImportPane.tsx:1011
 msgid "No presentations yet"
