@@ -74,7 +74,7 @@ window.L.Map.include({
 			'<img id="unlock-image">',
 			'<div class="item">',
 			'<h1>' + this.Locking.unlockTitle + '</h1>',
-			'<p>' + this.Locking.unlockDescription + '<p>',
+			'<p>' + this.Locking.unlockDescription + '</p>',
 			'<ul>',
 		];
 		var highlights = [this.Locking.writerHighlights, this.Locking.calcHighlights, this.Locking.impressHighlights, this.Locking.drawHighlights];
