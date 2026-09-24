@@ -93,6 +93,16 @@ namespace cool {
 			);
 		}
 
+		/// How long the transform makes a step of one along the x axis.
+		lengthOfXAxis(): number {
+			return Math.hypot(this.a, this.b);
+		}
+
+		/// How long the transform makes a step of one along the y axis.
+		lengthOfYAxis(): number {
+			return Math.hypot(this.c, this.d);
+		}
+
 		/// The angle in radians the transform turns the x axis by, as the canvas counts angles.
 		rotation(): number {
 			return Math.atan2(this.b, this.a);

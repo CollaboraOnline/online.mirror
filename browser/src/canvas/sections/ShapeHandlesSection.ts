@@ -1129,6 +1129,15 @@ class ShapeHandlesSection extends CanvasSectionObject {
 			canDrag = deleteRowsState ? deleteRowsState === 'disabled': true;
 		}
 
+		// A view that draws from objects carries the selection in the section that draws the
+		// handles, so a drag that lands here does nothing at all. Cropping an image still runs
+		// here, and so does everything while the document is drawn from tiles.
+		if (
+			RenderManager.isVectorRendering() &&
+			GraphicSelection.extraInfo?.isCropMode !== true
+		)
+			return;
+
 		if (this.containerObject.isDraggingSomething() && canDrag) {
 			this.constrainDragToSheetArea(dragDistance);
 

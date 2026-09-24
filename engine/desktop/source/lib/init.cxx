@@ -11,7 +11,13 @@
 #include <sal/types.h>
 #include <svx/sdr/contact/viewcontact.hxx>
 #include <svx/svdpage.hxx>
+#include <svx/svdoashp.hxx>
+#include <svx/svdglue.hxx>
 #include <svx/svdopath.hxx>
+#include <cmath>
+
+#include <basegfx/matrix/b2dhommatrixtools.hxx>
+#include <basegfx/numeric/ftools.hxx>
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
 #include <svx/svdpagv.hxx>
 #include <config_buildconfig.h>
@@ -196,6 +202,9 @@
 #include <svx/svdmodel.hxx>
 #include <svx/svdoutl.hxx>
 #include <svx/svdview.hxx>
+#include <svx/svddrag.hxx>
+#include <svx/svdhdl.hxx>
+#include <svx/svdundo.hxx>
 #include <svx/svxids.hrc>
 #include <svx/ucsubset.hxx>
 #include <vcl/vclevent.hxx>
@@ -6746,13 +6755,33 @@ void COKitDocumentImpl::setObjectGluePoint(unsigned long long nObjectId, int nAt
 }
 
 /*
+    The same mapping with its shear turned over. The base geometry of an object holds the shear
+    one way and the object lays itself out with it the other way round, so whoever crosses between
+    the two goes through here. A mapping without shear comes back as it went in.
+*/
+static basegfx::B2DHomMatrix lcl_turnTheShearOver(const basegfx::B2DHomMatrix& rMatrix)
+{
+    basegfx::B2DTuple aScale;
+    basegfx::B2DTuple aTranslate;
+    double fRotate(0.0);
+    double fShearX(0.0);
+    rMatrix.decompose(aScale, aTranslate, fRotate, fShearX);
+
+    if (basegfx::fTools::equalZero(fShearX))
+        return rMatrix;
+
+    return basegfx::utils::createScaleShearXRotateTranslateB2DHomMatrix(aScale, -fShearX, fRotate,
+                                                                        aTranslate);
+}
+
+/*
     Lays a change over drawing objects: the client works out what a drag does and hands over the
     change itself, rather than asking for a handle to be moved. Every object keeps what it is and
     only its place, its size, its turn and its shear follow the change, all of it in one step to
     undo.
 */
-void COKitDocumentImpl::setObjectTransform(const char* pObjectIds,
-                                           const char* pChange, const char* pWhat)
+void COKitDocumentImpl::setObjectTransform(const char* pMappings,
+                                           const char* pWhat)
 {
     comphelper::ProfileZone aZone("COKitDocumentImpl::setObjectTransform");
 
@@ -6770,63 +6799,374 @@ void COKitDocumentImpl::setObjectTransform(const char* pObjectIds,
         return;
     }
 
-    const OString aChange(pChange ? pChange : "");
-    double aNumber[6] = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
-    sal_Int32 nField = 0;
-    for (double& rNumber : aNumber)
-    {
-        if (nField < 0)
-        {
-            SetLastExceptionMsg(u"A change is six numbers"_ustr);
-            return;
-        }
-
-        rNumber = o3tl::toDouble(o3tl::getToken(aChange, 0, ',', nField));
-    }
-
-    /*
-        The change arrives in twips, as the client sees the page, and the model holds the page in
-        its own unit. The same change in that unit is the one with its own units taken off and the
-        model's put on, which leaves what it does to a length as it was and scales what it moves.
-    */
-    const double fToModel(o3tl::convert(1.0, o3tl::Length::twip, o3tl::Length::mm100));
-    basegfx::B2DHomMatrix aChangeInModel(aNumber[0], aNumber[2], aNumber[4] * fToModel,
-                                         aNumber[1], aNumber[3], aNumber[5] * fToModel);
-
-    std::vector<SdrObject*> aObjects;
-    const OString aIds(pObjectIds ? pObjectIds : "");
-    for (sal_Int32 nAt = 0; nAt >= 0;)
-    {
-        const OString aId(aIds.getToken(0, ',', nAt));
-        if (aId.isEmpty())
-            continue;
-
-        if (SdrObject* pObject = pPage->FindObjectByUniqueID(aId.toUInt64()))
-            aObjects.push_back(pObject);
-    }
-
-    if (aObjects.empty())
-    {
-        SetLastExceptionMsg(u"No object of those ids is on the page"_ustr);
-        return;
-    }
-
     const OString aWhat(pWhat ? pWhat : "");
     const TranslateId aStep(aWhat == "turn"    ? STR_DragMethRotate
                             : aWhat == "scale" ? STR_DragMethResize
                                                : STR_DragMethMove);
 
-    SdrModel& rModel(aObjects.front()->getSdrModelFromSdrObject());
-    rModel.BegUndo(SvxResId(aStep));
+    // The mappings arrive in twips and the model holds the page in its own unit. A mapping takes
+    // the object's own square, which has no unit of its own, so all six numbers are lengths.
+    const double fToModel(o3tl::convert(1.0, o3tl::Length::twip, o3tl::Length::mm100));
 
-    for (SdrObject* pObject : aObjects)
+    SdrModel* pModel = nullptr;
+    bool bBegun = false;
+
+    const OString aAll(pMappings ? pMappings : "");
+    for (sal_Int32 nAt = 0; nAt >= 0;)
     {
+        const OString aOne(aAll.getToken(0, ';', nAt));
+        if (aOne.isEmpty())
+            continue;
+
+        sal_Int32 nField = 0;
+        const OString aId(aOne.getToken(0, ',', nField));
+        double aNumber[6] = { 1.0, 0.0, 0.0, 1.0, 0.0, 0.0 };
+        bool bWholeMapping = true;
+
+        for (double& rNumber : aNumber)
+        {
+            if (nField < 0)
+            {
+                bWholeMapping = false;
+                break;
+            }
+
+            rNumber = o3tl::toDouble(o3tl::getToken(aOne, 0, ',', nField)) * fToModel;
+        }
+
+        SdrObject* pObject = bWholeMapping ? pPage->FindObjectByUniqueID(aId.toUInt64()) : nullptr;
+        if (!pObject)
+            continue;
+
+        const basegfx::B2DHomMatrix aWanted(aNumber[0], aNumber[2], aNumber[4], aNumber[1],
+                                            aNumber[3], aNumber[5]);
+
         basegfx::B2DHomMatrix aOfTheObject;
         basegfx::B2DPolyPolygon aOutline;
-        pObject->TRGetBaseGeometry(aOfTheObject, aOutline);
+        const bool bCarriesItsOwnOutline(pObject->TRGetBaseGeometry(aOfTheObject, aOutline));
 
-        rModel.AddUndo(rModel.GetSdrUndoFactory().CreateUndoGeoObject(*pObject));
-        pObject->TRSetBaseGeometry(aChangeInModel * aOfTheObject, aOutline);
+        /*
+            An object holds the shear the other way round from the way it is drawn, and the
+            mapping arrives in the way it is drawn, so it is turned over before the object is
+            given it.
+        */
+        const basegfx::B2DHomMatrix aReached(lcl_turnTheShearOver(aWanted));
+
+        /*
+            An object that carries an outline of its own is given that outline at the size it is
+            to have: the size in the mapping is not read for such an object, the outline is what
+            says how large it is. So the outline is made larger or smaller by as much as the
+            mapping grew.
+        */
+        if (bCarriesItsOwnOutline)
+        {
+            basegfx::B2DTuple aWas;
+            basegfx::B2DTuple aBecomes;
+            basegfx::B2DTuple aTranslate;
+            double fRotate(0.0);
+            double fShearX(0.0);
+            aOfTheObject.decompose(aWas, aTranslate, fRotate, fShearX);
+            aReached.decompose(aBecomes, aTranslate, fRotate, fShearX);
+
+            /*
+                How much larger the object became, without the sign: an object that is turned
+                over has a size that counts backwards, and the mirroring is done by the object
+                itself when it is given the mapping, so doing it to the outline as well would
+                turn it over twice.
+            */
+            const double fAcross(basegfx::fTools::equalZero(aWas.getX())
+                                     ? 1.0
+                                     : std::abs(aBecomes.getX() / aWas.getX()));
+            const double fDown(basegfx::fTools::equalZero(aWas.getY())
+                                   ? 1.0
+                                   : std::abs(aBecomes.getY() / aWas.getY()));
+
+            if (!basegfx::fTools::equal(fAcross, 1.0) || !basegfx::fTools::equal(fDown, 1.0))
+                aOutline.transform(basegfx::utils::createScaleB2DHomMatrix(fAcross, fDown));
+        }
+
+        if (!bBegun)
+        {
+            pModel = &pObject->getSdrModelFromSdrObject();
+            pModel->BegUndo(SvxResId(aStep));
+            bBegun = true;
+        }
+
+        pModel->AddUndo(pModel->GetSdrUndoFactory().CreateUndoGeoObject(*pObject));
+
+        // The way a shape says it faces is kept among its attributes rather than in its
+        // geometry, so putting it back takes an undo of its own.
+        if (nullptr != dynamic_cast<const SdrObjCustomShape*>(pObject))
+            pModel->AddUndo(pModel->GetSdrUndoFactory().CreateUndoAttrObject(*pObject));
+
+        /*
+            A shape keeps the way it faces apart from its mapping, and being given a mapping does
+            not reliably take that off again. It is taken off here, so that the mapping is read
+            as the whole of where the shape stands rather than on top of the way it already
+            faced: the shape is turned back about its own middle, and then told that it faces
+            the plain way, whichever of the two the turning back left behind.
+
+            The points to tie a connector to are turned along with the shape, and the mapping
+            that follows turns them a second time, about a line of its own. The shape wants both
+            turns and the points want neither, so they are put back as they stood and left to
+            the mapping alone.
+        */
+        if (auto* pFacingShape = dynamic_cast<SdrObjCustomShape*>(pObject))
+        {
+            if (pFacingShape->IsMirroredX() || pFacingShape->IsMirroredY())
+            {
+                std::optional<SdrGluePointList> aPointsAsTheyStood;
+                if (const SdrGluePointList* pPoints = pFacingShape->GetGluePointList())
+                    aPointsAsTheyStood = *pPoints;
+
+                const Point aMiddle(pFacingShape->GetSnapRect().Center());
+
+                if (pFacingShape->IsMirroredX())
+                {
+                    pFacingShape->NbcMirror(aMiddle, Point(aMiddle.X(), aMiddle.Y() + 1000));
+                    pFacingShape->SetMirroredX(false);
+                }
+
+                if (pFacingShape->IsMirroredY())
+                {
+                    pFacingShape->NbcMirror(aMiddle, Point(aMiddle.X() + 1000, aMiddle.Y()));
+                    pFacingShape->SetMirroredY(false);
+                }
+
+                if (aPointsAsTheyStood)
+                {
+                    if (SdrGluePointList* pPoints = pFacingShape->ForceGluePointList())
+                        *pPoints = *aPointsAsTheyStood;
+                }
+            }
+        }
+
+        pObject->TRSetBaseGeometry(aReached, aOutline);
+
+        /*
+            A mapping that turns the object over can be read in two ways - as mirrored across the
+            one axis, or as mirrored across the other and turned half way round - and the object
+            is rebuilt from a rectangle at the corner, so the two do not put it in the same place.
+            Which of the two is chosen is not ours to say, so the object is asked where it ended
+            up and moved by what is missing. The middle is what is compared, since it is the one
+            place that does not depend on which corner the mapping starts from.
+        */
+        basegfx::B2DHomMatrix aEnded;
+        basegfx::B2DPolyPolygon aEndedOutline;
+        pObject->TRGetBaseGeometry(aEnded, aEndedOutline);
+
+        const basegfx::B2DPoint aWantedMiddle(aWanted * basegfx::B2DPoint(0.5, 0.5));
+        const basegfx::B2DPoint aEndedMiddle(lcl_turnTheShearOver(aEnded)
+                                             * basegfx::B2DPoint(0.5, 0.5));
+        const basegfx::B2DVector aMissing(aWantedMiddle - aEndedMiddle);
+
+        if (!aMissing.equalZero())
+            pObject->Move(Size(basegfx::fround<tools::Long>(aMissing.getX()),
+                               basegfx::fround<tools::Long>(aMissing.getY())));
+
+        // The object is laid out again, and whoever holds it is told that it changed.
+        pObject->SetChanged();
+        pObject->BroadcastObjectChange();
+    }
+
+    if (bBegun)
+        pModel->EndUndo();
+    else
+        SetLastExceptionMsg(u"No object of those ids is on the page"_ustr);
+}
+
+/*
+    Moves one of the points a custom shape is shaped by. The shape reads such a point as the value
+    it shapes itself from, and holds it to whatever that value may be, so the place asked for here
+    is a wish and the shape says what comes of it.
+*/
+void COKitDocumentImpl::setObjectControlPoint(unsigned long long nObjectId,
+                                              int nAt, int nX, int nY, bool bWithTheShape)
+{
+    comphelper::ProfileZone aZone("COKitDocumentImpl::setObjectControlPoint");
+
+    SolarMutexGuard aGuard;
+    SetLastExceptionMsg();
+
+    SfxViewShell* pViewShell = SfxViewShell::Current();
+    SdrView* pView = pViewShell ? pViewShell->GetDrawView() : nullptr;
+    SdrPageView* pPageView = pView ? pView->GetSdrPageView() : nullptr;
+    const SdrPage* pPage = pPageView ? pPageView->GetPage() : nullptr;
+
+    if (!pPage)
+    {
+        SetLastExceptionMsg(u"The view shows no page to shape an object on"_ustr);
+        return;
+    }
+
+    SdrObjCustomShape* pShape
+        = dynamic_cast<SdrObjCustomShape*>(pPage->FindObjectByUniqueID(nObjectId));
+
+    if (!pShape || nAt < 0)
+    {
+        SetLastExceptionMsg(u"No object of that id is a shape with points to shape it by"_ustr);
+        return;
+    }
+
+    // The place arrives in twips and the model holds the page in its own unit.
+    const Point aWhereTo(o3tl::convert(tools::Long(nX), o3tl::Length::twip, o3tl::Length::mm100),
+                         o3tl::convert(tools::Long(nY), o3tl::Length::twip, o3tl::Length::mm100));
+
+    SdrModel& rModel(pShape->getSdrModelFromSdrObject());
+    rModel.BegUndo(SvxResId(STR_DragMethMove));
+    rModel.AddUndo(rModel.GetSdrUndoFactory().CreateUndoAttrObject(*pShape));
+    rModel.AddUndo(rModel.GetSdrUndoFactory().CreateUndoGeoObject(*pShape));
+
+    pShape->DragMoveCustomShapeHdl(aWhereTo, static_cast<sal_uInt16>(nAt), bWithTheShape);
+    pShape->SetBoundAndSnapRectsDirty();
+    pShape->InvalidateRenderGeometry();
+    pShape->SetChanged();
+    pShape->BroadcastObjectChange();
+
+    rModel.EndUndo();
+}
+
+/** Moves one handle of an object to where it was let go, by naming the object and the handle
+    rather than by what a view has selected.
+
+    The object reads such a move its own way - a corner radius, an angle, the offset of a
+    measurement - and the drawing layer reaches all of that through the drag the object does
+    itself. So that drag is run here, from the handle's own place to the place asked for, with
+    nothing selected anywhere.
+ */
+void COKitDocumentImpl::setObjectHandle(unsigned long long nObjectId, int nKind,
+                                        int nPolygon, int nPoint, int nAt, int nX, int nY)
+{
+    comphelper::ProfileZone aZone("COKitDocumentImpl::setObjectHandle");
+
+    SolarMutexGuard aGuard;
+    SetLastExceptionMsg();
+
+    SfxViewShell* pViewShell = SfxViewShell::Current();
+    SdrView* pView = pViewShell ? pViewShell->GetDrawView() : nullptr;
+    SdrPageView* pPageView = pView ? pView->GetSdrPageView() : nullptr;
+    const SdrPage* pPage = pPageView ? pPageView->GetPage() : nullptr;
+
+    if (!pPage)
+    {
+        SetLastExceptionMsg(u"The view shows no page to move a handle on"_ustr);
+        SAL_WARN("sd", "setobjecthandle did nothing: the view shows no page");
+        return;
+    }
+
+    SdrObject* pObject = pPage->FindObjectByUniqueID(nObjectId);
+
+    if (!pObject)
+    {
+        SetLastExceptionMsg(u"No object of that id is on the page"_ustr);
+        SAL_WARN("sd", "setobjecthandle did nothing: no object of that id");
+        return;
+    }
+
+    // The object's handles as it makes them, so that the one named can be found again. They are
+    // this list's own and go with it. The view has none of them.
+    SdrHdlList aHandles(nullptr);
+    pObject->AddToHdlList(aHandles);
+
+    SdrHdl* pHandle = nullptr;
+    for (size_t nHandle = 0; nHandle < aHandles.GetHdlCount(); ++nHandle)
+    {
+        SdrHdl* pOne = aHandles.GetHdl(nHandle);
+
+        if (nullptr == pOne || static_cast<int>(pOne->GetKind()) != nKind)
+            continue;
+        if (static_cast<int>(pOne->GetPolyNum()) != nPolygon
+            || static_cast<int>(pOne->GetPointNum()) != nPoint)
+            continue;
+        if (nAt >= 0 && static_cast<int>(pOne->GetObjHdlNum()) != nAt)
+            continue;
+
+        pHandle = pOne;
+        break;
+    }
+
+    if (!pHandle)
+    {
+        SetLastExceptionMsg(u"The object has no handle of that name"_ustr);
+        SAL_WARN("sd", "setobjecthandle did nothing: no handle of that name");
+        return;
+    }
+
+    /*
+        A point a custom shape is shaped by is not moved this way. The shape reads such a drag
+        through the method that is driving it, to see whether a modifier is held down, and there
+        is no such method here. It has a command of its own, which says that in the command
+        instead of leaving it to be read off a drag.
+    */
+    if (SdrHdlKind::CustomShape1 == pHandle->GetKind())
+    {
+        SetLastExceptionMsg(
+            u"A point a custom shape is shaped by is moved by setobjectcontrolpoint"_ustr);
+        SAL_WARN("sd", "setobjecthandle did nothing: a custom shape point goes by "
+                       "setobjectcontrolpoint");
+        return;
+    }
+
+    if (pObject->IsResizeProtect())
+    {
+        SetLastExceptionMsg(u"The object is held against being changed"_ustr);
+        SAL_WARN("sd", "setobjecthandle did nothing: the object is held against being changed");
+        return;
+    }
+
+    // The place arrives in twips and the model holds the page in its own unit.
+    const Point aWhereTo(o3tl::convert(tools::Long(nX), o3tl::Length::twip, o3tl::Length::mm100),
+                         o3tl::convert(tools::Long(nY), o3tl::Length::twip, o3tl::Length::mm100));
+
+    SdrDragStat aDrag;
+    aDrag.Reset(pHandle->GetPos());
+    aDrag.SetView(pView);
+    aDrag.SetPageView(pPageView);
+    aDrag.SetHdl(pHandle);
+    aDrag.SetNoSnap();
+
+    if (!pObject->beginSpecialDrag(aDrag))
+    {
+        SetLastExceptionMsg(u"The object will not have that handle dragged"_ustr);
+        SAL_WARN("sd", "setobjecthandle did nothing: the object will not have that handle dragged");
+        return;
+    }
+
+    aDrag.NextMove(aWhereTo);
+
+    /*
+        What has to be put back to undo the move is the object's own business as well: most of
+        them change their geometry, while one that changes an attribute - the corner radius is
+        kept among the attributes - says so on the drag.
+    */
+    SdrModel& rModel(pObject->getSdrModelFromSdrObject());
+    SdrUndoFactory& rFactory(rModel.GetSdrUndoFactory());
+    std::unique_ptr<SdrUndoAction> pAttributes;
+    std::unique_ptr<SdrUndoAction> pGeometry;
+
+    if (aDrag.IsEndDragChangesAttributes())
+    {
+        pAttributes = rFactory.CreateUndoAttrObject(*pObject);
+
+        if (aDrag.IsEndDragChangesGeoAndAttributes())
+            pGeometry = rFactory.CreateUndoGeoObject(*pObject);
+    }
+    else
+    {
+        pGeometry = rFactory.CreateUndoGeoObject(*pObject);
+    }
+
+    rModel.BegUndo(pAttributes ? pAttributes->GetComment() : pGeometry->GetComment());
+
+    if (pObject->applySpecialDrag(aDrag))
+    {
+        if (pAttributes)
+            rModel.AddUndo(std::move(pAttributes));
+        if (pGeometry)
+            rModel.AddUndo(std::move(pGeometry));
+
+        pObject->SetChanged();
+        pObject->BroadcastObjectChange();
     }
 
     rModel.EndUndo();

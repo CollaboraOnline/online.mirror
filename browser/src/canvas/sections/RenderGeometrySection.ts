@@ -308,8 +308,14 @@ class RenderGeometrySection extends CanvasSectionObject {
 	/// not hold.
 	public static boxOf(objectId: number): cool.Range2D | undefined {
 		const object = RenderGeometrySection.objectOf(objectId);
-		if (!object || object.x === undefined || object.y === undefined)
-			return undefined;
+		return object ? RenderGeometrySection.boxOfTheObject(object) : undefined;
+	}
+
+	/// The box that object takes up on the page, in twips. Nothing where it says no place.
+	private static boxOfTheObject(
+		object: cool.SlideObject,
+	): cool.Range2D | undefined {
+		if (object.x === undefined || object.y === undefined) return undefined;
 
 		return new cool.Range2D(
 			object.x,
@@ -332,6 +338,20 @@ class RenderGeometrySection extends CanvasSectionObject {
 	public static changeObject(objectId: number, matrix: cool.Matrix2D): void {
 		const object = RenderGeometrySection.objectOf(objectId);
 		if (!object) return;
+
+		RenderGeometrySection.layOverTheObject(object, matrix);
+
+		// Whoever keeps a picture of the page drew it before this change, so it is told to draw
+		// it again. The handles are worked out afresh on every draw and need no telling.
+		RenderManager.changedHere();
+	}
+
+	/// Lays the change over that object, which is what changing one comes down to.
+	public static layOverTheObject(
+		object: cool.SlideObject,
+		matrix: cool.Matrix2D,
+	): void {
+		const wasDrawnBy = cool.Matrix2D.fromArray(object.transform);
 
 		/*
 			What it draws is wrapped in the change rather than being written out again point by
@@ -357,10 +377,17 @@ class RenderGeometrySection extends CanvasSectionObject {
 				} as cool.Primitive,
 			];
 
+		/*
+			The change goes into the mapping whole, turn over and all, so that what is held here
+			says the same as what is drawn. The engine answers with a mapping worked out the
+			drawing layer's own way, and that one takes the place of this as soon as it arrives:
+			the engine says what the object is, and the handles are worked out afresh from
+			whatever it says.
+		*/
 		const mapping = cool.Matrix2D.fromArray(object.transform);
 		if (mapping) object.transform = mapping.then(matrix).toArray();
 
-		const box = RenderGeometrySection.boxOf(objectId);
+		const box = RenderGeometrySection.boxOfTheObject(object);
 		if (box) {
 			const reached = cool.Range2D.fromPoints([
 				matrix.apply(box.minX, box.minY),
@@ -375,8 +402,42 @@ class RenderGeometrySection extends CanvasSectionObject {
 			object.height = reached.height;
 		}
 
-		// The path is held where it lies on the page, so it moves with the object. The points to
-		// tie a connector to are held on the object itself, so they need nothing.
+		/*
+			The handles the object carries are held where they lie on the page, so they move with
+			it. The points to tie a connector to are held on the object itself and need nothing.
+		*/
+		const stood = new Map<cool.ObjectHandle, cool.Point>();
+		for (const one of object.handles ?? []) {
+			stood.set(one, new cool.Point(one.x, one.y));
+
+			const at = matrix.apply(one.x, one.y);
+			one.x = at.x;
+			one.y = at.y;
+		}
+
+		/*
+			A handle that keeps a length of its own does not travel with the object but is laid
+			out again on it: the corner radius of a rectangle stays the size it is while the
+			object grows. Its place has to be read before the handles above are carried along,
+			so the one before the change is kept and used here.
+		*/
+		const drawnBy = cool.Matrix2D.fromArray(object.transform);
+		if (wasDrawnBy && drawnBy) {
+			for (const one of object.handles ?? []) {
+				const place = ObjectHandles.keptAlongItsRail(
+					one.rails,
+					stood.get(one) ?? new cool.Point(one.x, one.y),
+					wasDrawnBy,
+					drawnBy,
+				);
+				if (!place) continue;
+
+				one.x = place.x;
+				one.y = place.y;
+			}
+		}
+
+		// The path is held where it lies on the page, so it moves with the object.
 		for (const polygon of object.path ?? []) {
 			for (const point of polygon.points ?? []) {
 				const at = matrix.apply(point.x, point.y);

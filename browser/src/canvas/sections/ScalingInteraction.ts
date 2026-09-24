@@ -25,12 +25,11 @@ class ScalingInteraction extends SelectionInteraction {
 	/// The shape it would leave behind, null until the mouse has moved.
 	private reached: any = null;
 
-	/*
-		The corner radius of the object, in twips, taken from where its handle stood when the
-		drag began: that handle sits on the upper side, that far from the upper left corner.
-		Null where the object has no such handle.
-	*/
-	private radius: number | null = null;
+	/// Whether the drag keeps the shape of the object, which a held Shift asks for.
+	private keepsRatio: boolean = false;
+
+	/// Where the drag has taken the handle, in twips, null until the mouse has moved.
+	private at: cool.SimplePoint | null = null;
 
 	constructor(
 		selection: SelectionSection,
@@ -41,52 +40,37 @@ class ScalingInteraction extends SelectionInteraction {
 
 		this.handle = handle;
 		this.shapeAtStart = shapeAtStart;
-		this.radius = ScalingInteraction.radiusOf(selection.knownHandles());
-	}
-
-	/// How far the handle for the corner radius stands from the upper left corner, in twips.
-	private static radiusOf(handles: SelectionHandle[]): number | null {
-		const corner = handles.find((one: SelectionHandle) => one.kind === '1');
-		const radius = handles.find((one: SelectionHandle) => one.kind === '11');
-		if (!corner || !radius) return null;
-
-		return radius.point.subtract(corner.point).length();
 	}
 
 	/*
-		The handle for the corner radius, laid out for the shape the drag leads to rather than
-		carried along with the object: the radius keeps the size it has, so the handle stays
-		that far from the upper left corner along the upper side, and it comes no further than
-		half the longer side of the shape. That is the rule the object is drawn by.
+		The handles that keep a length of their own, laid out again on the object as the drag
+		leaves it rather than carried along with it. The corner radius of a rectangle is such a
+		handle: the radius stays the size it is while the object grows.
 	*/
-	private placedRadius(mapped: SelectionHandle[]): SelectionHandle[] {
-		if (this.radius === null || !this.reached) return mapped;
+	private keptAsTheyAre(
+		known: SelectionHandle[],
+		mapped: SelectionHandle[],
+	): SelectionHandle[] {
+		const transform = this.onTheSquare();
+		const matrix = this.transformation();
+		if (!transform || !matrix) return mapped;
 
-		const corner = mapped.find((one: SelectionHandle) => one.kind === '1');
-		const along = mapped.find((one: SelectionHandle) => one.kind === '3');
-		if (!corner || !along) return mapped;
+		const becomes = transform.then(matrix);
 
-		const upper = along.point.subtract(corner.point);
-		const side = upper.length();
-		if (!side) return mapped;
+		return mapped.map((one: SelectionHandle, at: number) => {
+			const place = ObjectHandles.keptAlongItsRail(
+				one.rails,
+				known[at]?.point ?? one.point,
+				transform,
+				becomes,
+			);
 
-		const longer =
-			Math.max(this.reached.width, this.reached.height) * app.pixelsToTwips;
-		const kept = Math.min(this.radius, longer * 0.5);
-
-		return mapped.map((one: SelectionHandle) =>
-			one.kind === '11'
-				? {
-						...one,
-						point: corner.point
-							.add(upper.divideBy(side).multiplyBy(kept))
-							.round(),
-					}
-				: one,
-		);
+			return place ? { ...one, point: place } : one;
+		});
 	}
 
-	/// The shape the mouse at that point leads to.
+	/// The shape the mouse at that point leads to. Its width or its height counts backwards where
+	/// the drag took a side past the one opposite it.
 	private shapeFor(to: cool.SimplePoint, event: MouseEvent): any {
 		return HandleScaling.shapeAfterDrag(
 			to.clone(),
@@ -100,6 +84,9 @@ class ScalingInteraction extends SelectionInteraction {
 		if (GraphicSelection.extraInfo?.isResizable === false) return;
 		if (!this.shapeAtStart) return;
 
+		this.keepsRatio = HandleScaling.keepsRatio(event, false);
+
+		this.at = to.clone();
 		this.reached = this.shapeFor(to, event);
 
 		// What may snap to another object of the page is the handle being dragged, taken where
@@ -110,41 +97,41 @@ class ScalingInteraction extends SelectionInteraction {
 		this.selection.redraw();
 	}
 
+	/*
+		The drag ends by handing the engine the change itself, which is the one the objects were
+		drawn with while it ran. Naming the handle instead would leave the engine to work the
+		change out again from where that handle was let go, and for a turned object the two do not
+		meet: a scale along one side of a turned object shears it, and the way an object holds its
+		shear is not the way it is drawn.
+	*/
 	public finish(to: cool.SimplePoint, event: MouseEvent): void {
 		if (!this.shapeAtStart) return;
 
-		const keepRatio = HandleScaling.keepsRatio(event, false);
-		const shape = this.shapeFor(to, event);
+		// Where the ratio is free, the drag ends where the mouse is, or where it lined up with
+		// something else on the page.
+		// One axis can line up while the other does not, so each of the two is taken from the
+		// snap where it found something and from the mouse where it did not.
+		const snapped = HandleScaling.keepsRatio(event, false)
+			? null
+			: this.selection.snappedTo();
+		const at = snapped
+			? cool.SimplePoint.fromCorePixels([
+					snapped[0] ?? to.pX,
+					snapped[1] ?? to.pY,
+				])
+			: to;
 
-		const reached = cool.SimpleRectangle.fromCorePixels([
-			shape.center.pX - shape.width * 0.5,
-			shape.center.pY - shape.height * 0.5,
-			shape.width,
-			shape.height,
-		]);
+		this.at = at.clone();
+		this.keepsRatio = HandleScaling.keepsRatio(event, false);
+		this.reached = this.shapeFor(at, event);
 
-		// The engine counts the eight from zero, where a name counts the kinds from one.
-		const committed = HandleScaling.committedHandle(
-			String(Number(this.handle.kind) - 1),
-			keepRatio,
-		);
-		const point = HandleScaling.positionOfHandle(committed, reached);
-
-		// Where the ratio is free, the drag ends where the mouse is, or where it snapped to
-		// another object of the page.
-		if (!keepRatio) {
-			const snapped = this.selection.snappedTo();
-			point[0] = Math.round((snapped?.[0] ?? to.pX) * app.pixelsToTwips);
-			point[1] = Math.round((snapped?.[1] ?? to.pY) * app.pixelsToTwips);
-		}
-
-		app.map.sendUnoCommand('.uno:MoveShapeHandle', {
-			...ShapeHandlesSection.handleParameters({
-				name: String(Number(committed) + 1) + '.0.0',
-			}),
-			NewPosX: { type: 'long', value: point[0] },
-			NewPosY: { type: 'long', value: point[1] },
-		});
+		const matrix = this.transformation();
+		if (matrix)
+			SelectionSection.sendTransform(
+				this.selection.selectedObjects(),
+				matrix,
+				'scale',
+			);
 	}
 
 	/// The handle being dragged, where the drag has it now.
@@ -162,16 +149,131 @@ class ScalingInteraction extends SelectionInteraction {
 			: null;
 	}
 
+	/*
+		The mapping that takes a square onto what is being scaled: the object's own mapping where
+		one object is selected, and the box that frames them where several are. A box that frames
+		several objects stands upright, so its mapping only says where it is and how large it is.
+	*/
+	private onTheSquare(): cool.Matrix2D | null {
+		const objects = this.selection.selectedObjects();
+		if (objects.length === 1)
+			return RenderGeometrySection.transformOf(objects[0]);
+
+		const handles = this.selection.knownHandles();
+		const upperLeft = handles.find((one: SelectionHandle) => one.kind === '1');
+		const lowerRight = handles.find((one: SelectionHandle) => one.kind === '8');
+		if (!upperLeft || !lowerRight) return null;
+
+		const width = lowerRight.point.x - upperLeft.point.x;
+		const height = lowerRight.point.y - upperLeft.point.y;
+		if (!width || !height) return null;
+
+		return new cool.Matrix2D(
+			width,
+			0,
+			0,
+			height,
+			upperLeft.point.x,
+			upperLeft.point.y,
+		);
+	}
+
+	/*
+		What the drag does to a single object, worked out on the object's own square: the handle
+		that was taken hold of is at a corner of that square and the one facing it stays where it
+		is, so the drag says how much larger the object becomes along each of its own two axes.
+		Turning, shearing and mirroring are all in the mapping already, so none of them has to be
+		worked out again, and nothing passes through a whole twip or a whole pixel on the way,
+		which is what let a shear collect over a run of key presses.
+	*/
+	private onTheSquareTransformation(
+		transform: cool.Matrix2D,
+	): cool.Matrix2D | null {
+		const mine = ObjectHandles.placeOfKind(this.handle.kind);
+		if (!mine || !this.at) return null;
+
+		const back = transform.invert();
+		if (!back) return null;
+
+		const asked = back.apply(this.at.x, this.at.y);
+
+		// The place that stays where it is, which is the one facing the handle across the middle
+		// of the square.
+		const stays = new cool.Point(1 - mine.x, 1 - mine.y);
+
+		/*
+			How much larger the object becomes along one of its own axes: how far the mouse is
+			from the place that stays, against how far the handle was. A hair rather than nothing,
+			so that what the object is given can be undone, and the way it faces is kept while the
+			hair is taken. The size is how long the axis is on the page.
+		*/
+		const along = (
+			handleAt: number,
+			staysAt: number,
+			askedAt: number,
+			size: number,
+		): number => {
+			if (handleAt === 0.5) return 1;
+
+			const reached = (askedAt - staysAt) / (handleAt - staysAt);
+			const hair = size ? 10 / size : 0.001;
+
+			return Math.sign(reached || 1) * Math.max(Math.abs(reached), hair);
+		};
+
+		let across = along(mine.x, stays.x, asked.x, transform.lengthOfXAxis());
+		let down = along(mine.y, stays.y, asked.y, transform.lengthOfYAxis());
+
+		// Keeping the shape of the object means the same step on both axes, which is the larger
+		// of the two the drag asks for. Each of them keeps the way it faces.
+		if (this.keepsRatio) {
+			const both = Math.max(
+				mine.x === 0.5 ? 0 : Math.abs(across),
+				mine.y === 0.5 ? 0 : Math.abs(down),
+			);
+			across = Math.sign(across) * both;
+			down = Math.sign(down) * both;
+		}
+
+		// Back onto the square, scaled there about the place that stays, and onto the page again.
+		const onTheSquare = cool.Matrix2D.IDENTITY.translate(-stays.x, -stays.y)
+			.scale(across, down)
+			.translate(stays.x, stays.y);
+
+		return back.then(onTheSquare).then(transform);
+	}
+
 	public transformation(): cool.Matrix2D | null {
+		const transform = this.onTheSquare();
+		if (transform) return this.onTheSquareTransformation(transform);
+
 		const from = this.shapeAtStart;
 		const to = this.reached;
 		if (!from || !to || !from.width || !from.height) return null;
+
+		/*
+			A drag that takes a side past the one opposite it says so in the change, as a length
+			that counts backwards. What that comes to is the object's own business: one drawn
+			along an outline of its own turns the outline over, a custom shape marks itself as
+			facing the other way, and one drawn from a rectangle does what the office does with
+			it, which is the same road this takes.
+		*/
+		const across = to.width / from.width;
+		const down = to.height / from.height;
+
+		// A hair rather than nothing, so that what the object is given can be undone, and the
+		// way it faces is kept while the hair is taken.
+		const least = app.twipsToPixels * 10;
+		const wide =
+			Math.sign(across || 1) * Math.max(Math.abs(across), least / from.width);
+		const high =
+			Math.sign(down || 1) * Math.max(Math.abs(down), least / from.height);
 
 		// From the middle it started at, upright, scaled along its own two directions, turned
 		// back and on to the middle it reached.
 		return cool.Matrix2D.IDENTITY.translate(-from.center.x, -from.center.y)
 			.rotateAround(0, 0, from.angleRadian)
-			.scale(to.width / from.width, to.height / from.height)
+			.scale(wide, high)
 			.rotateAround(0, 0, -from.angleRadian)
 			.translate(to.center.x, to.center.y);
 	}
@@ -193,6 +295,6 @@ class ScalingInteraction extends SelectionInteraction {
 			point: matrix.apply(handle.point.x, handle.point.y).round(),
 		}));
 
-		return this.placedRadius(mapped);
+		return this.keptAsTheyAre(known, mapped);
 	}
 }

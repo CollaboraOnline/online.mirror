@@ -20,9 +20,15 @@ interface SelectionHandle {
 	kind: string;
 	pointer: string;
 	point: cool.Point;
+	/// The number the object itself gives the handle, for the handles that are told apart by
+	/// nothing else. Absent where the name already says which one it is.
+	at?: number;
 	/// The name of the group of handles it came from, which is what draws it, what a press on it
 	/// asks and what a key on it asks. Absent for a handle that stands outside the groups.
 	group?: string;
+	/// How far it may be moved, on the square of the object it belongs to. Absent for a handle
+	/// that is held nowhere.
+	rails?: cool.ObjectHandleRails;
 }
 
 /*
@@ -139,8 +145,96 @@ class ObjectHandles implements HandleSource {
 		return GluePointHandles.ownPointsOf(this.objectIds[0]);
 	}
 
+	/*
+		Where on the object's own square each of the eight that frame it sits: 0 and 0 is its
+		upper left corner and 1 and 1 its lower right one. A handle in the middle of a side sits
+		at a half on the axis it does not move on.
+	*/
+	private static readonly placesOfTheKinds: { [kind: string]: number[] } = {
+		'1': [0, 0],
+		'2': [0.5, 0],
+		'3': [1, 0],
+		'4': [0, 0.5],
+		'5': [1, 0.5],
+		'6': [0, 1],
+		'7': [0.5, 1],
+		'8': [1, 1],
+	};
+
+	/// Where one of the eight of that kind sits on the object's own square. Nothing for a kind
+	/// that is not one of the eight.
+	public static placeOfKind(kind: string): cool.Point | undefined {
+		const place = ObjectHandles.placesOfTheKinds[kind];
+		return place ? new cool.Point(place[0], place[1]) : undefined;
+	}
+
+	/*
+		The handles a change that turns the object over can put in the place of the given one:
+		itself, the one it reflects onto across the square, the one down it, and the one across
+		and down both. A handle in the middle of a side reflects onto itself on the axis it sits
+		in the middle of, so only it and the one facing it come out.
+	*/
+	public static facing(kind: string): string[] {
+		const mine = ObjectHandles.placeOfKind(kind);
+		if (!mine) return [kind];
+
+		const wanted = [
+			new cool.Point(mine.x, mine.y),
+			new cool.Point(1 - mine.x, mine.y),
+			new cool.Point(mine.x, 1 - mine.y),
+			new cool.Point(1 - mine.x, 1 - mine.y),
+		];
+
+		return Object.keys(ObjectHandles.placesOfTheKinds).filter((one: string) => {
+			const place = ObjectHandles.placeOfKind(one);
+			return wanted.some((other: cool.Point) => place && other.equals(place));
+		});
+	}
+
 	/// The number the drawing layer gives a connector among the kinds of object.
 	private static readonly connectorKind: number = 24;
+
+	/*
+		Where a handle that keeps a length of its own stands once the object has been given a
+		change: as far along its rail as it was, on the rail as the change leaves it. The corner
+		radius of a rectangle is such a handle - the radius is a length the object keeps, so the
+		handle does not grow with the object - where a point a custom shape is shaped by is a
+		share of the shape and travels with it, needing none of this.
+
+		Nothing for a handle that travels, or for one whose rail is not a line.
+	*/
+	public static keptAlongItsRail(
+		rails: cool.ObjectHandleRails | undefined,
+		point: cool.Point,
+		was: cool.Matrix2D,
+		becomes: cool.Matrix2D,
+	): cool.Point | undefined {
+		if (!rails?.keepsItsLength) return undefined;
+
+		const least = rails.leastAcross;
+		const most = rails.mostAcross;
+		if (!least || !most) return undefined;
+
+		// Where the rail starts on the page, and the way it runs from there.
+		const ends = (mapping: cool.Matrix2D) => {
+			const from = mapping.apply(least.x, least.y);
+			return {
+				from: from,
+				along: mapping.apply(most.x, most.y).subtract(from),
+			};
+		};
+
+		const before = ends(was);
+		const after = ends(becomes);
+		const length = after.along.length();
+		if (!length) return undefined;
+
+		const howFar = Math.min(point.distanceTo(before.from), length);
+
+		return after.from
+			.add(after.along.divideBy(length).multiplyBy(howFar))
+			.round();
+	}
 
 	/// Whether the object of that id is a connector.
 	public static isAConnector(objectId: number): boolean {
@@ -196,17 +290,10 @@ class ObjectHandles implements HandleSource {
 		if (!mapping) return undefined;
 
 		// A framing handle sits on each corner of the unit square and halfway along each side,
-		// taken onto the page by the mapping.
-		const corners = [
-			[0, 0],
-			[0.5, 0],
-			[1, 0],
-			[0, 0.5],
-			[1, 0.5],
-			[0, 1],
-			[0.5, 1],
-			[1, 1],
-		].map(([x, y]: number[]) => mapping.apply(x, y));
+		// taken onto the page by the mapping, from the upper left one to the lower right one.
+		const corners = Object.values(ObjectHandles.placesOfTheKinds).map(
+			([x, y]: number[]) => mapping.apply(x, y),
+		);
 
 		// The pointer the engine asks for at each of the eight, in the same order.
 		const pointers = [11, 7, 12, 9, 10, 13, 8, 14];
@@ -288,6 +375,8 @@ class ObjectHandles implements HandleSource {
 			kind: String(handle.kind),
 			pointer: '28',
 			point: new cool.Point(handle.x, handle.y),
+			at: handle.at,
+			rails: handle.rails,
 		}));
 	}
 

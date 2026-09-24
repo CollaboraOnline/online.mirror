@@ -116,16 +116,35 @@ abstract class HandleGroup {
 		return at;
 	}
 
-	/// Hands the engine a handle that was moved, by the name that says what it is.
-	protected static sendTheHandle(
-		handle: SelectionHandle,
-		to: cool.Point,
-	): void {
-		app.map.sendUnoCommand('.uno:MoveShapeHandle', {
-			...ShapeHandlesSection.handleParameters(handle),
-			NewPosX: { type: 'long', value: to.x },
-			NewPosY: { type: 'long', value: to.y },
-		});
+	/*
+		Hands the engine a handle that was moved, naming the object and the handle. The object
+		reads the move its own way - a corner radius, the angle a piece of a circle begins at,
+		the offset of a measurement - and nothing about a selection is needed for it.
+	*/
+	protected sendTheHandle(handle: SelectionHandle, to: cool.Point): void {
+		const objectId = this.selection.selectedObjects()[0];
+		if (objectId === undefined) return;
+
+		// The name says the kind, the polygon and the point. The number the object gives the
+		// handle travels beside them, for the handles that are told apart by nothing else.
+		const named = handle.name.split('.');
+
+		app.socket.sendMessage(
+			'setobjecthandle id=' +
+				String(objectId) +
+				' kind=' +
+				String(Number(handle.kind)) +
+				' polygon=' +
+				String(Number(named[1] ?? 0)) +
+				' point=' +
+				String(Number(named[2] ?? 0)) +
+				' at=' +
+				String(handle.at ?? -1) +
+				' x=' +
+				String(Math.round(to.x)) +
+				' y=' +
+				String(Math.round(to.y)),
+		);
 	}
 
 	/// Lays out a round handle of the usual size at that place, grown by as much as asked.
@@ -182,12 +201,43 @@ abstract class HandleGroup {
 class FramingHandles extends HandleGroup {
 	public readonly name: string = 'framing';
 
-	public handOver(handle: SelectionHandle, to: cool.Point): void {
-		HandleGroup.sendTheHandle(handle, to);
-	}
-
 	public handles(): SelectionHandle[] {
 		return ObjectHandles.framingOf(this.selection.selectedObjects()) ?? [];
+	}
+
+	/*
+		A key on one of the eight scales the selection as a drag of that handle would, and hands
+		the engine what a drag hands it: the mapping every object is to be drawn by. The drag
+		works that mapping out, so the key borrows the drag rather than saying it again.
+	*/
+	public moveByKey(
+		handle: SelectionHandle,
+		towards: cool.Point,
+		event: KeyboardEvent,
+	): cool.Point | null {
+		const shape = this.selection.shapeNow();
+		if (!shape) return null;
+
+		const to = HandleGroup.steppedBy(handle, towards, event);
+		const scaling = new ScalingInteraction(this.selection, handle, shape);
+
+		// A key that keeps the ratio is the one a drag keeps it with, so the event goes along.
+		scaling.finish(
+			new cool.SimplePoint(to.x, to.y),
+			event as unknown as MouseEvent,
+		);
+
+		this.selection.layTheChangeOn(scaling.transformation());
+
+		/*
+			The handle keeps its name through a change that takes a side past the one opposite
+			it. Each of the eight sits at its own corner of the object's square, so the one that
+			is named the upper left is drawn wherever the mapping puts that corner, and a mapping
+			that turns the object over puts it on the other side by itself. The key that follows
+			goes on stretching the same way.
+		*/
+
+		return to;
 	}
 
 	public shape(
@@ -210,14 +260,6 @@ class FramingHandles extends HandleGroup {
 		const shape = this.selection.shapeNow();
 
 		return shape ? new ScalingInteraction(this.selection, handle, shape) : null;
-	}
-
-	public moveByKey(
-		handle: SelectionHandle,
-		towards: cool.Point,
-		event: KeyboardEvent,
-	): cool.Point | null {
-		return this.stepAndHandOver(handle, towards, event);
 	}
 }
 
@@ -316,10 +358,14 @@ class TurningHandle extends HandleGroup {
 
 		// The keys that point left and up turn against the clock, the others with it.
 		const against = towards.x < 0 || towards.y < 0;
-		TurningInteraction.turnObjects(
+		const turned = TurningInteraction.turnObjects(
+			this.selection,
 			middle,
 			TurningHandle.turningStep(event) * (against ? 1 : -1),
 		);
+
+		// What the key did is laid on the objects, as the end of a drag lays its own.
+		this.selection.layTheChangeOn(turned);
 
 		return null;
 	}
@@ -355,12 +401,150 @@ abstract class HandlesMovedOneByOne extends HandleGroup {
 class ShapingHandles extends HandlesMovedOneByOne {
 	public readonly name: string = 'shaping';
 
+	/// The kind the engine gives a point a custom shape is shaped by.
+	private static readonly shapingPointKind: string = '22';
+
+	/*
+		A point a custom shape is shaped by is moved by naming the shape and the point: the shape
+		reads it as the value it shapes itself from, and nothing about a selection or a handle of
+		a view is needed for that. The others - the corner radius of a rectangle, the points along
+		a connector's way - are still named as handles, since what they mean lives in rules of
+		their own that nothing here says yet.
+	*/
 	public handOver(handle: SelectionHandle, to: cool.Point): void {
-		HandleGroup.sendTheHandle(handle, to);
+		if (handle.kind !== ShapingHandles.shapingPointKind) {
+			this.sendTheHandle(handle, to);
+			return;
+		}
+
+		const at = Number(handle.name.split('.')[2]);
+		if (!(at >= 0)) return;
+
+		app.socket.sendMessage(
+			'setobjectcontrolpoint id=' +
+				String(this.selection.selectedObjects()[0]) +
+				' at=' +
+				String(at) +
+				' x=' +
+				String(Math.round(to.x)) +
+				' y=' +
+				String(Math.round(to.y)) +
+				// The tail of a callout carries the shape along, which a drag says by having no
+				// modifier held down. Nothing here holds one yet.
+				' withtheshape=1',
+		);
 	}
 
 	public handles(): SelectionHandle[] {
 		return ObjectHandles.shapingOf(this.selection.selectedObjects());
+	}
+
+	/*
+		A point a custom shape is shaped by runs on rails the shape gives it: across the shape,
+		down it, both, or around a point of it, and between the places the shape names. The
+		places are given on the square of the object, so the place the mouse asks for is taken
+		onto that square, held there, and taken back onto the page. A shape that is turned,
+		sheared, mirrored or stretched more one way than the other is held right that way, and
+		the places stay right while the object is dragged, since they move with it.
+	*/
+	public holdInside(handle: SelectionHandle, at: cool.Point): cool.Point {
+		const rails = handle.rails;
+		if (!rails) return at;
+
+		const transform = RenderGeometrySection.transformOf(
+			this.selection.selectedObjects()[0],
+		);
+		if (!transform) return at;
+
+		const onTheSquare = transform.invert();
+		if (!onTheSquare) return at;
+
+		const asked = onTheSquare.apply(at.x, at.y);
+		const was = onTheSquare.apply(handle.point.x, handle.point.y);
+
+		const held = rails.movesAround
+			? ShapingHandles.heldAround(rails, asked, was)
+			: ShapingHandles.heldOnTheAxes(rails, asked, was);
+
+		return transform.apply(held.x, held.y).round();
+	}
+
+	/*
+		Where on the square of the object a handle that moves on the axes may go. An axis it does
+		not move on keeps the place it had. On an axis it does move on, each place the shape names
+		blocks the side it lies on, which is the side away from where the handle stands: the shape
+		says which end of its own value a place comes from, and that end can be either side of the
+		shape.
+	*/
+	private static heldOnTheAxes(
+		rails: cool.ObjectHandleRails,
+		asked: cool.Point,
+		was: cool.Point,
+	): cool.Point {
+		return new cool.Point(
+			rails.movesAcross
+				? ShapingHandles.between(asked.x, was.x, [
+						rails.leastAcross?.x,
+						rails.mostAcross?.x,
+					])
+				: was.x,
+			rails.movesDown
+				? ShapingHandles.between(asked.y, was.y, [
+						rails.leastDown?.y,
+						rails.mostDown?.y,
+					])
+				: was.y,
+		);
+	}
+
+	/*
+		Where on the square of the object a handle that turns about a point may go: anywhere
+		around that point, no nearer and no further than the shape allows. A shape that names no
+		point of its own turns about its middle.
+	*/
+	private static heldAround(
+		rails: cool.ObjectHandleRails,
+		asked: cool.Point,
+		was: cool.Point,
+	): cool.Point {
+		const around = rails.around
+			? new cool.Point(rails.around.x, rails.around.y)
+			: new cool.Point(0.5, 0.5);
+		const awayFrom = (place?: cool.ObjectPlace): number | undefined =>
+			place ? new cool.Point(place.x, place.y).distanceTo(around) : undefined;
+
+		const away = asked.distanceTo(around);
+		const kept = ShapingHandles.between(away, was.distanceTo(around), [
+			awayFrom(rails.nearest),
+			awayFrom(rails.furthest),
+		]);
+		if (!away || kept === away) return asked;
+
+		return around.add(asked.subtract(around).divideBy(away).multiplyBy(kept));
+	}
+
+	/*
+		A value held between the places the shape names. Where it names both, the value stays
+		between them. Where it names one, that one blocks the side it lies on, which is told from
+		the place the handle stands at now: the handle stands inside its own rails, so the side
+		the place lies on is the side that is closed.
+	*/
+	private static between(
+		value: number,
+		stands: number,
+		places: (number | undefined)[],
+	): number {
+		const given = places.filter(
+			(place): place is number => place !== undefined,
+		);
+		if (given.length === 2)
+			return Math.min(Math.max(value, Math.min(...given)), Math.max(...given));
+
+		let held = value;
+		for (const place of given)
+			held = place <= stands ? Math.max(held, place) : Math.min(held, place);
+
+		return held;
 	}
 
 	public shape(
@@ -372,6 +556,20 @@ class ShapingHandles extends HandlesMovedOneByOne {
 		HandleGroup.round(context, at, grown);
 
 		return '#FFFF00';
+	}
+
+	public moveByKey(
+		handle: SelectionHandle,
+		towards: cool.Point,
+		event: KeyboardEvent,
+	): cool.Point | null {
+		const to = this.holdInside(
+			handle,
+			HandleGroup.steppedBy(handle, towards, event),
+		);
+		this.handOver(handle, to);
+
+		return to;
 	}
 }
 
@@ -409,11 +607,17 @@ class TiePointHandles extends HandleGroup {
 	}
 
 	/*
-		The object's own points while a drag of the object runs. A point held as a share of the
-		object's size sits at the same place on the object whatever is done to it, so it travels
-		with the drag as everything else does. A point that keeps a distance of its own moves and
-		turns with the object but is not stretched by it, so it keeps its way from the middle and
-		only turns with it.
+		The object's own points while a drag of the object runs.
+
+		Such a point is not held on the object's own square but on the box around it, and that is
+		what has to be worked out again: the drawing layer reads it from the middle of that box,
+		or from one of its sides where the point names one. A point held as a share of the size
+		keeps its share of the box, and one that keeps a distance of its own keeps that distance
+		in twips. Either way the point ends up inside the box.
+
+		Carrying the point through the change instead would hold it to the shape, and for a
+		turned object the two part company, because turning the box is not the same as turning
+		the shape inside it.
 	*/
 	private ownAsTheDragLeavesThem(shown: SelectionHandle[]): SelectionHandle[] {
 		const own = shown.filter(
@@ -424,30 +628,91 @@ class TiePointHandles extends HandleGroup {
 		const objects = this.selection.selectedObjects();
 		if (!matrix || objects.length !== 1) return own;
 
+		const transform = RenderGeometrySection.transformOf(objects[0]);
 		const held = RenderGeometrySection.objectOf(objects[0])?.gluePoints ?? [];
-		if (!held.some((point) => point.keepsItsDistance)) return own;
+		if (!transform || !held.length) return own;
 
-		const before = SelectionSection.middleOf(this.selection.knownHandles());
-		const after = SelectionSection.middleOf(shown);
+		/*
+			A change that leaves the object the size it was - a move, or a turn - carries the
+			points along with it and nothing more: the drawing layer takes them off the box for
+			as long as such a change runs, moves them with the object and measures them against
+			the box again afterwards. It is only a change of size that they follow the box
+			through, and that is what is worked out below.
+		*/
+		const grewAcross = matrix.lengthOfXAxis();
+		const grewDown = matrix.lengthOfYAxis();
+		if (Math.abs(grewAcross - 1) < 0.0001 && Math.abs(grewDown - 1) < 0.0001)
+			return own;
+
+		const was = TiePointHandles.theBoxAround(transform);
+		const becomes = TiePointHandles.theBoxAround(transform.then(matrix));
 		const standing = GluePointHandles.ownPointsOf(objects[0]);
-		if (!before || !after) return own;
-
-		// How far the drag turns the objects, which is all of it that such a point follows: it
-		// keeps its way from the middle, turned, around the middle the drag leads to.
-		const carried = cool.Matrix2D.IDENTITY.translate(-before.x, -before.y)
-			.rotateAround(0, 0, matrix.rotation())
-			.translate(after.x, after.y);
 
 		return own.map((handle: SelectionHandle, at: number) => {
-			if (!held[at]?.keepsItsDistance || !standing[at]) return handle;
+			const point = held[at];
+			if (!point || !standing[at]) return handle;
 
 			return {
 				...handle,
-				point: carried
-					.apply(standing[at].point.x, standing[at].point.y)
-					.round(),
+				point: TiePointHandles.laidOnTheBox(
+					point,
+					standing[at].point,
+					was,
+					becomes,
+				),
 			};
 		});
+	}
+
+	/// The box around what the mapping draws, which is the box the drawing layer holds a point
+	/// to tie a connector to against.
+	private static theBoxAround(transform: cool.Matrix2D): cool.Range2D {
+		return cool.Range2D.fromPoints(
+			[
+				[0, 0],
+				[1, 0],
+				[1, 1],
+				[0, 1],
+			].map(([x, y]: number[]) => transform.apply(x, y)),
+		);
+	}
+
+	/*
+		Where a point stands once the box around the object has become the other one: the side it
+		is measured from moves with the box, and what it keeps from that side is either its share
+		of the size or its own distance. A point that would end up outside the box is brought
+		back to the edge, as the drawing layer brings it back.
+	*/
+	private static laidOnTheBox(
+		point: cool.ObjectGluePoint,
+		standing: cool.Point,
+		was: cool.Range2D,
+		becomes: cool.Range2D,
+	): cool.Point {
+		const acrossFrom = (box: cool.Range2D): number =>
+			point.fromAcross === 'left'
+				? box.minX
+				: point.fromAcross === 'right'
+					? box.maxX
+					: box.centerX;
+		const downFrom = (box: cool.Range2D): number =>
+			point.fromDown === 'top'
+				? box.minY
+				: point.fromDown === 'bottom'
+					? box.maxY
+					: box.centerY;
+
+		// A point held as a share of the size grows with the box. One that keeps a distance of
+		// its own is left as far from its side as it was.
+		const grewAcross =
+			point.keepsItsDistance || !was.width ? 1 : becomes.width / was.width;
+		const grewDown =
+			point.keepsItsDistance || !was.height ? 1 : becomes.height / was.height;
+
+		const x = acrossFrom(becomes) + (standing.x - acrossFrom(was)) * grewAcross;
+		const y = downFrom(becomes) + (standing.y - downFrom(was)) * grewDown;
+
+		return becomes.clamp(new cool.Point(x, y)).round();
 	}
 
 	/*
@@ -519,28 +784,170 @@ class TiePointHandles extends HandleGroup {
 		return to;
 	}
 
+	/// What the object holds about the point that handle stands for, or nothing for one of the
+	/// four an object falls back on, which it holds nothing about.
+	private held(handle: SelectionHandle): cool.ObjectGluePoint | undefined {
+		if (handle.kind !== 'GluePoint') return undefined;
+
+		const at = Number(handle.name.split('.')[1]);
+		const objects = this.selection.selectedObjects();
+		if (!(at >= 0) || objects.length !== 1) return undefined;
+
+		return RenderGeometrySection.objectOf(objects[0])?.gluePoints?.[at];
+	}
+
+	/*
+		The side a way out points to while a drag turns the object. A way out is one of the four
+		sides of the page, never a way of the object's own, and turning an object moves it to the
+		side it comes nearest to: the model adds the turn to it and takes the side that is within
+		a quarter turn of the result. So the drag shows what the turn will leave behind, and a
+		turn of less than an eighth leaves it where it is.
+	*/
+	private turnedBy(name: string): string {
+		const matrix = this.selection.dragMatrix();
+		const side = TiePointHandles.sides.findIndex(
+			(one: { name: string }) => one.name === name,
+		);
+		if (!matrix || side < 0) return name;
+
+		const quarters =
+			Math.round(
+				(TiePointHandles.sides[side].turn + matrix.rotation()) /
+					(Math.PI * 0.5),
+			) & 3;
+
+		return TiePointHandles.sides[quarters].name;
+	}
+
+	/// The sides, in the order they go round the circle, with the way each of them points.
+	private static readonly sides: { name: string; turn: number }[] = [
+		{ name: 'right', turn: 0 },
+		{ name: 'bottom', turn: Math.PI * 0.5 },
+		{ name: 'left', turn: Math.PI },
+		{ name: 'top', turn: Math.PI * 1.5 },
+	];
+
+	/*
+		A point to tie a connector to is a circle, and every way a connector may leave the object
+		there puts a nose on that circle: the quarter of it facing that way is replaced by two
+		lines out to a tip. A point with no way named is a plain circle, and a connector leaving
+		it may go whichever way it likes.
+	*/
 	public shape(
 		context: CanvasRenderingContext2D,
 		handle: SelectionHandle,
 		at: cool.SimplePoint,
 		grown: number,
 	): string {
+		const held = this.held(handle);
+		const radius = ShapeHandlesSection.gluePointSize() * 0.5 + grown;
+
+		// The two that face each other are drawn as what they are, a nose on each side.
+		const wayOut = held?.wayOut;
+		const ways = (
+			wayOut === 'horizontal'
+				? ['left', 'right']
+				: wayOut === 'vertical'
+					? ['top', 'bottom']
+					: wayOut
+						? [wayOut]
+						: []
+		).map((name: string) => this.turnedBy(name));
+
+		// A nose sits on a whole quarter of the circle. A point never carries more than two ways
+		// out, and those two face each other, so half the circle is left between them.
+		const half = Math.PI / 4;
+		const tip = radius * Math.SQRT2;
+
+		const onTheCircle = (turn: number) => [
+			at.vX + radius * Math.cos(turn),
+			at.vY + radius * Math.sin(turn),
+		];
+
+		let from = TiePointHandles.sides[0].turn - half;
+		const [startX, startY] = onTheCircle(from);
+		context.moveTo(startX, startY);
+
+		for (const side of TiePointHandles.sides) {
+			if (!ways.includes(side.name)) {
+				// The circle runs on through this side, so it is drawn with the gaps beside it.
+				context.arc(at.vX, at.vY, radius, from, side.turn + half);
+			} else {
+				context.arc(at.vX, at.vY, radius, from, side.turn - half);
+				context.lineTo(
+					at.vX + tip * Math.cos(side.turn),
+					at.vY + tip * Math.sin(side.turn),
+				);
+				const [backX, backY] = onTheCircle(side.turn + half);
+				context.lineTo(backX, backY);
+			}
+
+			from = side.turn + half;
+		}
+
 		context.arc(
 			at.vX,
 			at.vY,
-			ShapeHandlesSection.gluePointSize() * 0.5 + grown,
-			0,
-			Math.PI * 2,
+			radius,
+			from,
+			TiePointHandles.sides[0].turn - half + Math.PI * 2,
 		);
 
 		/*
-			A dimmed red: these are offered while something else is being done and should not
-			shout over the handles beside them. The four an object falls back on take that red
-			darker again, so the ones it was given stand out from them.
+			A dimmed red for a point the object holds as a share of its own size, that red lighter
+			for one it holds as a distance of its own, and darker again for the four an object
+			falls back on, which it was given none of.
 		*/
-		return handle.kind === 'GluePoint'
-			? '#B03A3A'
-			: SelectionSection.darker('#B03A3A', 0.6);
+		if (handle.kind !== 'GluePoint')
+			return SelectionSection.darker('#B03A3A', 0.6);
+
+		return held?.keepsItsDistance ? '#CC6666' : '#B03A3A';
+	}
+
+	/*
+		The side a point is measured from, where it is not the middle: a short line lying along
+		the circle, just outside it, on that side. A point measured from the middle shows none,
+		which is what a point is given unless someone says otherwise.
+	*/
+	public paint(section: SelectionSection, shown: SelectionHandle[]): void {
+		const marked = shown.filter(
+			(handle: SelectionHandle) => handle.group === this.name,
+		);
+		if (!marked.length) return;
+
+		const radius = ShapeHandlesSection.gluePointSize() * 0.5;
+		// A pixel of air between the circle and the line, so the two read apart.
+		const away = radius + 2 * app.dpiScale;
+
+		section.context.save();
+		section.context.setTransform(1, 0, 0, 1, 0, 0);
+		section.context.strokeStyle = 'black';
+		section.context.lineWidth = app.dpiScale;
+		section.context.beginPath();
+
+		for (const handle of marked) {
+			const held = this.held(handle);
+			if (!held) continue;
+
+			const at = new cool.SimplePoint(handle.point.x, handle.point.y);
+
+			for (const side of TiePointHandles.sides) {
+				if (held.fromAcross !== side.name && held.fromDown !== side.name)
+					continue;
+
+				// The line lies along the circle, so it runs across the way the side faces.
+				const middleX = at.vX + away * Math.cos(side.turn);
+				const middleY = at.vY + away * Math.sin(side.turn);
+				const alongX = -Math.sin(side.turn) * radius * 0.5;
+				const alongY = Math.cos(side.turn) * radius * 0.5;
+
+				section.context.moveTo(middleX - alongX, middleY - alongY);
+				section.context.lineTo(middleX + alongX, middleY + alongY);
+			}
+		}
+
+		section.context.stroke();
+		section.context.restore();
 	}
 }
 

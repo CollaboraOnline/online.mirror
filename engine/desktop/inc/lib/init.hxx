@@ -437,8 +437,11 @@ namespace desktop {
         void setObjectPoints(unsigned long long nObjectId, const char* pChanges) override;
         void setObjectGluePoint(unsigned long long nObjectId, int nAt, double fX,
                                 double fY) override;
-        void setObjectTransform(const char* pObjectIds, const char* pChange,
-                                const char* pWhat) override;
+        void setObjectTransform(const char* pMappings, const char* pWhat) override;
+        void setObjectControlPoint(unsigned long long nObjectId, int nAt, int nX, int nY,
+                                   bool bWithTheShape) override;
+        void setObjectHandle(unsigned long long nObjectId, int nKind, int nPolygon, int nPoint,
+                             int nAt, int nX, int nY) override;
     };
 
     struct DESKTOP_DLLPUBLIC COKitImpl : public COKit

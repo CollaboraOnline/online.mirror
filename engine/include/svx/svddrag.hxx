@@ -91,7 +91,7 @@ class SVXCORE_DLLPUBLIC SdrDragStat final
 
 public:
     SdrDragStat()                                    { Reset(); }
-    SAL_DLLPRIVATE ~SdrDragStat();
+    ~SdrDragStat();
     void         Reset();
     SdrView*     GetView() const                     { return m_pView; }
     void         SetView(SdrView* pV)                { m_pView=pV; }
@@ -150,7 +150,7 @@ public:
     bool         IsMouseDown() const                  { return !m_bMouseIsUp; }
     void         SetMouseDown(bool bDown)         { m_bMouseIsUp=!bDown; }
 
-    SAL_DLLPRIVATE void         Reset(const Point& rPnt);
+    void         Reset(const Point& rPnt);
     void         NextMove(const Point& rPnt);
     SAL_DLLPRIVATE void         NextPoint();
     SAL_DLLPRIVATE void         PrevPoint();

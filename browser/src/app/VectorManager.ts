@@ -107,6 +107,15 @@ class VectorManager extends RenderManagerBase {
 		for (const callback of this._changeListeners) callback();
 	}
 
+	/*
+		Says that the objects the client holds have changed here rather than at the engine, which
+		is what a drag does when it lays what it did on them. Whoever keeps a picture of a part
+		draws it again, as it does when an update arrives.
+	*/
+	changedHere(): void {
+		this._fireChanged();
+	}
+
 	/// The id of the page at the given index of the page list on screen, or
 	/// undefined when the list on screen is of another mode or holds no page
 	/// at the index. The status message names every page of that list by id.

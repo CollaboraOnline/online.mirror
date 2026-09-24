@@ -658,6 +658,8 @@ bool ChildSession::_handleInput(const char *buffer, int length)
                tokens.equals(0, "setobjectpoints") ||
                tokens.equals(0, "setobjectgluepoint") ||
                tokens.equals(0, "setobjecttransform") ||
+               tokens.equals(0, "setobjectcontrolpoint") ||
+               tokens.equals(0, "setobjecthandle") ||
                tokens.equals(0, "downloadas") ||
                tokens.equals(0, "getchildid") ||
                tokens.equals(0, "gettextselection") ||
@@ -738,6 +740,14 @@ bool ChildSession::_handleInput(const char *buffer, int length)
         else if (tokens.equals(0, "setobjecttransform"))
         {
             return setObjectTransform(tokens);
+        }
+        else if (tokens.equals(0, "setobjectcontrolpoint"))
+        {
+            return setObjectControlPoint(tokens);
+        }
+        else if (tokens.equals(0, "setobjecthandle"))
+        {
+            return setObjectHandle(tokens);
         }
         else if (tokens.equals(0, "downloadas"))
         {
@@ -1806,21 +1816,73 @@ bool ChildSession::setObjectGluePoint(const StringVector& tokens)
     return true;
 }
 
+bool ChildSession::setObjectControlPoint(const StringVector& tokens)
+{
+    std::string objectId;
+    int nAt = 0;
+    int nX = 0;
+    int nY = 0;
+    int nWithTheShape = 0;
+
+    if (tokens.size() != 6 || !getTokenString(tokens[1], "id", objectId)
+        || !getTokenInteger(tokens[2], "at", nAt) || !getTokenInteger(tokens[3], "x", nX)
+        || !getTokenInteger(tokens[4], "y", nY)
+        || !getTokenInteger(tokens[5], "withtheshape", nWithTheShape))
+    {
+        sendTextFrameAndLogError("error: cmd=setobjectcontrolpoint kind=syntax");
+        return false;
+    }
+
+    // The id an object is named by counts as far as an unsigned long long does.
+    getLOKitDocument()->setView(_viewId);
+    getLOKitDocument()->setObjectControlPoint(std::strtoull(objectId.c_str(), nullptr, 10), nAt,
+                                              nX, nY, nWithTheShape != 0);
+    return true;
+}
+
+bool ChildSession::setObjectHandle(const StringVector& tokens)
+{
+    std::string objectId;
+    int nKind = 0;
+    int nPolygon = 0;
+    int nPoint = 0;
+    int nAt = -1;
+    int nX = 0;
+    int nY = 0;
+
+    if (tokens.size() != 8 || !getTokenString(tokens[1], "id", objectId)
+        || !getTokenInteger(tokens[2], "kind", nKind)
+        || !getTokenInteger(tokens[3], "polygon", nPolygon)
+        || !getTokenInteger(tokens[4], "point", nPoint) || !getTokenInteger(tokens[5], "at", nAt)
+        || !getTokenInteger(tokens[6], "x", nX) || !getTokenInteger(tokens[7], "y", nY))
+    {
+        sendTextFrameAndLogError("error: cmd=setobjecthandle kind=syntax");
+        return false;
+    }
+
+    // The id an object is named by counts as far as an unsigned long long does.
+    getLOKitDocument()->setView(_viewId);
+
+    getLOKitDocument()->setObjectHandle(std::strtoull(objectId.c_str(), nullptr, 10), nKind,
+                                        nPolygon, nPoint, nAt, nX, nY);
+
+    return true;
+}
+
 bool ChildSession::setObjectTransform(const StringVector& tokens)
 {
-    std::string objectIds;
-    std::string change;
+    std::string mappings;
     std::string what;
 
-    if (tokens.size() != 4 || !getTokenString(tokens[1], "ids", objectIds)
-        || !getTokenString(tokens[2], "by", change) || !getTokenString(tokens[3], "as", what))
+    if (tokens.size() != 3 || !getTokenString(tokens[1], "to", mappings)
+        || !getTokenString(tokens[2], "as", what))
     {
         sendTextFrameAndLogError("error: cmd=setobjecttransform kind=syntax");
         return false;
     }
 
     getLOKitDocument()->setView(_viewId);
-    getLOKitDocument()->setObjectTransform(objectIds.c_str(), change.c_str(), what.c_str());
+    getLOKitDocument()->setObjectTransform(mappings.c_str(), what.c_str());
     return true;
 }
 

@@ -316,6 +316,11 @@ class RenderManager {
 		RenderManager.ensureInstance().offVectorChanged(callback);
 	}
 
+	/// Says that the objects the client holds changed here rather than at the engine.
+	static changedHere(): void {
+		RenderManager.ensureInstance().changedHere();
+	}
+
 	static handleVectorPrimitivesResponse(
 		values: cool.VectorPrimitivesResponse,
 	): void {

@@ -2810,16 +2810,51 @@ struct COKitDocument
         = 0;
 
     /**
-     * Lays a change over the drawing objects named, which moves, scales, turns or shears them.
+     * Gives drawing objects the mapping they are to be drawn by, which moves, scales, turns or
+     * shears them.
      *
-     * @param pObjectIds the unique ids of the objects, as the render geometry names them,
-     * separated by commas
-     * @param pChange the change, in twips, as the six numbers of a matrix - a, b, c, d, e and f -
-     * separated by commas, where a point x and y becomes a*x + c*y + e and b*x + d*y + f
-     * @param pWhat what the change was done by, which names the step it can be undone with:
-     * "move", "scale" or "turn"
+     * @param pMappings one item per object, separated by semicolons. An item is the unique id of
+     * the object, as the render geometry names it, then the six numbers of its mapping -
+     * a, b, c, d, e and f - all separated by commas. The corner 0 and 0 of the object goes to
+     * e and f, in twips, and its own axes are the other four. A mapping whose two axes are
+     * turned over against each other turns the object over
+     * @param pWhat what was done, which names the step it can be undone with: "move", "scale" or
+     * "turn"
      */
-    virtual void setObjectTransform(const char* pObjectIds, const char* pChange, const char* pWhat)
+    virtual void setObjectTransform(const char* pMappings, const char* pWhat) = 0;
+
+    /**
+     * Moves one of the points a custom shape is shaped by, which the shape reads as the value it
+     * shapes itself from.
+     *
+     * @param nObjectId the unique id of the object, as the render geometry names it
+     * @param nAt which of the points the shape offers, counted from zero as it lists them
+     * @param nX where the point goes, on the page, in twips
+     * @param nY where the point goes, on the page, in twips
+     * @param bWithTheShape true to carry the shape along where the point is one that moves it,
+     * which is what a callout's tail does when it is dragged without a modifier
+     */
+    virtual void setObjectControlPoint(unsigned long long nObjectId, int nAt, int nX, int nY,
+                                       bool bWithTheShape)
+        = 0;
+
+    /**
+     * Moves one handle of an object to a place on the page, by naming the object and the handle
+     * rather than by what a view has selected. The object reads the move its own way: a corner
+     * radius, the angle a piece of a circle begins at, the offset of a measurement.
+     *
+     * @param nObjectId the unique id of the object, as the render geometry names it
+     * @param nKind the kind of handle, as the drawing layer numbers the kinds
+     * @param nPolygon which polygon of the object the handle belongs to, zero where it belongs
+     * to none
+     * @param nPoint which point of that polygon, zero where it stands for no point
+     * @param nAt the number the object itself gives the handle, for the handles that are told
+     * apart by nothing else; -1 where the three above already name it
+     * @param nX where the handle goes, on the page, in twips
+     * @param nY where the handle goes, on the page, in twips
+     */
+    virtual void setObjectHandle(unsigned long long nObjectId, int nKind, int nPolygon,
+                                 int nPoint, int nAt, int nX, int nY)
         = 0;
 
 };

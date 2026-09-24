@@ -47,33 +47,26 @@ class MovingInteraction extends SelectionInteraction {
 	}
 
 	/*
-		Tells the engine where the selection now stands: the corner it started at, moved by as
-		much as the mouse moved, or the place it snapped to. The engine is handed a position, not
-		a drag of its own.
+		Hands the engine the mapping every object of the selection is to be drawn by, which is the
+		one it was drawn by here while the move ran, with whatever it lined up with taken into
+		account.
 	*/
 	public finish(to: cool.SimplePoint): void {
 		this.move(to);
 
 		if (!this.across && !this.down) return;
 
-		// Where the selection stands is read now rather than when the move began: nothing has
-		// moved it in the meantime, and a selection made by the press itself is known by now.
-		const corner = this.selection.selectionCorner();
-		const stands = this.selection.snappedCorner(
-			corner[0] + this.across * app.twipsToPixels,
-			corner[1] + this.down * app.twipsToPixels,
-		);
+		const matrix = this.transformation();
+		if (matrix)
+			SelectionSection.sendTransform(
+				this.selection.selectedObjects(),
+				matrix,
+				'move',
+			);
+	}
 
-		app.map.sendUnoCommand('.uno:TransformDialog', {
-			TransformPosX: {
-				type: 'long',
-				value: Math.round(stands[0] * app.pixelsToTwips),
-			},
-			TransformPosY: {
-				type: 'long',
-				value: Math.round(stands[1] * app.pixelsToTwips),
-			},
-		});
+	public scrollsWithTheMouse(): boolean {
+		return true;
 	}
 
 	public leadingPoint(): cool.SimplePoint | null {
@@ -83,7 +76,18 @@ class MovingInteraction extends SelectionInteraction {
 	public transformation(): cool.Matrix2D | null {
 		if (!this.across && !this.down) return null;
 
-		return cool.Matrix2D.IDENTITY.translate(this.across, this.down);
+		// Where the selection lined up with something on the page, the move goes as far as that
+		// rather than as far as the mouse.
+		const corner = this.selection.selectionCorner();
+		const stands = this.selection.snappedCorner(
+			corner[0] + this.across * app.twipsToPixels,
+			corner[1] + this.down * app.twipsToPixels,
+		);
+
+		return cool.Matrix2D.IDENTITY.translate(
+			(stands[0] - corner[0]) * app.pixelsToTwips,
+			(stands[1] - corner[1]) * app.pixelsToTwips,
+		);
 	}
 
 	public handles(known: SelectionHandle[]): SelectionHandle[] {

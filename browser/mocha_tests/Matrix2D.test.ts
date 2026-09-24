@@ -96,6 +96,12 @@ describe('Matrix2D', function () {
 		assertPoint(onto.apply(0.5, 0.5), 25, 25);
 	});
 
+	it('says how long it makes a step along each axis', function () {
+		const matrix = cool.Matrix2D.IDENTITY.scale(3, 4).rotateAround(0, 0, 1.1);
+		assert.ok(Math.abs(matrix.lengthOfXAxis() - 3) < 1e-12);
+		assert.ok(Math.abs(matrix.lengthOfYAxis() - 4) < 1e-12);
+	});
+
 	it('says by how much it turns the x axis', function () {
 		const quarter = cool.Matrix2D.IDENTITY.rotateAround(3, 4, Math.PI / 2);
 		assert.ok(Math.abs(quarter.rotation() - Math.PI / 2) < 1e-12);

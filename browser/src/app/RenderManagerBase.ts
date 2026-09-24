@@ -250,6 +250,11 @@ class RenderManagerBase {
 	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	offVectorChanged(_callback: () => void): void {}
 
+	/// See VectorManager. A view that draws from tiles holds no objects to change.
+	changedHere(): void {
+		// Nothing of the kind is held here.
+	}
+
 	handleVectorPrimitivesResponse(
 		_values: cool.VectorPrimitivesResponse,
 		// eslint-disable-next-line @typescript-eslint/no-empty-function

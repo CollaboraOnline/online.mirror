@@ -580,18 +580,50 @@ selectobjects ids=<ids>
     of one selection all sit at the same level, directly on the page or in one and the same group;
     an id naming an object elsewhere, or naming nothing on the page the view shows, is left out.
 
-setobjecttransform ids=<ids> by=<change> as=<what>
+setobjecttransform to=<mappings> as=<what>
 
-    <ids> is a comma separated list of the unique ids of drawing objects, the ones the render
-    geometry of a page names its objects by. <change> is what is done to them, in twips, as the
-    six numbers of a matrix - a, b, c, d, e and f - separated by commas, where a point x and y
-    becomes a*x + c*y + e and b*x + d*y + f. <what> is "move", "scale" or "turn", and names the
-    step the change can be undone with.
+    <mappings> holds one item per object, separated by semicolons. An item is the unique id of a
+    drawing object, the one the render geometry of a page names it by, then the six numbers of
+    the mapping it is to be drawn by - a, b, c, d, e and f - all separated by commas. The
+    mapping takes the object's own square, whose corners are 0 and 0 and 1 and 1, onto the
+    page, in twips: the first corner goes to e and f, and the other four numbers say which way
+    and how far its own two axes run. A mapping whose two axes are turned over against each
+    other turns the object over. <what> is "move", "scale" or "turn", and names the step it can
+    be undone with.
 
-    Lays that change over every one of those objects: each of them keeps what it is and only its
-    place, its size, its turn and its shear follow the change. The whole of it is one step to
-    undo. A client that works a drag out for itself hands the change over this way rather than
+    Gives every one of those objects the mapping named: it keeps what it is and only its place,
+    its size, its turn and its shear become what the mapping says. The whole of it is one step to
+    undo. A client that works a drag out for itself hands over what it drew this way, rather than
     asking for a handle of the selection to be moved.
+
+setobjectcontrolpoint id=<id> at=<at> x=<x> y=<y> withtheshape=<withtheshape>
+
+    <id> is the unique id of a drawing object, the one the render geometry of a page names it by,
+    and <at> counts the points a custom shape is shaped by, from zero, in the order the shape
+    offers them. <x> and <y> are where that point is to go on the page, in twips.
+    <withtheshape> is 1 to carry the shape along where the point is one that moves it, which is
+    what the tail of a callout does when it is dragged without a modifier, and 0 otherwise.
+
+    The shape reads such a point as the value it shapes itself from and holds it to whatever that
+    value may be, so the place named here is a wish and what the shape makes of it is the answer.
+    One step to undo. Naming an object that is not a custom shape does nothing.
+
+setobjecthandle id=<id> kind=<kind> polygon=<polygon> point=<point> at=<at> x=<x> y=<y>
+
+    <id> is the unique id of a drawing object, the one the render geometry of a page names it by,
+    and the four after it name one of that object's handles as the render geometry reports it:
+    <kind> is the kind of handle, <polygon> and <point> say which point of which polygon it
+    belongs to, and <at> is the number the object itself gives the handle, for the handles that
+    are told apart by nothing else. <at> is -1 where the three before it already name the handle.
+    <x> and <y> are where the handle is to go on the page, in twips.
+
+    The object reads such a move its own way: the corner radius of a rectangle, the angle a piece
+    of a circle begins at, the offset of a measurement. One step to undo. Nothing happens where
+    the object has no handle of that name or will not have that one dragged.
+
+    A point a custom shape is shaped by is not moved this way: it has setobjectcontrolpoint,
+    which says in the command whether the shape is carried along, where this one would leave
+    that to be read off the drag that is driving it.
 
 setobjectgluepoint id=<id> at=<at> x=<x> y=<y>
 

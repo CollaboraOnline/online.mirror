@@ -35,6 +35,7 @@
 #include <com/sun/star/beans/XPropertySet.hpp>
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <svx/sdrhandlerails.hxx>
 #include <svx/svdobjkind.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <drawinglayer/primitive2d/Primitive2DContainer.hxx>
@@ -164,12 +165,48 @@ public:
             sal_Int32 mnKind = 0;
             sal_uInt32 mnPolygon = 0;
             sal_uInt32 mnPoint = 0;
+
+            /// The number the object itself gives the handle, which is what tells apart the
+            /// handles that are alike in every other way.
+            sal_uInt32 mnObjHandle = 0;
             Point maPosition;
+
+            /** How far the handle may be moved, for a point a custom shape is shaped by, on the
+                shape's own square: 0 and 0 is its upper left corner and 1 and 1 its lower right
+                one. Says nothing for a handle of another kind.
+             */
+            bool mbHasRails = false;
+            SdrHandleRails maRails;
 
             bool operator==(const Handle& rOther) const
             {
                 return mnKind == rOther.mnKind && mnPolygon == rOther.mnPolygon
-                       && mnPoint == rOther.mnPoint && maPosition == rOther.maPosition;
+                       && mnPoint == rOther.mnPoint && mnObjHandle == rOther.mnObjHandle
+                       && maPosition == rOther.maPosition
+                       && mbHasRails == rOther.mbHasRails
+                       && (!mbHasRails || sameRails(maRails, rOther.maRails));
+            }
+
+            static bool sameRails(const SdrHandleRails& rOne, const SdrHandleRails& rOther)
+            {
+                return rOne.meKind == rOther.meKind && rOne.mbMovesAcross == rOther.mbMovesAcross
+                       && rOne.mbMovesDown == rOther.mbMovesDown
+                       && rOne.mbHasLeastAcross == rOther.mbHasLeastAcross
+                       && rOne.mbHasMostAcross == rOther.mbHasMostAcross
+                       && rOne.mbHasLeastDown == rOther.mbHasLeastDown
+                       && rOne.mbHasMostDown == rOther.mbHasMostDown
+                       && rOne.maLeastAcross == rOther.maLeastAcross
+                       && rOne.maMostAcross == rOther.maMostAcross
+                       && rOne.maLeastDown == rOther.maLeastDown
+                       && rOne.maMostDown == rOther.maMostDown
+                       && rOne.maAround == rOther.maAround
+                       && rOne.mbHasNearest == rOther.mbHasNearest
+                       && rOne.mbHasFurthest == rOther.mbHasFurthest
+                       && rOne.maNearest == rOther.maNearest
+                       && rOne.maFurthest == rOther.maFurthest
+                       && rOne.mbHasFrom == rOther.mbHasFrom && rOne.mbHasTo == rOther.mbHasTo
+                       && rOne.maFrom == rOther.maFrom && rOne.maTo == rOther.maTo
+                       && rOne.mbKeepsItsLength == rOther.mbKeepsItsLength;
             }
         };
 
@@ -209,10 +246,30 @@ public:
             double mfY = 0.0;
             bool mbShareOfTheSize = true;
 
+            /** The way a connector leaves the object at this point: "left", "right", "top",
+                "bottom", or "horizontal" and "vertical" for the two ways that face each other.
+                Empty when the point names none and the way is worked out from where it lies.
+
+                These are the ways a point can hold. The model itself can hold any mix of the
+                four sides, but neither the interface a document is read through nor the file it
+                is read from can carry one, so a mix never arrives here.
+             */
+            OString maWayOut;
+
+            /** The side the place of the point is measured from, "left" or "right" across the
+                object and "top" or "bottom" down it. Empty where it is measured from the middle,
+                which is what a point is given when nothing else is said.
+             */
+            OString maFromAcross;
+            OString maFromDown;
+
             bool operator==(const GluePoint& rOther) const
             {
                 return mfX == rOther.mfX && mfY == rOther.mfY
-                       && mbShareOfTheSize == rOther.mbShareOfTheSize;
+                       && mbShareOfTheSize == rOther.mbShareOfTheSize
+                       && maWayOut == rOther.maWayOut
+                       && maFromAcross == rOther.maFromAcross
+                       && maFromDown == rOther.maFromDown;
             }
         };
 

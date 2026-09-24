@@ -20,6 +20,52 @@ namespace cool {
 		kind: number;
 		polygon?: number;
 		point?: number;
+		/// The number the object itself gives the handle, which tells apart the handles that
+		/// are alike in every other way. Absent where the kind, the polygon and the point
+		/// already name it.
+		at?: number;
+		x: number;
+		y: number;
+		/// How far the handle may be moved, for a point a custom shape is shaped by. Absent for a
+		/// handle of another kind.
+		rails?: ObjectHandleRails;
+	}
+
+	/** How far a point a custom shape is shaped by may be moved, given as the places the point
+	 * itself would stand at, on the object's own square: 0 and 0 is its upper left corner and 1
+	 * and 1 its lower right one.
+	 *
+	 * A handle moves across the shape, down it, both, or around a point of it. A place that is
+	 * not given leaves that side open. The names say which end of the shape's own value a place
+	 * comes from, not which side of the shape it lies on: a shape that counts the other way
+	 * round puts the smallest one on the right.
+	 */
+	export interface ObjectHandleRails {
+		/// A handle that runs on the object's two ways: whether it moves on each of them, and
+		/// the places it is held between on each. A place that is not given leaves that side
+		/// open, and an axis it does not move on keeps the place it had.
+		movesAcross?: boolean;
+		movesDown?: boolean;
+		leastAcross?: ObjectPlace;
+		mostAcross?: ObjectPlace;
+		leastDown?: ObjectPlace;
+		mostDown?: ObjectPlace;
+		/// A handle that turns about a point: the point, the nearest and furthest it may come to
+		/// it, and the two ends of the piece of the way round it may take.
+		movesAround?: boolean;
+		around?: ObjectPlace;
+		nearest?: ObjectPlace;
+		furthest?: ObjectPlace;
+		from?: ObjectPlace;
+		to?: ObjectPlace;
+		/// Whether the handle keeps a length of its own when the object is made larger or
+		/// smaller, rather than travelling with it.
+		keepsItsLength?: boolean;
+	}
+
+	/// A place on the object's own square, where 0 and 0 is its upper left corner and 1 and 1 its
+	/// lower right one.
+	export interface ObjectPlace {
 		x: number;
 		y: number;
 	}
@@ -39,6 +85,26 @@ namespace cool {
 		/// the curve turns a corner there. It is worked out by the engine on the model's own
 		/// numbers, which are finer than the twips here.
 		continuity?: 1 | 2;
+	}
+
+	/** One point an object was given for a connector to tie itself to, where it lies on the
+	 * object: 0 and 0 is its upper left corner and 1 and 1 its lower right one.
+	 */
+	export interface ObjectGluePoint {
+		x: number;
+		y: number;
+		/// True for a point the object holds as a distance of its own rather than as a share of
+		/// its size: making the object larger leaves such a point where it is.
+		keepsItsDistance?: boolean;
+		/// The way a connector leaves the object at this point: one side of it, or the two that
+		/// face each other. Absent where the point names none and the way is worked out from
+		/// where the point lies. These six are all a point can hold: the model can hold any mix
+		/// of the four sides, but no document can carry one, so a mix never arrives.
+		wayOut?: 'left' | 'right' | 'top' | 'bottom' | 'horizontal' | 'vertical';
+		/// The side the place of the point is measured from, across the object and down it.
+		/// Absent where it is measured from the middle.
+		fromAcross?: 'left' | 'right';
+		fromDown?: 'top' | 'bottom';
 	}
 
 	/** One polygon of the path of an object, as the model holds it. The polygons and their
@@ -117,7 +183,7 @@ namespace cool {
 		/// What kind of object it is, as the drawing layer numbers the kinds: 2 a line, 24 a
 		/// connector, 25 a caption, 29 a measurement, 33 a custom shape, 35 a table.
 		objectKind?: number;
-		gluePoints?: { x: number; y: number; keepsItsDistance?: boolean }[];
+		gluePoints?: ObjectGluePoint[];
 		/// True for a connector whose first end is tied to an object, and the same for its last
 		/// end. Absent for anything that is not a connector, and for an end that is free.
 		tiedAtStart?: boolean;

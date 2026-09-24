@@ -50,6 +50,16 @@ abstract class SelectionInteraction {
 		return known;
 	}
 
+	/*
+		Whether the view scrolls on by itself while the mouse stands near its edge. Carrying the
+		objects does: the mouse leads them and the page has to come along. A drag that is led by
+		a handle does not, because the handle follows the mouse on the page, and a page that
+		moves under a mouse standing still would run away with it.
+	*/
+	public scrollsWithTheMouse(): boolean {
+		return false;
+	}
+
 	/// The handle it has hold of, for the ones that are led by a handle. Nothing for the others.
 	public handleHeld(): SelectionHandle | null {
 		return null;

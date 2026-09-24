@@ -45,20 +45,34 @@ class TurningInteraction extends SelectionInteraction {
 
 	/*
 		Turns the objects of a selection around a point by that many degrees, counted against the
-		clock, which is how the engine counts them. It is handed a transformation of the objects
-		rather than a handle that moved, because the engine has no handle that turns them.
+		clock. Every object is handed the mapping it is to be drawn by, which is the one it would
+		be drawn by here, so that what is shown and what is sent are the same thing.
 	*/
-	public static turnObjects(middle: cool.SimplePoint, degrees: number): void {
-		if (!degrees) return;
+	public static turnObjects(
+		selection: SelectionSection,
+		middle: cool.SimplePoint,
+		degrees: number,
+	): cool.Matrix2D | null {
+		if (!degrees) return null;
 
-		app.map.sendUnoCommand('.uno:TransformDialog ', {
-			TransformRotationDeltaAngle: {
-				type: 'long',
-				value: Math.round(degrees * 100),
-			},
-			TransformRotationX: { type: 'long', value: middle.x },
-			TransformRotationY: { type: 'long', value: middle.y },
-		});
+		const matrix = TurningInteraction.turnAbout(middle, degrees);
+
+		SelectionSection.sendTransform(selection.selectedObjects(), matrix, 'turn');
+
+		return matrix;
+	}
+
+	/// The change that turns the objects around that point by that many degrees, counted against
+	/// the clock. The canvas counts an angle with the clock, so it is handed the other sign.
+	public static turnAbout(
+		middle: cool.SimplePoint,
+		degrees: number,
+	): cool.Matrix2D {
+		return cool.Matrix2D.IDENTITY.rotateAround(
+			middle.x,
+			middle.y,
+			(-degrees * Math.PI) / 180,
+		);
 	}
 
 	public move(to: cool.SimplePoint): void {
@@ -70,16 +84,19 @@ class TurningInteraction extends SelectionInteraction {
 		this.move(to);
 
 		// The canvas counts an angle with the clock, the engine against it.
-		TurningInteraction.turnObjects(this.middle, (-this.turned * 180) / Math.PI);
+		TurningInteraction.turnObjects(
+			this.selection,
+			this.middle,
+			(-this.turned * 180) / Math.PI,
+		);
 	}
 
 	public transformation(): cool.Matrix2D | null {
 		if (!this.turned) return null;
 
-		return cool.Matrix2D.IDENTITY.rotateAround(
-			this.middle.x,
-			this.middle.y,
-			this.turned,
+		return TurningInteraction.turnAbout(
+			this.middle,
+			(-this.turned * 180) / Math.PI,
 		);
 	}
 

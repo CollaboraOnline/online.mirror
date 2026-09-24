@@ -109,6 +109,11 @@ class HandleTravel {
 		return this.handlesOf().filter((handle: any) => handle?.name);
 	}
 
+	/// The name of the handle the keyboard works on, or nothing while it is on none.
+	public whichIsActive(): string | null {
+		return this.activeName;
+	}
+
 	/// The handle the keyboard works on, or nothing while it is on none.
 	public activeHandle(): any | undefined {
 		return this.handles().find(

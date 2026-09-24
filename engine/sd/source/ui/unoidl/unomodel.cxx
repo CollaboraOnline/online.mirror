@@ -127,6 +127,7 @@
 #include <svx/svdopage.hxx>
 #include <svx/svdtext.hxx>
 #include <svx/svdopath.hxx>
+#include <svx/svdoashp.hxx>
 #include <svx/svdhdl.hxx>
 #include <svtools/colorcfg.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
@@ -217,6 +218,7 @@
 #include <drawinglayer/primitive2d/structuretagprimitive2d.hxx>
 #include <drawinglayer/processor2d/Primitive2dJsonProcessor.hxx>
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
+#include <basegfx/numeric/ftools.hxx>
 #include <vcl/canvastools.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
@@ -3631,6 +3633,48 @@ private:
                     aOne.mfX = aOnThePage.getX();
                     aOne.mfY = aOnThePage.getY();
                     aOne.mbShareOfTheSize = rGluePoint.IsPercent();
+
+                    /*
+                        The six a point can hold, which are the six the interface a document is
+                        read through knows. A mix of sides the model could hold besides them
+                        turns into none of them on the way in, so it never reaches here.
+                    */
+                    switch (rGluePoint.GetEscDir())
+                    {
+                        case SdrEscapeDirection::LEFT:
+                            aOne.maWayOut = "left"_ostr;
+                            break;
+                        case SdrEscapeDirection::RIGHT:
+                            aOne.maWayOut = "right"_ostr;
+                            break;
+                        case SdrEscapeDirection::TOP:
+                            aOne.maWayOut = "top"_ostr;
+                            break;
+                        case SdrEscapeDirection::BOTTOM:
+                            aOne.maWayOut = "bottom"_ostr;
+                            break;
+                        case SdrEscapeDirection::HORZ:
+                            aOne.maWayOut = "horizontal"_ostr;
+                            break;
+                        case SdrEscapeDirection::VERT:
+                            aOne.maWayOut = "vertical"_ostr;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    const SdrAlign eAcross(rGluePoint.GetHorzAlign());
+                    if (SdrAlign::HORZ_LEFT == eAcross)
+                        aOne.maFromAcross = "left"_ostr;
+                    else if (SdrAlign::HORZ_RIGHT == eAcross)
+                        aOne.maFromAcross = "right"_ostr;
+
+                    const SdrAlign eDown(rGluePoint.GetVertAlign());
+                    if (SdrAlign::VERT_TOP == eDown)
+                        aOne.maFromDown = "top"_ostr;
+                    else if (SdrAlign::VERT_BOTTOM == eDown)
+                        aOne.maFromDown = "bottom"_ostr;
+
                     aContent.maOwnGluePoints.push_back(aOne);
                 }
             }
@@ -3885,6 +3929,36 @@ private:
         }
     }
 
+    /** Takes the places a handle may be moved between onto the object's own square, where 0 and
+        0 is its upper left corner and 1 and 1 its lower right one.
+
+        A place written that way travels with the object: a reader that moves the object itself,
+        without waiting to be told what became of it, still has the places right. It also says
+        the same thing however the object is turned, sheared or mirrored, since all of that is
+        in the mapping the reader already holds.
+     */
+    static void onTheObjectsSquare(SdrHandleRails& rRails, const SdrObject& rObject)
+    {
+        basegfx::B2DHomMatrix aOntoTheSquare(transformationInTwips(rObject));
+        if (!aOntoTheSquare.invert())
+            return;
+
+        auto aOne = [&aOntoTheSquare](basegfx::B2DPoint& rPlace) {
+            rPlace = aOntoTheSquare * basegfx::B2DPoint(rPlace.getX() * constTwipConversionFactor,
+                                                        rPlace.getY() * constTwipConversionFactor);
+        };
+
+        aOne(rRails.maLeastAcross);
+        aOne(rRails.maMostAcross);
+        aOne(rRails.maLeastDown);
+        aOne(rRails.maMostDown);
+        aOne(rRails.maAround);
+        aOne(rRails.maNearest);
+        aOne(rRails.maFurthest);
+        aOne(rRails.maFrom);
+        aOne(rRails.maTo);
+    }
+
     /** The handles that shape an object, in twips: the corner radius of a rectangle and the
         points a custom shape is shaped by.
 
@@ -3926,6 +4000,18 @@ private:
             aOne.mnKind = static_cast<sal_Int32>(eKind);
             aOne.mnPolygon = pHandle->GetPolyNum();
             aOne.mnPoint = pHandle->GetPointNum();
+            aOne.mnObjHandle = pHandle->GetObjHdlNum();
+
+            /*
+                A point a custom shape is shaped by may only go where the shape lets it, and what
+                it lets it do is worked out from the shape as it stands. It travels so that a
+                client can hold a drag to it without knowing anything about the shape itself.
+            */
+            // How far the handle may be moved is the object's own business, and it answers in
+            // its own coordinates, so the places are taken onto its square here.
+            aOne.mbHasRails = rObject.GetHandleRails(*pHandle, aOne.maRails);
+            if (aOne.mbHasRails)
+                onTheObjectsSquare(aOne.maRails, rObject);
             aOne.maPosition = Point(
                 basegfx::fround<tools::Long>(aPosition.X() * constTwipConversionFactor),
                 basegfx::fround<tools::Long>(aPosition.Y() * constTwipConversionFactor));
@@ -3982,14 +4068,91 @@ private:
         return rangeInTwips(aRange);
     }
 
-    /// The mapping of the unit rectangle onto the object, in twips. The object reports it in
-    /// the model unit, and scaling from the left scales the mapped result, not the unit
-    /// rectangle it starts from.
+    /*
+        The mapping an object is drawn by. What the object answers describes its base geometry,
+        which holds the shear the other way round: the object lays itself out with the shear
+        turned over, and the answer keeps the angle as the model holds it, so that the two agree
+        when the answer is handed back. A reader that wants to know where the object is drawn
+        needs the first of those, so the shear is turned over here.
+
+        An object with no shear is the same either way, and a scale of a turned object is what
+        gives an object shear, which is why this only shows there.
+    */
+    static basegfx::B2DHomMatrix asItIsDrawn(const basegfx::B2DHomMatrix& rBaseGeometry)
+    {
+        basegfx::B2DTuple aScale;
+        basegfx::B2DTuple aTranslate;
+        double fRotate(0.0);
+        double fShearX(0.0);
+        rBaseGeometry.decompose(aScale, aTranslate, fRotate, fShearX);
+
+        if (basegfx::fTools::equalZero(fShearX))
+            return rBaseGeometry;
+
+        return basegfx::utils::createScaleShearXRotateTranslateB2DHomMatrix(aScale, -fShearX,
+                                                                            fRotate, aTranslate);
+    }
+
+    /** Mirrors the mapping back about the line the drawing layer un-mirrored it about: an
+        upright line through the middle of the box around it, or a level one.
+
+        A shape that says it faces the other way is answered for with the mapping it would have
+        if it did not, and that is worked out by mirroring it about a line of the page, not about
+        a line of its own. For a shape standing straight the two are the same line and nothing
+        moves. For a turned one they are not, and the answer lies somewhere else than the shape
+        is drawn, which is what this takes back. The box around a shape is not changed by
+        mirroring it about its own middle, so the line can be worked out here just as well.
+     */
+    static basegfx::B2DHomMatrix mirroredBack(const basegfx::B2DHomMatrix& rTransformation,
+                                              const bool bAcross)
+    {
+        basegfx::B2DRange aBox;
+        for (const auto& rCorner : { basegfx::B2DPoint(0.0, 0.0), basegfx::B2DPoint(1.0, 0.0),
+                                     basegfx::B2DPoint(1.0, 1.0), basegfx::B2DPoint(0.0, 1.0) })
+            aBox.expand(rTransformation * rCorner);
+
+        const double fMiddle(bAcross ? aBox.getCenter().getX() : aBox.getCenter().getY());
+
+        basegfx::B2DHomMatrix aMirror;
+        if (bAcross)
+        {
+            aMirror.set(0, 0, -1.0);
+            aMirror.set(0, 2, 2.0 * fMiddle);
+        }
+        else
+        {
+            aMirror.set(1, 1, -1.0);
+            aMirror.set(1, 2, 2.0 * fMiddle);
+        }
+
+        return aMirror * rTransformation;
+    }
+
+    /** The mapping that takes the object's own square onto the page, in twips, saying the whole
+        truth about where the object is and which way round it is drawn.
+
+        The drawing layer holds none of its own mirroring in a mapping: a shape keeps it apart,
+        as the way it says it faces, and answers with a mapping that has positive lengths
+        whichever way it is drawn. A reader that only has the mapping would then have no way of
+        telling the two apart, so the mirroring is laid back into it here. The shear is turned
+        over here for the same reason, and both belong at this one place: what leaves the engine
+        should be a mapping anybody can work with, and the drawing layer's own way of keeping
+        these should not have to be known on the other side.
+     */
     static basegfx::B2DHomMatrix transformationInTwips(const SdrObject& rObject)
     {
         basegfx::B2DHomMatrix aTransformation;
         basegfx::B2DPolyPolygon aPolyPolygon;
         rObject.TRGetBaseGeometry(aTransformation, aPolyPolygon);
+        aTransformation = asItIsDrawn(aTransformation);
+
+        if (const auto* pShape = dynamic_cast<const SdrObjCustomShape*>(&rObject))
+        {
+            if (pShape->IsMirroredX())
+                aTransformation = mirroredBack(aTransformation, true);
+            if (pShape->IsMirroredY())
+                aTransformation = mirroredBack(aTransformation, false);
+        }
 
         return basegfx::utils::createScaleB2DHomMatrix(constTwipConversionFactor,
                                                        constTwipConversionFactor)
@@ -4106,6 +4269,12 @@ private:
                 rWriter.put("y", rGluePoint.mfY);
                 if (!rGluePoint.mbShareOfTheSize)
                     rWriter.put("keepsItsDistance", true);
+                if (!rGluePoint.maWayOut.isEmpty())
+                    rWriter.put("wayOut", rGluePoint.maWayOut);
+                if (!rGluePoint.maFromAcross.isEmpty())
+                    rWriter.put("fromAcross", rGluePoint.maFromAcross);
+                if (!rGluePoint.maFromDown.isEmpty())
+                    rWriter.put("fromDown", rGluePoint.maFromDown);
             }
         }
 
@@ -4172,8 +4341,52 @@ private:
                     rWriter.put("polygon", sal_Int64(rHandle.mnPolygon));
                 if (rHandle.mnPoint)
                     rWriter.put("point", sal_Int64(rHandle.mnPoint));
+                if (rHandle.mnObjHandle)
+                    rWriter.put("at", sal_Int64(rHandle.mnObjHandle));
                 rWriter.put("x", sal_Int64(rHandle.maPosition.X()));
                 rWriter.put("y", sal_Int64(rHandle.maPosition.Y()));
+
+                if (rHandle.mbHasRails)
+                {
+                    const auto& rRails = rHandle.maRails;
+                    auto aRailNode = rWriter.startNode("rails");
+
+                    // A place is written on the object's own square, where 0 and 0 is its
+                    // upper left corner and 1 and 1 its lower right one.
+                    auto aPlace = [&rWriter](const char* pName, const bool bHas,
+                                             const basegfx::B2DPoint& rPlace) {
+                        if (!bHas)
+                            return;
+
+                        auto aNode = rWriter.startNode(pName);
+                        rWriter.put("x", rPlace.getX());
+                        rWriter.put("y", rPlace.getY());
+                    };
+
+                    if (SdrHandleRailKind::Around == rRails.meKind)
+                    {
+                        rWriter.put("movesAround", true);
+                        aPlace("around", true, rRails.maAround);
+                        aPlace("nearest", rRails.mbHasNearest, rRails.maNearest);
+                        aPlace("furthest", rRails.mbHasFurthest, rRails.maFurthest);
+                        aPlace("from", rRails.mbHasFrom, rRails.maFrom);
+                        aPlace("to", rRails.mbHasTo, rRails.maTo);
+                    }
+                    else
+                    {
+                        if (rRails.mbMovesAcross)
+                            rWriter.put("movesAcross", true);
+                        if (rRails.mbMovesDown)
+                            rWriter.put("movesDown", true);
+                        aPlace("leastAcross", rRails.mbHasLeastAcross, rRails.maLeastAcross);
+                        aPlace("mostAcross", rRails.mbHasMostAcross, rRails.maMostAcross);
+                        aPlace("leastDown", rRails.mbHasLeastDown, rRails.maLeastDown);
+                        aPlace("mostDown", rRails.mbHasMostDown, rRails.maMostDown);
+                    }
+
+                    if (rRails.mbKeepsItsLength)
+                        rWriter.put("keepsItsLength", true);
+                }
             }
         }
     }

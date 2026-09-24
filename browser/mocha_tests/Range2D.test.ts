@@ -44,6 +44,14 @@ describe('Range2D', function () {
 		assert.deepStrictEqual(grown.toArray(), [5, 18, 35, 42]);
 	});
 
+	it('brings a point outside it back to its edge', function () {
+		const range = new cool.Range2D(10, 20, 30, 40);
+		const inside = range.clamp(new cool.Point(15, 25));
+		assert.deepStrictEqual([inside.x, inside.y], [15, 25]);
+		const outside = range.clamp(new cool.Point(5, 50));
+		assert.deepStrictEqual([outside.x, outside.y], [10, 40]);
+	});
+
 	it('holds both ranges in their union', function () {
 		const union = new cool.Range2D(10, 20, 30, 40).union(
 			new cool.Range2D(0, 25, 20, 50),

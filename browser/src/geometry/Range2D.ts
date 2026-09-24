@@ -63,6 +63,15 @@ namespace cool {
 			);
 		}
 
+		/// The point inside the range that is nearest to the one given: itself where it lies inside,
+		/// and on the edge where it lies outside.
+		clamp(point: cool.Point): cool.Point {
+			return new cool.Point(
+				Math.min(Math.max(point.x, this.minX), this.maxX),
+				Math.min(Math.max(point.y, this.minY), this.maxY),
+			);
+		}
+
 		/// The smallest range that holds both this one and the other.
 		union(other: Range2D): Range2D {
 			return new Range2D(

@@ -36,6 +36,17 @@ abstract class SelectionSection extends CanvasSectionObject {
 	/// The handles as they were last worked out from the objects of the selection.
 	private known: SelectionHandle[] = [];
 
+	/*
+		Where a key last left the handle it works on, and which of the eight that was. A change
+		that turns the object over lays its square down the other way round, so the handle of
+		that name is drawn on the far side and the one now standing where the key left it is the
+		one facing it. Held so that the keyboard can follow the place rather than the name.
+	*/
+	private keyLeftTheHandle: {
+		at: cool.Point;
+		named: string;
+	} | null = null;
+
 	/// The object an end of a connector is being dragged onto, or null while none is aimed at.
 	private aimingAt: number | null = null;
 
@@ -185,6 +196,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 		if (!worked.length && this.known.length) return;
 
 		this.known = worked;
+		this.followTheHandleByPlace();
 		this.coverTheHandles();
 	}
 
@@ -689,6 +701,37 @@ abstract class SelectionSection extends CanvasSectionObject {
 	}
 
 	/*
+		The five places the handles that frame a single object stand at, worked out from the
+		mapping that object is drawn by. They are the same places the handles hold, only whole:
+		a handle lies on a whole twip, and the fraction rounding takes off tilts the two axes the
+		object is scaled along, which leaves a shear behind that the object never had. Nothing
+		for a selection of several, which is framed by a box and not by a mapping.
+	*/
+	private framingPlacesOfTheObject():
+		| { [where: string]: cool.SimplePoint }
+		| undefined {
+		const objects = this.selectedObjects();
+		if (objects.length !== 1) return undefined;
+
+		const transform = RenderGeometrySection.transformOf(objects[0]);
+		if (!transform) return undefined;
+
+		const at = (x: number, y: number): cool.SimplePoint => {
+			const place = transform.apply(x, y);
+
+			return new cool.SimplePoint(place.x, place.y);
+		};
+
+		return {
+			middle: at(0.5, 0.5),
+			above: at(0.5, 0),
+			below: at(0.5, 1),
+			left: at(0, 0.5),
+			right: at(1, 0.5),
+		};
+	}
+
+	/*
 		The shape of the selection as the maths of a drag wants it: the middle it turns around,
 		how wide and how high it is in core pixels, and the angle it stands at, counted in
 		radians against the clock. All four come from the handles that frame it, so nothing else
@@ -706,19 +749,28 @@ abstract class SelectionSection extends CanvasSectionObject {
 
 		// The handles as the objects have them, not as a drag shows them: this says what the
 		// selection is now, which is what a drag starts from.
-		const middle = SelectionSection.middleOf(this.known);
-		const above = handleOfKind('2');
-		const below = handleOfKind('7');
-		const left = handleOfKind('4');
-		const right = handleOfKind('5');
+		const whole = this.framingPlacesOfTheObject();
+		const middle = whole?.middle ?? SelectionSection.middleOf(this.known);
+		const above = whole?.above ?? handleOfKind('2');
+		const below = whole?.below ?? handleOfKind('7');
+		const left = whole?.left ?? handleOfKind('4');
+		const right = whole?.right ?? handleOfKind('5');
 		if (!middle || !above || !below || !left || !right) return undefined;
+
+		/*
+			An object that stands straight still answers with a hundredth of a degree of turn
+			where the places come from the handles, so the turn is taken as none when it is that
+			small.
+		*/
+		const turned =
+			Math.atan2(middle.y - above.y, above.x - middle.x) - Math.PI * 0.5;
+		const straight = Math.abs(turned) < 0.0005;
 
 		return {
 			center: middle.clone(),
 			width: left.pDistanceTo(right.pToArray()),
 			height: above.pDistanceTo(below.pToArray()),
-			angleRadian:
-				Math.atan2(middle.y - above.y, above.x - middle.x) - Math.PI * 0.5,
+			angleRadian: straight ? 0 : turned,
 		};
 	}
 
@@ -808,6 +860,11 @@ abstract class SelectionSection extends CanvasSectionObject {
 		the drag left them. The engine's own version of an object replaces this one when it
 		arrives, so a change it made differently puts itself right then.
 	*/
+	/// Lays a change a key made over the objects, as the end of a drag does with its own.
+	public layTheChangeOn(matrix: cool.Matrix2D | null): void {
+		this.leaveTheChangeOnTheObjects(matrix);
+	}
+
 	private leaveTheChangeOnTheObjects(matrix: cool.Matrix2D | null): void {
 		if (!matrix) return;
 
@@ -833,6 +890,52 @@ abstract class SelectionSection extends CanvasSectionObject {
 	}
 
 	/*
+		Hands the engine what a drag did to the objects as a whole: for every object the mapping
+		it is to be drawn by, which is the mapping it was drawn by here while the drag ran. The
+		last word says what the drag was, which is what names the step it can be undone with.
+
+		The mapping travels whole rather than as the change alone, because the client is the one
+		that holds what the object is drawn by: the engine would have to read that again and the
+		two could then disagree.
+	*/
+	public static sendTransform(
+		objectIds: number[],
+		matrix: cool.Matrix2D,
+		what: string,
+	): void {
+		const mappings: string[] = [];
+
+		for (const objectId of objectIds) {
+			const mapping = RenderGeometrySection.transformOf(objectId);
+			if (!mapping) continue;
+
+			// The change the drag stands for, laid over what the object is drawn by now.
+			const reached = mapping.then(matrix).toArray();
+
+			/*
+				A mapping that turns the object over travels whole, turn over and all. The object
+				lays that out itself, and it does it in its own frame: it builds its rectangle
+				unturned at the origin, mirrors it there, and only then shears, turns and moves
+				it. Asking for the turn over apart from the mapping would mean naming a line for
+				it, and a line that does not lie along one of the page's own two is not one the
+				drawing layer can follow.
+			*/
+			mappings.push(
+				String(objectId) +
+					',' +
+					reached.map((value: number) => value.toFixed(4)).join(','),
+			);
+		}
+
+		if (!mappings.length) return;
+
+		const message =
+			'setobjecttransform to=' + mappings.join(';') + ' as=' + what;
+
+		app.socket.sendMessage(message);
+	}
+
+	/*
 		Moves a handle as a key asks, which is the business of the group the handle belongs to:
 		one of the eight scales the selection, the one above it turns it, a point of a path moves
 		that point. Answers where the handle lands, and nothing where it goes nowhere of its own.
@@ -842,8 +945,74 @@ abstract class SelectionSection extends CanvasSectionObject {
 		towards: cool.Point,
 		event: KeyboardEvent,
 	): cool.SimplePoint | null {
-		const landed = this.groupOf(handle)?.moveByKey(handle, towards, event);
-		return landed ? new cool.SimplePoint(landed.x, landed.y) : null;
+		/*
+			The group sends the change and lays it on the objects itself, so the handles are
+			worked out afresh before this has the place the key is taking them to. Nothing is
+			followed while that happens: the place the step before left says nothing about where
+			the handles stand now, and following it sends the keyboard to the handle facing the
+			one being moved.
+		*/
+		this.keyLeftTheHandle = null;
+
+		const to = this.groupOf(handle)?.moveByKey(handle, towards, event) ?? null;
+
+		// Only one of the eight can end up facing the other way, and only it is followed by
+		// place. Anything else stays with the keyboard by name.
+		this.keyLeftTheHandle =
+			to && handle.group === 'framing' ? { at: to, named: handle.name } : null;
+
+		return to ? new cool.SimplePoint(to.x, to.y) : null;
+	}
+
+	/*
+		Keeps the keyboard on the handle that stands where the key left it, rather than on the
+		one that keeps its name. They are the same handle until a change turns the object over,
+		and then the object's square is laid down the other way and the two part company: going
+		on in the same direction would otherwise push back the side that was just crossed.
+
+		It works the same whether the handles were worked out from the change laid on here or
+		from the one the engine answered with, which are not the same thing and need not be: the
+		place is what the keyboard follows, and both of them put a handle there.
+	*/
+	private followTheHandleByPlace(): void {
+		const left = this.keyLeftTheHandle;
+		if (!left) return;
+
+		// The keyboard being somewhere else means it was sent there, by a press or by walking
+		// on, and then the place a key left behind says nothing any more.
+		const active = this.travel.whichIsActive();
+		if (active !== left.named) {
+			this.keyLeftTheHandle = null;
+			return;
+		}
+
+		/*
+			Only the handle itself and the ones it reflects onto are candidates. A change that
+			turns the object over is the one thing that can put another handle where this one
+			was, and it can only ever put one of those there: the handle in the middle of the
+			upper side can become the one in the middle of the lower side and nothing else.
+		*/
+		const couldBe = ObjectHandles.facing(
+			this.known.find((one: SelectionHandle) => one.name === active)?.kind ??
+				'',
+		);
+
+		let nearest: SelectionHandle | null = null;
+		let howFar = Number.POSITIVE_INFINITY;
+		for (const one of this.known) {
+			if (one.group !== 'framing' || !couldBe.includes(one.kind)) continue;
+
+			const away = one.point.distanceTo(left.at);
+			if (away < howFar) {
+				howFar = away;
+				nearest = one;
+			}
+		}
+
+		if (!nearest || nearest.name === active) return;
+
+		this.travel.goTo(nearest.name);
+		this.keyLeftTheHandle = { at: left.at, named: nearest.name };
 	}
 
 	/*
@@ -925,11 +1094,27 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.aimAtWhatIsUnder(this.inTheDocument(point));
 
 		/*
-			The view follows the point the drag is led by, so that a drag which reaches past the
-			edge brings the view with it. It is scrolled by the shortest way that shows that
-			point again, once for each move the mouse makes: a view that scrolled on by itself
-			would move the document under a mouse that is standing still, and the drag would run
-			away from under it.
+			Carrying the objects brings the page along: while the mouse stands near an edge of the
+			view, or outside it, the view scrolls on by itself, and it stops of its own accord as
+			soon as the mouse is away from the edge again.
+		*/
+		if (this.interaction.scrollsWithTheMouse()) {
+			const onCanvas = point.clone();
+			onCanvas.pX += this.myTopLeft[0];
+			onCanvas.pY += this.myTopLeft[1];
+
+			app.map.fire('handleautoscroll', {
+				pos: new cool.Point(onCanvas.cX, onCanvas.cY),
+				map: app.map,
+			});
+			return;
+		}
+
+		/*
+			A drag led by a handle brings the view along another way: it is scrolled by the
+			shortest way that shows that handle again, once for each move the mouse makes. A view
+			that scrolled on by itself would move the page under a mouse standing still, and the
+			handle, which follows the mouse on the page, would run away with it.
 		*/
 		const leading = this.interaction.leadingPoint();
 		if (leading) GraphicSelection.scrollPointIntoView(leading);

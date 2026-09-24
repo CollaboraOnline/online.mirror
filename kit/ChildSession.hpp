@@ -216,9 +216,13 @@ private:
     /// Moves one of the points a drawing object was given for a connector to tie itself to.
     bool setObjectGluePoint(const StringVector& tokens);
 
-    /// Lays a change over the drawing objects the client names, which moves, scales or turns
-    /// them.
+    /// Gives the drawing objects the client names the mapping they are to be drawn by, which
+    /// moves, scales or turns them.
     bool setObjectTransform(const StringVector& tokens);
+
+    /// Moves one of the points a custom shape is shaped by.
+    bool setObjectControlPoint(const StringVector& tokens);
+    bool setObjectHandle(const StringVector& tokens);
     bool downloadAs(const StringVector& tokens);
     /// Whether core will put a question to the person while writing the document out in
     /// this format.
