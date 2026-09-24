@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-24 12:52+0000\n"
+"PO-Revision-Date: 2026-09-24 13:47+0000\n"
 "Last-Translator: bittin1ddc447d824349b2 <bittin@reimu.nl>\n"
 "Language-Team: Swedish <https://hosted.weblate.org/projects/collabora-online/"
 "collabora-ui/sv/>\n"
@@ -5869,9 +5869,8 @@ msgid "Cannot update slide {0}: the source lacks matching slide"
 msgstr "Det går inte att uppdatera bild {0}: källan saknar en motsvarande bild"
 
 #: src/slideimport/SlideLinks.ts:684
-#, fuzzy
 msgid "Unlinking the slide failed."
-msgstr "Det gick inte att infoga bilderna."
+msgstr "Det gick inte att ta bort länken till bilden."
 
 #: src/slideimport/SlideLinks.ts:695 src/slideimport/SlideLinks.ts:756
 msgid "Updating the slides of {0} failed."
@@ -5915,17 +5914,17 @@ msgid "No problems with SSL verification detected"
 msgstr "Inga problem med SSL-verifiering upptäcktes"
 
 #: src/control/Control.ServerAuditDialog.ts:78
-#, fuzzy
 msgid "Each document is securely contained (landlock)"
-msgstr "Varje dokument är säkert inneslutet"
+msgstr "Varje dokument förvaras säkert (inneslutet)"
 
 #: src/control/Control.ServerAuditDialog.ts:83
 msgid "Each document is securely contained (Linux namespaces)"
-msgstr ""
+msgstr "Varje dokument är säkert inkapslat (Linux-namnrymder)"
 
 #: src/control/Control.ServerAuditDialog.ts:88
 msgid "Each document is securely contained (capabilities and chroot)"
 msgstr ""
+"Varje dokument är säkert inkapslat (med hjälp av capabilities och chroot)"
 
 #: src/control/Control.ServerAuditDialog.ts:102
 msgid "System call security filtering enabled"
@@ -5942,6 +5941,8 @@ msgstr "Snabb kit-jail-bindmontering är aktiverad"
 #: src/control/Control.ServerAuditDialog.ts:133
 msgid "Fast kit jail setup with landlock, nothing to copy or mount"
 msgstr ""
+"Snabb uppsättning av jail-miljö med Landlock – inget behöver kopieras eller "
+"monteras"
 
 #: src/control/Control.ServerAuditDialog.ts:146
 msgid "Poorly performing proxying of all network requests."
@@ -7386,11 +7387,11 @@ msgstr "Redigeringsläge"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:70
 msgid "Last Custom Value"
-msgstr ""
+msgstr "Senaste anpassade värde"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:134
 msgid "Custom Line Thickness:"
-msgstr ""
+msgstr "Anpassad linjetjocklek:"
 
 #: src/control/jsdialog/Widget.MobileBorderSelector.js:111
 msgid "Cell borders"
