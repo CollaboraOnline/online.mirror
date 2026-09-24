@@ -364,7 +364,7 @@ class Xcu {
 				const contentsContainer = editorContainer.querySelector(
 					'#xcu-tab-contents',
 				) as HTMLElement;
-				contentsContainer.innerHTML = '';
+				contentsContainer.replaceChildren();
 				if (this.xcuDataObj && this.xcuDataObj[tab.label]) {
 					const renderedTree = (
 						window as any
