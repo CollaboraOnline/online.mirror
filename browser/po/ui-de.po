@@ -12,11 +12,11 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-19 05:24+0000\n"
-"Last-Translator: Mr-Update <mr.update@yahoo.de>\n"
+"PO-Revision-Date: 2026-09-25 03:35+0000\n"
+"Last-Translator: Thorsten Behrens <thorsten.behrens@collabora.com>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/collabora-online/"
 "collabora-ui/de/>\n"
-"Language: \n"
+"Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -839,19 +839,19 @@ msgstr "Broschüre von rechts nach links"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:731
 msgid "English"
-msgstr ""
+msgstr "Englisch"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:732
 msgid "Hungarian"
-msgstr ""
+msgstr "Ungarisch"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:733
 msgid "Portuguese (Brazil)"
-msgstr ""
+msgstr "Portugiesisch (Brasilien)"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:734
 msgid "Russian"
-msgstr ""
+msgstr "Russisch"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1293
 msgid "Invalid JSON file"
@@ -1213,11 +1213,12 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3898
 msgid "Lightproof Sentence Checker"
-msgstr ""
+msgstr "Lightproof Grammatikprüfung"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3901
 msgid "Choose what the sentence checker looks for as you type."
 msgstr ""
+"Wählen Sie aus, worauf die Satzprüfung während der Texteingabe achten soll."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3941
 msgid ""
@@ -2157,6 +2158,8 @@ msgid ""
 "The request timed out. You can increase the request timeout in the AI "
 "section of the settings."
 msgstr ""
+"Das Zeitlimit für die Anfrage wurde überschritten. Sie können das Zeitlimit "
+"im KI-Bereich der Einstellungen erhöhen."
 
 #: src/control/Control.AIChatSidebar.ts:2144
 msgid "Request too large"
@@ -2226,13 +2229,16 @@ msgstr "Keine Antwort von der KI"
 
 #: src/control/Control.AIChatSidebar.ts:2166
 msgid "AI used too many tool steps"
-msgstr ""
+msgstr "Die KI hat das Anfragelimit erreicht"
 
 #: src/control/Control.AIChatSidebar.ts:2169
 msgid ""
 "The model ran out of tokens before producing output. Try a shorter input or "
 "a model with a larger output budget."
 msgstr ""
+"Nicht ausreichend Tokens für das KI-Modell vorhanden, um eine Ausgabe zu "
+"erzeugen. Versuchen Sie es mit einer kürzeren Eingabe oder einem Modell mit "
+"einem größeren Tokenbudget."
 
 #: src/control/Control.AIChatSidebar.ts:2173
 msgid ""
@@ -2242,7 +2248,7 @@ msgstr ""
 
 #: src/control/Control.AIChatSidebar.ts:2175
 msgid "Image generation failed: no prompt from model"
-msgstr ""
+msgstr "Bilderzeugung fehlgeschlagen: keine Antwort vom KI-Modell"
 
 #: src/control/Control.AIChatSidebar.ts:2176
 msgid "Document not available"
