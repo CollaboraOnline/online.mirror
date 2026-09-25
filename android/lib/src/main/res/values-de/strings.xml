@@ -25,4 +25,5 @@
     <string name="all_files_access_title">Im schreibgeschützten Modus geöffnet</string>
     <string name="all_files_access_grant">Zugriff zulassen</string>
     <string name="do_not_ask_again">Nicht erneut nachfragen</string>
+    <string name="failed_to_save_file">Die Änderungen konnten nicht in der Datei gespeichert werden</string>
 </resources>
