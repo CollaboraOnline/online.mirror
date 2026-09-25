@@ -150,8 +150,16 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.groupsHeld = null;
 
 		const objects = this.selectedObjects();
+		/*
+			The points of a path are edited only where the objects may be made larger or smaller:
+			moving one changes the shape of the object, which is the thing that is held against
+			being changed. Where they may not, the editor is not made at all, so there are no
+			points to walk to and nothing to take hold of.
+		*/
 		this.editor =
-			objects.length === 1 && RenderGeometrySection.objectOf(objects[0])?.path
+			objects.length === 1 &&
+			RenderGeometrySection.objectOf(objects[0])?.path &&
+			ObjectHandles.canBeResized(objects)
 				? new PolyPolygonEditor(objects[0])
 				: null;
 
@@ -278,7 +286,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 		const shown = this.handles();
 
 		for (let at = shown.length - 1; at >= 0; --at) {
-			if (!shown[at].name) continue;
+			if (!shown[at].name || shown[at].deactivated) continue;
 
 			const point = new cool.SimplePoint(shown[at].point.x, shown[at].point.y);
 			if (Math.abs(point.vX - x) <= half && Math.abs(point.vY - y) <= half)
@@ -572,7 +580,10 @@ abstract class SelectionSection extends CanvasSectionObject {
 			if (!group) continue;
 
 			const point = new cool.SimplePoint(handle.point.x, handle.point.y);
-			const hovered = handle.name !== '' && handle.name === this.hovered;
+			const hovered =
+				!handle.deactivated &&
+				handle.name !== '' &&
+				handle.name === this.hovered;
 
 			/*
 				The handle the keyboard is on is drawn a third larger, at the larger half of its
@@ -580,15 +591,27 @@ abstract class SelectionSection extends CanvasSectionObject {
 				that, which is enough to be seen beside the color it takes and little enough
 				that the two cannot be taken for one another.
 			*/
-			const grown = this.travel.showsAsActive(handle.name)
-				? size / 3
-				: hovered
-					? size / 8
-					: 0;
+			const grown =
+				!handle.deactivated && this.travel.showsAsActive(handle.name)
+					? size / 3
+					: hovered
+						? size / 8
+						: 0;
 
 			this.context.beginPath();
-			this.context.strokeStyle = HandleLook.outlineColour;
-			this.context.fillStyle = group.shape(this.context, handle, point, grown);
+			this.context.strokeStyle = handle.deactivated
+				? HandleLook.deactivatedOutlineColour
+				: HandleLook.outlineColour;
+
+			/*
+				A handle that does nothing keeps its shape and its size, so that the selection
+				looks the same whatever may be done to it, and is drawn pale to say that taking
+				hold of it would do nothing.
+			*/
+			const color = group.shape(this.context, handle, point, grown);
+			this.context.fillStyle = handle.deactivated
+				? HandleLook.deactivatedColour
+				: color;
 
 			this.context.closePath();
 			this.context.fill();
@@ -660,7 +683,8 @@ abstract class SelectionSection extends CanvasSectionObject {
 				'url(' + app.LOUtil.getURL('images/cursors/grab.svg') + ') 12 12, grab'
 			);
 
-		if (GraphicSelection.extraInfo?.isResizable === false) return 'not-allowed';
+		if (!ObjectHandles.canBeResized(this.selectedObjects()))
+			return 'not-allowed';
 
 		const byKind: Record<string, string> = {
 			'1': 'nwse-resize',

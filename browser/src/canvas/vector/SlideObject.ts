@@ -183,6 +183,14 @@ namespace cool {
 		/// What kind of object it is, as the drawing layer numbers the kinds: 2 a line, 24 a
 		/// connector, 25 a caption, 29 a measurement, 33 a custom shape, 35 a table.
 		objectKind?: number;
+		/** What may not be done to the object. Absent means it may: most objects allow
+		 * everything, so only the refusals travel. Whether it may be moved and whether it may be
+		 * made larger or smaller are each held against being changed on their own. Whether it may
+		 * be turned is something the object answers about itself, and a media object will not.
+		 */
+		cannotBeMoved?: boolean;
+		cannotBeResized?: boolean;
+		cannotBeTurned?: boolean;
 		gluePoints?: ObjectGluePoint[];
 		/// True for a connector whose first end is tied to an object, and the same for its last
 		/// end. Absent for anything that is not a connector, and for an end that is free.

@@ -81,7 +81,7 @@ class ScalingInteraction extends SelectionInteraction {
 	}
 
 	public move(to: cool.SimplePoint, event: MouseEvent): void {
-		if (GraphicSelection.extraInfo?.isResizable === false) return;
+		if (!ObjectHandles.canBeResized(this.selection.selectedObjects())) return;
 		if (!this.shapeAtStart) return;
 
 		this.keepsRatio = HandleScaling.keepsRatio(event, false);

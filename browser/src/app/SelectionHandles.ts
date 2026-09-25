@@ -20,6 +20,11 @@ interface SelectionHandle {
 	kind: string;
 	pointer: string;
 	point: cool.Point;
+	/** Shown, and doing nothing. A handle that stands for something the objects will not have
+	 * done to them is still drawn, so that the selection can be seen, but it is drawn pale, the
+	 * mouse cannot take hold of it and the keyboard walks past it.
+	 */
+	deactivated?: boolean;
 	/// The number the object itself gives the handle, for the handles that are told apart by
 	/// nothing else. Absent where the name already says which one it is.
 	at?: number;
@@ -236,6 +241,40 @@ class ObjectHandles implements HandleSource {
 			.round();
 	}
 
+	/*
+		What may be done to the objects of a selection: it may be moved only where every one of
+		them may be moved, and the same for the other two. The objects say it themselves, so a
+		selection of several is not one answer for all of them any more.
+
+		A group is asked about along with everything it holds. What may be done to it is what may
+		be done to all of them: a group holding one object whose place is held fast cannot be
+		moved, however little the group itself says about it.
+	*/
+	private static allOfThem(objectIds: number[]): number[] {
+		return objectIds.concat(RenderGeometrySection.theOnesThatDraw(objectIds));
+	}
+
+	public static canBeMoved(objectIds: number[]): boolean {
+		return ObjectHandles.allOfThem(objectIds).every(
+			(objectId: number) =>
+				RenderGeometrySection.objectOf(objectId)?.cannotBeMoved !== true,
+		);
+	}
+
+	public static canBeResized(objectIds: number[]): boolean {
+		return ObjectHandles.allOfThem(objectIds).every(
+			(objectId: number) =>
+				RenderGeometrySection.objectOf(objectId)?.cannotBeResized !== true,
+		);
+	}
+
+	public static canBeTurned(objectIds: number[]): boolean {
+		return ObjectHandles.allOfThem(objectIds).every(
+			(objectId: number) =>
+				RenderGeometrySection.objectOf(objectId)?.cannotBeTurned !== true,
+		);
+	}
+
 	/// Whether the object of that id is a connector.
 	public static isAConnector(objectId: number): boolean {
 		return (
@@ -327,11 +366,16 @@ class ObjectHandles implements HandleSource {
 		*/
 		if (![1, 2, 3, 4, 5, 6, 7, 8].every(wanted)) return undefined;
 
+		// The eight are what a scale takes hold of, so where the objects may not be made larger
+		// or smaller they are shown and do nothing.
+		const dead = !ObjectHandles.canBeResized(this.objectIds);
+
 		return corners.map((corner: cool.Point, index: number) => ({
 			name: String(index + 1) + '.0.0',
 			kind: String(index + 1),
 			pointer: String(pointers[index]),
 			point: corner.round(),
+			deactivated: dead,
 		}));
 	}
 

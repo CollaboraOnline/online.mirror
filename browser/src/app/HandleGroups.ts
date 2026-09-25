@@ -238,6 +238,9 @@ class FramingHandles extends HandleGroup {
 		handle: SelectionHandle,
 		_at: cool.SimplePoint,
 	): SelectionInteraction | null {
+		if (!ObjectHandles.canBeResized(this.selection.selectedObjects()))
+			return null;
+
 		const shape = this.selection.shapeNow();
 
 		return shape ? new ScalingInteraction(this.selection, handle, shape) : null;
@@ -278,13 +281,14 @@ class TurningHandle extends HandleGroup {
 	}
 
 	/// The handle above the upper side of what those handles frame, or none where they do not
-	/// frame anything or the objects say they cannot be turned.
+	/// frame anything. Where the objects say they cannot be turned it is there but dead, so
+	/// the selection looks the same whatever may be done to it.
 	private placedAbove(shown: SelectionHandle[]): SelectionHandle[] {
-		if (GraphicSelection.extraInfo?.isRotatable === false) return [];
-
 		const middle = SelectionSection.middleOf(shown);
 		const above = shown.find((one: SelectionHandle) => one.kind === '2');
 		if (!middle || !above) return [];
+
+		const dead = !ObjectHandles.canBeTurned(this.selection.selectedObjects());
 
 		const away = TurningHandle.distance * app.dpiScale;
 		const out = new cool.Point(
@@ -305,6 +309,7 @@ class TurningHandle extends HandleGroup {
 					above.point.x + (out.x / length) * step.x,
 					above.point.y + (out.y / length) * step.y,
 				).round(),
+				deactivated: dead,
 			},
 		];
 	}
@@ -994,7 +999,8 @@ class TheObjectItself extends HandleGroup {
 	public interactionForThePlace(
 		at: cool.SimplePoint,
 	): SelectionInteraction | null {
-		if (GraphicSelection.extraInfo?.isDraggable === false) return null;
+		if (!ObjectHandles.canBeMoved(this.selection.selectedObjects()))
+			return null;
 
 		return new MovingInteraction(this.selection, at);
 	}

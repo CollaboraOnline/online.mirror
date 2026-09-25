@@ -167,11 +167,31 @@ class GraphicSelection {
 		return GraphicSelection.selectionSection?.travel;
 	}
 
-	/// What the keyboard does to the handles, while the client draws the selection itself.
+	/// The four keys that move what is selected one step across the page.
+	private static readonly theMovingKeys: string[] = [
+		'ArrowUp',
+		'ArrowDown',
+		'ArrowLeft',
+		'ArrowRight',
+	];
+
+	/*
+		What the keyboard does to what is selected, while the client draws the selection itself.
+		A handle takes the key first, where the keyboard is on one. An arrow key moves the
+		objects, so it is used up here and travels no further where they may not be moved: the
+		engine asks only the objects that are marked, and not the ones they hold, so it would
+		move a group whose member is held fast.
+	*/
 	public static handleKeyboard(event: KeyboardEvent): boolean {
 		if (!this.hasActiveSelection()) return false;
 
-		return GraphicSelection.travel()?.keyboard(event) ?? false;
+		if (GraphicSelection.travel()?.keyboard(event)) return true;
+
+		return (
+			RenderManager.isVectorRendering() &&
+			GraphicSelection.theMovingKeys.includes(event.key) &&
+			!ObjectHandles.canBeMoved(this.selectedObjectIDs)
+		);
 	}
 
 	/*

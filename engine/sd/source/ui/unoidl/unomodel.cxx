@@ -3682,6 +3682,19 @@ private:
             decomposeForComparison(aContent);
         }
 
+        /*
+            What may be done to the object. The place and the size are each held against being
+            changed on their own, while whether it may be turned is one of the things the object
+            answers about itself - a media object, for one, will not be. A group answers about
+            these as much as anything else does, so they are taken outside the part that only an
+            object drawing something of its own goes through.
+        */
+        SdrObjTransformInfoRec aWhatItAllows;
+        rObject.TakeObjInfo(aWhatItAllows);
+        aContent.mbCanBeMoved = !rObject.IsMoveProtect();
+        aContent.mbCanBeResized = !rObject.IsResizeProtect();
+        aContent.mbCanBeTurned = aWhatItAllows.bRotateFreeAllowed;
+
         aContent.maPaintedBox = paintedRectangleInTwips(rObject, aContent.maPrimitives);
         aContent.maTransformation = transformationInTwips(rObject);
         aContent.maName = rObject.GetName();
@@ -4254,6 +4267,15 @@ private:
         }
         if (rContent.meKind != SdrObjKind::NONE)
             rWriter.put("objectKind", static_cast<sal_Int32>(rContent.meKind));
+
+        // Only what it may not have done travels, since most objects allow everything.
+        if (!rContent.mbCanBeMoved)
+            rWriter.put("cannotBeMoved", true);
+        if (!rContent.mbCanBeResized)
+            rWriter.put("cannotBeResized", true);
+        if (!rContent.mbCanBeTurned)
+            rWriter.put("cannotBeTurned", true);
+
         if (rContent.mbTiedAtStart)
             rWriter.put("tiedAtStart", true);
         if (rContent.mbTiedAtEnd)

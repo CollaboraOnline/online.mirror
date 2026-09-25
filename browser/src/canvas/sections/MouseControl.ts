@@ -498,9 +498,8 @@ class MouseControl extends CanvasSectionObject {
 			);
 			if (hit === undefined) return false;
 
-			if (GraphicSelection.extraInfo?.isDraggable === false) return false;
-
 			const objectId = RenderGeometrySection.outermostOf(hit);
+			if (!ObjectHandles.canBeMoved([objectId])) return false;
 
 			GraphicSelection.selectObjects([objectId]);
 			GraphicSelection.updateSelectionSection();

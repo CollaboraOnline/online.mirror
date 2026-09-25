@@ -225,6 +225,15 @@ public:
         /// What kind of object it is, as the drawing layer numbers the kinds.
         SdrObjKind meKind = SdrObjKind::NONE;
 
+        /** What may be done to the object, which is the object's own business and not the
+            selection's: whether it may be moved, made larger or smaller, and turned. A reader
+            that offers a drag asks every object it would change and offers it only where they
+            all allow it.
+         */
+        bool mbCanBeMoved = true;
+        bool mbCanBeResized = true;
+        bool mbCanBeTurned = true;
+
         /// True for a connector whose first end is tied to an object, and the same for its last
         /// end. A connector runs from where it is tied, so a tied end stays with the object it
         /// holds on to. False for anything that is not a connector.
@@ -307,6 +316,9 @@ public:
                    && maAutoColor == rOther.maAutoColor && maDrawn == rOther.maDrawn
                    && maAids == rOther.maAids && maHandles == rOther.maHandles
                    && maPath == rOther.maPath && meKind == rOther.meKind
+                   && mbCanBeMoved == rOther.mbCanBeMoved
+                   && mbCanBeResized == rOther.mbCanBeResized
+                   && mbCanBeTurned == rOther.mbCanBeTurned
                    && mbTiedAtStart == rOther.mbTiedAtStart
                    && mbTiedAtEnd == rOther.mbTiedAtEnd
                    && maOwnGluePoints == rOther.maOwnGluePoints;

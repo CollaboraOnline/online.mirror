@@ -106,7 +106,9 @@ class HandleTravel {
 	/// The handles that can be traveled: the ones the client named, since a name is what the
 	/// engine is told to move.
 	private handles(): any[] {
-		return this.handlesOf().filter((handle: any) => handle?.name);
+		return this.handlesOf().filter(
+			(handle: any) => handle?.name && !handle.deactivated,
+		);
 	}
 
 	/// The name of the handle the keyboard works on, or nothing while it is on none.
