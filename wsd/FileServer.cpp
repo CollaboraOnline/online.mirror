@@ -842,7 +842,7 @@ void FileServerRequestHandler::sendError(http::StatusCode errorCode,
     {
         const std::string pathSanitized = Uri::encode(requestPath, std::string());
         // Let's keep message as plain text to avoid complications.
-        headers += "Content-Type: text/plain charset=UTF-8\r\n";
+        headers += "Content-Type: text/plain; charset=UTF-8\r\n";
         body = "Error: " + shortMessage + '\n' +
             longMessage + ' ' + pathSanitized + '\n' +
             "Please contact your system administrator.";

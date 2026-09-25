@@ -1345,7 +1345,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             {
                 //LOG_ERR("FileServerRequestHandler::NotAuthenticated: " << exc.displayText());
                 http::Response httpResponse(http::StatusCode::Unauthorized);
-                httpResponse.set("Content-Type", "text/html charset=UTF-8");
+                httpResponse.set("Content-Type", "text/html; charset=UTF-8");
                 httpResponse.set("WWW-authenticate", "Basic realm=\"online\"");
                 socket->sendAndShutdown(httpResponse);
                 socket->ignoreInput();
