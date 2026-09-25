@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-24 13:47+0000\n"
+"PO-Revision-Date: 2026-09-25 03:35+0000\n"
 "Last-Translator: QuietCedar47 <quietcedar47@users.noreply.hosted.weblate.org>"
 "\n"
 "Language-Team: Chinese (Simplified Han script) <https://hosted.weblate.org/"
@@ -3033,7 +3033,7 @@ msgstr "Pages文稿"
 
 #: src/control/Control.BackstageView.ts:850
 msgid "Spreadsheet"
-msgstr "Spreadsheet电子表格"
+msgstr "电子表格"
 
 #: src/control/Control.BackstageView.ts:850 src/control/Control.Tabs.js:218
 msgid "Sheets"
@@ -3071,7 +3071,7 @@ msgstr "文件名"
 
 #: src/control/Control.BackstageView.ts:1021
 msgid "Blank Spreadsheet"
-msgstr "空白Spreadsheet表格"
+msgstr "空白电子表格"
 
 #: src/control/Control.BackstageView.ts:1025
 msgid "Blank Presentation"
