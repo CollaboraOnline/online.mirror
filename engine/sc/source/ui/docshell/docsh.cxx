@@ -671,13 +671,10 @@ bool ScDocShell::Load( SfxMedium& rMedium )
     // (if required, it will be overridden in *::ReadUserDataSequence())
     if (IsOwnStorageFormat(rMedium))
     {
-        if (ScDrawLayer* pDrawLayer = m_pDocument->GetDrawLayer())
-        {
-            pDrawLayer->SetCompatibilityFlag(SdrCompatibilityFlag::AnchoredTextOverflowLegacy,
-                                             true); // for tdf#99729
-            pDrawLayer->SetCompatibilityFlag(SdrCompatibilityFlag::LegacyFontwork,
-                                             true); // for tdf#148000
-        }
+        m_pDocument->SetCompatibilityFlag(SdrCompatibilityFlag::AnchoredTextOverflowLegacy,
+                                          true); // for tdf#99729
+        m_pDocument->SetCompatibilityFlag(SdrCompatibilityFlag::LegacyFontwork,
+                                          true); // for tdf#148000
     }
 
     GetUndoManager()->Clear();

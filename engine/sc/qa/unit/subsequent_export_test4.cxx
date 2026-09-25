@@ -1752,6 +1752,40 @@ CPPUNIT_TEST_FIXTURE(ScExportTest4, testCompatibilityFlagIsDocumentSetting)
                        u"true");
 }
 
+CPPUNIT_TEST_FIXTURE(ScExportTest4, testCompatibilityFlagsForOldSpreadsheet)
+{
+    // A spreadsheet in our own format saved before the drawing layer compatibility flags existed
+    // keeps the older behaviours, with or without drawings, also after it is saved again.
+    for (const char* pFile : { "ods/document_with_linked_graphic.ods", "ods/print-range.ods" })
+    {
+        createScDoc(pFile);
+        for (int i = 0; i < 2; ++i)
+        {
+            uno::Reference<lang::XMultiServiceFactory> xFactory(mxComponent, uno::UNO_QUERY_THROW);
+            uno::Reference<beans::XPropertySet> xSettings(
+                xFactory->createInstance(u"com.sun.star.document.Settings"_ustr),
+                uno::UNO_QUERY_THROW);
+            CPPUNIT_ASSERT_MESSAGE(
+                pFile, xSettings->getPropertyValue(u"AnchoredTextOverflowLegacy"_ustr).get<bool>());
+            CPPUNIT_ASSERT_MESSAGE(
+                pFile, xSettings->getPropertyValue(u"LegacySingleLineFontwork"_ustr).get<bool>());
+            saveAndReload(TestFilter::ODS);
+        }
+    }
+}
+
+CPPUNIT_TEST_FIXTURE(ScExportTest4, testCompatibilityFlagsForNewSpreadsheet)
+{
+    // A new spreadsheet saved in our own format keeps the newer behaviours when loaded again.
+    createScDoc();
+    saveAndReload(TestFilter::ODS);
+    uno::Reference<lang::XMultiServiceFactory> xFactory(mxComponent, uno::UNO_QUERY_THROW);
+    uno::Reference<beans::XPropertySet> xSettings(
+        xFactory->createInstance(u"com.sun.star.document.Settings"_ustr), uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT(!xSettings->getPropertyValue(u"AnchoredTextOverflowLegacy"_ustr).get<bool>());
+    CPPUNIT_ASSERT(!xSettings->getPropertyValue(u"LegacySingleLineFontwork"_ustr).get<bool>());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

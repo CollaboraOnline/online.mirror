@@ -426,14 +426,7 @@ void ScDocumentConfiguration::setPropertyValue(
     else if (std::optional<SdrCompatibilityFlag> oFlag
              = SdrModel::GetCompatibilityFlagByName(aPropertyName))
     {
-        // The draw layer is made on demand and starts with every flag off, so only a flag that
-        // is on needs one to hold it.
-        const bool bEnabled = ScUnoHelpFunctions::GetBoolFromAny(aValue);
-        ScDrawLayer* pDrawLayer = rDoc.GetDrawLayer();
-        if (!pDrawLayer && bEnabled)
-            pDrawLayer = pDocShell->MakeDrawLayer();
-        if (pDrawLayer)
-            pDrawLayer->SetCompatibilityFlag(*oFlag, bEnabled);
+        rDoc.SetCompatibilityFlag(*oFlag, ScUnoHelpFunctions::GetBoolFromAny(aValue));
     }
     else
     {
@@ -648,8 +641,7 @@ cpo::uno::Any ScDocumentConfiguration::getPropertyValue( const OUString& aProper
     else if (std::optional<SdrCompatibilityFlag> oFlag
              = SdrModel::GetCompatibilityFlagByName(aPropertyName))
     {
-        const ScDrawLayer* pDrawLayer = rDoc.GetDrawLayer();
-        aRet <<= pDrawLayer && pDrawLayer->GetCompatibilityFlag(*oFlag);
+        aRet <<= rDoc.GetCompatibilityFlag(*oFlag);
     }
     else
     {

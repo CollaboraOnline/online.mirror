@@ -23,6 +23,7 @@
 #include <editeng/autokernitem.hxx>
 #include <editeng/fontitem.hxx>
 #include <editeng/langitem.hxx>
+#include <o3tl/enumrange.hxx>
 #include <o3tl/unit_conversion.hxx>
 #include <osl/thread.h>
 #include <osl/diagnose.h>
@@ -123,6 +124,21 @@ void ScDocument::TransferDrawPage(const ScDocument& rSrcDoc, SCTAB nSrcPos, SCTA
     ScChartHelper::UpdateChartsOnDestinationPage(*this, nDestPos);
 }
 
+void ScDocument::SetCompatibilityFlag(SdrCompatibilityFlag eFlag, bool bEnabled)
+{
+    if (mpDrawLayer)
+        mpDrawLayer->SetCompatibilityFlag(eFlag, bEnabled);
+    else
+        maPendingCompatibilityFlags[eFlag] = bEnabled;
+}
+
+bool ScDocument::GetCompatibilityFlag(SdrCompatibilityFlag eFlag) const
+{
+    if (mpDrawLayer)
+        return mpDrawLayer->GetCompatibilityFlag(eFlag);
+    return maPendingCompatibilityFlags[eFlag].value_or(false);
+}
+
 void ScDocument::InitDrawLayer( ScDocShell* pDocShell )
 {
     if (pDocShell && !mpShell)
@@ -139,6 +155,14 @@ void ScDocument::InitDrawLayer( ScDocShell* pDocShell )
     if ( mpShell && !mpShell->IsLoading() )       // don't call GetTitle while loading
         aName = mpShell->GetTitle();
     mpDrawLayer.reset(new ScDrawLayer( this, aName ));
+    for (SdrCompatibilityFlag eFlag : o3tl::enumrange<SdrCompatibilityFlag>())
+    {
+        if (std::optional<bool>& rPending = maPendingCompatibilityFlags[eFlag])
+        {
+            mpDrawLayer->SetCompatibilityFlag(eFlag, *rPending);
+            rPending.reset();
+        }
+    }
 
     // Create the LinkManager up front (not gated on bAutoCalc) so the draw
     // layer can register fill bitmap links as shapes are imported. Setting it

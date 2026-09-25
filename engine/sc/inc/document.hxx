@@ -50,6 +50,8 @@
 #include <map>
 #include <shared_mutex>
 #include <optional>
+#include <o3tl/enumarray.hxx>
+#include <svx/compatflags.hxx>
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
@@ -417,6 +419,8 @@ private:
     VclPtr<SfxPrinter>  mpPrinter;
     VclPtr<VirtualDevice> mpVirtualDevice_100th_mm;
     std::unique_ptr<ScDrawLayer> mpDrawLayer;           // SdrModel
+    // The compatibility flags set while there is no draw layer, all empty once it is made.
+    o3tl::enumarray<SdrCompatibilityFlag, std::optional<bool>> maPendingCompatibilityFlags;
     rtl::Reference<XColorList> pColorList;
     std::unique_ptr<ScValidationDataList> pValidationList;              // validity
     sal_uInt32 mnLastValidationListMax = 0;
@@ -706,6 +710,8 @@ public:
     void              GetDocStat( ScDocStat& rDocStat );
 
     SC_DLLPUBLIC void  InitDrawLayer( ScDocShell* pDocShell = nullptr );
+    void               SetCompatibilityFlag(SdrCompatibilityFlag eFlag, bool bEnabled);
+    bool               GetCompatibilityFlag(SdrCompatibilityFlag eFlag) const;
 
     ScInterpreterContext& GetNonThreadedContext() const
     {
