@@ -2353,6 +2353,16 @@ void FileServerRequestHandler::deleteWopiSettingConfigs(
         wopiSession->asyncShutdown();
 
         const std::shared_ptr<const http::Response> httpResponse = wopiSession->response();
+        if (httpResponse->state() != http::Response::State::Complete)
+        {
+            LOG_ERR("Failed to delete presetfile with fileId["
+                    << fileId << "] from WopiHost[" << uriAnonym
+                    << "]: the transfer did not complete");
+            sendError(http::StatusCode::BadGateway, request, socket, shortMessage,
+                      "The transfer did not complete");
+            return;
+        }
+
         const http::StatusLine statusLine = httpResponse->statusLine();
         const http::StatusCode statusCode = statusLine.statusCode();
         if (statusCode != http::StatusCode::OK && statusCode != http::StatusCode::NoContent)
@@ -2376,6 +2386,7 @@ void FileServerRequestHandler::deleteWopiSettingConfigs(
     };
 
     LOG_DBG("Deleting presetfile with fileId[" << fileId << "] from WopiHost[" << uriAnonym << ']');
+    httpSession->setBodySizeLimit(MaxSettingsFetchSizeBytes);
     httpSession->setFinishedHandler(std::move(finishedCallback));
     httpSession->asyncRequest(httpRequest, *COOLWSD::getWebServerPoll());
 }
