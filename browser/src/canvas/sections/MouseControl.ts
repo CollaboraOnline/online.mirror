@@ -519,7 +519,10 @@ class MouseControl extends CanvasSectionObject {
 			);
 			if (hit === undefined) return false;
 
-			const objectId = RenderGeometrySection.outermostOf(hit);
+			const objectId = RenderGeometrySection.outermostOf(
+				hit,
+				GraphicSelection.theGroupStoodIn(),
+			);
 			if (!ObjectHandles.canBeMoved([objectId])) return false;
 
 			GraphicSelection.selectObjects([objectId]);
@@ -751,7 +754,12 @@ class MouseControl extends CanvasSectionObject {
 		*/
 		const hit = RenderGeometrySection.objectIdAt(point.x, point.y);
 		const objectId =
-			hit === undefined ? undefined : RenderGeometrySection.outermostOf(hit);
+			hit === undefined
+				? undefined
+				: RenderGeometrySection.outermostOf(
+						hit,
+						GraphicSelection.theGroupStoodIn(),
+					);
 		if (objectId === undefined && !GraphicSelection.selectedObjectIDs.length)
 			return false;
 

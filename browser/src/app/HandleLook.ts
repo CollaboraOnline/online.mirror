@@ -19,6 +19,12 @@ type HandleKind =
 	| 'weight';
 
 /*
+	The kinds of band that can be drawn round a selection. A selection takes one where it is a
+	single thing holding others, so that what is selected can be told apart from one object.
+*/
+type SurroundKind = 'group' | 'diagram';
+
+/*
 	How the handles of a selection look: how large each kind is, what shape it has and what color
 	it takes. One place, so that changing any of it is changing one number rather than hunting
 	through the groups that draw them.
@@ -73,6 +79,48 @@ class HandleLook {
 		weight: '#1C99E0',
 	};
 
+	/*
+		The band drawn round a selection that holds other objects stands off from what it goes
+		round, and has a width of its own. Both are shares of the same size the handles take, so
+		making the handles larger moves the band out and widens it in step. Every kind of band is
+		the same size, and only the color tells one from another.
+	*/
+	public static shareOfTheSizeBeforeASurround: number = 2 / 5;
+	public static shareOfTheSizeOfASurround: number = 2 / 5;
+
+	/*
+		One color for each kind of band. The lines that bound it and the gradient it is filled
+		with are all worked out from that one color, lighter on one side and darker on the
+		other, so a band is changed by changing a single value.
+	*/
+	public static colourOfTheSurround: {
+		[kind in SurroundKind]: string;
+	} = {
+		group: '#CFE0F4',
+		diagram: '#F0F0F0',
+	};
+
+	/// How far the lighter and the darker of that color stand from it, as a share of the whole
+	/// range a color has.
+	public static surroundBlend: number = 0.1;
+
+	/// Whether a group that is not a diagram is drawn with a band round it.
+	public static bandRoundAGroup: boolean = true;
+
+	/*
+		That color moved towards white by that share of the whole range, or towards black where
+		the share is negative.
+	*/
+	public static blended(color: string, by: number): string {
+		const part = (at: number) => parseInt(color.substr(at, 2), 16);
+		const moved = (value: number) =>
+			Math.round(Math.min(255, Math.max(0, value + by * 255)))
+				.toString(16)
+				.padStart(2, '0');
+
+		return '#' + moved(part(1)) + moved(part(3)) + moved(part(5));
+	}
+
 	/// The line every handle is drawn round with.
 	public static readonly outlineColour: string = 'black';
 
@@ -92,6 +140,25 @@ class HandleLook {
 	/// How wide a handle of that kind is drawn, in core pixels.
 	public static widthOf(kind: HandleKind): number {
 		return HandleLook.size * HandleLook.shareOfTheSize[kind] * app.dpiScale;
+	}
+
+	/// How far a band stands off from what it goes round, in core pixels.
+	public static distanceBeforeASurround(): number {
+		return (
+			HandleLook.size * HandleLook.shareOfTheSizeBeforeASurround * app.dpiScale
+		);
+	}
+
+	/// How wide a band is drawn, in core pixels.
+	public static widthOfASurround(): number {
+		return (
+			HandleLook.size * HandleLook.shareOfTheSizeOfASurround * app.dpiScale
+		);
+	}
+
+	/// How far the outer edge of a band lies from what it goes round, in core pixels.
+	public static reachOfASurround(): number {
+		return HandleLook.distanceBeforeASurround() + HandleLook.widthOfASurround();
 	}
 
 	/*

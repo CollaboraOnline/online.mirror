@@ -405,6 +405,8 @@ window.L.Map.include({
 			this.dialog.blinkOpenDialog();
 		} else if (this.isEditMode() || isAllowedInReadOnly) {
 			app.socket.sendMessage('uno ' + command + (json ? ' ' + JSON.stringify(json) : ''));
+			if (command === '.uno:EnterGroup')
+				GraphicSelection.takeTheFirstOfTheGroup();
 			// user interaction turns off the following of other users
 			if (map.userList && map._docLayer && map._docLayer._viewId)
 				map.userList.followUser(map._docLayer._viewId, /* do instant scroll */ false);

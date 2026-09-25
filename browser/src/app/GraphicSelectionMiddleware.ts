@@ -90,6 +90,40 @@ class GraphicSelection {
 	}
 
 	/*
+		The group the selection stands inside, or nothing while it stands on the page. Nothing has
+		to be remembered for it: an object says which group holds it, and that group is the one
+		being stood in. A press then takes hold of what that group holds rather than of the group
+		itself, which is what makes a selection of several inside a group possible at all.
+
+		Several objects are only ever selected on one level, so they all have the same group above
+		them and any one of them answers for all.
+	*/
+	public static theGroupStoodIn(): number | undefined {
+		const first = this.selectedObjectIDs[0];
+
+		return first === undefined
+			? undefined
+			: RenderGeometrySection.parentOf(first) || undefined;
+	}
+
+	/*
+		Takes hold of the first object of the group that was selected, which is what stepping into
+		a group leaves behind. Stepping in leaves nothing selected on its own, and with nothing
+		selected there is no band to say which group one is standing in, and nothing to add to
+		with a second press either.
+	*/
+	public static takeTheFirstOfTheGroup(): void {
+		if (!RenderManager.isVectorRendering()) return;
+		if (this.selectedObjectIDs.length !== 1) return;
+
+		const held = RenderGeometrySection.heldBy(this.selectedObjectIDs[0]);
+		if (!held.length) return;
+
+		this.selectObjects([held[0]]);
+		this.updateSelectionSection();
+	}
+
+	/*
 		Takes up the selection the engine reports and says whether it is another one than the
 		client holds. It is the same one whenever the client asked for it, since the answer names
 		the objects it named itself.
@@ -187,7 +221,7 @@ class GraphicSelection {
 
 		// The button of a diagram stands beside the selection, so it follows it wherever the
 		// objects take it.
-		this.diagramButton?.updatePosition();
+		this.diagramButton?.follow();
 
 		// The older section is given the set it reads only when that set is one it can read,
 		// and only when it differs from the one it holds.

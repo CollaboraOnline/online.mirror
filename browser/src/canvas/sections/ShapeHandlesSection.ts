@@ -806,15 +806,15 @@ class ShapeHandlesSection extends CanvasSectionObject {
 	/*
 		Whether a handle of that kind gets a section of its own. A view that draws from objects
 		draws the handles that frame and shape the selection in one section of its own, which
-		knows them as a list, and leaves the rest here: the anchor and the handles of a diagram.
-		Cropping an image is done with the whole set of handles here, so while it runs they are
-		all made as they always were.
+		knows them as a list, and draws the band round a group or a diagram there as well, so only
+		the anchor is left here. Cropping an image is done with the whole set of handles here, so
+		while it runs they are all made as they always were.
 	*/
 	private handleGetsItsOwnSection(kind: string): boolean {
 		if (!RenderManager.isVectorRendering()) return true;
 		if (GraphicSelection.extraInfo?.isCropMode) return true;
 
-		return ['16', 'DiagramHandle'].includes(kind);
+		return kind === '16';
 	}
 
 	addSubSections() {

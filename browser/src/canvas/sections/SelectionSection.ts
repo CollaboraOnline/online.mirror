@@ -243,6 +243,10 @@ abstract class SelectionSection extends CanvasSectionObject {
 
 	/// Asks for the page to be drawn again, after something moved under an interaction.
 	public redraw(): void {
+		// The button of a diagram is a thing of its own beside the canvas, so it is moved rather
+		// than drawn along with the rest.
+		GraphicSelection.diagramButton?.follow();
+
 		this.containerObject.requestReDraw();
 	}
 
@@ -509,6 +513,251 @@ abstract class SelectionSection extends CanvasSectionObject {
 	}
 
 	/*
+		The objects the bands go round, from the outermost one inwards: every group the selection
+		sits inside, and the selection itself where it is a single object holding others. Each of
+		them takes a band, so how deep in a hierarchy of groups the selection sits is there to be
+		seen. A diagram is one of them, which is why a band stays round a diagram when one of the
+		shapes it holds is selected on its own.
+
+		A selection of several objects takes none of its own: it is put together for the moment
+		and taken apart again, while a group stays. The groups above it still take theirs.
+	*/
+	private surroundObjects(): number[] {
+		const objects = this.selectedObjects();
+		if (!objects.length) return [];
+
+		const holding: number[] = [];
+		let walking = RenderGeometrySection.parentOf(objects[0]);
+
+		for (let guard = 0; guard < 100 && walking; ++guard) {
+			holding.unshift(walking);
+			walking = RenderGeometrySection.parentOf(walking);
+		}
+
+		if (objects.length === 1 && RenderGeometrySection.holdsObjects(objects[0]))
+			holding.push(objects[0]);
+
+		return holding;
+	}
+
+	/// What kind of band that object takes.
+	private surroundKind(objectId: number): SurroundKind {
+		return RenderGeometrySection.objectOf(objectId)?.isDiagram
+			? 'diagram'
+			: 'group';
+	}
+
+	/*
+		The four places the band round that object goes through, in twips, in the order they go
+		round it. For the object that is itself selected they are the places the framing handles
+		stand on, so its band follows a drag as they do; for a group holding what is selected they
+		are the corners of the box that group takes up.
+	*/
+	private surroundPlaces(objectId: number): cool.SimplePoint[] {
+		const objects = this.selectedObjects();
+
+		if (objects.length === 1 && objects[0] === objectId) {
+			const framing = ['1', '3', '8', '6']
+				.map((kind: string) =>
+					this.handles().find(
+						(handle: SelectionHandle) => handle.kind === kind,
+					),
+				)
+				.filter((handle): handle is SelectionHandle => handle !== undefined)
+				.map(
+					(handle: SelectionHandle) =>
+						new cool.SimplePoint(handle.point.x, handle.point.y),
+				);
+
+			if (framing.length === 4) return framing;
+		}
+
+		const box = this.boxAround(
+			RenderGeometrySection.theOnesThatDraw([objectId]),
+		);
+		if (!box) return [];
+
+		return [
+			new cool.SimplePoint(box.minX, box.minY),
+			new cool.SimplePoint(box.maxX, box.minY),
+			new cool.SimplePoint(box.maxX, box.maxY),
+			new cool.SimplePoint(box.minX, box.maxY),
+		];
+	}
+
+	/*
+		The box the band of the diagram goes round, in core pixels, or nothing where the selection
+		sits in no diagram. Whatever stands beside that band is placed against this box, so that
+		it sits beside what is drawn and not beside something else.
+	*/
+	public surroundBox(): number[] | undefined {
+		const diagram = this.surroundObjects().find(
+			(objectId: number) => RenderGeometrySection.objectOf(objectId)?.isDiagram,
+		);
+		if (diagram === undefined) return undefined;
+
+		const places = this.surroundPlaces(diagram);
+		if (places.length !== 4) return undefined;
+
+		const box = cool.Range2D.fromPoints(
+			places.map((place) => new cool.Point(place.pX, place.pY)),
+		);
+
+		return [box.minX, box.minY, box.width, box.height];
+	}
+
+	/*
+		The four places pushed outwards by that much, in view pixels. Each one moves to the place
+		that lies that far from both of the edges meeting there, so the band round them keeps an
+		even width along a selection that is turned or sheared.
+	*/
+	private static grownOutwards(
+		corners: cool.Point[],
+		by: number,
+	): cool.Point[] {
+		const middle = corners
+			.reduce(
+				(sum: cool.Point, corner: cool.Point) => sum.add(corner),
+				new cool.Point(0, 0),
+			)
+			.divideBy(corners.length);
+
+		// The unit normal of the edge that begins at each corner, facing away from the middle.
+		const normals = corners.map((corner: cool.Point, at: number) => {
+			const next = corners[(at + 1) % corners.length];
+			const along = next.subtract(corner);
+			const length = along.length() || 1;
+			const normal = new cool.Point(along.y / length, -along.x / length);
+			const outwards = corner.add(next).multiplyBy(0.5).subtract(middle);
+
+			return normal.dot(outwards) < 0 ? normal.multiplyBy(-1) : normal;
+		});
+
+		return corners.map((corner: cool.Point, at: number) => {
+			const before = normals[(at + corners.length - 1) % corners.length];
+			const here = normals[at];
+
+			// The two edges meeting at a corner stand at some angle to each other, and the
+			// sharper that angle the further out the corner has to go to keep its distance from
+			// both. A very sharp one is held back, so a thin sliver of a selection cannot throw
+			// its corners far across the page.
+			const together = before.dot(here);
+			const share = by / Math.max(1 + together, 0.2);
+
+			return corner.add(before.add(here).multiplyBy(share));
+		});
+	}
+
+	/*
+		Lays a rounded path through those places into the path being built: along each edge, and
+		round each corner with an arc of that radius. The radius is held down to half of the
+		shortest edge, so a small band still comes out as a closed path rather than as an arc that
+		has nowhere to fit.
+	*/
+	private static layRounded(
+		context: CanvasRenderingContext2D,
+		corners: cool.Point[],
+		radius: number,
+	): void {
+		const middleOf = (one: cool.Point, other: cool.Point): cool.Point =>
+			one.add(other).multiplyBy(0.5);
+
+		const shortest = Math.min(
+			...corners.map((corner: cool.Point, at: number) =>
+				corners[(at + 1) % corners.length].distanceTo(corner),
+			),
+		);
+		const rounding = Math.max(0, Math.min(radius, shortest * 0.5));
+
+		const from = middleOf(corners[corners.length - 1], corners[0]);
+		context.moveTo(from.x, from.y);
+
+		for (let at = 0; at < corners.length; ++at) {
+			const corner = corners[at];
+			const to = middleOf(corner, corners[(at + 1) % corners.length]);
+
+			context.arcTo(corner.x, corner.y, to.x, to.y, rounding);
+			context.lineTo(to.x, to.y);
+		}
+
+		context.closePath();
+	}
+
+	/*
+		Draws the band round one group or diagram: two rounded paths, the inner one through the
+		places the band goes round and the outer one that much further out, with the space between
+		them filled. Where the band goes round what is selected those places follow whatever is
+		being done to it, so the band turns with a turn and grows with a scale while a drag runs.
+
+		Everything it is drawn with comes from the one color of its kind: the fill runs from the
+		darker of that color through it to the lighter, and both bounds are drawn in the darker.
+	*/
+	private drawOneSurround(objectId: number): void {
+		const kind = this.surroundKind(objectId);
+		if (kind === 'group' && !HandleLook.bandRoundAGroup) return;
+
+		const places = this.surroundPlaces(objectId);
+		if (places.length !== 4) return;
+
+		const around = places.map(
+			(place: cool.SimplePoint) => new cool.Point(place.vX, place.vY),
+		);
+		const thickness = HandleLook.widthOfASurround();
+		const inner = SelectionSection.grownOutwards(
+			around,
+			HandleLook.distanceBeforeASurround(),
+		);
+		const outer = SelectionSection.grownOutwards(
+			around,
+			HandleLook.reachOfASurround(),
+		);
+
+		const color = HandleLook.colourOfTheSurround[kind];
+		const lighter = HandleLook.blended(color, HandleLook.surroundBlend);
+		const darker = HandleLook.blended(color, -HandleLook.surroundBlend);
+
+		const gradient = this.context.createLinearGradient(
+			outer[0].x,
+			outer[0].y,
+			outer[2].x,
+			outer[2].y,
+		);
+		gradient.addColorStop(0, darker);
+		gradient.addColorStop(0.5, color);
+		gradient.addColorStop(1, lighter);
+
+		this.context.beginPath();
+		SelectionSection.layRounded(this.context, outer, thickness);
+		SelectionSection.layRounded(this.context, inner, thickness * 0.5);
+		this.context.fillStyle = gradient;
+		this.context.fill('evenodd');
+
+		this.context.strokeStyle = darker;
+		this.context.lineWidth = app.dpiScale;
+
+		this.context.beginPath();
+		SelectionSection.layRounded(this.context, outer, thickness);
+		this.context.stroke();
+
+		this.context.beginPath();
+		SelectionSection.layRounded(this.context, inner, thickness * 0.5);
+		this.context.stroke();
+	}
+
+	/// Draws a band for every group the selection sits in, the outermost first.
+	private drawTheSurrounds(): void {
+		const holding = this.surroundObjects();
+		if (!holding.length) return;
+
+		this.context.save();
+		this.context.setTransform(1, 0, 0, 1, 0, 0);
+
+		for (const objectId of holding) this.drawOneSurround(objectId);
+
+		this.context.restore();
+	}
+
+	/*
 		Draws the path the running interaction would leave behind, as a thin line. It is what a
 		drag of a point shows of itself: moving a point is not a transformation of the object, so
 		the object cannot be drawn through one, but the line it would follow can.
@@ -569,6 +818,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 		for (const group of this.groups()) group.paint(this, shown);
 
 		this.snap.draw(this);
+		this.drawTheSurrounds();
 		this.drawTheFrame();
 
 		this.context.save();
@@ -816,19 +1066,26 @@ abstract class SelectionSection extends CanvasSectionObject {
 		return this.snap.corner(x, y);
 	}
 
+	/// The box those objects all fit in, in twips, or nothing where none of them carries one.
+	private boxAround(objectIds: number[]): cool.Range2D | undefined {
+		let box: cool.Range2D | undefined;
+		for (const objectId of objectIds) {
+			const one = RenderGeometrySection.boxOf(objectId);
+			if (one) box = box ? box.union(one) : one;
+		}
+
+		return box;
+	}
+
 	/*
 		The box the selection takes up, in core pixels. While the document is drawn from objects
 		it is worked out from the boxes they carry, which is the same box the handles are worked
 		out from; otherwise it is the one the engine sends with the selection.
 	*/
 	private boxOfTheSelection(): number[] | undefined {
-		let box: cool.Range2D | undefined;
-		for (const objectId of RenderGeometrySection.theOnesThatDraw(
-			this.selectedObjects(),
-		)) {
-			const one = RenderGeometrySection.boxOf(objectId);
-			if (one) box = box ? box.union(one) : one;
-		}
+		const box = this.boxAround(
+			RenderGeometrySection.theOnesThatDraw(this.selectedObjects()),
+		);
 		if (!box) return undefined;
 
 		const scale = app.twipsToPixels;

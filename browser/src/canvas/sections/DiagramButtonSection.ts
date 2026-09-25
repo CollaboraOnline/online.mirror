@@ -35,25 +35,39 @@ class DiagramButtonSection extends GenericButtonSection {
 	}
 
 	/*
+		Puts the button where it belongs now. A drag carries the selection across the page without
+		the zoom changing, so the button follows it from here rather than through updatePosition,
+		which waits for a new zoom before it moves anything.
+	*/
+	public follow(): void {
+		const at = this.calculatePositionPixel();
+
+		this.setPosition(at[0], at[1]);
+		this.adjustHTMLObjectPosition();
+	}
+
+	/*
 		Where the button stands: to the right of what is selected and level with the top of it.
 		While the document is drawn from objects the selection says where it is itself, since the
 		engine sends no rectangle along with it then.
 	*/
 	calculatePositionPixel(): Array<number> {
-		const drawn = GraphicSelection.selectionSection;
+		const band = GraphicSelection.selectionSection?.surroundBox();
 
-		if (drawn) {
-			const corner = drawn.selectionCorner();
-			const size = drawn.selectionSize();
-
+		if (band) {
+			/*
+				The button stands clear of the band, by the space it always stood clear of the
+				frame by. That space is a fixed number of pixels and does not follow the band as
+				the band is made wider or narrower, so the button keeps its own distance.
+			*/
 			return [
 				Math.round(
-					corner[0] +
-						size[0] +
-						this.halfWidthPixels +
+					band[0] +
+						band[2] +
+						HandleLook.reachOfASurround() +
 						DiagramButtonSection.sizeSpaceBetweenButtons,
 				),
-				Math.round(corner[1]),
+				Math.round(band[1]),
 			];
 		}
 

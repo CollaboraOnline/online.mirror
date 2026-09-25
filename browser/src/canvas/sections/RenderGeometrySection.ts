@@ -731,17 +731,23 @@ class RenderGeometrySection extends CanvasSectionObject {
 	}
 
 	/*
-		The outermost object the given one belongs to: the group at the top of the chain of
-		groups above it, or the object itself where it is in none. A press on something inside a
-		group takes hold of the group, as it does in the office, and only entering the group
+		The outermost object the given one belongs to: the group at the top of the chain of groups
+		above it, or the object itself where it is in none. A press on something inside a group
+		takes hold of the group, as it does in the office, and only stepping into the group
 		reaches what is inside it.
+
+		Standing inside a group stops the climb there, so a press then takes hold of what that
+		group holds and not of the group itself. A press on something outside the group one stands
+		in climbs the whole way, which is how pressing beside a group steps back out of it.
 	*/
-	public static outermostOf(objectId: number): number {
+	public static outermostOf(objectId: number, standingIn?: number): number {
 		let outermost = objectId;
 
 		for (let guard = 0; guard < 100; ++guard) {
+			if (outermost === standingIn) break;
+
 			const parent = RenderGeometrySection.parentOf(outermost);
-			if (!parent) break;
+			if (!parent || parent === standingIn) break;
 
 			outermost = parent;
 		}
@@ -806,6 +812,22 @@ class RenderGeometrySection extends CanvasSectionObject {
 		for (const objectId of objectIds) takeIn(objectId, 0);
 
 		return drawn;
+	}
+
+	/// The objects that object holds, in the order the page draws them. Empty for anything that
+	/// is not a group.
+	public static heldBy(objectId: number): number[] {
+		const data = RenderGeometrySection.currentPart();
+		if (!data) return [];
+
+		return data.order.filter(
+			(id: number) => data.objects.get(id)?.parent === objectId,
+		);
+	}
+
+	/// Whether the object holds other objects, which is what makes it a group.
+	public static holdsObjects(objectId: number): boolean {
+		return RenderGeometrySection.heldBy(objectId).length > 0;
 	}
 
 	/// The object of the page with the given id, or nothing when the page holds no such object.
