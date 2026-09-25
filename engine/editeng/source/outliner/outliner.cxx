@@ -27,7 +27,6 @@
 
 #include <svl/style.hxx>
 #include <editeng/outliner.hxx>
-#include <paralist.hxx>
 #include <editeng/outlobj.hxx>
 #include <ParagraphPortionList.hxx>
 #include <outlundo.hxx>
@@ -718,9 +717,9 @@ void Outliner::SetCharAttribs(sal_Int32 nPara, const SfxItemSet& rSet)
     pEditEngine->SetCharAttribs(nPara, rSet);
 }
 
-bool Outliner::Expand( sal_Int32 nPara )
+bool Outliner::Expand( sal_Int32 nParentPos )
 {
-    if ( !ParagraphList::HasHiddenChildren( nPara, *pEditEngine ) )
+    if ( !HasHiddenChildren( nParentPos ) )
         return false;
 
     std::unique_ptr<OLUndoExpand> pUndo;
@@ -729,10 +728,20 @@ bool Outliner::Expand( sal_Int32 nPara )
     {
         UndoActionStart( OLUNDO_EXPAND );
         pUndo.reset( new OLUndoExpand( this, OLUNDO_EXPAND ) );
-        pUndo->nCount = nPara;
+        pUndo->nCount = nParentPos;
     }
-    pParaList->Expand( nPara, *pEditEngine );
-    InvalidateBullet(nPara);
+
+    sal_Int32 nChildCount = GetChildCount( nParentPos );
+    for ( sal_Int32 n = 1; n <= nChildCount; n++  )
+    {
+        if ( !( pEditEngine->IsBulletVisible(nParentPos + n) ) )
+        {
+            pEditEngine->SetBulletVisible(nParentPos + n, true);
+            pEditEngine->ShowParagraph(nParentPos + n, true);
+        }
+    }
+
+    InvalidateBullet(nParentPos);
     if( bUndo )
     {
         InsertUndo( std::move(pUndo) );
@@ -741,9 +750,9 @@ bool Outliner::Expand( sal_Int32 nPara )
     return true;
 }
 
-bool Outliner::Collapse( sal_Int32 nPara )
+bool Outliner::Collapse( sal_Int32 nParentPos )
 {
-    if ( !ParagraphList::HasVisibleChildren( nPara, *pEditEngine ) ) // collapsed
+    if ( !HasVisibleChildren( nParentPos ) ) // collapsed
         return false;
 
     std::unique_ptr<OLUndoExpand> pUndo;
@@ -755,11 +764,20 @@ bool Outliner::Collapse( sal_Int32 nPara )
     {
         UndoActionStart( OLUNDO_COLLAPSE );
         pUndo.reset( new OLUndoExpand( this, OLUNDO_COLLAPSE ) );
-        pUndo->nCount = nPara;
+        pUndo->nCount = nParentPos;
     }
 
-    pParaList->Collapse( nPara, *pEditEngine );
-    InvalidateBullet(nPara);
+    sal_Int32 nChildCount = GetChildCount( nParentPos );
+    for ( sal_Int32 n = 1; n <= nChildCount; n++  )
+    {
+        if ( pEditEngine->IsBulletVisible(nParentPos+n) )
+        {
+            pEditEngine->SetBulletVisible(nParentPos+n, false);
+            pEditEngine->ShowParagraph(nParentPos + n, false);
+        }
+    }
+
+    InvalidateBullet(nParentPos);
     if( bUndo )
     {
         InsertUndo( std::move(pUndo) );
@@ -1120,7 +1138,6 @@ bool Outliner::ImpCanDeleteSelectedPages( OutlinerView* pCurView )
 
 Outliner::Outliner(SfxItemPool* pPool, OutlinerMode nMode)
     : pEditEngine(new EditEngine(this, pPool))
-    , pParaList(new ParagraphList)
     , mnFirstSelPage(0)
     , nDepthChangedHdlPrevDepth(0)
     , nMaxDepth(9)
@@ -1128,7 +1145,6 @@ Outliner::Outliner(SfxItemPool* pPool, OutlinerMode nMode)
     , nBlockInsCallback(0)
     , bPasting(false)
 {
-    pParaList->SetVisibleStateChangedHdl( LINK( this, Outliner, ParaVisibleStateChangedHdl ) );
     pEditEngine->SetNumberingDepth(0, 0);
 
     pEditEngine->SetBeginMovingParagraphsHdl( LINK( this, Outliner, BeginMovingParagraphsHdl ) );
@@ -1141,7 +1157,6 @@ Outliner::Outliner(SfxItemPool* pPool, OutlinerMode nMode)
 
 Outliner::~Outliner()
 {
-    pParaList.reset();
     pEditEngine.reset();
 }
 
@@ -1199,9 +1214,12 @@ sal_Int32 Outliner::GetParagraphCount() const
     return pEditEngine->GetParagraphCount();
 }
 
-bool Outliner::HasChildren( sal_Int32 nParagraph ) const
+bool Outliner::HasChildren( sal_Int32 nPara ) const
 {
-    return ParagraphList::HasChildren( nParagraph, *pEditEngine );
+    sal_Int32 nParaNext = nPara+1;
+    if (nParaNext >= pEditEngine->GetParagraphCount())
+        return false;
+    return pEditEngine->GetNumberingDepth(nParaNext) > pEditEngine->GetNumberingDepth(nPara);
 }
 
 bool Outliner::ImplHasNumberFormat( sal_Int32 nPara ) const
@@ -1559,11 +1577,6 @@ bool Outliner::ImpCanDeleteSelectedPages( OutlinerView* pCurView, sal_Int32 _nFi
 SfxItemSet const & Outliner::GetParaAttribs( sal_Int32 nPara ) const
 {
     return pEditEngine->GetParaAttribs( nPara );
-}
-
-IMPL_LINK( Outliner, ParaVisibleStateChangedHdl, sal_Int32, nPara, void )
-{
-    pEditEngine->ShowParagraph( nPara, pEditEngine->IsBulletVisible(nPara) );
 }
 
 IMPL_LINK_NOARG(Outliner, BeginMovingParagraphsHdl, MoveParagraphsInfo&, void)
