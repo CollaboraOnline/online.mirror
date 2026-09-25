@@ -2565,6 +2565,26 @@ void FileServerRequestHandler::uploadFileToIntegrator(const Poco::Net::HTTPReque
         return;
     }
 
+    bool bad =
+        !filePath.starts_with('/')
+        || filePath.find("/./") != std::string::npos
+        || filePath.find("/../") != std::string::npos
+        || filePath.ends_with("/.")
+        || filePath.ends_with("/..");
+    if (fileName.empty() || fileName == "." || fileName == ".."
+        || std::any_of(fileName.begin(), fileName.end(),
+                       [](unsigned char c)
+                       { return c == '/' || c == '\\' || c < 0x20 || c == 0x7f; }))
+        bad = true;
+    if (bad) {
+        LOG_WRN("Rejected settings upload to filePath ["
+                << COOLWSD::anonymizeUrl(filePath) << "] with file name ["
+                << COOLWSD::anonymizeUrl(fileName) << ']');
+        sendError(http::StatusCode::Forbidden, getRequestPath(request), socket, shortMessage,
+                  "Invalid filePath or file name");
+        return;
+    }
+
     Poco::URI wopiUri(wopiSettingBaseUrl + "/upload");
 
     if (!isAllowedWopiHost(wopiUri))
