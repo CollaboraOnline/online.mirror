@@ -227,6 +227,12 @@ bool SdPageObjsTLV::IsEqualToShapeList(std::unique_ptr<weld::TreeIter>& rEntry, 
             if (aObjectName != aName)
                 return false;
 
+            // The entry stands for one object, its id is the object's address. A group whose
+            // children were made anew, a Diagram laid out again, has objects of the same names
+            // at new addresses, so the name alone does not tell the tree is current.
+            if (weld::fromId<SdrObject*>(m_xTreeView->get_id(*rEntry)) != pObj)
+                return false;
+
             if (pObj->IsGroupObject())
             {
                 bool bRet = IsEqualToShapeList(rEntry, *pObj->GetSubList(), aObjectName);
