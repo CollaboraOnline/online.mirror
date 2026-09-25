@@ -678,7 +678,7 @@ private:
     bool mbReplaceLeadingSingleQuotationMark : 1;
     bool mbSkipOutsideFormat : 1;
     bool mbFuzzing : 1;
-
+    bool mbIgnoreBreakAfterMultilineField : 1;
     bool mbNbspRunNext;  // can't be a bitfield as it is passed as bool&
 
     // Methods...
@@ -1451,6 +1451,7 @@ public:
     Size getTopLeftDocOffset(const tools::Rectangle& rect) const;
 
     void SetDefTab( sal_uInt16 nDefTab );
+    void SetIgnoreBreakAfterMultilineField(bool b) { mbIgnoreBreakAfterMultilineField = b; }
 
     bool PostKeyEvent( const KeyEvent& rKeyEvent, EditView* pEditView, vcl::Window const * pFrameWin );
     static bool IsSimpleCharInput( const KeyEvent& rKeyEvent );

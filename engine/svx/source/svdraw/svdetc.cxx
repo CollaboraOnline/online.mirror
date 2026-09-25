@@ -25,6 +25,7 @@
 #include <officecfg/Office/Common.hxx>
 #endif
 #include <svtools/colorcfg.hxx>
+#include <svx/compatflags.hxx>
 #include <svx/svdetc.hxx>
 #include <svx/svdedxv.hxx>
 #include <svx/svdmodel.hxx>
@@ -367,6 +368,7 @@ std::unique_ptr<SdrOutliner> SdrMakeOutliner(OutlinerMode nOutlinerMode, SdrMode
     pOutl->SetAsianCompressionMode(rModel.GetCharCompressType());
     pOutl->SetKernAsianPunctuation(rModel.IsKernAsianPunctuation());
     pOutl->SetAddExtLeading(rModel.IsAddExtLeading());
+    pOutl->SetIgnoreBreakAfterMultilineField(rModel.GetCompatibilityFlag(SdrCompatibilityFlag::IgnoreBreakAfterMultilineField));
     return pOutl;
 }
 

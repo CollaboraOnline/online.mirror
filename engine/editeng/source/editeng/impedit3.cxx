@@ -3736,11 +3736,7 @@ void ImpEditEngine::StripAllPortions( OutputDevice& rOutDev, tools::Rectangle aC
                     ++rLine;
                     return true;
                 }
-                const bool bIgnoreBreak
-                    = mpEditEngine
-                             ->GetCompatFlag(SdrCompatibilityFlag::IgnoreBreakAfterMultilineField)
-                             .value_or(false);
-                if (bIgnoreBreak || mpActiveView)
+                if (mbIgnoreBreakAfterMultilineField || mpActiveView)
                     ++rLine;
                 return false;
             };

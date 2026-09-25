@@ -738,6 +738,7 @@ void SdrModel::ImpSetOutlinerDefaults( SdrOutliner* pOutliner, bool bInit )
     pOutliner->SetAsianCompressionMode( mnCharCompressType );
     pOutliner->SetKernAsianPunctuation( IsKernAsianPunctuation() );
     pOutliner->SetAddExtLeading( IsAddExtLeading() );
+    pOutliner->SetIgnoreBreakAfterMultilineField( GetCompatibilityFlag(SdrCompatibilityFlag::IgnoreBreakAfterMultilineField) );
 
     if ( !GetRefDevice() )
     {
@@ -1778,6 +1779,15 @@ void SdrModel::SetCompatibilityFlag(SdrCompatibilityFlag eFlag, bool bEnabled)
                 }
             }
         }
+    }
+    else if (eFlag == SdrCompatibilityFlag::IgnoreBreakAfterMultilineField)
+    {
+        if (m_pDrawOutliner)
+            m_pDrawOutliner->SetIgnoreBreakAfterMultilineField(bEnabled);
+        if (m_pHitTestOutliner)
+            m_pHitTestOutliner->SetIgnoreBreakAfterMultilineField(bEnabled);
+        if (m_pChainingOutliner)
+            m_pChainingOutliner->SetIgnoreBreakAfterMultilineField(bEnabled);
     }
 }
 

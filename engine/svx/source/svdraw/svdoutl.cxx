@@ -20,6 +20,7 @@
 #include <optional>
 #include <svx/svdoutl.hxx>
 #include <editeng/outliner.hxx>
+#include <svx/compatflags.hxx>
 #include <svx/svdmodel.hxx>
 #include <svx/svdotext.hxx>
 #include <svx/svdpage.hxx>
@@ -109,13 +110,26 @@ bool SdrOutliner::hasEditViewCallbacks() const
     return false;
 }
 
-std::optional<bool> SdrOutliner::GetCompatFlag(SdrCompatibilityFlag eFlag) const
+void SdrOutliner::setVisualizedPage(const SdrPage* pPage)
 {
-    if( mpVisualizedPage )
-    {
-        return {mpVisualizedPage->getSdrModelFromSdrPage().GetCompatibilityFlag(eFlag)};
-    }
-    return {};
+    if(pPage == mpVisualizedPage)
+        return;
+
+    // if this fires, we are changing from one SdrModel to a different SdrModel,
+    // which means that the SetIgnoreBreakAfterMultilineField will need to handle
+    // propogating the new value of the compat flag.
+    assert(!pPage || !mpVisualizedPage
+        || &pPage->getSdrModelFromSdrPage() == &mpVisualizedPage->getSdrModelFromSdrPage());
+
+    // When we transition from no-attached-page to have-attached-page, we need to
+    // propogate one of the compat flags from the SdrModel down to the EditEngine.
+    if (!mpVisualizedPage)
+        SetIgnoreBreakAfterMultilineField(pPage->getSdrModelFromSdrPage().GetCompatibilityFlag(SdrCompatibilityFlag::IgnoreBreakAfterMultilineField));
+    // Similarly, when we are detached, we need to reset the value of the flag
+    else if (!pPage)
+        SetIgnoreBreakAfterMultilineField(false);
+
+    mpVisualizedPage = pPage;
 }
 
 void TextHierarchyBreakupBlockText::processDrawPortionInfo(const DrawPortionInfo& rDrawPortionInfo)

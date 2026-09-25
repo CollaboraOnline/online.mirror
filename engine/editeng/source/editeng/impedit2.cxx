@@ -136,6 +136,7 @@ ImpEditEngine::ImpEditEngine( EditEngine* pEE, SfxItemPool* pItemPool, Outliner*
     mbReplaceLeadingSingleQuotationMark(true),
     mbSkipOutsideFormat(false),
     mbFuzzing(comphelper::IsFuzzing()),
+    mbIgnoreBreakAfterMultilineField(false),
     mbNbspRunNext(false)
 {
     maStatus.GetControlWord() =  EEControlBits::USECHARATTRIBS | EEControlBits::DOIDLEFORMAT |

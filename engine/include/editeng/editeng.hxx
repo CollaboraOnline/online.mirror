@@ -665,8 +665,7 @@ public:
     void SetBulletVisible( sal_Int32 nPara, bool bVisible );
 
     // Only useful when this is Outliner capable.
-    /// @returns state of the SdrCompatibilityFlag
-    std::optional<bool> GetCompatFlag(SdrCompatibilityFlag eFlag) const;
+    void SetIgnoreBreakAfterMultilineField(bool b);
 
     // Only useful when this is Outliner capable.
     Outliner* GetOwner();

@@ -1766,11 +1766,9 @@ tools::Rectangle EditEngine::GetBulletArea( sal_Int32 nPara )
     return tools::Rectangle( Point(), Point() );
 }
 
-std::optional<bool> EditEngine::GetCompatFlag(SdrCompatibilityFlag eFlag) const
+void EditEngine::SetIgnoreBreakAfterMultilineField(bool b)
 {
-    if (Outliner* pOwner = getImpl().GetOwner())
-        return pOwner->GetCompatFlag(eFlag);
-    return {};
+    getImpl().SetIgnoreBreakAfterMultilineField(b);
 }
 
 OUString EditEngine::CalcFieldValue( const SvxFieldItem& rField, sal_Int32 nPara, sal_Int32 nPos,

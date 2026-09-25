@@ -841,8 +841,7 @@ public:
     // convenient method to determine the bullets/numbering status for all paragraphs
     sal_Int32 GetBulletsNumberingStatus() const;
 
-    // overridden in SdrOutliner
-    SAL_DLLPRIVATE virtual std::optional<bool> GetCompatFlag(SdrCompatibilityFlag /*eFlag*/) const { return {}; };
+    void SetIgnoreBreakAfterMultilineField(bool b);
 
     // return FirstParaIsEmpty state
     bool getFirstParaIsEmpty() const { return bFirstParaIsEmpty; }

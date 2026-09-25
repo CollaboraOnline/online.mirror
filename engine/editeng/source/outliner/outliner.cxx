@@ -1995,4 +1995,9 @@ void Outliner::ClearOverflowingParaNum()
     pEditEngine->ClearOverflowingParaNum();
 }
 
+void Outliner::SetIgnoreBreakAfterMultilineField(bool b)
+{
+    pEditEngine->SetIgnoreBreakAfterMultilineField(b);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
