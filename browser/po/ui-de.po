@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-25 03:35+0000\n"
+"PO-Revision-Date: 2026-09-25 21:45+0000\n"
 "Last-Translator: Ettore Atalan <atalanttore@googlemail.com>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/collabora-online/"
 "collabora-ui/de/>\n"
@@ -3184,7 +3184,7 @@ msgstr "Tabellendokument"
 
 #: src/control/Control.BackstageView.ts:850 src/control/Control.Tabs.js:218
 msgid "Sheets"
-msgstr "Tabellen"
+msgstr "Blätter"
 
 #: src/control/Control.BackstageView.ts:851
 #: src/control/Control.NavigatorPanel.ts:210
