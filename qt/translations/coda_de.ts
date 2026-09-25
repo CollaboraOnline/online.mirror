@@ -157,12 +157,12 @@
     <message>
         <location filename="../Bridge.cpp" line="354"/>
         <source>Failed to export the document.</source>
-        <translation type="unfinished"></translation>
+        <translation>Der Export des Dokuments ist fehlgeschlagen.</translation>
     </message>
     <message>
         <location filename="../Bridge.cpp" line="939"/>
         <source>Cannot open remote document</source>
-        <translation type="unfinished"></translation>
+        <translation>Das entfernte Dokument kann nicht geöffnet werden</translation>
     </message>
     <message>
         <location filename="../Bridge.cpp" line="942"/>
@@ -204,7 +204,7 @@
     <message>
         <location filename="../DBusService.cpp" line="87"/>
         <source>Could not create a new document from this template.</source>
-        <translation type="unfinished"></translation>
+        <translation>Aus dieser Vorlage konnte kein neues Dokument erstellt werden.</translation>
     </message>
 </context>
 <context>
