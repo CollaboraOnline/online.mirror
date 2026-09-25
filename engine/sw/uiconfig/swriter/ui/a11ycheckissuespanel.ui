@@ -11,51 +11,6 @@
     <property name="orientation">vertical</property>
     <property name="spacing">3</property>
     <child>
-      <!-- n-columns=2 n-rows=1 -->
-      <object class="GtkGrid" id="gridOptions">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <child>
-          <object class="GtkLabel" id="lbOptions">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="halign">start</property>
-            <property name="hexpand">True</property>
-            <property name="label" translatable="yes" context="a11ycheckissuespanel|lbOptions">Adjust accessibility check options</property>
-          </object>
-          <packing>
-            <property name="left-attach">0</property>
-            <property name="top-attach">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="bOptions">
-            <property name="label" translatable="yes" context="optsecuritypage|bOptions">O_ptions...</property>
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="receives-default">True</property>
-            <property name="halign">end</property>
-            <property name="valign">center</property>
-            <property name="use-underline">True</property>
-            <child internal-child="accessible">
-              <object class="AtkObject" id="bOptions-atkobject">
-                <property name="AtkObject::accessible-description" translatable="yes" context="extended_tip|bOptions">Opens the "Accessibility options" page.</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="left-attach">1</property>
-            <property name="top-attach">0</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">0</property>
-      </packing>
-    </child>
-    <child>
       <object class="GtkSeparator" id="sep">
         <property name="visible">True</property>
         <property name="can-focus">False</property>
@@ -63,7 +18,7 @@
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">1</property>
+        <property name="position">0</property>
       </packing>
     </child>
     <child>
@@ -94,7 +49,7 @@
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">2</property>
+        <property name="position">1</property>
       </packing>
     </child>
     <child>
@@ -104,7 +59,7 @@
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">3</property>
+        <property name="position">2</property>
       </packing>
     </child>
     <child>
@@ -135,7 +90,7 @@
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">4</property>
+        <property name="position">3</property>
       </packing>
     </child>
     <child>
@@ -161,7 +116,7 @@
       <packing>
         <property name="expand">False</property>
         <property name="fill">True</property>
-        <property name="position">5</property>
+        <property name="position">4</property>
       </packing>
     </child>
   </object>
