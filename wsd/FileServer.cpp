@@ -2333,9 +2333,8 @@ void FileServerRequestHandler::fetchWopiSettingConfigs(const Poco::Net::HTTPRequ
             LOG_ERR("Failed to fetch wopi settings config from WopiHost["
                     << uriAnonym << "] with status[" << statusLine.reasonPhrase() << ']');
 
-            const std::string& body = httpResponse->getBody();
             sendError(statusCode, requestPath, destSocket, shortMessage,
-                      statusLine.reasonPhrase() + ". Response: " + body);
+                      statusLine.reasonPhrase());
             return;
         }
         http::Response clientResponse(http::StatusCode::OK);
@@ -2510,9 +2509,8 @@ void FileServerRequestHandler::deleteWopiSettingConfigs(
             LOG_ERR("Failed to delete presetfile from WopiHost["
                     << uriAnonym << "] with status[" << statusLine.reasonPhrase() << ']');
 
-            const std::string& body = httpResponse->getBody();
             sendError(statusCode, requestPath, destSocket, shortMessage,
-                      statusLine.reasonPhrase() + ". Response: " + body);
+                      statusLine.reasonPhrase());
             return;
         }
         http::Response clientResponse(http::StatusCode::OK);
