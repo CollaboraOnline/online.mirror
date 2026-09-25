@@ -527,6 +527,20 @@ ul {
 	transition: border-color 0.2s ease;
 }
 
+.view-input-container .secret-input-row {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	max-width: 400px;
+	margin-bottom: 16px;
+}
+
+.view-input-container .secret-input-row input[type='password'] {
+	flex: 1;
+	min-width: 0;
+	margin-bottom: 0;
+}
+
 .view-input-container input[type='text']:focus,
 .view-input-container input[type='password']:focus,
 .view-input-container input[type='number']:focus,

@@ -110,6 +110,8 @@ const SECRET_SETTING_FIELDS = [
 	'ESignatureSecret',
 ];
 
+const SECRET_FIELDS_WITH_DELETE = ['aiProviderAPIKey', 'aiImageProviderAPIKey'];
+
 interface AIProvider {
 	id: string;
 	name: string;
@@ -4570,10 +4572,51 @@ class SettingIframe {
 			if (isSecretField) {
 				input.type = 'password';
 			}
-			container.appendChild(input);
+			container.appendChild(
+				SECRET_FIELDS_WITH_DELETE.includes(key)
+					? this.createSecretInputRow(input, key, label, data)
+					: input,
+			);
 		}
 
 		return container;
+	}
+	// Input with delete button to reset.
+	private createSecretInputRow(
+		input: HTMLInputElement,
+		key: string,
+		label: string,
+		data: any,
+	): HTMLDivElement {
+		const row = document.createElement('div');
+		row.classList.add('secret-input-row');
+
+		const storedFlag = `${key}Stored`;
+		const syncDeleteButton = () => {
+			deleteButton.disabled = !data[storedFlag] && input.value.length === 0;
+		};
+
+		const deleteButton = this.createButtonWithIcon(
+			`${key}-delete`,
+			'delete',
+			_('Delete {0}').replace('{0}', label),
+			['button--vue-secondary', 'delete-icon'],
+			() => {
+				input.value = '';
+				data[key] = '';
+				data[storedFlag] = false;
+				input.dispatchEvent(new Event('input', { bubbles: true }));
+				input.focus();
+			},
+			true,
+		);
+
+		input.addEventListener('input', syncDeleteButton);
+		syncDeleteButton();
+
+		row.appendChild(input);
+		row.appendChild(deleteButton);
+		return row;
 	}
 
 	private createSettingsActions(
