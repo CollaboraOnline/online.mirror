@@ -2371,9 +2371,8 @@ void FileServerRequestHandler::fetchWopiSettingConfigs(const Poco::Net::HTTPRequ
             LOG_ERR("Failed to fetch wopi settings config from WopiHost["
                     << uriAnonym << "] with status[" << statusLine.reasonPhrase() << ']');
 
-            const std::string& body = httpResponse->getBody();
             sendError(statusCode, requestPath, destSocket, shortMessage,
-                      statusLine.reasonPhrase() + ". Response: " + body);
+                      statusLine.reasonPhrase());
             return;
         }
         http::Response clientResponse(http::StatusCode::OK);
@@ -2588,9 +2587,7 @@ void FileServerRequestHandler::fetchSettingFile(const Poco::Net::HTTPRequest& re
             LOG_ERR("Failed to fetch setting file from [" << uriAnonym
                     << "] with status [" << httpResponse->statusLine().reasonPhrase() << ']');
             sendError(httpResponse->statusLine().statusCode(), requestPath, destSocket,
-                      shortMessage,
-                      httpResponse->statusLine().reasonPhrase() + ". Response: " +
-                          httpResponse->getBody());
+                      shortMessage, httpResponse->statusLine().reasonPhrase());
             return;
         }
 
@@ -2749,10 +2746,14 @@ void FileServerRequestHandler::fetchModels(const Poco::Net::HTTPRequest& request
             {
                 LOG_ERR("Failed to fetch models from [" << uriAnonym
                         << "] with status [" << httpResponse->statusLine().reasonPhrase() << ']');
+                // Of the provider's error body only the insufficient_quota marker is passed on,
+                // because on a 429 it separates a used-up quota from a throttle.
+                std::string reason = httpResponse->statusLine().reasonPhrase();
+                if (httpResponse->statusLine().statusCode() == http::StatusCode::TooManyRequests
+                    && httpResponse->getBody().find("insufficient_quota") != std::string::npos)
+                    reason += ". insufficient_quota";
                 sendError(httpResponse->statusLine().statusCode(), requestPath, destSocket,
-                          shortMessage,
-                          httpResponse->statusLine().reasonPhrase() + ". Response: " +
-                              httpResponse->getBody());
+                          shortMessage, reason);
                 return;
             }
 
@@ -2934,9 +2935,8 @@ void FileServerRequestHandler::deleteWopiSettingConfigs(const Poco::Net::HTTPReq
             LOG_ERR("Failed to delete presetfile from WopiHost["
                     << uriAnonym << "] with status[" << statusLine.reasonPhrase() << ']');
 
-            const std::string& body = httpResponse->getBody();
             sendError(statusCode, requestPath, destSocket, shortMessage,
-                      statusLine.reasonPhrase() + ". Response: " + body);
+                      statusLine.reasonPhrase());
             return;
         }
         http::Response clientResponse(http::StatusCode::OK);
