@@ -76,13 +76,8 @@ class MovingInteraction extends SelectionInteraction {
 	public transformation(): cool.Matrix2D | null {
 		if (!this.across && !this.down) return null;
 
-		// Where the selection lined up with something on the page, the move goes as far as that
-		// rather than as far as the mouse.
 		const corner = this.selection.selectionCorner();
-		const stands = this.selection.snappedCorner(
-			corner[0] + this.across * app.twipsToPixels,
-			corner[1] + this.down * app.twipsToPixels,
-		);
+		const stands = this.applyTheSnap(corner);
 
 		return cool.Matrix2D.IDENTITY.translate(
 			(stands[0] - corner[0]) * app.pixelsToTwips,
@@ -90,13 +85,30 @@ class MovingInteraction extends SelectionInteraction {
 		);
 	}
 
+	/*
+		Applies the snap: the upper left corner of the selection as the mouse would leave it, moved
+		onto whatever the selection lined up with on the page. Where it lined up with nothing it
+		is where the mouse leaves it.
+	*/
+	private applyTheSnap(corner: number[]): number[] {
+		return this.selection.snappedCorner(
+			corner[0] + this.across * app.twipsToPixels,
+			corner[1] + this.down * app.twipsToPixels,
+		);
+	}
+
+	/*
+		Every handle goes through the very change the objects are drawn with, so that where the
+		move lines up with something on the page the handles and the frame go there as well.
+		Moving them by how far the mouse went instead would leave them beside what is drawn.
+	*/
 	public handles(known: SelectionHandle[]): SelectionHandle[] {
 		const matrix = this.transformation();
 		if (!matrix) return known;
 
 		return known.map((handle: SelectionHandle) => ({
 			...handle,
-			point: matrix.apply(handle.point.x, handle.point.y),
+			point: matrix.apply(handle.point.x, handle.point.y).round(),
 		}));
 	}
 }

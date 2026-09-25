@@ -94,7 +94,32 @@ class ScalingInteraction extends SelectionInteraction {
 		const dragged = this.draggedHandle();
 		if (dragged) this.selection.lookForASnap(dragged);
 
+		// The snap is applied while the drag runs, so that what is drawn and where the handles
+		// stand are the one thing, and letting go changes nothing again.
+		this.applyTheSnap(to, event);
+
 		this.selection.redraw();
+	}
+
+	/*
+		Applies the snap: the drag is moved from where the mouse is onto whatever it lined up with
+		on the page. One way can snap while the other does not, so each is taken from the line
+		where it found one and from the mouse where it did not. A drag that keeps the shape of the
+		object snaps to nothing, since it has only one number to give.
+	*/
+	private applyTheSnap(to: cool.SimplePoint, event: MouseEvent): void {
+		if (HandleScaling.keepsRatio(event, false)) return;
+
+		const snapped = this.selection.snappedTo();
+		if (!snapped || (snapped[0] === null && snapped[1] === null)) return;
+
+		const at = cool.SimplePoint.fromCorePixels([
+			snapped[0] ?? to.pX,
+			snapped[1] ?? to.pY,
+		]);
+
+		this.at = at.clone();
+		this.reached = this.shapeFor(at, event);
 	}
 
 	/*
@@ -107,23 +132,9 @@ class ScalingInteraction extends SelectionInteraction {
 	public finish(to: cool.SimplePoint, event: MouseEvent): void {
 		if (!this.shapeAtStart) return;
 
-		// Where the ratio is free, the drag ends where the mouse is, or where it lined up with
-		// something else on the page.
-		// One axis can line up while the other does not, so each of the two is taken from the
-		// snap where it found something and from the mouse where it did not.
-		const snapped = HandleScaling.keepsRatio(event, false)
-			? null
-			: this.selection.snappedTo();
-		const at = snapped
-			? cool.SimplePoint.fromCorePixels([
-					snapped[0] ?? to.pX,
-					snapped[1] ?? to.pY,
-				])
-			: to;
-
-		this.at = at.clone();
-		this.keepsRatio = HandleScaling.keepsRatio(event, false);
-		this.reached = this.shapeFor(at, event);
+		// The snap has been applied all through the drag, so letting go only hands over what is
+		// drawn.
+		this.move(to, event);
 
 		const matrix = this.transformation();
 		if (matrix)
