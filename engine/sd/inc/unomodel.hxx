@@ -234,6 +234,13 @@ public:
         bool mbCanBeResized = true;
         bool mbCanBeTurned = true;
 
+        /** True where the object is a diagram, which is a set of shapes the office lays out
+            from data it holds beside them, and the file name ending of the picture an object
+            holds, empty where it holds none. Both belong to the object and are asked of it.
+         */
+        bool mbIsDiagram = false;
+        OUString maGraphicExtension;
+
         /// True for a connector whose first end is tied to an object, and the same for its last
         /// end. A connector runs from where it is tied, so a tied end stays with the object it
         /// holds on to. False for anything that is not a connector.
@@ -316,6 +323,8 @@ public:
                    && maAutoColor == rOther.maAutoColor && maDrawn == rOther.maDrawn
                    && maAids == rOther.maAids && maHandles == rOther.maHandles
                    && maPath == rOther.maPath && meKind == rOther.meKind
+                   && mbIsDiagram == rOther.mbIsDiagram
+                   && maGraphicExtension == rOther.maGraphicExtension
                    && mbCanBeMoved == rOther.mbCanBeMoved
                    && mbCanBeResized == rOther.mbCanBeResized
                    && mbCanBeTurned == rOther.mbCanBeTurned

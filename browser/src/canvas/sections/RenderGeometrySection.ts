@@ -756,6 +756,27 @@ class RenderGeometrySection extends CanvasSectionObject {
 		holds. Anything that is not a group answers with itself.
 	*/
 	public static theOnesThatDraw(objectIds: number[]): number[] {
+		return RenderGeometrySection.descendingInto(objectIds, false);
+	}
+
+	/*
+		The objects that have a say in what may be done to these ones: a group is asked along with
+		everything it holds, so a group holding one object whose place is held fast refuses to be
+		moved. A diagram answers on its own. The office holds the place and the size of a
+		diagram's members fast as bookkeeping of its own, so that the layout it builds stays the
+		one thing that places them, which is not the user saying the diagram may not be moved.
+	*/
+	public static theOnesThatHaveASay(objectIds: number[]): number[] {
+		return objectIds.concat(
+			RenderGeometrySection.descendingInto(objectIds, true),
+		);
+	}
+
+	/// The descent itself. It walks to the objects that draw, and stops at a diagram when asked.
+	private static descendingInto(
+		objectIds: number[],
+		stoppingAtADiagram: boolean,
+	): number[] {
 		const data = RenderGeometrySection.currentPart();
 		if (!data) return objectIds;
 
@@ -771,7 +792,9 @@ class RenderGeometrySection extends CanvasSectionObject {
 
 		const drawn: number[] = [];
 		const takeIn = (objectId: number, depth: number) => {
-			const held = depth < 100 ? holds.get(objectId) : undefined;
+			const stops =
+				stoppingAtADiagram && data.objects.get(objectId)?.isDiagram === true;
+			const held = depth < 100 && !stops ? holds.get(objectId) : undefined;
 			if (!held) {
 				drawn.push(objectId);
 				return;

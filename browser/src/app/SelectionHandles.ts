@@ -251,7 +251,7 @@ class ObjectHandles implements HandleSource {
 		moved, however little the group itself says about it.
 	*/
 	private static allOfThem(objectIds: number[]): number[] {
-		return objectIds.concat(RenderGeometrySection.theOnesThatDraw(objectIds));
+		return RenderGeometrySection.theOnesThatHaveASay(objectIds);
 	}
 
 	public static canBeMoved(objectIds: number[]): boolean {

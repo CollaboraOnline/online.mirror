@@ -183,6 +183,11 @@ namespace cool {
 		/// What kind of object it is, as the drawing layer numbers the kinds: 2 a line, 24 a
 		/// connector, 25 a caption, 29 a measurement, 33 a custom shape, 35 a table.
 		objectKind?: number;
+		/// True where the object is a diagram, which is a set of shapes the office lays out from
+		/// data it holds beside them.
+		isDiagram?: boolean;
+		/// The file name ending of the picture the object holds, absent where it holds none.
+		graphicExtension?: string;
 		/** What may not be done to the object. Absent means it may: most objects allow
 		 * everything, so only the refusals travel. Whether it may be moved and whether it may be
 		 * made larger or smaller are each held against being changed on their own. Whether it may

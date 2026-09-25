@@ -34,7 +34,29 @@ class DiagramButtonSection extends GenericButtonSection {
 		this.updatePosition();
 	}
 
+	/*
+		Where the button stands: to the right of what is selected and level with the top of it.
+		While the document is drawn from objects the selection says where it is itself, since the
+		engine sends no rectangle along with it then.
+	*/
 	calculatePositionPixel(): Array<number> {
+		const drawn = GraphicSelection.selectionSection;
+
+		if (drawn) {
+			const corner = drawn.selectionCorner();
+			const size = drawn.selectionSize();
+
+			return [
+				Math.round(
+					corner[0] +
+						size[0] +
+						this.halfWidthPixels +
+						DiagramButtonSection.sizeSpaceBetweenButtons,
+				),
+				Math.round(corner[1]),
+			];
+		}
+
 		Util.ensureValue(GraphicSelection.rectangle);
 		// calculate & return top-left position
 		return [

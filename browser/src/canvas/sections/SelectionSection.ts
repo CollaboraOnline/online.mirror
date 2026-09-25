@@ -853,7 +853,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 	}
 
 	/// How wide and how high the selection is, in core pixels.
-	private selectionSize(): number[] {
+	public selectionSize(): number[] {
 		const box = RenderGeometrySection.answersPointer()
 			? this.boxOfTheSelection()
 			: undefined;
@@ -1250,6 +1250,15 @@ abstract class SelectionSection extends CanvasSectionObject {
 
 		this.stopPropagating();
 		e.stopPropagation();
+	}
+
+	/*
+		A press of the right button, which asks for the menu of what is selected. The section
+		covers the objects while the client draws the selection, so the press would otherwise
+		stop here and no menu would open.
+	*/
+	onContextMenu(point: cool.SimplePoint, e: MouseEvent): void {
+		MouseControl.contextMenuFrom(this, point, e);
 	}
 
 	/// Drops a press that is waiting to be handed over, because a second one took its place.

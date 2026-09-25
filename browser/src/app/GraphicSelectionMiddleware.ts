@@ -37,8 +37,41 @@ class GraphicSelection {
 	/// The object the dark overlay was last laid out for.
 	public static darkOverlayRectangle: cool.SimpleRectangle | null = null;
 
+	/*
+		Whether anything is selected. While the document is drawn from objects that is what the
+		ids say, and the rectangle the engine sends is not needed for it; otherwise it is the
+		rectangle, since that is all there is.
+	*/
 	public static hasActiveSelection() {
+		if (RenderManager.isVectorRendering())
+			return this.selectedObjectIDs.length > 0;
+
 		return this.rectangle !== null;
+	}
+
+	/// The one selected object, or nothing where none or several are selected.
+	private static theOneSelected(): cool.SlideObject | undefined {
+		return this.selectedObjectIDs.length === 1
+			? RenderGeometrySection.objectOf(this.selectedObjectIDs[0])
+			: undefined;
+	}
+
+	/// Whether what is selected is a diagram, asked of the object while the document is drawn
+	/// from objects and of the selection message otherwise.
+	public static isADiagram(): boolean {
+		if (RenderManager.isVectorRendering())
+			return this.theOneSelected()?.isDiagram === true;
+
+		return this.extraInfo?.isDiagram === true;
+	}
+
+	/// The file name ending of the picture what is selected holds, or nothing where it holds
+	/// none. Asked the same two ways.
+	public static graphicExtension(): string | undefined {
+		if (RenderManager.isVectorRendering())
+			return this.theOneSelected()?.graphicExtension || undefined;
+
+		return this.extraInfo?.graphicExtension || undefined;
 	}
 
 	public static onUpdatePermission() {
@@ -151,6 +184,10 @@ class GraphicSelection {
 		// The section that draws the selection works its handles out from the objects, so it is
 		// told whenever they change, whatever kind of handles they are.
 		this.selectionSection?.refresh();
+
+		// The button of a diagram stands beside the selection, so it follows it wherever the
+		// objects take it.
+		this.diagramButton?.updatePosition();
 
 		// The older section is given the set it reads only when that set is one it can read,
 		// and only when it differs from the one it holds.
@@ -613,7 +650,7 @@ class GraphicSelection {
 	}
 
 	private static checkDiagramData() {
-		if (GraphicSelection.extraInfo && GraphicSelection.extraInfo.isDiagram) {
+		if (GraphicSelection.isADiagram()) {
 			if (!GraphicSelection.diagramButton) {
 				// need to create DiagramButtonSection
 				const subSection = app.sectionContainer.getSectionWithName(

@@ -1296,12 +1296,7 @@ class ShapeHandlesSection extends CanvasSectionObject {
 	}
 
 	onContextMenu(point: cool.SimplePoint, e: MouseEvent): void {
-		const viewed = app.activeDocument.activeLayout.viewedRectangle;
-		const anchor = this.containerObject.getDocumentAnchor();
-		point.pX = this.myTopLeft[0] + point.pX + viewed.pX1 - anchor[0];
-		point.pY = this.myTopLeft[1] + point.pY + viewed.pY1 - anchor[1];
-		app.activeDocument.mouseControl.setMousePosition(point);
-		app.activeDocument.mouseControl.onContextMenu(point, e);
+		MouseControl.contextMenuFrom(this, point, e);
 	}
 
 	private hideSubSections() {

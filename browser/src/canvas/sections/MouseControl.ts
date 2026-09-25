@@ -113,6 +113,27 @@ class MouseControl extends CanvasSectionObject {
 		}
 	}
 
+	/*
+		Hands a press that landed on a section over to the document, so that the menu is about
+		what lies under it on the page. A section is told where the press landed inside it, while
+		the document wants to know where that is on the page.
+	*/
+	public static contextMenuFrom(
+		section: CanvasSectionObject,
+		point: cool.SimplePoint,
+		e: MouseEvent,
+	): void {
+		const activeDocument = app.activeDocument;
+		if (!activeDocument || !activeDocument.mouseControl) return;
+
+		const viewed = activeDocument.activeLayout.viewedRectangle;
+		const anchor = section.containerObject.getDocumentAnchor();
+		point.pX = section.myTopLeft[0] + point.pX + viewed.pX1 - anchor[0];
+		point.pY = section.myTopLeft[1] + point.pY + viewed.pY1 - anchor[1];
+		activeDocument.mouseControl.setMousePosition(point);
+		activeDocument.mouseControl.onContextMenu(point, e);
+	}
+
 	public onContextMenu(point: cool.SimplePoint, e: MouseEvent): void {
 		// We need this to prevent native context menu.
 		e.preventDefault();

@@ -3689,6 +3689,9 @@ private:
             these as much as anything else does, so they are taken outside the part that only an
             object drawing something of its own goes through.
         */
+        aContent.mbIsDiagram = rObject.isDiagram();
+        aContent.maGraphicExtension = rObject.getGraphicExtension();
+
         SdrObjTransformInfoRec aWhatItAllows;
         rObject.TakeObjInfo(aWhatItAllows);
         aContent.mbCanBeMoved = !rObject.IsMoveProtect();
@@ -4267,6 +4270,10 @@ private:
         }
         if (rContent.meKind != SdrObjKind::NONE)
             rWriter.put("objectKind", static_cast<sal_Int32>(rContent.meKind));
+        if (rContent.mbIsDiagram)
+            rWriter.put("isDiagram", true);
+        if (!rContent.maGraphicExtension.isEmpty())
+            rWriter.put("graphicExtension", rContent.maGraphicExtension);
 
         // Only what it may not have done travels, since most objects allow everything.
         if (!rContent.mbCanBeMoved)
