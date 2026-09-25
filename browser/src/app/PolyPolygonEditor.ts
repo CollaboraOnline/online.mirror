@@ -27,13 +27,13 @@ class PolyPolygonEditor implements HandleSource {
 	/// How wide a point of the path is drawn, in core pixels. Smaller than a handle, and drawn
 	/// over them, so that a point lying on one of the eight is still the one a press reaches.
 	public static pointSize(): number {
-		return 8 * app.dpiScale;
+		return HandleLook.widthOf('pathPoint');
 	}
 
 	/// How wide the weight of a curve is drawn, in core pixels. Smaller again: there are two of
 	/// them for every point of a curve, and they should not shout.
 	public static weightSize(): number {
-		return 6 * app.dpiScale;
+		return HandleLook.widthOf('weight');
 	}
 
 	/// The path of the object, or nothing where it holds none.

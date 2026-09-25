@@ -384,6 +384,7 @@ COOL_JS_LST =\
 	src/core/TimerRegistry.ts \
 	src/core/DPIChangeListener.ts \
 	src/app/SelectionSnap.ts \
+	src/app/HandleLook.ts \
 	src/app/HandleScaling.ts \
 	src/app/SelectionHandles.ts \
 	src/app/PolyPolygonEditor.ts \

@@ -88,19 +88,6 @@ abstract class SelectionSection extends CanvasSectionObject {
 	*/
 	public static readonly turningKind: string = 'rotate';
 
-	/// The colors the handles are drawn in.
-	private static readonly framingColour: string = '#FFFFFF';
-	private static readonly shapingColour: string = '#FFFF00';
-	private static readonly pathColour: string = '#1C99E0';
-	/*
-		A point to tie a connector to is drawn in a dimmed red: it is offered while something else
-		is being done and should not shout over the handles beside it. The four an object falls
-		back on take the same red darker again, so the ones it was given stand out from them.
-	*/
-	private static readonly gluePointColour: string = '#B03A3A';
-	private static readonly defaultGluePointColour: string =
-		SelectionSection.darker(SelectionSection.gluePointColour, 0.6);
-
 	/*
 		The color that marks the handle the mouse is over: the handle's own color with its
 		light turned up, or turned down where it is light already, so that the mark stands out
@@ -121,17 +108,6 @@ abstract class SelectionSection extends CanvasSectionObject {
 				.padStart(2, '0');
 
 		return '#' + back(red) + back(green) + back(blue);
-	}
-
-	/// That color with its light turned down by that much, as a hexadecimal color again.
-	public static darker(color: string, by: number): string {
-		const of = (at: number) => parseInt(color.substr(at, 2), 16);
-		const down = (value: number) =>
-			Math.round(value * by)
-				.toString(16)
-				.padStart(2, '0');
-
-		return '#' + down(of(1)) + down(of(3)) + down(of(5));
 	}
 
 	/// How far above the selection the handle that turns it sits, in core pixels.
@@ -541,7 +517,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 		const origin = new cool.SimplePoint(0, 0);
 		this.context.translate(origin.vX, origin.vY);
 		this.context.scale(app.twipsToPixels, app.twipsToPixels);
-		this.context.strokeStyle = '#1C99E0';
+		this.context.strokeStyle = HandleLook.outlineOfADrag;
 		this.context.lineWidth = app.pixelsToTwips;
 		this.context.beginPath();
 
@@ -611,7 +587,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 					: 0;
 
 			this.context.beginPath();
-			this.context.strokeStyle = 'black';
+			this.context.strokeStyle = HandleLook.outlineColour;
 			this.context.fillStyle = group.shape(this.context, handle, point, grown);
 
 			this.context.closePath();

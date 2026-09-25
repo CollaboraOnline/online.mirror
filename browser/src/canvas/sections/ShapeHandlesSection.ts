@@ -65,12 +65,12 @@ class ShapeHandlesSection extends CanvasSectionObject {
 
 	/// How wide and how high a handle is drawn, in core pixels.
 	public static handleSize(): number {
-		return 12 * app.dpiScale;
+		return HandleLook.widthOf('framing');
 	}
 
 	/// How wide a point that a connector can be tied to is drawn, in core pixels.
 	public static gluePointSize(): number {
-		return 10 * app.dpiScale;
+		return HandleLook.widthOf('tiePoint');
 	}
 
 	/// What every handle of the selection is, in the order they are drawn.

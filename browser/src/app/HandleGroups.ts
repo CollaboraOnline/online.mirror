@@ -147,21 +147,6 @@ abstract class HandleGroup {
 		);
 	}
 
-	/// Lays out a round handle of the usual size at that place, grown by as much as asked.
-	protected static round(
-		context: CanvasRenderingContext2D,
-		at: cool.SimplePoint,
-		grown: number,
-	): void {
-		context.arc(
-			at.vX,
-			at.vY,
-			ShapeHandlesSection.handleSize() * 0.5 + grown,
-			0,
-			Math.PI * 2,
-		);
-	}
-
 	/*
 		Moves the handle a key step and hands the engine where it landed, the way the end of a
 		drag of it would. Answers where it landed.
@@ -246,11 +231,7 @@ class FramingHandles extends HandleGroup {
 		at: cool.SimplePoint,
 		grown: number,
 	): string {
-		const size = ShapeHandlesSection.handleSize() + 2 * grown;
-
-		context.rect(at.vX - size * 0.5, at.vY - size * 0.5, size, size);
-
-		return '#FFFFFF';
+		return HandleLook.lay(context, 'framing', at, grown);
 	}
 
 	public interactionFor(
@@ -334,9 +315,7 @@ class TurningHandle extends HandleGroup {
 		at: cool.SimplePoint,
 		grown: number,
 	): string {
-		HandleGroup.round(context, at, grown);
-
-		return '#FFFFFF';
+		return HandleLook.lay(context, 'turning', at, grown);
 	}
 
 	public interactionFor(
@@ -553,9 +532,7 @@ class ShapingHandles extends HandlesMovedOneByOne {
 		at: cool.SimplePoint,
 		grown: number,
 	): string {
-		HandleGroup.round(context, at, grown);
-
-		return '#FFFF00';
+		return HandleLook.lay(context, 'shaping', at, grown);
 	}
 
 	public moveByKey(
@@ -840,7 +817,7 @@ class TiePointHandles extends HandleGroup {
 		grown: number,
 	): string {
 		const held = this.held(handle);
-		const radius = ShapeHandlesSection.gluePointSize() * 0.5 + grown;
+		const radius = HandleLook.widthOf('tiePoint') * 0.5 + grown;
 
 		// The two that face each other are drawn as what they are, a nose on each side.
 		const wayOut = held?.wayOut;
@@ -898,10 +875,11 @@ class TiePointHandles extends HandleGroup {
 			for one it holds as a distance of its own, and darker again for the four an object
 			falls back on, which it was given none of.
 		*/
-		if (handle.kind !== 'GluePoint')
-			return SelectionSection.darker('#B03A3A', 0.6);
+		if (handle.kind !== 'GluePoint') return HandleLook.tiePointFallenBackOn;
 
-		return held?.keepsItsDistance ? '#CC6666' : '#B03A3A';
+		return held?.keepsItsDistance
+			? HandleLook.tiePointKeepingItsDistance
+			: HandleLook.colourOfTheKind.tiePoint;
 	}
 
 	/*
@@ -982,24 +960,17 @@ class PathHandles extends HandlesMovedOneByOne {
 		at: cool.SimplePoint,
 		grown: number,
 	): string {
-		if (handle.kind === '9') {
-			// A point of the path, smaller than the eight and drawn over them, so it can be taken
-			// hold of where the two meet.
-			const across = PolyPolygonEditor.pointSize() + 2 * grown;
-			context.rect(at.vX - across * 0.5, at.vY - across * 0.5, across, across);
-		} else {
-			// A weight that bends the curve at a point, smaller again: there are two of them for
-			// every point of a curve.
-			context.arc(
-				at.vX,
-				at.vY,
-				PolyPolygonEditor.weightSize() * 0.5 + grown,
-				0,
-				Math.PI * 2,
-			);
-		}
-
-		return '#1C99E0';
+		/*
+			A point of the path is smaller than the eight and drawn over them, so that it can be
+			taken hold of where the two meet. A weight that bends the curve at a point is smaller
+			again, since there are two of them for every point of a curve.
+		*/
+		return HandleLook.lay(
+			context,
+			handle.kind === '9' ? 'pathPoint' : 'weight',
+			at,
+			grown,
+		);
 	}
 }
 

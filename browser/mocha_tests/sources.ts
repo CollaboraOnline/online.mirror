@@ -35,6 +35,7 @@
 /// <reference path="../src/app/HandleScaling.ts" />
 /// <reference path="../src/app/SelectionHandles.ts" />
 /// <reference path="../src/app/PolyPolygonEditor.ts" />
+/// <reference path="../src/app/HandleLook.ts" />
 /// <reference path="../src/app/HandleGroups.ts" />
 /// <reference path="../src/app/HandleTravel.ts" />
 /// <reference path="../src/app/GraphicSelectionMiddleware.ts" />
