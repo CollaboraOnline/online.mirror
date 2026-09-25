@@ -484,6 +484,7 @@ JSDialog._parseSpinFieldValue = function (displayValue: string) {
 
 JSDialog._formatSpinFieldValue = function (value: number, unit: string) {
 	var str = '' + value;
+	if (!str) return '';
 	if (getDecimal() !== '.') str = str.replace('.', getDecimal());
 	if (unit) {
 		var noSpace =

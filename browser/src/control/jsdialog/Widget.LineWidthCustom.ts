@@ -204,6 +204,12 @@ JSDialog.LineWidthCustom = function (
 		);
 	};
 
+	window.L.DomUtil.create(
+		'hr',
+		'jsdialog ui-separator horizontal ui-linewidth-section-separator',
+		parentContainer,
+	);
+
 	createLastCustomEntry(parentContainer, data, builder, applyWidth);
 
 	window.L.DomUtil.create(

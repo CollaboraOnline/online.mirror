@@ -2043,6 +2043,13 @@ img.ui-combobox-value-preview {
 	height: var(--ui-linewidth-preview-height, 0);
 }
 
+.modalpopup[id$='-dropdown']
+.jsdialog.ui-separator.horizontal.ui-linewidth-section-separator {
+	height: 2px;
+	margin: 6px 0;
+	background-color: var(--color-border);
+}
+
 .ui-linewidth-custom {
 	display: flex;
 	align-items: center;
