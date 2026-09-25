@@ -661,7 +661,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 		RenderManager.renderObjectsWith(
 			this.context,
 			data,
-			this.selectedObjects(),
+			RenderGeometrySection.theOnesThatDraw(this.selectedObjects()),
 			matrix,
 		);
 
@@ -816,14 +816,49 @@ abstract class SelectionSection extends CanvasSectionObject {
 		return this.snap.corner(x, y);
 	}
 
+	/*
+		The box the selection takes up, in core pixels. While the document is drawn from objects
+		it is worked out from the boxes they carry, which is the same box the handles are worked
+		out from; otherwise it is the one the engine sends with the selection.
+	*/
+	private boxOfTheSelection(): number[] | undefined {
+		let box: cool.Range2D | undefined;
+		for (const objectId of RenderGeometrySection.theOnesThatDraw(
+			this.selectedObjects(),
+		)) {
+			const one = RenderGeometrySection.boxOf(objectId);
+			if (one) box = box ? box.union(one) : one;
+		}
+		if (!box) return undefined;
+
+		const scale = app.twipsToPixels;
+
+		return [
+			box.minX * scale,
+			box.minY * scale,
+			box.width * scale,
+			box.height * scale,
+		];
+	}
+
 	/// The upper left corner of the selection, in core pixels.
 	public selectionCorner(): number[] {
+		const box = RenderGeometrySection.answersPointer()
+			? this.boxOfTheSelection()
+			: undefined;
+		if (box) return [box[0], box[1]];
+
 		const rectangle = GraphicSelection.rectangle;
 		return rectangle ? [rectangle.pX1, rectangle.pY1] : this.position;
 	}
 
 	/// How wide and how high the selection is, in core pixels.
 	private selectionSize(): number[] {
+		const box = RenderGeometrySection.answersPointer()
+			? this.boxOfTheSelection()
+			: undefined;
+		if (box) return [box[2], box[3]];
+
 		const rectangle = GraphicSelection.rectangle;
 		return rectangle ? [rectangle.pWidth, rectangle.pHeight] : this.size;
 	}
@@ -868,7 +903,13 @@ abstract class SelectionSection extends CanvasSectionObject {
 	private leaveTheChangeOnTheObjects(matrix: cool.Matrix2D | null): void {
 		if (!matrix) return;
 
-		for (const objectId of this.selectedObjects())
+		/*
+			A group holds no drawing and no mapping of its own, so the change goes to the objects
+			it holds. Anything else is changed as it stands.
+		*/
+		for (const objectId of RenderGeometrySection.theOnesThatDraw(
+			this.selectedObjects(),
+		))
 			RenderGeometrySection.changeObject(objectId, matrix);
 
 		app.sectionContainer?.requestReDraw();
@@ -905,7 +946,13 @@ abstract class SelectionSection extends CanvasSectionObject {
 	): void {
 		const mappings: string[] = [];
 
-		for (const objectId of objectIds) {
+		/*
+			A group is named to the engine as the objects it holds. It has no mapping of its own
+			to be given - the drawing layer keeps only a rectangle for it, and hands a turn on to
+			what is inside it - so naming the group would lose the turn. Naming the objects
+			cannot: each of them has a mapping and takes it whole.
+		*/
+		for (const objectId of RenderGeometrySection.theOnesThatDraw(objectIds)) {
 			const mapping = RenderGeometrySection.transformOf(objectId);
 			if (!mapping) continue;
 

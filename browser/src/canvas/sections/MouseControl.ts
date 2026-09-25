@@ -490,12 +490,17 @@ class MouseControl extends CanvasSectionObject {
 		if (!this.carrying) {
 			if (modifier !== 0) return false;
 
-			const objectId = RenderGeometrySection.objectIdAt(
+			// A drag that begins on something nobody selected takes hold of the outermost
+			// object it belongs to, which is the group where it is in one.
+			const hit = RenderGeometrySection.objectIdAt(
 				this.positionOnMouseDown.x,
 				this.positionOnMouseDown.y,
 			);
-			if (objectId === undefined) return false;
+			if (hit === undefined) return false;
+
 			if (GraphicSelection.extraInfo?.isDraggable === false) return false;
+
+			const objectId = RenderGeometrySection.outermostOf(hit);
 
 			GraphicSelection.selectObjects([objectId]);
 			GraphicSelection.updateSelectionSection();
@@ -720,7 +725,13 @@ class MouseControl extends CanvasSectionObject {
 			modifier === app.UNOModifier.SHIFT || modifier === app.UNOModifier.CTRL;
 		if (modifier !== 0 && !extending) return false;
 
-		const objectId = RenderGeometrySection.objectIdAt(point.x, point.y);
+		/*
+			A press inside a group takes hold of the group. What was hit may be an object the
+			group holds, and only entering the group reaches that.
+		*/
+		const hit = RenderGeometrySection.objectIdAt(point.x, point.y);
+		const objectId =
+			hit === undefined ? undefined : RenderGeometrySection.outermostOf(hit);
 		if (objectId === undefined && !GraphicSelection.selectedObjectIDs.length)
 			return false;
 

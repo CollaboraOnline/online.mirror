@@ -730,6 +730,61 @@ class RenderGeometrySection extends CanvasSectionObject {
 		return object ? (object.parent ?? 0) : undefined;
 	}
 
+	/*
+		The outermost object the given one belongs to: the group at the top of the chain of
+		groups above it, or the object itself where it is in none. A press on something inside a
+		group takes hold of the group, as it does in the office, and only entering the group
+		reaches what is inside it.
+	*/
+	public static outermostOf(objectId: number): number {
+		let outermost = objectId;
+
+		for (let guard = 0; guard < 100; ++guard) {
+			const parent = RenderGeometrySection.parentOf(outermost);
+			if (!parent) break;
+
+			outermost = parent;
+		}
+
+		return outermost;
+	}
+
+	/*
+		The objects a change to these ones really changes. A group holds no drawing of its own and
+		no mapping of its own - it is an organisation of the objects under it, a multi-selection
+		someone gave a name to - so a change to a group is a change to each of the objects it
+		holds. Anything that is not a group answers with itself.
+	*/
+	public static theOnesThatDraw(objectIds: number[]): number[] {
+		const data = RenderGeometrySection.currentPart();
+		if (!data) return objectIds;
+
+		const holds = new Map<number, number[]>();
+		for (const id of data.order) {
+			const parent = data.objects.get(id)?.parent;
+			if (!parent) continue;
+
+			const held = holds.get(parent);
+			if (held) held.push(id);
+			else holds.set(parent, [id]);
+		}
+
+		const drawn: number[] = [];
+		const takeIn = (objectId: number, depth: number) => {
+			const held = depth < 100 ? holds.get(objectId) : undefined;
+			if (!held) {
+				drawn.push(objectId);
+				return;
+			}
+
+			for (const one of held) takeIn(one, depth + 1);
+		};
+
+		for (const objectId of objectIds) takeIn(objectId, 0);
+
+		return drawn;
+	}
+
 	/// The object of the page with the given id, or nothing when the page holds no such object.
 	public static objectOf(objectId: number): cool.SlideObject | undefined {
 		return RenderGeometrySection.currentPart()?.objects.get(objectId);
