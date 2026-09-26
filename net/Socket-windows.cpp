@@ -76,6 +76,12 @@ bool bindToPort(int, Socket::Type, bool, int)
     Util::forcedExit(EX_SOFTWARE);
 }
 
+int boundPort(int)
+{
+    LOG_FTL("Reading the port of a real socket is not implemented for this platform.");
+    Util::forcedExit(EX_SOFTWARE);
+}
+
 bool isUnrecoverableAcceptError(int)
 {
     LOG_FTL("Accepting on a real listening socket is not implemented for this platform.");

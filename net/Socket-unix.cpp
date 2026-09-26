@@ -141,6 +141,23 @@ bool bindToPort(int descriptor, Socket::Type socketType, bool publicly, int port
     return rc == 0;
 }
 
+int boundPort(int descriptor)
+{
+    struct sockaddr_storage address;
+    socklen_t length = sizeof(address);
+    if (::getsockname(descriptor, reinterpret_cast<sockaddr*>(&address), &length) == -1)
+    {
+        LOG_SYS("Failed getsockname on socket fd " << descriptor);
+        return -1;
+    }
+
+    if (address.ss_family == AF_INET)
+        return ntohs(reinterpret_cast<const sockaddr_in*>(&address)->sin_port);
+    if (address.ss_family == AF_INET6)
+        return ntohs(reinterpret_cast<const sockaddr_in6*>(&address)->sin6_port);
+    return -1;
+}
+
 bool isUnrecoverableAcceptError(const int cause)
 {
     static constexpr const char * messagePrefix = "Failed to accept. (errno: ";

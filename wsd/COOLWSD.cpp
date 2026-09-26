@@ -3892,9 +3892,9 @@ std::shared_ptr<ServerSocket> COOLWSDServer::findServerPort()
 
     if (ClientPortNumber <= 0)
     {
-        // Avoid using the default port for unit-tests altogether.
-        // This avoids interfering with a running test instance.
-        ClientPortNumber = DEFAULT_CLIENT_PORT_NUMBER + (UnitWSD::isUnitTesting() ? 1 : 0);
+        // A unit test listens on a free port that the kernel picks, so no other process on the
+        // host knows its port.
+        ClientPortNumber = UnitWSD::isUnitTesting() ? 0 : DEFAULT_CLIENT_PORT_NUMBER;
     }
 
 #if ENABLE_SSL
@@ -3910,7 +3910,7 @@ std::shared_ptr<ServerSocket> COOLWSDServer::findServerPort()
 #if !MOBILEAPP
     const int firstPortNumber = ClientPortNumber;
 #endif
-    while (!socket &&
+    while (!socket && ClientPortNumber > 0 &&
 #ifdef BUILDING_TESTS
            true
 #else
@@ -3936,6 +3936,9 @@ std::shared_ptr<ServerSocket> COOLWSDServer::findServerPort()
                                                        << ClientPortNumber << "). Exiting");
         Util::forcedExit(EX_SOFTWARE);
     }
+
+    if (ClientPortNumber == 0)
+        ClientPortNumber = net::boundPort(socket->getFD());
 
     LOG_INF('#' << socket->getFD() << " Listening to client connections on port "
                 << ClientPortNumber);

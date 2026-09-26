@@ -545,6 +545,9 @@ namespace net
     /// loopback address otherwise. Returns true on success only.
     bool bindToPort(int descriptor, Socket::Type socketType, bool publicly, int port);
 
+    /// The port a bound socket has, in host byte order, or -1 when it cannot be read.
+    int boundPort(int descriptor);
+
     /// Where a connection came from.
     struct PeerAddress
     {
