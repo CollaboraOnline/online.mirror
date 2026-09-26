@@ -1,0 +1,16 @@
+-*- Mode: Diff -*-
+
+We don't want to need Perl to build the curl library. That will just be an unnecessary dependency when
+eventually building on Windows with WSL.
+
+--- CMakeLists.txt
++++ CMakeLists.txt
+@@ -562,7 +562,7 @@
+ 
+ option(CURL_LINT "Run lint checks while building" OFF)
+ 
+-find_package(Perl)
++# find_package(Perl)
+ 
+ if(PERL_EXECUTABLE)
+   add_custom_target(curl-ca-bundle

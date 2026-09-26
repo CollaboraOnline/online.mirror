@@ -19,6 +19,7 @@ $(eval $(call gb_UnpackedTarball_update_autoconf_configs,curl))
 
 $(eval $(call gb_UnpackedTarball_add_patches,curl,\
 	external/curl/zlib.patch.0 \
+	external/curl/noperl.patch.0 \
 ))
 
 ifeq ($(ENABLE_EMSCRIPTEN_PROXY_POSIX_SOCKETS),TRUE)
