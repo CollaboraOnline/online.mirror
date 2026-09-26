@@ -148,7 +148,8 @@ describe(['tagmobile', 'tagnextcloud', 'tagproxy'], 'Apply font on selected text
 		selectText(this.win);
 
 		mobileHelper.openTextPropertiesPanel();
-		cy.cGet('#CharBackColor .ui-header').scrollIntoView().click();
+		cy.cGet('#CharBackColor .ui-header').scrollIntoView();
+		cy.cGet('#CharBackColor .ui-header').click();
 		mobileHelper.selectFromColorPicker('#CharBackColor', 2, 2);
 		cy.cGet('#CharBackColor .color-sample-selected')
 			.should('have.attr', 'style', 'background-color: rgb(204, 0, 0);');
@@ -162,7 +163,8 @@ describe(['tagmobile', 'tagnextcloud', 'tagproxy'], 'Apply font on selected text
 		selectText(this.win);
 
 		mobileHelper.openTextPropertiesPanel();
-		cy.cGet('#CharBackColor .color-sample-selected').scrollIntoView()
+		cy.cGet('#CharBackColor .color-sample-selected').scrollIntoView();
+		cy.cGet('#CharBackColor .color-sample-selected')
 			.should('have.attr', 'style', 'background-color: rgb(204, 0, 0);');
 	});
 
