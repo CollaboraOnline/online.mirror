@@ -1301,6 +1301,19 @@ WaitUntilIdle::WaitUntilIdle()
 
 IMPL_LINK_NOARG(WaitUntilIdle, IdleHdl, Timer*, void)
 {
+    if (!mbFirstPass)
+    {
+        tools::JsonWriter aJson;
+        aJson.put("commandName", ".uno:ReportWhenIdle");
+        aJson.put("idleID", msIdleId);
+        mpCallbackFlushHandler->queue(COKitCallbackType::UNO_COMMAND_RESULT,
+                                      aJson.finishAndGetAsOString());
+        mpCallbackFlushHandler.reset();
+        msIdleId.clear();
+        mnViewId = -1;
+        return;
+    }
+
     // SfxBindings defers slot updates via an AutoTimer with
     // TIMEOUT_FIRST=300ms (DEFAULT_IDLE priority).  The vcl::Idle
     // backing this handler runs at TOOLKIT_DEBUG and is ready
@@ -1325,13 +1338,10 @@ IMPL_LINK_NOARG(WaitUntilIdle, IdleHdl, Timer*, void)
         }
     }
 
-    tools::JsonWriter aJson;
-    aJson.put("commandName", ".uno:ReportWhenIdle");
-    aJson.put("idleID", msIdleId);
-    mpCallbackFlushHandler->queue(COKitCallbackType::UNO_COMMAND_RESULT, aJson.finishAndGetAsOString());
-    mpCallbackFlushHandler.reset();
-    msIdleId.clear();
-    mnViewId = -1;
+    // The widget updates that the drain caused go out from JSDialog idles, which run at a higher
+    // priority than this one, so reply from a second pass that runs after them.
+    mbFirstPass = false;
+    maIdle.Start();
 }
 
 COKitDocumentImpl::COKitDocumentImpl(uno::Reference <css::lang::XComponent> xComponent, int nDocumentId)
@@ -6151,6 +6161,7 @@ void COKitDocumentImpl::postUnoCommand(const char* pCommand, const char* pArgume
         assert(maIdleHelper.msIdleId.isEmpty() && "idle id should be uset");
         maIdleHelper.mpCallbackFlushHandler = mpCallbackFlushHandlers[nView];
         maIdleHelper.mnViewId = nView;
+        maIdleHelper.mbFirstPass = true;
 
         for (const beans::PropertyValue& rPropValue : aPropertyValuesVector)
         {

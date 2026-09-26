@@ -289,6 +289,8 @@ namespace desktop {
         OUString msIdleId;
         std::shared_ptr<CallbackFlushHandler> mpCallbackFlushHandler;
         int mnViewId = -1;
+        // True until the idle handler has run once for the current request.
+        bool mbFirstPass = true;
 
         DECL_LINK(IdleHdl, Timer*, void);
     };
