@@ -131,11 +131,14 @@ function removeShapeSelection() {
 			cy.cGet('body').click(XPos, YPos);
 		});
 
+	// A click within 250 ms of this one is sent as a double click, wherever it lands.
+	//
 	// The click triggers MouseControl.onClick which calls focus(false),
 	// blurring the textarea on mobile. Re-focus depends on INCOMING
 	// invalidatecursor from core. processToIdle ensures that message
 	// has been received before we send the Esc keys.
 	cy.getFrameWindow().then(function(win) {
+		helper.waitForTimers(win, 'clicktimer');
 		helper.processToIdle(win);
 	});
 
@@ -170,10 +173,6 @@ function triggerNewSVGForShapeInTheCenter() {
 	cy.log('>> triggerNewSVGForShapeInTheCenter - start');
 
 	removeShapeSelection();
-
-	cy.getFrameWindow().then(function(win) {
-		helper.waitForTimers(win, 'clicktimer');
-	});
 
 	// Select text shape again which will retrigger a new SVG from core
 	selectTextShapeInTheCenter();
