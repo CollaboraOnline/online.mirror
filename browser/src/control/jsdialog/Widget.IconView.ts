@@ -340,6 +340,30 @@ function _iconViewEntry(
 	}
 }
 
+JSDialog.UpdateIconViewIndexes = function (iconview: HTMLElement) {
+	if (!iconview) return;
+
+	const entries = Array.from(
+		iconview.querySelectorAll('.ui-iconview-entry'),
+	) as HTMLElement[];
+	if (!entries.length) return;
+
+	const positionIn = (offsets: number[]) => {
+		const distinct = Array.from(new Set(offsets)).sort((a, b) => a - b);
+		return (offset: number) => distinct.indexOf(offset);
+	};
+
+	const rowOf = positionIn(entries.map((entry) => entry.offsetTop));
+	const columnOf = positionIn(entries.map((entry) => entry.offsetLeft));
+
+	entries.forEach((entry) => {
+		entry.setAttribute(
+			'index',
+			rowOf(entry.offsetTop) + ':' + columnOf(entry.offsetLeft),
+		);
+	});
+};
+
 JSDialog.iconView = function (
 	parentContainer: Element,
 	data: IconViewJSON,
@@ -587,6 +611,8 @@ JSDialog.iconView = function (
 		for (const i in data.entries) {
 			_iconViewEntry(iconview, data, data.entries[i], builder);
 		}
+
+		JSDialog.UpdateIconViewIndexes(iconview);
 
 		// Do not animate on creation - eg. when opening sidebar with icon view it might move the app
 		const firstSelected = $(iconview).children('.selected').get(0);

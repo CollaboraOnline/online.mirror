@@ -2602,8 +2602,62 @@ window.L.Control.NotebookbarWriter = window.L.Control.Notebookbar.extend({
 				'command': '.uno:ChangeAlignment',
 				'icon': 'lc_fontworkalignmentfloater.svg',
 				'accessibility': { focusBack: true, combination: 'CA', de: null },
+			},
+			{ type: 'separator', id: 'formula-changealignment-break', orientation: 'vertical' },
+			/* ids have to match the welded elements pane ids from the .ui in the core */
+			{
+				'id': 'formula-element-categories',
+				'type': 'container',
+				'vertical': 'true',
+				'children': [
+					{
+						'id': 'categorylistlabel',
+						'type': 'fixedtext',
+						'text': _('Element categories')
+					},
+					{
+						'id': 'categorylist',
+						'type': 'listbox',
+						'text': '',
+						'entries': [],
+						'labelledBy': 'categorylistlabel',
+						'accessibility': { focusBack: true, combination: 'EC', de: null }
+					}
+				]
 			}
-        ];
+		];
+
+		for (var group = 0; group < 15; group++) {
+			var groupId = 'elements_group' + group;
+			var groupAccessKey = 'G' + (group + 1).toString(16).toUpperCase();
+			content.push(
+				{ type: 'separator', id: groupId + '-break', orientation: 'vertical' },
+				{
+					'type': 'overflowgroup',
+					'id': groupId + '-group',
+					'nofold': true,
+					'visible': group === 0,
+					'children': [
+						{
+							'id': groupId + '-iconview-list',
+							'type': 'iconviewlist',
+							'horizontal': true,
+							'expanderAccessKey': groupAccessKey,
+							'accessibility': { focusBack: false, combination: groupAccessKey, de: null },
+							'children': [
+								{
+									'id': groupId,
+									'type': 'iconview',
+									'entries': [],
+									'singleclickactivate': true
+								}
+							]
+						}
+					]
+				}
+			);
+		}
+
 		return this.getTabPage(formulaTabName, content);
 	},
 

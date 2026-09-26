@@ -317,7 +317,7 @@ void IconView::DumpEntryAndSiblings(tools::JsonWriter& rJsonWriter, SvTreeListEn
 
         // simple listbox value
         const SvLBoxItem* pIt = pEntry->GetFirstItem(SvLBoxItemType::String);
-        if (pIt)
+        if (pIt && !pEntry->IsSeparator())
             rJsonWriter.put("text", static_cast<const SvLBoxString*>(pIt)->GetText());
 
         pIt = pEntry->GetFirstItem(SvLBoxItemType::ContextBmp);

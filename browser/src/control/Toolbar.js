@@ -334,6 +334,7 @@ window.L.Map.include({
 					this.sidebar.setupTargetDeck(command);
 				} else {
 					// we don't know which deck was active last, show first then switch if needed
+					this.sidebar.noteShowRequest();
 					app.socket.sendMessage('uno .uno:SidebarShow');
 
 					this.sidebar.setupTargetDeck(command);

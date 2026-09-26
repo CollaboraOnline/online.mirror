@@ -31,6 +31,7 @@ interface SidebarDeckState {
 	targetDeckCommand: string | null; /// deck command last asked for
 	/// deck showing when the current deck was requested, and the command that requested it
 	openedFrom: { deckId: string | null; forCommand: string } | null;
+	showRequested: boolean; /// the dock was asked to open and has not opened yet
 }
 
 class Sidebar extends SidebarBase {
@@ -43,6 +44,7 @@ class Sidebar extends SidebarBase {
 		activeDeckId: null,
 		targetDeckCommand: null,
 		openedFrom: null,
+		showRequested: false,
 	};
 
 	/// the extension currently showing, if any
@@ -75,7 +77,11 @@ class Sidebar extends SidebarBase {
 	closeSidebar() {
 		if (this.extensionDeck) this.extensionDeck.owner.closeDeck();
 		super.closeSidebar();
-		this.setDeckState({ activeDeckId: null });
+		this.setDeckState({ activeDeckId: null, showRequested: false });
+	}
+
+	noteShowRequest() {
+		this.setDeckState({ showRequested: true });
 	}
 
 	hasExtensionDeck(owner: ExtensionDeckOwner): boolean {
@@ -201,6 +207,21 @@ class Sidebar extends SidebarBase {
 		this.setDeckState({ targetDeckCommand: unoCommand });
 	}
 
+	private formulaKeepsDockClosed(): boolean {
+		if (this.deckState.showRequested) return false;
+
+		if (
+			this.map.getDocType() !== 'text' ||
+			this.map.uiManager.getCurrentMode() !== 'notebookbar'
+		)
+			return false;
+
+		const context = (this.map as any).context;
+		return (
+			!!context && context.appId === 'com.sun.star.formula.FormulaProperties'
+		);
+	}
+
 	getTargetDeck(): string {
 		return this.deckState.targetDeckCommand;
 	}
@@ -285,7 +306,10 @@ class Sidebar extends SidebarBase {
 
 				this.builder.build(tempContainer, [this.model.getSnapshot()], false);
 
-				if (!this.isVisible()) {
+				const keepClosed = this.formulaKeepsDockClosed();
+				this.setDeckState({ showRequested: false });
+
+				if (!this.isVisible() && !keepClosed) {
 					this.showSidebar();
 
 					if (this.sidebarShownTheFirstTime) {
@@ -298,10 +322,10 @@ class Sidebar extends SidebarBase {
 					}
 				}
 
-				this.map.uiManager.setDocTypePref('ShowSidebar', true);
+				if (!keepClosed) this.map.uiManager.setDocTypePref('ShowSidebar', true);
 
 				// cache - check happens in task and we will update value later in this function
-				const wasUserRequest = this.isUserRequest;
+				const wasUserRequest = !keepClosed && this.isUserRequest;
 
 				app.layoutingService.appendLayoutingTask(() => {
 					// now attach to the DOM built content
@@ -330,10 +354,10 @@ class Sidebar extends SidebarBase {
 						); // see animation time in #sidebar-dock-wrapper.visible
 					}
 
-					this.sidebarShownTheFirstTime = false;
+					if (!keepClosed) this.sidebarShownTheFirstTime = false;
 				});
 
-				this.isUserRequest = false;
+				if (!keepClosed) this.isUserRequest = false;
 			} else {
 				this.closeSidebar();
 				this.isUserRequest = true;

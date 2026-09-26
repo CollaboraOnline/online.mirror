@@ -23,24 +23,31 @@
 #include <frmsh.hxx>
 #include <olesh.hxx>
 
-#include <sfx2/sidebar/SidebarController.hxx>
+#include <sfx2/ipclient.hxx>
+#include <sot/exchange.hxx>
+#include <tools/globname.hxx>
+#include <com/sun/star/embed/XEmbeddedObject.hpp>
 
 #define ShellClass_SwOleShell
 #include <sfx2/msg.hxx>
 #include <swslots.hxx>
 
 using namespace ::cpo::uno;
-using namespace sfx2::sidebar;
 
 namespace {
 
 bool inChartOrMathContext(const SwView& rViewShell)
 {
-    SidebarController* pSidebar = SidebarController::GetSidebarControllerForView(&rViewShell);
-    if (pSidebar)
-        return pSidebar->hasChartOrMathContextCurrently();
+    const SfxInPlaceClient* pClient = rViewShell.GetIPClient();
+    if (!pClient || !pClient->IsObjectInPlaceActive())
+        return false;
 
-    return false;
+    const cpo::uno::Reference<css::embed::XEmbeddedObject>& xObject = pClient->GetObject();
+    if (!xObject.is())
+        return false;
+
+    const SvGlobalName aClassName(xObject->getClassID());
+    return SotExchange::IsChart(aClassName) || SotExchange::IsMath(aClassName);
 }
 
 } // anonymous namespace

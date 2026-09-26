@@ -191,20 +191,32 @@ JSDialog.notebookbarIconViewList = function (
 	);
 	buttonsContainer.id = data.id + '-buttons-container';
 
+	const horizontal = data.horizontal === true;
+	if (horizontal)
+		window.L.DomUtil.addClass(rootNode, 'ui-iconview-root-horizontal');
+
 	// be aware the child iconviews can get update and be replaced in DOM
 	// we need to use firstChild to get correct instance at the time of execution
+	const scrollBySteps = (steps: number) => {
+		const current = commonContainer.firstChild as HTMLElement;
+		if (horizontal)
+			current.scrollBy({
+				left: steps * current.offsetWidth,
+				behavior: 'smooth',
+			});
+		else
+			current.scrollBy({
+				top: steps * current.offsetHeight,
+				behavior: 'smooth',
+			});
+	};
+
 	const scrollUpCallback = () => {
-		commonContainer.firstChild.scrollBy({
-			top: -commonContainer.firstChild.offsetHeight,
-			behavior: 'smooth',
-		});
+		scrollBySteps(-1);
 	};
 
 	const scrollDownCallback = () => {
-		commonContainer.firstChild.scrollBy({
-			top: commonContainer.firstChild.offsetHeight,
-			behavior: 'smooth',
-		});
+		scrollBySteps(1);
 	};
 
 	const notebookbarIconViewCallback = (
@@ -237,8 +249,8 @@ JSDialog.notebookbarIconViewList = function (
 		buttonsContainer,
 		data.id + '-scroll-up',
 		'ui-iconview-scroll-up-button',
-		'lc_searchprev.svg',
-		_('Scroll up'),
+		horizontal ? 'lc_prevrecord.svg' : 'lc_searchprev.svg',
+		horizontal ? _('Scroll left') : _('Scroll up'),
 		builder,
 		scrollUpCallback,
 	);
@@ -247,8 +259,8 @@ JSDialog.notebookbarIconViewList = function (
 		buttonsContainer,
 		data.id + '-scroll-down',
 		'ui-iconview-scroll-down-button',
-		'lc_searchnext.svg',
-		_('Scroll down'),
+		horizontal ? 'lc_nextrecord.svg' : 'lc_searchnext.svg',
+		horizontal ? _('Scroll right') : _('Scroll down'),
 		builder,
 		scrollDownCallback,
 	);
@@ -261,7 +273,11 @@ JSDialog.notebookbarIconViewList = function (
 		_('More options'),
 		builder,
 		expanderCallback,
-		{ focusBack: true, combination: 'SD', de: null },
+		{
+			focusBack: true,
+			combination: data.expanderAccessKey || 'SD',
+			de: null,
+		},
 		true /* opensPopup */,
 	);
 
@@ -297,24 +313,6 @@ JSDialog.notebookbarIconViewList = function (
 		}
 	};
 
-	const updateAllIndexes = () => {
-		// Example: if gridTemplateColumns = "96px 96px 96px"
-		// Step 1: Split the string by spaces:           ["96px", "96px", "96px"]
-		// Step 2: Remove any empty entries (if any):    ["96px", "96px", "96px"]
-		// Step 3: The length of this array is the number of columns in the grid.
-		const gridTemplateColumns = getComputedStyle(iconview).gridTemplateColumns;
-		const columns = gridTemplateColumns.split(' ').filter(Boolean).length;
-
-		if (columns > 0) {
-			const entries = iconview.querySelectorAll('.ui-iconview-entry');
-			entries.forEach((entry: HTMLElement, flatIndex: number) => {
-				const row = Math.floor(flatIndex / columns);
-				const column = flatIndex % columns;
-				entry.setAttribute('index', row + ':' + column);
-			});
-		}
-	};
-
 	/*
 		close dropdown when the window is resized. this
 		is to prevent dropdown from hanging in the corner
@@ -324,7 +322,7 @@ JSDialog.notebookbarIconViewList = function (
 
 	// update indexes on resize
 	const resizeObserver = new ResizeObserver(() => {
-		updateAllIndexes();
+		JSDialog.UpdateIconViewIndexes(commonContainer.firstChild as HTMLElement);
 		const dropdown = JSDialog.GetDropdown(data.id);
 		if (dropdown) JSDialog.CloseDropdown(data.id);
 	});

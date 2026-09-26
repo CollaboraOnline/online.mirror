@@ -595,6 +595,7 @@ label.notebookbar.ui-checkbox-label {
 }
 
 /* root of iconview */
+.jsdialog [id^='elements_'][id$='-iconview-list']:not(.sidebar),
 .jsdialog #stylesview-iconview-list:not(.sidebar),
 .jsdialog #masterpagenb-iconview-list:not(.sidebar),
 .jsdialog #tablestyles_design-iconview-list:not(.sidebar),
@@ -657,7 +658,8 @@ label.notebookbar.ui-checkbox-label {
 .notebookbar#transitions_icons,
 .notebookbar#iconview_theme_colors,
 .notebookbar#custom_animation_list,
-.notebookbar#effect_list {
+.notebookbar#effect_list,
+.notebookbar.ui-iconview[id^='elements_'] {
 	height: var(--notebookbar-element-height);
 	overflow: auto;
 	display: grid;
@@ -702,6 +704,7 @@ label.notebookbar.ui-checkbox-label {
 
 #masterpagenb-iconview-list-dropdown,
 #stylesview-iconview-list-dropdown,
+[id^='elements_'][id$='-iconview-list-dropdown'],
 #iconview_theme_colors-iconview-list-dropdown {
 	margin-top: 37px !important;
 }
@@ -1217,3 +1220,79 @@ label.notebookbar.ui-checkbox-label {
 	}
 }
 
+/* Formula Tab (Writer) */
+
+.notebookbar.ui-iconview[id^='elements_'] {
+	grid-auto-flow: column;
+	grid-template-rows: repeat(2, minmax(0, 1fr));
+	grid-auto-columns: max-content;
+	grid-template-columns: none;
+	justify-content: start;
+	width: max-content;
+	min-width: 64px;
+	max-width: 160px;
+	overflow-x: auto;
+	overflow-y: hidden;
+	gap: 0;
+	column-gap: var(--spacing-xs);
+}
+
+.notebookbar [id^='elements_'] .ui-iconview-entry {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	align-self: stretch;
+	box-sizing: border-box;
+	min-width: 26px;
+	padding: 0 var(--spacing-xs);
+	float: none;
+}
+
+.notebookbar [id^='elements_'] .ui-iconview-entry img,
+.notebookbar [id^='elements_'] .ui-iconview-entry span {
+	max-height: 100%;
+}
+
+[data-theme='dark'] .notebookbar [id^='elements_'] .ui-iconview-entry img {
+	filter: invert(1);
+}
+
+.notebookbar [id^='elements_'] .ui-iconview-separator {
+	grid-row: 1 / -1;
+	align-self: stretch;
+	flex: none;
+	width: 1px;
+	margin: var(--spacing-xs) var(--spacing-s);
+	padding: 0;
+	border: none;
+	background-color: var(--color-border-dark);
+}
+
+.ui-separator[id^='elements_group'][id$='-break']:has(+ .ui-overflow-group.hidden) {
+	display: none;
+}
+
+.notebookbar .ui-iconview-root-horizontal .ui-iconview-window {
+	min-width: 0;
+}
+
+[id^='elements_'][id$='-iconview-list-dropdown'] .ui-iconview {
+	grid-auto-flow: row;
+	grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+	grid-template-rows: none;
+	width: 40vw;
+	max-width: 640px;
+	overflow-x: hidden;
+}
+
+[id^='elements_'][id$='-iconview-list-dropdown'] .ui-iconview-entry {
+	align-self: center;
+}
+
+[id^='elements_'][id$='-iconview-list-dropdown'] .ui-iconview-separator {
+	grid-column: 1 / -1;
+	grid-row: auto;
+	width: auto;
+	height: 1px;
+	margin: var(--spacing-xs) 0;
+}

@@ -40,6 +40,7 @@ class SmElementsControl
     SmDocShell*   mpDocShell;
     SmFormat      maFormat;
     int           mnCurrentSetIndex;
+    int           mnCurrentGroup;
     sal_Int16     m_nSmSyntaxVersion;
     bool          m_bAllowDelete;
     OUString      m_sHoveredItem;
@@ -51,7 +52,7 @@ class SmElementsControl
     Link<const OUString&, void> maSelectHdlLink;
 
     void addElement(const OUString& aElementVisual, const OUString& aElementSource, const OUString& aHelpText);
-    void addElements(int nCategory);
+    void addElements(int nCategory, int nGroup);
 
     void build();
 
@@ -70,7 +71,11 @@ public:
     ~SmElementsControl();
 
     static const std::vector<TranslateId>& categories();
-    void setElementSetIndex(int nSetIndex, bool bForceBuild = false);
+    /// The number of separator-delimited groups of a category
+    static int groupCount(int nCategory);
+    void setElementSetIndex(int nSetIndex, bool bForceBuild = false, int nGroup = -1);
+
+    void SetAccessibleName(const OUString& rName) { mpIconView->set_accessible_name(rName); }
 
     void setSmSyntaxVersion(sal_Int16 nSmSyntaxVersion);
 

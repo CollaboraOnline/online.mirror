@@ -435,12 +435,18 @@ bool SfxNotebookBar::StateMethod(SystemWindow* pSysWindow,
 
     sal_uInt64 nWindowId = reinterpret_cast<sal_uInt64>(pViewShell);
 
-    const std::vector<WeldedTabbedNotebookbar::ExtraPanel> aExtraPanels{
+    std::vector<WeldedTabbedNotebookbar::ExtraPanel> aExtraPanels{
         { u"svx/ui/notebookbarshapeline.ui"_ustr, u"LineWeldedToolbar"_ustr,
           u"com.sun.star.svx.NotebookbarLineController"_ustr },
         { u"svx/ui/notebookbarpictureline.ui"_ustr, u"PictureLineWeldedToolbar"_ustr,
           OUString() },
     };
+
+    // Only the Writer notebookbar has a Formula tab to carry Math elements
+    if (eApp == vcl::EnumContext::Application::Writer)
+        aExtraPanels.push_back({ u"modules/smath/ui/notebookbarelements_math.ui"_ustr,
+                                 u"MathElementsWeldedToolbar"_ustr,
+                                 u"com.sun.star.starmath.NotebookbarElementsController"_ustr });
 
     rViewData.m_pWeldedWrapper.reset(
             new WeldedTabbedNotebookbar(pNotebookBar->GetMainContainer(),

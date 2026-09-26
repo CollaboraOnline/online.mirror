@@ -490,6 +490,22 @@ const std::vector<TranslateId>& SmElementsControl::categories()
     return s_a5Categories;
 }
 
+// static
+int SmElementsControl::groupCount(int nCategory)
+{
+    if (o3tl::make_unsigned(nCategory) >= s_a5CategoryDescriptions.size())
+        return 1;
+
+    const auto& [aElementsArray, aElementsArraySize] = s_a5CategoryDescriptions[nCategory];
+    int nGroups = 1;
+    for (size_t i = 0; i < aElementsArraySize; i++)
+    {
+        if (std::get<0>(aElementsArray[i]).empty())
+            ++nGroups;
+    }
+    return nGroups;
+}
+
 struct ElementData
 {
     OUString maElementSource;
@@ -507,6 +523,7 @@ SmElementsControl::SmElementsControl(std::unique_ptr<weld::IconView> pIconView,
                                      std::unique_ptr<weld::Menu> pMenu)
     : mpDocShell(new SmDocShell(SfxModelFlags::EMBEDDED_OBJECT))
     , mnCurrentSetIndex(-1)
+    , mnCurrentGroup(-1)
     , m_nSmSyntaxVersion(SmModule::get()->GetConfig()->GetDefaultSmSyntaxVersion())
     , m_bAllowDelete(false)
     , mpIconView(std::move(pIconView))
@@ -616,15 +633,16 @@ int SmElementsControl::GetElementPos(const OUString& itemId)
     return weld::fromId<ElementData*>(itemId)->maPos;
 }
 
-void SmElementsControl::setElementSetIndex(int nSetIndex, bool bForceBuild)
+void SmElementsControl::setElementSetIndex(int nSetIndex, bool bForceBuild, int nGroup)
 {
-    if (!bForceBuild && mnCurrentSetIndex == nSetIndex)
+    if (!bForceBuild && mnCurrentSetIndex == nSetIndex && mnCurrentGroup == nGroup)
         return;
     mnCurrentSetIndex = nSetIndex;
+    mnCurrentGroup = nGroup;
     build();
 }
 
-void SmElementsControl::addElements(int nCategory)
+void SmElementsControl::addElements(int nCategory, int nGroup)
 {
     mpIconView->freeze();
     mpIconView->clear();
@@ -635,14 +653,17 @@ void SmElementsControl::addElements(int nCategory)
     {
         const auto& [aElementsArray, aElementsArraySize] = s_a5CategoryDescriptions[nCategory];
 
+        int nCurrentGroup = 0;
         for (size_t i = 0; i < aElementsArraySize; i++)
         {
             const auto& [element, elementHelp, elementVisual, visualTranslatable] = aElementsArray[i];
             if (element.empty())
             {
-                mpIconView->append_separator({});
+                ++nCurrentGroup;
+                if (nGroup == -1)
+                    mpIconView->append_separator({});
             }
-            else
+            else if (nGroup == -1 || nGroup == nCurrentGroup)
             {
                 OUString aElement(element);
                 OUString aVisual(elementVisual.empty() ? aElement : OUString(elementVisual));
@@ -673,7 +694,7 @@ void SmElementsControl::build()
     switch(m_nSmSyntaxVersion)
     {
         case 5:
-            addElements(mnCurrentSetIndex);
+            addElements(mnCurrentSetIndex, mnCurrentGroup);
             m_sHoveredItem = u"nil"_ustr; // if list is empty we must not use the previously hovered item
             break;
         case 6:

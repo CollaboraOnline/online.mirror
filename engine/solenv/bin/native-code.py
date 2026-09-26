@@ -364,6 +364,7 @@ core_constructor_list = [
     "Math_XMLOasisSettingsImporter_get_implementation",
     "Math_XMLSettingsExporter_get_implementation",
     "com_sun_star_comp_Math_MathTypeFilter_get_implementation",
+    "com_sun_star_comp_starmath_NotebookbarElementsController_get_implementation",
 # svl/source/fsstor/fsstorage.component
     "svl_FSStorageFactory_get_implementation",
 # vcl/vcl.android.component

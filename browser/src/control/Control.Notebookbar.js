@@ -1134,7 +1134,7 @@ window.L.Control.Notebookbar = window.L.Control.extend({
 		const detail = event.detail;
 		if (detail.appId !== detail.oldAppId) {
 			var childrenArray = undefined; // Use buttons provided by specific Control.Notebookbar implementation by default
-			if (detail.appId === 'com.sun.star.formula.FormulaProperties') {
+			if (detail.appId === 'com.sun.star.formula.FormulaProperties' && this.map.getDocType() !== 'text') {
 				childrenArray = [
 					{
 						'type': 'toolitem',

@@ -67,4 +67,8 @@
         constructor="org_libreoffice_comp_Math_sidebar_SmPanelFactory">
     <service name="com.sun.star.ui.UIElementFactory"/>
   </implementation>
+  <implementation name="com.sun.star.comp.starmath.NotebookbarElementsController"
+        constructor="com_sun_star_comp_starmath_NotebookbarElementsController_get_implementation">
+    <service name="com.sun.star.starmath.NotebookbarElementsController"/>
+  </implementation>
 </component>

@@ -91,6 +91,7 @@
 #include "accessibility.hxx"
 #include <svl/hint.hxx>
 #include <ElementsDockingWindow.hxx>
+#include <NotebookbarElements.hxx>
 #include <helpids.h>
 
 // space around the edit window, in pixels
@@ -1863,11 +1864,15 @@ void SmViewShell::Execute(SfxRequest& rReq)
                 if (SmEditWindow* pEditWin = GetEditWindow())
                     SmModule::get()->GetConfig()->SaveUserDefinedFormula(aName, pEditWin->GetText());
 
-                // Show the Elements sidebar with the "User-defined" entry selected
-                GetViewFrame().ShowChildWindow(SID_SIDEBAR);
-                sfx2::sidebar::Sidebar::ShowPanel(u"MathElementsPanel",
-                                                  GetViewFrame().GetFrame().GetFrameInterface());
-                GetViewFrame().GetBindings().Invalidate( SID_ELEMENTSDOCKINGWINDOW );
+                // Show the Elements tab with the "User-defined" entry selected
+                const cpo::uno::Reference<css::frame::XFrame>& xFrame
+                    = GetViewFrame().GetFrame().GetFrameInterface();
+                if (!sm::notebookbar::HostsElements(sm::notebookbar::GetHostView(xFrame)))
+                {
+                    GetViewFrame().ShowChildWindow(SID_SIDEBAR);
+                    sfx2::sidebar::Sidebar::ShowPanel(u"MathElementsPanel", xFrame);
+                    GetViewFrame().GetBindings().Invalidate( SID_ELEMENTSDOCKINGWINDOW );
+                }
                 Broadcast(SfxHint(SfxHintId::SmNewUserFormula));
                 rReq.Ignore ();
             }
@@ -2035,12 +2040,15 @@ public:
             // In COKit mode, DocumentHolder::ShowUI is not called on OLE in-place activation,
             // because respective code is skipped in OCommonEmbeddedObject::SwitchStateTo_Impl,
             // so sidebar controller does not get registered properly; do it here
-            if (auto xSidebar = getSidebarFromModel(getModel()))
+            if (!sm::notebookbar::HostsElements(sm::notebookbar::GetHostView(xFrame)))
             {
-                auto pSidebar = dynamic_cast<sfx2::sidebar::SidebarController*>(xSidebar.get());
-                assert(pSidebar);
-                pSidebar->registerSidebarForFrame(this);
-                pSidebar->updateModel(getModel());
+                if (auto xSidebar = getSidebarFromModel(getModel()))
+                {
+                    auto pSidebar = dynamic_cast<sfx2::sidebar::SidebarController*>(xSidebar.get());
+                    assert(pSidebar);
+                    pSidebar->registerSidebarForFrame(this);
+                    pSidebar->updateModel(getModel());
+                }
             }
         }
 
