@@ -8,17 +8,17 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-08-19 17:51+0000\n"
+"PO-Revision-Date: 2026-09-28 02:51+0000\n"
 "Last-Translator: dukezas <dukezas@gmail.com>\n"
-"Language-Team: Lithuanian <https://hosted.weblate.org/projects/"
-"collabora-online/collabora-ui/lt/>\n"
-"Language: \n"
+"Language-Team: Lithuanian <https://hosted.weblate.org/projects/collabora-"
+"online/collabora-ui/lt/>\n"
+"Language: lt\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n"
-"%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Weblate 2026.9.dev0\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"(n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Weblate 2026.10.dev0\n"
 
 #: admin/admin.strings.js:15
 msgid "Admin console"
@@ -416,12 +416,12 @@ msgstr "Jūsų WOPI serveris nėra saugus: SSL patvirtinimas nepavyko"
 
 #: admin/src/AdminSocketServerAudit.js:40
 #: src/control/Control.ServerAuditDialog.ts:72
-#, fuzzy
 msgid ""
 "Documents are not effectively contained: missing capabilities, namespaces "
 "and landlock."
 msgstr ""
-"Dokumentai nėra efektyviai saugomi: trūksta galimybių arba vardų erdvių."
+"Dokumentai nėra efektyviai saugomi: trūkstamos funkcijos, vardų erdvės ir "
+"užraktai."
 
 #: admin/src/AdminSocketServerAudit.js:45
 #: src/control/Control.ServerAuditDialog.ts:97
@@ -491,38 +491,40 @@ msgstr "Įkeliant nustatymų failą įvyko klaida. Pabandykite atnaujinti puslap
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:585
 msgid "Invalid request"
-msgstr ""
+msgstr "Neteisinga užklausa"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:586
 #: src/control/Control.AIChatSidebar.ts:2187
 msgid "Invalid API key"
-msgstr ""
+msgstr "Neteisingas API raktas"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:587
 #: src/control/Control.AIChatSidebar.ts:2188
 msgid "API key lacks permissions"
-msgstr ""
+msgstr "API raktui trūksta leidimų"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:590
 msgid ""
 "This AI host is not in the server's allowed host list (lok_allow.host). Ask "
 "your administrator to permit it."
 msgstr ""
+"Šio DI serverio nėra serverio leidžiamų serverių sąraše (lok_allow.host). "
+"Paprašykite administratoriaus leisti."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:592
 #: src/control/Control.AIChatSidebar.ts:2192
 msgid "Rate limited - please wait a moment and retry"
-msgstr ""
+msgstr "Tempas ribotas - prašome luktelt ir pabandyti iš naujo"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:593
 #: src/control/Control.AIChatSidebar.ts:2193
 msgid "API server error - try again later"
-msgstr ""
+msgstr "API serverio klaida - bandykite vėliau"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:594
 #: src/control/Control.AIChatSidebar.ts:2194
 msgid "Service temporarily unavailable"
-msgstr ""
+msgstr "Paslauga laikinai neįmanoma"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:652
 msgid "Signature Certificate"
@@ -586,7 +588,7 @@ msgstr "Automatinis Rašybos tikrinimas"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:670
 msgid "Use this server's zoom settings"
-msgstr ""
+msgstr "Naudoti šio serverio mastelio keitimo nustatymus"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:671
 msgid "Smart Zoom"
@@ -826,19 +828,19 @@ msgstr "Brošiūra iš dešinės į kairę"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:731
 msgid "English"
-msgstr ""
+msgstr "Anglų"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:732
 msgid "Hungarian"
-msgstr ""
+msgstr "Vengrų"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:733
 msgid "Portuguese (Brazil)"
-msgstr ""
+msgstr "Portugalų (Brazilija)"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:734
 msgid "Russian"
-msgstr ""
+msgstr "Ruskių"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1293
 msgid "Invalid JSON file"
@@ -921,17 +923,19 @@ msgstr "Įkelti plėtinį"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1366
 msgid "Security policies"
-msgstr ""
+msgstr "Saugumo strategijos"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1368
 msgid ""
 "Upload SPIF security policies (.xml). These define the classifications and "
 "categories available when applying a security label to a document."
 msgstr ""
+"Įkelti SPIF saugumo strategijas (.xml). Jos apibrėžia klasifikacijas ir "
+"kategorijas, kurias galima naudoti taikant saugumo žymą dokumentui."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1374
 msgid "Upload Security Policy"
-msgstr ""
+msgstr "Įkelti saugumo strategijas"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1463
 msgid "Settings are only available to signed-in users."
@@ -959,13 +963,15 @@ msgstr "Nustatykite numatytąsias sąsajos nuostatas."
 #: admin/src/integrator/AdminIntegratorSettings.ts:1753
 #: admin/src/integrator/AdminIntegratorSettings.ts:3998
 msgid "Zoom Behaviour"
-msgstr ""
+msgstr "Mastelio keitimo elgsena"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1898
 msgid ""
 "When on, text documents open at the zoom this server chooses. Turn it off "
 "to choose the zoom yourself."
 msgstr ""
+"Kai įjungta, tekstiniai dokumentai atidaromi šio serverio pasirinktu "
+"masteliu. Išjunkite, jei norite patys pasirinkti mastelį."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1904
 msgid ""
@@ -1181,23 +1187,28 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3898
 msgid "Lightproof Sentence Checker"
-msgstr ""
+msgstr "Lightproof sakinių tikrinimas"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3901
 msgid "Choose what the sentence checker looks for as you type."
-msgstr ""
+msgstr "Pasirinkite ko sakinių tikrintojas ieškos kai jūs spausdinate."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3941
 msgid ""
 "This document is using the document settings it was opened with. What you "
 "change here applies to the next document you open."
 msgstr ""
+"Šiame dokumente naudojami dokumento nustatymai, su kuriais jis buvo "
+"atidarytas. Čia pakeisti nustatymai bus taikomi kitam dokumentui, kurį "
+"atidarysite."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3944
 msgid ""
 "This document is open in more than one window, so what you change here "
 "applies to the next document you open rather than this one."
 msgstr ""
+"Šis dokumentas atidarytas daugiau nei viename lange, todėl čia atlikti "
+"pakeitimai bus taikomi kitam atidarytam dokumentui, o ne šiam."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:4032
 #: admin/src/integrator/Xcu.ts:439
@@ -1491,11 +1502,11 @@ msgstr "Lentelių stiliai"
 
 #: src/app/TableStylesService.ts:355
 msgid "Set as Default"
-msgstr ""
+msgstr "Nustatyti kaip numatytąjį"
 
 #: src/app/TableStylesService.ts:361
 msgid "Duplicate Style"
-msgstr ""
+msgstr "Kopijuoti stilių"
 
 #: src/canvas/sections/CommentListSection.ts:2069
 #: src/canvas/sections/CommentListSection.ts:2082
@@ -2121,31 +2132,31 @@ msgstr ""
 
 #: src/control/Control.AIChatSidebar.ts:2144
 msgid "Request too large"
-msgstr ""
+msgstr "Per didelė užklausa"
 
 #: src/control/Control.AIChatSidebar.ts:2145
 msgid "Invalid request format"
-msgstr ""
+msgstr "Neteisingas užklausos formatas"
 
 #: src/control/Control.AIChatSidebar.ts:2146
 msgid "Request superseded by a newer request"
-msgstr ""
+msgstr "Užklausa pakeista naujesne užklausa"
 
 #: src/control/Control.AIChatSidebar.ts:2147
 msgid "No messages provided"
-msgstr ""
+msgstr "Nepateikta jokių žinučių"
 
 #: src/control/Control.AIChatSidebar.ts:2148
 msgid "Message too long"
-msgstr ""
+msgstr "Per ilga žinutė"
 
 #: src/control/Control.AIChatSidebar.ts:2149
 msgid "AI features are disabled by the administrator"
-msgstr ""
+msgstr "Administratorius išjungė DI funkcijas"
 
 #: src/control/Control.AIChatSidebar.ts:2150
 msgid "AI is not available for guests"
-msgstr ""
+msgstr "DI svečiams neprieinamas"
 
 #: src/control/Control.AIChatSidebar.ts:2152
 msgid "AI features are disabled for this document"
@@ -2391,10 +2402,11 @@ msgstr[1] "formatuoti tekstą %n vietose"
 msgstr[2] "formatuoti tekstą %n vietų"
 
 #: src/control/Control.AIChatSidebar.ts:2614
-#, fuzzy
 msgid "generate %n image"
 msgid_plural "generate %n images"
-msgstr[0] "Sugeneruotas vaizdas"
+msgstr[0] "generuoti %n vaizdą"
+msgstr[1] "generuoti %n vaizdus"
+msgstr[2] "generuoti %n vaizdų"
 
 #: src/control/Control.AIChatSidebar.ts:2622
 msgid "run %n document command"
@@ -2406,9 +2418,9 @@ msgstr[2] "vykdyti %n dokumentų komandas"
 #: src/control/Control.AIChatSidebar.ts:2653
 msgid "run %n %1 command"
 msgid_plural "run %n %1 commands"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "vykdyti %n %1 komandą"
+msgstr[1] "vykdyti %n %1 komandas"
+msgstr[2] "vykdyti %n %1 komandų"
 
 #: src/control/Control.AIChatSidebar.ts:2661
 msgid "apply the design template '%1'"
@@ -3015,7 +3027,7 @@ msgstr "Serveris aptiko {0} klaidą analizuodamas {1} komandą."
 #: src/control/Control.NotebookbarImpress.js:89
 #: src/control/Control.NotebookbarWriter.js:43
 msgid "Home"
-msgstr "Pagrindinis"
+msgstr "Pradinis"
 
 #: src/control/Control.BackstageView.ts:119
 #: src/control/Control.BackstageView.ts:701
@@ -4656,9 +4668,8 @@ msgid "Animations"
 msgstr "Animacijos"
 
 #: src/control/Control.Notebookbar.js:634
-#, fuzzy
 msgid "Start:"
-msgstr "Pradžia"
+msgstr "Pradžia:"
 
 #: src/control/Control.Notebookbar.js:634
 msgid "End:"
@@ -5454,9 +5465,8 @@ msgid "Paste"
 msgstr "Įklijuoti"
 
 #: src/control/Control.PartsPreview.js:736
-#, fuzzy
 msgid "Unlink Slide"
-msgstr "Tuščia skaidrė"
+msgstr "Atsieti skaidrę"
 
 #: src/control/Control.PartsPreview.js:758
 msgid "Add Section"
@@ -5530,10 +5540,11 @@ msgid "Expand All Sections"
 msgstr "Išskleisti visas skiltis"
 
 #: src/control/Control.PartsPreview.js:1372
-#, fuzzy
 msgid "Delete section \"%1\" and its %n slide?"
 msgid_plural "Delete section \"%1\" and its %n slides?"
-msgstr[0] "Ištrinti skyrių „%1“ ir jo %2 skaidres?"
+msgstr[0] "Ištrinti „%1“ skyrių ir jo %n skaidrę?"
+msgstr[1] "Ištrinti „%1“ skyrių ir jo %n skaidres?"
+msgstr[2] "Ištrinti „%1“ skyrių ir jo %n skaidrių?"
 
 #: src/control/Control.PartsPreview.js:1421
 msgid "Enter new section name:"
@@ -5621,23 +5632,20 @@ msgid "Slide {0}"
 msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:827
-#, fuzzy
 msgid "Insert slides"
-msgstr "Įterpti figūras"
+msgstr "Įterpti skaidres"
 
 #: src/control/Control.SlideImportPane.tsx:835
 msgid "Insert {0} from {1}"
 msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:838
-#, fuzzy
 msgid "Insert 1 slide"
-msgstr "įterpti %n skaidrę"
+msgstr "Įterpti 1 skaidrę"
 
 #: src/control/Control.SlideImportPane.tsx:839
-#, fuzzy
 msgid "Insert {0} slides"
-msgstr "Įterpti figūras"
+msgstr "Įterpti {0} skaidres"
 
 #: src/control/Control.SlideImportPane.tsx:871
 msgid "{0} of {1}"
@@ -5665,9 +5673,8 @@ msgid "Inserting slides..."
 msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:961
-#, fuzzy
 msgid "Import slides"
-msgstr "Įterpti figūras"
+msgstr "Importuoti skaidres"
 
 #: src/control/Control.SlideImportPane.tsx:965
 #: src/control/Control.SlideImportPane.tsx:966
@@ -5680,9 +5687,8 @@ msgid "Close slide import"
 msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:996
-#, fuzzy
 msgid "Add presentation…"
-msgstr "Užbaigti pristatymą"
+msgstr "Pridėti prezentaciją…"
 
 #: src/control/Control.SlideImportPane.tsx:1011
 msgid "No presentations yet"
@@ -5898,9 +5904,8 @@ msgid "No problems with SSL verification detected"
 msgstr "Neaptikta problemų su SSL patvirtinimu"
 
 #: src/control/Control.ServerAuditDialog.ts:78
-#, fuzzy
 msgid "Each document is securely contained (landlock)"
-msgstr "Kiekvienas dokumentas yra laikomas saugiai"
+msgstr "Kiekvienas dokumentas yra laikomas saugiai (užrakintas)"
 
 #: src/control/Control.ServerAuditDialog.ts:83
 msgid "Each document is securely contained (Linux namespaces)"
@@ -6188,9 +6193,8 @@ msgid "Insert connectors"
 msgstr "Įterpti jungtis"
 
 #: src/control/Control.UIManager.ts:116
-#, fuzzy
 msgid "Main"
-msgstr "Minimalus"
+msgstr "Pagrindinis"
 
 #: src/control/Control.UIManager.ts:245
 msgid "You are currently in View mode, press {0} to edit"
@@ -6495,9 +6499,8 @@ msgid "Wrong password provided. Please try again."
 msgstr "Įvestas neteisingas slaptažodis. Bandykite dar kartą."
 
 #: src/control/Permission.js:193
-#, fuzzy
 msgid "Document requires a password to edit."
-msgstr "Dokumentui peržiūrėti reikalingas slaptažodis."
+msgstr "Dokumento redagavimui reikalingas slaptažodis."
 
 #: src/control/Permission.js:238
 msgid "Enter a file name"
@@ -6522,7 +6525,7 @@ msgstr ""
 
 #: src/control/Permission.js:448
 msgid "Collaborative editing"
-msgstr ""
+msgstr "Bendradarbiavimas redaguojant"
 
 #: src/control/Permission.js:449 src/control/Permission.js:481
 msgid "Edit together in real-time"
@@ -6966,14 +6969,12 @@ msgid "All users"
 msgstr "Visi vartotojai"
 
 #: src/control/jsdialog/Definitions.Menu.ts:1917
-#, fuzzy
 msgid "Highlight cells with"
-msgstr "Paryškinkite langelius su..."
+msgstr "Paryškinkite langelius su"
 
 #: src/control/jsdialog/Definitions.Menu.ts:1948
-#, fuzzy
 msgid "Top/Bottom Rules"
-msgstr "Viršaus/apačios taisyklės..."
+msgstr "Viršaus/apačios taisyklės"
 
 #: src/control/jsdialog/Definitions.Menu.ts:1984
 msgid "Color Scale"
@@ -7863,9 +7864,8 @@ msgid "Document cannot be exported. Please try again."
 msgstr "Dokumento eksportuoti negalima. Bandykite dar kartą."
 
 #: src/layer/marker/A11yTextInput.js:84
-#, fuzzy
 msgid "Slide"
-msgstr "Skaidrės"
+msgstr "Skaidrė"
 
 #: src/layer/marker/A11yTextInput.js:354
 msgid "Out of table"
@@ -8244,14 +8244,12 @@ msgid "End Show"
 msgstr "Nutraukti pristatymą"
 
 #: src/slideshow/engine/SlideShowHandler.ts:123
-#, fuzzy
 msgid "Paused"
-msgstr "Pauzė"
+msgstr "Sustabdytas"
 
 #: src/slideshow/engine/SlideShowHandler.ts:124
-#, fuzzy
 msgid "Resumed"
-msgstr "Tęsti"
+msgstr "Tęsiamas"
 
 #: src/slideshow/engine/SlideShowHandler.ts:394
 msgid "Animation: {0}, {1}"
@@ -8350,10 +8348,11 @@ msgid "No Notes"
 msgstr "Nėra pastabų"
 
 #: src/slideshow/PresenterConsole.js:1709
-#, fuzzy
 msgid "Repeat in %n second"
 msgid_plural "Repeat in %n seconds"
-msgstr[0] "Pakartojimas po {0} sekundžių"
+msgstr[0] "Pakartoti po %n sekundės"
+msgstr[1] "Pakartoti po %n sekundžių"
+msgstr[2] "Pakartoti po %n sekundžių"
 
 #: src/slideshow/PresenterConsole.js:1716
 #: src/slideshow/SlideShowPresenter.ts:696
