@@ -3,9 +3,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-20 07:56+0000\n"
-"Last-Translator: Deleted User <nobody_12345@users.noreply.hosted.weblate.org>"
-"\n"
+"PO-Revision-Date: 2026-09-28 02:51+0000\n"
+"Last-Translator: blueskyxxz <xinxizhe@163.com>\n"
 "Language-Team: Chinese (Simplified Han script) <https://hosted.weblate.org/"
 "projects/collabora-online/help/zh_Hans/>\n"
 "Language: zh_CN\n"
@@ -13,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Translate Toolkit 3.6.0\n"
+"X-Generator: Weblate 2026.10.dev0\n"
 
 #: html/cool-help.html%2Bdiv.h1:10-5
 msgid "Keyboard Shortcuts"
@@ -1280,7 +1279,7 @@ msgstr ""
 
 #: html/cool-help.html%2Bdiv.div.div.table.tr.td:161-38
 msgid "Moves one screen page to the right."
-msgstr "向右移动一个屏幕页面。"
+msgstr "将屏幕页面向右移动"
 
 #: html/cool-help.html%2Bdiv.div.div.table.tr.td:161-100
 msgid ""
