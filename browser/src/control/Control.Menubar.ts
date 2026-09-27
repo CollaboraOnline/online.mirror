@@ -2822,9 +2822,8 @@ class Menubar extends window.L.Control {
 	 */
 	private _createFileIcon(): void {
 		if (!(window.logoURL && window.logoURL == "none")) {
-			var liItem = window.L.DomUtil.create('li', '');
+			var liItem = window.L.DomUtil.create('div', '');
 			liItem.id = 'document-header';
-			liItem.setAttribute('role', 'menuitem');
 			var aItem = window.L.DomUtil.create('a', 'document-logo', liItem);
 			$(aItem).data('id', 'document-logo');
 			$(aItem).data('type', 'action');
@@ -2841,8 +2840,14 @@ class Menubar extends window.L.Control {
 			}
 			app.LOUtil.syncDocumentLogoAriaLabel(aItem);
 
-			if (this._menubarCont != null)
-				this._menubarCont.insertBefore(liItem, this._menubarCont.firstChild);
+			const mainNav = document.querySelector('.main-nav');
+			if (mainNav) {
+				const existingHeader = document.getElementById('document-header');
+				if (existingHeader) {
+					existingHeader.remove();
+				}
+				mainNav.insertBefore(liItem, mainNav.firstChild);
+			}
 
 			/**!
 			 * Only the desktop applications have a backstage view.
