@@ -4933,7 +4933,21 @@ void COKitDocumentImpl::registerCallback(COKitCallback pCallback, void* pData)
             }
         }
 
-        mpCallbackFlushHandlers.erase(nView);
+        if (mpCallbackFlushHandlers.find(nView) != mpCallbackFlushHandlers.end())
+        {
+            mpCallbackFlushHandlers[nView]->setViewId(-1);
+            mpCallbackFlushHandlers.erase(nView);
+        }
+
+        // With the last such reader gone there is nothing to broadcast for.
+        const bool bAnyDrawsFromModel = std::any_of(
+            mpCallbackFlushHandlers.begin(), mpCallbackFlushHandlers.end(),
+            [](const auto& rEntry) { return rEntry.second && rEntry.second->isVectorRendering(); });
+        if (!bAnyDrawsFromModel)
+        {
+            if (ITiledRenderable* pDoc = getTiledRenderable(this))
+                pDoc->setDrawnFromModel(false);
+        }
         return;
     }
 
@@ -4995,22 +5009,6 @@ void COKitDocumentImpl::registerCallback(COKitCallback pCallback, void* pData)
                 pCallbackFlushHandler->setPaintedTiles(rHandler.second->getPaintedTiles());
                 break;
             }
-        }
-    }
-    else
-    {
-        pViewShell->setCOKitViewCallback(nullptr);
-        mpCallbackFlushHandlers[nView]->setViewId(-1);
-        mpCallbackFlushHandlers.erase(nView);
-
-        // With the last such reader gone there is nothing to broadcast for.
-        const bool bAnyDrawsFromModel = std::any_of(
-            mpCallbackFlushHandlers.begin(), mpCallbackFlushHandlers.end(),
-            [](const auto& rEntry) { return rEntry.second && rEntry.second->isVectorRendering(); });
-        if (!bAnyDrawsFromModel)
-        {
-            if (ITiledRenderable* pDoc = getTiledRenderable(this))
-                pDoc->setDrawnFromModel(false);
         }
     }
 }
