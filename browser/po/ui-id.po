@@ -12,11 +12,11 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-14 04:00+0000\n"
+"PO-Revision-Date: 2026-09-29 03:51+0000\n"
 "Last-Translator: Arif Budiman <arifpedia@gmail.com>\n"
-"Language-Team: Indonesian <https://hosted.weblate.org/projects/"
-"collabora-online/collabora-ui/id/>\n"
-"Language: \n"
+"Language-Team: Indonesian <https://hosted.weblate.org/projects/collabora-"
+"online/collabora-ui/id/>\n"
+"Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -833,19 +833,19 @@ msgstr "Brosur Kanan ke Kiri"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:731
 msgid "English"
-msgstr ""
+msgstr "Inggris"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:732
 msgid "Hungarian"
-msgstr ""
+msgstr "Hungaria"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:733
 msgid "Portuguese (Brazil)"
-msgstr ""
+msgstr "Portugis (Brasil)"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:734
 msgid "Russian"
-msgstr ""
+msgstr "Rusia"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1293
 msgid "Invalid JSON file"
@@ -1194,23 +1194,29 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3898
 msgid "Lightproof Sentence Checker"
-msgstr ""
+msgstr "Pemeriksa Kalimat Lightproof"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3901
 msgid "Choose what the sentence checker looks for as you type."
 msgstr ""
+"Pilih hal yang akan diperiksa oleh pemeriksa kalimat saat Anda mengetik."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3941
 msgid ""
 "This document is using the document settings it was opened with. What you "
 "change here applies to the next document you open."
 msgstr ""
+"Dokumen ini menggunakan pengaturan dokumen saat dibuka. Perubahan yang Anda "
+"buat di sini akan diterapkan pada dokumen berikutnya yang Anda buka."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3944
 msgid ""
 "This document is open in more than one window, so what you change here "
 "applies to the next document you open rather than this one."
 msgstr ""
+"Dokumen ini terbuka di lebih dari satu jendela, sehingga perubahan yang Anda "
+"buat di sini akan diterapkan pada dokumen berikutnya yang Anda buka, bukan "
+"pada dokumen ini."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:4032
 #: admin/src/integrator/Xcu.ts:439
@@ -2769,27 +2775,27 @@ msgstr ""
 #: src/control/Control.CleanupSidebar.ts:259
 msgid "%1 byte"
 msgid_plural "%1 bytes"
-msgstr[0] ""
+msgstr[0] "%1 byte"
 
 #: src/control/Control.CleanupSidebar.ts:267
 msgid "%1 KB"
-msgstr ""
+msgstr "%1 KB"
 
 #: src/control/Control.CleanupSidebar.ts:272
 msgid "%1 MB"
-msgstr ""
+msgstr "%1 MB"
 
 #: src/control/Control.CleanupSidebar.ts:278
 msgid "Fix %1"
-msgstr ""
+msgstr "Perbaiki %1"
 
 #: src/control/Control.CleanupSidebar.ts:331
 msgid "Master slide"
-msgstr ""
+msgstr "Slide master"
 
 #: src/control/Control.CleanupSidebar.ts:332
 msgid "Master slide, image %1"
-msgstr ""
+msgstr "Slide master, gambar %1"
 
 #: src/control/Control.CleanupSidebar.ts:335
 #: src/control/Control.PartsPreview.js:944
@@ -2798,164 +2804,168 @@ msgstr "Salindia %1"
 
 #: src/control/Control.CleanupSidebar.ts:336
 msgid "Slide %1, image %2"
-msgstr ""
+msgstr "Slide %1, gambar %2"
 
 #: src/control/Control.CleanupSidebar.ts:340
 msgid "Slide %1 is hidden and can be removed"
-msgstr ""
+msgstr "Slide %1 disembunyikan dan dapat dihapus"
 
 #: src/control/Control.CleanupSidebar.ts:342
 msgid "Master slide '%1' is not used by any slide"
-msgstr ""
+msgstr "Slide master '%1' tidak digunakan oleh slide mana pun"
 
 #: src/control/Control.CleanupSidebar.ts:347
 msgid "Slide %1 has speaker notes"
-msgstr ""
+msgstr "Slide %1 memiliki catatan presenter"
 
 #: src/control/Control.CleanupSidebar.ts:350
 msgid "Slide %1: embedded object"
-msgstr ""
+msgstr "Slide %1: objek tersemat"
 
 #: src/control/Control.CleanupSidebar.ts:351
 msgid "Slide %1: embedded object, no image to replace it with"
-msgstr ""
+msgstr "Slide %1: objek tersemat, tidak ada gambar untuk menggantikannya"
 
 #: src/control/Control.CleanupSidebar.ts:365
 msgid "%1 DPI"
-msgstr ""
+msgstr "%1 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:367
 msgid "%1 at %2 DPI"
-msgstr ""
+msgstr "%1 pada %2 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:426
 msgid "Leave images alone"
-msgstr ""
+msgstr "Biarkan gambar apa adanya"
 
 #: src/control/Control.CleanupSidebar.ts:427
 msgid "96 DPI"
-msgstr ""
+msgstr "96 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:428
 msgid "150 DPI"
-msgstr ""
+msgstr "150 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:429
 msgid "220 DPI"
-msgstr ""
+msgstr "220 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:430
 msgid "300 DPI"
-msgstr ""
+msgstr "300 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:454
 msgid "Scanning..."
-msgstr ""
+msgstr "Memindai..."
 
 #: src/control/Control.CleanupSidebar.ts:456
 msgid "Measuring images..."
-msgstr ""
+msgstr "Mengukur gambar..."
 
 #: src/control/Control.CleanupSidebar.ts:458
 msgid "Preparing cleanup..."
-msgstr ""
+msgstr "Menyiapkan pembersihan..."
 
 #: src/control/Control.CleanupSidebar.ts:460
 msgid "Cleaning up..."
-msgstr ""
+msgstr "Membersihkan..."
 
 #: src/control/Control.CleanupSidebar.ts:472
 msgid "Images over %1 DPI (%2)"
-msgstr ""
+msgstr "Gambar di atas %1 DPI (%2)"
 
 #: src/control/Control.CleanupSidebar.ts:476
 msgid "Hidden slides (%1)"
-msgstr ""
+msgstr "Slide tersembunyi (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:478
 msgid "Unused master slides (%1)"
-msgstr ""
+msgstr "Slide master yang tidak digunakan (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:480
 msgid "Speaker notes (%1)"
-msgstr ""
+msgstr "Catatan presenter (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:482
 msgid "Embedded objects (%1)"
-msgstr ""
+msgstr "Objek tersemat (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:490
 msgid "Saved %1"
-msgstr ""
+msgstr "Menghemat %1"
 
 #: src/control/Control.CleanupSidebar.ts:493
 msgid "Estimated saving: %1"
-msgstr ""
+msgstr "Perkiraan penghematan: %1"
 
 #: src/control/Control.CleanupSidebar.ts:500
 msgid "%1 thing to clean up"
 msgid_plural "%1 things to clean up"
-msgstr[0] ""
+msgstr[0] "%1 item untuk dibersihkan"
 
 #: src/control/Control.CleanupSidebar.ts:525
 msgid "Image resolution"
-msgstr ""
+msgstr "Resolusi gambar"
 
 #: src/control/Control.CleanupSidebar.ts:547
 msgid "JPEG quality in %"
-msgstr ""
+msgstr "Kualitas JPEG dalam %"
 
 #: src/control/Control.CleanupSidebar.ts:572
 msgid "Prepare for sharing"
-msgstr ""
+msgstr "Siapkan untuk dibagikan"
 
 #: src/control/Control.CleanupSidebar.ts:601
 msgid "%1 of %2"
-msgstr ""
+msgstr "%1 dari %2"
 
 #: src/control/Control.CleanupSidebar.ts:614
 msgid "Cleanup progress"
-msgstr ""
+msgstr "Progres pembersihan"
 
 #: src/control/Control.CleanupSidebar.ts:647
 msgid "Stop"
-msgstr ""
+msgstr "Berhenti"
 
 #: src/control/Control.CleanupSidebar.ts:668
 msgid "Scan"
-msgstr ""
+msgstr "Pindai"
 
 #: src/control/Control.CleanupSidebar.ts:701
 msgid "Fix all"
-msgstr ""
+msgstr "Perbaiki semua"
 
 #: src/control/Control.CleanupSidebar.ts:726
 msgid "This document cannot be changed here, so there is nothing to clean up."
 msgstr ""
+"Dokumen ini tidak dapat diubah di sini, sehingga tidak ada yang perlu "
+"dibersihkan."
 
 #: src/control/Control.CleanupSidebar.ts:730
 msgid ""
 "Choose a target resolution, then press Scan to find what can be cleaned up."
 msgstr ""
+"Pilih resolusi target, lalu tekan Pindai untuk menemukan item yang dapat "
+"dibersihkan."
 
 #: src/control/Control.CleanupSidebar.ts:733
 msgid "Nothing to clean up."
-msgstr ""
+msgstr "Tidak ada yang perlu dibersihkan."
 
 #: src/control/Control.CleanupSidebar.ts:791
 msgid "saves %1"
-msgstr ""
+msgstr "menghemat %1"
 
 #: src/control/Control.CleanupSidebar.ts:801
 msgid "Fix"
-msgstr ""
+msgstr "Perbaiki"
 
 #: src/control/Control.CleanupSidebar.ts:901
 #: src/control/Control.Menubar.ts:657
 #: src/control/Control.NotebookbarImpress.js:2184
 #: src/control/Control.NotebookbarImpress.js:2185
 msgid "Clean Up"
-msgstr ""
+msgstr "Bersihkan"
 
 #: src/control/Control.AlertDialog.js:55
 msgid "External link"
@@ -3169,7 +3179,7 @@ msgstr "Presentasi Kosong"
 
 #: src/control/Control.BackstageView.ts:1029
 msgid "Blank Drawing"
-msgstr ""
+msgstr "Gambar Kosong"
 
 #: src/control/Control.BackstageView.ts:1034
 msgid "Blank Document"
@@ -3341,14 +3351,15 @@ msgstr "Nama dokumen"
 #: src/control/Control.DocumentNameInput.js:39
 msgid "A document name cannot contain a slash or a backslash."
 msgstr ""
+"Nama dokumen tidak boleh berisi garis miring atau garis miring terbalik."
 
 #: src/control/Control.DocumentNameInput.js:42 src/app/Socket.ts:2531
 msgid "Please enter a valid document name."
-msgstr ""
+msgstr "Masukkan nama dokumen yang valid."
 
 #: src/control/Control.DocumentNameInput.js:55
 msgid "Invalid document name"
-msgstr ""
+msgstr "Nama dokumen tidak valid"
 
 #: src/control/Control.DocumentRepair.js:27
 #: src/control/Control.DocumentRepair.js:28
@@ -4184,17 +4195,17 @@ msgstr "Halaman Catatan"
 #: src/control/Control.Menubar.ts:523
 #: src/control/Control.NotebookbarImpress.js:743
 msgid "View Notes"
-msgstr ""
+msgstr "Lihat Catatan"
 
 #: src/control/Control.Menubar.ts:524
 #: src/control/Control.NotebookbarImpress.js:745
 msgid "Bottom Panel"
-msgstr ""
+msgstr "Panel Bawah"
 
 #: src/control/Control.Menubar.ts:525
 #: src/control/Control.NotebookbarImpress.js:746
 msgid "Handout Page"
-msgstr ""
+msgstr "Halaman Handout"
 
 #: src/control/Control.Menubar.ts:526
 #: src/control/Control.NotebookbarImpress.js:747
@@ -5384,7 +5395,7 @@ msgstr "Pergi Luring"
 
 #: src/control/Control.NotebookbarWriter.js:481
 msgid "Lets a screen reader follow the cursor and read the document"
-msgstr ""
+msgstr "Memungkinkan pembaca layar mengikuti kursor dan membacakan dokumen"
 
 #: src/control/Control.NotebookbarWriter.js:605
 msgid "Validate Sidebar"
@@ -5446,7 +5457,7 @@ msgstr "Beralih ke Mode Pengeditan"
 
 #: src/control/Control.PartsPreview.js:451
 msgid "Show everyone on this slide"
-msgstr ""
+msgstr "Tampilkan semua orang di slide ini"
 
 #: src/control/Control.PartsPreview.js:597
 #: src/control/Control.PartsPreview.js:672 src/map/Clipboard.js:1546
@@ -5464,16 +5475,16 @@ msgstr "Tambahkan Bagian"
 #: src/control/Control.PartsPreview.js:875
 msgid "with 1 other"
 msgid_plural "with %n others"
-msgstr[0] ""
+msgstr[0] "dengan %n orang lainnya"
 
 #: src/control/Control.PartsPreview.js:885
 msgid "with %1"
-msgstr ""
+msgstr "dengan %1"
 
 #: src/control/Control.PartsPreview.js:886
 msgid "with %1 and 1 other"
 msgid_plural "with %1 and %n others"
-msgstr[0] ""
+msgstr[0] "dengan %1 dan %n orang lainnya"
 
 #: src/control/Control.PartsPreview.js:916
 msgid "preview of page %1, linked to %2 in %3"
@@ -5539,7 +5550,7 @@ msgstr "Impor slide Anda"
 
 #: src/control/Control.SlideImportPane.tsx:673
 msgid "Checking..."
-msgstr ""
+msgstr "Memeriksa..."
 
 #: src/control/Control.SlideImportPane.tsx:675
 #: src/control/Control.SlideLinkToolbar.tsx:165
@@ -5553,11 +5564,11 @@ msgstr "Tidak memiliki akses"
 
 #: src/control/Control.SlideImportPane.tsx:679
 msgid "Could not open"
-msgstr ""
+msgstr "Tidak dapat membuka"
 
 #: src/control/Control.SlideImportPane.tsx:685
 msgid "{0} changed"
-msgstr ""
+msgstr "{0} berubah"
 
 #: src/control/Control.SlideImportPane.tsx:687
 #: src/control/Control.SlideLinkToolbar.tsx:115
@@ -5566,7 +5577,7 @@ msgstr "Ditautkan"
 
 #: src/control/Control.SlideImportPane.tsx:689
 msgid "Not checked"
-msgstr ""
+msgstr "Belum diperiksa"
 
 #: src/control/Control.SlideImportPane.tsx:690
 #: src/control/Control.SlideImportPane.tsx:1392
@@ -5583,14 +5594,16 @@ msgid ""
 "The slides are in this presentation. The file they came from is no longer "
 "here."
 msgstr ""
+"Slide terdapat dalam presentasi ini. Berkas asalnya sudah tidak tersedia "
+"lagi."
 
 #: src/control/Control.SlideImportPane.tsx:739
 msgid "This file is here. You do not have permission to open it."
-msgstr ""
+msgstr "Berkas ini tersedia. Anda tidak memiliki izin untuk membukanya."
 
 #: src/control/Control.SlideImportPane.tsx:741
 msgid "This file could not be read this time."
-msgstr ""
+msgstr "Berkas ini tidak dapat dibaca saat ini."
 
 #: src/control/Control.SlideImportPane.tsx:750
 #: src/control/Control.SlideImportPane.tsx:1251
@@ -5620,7 +5633,7 @@ msgstr "Sisipkan slide"
 
 #: src/control/Control.SlideImportPane.tsx:835
 msgid "Insert {0} from {1}"
-msgstr ""
+msgstr "Sisipkan {0} dari {1}"
 
 #: src/control/Control.SlideImportPane.tsx:838
 msgid "Insert 1 slide"
@@ -5632,7 +5645,7 @@ msgstr "Sisipkan {0} slide"
 
 #: src/control/Control.SlideImportPane.tsx:871
 msgid "{0} of {1}"
-msgstr ""
+msgstr "{0} dari {1}"
 
 #: src/control/Control.SlideImportPane.tsx:874
 #: src/control/Control.SlideImportPane.tsx:1638
@@ -5641,11 +5654,11 @@ msgstr "{0} slide"
 
 #: src/control/Control.SlideImportPane.tsx:881
 msgid "Inserts at the end"
-msgstr ""
+msgstr "Sisipkan di akhir"
 
 #: src/control/Control.SlideImportPane.tsx:882
 msgid "Inserts after slide {0}"
-msgstr ""
+msgstr "Sisipkan setelah slide {0}"
 
 #: src/control/Control.SlideImportPane.tsx:886
 msgid "Opening file..."
@@ -5670,9 +5683,8 @@ msgid "Close slide import"
 msgstr "Tutup impor slide"
 
 #: src/control/Control.SlideImportPane.tsx:996
-#, fuzzy
 msgid "Add presentation…"
-msgstr "Tambahkan presentasi..."
+msgstr "Tambahkan presentasi…"
 
 #: src/control/Control.SlideImportPane.tsx:1011
 msgid "No presentations yet"
@@ -5687,20 +5699,20 @@ msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:1048
 msgid "Hide all slides"
-msgstr ""
+msgstr "Sembunyikan semua slide"
 
 #: src/control/Control.SlideImportPane.tsx:1048
 msgid "Show all slides"
-msgstr ""
+msgstr "Tampilkan semua slide"
 
 #: src/control/Control.SlideImportPane.tsx:1080
 #: src/control/Control.SlideImportPane.tsx:1081
 msgid "Filter presentations"
-msgstr ""
+msgstr "Filter presentasi"
 
 #: src/control/Control.SlideImportPane.tsx:1109
 msgid "Slide sources"
-msgstr ""
+msgstr "Sumber slide"
 
 #: src/control/Control.SlideImportPane.tsx:1117
 msgid "Presentations to import from"
@@ -5708,7 +5720,7 @@ msgstr "Presentasi yang dapat diimpor"
 
 #: src/control/Control.SlideImportPane.tsx:1185
 msgid "{0} picked"
-msgstr ""
+msgstr "{0} dipilih"
 
 #: src/control/Control.SlideImportPane.tsx:1223
 msgid "Actions for {0}"
@@ -5740,15 +5752,15 @@ msgstr "Slide dalam {0}"
 
 #: src/control/Control.SlideImportPane.tsx:1391
 msgid "Original design"
-msgstr ""
+msgstr "Desain asli"
 
 #: src/control/Control.SlideImportPane.tsx:1394
 msgid "Linked, follows the slide number"
-msgstr ""
+msgstr "Tertaut, mengikuti nomor slide"
 
 #: src/control/Control.SlideImportPane.tsx:1395
 msgid "Linked, follows the slide"
-msgstr ""
+msgstr "Tertaut, mengikuti slide"
 
 #: src/control/Control.SlideImportPane.tsx:1432
 msgid "Keep original design"
@@ -5756,39 +5768,39 @@ msgstr "Pertahankan desain asli"
 
 #: src/control/Control.SlideImportPane.tsx:1446
 msgid "Stay linked to the source file"
-msgstr ""
+msgstr "Tetap tertaut ke berkas sumber"
 
 #: src/control/Control.SlideImportPane.tsx:1484
 msgid "Follow the slide, wherever it moves"
-msgstr ""
+msgstr "Ikuti slide, ke mana pun dipindahkan"
 
 #: src/control/Control.SlideImportPane.tsx:1486
 msgid "Follow the slide number"
-msgstr ""
+msgstr "Ikuti nomor slide"
 
 #: src/control/Control.SlideImportPane.tsx:1644
 msgid "Select the slides of {0}"
-msgstr ""
+msgstr "Pilih slide dari {0}"
 
 #: src/control/Control.SlideLinkToolbar.tsx:102
 msgid "Linked to {0} in {1}"
-msgstr ""
+msgstr "Tertaut ke {0} dalam {1}"
 
 #: src/control/Control.SlideLinkToolbar.tsx:126
 msgid "Hide the actions for this linked slide"
-msgstr ""
+msgstr "Sembunyikan tindakan untuk slide tertaut ini"
 
 #: src/control/Control.SlideLinkToolbar.tsx:127
 msgid "Show the actions for this linked slide"
-msgstr ""
+msgstr "Tampilkan tindakan untuk slide tertaut ini"
 
 #: src/control/Control.SlideLinkToolbar.tsx:137
 msgid "Unlink"
-msgstr ""
+msgstr "Putuskan Tautan"
 
 #: src/control/Control.SlideLinkToolbar.tsx:161
 msgid "Not available"
-msgstr ""
+msgstr "Tidak tersedia"
 
 #: src/control/SlideSectionHeader.tsx:68
 msgid "Toggle section %1"
@@ -5813,7 +5825,7 @@ msgstr "Tidak ada slide dalam presentasi ini yang ditautkan ke file lain."
 
 #: src/slideimport/SlideLinks.ts:275
 msgid "This slide is not linked to another file."
-msgstr ""
+msgstr "Slide ini tidak tertaut ke berkas lain."
 
 #: src/slideimport/SlideLinks.ts:426 src/slideimport/SlideLinks.ts:738
 msgid ""
@@ -5852,9 +5864,8 @@ msgstr ""
 "Tidak dapat memperbarui slide {0}: sumber tidak memiliki slide yang sesuai"
 
 #: src/slideimport/SlideLinks.ts:684
-#, fuzzy
 msgid "Unlinking the slide failed."
-msgstr "Gagal menyisipkan slide."
+msgstr "Gagal memutuskan tautan slide."
 
 #: src/slideimport/SlideLinks.ts:695 src/slideimport/SlideLinks.ts:756
 msgid "Updating the slides of {0} failed."
@@ -5899,17 +5910,16 @@ msgid "No problems with SSL verification detected"
 msgstr "Tidak ada masalah terdeteksi dengan verifikasi SSL"
 
 #: src/control/Control.ServerAuditDialog.ts:78
-#, fuzzy
 msgid "Each document is securely contained (landlock)"
-msgstr "Setiap dokumen tertampung dengan aman"
+msgstr "Setiap dokumen diamankan secara terisolasi (landlock)"
 
 #: src/control/Control.ServerAuditDialog.ts:83
 msgid "Each document is securely contained (Linux namespaces)"
-msgstr ""
+msgstr "Setiap dokumen diamankan secara terisolasi (namespace Linux)"
 
 #: src/control/Control.ServerAuditDialog.ts:88
 msgid "Each document is securely contained (capabilities and chroot)"
-msgstr ""
+msgstr "Setiap dokumen diamankan secara terisolasi (capabilities dan chroot)"
 
 #: src/control/Control.ServerAuditDialog.ts:102
 msgid "System call security filtering enabled"
@@ -5926,6 +5936,8 @@ msgstr "Pengaitan pengikatan jail fast kit diaktifkan"
 #: src/control/Control.ServerAuditDialog.ts:133
 msgid "Fast kit jail setup with landlock, nothing to copy or mount"
 msgstr ""
+"Penyiapan kit jail cepat dengan landlock, tanpa perlu menyalin atau memasang "
+"apa pun"
 
 #: src/control/Control.ServerAuditDialog.ts:146
 msgid "Poorly performing proxying of all network requests."
@@ -7370,11 +7382,11 @@ msgstr "Modus sunting"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:70
 msgid "Last Custom Value"
-msgstr ""
+msgstr "Nilai Kustom Terakhir"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:134
 msgid "Custom Line Thickness:"
-msgstr ""
+msgstr "Ketebalan Garis Kustom:"
 
 #: src/control/jsdialog/Widget.MobileBorderSelector.js:111
 msgid "Cell borders"
