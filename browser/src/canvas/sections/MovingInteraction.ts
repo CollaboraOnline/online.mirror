@@ -32,7 +32,7 @@ class MovingInteraction extends SelectionInteraction {
 		this.at = at.clone();
 	}
 
-	public move(to: cool.SimplePoint): void {
+	public move(to: cool.SimplePoint, event?: MouseEvent): void {
 		this.at = to.clone();
 		this.across = to.x - this.from.x;
 		this.down = to.y - this.from.y;
@@ -41,6 +41,7 @@ class MovingInteraction extends SelectionInteraction {
 		this.selection.lookForASnapOfTheWhole(
 			this.across * app.twipsToPixels,
 			this.down * app.twipsToPixels,
+			event,
 		);
 
 		this.selection.redraw();
@@ -51,8 +52,8 @@ class MovingInteraction extends SelectionInteraction {
 		one it was drawn by here while the move ran, with whatever it lined up with taken into
 		account.
 	*/
-	public finish(to: cool.SimplePoint): void {
-		this.move(to);
+	public finish(to: cool.SimplePoint, event?: MouseEvent): void {
+		this.move(to, event);
 
 		if (!this.across && !this.down) return;
 

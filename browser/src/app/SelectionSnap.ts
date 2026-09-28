@@ -95,10 +95,16 @@ class SelectionSnap {
 		size: number[],
 		position: number[],
 		dragDistance: number[],
+		snapKeyHeld: boolean = false,
 	): void {
 		this.forget();
 
-		if (app.map.stateChangeHandler.getItemValue('.uno:GridUse') === 'true') {
+		// Alt turns the snap over against how it is set, for every kind of snap and for every
+		// action that snaps, so a grid that is on is left alone while Alt is held and one that is
+		// off is snapped to.
+		const gridOn =
+			app.map.stateChangeHandler.getItemValue('.uno:GridUse') === 'true';
+		if (gridOn !== snapKeyHeld) {
 			this.findClosestGridPoint(size, position, dragDistance);
 			return;
 		}

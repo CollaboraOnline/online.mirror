@@ -32,7 +32,16 @@ class HandleScaling {
 	): boolean {
 		if (cropMode) return false;
 
-		let keep = event !== undefined && event.ctrlKey && event.shiftKey;
+		/*
+			Where the client draws the drag itself, Shift is the key, as it is in the office: a
+			shape keeps its ratio while Shift is held. Where the engine draws the drag the older
+			rule stays, Ctrl and Shift together, since that is what the engine is sent and what
+			it shows.
+		*/
+		let keep =
+			event !== undefined &&
+			event.shiftKey &&
+			(RenderManager.isVectorRendering() || event.ctrlKey);
 
 		const context = app.map.context?.context;
 		if (context === 'Graphic' || context === 'Media') keep = !keep;

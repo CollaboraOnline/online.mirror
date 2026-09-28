@@ -112,7 +112,7 @@ class ScalingInteraction extends SelectionInteraction {
 			// What may snap to another object of the page is the handle being dragged, taken
 			// where the drag has it now.
 			const dragged = this.draggedHandle();
-			if (dragged) this.selection.lookForASnap(dragged);
+			if (dragged) this.selection.lookForASnap(dragged, event);
 
 			// The snap is applied while the drag runs, so that what is drawn and where the
 			// handles stand are the one thing, and letting go changes nothing again.

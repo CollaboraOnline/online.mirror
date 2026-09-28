@@ -1041,12 +1041,17 @@ abstract class SelectionSection extends CanvasSectionObject {
 	}
 
 	/// Looks for something on the page that the handle could line up with, and marks it.
-	public lookForASnap(handle: SelectionHandle): void {
+	public lookForASnap(handle: SelectionHandle, event?: MouseEvent): void {
 		const half = 0.5 * ShapeHandlesSection.handleSize();
 		const at = new cool.SimplePoint(handle.point.x, handle.point.y);
 
 		// A point is asked about, so there is no size to it and no distance left to travel.
-		this.snap.look([0, 0], [at.pX - half, at.pY - half], [0, 0]);
+		this.snap.look(
+			[0, 0],
+			[at.pX - half, at.pY - half],
+			[0, 0],
+			event?.altKey === true,
+		);
 		this.redraw();
 	}
 
@@ -1059,11 +1064,17 @@ abstract class SelectionSection extends CanvasSectionObject {
 		Looks for something on the page that the whole selection could line up with, from where
 		the move has taken it, and marks it. The distance is in core pixels.
 	*/
-	public lookForASnapOfTheWhole(across: number, down: number): void {
-		this.snap.look(this.selectionSize(), this.selectionCorner(), [
-			across,
-			down,
-		]);
+	public lookForASnapOfTheWhole(
+		across: number,
+		down: number,
+		event?: MouseEvent,
+	): void {
+		this.snap.look(
+			this.selectionSize(),
+			this.selectionCorner(),
+			[across, down],
+			event?.altKey === true,
+		);
 	}
 
 	/// Where the upper left corner of the selection lands, in core pixels: where the move puts
@@ -1348,6 +1359,28 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.endTheInteraction(false);
 	}
 
+	/*
+		Where the mouse last was during a drag, and the event that took it there. A change of
+		Shift or Alt while the mouse stands still is taken up from these: the drag is moved to
+		the same place again with the keys as they are now.
+	*/
+	private lastMoved: { at: cool.SimplePoint; event: MouseEvent } | null = null;
+
+	private readonly keysChanged = (e: KeyboardEvent): void => {
+		if (!this.interaction || !this.lastMoved) return;
+		if (!['Shift', 'Alt', 'Control'].includes(e.key)) return;
+
+		// The event that lets a key go can still carry that key as held, so the key it names
+		// is taken as let go whatever its flag says.
+		const letGo = e.type === 'keyup' ? e.key : null;
+
+		this.interaction.move(this.lastMoved.at, {
+			shiftKey: letGo !== 'Shift' && e.shiftKey,
+			altKey: letGo !== 'Alt' && e.altKey,
+			ctrlKey: letGo !== 'Control' && e.ctrlKey,
+		} as MouseEvent);
+	};
+
 	onMouseDown(point: cool.SimplePoint, e: MouseEvent): void {
 		const at = this.inTheDocument(point);
 		const onCanvas = [
@@ -1379,6 +1412,12 @@ abstract class SelectionSection extends CanvasSectionObject {
 			this.interaction = this.pressedGroup?.interactionForThePlace(at) ?? null;
 		}
 
+		if (this.interaction) {
+			this.lastMoved = null;
+			document.addEventListener('keydown', this.keysChanged, true);
+			document.addEventListener('keyup', this.keysChanged, true);
+		}
+
 		this.stopPropagating();
 		e.stopPropagation();
 	}
@@ -1404,8 +1443,9 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.stopPropagating();
 		e.stopPropagation();
 
-		this.interaction.move(this.inTheDocument(point), e);
-		this.aimAtWhatIsUnder(this.inTheDocument(point));
+		this.lastMoved = { at: this.inTheDocument(point), event: e };
+		this.interaction.move(this.lastMoved.at, e);
+		this.aimAtWhatIsUnder(this.lastMoved.at);
 
 		/*
 			Carrying the objects brings the page along: while the mouse stands near an edge of the
@@ -1570,6 +1610,9 @@ abstract class SelectionSection extends CanvasSectionObject {
 		}
 
 		this.interaction = null;
+		this.lastMoved = null;
+		document.removeEventListener('keydown', this.keysChanged, true);
+		document.removeEventListener('keyup', this.keysChanged, true);
 		this.snap.forget();
 
 		// Nothing is aimed at once the drag is over, so the places to tie to go with it.
