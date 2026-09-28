@@ -212,7 +212,8 @@ class FramingHandles extends HandleGroup {
 			event as unknown as MouseEvent,
 		);
 
-		this.selection.layTheChangeOn(scaling.transformation());
+		const change = scaling.transformation();
+		this.selection.layTheChangeOn(change);
 
 		/*
 			The handle keeps its name through a change that takes a side past the one opposite
@@ -220,9 +221,18 @@ class FramingHandles extends HandleGroup {
 			is named the upper left is drawn wherever the mapping puts that corner, and a mapping
 			that turns the object over puts it on the other side by itself. The key that follows
 			goes on stretching the same way.
-		*/
 
-		return to;
+			What is answered is where the handle really landed, and not where the key asked it
+			to go. The two part company where the object is held to a hair rather than made
+			thinner still: the handle then stops a hair short of the asked place, and the edge
+			facing it, which never moved, can lie nearer to that place than the handle does.
+			The place is taken through the change itself, which is a change of the page: no
+			object's mapping is asked, so a group, whose own mapping the change is never laid
+			on, answers as truly as one object does.
+		*/
+		if (!change) return to;
+
+		return change.apply(handle.point.x, handle.point.y).round();
 	}
 
 	public shape(

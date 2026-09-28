@@ -180,7 +180,13 @@ abstract class SelectionSection extends CanvasSectionObject {
 		if (!worked.length && this.known.length) return;
 
 		this.known = worked;
+
+		// The place a key left is followed once, when the objects it changed come back, and is
+		// then forgotten: whatever changes them after that, an undo among other things, is not
+		// that key's doing and says nothing about where the keyboard should be.
 		this.followTheHandleByPlace();
+		this.keyLeftTheHandle = null;
+
 		this.coverTheHandles();
 	}
 
