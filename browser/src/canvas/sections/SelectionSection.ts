@@ -1361,6 +1361,10 @@ abstract class SelectionSection extends CanvasSectionObject {
 		if (handle) {
 			this.pressedGroup = this.groupOf(handle) ?? null;
 			this.interaction = this.pressedGroup?.interactionFor(handle, at) ?? null;
+
+			// A drag leads the handle, so it is told where inside the handle the press landed
+			// and can set off from where the handle stands rather than from the mouse.
+			this.interaction?.tookHoldAt(at, handle);
 		} else {
 			this.pressedGroup =
 				this.groups().find((group: HandleGroup) =>

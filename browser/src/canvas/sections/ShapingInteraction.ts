@@ -22,15 +22,14 @@ class ShapingInteraction extends SelectionInteraction {
 	/// Where it has been taken, in twips.
 	private at: cool.SimplePoint;
 
-	constructor(
-		selection: SelectionSection,
-		handle: SelectionHandle,
-		at: cool.SimplePoint,
-	) {
+	constructor(selection: SelectionSection, handle: SelectionHandle) {
 		super(selection);
 
 		this.handle = handle;
-		this.at = at.clone();
+
+		// Before the mouse has moved the handle stands where it stood, whatever part of it the
+		// press landed on.
+		this.at = new cool.SimplePoint(handle.point.x, handle.point.y);
 	}
 
 	/*
@@ -45,7 +44,7 @@ class ShapingInteraction extends SelectionInteraction {
 	}
 
 	public move(to: cool.SimplePoint): void {
-		this.at = to.clone();
+		this.at = this.led(to);
 		this.selection.redraw();
 	}
 

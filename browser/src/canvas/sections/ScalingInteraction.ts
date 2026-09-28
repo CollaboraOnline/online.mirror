@@ -86,8 +86,12 @@ class ScalingInteraction extends SelectionInteraction {
 
 		this.keepsRatio = HandleScaling.keepsRatio(event, false);
 
-		this.at = to.clone();
-		this.reached = this.shapeFor(to, event);
+		// The drag leads the handle, so it goes to where the handle stands for this mouse point
+		// and not to the mouse point itself.
+		const led = this.led(to);
+
+		this.at = led.clone();
+		this.reached = this.shapeFor(led, event);
 
 		// What may snap to another object of the page is the handle being dragged, taken where
 		// the drag has it now.
@@ -96,7 +100,7 @@ class ScalingInteraction extends SelectionInteraction {
 
 		// The snap is applied while the drag runs, so that what is drawn and where the handles
 		// stand are the one thing, and letting go changes nothing again.
-		this.applyTheSnap(to, event);
+		this.applyTheSnap(led, event);
 
 		this.selection.redraw();
 	}

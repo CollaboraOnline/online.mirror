@@ -27,6 +27,33 @@ abstract class SelectionInteraction {
 		this.selection = selection;
 	}
 
+	/*
+		The vector from the place the press landed on to the place of the handle it took hold of,
+		in twips. A drag puts what the handle names where the mouse is, so a press a little beside
+		the middle of a handle would move it by that much on the very first step. Adding the
+		vector back gives the place the handle itself stands at, so a drag sets off from there and
+		follows the mouse from there on. It is the same from the first step to the last and
+		carries no sign to be turned over, so a mirror, a kept ratio and the snap all need to know
+		nothing of it.
+	*/
+	private fromThePressToTheHandle: cool.Point = new cool.Point(0, 0);
+
+	/// Takes in where inside its handle the press landed.
+	public tookHoldAt(press: cool.SimplePoint, handle: SelectionHandle): void {
+		this.fromThePressToTheHandle = new cool.Point(
+			handle.point.x - press.x,
+			handle.point.y - press.y,
+		);
+	}
+
+	/// The place the handle is led to for a mouse at that point, in twips.
+	protected led(to: cool.SimplePoint): cool.SimplePoint {
+		return new cool.SimplePoint(
+			to.x + this.fromThePressToTheHandle.x,
+			to.y + this.fromThePressToTheHandle.y,
+		);
+	}
+
 	/// Follows the mouse to that point in the document.
 	public abstract move(to: cool.SimplePoint, event?: MouseEvent): void;
 

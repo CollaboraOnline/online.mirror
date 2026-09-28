@@ -362,9 +362,9 @@ class TurningHandle extends HandleGroup {
 abstract class HandlesMovedOneByOne extends HandleGroup {
 	public interactionFor(
 		handle: SelectionHandle,
-		at: cool.SimplePoint,
+		_at: cool.SimplePoint,
 	): SelectionInteraction | null {
-		return new ShapingInteraction(this.selection, handle, at);
+		return new ShapingInteraction(this.selection, handle);
 	}
 
 	public moveByKey(
@@ -722,11 +722,9 @@ class TiePointHandles extends HandleGroup {
 	*/
 	public interactionFor(
 		handle: SelectionHandle,
-		at: cool.SimplePoint,
+		_at: cool.SimplePoint,
 	): SelectionInteraction | null {
-		return handle.name
-			? new ShapingInteraction(this.selection, handle, at)
-			: null;
+		return handle.name ? new ShapingInteraction(this.selection, handle) : null;
 	}
 
 	public handOver(handle: SelectionHandle, to: cool.Point): void {
