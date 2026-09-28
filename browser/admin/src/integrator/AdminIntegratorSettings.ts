@@ -671,6 +671,11 @@ class SettingIframe {
 	private _aiImageModelFetchTimeout: number | null = null;
 	private _aiImageModelFetchAbort: AbortController | null = null;
 	private _aiImageModelFetchSeq = 0;
+	private _imageProviderMemo: {
+		url: string;
+		apiKey: string;
+		apiKeyStored: boolean;
+	} | null = null;
 	private _viewSettingLabels = {
 		zoteroAPIKey: 'Zotero',
 		signatureCert: _('Signature Certificate'),
@@ -3232,14 +3237,28 @@ class SettingIframe {
 		legend.textContent = _('Image Generation');
 		group.appendChild(legend);
 
-		// Provider dropdown with "Same as Text AI" option
-		const imageProviderOptions = [
-			{ value: '', label: _('Same as Text AI') },
-			...AI_PROVIDERS.map((provider) => ({
-				value: provider.id,
-				label: provider.name,
-			})),
-		];
+		group.appendChild(
+			this.createCheckbox(
+				'aiImageSameAsText',
+				this.isImageProviderSameAsText(data, group),
+				_('Same as text provider'),
+				(inputCheckbox, checkboxWrapper) => {
+					checkboxWrapper.classList.toggle(
+						'checkbox-radio-switch--checked',
+						!inputCheckbox.checked,
+					);
+					this.applyImageProviderSameAsText(inputCheckbox.checked, data, group);
+				},
+			),
+		);
+		const providerFields = document.createElement('div');
+		providerFields.id = 'aiImageProviderFields';
+		group.appendChild(providerFields);
+		this._imageProviderMemo = null;
+		const imageProviderOptions = AI_PROVIDERS.map((provider) => ({
+			value: provider.id,
+			label: provider.name,
+		}));
 
 		const providerField = document.createElement('div');
 		providerField.id = 'aiImageProvidercontainer';
@@ -3251,38 +3270,27 @@ class SettingIframe {
 		providerHeading.classList.add('view-setting-small-label');
 		providerField.appendChild(providerHeading);
 
-		const selectedImageProvider = data.aiImageProviderURL
-			? this.getProviderIdFromUrl(data.aiImageProviderURL)
-			: '';
+		const selectedImageProvider = this.getProviderIdFromUrl(
+			data.aiImageProviderURL || data.aiProviderURL || '',
+		);
 
 		const providerSelect = this.createSelectInput(
 			'aiImageProvider',
 			imageProviderOptions,
 			selectedImageProvider,
 			(selectEl) => {
-				if (selectEl.value === '') {
-					data.aiImageProviderURL = '';
-				} else {
-					const provider = this.getProviderById(selectEl.value);
-					if (provider && !provider.isCustom) {
-						data.aiImageProviderURL = provider.baseUrl;
-					}
+				const provider = this.getProviderById(selectEl.value);
+				if (provider && !provider.isCustom) {
+					data.aiImageProviderURL = provider.baseUrl;
 				}
 			},
 		);
 		providerField.appendChild(providerSelect);
-		group.appendChild(providerField);
+		providerFields.appendChild(providerField);
 
-		group.appendChild(
+		providerFields.appendChild(
 			this.createViewSettingsTextBox('aiImageProviderURL', data, false, true),
 		);
-		const imageUrlContainer = group.querySelector(
-			'#aiImageProviderURLcontainer',
-		) as HTMLElement | null;
-		if (imageUrlContainer) {
-			imageUrlContainer.style.display =
-				selectedImageProvider === 'custom' ? 'block' : 'none';
-		}
 		const imageUrlInput = group.querySelector(
 			'#aiImageProviderURL',
 		) as HTMLInputElement | null;
@@ -3290,7 +3298,7 @@ class SettingIframe {
 			imageUrlInput.placeholder = _('e.g.') + ' http://localhost:11434';
 		}
 
-		group.appendChild(
+		providerFields.appendChild(
 			this.createViewSettingsTextBox(
 				'aiImageProviderAPIKey',
 				data,
@@ -3303,9 +3311,6 @@ class SettingIframe {
 		) as HTMLInputElement | null;
 		if (imageApiKeyInput) {
 			imageApiKeyInput.type = 'password';
-			if (!data.aiImageProviderAPIKeyStored) {
-				imageApiKeyInput.placeholder = _('Leave empty to use Text AI key');
-			}
 		}
 
 		const modelField = document.createElement('div');
@@ -3365,6 +3370,8 @@ class SettingIframe {
 		) {
 			this._lastCustomAIImageProviderURL = data.aiImageProviderURL;
 		}
+
+		this.syncAIImageSettingsVisibility(data, group);
 
 		return group;
 	}
@@ -3480,25 +3487,20 @@ class SettingIframe {
 		};
 
 		providerInput?.addEventListener('change', () => {
-			if (providerInput.value === '') {
-				// "Same as Text AI"
-				data.aiImageProviderURL = '';
-			} else {
-				const selectedProvider = this.getProviderById(providerInput.value);
-				if (selectedProvider && !selectedProvider.isCustom) {
-					if (customUrlInput) {
-						this._lastCustomAIImageProviderURL = customUrlInput.value;
-					}
-					data.aiImageProviderURL = selectedProvider.baseUrl;
-					if (customUrlInput) {
-						customUrlInput.value = selectedProvider.baseUrl;
-					}
-				} else if (customUrlInput) {
-					customUrlInput.value = this._lastCustomAIImageProviderURL;
-					data.aiImageProviderURL = customUrlInput.value;
-				} else {
-					data.aiImageProviderURL = '';
+			const selectedProvider = this.getProviderById(providerInput.value);
+			if (selectedProvider && !selectedProvider.isCustom) {
+				if (customUrlInput) {
+					this._lastCustomAIImageProviderURL = customUrlInput.value;
 				}
+				data.aiImageProviderURL = selectedProvider.baseUrl;
+				if (customUrlInput) {
+					customUrlInput.value = selectedProvider.baseUrl;
+				}
+			} else if (customUrlInput) {
+				customUrlInput.value = this._lastCustomAIImageProviderURL;
+				data.aiImageProviderURL = customUrlInput.value;
+			} else {
+				data.aiImageProviderURL = '';
 			}
 			this.syncAIImageSettingsVisibility(data, root);
 			queueFetch();
@@ -3508,6 +3510,7 @@ class SettingIframe {
 			data.aiImageProviderAPIKey = apiKeyInput.value;
 			// The typed value is now authoritative, not the stored one.
 			data.aiImageProviderAPIKeyStored = false;
+			this.syncAIImageKeyRequirement(data, root);
 			queueFetch();
 		});
 
@@ -3541,6 +3544,28 @@ class SettingIframe {
 		});
 	}
 
+	// Image generation borrows the Text Generation provider while it has no
+	// endpoint and no key of its own - what an empty aiImageProviderURL has
+	// always meant - so the checkbox reads and writes those fields.
+	//
+	// Once the section is on screen the checkbox answers, because the fields go
+	// through states the stored ones cannot tell apart: a custom provider whose
+	// URL has not been typed yet is empty too, and must not read as "same as
+	// text". The stored fields answer only while the section is being built.
+	private isImageProviderSameAsText(
+		data: ViewSettings,
+		root: ParentNode = document,
+	): boolean {
+		const checkbox = root.querySelector(
+			'#aiImageSameAsText-input',
+		) as HTMLInputElement | null;
+		return checkbox
+			? checkbox.checked
+			: !data.aiImageProviderURL &&
+					!data.aiImageProviderAPIKey &&
+					!data.aiImageProviderAPIKeyStored;
+	}
+
 	private syncAIImageSettingsVisibility(
 		data: ViewSettings,
 		root: ParentNode = document,
@@ -3555,6 +3580,98 @@ class SettingIframe {
 			imageUrlContainer.style.display =
 				imageProvider?.value === 'custom' ? 'block' : 'none';
 		}
+
+		const providerFields = root.querySelector(
+			'#aiImageProviderFields',
+		) as HTMLElement | null;
+		if (providerFields) {
+			providerFields.style.display = this.isImageProviderSameAsText(data, root)
+				? 'none'
+				: 'block';
+		}
+
+		this.syncAIImageKeyRequirement(data, root);
+	}
+
+	private imageInheritsTextProvider(data: ViewSettings): boolean {
+		return (
+			!data.aiImageProviderURL ||
+			this.normalizeBaseUrl(data.aiImageProviderURL) ===
+				this.normalizeBaseUrl(data.aiProviderURL || '')
+		);
+	}
+
+	private syncAIImageKeyRequirement(
+		data: ViewSettings,
+		root: ParentNode = document,
+	): void {
+		const apiKeyInput = root.querySelector(
+			'#aiImageProviderAPIKey',
+		) as HTMLInputElement | null;
+		if (!apiKeyInput) {
+			return;
+		}
+
+		const imageProvider = root.querySelector(
+			'#aiImageProvider',
+		) as HTMLSelectElement | null;
+		const required =
+			!this.imageInheritsTextProvider(data) &&
+			imageProvider?.value !== 'custom';
+		const hasKey =
+			!!data.aiImageProviderAPIKey || !!data.aiImageProviderAPIKeyStored;
+		const missing = required && !hasKey;
+
+		apiKeyInput.required = required;
+		apiKeyInput.setAttribute('aria-invalid', missing ? 'true' : 'false');
+		apiKeyInput.classList.toggle('view-input-invalid', missing);
+		apiKeyInput.placeholder = data.aiImageProviderAPIKeyStored
+			? '********'
+			: required
+				? _('Required for this provider')
+				: _('Leave empty if your server does not require one');
+	}
+
+	private applyImageProviderSameAsText(
+		sameAsText: boolean,
+		data: ViewSettings,
+		root: ParentNode,
+	): void {
+		const memo = this._imageProviderMemo;
+		this._imageProviderMemo = sameAsText
+			? {
+					url: data.aiImageProviderURL,
+					apiKey: data.aiImageProviderAPIKey,
+					apiKeyStored: !!data.aiImageProviderAPIKeyStored,
+				}
+			: null;
+
+		const url = sameAsText
+			? ''
+			: memo?.url || data.aiProviderURL || this.getDefaultAIProviderURL();
+		data.aiImageProviderURL = url;
+		data.aiImageProviderAPIKey = sameAsText ? '' : memo?.apiKey || '';
+		data.aiImageProviderAPIKeyStored = sameAsText
+			? false
+			: !!memo?.apiKeyStored;
+		if (url && this.getProviderIdFromUrl(url) === 'custom') {
+			this._lastCustomAIImageProviderURL = url;
+		}
+
+		const setValue = (selector: string, value: string) => {
+			const field = root.querySelector(selector) as
+				| HTMLInputElement
+				| HTMLSelectElement
+				| null;
+			if (field) field.value = value;
+		};
+		if (url) setValue('#aiImageProvider', this.getProviderIdFromUrl(url));
+		setValue('#aiImageProviderURL', url);
+		setValue('#aiImageProviderAPIKey', data.aiImageProviderAPIKey);
+		this.syncSecretDeleteButton('aiImageProviderAPIKey', data, root);
+
+		this.syncAIImageSettingsVisibility(data, root);
+		this.scheduleAIImageModelFetch(data);
 	}
 
 	private scheduleAIModelFetch(data: ViewSettings): void {
@@ -3580,8 +3697,10 @@ class SettingIframe {
 		const effectiveUrl =
 			this.normalizeBaseUrl(data.aiImageProviderURL || '') ||
 			this.normalizeBaseUrl(data.aiProviderURL || '');
+		const inheritsTextProvider = this.imageInheritsTextProvider(data);
 		const effectiveKey =
-			data.aiImageProviderAPIKey || data.aiProviderAPIKey || '';
+			data.aiImageProviderAPIKey ||
+			(inheritsTextProvider ? data.aiProviderAPIKey : '');
 		const effectiveProviderId = this.getProviderIdFromUrl(effectiveUrl);
 		const provider = this.getProviderById(effectiveProviderId);
 		const isCustom = provider?.isCustom ?? effectiveProviderId === 'custom';
@@ -3589,7 +3708,7 @@ class SettingIframe {
 		// Which saved key the server should read back: image key, else chat key.
 		const storedImageSecretField = data.aiImageProviderAPIKeyStored
 			? 'aiImageProviderAPIKey'
-			: data.aiProviderAPIKeyStored
+			: inheritsTextProvider && data.aiProviderAPIKeyStored
 				? 'aiProviderAPIKey'
 				: '';
 		const canUseStoredKey =
@@ -3598,7 +3717,16 @@ class SettingIframe {
 		// As for text: a custom (self-hosted) image provider lists models with
 		// just a base URL; the pre-canned cloud providers still need a key.
 		if (!effectiveUrl || (!isCustom && !effectiveKey && !canUseStoredKey)) {
-			this.setAIImageStatus('', 'hidden');
+			// Say which of the two it is, so a provider picked here without a key
+			// of its own does not just sit there with an empty model list.
+			if (effectiveUrl && !isCustom && !inheritsTextProvider) {
+				this.setAIImageStatus(
+					_('Enter an API key for this provider to list its models.'),
+					'error',
+				);
+			} else {
+				this.setAIImageStatus('', 'hidden');
+			}
 			this.resetAIImageModelSelect(data.aiImageModel);
 			return;
 		}
@@ -4259,7 +4387,7 @@ class SettingIframe {
 				this._viewSetting.aiProviderURL =
 					this.normalizeBaseUrl(viewSetting.aiProviderURL || '') ||
 					this.getDefaultAIProviderURL();
-				// An empty image URL means "Same as Text AI", so keep it empty
+				// An empty image URL means "Same as text provider", so keep it empty
 				// rather than falling back to a default.
 				this._viewSetting.aiImageProviderURL = this.normalizeBaseUrl(
 					viewSetting.aiImageProviderURL || '',
@@ -4592,9 +4720,7 @@ class SettingIframe {
 		row.classList.add('secret-input-row');
 
 		const storedFlag = `${key}Stored`;
-		const syncDeleteButton = () => {
-			deleteButton.disabled = !data[storedFlag] && input.value.length === 0;
-		};
+		const syncDeleteButton = () => this.syncSecretDeleteButton(key, data, row);
 
 		const deleteButton = this.createButtonWithIcon(
 			`${key}-delete`,
@@ -4612,11 +4738,28 @@ class SettingIframe {
 		);
 
 		input.addEventListener('input', syncDeleteButton);
-		syncDeleteButton();
 
 		row.appendChild(input);
 		row.appendChild(deleteButton);
+		syncDeleteButton();
 		return row;
+	}
+
+	// Nothing to clear, nothing to press: the one rule for a secret field's
+	// delete button, for the field's own input event and for the places that
+	// change the field without the user typing in it.
+	private syncSecretDeleteButton(
+		key: string,
+		data: any,
+		root: ParentNode = document,
+	): void {
+		const button = root.querySelector(
+			`#${key}-delete`,
+		) as HTMLButtonElement | null;
+		const input = root.querySelector(`#${key}`) as HTMLInputElement | null;
+		if (button) {
+			button.disabled = !data[`${key}Stored`] && !input?.value;
+		}
 	}
 
 	private createSettingsActions(

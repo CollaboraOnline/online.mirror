@@ -527,6 +527,10 @@ ul {
 	transition: border-color 0.2s ease;
 }
 
+.view-input-container input.view-input-invalid {
+	border-color: var(--color-error);
+}
+
 .view-input-container .secret-input-row {
 	display: flex;
 	align-items: center;
@@ -749,6 +753,10 @@ ul {
 }
 
 .ai-settings-group .view-input-container {
+  margin: 10px 0;
+}
+
+.ai-settings-group > .checkbox-wrapper {
   margin: 10px 0;
 }
 
