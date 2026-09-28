@@ -204,9 +204,15 @@ class FramingHandles extends HandleGroup {
 		if (!shape) return null;
 
 		const to = HandleGroup.steppedBy(handle, towards, event);
-		const scaling = new ScalingInteraction(this.selection, handle, shape);
 
-		// A key that keeps the ratio is the one a drag keeps it with, so the event goes along.
+		// A key moves by exactly what it says: the drag it makes lines up with nothing on the
+		// page and keeps no ratio, since Shift on a key is the large step and not the ratio.
+		const scaling = new ScalingInteraction(
+			this.selection,
+			handle,
+			shape,
+		).exactlyAsTold();
+
 		scaling.finish(
 			new cool.SimplePoint(to.x, to.y),
 			event as unknown as MouseEvent,

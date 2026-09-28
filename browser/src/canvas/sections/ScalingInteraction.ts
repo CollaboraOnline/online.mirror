@@ -31,6 +31,14 @@ class ScalingInteraction extends SelectionInteraction {
 	/// Where the drag has taken the handle, in twips, null until the mouse has moved.
 	private at: cool.SimplePoint | null = null;
 
+	/*
+		Whether the drag goes exactly where it is told. One led by the mouse lines up with other
+		things on the page as it goes and keeps the shape of the object while Shift is held; a
+		step from the keyboard does neither, it goes as far as the key says along the one axis
+		the key names, and Shift is what makes the step a large one.
+	*/
+	private exact: boolean = false;
+
 	constructor(
 		selection: SelectionSection,
 		handle: SelectionHandle,
@@ -69,14 +77,21 @@ class ScalingInteraction extends SelectionInteraction {
 		});
 	}
 
+	/// Makes the drag one that goes exactly where it is told.
+	public exactlyAsTold(): ScalingInteraction {
+		this.exact = true;
+
+		return this;
+	}
+
 	/// The shape the mouse at that point leads to. Its width or its height counts backwards where
 	/// the drag took a side past the one opposite it.
-	private shapeFor(to: cool.SimplePoint, event: MouseEvent): any {
+	private shapeFor(to: cool.SimplePoint): any {
 		return HandleScaling.shapeAfterDrag(
 			to.clone(),
 			this.shapeAtStart,
 			this.handle.kind,
-			HandleScaling.keepsRatio(event, false),
+			this.keepsRatio,
 		);
 	}
 
@@ -84,23 +99,25 @@ class ScalingInteraction extends SelectionInteraction {
 		if (!ObjectHandles.canBeResized(this.selection.selectedObjects())) return;
 		if (!this.shapeAtStart) return;
 
-		this.keepsRatio = HandleScaling.keepsRatio(event, false);
+		this.keepsRatio = !this.exact && HandleScaling.keepsRatio(event, false);
 
 		// The drag leads the handle, so it goes to where the handle stands for this mouse point
 		// and not to the mouse point itself.
 		const led = this.led(to);
 
 		this.at = led.clone();
-		this.reached = this.shapeFor(led, event);
+		this.reached = this.shapeFor(led);
 
-		// What may snap to another object of the page is the handle being dragged, taken where
-		// the drag has it now.
-		const dragged = this.draggedHandle();
-		if (dragged) this.selection.lookForASnap(dragged);
+		if (!this.exact) {
+			// What may snap to another object of the page is the handle being dragged, taken
+			// where the drag has it now.
+			const dragged = this.draggedHandle();
+			if (dragged) this.selection.lookForASnap(dragged);
 
-		// The snap is applied while the drag runs, so that what is drawn and where the handles
-		// stand are the one thing, and letting go changes nothing again.
-		this.applyTheSnap(led, event);
+			// The snap is applied while the drag runs, so that what is drawn and where the
+			// handles stand are the one thing, and letting go changes nothing again.
+			this.applyTheSnap(led, event);
+		}
 
 		this.selection.redraw();
 	}
@@ -123,7 +140,7 @@ class ScalingInteraction extends SelectionInteraction {
 		]);
 
 		this.at = at.clone();
-		this.reached = this.shapeFor(at, event);
+		this.reached = this.shapeFor(at);
 	}
 
 	/*
