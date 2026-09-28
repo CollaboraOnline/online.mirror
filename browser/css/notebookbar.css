@@ -439,7 +439,7 @@ label.notebookbar.ui-checkbox-label {
 	padding: var(--spacing-s);
 }
 
-.ui-combobox[disabled],
+.ui-combobox.notebookbar[disabled],
 .unotoolbutton.notebookbar.disabled:not(.unospan-shortcutstoolbox),
 .unotoolbutton[disabled]:not(.unospan-shortcutstoolbox) {
 	cursor: not-allowed;
@@ -465,6 +465,11 @@ label.notebookbar.ui-checkbox-label {
 	filter: grayscale(100%) brightness(100%);
 }
 
+.ui-combobox.notebookbar[disabled] img {
+	opacity: 0.35;
+}
+
+.ui-combobox-button.notebookbar[disabled] .ui-listbox-arrow,
 .unotoolbutton.notebookbar.disabled img,
 .unotoolbutton.notebookbar.disabled .unoarrow,
 .unotoolbutton[disabled] img,
