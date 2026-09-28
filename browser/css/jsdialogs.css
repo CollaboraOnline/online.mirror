@@ -1932,6 +1932,10 @@ img.ui-combobox-value-preview {
 	border: none;
 }
 
+.ui-combobox-button[disabled]:hover {
+	background-color: transparent;
+}
+
 .ui-combobox-button:hover {
 	cursor: pointer;
 	border-left-color: transparent;
