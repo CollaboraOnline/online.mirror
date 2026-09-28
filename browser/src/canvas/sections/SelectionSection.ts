@@ -260,7 +260,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 
 		const box = ShapeHandlesSection.handleSize() * app.pixelsToTwips;
 		const covered = cool.Range2D.fromPoints(
-			shown.map((handle: SelectionHandle) => handle.point),
+			shown.map((handle: SelectionHandle) => HandleLook.drawnAt(handle)),
 		).expand(box, box);
 		const area = new cool.SimpleRectangle(
 			covered.minX,
@@ -292,7 +292,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 		for (let at = shown.length - 1; at >= 0; --at) {
 			if (!shown[at].name || shown[at].deactivated) continue;
 
-			const point = new cool.SimplePoint(shown[at].point.x, shown[at].point.y);
+			const point = HandleLook.drawnAt(shown[at]);
 			if (Math.abs(point.vX - x) <= half && Math.abs(point.vY - y) <= half)
 				return shown[at];
 		}
@@ -829,7 +829,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 			const group = this.groupOf(handle);
 			if (!group) continue;
 
-			const point = new cool.SimplePoint(handle.point.x, handle.point.y);
+			const point = HandleLook.drawnAt(handle);
 			const hovered =
 				!handle.deactivated &&
 				handle.name !== '' &&

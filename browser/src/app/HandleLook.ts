@@ -121,6 +121,25 @@ class HandleLook {
 		return '#' + moved(part(1)) + moved(part(3)) + moved(part(5));
 	}
 
+	/*
+		How far the eight that frame a selection are drawn outside the places they stand on, as a
+		share of half a handle. At one, a corner handle has moved by half of itself along each
+		axis, so the corner of it that faces the selection lands on the place it stands on and
+		the handle lies wholly outside the frame; at nought it is drawn centered on that place, as
+		it always was; at minus one it lies wholly inside. Anything beyond either end would leave
+		the frame behind altogether, so the share is held between the two.
+
+		It is what keeps the eight off the points of a path, which lie on the corners of the
+		frame and halfway along its sides. Only the drawing and the hit test know of it: a drag
+		still puts the edge the handle names where the mouse is.
+	*/
+	public static shareTheEightMoveOut: number = 0.5;
+
+	/// Whether the eight are drawn turned with the selection, so that a square handle stands at
+	/// the object's own angle rather than upright. Only the turn: a sheared object still gets
+	/// square handles.
+	public static turnTheEightWithTheObject: boolean = true;
+
 	/// The line every handle is drawn round with.
 	public static readonly outlineColour: string = 'black';
 
@@ -140,6 +159,29 @@ class HandleLook {
 	/// How wide a handle of that kind is drawn, in core pixels.
 	public static widthOf(kind: HandleKind): number {
 		return HandleLook.size * HandleLook.shareOfTheSize[kind] * app.dpiScale;
+	}
+
+	/// How far the eight are drawn outside the places they stand on, in core pixels.
+	public static distanceTheEightMoveOut(): number {
+		const share = Math.max(-1, Math.min(1, HandleLook.shareTheEightMoveOut));
+
+		return share * HandleLook.widthOf('framing') * 0.5;
+	}
+
+	/*
+		Where a handle is drawn, in twips, which is where it stands unless it is one of the eight
+		and those are drawn outside the frame.
+	*/
+	public static drawnAt(handle: SelectionHandle): cool.SimplePoint {
+		const away = handle.awayFromItsPlace;
+		const distance = away
+			? HandleLook.distanceTheEightMoveOut() * app.pixelsToTwips
+			: 0;
+
+		return new cool.SimplePoint(
+			handle.point.x + (away ? away.x * distance : 0),
+			handle.point.y + (away ? away.y * distance : 0),
+		);
 	}
 
 	/// How far a band stands off from what it goes round, in core pixels.
@@ -170,12 +212,22 @@ class HandleLook {
 		kind: HandleKind,
 		at: cool.SimplePoint,
 		grown: number,
+		turnedBy?: number,
 	): string {
 		const across = HandleLook.widthOf(kind) + 2 * grown;
 
-		if (HandleLook.shapeOfTheKind[kind] === 'square')
+		if (HandleLook.shapeOfTheKind[kind] !== 'square')
+			context.arc(at.vX, at.vY, across * 0.5, 0, Math.PI * 2);
+		else if (turnedBy && HandleLook.turnTheEightWithTheObject) {
+			// The corners of the square are laid into the path under the turn and stay where
+			// they were laid once the transform is put back.
+			context.save();
+			context.translate(at.vX, at.vY);
+			context.rotate(turnedBy);
+			context.rect(-across * 0.5, -across * 0.5, across, across);
+			context.restore();
+		} else
 			context.rect(at.vX - across * 0.5, at.vY - across * 0.5, across, across);
-		else context.arc(at.vX, at.vY, across * 0.5, 0, Math.PI * 2);
 
 		return HandleLook.colourOfTheKind[kind];
 	}

@@ -107,9 +107,13 @@ class TurningInteraction extends SelectionInteraction {
 			this.turned,
 		);
 
-		return known.map((handle: SelectionHandle) => ({
-			...handle,
-			point: matrix.apply(handle.point.x, handle.point.y).round(),
-		}));
+		// The axes turn with the selection, so the way each of the eight faces is worked out
+		// again from where they stand now.
+		return ObjectHandles.facedAwayFromTheirPlaces(
+			known.map((handle: SelectionHandle) => ({
+				...handle,
+				point: matrix.apply(handle.point.x, handle.point.y).round(),
+			})),
+		);
 	}
 }

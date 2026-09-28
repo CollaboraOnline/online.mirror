@@ -25,6 +25,15 @@ interface SelectionHandle {
 	 * mouse cannot take hold of it and the keyboard walks past it.
 	 */
 	deactivated?: boolean;
+	/** Which way the handle is drawn away from the place it stands on, one step along each of
+	 * the two axes of the selection, with a nought for an axis it does not move along. It is
+	 * only for the drawing and for the hit test: what a drag does goes from the place itself.
+	 * Absent for a handle that is drawn where it stands.
+	 */
+	awayFromItsPlace?: cool.Point;
+	/// The angle the selection's own across axis stands at, in radians, for a handle that may be
+	/// drawn turned with the selection. Absent for one that is always drawn upright.
+	turnedBy?: number;
 	/// The number the object itself gives the handle, for the handles that are told apart by
 	/// nothing else. Absent where the name already says which one it is.
 	at?: number;
@@ -275,6 +284,51 @@ class ObjectHandles implements HandleSource {
 		);
 	}
 
+	/*
+		Gives each of the eight the way it is drawn away from the place it stands on: one step
+		along each of the two axes of the selection, worked out from where the eight stand now.
+		The axes are the selection's own and not the page's, so a handle stays outside whatever
+		angle the selection stands at, and a change that turns the selection over turns the axes
+		over with it, so the handles keep facing outwards through a mirror.
+
+		A handle that was not given a way to face is left as it is, which is every handle the
+		engine sends.
+	*/
+	public static facedAwayFromTheirPlaces(
+		handles: SelectionHandle[],
+	): SelectionHandle[] {
+		const placeOf = (kind: string) =>
+			handles.find((one: SelectionHandle) => one.kind === kind)?.point;
+		const upperLeft = placeOf('1');
+		const upperRight = placeOf('3');
+		const lowerLeft = placeOf('6');
+		if (!upperLeft || !upperRight || !lowerLeft) return handles;
+
+		// The way from one place to the other, one long.
+		const step = (from: cool.Point, to: cool.Point): cool.Point => {
+			const along = to.subtract(from);
+			return along.divideBy(along.length() || 1);
+		};
+		const across = step(upperLeft, upperRight);
+		const down = step(upperLeft, lowerLeft);
+
+		return handles.map((one: SelectionHandle) => {
+			const place = ObjectHandles.placeOfKind(one.kind);
+			if (!place || !one.awayFromItsPlace) return one;
+
+			const sideways = Math.sign(place.x - 0.5);
+			const downwards = Math.sign(place.y - 0.5);
+
+			return {
+				...one,
+				awayFromItsPlace: across
+					.multiplyBy(sideways)
+					.add(down.multiplyBy(downwards)),
+				turnedBy: Math.atan2(across.y, across.x),
+			};
+		});
+	}
+
 	/// Whether the object of that id is a connector.
 	public static isAConnector(objectId: number): boolean {
 		return (
@@ -370,13 +424,16 @@ class ObjectHandles implements HandleSource {
 		// or smaller they are shown and do nothing.
 		const dead = !ObjectHandles.canBeResized(this.objectIds);
 
-		return corners.map((corner: cool.Point, index: number) => ({
-			name: String(index + 1) + '.0.0',
-			kind: String(index + 1),
-			pointer: String(pointers[index]),
-			point: corner.round(),
-			deactivated: dead,
-		}));
+		return ObjectHandles.facedAwayFromTheirPlaces(
+			corners.map((corner: cool.Point, index: number) => ({
+				name: String(index + 1) + '.0.0',
+				kind: String(index + 1),
+				pointer: String(pointers[index]),
+				point: corner.round(),
+				deactivated: dead,
+				awayFromItsPlace: new cool.Point(0, 0),
+			})),
+		);
 	}
 
 	/*

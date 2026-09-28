@@ -310,6 +310,10 @@ class ScalingInteraction extends SelectionInteraction {
 			point: matrix.apply(handle.point.x, handle.point.y).round(),
 		}));
 
-		return this.keptAsTheyAre(known, mapped);
+		// A scale can turn the selection over, and the axes turn with it, so the way each of the
+		// eight faces is worked out again from where they stand now.
+		return ObjectHandles.facedAwayFromTheirPlaces(
+			this.keptAsTheyAre(known, mapped),
+		);
 	}
 }

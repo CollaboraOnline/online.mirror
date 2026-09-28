@@ -227,11 +227,11 @@ class FramingHandles extends HandleGroup {
 
 	public shape(
 		context: CanvasRenderingContext2D,
-		_handle: SelectionHandle,
+		handle: SelectionHandle,
 		at: cool.SimplePoint,
 		grown: number,
 	): string {
-		return HandleLook.lay(context, 'framing', at, grown);
+		return HandleLook.lay(context, 'framing', at, grown, handle.turnedBy);
 	}
 
 	public interactionFor(
