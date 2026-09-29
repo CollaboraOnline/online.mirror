@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-04 06:51+0000\n"
-"Last-Translator: DrLous <drlous@gmail.com>\n"
+"PO-Revision-Date: 2026-09-30 13:51+0000\n"
+"Last-Translator: Méven Car <meven.car@collabora.com>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/collabora-online/"
 "collabora-ui/fr/>\n"
-"Language: \n"
+"Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 2026.9\n"
+"X-Generator: Weblate 2026.10.dev0\n"
 
 #: admin/admin.strings.js:15
 msgid "Admin console"
@@ -841,19 +841,19 @@ msgstr "Brochure de droite à gauche"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:731
 msgid "English"
-msgstr ""
+msgstr "Anglais"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:732
 msgid "Hungarian"
-msgstr ""
+msgstr "Hongrois"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:733
 msgid "Portuguese (Brazil)"
-msgstr ""
+msgstr "Portugais (Brésil)"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:734
 msgid "Russian"
-msgstr ""
+msgstr "Russe"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1293
 msgid "Invalid JSON file"
@@ -938,17 +938,20 @@ msgstr "Ajouter une extension"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1366
 msgid "Security policies"
-msgstr ""
+msgstr "Polices de sécurité"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1368
 msgid ""
 "Upload SPIF security policies (.xml). These define the classifications and "
 "categories available when applying a security label to a document."
 msgstr ""
+"Téléchargez les polices de sécurité SPIF (.xml). Elles définissent les "
+"classifications et les catégories disponibles lors de l'application d'une "
+"étiquette de sécurité sur un document."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1374
 msgid "Upload Security Policy"
-msgstr ""
+msgstr "Envoyé une police de sécurité"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1463
 msgid "Settings are only available to signed-in users."
@@ -979,13 +982,15 @@ msgstr "Définir les préférences de l’interface par défaut."
 #: admin/src/integrator/AdminIntegratorSettings.ts:1753
 #: admin/src/integrator/AdminIntegratorSettings.ts:3998
 msgid "Zoom Behaviour"
-msgstr ""
+msgstr "Comportement du Zoom"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1898
 msgid ""
 "When on, text documents open at the zoom this server chooses. Turn it off "
 "to choose the zoom yourself."
 msgstr ""
+"Quand actif, les document textes s'ouvre au niveau de zoom choisi par le "
+"serveur. Désactiver le pour choisir le zoom vous-même."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1904
 msgid ""
@@ -1213,19 +1218,24 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3901
 msgid "Choose what the sentence checker looks for as you type."
-msgstr ""
+msgstr "Choisissez ce que le vérificateur de phrase cherche quand vous tapez."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3941
 msgid ""
 "This document is using the document settings it was opened with. What you "
 "change here applies to the next document you open."
 msgstr ""
+"Ce document utilise les paramètres du document avec lesquels il a été "
+"ouvert. Ce que vous modifiez ici s'applique au prochain document que vous "
+"ouvrirez."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3944
 msgid ""
 "This document is open in more than one window, so what you change here "
 "applies to the next document you open rather than this one."
 msgstr ""
+"Ce document est ouvert dans plus d'une fenêtre, ce que vous modifiez ici "
+"s'appliquera au prochain document que vous ouvrez plutôt que celui-ci."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:4032
 #: admin/src/integrator/Xcu.ts:439
@@ -1420,7 +1430,7 @@ msgstr "Fichier HTML (.html)"
 
 #: src/app/ExportFormats.ts:70
 msgid "Markdown (.md)"
-msgstr ""
+msgstr "Markdown (.md)"
 
 #: src/app/ExportFormats.ts:76 src/control/Control.Menubar.ts:851
 #: src/control/Control.NotebookbarBuilder.js:433
@@ -1526,11 +1536,11 @@ msgstr "Styles table"
 
 #: src/app/TableStylesService.ts:355
 msgid "Set as Default"
-msgstr ""
+msgstr "Établir comme Défaut"
 
 #: src/app/TableStylesService.ts:361
 msgid "Duplicate Style"
-msgstr ""
+msgstr "Dupliquer le Style"
 
 #: src/canvas/sections/CommentListSection.ts:2069
 #: src/canvas/sections/CommentListSection.ts:2082
@@ -1860,7 +1870,7 @@ msgstr "Bon"
 
 #: src/control/Control.AIChatSidebar.ts:415
 msgid "Poor"
-msgstr ""
+msgstr "Médiocre"
 
 #: src/control/Control.AIChatSidebar.ts:417
 msgid "Unknown"
@@ -2169,64 +2179,67 @@ msgstr ""
 
 #: src/control/Control.AIChatSidebar.ts:2144
 msgid "Request too large"
-msgstr ""
+msgstr "Requête trop grande"
 
 #: src/control/Control.AIChatSidebar.ts:2145
 msgid "Invalid request format"
-msgstr ""
+msgstr "Format de requête invalide"
 
 #: src/control/Control.AIChatSidebar.ts:2146
 msgid "Request superseded by a newer request"
-msgstr ""
+msgstr "Requête remplacée par une nouvelle requête"
 
 #: src/control/Control.AIChatSidebar.ts:2147
 msgid "No messages provided"
-msgstr ""
+msgstr "Aucun message fourni"
 
 #: src/control/Control.AIChatSidebar.ts:2148
 msgid "Message too long"
-msgstr ""
+msgstr "Message trop long"
 
 #: src/control/Control.AIChatSidebar.ts:2149
 msgid "AI features are disabled by the administrator"
-msgstr ""
+msgstr "Les fonctionnalités IA ont été désactivé par l'administrateur"
 
 #: src/control/Control.AIChatSidebar.ts:2150
 msgid "AI is not available for guests"
-msgstr ""
+msgstr "L'IA n'est pas disponible pour les invités"
 
 #: src/control/Control.AIChatSidebar.ts:2152
 msgid "AI features are disabled for this document"
-msgstr ""
+msgstr "Les fonctionnalités IA sont désactivées pour ce document"
 
 #: src/control/Control.AIChatSidebar.ts:2153
 msgid "AI settings not configured"
-msgstr ""
+msgstr "Paramètres IA non configurés"
 
 #: src/control/Control.AIChatSidebar.ts:2155
 msgid "The AI provider URL is invalid, check the AI settings"
-msgstr ""
+msgstr "L'URL du fournisseur d'IA est invalide, vérifiez les paramètres d'IA"
 
 #: src/control/Control.AIChatSidebar.ts:2157
 msgid "The AI image provider URL is invalid, check the AI settings"
 msgstr ""
+"L'URL du fournisseur d'image IA est invalide, vérifiez les paramètres d'IA"
 
 #: src/control/Control.AIChatSidebar.ts:2160
 msgid ""
 "Host \"{0}\" is not in the allowed host list, contact your administrator"
 msgstr ""
+"Host \"{0}\" n'est pas dans la liste d'hôte autorisée, contactez votre "
+"administrateur"
 
 #: src/control/Control.AIChatSidebar.ts:2162
 msgid "Network error - please check your connection"
-msgstr ""
+msgstr "Erreur réseau - veuillez vérifier votre connexion"
 
 #: src/control/Control.AIChatSidebar.ts:2164
 msgid "Could not connect to the AI provider"
-msgstr ""
+msgstr "Impossible de se connecter au fournisseur d'IA"
 
 #: src/control/Control.AIChatSidebar.ts:2165
 msgid "No response from AI"
-msgstr ""
+msgstr "Aucune réponse de l 'IA"
 
 #: src/control/Control.AIChatSidebar.ts:2166
 msgid "AI used too many tool steps"
@@ -2237,121 +2250,137 @@ msgid ""
 "The model ran out of tokens before producing output. Try a shorter input or "
 "a model with a larger output budget."
 msgstr ""
+"Le modèle a épuisé ses jetons avant de produire une sortie. Essayez une "
+"entrée plus courte ou un modèle avec un budget de production plus élevé."
 
 #: src/control/Control.AIChatSidebar.ts:2173
 msgid ""
 "The model returned an empty response (no tokens generated). This is usually "
 "a temporary provider issue - please retry, or try a different model."
 msgstr ""
+"Le modèle a retourné une réponse vide (pas de jetons générés). Il s'agit "
+"généralement d'un problème de fournisseur temporaire - veuillez réessayer, "
+"ou essayer un autre modèle."
 
 #: src/control/Control.AIChatSidebar.ts:2175
 msgid "Image generation failed: no prompt from model"
-msgstr ""
+msgstr "La génération d'image a échoué : aucun prompt du modèle"
 
 #: src/control/Control.AIChatSidebar.ts:2176
 msgid "Document not available"
-msgstr ""
+msgstr "Document non disponible"
 
 #: src/control/Control.AIChatSidebar.ts:2177
 msgid "The edited outline is not valid: {0}"
-msgstr ""
+msgstr "Le plan édité n'est pas valide : {0}"
 
 #: src/control/Control.AIChatSidebar.ts:2179
 msgid "Could not build any slides from the outline. Please try again."
 msgstr ""
+"Impossible de construire des diapositives à partir du plan. Veuillez "
+"réessayer."
 
 #: src/control/Control.AIChatSidebar.ts:2180
 msgid "AI image settings not configured"
-msgstr ""
+msgstr "Paramètres d'image IA non configurés"
 
 #: src/control/Control.AIChatSidebar.ts:2181
 msgid "Image model not configured"
-msgstr ""
+msgstr "Modèle d'image non configuré"
 
 #: src/control/Control.AIChatSidebar.ts:2182
 msgid "Image generation failed: {0}"
-msgstr ""
+msgstr "La génération d'images a échoué : {0}"
 
 #: src/control/Control.AIChatSidebar.ts:2183
 msgid "No image generated"
-msgstr ""
+msgstr "Aucune image générée"
 
 #: src/control/Control.AIChatSidebar.ts:2184
 msgid "Failed to parse the AI response"
-msgstr ""
+msgstr "Échec de lecture de la réponse IA"
 
 #: src/control/Control.AIChatSidebar.ts:2186
 msgid "The AI provider rejected the request as invalid"
-msgstr ""
+msgstr "Le fournisseur d'IA a rejeté la requête comme invalide"
 
 #: src/control/Control.AIChatSidebar.ts:2195
 msgid "API error ({0})"
-msgstr ""
+msgstr "Erreur de l'API ({0})"
 
 #: src/control/Control.AIChatSidebar.ts:2224
 msgid "Extracting link targets..."
-msgstr ""
+msgstr "Extraction des cibles de lien..."
 
 #: src/control/Control.AIChatSidebar.ts:2225
 msgid "Evaluating formula..."
-msgstr ""
+msgstr "Évaluation de la formule..."
 
 #: src/control/Control.AIChatSidebar.ts:2226
 msgid "Loading function catalog..."
-msgstr ""
+msgstr "Chargement du catalogue de fonctions..."
 
 #: src/control/Control.AIChatSidebar.ts:2227
 msgid "Thinking..."
-msgstr ""
+msgstr "Réflexion..."
 
 #: src/control/Control.AIChatSidebar.ts:2228
 msgid "Working..."
-msgstr ""
+msgstr "Traitement en cours..."
 
 #: src/control/Control.AIChatSidebar.ts:2229
 msgid "Setting formulas..."
-msgstr ""
+msgstr "Réglage des formules..."
 
 #: src/control/Control.AIChatSidebar.ts:2230
 msgid "Building slide {0} of {1}..."
-msgstr ""
+msgstr "Construction de la Diapositive {0} de {1}..."
 
 #: src/control/Control.AIChatSidebar.ts:2231
 msgid "Skipping slide {0}..."
-msgstr ""
+msgstr "Ignore la Diapositive {0}..."
 
 #: src/control/Control.AIChatSidebar.ts:2232
 msgid "Generating image {0} of {1}..."
-msgstr ""
+msgstr "Génération de l'image {0} de {1}..."
 
 #: src/control/Control.AIChatSidebar.ts:2252
 msgid ""
 "This document is too large to read in full. Pick a section to focus on:"
 msgstr ""
+"Ce document est trop grand pour être lu en entier. Choisissez une section sur"
+" :"
 
 #: src/control/Control.AIChatSidebar.ts:2260
 msgid "This sheet is too large to read in full. To narrow it down, you can:"
 msgstr ""
+"Cette feuille est trop grande pour lire en entier. Pour le réduire, vous "
+"pouvez :"
 
 #: src/control/Control.AIChatSidebar.ts:2264
 msgid "Select a range of cells in the sheet, then ask your question again"
 msgstr ""
+"Sélectionnez une plage de cellules dans la feuille, puis posez votre "
+"question à nouveau"
 
 #: src/control/Control.AIChatSidebar.ts:2267
 msgid "Reply with a range to focus on, like `A1:D100`"
-msgstr ""
+msgstr "Répondre avec une plage sur laquelle se concentrer, comme `A1:D100`"
 
 #: src/control/Control.AIChatSidebar.ts:2272
 msgid "Your deck is ready: {0} slides built from the approved outline."
 msgstr ""
+"Votre présentation est prête : {0} diapositives construites à partir du plan "
+"approuvé."
 
 #: src/control/Control.AIChatSidebar.ts:2280
 msgid "{0} slide(s) could not be built and were skipped."
-msgstr ""
+msgstr "{0} diapositive(s) n'ont pas pu être générée et ont été ignorée(s)."
 
 #: src/control/Control.AIChatSidebar.ts:2288
 msgid "{0} image(s) could not be generated and show a placeholder."
 msgstr ""
+"{0} image(s) n'ont pu être généré et affiche un contenu de remplacement."
 
 #: src/control/Control.AIChatSidebar.ts:2328
 #: src/control/Control.AIChatSidebar.ts:3839
@@ -2363,9 +2392,8 @@ msgstr ""
 "peuvent pas être envoyés comme contexte."
 
 #: src/control/Control.AIChatSidebar.ts:2417
-#, fuzzy
 msgid "Message is too long. Please shorten it and try again."
-msgstr "Message trop long : Merci de le réduire et réessayez."
+msgstr "Message trop long. Merci de le réduire et réessayez."
 
 #: src/control/Control.AIChatSidebar.ts:2474
 msgid "Error: "
@@ -2373,52 +2401,51 @@ msgstr "Erreur : "
 
 #: src/control/Control.AIChatSidebar.ts:2504
 msgid "Generated image"
-msgstr "image générée par IA"
+msgstr "Image générée par IA"
 
 #: src/control/Control.AIChatSidebar.ts:2516
 msgid "AI request failed"
-msgstr "La requête AI a échoué"
+msgstr "La requête IA a échouée"
 
 #: src/control/Control.AIChatSidebar.ts:2533
-#, fuzzy
 msgid "The AI assistant"
-msgstr "L'assistant AI"
+msgstr "L'assistant IA"
 
 #: src/control/Control.AIChatSidebar.ts:2572
 msgid "insert %n slide"
 msgid_plural "insert %n slides"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "insérer %n Diapo"
+msgstr[1] "insérer %n diapos"
 
 #: src/control/Control.AIChatSidebar.ts:2575
 msgid "delete %n slide"
 msgid_plural "delete %n slides"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "supprimer %n Diapo"
+msgstr[1] "supprimer %n Diapos"
 
 #: src/control/Control.AIChatSidebar.ts:2580
 msgid "duplicate %n slide"
 msgid_plural "duplicate %n slides"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "dupliquer %n Diapo"
+msgstr[1] "dupliquer %n Diapos"
 
 #: src/control/Control.AIChatSidebar.ts:2586
 msgid "move %n slide"
 msgid_plural "move %n slides"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "déplacer %n Diapo"
+msgstr[1] "déplacer %n Diapos"
 
 #: src/control/Control.AIChatSidebar.ts:2589
 msgid "rename %n slide"
 msgid_plural "rename %n slides"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "renommer %n Diapo"
+msgstr[1] "renommer %n Diapos"
 
 #: src/control/Control.AIChatSidebar.ts:2594
 msgid "change %n layout"
 msgid_plural "change %n layouts"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "changer %n mise en page"
+msgstr[1] "changer %n mises en page"
 
 #: src/control/Control.AIChatSidebar.ts:2598
 msgid "set text in %n place"
@@ -2429,8 +2456,8 @@ msgstr[1] ""
 #: src/control/Control.AIChatSidebar.ts:2606
 msgid "format text in %n place"
 msgid_plural "format text in %n places"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "formater le texte dans %n emplacement"
+msgstr[1] "formater le texte dans %n emplacements"
 
 #: src/control/Control.AIChatSidebar.ts:2614
 #, fuzzy
@@ -2452,7 +2479,7 @@ msgstr[1] ""
 
 #: src/control/Control.AIChatSidebar.ts:2661
 msgid "apply the design template '%1'"
-msgstr ""
+msgstr "appliquer le patron de design '%1'"
 
 #: src/control/Control.AIChatSidebar.ts:2664
 msgid "This will: %1."
