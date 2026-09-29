@@ -395,7 +395,8 @@ void DrawingFragment::onEndElement()
                     if ( !bIsShapeVisible)
                         mxShape->setHidden(true);
 
-                    mxShape->addShape( getOoxFilter(), &getTheme(), mxDrawPage, aTransformation, mxShape->getFillProperties() );
+                    mxShape->addShape( getOoxFilter(), &getTheme(), mxDrawPage, aTransformation,
+                                       mxShape->getFillProperties(), &maShapeMap );
 
                     /*  Collect all shape positions in the WorksheetHelper base
                         class. But first, scale EMUs to 1/100 mm. */
@@ -411,6 +412,8 @@ void DrawingFragment::onEndElement()
                         {
                             bool bResizeWithCell = mxAnchor->getEditAs() == ShapeAnchor::ANCHOR_TWOCELL;
                             ScDrawLayer::SetCellAnchoredFromPosition( *pObj, getScDocument(), getSheetIndex(), bResizeWithCell );
+                            if( mxShape->getServiceName() == "com.sun.star.drawing.ConnectorShape" )
+                                maCellAnchoredConnectors.emplace_back( mxShape, bResizeWithCell );
                         }
                     }
                 }
@@ -419,6 +422,20 @@ void DrawingFragment::onEndElement()
             mxAnchor.reset();
         break;
     }
+}
+
+void DrawingFragment::finalizeImport()
+{
+    // A connector can name a shape that comes after it, so the connections are made once all
+    // shapes of the sheet are inserted.
+    ::oox::drawingml::connectConnectorShapes( maShapeMap );
+
+    // Connecting moves the ends of a connector onto its shapes, so its cell anchor is taken from
+    // the new position.
+    for( const auto& [ rxConnector, bResizeWithCell ] : maCellAnchoredConnectors )
+        if( SdrObject* pObj = SdrObject::getSdrObjectFromXShape( rxConnector->getXShape() ) )
+            ScDrawLayer::SetCellAnchoredFromPosition( *pObj, getScDocument(), getSheetIndex(),
+                                                      bResizeWithCell );
 }
 
 void DrawingFragment::applyFontRefColor(const oox::drawingml::ShapePtr& pShape,

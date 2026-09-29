@@ -76,6 +76,11 @@ typedef ::std::map< OUString, ShapePtr > ShapeIdMap;
 
 typedef std::vector<ConnectorShapeProperties> ConnectorShapePropertiesList;
 
+/** Connects each connector shape in the map to the shapes of the map that its start and end
+    connections name, and moves the handles of bent and curved connectors to where the document
+    has them. The shapes must already be inserted. */
+OOX_DLLPUBLIC void connectConnectorShapes(ShapeIdMap& rShapeMap);
+
 struct ShapeStyleRef
 {
     Color               maPhClr;

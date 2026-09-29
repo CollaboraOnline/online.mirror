@@ -494,4 +494,30 @@ void ConnectorHelper::applyCurvedHandleAdjustments(oox::drawingml::ShapePtr pCon
     }
 }
 
+void oox::drawingml::connectConnectorShapes(ShapeIdMap& rShapeMap)
+{
+    for (auto& rIt : rShapeMap)
+    {
+        if (rIt.second->getServiceName() != "com.sun.star.drawing.ConnectorShape")
+            continue;
+
+        ConnectorHelper::applyConnections(rIt.second, rShapeMap);
+
+        if (rIt.second->getConnectorName() == u"bentConnector3"_ustr
+            || rIt.second->getConnectorName() == u"bentConnector4"_ustr
+            || rIt.second->getConnectorName() == u"bentConnector5"_ustr)
+        {
+            ConnectorHelper::applyBentHandleAdjustments(rIt.second);
+        }
+        else if (rIt.second->getConnectorName() == u"curvedConnector3"_ustr
+                 || rIt.second->getConnectorName() == u"curvedConnector4"_ustr
+                 || rIt.second->getConnectorName() == u"curvedConnector5"_ustr)
+        {
+            ConnectorHelper::applyCurvedHandleAdjustments(rIt.second);
+        }
+        // else use the default path.
+        // curveConnector2 and bentConnector2 do not have handles.
+    }
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

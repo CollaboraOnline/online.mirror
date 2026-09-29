@@ -20,6 +20,7 @@
 #include <postit.hxx>
 #include <tabprotection.hxx>
 #include <dpobject.hxx>
+#include <drwlayer.hxx>
 
 #include <editeng/wghtitem.hxx>
 #include <editeng/eeitem.hxx>
@@ -30,6 +31,8 @@
 #include <svl/numformat.hxx>
 #include <svl/zformat.hxx>
 #include <svx/svdocapt.hxx>
+#include <svx/svdoedge.hxx>
+#include <svx/svdpage.hxx>
 
 #include <com/sun/star/chart2/XChartDocument.hpp>
 #include <com/sun/star/chart2/XChartTypeContainer.hpp>
@@ -1171,6 +1174,28 @@ CPPUNIT_TEST_FIXTURE(ScExportTest5, testNoteFirstParagraphFormatting)
         = "/x:comments/x:commentList/x:comment/x:text/x:r[starts-with(x:t, 'Second')]/x:rPr"_ostr;
     assertXPath(pXmlDoc, aSecond + "/x:b", 0);
     assertXPath(pXmlDoc, aSecond + "/x:rFont", "val", u"Tahoma");
+}
+
+CPPUNIT_TEST_FIXTURE(ScExportTest5, testConnectorStartShape)
+{
+    // The sheet has an arrow connector whose start is connected to a box. The connector comes
+    // first in the drawing, before the box.
+    createScDoc("xlsx/connector-start-shape.xlsx");
+
+    SdrPage* pPage = getScDoc()->GetDrawLayer()->GetPage(0);
+    auto pConnector = dynamic_cast<SdrEdgeObj*>(pPage->GetObj(0));
+    CPPUNIT_ASSERT(pConnector);
+    // Without the fix in place, the connector was not connected to anything after import.
+    CPPUNIT_ASSERT_EQUAL(pPage->GetObj(1), pConnector->GetConnectedNode(true));
+
+    save(TestFilter::XLSX);
+    xmlDocUniquePtr pDrawing = parseExport(u"xl/drawings/drawing1.xml"_ustr);
+    CPPUNIT_ASSERT(pDrawing);
+
+    // The connection names the id that the box is written with.
+    const OUString sBoxId = getXPath(pDrawing, "//xdr:sp/xdr:nvSpPr/xdr:cNvPr", "id");
+    assertXPath(pDrawing, "//xdr:cxnSp/xdr:nvCxnSpPr/xdr:cNvCxnSpPr/a:stCxn", "id", sBoxId);
+    assertXPath(pDrawing, "//xdr:cxnSp/xdr:nvCxnSpPr/xdr:cNvCxnSpPr/a:stCxn", "idx", u"3");
 }
 
 CPPUNIT_TEST_FIXTURE(ScExportTest5, testSheetProtections)

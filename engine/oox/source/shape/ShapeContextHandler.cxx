@@ -43,8 +43,6 @@
 #include <svx/svdoedge.hxx>
 #include <svx/svdobj.hxx>
 
-#include <drawingml/connectorhelper.hxx>
-
 #include <memory>
 #include <utility>
 
@@ -534,28 +532,7 @@ ShapeContextHandler::getShape()
                 lcl_createShapeMap(pShape, aShapeMap);
 
                 // Traverse aShapeMap and generate edge related properties.
-                for (auto& rIt : aShapeMap)
-                {
-                    if ((rIt.second)->getServiceName() == "com.sun.star.drawing.ConnectorShape")
-                    {
-                        ConnectorHelper::applyConnections(rIt.second, aShapeMap);
-
-                        if (rIt.second->getConnectorName() == u"bentConnector3"_ustr
-                           || rIt.second->getConnectorName() == u"bentConnector4"_ustr
-                           || rIt.second->getConnectorName() == u"bentConnector5"_ustr)
-                        {
-                           ConnectorHelper::applyBentHandleAdjustments(rIt.second);
-                        }
-                        else if (rIt.second->getConnectorName() == u"curvedConnector3"_ustr
-                           || rIt.second->getConnectorName() == u"curvedConnector4"_ustr
-                           || rIt.second->getConnectorName() == u"curvedConnector5"_ustr)
-                        {
-                            ConnectorHelper::applyCurvedHandleAdjustments(rIt.second);
-                        }
-                        // else use the default path of LibreOffice.
-                        // curveConnector2 and bentConnector2 do not have handles.
-                    }
-                }
+                oox::drawingml::connectConnectorShapes(aShapeMap);
                 xResult = pShape->getXShape();
                 mxWordprocessingCanvasContext.clear();
             }

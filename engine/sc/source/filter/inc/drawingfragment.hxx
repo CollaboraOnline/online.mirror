@@ -20,6 +20,8 @@
 #pragma once
 
 #include <memory>
+#include <utility>
+#include <vector>
 #include <oox/drawingml/shapegroupcontext.hxx>
 #include <oox/drawingml/color.hxx>
 #include <oox/ole/axcontrol.hxx>
@@ -106,6 +108,7 @@ private:
     virtual ::oox::core::ContextHandlerRef onCreateContext( sal_Int32 nElement, const AttributeList& rAttribs ) override;
     virtual void        onCharacters( const OUString& rChars ) override;
     virtual void        onEndElement() override;
+    virtual void        finalizeImport() override;
 
     typedef ::std::unique_ptr< ShapeAnchor > ShapeAnchorRef;
 
@@ -113,6 +116,9 @@ private:
                         mxDrawPage;             /// Drawing page of this sheet.
     ::oox::drawingml::ShapePtr mxShape;         /// Current top-level shape.
     ShapeAnchorRef      mxAnchor;               /// Current anchor of top-level shape.
+    ::oox::drawingml::ShapeIdMap maShapeMap;    /// All inserted shapes, by their id.
+    /// Top-level connectors anchored to cells, each with whether it resizes with its cells.
+    ::std::vector< ::std::pair< ::oox::drawingml::ShapePtr, bool > > maCellAnchoredConnectors;
     // for SmartArt. Apply the colors in rFontRefColor (from clrScheme) to all shapes in pShape,
     // the group object which represents the SmartArt.
     void applyFontRefColor(const oox::drawingml::ShapePtr& pShape,

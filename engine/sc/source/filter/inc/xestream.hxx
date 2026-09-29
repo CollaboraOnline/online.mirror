@@ -27,6 +27,7 @@
 #include <rtl/strbuf.hxx>
 
 #include <oox/core/xmlfilterbase.hxx>
+#include <oox/export/shapes.hxx>
 #include <sax/fshelper.hxx>
 #include <tools/stream.hxx>
 #include <formula/errorcodes.hxx>
@@ -333,6 +334,8 @@ public:
 
     static OUString GenerateUniqueTableName(const std::u16string_view& rOriginalName, const std::vector<OUString>& aNewTabNames, const std::vector<OUString>& aOriginalTabNames);
     sal_Int32 getAndIncrementDiagramId() { maDiagramId++; return maDiagramId; };
+    /// The ids of the drawing shapes of the document that are written or referenced so far.
+    oox::drawingml::ShapeExport::ShapeHashMap& getShapeIdMap() { return maShapeIdMap; }
 
     /// Set when a dynamic array master cell is emitted.
     void NoteDynamicArrayFormula() { mbHasDynamicArrayFormula = true; }
@@ -380,6 +383,7 @@ private:
     XclExpXmlPathToStateMap                     maOpenedStreamMap;
 
     sal_Int32 maDiagramId;
+    oox::drawingml::ShapeExport::ShapeHashMap maShapeIdMap;
 
     bool mbExportVBA;
     bool mbExportTemplate;

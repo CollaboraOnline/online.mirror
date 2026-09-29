@@ -1394,7 +1394,9 @@ void XclObjAny::SaveXml( XclExpXmlStream& rStrm )
 
     sax_fastparser::FSHelperPtr pDrawing = rStrm.GetCurrentStream();
 
-    ShapeExport aDML(XML_xdr, pDrawing, nullptr, &rStrm, drawingml::DOCUMENT_XLSX);
+    // All shapes share one id map, so that a connector names the same id as the shape it
+    // connects to.
+    ShapeExport aDML(XML_xdr, pDrawing, &rStrm.getShapeIdMap(), &rStrm, drawingml::DOCUMENT_XLSX);
     auto pURLTransformer = std::make_shared<ScURLTransformer>(*mpDoc);
     aDML.SetURLTranslator(pURLTransformer);
 
