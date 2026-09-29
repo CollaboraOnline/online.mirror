@@ -300,7 +300,10 @@ private:
     /// The actual main implementation.
     int innerMain();
 
-    static void appendAllowedHostsFrom(Poco::Util::LayeredConfiguration& conf, const std::string& root, std::vector<std::string>& allowed);
+    /// onlyAllowed: skip entries whose [@allow] attribute is not true.
+    static void appendAllowedHostsFrom(Poco::Util::LayeredConfiguration& conf,
+                                       const std::string& root, std::vector<std::string>& allowed,
+                                       bool onlyAllowed = false);
     static void appendAllowedAliasGroups(Poco::Util::LayeredConfiguration& conf, std::vector<std::string>& allowed);
 
 private:

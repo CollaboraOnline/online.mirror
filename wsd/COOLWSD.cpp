@@ -209,7 +209,8 @@ static std::size_t SimulatedLatencyMs = 0;
 
 #endif
 
-void COOLWSD::appendAllowedHostsFrom(LayeredConfiguration& conf, const std::string& root, std::vector<std::string>& allowed)
+void COOLWSD::appendAllowedHostsFrom(LayeredConfiguration& conf, const std::string& root,
+                                     std::vector<std::string>& allowed, bool onlyAllowed)
 {
     for (size_t i = 0; ; ++i)
     {
@@ -218,6 +219,10 @@ void COOLWSD::appendAllowedHostsFrom(LayeredConfiguration& conf, const std::stri
         {
             break;
         }
+
+        if (onlyAllowed && !conf.getBool(path + "[@allow]", false))
+            continue;
+
         const std::string host = ConfigUtil::getConfigValue<std::string>(conf, path, "");
         if (!host.empty())
         {
@@ -2079,7 +2084,7 @@ void COOLWSD::innerInitialize(Poco::Util::Application& self)
     bool wopiAllowed = conf.getBool("storage.wopi[@allow]", false);
     if (wopiAllowed)
     {
-        appendAllowedHostsFrom(conf, "storage.wopi", lokAllowedHosts);
+        appendAllowedHostsFrom(conf, "storage.wopi", lokAllowedHosts, /*onlyAllowed=*/true);
         appendAllowedAliasGroups(conf, lokAllowedHosts);
     }
 
