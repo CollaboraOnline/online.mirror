@@ -301,6 +301,7 @@ public:
     const std::string& getDocTemplate() const { return _docTemplate; }
 
     const std::string& getInFilterOption() const { return _inFilterOptions; }
+    void setInFilterOptions(const std::string& options) { _inFilterOptions = options; }
 
     std::string getZoteroAPIKey() const { return _zoteroAPIKey; }
 
