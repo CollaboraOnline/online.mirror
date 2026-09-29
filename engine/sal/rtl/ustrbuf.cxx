@@ -20,6 +20,7 @@
 #include <osl/interlck.h>
 #include <rtl/character.hxx>
 #include <rtl/ustrbuf.h>
+#include <rtl/ustrbuf.hxx>
 #include "strimp.hxx"
 
 #if USE_SDT_PROBES
@@ -106,6 +107,44 @@ void rtl_uStringbuffer_remove( rtl_uString ** This,
                                        sal_Int32 len )
 {
     rtl::str::stringbuffer_remove(This, start, len);
+}
+
+/** Similar to OUString::replaceAt
+
+    Replace n = count characters
+    from position index in this string with newStr.
+ */
+void rtl::OUStringBuffer::replaceAt(sal_Int32 nIndex, sal_Int32 nCount, std::u16string_view newStr )
+{
+    assert(nIndex >= 0 && nIndex <= getLength());
+    assert(nCount >= 0);
+    assert(nCount <= getLength() - nIndex);
+
+    /* Append? */
+    const sal_Int32 nOldLength = getLength();
+    if ( nIndex == nOldLength )
+    {
+        append(newStr);
+        return;
+    }
+
+    sal_Int32 nNewLength = nOldLength + newStr.size() - nCount;
+    if (newStr.size() > o3tl::make_unsigned(nCount))
+        ensureCapacity(nOldLength + newStr.size() - nCount);
+
+    sal_Unicode* pStr = const_cast<sal_Unicode*>(getStr());
+    // move the piece after the insert site into the right place
+    memmove(
+        pStr + nIndex + newStr.size(),
+        pStr + nIndex + nCount,
+        (nOldLength - nIndex - nCount) * sizeof(sal_Unicode));
+    // copy the inserted data into place
+    memcpy(
+        pStr + nIndex,
+        newStr.data(),
+        newStr.size() * sizeof(sal_Unicode));
+
+    setLength(nNewLength);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -2152,8 +2152,7 @@ bool INetURLObject::convertIntToExt(std::u16string_view rTheIntURIRef,
     bool bConvert = pPrefix && pPrefix->m_eKind == PrefixInfo::Kind::Internal;
     if (bConvert)
     {
-        comphelper::string::replaceAt(aSynExtURIRef, 0, p - pBegin,
-                pPrefix->m_aTranslatedPrefix);
+        aSynExtURIRef.replaceAt(0, p - pBegin, pPrefix->m_aTranslatedPrefix);
     }
     rTheExtURIRef = decode(aSynExtURIRef, eDecodeMechanism, eCharset);
     return bConvert;
@@ -2175,8 +2174,7 @@ bool INetURLObject::convertExtToInt(std::u16string_view rTheExtURIRef,
     bool bConvert = pPrefix && pPrefix->m_eKind == PrefixInfo::Kind::External;
     if (bConvert)
     {
-        comphelper::string::replaceAt(aSynIntURIRef, 0, p - pBegin,
-            pPrefix->m_aTranslatedPrefix);
+        aSynIntURIRef.replaceAt(0, p - pBegin, pPrefix->m_aTranslatedPrefix);
     }
     rTheIntURIRef = decode(aSynIntURIRef, eDecodeMechanism, eCharset);
     return bConvert;

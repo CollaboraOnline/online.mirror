@@ -1123,6 +1123,13 @@ public:
         return *this;
     }
 
+    /** Similar to OUString::replaceAt, but for an OUStringBuffer.
+
+        Replace n = count characters
+        from position index in this string with newStr.
+     */
+    SAL_DLLPUBLIC void replaceAt(sal_Int32 index, sal_Int32 count, std::u16string_view newStr );
+
     /** Allows access to the internal data of this OUStringBuffer, for effective
         manipulation.
 
