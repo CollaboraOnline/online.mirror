@@ -85,6 +85,11 @@ window.L.Clipboard = window.L.Class.extend({
 		document.oncopy = function(ev)  { return that.copy(ev); };
 		document.onpaste = function(ev) {
 			if (window.ThisIsTheMacOSApp || window.ThisIsTheWindowsApp) {
+				// A text field of our own, such as a dialog's input, takes the paste itself.
+				if (that._isAnyInputFieldSelected() && !that._isFormulabarSelected()) {
+					window.app.console.debug('Paste: the focused text field takes the paste');
+					return;
+				}
 				// For each app that uses the COKitClipboardProvider API
 				ev.preventDefault();
 				window.postMobileMessage('uno .uno:Paste');
