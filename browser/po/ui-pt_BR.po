@@ -12,17 +12,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-08 00:47+0000\n"
-"Last-Translator: Jonathan Carvalho <jonathancarvalho@users.noreply.hosted."
-"weblate.org>\n"
+"PO-Revision-Date: 2026-09-29 03:51+0000\n"
+"Last-Translator: H2Oufoe <regularwater@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "collabora-online/collabora-ui/pt_BR/>\n"
-"Language: \n"
+"Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 2026.9.1.dev0\n"
+"X-Generator: Weblate 2026.10.dev0\n"
 
 #: admin/admin.strings.js:15
 msgid "Admin console"
@@ -425,13 +424,12 @@ msgstr "Seu servidor WOPI não é seguro: a verificação SSL falhou"
 
 #: admin/src/AdminSocketServerAudit.js:40
 #: src/control/Control.ServerAuditDialog.ts:72
-#, fuzzy
 msgid ""
 "Documents are not effectively contained: missing capabilities, namespaces "
 "and landlock."
 msgstr ""
-"Os documentos não estão sendo efetivamente contidos: faltam recursos ou "
-"namespaces."
+"Os documentos não estão sendo efetivamente contidos: faltam recursos, "
+"namespaces e landlock."
 
 #: admin/src/AdminSocketServerAudit.js:45
 #: src/control/Control.ServerAuditDialog.ts:97
@@ -842,19 +840,19 @@ msgstr "Folheto direita para esquerda"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:731
 msgid "English"
-msgstr ""
+msgstr "Inglês"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:732
 msgid "Hungarian"
-msgstr ""
+msgstr "Húngaro"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:733
 msgid "Portuguese (Brazil)"
-msgstr ""
+msgstr "Português (Brasil)"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:734
 msgid "Russian"
-msgstr ""
+msgstr "Russo"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1293
 msgid "Invalid JSON file"
@@ -937,17 +935,20 @@ msgstr "Carregar extensão"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1366
 msgid "Security policies"
-msgstr ""
+msgstr "Políticas de segurança"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1368
 msgid ""
 "Upload SPIF security policies (.xml). These define the classifications and "
 "categories available when applying a security label to a document."
 msgstr ""
+"Carregar as políticas de segurança SPIF (.xml). Elas definem as "
+"classificações e categorias disponíveis ao aplicar um rótulo de segurança em "
+"um documento."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1374
 msgid "Upload Security Policy"
-msgstr ""
+msgstr "Atualizar as políticas de segurança"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1463
 msgid "Settings are only available to signed-in users."
@@ -1204,24 +1205,29 @@ msgstr ""
 "a chave da API."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3898
+#, fuzzy
 msgid "Lightproof Sentence Checker"
-msgstr ""
+msgstr "Verificador de sentença à prova de luz"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3901
 msgid "Choose what the sentence checker looks for as you type."
-msgstr ""
+msgstr "Escolha qual frase do verificador de frases você quer enquanto digita."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3941
 msgid ""
 "This document is using the document settings it was opened with. What you "
 "change here applies to the next document you open."
 msgstr ""
+"Esse documento atual está usando as configurações do documento de quando foi "
+"criado. O que você muda aqui se aplica ao próximo documento que você criar."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3944
 msgid ""
 "This document is open in more than one window, so what you change here "
 "applies to the next document you open rather than this one."
 msgstr ""
+"Esse documento está aberto em mais de uma janela, então o que você mudar "
+"aqui se aplica ao próximo documento que você abrir em vez desse."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:4032
 #: admin/src/integrator/Xcu.ts:439
@@ -2195,58 +2201,67 @@ msgid "The AI provider URL is invalid, check the AI settings"
 msgstr "A URL do provedor de IA é inválida; verifique as configurações de IA"
 
 #: src/control/Control.AIChatSidebar.ts:2157
-#, fuzzy
 msgid "The AI image provider URL is invalid, check the AI settings"
-msgstr "A URL do provedor de IA é inválida; verifique as configurações de IA"
+msgstr ""
+"O link do provedor de imagens de IA é inválido, verifique nas configurações "
+"de IA"
 
 #: src/control/Control.AIChatSidebar.ts:2160
 msgid ""
 "Host \"{0}\" is not in the allowed host list, contact your administrator"
 msgstr ""
+"Host \"{0}\" não está na lista de hosts permitido, contate seu administrador"
 
 #: src/control/Control.AIChatSidebar.ts:2162
 msgid "Network error - please check your connection"
-msgstr ""
+msgstr "Erro de rede - verifique sua conexão"
 
 #: src/control/Control.AIChatSidebar.ts:2164
 msgid "Could not connect to the AI provider"
-msgstr ""
+msgstr "Não foi possível se conectar ao provedor de IA"
 
 #: src/control/Control.AIChatSidebar.ts:2165
 msgid "No response from AI"
-msgstr ""
+msgstr "Nenhuma resposta da AI"
 
 #: src/control/Control.AIChatSidebar.ts:2166
+#, fuzzy
 msgid "AI used too many tool steps"
-msgstr ""
+msgstr "AI usou muitos passos de ferramenta"
 
 #: src/control/Control.AIChatSidebar.ts:2169
 msgid ""
 "The model ran out of tokens before producing output. Try a shorter input or "
 "a model with a larger output budget."
 msgstr ""
+"O modelo ficou sem tokens antes de gerar um resultado. Experimente uma "
+"entrada mais curta ou um modelo com um orçamento de saída maior."
 
 #: src/control/Control.AIChatSidebar.ts:2173
 msgid ""
 "The model returned an empty response (no tokens generated). This is usually "
 "a temporary provider issue - please retry, or try a different model."
 msgstr ""
+"O modelo retornou uma resposta vazia (sem fichas geradas). Este é geralmente "
+"um problema de provedor temporário - por favor, tente um modelo diferente."
 
 #: src/control/Control.AIChatSidebar.ts:2175
 msgid "Image generation failed: no prompt from model"
-msgstr ""
+msgstr "A geração de imagem falhou: nenhum prompt do modelo"
 
 #: src/control/Control.AIChatSidebar.ts:2176
 msgid "Document not available"
-msgstr ""
+msgstr "Documento não disponível"
 
 #: src/control/Control.AIChatSidebar.ts:2177
 msgid "The edited outline is not valid: {0}"
-msgstr ""
+msgstr "O esboço editado não é válido: {0}"
 
 #: src/control/Control.AIChatSidebar.ts:2179
 msgid "Could not build any slides from the outline. Please try again."
 msgstr ""
+"Não foi possível construir nenhum slides pelo contorno. Por favor, tente "
+"novamente."
 
 #: src/control/Control.AIChatSidebar.ts:2180
 #, fuzzy
@@ -2255,92 +2270,96 @@ msgstr "Configurações de IA não configuradas"
 
 #: src/control/Control.AIChatSidebar.ts:2181
 msgid "Image model not configured"
-msgstr ""
+msgstr "Modelo de imagem não configurado"
 
 #: src/control/Control.AIChatSidebar.ts:2182
 msgid "Image generation failed: {0}"
-msgstr ""
+msgstr "A geração de imagem falhou: {0}"
 
 #: src/control/Control.AIChatSidebar.ts:2183
 msgid "No image generated"
-msgstr ""
+msgstr "Nenhuma imagem gerada"
 
 #: src/control/Control.AIChatSidebar.ts:2184
 msgid "Failed to parse the AI response"
-msgstr ""
+msgstr "Falha ao analisar resposta da AI"
 
 #: src/control/Control.AIChatSidebar.ts:2186
 msgid "The AI provider rejected the request as invalid"
-msgstr ""
+msgstr "O provedor de IA rejeitou o pedido como inválido"
 
 #: src/control/Control.AIChatSidebar.ts:2195
 msgid "API error ({0})"
-msgstr ""
+msgstr "Erro de API ({0})"
 
 #: src/control/Control.AIChatSidebar.ts:2224
 msgid "Extracting link targets..."
-msgstr ""
+msgstr "Extraindo links alvos..."
 
 #: src/control/Control.AIChatSidebar.ts:2225
 msgid "Evaluating formula..."
-msgstr ""
+msgstr "Avaliando fórmula..."
 
 #: src/control/Control.AIChatSidebar.ts:2226
 msgid "Loading function catalog..."
-msgstr ""
+msgstr "Carregando catálogo de funções..."
 
 #: src/control/Control.AIChatSidebar.ts:2227
 msgid "Thinking..."
-msgstr ""
+msgstr "Pensando…"
 
 #: src/control/Control.AIChatSidebar.ts:2228
 msgid "Working..."
-msgstr ""
+msgstr "Processando..."
 
 #: src/control/Control.AIChatSidebar.ts:2229
 msgid "Setting formulas..."
-msgstr ""
+msgstr "Definindo fórmulas..."
 
 #: src/control/Control.AIChatSidebar.ts:2230
 msgid "Building slide {0} of {1}..."
-msgstr ""
+msgstr "Construindo slide {0} of {1}..."
 
 #: src/control/Control.AIChatSidebar.ts:2231
 msgid "Skipping slide {0}..."
-msgstr ""
+msgstr "Pulando slide {0}..."
 
 #: src/control/Control.AIChatSidebar.ts:2232
 msgid "Generating image {0} of {1}..."
-msgstr ""
+msgstr "Gerando imagem {0} de {1}..."
 
 #: src/control/Control.AIChatSidebar.ts:2252
 msgid ""
 "This document is too large to read in full. Pick a section to focus on:"
 msgstr ""
+"Esse documento é muito grande para ler todo. Escolha uma parte dele para "
+"focar:"
 
 #: src/control/Control.AIChatSidebar.ts:2260
 msgid "This sheet is too large to read in full. To narrow it down, you can:"
-msgstr ""
+msgstr "Essa planilha é muito grande para ler todo. Para reduzi-lo, você pode:"
 
 #: src/control/Control.AIChatSidebar.ts:2264
 msgid "Select a range of cells in the sheet, then ask your question again"
 msgstr ""
+"Selecione as células na planilha e, em seguida, faça sua pergunta novamente"
 
 #: src/control/Control.AIChatSidebar.ts:2267
 msgid "Reply with a range to focus on, like `A1:D100`"
-msgstr ""
+msgstr "Responder com um intervalo para focar, como `A1:D100`"
 
 #: src/control/Control.AIChatSidebar.ts:2272
 msgid "Your deck is ready: {0} slides built from the approved outline."
 msgstr ""
+"Seu deck está pronto: {0} slides construídos a partir do contorno aprovado."
 
 #: src/control/Control.AIChatSidebar.ts:2280
 msgid "{0} slide(s) could not be built and were skipped."
-msgstr ""
+msgstr "{0} slide(s) não puderam ser construídos e foram pulados."
 
 #: src/control/Control.AIChatSidebar.ts:2288
 msgid "{0} image(s) could not be generated and show a placeholder."
-msgstr ""
+msgstr "{0} imagem(s) não puderam ser geradas e mostram um placeholder."
 
 #: src/control/Control.AIChatSidebar.ts:2328
 #: src/control/Control.AIChatSidebar.ts:3839
@@ -2374,76 +2393,76 @@ msgstr "O assistente de IA"
 #: src/control/Control.AIChatSidebar.ts:2572
 msgid "insert %n slide"
 msgid_plural "insert %n slides"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "inserir slide %n"
+msgstr[1] "inserir slides %n"
 
 #: src/control/Control.AIChatSidebar.ts:2575
 msgid "delete %n slide"
 msgid_plural "delete %n slides"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "apagar %n slide"
+msgstr[1] "apagar %n slides"
 
 #: src/control/Control.AIChatSidebar.ts:2580
 msgid "duplicate %n slide"
 msgid_plural "duplicate %n slides"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "slide %n duplicado"
+msgstr[1] "slides %n duplicados"
 
 #: src/control/Control.AIChatSidebar.ts:2586
 msgid "move %n slide"
 msgid_plural "move %n slides"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "mover %n slide"
+msgstr[1] "mover %n slides"
 
 #: src/control/Control.AIChatSidebar.ts:2589
 msgid "rename %n slide"
 msgid_plural "rename %n slides"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "renomear %n slide"
+msgstr[1] "renomear %n slides"
 
 #: src/control/Control.AIChatSidebar.ts:2594
 msgid "change %n layout"
 msgid_plural "change %n layouts"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "alterar layout %n"
+msgstr[1] "alterar layouts %n"
 
 #: src/control/Control.AIChatSidebar.ts:2598
 msgid "set text in %n place"
 msgid_plural "set text in %n places"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "coloque texto em %n lugar"
+msgstr[1] "coloque texto em %n lugares"
 
 #: src/control/Control.AIChatSidebar.ts:2606
 msgid "format text in %n place"
 msgid_plural "format text in %n places"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "formatar texto em %n lugar"
+msgstr[1] "formatar texto em %n lugares"
 
 #: src/control/Control.AIChatSidebar.ts:2614
-#, fuzzy
 msgid "generate %n image"
 msgid_plural "generate %n images"
 msgstr[0] "Imagem gerada"
+msgstr[1] "Imagens geradas"
 
 #: src/control/Control.AIChatSidebar.ts:2622
 msgid "run %n document command"
 msgid_plural "run %n document commands"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "executar comando %n documento"
+msgstr[1] "executar comandos %n documento"
 
 #: src/control/Control.AIChatSidebar.ts:2653
 msgid "run %n %1 command"
 msgid_plural "run %n %1 commands"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "executar %n %1 comando"
+msgstr[1] "executar %n %1 comandos"
 
 #: src/control/Control.AIChatSidebar.ts:2661
 msgid "apply the design template '%1'"
-msgstr ""
+msgstr "aplicar o modelo de design '%1'"
 
 #: src/control/Control.AIChatSidebar.ts:2664
 msgid "This will: %1."
-msgstr ""
+msgstr "Isso será %1."
 
 #: src/control/Control.AIChatSidebar.ts:2678
 msgid "Do you want to proceed?"
@@ -2518,65 +2537,67 @@ msgstr "Falha ao analisar o conteúdo da seleção"
 
 #: src/control/Control.AIChatSidebar.ts:3218
 msgid "Design (optional):"
-msgstr ""
+msgstr "Design (opcional):"
 
 #: src/control/Control.AIChatSidebar.ts:3235
 msgid "No design"
-msgstr ""
+msgstr "Sem design"
 
 #: src/control/Control.AIChatSidebar.ts:3236
 msgid "Continue without a design template"
-msgstr ""
+msgstr "Continuar sem um modelo de design"
 
 #: src/control/Control.AIChatSidebar.ts:3302
 msgid ""
 "Here is a proposed outline. Edit the titles or descriptions, remove slides "
 "you do not want, then approve to build the deck:"
 msgstr ""
+"Aqui está um esboço proposto. Edite os títulos ou descrições, remova slides "
+"que você não quer, então aprove para construir o deck:"
 
 #: src/control/Control.AIChatSidebar.ts:3363
 msgid "Reject outline"
-msgstr ""
+msgstr "Rejeitar o esboço"
 
 #: src/control/Control.AIChatSidebar.ts:3369
 msgid "Give every added slide a title to approve."
-msgstr ""
+msgstr "Dê a cada slide adicionado um título para aprovar."
 
 #: src/control/Control.AIChatSidebar.ts:3397
 msgid "Slide %1 title"
-msgstr ""
+msgstr "Título de Slide %1"
 
 #: src/control/Control.AIChatSidebar.ts:3403
 msgid "Slide %1 description"
-msgstr ""
+msgstr "Descrição de Slide %1"
 
 #: src/control/Control.AIChatSidebar.ts:3409
 msgid "Remove slide %1"
-msgstr ""
+msgstr "Remover slide %1"
 
 #: src/control/Control.AIChatSidebar.ts:3457
 msgid "Slide title"
-msgstr ""
+msgstr "Título de slide"
 
 #: src/control/Control.AIChatSidebar.ts:3469
 msgid "What this slide should cover"
-msgstr ""
+msgstr "O que este slide deve cobrir"
 
 #: src/control/Control.AIChatSidebar.ts:3494
 msgid "Add slide"
-msgstr ""
+msgstr "Adicionar slide"
 
 #: src/control/Control.AIChatSidebar.ts:3532
 msgid "Outline approved - building %1 slides."
-msgstr ""
+msgstr "Esboço aprovado - construindo %1 slides."
 
 #: src/control/Control.AIChatSidebar.ts:3541
 msgid "Outline rejected."
-msgstr ""
+msgstr "Esboço rejeitado."
 
 #: src/control/Control.AIChatSidebar.ts:3577
 msgid "Building slides..."
-msgstr ""
+msgstr "Construindo slides..."
 
 #: src/control/Control.AIChatSidebar.ts:3611
 msgid "Formula analysis timeout"
@@ -2786,195 +2807,199 @@ msgstr ""
 #: src/control/Control.CleanupSidebar.ts:259
 msgid "%1 byte"
 msgid_plural "%1 bytes"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%1 byte"
+msgstr[1] "%1 bytes"
 
 #: src/control/Control.CleanupSidebar.ts:267
 msgid "%1 KB"
-msgstr ""
+msgstr "%1 KB"
 
 #: src/control/Control.CleanupSidebar.ts:272
 msgid "%1 MB"
-msgstr ""
+msgstr "%1 MB"
 
 #: src/control/Control.CleanupSidebar.ts:278
 msgid "Fix %1"
-msgstr ""
+msgstr "Consertar %1"
 
 #: src/control/Control.CleanupSidebar.ts:331
 msgid "Master slide"
-msgstr ""
+msgstr "Slide mestre"
 
 #: src/control/Control.CleanupSidebar.ts:332
 msgid "Master slide, image %1"
-msgstr ""
+msgstr "Slide mestre, imagem %1"
 
 #: src/control/Control.CleanupSidebar.ts:335
 #: src/control/Control.PartsPreview.js:944
 msgid "Slide %1"
-msgstr ""
+msgstr "Slide %1"
 
 #: src/control/Control.CleanupSidebar.ts:336
 msgid "Slide %1, image %2"
-msgstr ""
+msgstr "Slide %1, imagem %2"
 
 #: src/control/Control.CleanupSidebar.ts:340
 msgid "Slide %1 is hidden and can be removed"
-msgstr ""
+msgstr "Slide %1 está oculto e pode ser removido"
 
 #: src/control/Control.CleanupSidebar.ts:342
 msgid "Master slide '%1' is not used by any slide"
-msgstr ""
+msgstr "Slide mestre '%1' não é usado por nenhum slide"
 
 #: src/control/Control.CleanupSidebar.ts:347
 msgid "Slide %1 has speaker notes"
-msgstr ""
+msgstr "Slide %1 tem notas de coluna"
 
 #: src/control/Control.CleanupSidebar.ts:350
 msgid "Slide %1: embedded object"
-msgstr ""
+msgstr "Slide %1: objeto incorporado"
 
 #: src/control/Control.CleanupSidebar.ts:351
 msgid "Slide %1: embedded object, no image to replace it with"
-msgstr ""
+msgstr "Slide %1: objeto incorporado, nenhuma imagem para substituí-lo"
 
 #: src/control/Control.CleanupSidebar.ts:365
 msgid "%1 DPI"
-msgstr ""
+msgstr "%1 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:367
 msgid "%1 at %2 DPI"
-msgstr ""
+msgstr "%1 em %2 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:426
 msgid "Leave images alone"
-msgstr ""
+msgstr "Deixar imagens sozinhas"
 
 #: src/control/Control.CleanupSidebar.ts:427
 msgid "96 DPI"
-msgstr ""
+msgstr "96 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:428
 msgid "150 DPI"
-msgstr ""
+msgstr "150 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:429
 msgid "220 DPI"
-msgstr ""
+msgstr "220 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:430
 msgid "300 DPI"
-msgstr ""
+msgstr "300 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:454
 msgid "Scanning..."
-msgstr ""
+msgstr "Escaneando..."
 
 #: src/control/Control.CleanupSidebar.ts:456
 msgid "Measuring images..."
-msgstr ""
+msgstr "Medindo imagens..."
 
 #: src/control/Control.CleanupSidebar.ts:458
 msgid "Preparing cleanup..."
-msgstr ""
+msgstr "Preparando a limpeza..."
 
 #: src/control/Control.CleanupSidebar.ts:460
 msgid "Cleaning up..."
-msgstr ""
+msgstr "Limpando..."
 
 #: src/control/Control.CleanupSidebar.ts:472
 msgid "Images over %1 DPI (%2)"
-msgstr ""
+msgstr "Imagens sobre %1 DPI (%2)"
 
 #: src/control/Control.CleanupSidebar.ts:476
 msgid "Hidden slides (%1)"
-msgstr ""
+msgstr "Slides ocultos (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:478
 msgid "Unused master slides (%1)"
-msgstr ""
+msgstr "Slides mestre não utilizados (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:480
 msgid "Speaker notes (%1)"
-msgstr ""
+msgstr "Notas de coluna (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:482
 msgid "Embedded objects (%1)"
-msgstr ""
+msgstr "Objetos incorporados (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:490
 msgid "Saved %1"
-msgstr ""
+msgstr "Salvo %1"
 
 #: src/control/Control.CleanupSidebar.ts:493
+#, fuzzy
 msgid "Estimated saving: %1"
-msgstr ""
+msgstr "Economia estimada: %"
 
 #: src/control/Control.CleanupSidebar.ts:500
 msgid "%1 thing to clean up"
 msgid_plural "%1 things to clean up"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%1 coisa para limpar"
+msgstr[1] "%1 coisas para limpar"
 
 #: src/control/Control.CleanupSidebar.ts:525
 msgid "Image resolution"
-msgstr ""
+msgstr "Resolução de imagem"
 
 #: src/control/Control.CleanupSidebar.ts:547
 msgid "JPEG quality in %"
-msgstr ""
+msgstr "Qualidade JPEG em %"
 
 #: src/control/Control.CleanupSidebar.ts:572
 msgid "Prepare for sharing"
-msgstr ""
+msgstr "Preparar para compartilhar"
 
 #: src/control/Control.CleanupSidebar.ts:601
 msgid "%1 of %2"
-msgstr ""
+msgstr "%1 de %2"
 
 #: src/control/Control.CleanupSidebar.ts:614
 msgid "Cleanup progress"
-msgstr ""
+msgstr "Progresso de limpeza"
 
 #: src/control/Control.CleanupSidebar.ts:647
 msgid "Stop"
-msgstr ""
+msgstr "Parar"
 
 #: src/control/Control.CleanupSidebar.ts:668
 msgid "Scan"
-msgstr ""
+msgstr "Escanear"
 
 #: src/control/Control.CleanupSidebar.ts:701
 msgid "Fix all"
-msgstr ""
+msgstr "Corrigir tudo"
 
 #: src/control/Control.CleanupSidebar.ts:726
 msgid "This document cannot be changed here, so there is nothing to clean up."
 msgstr ""
+"Esse documento não pode ser alterado aqui, então não há nada para limpar."
 
 #: src/control/Control.CleanupSidebar.ts:730
 msgid ""
 "Choose a target resolution, then press Scan to find what can be cleaned up."
 msgstr ""
+"Escolha uma resolução de destino e, em seguida, pressione Escanear para "
+"encontrar o que pode ser limpo."
 
 #: src/control/Control.CleanupSidebar.ts:733
 msgid "Nothing to clean up."
-msgstr ""
+msgstr "Nada para limpar."
 
 #: src/control/Control.CleanupSidebar.ts:791
 msgid "saves %1"
-msgstr ""
+msgstr "salvo %1"
 
 #: src/control/Control.CleanupSidebar.ts:801
 msgid "Fix"
-msgstr ""
+msgstr "Corrigir"
 
 #: src/control/Control.CleanupSidebar.ts:901
 #: src/control/Control.Menubar.ts:657
 #: src/control/Control.NotebookbarImpress.js:2184
 #: src/control/Control.NotebookbarImpress.js:2185
 msgid "Clean Up"
-msgstr ""
+msgstr "Limpar"
 
 #: src/control/Control.AlertDialog.js:55
 msgid "External link"
@@ -3024,7 +3049,7 @@ msgstr "Não mostrar isto novamente"
 
 #: src/control/Control.AlertDialog.js:108
 msgid "A {0} error occurred while processing the {1} command."
-msgstr ""
+msgstr "Um erro {0} ocorreu durante o processamento do comando {1}."
 
 #: src/control/Control.AlertDialog.js:109
 msgid "The server encountered a {0} error while parsing the {1} command."
@@ -3090,7 +3115,7 @@ msgstr "Assinar"
 
 #: src/control/Control.BackstageView.ts:213
 msgid "Quit"
-msgstr ""
+msgstr "Sair"
 
 #: src/control/Control.BackstageView.ts:220 src/control/Control.Menubar.ts:143
 #: src/control/Control.Menubar.ts:484 src/control/Control.Menubar.ts:692
@@ -3115,23 +3140,23 @@ msgstr "Recente"
 
 #: src/control/Control.BackstageView.ts:793
 msgid "Document Info"
-msgstr ""
+msgstr "Informação do documento"
 
 #: src/control/Control.BackstageView.ts:794
 msgid "View document properties and information"
-msgstr ""
+msgstr "Ver propriedades e informação do documento"
 
 #: src/control/Control.BackstageView.ts:816
 msgid "Export Document"
-msgstr ""
+msgstr "Exportar documento"
 
 #: src/control/Control.BackstageView.ts:817
 msgid "export your documents in different formats"
-msgstr ""
+msgstr "exportar seus documentos em diferentes formatos"
 
 #: src/control/Control.BackstageView.ts:849
 msgid "Text Document"
-msgstr ""
+msgstr "Documentos texto"
 
 #: src/control/Control.BackstageView.ts:849
 #: src/control/Control.BackstageView.ts:852
@@ -3142,7 +3167,7 @@ msgstr "Página"
 
 #: src/control/Control.BackstageView.ts:850
 msgid "Spreadsheet"
-msgstr ""
+msgstr "Planilha"
 
 #: src/control/Control.BackstageView.ts:850 src/control/Control.Tabs.js:218
 #, fuzzy
@@ -3155,11 +3180,11 @@ msgstr "~Planilha"
 #: src/control/Control.PartsPreview.js:135
 #: src/slideshow/PresenterConsole.js:37
 msgid "Slides"
-msgstr ""
+msgstr "Slides"
 
 #: src/control/Control.BackstageView.ts:857
 msgid "Parts"
-msgstr ""
+msgstr "Partes"
 
 #: src/control/Control.BackstageView.ts:861
 #: src/control/backstage/CloudDialogs.tsx:99
@@ -3174,15 +3199,15 @@ msgstr "Modelo"
 
 #: src/control/Control.BackstageView.ts:868
 msgid "View Only"
-msgstr ""
+msgstr "Apenas visualização"
 
 #: src/control/Control.BackstageView.ts:875
 msgid "File Name"
-msgstr ""
+msgstr "Nome do arquivo"
 
 #: src/control/Control.BackstageView.ts:1021
 msgid "Blank Spreadsheet"
-msgstr ""
+msgstr "Planilha em branco"
 
 #: src/control/Control.BackstageView.ts:1025
 #, fuzzy
@@ -3191,27 +3216,27 @@ msgstr "Terminal apresentação"
 
 #: src/control/Control.BackstageView.ts:1029
 msgid "Blank Drawing"
-msgstr ""
+msgstr "Desenho em branco"
 
 #: src/control/Control.BackstageView.ts:1034
 msgid "Blank Document"
-msgstr ""
+msgstr "Documento em branco"
 
 #: src/control/Control.BackstageView.ts:1183
 msgid "Untitled"
-msgstr ""
+msgstr "Sem Título"
 
 #: src/control/backstage/Common.tsx:48
 msgid "Loading templates…"
-msgstr ""
+msgstr "Carregando modelos…"
 
 #: src/control/backstage/Common.tsx:65
 msgid "Recently opened documents will appear here"
-msgstr ""
+msgstr "Documentos recentemente abertos aparecerão aqui"
 
 #: src/control/backstage/Sidebar.tsx:87 src/control/backstage/Sidebar.tsx:88
 msgid "Close backstage"
-msgstr ""
+msgstr "Fechar backstage"
 
 #: src/control/backstage/Sidebar.tsx:113 src/control/backstage/Sidebar.tsx:114
 msgid "Back to document"
@@ -3259,92 +3284,92 @@ msgstr "Mais informações sobre a propriedade"
 
 #: src/control/backstage/OpenView.tsx:43
 msgid "Open a document from your computer or a cloud location."
-msgstr ""
+msgstr "Abra um documento do seu computador ou um local de nuvem."
 
 #: src/control/backstage/OpenView.tsx:47
 msgid "Open File from Computer"
-msgstr ""
+msgstr "Abrir arquivo do computador"
 
 #: src/control/backstage/OpenView.tsx:65
 msgid "Add Cloud +"
-msgstr ""
+msgstr "Adicionar nuvem +"
 
 #: src/control/backstage/CloudDialogs.tsx:90
 msgid "Edit account"
-msgstr ""
+msgstr "Editar conta"
 
 #: src/control/backstage/CloudDialogs.tsx:90
 msgid "Add new account"
-msgstr ""
+msgstr "Adicionar uma conta"
 
 #: src/control/backstage/CloudDialogs.tsx:104
 msgid "Server URL"
-msgstr ""
+msgstr "Link do servidor"
 
 #: src/control/backstage/CloudDialogs.tsx:109
 msgid "Enter server URL"
-msgstr ""
+msgstr "Digite o link do servidor"
 
 #: src/control/backstage/CloudDialogs.tsx:117
 msgid "Display name"
-msgstr ""
+msgstr "Nome para exibição"
 
 #: src/control/backstage/CloudDialogs.tsx:123
 msgid "Enter display name"
-msgstr ""
+msgstr "Digite o nome de exibição"
 
 #: src/control/backstage/CloudDialogs.tsx:130
 msgid "Name displayed in your cloud list (max. 40 characters)."
-msgstr ""
+msgstr "Nome exibido na sua lista de nuvem (máx. 40 caracteres)."
 
 #: src/control/backstage/CloudDialogs.tsx:143
 msgid "Save changes"
-msgstr ""
+msgstr "Salve as alterações"
 
 #: src/control/backstage/CloudDialogs.tsx:143
 msgid "Add Account"
-msgstr ""
+msgstr "Adicionar conta"
 
 #: src/control/backstage/CloudDialogs.tsx:183
 msgid "Remove account"
-msgstr ""
+msgstr "Remover conta"
 
 #: src/control/backstage/CloudDialogs.tsx:185
 msgid "Disconnects this cloud"
-msgstr ""
+msgstr "Desconecta essa nuvem"
 
 #: src/control/backstage/CloudDialogs.tsx:213
 msgid "New account successfully added"
-msgstr ""
+msgstr "Nova conta adicionada com sucesso"
 
 #: src/control/backstage/CloudDialogs.tsx:218
 msgid "You can now access your files from this cloud."
-msgstr ""
+msgstr "Agora você pode acessar seus arquivos a partir desta nuvem."
 
 #: src/control/backstage/CloudDialogs.tsx:241
 msgid "Open Files"
-msgstr ""
+msgstr "Abrir arquivos"
 
 #: src/control/backstage/CloudDialogs.tsx:267
 msgid "Remove this account?"
-msgstr ""
+msgstr "Remover essa conta?"
 
 #: src/control/backstage/CloudDialogs.tsx:272
 msgid "You'll be disconnected from this cloud account."
-msgstr ""
+msgstr "Você será desconectado dessa conta na nuvem."
 
 #: src/control/DropFileOverlay.tsx:30
 msgid "Drop file to open"
-msgstr ""
+msgstr "Largue o arquivo para abrir"
 
 #: src/control/AccessibilityNotice.tsx:34
 #: src/control/AccessibilityNotice.tsx:64
 msgid "This mobile view is not fully accessible."
-msgstr ""
+msgstr "Essa visualização móvel não é totalmente acessível."
 
 #: src/control/AccessibilityNotice.tsx:43
 msgid "Accessibility statement"
-msgstr ""
+msgstr "Declaração de acessibilidade"
 
 #: src/control/AccessibilityNotice.tsx:50
 #: src/control/jsdialog/Util.SnackbarController.ts:115
@@ -3362,15 +3387,15 @@ msgstr "Nome do documento"
 
 #: src/control/Control.DocumentNameInput.js:39
 msgid "A document name cannot contain a slash or a backslash."
-msgstr ""
+msgstr "Um nome de documento não pode conter uma barra ou uma barra invertida."
 
 #: src/control/Control.DocumentNameInput.js:42 src/app/Socket.ts:2531
 msgid "Please enter a valid document name."
-msgstr ""
+msgstr "Digite um nome de documento válido."
 
 #: src/control/Control.DocumentNameInput.js:55
 msgid "Invalid document name"
-msgstr ""
+msgstr "Nome de documento inválido"
 
 #: src/control/Control.DocumentRepair.js:27
 #: src/control/Control.DocumentRepair.js:28
@@ -4206,23 +4231,23 @@ msgstr "Páginas de notas"
 #: src/control/Control.Menubar.ts:523
 #: src/control/Control.NotebookbarImpress.js:743
 msgid "View Notes"
-msgstr ""
+msgstr "Ver notas"
 
 #: src/control/Control.Menubar.ts:524
 #: src/control/Control.NotebookbarImpress.js:745
 msgid "Bottom Panel"
-msgstr ""
+msgstr "Painel inferior"
 
 #: src/control/Control.Menubar.ts:525
 #: src/control/Control.NotebookbarImpress.js:746
 msgid "Handout Page"
-msgstr ""
+msgstr "Página de entrega"
 
 #: src/control/Control.Menubar.ts:526
 #: src/control/Control.NotebookbarImpress.js:747
 #: src/control/jsdialog/Definitions.Menu.ts:1847
 msgid "Hidden"
-msgstr ""
+msgstr "Oculto"
 
 #: src/control/Control.Menubar.ts:531
 #: src/control/Control.NotebookbarImpress.js:754
@@ -4239,15 +4264,15 @@ msgstr "Multimídia Local..."
 #: src/control/Control.NotebookbarImpress.js:2739
 #: src/control/Control.NotebookbarImpress.js:3104
 msgid "Distribute"
-msgstr ""
+msgstr "Distribuir"
 
 #: src/control/Control.Menubar.ts:635
 msgid "Insert Slides from File..."
-msgstr ""
+msgstr "Inserir slides do arquivo..."
 
 #: src/control/Control.Menubar.ts:637
 msgid "Update Linked Slides..."
-msgstr ""
+msgstr "Atualizando slides conectados..."
 
 #: src/control/Control.Menubar.ts:644 src/control/Control.Menubar.ts:1269
 #: src/control/Control.PresentationBar.js:143
@@ -4463,7 +4488,7 @@ msgstr "Resultados"
 
 #: src/control/Control.NavigatorPanel.ts:317
 msgid "Maximize to grid"
-msgstr ""
+msgstr "Maximize para a grade"
 
 #: src/control/Control.NavigatorPanel.ts:629
 msgid "Find and Replace"
@@ -4487,7 +4512,7 @@ msgstr "Design de mesa"
 
 #: src/control/Notebookbar.CalcTableTab.ts:105
 msgid "Tools"
-msgstr ""
+msgstr "Ferramentas"
 
 #: src/control/Notebookbar.CalcTableTab.ts:190
 #: src/control/Notebookbar.ImpressTableDesignTab.ts:121
@@ -4561,12 +4586,12 @@ msgstr "Efeito"
 #: src/control/Notebookbar.WriterTableTab.ts:472
 #: src/control/Control.NotebookbarImpress.js:102
 msgid "Design"
-msgstr ""
+msgstr "Design"
 
 #: src/control/Notebookbar.ImpressTableDesignTab.ts:99
 #: src/control/Notebookbar.WriterTableTab.ts:514
 msgid "Cell Background"
-msgstr ""
+msgstr "Fundo da célula"
 
 #: src/control/Notebookbar.ImpressTransitionTab.ts:24
 msgid "Transition"
@@ -4587,24 +4612,24 @@ msgstr "Duração"
 
 #: src/control/Notebookbar.ImpressTransitionTab.ts:117
 msgid "On mouse click"
-msgstr ""
+msgstr "No clique do mouse"
 
 #: src/control/Notebookbar.ImpressTransitionTab.ts:125
 #: src/control/HRuler.ts:338
 msgid "After"
-msgstr ""
+msgstr "Após"
 
 #: src/control/Notebookbar.ImpressTransitionTab.ts:146
 msgid "Apply to All Slides"
-msgstr ""
+msgstr "Aplicar a todos os slides"
 
 #: src/control/Notebookbar.WriterReferencesTab.ts:41
 msgid "Table of content"
-msgstr ""
+msgstr "Tabela de conteúdo"
 
 #: src/control/Notebookbar.WriterReferencesTab.ts:95
 msgid "Footnote/Endnote"
-msgstr ""
+msgstr "Nota de rodapé/fim"
 
 #: src/control/Notebookbar.WriterReferencesTab.ts:313
 #: src/control/Control.NotebookbarDraw.js:1705
@@ -4626,7 +4651,7 @@ msgstr "Tabela"
 #: src/control/Notebookbar.WriterTableTab.ts:39
 #: src/control/Control.NotebookbarImpress.js:2204
 msgid "Select"
-msgstr ""
+msgstr "Selecionar"
 
 #: src/control/Notebookbar.WriterTableTab.ts:113
 #: src/control/Control.NotebookbarCalc.js:42
@@ -4644,19 +4669,19 @@ msgstr "Inserir"
 #: src/control/Control.NotebookbarCalc.js:1196
 #: src/control/Control.NotebookbarWriter.js:1912
 msgid "Size"
-msgstr ""
+msgstr "Dimensionar"
 
 #: src/control/Notebookbar.WriterTableTab.ts:307
 #: src/control/Control.NotebookbarImpress.js:2370
 msgid "Merge & Split"
-msgstr ""
+msgstr "Mesclar & Dividir"
 
 #: src/control/Notebookbar.WriterTableTab.ts:365
 #: src/control/Control.NotebookbarCalc.js:686
 #: src/control/Control.NotebookbarDraw.js:860
 #: src/control/Control.NotebookbarImpress.js:2409
 msgid "Alignment"
-msgstr ""
+msgstr "Alinhamento"
 
 #: src/control/Notebookbar.WriterTableTab.ts:537
 #: src/control/Control.NotebookbarCalc.js:72
@@ -4674,13 +4699,13 @@ msgstr "Curto"
 
 #: src/control/Notebookbar.WriterTableTab.ts:615
 msgid "Protect"
-msgstr ""
+msgstr "Proteger"
 
 #: src/control/Notebookbar.WriterTableTab.ts:667
 #: src/control/Control.NotebookbarWriter.js:2891
 #: src/control/Control.NotebookbarWriter.js:3269
 msgid "Caption"
-msgstr ""
+msgstr "Legenda"
 
 #: src/control/Sidebar.FromNotebookbarPanel.ts:154
 #, fuzzy
@@ -4693,40 +4718,41 @@ msgstr "Começar:"
 
 #: src/control/Control.Notebookbar.js:634
 msgid "End:"
-msgstr ""
+msgstr "Fim:"
 
 #: src/control/Control.Notebookbar.js:647
 msgid "Start arrowhead style"
-msgstr ""
+msgstr "Comece o estilo de flecha"
 
 #: src/control/Control.Notebookbar.js:647
 msgid "End arrowhead style"
-msgstr ""
+msgstr "Terminar do estilo de flecha"
 
 #: src/control/Control.Notebookbar.js:722
 msgid "Line Width"
-msgstr ""
+msgstr "Largura da linha"
 
 #: src/control/Control.Notebookbar.js:755
 msgid "Line Transparency:"
-msgstr ""
+msgstr "Transparência de linha:"
 
 #: src/control/Control.NotebookbarBuilder.js:202
 #: src/control/Control.NotebookbarBuilder.js:604
 msgid "Unsaved changes. Save"
-msgstr ""
+msgstr "Mudanças não salvas. Salvar"
 
 #: src/control/Control.NotebookbarBuilder.js:266
 msgid "Click to expand"
-msgstr ""
+msgstr "Clique para expandir"
 
 #: src/control/Control.NotebookbarBuilder.js:266
 msgid "Tap to expand"
 msgstr "Clique para expandir"
 
 #: src/control/Control.NotebookbarBuilder.js:267
+#, fuzzy
 msgid "Click to collapse"
-msgstr ""
+msgstr "Clique para colapsar"
 
 #: src/control/Control.NotebookbarBuilder.js:267
 #: src/control/Control.NotebookbarBuilder.js:341
@@ -5027,31 +5053,31 @@ msgstr ""
 
 #: src/control/Control.NotebookbarCalc.js:1480
 msgid "Sheet View"
-msgstr ""
+msgstr "Visualização de planilha"
 
 #: src/control/Control.NotebookbarCalc.js:1494
 msgid "Default View"
-msgstr ""
+msgstr "Visualização padrão"
 
 #: src/control/Control.NotebookbarCalc.js:1511
 msgid "Open Views List"
-msgstr ""
+msgstr "Abrir lista de visualizações"
 
 #: src/control/Control.NotebookbarCalc.js:1518
 msgid "New Sheet View"
-msgstr ""
+msgstr "Nova visualização da planilha"
 
 #: src/control/Control.NotebookbarCalc.js:1525
 msgid "Remove Sheet View"
-msgstr ""
+msgstr "Remover visualização da planilha"
 
 #: src/control/Control.NotebookbarCalc.js:1532
 msgid "Exit Sheet View"
-msgstr ""
+msgstr "Sair da visualização de planilha"
 
 #: src/control/Control.NotebookbarCalc.js:1547
 msgid "Freeze"
-msgstr ""
+msgstr "Congelar"
 
 #: src/control/Control.NotebookbarCalc.js:1601
 #: src/control/Control.NotebookbarDraw.js:453
@@ -5059,7 +5085,7 @@ msgstr ""
 #: src/control/Control.NotebookbarWriter.js:1709
 #: src/control/Control.StatusBar.js:150
 msgid "Zoom"
-msgstr ""
+msgstr "Zoom"
 
 #: src/control/Control.NotebookbarCalc.js:1608
 #: src/control/Control.NotebookbarDraw.js:460
