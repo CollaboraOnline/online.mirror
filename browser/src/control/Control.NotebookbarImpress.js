@@ -3020,9 +3020,11 @@ window.L.Control.NotebookbarImpress = window.L.Control.NotebookbarWriter.extend(
 			},
 			{ type: 'separator', id: 'picture-leavegroup-break', orientation: 'vertical' },
 			{
+				'id': 'picture-crop',
 				'type': 'bigtoolitem',
 				'text': _UNO('.uno:Crop'),
 				'command': '.uno:Crop',
+				'accessibility': { focusBack: true, combination: 'CR', de: null },
 				'context': 'Graphic'
 			},
 			{ type: 'separator', id: 'picture-crop-break', orientation: 'vertical' },

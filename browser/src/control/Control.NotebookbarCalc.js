@@ -3460,9 +3460,11 @@ window.L.Control.NotebookbarCalc = window.L.Control.NotebookbarWriter.extend({
 			},
 			{ type: 'separator', id: 'picture-leavegroup-break', orientation: 'vertical' },
 			{
+				'id': 'picture-crop',
 				'type': 'bigtoolitem',
 				'text': _UNO('.uno:Crop'),
 				'command': '.uno:Crop',
+				'accessibility': { focusBack: true, combination: 'CR', de: null },
 				'context': 'Graphic'
 			},
 		];

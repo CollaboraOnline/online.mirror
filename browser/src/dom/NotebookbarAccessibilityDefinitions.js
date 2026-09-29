@@ -83,7 +83,8 @@ var NotebookbarAccessibilityDefinitions = function() {
 					if (!overflow && !arrow && !element && rawList[i].command) {
 						var commandId = rawList[i].command.replace('.uno:', '');
 						var selector = '[modelid="' + id + '"], [modelid="' + commandId + '"]';
-						var widgets = document.querySelectorAll(selector);
+						var root = document.getElementById('toolbar-up') || document;
+						var widgets = root.querySelectorAll(selector);
 						if (widgets.length > 0) {
 							for (var k = 0; k < widgets.length; k++) {
 								var widget = widgets[k];
