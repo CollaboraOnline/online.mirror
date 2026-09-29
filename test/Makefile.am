@@ -84,7 +84,6 @@ all_la_unit_tests = \
 	unit-wopi-crash-modified.la \
 	unit-oauth.la \
 	unit-wopi-versionrestore.la \
-	unit-rendering-options.la \
 	unit-paste.la \
 	unit-large-paste.la \
 	unit-typing.la \
@@ -338,8 +337,6 @@ unit_save_torture_la_SOURCES = UnitSaveTorture.cpp
 unit_save_torture_la_LIBADD = $(CPPUNIT_LIBS)
 unit_synthetic_lok_la_SOURCES = UnitSyntheticLok.cpp
 unit_synthetic_lok_la_LIBADD = $(CPPUNIT_LIBS)
-unit_rendering_options_la_SOURCES = UnitRenderingOptions.cpp
-unit_rendering_options_la_LIBADD = $(CPPUNIT_LIBS)
 unit_invalidation_la_SOURCES = UnitInvalidation.cpp
 unit_invalidation_la_LIBADD = $(CPPUNIT_LIBS)
 unit_password_protected_la_SOURCES = UnitPasswordProtected.cpp

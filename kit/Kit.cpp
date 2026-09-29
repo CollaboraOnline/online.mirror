@@ -1277,8 +1277,7 @@ void Document::trimAfterInactivity()
 
 /// Load a document (or view) and register callbacks.
 bool Document::onLoad(const std::string& sessionId,
-                      const std::string& uriAnonym,
-                      const std::string& renderOpts)
+                      const std::string& uriAnonym)
 {
     LOG_INF("Loading url [" << uriAnonym << "] for session [" << sessionId <<
             "] which has " << (_sessions.size() - 1) << " sessions.");
@@ -1296,7 +1295,7 @@ bool Document::onLoad(const std::string& sessionId,
     std::shared_ptr<ChildSession> session = it->second;
     try
     {
-        if (load(session, renderOpts))
+        if (load(session))
         {
             return true;
         }
@@ -2011,8 +2010,7 @@ void appendLoadOption(std::string& options, std::string_view name, std::string_v
 }
 }
 
-std::shared_ptr<lok::Document> Document::load(const std::shared_ptr<ChildSession>& session,
-                                              const std::string& renderOpts)
+std::shared_ptr<lok::Document> Document::load(const std::shared_ptr<ChildSession>& session)
 {
     const std::string sessionId = session->getId();
 
@@ -2180,10 +2178,6 @@ std::shared_ptr<lok::Document> Document::load(const std::shared_ptr<ChildSession
             SigUtil::setTerminationFlag();
             return nullptr;
         }
-
-        // Only save the options on opening the document.
-        // No support for changing them after opening a document.
-        _renderOpts = renderOpts;
     }
     else
     {
@@ -2240,11 +2234,11 @@ std::shared_ptr<lok::Document> Document::load(const std::shared_ptr<ChildSession
 
     // Avoid logging userPrivateInfo till it's not anonymized.
     LOG_INF("Initializing for rendering session [" << sessionId << "] on document url [" <<
-            anonymizeUrl(_url) << "] with: [" << makeRenderParams(_renderOpts, userNameAnonym, spellOnline, theme, backgroundTheme, focusRingColor, "") << "].");
+            anonymizeUrl(_url) << "] with: [" << makeRenderParams(userNameAnonym, spellOnline, theme, backgroundTheme, focusRingColor, "") << "].");
 
     // initializeForRendering() should be called before
     // registerCallback(), as the previous creates a new view in Impress.
-    const std::string renderParams = makeRenderParams(_renderOpts, userName, spellOnline, theme, backgroundTheme, focusRingColor, userPrivateInfo);
+    const std::string renderParams = makeRenderParams(userName, spellOnline, theme, backgroundTheme, focusRingColor, userPrivateInfo);
 
     _loKitDocument->initializeForRendering(renderParams.c_str());
 
@@ -2396,25 +2390,13 @@ bool Document::forwardToChild(const std::string_view prefix, const std::vector<c
     return false;
 }
 
-/* static */ std::string Document::makeRenderParams(const std::string& renderOpts, const std::string& userName,
+/* static */ std::string Document::makeRenderParams(const std::string& userName,
                                                     const std::string& spellOnline, const std::string& theme,
                                                     const std::string& backgroundTheme,
                                                     const std::string& focusRingColor,
                                                     const std::string& userPrivateInfo)
 {
-    Object::Ptr renderOptsObj;
-
-    // Fill the object with renderoptions, if any
-    if (!renderOpts.empty())
-    {
-        Parser parser;
-        Poco::Dynamic::Var var = parser.parse(renderOpts);
-        renderOptsObj = var.extract<Object::Ptr>();
-    }
-    else
-    {
-        renderOptsObj = new Object();
-    }
+    Object::Ptr renderOptsObj = new Object();
 
     Object::Ptr userPrivateInfoObj;
     if (!userPrivateInfo.empty())
@@ -2820,7 +2802,6 @@ void Document::dumpState(std::ostream& oss)
         << "\n\turl: " << _url
         << "\n\tobfuscatedFileId: " << _obfuscatedFileId
         << "\n\tjailedUrl: " << anonymizeUrl(_jailedUrl)
-        << "\n\trenderOpts: " << _renderOpts
         << "\n\thaveDocPassword: " << _haveDocPassword // not the pwd itself
         << "\n\tisDocPasswordProtected: " << _isDocPasswordProtected
         << "\n\tdocPasswordType: " << (int)_docPasswordType

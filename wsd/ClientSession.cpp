@@ -1877,11 +1877,6 @@ bool ClientSession::loadDocument(const char* /*buffer*/, int /*length*/,
             oss << " accessibilityState=" << getAccessibilityState();
         }
 
-        if (!getDocOptions().empty())
-        {
-            oss << " options=" << getDocOptions();
-        }
-
         if (_wopiFileInfo && !_wopiFileInfo->getTemplateSource().empty())
         {
             oss << " template=" << _wopiFileInfo->getTemplateSource();

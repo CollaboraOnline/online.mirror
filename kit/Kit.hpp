@@ -275,8 +275,7 @@ private:
 public:
     /// Request loading a document, or a new view, if one exists,
     /// and register callbacks.
-    bool onLoad(const std::string& sessionId, const std::string& uriAnonym,
-                const std::string& renderOpts);
+    bool onLoad(const std::string& sessionId, const std::string& uriAnonym);
 
     /// Unload a client session, which unloads the document
     /// if it is the last and only.
@@ -354,12 +353,11 @@ private:
 
     std::string getDefaultBackgroundTheme(const std::shared_ptr<ChildSession>& session) const;
 
-    std::shared_ptr<lok::Document> load(const std::shared_ptr<ChildSession>& session,
-                                        const std::string& renderOpts);
+    std::shared_ptr<lok::Document> load(const std::shared_ptr<ChildSession>& session);
 
     bool forwardToChild(std::string_view prefix, const std::vector<char>& payload);
 
-    static std::string makeRenderParams(const std::string& renderOpts, const std::string& userName,
+    static std::string makeRenderParams(const std::string& userName,
                                         const std::string& spellOnline, const std::string& theme,
                                         const std::string& backgroundTheme,
                                         const std::string& focusRingColor,
@@ -467,7 +465,6 @@ private:
     const std::string _url;
     const std::string _obfuscatedFileId;
     std::string _jailedUrl;
-    std::string _renderOpts;
 
     std::shared_ptr<lok::Document> _loKitDocument;
 #ifdef __ANDROID__

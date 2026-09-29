@@ -106,47 +106,38 @@ void Session::parseDocOptions(const StringVector& tokens, int& part, std::string
         if (name == "url")
         {
             _docURL = std::move(value);
-            ++offset;
         }
         else if (name == "jail")
         {
             _jailedFilePath = std::move(value);
-            ++offset;
         }
         else if (name == "xjail")
         {
             _jailedFilePathAnonym = std::move(value);
-            ++offset;
         }
         else if (name == "authorid")
         {
             _userId = Uri::decode(value);
-            ++offset;
         }
         else if (name == "xauthorid")
         {
             _userIdAnonym = Uri::decode(value);
-            ++offset;
         }
         else if (name == "author")
         {
             _userName = Uri::decode(value);
-            ++offset;
         }
         else if (name == "xauthor")
         {
             _userNameAnonym = Uri::decode(value);
-            ++offset;
         }
         else if (name == "authorextrainfo")
         {
             _userExtraInfo = Uri::decode(value);
-            ++offset;
         }
         else if (name == "authorprivateinfo")
         {
             _userPrivateInfo = Uri::decode(value);
-            ++offset;
         }
         else if (name == "signatureconfig")
         {
@@ -154,7 +145,6 @@ void Session::parseDocOptions(const StringVector& tokens, int& part, std::string
             {
                 LOG_WRN(
                     "signatureconfig: User private info not set, skipping signature configuration");
-                ++offset;
                 continue;
             }
 
@@ -162,7 +152,6 @@ void Session::parseDocOptions(const StringVector& tokens, int& part, std::string
             if (decodedSignatureData == "{}")
             {
                 LOG_INF("signatureconfig: Empty signature data received, skipping processing");
-                ++offset;
                 continue;
             }
 
@@ -171,7 +160,6 @@ void Session::parseDocOptions(const StringVector& tokens, int& part, std::string
             {
                 LOG_ERR("signatureconfig: Failed to parse signature data as JSON: "
                         << decodedSignatureData);
-                ++offset;
                 continue;
             }
 
@@ -180,7 +168,6 @@ void Session::parseDocOptions(const StringVector& tokens, int& part, std::string
             {
                 LOG_ERR("signatureconfig: Failed to parse user private info as JSON: "
                         << _userPrivateInfo);
-                ++offset;
                 continue;
             }
 
@@ -194,138 +181,105 @@ void Session::parseDocOptions(const StringVector& tokens, int& part, std::string
             _userPrivateInfo = JsonUtil::jsonToString(userPrivateInfoObject);
             LOG_INF("signatureconfig: Successfully updated user private info with signature data");
 
-            ++offset;
         }
         else if (name == "serverprivateinfo")
         {
             _serverPrivateInfo = Uri::decode(value);
-            ++offset;
         }
         else if (name == "readonly")
         {
             _isReadOnly = value != "0";
-            ++offset;
         }
         else if (name == "password")
         {
             _docPassword = std::move(value);
             _haveDocPassword = true;
-            ++offset;
         }
         else if (name == "lang")
         {
             setLang(value);
-            ++offset;
         }
         else if (name == "timezone")
         {
             _timeZone= std::move(value);
-            ++offset;
         }
         else if (name == "watermarkText")
         {
             _watermarkText = Uri::decode(value);
-            ++offset;
         }
         else if (name == "watermarkOpacity")
         {
             _watermarkOpacity = std::stod(value);
-            ++offset;
         }
         else if (name == "timestamp")
         {
             timestamp = std::move(value);
-            ++offset;
         }
         else if (name == "template")
         {
             _docTemplate = std::move(value);
-            ++offset;
         }
         else if (name == "deviceFormFactor")
         {
             _deviceFormFactor = std::move(value);
-            ++offset;
         }
         else if (name == "spellOnline")
         {
             _spellOnline = std::move(value);
-            ++offset;
         }
         else if (name == "darkTheme")
         {
             _darkTheme = std::move(value);
-            ++offset;
         }
         else if (name == "focusRingColor")
         {
             _focusRingColor = std::move(value);
-            ++offset;
         }
         else if (name == "darkBackground")
         {
             _darkBackground = std::move(value);
-            ++offset;
         }
         else if (name == "batch")
         {
             _batch = std::move(value);
-            ++offset;
         }
         else if (name == "enableMacrosExecution")
         {
             _enableMacrosExecution = std::move(value);
-            ++offset;
         }
         else if (name == "macroSecurityLevel")
         {
             _macroSecurityLevel = std::move(value);
-            ++offset;
         }
         else if (name == "clientvisiblearea")
         {
             _initialClientVisibleArea = std::move(value);
-            ++offset;
         }
         else if (name == "accessibilityState")
         {
             _accessibilityState = value == "true";
-            ++offset;
         }
         else if (name == "isAllowChangeComments")
         {
             _isAllowChangeComments = value == "true";
-            ++offset;
         }
         else if (name == "isAllowManageRedlines")
         {
             _isAllowManageRedlines = value == "true";
-            ++offset;
         }
         else if (name == "verifyHost")
         {
             _disableVerifyHost = value == "false";
-            ++offset;
         }
         else if (name == "infilterOptions")
         {
             _inFilterOptions = std::move(value);
-            ++offset;
         }
     }
 
     Anonymizer::mapAnonymized(_userId, _userIdAnonym);
     Anonymizer::mapAnonymized(_userName, _userNameAnonym);
     Anonymizer::mapAnonymized(_jailedFilePath, _jailedFilePathAnonym);
-
-    if (tokens.size() > offset)
-    {
-        if (getTokenString(tokens[offset], "options", _docOptions))
-        {
-            if (tokens.size() > offset + 1)
-                _docOptions += tokens.cat(' ', offset + 1);
-        }
-    }
 
     // Disable spell check if the document is read-only
     disableSpellCheckIfReadOnly();
@@ -420,7 +374,6 @@ void Session::dumpState(std::ostream& os)
        << "\n\t\tdocPwd: " << _docPassword
        << "\n\t\thaveDocPwd: " << _haveDocPassword
        << "\n\t\tisDocPwdProtected: " << _isDocPasswordProtected
-       << "\n\t\tDocOptions: " << _docOptions
        << "\n\t\tuserId: " << Anonymizer::anonymize(_userId)
        << "\n\t\tuserName: " << Anonymizer::anonymize(_userName)
        << "\n\t\tlang: " << _lang
