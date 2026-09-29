@@ -1751,9 +1751,38 @@ bool ClientSession::loadDocument(const char* /*buffer*/, int /*length*/,
     LOG_INF("Requesting document load from child.");
     try
     {
-        std::string timestamp;
+        // First token is the "load" command itself.
         int loadPart = -1;
-        parseDocOptions(tokens, loadPart, timestamp);
+        std::size_t offset = 1;
+        if (tokens.size() > 2 && tokens[1].find("part=") == 0)
+        {
+            (void)getTokenInteger(tokens[1], "part", loadPart);
+            ++offset;
+        }
+
+        for (std::size_t i = offset; i < tokens.size(); ++i)
+        {
+            std::string name;
+            std::string value;
+            if (!COOLProtocol::parseNameValuePair(tokens[i], name, value))
+            {
+                LOG_WRN("Unexpected load token [" << tokens[i] << "]. Skipping.");
+                continue;
+            }
+
+            if (name == "timestamp" || name == "part")
+            {
+                // The browser sends the document's timestamp, and a part after the first
+                // option when it reconnects, and nothing reads either.
+                continue;
+            }
+
+            if (!applyBrowserLoadOption(name, value))
+                LOG_WRN("Ignoring the load option [" << name
+                        << "]: a browser's load message does not carry it");
+        }
+
+        disableSpellCheckIfReadOnly();
         overrideDocOption();
 
         std::ostringstream oss;
