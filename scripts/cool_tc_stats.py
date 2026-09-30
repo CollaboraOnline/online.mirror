@@ -15,6 +15,7 @@
 import collections
 import datetime
 import json
+import re
 import statistics
 import subprocess
 import sys
@@ -34,13 +35,16 @@ JENKINS_RECENT_BUILD_LIMIT = 50
 
 STATS_FILE = "stats.json"
 
+GERRIT_VERDICT = re.compile(r"Build (Successful|Failed|Aborted|Unstable)")
 
-def fetch_changes(query):
-    """Returns all Gerrit changes matching the query, paginating as needed."""
+
+def fetch_changes(query, options=""):
+    """Returns all Gerrit changes matching the query, paginating as needed.
+    options is appended to the URL as is, e.g. "&o=MESSAGES"."""
     changes = []
     start = 0
     while True:
-        url = f"{GERRIT_BASE}/changes/?q={query}&n={PAGE_SIZE}&start={start}"
+        url = f"{GERRIT_BASE}/changes/?q={query}&n={PAGE_SIZE}&start={start}{options}"
         with urllib.request.urlopen(url) as resp:
             body = resp.read().decode("utf-8")
         # Gerrit prefixes JSON responses with )]}' to defeat XSSI.
@@ -142,6 +146,60 @@ def jenkins_recent_build_stats(limit=JENKINS_RECENT_BUILD_LIMIT):
     return green, len(completed), median_ms, len(durations)
 
 
+def parse_gerrit_time(stamp):
+    """Parses a Gerrit timestamp such as '2026-09-30 13:48:26.000000000', which is UTC."""
+    return datetime.datetime.strptime(stamp[:19], "%Y-%m-%d %H:%M:%S")
+
+
+def lone_push_to_verdict_stats(days=7):
+    """Returns (median_minutes, within_hour_percent, count) for the lone pushes to online main in
+    the last `days` days, or (None, None, 0) if there were none.
+
+    The time runs from uploading a patchset to its first Jenkins verdict, read from the change
+    messages. A lone push is one made while its author had no other patchset waiting for a
+    verdict. A patchset replaced by a newer one before its verdict arrived had its build
+    cancelled, so it is left out of the figures, but it still counts as waiting.
+    """
+    now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+    since = now - datetime.timedelta(days=days)
+    changes = fetch_changes(
+        f"project:online+branch:main+after:{since:%Y-%m-%d}", "&o=MESSAGES")
+
+    # (owner, push, verdict, superseded) for each patchset that got a verdict.
+    rows = []
+    for change in changes:
+        pushes = {}
+        verdicts = {}
+        for message in change.get("messages", []):
+            patchset = message.get("_revision_number")
+            when = parse_gerrit_time(message["date"])
+            if message["message"].startswith("Uploaded patch set"):
+                pushes.setdefault(patchset, when)
+            elif (patchset in pushes and patchset not in verdicts
+                  and GERRIT_VERDICT.search(message["message"])):
+                verdicts[patchset] = when
+        owner = change.get("owner", {}).get("_account_id")
+        for patchset, verdict in verdicts.items():
+            later = [pushes[p] for p in pushes if p > patchset]
+            superseded = bool(later) and min(later) < verdict
+            rows.append((owner, pushes[patchset], verdict, superseded))
+
+    minutes = []
+    for index, (owner, push, verdict, superseded) in enumerate(rows):
+        if superseded or push < since:
+            continue
+        lone = not any(
+            other_index != index and other_owner == owner
+            and other_push <= push < other_verdict
+            for other_index, (other_owner, other_push, other_verdict, _) in enumerate(rows))
+        if lone:
+            minutes.append((verdict - push).total_seconds() / 60)
+    if not minutes:
+        return None, None, 0
+    within_hour = round(100 * sum(1 for m in minutes if m <= 60) / len(minutes))
+    return statistics.median(minutes), within_hour, len(minutes)
+
+
 def fmt_duration_ms(ms):
     """Renders a millisecond duration as 'X hr Y min', matching how the
     Jenkins UI prints the 'Took ...' line on a build page."""
@@ -204,6 +262,7 @@ def main():
         round(100 * jenkins_green / jenkins_total) if jenkins_total else 0
     )
     jenkins_failed = jenkins_total - jenkins_green
+    lone_median, lone_within_hour, lone_count = lone_push_to_verdict_stats()
 
     prev = read_previous_week_stats(week_key) or {}
     gerrit_str = fmt_delta(gerrit_count, prev.get("gerritChangesOpenCount"))
@@ -232,6 +291,10 @@ def main():
     print(f"- [Gerrit for online main]({JENKINS_JOB_URL})")
     print(f"  - Week {week}: Success rate is {jenkins_success_rate}%, failed builds are {jenkins_failed}/{jenkins_total}")
     print(f"  - Week {week}: Turnaround time is {fmt_duration_ms(jenkins_median_ms)} (median of last {jenkins_median_n} SUCCESS/FAILURE builds)")
+    if lone_count:
+        print(f"  - Week {week}: {lone_within_hour}% of lone pushes got a CI verdict within an hour"
+              f" ({lone_count} lone pushes in the last 7 days, median"
+              f" {fmt_duration_ms(int(lone_median * 60_000))})")
 
     write_stats_json(week_key, gerrit_count, pr_count, regression_count)
     return 0
