@@ -334,18 +334,18 @@
 
 /* Grid layout for the slide navigator's list while the panels are
  * maximized. The slides flow into as many columns as the wide panel fits;
- * the reorder drop site and the section headers take a whole row of their
- * own. The grid takes the space left above the toolbar and scrolls on its
- * own. The rows pack at their content height from the top: left to the
- * default stretch, a short deck's row tracks would inflate to fill the panel
- * and any fixed-height cell added to a row would redistribute that slack,
- * moving every row. */
+ * the section headers take a whole row of their own. The grid takes the
+ * space left above the toolbar and scrolls on its own. The rows pack at
+ * their content height from the top: left to the default stretch, a short
+ * deck's row tracks would inflate to fill the panel and any fixed-height
+ * cell added to a row would redistribute that slack, moving every row. */
 .parts-preview-grid #slide-sorter {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 	align-content: start;
 	gap: 12px;
-	padding: 12px;
+	--preview-outline: 3px;
+	padding: calc(20px + 1em) calc(16px + var(--preview-outline)) 12px;
 	white-space: normal;
 	overflow-x: visible;
 	overflow-y: auto;
@@ -387,9 +387,20 @@
 	width: 300px;
 }
 
-.parts-preview-grid #first-drop-site,
 .parts-preview-grid .slide-section-header {
 	grid-column: 1 / -1;
+}
+
+.parts-preview-grid #first-drop-site {
+	display: none;
+}
+
+.parts-preview-grid #slide-sorter .slide-section-header {
+	margin-inline: calc(-1 * var(--preview-outline));
+}
+
+.parts-preview-grid #slide-sorter:has(.slide-section-header:not(.preview-frame:not(#first-drop-site) ~ *)) {
+	padding-top: 20px;
 }
 
 .parts-preview-grid .preview-frame {
