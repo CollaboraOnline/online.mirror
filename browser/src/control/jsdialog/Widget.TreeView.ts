@@ -2553,18 +2553,19 @@ class TreeViewControl {
 		builder: JSBuilder,
 		level: number,
 		parent: HTMLElement,
+		selection: { hasSelectedEntry: boolean } = { hasSelectedEntry: false },
 	) {
-		let hasSelectedEntry = false;
 		for (const index in entries) {
-			hasSelectedEntry = hasSelectedEntry || entries[index].selected;
-			this.fillEntry(data, entries[index], builder, level, parent);
+			if (entries[index].selected) selection.hasSelectedEntry = true;
+			this.fillEntry(data, entries[index], builder, level, parent, selection);
 		}
 
 		if (entries && entries.length === 0) this.makeEmptyList(data, builder);
 
 		// we need to provide a way for making the treeview control focusable
-		// when no entry is selected
-		if (level === 1 && !hasSelectedEntry) this.makeTreeViewFocusable(true);
+		// when no entry is selected, at the top level or inside a subtree
+		if (level === 1 && !selection.hasSelectedEntry)
+			this.makeTreeViewFocusable(true);
 	}
 
 	showSearchBar(parent: HTMLElement) {
@@ -2610,6 +2611,7 @@ class TreeViewControl {
 		builder: JSBuilder,
 		level: number,
 		parent: HTMLElement,
+		selection?: { hasSelectedEntry: boolean },
 	): Array<HTMLElement> {
 		const entryElements = new Array<HTMLElement>();
 		const row: HTMLElement = this.fillRow(data, entry, builder, level, parent);
@@ -2634,7 +2636,14 @@ class TreeViewControl {
 				this._maxColumnsIncludingState = this._columns + dummyColumns + 1;
 			}
 
-			this.fillEntries(data, entry.children, builder, level + 1, subGrid);
+			this.fillEntries(
+				data,
+				entry.children,
+				builder,
+				level + 1,
+				subGrid,
+				selection,
+			);
 		}
 
 		return entryElements;
