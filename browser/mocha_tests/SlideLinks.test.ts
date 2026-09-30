@@ -17,11 +17,11 @@ describe('SlideLinks', function () {
 	let sent: string[];
 	let told: string[];
 	let posted: any[];
-	// What the class told the menubar and the uiManager about the update
-	// command. hidden starts true and commandShown starts empty, so a test
+	// What the class told the menubar and the notebookbar about the update
+	// command. hidden starts true and itemShown starts empty, so a test
 	// that reads them shown proves the show was really called.
 	let hidden: boolean;
-	let commandShown: Map<string, boolean>;
+	let itemShown: Map<string, boolean>;
 	let editable: boolean;
 	let links: SlideLinks;
 	let map: any;
@@ -128,7 +128,7 @@ describe('SlideLinks', function () {
 		told = [];
 		posted = [];
 		hidden = true;
-		commandShown = new Map();
+		itemShown = new Map();
 		editable = true;
 
 		map = {
@@ -142,8 +142,13 @@ describe('SlideLinks', function () {
 			isPresentationOrDrawing: () => true,
 			uiManager: {
 				showSnackbar: (message: string) => told.push(message),
-				showCommand: (command: string, show: boolean) => {
-					commandShown.set(command, show);
+				notebookbar: {
+					showItem: (id: string) => {
+						itemShown.set(id, true);
+					},
+					hideItem: (id: string) => {
+						itemShown.set(id, false);
+					},
 				},
 			},
 			menubar: {
@@ -262,17 +267,17 @@ describe('SlideLinks', function () {
 
 	it('offers the update command for a document that holds links alone', function () {
 		deliver('slidelinks', { message: list });
-		nodeassert.equal(commandShown.get('updateslidelinks'), true);
+		nodeassert.equal(itemShown.get('insert-update-slide-links'), true);
 		nodeassert.equal(hidden, false);
 
 		deliver('slidelinks', { message: { links: [] } });
 		nodeassert.equal(links.hasLinks(), false);
-		nodeassert.equal(commandShown.get('updateslidelinks'), false);
+		nodeassert.equal(itemShown.get('insert-update-slide-links'), false);
 		nodeassert.equal(hidden, true);
 
 		// The command comes back when the document gains links again.
 		deliver('slidelinks', { message: list });
-		nodeassert.equal(commandShown.get('updateslidelinks'), true);
+		nodeassert.equal(itemShown.get('insert-update-slide-links'), true);
 		nodeassert.equal(hidden, false);
 	});
 
