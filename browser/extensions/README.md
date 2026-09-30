@@ -311,7 +311,7 @@ The pieces:
 | File | Role |
 |---|---|
 | `gas-wrapper.html` | The page loaded into a sidebar panel. It fetches the add-on's server sources and grafts the requested HTML into itself, expanding `<?!= include('name') ?>`. |
-| `gas-shim.js` | Client half. Exposes `google.script.run` as a Proxy, so a leaf call ships the kit half through `cool.callRemote`. |
+| `gas-shim.js` | Client half. Exposes `google.script.run` as a Proxy, so a leaf call asks the main window to run the named function in the kit, through the kit half. |
 | `gas-kit-runner.js` | Kit half. Shims a subset of the Apps Script services on top of scriptinterop, then calls the named function. |
 
 An Apps Script project keeps its server code in `.gs` files in the web editor,

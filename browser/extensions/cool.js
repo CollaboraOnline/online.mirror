@@ -198,10 +198,6 @@
 	// `args` must be JSON-serializable.
 	window.cool.callRemote = function (fnOrOpts) {
 		const args = Array.prototype.slice.call(arguments, 1);
-		const callId = window.cool.idPrefix + String(nextCallId++);
-		const promise = new Promise(function (resolve, reject) {
-			pending[callId] = { resolve: resolve, reject: reject };
-		});
 		let fn, source, line;
 		if (typeof fnOrOpts === 'function') {
 			fn = fnOrOpts;
@@ -218,14 +214,24 @@
 			source = fnOrOpts.source;
 			line = fnOrOpts.line;
 		}
-		window.parent.postMessage(JSON.stringify({
+		return window.cool._postCall({
 			msgId: 'Extension_Call',
-			callId: callId,
 			fn: fn.toString(),
 			source,
 			line,
 			args: args
-		}), '*');
+		});
+	};
+
+	// Post message to the host under a new callId, and return a Promise that the host's
+	// Extension_CallResult for that callId settles:
+	window.cool._postCall = function (message) {
+		const callId = window.cool.idPrefix + String(nextCallId++);
+		const promise = new Promise(function (resolve, reject) {
+			pending[callId] = { resolve: resolve, reject: reject };
+		});
+		window.parent.postMessage(
+			JSON.stringify(Object.assign({ callId: callId }, message)), '*');
 		return promise;
 	};
 

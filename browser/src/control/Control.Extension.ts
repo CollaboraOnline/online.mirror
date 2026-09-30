@@ -290,11 +290,13 @@ interface ExtensionCloseMessage {
 	msgId: 'Extension_Close';
 }
 
-// A GAS add-on sidebar or dialog asks the main window to serve the XClientRuntime proxy of one
-// google.script.run call, and to stop serving it once the call has returned:
-interface ExtensionGasProxyMessage {
-	msgId: 'Extension_RegisterGasProxy' | 'Extension_UnregisterGasProxy';
-	proxyId: string;
+// A GAS add-on frame asks the main window to run the add-on's function functionName with args,
+// for one google.script.run call:
+interface ExtensionGasRunMessage {
+	msgId: 'Extension_GasRun';
+	callId: string;
+	functionName: string;
+	args?: unknown[];
 }
 
 interface ExtensionProxyReturnMessage {
@@ -336,11 +338,6 @@ interface ExtensionSaveFileMessage {
 	bytes: number[];
 }
 
-interface ExtensionOpenSidebarMessage {
-	msgId: 'Extension_OpenSidebar';
-	sidebarFile: string;
-}
-
 // The dialog an Apps Script add-on asked for through one of the ui.show*Dialog calls: its HTML
 // file under the add-on directory, and for a page made from a template, the properties the add-on
 // set on that template:
@@ -350,11 +347,6 @@ interface GasDialogSpec {
 	width?: number;
 	height?: number;
 	templateValues?: object;
-}
-
-interface ExtensionShowGasDialogMessage {
-	msgId: 'Extension_ShowGasDialog';
-	dialog: GasDialogSpec;
 }
 
 interface ExtensionDialogCloseMessage {
@@ -369,19 +361,17 @@ interface ExtensionDialogCancelMessage {
 type ExtensionSidebarMessage =
 	| ExtensionCallMessage
 	| ExtensionCloseMessage
-	| ExtensionGasProxyMessage
+	| ExtensionGasRunMessage
 	| ExtensionProxyReturnMessage
 	| ExtensionTeardownDoneMessage
 	| ExtensionUrlFetchResultMessage
 	| ExtensionResizeMessage
 	| ExtensionShowDialogMessage
-	| ExtensionSaveFileMessage
-	| ExtensionOpenSidebarMessage
-	| ExtensionShowGasDialogMessage;
+	| ExtensionSaveFileMessage;
 
 type ExtensionDialogMessage =
 	| ExtensionCallMessage
-	| ExtensionGasProxyMessage
+	| ExtensionGasRunMessage
 	| ExtensionProxyReturnMessage
 	| ExtensionShowDialogMessage
 	| ExtensionSaveFileMessage
@@ -438,6 +428,16 @@ window.L.Control.Extension = window.L.Control.extend({
 		};
 	} | null,
 	_nextCommandCallId: 0,
+	// The google.script.run calls of GAS add-on frames that are running in the kit, keyed by
+	// their executescript callId, each with the frame's window and own callId, and the call's
+	// proxyId:
+	_pendingGasRuns: null as {
+		[callId: string]: {
+			frame: Window | null;
+			frameCallId: string;
+			proxyId: string;
+		};
+	} | null,
 	// One modal dialog per extension at a time.  origRemove holds the un-hooked
 	// L.IFrameDialog.remove so _closeDialog can dismiss without re-entering the
 	// user-close override installed in _openDialog.
@@ -453,6 +453,7 @@ window.L.Control.Extension = window.L.Control.extend({
 		this.map = map;
 		this._setToolitemHighlight(false);
 		this._pendingCommandCalls = {};
+		this._pendingGasRuns = {};
 		window.addEventListener('message', this._onPostMessage.bind(this));
 		map.on('executescriptresult', this._onScriptResult, this);
 		map.on('proxycall', this._onProxyCall, this);
@@ -486,19 +487,23 @@ window.L.Control.Extension = window.L.Control.extend({
 		return true;
 	},
 
-	// A call or proxy id that cool.js made in the dialog iframe starts with "dlg-", and every
+	// A call or proxy ID that cool.js made in the dialog iframe starts with "dlg-", and every
 	// other one comes from the sidebar iframe:
-	_postToCaller: function (id: string, payload: object): boolean {
-		if (!id.startsWith('dlg-')) {
-			return this._postToIframe(payload);
-		}
-		const frame = this._dialog && this._dialog.iframeDialog._iframe;
-		if (!frame || !frame.contentWindow) return false;
-		frame.contentWindow.postMessage(
-			JSON.stringify(payload),
-			this._targetOrigin(),
-		);
+	_callerWindow: function (id: string): Window | null {
+		const frame = String(id).startsWith('dlg-')
+			? this._dialog && this._dialog.iframeDialog._iframe
+			: this._iframe;
+		return (frame && frame.contentWindow) || null;
+	},
+
+	_postToWindow: function (target: Window | null, payload: object): boolean {
+		if (!target) return false;
+		target.postMessage(JSON.stringify(payload), this._targetOrigin());
 		return true;
+	},
+
+	_postToCaller: function (id: string, payload: object): boolean {
+		return this._postToWindow(this._callerWindow(id), payload);
 	},
 
 	// Forward LOK comment events (Add/Modify/Remove) to the iframe as Extension_DocumentEvent
@@ -691,12 +696,7 @@ window.L.Control.Extension = window.L.Control.extend({
 						alert.title ? alert.title + ': ' + alert.message : alert.message,
 					);
 				}
-				if (typeof envelope.sidebarFile === 'string' && envelope.sidebarFile) {
-					this._openPanel(envelope.sidebarFile);
-				}
-				if (envelope.dialog) {
-					this._openGasDialog(envelope.dialog);
-				}
+				this._openGasEnvelopeUi(envelope);
 			},
 			onError: (err: Error) => {
 				releaseProxy();
@@ -721,30 +721,67 @@ window.L.Control.Extension = window.L.Control.extend({
 			delete this._pendingCommandCalls[callId];
 			pending.onError(new Error('timed out waiting for a response'));
 		}, 30000);
-		const gc = manifest.gasContext;
-		const args =
-			'[' +
-			JSON.stringify(proxyId) +
-			', ' +
-			JSON.stringify(gc.sources) +
-			', ' +
-			JSON.stringify(gc.names) +
-			', ' +
-			JSON.stringify(command.gasFunctionName) +
-			', [], ' +
-			JSON.stringify(this.options.id) +
-			', ' +
-			JSON.stringify(gc.libraries) +
-			']';
+		this._sendGasRunner(callId, proxyId, command.gasFunctionName, []);
+	},
+
+	// Open the sidebar and the dialog that the add-on asked for in a GAS runner result:
+	_openGasEnvelopeUi: function (envelope: {
+		sidebarFile?: string;
+		dialog?: GasDialogSpec | null;
+	}): void {
+		if (typeof envelope.sidebarFile === 'string' && envelope.sidebarFile) {
+			this._openPanel(envelope.sidebarFile);
+		}
+		if (envelope.dialog) {
+			this._openGasDialog(envelope.dialog);
+		}
+	},
+
+	// Run the add-on's function functionName with args in the kit, through the GAS runner:
+	_sendGasRunner: function (
+		callId: string,
+		proxyId: string,
+		functionName: string,
+		functionArgs: unknown[],
+	): void {
 		app.socket.sendMessage(
-			'executescript ' +
-				callId +
-				' 1 gas-kit-runner.js\n(\n' +
-				gc.runnerExpr +
-				'\n).apply(null, ' +
-				args +
-				');',
+			gasRunnerMessage(
+				callId,
+				proxyId,
+				this.options.id,
+				(this.options.manifest as ExtensionManifest).gasContext,
+				functionName,
+				functionArgs,
+			),
 		);
+	},
+
+	// Run the add-on function that a GAS add-on frame asked for, with the proxy of its
+	// XClientRuntime served here:
+	_runGasFunction: function (msg: ExtensionGasRunMessage) {
+		const manifest = this.options.manifest as ExtensionManifest;
+		if (!manifest.isGasExtension || !manifest.gasContext) {
+			console.warn(
+				'extension ' +
+					this.options.id +
+					': ' +
+					msg.msgId +
+					' is only for GAS add-ons with a cached gasContext',
+			);
+			return;
+		}
+		const seq = this._nextCommandCallId++;
+		const callId = 'gasrun-' + this.options.id + '-' + seq;
+		const proxyId = 'gas-run-proxy-' + this.options.id + '-' + seq;
+		const frame = this._callerWindow(msg.callId);
+		registerGasProxy(this.map, proxyId, this.options.id);
+		gasProxies[proxyId].frame = frame;
+		this._pendingGasRuns[callId] = {
+			frame: frame,
+			frameCallId: msg.callId,
+			proxyId: proxyId,
+		};
+		this._sendGasRunner(callId, proxyId, msg.functionName, msg.args || []);
 	},
 
 	// A `panel: true` command: make sure the sidebar panel is showing, then
@@ -820,14 +857,6 @@ window.L.Control.Extension = window.L.Control.extend({
 		params.set('base', new URL(this.options.baseUrl, document.baseURI).href);
 		if (manifest.gasContext && manifest.gasContext.names.length) {
 			params.set('scripts', manifest.gasContext.names.join(','));
-		}
-		if (manifest.gasContext && manifest.gasContext.libraries.length) {
-			params.set(
-				'libraries',
-				JSON.stringify(manifest.gasContext.libraries, (key, value) =>
-					key === 'sources' ? undefined : value,
-				),
-			);
 		}
 		params.set('sidebar', file + (/\.html?$/i.test(file) ? '' : '.html'));
 		return new URL(
@@ -982,9 +1011,6 @@ window.L.Control.Extension = window.L.Control.extend({
 		} else {
 			this._handleDialogMessage(msg as ExtensionDialogMessage);
 		}
-		if (msg.msgId === 'Extension_RegisterGasProxy' && gasProxies[msg.proxyId]) {
-			gasProxies[msg.proxyId].frame = e.source as Window;
-		}
 	},
 
 	// The sidebar and the dialog iframe both send these on to the kit:
@@ -1020,33 +1046,14 @@ window.L.Control.Extension = window.L.Control.extend({
 		}
 	},
 
-	_handleGasProxyMessage: function (msg: ExtensionGasProxyMessage) {
-		if (!(this.options.manifest as ExtensionManifest).isGasExtension) {
-			console.warn(
-				'extension ' +
-					this.options.id +
-					': ' +
-					msg.msgId +
-					' is only for GAS add-ons',
-			);
-			return;
-		}
-		if (msg.msgId === 'Extension_RegisterGasProxy') {
-			registerGasProxy(this.map, msg.proxyId, this.options.id);
-		} else {
-			delete gasProxies[msg.proxyId];
-		}
-	},
-
 	_handleSidebarMessage: function (msg: ExtensionSidebarMessage) {
 		switch (msg.msgId) {
 			case 'Extension_Call':
 			case 'Extension_ProxyReturn':
 				this._forwardToKit(msg);
 				break;
-			case 'Extension_RegisterGasProxy':
-			case 'Extension_UnregisterGasProxy':
-				this._handleGasProxyMessage(msg);
+			case 'Extension_GasRun':
+				this._runGasFunction(msg);
 				break;
 			case 'Extension_Close':
 				this._closeExtension();
@@ -1067,12 +1074,6 @@ window.L.Control.Extension = window.L.Control.extend({
 				break;
 			case 'Extension_SaveFile':
 				this._saveFile(msg);
-				break;
-			case 'Extension_OpenSidebar':
-				this._openPanel(msg.sidebarFile);
-				break;
-			case 'Extension_ShowGasDialog':
-				this._openGasDialog(msg.dialog);
 				break;
 			default:
 				console.warn('unexpected msgId: ' + (msg as any).msgId);
@@ -1143,9 +1144,8 @@ window.L.Control.Extension = window.L.Control.extend({
 			case 'Extension_ProxyReturn':
 				this._forwardToKit(msg);
 				break;
-			case 'Extension_RegisterGasProxy':
-			case 'Extension_UnregisterGasProxy':
-				this._handleGasProxyMessage(msg);
+			case 'Extension_GasRun':
+				this._runGasFunction(msg);
 				break;
 			case 'Extension_DialogClose':
 				this._closeDialog({ cancelled: false, value: msg.value });
@@ -1307,10 +1307,24 @@ window.L.Control.Extension = window.L.Control.extend({
 
 	_onScriptResult: function (e: ExtensionScriptResult) {
 		const pending = this._pendingCommandCalls[e.id];
+		const gasRun = this._pendingGasRuns[e.id];
 		if (pending) {
 			delete this._pendingCommandCalls[e.id];
 			if (e.err !== undefined) pending.onError(this._toScriptError(e.err));
 			else pending.onSuccess(e.ok);
+		} else if (gasRun) {
+			delete this._pendingGasRuns[e.id];
+			delete gasProxies[gasRun.proxyId];
+			const envelope = e.ok as { __coolGas?: boolean } | null;
+			if (e.err === undefined && envelope && envelope.__coolGas === true) {
+				this._openGasEnvelopeUi(envelope);
+			}
+			this._postToWindow(gasRun.frame, {
+				msgId: 'Extension_CallResult',
+				callId: gasRun.frameCallId,
+				ok: e.ok,
+				err: e.err,
+			});
 		} else {
 			this._postToCaller(e.id, {
 				msgId: 'Extension_CallResult',
@@ -1495,7 +1509,7 @@ function loadGasRunnerExpr(baseRel: string): Promise<string> {
 		const src = await resp.text();
 		// Strip the `globalThis.__gasKitRunner =` prefix and the trailing semicolon so what
 		// remains is a bare `function(...) { ... }` expression the kit can wrap in an
-		// IIFE call, matching how cool.callRemote ships its runner:
+		// IIFE call:
 		const m = src.match(
 			/globalThis\.__gasKitRunner\s*=\s*(function[\s\S]*?);\s*$/,
 		);
@@ -1952,28 +1966,58 @@ async function collectGasAddonMenu(
 			resolve(Array.isArray(value) ? value : []);
 		};
 		map.on('executescriptresult', handler);
-		const args =
-			'[' +
-			JSON.stringify(proxyId) +
-			', ' +
-			JSON.stringify(sources) +
-			', ' +
-			JSON.stringify(scriptNames) +
-			', "__coolGasMenu", [], ' +
-			JSON.stringify(id) +
-			', ' +
-			JSON.stringify(libraries) +
-			']';
 		app.socket.sendMessage(
-			'executescript ' +
-				callId +
-				' 1 gas-kit-runner.js\n(\n' +
-				runnerExpr +
-				'\n).apply(null, ' +
-				args +
-				');',
+			gasRunnerMessage(
+				callId,
+				proxyId,
+				id,
+				{ sources, names: scriptNames, libraries, runnerExpr },
+				'__coolGasMenu',
+				[],
+			),
 		);
 	});
+}
+
+// The executescript message that runs the add-on's function functionName with functionArgs in
+// the kit, through the GAS runner:
+function gasRunnerMessage(
+	callId: string,
+	proxyId: string,
+	extensionId: string,
+	gc: ExtensionManifest['gasContext'],
+	functionName: string,
+	functionArgs: unknown[],
+): string {
+	const args =
+		'[' +
+		JSON.stringify(proxyId) +
+		', ' +
+		JSON.stringify(gc.sources) +
+		', ' +
+		JSON.stringify(gc.names) +
+		', ' +
+		JSON.stringify(functionName) +
+		', ' +
+		JSON.stringify(functionArgs) +
+		', ' +
+		JSON.stringify(extensionId) +
+		', ' +
+		JSON.stringify(gc.libraries) +
+		']';
+	// The script's first line is the "(" in front of the runner, which starts at
+	// line 13 of browser/extensions/gas-kit-runner.js:
+	return (
+		'executescript ' +
+		callId +
+		' ' +
+		(13 - 1) +
+		' gas-kit-runner.js\n(\n' +
+		gc.runnerExpr +
+		'\n).apply(null, ' +
+		args +
+		');'
+	);
 }
 
 // --- Localization ------------------------------------------------------------------------------

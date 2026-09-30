@@ -10,10 +10,10 @@
  */
 
 // Client-side google.script.run shim for Google Apps Script Editor Add-ons hosted in COOL; each
-// leaf call ships gas-kit-runner.js (the kit half) via cool.callRemote:
+// leaf call has its add-on function run in the kit, through gas-kit-runner.js:
 (function() {
-    if (!window.cool || typeof window.cool.callRemote !== 'function') {
-        console.warn('gas-shim.js: cool.callRemote is not available');
+    if (!window.cool || typeof window.cool._postCall !== 'function') {
+        console.warn('gas-shim.js: cool._postCall is not available');
         return;
     }
 
@@ -43,36 +43,17 @@
                 if (Object.prototype.hasOwnProperty.call(chainReserved, prop)) return undefined;
                 return function() {
                     const callArgs = Array.prototype.slice.call(arguments);
-                    // The main window serves the XClientRuntime calls that the kit makes back
-                    // during this call:
-                    const proxyId = window.cool.idPrefix + 'gasrt' + (nextClientRuntimeId++);
-                    window.parent.postMessage(JSON.stringify({
-                        msgId: 'Extension_RegisterGasProxy', proxyId: proxyId
-                    }), '*');
-                    const done = function() {
-                        window.parent.postMessage(JSON.stringify({
-                            msgId: 'Extension_UnregisterGasProxy', proxyId: proxyId
-                        }), '*');
-                    };
-                    // Explicit source/line so kit-side stack frames map to gas-kit-runner.js on
-                    // disk:
-                    window.cool.callRemote(
-                        { fn: window.__gasKitRunner, source: 'gas-kit-runner.js', line: 13 },
-                        proxyId,
-                        window.__gasScriptSources || [],
-                        window.__gasScriptNames || [],
-                        prop,
-                        callArgs,
-                        extensionIdMatch ? extensionIdMatch[1] : '',
-                        window.__gasLibraries).then(function(result) {
-                        done();
+                    window.cool._postCall({
+                        msgId: 'Extension_GasRun',
+                        functionName: prop,
+                        args: callArgs
+                    }).then(function(result) {
                         const value = unwrapEnvelope(result);
                         if (typeof state.success === 'function') {
                             try { state.success(value, state.userObject); }
                             catch (ex) { console.warn('gas-shim success handler threw:', ex); }
                         }
                     }, function(err) {
-                        done();
                         // Deliver the Error object itself; matches the real API, and Error's
                         // toString still works for handlers that only want the message:
                         if (typeof state.failure === 'function') {
@@ -92,28 +73,13 @@
             }
         });
     }
-    // A result marked __coolGas holds the add-on function's own return value in value, every
-    // message it passed to getUi().alert() in alerts, (if any) the HtmlOutput file its
-    // ui.showSidebar was called with in sidebarFile, and (if any) the dialog one of its
-    // ui.show*Dialog calls asked for in dialog.  Show the messages, ask the host to open the
-    // sidebar and the dialog, return the value:
+    // A result marked __coolGas holds the add-on function's own return value in value, and every
+    // message it passed to getUi().alert() in alerts.  Show the messages, return the value:
     function unwrapEnvelope(result) {
         if (!result || result.__coolGas !== true) return result;
         const alerts = Array.isArray(result.alerts) ? result.alerts : [];
         for (const a of alerts) {
             showAlert(a.title, a.message);
-        }
-        if (typeof result.sidebarFile === 'string' && result.sidebarFile) {
-            window.parent.postMessage(JSON.stringify({
-                msgId: 'Extension_OpenSidebar',
-                sidebarFile: result.sidebarFile
-            }), '*');
-        }
-        if (result.dialog) {
-            window.parent.postMessage(JSON.stringify({
-                msgId: 'Extension_ShowGasDialog',
-                dialog: result.dialog
-            }), '*');
         }
         return result.value;
     }
@@ -232,11 +198,4 @@
         setHeight: function() {},
         setWidth: function() {},
     };
-
-    let nextClientRuntimeId = 0;
-
-    // The add-on's id, which is the name of its directory under extensions:
-    const baseParam = new URLSearchParams(location.search).get('base') || '';
-    const extensionIdMatch = baseParam.match(/\/extensions\/([^/]+)\/?$/);
-
 })();

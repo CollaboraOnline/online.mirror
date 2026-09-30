@@ -9,11 +9,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-// The next line's number is recorded as a hardcoded 13 in browser/extensions/gas-shim.js:
+// The next line's number is recorded as a hardcoded 13 in browser/src/control/Control.Extension.ts:
 globalThis.__gasKitRunner = function(
     proxyId, gsSources, gsNames, fnName, callArgs, extensionId, libraries)
 {
-    // Body must be self-contained; gas-shim.js ships it as source text via fn.toString():
+    // Body must be self-contained, as it gets shipped to the kit as source text:
     const clientRuntime = $internal.createProxy(uno.idl.scriptinterop.XClientRuntime, proxyId);
     try {
         // One document object for the whole call, as it holds the position that setCursor set:
