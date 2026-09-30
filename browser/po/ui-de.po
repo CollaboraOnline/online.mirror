@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-25 21:45+0000\n"
+"PO-Revision-Date: 2026-09-30 17:58+0000\n"
 "Last-Translator: Ettore Atalan <atalanttore@googlemail.com>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/collabora-online/"
 "collabora-ui/de/>\n"
@@ -2251,6 +2251,9 @@ msgid ""
 "The model returned an empty response (no tokens generated). This is usually "
 "a temporary provider issue - please retry, or try a different model."
 msgstr ""
+"Das Modell hat eine leere Antwort zurückgegeben (keine Tokens generiert). "
+"Dies ist in der Regel ein vorübergehendes Problem beim Anbieter – bitte "
+"versuchen Sie es erneut oder probieren Sie ein anderes Modell aus."
 
 #: src/control/Control.AIChatSidebar.ts:2175
 msgid "Image generation failed: no prompt from model"
@@ -2262,11 +2265,13 @@ msgstr "Dokument nicht verfügbar"
 
 #: src/control/Control.AIChatSidebar.ts:2177
 msgid "The edited outline is not valid: {0}"
-msgstr ""
+msgstr "Die bearbeitete Gliederung ist ungültig: {0}"
 
 #: src/control/Control.AIChatSidebar.ts:2179
 msgid "Could not build any slides from the outline. Please try again."
 msgstr ""
+"Aus der Gliederung konnten keine Folien erstellt werden. Bitte versuchen Sie "
+"es erneut."
 
 #: src/control/Control.AIChatSidebar.ts:2180
 msgid "AI image settings not configured"
@@ -2597,11 +2602,11 @@ msgstr "Folie hinzufügen"
 
 #: src/control/Control.AIChatSidebar.ts:3532
 msgid "Outline approved - building %1 slides."
-msgstr ""
+msgstr "Gliederung genehmigt – %1 Folien werden gebaut."
 
 #: src/control/Control.AIChatSidebar.ts:3541
 msgid "Outline rejected."
-msgstr ""
+msgstr "Gliederung abgelehnt."
 
 #: src/control/Control.AIChatSidebar.ts:3577
 msgid "Building slides..."
@@ -2960,7 +2965,7 @@ msgstr "JPEG-Qualität in %"
 
 #: src/control/Control.CleanupSidebar.ts:572
 msgid "Prepare for sharing"
-msgstr ""
+msgstr "Vorbereiten zum Teilen"
 
 #: src/control/Control.CleanupSidebar.ts:601
 msgid "%1 of %2"
