@@ -15,6 +15,7 @@
 interface IFrameDialog {
 	remove(): void;
 	hasLoaded(): boolean;
+	isFrameWindow(source: MessageEventSource | null): boolean;
 	postMessage(message: any): void;
 	show(): void;
 }
@@ -123,6 +124,12 @@ window.L.Map.Settings = window.L.Handler.extend({
 	},
 
 	onMessage: function (e: MessageEvent): void {
+		// Only the settings dialog and this window itself send these:
+		if (
+			e.source !== window &&
+			!(this._iframeDialog && this._iframeDialog.isFrameWindow(e.source))
+		)
+			return;
 		if (typeof e.data !== 'string') return; // Some extensions may inject scripts resulting in load events that are not strings
 		const data = JSON.parse(e.data);
 

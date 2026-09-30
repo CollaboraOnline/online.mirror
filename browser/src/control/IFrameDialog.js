@@ -187,6 +187,11 @@ window.L.IFrameDialog = window.L.Class.extend({
 		return document.body.querySelector('.' + this.options.prefix + '-wrap');
 	},
 
+	// Whether source is the window of this dialog's iframe:
+	isFrameWindow: function (source) {
+		return !!this._iframe && source === this._iframe.contentWindow;
+	},
+
 	postMessage: function (msg) {
 		this._iframe.contentWindow.postMessage(JSON.stringify(msg), '*');
 	},
