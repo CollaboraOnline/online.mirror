@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Calc-Intro-Template.ods\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-09-25 21:45+0000\n"
+"PO-Revision-Date: 2026-09-30 17:58+0000\n"
 "Last-Translator: Ettore Atalan <atalanttore@googlemail.com>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/collabora-online/"
 "calc-intro-template/de/>\n"
@@ -486,27 +486,30 @@ msgstr ""
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "1. Select the range of cells you want to format"
-msgstr ""
+msgstr "1. Wählen Sie den Bereich der Zellen aus, den Sie formatieren möchten"
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "<1>2. Open the </1><2>Format tab</2><3> in the toolbar</3>"
 msgstr ""
+"<1>2. Öffnen Sie die </1><2>Registerkarte „Format“</2><3> in der "
+"Symbolleiste</3>"
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "<1>3. Click </1><2>Conditional formatting</2>"
-msgstr ""
+msgstr "<1>3. Klicken Sie auf </1><2>Bedingte Formatierung</2>"
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "<1>4. Select the </1><2>rule</2><3> you want to apply</3>"
 msgstr ""
+"<1>4. Wählen Sie die </1><2>Regel</2><3> aus, die Sie anwenden möchten</3>"
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "5. Set the condition and select a cell style"
-msgstr ""
+msgstr "5. Legen Sie die Bedingung fest und wählen Sie einen Zellstil aus"
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "<1>6. Click </1><2>OK</2><3> to apply</3>"
-msgstr ""
+msgstr "<1>6. Klicken Sie auf </1><2>OK</2><3> zum Anwenden</3>"
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "➜Try it: Inventory stock overview"
@@ -522,15 +525,15 @@ msgstr ""
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "Next Chapter: 📊 Charts"
-msgstr ""
+msgstr "Nächstes Kapitel: 📊 Diagramme"
 
 #. content.xml (sheet name)
 msgid "📊 Charts"
-msgstr ""
+msgstr "📊 Diagramme"
 
 #. content.xml (sheet '📊 Charts')
 msgid "📊Create a chart"
-msgstr ""
+msgstr "📊Diagramm erstellen"
 
 #. content.xml (sheet '📊 Charts')
 msgid ""
@@ -548,88 +551,100 @@ msgstr ""
 
 #. content.xml (sheet '📊 Charts')
 msgid "Create a chart from existing data"
-msgstr ""
+msgstr "Ein Diagramm aus vorhandenen Daten erstellen"
 
 #. content.xml (sheet '📊 Charts'); content.xml (sheet '🔍 Data & filtering')
 msgid "Price per piece [£]"
-msgstr ""
+msgstr "Preis pro Stück [€]"
 
 #. content.xml (sheet '📊 Charts')
 msgid "900"
-msgstr ""
+msgstr "900"
 
 #. content.xml (sheet '📊 Charts')
 msgid "<1>2. Open the </1><2>Insert tab </2><3>in the toolbar</3>"
 msgstr ""
+"<1>2. Öffnen Sie die </1><2>Registerkarte „Einfügen“ </2><3>in der "
+"Symbolleiste</3>"
 
 #. content.xml (sheet '📊 Charts')
 msgid "15"
-msgstr ""
+msgstr "15"
 
 #. content.xml (sheet '📊 Charts')
 msgid "<1>3. Click </1><2>Chart</2>"
-msgstr ""
+msgstr "<1>3. Klicken Sie auf </1><2>Diagramm</2>"
 
 #. content.xml (sheet '📊 Charts')
 msgid "3"
-msgstr ""
+msgstr "3"
 
 #. content.xml (sheet '📊 Charts')
 msgid "4. Choose the chart type and style that best fits your data"
 msgstr ""
+"4. Wählen Sie den Diagrammtyp und den Stil, der am besten zu Ihren Daten "
+"passt"
 
 #. content.xml (sheet '📊 Charts')
 msgid "40"
-msgstr ""
+msgstr "40"
 
 #. content.xml (sheet '📊 Charts')
 msgid "<1>5. Click </1><2>Finish</2><3> to insert the chart</3>"
 msgstr ""
+"<1>5. Klicken Sie auf </1><2>Fertigstellen</2><3>, um das Diagramm "
+"einzufügen</3>"
 
 #. content.xml (sheet '📊 Charts')
 msgid "1"
-msgstr ""
+msgstr "1"
 
 #. content.xml (sheet '📊 Charts')
 msgid "6. Your data is now displayed as a chart"
-msgstr ""
+msgstr "6. Ihre Daten werden nun als Diagramm angezeigt"
 
 #. content.xml (sheet '📊 Charts')
 msgid "Create a chart via Insert tab"
-msgstr ""
+msgstr "Ein Diagramm über die Registerkarte „Einfügen“ erstellen"
 
 #. content.xml (sheet '📊 Charts')
 msgid "1. Open the Insert tab in the toolbar"
-msgstr ""
+msgstr "1. Öffnen Sie die Registerkarte „Einfügen“ in der Symbolleiste"
 
 #. content.xml (sheet '📊 Charts')
 msgid "<1>2. Click </1><2>Chart</2>"
-msgstr ""
+msgstr "<1>2. Klicken Sie auf </1><2>Diagramm</2>"
 
 #. content.xml (sheet '📊 Charts')
 msgid "3. Choose the chart type and style that best fits your data"
 msgstr ""
+"3. Wählen Sie den Diagrammtyp und den Stil, der am besten zu Ihren Daten "
+"passt"
 
 #. content.xml (sheet '📊 Charts')
 msgid "<1>4. Click </1><2>Next</2>"
-msgstr ""
+msgstr "<1>4. Klicken Sie auf </1><2>Weiter</2>"
 
 #. content.xml (sheet '📊 Charts')
 msgid ""
 "5. Select the range of cells that contains your data (including headers)"
 msgstr ""
+"5. Wählen Sie den Bereich der Zellen aus, der Ihre Daten enthält "
+"(einschließlich der Überschriften)"
 
 #. content.xml (sheet '📊 Charts')
 msgid "<1>6. Click </1><2>Finish</2><3> to insert the chart</3>"
 msgstr ""
+"<1>6. Klicken Sie auf </1><2>Fertigstellen</2><3>, um das Diagramm "
+"einzufügen</3>"
 
 #. content.xml (sheet '📊 Charts')
 msgid "7. Your data is now displayed as a chart"
-msgstr ""
+msgstr "7. Ihre Daten werden nun als Diagramm angezeigt"
 
 #. content.xml (sheet '📊 Charts')
 msgid "Editing charts"
-msgstr ""
+msgstr "Diagramme bearbeiten"
 
 #. content.xml (sheet '📊 Charts')
 msgid ""
@@ -637,14 +652,18 @@ msgid ""
 " you can use the options in the sidebar or open the context menu (right "
 "click) to modify the chart."
 msgstr ""
+"Um ein Diagramm zu bearbeiten, doppelklicken Sie darauf, um den "
+"Bearbeitungsmodus zu aktivieren. Sobald das Diagramm ausgewählt ist, können "
+"Sie die Optionen in der Seitenleiste nutzen oder das Kontextmenü "
+"(Rechtsklick) öffnen, um das Diagramm zu ändern."
 
 #. content.xml (sheet '📊 Charts')
 msgid "Next Chapter:🔍 Data & filtering"
-msgstr ""
+msgstr "Nächstes Kapitel: 🔍 Daten & Filterung"
 
 #. content.xml (sheet name); content.xml (sheet '🔍 Data & filtering')
 msgid "🔍 Data & filtering"
-msgstr ""
+msgstr "🔍 Daten & Filterung"
 
 #. content.xml (sheet '🔍 Data & filtering')
 msgid ""
@@ -652,32 +671,40 @@ msgid ""
 "efficiently. You can quickly sort information or apply filters to focus only"
 " on the data that matters."
 msgstr ""
+"Mit Daten- und Filterungswerkzeugen können Sie Ihre Daten effizienter "
+"organisieren und auswerten. Sie können Informationen schnell sortieren oder "
+"Filter anwenden, um sich ausschließlich auf die relevanten Daten zu "
+"konzentrieren."
 
 #. content.xml (sheet '🔍 Data & filtering')
 msgid ""
 "In this example, we will learn how to filter data to quickly find specific "
 "items in an inventory list."
 msgstr ""
+"In diesem Beispiel lernen wir, wie man Daten filtert, um bestimmte Artikel "
+"in einer Bestandsliste schnell zu finden."
 
 #. content.xml (sheet '🔍 Data & filtering')
 msgid "Enable filtering"
-msgstr ""
+msgstr "Filterung aktivieren"
 
 #. content.xml (sheet '🔍 Data & filtering')
 msgid "<1>2. Open the </1><2>Data tab </2><3>in the toolbar</3>"
 msgstr ""
+"<1>2. Öffnen Sie die </1><2>Registerkarte „Daten“ </2><3>in der "
+"Symbolleiste</3>"
 
 #. content.xml (sheet '🔍 Data & filtering')
 msgid "<1>3. Click </1><2>Auto Filter</2>"
-msgstr ""
+msgstr "<1>3. Klicken Sie auf </1><2>Automatischer Filter</2>"
 
 #. content.xml (sheet '🔍 Data & filtering')
 msgid "➜Try it: Find low stock items"
-msgstr ""
+msgstr "➜Probieren Sie es aus: Artikel mit geringem Lagerbestand finden"
 
 #. content.xml (sheet '🔍 Data & filtering')
 msgid "➜Try it: Show only Electronics items"
-msgstr ""
+msgstr "➜Probieren Sie es aus: Nur Elektronikartikel anzeigen"
 
 #. content.xml (sheet '🔍 Data & filtering')
 msgid ""
@@ -685,33 +712,41 @@ msgid ""
 "filtered data, then go to the</2><3> Data tab</3><4> and click </4><5>Reset "
 "Filter</5><6>. All data will be visible again.</6>"
 msgstr ""
+"<1>💡Nützlicher Tipp: </1><2>Um den Filter zu deaktivieren, wählen Sie eine "
+"beliebige Zelle innerhalb der gefilterten Daten aus, wechseln Sie dann zur</"
+"2><3> Registerkarte „Daten“</3><4> und klicken Sie auf </4><5>„Filter "
+"zurücksetzen“</5><6>. Alle Daten sind dann wieder sichtbar.</6>"
 
 #. content.xml (sheet '🔍 Data & filtering')
 msgid "Other filtering options"
-msgstr ""
+msgstr "Weitere Filterungsoptionen"
 
 #. content.xml (sheet '🔍 Data & filtering')
 msgid "Additional filtering options give you more control over your data."
 msgstr ""
+"Zusätzliche Filterungsoptionen bieten Ihnen mehr Kontrolle über Ihre Daten."
 
 #. content.xml (sheet '🔍 Data & filtering')
 msgid "Last Chapter: 🤝 Productivity & collaboration"
-msgstr ""
+msgstr "Letztes Kapitel: 🤝 Produktivität & Zusammenarbeit"
 
 #. content.xml (sheet name); content.xml (sheet '🤝 Productivity &
 #. collaboration')
 msgid "🤝 Productivity & collaboration"
-msgstr ""
+msgstr "🤝 Produktivität & Zusammenarbeit"
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid ""
 "A range of features helps you stay productive and collaborate with others, "
 "making it easier to organise work and share information in real time."
 msgstr ""
+"Eine Reihe von Funktionen hilft Ihnen dabei, produktiv zu bleiben und mit "
+"anderen zusammenzuarbeiten, wodurch sich die Arbeit einfacher organisieren "
+"und Informationen in Echtzeit austauschen lassen."
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid "Document sharing"
-msgstr ""
+msgstr "Dokumente teilen"
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid ""
@@ -719,30 +754,34 @@ msgid ""
 "document simultaneously, making it easy to share ideas, review changes, and "
 "stay aligned."
 msgstr ""
+"Arbeiten Sie in Echtzeit mit anderen zusammen. Mehrere Benutzer können "
+"dasselbe Dokument gleichzeitig bearbeiten, was den Austausch von Ideen, die "
+"Überprüfung von Änderungen und die Abstimmung untereinander erleichtert."
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid "Start sharing your document"
-msgstr ""
+msgstr "Beginnen Sie mit dem Teilen Ihres Dokuments"
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid "1. Create new document or open existing one"
-msgstr ""
+msgstr "1. Erstellen Sie ein neues Dokument oder öffnen Sie ein vorhandenes"
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid "<1>2. Click on </1><2>Share button</2><3> on right top side</3>"
 msgstr ""
+"<1>2. Klicken Sie auf </1><2>die Schaltfläche „Teilen“</2><3> oben rechts</3>"
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid "<1>3. </1><2>Share</2><3> your document with others</3>"
-msgstr ""
+msgstr "<1>3. </1><2>Teilen<2><3> Sie Ihr Dokument mit anderen</3>"
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid "➜Try it: Internal shares"
-msgstr ""
+msgstr "➜Probieren Sie es aus: Interne Freigaben"
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid "➜Try it: External shares"
-msgstr ""
+msgstr "➜Probieren Sie es aus: Externe Freigaben"
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid "Shortcuts"
@@ -765,7 +804,7 @@ msgstr ""
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid "⏯Video tutorials"
-msgstr ""
+msgstr "⏯Video-Tutorials"
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid ""
