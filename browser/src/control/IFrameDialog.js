@@ -196,6 +196,11 @@ window.L.IFrameDialog = window.L.Class.extend({
 		return document.body.querySelector('.' + this.options.prefix + '-wrap');
 	},
 
+	// Whether source is the window of this dialog's iframe:
+	isFrameWindow: function (source) {
+		return !!this._iframe && source === this._iframe.contentWindow;
+	},
+
 	postMessage: function (msg) {
 		// On the desktop apps the parent and the iframe both load over
 		// file://, but WebView2 gives the iframe an opaque "null" origin

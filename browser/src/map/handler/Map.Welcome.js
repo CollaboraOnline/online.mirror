@@ -131,6 +131,10 @@ window.L.Map.Welcome = window.L.Handler.extend({
 	},
 
 	onMessage: function (e) {
+		// Only the welcome dialog and this window itself send these:
+		if (e.source !== window
+		    && !(this._iframeWelcome && this._iframeWelcome.isFrameWindow(e.source)))
+			return;
 		if (typeof e.data !== 'string')
 			return; // Some extensions may inject scripts resulting in load events that are not strings
 
