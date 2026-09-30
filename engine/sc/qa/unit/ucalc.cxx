@@ -5962,6 +5962,214 @@ CPPUNIT_TEST_FIXTURE(Test, testAreasWithNotes)
     m_pDoc->DeleteTab(0);
 }
 
+namespace
+{
+// A header row, then empty rows that carry a border on every side, down to nLastBorderedRow.
+// This is the shape of a pre-printed form, where the bordered rows are filled in later.
+void lcl_makeBorderedForm(ScDocument* pDoc, SCROW nLastBorderedRow)
+{
+    pDoc->SetString(0, 0, 0, u"Header"_ustr);
+
+    ::editeng::SvxBorderLine aLine(nullptr, 50, SvxBorderLineStyle::SOLID);
+    SvxBoxItem aBorderItem(ATTR_BORDER);
+    aBorderItem.SetLine(&aLine, SvxBoxItemLine::LEFT);
+    aBorderItem.SetLine(&aLine, SvxBoxItemLine::RIGHT);
+    aBorderItem.SetLine(&aLine, SvxBoxItemLine::TOP);
+    aBorderItem.SetLine(&aLine, SvxBoxItemLine::BOTTOM);
+    ScPatternAttr aBordered(pDoc->getCellAttributeHelper());
+    aBordered.ItemSetPut(aBorderItem);
+    pDoc->ApplyPatternAreaTab(0, 1, 2, nLastBorderedRow, 0, aBordered);
+}
+
+// The pattern of a single border line, for marking one cell or one row.
+ScPatternAttr lcl_oneLine(ScDocument* pDoc, SvxBoxItemLine eSide)
+{
+    ::editeng::SvxBorderLine aLine(nullptr, 50, SvxBorderLineStyle::SOLID);
+    SvxBoxItem aBorderItem(ATTR_BORDER);
+    aBorderItem.SetLine(&aLine, eSide);
+    ScPatternAttr aPattern(pDoc->getCellAttributeHelper());
+    aPattern.ItemSetPut(aBorderItem);
+    return aPattern;
+}
+
+ScPatternAttr lcl_colour(ScDocument* pDoc, const Color& rColor)
+{
+    ScPatternAttr aPattern(pDoc->getCellAttributeHelper());
+    aPattern.ItemSetPut(SvxBrushItem(rColor, ATTR_BACKGROUND));
+    return aPattern;
+}
+
+SCROW lcl_printAreaEndRow(ScDocument* pDoc)
+{
+    SCCOL nEndCol;
+    SCROW nEndRow;
+    CPPUNIT_ASSERT(pDoc->GetPrintArea(0, nEndCol, nEndRow, false));
+    return nEndRow;
+}
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testPrintAreaCoversABorderedForm)
+{
+    // Empty rows carrying a border are printed, so they belong to the print area even though
+    // no cell in them holds anything.
+    m_pDoc->InsertTab(0, u"Form"_ustr);
+    lcl_makeBorderedForm(m_pDoc, 99);
+
+    SCCOL nEndCol;
+    SCROW nEndRow;
+    CPPUNIT_ASSERT(m_pDoc->GetPrintArea(0, nEndCol, nEndRow, false));
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("the printout reaches the last bordered row",
+                                 static_cast<SCROW>(99), nEndRow);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("the printout reaches the last bordered column",
+                                 static_cast<SCCOL>(2), nEndCol);
+    m_pDoc->DeleteTab(0);
+
+    // A form of over a thousand rows is still a form.
+    m_pDoc->InsertTab(0, u"LongForm"_ustr);
+    lcl_makeBorderedForm(m_pDoc, 1499);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("the printout reaches the last bordered row",
+                                 static_cast<SCROW>(1499), lcl_printAreaEndRow(m_pDoc));
+    m_pDoc->DeleteTab(0);
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testPrintAreaIgnoresAColourBelowTheContent)
+{
+    // A colour below the last cell with content stays out of the print area, wherever it sits
+    // and however far it runs.
+    const SCROW nLast = m_pDoc->MaxRow();
+
+    const std::pair<SCROW, SCROW> aRanges[] = {
+        { 0, nLast },           // the whole column
+        { 1, nLast },           // from under the header to the last row
+        { 10, nLast },          // from below the content to the last row
+        { 10, nLast - 1 },      // stopping one row short of the last row
+        { 49999, 49999 },       // one cell far below the content
+    };
+
+    sal_Int32 nSheet = 0;
+    for (const auto& rRange : aRanges)
+    {
+        m_pDoc->InsertTab(0, "Colour" + OUString::number(nSheet++));
+        m_pDoc->SetString(0, 0, 0, u"Header"_ustr);
+        m_pDoc->ApplyPatternAreaTab(0, rRange.first, 0, rRange.second, 0,
+                                    lcl_colour(m_pDoc, COL_BLUE));
+
+        OString aMessage = "a colour over rows " + OString::number(rRange.first) + " to "
+                           + OString::number(rRange.second);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(aMessage.getStr(), static_cast<SCROW>(0),
+                                     lcl_printAreaEndRow(m_pDoc));
+        m_pDoc->DeleteTab(0);
+    }
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testPrintAreaIgnoresABorderTooWideForAForm)
+{
+    // A border far below the content, or one many times wider than a form, stays out of the
+    // print area. The printout ends at the last row with content.
+    const SCROW nLast = m_pDoc->MaxRow();
+
+    const std::pair<SCROW, SCROW> aRanges[] = {
+        { nLast, nLast },       // the last row of the sheet
+        { 10, 50000 },          // reaching far below the content
+    };
+
+    sal_Int32 nSheet = 0;
+    for (const auto& rRange : aRanges)
+    {
+        m_pDoc->InsertTab(0, "Border" + OUString::number(nSheet++));
+        m_pDoc->SetString(0, 0, 0, u"Header"_ustr);
+        m_pDoc->ApplyPatternAreaTab(0, rRange.first, 0, rRange.second, 0,
+                                    lcl_oneLine(m_pDoc, SvxBoxItemLine::BOTTOM));
+
+        OString aMessage = "a border over rows " + OString::number(rRange.first) + " to "
+                           + OString::number(rRange.second);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(aMessage.getStr(), static_cast<SCROW>(0),
+                                     lcl_printAreaEndRow(m_pDoc));
+        m_pDoc->DeleteTab(0);
+    }
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testPrintAreaIgnoresAFrameRoundAWholeColumn)
+{
+    // A frame round a whole column keeps the side lines on every row, the top line on the
+    // first row and the bottom line on the last, so it arrives as three ranges and the middle
+    // one covers nearly the sheet. The printout ends at the last row with content.
+    m_pDoc->InsertTab(0, u"Frame"_ustr);
+    m_pDoc->SetString(0, 0, 0, u"Header"_ustr);
+    const SCROW nLast = m_pDoc->MaxRow();
+
+    ::editeng::SvxBorderLine aLine(nullptr, 50, SvxBorderLineStyle::SOLID);
+    SvxBoxItem aSides(ATTR_BORDER);
+    aSides.SetLine(&aLine, SvxBoxItemLine::LEFT);
+    aSides.SetLine(&aLine, SvxBoxItemLine::RIGHT);
+    ScPatternAttr aSidesOnly(m_pDoc->getCellAttributeHelper());
+    aSidesOnly.ItemSetPut(aSides);
+    m_pDoc->ApplyPatternAreaTab(0, 0, 0, nLast, 0, aSidesOnly);
+
+    SvxBoxItem aTop(aSides);
+    aTop.SetLine(&aLine, SvxBoxItemLine::TOP);
+    ScPatternAttr aTopRow(m_pDoc->getCellAttributeHelper());
+    aTopRow.ItemSetPut(aTop);
+    m_pDoc->ApplyPatternAreaTab(0, 0, 0, 0, 0, aTopRow);
+
+    SvxBoxItem aBottom(aSides);
+    aBottom.SetLine(&aLine, SvxBoxItemLine::BOTTOM);
+    ScPatternAttr aBottomRow(m_pDoc->getCellAttributeHelper());
+    aBottomRow.ItemSetPut(aBottom);
+    m_pDoc->ApplyPatternAreaTab(0, nLast, 0, nLast, 0, aBottomRow);
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("the printout stops at the last row with content",
+                                 static_cast<SCROW>(0), lcl_printAreaEndRow(m_pDoc));
+    m_pDoc->DeleteTab(0);
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testPrintAreaDoesNotMoveAsTheSheetIsFilledIn)
+{
+    // A form is printed in full wherever the last cell with content sits, so filling the form
+    // in row by row leaves the printout the same.
+    for (SCROW nContentRow : { SCROW(1), SCROW(13), SCROW(15), SCROW(16), SCROW(17), SCROW(50) })
+    {
+        m_pDoc->InsertTab(0, "Form" + OUString::number(nContentRow));
+        lcl_makeBorderedForm(m_pDoc, 99);
+        m_pDoc->SetString(0, nContentRow, 0, u"filled in"_ustr);
+
+        OString aMessage = "a form, content in row " + OString::number(nContentRow);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(aMessage.getStr(), static_cast<SCROW>(99),
+                                     lcl_printAreaEndRow(m_pDoc));
+        m_pDoc->DeleteTab(0);
+    }
+
+    // A block too wide to be a form stays out of the printout while the content ends well
+    // above it.
+    for (SCROW nContentRow : { SCROW(0), SCROW(600), SCROW(3000) })
+    {
+        m_pDoc->InsertTab(0, "Wide" + OUString::number(nContentRow));
+        m_pDoc->SetString(0, 0, 0, u"Header"_ustr);
+        if (nContentRow > 0)
+            m_pDoc->SetString(0, nContentRow, 0, u"filled in"_ustr);
+        lcl_makeBorderedForm(m_pDoc, 10499);
+
+        OString aMessage = "a wide block, content in row " + OString::number(nContentRow);
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(aMessage.getStr(), nContentRow,
+                                     lcl_printAreaEndRow(m_pDoc));
+        m_pDoc->DeleteTab(0);
+    }
+
+    // A form too wide for the printout stays out of it wherever the content sits inside it.
+    // Bold over the upper part splits the form into two ranges that still look the same, and
+    // the lower one is short enough on its own to pass for a form.
+    m_pDoc->InsertTab(0, u"Split"_ustr);
+    lcl_makeBorderedForm(m_pDoc, 3000);
+    ScPatternAttr aBold(m_pDoc->getCellAttributeHelper());
+    aBold.ItemSetPut(SvxWeightItem(WEIGHT_BOLD, ATTR_FONT_WEIGHT));
+    m_pDoc->ApplyPatternAreaTab(0, 1, 2, 2500, 0, aBold);
+    m_pDoc->SetString(0, 2600, 0, u"filled in"_ustr);
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("a wide form, content in its lower range",
+                                 static_cast<SCROW>(2600), lcl_printAreaEndRow(m_pDoc));
+    m_pDoc->DeleteTab(0);
+}
+
 CPPUNIT_TEST_FIXTURE(Test, testAnchoredRotatedShape)
 {
     m_pDoc->InsertTab(0, u"TestTab"_ustr);
