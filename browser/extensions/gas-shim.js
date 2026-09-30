@@ -43,9 +43,17 @@
                 if (Object.prototype.hasOwnProperty.call(chainReserved, prop)) return undefined;
                 return function() {
                     const callArgs = Array.prototype.slice.call(arguments);
+                    // The main window serves the XClientRuntime calls that the kit makes back
+                    // during this call:
                     const proxyId = window.cool.idPrefix + 'gasrt' + (nextClientRuntimeId++);
-                    window.cool.registerProxy(proxyId, clientRuntimeHandlers);
-                    const done = function() { window.cool.unregisterProxy(proxyId); };
+                    window.parent.postMessage(JSON.stringify({
+                        msgId: 'Extension_RegisterGasProxy', proxyId: proxyId
+                    }), '*');
+                    const done = function() {
+                        window.parent.postMessage(JSON.stringify({
+                            msgId: 'Extension_UnregisterGasProxy', proxyId: proxyId
+                        }), '*');
+                    };
                     // Explicit source/line so kit-side stack frames map to gas-kit-runner.js on
                     // disk:
                     window.cool.callRemote(
@@ -139,6 +147,69 @@
         document.body.insertBefore(box, document.body.firstChild);
     }
 
+    // The main window has this frame make the add-on's UrlFetchApp requests, as the
+    // Content-Security-Policy of cool.html does not apply here:
+    async function urlFetch(url, method, contentType, payload, payloadIsBase64,
+                            headerNames, headerValues, followRedirects) {
+        const headers = {};
+        for (let i = 0; i < headerNames.length; ++i) {
+            headers[headerNames[i]] = headerValues[i];
+        }
+        if (contentType) headers['Content-Type'] = contentType;
+        try {
+            const body = method === 'GET' || method === 'HEAD'
+                ? undefined
+                : payloadIsBase64
+                    ? Uint8Array.from(atob(payload), c => c.charCodeAt(0))
+                    : payload;
+            const resp = await fetch(url, {
+                method: method,
+                headers: headers,
+                body: body,
+                redirect: followRedirects ? 'follow' : 'manual'
+            });
+            const buf = await resp.arrayBuffer();
+            const bytes = new Uint8Array(buf);
+            let binary = '';
+            for (let i = 0; i < bytes.length; i += 0x8000) {
+                binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+            }
+            const outNames = [];
+            const outValues = [];
+            resp.headers.forEach(function(v, k) {
+                outNames.push(k);
+                outValues.push(v);
+            });
+            return {
+                code: resp.status,
+                headerNames: outNames,
+                headerValues: outValues,
+                body: btoa(binary),
+                error: ''
+            };
+        } catch (err) {
+            return {
+                code: 0, headerNames: [], headerValues: [], body: '',
+                error: err && err.message ? err.message : String(err)
+            };
+        }
+    }
+    window.cool._handleHostMessage = function(data) {
+        if (data.msgId !== 'Extension_UrlFetch') return false;
+        const answer = function(value) {
+            window.parent.postMessage(JSON.stringify({
+                msgId: 'Extension_UrlFetchResult', requestId: data.requestId, value: value
+            }), '*');
+        };
+        urlFetch.apply(null, data.args).then(answer, function(err) {
+            answer({
+                code: 0, headerNames: [], headerValues: [], body: '',
+                error: err && err.message ? err.message : String(err)
+            });
+        });
+        return true;
+    };
+
     // A page's own messages get the same presentation through this:
     window.__gasShowAlert = showAlert;
 
@@ -164,167 +235,8 @@
 
     let nextClientRuntimeId = 0;
 
-    // Extension id keyed into localStorage so one add-on's user properties don't see another's:
+    // The add-on's id, which is the name of its directory under extensions:
     const baseParam = new URLSearchParams(location.search).get('base') || '';
     const extensionIdMatch = baseParam.match(/\/extensions\/([^/]+)\/?$/);
-    const propStoragePrefix = 'gas-user-props:'
-        + (extensionIdMatch ? extensionIdMatch[1] : 'unknown') + ':';
-    function propKeys() {
-        const out = [];
-        for (let i = 0; i < localStorage.length; ++i) {
-            const k = localStorage.key(i);
-            if (k !== null && k.indexOf(propStoragePrefix) === 0) {
-                out.push(k.substring(propStoragePrefix.length));
-            }
-        }
-        return out;
-    }
-
-    // A cache entry lives in localStorage under the add-on and the scope, as JSON with the value
-    // and the time at which it expires:
-    function cacheKey(scope, key) {
-        return 'gas-cache:' + (extensionIdMatch ? extensionIdMatch[1] : 'unknown')
-            + ':' + scope + ':' + key;
-    }
-    // The cache entries of all add-ons share a budget of a million characters, well below the
-    // localStorage quota that COOL's own settings need too, and storing one drops the expired
-    // entries and, as far as needed, those that expire soonest:
-    function cacheStore(storageKey, envelope) {
-        const now = Date.now();
-        const entries = [];
-        const expired = [];
-        let used = 0;
-        for (let i = 0; i < localStorage.length; ++i) {
-            const k = localStorage.key(i);
-            if (k === null || !k.startsWith('gas-cache:') || k === storageKey) continue;
-            const raw = localStorage.getItem(k) || '';
-            let exp = 0;
-            try { exp = JSON.parse(raw).exp; } catch (_) { /* dropped as expired */ }
-            if (typeof exp !== 'number' || exp <= now) {
-                expired.push(k);
-            } else {
-                entries.push({ key: k, exp: exp, size: k.length + raw.length });
-                used += k.length + raw.length;
-            }
-        }
-        for (const k of expired) localStorage.removeItem(k);
-        entries.sort(function(a, b) { return a.exp - b.exp; });
-        const size = storageKey.length + envelope.length;
-        let next = 0;
-        while (used + size > 1000000 && next < entries.length) {
-            const entry = entries[next++];
-            localStorage.removeItem(entry.key);
-            used -= entry.size;
-        }
-        // A value that does not fit is not cached, which GAS allows as well:
-        for (;;) {
-            if (used + size > 1000000) {
-                localStorage.removeItem(storageKey);
-                return;
-            }
-            try {
-                localStorage.setItem(storageKey, envelope);
-                return;
-            } catch (_) {
-                if (next === entries.length) {
-                    localStorage.removeItem(storageKey);
-                    return;
-                }
-                const entry = entries[next++];
-                localStorage.removeItem(entry.key);
-                used -= entry.size;
-            }
-        }
-    }
-
-    const clientRuntimeHandlers = {
-        translate: function() {
-            throw new Error(
-                'LanguageApp.translate is not supported in the COOL Apps Script wrapper');
-        },
-        userPropGetProperty: function(key) {
-            const raw = localStorage.getItem(propStoragePrefix + String(key));
-            return { IsPresent: raw !== null, Value: raw === null ? '' : raw };
-        },
-        userPropSetProperty: function(key, value) {
-            localStorage.setItem(propStoragePrefix + String(key), String(value));
-        },
-        userPropDeleteProperty: function(key) {
-            localStorage.removeItem(propStoragePrefix + String(key));
-        },
-        userPropGetKeys: function() { return propKeys(); },
-        userPropDeleteAll: function() {
-            for (const k of propKeys()) {
-                localStorage.removeItem(propStoragePrefix + k);
-            }
-        },
-        cacheGet: function(scope, key) {
-            const raw = localStorage.getItem(cacheKey(String(scope), String(key)));
-            if (raw === null) return { IsPresent: false, Value: '' };
-            try {
-                const parsed = JSON.parse(raw);
-                if (parsed && typeof parsed.exp === 'number' && Date.now() < parsed.exp) {
-                    return { IsPresent: true, Value: String(parsed.v) };
-                }
-            } catch (_) { /* fall through and drop */ }
-            localStorage.removeItem(cacheKey(String(scope), String(key)));
-            return { IsPresent: false, Value: '' };
-        },
-        cachePut: function(scope, key, value, ttlSeconds) {
-            const envelope = JSON.stringify({
-                v: String(value),
-                exp: Date.now() + Math.max(0, ttlSeconds) * 1000
-            });
-            cacheStore(cacheKey(String(scope), String(key)), envelope);
-        },
-        cacheRemove: function(scope, key) {
-            localStorage.removeItem(cacheKey(String(scope), String(key)));
-        },
-        urlFetch: async function(url, method, contentType, payload, payloadIsBase64,
-                                 headerNames, headerValues, followRedirects) {
-            const headers = {};
-            for (let i = 0; i < headerNames.length; ++i) {
-                headers[headerNames[i]] = headerValues[i];
-            }
-            if (contentType) headers['Content-Type'] = contentType;
-            try {
-                const body = method === 'GET' || method === 'HEAD'
-                    ? undefined
-                    : payloadIsBase64
-                        ? Uint8Array.from(atob(payload), c => c.charCodeAt(0))
-                        : payload;
-                const resp = await fetch(url, {
-                    method: method,
-                    headers: headers,
-                    body: body,
-                    redirect: followRedirects ? 'follow' : 'manual'
-                });
-                const buf = await resp.arrayBuffer();
-                const bytes = new Uint8Array(buf);
-                let binary = '';
-                for (let i = 0; i < bytes.length; i += 0x8000) {
-                    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-                }
-                const outNames = [];
-                const outValues = [];
-                resp.headers.forEach(function(v, k) {
-                    outNames.push(k);
-                    outValues.push(v);
-                });
-                return {
-                    code: resp.status,
-                    headerNames: outNames,
-                    headerValues: outValues,
-                    body: btoa(binary),
-                    error: ''
-                };
-            } catch (err) {
-                return {
-                    code: 0, headerNames: [], headerValues: [], body: '',
-                    error: err && err.message ? err.message : String(err)
-                };
-            }
-        }
-    };
 
 })();

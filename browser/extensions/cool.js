@@ -574,7 +574,8 @@
 			window.parent.postMessage(JSON.stringify({
 				msgId: 'Extension_TeardownDone'
 			}), '*');
-		} else {
+		} else if (!(window.cool._handleHostMessage
+		             && window.cool._handleHostMessage(data))) {
 			console.warn('postMessage has unexpected msgId: ' + data.msgId);
 		}
 	});

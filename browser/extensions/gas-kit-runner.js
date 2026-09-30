@@ -524,7 +524,7 @@ globalThis.__gasKitRunner = function(
             Charset: charsetValues
         };
 
-        // Round-tripped over the XClientRuntime proxy so the store lives in the iframe's
+        // Round-tripped over the XClientRuntime proxy so the store lives in the main window's
         // localStorage:
         function userPropsFacade() {
             const f = {
@@ -575,8 +575,8 @@ globalThis.__gasKitRunner = function(
             getDocumentProperties: notYetImplementedScope('getDocumentProperties')
         };
 
-        // Hops back to the iframe over the XClientRuntime proxy since the kit has no outbound
-        // network:
+        // Hops back to the main window over the XClientRuntime proxy since the kit has no
+        // outbound network:
         globalThis.LanguageApp = {
             translate: function(text, origin, dest) {
                 return clientRuntime.translate(
@@ -621,8 +621,8 @@ globalThis.__gasKitRunner = function(
             getAuthorizationInfo: scriptAppNotSupported('getAuthorizationInfo'),
             invalidateAuth: scriptAppNotSupported('invalidateAuth')
         };
-        // A cache for one scope, whose entries live in the iframe's localStorage and which checks
-        // its arguments the way GAS does:
+        // A cache for one scope, whose entries live in the main window's localStorage and which
+        // checks its arguments the way GAS does:
         function cacheFacade(scope) {
             function normalizedTtl(ttl) {
                 const n = Math.trunc(Number(ttl));
@@ -691,19 +691,19 @@ globalThis.__gasKitRunner = function(
                 throw new Error(
                     'CacheService.getDocumentCache is not supported in the COOL Apps Script'
                         + ' wrapper; a per-document cache would need a document-side key that is'
-                        + ' not plumbed through the iframe yet.');
+                        + ' not plumbed through the main window yet.');
             }
         };
-        // Real UrlFetchApp, routed to the iframe (kit has no outbound network).  The response
+        // Real UrlFetchApp, routed to the main window (kit has no outbound network).  The response
         // object matches Apps Script's HTTPResponse shape: getContentText returns UTF-8 text,
         // getContent returns a byte array, and getHeaders and getAllHeaders return the headers
-        // under the lower-case names the iframe's fetch reports.  When the underlying fetch or the
-        // callback itself fails, urlFetch fills `error` and this shim throws with that message so
-        // an add-on's try/catch runs.  A non-2xx status without muteHttpExceptions:true also
+        // under the lower-case names the main window's fetch reports.  When the underlying fetch or
+        // the callback itself fails, urlFetch fills `error` and this shim throws with that message
+        // so an add-on's try/catch runs.  A non-2xx status without muteHttpExceptions:true also
         // throws, matching GAS.
         // A byte payload (an array of GAS's signed bytes, a Uint8Array, or a Blob) travels to the
-        // iframe as base64.  As in GAS, a payload without a contentType (and, for a Blob, without
-        // a content type of its own) is sent as application/x-www-form-urlencoded:
+        // main window as base64.  As in GAS, a payload without a contentType (and, for a Blob,
+        // without a content type of its own) is sent as application/x-www-form-urlencoded:
         function urlFetchNormalize(payload, givenContentType) {
             const contentType = givenContentType || 'application/x-www-form-urlencoded';
             if (payload == null) {
@@ -819,8 +819,8 @@ globalThis.__gasKitRunner = function(
                     return Array.from(content(), (b) => b > 127 ? b - 256 : b);
                 },
                 getHeaders: function() { return headerMap; },
-                // GAS gives the values of a repeated header as an array, but the iframe's fetch
-                // has already joined them into one string, separated by ", ":
+                // GAS gives the values of a repeated header as an array, but the main window's
+                // fetch has already joined them into one string, separated by ", ":
                 getAllHeaders: function() { return headerMap; },
                 // GAS gives the blob the response's media type without its parameters:
                 getBlob: function() {

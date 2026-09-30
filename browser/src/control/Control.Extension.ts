@@ -290,9 +290,23 @@ interface ExtensionCloseMessage {
 	msgId: 'Extension_Close';
 }
 
+// A GAS add-on sidebar or dialog asks the main window to serve the XClientRuntime proxy of one
+// google.script.run call, and to stop serving it once the call has returned:
+interface ExtensionGasProxyMessage {
+	msgId: 'Extension_RegisterGasProxy' | 'Extension_UnregisterGasProxy';
+	proxyId: string;
+}
+
 interface ExtensionProxyReturnMessage {
 	msgId: 'Extension_ProxyReturn';
 	callId: string;
+	value: unknown;
+}
+
+// A GAS add-on frame answers the UrlFetchApp request requestId that the main window passed to it:
+interface ExtensionUrlFetchResultMessage {
+	msgId: 'Extension_UrlFetchResult';
+	requestId: string;
 	value: unknown;
 }
 
@@ -355,8 +369,10 @@ interface ExtensionDialogCancelMessage {
 type ExtensionSidebarMessage =
 	| ExtensionCallMessage
 	| ExtensionCloseMessage
+	| ExtensionGasProxyMessage
 	| ExtensionProxyReturnMessage
 	| ExtensionTeardownDoneMessage
+	| ExtensionUrlFetchResultMessage
 	| ExtensionResizeMessage
 	| ExtensionShowDialogMessage
 	| ExtensionSaveFileMessage
@@ -365,11 +381,13 @@ type ExtensionSidebarMessage =
 
 type ExtensionDialogMessage =
 	| ExtensionCallMessage
+	| ExtensionGasProxyMessage
 	| ExtensionProxyReturnMessage
 	| ExtensionShowDialogMessage
 	| ExtensionSaveFileMessage
 	| ExtensionDialogCloseMessage
 	| ExtensionDialogCancelMessage
+	| ExtensionUrlFetchResultMessage
 	| ExtensionResizeMessage;
 
 type ExtensionMessage = ExtensionSidebarMessage | ExtensionDialogMessage;
@@ -964,6 +982,9 @@ window.L.Control.Extension = window.L.Control.extend({
 		} else {
 			this._handleDialogMessage(msg as ExtensionDialogMessage);
 		}
+		if (msg.msgId === 'Extension_RegisterGasProxy' && gasProxies[msg.proxyId]) {
+			gasProxies[msg.proxyId].frame = e.source as Window;
+		}
 	},
 
 	// The sidebar and the dialog iframe both send these on to the kit:
@@ -999,14 +1020,39 @@ window.L.Control.Extension = window.L.Control.extend({
 		}
 	},
 
+	_handleGasProxyMessage: function (msg: ExtensionGasProxyMessage) {
+		if (!(this.options.manifest as ExtensionManifest).isGasExtension) {
+			console.warn(
+				'extension ' +
+					this.options.id +
+					': ' +
+					msg.msgId +
+					' is only for GAS add-ons',
+			);
+			return;
+		}
+		if (msg.msgId === 'Extension_RegisterGasProxy') {
+			registerGasProxy(this.map, msg.proxyId, this.options.id);
+		} else {
+			delete gasProxies[msg.proxyId];
+		}
+	},
+
 	_handleSidebarMessage: function (msg: ExtensionSidebarMessage) {
 		switch (msg.msgId) {
 			case 'Extension_Call':
 			case 'Extension_ProxyReturn':
 				this._forwardToKit(msg);
 				break;
+			case 'Extension_RegisterGasProxy':
+			case 'Extension_UnregisterGasProxy':
+				this._handleGasProxyMessage(msg);
+				break;
 			case 'Extension_Close':
 				this._closeExtension();
+				break;
+			case 'Extension_UrlFetchResult':
+				answerGasFrameFetch(msg, this._iframe && this._iframe.contentWindow);
 				break;
 			case 'Extension_TeardownDone':
 				this._finishRemovePanel();
@@ -1097,6 +1143,10 @@ window.L.Control.Extension = window.L.Control.extend({
 			case 'Extension_ProxyReturn':
 				this._forwardToKit(msg);
 				break;
+			case 'Extension_RegisterGasProxy':
+			case 'Extension_UnregisterGasProxy':
+				this._handleGasProxyMessage(msg);
+				break;
 			case 'Extension_DialogClose':
 				this._closeDialog({ cancelled: false, value: msg.value });
 				break;
@@ -1109,6 +1159,12 @@ window.L.Control.Extension = window.L.Control.extend({
 				break;
 			case 'Extension_SaveFile':
 				this._saveFile(msg);
+				break;
+			case 'Extension_UrlFetchResult':
+				answerGasFrameFetch(
+					msg,
+					this._dialog && this._dialog.iframeDialog._iframe.contentWindow,
+				);
 				break;
 			case 'Extension_Resize':
 				// Dialog iframe reports its content's actual scrollHeight
@@ -1517,9 +1573,13 @@ const proxyCallDeliveries = new Map<string, { delivered: boolean }>();
 type GasProxyHandlers = { [method: string]: (...args: unknown[]) => unknown };
 
 // The XClientRuntime proxies that the main window serves itself, by proxy id, each with the id of
-// the extension whose runner calls it:
+// the extension whose runner calls it, and for the call of a GAS add-on frame that frame's window:
 const gasProxies: {
-	[proxyId: string]: { extensionId: string; handlers: GasProxyHandlers };
+	[proxyId: string]: {
+		extensionId: string;
+		handlers: GasProxyHandlers;
+		frame?: Window | null;
+	};
 } = {};
 let gasProxyMap: any = null;
 
@@ -1568,7 +1628,12 @@ function answerGasProxyCall(e: {
 		);
 		send(null);
 	};
-	const fn = handler[e.method];
+	// A GAS add-on frame makes its UrlFetchApp requests itself, where the
+	// Content-Security-Policy of cool.html does not apply:
+	const fn =
+		e.method === 'urlFetch' && proxy.frame !== undefined
+			? (...args: unknown[]) => fetchThroughGasFrame(proxy.frame, args)
+			: handler[e.method];
 	try {
 		// A handler may return a Promise (urlFetch does): wait for it before
 		// sending proxyreturn, so a non-void async method blocks the kit-side
@@ -1582,6 +1647,75 @@ function answerGasProxyCall(e: {
 	} catch (err) {
 		onThrow(err);
 	}
+}
+
+// The UrlFetchApp requests that GAS add-on frames are making for the main window, by request ID:
+const gasFrameFetches = new Map<
+	string,
+	{ frame: Window; resolve: (value: unknown) => void }
+>();
+let nextGasFrameFetchId = 0;
+let gasFrameFetchWatch: ReturnType<typeof setInterval> | null = null;
+
+const gasFrameGoneResult = {
+	code: 0,
+	headerNames: [] as string[],
+	headerValues: [] as string[],
+	body: '',
+	error: 'the frame that made the call is gone',
+};
+
+// Have frame make the UrlFetchApp request whose urlFetch arguments are args.  The requests of a
+// frame that goes away get gasFrameGoneResult, as the kit waits for every answer:
+function fetchThroughGasFrame(
+	frame: Window | null,
+	args: unknown[],
+): Promise<unknown> {
+	return new Promise((resolve) => {
+		if (!frame || frame.closed) {
+			resolve(gasFrameGoneResult);
+			return;
+		}
+		const requestId = String(nextGasFrameFetchId++);
+		gasFrameFetches.set(requestId, { frame: frame, resolve: resolve });
+		if (gasFrameFetchWatch === null) {
+			gasFrameFetchWatch = setInterval(() => {
+				gasFrameFetches.forEach((request, id) => {
+					if (request.frame.closed) {
+						gasFrameFetches.delete(id);
+						request.resolve(gasFrameGoneResult);
+					}
+				});
+				if (gasFrameFetches.size === 0) {
+					clearInterval(gasFrameFetchWatch);
+					gasFrameFetchWatch = null;
+				}
+			}, 1000);
+		}
+		frame.postMessage(
+			JSON.stringify({
+				msgId: 'Extension_UrlFetch',
+				requestId: requestId,
+				args: args,
+			}),
+			'*',
+		);
+	});
+}
+
+function answerGasFrameFetch(
+	msg: ExtensionUrlFetchResultMessage,
+	frame: Window | null,
+): void {
+	const request = gasFrameFetches.get(msg.requestId);
+	if (!request || request.frame !== frame) {
+		console.warn(
+			'Extension_UrlFetchResult: unknown requestId ' + msg.requestId,
+		);
+		return;
+	}
+	gasFrameFetches.delete(msg.requestId);
+	request.resolve(msg.value);
 }
 
 // The cache entries of all add-ons share a budget of a million characters, well below the

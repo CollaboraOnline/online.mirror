@@ -338,7 +338,7 @@ snackbar.
 
 `DocumentApp` and `SpreadsheetApp` (documents, sheets, ranges, the active
 selection and cursor), `HtmlService`, `PropertiesService.getUserProperties`
-(stored in the iframe's `localStorage`), `LanguageApp.translate`, `Session`,
+(stored in the main window's `localStorage`), `LanguageApp.translate`, `Session`,
 `Utilities` and `Logger`.
 
 `getUi().alert()` records its message rather than blocking on a modal, and the
