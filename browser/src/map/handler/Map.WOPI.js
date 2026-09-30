@@ -290,7 +290,19 @@ L.Map.WOPI = L.Handler.extend({
 		return false;
 	},
 
+	// Whether source is a frame nested inside this window, like an extension's, of any origin:
+	_isFrameInsideWindow: function(source) {
+		for (let w = source; w && w.parent !== w; w = w.parent) {
+			if (w.parent === window)
+				return true;
+		}
+		return false;
+	},
+
 	_postMessageListener: function(e) {
+		if (this._isFrameInsideWindow(e.source))
+			return;
+
 		if (!this._allowMessageOrigin(e)) {
 			window.app.console.error('PostMessage not allowed due to incorrect origin.');
 			return;

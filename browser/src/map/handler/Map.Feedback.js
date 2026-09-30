@@ -120,6 +120,10 @@ L.Map.Feedback = L.Handler.extend({
 	},
 
 	onMessage: function (e) {
+		// Only the feedback dialog and this window itself send these:
+		if (e.source !== window
+		    && !(this._iframeDialog && this._iframeDialog.isFrameWindow(e.source)))
+			return;
 		if (typeof e.data !== 'string')
 			return; // Some extensions may inject scripts resulting in load events that are not strings
 
