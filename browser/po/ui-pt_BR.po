@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-29 03:51+0000\n"
+"PO-Revision-Date: 2026-09-30 13:51+0000\n"
 "Last-Translator: H2Oufoe <regularwater@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "collabora-online/collabora-ui/pt_BR/>\n"
@@ -2182,7 +2182,7 @@ msgstr "Mensagem muito longa"
 
 #: src/control/Control.AIChatSidebar.ts:2149
 msgid "AI features are disabled by the administrator"
-msgstr "Os recursos de IA estão desativados pelo administrador."
+msgstr "Os recursos de IA estão desativados pelo administrador"
 
 #: src/control/Control.AIChatSidebar.ts:2150
 msgid "AI is not available for guests"
@@ -4634,9 +4634,8 @@ msgstr "Nota de rodapé/fim"
 #: src/control/Notebookbar.WriterReferencesTab.ts:313
 #: src/control/Control.NotebookbarDraw.js:1705
 #: src/control/Control.NotebookbarImpress.js:1783
-#, fuzzy
 msgid "Field"
-msgstr "Campos"
+msgstr "Local"
 
 #: src/control/Notebookbar.WriterTableTab.ts:24
 #: src/control/Control.NotebookbarCalc.js:1846
@@ -4693,9 +4692,8 @@ msgstr "Formatar"
 
 #: src/control/Notebookbar.WriterTableTab.ts:595
 #: src/control/Control.NotebookbarCalc.js:2409
-#, fuzzy
 msgid "Sort"
-msgstr "Curto"
+msgstr "Organizar"
 
 #: src/control/Notebookbar.WriterTableTab.ts:615
 msgid "Protect"
@@ -4708,9 +4706,8 @@ msgid "Caption"
 msgstr "Legenda"
 
 #: src/control/Sidebar.FromNotebookbarPanel.ts:154
-#, fuzzy
 msgid "Animations"
-msgstr "Animação"
+msgstr "Animações"
 
 #: src/control/Control.Notebookbar.js:634
 msgid "Start:"
@@ -4747,25 +4744,24 @@ msgstr "Clique para expandir"
 
 #: src/control/Control.NotebookbarBuilder.js:266
 msgid "Tap to expand"
-msgstr "Clique para expandir"
+msgstr "Toque para expandir"
 
 #: src/control/Control.NotebookbarBuilder.js:267
-#, fuzzy
 msgid "Click to collapse"
-msgstr "Clique para colapsar"
+msgstr "Clique para recolher"
 
 #: src/control/Control.NotebookbarBuilder.js:267
 #: src/control/Control.NotebookbarBuilder.js:341
 msgid "Tap to collapse"
-msgstr "Clique para recolher"
+msgstr "Toque para recolher"
 
 #: src/control/Control.NotebookbarBuilder.js:395
 msgid "PDF Document (.pdf) with options"
-msgstr ""
+msgstr "Documento PDF (.pdf) com opções"
 
 #: src/control/Control.NotebookbarBuilder.js:602
 msgid "Unsaved changes."
-msgstr ""
+msgstr "Mudanças não salvas."
 
 #: src/control/Control.NotebookbarCalc.js:29
 #: src/control/Control.NotebookbarDraw.js:63
@@ -4798,7 +4794,6 @@ msgstr "Revisão"
 #: src/control/Control.NotebookbarDraw.js:108
 #: src/control/Control.NotebookbarImpress.js:136
 #: src/control/Control.NotebookbarWriter.js:82
-#, fuzzy
 msgid "Shape"
 msgstr "Formas"
 
@@ -4815,7 +4810,7 @@ msgstr "Imagem"
 #: src/control/Control.NotebookbarImpress.js:150
 #: src/control/Control.NotebookbarWriter.js:96
 msgid "Chart"
-msgstr ""
+msgstr "Gráfico"
 
 #: src/control/Control.NotebookbarCalc.js:99
 #: src/control/Control.NotebookbarDraw.js:129
@@ -4860,7 +4855,7 @@ msgstr "Visualizar histórico"
 #: src/control/Control.NotebookbarImpress.js:444
 #: src/control/Control.NotebookbarWriter.js:390
 msgid "Security label"
-msgstr ""
+msgstr "Classificação de segurança"
 
 #: src/control/Control.NotebookbarCalc.js:406
 #: src/control/Control.NotebookbarDraw.js:403
@@ -4882,7 +4877,7 @@ msgstr "Renomear"
 #: src/control/Control.NotebookbarImpress.js:861
 #: src/control/Control.NotebookbarWriter.js:667
 msgid "Clipboard"
-msgstr ""
+msgstr "Área de transferência"
 
 #: src/control/Control.NotebookbarCalc.js:504
 #: src/control/Control.NotebookbarDraw.js:682
@@ -4890,13 +4885,15 @@ msgstr ""
 #: src/control/Control.NotebookbarWriter.js:694
 #: src/control/Control.TopToolbar.js:155
 msgid "Clone Formatting (double click to keep active)"
-msgstr ""
+msgstr "Clonar formatação (clique duas vezes para manter ativo)"
 
 #: src/control/Control.NotebookbarCalc.js:505
 msgid ""
 "Clone Formatting is active (press Enter on a cell to apply, click again or "
 "press Esc to exit)"
 msgstr ""
+"Clonar formatação está ativo (pressione Enter ou clique em uma célula para "
+"aplicar, clique no botão de novo ou pressione Esc para cancelar)"
 
 #: src/control/Control.NotebookbarCalc.js:541
 #: src/control/Control.NotebookbarDraw.js:719
@@ -4906,7 +4903,7 @@ msgstr "Fonte"
 
 #: src/control/Control.NotebookbarCalc.js:825
 msgid "Merge & Center"
-msgstr ""
+msgstr "Mesclar e Centralizar"
 
 #: src/control/Control.NotebookbarCalc.js:840
 #: src/control/Control.NotebookbarCalc.js:856
@@ -4948,12 +4945,11 @@ msgstr "Texto"
 
 #: src/control/Control.NotebookbarCalc.js:870
 msgid "Number Format"
-msgstr ""
+msgstr "Formato dos números"
 
 #: src/control/Control.NotebookbarCalc.js:943
-#, fuzzy
 msgid "Cells"
-msgstr "Célula"
+msgstr "Células"
 
 #: src/control/Control.NotebookbarCalc.js:1045
 #: src/control/jsdialog/Definitions.Menu.ts:2410
@@ -4979,7 +4975,7 @@ msgstr "Ruim"
 #: src/control/Control.NotebookbarCalc.js:1101
 #: src/control/PermissionMode.ts:219
 msgid "Editing"
-msgstr ""
+msgstr "Editando"
 
 #: src/control/Control.NotebookbarCalc.js:1125
 #: src/control/Control.NotebookbarDraw.js:1243
@@ -4991,7 +4987,7 @@ msgstr "Substituir"
 #: src/control/Control.NotebookbarCalc.js:1189
 #: src/control/Control.NotebookbarWriter.js:1905
 msgid "Margin"
-msgstr ""
+msgstr "Margem"
 
 #: src/control/Control.NotebookbarCalc.js:1257
 msgid "Row Height"
@@ -5036,7 +5032,7 @@ msgstr "Excluir colunas"
 #: src/control/Control.NotebookbarWriter.js:2708
 #: src/control/Control.NotebookbarWriter.js:3077
 msgid "Align"
-msgstr ""
+msgstr "Alinhar"
 
 #: src/control/Control.NotebookbarCalc.js:1418
 #: src/control/Control.NotebookbarCalc.js:3200
@@ -5049,7 +5045,7 @@ msgstr ""
 #: src/control/Control.NotebookbarWriter.js:2779
 #: src/control/Control.NotebookbarWriter.js:3148
 msgid "Arrange"
-msgstr ""
+msgstr "Arranjar"
 
 #: src/control/Control.NotebookbarCalc.js:1480
 msgid "Sheet View"
@@ -5117,28 +5113,30 @@ msgstr "Barra de estado"
 #: src/control/Control.NotebookbarWriter.js:2836
 #: src/control/Control.NotebookbarWriter.js:3205
 msgid "Group"
-msgstr ""
+msgstr "Agrupar"
 
 #: src/control/Control.NotebookbarCalc.js:1768
 msgid "Ungroup"
-msgstr ""
+msgstr "Desagrupar"
 
 #: src/control/Control.NotebookbarCalc.js:1790
 msgid "Pivot Table"
-msgstr ""
+msgstr "Tabela dinâmica"
 
 #: src/control/Control.NotebookbarCalc.js:1855
 #: src/control/Control.NotebookbarCalc.js:1858
 msgid "Table styles are only available in .xlsx files"
-msgstr ""
+msgstr "Estilos de tabela estão disponíveis apenas em arquivos .xlsx"
 
 #: src/control/Control.NotebookbarCalc.js:1856
 msgid "Insert a styled table"
-msgstr ""
+msgstr "Insira uma tabela com estilo"
 
 #: src/control/Control.NotebookbarCalc.js:1859
 msgid "Select an editable cell range to insert a styled table"
 msgstr ""
+"Selecione um intervalo de células editáveis para inserir uma tabela com "
+"estilo"
 
 #: src/control/Control.NotebookbarCalc.js:1868
 #: src/control/Control.NotebookbarDraw.js:1061
@@ -5147,7 +5145,7 @@ msgstr ""
 #: src/control/Control.NotebookbarImpress.js:1603
 #: src/control/Control.NotebookbarWriter.js:1314
 msgid "Illustrations"
-msgstr ""
+msgstr "Illustrações"
 
 #: src/control/Control.NotebookbarCalc.js:1931
 #: src/control/Control.NotebookbarDraw.js:1075
@@ -5167,88 +5165,85 @@ msgstr "Assistente"
 
 #: src/control/Control.NotebookbarCalc.js:2149
 msgid "Insert Function"
-msgstr ""
+msgstr "Inserir Função"
 
 #: src/control/Control.NotebookbarCalc.js:2157
-#, fuzzy
 msgid "Function Library"
-msgstr "Assistente de funções"
+msgstr "Biblioteca de Funções"
 
 #: src/control/Control.NotebookbarCalc.js:2171
 msgid "AutoSum"
-msgstr ""
+msgstr "Auto Soma"
 
 #: src/control/Control.NotebookbarCalc.js:2184
 msgid "Financial"
-msgstr ""
+msgstr "Financeiro"
 
 #: src/control/Control.NotebookbarCalc.js:2202
 msgid "Logical"
-msgstr ""
+msgstr "Lógico"
 
 #: src/control/Control.NotebookbarCalc.js:2232
 msgid "Date & Time"
-msgstr ""
+msgstr "Data e Hora"
 
 #: src/control/Control.NotebookbarCalc.js:2244
 msgid "Lookup & Reference"
-msgstr ""
+msgstr "Pesquisa e Referência"
 
 #: src/control/Control.NotebookbarCalc.js:2262
 msgid "Math & Trig"
-msgstr ""
+msgstr "Matemática e Trigonometria"
 
 #: src/control/Control.NotebookbarCalc.js:2274
 msgid "More Functions"
-msgstr ""
+msgstr "Mais Funções"
 
 #: src/control/Control.NotebookbarCalc.js:2319
-#, fuzzy
 msgid "Range"
-msgstr "faixa"
+msgstr "Faixa"
 
 #: src/control/Control.NotebookbarCalc.js:2460
 msgid "Filter"
-msgstr ""
+msgstr "Filtrar"
 
 #: src/control/Control.NotebookbarCalc.js:2697
 msgid "Proofing"
-msgstr ""
+msgstr "Revisando"
 
 #: src/control/Control.NotebookbarCalc.js:2725
 #: src/control/Control.NotebookbarImpress.js:2130
 #: src/control/Control.NotebookbarWriter.js:2331
 msgid "Auto Spell Check"
-msgstr ""
+msgstr "Verificação de ortografia automática"
 
 #: src/control/Control.NotebookbarCalc.js:2757
 #: src/control/Control.NotebookbarImpress.js:2160
 #: src/control/jsdialog/Widget.HTMLContent.ts:52
-#, fuzzy
 msgid "Comments"
-msgstr "Comentário"
+msgstr "Comentários"
 
 #: src/control/Control.NotebookbarCalc.js:2807
 #: src/control/Control.NotebookbarWriter.js:2430
 msgid "Tracking"
-msgstr ""
+msgstr "Rastreando"
 
 #: src/control/Control.NotebookbarCalc.js:2850
 msgid "Comment on Change"
-msgstr ""
+msgstr "Comentar sobre a mudança"
 
 #: src/control/Control.NotebookbarCalc.js:2861
 msgid "Protection"
-msgstr ""
+msgstr "Proteção"
 
 #: src/control/Control.NotebookbarCalc.js:2931
 msgid "Format Cells"
-msgstr ""
+msgstr "Formatar Células"
 
 #: src/control/Control.NotebookbarCalc.js:2991
 #: src/control/Control.NotebookbarImpress.js:1978
 msgid "Themes"
-msgstr ""
+msgstr "Temas"
 
 #: src/control/Control.NotebookbarCalc.js:3066
 #: src/control/Control.NotebookbarCalc.js:3401
@@ -5256,13 +5251,13 @@ msgstr ""
 #: src/control/Control.NotebookbarWriter.js:2641
 #: src/control/Control.NotebookbarWriter.js:3010
 msgid "Wrap"
-msgstr ""
+msgstr "Moldar"
 
 #: src/control/Control.NotebookbarCalc.js:3314
 #: src/control/Control.NotebookbarImpress.js:2942
 #: src/control/Control.NotebookbarWriter.js:2913
 msgid "Image Controls"
-msgstr ""
+msgstr "Controles de imagem"
 
 #: src/control/Control.NotebookbarDraw.js:82
 #: src/control/Control.NotebookbarWriter.js:56
@@ -5285,16 +5280,18 @@ msgstr "Régua"
 #: src/control/Control.TopToolbar.js:155
 msgid "Clone Formatting is active (click again or press Esc to exit)"
 msgstr ""
+"Clonar formatação está ativo (clique no botão de novo ou pressione Esc para "
+"cancelar)"
 
 #: src/control/Control.NotebookbarDraw.js:947
 #: src/control/Control.NotebookbarImpress.js:1120
 #: src/control/Control.NotebookbarWriter.js:877
 msgid "Paragraph"
-msgstr ""
+msgstr "Parágrafo"
 
 #: src/control/Control.NotebookbarImpress.js:110
 msgid "Slide Show"
-msgstr ""
+msgstr "Apresentação de slides"
 
 #: src/control/Control.NotebookbarImpress.js:157
 msgid "Master"
@@ -5302,35 +5299,35 @@ msgstr "Modelo Global"
 
 #: src/control/Control.NotebookbarImpress.js:536
 msgid "Start Slide Show"
-msgstr ""
+msgstr "Iniciar a Apresentação de slides"
 
 #: src/control/Control.NotebookbarImpress.js:541
 msgid "From Beginning"
-msgstr ""
+msgstr "Do início"
 
 #: src/control/Control.NotebookbarImpress.js:542
 msgid "Fullscreen, starting at slide 1"
-msgstr ""
+msgstr "Tela cheia, começando no primeiro slide"
 
 #: src/control/Control.NotebookbarImpress.js:549
 msgid "From Current Slide"
-msgstr ""
+msgstr "A partir do slide atual"
 
 #: src/control/Control.NotebookbarImpress.js:550
 msgid "Fullscreen, starting at this slide"
-msgstr ""
+msgstr "Tela cheia, começando desse slide"
 
 #: src/control/Control.NotebookbarImpress.js:558
 msgid "Presenter View"
-msgstr ""
+msgstr "Ver como será apresentado"
 
 #: src/control/Control.NotebookbarImpress.js:559
 msgid "Shows your notes, next slide, and a timer"
-msgstr ""
+msgstr "Mostrar suas anotações, o próximo slide e um temporizador"
 
 #: src/control/Control.NotebookbarImpress.js:574
 msgid "Present"
-msgstr ""
+msgstr "Apresentar"
 
 #: src/control/Control.NotebookbarImpress.js:580
 msgid "Present in Window"
@@ -5338,32 +5335,32 @@ msgstr "Apresentar em janela"
 
 #: src/control/Control.NotebookbarImpress.js:581
 msgid "Plays inside the document window. Starts at slide 1"
-msgstr ""
+msgstr "Reproduz dentro da janela do documento. Começa no slide 1"
 
 #: src/control/Control.NotebookbarImpress.js:589
 msgid "Present to All"
-msgstr ""
+msgstr "Apresentar a todos"
 
 #: src/control/Control.NotebookbarImpress.js:590
 msgid "Starts a slideshow on every viewer's screen"
-msgstr ""
+msgstr "Começa uma apresentação de slides na tela de cada pessoa"
 
 #: src/control/Control.NotebookbarImpress.js:598
 #: src/slideshow/SlideShowPresenter.ts:1674
 msgid "Follow Presenter"
-msgstr ""
+msgstr "Seguir apresentador"
 
 #: src/control/Control.NotebookbarImpress.js:599
 msgid "View slides as the presenter advances them"
-msgstr ""
+msgstr "Veja os slides à medida que o apresentador avança"
 
 #: src/control/Control.NotebookbarImpress.js:609
 msgid "Set Up"
-msgstr ""
+msgstr "Configurar"
 
 #: src/control/Control.NotebookbarImpress.js:736
 msgid "Slide Views"
-msgstr ""
+msgstr "Visualizações de slides"
 
 #: src/control/Control.NotebookbarImpress.js:780
 #, fuzzy
@@ -5373,7 +5370,7 @@ msgstr "Encaixar na grade"
 #: src/control/Control.NotebookbarImpress.js:926
 #: src/control/Control.NotebookbarImpress.js:2006
 msgid "Slide Layout"
-msgstr ""
+msgstr "Layout dos slides"
 
 #: src/control/Control.NotebookbarImpress.js:948
 #: src/control/Control.NotebookbarImpress.js:2016
@@ -5385,27 +5382,27 @@ msgstr "Layout de página"
 #: src/control/Control.NotebookbarImpress.js:956
 #: src/control/Control.NotebookbarImpress.js:2023
 msgid "Reset Layout"
-msgstr ""
+msgstr "Resetar o layout"
 
 #: src/control/Control.NotebookbarImpress.js:970
 msgid "Character"
-msgstr ""
+msgstr "Caractere"
 
 #: src/control/Control.NotebookbarImpress.js:1236
 msgid "Spacing & Color"
-msgstr ""
+msgstr "Espaçamento e Cor"
 
 #: src/control/Control.NotebookbarImpress.js:1584
 msgid "Import Slides"
-msgstr ""
+msgstr "Importar slides"
 
 #: src/control/Control.NotebookbarImpress.js:1592
 msgid "Update Links"
-msgstr ""
+msgstr "Atualizar links"
 
 #: src/control/Control.NotebookbarImpress.js:1943
 msgid "Master Slide Templates"
-msgstr ""
+msgstr "Modelos de slides mestres"
 
 #: src/control/Control.NotebookbarImpress.js:1955
 #, fuzzy
@@ -5414,7 +5411,7 @@ msgstr "Fechar Apresentação"
 
 #: src/control/Control.NotebookbarImpress.js:1964
 msgid "Presentation Templates"
-msgstr ""
+msgstr "Modelos de Apresentação"
 
 #: src/control/Control.NotebookbarImpress.js:2035
 msgid "Slide Size"
@@ -5737,9 +5734,8 @@ msgid "Close slide import"
 msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:996
-#, fuzzy
 msgid "Add presentation…"
-msgstr "Terminal apresentação"
+msgstr "Adicionar apresentação…"
 
 #: src/control/Control.SlideImportPane.tsx:1011
 msgid "No presentations yet"
@@ -6576,7 +6572,7 @@ msgstr ""
 
 #: src/control/Permission.js:448
 msgid "Collaborative editing"
-msgstr ""
+msgstr "Edição colaborativa"
 
 #: src/control/Permission.js:449 src/control/Permission.js:481
 msgid "Edit together in real-time"
@@ -7019,14 +7015,12 @@ msgid "All users"
 msgstr ""
 
 #: src/control/jsdialog/Definitions.Menu.ts:1917
-#, fuzzy
 msgid "Highlight cells with"
-msgstr "Destaque células com..."
+msgstr "Destaque células com"
 
 #: src/control/jsdialog/Definitions.Menu.ts:1948
-#, fuzzy
 msgid "Top/Bottom Rules"
-msgstr "Regras superiores/inferiores..."
+msgstr "Regras do topo/inferior"
 
 #: src/control/jsdialog/Definitions.Menu.ts:1984
 msgid "Color Scale"
