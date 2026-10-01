@@ -383,6 +383,9 @@ void EditEngineWidgetController::DumpWidgetData(tools::JsonWriter& rWriter)
     rWriter.put("backgroundColor",
                 toHexColor(aColorConfig.GetColorValue(svtools::DOCCOLOR).nColor));
     rWriter.put("readOnly", m_rEditView.IsReadOnly());
+    const sal_Int32 nLockingViewId = GetLockingViewId();
+    if (nLockingViewId >= 0)
+        rWriter.put("lockedBy", nLockingViewId);
 
     {
         auto aExtraNode = rWriter.startNode("extra");
