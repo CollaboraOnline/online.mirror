@@ -1126,6 +1126,7 @@ void Primitive2dJsonProcessor::processPrimitive(const BasePrimitive2D& rBasePrim
             mrWriter.put("type", "modifiedColor");
             const basegfx::BColorModifierSharedPtr& rModifier = rPrimitive.getColorModifier();
             mrWriter.put("modifier", rModifier->getModifierName());
+            writeBoundsScaled(rPrimitive);
 
             // Output modifier-specific parameters so the client can apply the modification
             if (rModifier->getBColorModifierType() == basegfx::BColorModifierType::BCMType_replace)

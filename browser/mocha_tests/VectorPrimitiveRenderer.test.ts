@@ -49,6 +49,10 @@ describe('VectorPrimitiveRenderer', function () {
 	}
 
 	describe('Primitive references', function () {
+		afterEach(function () {
+			ScratchCanvasStub.uninstall();
+		});
+
 		it('fills the slide rectangle for backgroundcolor', function () {
 			const primitive = loadVectorRenderingReference('testBackgroundColor')
 				.primitives[0];
@@ -721,9 +725,10 @@ describe('VectorPrimitiveRenderer', function () {
 			nodeassert.ok(recorder.findCall('clip'), 'clip not called');
 		});
 
-		it('composes nested colour modifiers inner first', function () {
+		it('composes nested color modifiers inner first without a scratch canvas', function () {
 			// Both modifiers apply, the inner one first as in the
 			// engine, so its filter leads the canvas filter list.
+			ScratchCanvasStub.installUnavailable();
 			const primitive = {
 				type: 'modifiedColor',
 				modifier: 'gray',
@@ -751,10 +756,11 @@ describe('VectorPrimitiveRenderer', function () {
 			nodeassert.strictEqual(fill?.properties.filter, 'invert(1) grayscale(1)');
 		});
 
-		it('composes a drawMode recolour with an enclosing colour modifier', function () {
-			// The drawMode is the innermost colour modifier around
+		it('composes a drawMode recolor with an enclosing color modifier without a scratch canvas', function () {
+			// The drawMode is the innermost color modifier around
 			// its graphic, so its filter leads and the enclosing
 			// invert follows.
+			ScratchCanvasStub.installUnavailable();
 			const primitive = {
 				type: 'modifiedColor',
 				modifier: 'invert',
@@ -1024,10 +1030,11 @@ describe('VectorPrimitiveRenderer', function () {
 			nodeassert.deepStrictEqual(recorder.properties, {});
 		});
 
-		it('applies grayscale filter for modifiedColor gray', function () {
+		it('grays modifiedColor gray even without a scratch canvas', function () {
 			// The gray modifier maps to canvas filter "grayscale(1)".
 			// The renderer wraps the children in save/restore so the
 			// filter does not leak.
+			ScratchCanvasStub.installUnavailable();
 			const primitive = loadVectorRenderingReference('testModifiedColorGray')
 				.primitives[0];
 			nodeassert.strictEqual(primitive.type, 'modifiedColor');
@@ -1046,8 +1053,9 @@ describe('VectorPrimitiveRenderer', function () {
 			nodeassert.strictEqual(recorder.countOf('fill'), 1);
 		});
 
-		it('applies invert filter for modifiedColor invert', function () {
+		it('inverts modifiedColor invert even without a scratch canvas', function () {
 			// The invert modifier maps to canvas filter "invert(1)".
+			ScratchCanvasStub.installUnavailable();
 			const primitive = loadVectorRenderingReference('testModifiedColorInvert')
 				.primitives[0];
 			nodeassert.strictEqual(primitive.type, 'modifiedColor');
@@ -1059,6 +1067,140 @@ describe('VectorPrimitiveRenderer', function () {
 
 			nodeassert.strictEqual(recorder.properties.filter, 'invert(1)');
 			nodeassert.strictEqual(recorder.countOf('fill'), 1);
+		});
+
+		it('grays modifiedColor gray without the canvas filter', function () {
+			ScratchCanvasStub.install();
+			const primitive = loadVectorRenderingReference('testModifiedColorGray')
+				.primitives[0];
+			const recorder = new CanvasRecorder(200, 200);
+			new cool.VectorPrimitiveRenderer().renderPrimitive(
+				recorder as any,
+				primitive,
+			);
+
+			// The child goes on the first canvas, and the second one
+			// takes the saturation of a gray, which leaves only the
+			// luminosity.
+			const content = ScratchCanvasStub.recorder(0);
+			const color = ScratchCanvasStub.recorder(1);
+			nodeassert.strictEqual(content.countOf('fill'), 1);
+			const gray = color
+				.callsOf('fillRect')
+				.find(
+					(call) => call.properties.globalCompositeOperation === 'saturation',
+				);
+			nodeassert.ok(gray, 'the color is grayed by a blend');
+			nodeassert.strictEqual(gray.properties.fillStyle, '#808080');
+			nodeassert.ok(
+				color
+					.callsOf('drawImage')
+					.some(
+						(call) =>
+							call.properties.globalCompositeOperation === 'color-dodge',
+					),
+				'the premultiplied color is divided by the alpha',
+			);
+
+			// The result lands once on the target, with no filter.
+			nodeassert.strictEqual(recorder.countOf('drawImage'), 1);
+			nodeassert.strictEqual(recorder.countOf('fill'), 0);
+			nodeassert.strictEqual(recorder.properties.filter, undefined);
+		});
+
+		it('inverts modifiedColor invert without the canvas filter', function () {
+			ScratchCanvasStub.install();
+			const primitive = loadVectorRenderingReference('testModifiedColorInvert')
+				.primitives[0];
+			const recorder = new CanvasRecorder(200, 200);
+			new cool.VectorPrimitiveRenderer().renderPrimitive(
+				recorder as any,
+				primitive,
+			);
+
+			// The alpha as a gray level, less the premultiplied color, is
+			// the premultiplied inverse.
+			const color = ScratchCanvasStub.recorder(1);
+			const alpha = ScratchCanvasStub.recorder(2);
+			const difference = color
+				.callsOf('drawImage')
+				.find(
+					(call) => call.properties.globalCompositeOperation === 'difference',
+				);
+			nodeassert.ok(difference, 'the color is inverted by a blend');
+			nodeassert.strictEqual(difference.args[0], alpha.canvas);
+			nodeassert.strictEqual(recorder.countOf('drawImage'), 1);
+			nodeassert.strictEqual(recorder.properties.filter, undefined);
+		});
+
+		it('keeps a modified color to the bounds of its subtree', function () {
+			ScratchCanvasStub.install();
+			const recorder = new CanvasRecorder(200, 200);
+			new cool.VectorPrimitiveRenderer().renderPrimitive(
+				recorder as any,
+				{
+					type: 'modifiedColor',
+					modifier: 'gray',
+					bounds: [10, 10, 50, 50],
+					children: [
+						{
+							type: 'polyPolygonColor',
+							color: '#ff0000',
+							path: 'M 10 10 L 50 10 L 50 50 Z',
+						},
+					],
+				} as any,
+			);
+
+			// A pixel more on each side for the antialiased edge.
+			nodeassert.strictEqual(ScratchCanvasStub.recorder(0).canvas.width, 42);
+			const draw = recorder.findCall('drawImage');
+			nodeassert.ok(draw);
+			nodeassert.deepStrictEqual(draw.args.slice(1), [9, 9]);
+		});
+
+		it('applies a nested color modifier before the one around it', function () {
+			ScratchCanvasStub.install();
+			const recorder = new CanvasRecorder(200, 200);
+			new cool.VectorPrimitiveRenderer().renderPrimitive(
+				recorder as any,
+				{
+					type: 'modifiedColor',
+					modifier: 'gray',
+					children: [
+						{
+							type: 'modifiedColor',
+							modifier: 'invert',
+							children: [
+								{
+									type: 'polyPolygonColor',
+									color: '#ff0000',
+									path: 'M 0 0 L 10 0 L 10 10 Z',
+								},
+							],
+						},
+					],
+				} as any,
+			);
+
+			// The outer content canvas comes first, then the three of
+			// the inner modifier, whose result lands on the outer
+			// content before the outer grays it.
+			const outerContent = ScratchCanvasStub.recorder(0);
+			const innerColor = ScratchCanvasStub.recorder(2);
+			const outerColor = ScratchCanvasStub.recorder(4);
+			nodeassert.strictEqual(
+				outerContent.findCall('drawImage')?.args[0],
+				innerColor.canvas,
+			);
+			nodeassert.ok(
+				outerColor
+					.callsOf('fillRect')
+					.some(
+						(call) => call.properties.globalCompositeOperation === 'saturation',
+					),
+			);
+			nodeassert.strictEqual(recorder.countOf('drawImage'), 1);
 		});
 
 		it('passes through modifiedColor replace without a filter', function () {

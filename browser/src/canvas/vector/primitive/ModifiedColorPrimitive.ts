@@ -20,6 +20,7 @@ namespace cool {
 		type: typeof ModifiedColorPrimitive.type;
 		modifier?: string;
 		color?: string;
+		bounds?: [number, number, number, number]; // what the subtree covers, in twips
 	}
 
 	export namespace ModifiedColorPrimitive {

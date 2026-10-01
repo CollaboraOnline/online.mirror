@@ -658,31 +658,122 @@ namespace cool {
 			context: CanvasRenderingContext2D,
 			primitive: ModifiedColorPrimitive,
 		): void {
-			if (!primitive.children) return;
+			const children = primitive.children;
+			if (!children) return;
 
-			let filter: string | null = null;
+			let invert: boolean;
 			switch (primitive.modifier) {
 				case 'gray':
 				case 'luminance_to_alpha':
-					filter = 'grayscale(1)';
+					invert = false;
 					break;
 				case 'invert':
-					filter = 'invert(1)';
+					invert = true;
 					break;
-				// The "replace" modifier needs every primitive that
-				// draws a colour to consult a shared colour override.
-				// That is left for a follow-up, so for now children
-				// render with their original colours.
+				default:
+					// The "replace" modifier needs every primitive that
+					// draws a color to consult a shared color override.
+					// That is left for a follow-up, so for now children
+					// render with their original colors.
+					this._renderPrimitives(context, children);
+					return;
 			}
 
-			if (filter !== null) {
+			// Without a scratch canvas the canvas filter does it, in the
+			// browsers that have one.
+			const filtered = (): void => {
 				context.save();
-				context.filter = this._composeFilter(context, filter);
-				this._renderPrimitives(context, primitive.children);
+				context.filter = this._composeFilter(
+					context,
+					invert ? 'invert(1)' : 'grayscale(1)',
+				);
+				this._renderPrimitives(context, children);
 				context.restore();
+			};
+			this._scratch.withEffectSlots(filtered, (slot) => {
+				if (
+					!this._renderModifiedOnScratch(
+						context,
+						slot,
+						children,
+						primitive.bounds,
+						invert,
+					)
+				)
+					filtered();
+			});
+		}
+
+		// Gray or invert a subtree with blend modes, which every browser
+		// has. A blend works on colors that are not premultiplied and
+		// mixes in the backdrop where the content is partly transparent.
+		// Over opaque black each pixel is its premultiplied color
+		// instead, both modifiers map that exactly, and dividing by the
+		// alpha afterwards gives the plain color back. False when there
+		// is no canvas for it.
+		private _renderModifiedOnScratch(
+			context: CanvasRenderingContext2D,
+			slot: number,
+			children: Primitive[],
+			bounds: number[] | undefined,
+			invert: boolean,
+		): boolean {
+			const region = VectorScratchCanvases.effectRegion(context, bounds, 0);
+			if (!region) return true;
+			const content = this._renderToScratch(context, slot, children, region);
+			if (!content) return false;
+			const width = region.width;
+			const height = region.height;
+			const color = this._scratch.slotContext(slot + 1, width, height);
+			const alpha = color
+				? this._scratch.slotContext(slot + 2, width, height)
+				: null;
+			if (!color || !alpha) return false;
+
+			color.save();
+			color.fillStyle = '#000000';
+			color.fillRect(0, 0, width, height);
+			color.drawImage(content.canvas, 0, 0);
+
+			// The alpha as an opaque gray level, white where the content
+			// is solid.
+			alpha.save();
+			alpha.drawImage(content.canvas, 0, 0);
+			alpha.globalCompositeOperation = 'source-in';
+			alpha.fillStyle = '#ffffff';
+			alpha.fillRect(0, 0, width, height);
+			alpha.globalCompositeOperation = 'destination-over';
+			alpha.fillStyle = '#000000';
+			alpha.fillRect(0, 0, width, height);
+
+			if (invert) {
+				// The alpha less the premultiplied color is the
+				// premultiplied inverse.
+				color.globalCompositeOperation = 'difference';
+				color.drawImage(alpha.canvas, 0, 0);
 			} else {
-				this._renderPrimitives(context, primitive.children);
+				// A gray has no saturation, so the blend keeps only the
+				// luminosity, with the weights the engine uses.
+				color.globalCompositeOperation = 'saturation';
+				color.fillStyle = '#808080';
+				color.fillRect(0, 0, width, height);
 			}
+
+			// Color dodge divides by one less the source, so one less
+			// the alpha divides the premultiplied color by the alpha.
+			alpha.globalCompositeOperation = 'difference';
+			alpha.fillStyle = '#ffffff';
+			alpha.fillRect(0, 0, width, height);
+			color.globalCompositeOperation = 'color-dodge';
+			color.drawImage(alpha.canvas, 0, 0);
+
+			color.globalCompositeOperation = 'destination-in';
+			color.drawImage(content.canvas, 0, 0);
+			alpha.restore();
+			color.restore();
+
+			this._scratch.drawOnto(context, color, region);
+			return true;
 		}
 
 		/// Prepend a filter to the context's active filter list. The
