@@ -557,6 +557,8 @@ try {
 	usesNativeCertStore = false;
 }
 
+const DEFAULT_PROVIDER = 'default';
+
 // Keep in sync with the pre-canned provider map in wsd/FileServer.cpp
 // fetchModels. The server ignores the baseUrl from the client for non-custom
 // providers and uses its own copy, so a caller cannot pair a pre-canned id
@@ -3042,6 +3044,8 @@ class SettingIframe {
 						aiImageModel: defaultSettings.aiImageModel,
 						aiImageSize: defaultSettings.aiImageSize,
 						aiRequestTimeout: defaultSettings.aiRequestTimeout,
+						aiProviderAPIKeyStored: false,
+						aiImageProviderAPIKeyStored: false,
 					};
 				},
 				() => this._viewSetting,
@@ -3084,6 +3088,17 @@ class SettingIframe {
 
 		container.appendChild(this.createTextAIGroup(data));
 		container.appendChild(this.createImageAIGroup(data));
+		if (window.showLeftNav) {
+			container.appendChild(
+				this.createButtonWithText(
+					'ai-reset-button',
+					_('Reset'),
+					_('Use the AI provider set on the server'),
+					['button--vue-secondary'],
+					() => this.resetAIProviders(data, container),
+				),
+			);
+		}
 
 		const timeoutBox = this.createViewSettingsTextBox(
 			'aiRequestTimeout',
@@ -3119,10 +3134,13 @@ class SettingIframe {
 		legend.textContent = _('Text Generation');
 		group.appendChild(legend);
 
-		const providerOptions = AI_PROVIDERS.map((provider) => ({
-			value: provider.id,
-			label: provider.name,
-		}));
+		const providerOptions = [
+			{ value: DEFAULT_PROVIDER, label: _('Default') },
+			...AI_PROVIDERS.map((provider) => ({
+				value: provider.id,
+				label: provider.name,
+			})),
+		];
 
 		const providerField = document.createElement('div');
 		providerField.id = 'aiProvidercontainer';
@@ -3137,7 +3155,7 @@ class SettingIframe {
 		const providerSelect = this.createSelectInput(
 			'aiProvider',
 			providerOptions,
-			this.getProviderIdFromUrl(data.aiProviderURL),
+			this.getSelectedProviderId(data, group),
 			(selectEl) => {
 				const provider = this.getProviderById(selectEl.value);
 				if (provider && !provider.isCustom) {
@@ -3387,6 +3405,12 @@ class SettingIframe {
 		if (customUrlContainer) {
 			customUrlContainer.style.display = isCustomProvider ? 'block' : 'none';
 		}
+		const isDefaultProvider =
+			this.getSelectedProviderId(data, root) === DEFAULT_PROVIDER;
+		for (const id of ['#aiProviderAPIKeycontainer', '#aiModelcontainer']) {
+			const field = root.querySelector(id) as HTMLElement | null;
+			if (field) field.style.display = isDefaultProvider ? 'none' : '';
+		}
 	}
 
 	private attachAISettingsAutoFetch(
@@ -3415,7 +3439,19 @@ class SettingIframe {
 
 		providerInput?.addEventListener('change', () => {
 			const selectedProvider = this.getProviderById(providerInput.value);
-			if (selectedProvider && !selectedProvider.isCustom) {
+			if (providerInput.value === DEFAULT_PROVIDER) {
+				data.aiProviderURL = '';
+				data.aiProviderModel = '';
+				data.aiProviderAPIKey = '';
+				data.aiProviderAPIKeyStored = false;
+				if (apiKeyInput) {
+					apiKeyInput.value = '';
+					apiKeyInput.placeholder = _(
+						'Leave empty if your server does not require one',
+					);
+				}
+				this.syncSecretDeleteButton('aiProviderAPIKey', data, root);
+			} else if (selectedProvider && !selectedProvider.isCustom) {
 				if (customUrlInput) {
 					this._lastCustomAIProviderURL = customUrlInput.value;
 				}
@@ -3823,6 +3859,10 @@ class SettingIframe {
 
 	private async fetchAIModels(data: ViewSettings): Promise<void> {
 		const providerId = this.getSelectedProviderId(data);
+		if (providerId === DEFAULT_PROVIDER) {
+			this.setAIStatus('', 'hidden');
+			return;
+		}
 		const provider = this.getProviderById(providerId);
 		if (!provider) {
 			this.setAIStatus(_('Invalid provider configuration'), 'error');
@@ -4384,9 +4424,14 @@ class SettingIframe {
 					}
 				}
 				this._viewSetting = viewSetting;
+				// A key or model saved without a URL is OpenAI's, as shown before.
 				this._viewSetting.aiProviderURL =
 					this.normalizeBaseUrl(viewSetting.aiProviderURL || '') ||
-					this.getDefaultAIProviderURL();
+					(viewSetting.aiProviderAPIKey ||
+					viewSetting.aiProviderAPIKeyStored ||
+					viewSetting.aiProviderModel
+						? this.getDefaultAIProviderURL()
+						: '');
 				// An empty image URL means "Same as text provider", so keep it empty
 				// rather than falling back to a default.
 				this._viewSetting.aiImageProviderURL = this.normalizeBaseUrl(
@@ -4824,7 +4869,7 @@ class SettingIframe {
 			signatureCert: '',
 			signatureKey: '',
 			signatureCa: '',
-			aiProviderURL: this.getDefaultAIProviderURL(),
+			aiProviderURL: '',
 			aiProviderAPIKey: '',
 			aiProviderModel: '',
 			aiImageProviderAPIKey: '',
@@ -4861,6 +4906,22 @@ class SettingIframe {
 		);
 	}
 
+	private resetAIProviders(data: ViewSettings, root: ParentNode): void {
+		const providerSelect = root.querySelector(
+			'#aiProvider',
+		) as HTMLSelectElement | null;
+		if (providerSelect) {
+			providerSelect.value = DEFAULT_PROVIDER;
+			providerSelect.dispatchEvent(new Event('change'));
+		}
+		const sameAsText = root.querySelector(
+			'#aiImageSameAsText-input',
+		) as HTMLInputElement | null;
+		if (sameAsText && !sameAsText.checked) sameAsText.click();
+		data.aiImageModel = '';
+		this.resetAIImageModelSelect('');
+	}
+
 	private getProviderIdFromUrl(url: string): string {
 		const provider = this.getProviderByUrl(url);
 		return provider ? provider.id : 'custom';
@@ -4876,7 +4937,9 @@ class SettingIframe {
 		if (providerSelect?.value) {
 			return providerSelect.value;
 		}
-		return this.getProviderIdFromUrl(data.aiProviderURL);
+		return data.aiProviderURL
+			? this.getProviderIdFromUrl(data.aiProviderURL)
+			: DEFAULT_PROVIDER;
 	}
 
 	private isCustomProviderSelected(
