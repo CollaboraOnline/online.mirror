@@ -12,9 +12,11 @@
 #include <condformathelper.hxx>
 #include <conditio.hxx>
 #include <document.hxx>
+#include <editeng/brushitem.hxx>
 #include <editeng/justifyitem.hxx>
 #include <fillinfo.hxx>
 #include <inputopt.hxx>
+#include <scitems.hxx>
 #include <scmod.hxx>
 #include <svl/zformat.hxx>
 
@@ -1157,6 +1159,31 @@ CPPUNIT_TEST_FIXTURE(CondFormatTest, testConditionalFormatOriginXLSX)
                                  u"NOT(ISERROR(SEARCH(\"BAC\",B1)))"_ustr, aFormula);
 }
 
+// A rule stored in the OOXML extension list wins over a lower-priority plain rule where the two
+// cover different, partly overlapping ranges.
+CPPUNIT_TEST_FIXTURE(CondFormatTest, testExtCondFormatPartialOverlapPriorityXLSX)
+{
+    createScDoc("xlsx/cond_format_ext_overlap_priority.xlsx");
+
+    ScDocument* pDoc = getScDoc();
+
+    // The orange rule has priority 2 and covers A1:B4. It is in the extension list because it
+    // compares against another sheet. The blue rule has priority 3 and covers A3:B4 only.
+    const Color aOrange(0xED, 0x7D, 0x31);
+
+    // A1 is outside the blue rule's range, so only the orange rule can apply there.
+    const SfxItemSet* pCondSet = pDoc->GetCondResult(0, 0, 0);
+    CPPUNIT_ASSERT(pCondSet);
+    CPPUNIT_ASSERT_EQUAL(aOrange,
+                         pDoc->GetPattern(0, 0, 0)->GetItem(ATTR_BACKGROUND, pCondSet).GetColor());
+
+    // A3 is empty, so both rules match it. The higher priority of the orange rule decides.
+    pCondSet = pDoc->GetCondResult(0, 2, 0);
+    CPPUNIT_ASSERT(pCondSet);
+    CPPUNIT_ASSERT_EQUAL(aOrange,
+                         pDoc->GetPattern(0, 2, 0)->GetItem(ATTR_BACKGROUND, pCondSet).GetColor());
+}
+
 // FILESAVE: XLSX export with long sheet names (length > 31 characters)
 CPPUNIT_TEST_FIXTURE(CondFormatTest, testTdf79998)
 {
@@ -1185,6 +1212,26 @@ CPPUNIT_TEST_FIXTURE(CondFormatTest, tdf169379)
     CPPUNIT_ASSERT_EQUAL(sal_uInt32(2), pFormat->GetKey());
     pFormat = pDoc->GetCondFormat(2, 0, 0); // third column
     CPPUNIT_ASSERT_EQUAL(sal_uInt32(1), pFormat->GetKey());
+}
+
+// Every rule of an OOXML extension list reaches the document, including one that shares its
+// priority with another rule and one whose priority is not a place of its own.
+CPPUNIT_TEST_FIXTURE(CondFormatTest, testExtCondFormatDuplicatePriorityXLSX)
+{
+    createScDoc("xlsx/cond_format_ext_duplicate_priority.xlsx");
+
+    ScDocument* pDoc = getScDoc();
+
+    // The three rules cover one range. Two of them claim priority 2 and the third claims 0.
+    ScConditionalFormat* pFormat = pDoc->GetCondFormat(0, 0, 0);
+    CPPUNIT_ASSERT(pFormat);
+    CPPUNIT_ASSERT_EQUAL(size_t(3), pFormat->size());
+
+    // The rule that keeps priority 2 is the one that decides the colour.
+    const SfxItemSet* pCondSet = pDoc->GetCondResult(0, 0, 0);
+    CPPUNIT_ASSERT(pCondSet);
+    CPPUNIT_ASSERT_EQUAL(Color(0xED, 0x7D, 0x31),
+                         pDoc->GetPattern(0, 0, 0)->GetItem(ATTR_BACKGROUND, pCondSet).GetColor());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

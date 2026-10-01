@@ -1165,6 +1165,15 @@ void CondFormat::finalizeImport()
     }
 }
 
+void CondFormat::setRanges( const ScRangeList& rRanges )
+{
+    assert(!mpFormat && "the ranges are set once, on a conditional formatting that has no format yet");
+    maModel.maRanges = rRanges;
+    mpFormat = new ScConditionalFormat(0, getScDocument());
+    // The ranges arrive complete, so there is no further element to wait for before finalizing.
+    mbReadyForFinalize = true;
+}
+
 std::unique_ptr<CondFormatRule> CondFormat::createRule()
 {
     return std::make_unique<CondFormatRule>( *this, mpFormat );
@@ -1194,20 +1203,6 @@ CondFormatRef CondFormatBuffer::importConditionalFormatting( const AttributeList
 
 namespace {
 
-ScConditionalFormat* findFormatByRange(const ScRangeList& rRange, const ScDocument& rDoc, SCTAB nTab)
-{
-    ScConditionalFormatList* pList = rDoc.GetCondFormList(nTab);
-    for (auto const& it : *pList)
-    {
-        if (it->GetRange() == rRange)
-        {
-            return it.get();
-        }
-    }
-
-    return nullptr;
-}
-
 class ScRangeListHasher
 {
 public:
@@ -1235,7 +1230,6 @@ void CondFormatBuffer::finalizeImport()
 {
     deduplicateCondFormats();
 
-    std::unordered_set<size_t> aDoneExtCFs;
     typedef std::unordered_map<ScRangeList, CondFormat*, ScRangeListHasher> RangeMap;
     RangeMap aRangeMap;
     for (auto& rxCondFormat : maCondFormats)
@@ -1245,36 +1239,44 @@ void CondFormatBuffer::finalizeImport()
         aRangeMap[rxCondFormat->getRanges()] = rxCondFormat.get();
     }
 
-    size_t nExtCFIndex = 0;
     for (const auto& rxExtCondFormat : maExtCondFormats)
     {
         ScDocument& rDoc = getScDocument();
         const ScRangeList& rRange = rxExtCondFormat->getRange();
         RangeMap::iterator it = aRangeMap.find(rRange);
-        if (it != aRangeMap.end())
+        if (it == aRangeMap.end())
         {
-            CondFormat& rCondFormat = *it->second;
-            const std::vector<std::unique_ptr<ScFormatEntry>>& rEntries = rxExtCondFormat->getEntries();
-            const std::vector<sal_Int32>& rPriorities = rxExtCondFormat->getPriorities();
-            size_t nEntryIdx = 0;
-            for (const auto& rxEntry : rEntries)
-            {
-                std::unique_ptr<CondFormatRule> xRule = rCondFormat.createRule();
-                if (ScDataBarFormat *pData = dynamic_cast<ScDataBarFormat*>(rxEntry.get()))
-                    updateImport(pData->GetDataBarData());
-                ScFormatEntry* pNewEntry = rxEntry->Clone(rDoc);
-                sal_Int32 nPriority = rPriorities[nEntryIdx];
-                if (nPriority == -1)
-                    nPriority = mnNonPrioritizedRuleNextPriority++;
-                xRule->setFormatEntry(nPriority, pNewEntry);
-                rCondFormat.insertRule(std::move(xRule));
-                ++nEntryIdx;
-            }
-
-            aDoneExtCFs.insert(nExtCFIndex);
+            // No regular conditional formatting covers exactly these ranges, so give the extension
+            // one a conditional format of its own. It then takes part in the priority sort below
+            // together with the regular ones, and ends up in the document in priority order.
+            CondFormatRef xCondFormat = createCondFormat();
+            xCondFormat->setRanges(rRange);
+            it = aRangeMap.emplace(rRange, xCondFormat.get()).first;
         }
 
-        ++nExtCFIndex;
+        CondFormat& rCondFormat = *it->second;
+        const std::vector<std::unique_ptr<ScFormatEntry>>& rEntries = rxExtCondFormat->getEntries();
+        const std::vector<sal_Int32>& rPriorities = rxExtCondFormat->getPriorities();
+        size_t nEntryIdx = 0;
+        for (const auto& rxEntry : rEntries)
+        {
+            std::unique_ptr<CondFormatRule> xRule = rCondFormat.createRule();
+            if (ScDataBarFormat *pData = dynamic_cast<ScDataBarFormat*>(rxEntry.get()))
+                updateImport(pData->GetDataBarData());
+            ScFormatEntry* pNewEntry = rxEntry->Clone(rDoc);
+            // A rule is placed by its priority, and a conditional formatting holds one rule per
+            // priority. An entry whose priority is missing or not a usable place of its own, and an
+            // entry whose priority another rule already took, go after the ones that keep theirs.
+            // That way every entry the file carries reaches the document.
+            sal_Int32 nPriority = rPriorities[nEntryIdx];
+            if (nPriority < 1)
+                nPriority = mnNonPrioritizedRuleNextPriority++;
+            while (rCondFormat.maRules.contains(nPriority))
+                nPriority = mnNonPrioritizedRuleNextPriority++;
+            xRule->setFormatEntry(nPriority, pNewEntry);
+            rCondFormat.insertRule(std::move(xRule));
+            ++nEntryIdx;
+        }
     }
 
     // tdf#138601 sort conditional formatting rules by their priority
@@ -1306,38 +1308,6 @@ void CondFormatBuffer::finalizeImport()
     {
         if ( rxCfRule )
             rxCfRule->finalizeImport();
-    }
-
-    nExtCFIndex = 0;
-    for (const auto& rxExtCondFormat : maExtCondFormats)
-    {
-        if (aDoneExtCFs.count(nExtCFIndex))
-        {
-            ++nExtCFIndex;
-            continue;
-        }
-
-        ScDocument& rDoc = getScDocument();
-        const ScRangeList& rRange = rxExtCondFormat->getRange();
-        SCTAB nTab = rRange.front().aStart.Tab();
-        ScConditionalFormat* pFormat = findFormatByRange(rRange, rDoc, nTab);
-        if (!pFormat)
-        {
-            // create new conditional format and insert it
-            auto pNewFormat = std::make_unique<ScConditionalFormat>(0, rDoc);
-            pFormat = pNewFormat.get();
-            pNewFormat->SetRange(rRange);
-            sal_uInt32 nKey = rDoc.AddCondFormat(std::move(pNewFormat), nTab);
-            rDoc.AddCondFormatData(rRange, nTab, nKey);
-        }
-
-        const std::vector< std::unique_ptr<ScFormatEntry> >& rEntries = rxExtCondFormat->getEntries();
-        for (const auto& rxEntry : rEntries)
-        {
-            pFormat->AddEntry(rxEntry->Clone(rDoc));
-        }
-
-        ++nExtCFIndex;
     }
 
     gnStyleIdx = 0; // Resets <extlst> <cfRule> style index.

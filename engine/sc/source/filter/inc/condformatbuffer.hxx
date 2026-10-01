@@ -229,6 +229,9 @@ public:
     /** Returns the cell ranges this conditional formatting belongs to. */
     const ScRangeList& getRanges() const { return maModel.maRanges; }
 
+    /** Sets the cell ranges and prepares an empty Calc conditional format for them. */
+    void                setRanges( const ScRangeList& rRanges );
+
     void                setReadyForFinalize() { mbReadyForFinalize = true; }
     void                insertRule( std::unique_ptr<CondFormatRule>  xRule );
 private:

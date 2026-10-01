@@ -138,11 +138,13 @@ CPPUNIT_TEST_FIXTURE(ScExportTest, testTdf139394)
     xmlDocUniquePtr pDoc = parseExport(u"xl/worksheets/sheet1.xml"_ustr);
     CPPUNIT_ASSERT(pDoc);
 
+    // The blocks come out in priority order. The source document gives the A1, A2 and A3 rules the
+    // priorities 3, 2 and 1, so they are written in the reverse of their order there.
     assertXPathContent(
         pDoc,
         "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[1]/"
         "x14:cfRule/xm:f",
-        u"LEFT(A1,LEN(\"+\"))=\"+\"");
+        u"LEFT(A3,LEN($B$3))=$B$3");
     assertXPathContent(
         pDoc,
         "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[2]/"
@@ -152,7 +154,7 @@ CPPUNIT_TEST_FIXTURE(ScExportTest, testTdf139394)
         pDoc,
         "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[3]/"
         "x14:cfRule/xm:f",
-        u"LEFT(A3,LEN($B$3))=$B$3");
+        u"LEFT(A1,LEN(\"+\"))=\"+\"");
 }
 
 CPPUNIT_TEST_FIXTURE(ScExportTest, testExtCondFormatXLSX)
@@ -163,36 +165,38 @@ CPPUNIT_TEST_FIXTURE(ScExportTest, testExtCondFormatXLSX)
     xmlDocUniquePtr pDoc = parseExport(u"xl/worksheets/sheet1.xml"_ustr);
     CPPUNIT_ASSERT(pDoc);
 
+    // The blocks come out in priority order. The A2 rule has priority 1 in the source document and
+    // the A1 rule priority 2, so the A2 rule is written first.
     assertXPath(
         pDoc,
         "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[1]/"
-        "x14:cfRule",
-        "type", u"containsText");
-    assertXPathContent(
-        pDoc,
-        "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[1]/"
-        "x14:cfRule/xm:f[1]",
-        u"NOT(ISERROR(SEARCH($B$1,A1)))");
-    assertXPathContent(
-        pDoc,
-        "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[1]/"
-        "x14:cfRule/xm:f[2]",
-        u"$B$1");
-    assertXPath(
-        pDoc,
-        "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[2]/"
         "x14:cfRule",
         "type", u"notContainsText");
     assertXPathContent(
         pDoc,
-        "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[2]/"
+        "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[1]/"
         "x14:cfRule/xm:f[1]",
         u"ISERROR(SEARCH($B$2,A2))");
     assertXPathContent(
         pDoc,
-        "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[2]/"
+        "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[1]/"
         "x14:cfRule/xm:f[2]",
         u"$B$2");
+    assertXPath(
+        pDoc,
+        "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[2]/"
+        "x14:cfRule",
+        "type", u"containsText");
+    assertXPathContent(
+        pDoc,
+        "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[2]/"
+        "x14:cfRule/xm:f[1]",
+        u"NOT(ISERROR(SEARCH($B$1,A1)))");
+    assertXPathContent(
+        pDoc,
+        "/x:worksheet/x:extLst/x:ext/x14:conditionalFormattings/x14:conditionalFormatting[2]/"
+        "x14:cfRule/xm:f[2]",
+        u"$B$1");
 }
 
 CPPUNIT_TEST_FIXTURE(ScExportTest, testTdf90104)
