@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-30 13:51+0000\n"
+"PO-Revision-Date: 2026-10-02 05:52+0000\n"
 "Last-Translator: H2Oufoe <regularwater@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "collabora-online/collabora-ui/pt_BR/>\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 2026.10.dev0\n"
+"X-Generator: Weblate 2026.10\n"
 
 #: admin/admin.strings.js:15
 msgid "Admin console"
@@ -3170,9 +3170,8 @@ msgid "Spreadsheet"
 msgstr "Planilha"
 
 #: src/control/Control.BackstageView.ts:850 src/control/Control.Tabs.js:218
-#, fuzzy
 msgid "Sheets"
-msgstr "~Planilha"
+msgstr "Planilhas"
 
 #: src/control/Control.BackstageView.ts:851
 #: src/control/Control.NavigatorPanel.ts:210
@@ -3193,9 +3192,8 @@ msgid "Type"
 msgstr "Tipo"
 
 #: src/control/Control.BackstageView.ts:867
-#, fuzzy
 msgid "Mode"
-msgstr "Modelo"
+msgstr "Modo"
 
 #: src/control/Control.BackstageView.ts:868
 msgid "View Only"
@@ -3210,9 +3208,8 @@ msgid "Blank Spreadsheet"
 msgstr "Planilha em branco"
 
 #: src/control/Control.BackstageView.ts:1025
-#, fuzzy
 msgid "Blank Presentation"
-msgstr "Terminal apresentação"
+msgstr "Apresentação em branco"
 
 #: src/control/Control.BackstageView.ts:1029
 msgid "Blank Drawing"
@@ -4429,7 +4426,7 @@ msgstr "Usar vista em Abas"
 
 #: src/control/Control.Menubar.ts:2580
 msgid "Insert Shape"
-msgstr "Inserir formas"
+msgstr "Inserir forma"
 
 #: src/control/Control.Menubar.ts:2669
 msgid "The signature line can now be moved or resized as needed."
@@ -5363,7 +5360,6 @@ msgid "Slide Views"
 msgstr "Visualizações de slides"
 
 #: src/control/Control.NotebookbarImpress.js:780
-#, fuzzy
 msgid "Snap to Grid"
 msgstr "Encaixar na grade"
 
@@ -5375,9 +5371,8 @@ msgstr "Layout dos slides"
 #: src/control/Control.NotebookbarImpress.js:948
 #: src/control/Control.NotebookbarImpress.js:2016
 #: src/control/Control.TopToolbar.js:264
-#, fuzzy
 msgid "Change Layout"
-msgstr "Layout de página"
+msgstr "Mudar layout da página"
 
 #: src/control/Control.NotebookbarImpress.js:956
 #: src/control/Control.NotebookbarImpress.js:2023
@@ -5405,9 +5400,8 @@ msgid "Master Slide Templates"
 msgstr "Modelos de slides mestres"
 
 #: src/control/Control.NotebookbarImpress.js:1955
-#, fuzzy
 msgid "This Presentation"
-msgstr "Fechar Apresentação"
+msgstr "Essa apresentação"
 
 #: src/control/Control.NotebookbarImpress.js:1964
 msgid "Presentation Templates"
@@ -5415,16 +5409,15 @@ msgstr "Modelos de Apresentação"
 
 #: src/control/Control.NotebookbarImpress.js:2035
 msgid "Slide Size"
-msgstr ""
+msgstr "Tamanho do slide"
 
 #: src/control/Control.NotebookbarImpress.js:2058
 msgid "Background Image"
-msgstr ""
+msgstr "Imagem de fundo"
 
 #: src/control/Control.NotebookbarImpress.js:2976
-#, fuzzy
 msgid "Effects"
-msgstr "Efeito"
+msgstr "Efeitos"
 
 #: src/control/Control.NotebookbarWriter.js:75
 msgid "Form"
@@ -5440,15 +5433,15 @@ msgstr "Fique off-line"
 
 #: src/control/Control.NotebookbarWriter.js:481
 msgid "Lets a screen reader follow the cursor and read the document"
-msgstr ""
+msgstr "Permite que um leitor de tela siga o mouse e leia o documento"
 
 #: src/control/Control.NotebookbarWriter.js:605
 msgid "Validate Sidebar"
-msgstr ""
+msgstr "Validar Barra Lateral"
 
 #: src/control/Control.NotebookbarWriter.js:612
 msgid "Validate Dialog"
-msgstr ""
+msgstr "Validar Diálogo"
 
 #: src/control/Control.NotebookbarWriter.js:1007
 #: src/control/Control.Zotero.js:828
@@ -5457,20 +5450,20 @@ msgstr "Estilos"
 
 #: src/control/Control.NotebookbarWriter.js:1160
 msgid "Lists/Bullets"
-msgstr ""
+msgstr "Listas/Bullets"
 
 #: src/control/Control.NotebookbarWriter.js:1447
 msgid "Header & Footer"
-msgstr ""
+msgstr "Cabeçalho e Rodapé"
 
 #: src/control/Control.NotebookbarWriter.js:1516
 msgid "Section"
-msgstr ""
+msgstr "Seção"
 
 #: src/control/Control.NotebookbarWriter.js:1601
 #: src/control/jsdialog/Widget.EmojiPicker.ts:182
 msgid "Symbols"
-msgstr ""
+msgstr "Símbolos"
 
 #: src/control/Control.NotebookbarWriter.js:1654
 msgid "Rich Text"
@@ -5482,27 +5475,27 @@ msgstr "Caixa de seleção"
 
 #: src/control/Control.NotebookbarWriter.js:1723
 msgid "Page Width"
-msgstr ""
+msgstr "Largura da página"
 
 #: src/control/Control.NotebookbarWriter.js:2306
 msgid "Spellcheck"
-msgstr ""
+msgstr "Verificador de gramática"
 
 #: src/control/Control.NotebookbarWriter.js:2319
 msgid "Spelling Options"
-msgstr ""
+msgstr "Opções de ortografia"
 
 #: src/control/Control.NotebookbarWriter.js:2444
 msgid "View Changes"
-msgstr ""
+msgstr "Ver alterações"
 
 #: src/control/Control.ContextToolbar.ts:154
 msgid "Switch to Editing"
-msgstr ""
+msgstr "Mudar para a edição"
 
 #: src/control/Control.PartsPreview.js:451
 msgid "Show everyone on this slide"
-msgstr ""
+msgstr "Mostre a todos nesse slide"
 
 #: src/control/Control.PartsPreview.js:597
 #: src/control/Control.PartsPreview.js:672 src/map/Clipboard.js:1546
@@ -5511,227 +5504,224 @@ msgstr "Colar"
 
 #: src/control/Control.PartsPreview.js:736
 msgid "Unlink Slide"
-msgstr ""
+msgstr "Desvincular slide"
 
 #: src/control/Control.PartsPreview.js:758
 msgid "Add Section"
-msgstr ""
+msgstr "Adicionar seção"
 
 #: src/control/Control.PartsPreview.js:875
 msgid "with 1 other"
 msgid_plural "with %n others"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "com 1 outro"
+msgstr[1] "com 1 outros"
 
 #: src/control/Control.PartsPreview.js:885
 msgid "with %1"
-msgstr ""
+msgstr "com %1"
 
 #: src/control/Control.PartsPreview.js:886
 msgid "with %1 and 1 other"
 msgid_plural "with %1 and %n others"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "com % 1 e 1 outro"
+msgstr[1] "com % 1 e %n outros"
 
 #: src/control/Control.PartsPreview.js:916
 msgid "preview of page %1, linked to %2 in %3"
-msgstr ""
+msgstr "visualização da página % 1, conectada a % 2 em % 3"
 
 #: src/control/Control.PartsPreview.js:920
 msgid "Slide %1, linked to %2 in %3"
-msgstr ""
+msgstr "Slide % 1, conectado a % 2 em %3"
 
 #: src/control/Control.PartsPreview.js:930
 msgid "preview of page %1, linked to %2"
-msgstr ""
+msgstr "visualização da página % 1, vinculada a % 2"
 
 #: src/control/Control.PartsPreview.js:934
 msgid "Slide %1, linked to %2"
-msgstr ""
+msgstr "Slide % 1, conectado a % 2"
 
 #: src/control/Control.PartsPreview.js:940
-#, fuzzy
 msgid "preview of page %1"
 msgstr "visualização da página %1"
 
 #: src/control/Control.PartsPreview.js:1286
 #: src/control/Control.PartsPreview.js:1420
 msgid "Rename Section"
-msgstr ""
+msgstr "Renomear seção"
 
 #: src/control/Control.PartsPreview.js:1293
 msgid "Remove Section"
-msgstr ""
+msgstr "Remover seção"
 
 #: src/control/Control.PartsPreview.js:1301
 msgid "Remove Section & Slides"
-msgstr ""
+msgstr "Remover seção e slides"
 
 #: src/control/Control.PartsPreview.js:1310
 msgid "Move Section Up"
-msgstr ""
+msgstr "Mova a seção para cima"
 
 #: src/control/Control.PartsPreview.js:1319
 msgid "Move Section Down"
-msgstr ""
+msgstr "Mover a seção para baixo"
 
 #: src/control/Control.PartsPreview.js:1328
 msgid "Collapse All Sections"
-msgstr ""
+msgstr "Fechar todas as seções"
 
 #: src/control/Control.PartsPreview.js:1336
 msgid "Expand All Sections"
-msgstr ""
+msgstr "Expandir todas as seções"
 
 #: src/control/Control.PartsPreview.js:1372
 msgid "Delete section \"%1\" and its %n slide?"
 msgid_plural "Delete section \"%1\" and its %n slides?"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Excluir a seção \"% 1\" e seu %n slide?"
+msgstr[1] "Excluir a seção \"% 1\" e seus %n slides?"
 
 #: src/control/Control.PartsPreview.js:1421
 msgid "Enter new section name:"
-msgstr ""
+msgstr "Digite o nome da nova seção:"
 
 #: src/control/Control.PresentationBar.js:99
 msgid "Import your slides"
-msgstr ""
+msgstr "Importe seus slides"
 
 #: src/control/Control.SlideImportPane.tsx:673
 msgid "Checking..."
-msgstr ""
+msgstr "Checando..."
 
 #: src/control/Control.SlideImportPane.tsx:675
 #: src/control/Control.SlideLinkToolbar.tsx:165
 msgid "Missing"
-msgstr ""
+msgstr "Faltando"
 
 #: src/control/Control.SlideImportPane.tsx:677
 #: src/control/Control.SlideLinkToolbar.tsx:163
 msgid "No access"
-msgstr ""
+msgstr "Sem acesso"
 
 #: src/control/Control.SlideImportPane.tsx:679
 msgid "Could not open"
-msgstr ""
+msgstr "Não foi possível abrir"
 
 #: src/control/Control.SlideImportPane.tsx:685
 msgid "{0} changed"
-msgstr ""
+msgstr "{0} mudaram"
 
 #: src/control/Control.SlideImportPane.tsx:687
 #: src/control/Control.SlideLinkToolbar.tsx:115
 msgid "Linked"
-msgstr ""
+msgstr "Conectado"
 
 #: src/control/Control.SlideImportPane.tsx:689
 msgid "Not checked"
-msgstr ""
+msgstr "Não verificado"
 
 #: src/control/Control.SlideImportPane.tsx:690
 #: src/control/Control.SlideImportPane.tsx:1392
 msgid "Not linked"
-msgstr ""
+msgstr "Não conectado"
 
 #: src/control/Control.SlideImportPane.tsx:733
 #: src/control/Control.SlideImportPane.tsx:742
 msgid "Reading the slides..."
-msgstr ""
+msgstr "Lendo os slides..."
 
 #: src/control/Control.SlideImportPane.tsx:736
 msgid ""
 "The slides are in this presentation. The file they came from is no longer "
 "here."
 msgstr ""
+"Os slides estão nesta apresentação. O arquivo de onde vieram já não está "
+"mais aqui."
 
 #: src/control/Control.SlideImportPane.tsx:739
 msgid "This file is here. You do not have permission to open it."
-msgstr ""
+msgstr "Este arquivo está aqui. Você não tem permissão para abri-lo."
 
 #: src/control/Control.SlideImportPane.tsx:741
 msgid "This file could not be read this time."
-msgstr ""
+msgstr "Este arquivo não pôde ser lido desta vez."
 
 #: src/control/Control.SlideImportPane.tsx:750
 #: src/control/Control.SlideImportPane.tsx:1251
 msgid "Locate file"
-msgstr ""
+msgstr "Localizar arquivo"
 
 #: src/control/Control.SlideImportPane.tsx:756
 #: src/control/Control.SlideImportPane.tsx:1270
 msgid "Reload slides"
-msgstr ""
+msgstr "Recarregar slides"
 
 #: src/control/Control.SlideImportPane.tsx:814
 msgid "1 slide inserted"
-msgstr ""
+msgstr "1 slide inserido"
 
 #: src/control/Control.SlideImportPane.tsx:815
 msgid "{0} slides inserted"
-msgstr ""
+msgstr "{0} slides inseridos"
 
 #: src/control/Control.SlideImportPane.tsx:822
 msgid "Slide {0}"
-msgstr ""
+msgstr "Slide {0}"
 
 #: src/control/Control.SlideImportPane.tsx:827
-#, fuzzy
 msgid "Insert slides"
-msgstr "Inserir formas"
+msgstr "Inserir slides"
 
 #: src/control/Control.SlideImportPane.tsx:835
 msgid "Insert {0} from {1}"
-msgstr ""
+msgstr "Inserir {0} de {1}"
 
 #: src/control/Control.SlideImportPane.tsx:838
-#, fuzzy
 msgid "Insert 1 slide"
-msgstr "Inserir formas"
+msgstr "Inserir 1 slide"
 
 #: src/control/Control.SlideImportPane.tsx:839
-#, fuzzy
 msgid "Insert {0} slides"
-msgstr "Inserir formas"
+msgstr "Inserir {0} slides"
 
 #: src/control/Control.SlideImportPane.tsx:871
 msgid "{0} of {1}"
-msgstr ""
+msgstr "{0} de {1}"
 
 #: src/control/Control.SlideImportPane.tsx:874
 #: src/control/Control.SlideImportPane.tsx:1638
 msgid "{0} slides"
-msgstr ""
+msgstr "{0} slides"
 
 #: src/control/Control.SlideImportPane.tsx:881
 msgid "Inserts at the end"
-msgstr ""
+msgstr "Inserir no final"
 
 #: src/control/Control.SlideImportPane.tsx:882
 msgid "Inserts after slide {0}"
-msgstr ""
+msgstr "Inserir após o slide {0}"
 
 #: src/control/Control.SlideImportPane.tsx:886
 msgid "Opening file..."
-msgstr ""
+msgstr "Abrindo o arquivo..."
 
 #: src/control/Control.SlideImportPane.tsx:887
 msgid "Inserting slides..."
-msgstr ""
+msgstr "Inserindo os slides..."
 
 #: src/control/Control.SlideImportPane.tsx:961
-#, fuzzy
 msgid "Import slides"
-msgstr "Inserir formas"
+msgstr "Importar slides"
 
 #: src/control/Control.SlideImportPane.tsx:965
 #: src/control/Control.SlideImportPane.tsx:966
 msgid "Expand slide import"
-msgstr ""
+msgstr "Expandir a importação de slides"
 
 #: src/control/Control.SlideImportPane.tsx:980
 #: src/control/Control.SlideImportPane.tsx:981
 msgid "Close slide import"
-msgstr ""
+msgstr "Fechar importação de slides"
 
 #: src/control/Control.SlideImportPane.tsx:996
 msgid "Add presentation…"
@@ -5739,69 +5729,71 @@ msgstr "Adicionar apresentação…"
 
 #: src/control/Control.SlideImportPane.tsx:1011
 msgid "No presentations yet"
-msgstr ""
+msgstr "Ainda não há apresentações"
 
 #: src/control/Control.SlideImportPane.tsx:1015
 msgid ""
 "Add a presentation to browse its slides and insert them into this deck."
 msgstr ""
+"Adicione uma apresentação para navegar em seus slides e inseri-los neste "
+"deck."
 
 #: src/control/Control.SlideImportPane.tsx:1048
 msgid "Hide all slides"
-msgstr ""
+msgstr "Ocultar todos os slides"
 
 #: src/control/Control.SlideImportPane.tsx:1048
 msgid "Show all slides"
-msgstr ""
+msgstr "Mostrar todos os slides"
 
 #: src/control/Control.SlideImportPane.tsx:1080
 #: src/control/Control.SlideImportPane.tsx:1081
 msgid "Filter presentations"
-msgstr ""
+msgstr "Filtrar apresentações"
 
 #: src/control/Control.SlideImportPane.tsx:1109
 msgid "Slide sources"
-msgstr ""
+msgstr "Fontes dos slides"
 
 #: src/control/Control.SlideImportPane.tsx:1117
 msgid "Presentations to import from"
-msgstr ""
+msgstr "Apresentações para importar de"
 
 #: src/control/Control.SlideImportPane.tsx:1185
 msgid "{0} picked"
-msgstr ""
+msgstr "{0} selecionados"
 
 #: src/control/Control.SlideImportPane.tsx:1223
 msgid "Actions for {0}"
-msgstr ""
+msgstr "Ações para {0}"
 
 #: src/control/Control.SlideImportPane.tsx:1261
 msgid "Hide slides"
-msgstr ""
+msgstr "Ocultar slides"
 
 #: src/control/Control.SlideImportPane.tsx:1261
 msgid "Show slides"
-msgstr ""
+msgstr "Mostrar slides"
 
 #: src/control/Control.SlideImportPane.tsx:1277
 msgid "Select all slides"
-msgstr ""
+msgstr "Selecionar todos os slides"
 
 #: src/control/Control.SlideImportPane.tsx:1285
 msgid "Update the slides linked to this file"
-msgstr ""
+msgstr "Atualizar os slides vinculados a esse arquivo"
 
 #: src/control/Control.SlideImportPane.tsx:1292
 msgid "Remove from list"
-msgstr ""
+msgstr "Remover da lista"
 
 #: src/control/Control.SlideImportPane.tsx:1377
 msgid "Slides in {0}"
-msgstr ""
+msgstr "Slides em {0}"
 
 #: src/control/Control.SlideImportPane.tsx:1391
 msgid "Original design"
-msgstr ""
+msgstr "Design original"
 
 #: src/control/Control.SlideImportPane.tsx:1394
 msgid "Linked, follows the slide number"
