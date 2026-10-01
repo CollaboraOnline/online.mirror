@@ -41,7 +41,7 @@
 namespace net
 {
 
-std::string HostEntry::makeIPAddress(const sockaddr* ai_addr)
+std::string ipAddressToString(const sockaddr* ai_addr)
 {
     char addrstr[INET6_ADDRSTRLEN];
 
@@ -65,19 +65,28 @@ std::string HostEntry::makeIPAddress(const sockaddr* ai_addr)
     }
 
     if (!inAddr)
-    {
-        LOG_ERR("Unknown sa_family: " << ai_addr->sa_family);
         return std::string();
-    }
 
     const char* result = inet_ntop(ai_addr->sa_family, inAddr, addrstr, sizeof(addrstr));
     if (!result)
-    {
-        _saved_errno = errno;
-        LOG_WRN("inet_ntop failure: " << errorMessage());
         return std::string();
-    }
     return std::string(result);
+}
+
+std::string HostEntry::makeIPAddress(const sockaddr* ai_addr)
+{
+    std::string address = ipAddressToString(ai_addr);
+    if (address.empty())
+    {
+        if (ai_addr->sa_family != AF_INET && ai_addr->sa_family != AF_INET6)
+            LOG_ERR("Unknown sa_family: " << ai_addr->sa_family);
+        else
+        {
+            _saved_errno = errno;
+            LOG_WRN("inet_ntop failure: " << errorMessage());
+        }
+    }
+    return address;
 }
 
 void HostEntry::setEAI(int eaino)
@@ -336,10 +345,8 @@ std::string resolveHostAddress(const std::string& targetHost)
     return syncResolveDNS(targetHost).resolveHostAddress();
 }
 
-bool HostEntry::isLocalhost() const
+bool isLocalAddress(const std::string& targetAddress)
 {
-    const std::string targetAddress = resolveHostAddress();
-
     try
     {
         const auto list = Poco::Net::NetworkInterface::list(true, true);
@@ -348,11 +355,7 @@ bool HostEntry::isLocalhost() const
             std::string address = netif.address().toString();
             address = address.substr(0, address.find('%', 0));
             if (address == targetAddress)
-            {
-                LOG_TRC("Host [" << _requestName << "] is on the same host as the client: \""
-                                 << targetAddress << "\".");
                 return true;
-            }
         }
     }
     catch (const Poco::Exception& exc)
@@ -360,6 +363,20 @@ bool HostEntry::isLocalhost() const
         // possibly getifaddrs failed
         LOG_WRN("Poco::Net::NetworkInterface::list failed: " << exc.displayText() <<
                 " (" << Util::symbolicErrno(errno) << ' ' << strerror(errno) << ")");
+    }
+
+    return false;
+}
+
+bool HostEntry::isLocalhost() const
+{
+    const std::string targetAddress = resolveHostAddress();
+
+    if (isLocalAddress(targetAddress))
+    {
+        LOG_TRC("Host [" << _requestName << "] is on the same host as the client: \""
+                         << targetAddress << "\".");
+        return true;
     }
 
     LOG_TRC("Host [" << _requestName << "] is not on the same host as the client: \"" << targetAddress
@@ -497,7 +514,7 @@ void AsyncDNS::lookup(std::string searchEntry, DNSThreadFn cb, DNSThreadDumpStat
 
 void asyncConnect(std::string host, const std::string& port, const bool isSSL,
                   const std::shared_ptr<ProtocolHandlerInterface>& protocolHandler,
-                  const asyncConnectCB& asyncCb)
+                  const asyncConnectCB& asyncCb, const AddressFilter& addressFilter)
 {
     if (host.empty() || port.empty())
     {
@@ -517,8 +534,8 @@ void asyncConnect(std::string host, const std::string& port, const bool isSSL,
     }
 #endif
 
-    net::AsyncDNS::DNSThreadFn callback = [isSSL, host, port, protocolHandler,
-                                           asyncCb](const HostEntry& hostEntry)
+    net::AsyncDNS::DNSThreadFn callback = [isSSL, host, port, protocolHandler, asyncCb,
+                                           addressFilter](const HostEntry& hostEntry)
     {
         std::shared_ptr<StreamSocket> socket;
 
@@ -535,6 +552,15 @@ void asyncConnect(std::string host, const std::string& port, const bool isSSL,
                         LOG_WRN("Blocking connection to instance metadata address for " << host);
                         result = AsyncConnectResult::ConnectionError;
                         break;
+                    }
+
+                    if (addressFilter && !addressFilter(ipAddressToString(ai->ai_addr)))
+                    {
+                        LOG_WRN("Skipping an address of " << host << " that is not allowed");
+                        // The result is AddressNotAllowed only while no address has been tried.
+                        if (result == AsyncConnectResult::UnknownHostError)
+                            result = AsyncConnectResult::AddressNotAllowed;
+                        continue;
                     }
 
                     int fd = Syscall::socket_cloexec_nonblock(ai->ai_addr->sa_family, SOCK_STREAM /*| SOCK_NONBLOCK | SOCK_CLOEXEC*/, 0);
@@ -602,7 +628,8 @@ void asyncConnect(std::string host, const std::string& port, const bool isSSL,
 
 std::shared_ptr<StreamSocket>
 connect(const std::string& host, const std::string& port, const bool isSSL,
-        const std::shared_ptr<ProtocolHandlerInterface>& protocolHandler)
+        const std::shared_ptr<ProtocolHandlerInterface>& protocolHandler,
+        const AddressFilter& addressFilter)
 {
     std::shared_ptr<StreamSocket> socket;
 
@@ -625,6 +652,8 @@ connect(const std::string& host, const std::string& port, const bool isSSL,
     HostEntry hostEntry(syncResolveDNS(host));
     if (const addrinfo* ainfo = hostEntry.getAddrInfo())
     {
+        bool addressTried = false;
+        bool addressRefused = false;
         for (const addrinfo* ai = ainfo; ai; ai = ai->ai_next)
         {
             if (ai->ai_addrlen && ai->ai_addr)
@@ -635,6 +664,14 @@ connect(const std::string& host, const std::string& port, const bool isSSL,
                     break;
                 }
 
+                if (addressFilter && !addressFilter(ipAddressToString(ai->ai_addr)))
+                {
+                    LOG_WRN("Skipping an address of " << host << " that is not allowed");
+                    addressRefused = true;
+                    continue;
+                }
+
+                addressTried = true;
                 int fd = Syscall::socket_cloexec_nonblock(ai->ai_addr->sa_family, SOCK_STREAM /*| SOCK_NONBLOCK | SOCK_CLOEXEC*/, 0);
                 if (fd < 0)
                 {
@@ -680,6 +717,9 @@ connect(const std::string& host, const std::string& port, const bool isSSL,
                 }
             }
         }
+
+        if (addressRefused && !addressTried)
+            LOG_WRN("No address of " << host << " is allowed");
     }
     else
         LOG_SYS("Failed to lookup host [" << host << "]. Skipping");

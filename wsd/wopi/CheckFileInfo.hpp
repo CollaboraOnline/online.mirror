@@ -39,6 +39,7 @@ public:
     CheckFileInfo(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& url,
                   std::function<void(CheckFileInfo&)> onFinishCallback)
         : _url(url)
+        , _urlFromRedirect(false)
         , _profileZone("WopiStorage::getWOPIFileInfo", { { "url", url.toString() } })
         , _poll(poll)
         , _docKey(RequestDetails::getDocKey(url))
@@ -94,6 +95,7 @@ private:
     bool parseResponseAndValidate(const std::string& response);
 
     Poco::URI _url; ///< Sanitized URL to the document. Can change through redirection.
+    bool _urlFromRedirect; ///< True when _url is a redirect target, not the original URL.
     ProfileZone _profileZone;
     std::shared_ptr<http::Session> _httpSession;
     std::shared_ptr<TerminatingPoll> _poll;

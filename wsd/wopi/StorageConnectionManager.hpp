@@ -56,6 +56,13 @@ public:
     getHttpSession(const Poco::URI& uri,
                    std::chrono::seconds timeout = std::chrono::seconds::zero());
 
+    /// Create an http::Session, as getHttpSession does, for a URI whose host passed the WOPI host
+    /// check. When the host name is not on the WOPI host list, the session connects only to those
+    /// resolved addresses of the host that are on the list, or are local, when it connects.
+    static std::shared_ptr<http::Session>
+    getWopiHttpSession(const Poco::URI& uri,
+                       std::chrono::seconds timeout = std::chrono::seconds::zero());
+
     /// Create an http::Request with the common headers.
     static http::Request createHttpRequest(const Poco::URI& uri, const Authorization& auth);
 

@@ -336,8 +336,10 @@ protected:
 private:
     /// Download the document from the given URI.
     /// Does not add authorization tokens or any other logic.
+    /// hostChecked is true when the host of uriObject passed the WOPI host check.
     std::string downloadDocument(const Poco::URI& uriObject, const std::string& uriAnonym,
-                                 const Authorization& auth, unsigned redirectLimit);
+                                 const Authorization& auth, unsigned redirectLimit,
+                                 bool hostChecked);
 
     /// Create the HTTP request for a WOPI Lock/Unlock operation.
     http::Request createLockRequest(const Poco::URI& uriObject, const Authorization& auth,

@@ -489,7 +489,7 @@ StorageBase::LockUpdateResult WopiStorage::updateLockState(const Authorization& 
     try
     {
         std::shared_ptr<http::Session> httpSession =
-            StorageConnectionManager::getHttpSession(uriObject, timeout);
+            StorageConnectionManager::getWopiHttpSession(uriObject, timeout);
 
         http::Request httpRequest = createLockRequest(uriObject, auth, lockCtx, lock, attribs);
 
@@ -568,7 +568,7 @@ void WopiStorage::updateLockStateAsync(const Authorization& auth, LockContext& l
     const auto wopiLog = (lock == StorageBase::LockState::LOCK ? "WOPI::Lock" : "WOPI::Unlock");
     LOG_DBG(wopiLog << " requesting: " << uriAnonym);
 
-    _lockHttpSession = StorageConnectionManager::getHttpSession(uriObject);
+    _lockHttpSession = StorageConnectionManager::getWopiHttpSession(uriObject);
 
     http::Request httpRequest = createLockRequest(uriObject, auth, lockCtx, lock, attribs);
 
@@ -644,7 +644,7 @@ std::string WopiStorage::downloadStorageFileToLocal(const Authorization& auth,
         {
             LOG_INF("WOPI::GetFile template source: " << templateUriAnonym);
             return downloadDocument(Poco::URI(templateUri), templateUriAnonym, auth,
-                                    HTTP_REDIRECTION_LIMIT);
+                                    HTTP_REDIRECTION_LIMIT, false);
         }
         catch (const std::exception& ex)
         {
@@ -662,7 +662,7 @@ std::string WopiStorage::downloadStorageFileToLocal(const Authorization& auth,
         {
             LOG_INF("WOPI::GetFile using FileUrl: " << fileUrlAnonym);
             return downloadDocument(Poco::URI(_fileUrl), fileUrlAnonym, auth,
-                                    HTTP_REDIRECTION_LIMIT);
+                                    HTTP_REDIRECTION_LIMIT, false);
         }
         catch (const StorageSpaceLowException&)
         {
@@ -688,7 +688,7 @@ std::string WopiStorage::downloadStorageFileToLocal(const Authorization& auth,
     try
     {
         LOG_INF("WOPI::GetFile using default URI: " << uriAnonym);
-        return downloadDocument(uriObject, uriAnonym, auth, HTTP_REDIRECTION_LIMIT);
+        return downloadDocument(uriObject, uriAnonym, auth, HTTP_REDIRECTION_LIMIT, true);
     }
     catch (const std::exception& ex)
     {
@@ -699,11 +699,13 @@ std::string WopiStorage::downloadStorageFileToLocal(const Authorization& auth,
 }
 
 std::string WopiStorage::downloadDocument(const Poco::URI& uriObject, const std::string& uriAnonym,
-                                          const Authorization& auth, unsigned redirectLimit)
+                                          const Authorization& auth, unsigned redirectLimit,
+                                          bool hostChecked)
 {
     const auto startTime = std::chrono::steady_clock::now();
     std::shared_ptr<http::Session> httpSession =
-        StorageConnectionManager::getHttpSession(uriObject);
+        hostChecked ? StorageConnectionManager::getWopiHttpSession(uriObject)
+                    : StorageConnectionManager::getHttpSession(uriObject);
 
     const http::Request httpRequest = StorageConnectionManager::createHttpRequest(uriObject, auth);
 
@@ -753,7 +755,8 @@ std::string WopiStorage::downloadDocument(const Poco::URI& uriObject, const std:
             LOG_TRC("WOPI::GetFile redirect to URI [" << Anonymizer::anonymizeUrl(location) << ']');
 
             Poco::URI redirectUriObject(location);
-            return downloadDocument(redirectUriObject, uriAnonym, auth, redirectLimit - 1);
+            return downloadDocument(redirectUriObject, uriAnonym, auth, redirectLimit - 1,
+                                    false);
         }
         else
         {
@@ -864,7 +867,7 @@ std::size_t WopiStorage::uploadLocalFileToStorageAsync(
     try
     {
         assert(!_uploadHttpSession && "Unexpected to have an upload http::session");
-        _uploadHttpSession = StorageConnectionManager::getHttpSession(uriObject);
+        _uploadHttpSession = StorageConnectionManager::getWopiHttpSession(uriObject);
 
         http::Request httpRequest = StorageConnectionManager::createHttpRequest(uriObject, auth);
         httpRequest.setVerb(http::Request::VERB_POST);
