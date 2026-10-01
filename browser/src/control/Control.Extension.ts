@@ -94,6 +94,10 @@
  * to Extension_DialogCancel via the iframe removal path.  Only one
  * dialog per extension can be open at a time; a second open() while
  * the first is still up resolves immediately as cancelled.
+ *
+ * The dialog page can also call, save a file and open a dialog like the
+ * sidebar page.  The ids it makes for these start with "dlg-", and each
+ * reply goes to the frame whose prefix the id carries.
  */
 
 /* global app */
@@ -362,6 +366,8 @@ type ExtensionSidebarMessage =
 type ExtensionDialogMessage =
 	| ExtensionCallMessage
 	| ExtensionProxyReturnMessage
+	| ExtensionShowDialogMessage
+	| ExtensionSaveFileMessage
 	| ExtensionDialogCloseMessage
 	| ExtensionDialogCancelMessage
 	| ExtensionResizeMessage;
@@ -1034,7 +1040,7 @@ window.L.Control.Extension = window.L.Control.extend({
 	// cool.saveFile promise settles.
 	_saveFile: function (msg: ExtensionSaveFileMessage) {
 		const reply = (how: string, err?: string) => {
-			this._postToIframe({
+			this._postToCaller(msg.saveId, {
 				msgId: 'Extension_SaveFileResult',
 				saveId: msg.saveId,
 				how: how,
@@ -1096,6 +1102,13 @@ window.L.Control.Extension = window.L.Control.extend({
 				break;
 			case 'Extension_DialogCancel':
 				this._closeDialog({ cancelled: true });
+				break;
+			case 'Extension_ShowDialog':
+				// A dialog is open while its page runs, so this resolves as cancelled at once:
+				this._openDialog(msg);
+				break;
+			case 'Extension_SaveFile':
+				this._saveFile(msg);
 				break;
 			case 'Extension_Resize':
 				// Dialog iframe reports its content's actual scrollHeight
@@ -1203,7 +1216,7 @@ window.L.Control.Extension = window.L.Control.extend({
 		result: { cancelled: boolean; value?: unknown },
 	) {
 		if (dialogId === null) return;
-		this._postToIframe({
+		this._postToCaller(dialogId, {
 			msgId: 'Extension_DialogResult',
 			dialogId: dialogId,
 			cancelled: result.cancelled,

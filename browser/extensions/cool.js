@@ -121,9 +121,9 @@
 		})(),
 	};
 
-	// The host opens a dialog page with coolRole=dialog in its query, and the call and proxy
-	// ids made in a dialog carry this prefix so that the host can send each reply to the frame
-	// that is waiting for it:
+	// The host opens a dialog page with coolRole=dialog in its query, and the call, proxy, save
+	// and dialog ids made in a dialog carry this prefix so that the host can send each reply to
+	// the frame that is waiting for it:
 	window.cool.idPrefix =
 		new URLSearchParams(location.search).get('coolRole') === 'dialog' ? 'dlg-' : '';
 
@@ -326,7 +326,7 @@
 	let nextSaveId = 0;
 	const pendingSaves = Object.create(null);
 	window.cool.saveFile = function (filename, content, mimeType) {
-		const saveId = 's' + (nextSaveId++);
+		const saveId = window.cool.idPrefix + 's' + (nextSaveId++);
 		let bytes;
 		if (typeof content === 'string') {
 			bytes = Array.from(new TextEncoder().encode(content));
@@ -364,7 +364,7 @@
 	// opts: { url, title, width, height }.  url is relative to the extension's base URL.
 	window.cool.dialog = {
 		open: function (opts) {
-			const dialogId = 'd' + (nextDialogId++);
+			const dialogId = window.cool.idPrefix + 'd' + (nextDialogId++);
 			const promise = new Promise(function (resolve) {
 				pendingDialogs[dialogId] = { resolve: resolve };
 			});
