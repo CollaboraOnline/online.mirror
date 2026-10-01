@@ -261,9 +261,9 @@ CPPUNIT_TEST_FIXTURE(Test, testAppendParagraphAndBulletLevels)
     xText->setBulletLevel(0);
     xText->appendText(u"first"_ustr);
     // appendParagraph hands back the paragraph holding the given text; its range covers that
-    // text.
+    // text up to and including the paragraph's newline.
     auto const xPara = getValue(xText->appendParagraph(u"second"_ustr)->getRange());
-    CPPUNIT_ASSERT_EQUAL(u"second"_ustr, xPara->asString());
+    CPPUNIT_ASSERT_EQUAL(u"second\n"_ustr, xPara->asString());
     xPara->setBulletLevel(1);
     CPPUNIT_ASSERT_EQUAL(u"first\nsecond\n"_ustr, xText->asString());
     // Each paragraph carries its own bullet depth, and the bullets show because paragraphs
@@ -303,6 +303,7 @@ CPPUNIT_TEST_FIXTURE(Test, testAppendParagraphAndBulletLevels)
     // Appending an empty paragraph gives back a position where later appended text lands, so
     // a depth set on the empty paragraph holds for text appended afterwards.
     auto const xEmpty = getValue(xText->appendParagraph(u""_ustr)->getRange());
+    CPPUNIT_ASSERT_EQUAL(u"\n"_ustr, xEmpty->asString());
     xEmpty->setBulletLevel(3);
     xText->appendText(u"third"_ustr);
     CPPUNIT_ASSERT_EQUAL(u"first\nsecond\nthird\n"_ustr, xText->asString());

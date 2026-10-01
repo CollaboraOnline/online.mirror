@@ -934,10 +934,14 @@ public:
     {
     }
 
+    // A range over part of the text.  With paragraph set, the range is a whole paragraph and
+    // its text ends with the paragraph's newline.
     TextRangeImpl(cpo::uno::Reference<css::text::XText> const& text,
-                  cpo::uno::Reference<css::text::XTextRange> const& range)
+                  cpo::uno::Reference<css::text::XTextRange> const& range,
+                  bool paragraph = false)
         : text_(text)
         , range_(range)
+        , paragraph_(paragraph)
     {
     }
 
@@ -970,12 +974,13 @@ public:
 
     OUString SAL_CALL asString() override
     {
-        if (range_.is())
+        // The whole text of a shape or table cell always ends in a paragraph terminator, and so
+        // does each paragraph in it.
+        if (!range_.is() || paragraph_)
         {
-            return rawString();
+            return rawString() + "\n";
         }
-        // The whole text of a shape or table cell always ends in a paragraph terminator.
-        return rawString() + "\n";
+        return rawString();
     }
 
     void SAL_CALL clear() override
@@ -1126,21 +1131,7 @@ public:
             throw cpo::uno::RuntimeException(
                 u"appendText: only the shape's whole text range can append"_ustr);
         }
-        cpo::uno::Reference<css::text::XTextPortionAppend> const append(text_,
-                                                                        cpo::uno::UNO_QUERY);
-        if (!append.is())
-        {
-            throw cpo::uno::RuntimeException(
-                u"appendText: the text cannot take appended runs"_ustr);
-        }
-        // The engine returns a range covering exactly the appended run, with any character
-        // formatting inherited from the preceding text stripped off.
-        auto const run = append->appendTextPortion(text, {});
-        if (!run.is())
-        {
-            throw cpo::uno::RuntimeException(u"appendText: appending failed"_ustr);
-        }
-        return new TextRangeImpl(text_, run);
+        return new TextRangeImpl(text_, appendRun(text));
     }
 
     cpo::uno::Reference<scriptinterop::XTextParagraph> SAL_CALL
@@ -1165,14 +1156,14 @@ public:
         {
             // The appended run lands in the new last paragraph and covers exactly its text, so
             // it doubles as the paragraph's range.
-            return new TextParagraphImpl(appendText(text));
+            return new TextParagraphImpl(new TextRangeImpl(text_, appendRun(text), true));
         }
         // With no text the new paragraph stays empty, so the paragraph's range is a cursor at
         // the text end.  That cursor is a live position: the edit engine keeps it inside the
         // last paragraph as text is inserted into it.
         auto const cursor = text_->createTextCursor();
         cursor->gotoEnd(false);
-        return new TextParagraphImpl(new TextRangeImpl(text_, cursor));
+        return new TextParagraphImpl(new TextRangeImpl(text_, cursor, true));
     }
 
     cpo::uno::Reference<scriptinterop::XTextRange> SAL_CALL setBulletLevel(sal_Int32 level)
@@ -1205,6 +1196,25 @@ public:
     }
 
 private:
+    // Appends a run at the end of the whole text and returns the range that covers exactly that
+    // run, with any character formatting inherited from the preceding text stripped off.
+    cpo::uno::Reference<css::text::XTextRange> appendRun(OUString const& text)
+    {
+        cpo::uno::Reference<css::text::XTextPortionAppend> const append(text_,
+                                                                        cpo::uno::UNO_QUERY);
+        if (!append.is())
+        {
+            throw cpo::uno::RuntimeException(
+                u"appendText: the text cannot take appended runs"_ustr);
+        }
+        auto const run = append->appendTextPortion(text, {});
+        if (!run.is())
+        {
+            throw cpo::uno::RuntimeException(u"appendText: appending failed"_ustr);
+        }
+        return run;
+    }
+
     // The characters the range covers, without any terminator.
     OUString rawString() const
     {
@@ -1217,6 +1227,7 @@ private:
 
     cpo::uno::Reference<css::text::XText> text_;
     cpo::uno::Reference<css::text::XTextRange> range_;
+    bool paragraph_ = false;
 };
 
 class ShapeImpl : public PageElementCommon<scriptinterop::XShape>
