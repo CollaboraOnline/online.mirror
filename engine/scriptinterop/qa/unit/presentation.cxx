@@ -139,7 +139,7 @@ CPPUNIT_TEST_FIXTURE(Test, testInsertTextBoxDefaultGeometry)
     // A text box inserted without geometry lands at the page's top left corner with the default
     // square size of 236.22 points.
     auto const xShape = xSlide->insertTextBox(u"Hello"_ustr);
-    CPPUNIT_ASSERT_EQUAL(u"Hello"_ustr, xShape->getText()->asString());
+    CPPUNIT_ASSERT_EQUAL(u"Hello\n"_ustr, xShape->getText()->asString());
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, xShape->getLeft(), 0.05);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, xShape->getTop(), 0.05);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(236.22, getValue(xShape->getWidth()), 0.05);
@@ -151,7 +151,7 @@ CPPUNIT_TEST_FIXTURE(Test, testInsertTextBoxGeometryRoundTrip)
     auto const xPresentation = loadPresentation();
     auto const xSlide = xPresentation->appendSlide();
     auto const xShape = xSlide->insertTextBoxAt(u"Hello"_ustr, 36, 72, 288, 144);
-    CPPUNIT_ASSERT_EQUAL(u"Hello"_ustr, xShape->getText()->asString());
+    CPPUNIT_ASSERT_EQUAL(u"Hello\n"_ustr, xShape->getText()->asString());
     // The chosen point values convert to whole 1/100 mm, so they round-trip exactly.
     CPPUNIT_ASSERT_DOUBLES_EQUAL(36.0, xShape->getLeft(), 0.05);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(72.0, xShape->getTop(), 0.05);
@@ -194,7 +194,7 @@ CPPUNIT_TEST_FIXTURE(Test, testTextStyling)
     CPPUNIT_ASSERT_EQUAL(sal_Int32(0xc9211e), nColor);
     // setText replaces the range's content.
     xRange->setText(u"Replaced"_ustr);
-    CPPUNIT_ASSERT_EQUAL(u"Replaced"_ustr, xRange->asString());
+    CPPUNIT_ASSERT_EQUAL(u"Replaced\n"_ustr, xRange->asString());
 }
 
 CPPUNIT_TEST_FIXTURE(Test, testItalicAndStrikethrough)
@@ -228,7 +228,7 @@ CPPUNIT_TEST_FIXTURE(Test, testAppendTextRunStyling)
     auto const xPlain = xText->appendText(u"plain "_ustr);
     auto const xBold = xText->appendText(u"bold"_ustr);
     getValue(xBold->getTextStyle())->setBold(true);
-    CPPUNIT_ASSERT_EQUAL(u"plain bold"_ustr, xText->asString());
+    CPPUNIT_ASSERT_EQUAL(u"plain bold\n"_ustr, xText->asString());
     CPPUNIT_ASSERT_EQUAL(u"bold"_ustr, xBold->asString());
     // Styling the returned range covers only that run, so the earlier run stays regular.
     cpo::uno::Reference<css::beans::XPropertySet> const xPlainProps(xPlain->getuno(),
@@ -265,7 +265,7 @@ CPPUNIT_TEST_FIXTURE(Test, testAppendParagraphAndBulletLevels)
     auto const xPara = getValue(xText->appendParagraph(u"second"_ustr)->getRange());
     CPPUNIT_ASSERT_EQUAL(u"second"_ustr, xPara->asString());
     xPara->setBulletLevel(1);
-    CPPUNIT_ASSERT_EQUAL(u"first\nsecond"_ustr, xText->asString());
+    CPPUNIT_ASSERT_EQUAL(u"first\nsecond\n"_ustr, xText->asString());
     // Each paragraph carries its own bullet depth, and the bullets show because paragraphs
     // count as bulleted by default once they have a depth.
     cpo::uno::Reference<css::container::XEnumerationAccess> const xParagraphs(
@@ -305,7 +305,7 @@ CPPUNIT_TEST_FIXTURE(Test, testAppendParagraphAndBulletLevels)
     auto const xEmpty = getValue(xText->appendParagraph(u""_ustr)->getRange());
     xEmpty->setBulletLevel(3);
     xText->appendText(u"third"_ustr);
-    CPPUNIT_ASSERT_EQUAL(u"first\nsecond\nthird"_ustr, xText->asString());
+    CPPUNIT_ASSERT_EQUAL(u"first\nsecond\nthird\n"_ustr, xText->asString());
     xEnum = xParagraphs->createEnumeration();
     xEnum->nextElement();
     xEnum->nextElement();
@@ -596,15 +596,15 @@ CPPUNIT_TEST_FIXTURE(Test, testNotesPage)
     // The speaker notes shape holds the notes text.
     auto const xNotesShape = xNotes->getSpeakerNotesShape();
     xNotesShape->getText()->setText(u"Speaker notes here"_ustr);
-    CPPUNIT_ASSERT_EQUAL(u"Speaker notes here"_ustr, xNotesShape->getText()->asString());
+    CPPUNIT_ASSERT_EQUAL(u"Speaker notes here\n"_ustr, xNotesShape->getText()->asString());
     // Replacing counts each replaced occurrence; the default match ignores case.
     CPPUNIT_ASSERT_EQUAL(sal_Int32(1), xNotes->replaceAllText(u"here"_ustr, u"there"_ustr));
-    CPPUNIT_ASSERT_EQUAL(u"Speaker notes there"_ustr, xNotesShape->getText()->asString());
+    CPPUNIT_ASSERT_EQUAL(u"Speaker notes there\n"_ustr, xNotesShape->getText()->asString());
     CPPUNIT_ASSERT_EQUAL(sal_Int32(0),
                          xNotes->replaceAllTextMatchCase(u"SPEAKER"_ustr, u"x"_ustr, true));
     CPPUNIT_ASSERT_EQUAL(sal_Int32(1), xNotes->replaceAllTextMatchCase(u"SPEAKER"_ustr,
                                                                        u"Presenter"_ustr, false));
-    CPPUNIT_ASSERT_EQUAL(u"Presenter notes there"_ustr, xNotesShape->getText()->asString());
+    CPPUNIT_ASSERT_EQUAL(u"Presenter notes there\n"_ustr, xNotesShape->getText()->asString());
     // An empty search text is rejected.
     CPPUNIT_ASSERT_THROW(xNotes->replaceAllText(u""_ustr, u"x"_ustr), cpo::uno::RuntimeException);
     // The notes master exists, and the notes page is taller than it is wide.
@@ -622,15 +622,15 @@ CPPUNIT_TEST_FIXTURE(Test, testReplaceAllText)
     xSlide->getNotesPage()->getSpeakerNotesShape()->getText()->setText(u"hello notes"_ustr);
     // The default match ignores case and counts every replaced occurrence on the page.
     CPPUNIT_ASSERT_EQUAL(sal_Int32(2), xSlide->replaceAllText(u"hello"_ustr, u"Bye"_ustr));
-    CPPUNIT_ASSERT_EQUAL(u"Bye World"_ustr, xSlide->getShapes()[0]->getText()->asString());
-    CPPUNIT_ASSERT_EQUAL(u"Bye again"_ustr, xSlide->getShapes()[1]->getText()->asString());
+    CPPUNIT_ASSERT_EQUAL(u"Bye World\n"_ustr, xSlide->getShapes()[0]->getText()->asString());
+    CPPUNIT_ASSERT_EQUAL(u"Bye again\n"_ustr, xSlide->getShapes()[1]->getText()->asString());
     // A case-sensitive match leaves a differently cased word alone.
     CPPUNIT_ASSERT_EQUAL(sal_Int32(0),
                          xSlide->replaceAllTextMatchCase(u"bye"_ustr, u"x"_ustr, true));
     // The presentation-wide replacement reaches the notes pages too.
     CPPUNIT_ASSERT_EQUAL(sal_Int32(1),
                          xPresentation->replaceAllText(u"hello"_ustr, u"Farewell"_ustr));
-    CPPUNIT_ASSERT_EQUAL(u"Farewell notes"_ustr,
+    CPPUNIT_ASSERT_EQUAL(u"Farewell notes\n"_ustr,
                          xSlide->getNotesPage()->getSpeakerNotesShape()->getText()->asString());
 }
 
@@ -731,7 +731,7 @@ CPPUNIT_TEST_FIXTURE(Test, testSelectionRanges)
     auto const aElements = xRange->getPageElements();
     CPPUNIT_ASSERT_EQUAL(sal_Int32(1), aElements.getLength());
     CPPUNIT_ASSERT_EQUAL(xShape->getuno(), aElements[0]->getuno());
-    CPPUNIT_ASSERT_EQUAL(u"pick me"_ustr, aElements[0]->asShape()->getText()->asString());
+    CPPUNIT_ASSERT_EQUAL(u"pick me\n"_ustr, aElements[0]->asShape()->getText()->asString());
     // The selected element knows its page, so removing it through the range takes it off the
     // slide.
     aElements[0]->remove();

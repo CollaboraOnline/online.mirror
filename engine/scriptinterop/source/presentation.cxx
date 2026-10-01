@@ -972,9 +972,10 @@ public:
     {
         if (range_.is())
         {
-            return range_->getString();
+            return rawString();
         }
-        return text_->getString();
+        // The whole text of a shape or table cell always ends in a paragraph terminator.
+        return rawString() + "\n";
     }
 
     void SAL_CALL clear() override
@@ -1196,7 +1197,7 @@ public:
         override
     {
         // Character formatting lives on the text runs, so an empty range holds none to style.
-        if (asString().isEmpty())
+        if (rawString().isEmpty())
         {
             return {false, {}};
         }
@@ -1204,6 +1205,16 @@ public:
     }
 
 private:
+    // The characters the range covers, without any terminator.
+    OUString rawString() const
+    {
+        if (range_.is())
+        {
+            return range_->getString();
+        }
+        return text_->getString();
+    }
+
     cpo::uno::Reference<css::text::XText> text_;
     cpo::uno::Reference<css::text::XTextRange> range_;
 };

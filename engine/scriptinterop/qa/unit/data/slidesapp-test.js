@@ -30,11 +30,11 @@ function test() {
     console.assert(title.getPageElementType() === SlidesApp.PageElementType.SHAPE);
     console.assert(slide.getPlaceholder(SlidesApp.PlaceholderType.SUBTITLE) === null);
 
-    // Five arguments pick the geometry overload.
+    // Five arguments pick the geometry overload.  The text of a shape always ends with a newline.
     const box = slide.insertTextBox('Hello from SlidesApp', 36, 36, 288, 72);
-    console.assert(box.getText().asString() === 'Hello from SlidesApp');
+    console.assert(box.getText().asString() === 'Hello from SlidesApp\n');
     console.assert(slide.replaceAllText('Hello', 'Bye') === 1);
-    console.assert(box.getText().asString() === 'Bye from SlidesApp');
+    console.assert(box.getText().asString() === 'Bye from SlidesApp\n');
 
     console.assert(slide.getLayout().getMaster() !== null);
     console.assert(presentation.getMasters().length === 1);
