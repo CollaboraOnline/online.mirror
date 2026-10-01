@@ -159,7 +159,6 @@ ContextHandlerRef ExtConditionalFormattingContext::onCreateContext(sal_Int32 nEl
         OUString aType = rAttribs.getString(XML_type, OUString());
         OUString aId = rAttribs.getString(XML_id, OUString());
         nPriority = rAttribs.getInteger( XML_priority, -1 );
-        maPriorities.push_back(nPriority);
         maModel.nPriority = nPriority;
 
         if (aType == "dataBar")
@@ -190,6 +189,7 @@ ContextHandlerRef ExtConditionalFormattingContext::onCreateContext(sal_Int32 nEl
             ScDocument& rDoc = getScDocument();
             mpCurrentRule.reset(new IconSetRule(*this));
             maEntries.push_back(std::make_unique<ScIconSetFormat>(rDoc));
+            maPriorities.push_back(nPriority);
             return new IconSetContext(*this, mpCurrentRule.get());
         }
         else if (aType == "cellIs")
@@ -331,11 +331,14 @@ void ExtConditionalFormattingContext::onEndElement()
                                                                       formula::FormulaGrammar::GRAM_OOXML,
                                                                       ScFormatEntry::Type::ExtCondition );
                     maEntries.push_back(std::unique_ptr<ScFormatEntry>(pEntry));
+                    maPriorities.push_back(maModels[i].nPriority);
                 }
 
-                assert(maPriorities.size() >= maModels.size());
                 maModels.clear();
             }
+
+            // Each entry is paired with the priority at the same index.
+            assert(maPriorities.size() == maEntries.size());
 
             std::vector< std::unique_ptr<ExtCfCondFormat> >& rExtFormats =  getCondFormats().importExtCondFormat();
             rExtFormats.push_back(std::make_unique<ExtCfCondFormat>(aRange, maEntries, &maPriorities));

@@ -1754,8 +1754,9 @@ ExtCfCondFormat::ExtCfCondFormat(ScRangeList aRange, std::vector< std::unique_pt
     maEntries.swap(rEntries);
     if (pPriorities)
         maPriorities = *pPriorities;
-    else
-        maPriorities.resize(maEntries.size(), -1);
+    // A broken file can leave an entry without a priority of its own. Such an entry is sorted after
+    // the ones that do carry a priority.
+    maPriorities.resize(maEntries.size(), -1);
 }
 
 ExtCfCondFormat::~ExtCfCondFormat()
