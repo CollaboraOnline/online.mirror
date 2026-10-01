@@ -28,6 +28,7 @@
 #include <editeng/editview.hxx>
 #include <unotools/weakref.hxx>
 #include <memory>
+#include <optional>
 
 class SdrOutliner;
 class OutlinerView;
@@ -100,6 +101,11 @@ protected:
 
     tools::Rectangle            m_aTextEditArea;
     tools::Rectangle            m_aMinTextEditArea;
+    // The size of the object being edited when the editing began, measured from one edge to the
+    // other. A text frame that grows to fit its text changes size on every keystroke, so this is
+    // the size it had before any of the current text was typed. It is empty while no object is
+    // being edited.
+    std::optional<Size>         m_oSizeBeforeTextEdit;
     Link<EditFieldInfo*,void>   m_aOldCalcFieldValueLink; // for call the old handler
     Point                       m_aMacroDownPos;
 

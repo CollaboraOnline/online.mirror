@@ -33,12 +33,78 @@
 #include <editeng/outlobj.hxx>
 #include <editeng/outliner.hxx>
 #include <editeng/editobj.hxx>
+#include <textframeedges.hxx>
 
 namespace {
 // The style family which is appended to the style names is padded to this many characters.
 const short PADDING_LENGTH_FOR_STYLE_FAMILY = 5;
 // this character will be used to pad the style families when they are appended to the style names
 const char PADDING_CHARACTER_FOR_STYLE_FAMILY = ' ';
+}
+
+namespace svx
+{
+bool MoveTextFrameEdges(const SdrTextObj& rTextObj, tools::Rectangle& rRectangle,
+                        tools::Long nWidth, tools::Long nHeight, bool bWidth, bool bHeight)
+{
+    const tools::Rectangle aOldRectangle(rRectangle);
+    tools::Long nWdtGrow = nWidth - (rRectangle.Right() - rRectangle.Left());
+    tools::Long nHgtGrow = nHeight - (rRectangle.Bottom() - rRectangle.Top());
+
+    if (nWdtGrow == 0)
+        bWidth = false;
+    if (nHgtGrow == 0)
+        bHeight = false;
+
+    if (!bWidth && !bHeight)
+        return false;
+
+    if (bWidth)
+    {
+        SdrTextHorzAdjust eHAdj = rTextObj.GetTextHorizontalAdjust();
+
+        if (eHAdj == SDRTEXTHORZADJUST_LEFT)
+            rRectangle.AdjustRight(nWdtGrow);
+        else if (eHAdj == SDRTEXTHORZADJUST_RIGHT)
+            rRectangle.AdjustLeft(-nWdtGrow);
+        else
+        {
+            tools::Long nWdtGrow2 = nWdtGrow / 2;
+            rRectangle.AdjustLeft(-nWdtGrow2);
+            rRectangle.SetRight(rRectangle.Left() + nWidth);
+        }
+    }
+
+    if (bHeight)
+    {
+        SdrTextVertAdjust eVAdj = rTextObj.GetTextVerticalAdjust();
+
+        if (eVAdj == SDRTEXTVERTADJUST_TOP)
+            rRectangle.AdjustBottom(nHgtGrow);
+        else if (eVAdj == SDRTEXTVERTADJUST_BOTTOM)
+            rRectangle.AdjustTop(-nHgtGrow);
+        else
+        {
+            tools::Long nHgtGrow2 = nHgtGrow / 2;
+            rRectangle.AdjustTop(-nHgtGrow2);
+            rRectangle.SetBottom(rRectangle.Top() + nHeight);
+        }
+    }
+
+    if (rTextObj.GetGeoStat().m_nRotationAngle)
+    {
+        // Object is rotated.
+        Point aD1(rRectangle.TopLeft());
+        aD1 -= aOldRectangle.TopLeft();
+        Point aD2(aD1);
+        RotatePoint(aD2, Point(), rTextObj.GetGeoStat().mfSinRotationAngle,
+                    rTextObj.GetGeoStat().mfCosRotationAngle);
+        aD2 -= aD1;
+        rRectangle.Move(aD2.X(), aD2.Y());
+    }
+
+    return true;
+}
 }
 
 bool SdrTextObj::AdjustTextFrameWidthAndHeight( tools::Rectangle& rR, bool bHgt, bool bWdt ) const
@@ -68,7 +134,6 @@ bool SdrTextObj::AdjustTextFrameWidthAndHeight( tools::Rectangle& rR, bool bHgt,
     bool bHScroll = bScroll && (eAniDir == SdrTextAniDirection::Left || eAniDir == SdrTextAniDirection::Right);
     bool bVScroll = bScroll && (eAniDir == SdrTextAniDirection::Up || eAniDir == SdrTextAniDirection::Down);
 
-    tools::Rectangle aOldRect = rR;
     tools::Long nHgt = 0, nMinHgt = 0, nMaxHgt = 0;
     tools::Long nWdt = 0, nMinWdt = 0, nMaxWdt = 0;
 
@@ -185,61 +250,7 @@ bool SdrTextObj::AdjustTextFrameWidthAndHeight( tools::Rectangle& rR, bool bHgt,
     nHgt += nVDist;
     if (nHgt < 1)
         nHgt = 1; // nVDist may be negative
-    tools::Long nWdtGrow = nWdt - (rR.Right() - rR.Left());
-    tools::Long nHgtGrow = nHgt - (rR.Bottom() - rR.Top());
-
-    if (nWdtGrow == 0)
-        bWdtGrow = false;
-    if (nHgtGrow == 0)
-        bHgtGrow = false;
-
-    if (!bWdtGrow && !bHgtGrow)
-        return false;
-
-    if (bWdtGrow)
-    {
-        SdrTextHorzAdjust eHAdj = GetTextHorizontalAdjust();
-
-        if (eHAdj == SDRTEXTHORZADJUST_LEFT)
-            rR.AdjustRight(nWdtGrow );
-        else if (eHAdj == SDRTEXTHORZADJUST_RIGHT)
-            rR.AdjustLeft( -nWdtGrow );
-        else
-        {
-            tools::Long nWdtGrow2 = nWdtGrow / 2;
-            rR.AdjustLeft( -nWdtGrow2 );
-            rR.SetRight( rR.Left() + nWdt );
-        }
-    }
-
-    if (bHgtGrow)
-    {
-        SdrTextVertAdjust eVAdj = GetTextVerticalAdjust();
-
-        if (eVAdj == SDRTEXTVERTADJUST_TOP)
-            rR.AdjustBottom(nHgtGrow );
-        else if (eVAdj == SDRTEXTVERTADJUST_BOTTOM)
-            rR.AdjustTop( -nHgtGrow );
-        else
-        {
-            tools::Long nHgtGrow2 = nHgtGrow / 2;
-            rR.AdjustTop( -nHgtGrow2 );
-            rR.SetBottom( rR.Top() + nHgt );
-        }
-    }
-
-    if (maGeo.m_nRotationAngle)
-    {
-        // Object is rotated.
-        Point aD1(rR.TopLeft());
-        aD1 -= aOldRect.TopLeft();
-        Point aD2(aD1);
-        RotatePoint(aD2, Point(), maGeo.mfSinRotationAngle, maGeo.mfCosRotationAngle);
-        aD2 -= aD1;
-        rR.Move(aD2.X(), aD2.Y());
-    }
-
-    return true;
+    return svx::MoveTextFrameEdges(*this, rR, nWdt, nHgt, bWdtGrow, bHgtGrow);
 }
 
 bool SdrTextObj::NbcAdjustTextFrameWidthAndHeight(bool bHgt, bool bWdt)

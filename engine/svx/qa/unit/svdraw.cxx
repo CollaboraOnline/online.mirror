@@ -10,6 +10,8 @@
 #include <config_pdfimport.h>
 #include <test/unoapixml_test.hxx>
 
+#include <com/sun/star/document/XUndoManagerSupplier.hpp>
+#include <com/sun/star/drawing/TextVerticalAdjust.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/drawing/XDrawPagesSupplier.hpp>
 #include <com/sun/star/drawing/XDrawPage.hpp>
@@ -386,6 +388,88 @@ CPPUNIT_TEST_FIXTURE(SvdrawTest, testRectangleObject)
     CPPUNIT_ASSERT_EQUAL(0, aPath.create(aStrokePath, "/stroke")->count());
 
     pPage->RemoveObject(0);
+}
+
+CPPUNIT_TEST_FIXTURE(SvdrawTest, testUndoOfTypingGivesTheFrameItsSizeBack)
+{
+    // Undoing the typing in a text frame puts the frame back at the size it had before that text
+    // was there. A frame that grows to fit its text is made taller while the text is being typed,
+    // and handing the earlier text back does not on its own take that height off again.
+    loadFromURL(u"private:factory/sdraw"_ustr);
+    uno::Reference<lang::XMultiServiceFactory> xFactory(mxComponent, uno::UNO_QUERY);
+    uno::Reference<drawing::XShape> xFrame(
+        xFactory->createInstance(u"com.sun.star.drawing.TextShape"_ustr), uno::UNO_QUERY);
+    uno::Reference<drawing::XDrawPagesSupplier> xDrawPagesSupplier(mxComponent, uno::UNO_QUERY);
+    uno::Reference<drawing::XDrawPage> xDrawPage(xDrawPagesSupplier->getDrawPages()->getByIndex(0),
+                                                 uno::UNO_QUERY);
+    xDrawPage->add(xFrame);
+    uno::Reference<beans::XPropertySet> xFrameProperties(xFrame, uno::UNO_QUERY);
+    xFrameProperties->setPropertyValue(u"TextAutoGrowHeight"_ustr, uno::Any(true));
+    xFrameProperties->setPropertyValue(u"TextAutoGrowWidth"_ustr, uno::Any(false));
+    xFrame->setPosition(awt::Point(1000, 1000));
+    xFrame->setSize(awt::Size(6000, 1000));
+    const sal_Int32 nHeightBeforeTyping = xFrame->getSize().Height;
+
+    SfxViewShell* pViewShell = SfxViewShell::Current();
+    CPPUNIT_ASSERT(pViewShell);
+    SdrView* pSdrView = pViewShell->GetDrawView();
+    SdrObject* pObject = SdrObject::getSdrObjectFromXShape(xFrame);
+    pSdrView->SdrBeginTextEdit(pObject);
+    pSdrView->GetTextEditOutlinerView()->GetEditView().InsertText(
+        u"one\ntwo\nthree\nfour\nfive\nsix"_ustr);
+    pSdrView->SdrEndTextEdit();
+
+    const sal_Int32 nHeightAfterTyping = xFrame->getSize().Height;
+    CPPUNIT_ASSERT_GREATER(nHeightBeforeTyping, nHeightAfterTyping);
+
+    uno::Reference<document::XUndoManagerSupplier> xUndoManagerSupplier(mxComponent,
+                                                                        uno::UNO_QUERY);
+    xUndoManagerSupplier->getUndoManager()->undo();
+
+    // Without the fix the frame kept the height it had grown to while the text was being typed.
+    CPPUNIT_ASSERT_EQUAL(nHeightBeforeTyping, xFrame->getSize().Height);
+}
+
+CPPUNIT_TEST_FIXTURE(SvdrawTest, testUndoOfTypingKeepsAMoveMadeMeanwhile)
+{
+    // Undoing the typing in an empty text frame gives the frame back its earlier size where it
+    // stands now. A move made after the typing, for example by another user, stays in place.
+    loadFromURL(u"private:factory/sdraw"_ustr);
+    uno::Reference<lang::XMultiServiceFactory> xFactory(mxComponent, uno::UNO_QUERY);
+    uno::Reference<drawing::XShape> xFrame(
+        xFactory->createInstance(u"com.sun.star.drawing.TextShape"_ustr), uno::UNO_QUERY);
+    uno::Reference<drawing::XDrawPagesSupplier> xDrawPagesSupplier(mxComponent, uno::UNO_QUERY);
+    uno::Reference<drawing::XDrawPage> xDrawPage(xDrawPagesSupplier->getDrawPages()->getByIndex(0),
+                                                 uno::UNO_QUERY);
+    xDrawPage->add(xFrame);
+    uno::Reference<beans::XPropertySet> xFrameProperties(xFrame, uno::UNO_QUERY);
+    xFrameProperties->setPropertyValue(u"TextAutoGrowHeight"_ustr, uno::Any(true));
+    xFrameProperties->setPropertyValue(u"TextAutoGrowWidth"_ustr, uno::Any(false));
+    xFrameProperties->setPropertyValue(u"TextVerticalAdjust"_ustr,
+                                       uno::Any(drawing::TextVerticalAdjust_TOP));
+    xFrame->setPosition(awt::Point(1000, 1000));
+    xFrame->setSize(awt::Size(6000, 1000));
+    const awt::Size aSizeBeforeTyping = xFrame->getSize();
+
+    SdrView* pSdrView = SfxViewShell::Current()->GetDrawView();
+    pSdrView->SdrBeginTextEdit(SdrObject::getSdrObjectFromXShape(xFrame));
+    pSdrView->GetTextEditOutlinerView()->GetEditView().InsertText(
+        u"one\ntwo\nthree\nfour\nfive\nsix"_ustr);
+    pSdrView->SdrEndTextEdit();
+    CPPUNIT_ASSERT_GREATER(aSizeBeforeTyping.Height, xFrame->getSize().Height);
+
+    // The frame is moved without an undo step of its own.
+    xFrame->setPosition(awt::Point(2000, 3000));
+
+    uno::Reference<document::XUndoManagerSupplier> xUndoManagerSupplier(mxComponent,
+                                                                        uno::UNO_QUERY);
+    xUndoManagerSupplier->getUndoManager()->undo();
+
+    // Without the fix the frame either kept the height it had grown to, or went back to where it
+    // stood before the typing.
+    CPPUNIT_ASSERT_EQUAL(aSizeBeforeTyping.Height, xFrame->getSize().Height);
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(2000), xFrame->getPosition().X);
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(3000), xFrame->getPosition().Y);
 }
 
 CPPUNIT_TEST_FIXTURE(SvdrawTest, testAutoHeightMultiColShape)

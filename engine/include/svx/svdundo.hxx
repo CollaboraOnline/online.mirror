@@ -438,6 +438,9 @@ class SVXCORE_DLLPUBLIC SdrUndoObjSetText : public SdrUndoObj
                                 m_pOldText;
     std::optional<OutlinerParaObject>
                                 m_pNewText;
+    // The size of the object before the text was set, measured from one edge to the other.
+    // It is empty unless the caller supplied it.
+    std::optional<Size>         m_oOldSize;
     bool                        m_bNewTextAvailable;
     bool                        m_bEmptyPresObj;
     sal_Int32                   mnText;
@@ -451,6 +454,10 @@ public:
 
     bool IsDifferent() const;
     void AfterSetText();
+
+    // Hand over the size the object had before the text was set, measured from one edge to the
+    // other, so that undo can give it back when the text goes back to none at all.
+    void SetOldSize(const Size& rSize) { m_oOldSize = rSize; }
 
     virtual void Undo() override;
     virtual void Redo() override;

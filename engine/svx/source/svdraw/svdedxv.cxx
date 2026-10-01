@@ -1438,6 +1438,8 @@ bool SdrObjEditView::SdrBeginTextEdit(SdrObject* pObj_, SdrPageView* pPV, vcl::W
         mpTextEditWin = pWin;
         mpTextEditPV = pPV;
         mxWeakTextEditObj = pObj;
+        m_oSizeBeforeTextEdit
+            = Size(pObj->GetLogicRect().getOpenWidth(), pObj->GetLogicRect().getOpenHeight());
         if (pGivenOutliner)
         {
             mpTextEditOutliner.reset(pGivenOutliner);
@@ -1715,6 +1717,7 @@ bool SdrObjEditView::SdrBeginTextEdit(SdrObject* pObj_, SdrPageView* pPV, vcl::W
 
     mpTextEditOutlinerView = nullptr;
     mxWeakTextEditObj.clear();
+    m_oSizeBeforeTextEdit.reset();
     mpTextEditPV = nullptr;
     mpTextEditWin = nullptr;
     maHdlList.SetMoveOutside(false);
@@ -1732,6 +1735,7 @@ SdrEndTextEditKind SdrObjEditView::SdrEndTextEdit(bool bDontDeleteReally)
     VclPtr<vcl::Window> pTEWin = mpTextEditWin;
     OutlinerView* pTEOutlinerView = mpTextEditOutlinerView;
     vcl::Cursor* pTECursorBuffer = m_pTextEditCursorBuffer;
+    std::optional<Size> oTESizeBeforeEdit = m_oSizeBeforeTextEdit;
     SdrUndoManager* pUndoEditUndoManager = nullptr;
     bool bNeedToUndoSavedRedoTextEdit(false);
 
@@ -1806,6 +1810,7 @@ SdrEndTextEditKind SdrObjEditView::SdrEndTextEdit(bool bDontDeleteReally)
     }
 
     mxWeakTextEditObj.clear();
+    m_oSizeBeforeTextEdit.reset();
     mpTextEditPV = nullptr;
     mpTextEditWin = nullptr;
     mpTextEditOutlinerView = nullptr;
@@ -1837,6 +1842,8 @@ SdrEndTextEditKind SdrObjEditView::SdrEndTextEdit(bool bDontDeleteReally)
                                                          .GetSdrUndoFactory()
                                                          .CreateUndoObjectSetText(*pTEObj, nText)
                                                          .release()));
+                if (pTxtUndo && oTESizeBeforeEdit)
+                    pTxtUndo->SetOldSize(*oTESizeBeforeEdit);
             }
             DBG_ASSERT(!bModified || pTxtUndo,
                        "svx::SdrObjEditView::EndTextEdit(), could not create undo action!");

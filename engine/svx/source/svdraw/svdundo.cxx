@@ -41,6 +41,7 @@
 #include <svx/e3dsceneupdater.hxx>
 #include <svx/svdviter.hxx>
 #include <svx/svdotable.hxx> // #i124389#
+#include <textframeedges.hxx>
 #include <utility>
 #include <sfx2/viewsh.hxx>
 #include <svx/svdoashp.hxx>
@@ -1171,6 +1172,20 @@ void SdrUndoObjSetText::Undo()
         pTarget->NbcSetOutlinerParaObjectForText(m_pOldText, pText);
     }
     ImplSetFitScales(*pTarget, m_aOldFitScales);
+
+    // A text frame that grows to fit its text was made larger while the text was being typed.
+    // Earlier text is measured again when it is put back, but no text at all is not measured, so
+    // the frame is given back the size it had before the typing, in the directions it grows in.
+    // Its edges move the way they move when it grows, so the frame keeps any move made to it in
+    // the meantime. A table takes its size from its cells in the relayout further down.
+    if (!m_pOldText && m_oOldSize && pTarget->IsTextFrame()
+        && !dynamic_cast<sdr::table::SdrTableObj*>(pTarget))
+    {
+        tools::Rectangle aRectangle(pTarget->GetLogicRect());
+        if (svx::MoveTextFrameEdges(*pTarget, aRectangle, m_oOldSize->Width(), m_oOldSize->Height(),
+                                    pTarget->IsAutoGrowWidth(), pTarget->IsAutoGrowHeight()))
+            pTarget->NbcSetLogicRect(aRectangle, false);
+    }
 
     pTarget->SetEmptyPresObj(m_bEmptyPresObj);
     pTarget->ActionChanged();
