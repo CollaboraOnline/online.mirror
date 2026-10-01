@@ -68,6 +68,11 @@ bool HostUtil::allowedWopiHost(const std::string& host)
     return WopiEnabled && WopiHosts.match(host);
 }
 
+bool HostUtil::allowedWopiHostWithoutCache(const std::string& host)
+{
+    return allowedWopiHost(host);
+}
+
 void HostUtil::parseAliases(Poco::Util::LayeredConfiguration& conf)
 {
     WopiEnabled = conf.getBool("storage.wopi[@allow]", false);

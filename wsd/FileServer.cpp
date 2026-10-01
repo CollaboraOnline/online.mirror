@@ -2243,7 +2243,7 @@ void FileServerRequestHandler::fetchWopiSettingConfigs(const Poco::Net::HTTPRequ
     };
 
     LOG_DBG("Fetching wopi setting config from WopiHost[" << uriAnonym << ']');
-    auto httpSession = StorageConnectionManager::getHttpSession(sharedUri);
+    auto httpSession = StorageConnectionManager::getWopiHttpSession(sharedUri);
     httpSession->setBodySizeLimit(MaxSettingsFetchSizeBytes);
     httpSession->setFinishedHandler(std::move(finishedCallback));
     httpSession->asyncRequest(httpRequest, *COOLWSD::getWebServerPoll());
@@ -2284,7 +2284,7 @@ void FileServerRequestHandler::fetchWordbook(const Poco::Net::HTTPRequest& reque
     httpRequest.setVerb(http::Request::VERB_GET);
     httpRequest.header().set("Content-Type", "text/plain");
 
-    auto httpSession = StorageConnectionManager::getHttpSession(dicUrl);
+    auto httpSession = StorageConnectionManager::getWopiHttpSession(dicUrl);
     httpSession->setBodySizeLimit(MaxSettingsFetchSizeBytes);
     auto httpResponse = httpSession->syncRequest(httpRequest);
 
@@ -2354,7 +2354,7 @@ void FileServerRequestHandler::deleteWopiSettingConfigs(
     LOG_DBG("Sending DELETE request to WopiURI[" << uriAnonym << "] for presetfile with fileId["
                                                  << fileId << ']');
 
-    auto httpSession = StorageConnectionManager::getHttpSession(sharedUri);
+    auto httpSession = StorageConnectionManager::getWopiHttpSession(sharedUri);
 
     http::Session::FinishedCallback finishedCallback =
         [uriAnonym, socket, request, fileId,
@@ -2478,7 +2478,7 @@ void FileServerRequestHandler::uploadFileToIntegrator(const Poco::Net::HTTPReque
     httpRequest.header().set("Content-Type", "application/octet-stream");
     httpRequest.setBody(fileContent);
 
-    auto httpSession = StorageConnectionManager::getHttpSession(wopiUri);
+    auto httpSession = StorageConnectionManager::getWopiHttpSession(wopiUri);
 
     http::Session::FinishedCallback finishedCallback =
         [fileName, uriAnonym, socket, request,

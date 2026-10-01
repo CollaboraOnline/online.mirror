@@ -1283,6 +1283,12 @@ public:
     /// Applied to the response of every later request. 0, the default, accepts any size.
     void setBodySizeLimit(int64_t limit) { _bodySizeLimit = limit; }
 
+    /// Connect only to those resolved addresses of the host that addressFilter allows.
+    void setAddressFilter(net::AddressFilter addressFilter)
+    {
+        _addressFilter = std::move(addressFilter);
+    }
+
     /// The response we _got_ for our request. Do *not* use this to _send_ a response!
     const std::shared_ptr<Response>& response() const { return _response; }
     const std::string& getUrl() const { return _request.getUrl(); }
@@ -1492,6 +1498,7 @@ public:
         os << indent << "\thost: " << _host;
         os << indent << "\tport: " << _port;
         os << indent << "\tprotocol: " << name(_protocol);
+        os << indent << "\taddressFilter: " << (_addressFilter ? "set" : "none");
         os << indent << "\thandshakeSslVerifyFailure: " << _handshakeSslVerifyFailure;
         os << indent << "\tstartTime: " << Util::getTimeForLog(now, _startTime);
         _request.dumpState(os, indent + '\t');
@@ -1787,7 +1794,7 @@ private:
     {
         _socket.reset(); // Reset to make sure we are disconnected.
         std::shared_ptr<StreamSocket> socket =
-            net::connect(_host, _port, isSecure(), shared_from_this());
+            net::connect(_host, _port, isSecure(), shared_from_this(), _addressFilter);
         assert((!socket || _fd == socket->getFD()) &&
                "The socket FD must have been set in onConnect");
 
@@ -1850,7 +1857,8 @@ private:
             });
         };
 
-        net::asyncConnect(_host, _port, isSecure(), shared_from_this(), pushConnectCompleteToPoll);
+        net::asyncConnect(_host, _port, isSecure(), shared_from_this(), pushConnectCompleteToPoll,
+                          _addressFilter);
     }
 
     bool checkTimeout(std::chrono::steady_clock::time_point now) override
@@ -1889,6 +1897,8 @@ private:
     const std::string _host;
     const std::string _port;
     const Protocol _protocol;
+    /// Which resolved addresses of the host may be used. Every address may be used when empty.
+    net::AddressFilter _addressFilter;
     int _fd; ///< The socket file-descriptor.
     long _handshakeSslVerifyFailure; ///< Save SslVerityResult at onHandshakeFail
     std::chrono::microseconds _timeout;

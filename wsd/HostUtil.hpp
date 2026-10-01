@@ -48,6 +48,9 @@ public:
 
     static bool allowedWopiHost(const std::string& host);
 
+    /// Returns what allowedWopiHost returns. Several threads may call it at once.
+    static bool allowedWopiHostWithoutCache(const std::string& host);
+
     static bool isWopiEnabled() { return WopiEnabled; }
 
     /// replace the authority of aliashost to realhost if it matches
