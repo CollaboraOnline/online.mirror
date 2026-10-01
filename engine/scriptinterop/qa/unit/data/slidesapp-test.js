@@ -47,8 +47,13 @@ function test() {
     console.assert(transform.getScaleX() === 2);
     console.assert(transform.getTranslateX() === 10);
 
-    slide.selectAsCurrentPage();
-    const selection = presentation.getSelection();
-    console.assert(selection.getSelectionType() === SlidesApp.SelectionType.CURRENT_PAGE);
-    console.assert(selection.getCurrentPage().asSlide().getPageType() === SlidesApp.PageType.SLIDE);
+    // run-gas-test.py runs the script through the Apps Script API with no editor open, and a
+    // selection there needs the presentation to be open in an editor.
+    if (globalThis.cool) {
+        slide.selectAsCurrentPage();
+        const selection = presentation.getSelection();
+        console.assert(selection.getSelectionType() === SlidesApp.SelectionType.CURRENT_PAGE);
+        console.assert(selection.getCurrentPage().asSlide().getPageType()
+                       === SlidesApp.PageType.SLIDE);
+    }
 }
