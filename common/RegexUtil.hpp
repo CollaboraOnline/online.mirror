@@ -112,6 +112,10 @@ public:
         return res;
     }
 
+    /// Match the given value to the regex rules without the cached results. This writes nothing, so
+    /// several threads may match at once.
+    bool matchWithoutCache(const std::string& subject) const { return matchImpl(subject); }
+
 private:
     /// The matching logic, without memoization.
     bool matchImpl(const std::string& subject) const

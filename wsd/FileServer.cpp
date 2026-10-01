@@ -2390,7 +2390,7 @@ void FileServerRequestHandler::fetchWopiSettingConfigs(const Poco::Net::HTTPRequ
     };
 
     LOG_DBG("Fetching wopi setting config from WopiHost[" << uriAnonym << ']');
-    auto httpSession = StorageConnectionManager::getHttpSession(sharedUri);
+    auto httpSession = StorageConnectionManager::getWopiHttpSession(sharedUri);
     httpSession->setFinishedHandler(std::move(finishedCallback));
     if (!httpSession->asyncRequest(httpRequest, COOLWSD::getWebServerPoll()))
         return;
@@ -2605,7 +2605,7 @@ void FileServerRequestHandler::fetchSettingFile(const Poco::Net::HTTPRequest& re
     };
 
     LOG_DBG("Fetching setting file from [" << uriAnonym << ']');
-    auto httpSession = StorageConnectionManager::getHttpSession(dicUrl);
+    auto httpSession = StorageConnectionManager::getWopiHttpSession(dicUrl);
     httpSession->setFinishedHandler(std::move(finishedCallback));
     if (!httpSession->asyncRequest(httpRequest, COOLWSD::getWebServerPoll()))
         return;
@@ -2856,7 +2856,7 @@ void FileServerRequestHandler::fetchModels(const Poco::Net::HTTPRequest& request
 
     LOG_DBG("Reading stored viewsetting.json from [" << storedUriAnonym
             << "] to list AI models");
-    auto storedSession = StorageConnectionManager::getHttpSession(storedUri);
+    auto storedSession = StorageConnectionManager::getWopiHttpSession(storedUri);
     storedSession->setFinishedHandler(std::move(storedCallback));
     if (!storedSession->asyncRequest(storedRequest, COOLWSD::getWebServerPoll()))
         return;
@@ -2910,7 +2910,7 @@ void FileServerRequestHandler::deleteWopiSettingConfigs(const Poco::Net::HTTPReq
     LOG_DBG("Sending DELETE request to WopiURI[" << uriAnonym << "] for presetfile with fileId["
                                                  << fileId << ']');
 
-    auto httpSession = StorageConnectionManager::getHttpSession(sharedUri);
+    auto httpSession = StorageConnectionManager::getWopiHttpSession(sharedUri);
 
     std::weak_ptr<StreamSocket> socketWeak(socket);
 
@@ -3033,7 +3033,7 @@ void FileServerRequestHandler::uploadFileToIntegrator(const Poco::Net::HTTPReque
     httpRequest.set("Content-Type", "application/octet-stream");
     httpRequest.setBodyFile(uploadedFilePath);
 
-    auto httpSession = StorageConnectionManager::getHttpSession(wopiUri);
+    auto httpSession = StorageConnectionManager::getWopiHttpSession(wopiUri);
 
     std::weak_ptr<StreamSocket> socketWeak(socket);
 
@@ -3146,7 +3146,7 @@ void FileServerRequestHandler::handleViewSettingUpload(
             LOG_TRC("Successfully uploaded viewsetting.json to wopiHost[" << uriAnonym << ']');
         };
 
-        auto httpSession = StorageConnectionManager::getHttpSession(wopiUri);
+        auto httpSession = StorageConnectionManager::getWopiHttpSession(wopiUri);
         httpSession->setFinishedHandler(std::move(finishedCallback));
         httpSession->asyncRequest(httpRequest, COOLWSD::getWebServerPoll());
     };
@@ -3235,7 +3235,7 @@ void FileServerRequestHandler::handleViewSettingUpload(
 
     LOG_DBG("Reading stored viewsetting.json from [" << storedUriAnonym
             << "] to keep a saved secret");
-    auto storedSession = StorageConnectionManager::getHttpSession(storedUri);
+    auto storedSession = StorageConnectionManager::getWopiHttpSession(storedUri);
     storedSession->setFinishedHandler(std::move(storedCallback));
     if (!storedSession->asyncRequest(storedRequest, COOLWSD::getWebServerPoll()))
         return;

@@ -29,7 +29,8 @@ bool CheckFileInfo::checkFileInfo(int redirectLimit)
     std::string uriAnonym = Anonymizer::anonymizeUrl(_url.toString());
 
     LOG_DBG("Getting info for wopi uri [" << uriAnonym << ']');
-    _httpSession = StorageConnectionManager::getHttpSession(_url);
+    _httpSession = _urlFromRedirect ? StorageConnectionManager::getHttpSession(_url)
+                                    : StorageConnectionManager::getWopiHttpSession(_url);
     Authorization auth = Authorization::create(_url);
     const http::Request httpRequest = StorageConnectionManager::createHttpRequest(_url, auth);
 
@@ -67,6 +68,7 @@ bool CheckFileInfo::checkFileInfo(int redirectLimit)
                         << Anonymizer::anonymizeUrl(location) << "]");
 
                 _url = RequestDetails::sanitizeURI(location);
+                _urlFromRedirect = true;
                 checkFileInfo(redirectLimit - 1);
                 return;
             }
@@ -142,11 +144,22 @@ bool CheckFileInfo::checkFileInfo(int redirectLimit)
     _httpSession->setFinishedHandler(std::move(finishedCallback));
 
     http::Session::ConnectFailCallback connectFailCallback =
-        [selfWeak = weak_from_this(), this](const std::shared_ptr<http::Session>& /* httpSession */)
+        [selfWeak = weak_from_this(), this](const std::shared_ptr<http::Session>& httpSession)
     {
         std::shared_ptr<CheckFileInfo> selfLifecycle = selfWeak.lock();
         if (!selfLifecycle)
             return;
+
+        // None of the host's addresses is allowed, so asking again cannot succeed.
+        if (httpSession->connectionResult() == net::AsyncConnectResult::AddressNotAllowed)
+        {
+            _state = State::Fail;
+            LOG_ERR("CheckFileInfo host has no allowed address");
+
+            if (_onFinishCallback)
+                _onFinishCallback(*this);
+            return;
+        }
 
         _state = State::Fail;
         LOG_ERR("Failed to start an async CheckFileInfo request");

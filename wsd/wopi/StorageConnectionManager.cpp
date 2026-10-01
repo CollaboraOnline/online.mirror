@@ -117,6 +117,11 @@ void initHttpRequest(Poco::Net::HTTPRequest& request, const Poco::URI& uri,
     request.set("X-COOL-WOPI-ServerId", Util::getProcessIdentifier());
 }
 
+bool isAllowedWopiAddress(const std::string& address)
+{
+    return HostUtil::allowedWopiHostWithoutCache(address) || net::isLocalAddress(address);
+}
+
 } // namespace
 
 http::Request StorageConnectionManager::createHttpRequest(const Poco::URI& uri,
@@ -169,6 +174,22 @@ StorageConnectionManager::getHttpSession(const Poco::URI& uri, std::chrono::seco
     }
 
     httpSession->setTimeout(timeout);
+
+    return httpSession;
+}
+
+std::shared_ptr<http::Session>
+StorageConnectionManager::getWopiHttpSession(const Poco::URI& uri, std::chrono::seconds timeout)
+{
+    std::shared_ptr<http::Session> httpSession = getHttpSession(uri, timeout);
+
+    // A host that is not on the list by name may be allowed through its resolved addresses, or
+    // through being local, so the connection uses only the resolved addresses that the list allows
+    // or that are local.
+    if (!HostUtil::allowedWopiHost(uri.getHost()))
+    {
+        httpSession->setAddressFilter(isAllowedWopiAddress);
+    }
 
     return httpSession;
 }
