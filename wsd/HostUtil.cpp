@@ -75,6 +75,11 @@ bool HostUtil::allowedWopiHost(const std::string& host)
     return WopiEnabled && WopiHosts.match(host);
 }
 
+bool HostUtil::allowedWopiHostWithoutCache(const std::string& host)
+{
+    return WopiEnabled && WopiHosts.matchWithoutCache(host);
+}
+
 std::string HostUtil::parseAlias(const std::string& aliasPattern)
 {
     if (!RegexUtil::isRegexValid(aliasPattern))

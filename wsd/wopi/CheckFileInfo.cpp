@@ -29,7 +29,8 @@ bool CheckFileInfo::checkFileInfo(int redirectLimit)
     std::string uriAnonym = COOLWSD::anonymizeUrl(_url.toString());
 
     LOG_DBG("Getting info for wopi uri [" << uriAnonym << ']');
-    _httpSession = StorageConnectionManager::getHttpSession(_url);
+    _httpSession = _urlFromRedirect ? StorageConnectionManager::getHttpSession(_url)
+                                    : StorageConnectionManager::getWopiHttpSession(_url);
     Authorization auth = Authorization::create(_url);
     const http::Request httpRequest = StorageConnectionManager::createHttpRequest(_url, auth);
 
@@ -70,6 +71,7 @@ bool CheckFileInfo::checkFileInfo(int redirectLimit)
                                                                 << "]");
 
                 _url = RequestDetails::sanitizeURI(location);
+                _urlFromRedirect = true;
                 checkFileInfo(redirectLimit - 1);
                 return;
             }
