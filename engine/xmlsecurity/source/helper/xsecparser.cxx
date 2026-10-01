@@ -385,7 +385,11 @@ class XSecParser::DsKeyInfoContext
         virtual void StartElement(
             cpo::uno::Reference<css::xml::sax::XAttributeList> const& xAttrs) override
         {
-            m_rParser.HandleIdAttr(xAttrs);
+            OUString const id{m_rParser.HandleIdAttr(xAttrs)};
+            if (!id.isEmpty() && m_rParser.m_pXSecController->haveReferenceForId(id))
+            {
+                m_rParser.m_pXSecController->setKeyInfoReferenced();
+            }
         }
 
         virtual std::unique_ptr<Context> CreateChildContext(
@@ -1166,6 +1170,7 @@ class XSecParser::XadesQualifyingPropertiesContext
                 bool const isReferenced)
             : ReferencedContextImpl(rParser, std::move(pOldNamespaceMap), isReferenced)
         {
+            rParser.m_pXSecController->setXAdES();
         }
 
         virtual void StartElement(
@@ -1379,6 +1384,11 @@ class XSecParser::DsSignatureContext
             {
                 m_rParser.m_pXSecController->setId( ouIdAttr );
             }
+        }
+
+        virtual void EndElement() override
+        {
+            m_rParser.m_pXSecController->resolveSigningCertificate();
         }
 
         virtual std::unique_ptr<Context> CreateChildContext(
