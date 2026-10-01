@@ -1382,9 +1382,7 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 				app.socket.sendMessage('uno .uno:MoveSlideSectionDown');
 				break;
 			case 'removeSection':
-				that._map.deselectAll();
-				that._map.setPart(section.startIndex);
-				that._map.selectPart(section.startIndex, 1, false);
+				that._selectOnlyPart(section.startIndex);
 				app.socket.sendMessage('uno .uno:RemoveSlideSection');
 				break;
 			case 'removeSectionAndSlides': {
@@ -1627,11 +1625,19 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 			} else if (e.shiftKey) {
 				this._selectPartRange(this._map._docLayer._selectedPart, partId);
 			} else {
-				this._map.deselectAll();
-				this._map.setPart(partId);
-				this._map.selectPart(partId, 1, false); // And select.
+				this._selectOnlyPart(partId);
 			}
 		}
+	},
+
+	// Make the given slide the current one and the only selected one. The
+	// server switches to the slide before it gets the deselections, so the
+	// status that answers each deselection already names this slide as the
+	// current one, and the view stays on it.
+	_selectOnlyPart: function (partId) {
+		this._map.setPart(partId);
+		this._map.deselectAll();
+		this._map.selectPart(partId, 1, false);
 	},
 
 	_selectPartRange: function (start, end, scrollToEnd = true) {
@@ -2074,9 +2080,7 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 			// Same selection change as a plain click on the slide: the
 			// previous selection is dropped on the client and the server
 			// alike, so both agree on which slides the move applies to.
-			partsPreview._map.deselectAll();
-			partsPreview._map.setPart(partId);
-			partsPreview._map.selectPart(partId, 1, false); // And select.
+			partsPreview._selectOnlyPart(partId);
 		}
 		// By default we move when dragging, but can
 		// support duplication with ctrl in the future.

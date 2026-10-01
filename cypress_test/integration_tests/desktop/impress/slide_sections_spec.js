@@ -208,6 +208,51 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Slide sections', function(
 			});
 		});
 
+		it('Clicking a slide of a selected section shows that slide at once', function() {
+			helper.processToIdle(this.win);
+
+			assertSectionHeaders(['Section-1', 'Section-2', 'Section-3']);
+			cy.window().should(function(win) {
+				var sections = win['0'].app.impress.sections;
+				expect(sections).to.have.length(3);
+				expect(sections[1].startIndex).to.equal(4);
+				expect(win['0'].app.impress.partList).to.have.length(13);
+			});
+
+			// Select Section-2 (slides 4-10). Its first slide becomes the current one.
+			cy.cGet('.slide-section-header').eq(1)
+				.find('.slide-section-name').click();
+			helper.processToIdle(this.win);
+			cy.window().should(function(win) {
+				var impress = win['0'].app.impress;
+				expect(impress.getSelectedSlidesCount()).to.equal(7);
+				expect(win['0'].app.map._docLayer._selectedPart).to.equal(4);
+			});
+
+			// Record every slide the view shows from now on.
+			var shownParts = [];
+			cy.getFrameWindow().then(function(win) {
+				win.app.map.on('updateparts', function() {
+					shownParts.push(win.app.map._docLayer._selectedPart);
+				});
+			});
+
+			cy.cGet('#preview-img-part-6').click();
+			helper.processToIdle(this.win);
+
+			cy.window().should(function(win) {
+				var impress = win['0'].app.impress;
+				expect(win['0'].app.map._docLayer._selectedPart).to.equal(6);
+				expect(impress.getSelectedSlidesCount()).to.equal(1);
+				expect(impress.isSlideSelected(6)).to.be.true;
+			});
+
+			// The view went from the section's first slide straight to the clicked
+			// slide, and never back to the first slide on the way.
+			cy.wrap(shownParts).should('have.length.greaterThan', 0);
+			cy.wrap(shownParts).should('not.include', 4);
+		});
+
 		describe('Drop slide at a section boundary', function() {
 
 			// Wait until app.impress.sections reflects [0, 4, 11] - the section
