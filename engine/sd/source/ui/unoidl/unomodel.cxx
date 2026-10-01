@@ -6187,6 +6187,11 @@ void SdXImpressDocument::moveSelectedParts(int nPosition, bool bDuplicate, int n
 
     mpDoc->MovePages(nPosition, *pSelectedPage);
 
+    // The new page order leaves only the current page selected in the document, and that is
+    // the selection clients show. The slide sorter takes the same selection, so the next move
+    // takes the pages the clients show as selected.
+    pSlideSorter->GetSlideSorter().GetController().GetPageSelector().GetCoreSelection();
+
     if (nSectionCount > 0)
     {
         sal_uInt16 nNewPageCount = mpDoc->GetSdPageCount(PageKind::Standard);
