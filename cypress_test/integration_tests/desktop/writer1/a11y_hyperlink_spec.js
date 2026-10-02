@@ -127,4 +127,24 @@ describe(['tagdesktop'], 'Writer hyperlinks for the reader', { testIsolation: fa
 			});
 		});
 	});
+
+	it('a URL changed in the dialog is read anew', function () {
+		// into the link
+		helper.typeIntoDocument('{ctrl}{home}');
+		helper.typeIntoDocument('{rightarrow}'.repeat(10));
+		cy.then(function () {
+			return helper.processToIdle(win);
+		});
+		helper.typeIntoDocument('{ctrl}k');
+		cy.cGet('#target-input').should('have.value', LINK_URL);
+		cy.cGet('#target-input').clear();
+		cy.cGet('#target-input').type('https://www.example.org/');
+		cy.then(function () {
+			return helper.processToIdle(win);
+		});
+		cy.cGet('#ok-button').click();
+		cy.cGet('#target-input').should('not.exist');
+
+		cy.cGet('#clipboard-area a').should('have.attr', 'href', 'https://www.example.org/');
+	});
 });

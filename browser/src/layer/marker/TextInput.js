@@ -254,7 +254,11 @@ window.L.TextInput = window.L.Layer.extend({
 			this._a11yFocusTime = Date.now();
 			this._a11yFocusDescription = this._textArea.getAttribute('aria-description');
 
-			if (!this._isSelectionValid() || this._isCursorAtBeginning()) {
+			// e.g. the paragraph changed through a dialog
+			if (this.hasAccessibilitySupport() && (this._remoteContent !== undefined
+				|| this._remoteSelectionEnd !== undefined || this._remotePosition !== undefined)) {
+				this._updateFocusedParagraph();
+			} else if (!this._isSelectionValid() || this._isCursorAtBeginning()) {
 				if (this.hasAccessibilitySupport()) {
 					this._setSelectionRange(this._lastSelectionStart, this._lastSelectionEnd);
 				} else {
