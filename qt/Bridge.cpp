@@ -684,7 +684,7 @@ void Bridge::saveAndClose()
 void Bridge::saveDocumentAs()
 {
     promptSaveLocation(
-        [fakeClientFd = _document._fakeClientFd,
+        [self = QPointer<Bridge>(this), fakeClientFd = _document._fakeClientFd,
          currentUri = _document._fileURL](const std::string& destPath, const std::string& format)
         {
             const QFileInfo destInfo(QString::fromStdString(destPath));
@@ -693,6 +693,8 @@ void Bridge::saveDocumentAs()
 
             if (destUri.getPath() == currentUri.getPath())
             {
+                if (self)
+                    self->_isNewDocument = false;
                 // Send save command if the saveas destination is the same as the current document.
                 const std::string saveCmd = "save dontTerminateEdit=0 dontSaveIfUnmodified=0";
                 fakeSocketWriteQueue(fakeClientFd, saveCmd.data(), saveCmd.size());
@@ -788,6 +790,7 @@ QVariant Bridge::cool(const QString& messageStr)
         _document._appDocId = coda::generateNewAppDocId();
         coda::unregisterBridge(this);
         coda::registerBridge(_document._appDocId, this);
+        const std::string previousUri = _document._fileURL.toString();
         // Update the file URL
         _document._fileURL = Poco::URI(newFileUrl);
 
@@ -812,6 +815,13 @@ QVariant Bridge::cool(const QString& messageStr)
         QString fileName = QString::fromStdString(uriPath.getFileName());
         if (_owner)
             _owner->updateTitle(fileName);
+
+        // Drop the app-picked name of a new document from the recent list.
+        if (_isNewDocument)
+        {
+            Application::getRecentFiles().remove(previousUri);
+            _isNewDocument = false;
+        }
 
         // Add the new document location to recent files.
         // For flatpak use the host location
