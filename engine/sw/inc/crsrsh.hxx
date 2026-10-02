@@ -43,6 +43,7 @@
 #include "fldbas.hxx"
 #include "IDocumentMarkAccess.hxx"
 #include <optional>
+#include <vector>
 
 class SfxItemSet;
 class SfxPoolItem;
@@ -114,6 +115,8 @@ struct SwContentAtPos
     int nDist;
     OUString sStr;
     const SwTextAttr* pFndTextAttr;
+    /// Other tracked changes on the comment anchors next to the found position, in text order.
+    std::vector<const SwRangeRedline*> aCommentAnchorRedlines;
 
     SwContentAtPos( IsAttrAtPos eGetAtPos )
         : eContentAtPos( eGetAtPos )

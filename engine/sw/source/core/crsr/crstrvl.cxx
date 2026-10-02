@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <algorithm>
 #include <memory>
 #include <utility>
 #include <hintids.hxx>
@@ -1487,6 +1488,34 @@ bool SwCursorShell::IsPageAtPos( const Point &rPt ) const
     return false;
 }
 
+/// Collects the tracked changes on the run of comment anchors around nIndex, except pSkip.
+static std::vector<const SwRangeRedline*>
+lcl_GetCommentAnchorRedlines(const IDocumentRedlineAccess& rIDRA, const SwTextNode& rTextNode,
+                             sal_Int32 nIndex, const SwRangeRedline* pSkip)
+{
+    auto isCommentAnchor = [&rTextNode](sal_Int32 n)
+    { return rTextNode.GetTextAttrForCharAt(n, RES_TXTATR_ANNOTATION) != nullptr; };
+
+    sal_Int32 nStart = nIndex;
+    while (nStart > 0 && isCommentAnchor(nStart - 1))
+        --nStart;
+    sal_Int32 nEnd = nIndex + 1;
+    while (nEnd < rTextNode.Len() && isCommentAnchor(nEnd))
+        ++nEnd;
+
+    std::vector<const SwRangeRedline*> aRedlines;
+    for (sal_Int32 n = nStart; n < nEnd; ++n)
+    {
+        if (n == nIndex)
+            continue;
+        const SwRangeRedline* pRedline = rIDRA.GetRedline(SwPosition(rTextNode, n), nullptr);
+        if (pRedline && pRedline != pSkip
+            && std::find(aRedlines.begin(), aRedlines.end(), pRedline) == aRedlines.end())
+            aRedlines.push_back(pRedline);
+    }
+    return aRedlines;
+}
+
 bool SwCursorShell::GetContentAtPos( const Point& rPt,
                                    SwContentAtPos& rContentAtPos,
                                    bool bSetCursor,
@@ -1955,8 +1984,21 @@ bool SwCursorShell::GetContentAtPos( const Point& rPt,
                                 break;
                         }
                     };
+                }
 
+                // Comment anchors have no width, so their changes cannot be hovered on their own.
+                std::vector<const SwRangeRedline*> aCommentAnchorRedlines
+                    = lcl_GetCommentAnchorRedlines(rIDRA, *pTextNd, aPos.GetContentIndex(), pRedl);
+                if (!pRedl && !aCommentAnchorRedlines.empty())
+                {
+                    pRedl = aCommentAnchorRedlines.front();
+                    aCommentAnchorRedlines.erase(aCommentAnchorRedlines.begin());
+                }
+
+                if( pRedl )
+                {
                     rContentAtPos.aFnd.pRedl = pRedl;
+                    rContentAtPos.aCommentAnchorRedlines = std::move(aCommentAnchorRedlines);
                     rContentAtPos.eContentAtPos = IsAttrAtPos::Redline;
                     rContentAtPos.pFndTextAttr = nullptr;
                     bRet = true;

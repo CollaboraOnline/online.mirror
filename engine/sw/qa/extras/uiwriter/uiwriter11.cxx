@@ -54,6 +54,9 @@
 #include <unotxdoc.hxx>
 #include <ndtxt.hxx>
 #include <IDocumentDrawModelAccess.hxx>
+#include <redline.hxx>
+#include <rootfrm.hxx>
+#include <txtfrm.hxx>
 #include <IDocumentLayoutAccess.hxx>
 #include <IDocumentRedlineAccess.hxx>
 #include <svx/svxids.hrc>
@@ -432,6 +435,40 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testTdf108791)
 
         CPPUNIT_ASSERT(aPostItFields.empty());
     }
+}
+
+CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testRedlineTooltipListsCommentAnchorChanges)
+{
+    // Given "Cec", three adjacent comments, each anchored in its own tracked insertion by Author A,
+    // Author B and Author C, then "ipour" inserted by Author D:
+    createSwDoc("redline-comment-anchors.fodt");
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    auto pTextFrame
+        = static_cast<SwTextFrame*>(pWrtShell->GetLayout()->GetLower()->GetLower()->GetLower());
+    const SwTextNode* pTextNode = pTextFrame->GetTextNodeForFirstText();
+
+    // Returns the authors of the changes in the tooltip when hovering the character at nIndex.
+    auto getAuthors = [&](sal_Int32 nIndex) {
+        SwRect aChar;
+        pTextFrame->GetCharRect(aChar, SwPosition(*pTextNode, nIndex));
+        SwRect aNextChar;
+        pTextFrame->GetCharRect(aNextChar, SwPosition(*pTextNode, nIndex + 1));
+        Point aPoint((aChar.Left() + aNextChar.Left()) / 2, aChar.Center().Y());
+        SwContentAtPos aContentAtPos(IsAttrAtPos::Redline);
+        CPPUNIT_ASSERT(pWrtShell->GetContentAtPos(aPoint, aContentAtPos));
+        OUString aAuthors = aContentAtPos.aFnd.pRedl->GetAuthorString();
+        for (const SwRangeRedline* pRedline : aContentAtPos.aCommentAnchorRedlines)
+            aAuthors += ", " + pRedline->GetAuthorString();
+        return aAuthors;
+    };
+
+    // Then hovering the text on either side of the comments lists the changes on the anchors too:
+    // Without the accompanying fix in place, this test would have failed with:
+    // - Expected: Author A, Author B, Author C
+    // - Actual  : Author A
+    // i.e. the changes that hold only a comment anchor never appeared in a tooltip.
+    CPPUNIT_ASSERT_EQUAL(u"Author A, Author B, Author C"_ustr, getAuthors(2));
+    CPPUNIT_ASSERT_EQUAL(u"Author D, Author A, Author B, Author C"_ustr, getAuthors(6));
 }
 
 CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testTdf162120AutoRTL)

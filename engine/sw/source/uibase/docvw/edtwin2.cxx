@@ -20,6 +20,7 @@
 #include <doc.hxx>
 #include <osl/diagnose.h>
 #include <osl/thread.h>
+#include <o3tl/string_view.hxx>
 #include <vcl/help.hxx>
 #include <tools/json_writer.hxx>
 #include <tools/urlobj.hxx>
@@ -306,15 +307,39 @@ static OUString lcl_GetRedlineHelp( const SwRangeRedline& rRedl, bool bBalloon,
     return sBuf.makeStringAndClear();
 }
 
-OUString SwEditWin::ClipLongToolTip(const OUString& rText)
+static OUString lcl_GetRedlineHelp(const SwContentAtPos& rContentAtPos, bool bBalloon)
 {
-    OUString sDisplayText(rText);
-    tools::Long nTextWidth = GetTextWidth(sDisplayText);
+    const bool bTableColChange = IsAttrAtPos::TableColRedline == rContentAtPos.eContentAtPos;
+    const bool bTableChange
+        = bTableColChange || IsAttrAtPos::TableRedline == rContentAtPos.eContentAtPos;
+    OUStringBuffer aBuf(
+        lcl_GetRedlineHelp(*rContentAtPos.aFnd.pRedl, bBalloon, bTableChange, bTableColChange));
+    for (const SwRangeRedline* pRedline : rContentAtPos.aCommentAnchorRedlines)
+    {
+        OUString aLine = lcl_GetRedlineHelp(*pRedline, bBalloon, /*bTableChange=*/false,
+                                            /*bTableColChange=*/false);
+        if (!aLine.isEmpty())
+            aBuf.append("\n" + aLine);
+    }
+    return aBuf.makeStringAndClear();
+}
+
+OUString SwEditWin::ClipLongToolTip(std::u16string_view rText)
+{
     tools::Long nMaxWidth = GetDesktopRectPixel().GetWidth() * 2 / 3;
     nMaxWidth = PixelToLogic(Size(nMaxWidth, 0)).Width();
-    if (nTextWidth > nMaxWidth)
-        sDisplayText = GetOutDev()->GetEllipsisString(sDisplayText, nMaxWidth, DrawTextFlags::CenterEllipsis);
-    return sDisplayText;
+    OUStringBuffer sDisplayText;
+    sal_Int32 nIndex = 0;
+    do
+    {
+        OUString sLine(o3tl::getToken(rText, 0, u'\n', nIndex));
+        if (GetTextWidth(sLine) > nMaxWidth)
+            sLine = GetOutDev()->GetEllipsisString(sLine, nMaxWidth, DrawTextFlags::CenterEllipsis);
+        sDisplayText.append(sLine);
+        if (nIndex >= 0)
+            sDisplayText.append('\n');
+    } while (nIndex >= 0);
+    return sDisplayText.makeStringAndClear();
 }
 
 static OString getTooltipPayload(const OUString& tooltip, const SwRect& rect,
@@ -554,10 +579,7 @@ void SwEditWin::RequestHelp(const HelpEvent &rEvt)
                 const bool bShowInlineTooltips = rSh.GetViewOptions()->IsShowInlineTooltips();
                 if ( bShowTrackChanges && bShowInlineTooltips )
                 {
-                     sText = lcl_GetRedlineHelp(*aContentAtPos.aFnd.pRedl, bBalloon,
-                         IsAttrAtPos::TableRedline == aContentAtPos.eContentAtPos ||
-                         IsAttrAtPos::TableColRedline == aContentAtPos.eContentAtPos,
-                         IsAttrAtPos::TableColRedline == aContentAtPos.eContentAtPos);
+                     sText = lcl_GetRedlineHelp(aContentAtPos, bBalloon);
                 }
                 break;
             }
@@ -712,7 +734,7 @@ void SwEditWin::RequestHelp(const HelpEvent &rEvt)
                         {
                             aContentAtPos.eContentAtPos = IsAttrAtPos::Redline;
                             if( rSh.GetContentAtPos( aPt, aContentAtPos, false, &aFieldRect ) )
-                                sText = lcl_GetRedlineHelp(*aContentAtPos.aFnd.pRedl, bBalloon, /*bTableChange=*/false, /*bTableColChange=*/false);
+                                sText = lcl_GetRedlineHelp(aContentAtPos, bBalloon);
                         }
                     }
                 }

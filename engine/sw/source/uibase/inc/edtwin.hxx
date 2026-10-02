@@ -272,7 +272,7 @@ public:
     /** fdo#55546 cut very long tooltips to 2/3 of the width of the screen
         via center ellipsis
      */
-    OUString ClipLongToolTip(const OUString& rText);
+    OUString ClipLongToolTip(std::u16string_view rText);
 
     SwFrameControlsManager& GetFrameControlsManager();
 
