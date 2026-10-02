@@ -605,6 +605,47 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testResizeTableColumn)
     pXmlDoc = nullptr;
 }
 
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testResizeTableColumnDuringTextEdit)
+{
+    SdXImpressDocument* pXImpressDocument = createDoc("table-column.odp");
+    sd::ViewShell* pViewShell = pXImpressDocument->GetDocShell()->GetViewShell();
+    SdPage* pActualPage = pViewShell->GetActualPage();
+    SdrObject* pObject = pActualPage->GetObj(0);
+    auto pTableObject = dynamic_cast<sdr::table::SdrTableObj*>(pObject);
+    CPPUNIT_ASSERT(pTableObject);
+
+    // Put a long word without spaces into the first cell.
+    SdrView* pView = pViewShell->GetView();
+    pView->MarkObj(pObject, pView->GetSdrPageView());
+    pTableObject->setActiveCell(sdr::table::CellPos(0, 0));
+    pView->SdrBeginTextEdit(pObject);
+    pView->GetTextEditOutlinerView()->InsertText(
+        u"https://www.collaboraoffice.com/downloads/Collabora-Office-Flatpak-Nightly/"_ustr);
+    pView->SdrEndTextEdit();
+
+    // Edit the cell again, without changing its text.
+    pTableObject->setActiveCell(sdr::table::CellPos(0, 0));
+    pView->SdrBeginTextEdit(pObject);
+    CPPUNIT_ASSERT(pView->IsTextEdit());
+    Scheduler::ProcessEventsToIdle();
+
+    // Make the first column 4 cm narrower while the cell is still being edited.
+    uno::Sequence<beans::PropertyValue> aArgs(comphelper::InitPropertySequence({
+        { "BorderType", uno::Any(u"column-middle"_ustr) },
+        { "Index", uno::Any(sal_uInt16(0)) },
+        { "Offset", uno::Any(sal_Int32(o3tl::toTwips(-4000, o3tl::Length::mm100))) },
+    }));
+    dispatchCommand(mxComponent, u".uno:TableChangeCurrentBorderPosition"_ustr, aArgs);
+    CPPUNIT_ASSERT(pView->IsTextEdit());
+
+    // The first row grows, so the text that now wraps onto more lines still fits inside the cell.
+    // Without the fix, the cell kept its old height of about half the text height.
+    ::tools::Rectangle aCellRect;
+    pTableObject->getCellBounds(sdr::table::CellPos(0, 0), aCellRect);
+    sal_Int32 nTextHeight = pView->GetTextEditOutliner()->GetTextHeight();
+    CPPUNIT_ASSERT_GREATEREQUAL(nTextHeight, static_cast<sal_Int32>(aCellRect.GetHeight()));
+}
+
 CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testViewCursors)
 {
     // Create two views.

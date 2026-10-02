@@ -54,6 +54,8 @@ public:
 
     CellRef getCell( const CellPos& rPos ) const;
     void LayoutTable( tools::Rectangle& rArea, bool bFitWidth, bool bFitHeight );
+    /// Make the next LayoutTable call compute the layout again, even when its inputs are unchanged.
+    static void InvalidateLayout();
 
     void ApplyCellStyles();
     void UpdateCells( tools::Rectangle const & rArea );

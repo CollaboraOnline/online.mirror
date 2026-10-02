@@ -799,6 +799,11 @@ void SdrTableObjImpl::LayoutTable( tools::Rectangle& rArea, bool bFitWidth, bool
     }
 }
 
+void SdrTableObjImpl::InvalidateLayout()
+{
+    lastLayoutTable = nullptr;
+}
+
 void SdrTableObjImpl::UpdateCells( tools::Rectangle const & rArea )
 {
     if( mpLayouter && mxTable.is() )
@@ -1456,6 +1461,9 @@ void SdrTableObj::onEditOutlinerStatusEvent( EditStatus* pEditStatus )
 {
     if( (pEditStatus->GetStatusWord() & EditStatusFlags::TextHeightChanged) && mpImpl.is() && mpImpl->mpLayouter )
     {
+        // The edited text now has a different height, also when only the cell width changed and
+        // the text itself is unmodified, so the row heights are computed again.
+        SdrTableObjImpl::InvalidateLayout();
         tools::Rectangle aRect0(getRectangle());
         setRectangle(maLogicRect);
         auto aRectangle = getRectangle();
