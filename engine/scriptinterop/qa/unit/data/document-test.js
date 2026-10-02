@@ -95,6 +95,8 @@ function test() {
     console.assert(row0.getCell(1).getText() === 'B1');
     console.assert(table.getRow(1).getCell(0).getText() === 'A2');
     console.assert(table.getRow(1).getCell(1).getText() === 'B2');
+    console.assert(row0.getText() === 'A1\nB1');
+    console.assert(table.getText() === 'A1\nB1\nA2\nB2');
 
     console.assert(body.getChildIndex(p0) === 0);
     console.assert(body.getChildIndex(body.getChild(1)) === 1);

@@ -1518,7 +1518,7 @@ public:
                     "getText: the row has no cell at position " + OUString::number(i));
             }
             if (!buf.isEmpty()) {
-                buf.append('\t');
+                buf.append('\n');
             }
             buf.append(cell.Value->getText());
         }
