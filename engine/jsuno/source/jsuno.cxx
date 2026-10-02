@@ -1040,6 +1040,36 @@ JSValue enumeratorToString(JSContext* ctx, JSValueConst this_val, int, JSValueCo
     });
 }
 
+OString compoundMemberName(typelib_CompoundTypeDescription const * compound, sal_Int32 i) {
+    if (i == 0 && OUString::unacquired(&compound->aBase.pTypeName) == u"cpo.uno.Exception") {
+        return "message"_ostr; // instead of UNOIDL's "Message"
+    }
+    return OUString::unacquired(&compound->ppMemberNames[i]).toUtf8();
+}
+
+JSValue exceptionToString(JSContext * ctx, JSValueConst this_val, int, JSValueConst *) {
+    return callFromJs(ctx, [ctx, this_val] {
+        auto const type = static_cast<typelib_TypeDescriptionReference *>(
+            JS_GetOpaque2(ctx, this_val, getRuntimeData(ctx)->compoundClassId));
+        if (type == nullptr) {
+            throw JsException();
+        }
+        ValueRef const message(ctx, JS_GetPropertyStr(ctx, this_val, "message"));
+        if (JS_IsException(message)) {
+            throw JsException();
+        }
+        std::size_t n;
+        UniqueCString16 const p(ctx, JS_ToCStringLenUTF16(ctx, &n, message));
+        if (p.get() == nullptr) {
+            throw JsException();
+        }
+        OUString const s(
+            OUString::unacquired(&type->pTypeName) + ": " + std::u16string_view(p.get(), n));
+        return JS_NewStringUTF16(
+            ctx, reinterpret_cast<std::uint16_t const *>(s.getStr()), s.getLength());
+    });
+}
+
 void compoundFinalizer(JSRuntime* rt, JSValueConst val)
 {
 #if defined DBG_UTIL
@@ -1493,7 +1523,7 @@ JSValue exceptionCtor(JSContext* ctx, JSValueConst new_target, int argc, JSValue
         {
             for (sal_Int32 i = 0; i != compDesc->nMembers; ++i)
             {
-                auto const name = OUString::unacquired(&compDesc->ppMemberNames[i]).toUtf8();
+                auto const name = compoundMemberName(compDesc, i);
                 AtomRef const a(ctx, JS_NewAtomLen(ctx, name.getStr(), name.getLength()));
                 assert(a != JS_ATOM_NULL); //TODO
                 ValueRef val(ctx);
@@ -1737,6 +1767,9 @@ JSValue moduleGetProperty(JSContext* ctx, JSValueConst obj, JSAtom atom, JSValue
         {
             ValueRef proto(ctx, JS_NewObject(ctx));
             assert(!JS_IsException(proto)); //TODO
+            static JSCFunctionListEntry const functions[] = {
+                JS_CFUNC_DEF("toString", 0, exceptionToString)};
+            JS_SetPropertyFunctionList(ctx, proto, functions, std::size(functions));
             val = JS_NewCFunction2(ctx, exceptionCtor, "TODO", 0, JS_CFUNC_constructor, 0);
             assert(!JS_IsException(val)); //TODO
             JS_SetConstructor(ctx, val, proto);
@@ -2486,7 +2519,7 @@ cpo::uno::Any fromJs(JSContext* ctx, cpo::uno::Type const& type, JSValueConst va
             {
                 for (sal_Int32 i = 0; i != compDesc->nMembers; ++i)
                 {
-                    auto const name = OUString::unacquired(&compDesc->ppMemberNames[i]).toUtf8();
+                    auto const name = compoundMemberName(compDesc, i);
                     AtomRef const a(ctx, JS_NewAtomLen(ctx, name.getStr(), name.getLength()));
                     assert(a != JS_ATOM_NULL); //TODO
                     auto const has = JS_HasProperty(ctx, effective, a);
@@ -2771,7 +2804,7 @@ ValueRef toJs(JSContext* ctx, cpo::uno::Type const& type, void const* value)
                                static_cast<std::byte const*>(value) + compDesc->pMemberOffsets[i]);
                     if (JS_SetPropertyStr(
                             ctx, mems,
-                            OUString::unacquired(&compDesc->ppMemberNames[i]).toUtf8().getStr(),
+                            compoundMemberName(compDesc, i).getStr(),
                             mem.release())
                         == -1)
                     {
@@ -3345,21 +3378,6 @@ jsuno::Exception extractException(JSContext* ctx, ValueRef const& err)
             }
         }
         parseStackTrace(ctx, err, exc.stack);
-        if (!haveMessage)
-        {
-            // See whether this is a css.uno.Exception with a Message member:
-            ValueRef const unoMsgVal(ctx, JS_GetPropertyStr(ctx, err, "Message"));
-            if (JS_IsString(unoMsgVal))
-            {
-                std::size_t n;
-                UniqueCString16 const p(ctx, JS_ToCStringLenUTF16(ctx, &n, unoMsgVal));
-                if (p.get() != nullptr)
-                {
-                    exc.message = OUString(p.get(), n);
-                    haveMessage = true;
-                }
-            }
-        }
     }
     if (!haveMessage)
     {

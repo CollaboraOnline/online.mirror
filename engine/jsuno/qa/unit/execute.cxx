@@ -99,6 +99,11 @@ public:
             CPPUNIT_ASSERT_EQUAL(u"plain string"_ustr, e.message);
             CPPUNIT_ASSERT_EQUAL(u""_ustr, e.name);
         }
+        CPPUNIT_ASSERT_EQUAL(
+            u"[\"boom\",\"cpo.uno.RuntimeException: boom\"]"_ustr,
+            testexec(
+                u"var e = new uno.idl.cpo.uno.RuntimeException({message: 'boom'});"
+                    "[e.message, String(e)]"_ustr).result);
     }
 
     void testLegacyUnoApiUse() {

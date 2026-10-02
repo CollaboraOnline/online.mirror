@@ -453,18 +453,18 @@ const test = uno.idl.com.sun.star.testuno.Test.create(uno.componentContext);
 {
     const v = test.getAnyException();
     console.log(v);
-    console.assert(v.Message.startsWith('error'));
+    console.assert(v.message.startsWith('error'));
     console.assert(v.Context === null);
     console.assert(v.m1 === -123456);
     console.assert(v.m2 === 100.5);
     console.assert(v.m3 === 'hä');
     console.assert(test.isAnyException(
         new uno.idl.com.sun.star.testuno.Exception(
-            {Message: 'error', m1: -123456, m2: 100.5, m3: 'hä'})));
+            {message: 'error', m1: -123456, m2: 100.5, m3: 'hä'})));
     console.assert(test.isAnyException(
         new uno.Any(
             uno.type.exception(uno.idl.com.sun.star.testuno.Exception),
-            {Message: 'error', Context: null, m1: -123456, m2: 100.5, m3: 'hä'})));
+            {message: 'error', Context: null, m1: -123456, m2: 100.5, m3: 'hä'})));
 }
 {
     const v = test.getAnyInterface();
@@ -878,20 +878,20 @@ try {
     console.assert(false);
 } catch (e) {
     console.assert(e instanceof uno.idl.cpo.uno.RuntimeException);
-    console.assert(e.Message.startsWith('test'));
+    console.assert(e.message.startsWith('test'));
 }
 try {
     throw new uno.idl.com.sun.star.lang.WrappedTargetException(
-        {Message: 'wrapped', Context: test,
+        {message: 'wrapped', Context: test,
          TargetException: new uno.idl.cpo.uno.RuntimeException({
-             Message: 'test', Context: test})});
+             message: 'test', Context: test})});
         console.assert(false);
 } catch (e) {
     console.assert(e instanceof uno.idl.com.sun.star.lang.WrappedTargetException);
-    console.assert(e.Message.startsWith('wrapped'));
+    console.assert(e.message.startsWith('wrapped'));
     console.assert(uno.sameUnoObject(e.Context, test));
     console.assert(e.TargetException instanceof uno.idl.cpo.uno.RuntimeException);
-    console.assert(e.TargetException.Message.startsWith('test'));
+    console.assert(e.TargetException.message.startsWith('test'));
     console.assert(uno.sameUnoObject(e.TargetException.Context, test));
 }
 console.assert(test.StringAttribute === 'hä');
