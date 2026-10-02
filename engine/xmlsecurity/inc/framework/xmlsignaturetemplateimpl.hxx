@@ -28,24 +28,43 @@
 #include <com/sun/star/lang/XServiceInfo.hpp>
 #include <com/sun/star/xml/crypto/XXMLSignatureTemplate.hpp>
 
+#include <SignatureTemplateInternal.hxx>
+
 #include <vector>
 
 namespace com::sun::star::lang { class XMultiServiceFactory; }
+namespace com::sun::star::security { class XCertificate; }
 namespace com::sun::star::xml::wrapper { class XXMLElementWrapper; }
 
 class XMLSignatureTemplateImpl final : public ::cppu::WeakImplHelper<
     css::xml::crypto::XXMLSignatureTemplate ,
     css::lang::XServiceInfo >
+    , public xmlsecurity::ISignatureTemplateInternal
 {
     private:
         cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper > m_xTemplate ;
         std::vector< cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper > > targets;
         cpo::uno::Reference< css::xml::crypto::XUriBinding > m_xUriBinding;
         css::xml::crypto::SecurityOperationStatus m_nStatus;
+        cpo::uno::Reference<css::security::XCertificate> m_xSigningCertificate;
+        cpo::uno::Reference<css::security::XCertificate> m_xVerifiedCertificate;
 
     public:
         explicit XMLSignatureTemplateImpl();
         virtual ~XMLSignatureTemplateImpl() override;
+
+        void SetSigningCertificate(cpo::uno::Reference<css::security::XCertificate> const& xCertificate)
+        {
+            m_xSigningCertificate = xCertificate;
+        }
+        cpo::uno::Reference<css::security::XCertificate> const& GetVerifiedCertificate() const
+        {
+            return m_xVerifiedCertificate;
+        }
+
+        // xmlsecurity::ISignatureTemplateInternal
+        virtual cpo::uno::Reference<css::security::XCertificate> GetSigningCertificate() override;
+        virtual void SetVerifiedCertificate(cpo::uno::Reference<css::security::XCertificate> const& rCertificate) override;
 
         //Methods from XXMLSignatureTemplate
         virtual void setTemplate(

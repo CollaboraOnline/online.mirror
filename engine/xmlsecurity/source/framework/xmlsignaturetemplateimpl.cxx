@@ -38,6 +38,16 @@ XMLSignatureTemplateImpl::XMLSignatureTemplateImpl()
 XMLSignatureTemplateImpl::~XMLSignatureTemplateImpl() {
 }
 
+cpo::uno::Reference<css::security::XCertificate> XMLSignatureTemplateImpl::GetSigningCertificate()
+{
+    return m_xSigningCertificate;
+}
+
+void XMLSignatureTemplateImpl::SetVerifiedCertificate(cpo::uno::Reference<css::security::XCertificate> const& xCertificate)
+{
+    m_xVerifiedCertificate = xCertificate;
+}
+
 /* XXMLSignatureTemplate */
 void XMLSignatureTemplateImpl::setTemplate( const Reference< XXMLElementWrapper >& aTemplate )
 {

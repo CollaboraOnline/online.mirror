@@ -49,6 +49,10 @@ class SignatureVerifierImpl final : public SignatureVerifierImpl_Base
 {
 private:
     cpo::uno::Reference< css::xml::crypto::XXMLSecurityContext > m_xXMLSecurityContext;
+    /// Certificate whose key must verify the signature, null to use ds:KeyInfo.
+    cpo::uno::Reference<css::security::XCertificate> m_xSigningCertificate;
+    /// Certificate whose key verified the signature, null if none did.
+    cpo::uno::Reference<css::security::XCertificate> m_xVerifiedCertificate;
 
     virtual void notifyResultListener() const override;
     virtual void startEngine( const rtl::Reference<XMLSignatureTemplateImpl>& xSignatureTemplate) override;
@@ -71,6 +75,15 @@ public:
     virtual OUString getImplementationName(  ) override;
     virtual bool supportsService( const OUString& ServiceName ) override;
     virtual cpo::uno::Sequence< OUString > getSupportedServiceNames(  ) override;
+
+    void SetSigningCertificate(cpo::uno::Reference<css::security::XCertificate> const& xCertificate)
+    {
+        m_xSigningCertificate = xCertificate;
+    }
+    cpo::uno::Reference<css::security::XCertificate> const& GetVerifiedCertificate() const
+    {
+        return m_xVerifiedCertificate;
+    }
 
     void updateSignature( const cpo::uno::Reference< css::xml::crypto::XXMLSignature >& xSignature,
                           const cpo::uno::Reference< css::xml::crypto::XXMLSecurityContext >& xContext ) { m_xXMLSignature = xSignature; m_xXMLSecurityContext = xContext; }
