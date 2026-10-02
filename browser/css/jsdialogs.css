@@ -4177,6 +4177,12 @@ kbd,
 	outline-offset: -2px;
 }
 
+/* The fill the canvas draws for a text selection in the slide. */
+.ui-editengine::selection,
+.ui-editengine *::selection {
+	background: rgba(var(--doc-type), 0.25);
+}
+
 .ui-editengine .ui-editengine-paragraph {
 	min-height: 1.4em;
 	/* Each paragraph keeps the height of its text when the text is taller than the editor, and the
