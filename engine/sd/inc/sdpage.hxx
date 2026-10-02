@@ -176,7 +176,7 @@ public:
     SD_DLLPUBLIC rtl::Reference<SdrObject> CreateDefaultPresObj(PresObjKind eObjKind);
     SD_DLLPUBLIC void DestroyDefaultPresObj(PresObjKind eObjKind);
     SD_DLLPUBLIC SdrObject* GetPresObj(PresObjKind eObjKind, int nIndex = 1, bool bFuzzySearch = false );
-    PresObjKind     GetPresObjKind(SdrObject* pObj) const;
+    SD_DLLPUBLIC PresObjKind GetPresObjKind(SdrObject* pObj) const;
     OUString        GetPresObjText(PresObjKind eObjKind) const;
     SfxStyleSheet* GetStyleSheetForMasterPageBackground() const;
     SfxStyleSheet*  GetStyleSheetForPresObj(PresObjKind eObjKind) const;

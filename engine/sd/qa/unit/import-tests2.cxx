@@ -3096,6 +3096,54 @@ CPPUNIT_TEST_FIXTURE(SdImportTest2, testCool16279_LayoutPlaceholderKeepsMasterAu
     }
 }
 
+CPPUNIT_TEST_FIXTURE(SdImportTest2, testCustomShapedLayoutPlaceholderNotOnSlide)
+{
+    // The layout holds two ellipse-shaped body placeholders, with the prompts "Prompt one" and
+    // "Prompt two", and the slide fills only the first of them.
+    createSdImpressDoc("pptx/narrow-placeholder-no-wrap.pptx");
+
+    const auto checkLayoutPlaceholders = [this](const char* pWhen) {
+        // Both prompts stay on the master page as placeholders, which the slide does not paint.
+        SdDrawDocument* pDoc = getSdDocShell()->GetDoc();
+        int nPromptsFound = 0;
+        for (sal_uInt16 nMaster = 0; nMaster < pDoc->GetMasterSdPageCount(PageKind::Standard);
+             ++nMaster)
+        {
+            SdPage* pMasterPage = pDoc->GetMasterSdPage(nMaster, PageKind::Standard);
+            for (size_t nObject = 0; nObject < pMasterPage->GetObjCount(); ++nObject)
+            {
+                SdrObject* pObject = pMasterPage->GetObj(nObject);
+                OutlinerParaObject* pParagraphs = pObject->GetOutlinerParaObject();
+                if (!pParagraphs)
+                    continue;
+                const OUString aText = pParagraphs->GetTextObject().GetText(0);
+                const OString aMessage = OString::Concat(pWhen) + ": " + aText.toUtf8();
+                CPPUNIT_ASSERT_MESSAGE(aMessage.getStr(), pObject->IsNotVisibleAsMaster());
+                if (aText == "Prompt one" || aText == "Prompt two")
+                {
+                    ++nPromptsFound;
+                    CPPUNIT_ASSERT_EQUAL_MESSAGE(aMessage.getStr(), PresObjKind::Outline,
+                                                 pMasterPage->GetPresObjKind(pObject));
+                }
+            }
+        }
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(pWhen, 2, nPromptsFound);
+
+        // The slide's own placeholder keeps the ellipse of the layout placeholder it refers to.
+        uno::Reference<beans::XPropertySet> xShape(getShapeFromPage(0, 0));
+        comphelper::SequenceAsHashMap aGeometry(
+            xShape->getPropertyValue(u"CustomShapeGeometry"_ustr));
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(pWhen, u"ooxml-ellipse"_ustr,
+                                     aGeometry[u"Type"_ustr].get<OUString>());
+    };
+
+    checkLayoutPlaceholders("after load");
+    saveAndReload(TestFilter::PPTX);
+    checkLayoutPlaceholders("after a PPTX round trip");
+    saveAndReload(TestFilter::ODP);
+    checkLayoutPlaceholders("after an ODP round trip");
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

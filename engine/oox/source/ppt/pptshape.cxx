@@ -408,8 +408,10 @@ void PPTShape::addShape(
                   || (mnSubType == XML_obj
                       && sServiceName != "com.sun.star.drawing.GraphicObjectShape"));
 
-        bool convertInLayoutMode = meShapeLocation == Layout && (mnSubType == XML_body);
-        if ((convertInSlideMode || convertInLayoutMode) && !mpCustomShapePropertiesPtr->representsDefaultShape())
+        // A body placeholder on a layout stays a placeholder even when its geometry is custom, so
+        // it is saved as a placeholder and is not painted on the slides. Its geometry shows on the
+        // slides through the slide placeholders that refer to it.
+        if (convertInSlideMode && !mpCustomShapePropertiesPtr->representsDefaultShape())
         {
             sServiceName = u"com.sun.star.drawing.CustomShape"_ustr;
         }
