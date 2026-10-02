@@ -11,11 +11,37 @@
 
 module scriptinterop {
 
+interface XBody;
+interface XContainerElement;
+interface XFootnote;
 interface XInlineImage;
+interface XParagraph;
+interface XTable;
+interface XTableCell;
+interface XTableRow;
+interface XText;
 
 // Common base for the heterogeneous children of a body (paragraphs, tables, etc.):
 interface XElement: XBase {
+    XBody asBody();
+
+    XFootnote asFootnote();
+
+    XContainerElement asFootnoteSection();
+
     XInlineImage asInlineImage();
+
+    XParagraph asListItem();
+
+    XParagraph asParagraph();
+
+    XTable asTable();
+
+    XTableCell asTableCell();
+
+    XTableRow asTableRow();
+
+    XText asText();
 
     XElement copy();
 

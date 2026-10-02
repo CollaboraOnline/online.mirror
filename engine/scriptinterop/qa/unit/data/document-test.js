@@ -136,6 +136,37 @@ function test() {
     console.assert(noteContents.getChild(0).getText() === 'Note');
     console.assert(noteContents.getChildIndex(noteContents.getChild(0)) === 0);
 
+    // As in GAS, an element casts to its own type, a paragraph also to a text that reports the
+    // paragraph's type, and any other cast throws:
+    console.assert(p0.asParagraph().getText() === 'BoldItalicPlain');
+    console.assert(p0.asText().getText() === 'BoldItalicPlain');
+    console.assert(p0.asText().asParagraph().getText() === 'BoldItalicPlain');
+    console.assert(t0.asText().getText() === 'BoldItalicPlain');
+    console.assert(table.asTable().getNumRows() === 2);
+    console.assert(row0.asTableRow().getNumCells() === 2);
+    console.assert(cell00.asTableCell().getText() === 'A1');
+    console.assert(body.asBody().getNumChildren() === body.getNumChildren());
+    console.assert(fns[1].asFootnote().getFootnoteContents().getText() === 'Note');
+    console.assert(noteContents.asFootnoteSection().getText() === 'Note');
+    for (const [element, cast, message] of [
+        [p0, 'asTable', "PARAGRAPH can't be cast to TABLE."],
+        [table, 'asParagraph', "TABLE can't be cast to PARAGRAPH."],
+        [p0, 'asInlineImage', "PARAGRAPH can't be cast to INLINE_IMAGE."],
+        [fns[1], 'asText', "FOOTNOTE can't be cast to TEXT."],
+    ]) {
+        let caught = null;
+        try {
+            element[cast]();
+        } catch (e) {
+            caught = e.message;
+        }
+        if (globalThis.cool) {
+            console.assert(caught.startsWith(message)); //TODO
+        } else {
+            console.assert(caught === message);
+        }
+    }
+
     // No user selection on a freshly opened document, so getSelection returns null:
     console.assert(DocumentApp.getActiveDocument().getSelection() === null);
 

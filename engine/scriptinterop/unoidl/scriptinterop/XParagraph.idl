@@ -13,8 +13,6 @@ module scriptinterop {
 
 interface XParagraph: XContainerElement
 {
-    XText asText();
-
     XText editAsText();
 
     com::sun::star::beans::Optional<HorizontalAlignment> getAlignment();

@@ -559,14 +559,101 @@ private:
     cpo::uno::Reference<css::text::XTextContent> image_;
 };
 
+OUString elementTypeName(scriptinterop::ElementType type) {
+    switch (type) {
+    case scriptinterop::ElementType_PARAGRAPH:
+        return u"PARAGRAPH"_ustr;
+    case scriptinterop::ElementType_LIST_ITEM:
+        return u"LIST_ITEM"_ustr;
+    case scriptinterop::ElementType_TABLE:
+        return u"TABLE"_ustr;
+    case scriptinterop::ElementType_TABLE_ROW:
+        return u"TABLE_ROW"_ustr;
+    case scriptinterop::ElementType_TABLE_CELL:
+        return u"TABLE_CELL"_ustr;
+    case scriptinterop::ElementType_INLINE_IMAGE:
+        return u"INLINE_IMAGE"_ustr;
+    case scriptinterop::ElementType_PAGE_BREAK:
+        return u"PAGE_BREAK"_ustr;
+    case scriptinterop::ElementType_HORIZONTAL_RULE:
+        return u"HORIZONTAL_RULE"_ustr;
+    case scriptinterop::ElementType_BODY_SECTION:
+        return u"BODY_SECTION"_ustr;
+    case scriptinterop::ElementType_FOOTNOTE:
+        return u"FOOTNOTE"_ustr;
+    case scriptinterop::ElementType_FOOTNOTE_SECTION:
+        return u"FOOTNOTE_SECTION"_ustr;
+    case scriptinterop::ElementType_TEXT:
+        return u"TEXT"_ustr;
+    default:
+        throw cpo::uno::RuntimeException(
+            "unknown element type " + OUString::number(static_cast<sal_Int32>(type)));
+    }
+}
+
+// As in GAS, an element can be cast to the interface of its own type only:
 template<typename T> class ElementImpl: public cppu::WeakImplHelper<T> {
 public:
+    cpo::uno::Reference<scriptinterop::XBody> asBody() override {
+        return cast<scriptinterop::XBody>(scriptinterop::ElementType_BODY_SECTION);
+    }
+
+    cpo::uno::Reference<scriptinterop::XFootnote> asFootnote() override {
+        return cast<scriptinterop::XFootnote>(scriptinterop::ElementType_FOOTNOTE);
+    }
+
+    cpo::uno::Reference<scriptinterop::XContainerElement> asFootnoteSection() override {
+        return cast<scriptinterop::XContainerElement>(scriptinterop::ElementType_FOOTNOTE_SECTION);
+    }
+
     cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override {
-        if (this->getType() != scriptinterop::ElementType_INLINE_IMAGE) {
-            return {};
+        return cast<scriptinterop::XInlineImage>(scriptinterop::ElementType_INLINE_IMAGE);
+    }
+
+    cpo::uno::Reference<scriptinterop::XParagraph> asListItem() override {
+        return cast<scriptinterop::XParagraph>(scriptinterop::ElementType_LIST_ITEM);
+    }
+
+    cpo::uno::Reference<scriptinterop::XParagraph> asParagraph() override {
+        return cast<scriptinterop::XParagraph>(scriptinterop::ElementType_PARAGRAPH);
+    }
+
+    cpo::uno::Reference<scriptinterop::XTable> asTable() override {
+        return cast<scriptinterop::XTable>(scriptinterop::ElementType_TABLE);
+    }
+
+    cpo::uno::Reference<scriptinterop::XTableCell> asTableCell() override {
+        return cast<scriptinterop::XTableCell>(scriptinterop::ElementType_TABLE_CELL);
+    }
+
+    cpo::uno::Reference<scriptinterop::XTableRow> asTableRow() override {
+        return cast<scriptinterop::XTableRow>(scriptinterop::ElementType_TABLE_ROW);
+    }
+
+    // GAS also gives the other containers a text view, which this does not have yet:
+    cpo::uno::Reference<scriptinterop::XText> asText() override {
+        switch (this->getType()) {
+        case scriptinterop::ElementType_BODY_SECTION:
+        case scriptinterop::ElementType_FOOTNOTE_SECTION:
+        case scriptinterop::ElementType_TABLE:
+        case scriptinterop::ElementType_TABLE_CELL:
+        case scriptinterop::ElementType_TABLE_ROW:
+            throw cpo::uno::RuntimeException(
+                "asText is not yet implemented for " + elementTypeName(this->getType())); // TODO
+        default:
+            return cast<scriptinterop::XText>(scriptinterop::ElementType_TEXT);
         }
-        return cpo::uno::Reference<scriptinterop::XInlineImage>(
-            static_cast<T *>(this), cpo::uno::UNO_QUERY_THROW);
+    }
+
+private:
+    template<typename U> cpo::uno::Reference<U> cast(scriptinterop::ElementType type) {
+        auto const own = this->getType();
+        cpo::uno::Reference<U> const element(static_cast<T *>(this), cpo::uno::UNO_QUERY);
+        if (own != type || !element.is()) {
+            throw cpo::uno::RuntimeException(
+                elementTypeName(own) + " can't be cast to " + elementTypeName(type) + ".");
+        }
+        return element;
     }
 };
 
@@ -593,6 +680,12 @@ public:
     }
 
     cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return content_; }
+
+    cpo::uno::Reference<scriptinterop::XParagraph> asListItem() override;
+
+    cpo::uno::Reference<scriptinterop::XParagraph> asParagraph() override;
+
+    cpo::uno::Reference<scriptinterop::XText> asText() override { return this; }
 
     cpo::uno::Reference<scriptinterop::XText> appendText(OUString const & text) override {
         auto const whole = wholeRange();
@@ -1449,6 +1542,21 @@ private:
     cpo::uno::Reference<scriptinterop::XElement> parent_;
     cpo::uno::Reference<css::text::XTextContent> content_;
 };
+
+// A paragraph's text view casts back to the paragraph, as it reports the paragraph's type:
+cpo::uno::Reference<scriptinterop::XParagraph> TextImpl::asListItem() {
+    if (reportedType_ != scriptinterop::ElementType_LIST_ITEM) {
+        return ElementImpl::asListItem();
+    }
+    return new ParagraphImpl(parent_, content_);
+}
+
+cpo::uno::Reference<scriptinterop::XParagraph> TextImpl::asParagraph() {
+    if (reportedType_ != scriptinterop::ElementType_PARAGRAPH) {
+        return ElementImpl::asParagraph();
+    }
+    return new ParagraphImpl(parent_, content_);
+}
 
 class TableCellImpl: public ElementImpl<scriptinterop::XTableCell> {
 public:
