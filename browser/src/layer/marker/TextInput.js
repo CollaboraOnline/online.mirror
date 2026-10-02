@@ -389,14 +389,42 @@ window.L.TextInput = window.L.Layer.extend({
 		return 	this._textArea.innerHTML;
 	},
 
-	_wrapContent: function(content) {
-		const escapedContent = app.LOUtil.escapeHtml(content);
+	_wrapContent: function(content, links) {
+		const escapedContent = this._escapeWithLinks(content, links);
 		const wrappedContent = this.hasAccessibilitySupport()
 			? '<span id="readable-content" role="presentation">' + escapedContent + '</span>'
 			: escapedContent;
 		return content.length === 0
 			? this._initialContent
 			: this._preSpaceChar + wrappedContent + this._postSpaceChar;
+	},
+
+	// links: { start, end, url } ranges of content, in order
+	_createLinkedNodes: function(content, links) {
+		const nodes = [];
+		let pos = 0;
+		for (const link of links || []) {
+			const start = parseInt(link.start);
+			const end = parseInt(link.end);
+			if (start < pos || end <= start || end > content.length)
+				continue;
+			if (start > pos)
+				nodes.push(document.createTextNode(content.substring(pos, start)));
+			const anchor = document.createElement('a');
+			anchor.setAttribute('href', window.sanitizeUrl(link.url));
+			anchor.textContent = content.substring(start, end);
+			nodes.push(anchor);
+			pos = end;
+		}
+		if (pos < content.length)
+			nodes.push(document.createTextNode(content.substring(pos)));
+		return nodes;
+	},
+
+	_escapeWithLinks: function(content, links) {
+		const span = document.createElement('span');
+		span.append(...this._createLinkedNodes(content, links));
+		return span.innerHTML;
 	},
 
 	resetContent: function() {

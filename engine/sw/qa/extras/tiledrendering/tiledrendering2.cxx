@@ -52,6 +52,7 @@
 #include <PostItMgr.hxx>
 #include <postithelper.hxx>
 #include <docufld.hxx>
+#include <fmtinfmt.hxx>
 #include <rootfrm.hxx>
 #include <pagefrm.hxx>
 #include <docsh.hxx>
@@ -1874,6 +1875,112 @@ CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yContextParagraphInCell)
     CPPUNIT_ASSERT_DOUBLES_EQUAL(fParagraphTop, fRectTop, 45.0);
 }
 
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yFocusedParagraphLinks)
+{
+    // Given a short hyperlink, then one wrapping over two lines:
+    createDoc("a11y-hyperlink.fodt");
+    SwTestViewCallback aView;
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->GetSfxViewShell()->SetKitAccessibilityState(true);
+
+    // When the cursor moves into the first paragraph:
+    pWrtShell->Down(/*bSelect=*/false);
+    pWrtShell->Up(/*bSelect=*/false);
+    Scheduler::ProcessEventsToIdle();
+
+    // Then the focused paragraph reports the link's range and URL:
+    boost::property_tree::ptree aLinks = aView.m_aA11yFocusedParagraph.get_child("links");
+    // Without the fix, there was no "links" node.
+    CPPUNIT_ASSERT_EQUAL(size_t(1), aLinks.size());
+    boost::property_tree::ptree aLink = aLinks.begin()->second;
+    CPPUNIT_ASSERT_EQUAL(6, aLink.get<int>("start"));
+    CPPUNIT_ASSERT_EQUAL(27, aLink.get<int>("end"));
+    CPPUNIT_ASSERT_EQUAL(std::string("https://www.collaboraonline.com/"),
+                         aLink.get<std::string>("url"));
+    // The paragraph after it carries its link too:
+    aLinks = aView.m_aA11yFocusedParagraph.get_child("afterLinks").begin()->second;
+    CPPUNIT_ASSERT_EQUAL(size_t(1), aLinks.size());
+    aLink = aLinks.begin()->second;
+    CPPUNIT_ASSERT_EQUAL(6, aLink.get<int>("start"));
+    CPPUNIT_ASSERT_EQUAL(150, aLink.get<int>("end"));
+    CPPUNIT_ASSERT_EQUAL(std::string("https://www.example.com/long"),
+                         aLink.get<std::string>("url"));
+
+    // And when the cursor moves into the second paragraph:
+    pWrtShell->Down(/*bSelect=*/false);
+    Scheduler::ProcessEventsToIdle();
+    const SwNodeOffset nParagraph = pWrtShell->GetCursor()->GetPoint()->GetNodeIndex();
+    pWrtShell->Down(/*bSelect=*/false);
+    CPPUNIT_ASSERT_EQUAL(nParagraph, pWrtShell->GetCursor()->GetPoint()->GetNodeIndex());
+
+    // Then the link wrapping over two lines is still reported as one:
+    aLinks = aView.m_aA11yFocusedParagraph.get_child("links");
+    CPPUNIT_ASSERT_EQUAL(size_t(1), aLinks.size());
+    aLink = aLinks.begin()->second;
+    CPPUNIT_ASSERT_EQUAL(6, aLink.get<int>("start"));
+    CPPUNIT_ASSERT_EQUAL(150, aLink.get<int>("end"));
+    CPPUNIT_ASSERT_EQUAL(std::string("https://www.example.com/long"),
+                         aLink.get<std::string>("url"));
+}
+
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yFocusedParagraphLinkURLChangeSameText)
+{
+    // Given the cursor moving between two paragraphs of the same text and link:
+    createDoc("a11y-hyperlink.fodt");
+    SwTestViewCallback aView;
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->GetSfxViewShell()->SetKitAccessibilityState(true);
+    pWrtShell->Down(/*bSelect=*/false);
+    pWrtShell->Up(/*bSelect=*/false);
+    Scheduler::ProcessEventsToIdle();
+    pWrtShell->EndOfSection(/*bSelect=*/false);
+    pWrtShell->SttPara(/*bSelect=*/false);
+    pWrtShell->Right(SwCursorSkipMode::Chars, /*bSelect=*/false, 6, /*bBasicCall=*/false);
+    pWrtShell->Right(SwCursorSkipMode::Chars, /*bSelect=*/true, 21, /*bBasicCall=*/false);
+    Scheduler::ProcessEventsToIdle();
+
+    // When only the URL of the second paragraph's link changes:
+    pWrtShell->SetAttrItem(SwFormatINetFormat(u"https://www.example.org/"_ustr, OUString()));
+    Scheduler::ProcessEventsToIdle();
+
+    // Then the focused paragraph reports the new URL:
+    boost::property_tree::ptree aLinks = aView.m_aA11yFocusedParagraph.get_child("links");
+    CPPUNIT_ASSERT_EQUAL(size_t(1), aLinks.size());
+    // Without the fix, the change was taken for one in the first paragraph and ignored.
+    CPPUNIT_ASSERT_EQUAL(std::string("https://www.example.org/"),
+                         aLinks.begin()->second.get<std::string>("url"));
+}
+
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yFocusedParagraphLinkURLChange)
+{
+    // Given a selected hyperlink:
+    createDoc("a11y-hyperlink.fodt");
+    SwTestViewCallback aView;
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->GetSfxViewShell()->SetKitAccessibilityState(true);
+    pWrtShell->Down(/*bSelect=*/false);
+    pWrtShell->Up(/*bSelect=*/false);
+    pWrtShell->Right(SwCursorSkipMode::Chars, /*bSelect=*/false, 6, /*bBasicCall=*/false);
+    pWrtShell->Right(SwCursorSkipMode::Chars, /*bSelect=*/true, 21, /*bBasicCall=*/false);
+    Scheduler::ProcessEventsToIdle();
+
+    // When only its URL changes:
+    pWrtShell->SetAttrItem(SwFormatINetFormat(u"https://www.example.org/"_ustr, OUString()));
+    Scheduler::ProcessEventsToIdle();
+
+    // Then the focused paragraph reports the new URL:
+    boost::property_tree::ptree aLinks = aView.m_aA11yFocusedParagraph.get_child("links");
+    CPPUNIT_ASSERT_EQUAL(size_t(1), aLinks.size());
+    CPPUNIT_ASSERT_EQUAL(std::string("https://www.example.org/"),
+                         aLinks.begin()->second.get<std::string>("url"));
+
+    // And when the link is removed:
+    dispatchCommand(mxComponent, u".uno:RemoveHyperlink"_ustr, {});
+    Scheduler::ProcessEventsToIdle();
+
+    // Then the focused paragraph reports no link:
+    CPPUNIT_ASSERT(!aView.m_aA11yFocusedParagraph.get_child_optional("links"));
+}
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

@@ -58,6 +58,8 @@
 #include <com/sun/star/accessibility/AccessibleEventId.hpp>
 #include <com/sun/star/accessibility/AccessibleStateType.hpp>
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
+#include <com/sun/star/accessibility/XAccessibleHyperlink.hpp>
+#include <com/sun/star/accessibility/XAccessibleHypertext.hpp>
 #include <com/sun/star/accessibility/XAccessibleText.hpp>
 #include <com/sun/star/accessibility/XAccessibleComponent.hpp>
 #include <com/sun/star/accessibility/XAccessibleExtendedAttributes.hpp>
@@ -650,11 +652,59 @@ sal_Int32 getHeadingLevel(const uno::Reference<css::accessibility::XAccessibleTe
     return std::max<sal_Int32>(0, sLevel.toInt32());
 }
 
+struct ParagraphLink
+{
+    sal_Int32 nStart;
+    sal_Int32 nEnd;
+    OUString aURL;
+
+    bool operator==(const ParagraphLink&) const = default;
+};
+
+std::vector<ParagraphLink>
+collectLinks(const uno::Reference<css::accessibility::XAccessibleText>& xAccText)
+{
+    const auto xHypertext = xAccText.query<accessibility::XAccessibleHypertext>();
+    if (!xHypertext.is())
+        return {};
+
+    std::vector<ParagraphLink> aLinks;
+    const sal_Int32 nCount = xHypertext->getHyperLinkCount();
+    for (sal_Int32 i = 0; i < nCount; ++i)
+    {
+        uno::Reference<accessibility::XAccessibleHyperlink> xLink = xHypertext->getHyperLink(i);
+        if (!xLink.is())
+            continue;
+        OUString aURL;
+        xLink->getAccessibleActionObject(0) >>= aURL;
+        if (aURL.isEmpty()) // editeng provides no URL
+            continue;
+        aLinks.push_back(
+            { .nStart = xLink->getStartIndex(), .nEnd = xLink->getEndIndex(), .aURL = aURL });
+    }
+    return aLinks;
+}
+
+boost::property_tree::ptree makeLinksTree(const std::vector<ParagraphLink>& rLinks)
+{
+    boost::property_tree::ptree aLinks;
+    for (const ParagraphLink& rLink : rLinks)
+    {
+        boost::property_tree::ptree aLink;
+        aLink.put("start", rLink.nStart);
+        aLink.put("end", rLink.nEnd);
+        aLink.put("url", rLink.aURL.toUtf8().getStr());
+        aLinks.push_back(std::make_pair("", aLink));
+    }
+    return aLinks;
+}
+
 struct ContextParagraph
 {
     OUString aText;
     tools::Rectangle aTwips;
     sal_Int32 nLevel = 0;
+    std::vector<ParagraphLink> aLinks;
 };
 
 ContextParagraph contextParagraph(const uno::Reference<accessibility::XAccessibleContext>& xContext,
@@ -666,6 +716,7 @@ ContextParagraph contextParagraph(const uno::Reference<accessibility::XAccessibl
     {
         aParagraph.aText = xText->getText();
         aParagraph.nLevel = getHeadingLevel(xText);
+        aParagraph.aLinks = collectLinks(xText);
     }
     uno::Reference<accessibility::XAccessibleComponent> xComponent(xContext, uno::UNO_QUERY);
     if (xComponent.is())
@@ -1068,6 +1119,7 @@ class KitDocumentFocusListener :
     sal_Int32 m_nSelectionEnd;
     sal_Int32 m_nListPrefixLength;
     sal_Int32 m_nHeadingLevel;
+    std::vector<ParagraphLink> m_aFocusedLinks;
     mutable std::vector<ContextParagraph> m_aParagraphsBefore;
     mutable std::vector<ContextParagraph> m_aParagraphsAfter;
     uno::Reference<accessibility::XAccessibleText> m_xFocusedText;
@@ -1187,6 +1239,8 @@ void KitDocumentFocusListener::paragraphPropertiesToTree(boost::property_tree::p
         aPayloadTree.put("listPrefixLength", m_nListPrefixLength);
     if (m_nHeadingLevel > 0)
         aPayloadTree.put("headingLevel", m_nHeadingLevel);
+    if (!m_aFocusedLinks.empty())
+        aPayloadTree.add_child("links", makeLinksTree(m_aFocusedLinks));
     if (!m_aParagraphsBefore.empty() || !m_aParagraphsAfter.empty())
     {
         auto toArray = [](const std::vector<ContextParagraph>& rParagraphs, auto aValue) {
@@ -1213,6 +1267,14 @@ void KitDocumentFocusListener::paragraphPropertiesToTree(boost::property_tree::p
             aPayloadTree.add_child("beforeLevels", toArray(m_aParagraphsBefore, aLevel));
             aPayloadTree.add_child("afterLevels", toArray(m_aParagraphsAfter, aLevel));
         }
+        auto toLinks = [](const std::vector<ContextParagraph>& rParagraphs) {
+            boost::property_tree::ptree aArray;
+            for (const ContextParagraph& rParagraph : rParagraphs)
+                aArray.push_back(std::make_pair("", makeLinksTree(rParagraph.aLinks)));
+            return aArray;
+        };
+        aPayloadTree.add_child("beforeLinks", toLinks(m_aParagraphsBefore));
+        aPayloadTree.add_child("afterLinks", toLinks(m_aParagraphsAfter));
     }
     if (force)
         aPayloadTree.put("force", 1);
@@ -1563,12 +1625,17 @@ bool KitDocumentFocusListener::updateParagraphInfo(const uno::Reference<css::acc
                 m_nSelectionStart = m_nSelectionEnd = -1;
         }
 
+        // the caret's paragraph, even when it equals the previous one
+        m_xFocusedText = xAccText;
+
         // In case only caret position or text selection are different we can rely on specific events.
-        if (m_sFocusedParagraph != sText || m_nHeadingLevel != nHeadingLevel)
+        if (std::vector<ParagraphLink> aLinks = collectLinks(xAccText);
+            m_sFocusedParagraph != sText || m_nHeadingLevel != nHeadingLevel
+            || m_aFocusedLinks != aLinks)
         {
             m_sFocusedParagraph = sText;
             m_nHeadingLevel = nHeadingLevel;
-            m_xFocusedText = xAccText;
+            m_aFocusedLinks = std::move(aLinks);
             collectParagraphWindow(xAccText, PARAGRAPH_WINDOW, visibleArea(), m_aParagraphsBefore, m_aParagraphsAfter);
             bNotify = true;
         }
@@ -1603,6 +1670,7 @@ void KitDocumentFocusListener::resetParagraphInfo()
     m_nSelectionEnd = -1;
     m_nListPrefixLength = 0;
     m_nHeadingLevel = 0;
+    m_aFocusedLinks.clear();
     m_aParagraphsBefore.clear();
     m_aParagraphsAfter.clear();
     m_xFocusedText.clear();
@@ -1917,6 +1985,14 @@ void KitDocumentFocusListener::notifyEvent(const accessibility::AccessibleEventO
                 uno::Reference<XAccessibleText> xAccText(getAccessible(aEvent), uno::UNO_QUERY);
                 updateAndNotifyParagraph(xAccText, false, "TEXT_ATTRIBUTE_CHANGED");
 
+                break;
+            }
+            case AccessibleEventId::VISIBLE_DATA_CHANGED:
+            {
+                // e.g. a link's URL, which leaves the text as is
+                const auto xAccText = getAccessible(aEvent).query<XAccessibleText>();
+                if (xAccText.is() && xAccText == m_xFocusedText)
+                    updateAndNotifyParagraph(xAccText, false, "VISIBLE_DATA_CHANGED");
                 break;
             }
             case AccessibleEventId::TEXT_SELECTION_CHANGED:
