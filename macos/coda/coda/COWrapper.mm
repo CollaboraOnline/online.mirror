@@ -790,6 +790,10 @@ static std::atomic<int> appDocIdCounter(1);
     LOG_TRC(stdMessage);
 }
 
++ (bool)traceEnabled {
+    return Log::traceEnabled();
+}
+
 + (bool)isRtlLanguage:(NSString *)language {
     return LangUtil::isRtlLanguage(std::string([language UTF8String]));
 }

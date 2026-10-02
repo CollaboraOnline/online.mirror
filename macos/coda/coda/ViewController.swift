@@ -638,12 +638,93 @@ class ViewController: NSViewController, WKScriptMessageHandlerWithReply, WKNavig
                                              handler: WKScriptMessageHandlerWithReply) {
         contentController.addScriptMessageHandler(handler, contentWorld: .page, name: "error")
         contentController.addScriptMessageHandler(handler, contentWorld: .page, name: "debug")
+#if DEBUG
+        addConsoleForwarding(to: contentController, handler: handler)
+#endif
     }
 
     /** Counterpart to addDiagnosticMessageHandlers, for use when tearing a web view down. */
     static func removeDiagnosticMessageHandlers(from contentController: WKUserContentController?) {
         contentController?.removeScriptMessageHandler(forName: "error")
         contentController?.removeScriptMessageHandler(forName: "debug")
+#if DEBUG
+        contentController?.removeScriptMessageHandler(forName: "console")
+#endif
+    }
+
+    private static func addConsoleForwarding(to contentController: WKUserContentController,
+                                             handler: WKScriptMessageHandlerWithReply) {
+        contentController.addScriptMessageHandler(handler, contentWorld: .page, name: "console")
+        let levels = COWrapper.traceEnabled()
+            ? "['debug', 'log', 'info', 'warn', 'error']" : "['warn', 'error']"
+        let source = consoleForwardingScript.replacingOccurrences(of: "%LEVELS%", with: levels)
+        contentController.addUserScript(WKUserScript(source: source, injectionTime: .atDocumentStart,
+                                                     forMainFrameOnly: false, in: .page))
+    }
+
+    private static let consoleForwardingScript = #"""
+        (function () {
+            const port = window.webkit && window.webkit.messageHandlers
+                && window.webkit.messageHandlers.console;
+            if (!port) return;
+            const shorten = function (url) {
+                return String(url).replace(/^.*\/Contents\/Resources\//, '');
+            };
+            const describe = function (value) {
+                if (typeof value === 'string') return value;
+                if (value instanceof Error)
+                    return value.stack ? value.message + '\n' + value.stack : String(value);
+                try {
+                    const json = JSON.stringify(value);
+                    return json === undefined ? String(value) : json;
+                } catch (e) {
+                    return String(value);
+                }
+            };
+            const send = function (level, text, where) {
+                try {
+                    const reply = port.postMessage({ level: level, message: text, location: where });
+                    if (reply && reply.catch) reply.catch(function () {});
+                } catch (e) {
+                }
+            };
+            // In a WebKit stack, line 2 is the code that called the console method:
+            const callerLocation = function () {
+                const line = (new Error().stack || '').split('\n')[2] || '';
+                return shorten(line.substring(line.indexOf('@') + 1));
+            };
+            for (const level of %LEVELS%) {
+                const original = console[level];
+                console[level] = function (...args) {
+                    send(level, args.map(describe).join(' '), callerLocation());
+                    return original.apply(console, args);
+                };
+            }
+            window.addEventListener('error', function (event) {
+                const where = event.filename
+                    ? shorten(event.filename) + ':' + event.lineno + ':' + event.colno
+                    : shorten(window.location.pathname);
+                send('error', 'Uncaught ' + (event.error ? describe(event.error) : event.message),
+                     where);
+            });
+            window.addEventListener('unhandledrejection', function (event) {
+                send('error', 'Unhandled rejection: ' + describe(event.reason),
+                     shorten(window.location.pathname));
+            });
+        })();
+        """#
+
+    private static func logConsoleMessage(_ message: WKScriptMessage) {
+        guard let body = message.body as? [String: Any],
+              let level = body["level"] as? String,
+              let text = body["message"] as? String else { return }
+        let location = body["location"] as? String ?? ""
+        let line = "JS console [\(level)] \(location): \(text)"
+        if level == "warn" || level == "error" {
+            COWrapper.LOG_DBG(line)
+        } else {
+            COWrapper.LOG_TRC(line)
+        }
     }
 
     /** Logs an "error" or "debug" message from a web view. Returns true if it was one of those. */
@@ -654,6 +735,9 @@ class ViewController: NSViewController, WKScriptMessageHandlerWithReply, WKNavig
             return true
         case "debug":
             COWrapper.LOG_DBG("Debug from WebView: \(message.body as? String ?? "")")
+            return true
+        case "console":
+            logConsoleMessage(message)
             return true
         default:
             return false

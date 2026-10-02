@@ -53,6 +53,7 @@
 + (void)LOG_DBG:(NSString *_Nonnull)message NS_SWIFT_NAME(LOG_DBG(_:));
 + (void)LOG_ERR:(NSString *_Nonnull)message NS_SWIFT_NAME(LOG_ERR(_:));
 + (void)LOG_TRC:(NSString *_Nonnull)message NS_SWIFT_NAME(LOG_TRC(_:));
++ (bool)traceEnabled NS_SWIFT_NAME(traceEnabled());
 
 + (bool)isRtlLanguage:(NSString *_Nonnull)language;
 
