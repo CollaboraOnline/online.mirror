@@ -437,9 +437,11 @@ window.L.TextInput = window.L.Layer.extend({
 	update: function() {
 		if (this._container && this._map && app.file.textCursor.rectangle && app.activeDocument) {
 			var rect = app.file.textCursor.rectangle;
-			var pos = new cool.Point(
-				Math.round(rect.v1X / app.dpiScale),
-				Math.round(rect.v1Y / app.dpiScale)
+			// the container is fixed, so its position is relative to the viewport
+			const canvasRect = app.sectionContainer.getCanvasBoundingClientRect();
+			const pos = new cool.Point(
+				Math.round(canvasRect.left + rect.v1X / app.dpiScale),
+				Math.round(canvasRect.top + rect.v1Y / app.dpiScale)
 			);
 			this._setPos(pos);
 		}
@@ -591,9 +593,13 @@ window.L.TextInput = window.L.Layer.extend({
 		this._map.fire('handlerstatus', {hidden: false});
 	},
 
+	// x of the editable's caret from its left edge
+	_getCaretOffsetX: function() {
+		return 0;
+	},
+
 	_setPos: function(pos) {
-		// the offset is needed since we have to move away from the edited text
-		// or double clicks for selecting text doesn't work properly
+		pos.x -= this._getCaretOffsetX();
 		if (window.L.Browser.cypressTest) {
 			// Some cypress tests require for the editable area to be as near as possible
 			// to the caret overlay when editing. In fact a synthetic mouse click on
@@ -603,8 +609,9 @@ window.L.TextInput = window.L.Layer.extend({
 			pos.x += 10;
 			pos.y += 10;
 		}
-		else {
-			pos.y += this._isDebugOn ? 50 : 200;
+		else if (this._isDebugOn) {
+			// keeps the visible debugging box off the text
+			pos.y += 50;
 		}
 		this._container.style.transform = 'translate(' + pos.x + 'px, ' + pos.y + 'px)';
 	},

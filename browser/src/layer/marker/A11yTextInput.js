@@ -166,6 +166,28 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		return this._lastCursorPosition;
 	},
 
+	_getCaretOffsetX: function() {
+		return this._getTextOffsetX(this._getLastCursorPosition());
+	},
+
+	// x of the given position in the text, from the editable's left edge
+	_getTextOffsetX: function(nPos) {
+		let offset = nPos;
+		const walker = document.createTreeWalker(this._textArea, NodeFilter.SHOW_TEXT);
+		for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+			if (offset <= node.length) {
+				const range = document.createRange();
+				range.setStart(node, offset);
+				const caret = range.getBoundingClientRect();
+				if (caret.height === 0)
+					return 0; // not laid out
+				return caret.left - this._textArea.getBoundingClientRect().left;
+			}
+			offset -= node.length;
+		}
+		return 0;
+	},
+
 	_setLastCursorPosition: function(nPos) {
 		this._lastCursorPosition = nPos;
 		this._lastSelectionStart = this._lastSelectionEnd = nPos;
@@ -196,6 +218,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 
 		this._setLastCursorPosition(pos);
 		this._setCursorPosition(pos);
+		this.update();
 	} ,
 
 	_updateSelection: function(pos, start, end, forced) {
@@ -215,6 +238,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 				// while typing can mess up editable area content.
 				this._setLastSelection(start, end);
 				this._setSelectionRange(start, end);
+				this.update();
 			}
 		}
 		this._setSelectionFlag(hasSelection);
