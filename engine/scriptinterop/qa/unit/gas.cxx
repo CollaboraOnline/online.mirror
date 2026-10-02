@@ -368,9 +368,9 @@ CPPUNIT_TEST_FIXTURE(Test, testDocument) {
     runScript(createFileURL(u"document-test.js"), {}, u"");
 }
 
-CPPUNIT_TEST_FIXTURE(Test, testEmptyCells) {
-    loadActiveDocument(u"emptycells-test.rtf");
-    runScript(createFileURL(u"emptycells-test.js"), {}, u"");
+CPPUNIT_TEST_FIXTURE(Test, testTables) {
+    loadActiveDocument(u"tables-test.rtf");
+    runScript(createFileURL(u"tables-test.js"), {}, u"");
 }
 
 CPPUNIT_TEST_FIXTURE(Test, testUtilities) {

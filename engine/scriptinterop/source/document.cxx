@@ -14,6 +14,7 @@
 #include <cmath>
 #include <optional>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include <com/sun/star/awt/FontSlant.hpp>
@@ -107,36 +108,154 @@ template<typename T>
 css::beans::Optional<cpo::uno::Reference<T>> maybe(cpo::uno::Reference<T> const & ref)
 { return {ref.is(), ref}; }
 
-// The text of a range, which is its string without the numbers of the footnote references in it,
-// as GAS leaves those out:
-OUString textOf(cpo::uno::Reference<css::text::XTextRange> const & range)
+// The length of the line end at offset in string, which is zero at the end of string:
+sal_Int32 lineEndAt(OUString const & string, sal_Int32 offset) {
+    if (offset == string.getLength()) {
+        return 0;
+    }
+    if (string.match(u"\r\n", offset)) {
+        return 2;
+    }
+    if (string.match(u"\n", offset)) {
+        return 1;
+    }
+    throw cpo::uno::RuntimeException(
+        "textOf: expected a line end at offset " + OUString::number(offset));
+}
+
+// The offset and the length of the number of each footnote reference in string, which is the
+// string of range, in increasing order:
+std::vector<std::pair<sal_Int32, sal_Int32>> footnoteNumbers(
+    cpo::uno::Reference<css::text::XTextRange> const & range, OUString const & string)
 {
-    OUString text = range->getString();
+    std::vector<std::pair<sal_Int32, sal_Int32>> numbers;
     auto const host = range->getText();
-    std::vector<cpo::uno::Reference<css::text::XTextRange>> footnotes;
-    cpo::uno::Reference<css::container::XEnumerationAccess> const paragraphs(
-        host->createTextCursorByRange(range), cpo::uno::UNO_QUERY_THROW);
-    for (auto const en = paragraphs->createEnumeration(); en->hasMoreElements();) {
-        cpo::uno::Reference<css::container::XEnumerationAccess> const portions(
-            en->nextElement(), cpo::uno::UNO_QUERY);
-        if (!portions.is()) {
+    // A table's text starts after the line end that follows the paragraph or table before it, and
+    // a table's text is the strings of its cells, each followed by a line end except the last one:
+    cpo::uno::Reference<css::text::XTextRange> previousParagraph;
+    sal_Int32 afterPreviousTable = 0;
+    // A text cursor cannot start in a table, as at the start of a table cell that begins with a
+    // nested table, so the whole of a text enumerates its elements itself:
+    cpo::uno::Reference<css::container::XEnumerationAccess> elements;
+    if (cpo::uno::Reference<css::text::XText>(range, cpo::uno::UNO_QUERY).is()) {
+        elements.set(range, cpo::uno::UNO_QUERY_THROW);
+    } else {
+        elements.set(host->createTextCursorByRange(range), cpo::uno::UNO_QUERY_THROW);
+    }
+    for (auto const en = elements->createEnumeration(); en->hasMoreElements();) {
+        auto const element = en->nextElement();
+        cpo::uno::Reference<css::text::XTextTable> const table(element, cpo::uno::UNO_QUERY);
+        if (table.is()) {
+            sal_Int32 offset = afterPreviousTable;
+            if (previousParagraph.is()) {
+                auto const before = host->createTextCursorByRange(range->getStart());
+                before->gotoRange(previousParagraph->getEnd(), true);
+                offset = before->getString().getLength();
+                offset += lineEndAt(string, offset);
+            }
+            cpo::uno::Reference<css::table::XCellRange> const cells(
+                table, cpo::uno::UNO_QUERY_THROW);
+            auto const rowCount = table->getRows()->getCount();
+            bool first = true;
+            for (sal_Int32 row = 0; row != rowCount; ++row) {
+                for (sal_Int32 column = 0;; ++column) {
+                    cpo::uno::Reference<css::text::XText> cell;
+                    try {
+                        cell.set(cells->getCellByPosition(column, row), cpo::uno::UNO_QUERY_THROW);
+                    } catch (css::lang::IndexOutOfBoundsException const &) {
+                        break;
+                    }
+                    if (!first) {
+                        offset += lineEndAt(string, offset);
+                    }
+                    first = false;
+                    auto const cellString = cell->getString();
+                    if (!string.match(cellString, offset)) {
+                        throw cpo::uno::RuntimeException(
+                            "textOf: expected the text of a table cell at offset "
+                            + OUString::number(offset));
+                    }
+                    for (auto const & number: footnoteNumbers(cell, cellString)) {
+                        numbers.emplace_back(offset + number.first, number.second);
+                    }
+                    offset += cellString.getLength();
+                }
+            }
+            afterPreviousTable = offset + lineEndAt(string, offset);
+            previousParagraph.clear();
             continue;
         }
+        cpo::uno::Reference<css::container::XEnumerationAccess> const portions(
+            element, cpo::uno::UNO_QUERY_THROW);
         for (auto const pen = portions->createEnumeration(); pen->hasMoreElements();) {
             cpo::uno::Reference<css::beans::XPropertySet> const portion(
                 pen->nextElement(), cpo::uno::UNO_QUERY_THROW);
             OUString type;
             portion->getPropertyValue(u"TextPortionType"_ustr) >>= type;
             if (type == u"Footnote") {
-                footnotes.emplace_back(portion, cpo::uno::UNO_QUERY_THROW);
+                cpo::uno::Reference<css::text::XTextRange> const footnote(
+                    portion, cpo::uno::UNO_QUERY_THROW);
+                auto const before = host->createTextCursorByRange(range->getStart());
+                before->gotoRange(footnote->getStart(), true);
+                numbers.emplace_back(
+                    before->getString().getLength(), footnote->getString().getLength());
             }
         }
+        previousParagraph.set(element, cpo::uno::UNO_QUERY_THROW);
     }
-    for (auto i = footnotes.rbegin(); i != footnotes.rend(); ++i) {
-        auto const before = host->createTextCursorByRange(range->getStart());
-        before->gotoRange((*i)->getStart(), true);
-        text = text.replaceAt(
-            before->getString().getLength(), (*i)->getString().getLength(), u"");
+    return numbers;
+}
+
+// The text of a range, which is its string without the numbers of the footnote references in it,
+// as GAS leaves those out:
+OUString textOf(cpo::uno::Reference<css::text::XTextRange> const & range)
+{
+    // Writer's string of a whole text, as of a table cell, lacks most of a table that the text
+    // starts with, so a whole text joins the texts of its paragraphs and table cells with line
+    // ends:
+    if (cpo::uno::Reference<css::text::XText> const whole{range, cpo::uno::UNO_QUERY}) {
+        OUStringBuffer buf;
+        bool first = true;
+        auto const append = [&buf, &first](OUString const & part) {
+            if (!first) {
+                buf.append('\n');
+            }
+            first = false;
+            buf.append(part);
+        };
+        cpo::uno::Reference<css::container::XEnumerationAccess> const elements(
+            whole, cpo::uno::UNO_QUERY_THROW);
+        for (auto const en = elements->createEnumeration(); en->hasMoreElements();) {
+            auto const element = en->nextElement();
+            if (cpo::uno::Reference<css::text::XTextTable> const table{
+                    element, cpo::uno::UNO_QUERY})
+            {
+                cpo::uno::Reference<css::table::XCellRange> const cells(
+                    table, cpo::uno::UNO_QUERY_THROW);
+                auto const rowCount = table->getRows()->getCount();
+                for (sal_Int32 row = 0; row != rowCount; ++row) {
+                    for (sal_Int32 column = 0;; ++column) {
+                        cpo::uno::Reference<css::text::XTextRange> cell;
+                        try {
+                            cell.set(
+                                cells->getCellByPosition(column, row), cpo::uno::UNO_QUERY_THROW);
+                        } catch (css::lang::IndexOutOfBoundsException const &) {
+                            break;
+                        }
+                        append(textOf(cell));
+                    }
+                }
+            } else {
+                append(textOf(cpo::uno::Reference<css::text::XTextRange>(
+                    element, cpo::uno::UNO_QUERY_THROW)));
+            }
+        }
+        return buf.makeStringAndClear();
+    }
+    OUString text = range->getString();
+    auto const numbers = footnoteNumbers(range, text);
+    for (auto i = numbers.rbegin(); i != numbers.rend(); ++i) {
+        text = text.replaceAt(i->first, i->second, u"");
     }
     return text;
 }

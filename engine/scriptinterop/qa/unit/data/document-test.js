@@ -115,8 +115,9 @@ function test() {
     }
     console.assert(threw);
 
-    // Paragraph 4 anchors a footnote whose only paragraph is "Note", and the reference to it is no
-    // part of the paragraph's text:
+    // Cell B2 and paragraph 4 each anchor a footnote, whose only paragraph is "Cellnote" and
+    // "Note", and the references to them are no part of the text:
+    console.assert(body.getText().indexOf('A2\nB2\nTrailing') !== -1);
     console.assert(body.getChild(4).getText() === 'Trailing');
     let pastFootnote = false;
     try {
@@ -126,9 +127,10 @@ function test() {
     }
     console.assert(pastFootnote);
     const fns = DocumentApp.getActiveDocument().getFootnotes();
-    console.assert(fns.length === 1);
-    console.assert(fns[0].getType() === DocumentApp.ElementType.FOOTNOTE);
-    const noteContents = fns[0].getFootnoteContents();
+    console.assert(fns.length === 2);
+    console.assert(fns[0].getFootnoteContents().getText() === 'Cellnote');
+    console.assert(fns[1].getType() === DocumentApp.ElementType.FOOTNOTE);
+    const noteContents = fns[1].getFootnoteContents();
     console.assert(noteContents.getType() === DocumentApp.ElementType.FOOTNOTE_SECTION);
     console.assert(noteContents.getNumChildren() >= 1);
     console.assert(noteContents.getChild(0).getText() === 'Note');
