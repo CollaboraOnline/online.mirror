@@ -61,8 +61,10 @@ void SignatureVerifierImpl::startEngine( const rtl::Reference<XMLSignatureTempla
     cpo::uno::Reference< css::xml::crypto::XXMLSignatureTemplate > xResultTemplate;
     try
     {
+        xSignatureTemplate->SetSigningCertificate(m_xSigningCertificate);
         xResultTemplate = m_xXMLSignature->validate(cpo::uno::Reference<css::xml::crypto::XXMLSignatureTemplate>(xSignatureTemplate), m_xXMLSecurityContext);
         m_nStatus = xResultTemplate->getStatus();
+        m_xVerifiedCertificate = xSignatureTemplate->GetVerifiedCertificate();
     }
     catch( cpo::uno::Exception& )
     {

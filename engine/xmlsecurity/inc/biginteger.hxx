@@ -26,6 +26,8 @@
 #include <rtl/ustring.hxx>
 
 #include <cpo/uno/Sequence.h>
+#include <cpo/uno/Reference.h>
+#include <com/sun/star/security/XCertificate.hpp>
 
 #include "xsecxmlsecdllapi.h"
 
@@ -46,6 +48,15 @@ enum EqualMode
 };
 XSECXMLSEC_DLLPUBLIC bool EqualDistinguishedNames(std::u16string_view rName1,
                                                   std::u16string_view rName2, EqualMode eMode);
+
+inline bool
+IsIssuerOf(cpo::uno::Reference<css::security::XCertificate> const& xIssuer,
+           cpo::uno::Reference<css::security::XCertificate> const& xCertificate)
+{
+    return EqualDistinguishedNames(xCertificate->getIssuerName(), xIssuer->getSubjectName(), xmlsecurity::NOCOMPAT)
+        && xCertificate->getIssuerUniqueID() == xIssuer->getSubjectUniqueID();
 }
+
+} // namespace xmlsecurity
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
