@@ -205,31 +205,43 @@ window.L.Map.Settings = window.L.Handler.extend({
 	// under.
 	_docTypeSettingGroups: ['text', 'spreadsheet', 'presentation', 'drawing'],
 
-	/**
-	 * Takes on the Interface Settings the dialog has just saved. The view toggles
-	 * of a document type are read when a document opens, so recording them here
-	 * keeps this session, localStorage and the stored browsersetting.json on the
-	 * same values. The settings shared by every document type (theme, layout,
-	 * zoom) have live UI of their own and go on applying at the next open only.
-	 * The comments are switched over through the same call the Show Comments
-	 * button makes, so that choice takes effect without a reload.
-	 */
-	applyBrowserSettings: function (settings: Record<string, string>): void {
+	// Every setting, shared ones included, becomes this session's browser
+	// settings and is handed to the server, which keeps a copy. The view toggles
+	// of each document type are also kept as this browser's preferences, and
+	// the open document takes on the ones of its own type at once. The layout
+	// and the theme are switched through the same calls their own buttons make,
+	// so each is recorded the way the button records it. The zoom and scrolling
+	// settings are read as a document opens and go on applying at the next
+	// open. The layout goes first: switching it builds the toolbars again and
+	// restores the sidebar from the preferences, and the view toggles are then
+	// applied to the toolbars that are left.
+	applyBrowserSettings: function (
+		settings: Record<string, string | number>,
+	): void {
+		window.prefs.recordStoredBrowserSettings(settings);
+
 		const viewToggles: Record<string, string> = {};
 		for (const [key, value] of Object.entries(settings)) {
 			const group = key.substring(0, key.indexOf('.'));
-			if (this._docTypeSettingGroups.includes(group)) viewToggles[key] = value;
+			if (this._docTypeSettingGroups.includes(group))
+				viewToggles[key] = String(value);
 		}
 		window.prefs.setMultiple(viewToggles);
 
-		const saved = viewToggles[this._map.getDocType() + '.ShowAnnotations'];
-		if (saved === undefined) return;
-
-		const handler = this._map['stateChangeHandler'];
-		const state = handler.getItemValue('showannotations');
-		const shown = state === 'true' || state === true;
-		const show = saved === 'true';
-		if (show !== shown) this._map.showComments(show);
+		const uiManager = this._map.uiManager;
+		let layoutSwitched = false;
+		if (settings.compactMode !== undefined) {
+			const mode = settings.compactMode === 'true' ? 'classic' : 'notebookbar';
+			layoutSwitched = mode !== uiManager.getCurrentMode();
+			if (layoutSwitched)
+				uiManager.onChangeUIMode({ mode: mode, force: false });
+		}
+		if (settings.darkTheme !== undefined) {
+			const dark = settings.darkTheme === 'true';
+			if (dark !== window.prefs.getBoolean('darkTheme'))
+				uiManager.applyDarkMode(dark, true);
+		}
+		uiManager.applyViewPreferences(layoutSwitched);
 	},
 
 	onMessage: function (e: MessageEvent): void {

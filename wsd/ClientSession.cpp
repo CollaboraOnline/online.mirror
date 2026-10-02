@@ -1769,12 +1769,18 @@ bool ClientSession::_handleInput(const char *buffer, int length)
         if (action == "update")
         {
             std::string json;
-            getTokenString(tokens[2], "json", json);
+            getTokenString(tokens, "json", json);
+            // The settings file is written out again with the changes, unless the
+            // client says the file already holds them: then only the copies are
+            // brought up to date.
+            std::string upload;
+            getTokenString(tokens, "upload", upload);
             try
             {
                 updateBrowserSettingsJSON(json);
                 COOLWSD::syncUsersBrowserSettings(getUserId(), docBroker->getPid(), json);
-                uploadBrowserSettingsToWopiHost();
+                if (upload != "false")
+                    uploadBrowserSettingsToWopiHost();
             }
             catch (const std::exception& exc)
             {
@@ -2260,7 +2266,9 @@ void ClientSession::updateBrowserSettingsJSON(const std::string& json)
     const auto& extractedObject = result.extract<Poco::JSON::Object::Ptr>();
     for (const auto& key : extractedObject->getNames())
     {
-        const std::string value = extractedObject->get(key);
+        // The value keeps the type it has in the message, so a number such as the
+        // zoom index is written back to the file as a number.
+        const Poco::Dynamic::Var value = extractedObject->get(key);
         std::vector<std::string> vec = Util::splitStringToVector(key, '.');
         if (vec.size() == 2)
         {

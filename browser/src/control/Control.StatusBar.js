@@ -438,10 +438,6 @@ class StatusBar extends JSDialog.Toolbar {
 			this.map.uiManager.showStatusBar();
 		else
 			this.map.uiManager.hideStatusBar(true);
-
-		const statusbarState = showStatusbar ? 'true' : 'false';
-		app.map['stateChangeHandler'].setItemValue('showstatusbar', statusbarState);
-		this.map.fire('commandstatechanged', {commandName : 'showstatusbar', state : statusbarState});
 	}
 
 	onDocLayerInit() {

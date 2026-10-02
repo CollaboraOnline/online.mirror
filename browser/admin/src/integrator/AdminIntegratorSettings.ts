@@ -139,9 +139,10 @@ interface SaveAllResult {
 	// freshly entered secret is not lost.
 	viewSettings: ViewSettings;
 	// The Interface Settings as they were written to browsersetting.json, with
-	// flat dotted keys and string values ("text.ShowAnnotations": "false"). Null
-	// when the dialog shows no Interface Settings section.
-	browserSettings: Record<string, string> | null;
+	// flat dotted keys ("text.ShowAnnotations": "false"). A toggle is the string
+	// "true" or "false", the zoom index stays a number. Null when the dialog
+	// shows no Interface Settings section.
+	browserSettings: Record<string, string | number> | null;
 }
 
 // Visual state of an AI model-fetch status line. 'hidden' (or an empty message)
@@ -284,7 +285,7 @@ const defaultBrowserSetting: Record<string, any> = {
 	},
 	smoothScroll: true,
 	spreadsheet: {
-		ShowStatusbar: false,
+		ShowStatusbar: true,
 		A11yCheckDeck: false,
 		ShowNavigator: false,
 		ShowSidebar: true,
@@ -294,7 +295,7 @@ const defaultBrowserSetting: Record<string, any> = {
 	},
 	text: {
 		ShowRuler: false,
-		ShowStatusbar: false,
+		ShowStatusbar: true,
 		A11yCheckDeck: false,
 		ShowNavigator: false,
 		ShowSidebar: true,
@@ -305,7 +306,7 @@ const defaultBrowserSetting: Record<string, any> = {
 	},
 	presentation: {
 		ShowRuler: false,
-		ShowStatusbar: false,
+		ShowStatusbar: true,
 		A11yCheckDeck: false,
 		ShowNavigator: false,
 		ShowSidebar: true,
@@ -317,7 +318,7 @@ const defaultBrowserSetting: Record<string, any> = {
 	},
 	drawing: {
 		ShowRuler: false,
-		ShowStatusbar: false,
+		ShowStatusbar: true,
 		A11yCheckDeck: false,
 		ShowNavigator: false,
 		ShowSidebar: true,
@@ -1162,7 +1163,7 @@ class SettingIframe {
 		const saves: Promise<void>[] = [];
 
 		// Browser settings
-		let browserSettings: Record<string, string> | null = null;
+		let browserSettings: Record<string, string | number> | null = null;
 		if (this._browserSettingSection) {
 			const payload = this.browserSettingsPayload();
 			browserSettings = this.flattenBrowserSettings(JSON.parse(payload));
@@ -2403,23 +2404,32 @@ class SettingIframe {
 		return merged;
 	}
 
-	// The Interface Settings as flat, dotted keys with string values, the shape a
-	// browser preference has: {"text.ShowAnnotations": "false"}.
+	// The Interface Settings as flat, dotted keys, the shape a browser preference
+	// has: {"text.ShowAnnotations": "false"}. A toggle becomes the string "true"
+	// or "false", the way the document records it. A number such as the zoom
+	// index stays a number, so the file keeps the same value whichever side
+	// writes it.
 	private flattenBrowserSettings(
 		settings: Record<string, any>,
 		parentKey: string = '',
-		flattened: Record<string, string> = {},
-	): Record<string, string> {
-		for (const [key, value] of Object.entries(settings)) {
+		flattened: Record<string, string | number> = {},
+	): Record<string, string | number> {
+		for (const [key, entry] of Object.entries(settings)) {
 			const fullKey = parentKey ? `${parentKey}.${key}` : key;
-			if (SettingIframe.isSettingGroup(value))
-				this.flattenBrowserSettings(value, fullKey, flattened);
-			else if (Array.isArray(value)) flattened[fullKey] = JSON.stringify(value);
+			if (SettingIframe.isSettingGroup(entry)) {
+				this.flattenBrowserSettings(entry, fullKey, flattened);
+				continue;
+			}
+
+			// A custom-widget setting carries its value beside the widget type.
+			const isWidget =
+				entry !== null && typeof entry === 'object' && !Array.isArray(entry);
+			const value = isWidget ? entry.value : entry;
+
+			if (Array.isArray(value)) flattened[fullKey] = JSON.stringify(value);
 			else if (typeof value === 'boolean')
 				flattened[fullKey] = value ? 'true' : 'false';
-			else if (value !== null && typeof value === 'object')
-				// A custom-widget setting carries its value beside the widget type.
-				flattened[fullKey] = String(value.value);
+			else if (typeof value === 'number') flattened[fullKey] = value;
 			else flattened[fullKey] = String(value);
 		}
 

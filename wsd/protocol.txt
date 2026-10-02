@@ -805,12 +805,18 @@ removetextcontext id=<windowId> before=<before_position> after=<after_position>
     - before=<before_position> : The position before the deletion starts.
     - after=<after_position> : The position after the deletion ends.
 
-browsersetting action=update key=<SettingKey> value=<SettingValue>
+browsersetting action=update [upload=false] json=<JSON>
 
-    The browsersetting protocol modify specific UI settings.
+    Changes the user's browser settings. The server keeps a copy of the
+    browsersetting.json file for each session of the user; the changes are
+    applied to every copy.
 
-    - key=<SettingKey> : The name of the setting to update (e.g., ShowStatusBar).
-    - value=<SettingValue> : The new value for the setting (e.g., true or false).
+    - json=<JSON> : An object of the changed settings, with flat dotted keys
+      ("text.ShowAnnotations": "false"). A toggle is the string "true" or
+      "false", a number such as the zoom index is a number.
+    - upload=false : The file already holds these settings, so the server
+      does not write it out again. Without this token, the server writes
+      the file out with the changes.
 
 contentcontrolevent <JSON>
     *Properties:

@@ -1117,15 +1117,37 @@ function showWelcomeSVG() {
 		},
 
 		sendPendingBrowserSettingsUpdate: function() {
+			global.prefs._sendBrowserSettingsUpdate(true);
+		},
+
+		// Hands the pending changes to the server, which keeps its own copy of the
+		// settings file. With upload set, the server writes the file out again
+		// afterwards; without it, the file already holds these values and the
+		// server only refreshes its copy.
+		_sendBrowserSettingsUpdate: function(upload) {
 			const isEmpty = (obj) => Object.keys(obj).length === 0;
 			// Ensure the socket is open before sending. Because it resets the _settingsUpdatedJSON.
 			const canSend = global.socket && global.socket.readyState === 1;
 			if (canSend && !isEmpty(global.prefs._settingUpdateJSON)) {
-				global.socket.send('browsersetting action=update json=' + JSON.stringify(global.prefs._settingUpdateJSON));
+				const uploadToken = upload ? '' : 'upload=false ';
+				global.socket.send('browsersetting action=update ' + uploadToken + 'json=' + JSON.stringify(global.prefs._settingUpdateJSON));
 				global.prefs._settingUpdateJSON = {};
 			}
 			clearTimeout(global.prefs._pendingSettingUpdate);
 			global.prefs._pendingSettingUpdate = undefined;
+		},
+
+		recordStoredBrowserSettings: function (settings) {
+			if (!global.prefs.useBrowserSetting)
+				return;
+
+			// Data is already sent to WOPI. Don't re-send it if there isn't any news.
+			const upload = Object.keys(global.prefs._settingUpdateJSON).length > 0;
+			for (const [key, value] of Object.entries(settings)) {
+				global.prefs._userBrowserSetting[key] = value;
+				global.prefs._settingUpdateJSON[key] = value;
+			}
+			global.prefs._sendBrowserSettingsUpdate(upload);
 		},
 
 		// Debounce before pushing a browsersetting update to the server, so a

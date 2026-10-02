@@ -1105,6 +1105,88 @@ class UIManager extends window.L.Control {
 		this.initializeQuickFindInCore();
 	}
 
+	// Brings the open document in line with the stored view preferences of its document type.
+	applyViewPreferences(lateComponentsRestored: boolean = false): void {
+		const docType = this.map.getDocType();
+
+		if (docType !== 'spreadsheet') {
+			const state = this.map['stateChangeHandler'].getItemValue('showannotations');
+			const shown = state === 'true' || state === true;
+			const show = this.getBooleanDocTypePref('ShowAnnotations', true);
+			if (show !== shown) this.map.showComments(show);
+		}
+
+		if (this.map.statusBar) {
+			const show = this.getBooleanDocTypePref('ShowStatusbar', true);
+			if (show !== this.isStatusBarVisible()) {
+				if (show) this.showStatusBar();
+				else this.hideStatusBar();
+			}
+		}
+
+		// The ruler exists once initializeRuler has run, on desktop and tablet in
+		// edit mode.
+		if (app.UI.horizontalRuler) {
+			const show = this.getBooleanDocTypePref('ShowRuler', window.mode.isCODesktop());
+			if (show !== this.isRulerVisible()) {
+				if (show) this.showRuler();
+				else this.hideRuler();
+			}
+		}
+
+		if (docType === 'text')
+			this.sendToggleCommandFor('.uno:ControlCodes', this.getBooleanDocTypePref('ShowFormattingMarks', false));
+		this.sendToggleCommandFor('.uno:SpellOnline', this.getBooleanDocTypePref('spellOnline', docType !== 'spreadsheet'));
+
+		if (lateComponentsRestored) return;
+		if (!window.mode.isDesktop() || window.mode.isInteractivePreview()) return;
+
+		if (this.map.navigator) {
+			const show = this.getBooleanDocTypePref('ShowNavigator', false);
+			// .uno:Navigator toggles the panel.
+			if (show !== !!app.showNavigator) this.map.sendUnoCommand('.uno:Navigator');
+		}
+
+		if (this.map.sidebar) {
+			const show = this.getBooleanDocTypePref('ShowSidebar', true);
+			if (!show) {
+				if (this.map.sidebar.isVisible()) app.socket.sendMessage('uno .uno:SidebarHide');
+			} else {
+				const deck = this.preferredSidebarDeck();
+				// The deck command shows the sidebar first when it is closed, and
+				// switches the deck when another one is open.
+				if (!this.map.sidebar.isVisible() || this.map.sidebar.deckState.activeDeckId !== deck)
+					this.map.sendUnoCommand(this.map.sidebar.commandForDeck(deck));
+			}
+		}
+	}
+
+	reportToggleState(name: string, on: boolean): void {
+		const state = on ? 'true' : 'false';
+		this.map['stateChangeHandler'].setItemValue(name, state);
+		this.map.fire('commandstatechanged', {commandName : name, state : state});
+	}
+
+	private sendToggleCommandFor(command: string, wanted: boolean): void {
+		const state = this.map['stateChangeHandler'].getItemValue(command);
+		if (state !== 'true' && state !== 'false') return;
+		if ((state === 'true') !== wanted) this.map.sendUnoCommand(command);
+	}
+
+	/**
+	 * The sidebar deck the stored preferences ask for, in the order a document
+	 * restores them as it opens; the properties deck when none is asked for.
+	 */
+	private preferredSidebarDeck(): string {
+		const decks = this.map.getDocType() === 'presentation'
+			? ['SdCustomAnimationDeck', 'SdMasterPagesDeck']
+			: ['StyleListDeck', 'A11yCheckDeck'];
+		for (const deck of decks) {
+			if (this.getBooleanDocTypePref(deck, false)) return deck;
+		}
+		return 'PropertyDeck';
+	}
+
 	/**
 	 * Reopens the navigator panel on start when the saved state asks for it.
 	 * The navigator is the panel on the left of the document and is separate
@@ -1260,9 +1342,7 @@ class UIManager extends window.L.Control {
 				showruler: showRuler
 			});
 
-			const rulerState = showRuler ? 'true' : 'false';
-			this.map['stateChangeHandler'].setItemValue('showruler', rulerState);
-			this._map.fire('commandstatechanged', {commandName : 'showruler', state : rulerState});
+			this.reportToggleState('showruler', showRuler);
 		}
 	}
 
@@ -1857,6 +1937,7 @@ class UIManager extends window.L.Control {
 
 		$('#document-container').addClass('hasruler');
 		this.setDocTypePref('ShowRuler', true);
+		this.reportToggleState('showruler', true);
 		this.map.fire('rulerchanged');
 
 		if (app.sectionContainer
@@ -1875,6 +1956,7 @@ class UIManager extends window.L.Control {
 
 		$('#document-container').removeClass('hasruler');
 		this.setDocTypePref('ShowRuler', false);
+		this.reportToggleState('showruler', false);
 
 		if (app.sectionContainer
 			&& app.sectionContainer.getSectionWithName(app.CSections.RulerSpacer.name)) {
@@ -2026,6 +2108,7 @@ class UIManager extends window.L.Control {
 		$('#document-container').css('bottom', this.documentBottom);
 		this.map.statusBar.show();
 		this.setDocTypePref('ShowStatusbar', true);
+		this.reportToggleState('showstatusbar', true);
 		this.map.fire('statusbarchanged');
 	}
 
@@ -2046,6 +2129,7 @@ class UIManager extends window.L.Control {
 		this.map.statusBar.hide();
 		if (!firstStart)
 			this.setDocTypePref('ShowStatusbar', false);
+		this.reportToggleState('showstatusbar', false);
 		this.map.fire('statusbarchanged');
 	}
 
