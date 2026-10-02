@@ -54,6 +54,8 @@ public:
     /// Post-it / annotation payload.
     boost::property_tree::ptree m_aComment;
     int m_nCommentCallbackCount = 0;
+    /// Accessibility focused table cell payload.
+    boost::property_tree::ptree m_aA11yFocusedCell;
     std::vector<OString> m_aStateChanges;
     TestKitCallbackWrapper m_callbackWrapper;
     OString m_aExportFile;

@@ -614,10 +614,13 @@ div.leaflet-cursor-container:hover > .leaflet-cursor-header {
 	position: absolute;
 	/* the container is 0px wide, so a reader moving by line got one word at a time */
 	width: 100vw;
+	/* lines shorter than 12pt ones at 100% zoom; a smaller line-height lets text overhang */
+	font-size: 13px;
 }
 
 .clipboard-container .a11y-context > span {
-	display: block;
+	/* an empty paragraph keeps its margin apart from the next paragraph's */
+	display: flow-root;
 }
 
 input.clipboard {

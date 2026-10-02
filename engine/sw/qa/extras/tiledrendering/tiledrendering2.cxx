@@ -26,6 +26,7 @@
 #include <sfx2/kit/helper.hxx>
 #include <comphelper/kit.hxx>
 #include <comphelper/scopeguard.hxx>
+#include <o3tl/string_view.hxx>
 #include <sfx2/dispatch.hxx>
 #include <sfx2/sfxsids.hrc>
 #include <vcl/jsdialog/executor.hxx>
@@ -1844,6 +1845,35 @@ CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testQuickFindFindsTextAfterLinkInComm
                          aView.m_aComment.get_child("searchText").get_value<std::string>());
     CPPUNIT_ASSERT_EQUAL(1, aView.m_aComment.get_child("searchOccurrence").get_value<int>());
 }
+
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yContextParagraphInCell)
+{
+    // Given the cursor in the first of two paragraphs of a table cell on page 3, which is visible:
+    createDoc("a11y-context-cell.fodt");
+    SwTestViewCallback aView;
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->InsertPageBreak();
+    pWrtShell->InsertPageBreak();
+    SwPageFrame* pPage3
+        = pWrtShell->GetLayout()->GetLower()->GetNext()->GetNext()->DynCastPageFrame();
+    pWrtShell->setKitVisibleArea(pPage3->getFrameArea().SVRect());
+    pWrtShell->GetSfxViewShell()->SetKitAccessibilityState(true);
+    pWrtShell->Down(/*bSelect=*/false, 2);
+    Scheduler::ProcessEventsToIdle();
+    const std::string aRect = aView.m_aA11yFocusedCell.get_child("paragraph.afterRects")
+                                  .begin()
+                                  ->second.get_value<std::string>();
+    const double fRectTop = o3tl::toInt32(o3tl::getToken(aRect, 1, ','));
+
+    // When the cursor moves into the second paragraph:
+    pWrtShell->Down(/*bSelect=*/false);
+    const double fParagraphTop = pWrtShell->GetCharRect().Top();
+
+    // Then the rectangle sent for it is in document coordinates:
+    // Without the fix, there was no rectangle, or it was relative to the cell.
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(fParagraphTop, fRectTop, 45.0);
+}
+
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

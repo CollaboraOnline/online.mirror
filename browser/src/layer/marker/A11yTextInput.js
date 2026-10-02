@@ -17,7 +17,7 @@
  * text area itself.
  */
 
-/* global app _ _n */
+/* global app _ _n cool */
 
 window.L.A11yTextInput = window.L.TextInput.extend({
 	initialize: function() {
@@ -479,8 +479,16 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		this.focus();
 	},
 
+	update: function() {
+		window.L.TextInput.prototype.update.call(this);
+		this._placeContextRegions();
+	},
+
 	onVisibleAreaChanged: function() {
-		if (!this.hasAccessibilitySupport() || !this._map || !this._map._docLoaded || !this.hasFocus())
+		if (!this._map || !this._map._docLoaded)
+			return;
+		this.update();
+		if (!this.hasAccessibilitySupport() || !this.hasFocus())
 			return;
 
 		clearTimeout(this._contextRequestTimer);
@@ -605,16 +613,59 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 			return !!(region.compareDocumentPosition(textArea) & Node.DOCUMENT_POSITION_FOLLOWING);
 		};
 
+		// Each paragraph goes down to where the document draws it, but not over another one.
+		// Only Writer sends the rectangles in document coordinates.
+		const isText = this._map.getDocType() === 'text';
+		const containerRect = this._container.getBoundingClientRect();
+		const canvasRect = app.sectionContainer.getCanvasBoundingClientRect();
+		const getDocumentRect = function (span) {
+			if (!isText || !span.dataset.twips)
+				return null;
+			const twips = span.dataset.twips.split(',').map(Number);
+			return new cool.SimpleRectangle(twips[0], twips[1], twips[2], twips[3]);
+		};
+		const getDocumentTop = function (span) {
+			const rect = getDocumentRect(span);
+			return rect ? canvasRect.top + rect.v1Y / app.dpiScale - containerRect.top : NaN;
+		};
+		const getDocumentLeft = function (span) {
+			const rect = getDocumentRect(span);
+			return rect ? canvasRect.left + rect.v1X / app.dpiScale - containerRect.left : NaN;
+		};
+		const spread = function (region, top) {
+			region.style.top = top + 'px';
+			const spans = Array.from(region.children);
+			const heights = spans.map(function (span) { return span.offsetHeight; });
+			let bottom = top;
+			spans.forEach(function (span, index) {
+				const gap = Math.max(0, getDocumentTop(span) - bottom) || 0;
+				span.style.marginTop = gap + 'px';
+				bottom += gap + heights[index];
+			});
+			return bottom;
+		};
+
+		// not left of the paragraphs: the text starts far left with the caret on a wrapped line
+		const anySpan = this._contextBefore.firstElementChild
+			|| this._contextAfter.firstElementChild;
+		const pageLeft = anySpan ? getDocumentLeft(anySpan) : NaN;
+		const textLeft = textArea.offsetLeft + this._getTextOffsetX(0);
+		const left = (isNaN(pageLeft) ? textLeft : Math.max(textLeft, pageLeft)) + 'px';
+		regions.forEach(function (region) { region.style.left = left; });
+
 		let above = textArea.offsetTop;
 		regions.filter(isBefore).reverse().forEach(function (region) {
-			above -= region.offsetHeight;
+			const first = region.firstElementChild;
+			const firstTop = first ? getDocumentTop(first) : NaN;
+			const top = isNaN(firstTop) ? above : firstTop;
+			const overlap = Math.max(0, spread(region, top) - above);
+			above = top - overlap;
 			region.style.top = above + 'px';
 		});
 
 		let below = textArea.offsetTop + textArea.scrollHeight;
 		regions.filter(function (region) { return !isBefore(region); }).forEach(function (region) {
-			region.style.top = below + 'px';
-			below += region.offsetHeight;
+			below = spread(region, below);
 		});
 	},
 

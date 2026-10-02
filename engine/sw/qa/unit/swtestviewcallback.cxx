@@ -202,6 +202,13 @@ void SwTestViewCallback::callbackImpl(COKitCallbackType eType, const char* pPayl
             m_bCursorVisible = aPayload == "true";
             break;
         }
+        case COKitCallbackType::A11Y_FOCUSED_CELL_CHANGED:
+        {
+            m_aA11yFocusedCell.clear();
+            std::stringstream aStream(pPayload);
+            boost::property_tree::read_json(aStream, m_aA11yFocusedCell);
+            break;
+        }
         default:
             break;
     }

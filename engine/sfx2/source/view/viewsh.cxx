@@ -633,7 +633,8 @@ ContextParagraph contextParagraph(const uno::Reference<accessibility::XAccessibl
 
 void walkParagraphFlow(const uno::Reference<accessibility::XAccessibleContext>& xStart,
                        bool bBackward, const uno::Reference<accessibility::XAccessible>& xParent,
-                       const css::awt::Point& rParentOnScreen, bool bByArea, sal_Int32 nTop,
+                       const css::awt::Point& rParentOnScreen,
+                       const css::awt::Point& rOriginOnScreen, bool bByArea, sal_Int32 nTop,
                        sal_Int32 nBottom, sal_Int32 nRadius, std::vector<ContextParagraph>& rOut)
 {
     const accessibility::AccessibleRelationType eType
@@ -654,10 +655,31 @@ void walkParagraphFlow(const uno::Reference<accessibility::XAccessibleContext>& 
         else if (static_cast<sal_Int32>(rOut.size()) >= nRadius)
             break;
         if (isSiblingParagraph(xContext, xParent))
-            rOut.push_back(contextParagraph(xContext, rParentOnScreen));
+            rOut.push_back(contextParagraph(xContext, rOriginOnScreen));
     }
     if (bBackward)
         std::reverse(rOut.begin(), rOut.end());
+}
+
+// rectangles in document coordinates
+css::awt::Point getTextDocumentOnScreen(const uno::Reference<accessibility::XAccessible>& xParent,
+                                        const css::awt::Point& rFallback)
+{
+    uno::Reference<accessibility::XAccessible> xAncestor = xParent;
+    while (xAncestor.is())
+    {
+        uno::Reference<accessibility::XAccessibleContext> xContext
+            = xAncestor->getAccessibleContext();
+        if (!xContext.is())
+            break;
+        if (xContext->getAccessibleRole() == accessibility::AccessibleRole::DOCUMENT_TEXT)
+        {
+            const auto xComponent = xContext.query<accessibility::XAccessibleComponent>();
+            return xComponent.is() ? xComponent->getLocationOnScreen() : rFallback;
+        }
+        xAncestor = xContext->getAccessibleParent();
+    }
+    return rFallback;
 }
 
 uno::Reference<accessibility::XAccessibleContext>
@@ -720,46 +742,55 @@ void collectParagraphWindow(const uno::Reference<css::accessibility::XAccessible
 
     const css::awt::Point aParentOnScreen
         = xParentComponent.is() ? xParentComponent->getLocationOnScreen() : css::awt::Point();
+    const css::awt::Point aOriginOnScreen = getTextDocumentOnScreen(xParent, aParentOnScreen);
     const bool bByArea = !rVisibleTwips.IsEmpty() && xParentComponent.is() && xComponent.is();
     if (!bByArea)
     {
-        walkParagraphFlow(xContext, true, xParent, aParentOnScreen, false, 0, 0, nRadius, rBefore);
-        walkParagraphFlow(xContext, false, xParent, aParentOnScreen, false, 0, 0, nRadius, rAfter);
+        walkParagraphFlow(xContext, true, xParent, aParentOnScreen, aOriginOnScreen, false, 0, 0,
+                          nRadius, rBefore);
+        walkParagraphFlow(xContext, false, xParent, aParentOnScreen, aOriginOnScreen, false, 0, 0,
+                          nRadius, rAfter);
         return;
     }
 
     const tools::Rectangle aVisiblePx
         = o3tl::convert(rVisibleTwips, o3tl::Length::twip, o3tl::Length::px);
     const sal_Int32 nMargin = aVisiblePx.GetHeight();
-    const sal_Int32 nTop = aVisiblePx.Top() - nMargin;
-    const sal_Int32 nBottom = aVisiblePx.Bottom() + nMargin;
+    // in the coordinates of the parent, e.g. a table cell
+    const sal_Int32 nShift = aParentOnScreen.Y - aOriginOnScreen.Y;
+    const sal_Int32 nTop = aVisiblePx.Top() - nMargin - nShift;
+    const sal_Int32 nBottom = aVisiblePx.Bottom() + nMargin - nShift;
 
     const WindowSide eCaretSide = windowSide(xContext, aParentOnScreen, nTop, nBottom);
     if (eCaretSide != WindowSide::Above && eCaretSide != WindowSide::Below)
     {
-        walkParagraphFlow(xContext, true, xParent, aParentOnScreen, true, nTop, nBottom, 0,
-                          rBefore);
-        walkParagraphFlow(xContext, false, xParent, aParentOnScreen, true, nTop, nBottom, 0,
-                          rAfter);
+        walkParagraphFlow(xContext, true, xParent, aParentOnScreen, aOriginOnScreen, true, nTop,
+                          nBottom, 0, rBefore);
+        walkParagraphFlow(xContext, false, xParent, aParentOnScreen, aOriginOnScreen, true, nTop,
+                          nBottom, 0, rAfter);
         return;
     }
 
     const css::awt::Rectangle aCaretBounds = xComponent->getBounds();
-    uno::Reference<accessibility::XAccessibleContext> xAnchor = paragraphInWindow(
-        xParent, aCaretBounds.X + aCaretBounds.Width / 2, aVisiblePx.Top(), aVisiblePx.Bottom());
+    uno::Reference<accessibility::XAccessibleContext> xAnchor
+        = paragraphInWindow(xParent, aCaretBounds.X + aCaretBounds.Width / 2,
+                            aVisiblePx.Top() - nShift, aVisiblePx.Bottom() - nShift);
     if (!xAnchor.is())
     {
-        walkParagraphFlow(xContext, eCaretSide == WindowSide::Below, xParent, aParentOnScreen, true,
-                          nTop, nBottom, 0, eCaretSide == WindowSide::Below ? rBefore : rAfter);
+        walkParagraphFlow(xContext, eCaretSide == WindowSide::Below, xParent, aParentOnScreen,
+                          aOriginOnScreen, true, nTop, nBottom, 0,
+                          eCaretSide == WindowSide::Below ? rBefore : rAfter);
         return;
     }
 
     std::vector<ContextParagraph>& rOut = eCaretSide == WindowSide::Below ? rBefore : rAfter;
-    walkParagraphFlow(xAnchor, true, xParent, aParentOnScreen, true, nTop, nBottom, 0, rOut);
+    walkParagraphFlow(xAnchor, true, xParent, aParentOnScreen, aOriginOnScreen, true, nTop, nBottom,
+                      0, rOut);
     if (isSiblingParagraph(xAnchor, xParent))
-        rOut.push_back(contextParagraph(xAnchor, aParentOnScreen));
+        rOut.push_back(contextParagraph(xAnchor, aOriginOnScreen));
     std::vector<ContextParagraph> aFollowing;
-    walkParagraphFlow(xAnchor, false, xParent, aParentOnScreen, true, nTop, nBottom, 0, aFollowing);
+    walkParagraphFlow(xAnchor, false, xParent, aParentOnScreen, aOriginOnScreen, true, nTop,
+                      nBottom, 0, aFollowing);
     rOut.insert(rOut.end(), aFollowing.begin(), aFollowing.end());
 }
 

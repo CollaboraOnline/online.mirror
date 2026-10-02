@@ -41,4 +41,23 @@ describe(['tagdesktop'], 'Writer editable for the reader', { testIsolation: fals
 				.to.be.within(caret.left - 1, caret.left + 11);
 		});
 	});
+
+	it('a paragraph further down is where the caret goes there', function () {
+		let paragraphTop;
+		helper.typeIntoDocument('{ctrl}{home}');
+		cy.then(function () {
+			return helper.processToIdle(win);
+		});
+		cy.cGet('#a11y-context-after > span').eq(1).should(function ($span) {
+			expect($span.text(), 'the second paragraph after the caret')
+				.to.match(/^Third paragraph/);
+			paragraphTop = $span[0].getBoundingClientRect().top;
+		});
+
+		helper.typeIntoDocument('{ctrl}{end}');
+		cy.cGet('.cursor-overlay .blinking-cursor').should(function ($caret) {
+			expect($caret[0].getBoundingClientRect().top, 'the caret top in that paragraph')
+				.to.be.within(paragraphTop - 2, paragraphTop + 2);
+		});
+	});
 });
