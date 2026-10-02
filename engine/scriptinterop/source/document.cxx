@@ -1517,7 +1517,7 @@ public:
                 throw cpo::uno::RuntimeException(
                     "getText: the row has no cell at position " + OUString::number(i));
             }
-            if (!buf.isEmpty()) {
+            if (i != 0) {
                 buf.append('\n');
             }
             buf.append(cell.Value->getText());
@@ -1616,7 +1616,7 @@ public:
                 throw cpo::uno::RuntimeException(
                     "getText: the table has no row " + OUString::number(i));
             }
-            if (!buf.isEmpty()) {
+            if (i != 0) {
                 buf.append('\n');
             }
             buf.append(row.Value->getText());
