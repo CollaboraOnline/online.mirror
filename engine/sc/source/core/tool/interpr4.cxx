@@ -46,6 +46,7 @@
 
 #include <global.hxx>
 #include <dbdata.hxx>
+#include <brdcst.hxx>
 #include <formulacell.hxx>
 #include <callform.hxx>
 #include <addincol.hxx>
@@ -3563,6 +3564,9 @@ void ScInterpreter::ScTableOp()
         mrDoc.SetTableOpDirty( ScRange(aTableOp.aOld1) );
         if ( nParamCount == 5 )
             mrDoc.SetTableOpDirty( ScRange(aTableOp.aOld2) );
+        // Each row of the table is a new calculation of the model, so volatile cells and the
+        // cells that depend on them are calculated again even if they don't read an input cell.
+        mrDoc.AreaBroadcast(ScHint(SfxHintId::ScTableOpDirty, BCA_BRDCST_ALWAYS));
     }
     aTableOp.bCollectNotifications = false;
 

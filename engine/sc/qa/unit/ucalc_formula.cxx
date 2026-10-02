@@ -27,6 +27,7 @@
 
 #include <memory>
 #include <algorithm>
+#include <set>
 #include <vector>
 
 using namespace formula;
@@ -4427,6 +4428,77 @@ CPPUNIT_TEST_FIXTURE(TestFormula, testMultipleOperations)
     CPPUNIT_ASSERT_EQUAL(30.0, m_pDoc->GetValue(1,2,0));
     CPPUNIT_ASSERT_EQUAL(40.0, m_pDoc->GetValue(1,3,0));
     CPPUNIT_ASSERT_EQUAL(50.0, m_pDoc->GetValue(1,4,0));
+
+    m_pDoc->DeleteTab(0);
+}
+
+CPPUNIT_TEST_FIXTURE(TestFormula, testMultipleOperationsRandomPrecedent)
+{
+    // Each row of a table of multiple operations is a fresh recalculation of the model, so a RAND()
+    // anywhere in the formula chain draws a new number per row. This is what lets a table driven by
+    // a dummy input cell act as a Monte Carlo simulation.
+    m_pDoc->InsertTab(0, u"MultiOp"_ustr);
+
+    sc::AutoCalcSwitch aACSwitch(*m_pDoc, true);
+
+    // A1 is the dummy input cell. Nothing in the model reads it.
+    // B1 holds RAND() itself
+    m_pDoc->SetString(ScAddress(1,0,0), u"=RAND()"_ustr);
+    // D1 only reaches RAND() through C1.
+    m_pDoc->SetString(ScAddress(2,0,0), u"=RAND()"_ustr);
+    m_pDoc->SetString(ScAddress(3,0,0), u"=C1*10"_ustr);
+
+    constexpr SCROW nFirstRow = 2;
+    constexpr SCROW nLastRow = 6;
+    for (SCROW nRow = nFirstRow; nRow <= nLastRow; ++nRow)
+    {
+        m_pDoc->SetValue(ScAddress(0, nRow, 0), nRow - nFirstRow + 1);
+        OUString aRow = OUString::number(nRow + 1);
+        m_pDoc->SetString(ScAddress(1, nRow, 0), "=MULTIPLE.OPERATIONS($B$1;$A$1;A" + aRow + ")");
+        m_pDoc->SetString(ScAddress(3, nRow, 0), "=MULTIPLE.OPERATIONS($D$1;$A$1;A" + aRow + ")");
+    }
+
+    // Two draws of RAND() can be equal, so the rows only have to differ somewhere.
+    std::set<double> aDirectValues;
+    for (SCROW nRow = nFirstRow; nRow <= nLastRow; ++nRow)
+        aDirectValues.insert(m_pDoc->GetValue(ScAddress(1,nRow,0)));
+    CPPUNIT_ASSERT_GREATER(size_t(1), aDirectValues.size());
+
+    // RAND() one step down the chain is drawn again in each row too.
+    std::set<double> aChainedValues;
+    for (SCROW nRow = nFirstRow; nRow <= nLastRow; ++nRow)
+        aChainedValues.insert(m_pDoc->GetValue(ScAddress(3,nRow,0)));
+    CPPUNIT_ASSERT_GREATER(size_t(1), aChainedValues.size());
+
+    m_pDoc->DeleteTab(0);
+}
+
+CPPUNIT_TEST_FIXTURE(TestFormula, testMultipleOperationsIndirectInput)
+{
+    // A table of multiple operations substitutes the input cell even where the model reaches it
+    // only through INDIRECT.
+    m_pDoc->InsertTab(0, u"MultiOp"_ustr);
+
+    sc::AutoCalcSwitch aACSwitch(*m_pDoc, true);
+
+    // INDIRECT makes B1 volatile, so B1 does not listen to A1 for changes.
+    m_pDoc->SetValue(ScAddress(0,0,0), 1);
+    m_pDoc->SetString(ScAddress(1,0,0), u"=INDIRECT(\"A1\")"_ustr);
+    m_pDoc->SetString(ScAddress(2,0,0), u"=B1*10"_ustr);
+    CPPUNIT_ASSERT_EQUAL(10.0, m_pDoc->GetValue(ScAddress(2,0,0)));
+
+    m_pDoc->SetValue(ScAddress(0,2,0), 2);
+    m_pDoc->SetValue(ScAddress(0,3,0), 3);
+    m_pDoc->SetValue(ScAddress(0,4,0), 4);
+    m_pDoc->SetString(ScAddress(2,2,0), u"=MULTIPLE.OPERATIONS($C$1;$A$1;A3)"_ustr);
+    m_pDoc->SetString(ScAddress(2,3,0), u"=MULTIPLE.OPERATIONS($C$1;$A$1;A4)"_ustr);
+    m_pDoc->SetString(ScAddress(2,4,0), u"=MULTIPLE.OPERATIONS($C$1;$A$1;A5)"_ustr);
+    CPPUNIT_ASSERT_EQUAL(20.0, m_pDoc->GetValue(ScAddress(2,2,0)));
+    CPPUNIT_ASSERT_EQUAL(30.0, m_pDoc->GetValue(ScAddress(2,3,0)));
+    CPPUNIT_ASSERT_EQUAL(40.0, m_pDoc->GetValue(ScAddress(2,4,0)));
+
+    // The model shows its own result again once the table is calculated.
+    CPPUNIT_ASSERT_EQUAL(10.0, m_pDoc->GetValue(ScAddress(2,0,0)));
 
     m_pDoc->DeleteTab(0);
 }
