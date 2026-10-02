@@ -1293,6 +1293,11 @@ window.L.control.extension = function (
 	});
 };
 
+// A page loaded from file:// gets status 0 for a local file it has read:
+function responseSucceeded(resp: Response): boolean {
+	return resp.ok || (resp.status === 0 && window.location.protocol === 'file:');
+}
+
 // The kit-side text behind every command of an Apps Script add-on: the runner, followed by a
 // `commands` entry per menu function that hands the add-on's own sources to it.  The sources
 // travel as string literals rather than being pasted in, because the runner evaluates each one
@@ -1307,7 +1312,7 @@ async function tryLoadAppsScriptExtension(
 	map: any,
 ): Promise<ExtensionManifest | null> {
 	const gasResp = await fetch(app.LOUtil.getURL(baseRel + 'appsscript.json'));
-	if (!gasResp.ok) return null;
+	if (!responseSucceeded(gasResp)) return null;
 	const libraries = await loadGasLibraries(id, baseRel, await gasResp.json());
 	let listing: {
 		scripts?: string[];
@@ -1317,7 +1322,7 @@ async function tryLoadAppsScriptExtension(
 	} = {};
 	try {
 		const listResp = await fetch(app.LOUtil.getURL(baseRel + '_cool-gas.json'));
-		if (listResp.ok) listing = await listResp.json();
+		if (responseSucceeded(listResp)) listing = await listResp.json();
 	} catch {
 		// Missing sidecar is not fatal; discovery continues with no scripts.
 	}
@@ -1397,7 +1402,7 @@ async function tryLoadAppsScriptExtension(
 				Promise.all(
 					scriptNames.map(async (name) => {
 						const resp = await fetch(app.LOUtil.getURL(baseRel + name));
-						if (!resp.ok) {
+						if (!responseSucceeded(resp)) {
 							throw new Error(baseRel + name + ' HTTP ' + resp.status);
 						}
 						return await resp.text();
@@ -1429,7 +1434,8 @@ function loadGasRunnerExpr(baseRel: string): Promise<string> {
 	const url = app.LOUtil.getURL(baseRel + '../gas-kit-runner.js');
 	gasRunnerExpr = (async () => {
 		const resp = await fetch(url);
-		if (!resp.ok) throw new Error('gas-kit-runner.js HTTP ' + resp.status);
+		if (!responseSucceeded(resp))
+			throw new Error('gas-kit-runner.js HTTP ' + resp.status);
 		const src = await resp.text();
 		// Strip the `globalThis.__gasKitRunner =` prefix and the trailing semicolon so what
 		// remains is a bare `function(...) { ... }` expression the kit can wrap in an
@@ -1465,7 +1471,7 @@ async function loadGasLibraries(
 				'/';
 			const fetchFile = async (name: string) => {
 				const resp = await fetch(app.LOUtil.getURL(baseRel + dir + name));
-				if (!resp.ok) {
+				if (!responseSucceeded(resp)) {
 					throw new Error(baseRel + dir + name + ' HTTP ' + resp.status);
 				}
 				return resp;
@@ -1473,7 +1479,7 @@ async function loadGasLibraries(
 			const listResp = await fetch(
 				app.LOUtil.getURL(baseRel + dir + '_cool-gas.json'),
 			);
-			if (!listResp.ok) {
+			if (!responseSucceeded(listResp)) {
 				console.warn(
 					'extension ' +
 						id +
@@ -1779,7 +1785,8 @@ async function collectGasAddonMenu(
 		Promise.all(
 			scriptNames.map(async (s) => {
 				const resp = await fetch(app.LOUtil.getURL(baseRel + s));
-				if (!resp.ok) throw new Error(baseRel + s + ' HTTP ' + resp.status);
+				if (!responseSucceeded(resp))
+					throw new Error(baseRel + s + ' HTTP ' + resp.status);
 				return await resp.text();
 			}),
 		),
@@ -1899,7 +1906,7 @@ function loadExtensionCatalog(
 					const resp = await fetch(
 						app.LOUtil.getURL(baseRel + 'l10n/' + cand + '.json'),
 					);
-					if (!resp.ok) return null;
+					if (!responseSucceeded(resp)) return null;
 					const catalog = await resp.json();
 					return catalog && typeof catalog === 'object' ? catalog : null;
 				} catch (err) {
@@ -1968,7 +1975,7 @@ window.L.loadExtensions = async function (map: any, docType: string) {
 	const fetchIndex = async (indexBase: string): Promise<string[]> => {
 		try {
 			const resp = await fetch(app.LOUtil.getURL(indexBase + 'index.json'));
-			if (!resp.ok) throw new Error('HTTP ' + resp.status);
+			if (!responseSucceeded(resp)) throw new Error('HTTP ' + resp.status);
 			return await resp.json();
 		} catch (err) {
 			console.warn(
@@ -2002,7 +2009,7 @@ window.L.loadExtensions = async function (map: any, docType: string) {
 			const baseRel = baseSourceRel + id + '/';
 			try {
 				const resp = await fetch(app.LOUtil.getURL(baseRel + 'manifest.json'));
-				if (!resp.ok) throw new Error('HTTP ' + resp.status);
+				if (!responseSucceeded(resp)) throw new Error('HTTP ' + resp.status);
 				const manifest: ExtensionManifest = await resp.json();
 				// contributes is a string naming a separate JSON file (resolved the same way
 				// entry/icon are) holding the actual object, keeping manifest.json itself
@@ -2014,7 +2021,8 @@ window.L.loadExtensions = async function (map: any, docType: string) {
 					const uiPath = manifest.contributes as unknown as string;
 					try {
 						const uiResp = await fetch(app.LOUtil.getURL(baseRel + uiPath));
-						if (!uiResp.ok) throw new Error('HTTP ' + uiResp.status);
+						if (!responseSucceeded(uiResp))
+							throw new Error('HTTP ' + uiResp.status);
 						manifest.contributes = await uiResp.json();
 					} catch (err) {
 						console.warn(
@@ -2047,7 +2055,7 @@ window.L.loadExtensions = async function (map: any, docType: string) {
 								const scriptResp = await fetch(
 									app.LOUtil.getURL(baseRel + command.script),
 								);
-								if (!scriptResp.ok)
+								if (!responseSucceeded(scriptResp))
 									throw new Error('HTTP ' + scriptResp.status);
 								command.source = await scriptResp.text();
 							} catch (err) {
