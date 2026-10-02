@@ -1122,6 +1122,8 @@ void WebView::load(const Poco::URI& fileURL, bool newFile, bool isStarterMode, b
     _bridge = new Bridge(channel, this, _document, nullptr, _webView.get());
     if (requiresSaveAs)
         _bridge->setRequiresSaveAs(true);
+    if (newFile)
+        _bridge->setNewDocument(true);
     channel->registerObject("bridge", _bridge);
     _webView->page()->setWebChannel(channel);
 
