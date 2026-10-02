@@ -440,7 +440,18 @@ private:
     cpo::uno::Reference<css::text::XTextContent> image_;
 };
 
-class TextImpl: public cppu::WeakImplHelper<scriptinterop::XText> {
+template<typename T> class ElementImpl: public cppu::WeakImplHelper<T> {
+public:
+    cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override {
+        if (this->getType() != scriptinterop::ElementType_INLINE_IMAGE) {
+            return {};
+        }
+        return cpo::uno::Reference<scriptinterop::XInlineImage>(
+            static_cast<T *>(this), cpo::uno::UNO_QUERY_THROW);
+    }
+};
+
+class TextImpl: public ElementImpl<scriptinterop::XText> {
 public:
     explicit TextImpl(
         cpo::uno::Reference<scriptinterop::XElement> const & parent,
@@ -470,8 +481,6 @@ public:
         host->insertString(host->createTextCursorByRange(whole->getEnd()), text, false);
         return this;
     }
-
-    cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override { return nullptr; }
 
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
     // element:
@@ -858,7 +867,7 @@ private:
     std::vector<cpo::uno::Reference<css::text::XTextRange>> runs_;
 };
 
-class InlineImageImpl: public cppu::WeakImplHelper<scriptinterop::XInlineImage> {
+class InlineImageImpl: public ElementImpl<scriptinterop::XInlineImage> {
 public:
     explicit InlineImageImpl(
         cpo::uno::Reference<scriptinterop::XElement> const & parent,
@@ -866,8 +875,6 @@ public:
         parent_(parent), content_(content) {}
 
     cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return content_; }
-
-    cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override { return this; }
 
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
     // element:
@@ -973,7 +980,7 @@ private:
     cpo::uno::Reference<css::text::XTextContent> content_;
 };
 
-class ParagraphImpl : public cppu::WeakImplHelper<scriptinterop::XParagraph>
+class ParagraphImpl : public ElementImpl<scriptinterop::XParagraph>
 {
 public:
     explicit ParagraphImpl(
@@ -984,8 +991,6 @@ public:
     }
 
     cpo::uno::Reference<cpo::uno::XInterface> SAL_CALL getuno() override { return content_; }
-
-    cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override { return {}; }
 
     cpo::uno::Reference<scriptinterop::XText> asText() override {
         return new TextImpl(parent_, content_, getType());
@@ -1326,7 +1331,7 @@ private:
     cpo::uno::Reference<css::text::XTextContent> content_;
 };
 
-class TableCellImpl: public cppu::WeakImplHelper<scriptinterop::XTableCell> {
+class TableCellImpl: public ElementImpl<scriptinterop::XTableCell> {
 public:
     explicit TableCellImpl(
         cpo::uno::Reference<scriptinterop::XElement> const & parent,
@@ -1334,8 +1339,6 @@ public:
         parent_(parent), text_(text) {}
 
     cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return text_; }
-
-    cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override { return {}; }
 
     void clear() override {
         if (!text_.is()) {
@@ -1412,7 +1415,7 @@ private:
     cpo::uno::Reference<css::text::XText> text_;
 };
 
-class TableRowImpl: public cppu::WeakImplHelper<scriptinterop::XTableRow> {
+class TableRowImpl: public ElementImpl<scriptinterop::XTableRow> {
 public:
     TableRowImpl(
         cpo::uno::Reference<scriptinterop::XElement> const & parent,
@@ -1430,8 +1433,6 @@ public:
         }
         return row;
     }
-
-    cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override { return {}; }
 
     void clear() override {
         throw cpo::uno::RuntimeException(u"TableRow.clear is not yet implemented"_ustr); // TODO
@@ -1544,7 +1545,7 @@ private:
     sal_Int32 rowIndex_;
 };
 
-class TableImpl: public cppu::WeakImplHelper<scriptinterop::XTable> {
+class TableImpl: public ElementImpl<scriptinterop::XTable> {
 public:
     explicit TableImpl(
         cpo::uno::Reference<scriptinterop::XElement> const & parent,
@@ -1552,8 +1553,6 @@ public:
         parent_(parent), table_(table) {}
 
     cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return table_; }
-
-    cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override { return {}; }
 
     void clear() override {
         throw cpo::uno::RuntimeException(u"Table.clear is not yet implemented"_ustr); // TODO
@@ -2048,14 +2047,12 @@ private:
     sal_Int32 offset_ = 0;
 };
 
-class FootnoteSectionImpl: public cppu::WeakImplHelper<scriptinterop::XContainerElement> {
+class FootnoteSectionImpl: public ElementImpl<scriptinterop::XContainerElement> {
 public:
     explicit FootnoteSectionImpl(cpo::uno::Reference<css::text::XText> const & text):
         text_(text) {}
 
     cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return text_; }
-
-    cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override { return {}; }
 
     void clear() override {
         if (!text_.is()) {
@@ -2112,14 +2109,12 @@ private:
     cpo::uno::Reference<css::text::XText> text_;
 };
 
-class FootnoteImpl: public cppu::WeakImplHelper<scriptinterop::XFootnote> {
+class FootnoteImpl: public ElementImpl<scriptinterop::XFootnote> {
 public:
     explicit FootnoteImpl(cpo::uno::Reference<css::text::XFootnote> const & footnote):
         footnote_(footnote) {}
 
     cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return footnote_; }
-
-    cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override { return {}; }
 
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
     // element:
@@ -2163,7 +2158,7 @@ private:
     cpo::uno::Reference<css::text::XFootnote> footnote_;
 };
 
-class BodyImpl: public cppu::WeakImplHelper<scriptinterop::XBody> {
+class BodyImpl: public ElementImpl<scriptinterop::XBody> {
 public:
     explicit BodyImpl(
         cpo::uno::Reference<css::frame::XModel> const & model,
@@ -2190,8 +2185,6 @@ public:
     cpo::uno::Reference<scriptinterop::XParagraph> appendParagraph(OUString const & text) override {
         return appendImpl(text, u""_ustr);
     }
-
-    cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override { return {}; }
 
     void clear() override {
         throw cpo::uno::RuntimeException(u"Body.clear is not yet implemented"_ustr); // TODO
