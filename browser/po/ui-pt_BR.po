@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-10-02 05:52+0000\n"
+"PO-Revision-Date: 2026-10-04 12:51+0000\n"
 "Last-Translator: H2Oufoe <regularwater@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "collabora-online/collabora-ui/pt_BR/>\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 2026.10\n"
+"X-Generator: Weblate 2026.10.1.dev0\n"
 
 #: admin/admin.strings.js:15
 msgid "Admin console"
@@ -5797,51 +5797,51 @@ msgstr "Design original"
 
 #: src/control/Control.SlideImportPane.tsx:1394
 msgid "Linked, follows the slide number"
-msgstr ""
+msgstr "Vinculado, segue o número do slide"
 
 #: src/control/Control.SlideImportPane.tsx:1395
 msgid "Linked, follows the slide"
-msgstr ""
+msgstr "Vinculado, segue o slide"
 
 #: src/control/Control.SlideImportPane.tsx:1432
 msgid "Keep original design"
-msgstr ""
+msgstr "Mantenha o design original"
 
 #: src/control/Control.SlideImportPane.tsx:1446
 msgid "Stay linked to the source file"
-msgstr ""
+msgstr "Mantém vinculado ao arquivo de origem"
 
 #: src/control/Control.SlideImportPane.tsx:1484
 msgid "Follow the slide, wherever it moves"
-msgstr ""
+msgstr "Segue o slide, onde quer que ele se mova"
 
 #: src/control/Control.SlideImportPane.tsx:1486
 msgid "Follow the slide number"
-msgstr ""
+msgstr "Segue o número do slide"
 
 #: src/control/Control.SlideImportPane.tsx:1644
 msgid "Select the slides of {0}"
-msgstr ""
+msgstr "Selecione os slides de {0}"
 
 #: src/control/Control.SlideLinkToolbar.tsx:102
 msgid "Linked to {0} in {1}"
-msgstr ""
+msgstr "Vinculado o {0} com {1}"
 
 #: src/control/Control.SlideLinkToolbar.tsx:126
 msgid "Hide the actions for this linked slide"
-msgstr ""
+msgstr "Ocultar as ações para este slide vinculado"
 
 #: src/control/Control.SlideLinkToolbar.tsx:127
 msgid "Show the actions for this linked slide"
-msgstr ""
+msgstr "Mostrar as ações para este slide vinculado"
 
 #: src/control/Control.SlideLinkToolbar.tsx:137
 msgid "Unlink"
-msgstr ""
+msgstr "Desvincular"
 
 #: src/control/Control.SlideLinkToolbar.tsx:161
 msgid "Not available"
-msgstr ""
+msgstr "Não disponível"
 
 #: src/control/SlideSectionHeader.tsx:68
 msgid "Toggle section %1"
