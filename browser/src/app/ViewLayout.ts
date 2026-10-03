@@ -533,7 +533,8 @@ class ViewLayoutBase {
 		this.applyZoom(targetZoom, anchorTwips);
 
 		// Restore the cursor and selection handles hidden for the animation.
-		if (app.file.textCursor.visible) docLayer._cursorMarker.setOpacity(1);
+		if (docLayer._cursorMarker && app.file.textCursor.visible)
+			docLayer._cursorMarker.setOpacity(1);
 		const textInput: any = app.map._textInput;
 		if (textInput._cursorHandler) textInput._cursorHandler.setOpacity(1);
 		TextSelections.showHandles();
