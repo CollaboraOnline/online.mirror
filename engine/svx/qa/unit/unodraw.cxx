@@ -297,6 +297,47 @@ CPPUNIT_TEST_FIXTURE(UnodrawTest, testTextThemeColorSetBeforePlainColor)
     // i.e. the plain color cleared the theme color that the same call had set.
     CPPUNIT_ASSERT_EQUAL(model::ThemeColorType::Accent1, aCharColor.getThemeColorType());
 }
+
+CPPUNIT_TEST_FIXTURE(UnodrawTest, testReflectionProperties)
+{
+    loadFromURL(u"private:factory/simpress"_ustr);
+    uno::Reference<beans::XPropertySet> xShapeProps(insertRectangle(mxComponent), uno::UNO_QUERY);
+
+    // A new shape has no reflection, and the values it would have fade from opaque at the shape
+    // to invisible at the far end.
+    CPPUNIT_ASSERT(!xShapeProps->getPropertyValue(u"ReflectionEffect"_ustr).get<bool>());
+    CPPUNIT_ASSERT_EQUAL(
+        sal_Int32(0),
+        xShapeProps->getPropertyValue(u"ReflectionEffectDistance"_ustr).get<sal_Int32>());
+    CPPUNIT_ASSERT_EQUAL(
+        sal_Int32(0),
+        xShapeProps->getPropertyValue(u"ReflectionEffectBlurRadius"_ustr).get<sal_Int32>());
+    CPPUNIT_ASSERT_EQUAL(
+        sal_Int16(0),
+        xShapeProps->getPropertyValue(u"ReflectionEffectStartTransparency"_ustr).get<sal_Int16>());
+    CPPUNIT_ASSERT_EQUAL(
+        sal_Int16(0),
+        xShapeProps->getPropertyValue(u"ReflectionEffectStartPosition"_ustr).get<sal_Int16>());
+    CPPUNIT_ASSERT_EQUAL(
+        sal_Int16(100),
+        xShapeProps->getPropertyValue(u"ReflectionEffectEndTransparency"_ustr).get<sal_Int16>());
+    CPPUNIT_ASSERT_EQUAL(
+        sal_Int16(100),
+        xShapeProps->getPropertyValue(u"ReflectionEffectEndPosition"_ustr).get<sal_Int16>());
+
+    // Values set on the shape read back unchanged.
+    xShapeProps->setPropertyValue(u"ReflectionEffect"_ustr, cpo::uno::Any(true));
+    xShapeProps->setPropertyValue(u"ReflectionEffectDistance"_ustr, cpo::uno::Any(sal_Int32(250)));
+    xShapeProps->setPropertyValue(u"ReflectionEffectEndPosition"_ustr,
+                                  cpo::uno::Any(sal_Int16(35)));
+    CPPUNIT_ASSERT(xShapeProps->getPropertyValue(u"ReflectionEffect"_ustr).get<bool>());
+    CPPUNIT_ASSERT_EQUAL(
+        sal_Int32(250),
+        xShapeProps->getPropertyValue(u"ReflectionEffectDistance"_ustr).get<sal_Int32>());
+    CPPUNIT_ASSERT_EQUAL(
+        sal_Int16(35),
+        xShapeProps->getPropertyValue(u"ReflectionEffectEndPosition"_ustr).get<sal_Int16>());
+}
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
