@@ -105,6 +105,17 @@ class ViewLayoutWriter extends ViewLayoutBase {
 		return [centerX, centerY];
 	}
 
+	// The page starts at its centring offset, not at zero, so the
+	// scrollable width needs that offset too to reach the comments.
+	public override ensureViewSizeCoversComments(
+		extraWidth: number,
+		bottomY: number,
+	): void {
+		const centeringWidth =
+			extraWidth > 0 ? this.getCenteringOffset()[0] * app.pixelsToTwips : 0;
+		super.ensureViewSizeCoversComments(extraWidth + centeringWidth, bottomY);
+	}
+
 	private getCommentAndDocumentSpacingInfo(): DocumentSpacingInfo {
 		const commentSection = app.sectionContainer.getSectionWithName(
 			app.CSections.CommentList.name,
