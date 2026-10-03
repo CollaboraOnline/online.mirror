@@ -835,7 +835,7 @@ public class LOActivity extends AppCompatActivity {
                         Uri uri = mActivity.getIntent().getData();
                         inputStream = contentResolver.openInputStream(uri);
 
-                        mTempFile = File.createTempFile("LibreOffice", suffix, mActivity.getCacheDir());
+                        mTempFile = File.createTempFile("CollaboraOffice", suffix, mActivity.getCacheDir());
                         outputStream = new FileOutputStream(mTempFile);
 
                         byte[] buffer = new byte[1024];
@@ -1152,7 +1152,7 @@ public class LOActivity extends AppCompatActivity {
                     InputStream inputStream = null;
                     OutputStream outputStream = null;
                     try {
-                        final File tempFile = File.createTempFile("LibreOffice", "." + format, this.getCacheDir());
+                        final File tempFile = File.createTempFile("CollaboraOffice", "." + format, this.getCacheDir());
                         LOActivity.this.saveAs(tempFile.toURI().toString(), format, requestCopy ? "TakeOwnership" : null);
 
                         inputStream = new FileInputStream(tempFile);
@@ -1625,10 +1625,30 @@ public class LOActivity extends AppCompatActivity {
                 filename = cursor.getString(cursor.getColumnIndexOrThrow(OpenableColumns.DISPLAY_NAME));
         } catch (Exception e) {
             return null;
+        } finally {
+            if (cursor != null)
+                cursor.close();
         }
-        if (!withExtension)
-            filename = filename.substring(0, filename.lastIndexOf("."));
+        if (filename != null && !withExtension) {
+            int dot = filename.lastIndexOf('.');
+            if (dot > 0)
+                filename = filename.substring(0, dot);
+        }
         return filename;
+    }
+
+    /**
+     * Returns the name to offer in a save dialog for document export. The base name
+     * is the display name the content provider reports for the document.
+     */
+    private String getExportDisplayName(String exportedName) {
+        String displayName = getFileName(false);
+        if (displayName == null || displayName.isEmpty())
+            return exportedName;
+
+        int dot = exportedName.lastIndexOf('.');
+        String extension = dot >= 0 ? exportedName.substring(dot) : "";
+        return displayName + extension;
     }
 
     private void requestForCopy() {
@@ -1709,7 +1729,7 @@ public class LOActivity extends AppCompatActivity {
             return;
         }
 
-        String filename = srcFile.getName();
+        String filename = getExportDisplayName(srcFile.getName());
         int dot = filename.lastIndexOf('.');
         String extension = dot > 0 ? filename.substring(dot + 1).toLowerCase() : "";
         String mime = getMimeForFormat(extension);
@@ -1742,6 +1762,7 @@ public class LOActivity extends AppCompatActivity {
             String filename = optionsMap.get("name");
             if (filename == null)
                 filename = "document." + format;
+            filename = getExportDisplayName(filename);
             int requestID = getRequestIDForFormat(format);
 
             Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
