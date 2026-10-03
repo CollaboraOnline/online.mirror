@@ -816,7 +816,11 @@ export class ScrollSection extends CanvasSectionObject {
 		}
 
 		this.sectionProperties.previousDragDistance = null;
-		this.onMouseMove(point, null, e);
+
+		if (e.type === 'touchend')
+			this.onMouseLeave();
+		else
+			this.onMouseMove(point, null, e);
 	}
 
 	public onClick(point: cool.SimplePoint, e: MouseEvent): void {
