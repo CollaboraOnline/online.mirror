@@ -1862,6 +1862,9 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public onResize (): void {
+		// A browser zoom changes app.dpiScale and arrives as a resize.
+		this.sectionProperties.commentWidth = CommentSection.getCommentWidth();
+		this.sectionProperties.commentWidthBigger = CommentSection.getBiggerCommentWidth();
 		this.checkCollapseState();
 		// When window is resized, it may mean that comment wizard is closed. So we hide the highlights.
 		this.removeHighlighters();
