@@ -5880,6 +5880,21 @@ static bool hasPendingPasswordToModify(const SfxObjectShell* pObjectShell)
     return hasPasswordToModify(pObjectShell) && !pObjectShell->IsModifyPasswordEntered();
 }
 
+/// Removes the DontSaveIfUnmodified argument from the save arguments and returns its value.
+static bool extractDontSaveIfUnmodified(std::vector<beans::PropertyValue>& rArguments)
+{
+    bool bDontSaveIfUnmodified = false;
+    std::erase_if(rArguments, [&bDontSaveIfUnmodified](const beans::PropertyValue& rItem) {
+        if (rItem.Name == "DontSaveIfUnmodified")
+        {
+            bDontSaveIfUnmodified = rItem.Value.get<bool>();
+            return true;
+        }
+        return false;
+    });
+    return bDontSaveIfUnmodified;
+}
+
 void COKitDocumentImpl::postUnoCommand(const char* pCommand, const char* pArguments,
                                        bool bNotifyWhenFinished)
 {
@@ -5898,12 +5913,14 @@ void COKitDocumentImpl::postUnoCommand(const char* pCommand, const char* pArgume
             aJson.put("commandName", pCommand);
             aJson.put("success", false);
 
-            // The save is refused because this view is read-only. When the document has an
-            // edit password and carries no changes, the refusal is reported like a save of an
-            // unmodified document.
+            std::vector<beans::PropertyValue> aSaveArguments(
+                jsonToPropertyValuesVector(pArguments));
             SfxViewShell* pViewShell = SfxViewShell::Current();
             const SfxObjectShell* pObjectShell = pViewShell ? pViewShell->GetObjectShell() : nullptr;
-            if (pObjectShell && hasPasswordToModify(pObjectShell) && !pObjectShell->IsModified())
+            // A save that may skip an unchanged document gets the same answer the skip gives:
+            // unmodified.
+            if (extractDontSaveIfUnmodified(aSaveArguments) && pObjectShell
+                && !pObjectShell->IsModified())
             {
                 auto resultNode = aJson.startNode("result");
                 aJson.put("type", "string");
@@ -5992,16 +6009,7 @@ void COKitDocumentImpl::postUnoCommand(const char* pCommand, const char* pArgume
         aValue.Value <<= uno::Reference<task::XInteractionHandler2>(pInteraction);
         aPropertyValuesVector.push_back(aValue);
 
-        bool bDontSaveIfUnmodified = false;
-        std::erase_if(aPropertyValuesVector,
-                                                   [&bDontSaveIfUnmodified](const beans::PropertyValue& aItem){
-                                                       if (aItem.Name == "DontSaveIfUnmodified")
-                                                       {
-                                                           bDontSaveIfUnmodified = aItem.Value.get<bool>();
-                                                           return true;
-                                                       }
-                                                       return false;
-                                                   });
+        const bool bDontSaveIfUnmodified = extractDontSaveIfUnmodified(aPropertyValuesVector);
 
         // skip saving and tell the result via UNO_COMMAND_RESULT
         if (bDontSaveIfUnmodified && (!pDocSh || !pDocSh->IsModified()))

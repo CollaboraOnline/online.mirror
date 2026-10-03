@@ -151,6 +151,8 @@ public:
     void closeDoc() { closeDoc(m_pDocument); }
     static void callback(COKitCallbackType eType, const char* pPayload, void* pData);
     void callbackImpl(COKitCallbackType eType, const char* pPayload);
+    boost::property_tree::ptree postSaveAndReadResult(COKitDocumentImpl* pDocument,
+                                                      const char* pArguments);
 
     void testGetStyles();
     void testGetFonts();
@@ -166,6 +168,7 @@ public:
     void testPaintTile();
     void testSaveAs();
     void testSaveFailedReportsReason();
+    void testSaveFromReadOnlyView();
     void testExportDirectToPdfDottedName();
     void testSaveAsJsonOptions();
     void testSaveAsCalc();
@@ -261,6 +264,7 @@ public:
     CPPUNIT_TEST(testPaintTile);
     CPPUNIT_TEST(testSaveAs);
     CPPUNIT_TEST(testSaveFailedReportsReason);
+    CPPUNIT_TEST(testSaveFromReadOnlyView);
     CPPUNIT_TEST(testExportDirectToPdfDottedName);
     CPPUNIT_TEST(testSaveAsJsonOptions);
     CPPUNIT_TEST(testSaveAsCalc);
@@ -713,6 +717,21 @@ void DesktopKitTest::testSaveAs()
     CPPUNIT_ASSERT(pDocument->saveAs(maTempFile.GetURL().toUtf8().getStr(), "png", nullptr));
 }
 
+boost::property_tree::ptree DesktopKitTest::postSaveAndReadResult(COKitDocumentImpl* pDocument,
+                                                                   const char* pArguments)
+{
+    TimeValue aTimeValue = { 5, 0 };
+    m_aCommandResultCondition.reset();
+    pDocument->postUnoCommand(".uno:Save", pArguments, true);
+    Scheduler::ProcessEventsToIdle();
+    m_aCommandResultCondition.wait(aTimeValue);
+
+    boost::property_tree::ptree aTree;
+    std::stringstream aStream((std::string(m_aCommandResult)));
+    boost::property_tree::read_json(aStream, aTree);
+    return aTree;
+}
+
 void DesktopKitTest::testSaveFailedReportsReason()
 {
     // Load the document editable, then drop the medium to read-only while leaving the document
@@ -727,18 +746,10 @@ void DesktopKitTest::testSaveFailedReportsReason()
     CPPUNIT_ASSERT(pShell);
     pShell->SetReadOnly();
 
-    TimeValue aTimeValue = { 5, 0 };
-    m_aCommandResultCondition.reset();
     // A save argument makes the dispatch report the store's own true/false result rather than
     // masking a failed save as done, matching how the kit posts a save with its own arguments.
-    pDocument->postUnoCommand(".uno:Save",
-                                      "{\"NoFileSync\":{\"type\":\"boolean\",\"value\":false}}", true);
-    Scheduler::ProcessEventsToIdle();
-    m_aCommandResultCondition.wait(aTimeValue);
-
-    boost::property_tree::ptree aTree;
-    std::stringstream aStream((std::string(m_aCommandResult)));
-    boost::property_tree::read_json(aStream, aTree);
+    boost::property_tree::ptree aTree = postSaveAndReadResult(
+        pDocument, "{\"NoFileSync\":{\"type\":\"boolean\",\"value\":false}}");
 
     CPPUNIT_ASSERT_EQUAL(std::string(".uno:Save"),
                          aTree.get_child("commandName").get_value<std::string>());
@@ -748,6 +759,42 @@ void DesktopKitTest::testSaveFailedReportsReason()
     CPPUNIT_ASSERT_EQUAL(std::string("string"),
                          aTree.get_child("result.type").get_value<std::string>());
     CPPUNIT_ASSERT(!aTree.get_child("result.value").get_value<std::string>().empty());
+}
+
+void DesktopKitTest::testSaveFromReadOnlyView()
+{
+    // A read-only view cannot save. The answer to the refused save depends on whether the caller
+    // asked to skip an unchanged document.
+    m_pDocument = loadDocUrlImpl(createFileURL(u"blank_text.odt"), COKitDocumentType::TEXT);
+    COKitDocumentImpl* pDocument = m_pDocument.get();
+    pDocument->registerCallback(&DesktopKitTest::callback, this);
+    KitHelper::setViewReadOnly(pDocument->getView(), true);
+
+    const char* const pSkipUnmodified
+        = "{\"DontSaveIfUnmodified\":{\"type\":\"boolean\",\"value\":true}}";
+    const char* const pPlainSave = "{\"DontTerminateEdit\":{\"type\":\"boolean\",\"value\":true}}";
+
+    // A save that may skip an unchanged document is answered like that skip.
+    boost::property_tree::ptree aTree = postSaveAndReadResult(pDocument, pSkipUnmodified);
+    CPPUNIT_ASSERT_EQUAL(std::string(".uno:Save"),
+                         aTree.get_child("commandName").get_value<std::string>());
+    CPPUNIT_ASSERT_EQUAL(false, aTree.get_child("success").get_value<bool>());
+    CPPUNIT_ASSERT_EQUAL(std::string("unmodified"),
+                         aTree.get_child("result.value").get_value<std::string>());
+
+    // A save that did not ask for the skip is a plain failure, with no result string.
+    aTree = postSaveAndReadResult(pDocument, pPlainSave);
+    CPPUNIT_ASSERT_EQUAL(false, aTree.get_child("success").get_value<bool>());
+    CPPUNIT_ASSERT(!aTree.get_child_optional("result"));
+
+    // Once the document carries changes there is nothing to skip, so the refusal is a failure
+    // even for a save that may skip an unchanged document.
+    SfxObjectShell* pShell = SfxObjectShell::GetShellFromComponent(pDocument->mxComponent);
+    CPPUNIT_ASSERT(pShell);
+    pShell->SetModified(true);
+    aTree = postSaveAndReadResult(pDocument, pSkipUnmodified);
+    CPPUNIT_ASSERT_EQUAL(false, aTree.get_child("success").get_value<bool>());
+    CPPUNIT_ASSERT(!aTree.get_child_optional("result"));
 }
 
 void DesktopKitTest::testExportDirectToPdfDottedName()
