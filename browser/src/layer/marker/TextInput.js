@@ -562,7 +562,7 @@ window.L.TextInput = window.L.Layer.extend({
 		// Move and display under-caret marker
 
 		if (window.touch.currentlyUsingTouchscreen() && !app.activeDocument.activeView.hasTextSelection && this._cursorHandler) {
-			this._cursorHandler.setPosition(app.file.textCursor.rectangle.pX1, app.file.textCursor.rectangle.pY2 + (0 * app.dpiScale));
+			this._cursorHandler.moveUnderCaret();
 			this._cursorHandler.setShowSection(true);
 		} else if (this._cursorHandler) {
 			this._cursorHandler.setShowSection(false);

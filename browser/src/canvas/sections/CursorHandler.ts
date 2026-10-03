@@ -73,8 +73,21 @@ class CursorHandler extends HTMLObjectSection {
 				1,
 				0,
 			);
+
+			// Put the handle under the caret now. The cursor update from core moves it again
+			// when the caret moved.
+			this.moveUnderCaret();
 		}
 		this.sectionProperties.lastPosition = null;
+	}
+
+	// Place the handle directly below the text cursor.
+	public moveUnderCaret(): void {
+		Util.ensureValue(app.file.textCursor.rectangle);
+		this.setPosition(
+			app.file.textCursor.rectangle.pX1,
+			app.file.textCursor.rectangle.pY2,
+		);
 	}
 
 	setOpacity(value: number) {
