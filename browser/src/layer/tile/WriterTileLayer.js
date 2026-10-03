@@ -107,9 +107,22 @@ window.L.WriterTileLayer = window.L.CanvasTileLayer.extend({
 		}
 	},
 
+	// The engine sends new sizes often while a document loads, and
+	// each one set the scrollable width back to the page width until
+	// the next comment layout. Keep the extra width beside the page:
+	// the comment column and the empty strip left of a centred page.
 	_setNewSize: function (/*cool.SimplePoint*/ size) {
+		const layout = app.activeDocument.activeLayout;
+		const oldSize = app.activeDocument.fileSize;
+		const extraWidth = oldSize ? Math.max(0, layout.viewSize.x - oldSize.x) : 0;
+
 		app.activeDocument.fileSize = size;
-		app.activeDocument.activeLayout.viewSize = size.clone();
+		layout.viewSize = new cool.SimplePoint(size.x + extraWidth, size.y);
+
+		const commentSection = app.sectionContainer.getSectionWithName(app.CSections.CommentList.name);
+		if (commentSection && !commentSection.commentsHiddenOrNotPresent())
+			commentSection.layoutOnNextDraw();
+
 		this._updateScrollLimits();
 	},
 

@@ -1881,6 +1881,12 @@ export class CommentSection extends CanvasSectionObject {
 		this._commentPositionDirty = true;
 	}
 
+	// The comments are laid out again on the next frame, without animation.
+	public layoutOnNextDraw (): void {
+		this._commentPositionDirty = true;
+		app.sectionContainer.requestReDraw();
+	}
+
 	public onDraw (frameCount?: number, elapsedTime?: number): void {
 		if (this._commentPositionDirty) {
 			this._commentPositionDirty = false;
