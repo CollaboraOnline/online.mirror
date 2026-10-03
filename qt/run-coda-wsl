@@ -1,0 +1,31 @@
+#!/bin/bash
+# WSL/headless launch wrapper for coda-qt
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Force headless SVP VCL plugin for LibreOffice Kit
+export SAL_USE_VCLPLUGIN=svp
+
+# Fix WSL fontconfig error
+export FONTCONFIG_PATH=/etc/fonts
+
+# Software rendering for Qt/Chromium (WSL has no GPU)
+export LIBGL_ALWAYS_SOFTWARE=1
+
+# Prevent engine display connection
+export DISPLAY="${DISPLAY:-:0}"
+
+# Force X11 for WSLg
+unset WAYLAND_DISPLAY
+export QT_QPA_PLATFORM=xcb
+
+# Verbose logging
+export SAL_LOG="+WARN+INFO.lokit"
+
+echo "[run-coda-wsl] Starting coda-qt with WSL-safe environment..."
+echo "[run-coda-wsl] SAL_USE_VCLPLUGIN=svp  LIBGL_ALWAYS_SOFTWARE=1  DISPLAY=$DISPLAY  QT_QPA_PLATFORM=xcb"
+
+# Fix NSS version mismatch
+export LD_PRELOAD="$SCRIPT_DIR/../engine/instdir/program/libnss3.so:$SCRIPT_DIR/../engine/instdir/program/libsmime3.so:$SCRIPT_DIR/../engine/instdir/program/libnssutil3.so:$SCRIPT_DIR/../engine/instdir/program/libnspr4.so"
+
+exec "$SCRIPT_DIR/coda-qt" "$@"

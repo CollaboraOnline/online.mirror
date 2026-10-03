@@ -1032,6 +1032,12 @@ void WebView::onDocumentUnmodified()
         _onUnmodified();
 }
 
+void WebView::onDocumentModifiedStatusChanged(bool modified)
+{
+    if (_onModifiedStatusChange)
+        _onModifiedStatusChange(modified);
+}
+
 QString WebView::composedWindowTitle() const
 {
     return _docTitle.isEmpty() ? QStringLiteral(APP_NAME)

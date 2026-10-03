@@ -384,6 +384,7 @@ int TabManager::registerTab(std::unique_ptr<WebView> wv, int insertAt)
             closeTab(tid);
     });
     raw->setOnTitleChange([this, raw](const QString& title) { onWebViewTitleChanged(raw, title); });
+    raw->setOnModifiedStatusChange([this](bool) { emitTabsChangedNow(); });
     // A document whose content has just reached the disk can be dropped now, so the limit
     // does not have to wait for the next tab activation to notice.
     raw->setOnUnmodified([this]() { scheduleLiveViewLimit(kLiveViewLimitDelayMilliseconds); });
@@ -424,6 +425,7 @@ std::unique_ptr<WebView> TabManager::detachAt(std::vector<Entry>::iterator it)
     delete placeholder;
     wv->setOnCloseRequest({});
     wv->setOnTitleChange({});
+    wv->setOnModifiedStatusChange({});
     wv->setOnUnmodified({});
 
     // activateTab() below already emits; only emit here if it did not run.

@@ -138,6 +138,7 @@ public:
     using CloseRequestFn = std::function<void()>;
     using TitleChangeFn = std::function<void(const QString&)>;
     using UnmodifiedFn = std::function<void()>;
+    using ModifiedStatusChangeFn = std::function<void(bool)>;
 
     explicit WebView(QWebEngineProfile* profile, bool isWelcome = false);
     ~WebView() override;
@@ -158,10 +159,12 @@ public:
     void setOnTitleChange(TitleChangeFn cb) { _onTitleChange = std::move(cb); }
     // Runs each time the document stops holding a change that is not on disk.
     void setOnUnmodified(UnmodifiedFn cb) { _onUnmodified = std::move(cb); }
+    void setOnModifiedStatusChange(ModifiedStatusChangeFn cb) { _onModifiedStatusChange = std::move(cb); }
     void requestClose();
     void updateTitle(const QString& title);
     /// The document reported that it holds no change that is not on disk.
     void onDocumentUnmodified();
+    void onDocumentModifiedStatusChanged(bool modified);
     QString composedWindowTitle() const;
 
     QString documentTitle() const { return _docTitle; }
@@ -279,6 +282,7 @@ private:
     CloseRequestFn _onCloseRequest;
     TitleChangeFn _onTitleChange;
     UnmodifiedFn _onUnmodified;
+    ModifiedStatusChangeFn _onModifiedStatusChange;
 
     static std::vector<WebView*> s_instances;
 };

@@ -890,10 +890,14 @@ QVariant Bridge::cool(const QString& messageStr)
         const bool wasModified = _modified;
         _modified = (object->get("state").toString() == "true");
         LOG_TRC_NOFILE("Document modified status changed: " << (_modified ? "modified" : "unmodified"));
-        if (wasModified && !_modified)
+        if (wasModified != _modified)
         {
             if (WebView* owner = _owner.data())
-                owner->onDocumentUnmodified();
+            {
+                owner->onDocumentModifiedStatusChanged(_modified);
+                if (wasModified && !_modified)
+                    owner->onDocumentUnmodified();
+            }
         }
     }
     else if (tokens.equals(0, "UPLOADSETTINGS"))
