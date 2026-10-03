@@ -3644,6 +3644,14 @@ namespace xmloff::token {
         TOKEN( "hidden-columns",                  XML_HIDDEN_COLUMNS ),
         TOKEN( "filter-guid",                     XML_FILTER_GUID ),
 
+        TOKEN( "reflection",                      XML_REFLECTION ),
+        TOKEN( "reflection-distance",             XML_REFLECTION_DISTANCE ),
+        TOKEN( "reflection-blur",                 XML_REFLECTION_BLUR ),
+        TOKEN( "reflection-start-transparency",   XML_REFLECTION_START_TRANSPARENCY ),
+        TOKEN( "reflection-start-position",       XML_REFLECTION_START_POSITION ),
+        TOKEN( "reflection-end-transparency",     XML_REFLECTION_END_TRANSPARENCY ),
+        TOKEN( "reflection-end-position",         XML_REFLECTION_END_POSITION ),
+
 #if OSL_DEBUG_LEVEL > 0
         { 0, nullptr, std::nullopt,               XML_TOKEN_END }
 #else

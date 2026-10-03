@@ -3377,4 +3377,11 @@ sheet-views
 sheet-view
 hidden-columns
 filter-guid
+reflection
+reflection-distance
+reflection-blur
+reflection-start-transparency
+reflection-start-position
+reflection-end-transparency
+reflection-end-position
 TOKEN_END_DUMMY
