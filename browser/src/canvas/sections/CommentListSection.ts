@@ -316,7 +316,7 @@ export class CommentSection extends CanvasSectionObject {
 		this.sectionProperties.width = Math.round(1 * app.dpiScale); // Configurable variable.
 		this.sectionProperties.scrollAnnotation = null; // For impress, when 1 or more comments exist.
 		this.sectionProperties.commentWidth = CommentSection.getCommentWidth();
-		this.sectionProperties.commentWidthBigger =  588 * app.dpiScale;
+		this.sectionProperties.commentWidthBigger = CommentSection.getBiggerCommentWidth();
 		this.sectionProperties.deflectionOfSelectedComment = 160; // CSS pixels.
 		this.sectionProperties.showSelectedBigger = false;
 		this.sectionProperties.calcCurrentComment = null; // We don't automatically show a Calc comment when cursor is on its cell. But we remember it to show if user presses Alt+C keys.
@@ -526,6 +526,10 @@ export class CommentSection extends CanvasSectionObject {
 
 	public static getCommentWidth(): number {
 		return 200 * 1.3 * app.dpiScale;
+	}
+
+	public static getBiggerCommentWidth(): number {
+		return 588 * app.dpiScale;
 	}
 
 	/// If the current layout has more than one pages in a row, so the comment should be next to
