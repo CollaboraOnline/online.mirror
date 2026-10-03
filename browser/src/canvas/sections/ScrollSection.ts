@@ -769,10 +769,8 @@ export class ScrollSection extends CanvasSectionObject {
 			}
 		}
 
-		// Same reasoning as vertical: CompareChanges can have negative pX1.
-		const canScrollH = layout.type === 'ViewLayoutCompareChanges'
-			? layout.canScrollHorizontal(documentAnchor)
-			: layout.viewedRectangle.pX1 >= 0;
+		// The same test decides whether the bar is drawn.
+		const canScrollH = layout.canScrollHorizontal(documentAnchor);
 
 		if (canScrollH) {
 			if (point.pY >= this.size[1] - scrollProps.usableThickness) {
