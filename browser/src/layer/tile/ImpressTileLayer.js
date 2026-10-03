@@ -210,13 +210,10 @@ window.L.ImpressTileLayer = window.L.CanvasTileLayer.extend({
 	_putPCWInsideFlex: function () {
 		if (!this._isPCWInsideFlex()) {
 			var pcw = document.getElementById('presentation-controls-wrapper');
-			if (pcw) {
+			if (pcw && pcw.parentNode) {
 				var frc = document.getElementById('main-document-content');
-				document.body.removeChild(pcw);
-
-				document
-					.getElementById('document-container')
-					.parentNode.insertBefore(pcw, frc.children[0]);
+				pcw.parentNode.removeChild(pcw);
+				frc.insertBefore(pcw, frc.firstElementChild);
 			}
 		}
 	},
