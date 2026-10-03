@@ -253,6 +253,8 @@ OUString idToString(sal_uInt32 nId)
             return u"TEXTHIERARCHYEMPHASISMARKPRIMITIVE2D"_ustr;
         case PRIMITIVE2D_ID_PDFPRIMITIVE2D:
             return u"PDFPRIMITIVE2D"_ustr;
+        case PRIMITIVE2D_ID_REFLECTIONPRIMITIVE2D:
+            return u"REFLECTIONPRIMITIVE2D"_ustr;
         default:
             return OUString::number((nId >> 16) & 0xFF) + "|" + OUString::number(nId & 0xFF);
     }

@@ -40,6 +40,7 @@ $(eval $(call gb_CppunitTest_add_exception_objects,drawinglayer_processors, \
 	drawinglayer/qa/unit/cairopixelprocessor2d \
 	drawinglayer/qa/unit/GlowPrimitive2dTest \
 	drawinglayer/qa/unit/PdfPrimitive2DTest \
+	drawinglayer/qa/unit/ReflectionPrimitive2dTest \
 	drawinglayer/qa/unit/vclmetafileprocessor2d \
 	drawinglayer/qa/unit/vclpixelprocessor2d \
 ))
