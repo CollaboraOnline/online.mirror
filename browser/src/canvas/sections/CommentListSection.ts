@@ -553,7 +553,8 @@ export class CommentSection extends CanvasSectionObject {
 		}
 		else {
 			const availableSpace = (this.containerObject.getDocumentAnchorSection().size[0] - app.activeDocument.fileSize.pX) * 0.5;
-			return Math.round(availableSpace);
+			// Rounding down keeps the two margins together within the gap.
+			return Math.floor(availableSpace);
 		}
 	}
 
