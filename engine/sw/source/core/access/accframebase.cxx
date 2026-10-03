@@ -48,9 +48,12 @@ bool SwAccessibleFrameBase::IsSelected()
     const SwViewShell& rVSh = GetMap()->GetShell();
     if (auto pFESh = dynamic_cast<const SwFEShell*>(&rVSh))
     {
-        const SwFrame *pFlyFrame = pFESh->GetSelectedFlyFrame();
-        if( pFlyFrame == GetFrame() )
-            bRet = true;
+        // Any number of fly frames may be selected together.
+        for (const SwFlyFrame* pFlyFrame : pFESh->GetSelectedFlyFrames())
+        {
+            if( pFlyFrame == GetFrame() )
+                bRet = true;
+        }
     }
 
     return bRet;

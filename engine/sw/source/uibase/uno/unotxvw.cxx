@@ -26,6 +26,7 @@
 #include <docsh.hxx>
 #include <rubylist.hxx>
 #include <doc.hxx>
+#include <flyfrm.hxx>
 #include <IDocumentDeviceAccess.hxx>
 #include <unotxvw.hxx>
 #include <unodispatch.hxx>
@@ -300,6 +301,25 @@ cpo::uno::Any SwXTextView::getSelection()
             break;
             case ShellMode::Graphic         :
             {
+                const std::vector<SwFlyFrame*> aFlyFrames = rSh.GetSelectedFlyFrames();
+                if (aFlyFrames.size() > 1)
+                {
+                    // Several selected images come back as a collection, the way several
+                    // shapes do.
+                    uno::Reference< drawing::XShapes > xShapes = drawing::ShapeCollection::create(
+                            comphelper::getProcessComponentContext());
+                    for (SwFlyFrame* pFlyFrame : aFlyFrames)
+                    {
+                        SwFrameFormat* pFlyFormat = pFlyFrame->GetFormat();
+                        uno::Reference< drawing::XShape > xShape(
+                            cppu::getXWeak(SwXTextGraphicObject::CreateXTextGraphicObject(
+                                pFlyFormat->GetDoc(), pFlyFormat).get()), uno::UNO_QUERY);
+                        xShapes->add(xShape);
+                    }
+                    aRef.set(xShapes, uno::UNO_QUERY);
+                    break;
+                }
+
                 SwFrameFormat *const pFormat = rSh.GetFlyFrameFormat();
                 if (pFormat)
                 {
