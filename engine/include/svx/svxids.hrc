@@ -1118,8 +1118,16 @@ class XFillGradientItem;
 // slot uses the next free number instead.
 #define SID_TABLE_STYLE_LIST                            TypedWhichId<SfxStringItem>( SID_SVX_START + 1263 )
 
+#define SID_ATTR_REFLECTION                             ( SID_SVX_START + 1264 )
+#define SID_ATTR_REFLECTION_DISTANCE                    ( SID_SVX_START + 1265 )
+#define SID_ATTR_REFLECTION_BLUR_RADIUS                 ( SID_SVX_START + 1266 )
+#define SID_ATTR_REFLECTION_START_TRANSPARENCY          ( SID_SVX_START + 1267 )
+#define SID_ATTR_REFLECTION_START_POSITION              ( SID_SVX_START + 1268 )
+#define SID_ATTR_REFLECTION_END_TRANSPARENCY            ( SID_SVX_START + 1269 )
+#define SID_ATTR_REFLECTION_END_POSITION                ( SID_SVX_START + 1270 )
+
 // IMPORTANT NOTE: adjust SID_SVX_FIRSTFREE, when adding new slot id
-#define SID_SVX_FIRSTFREE                               ( SID_SVX_START + 1263 + 1 )
+#define SID_SVX_FIRSTFREE                               ( SID_SVX_START + 1270 + 1 )
 
 // Overflow check for slot IDs
 #if SID_SVX_FIRSTFREE > SID_SVX_END
