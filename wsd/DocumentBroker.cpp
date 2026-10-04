@@ -5396,22 +5396,35 @@ void DocumentBroker::disconnectSessionInternal(const std::shared_ptr<ClientSessi
                 failLoadingSessions(/*remove=*/true);
             }
 
-            if (!Util::isMobileApp() && !isLoaded() &&
+            if (!isLoaded() &&
                 _sessions.size() <= 1) // We remove the session below, so we still have it here.
             {
-                // We aren't even loaded and no other views--kill.
-                // If we send disconnect, we risk hanging because we flag Core for
-                // quiting via unipoll, but Core would still continue loading.
-                // If at the end of loading it shows a dialog (such as the macro or
-                // csv import dialogs), it will wait for their dismissal indefinitely.
-                // Neither would our load-timeout kick in, since we would be gone.
-                LOG_INF("Session [" << session->getName() << "] disconnected but DocKey ["
-                                    << _docKey
-                                    << "] isn't loaded yet. Terminating the child roughly");
-                if (_childProcess)
-                    _childProcess->terminate();
+                if (Util::isMobileApp())
+                {
+                    // The kit shares our process, so there is nothing to kill. Marking the
+                    // document to destroy lets the poll loop stop it once this last session is
+                    // gone, which it does not do for an unloaded document otherwise.
+                    LOG_INF("Session [" << session->getName() << "] disconnected but DocKey ["
+                                        << _docKey
+                                        << "] isn't loaded yet. Marking it to destroy");
+                    _docState.markToDestroy();
+                }
+                else
+                {
+                    // We aren't even loaded and no other views--kill.
+                    // If we send disconnect, we risk hanging because we flag Core for
+                    // quiting via unipoll, but Core would still continue loading.
+                    // If at the end of loading it shows a dialog (such as the macro or
+                    // csv import dialogs), it will wait for their dismissal indefinitely.
+                    // Neither would our load-timeout kick in, since we would be gone.
+                    LOG_INF("Session [" << session->getName() << "] disconnected but DocKey ["
+                                        << _docKey
+                                        << "] isn't loaded yet. Terminating the child roughly");
+                    if (_childProcess)
+                        _childProcess->terminate();
 
-                stop("Disconnected before loading");
+                    stop("Disconnected before loading");
+                }
             }
         }
 
