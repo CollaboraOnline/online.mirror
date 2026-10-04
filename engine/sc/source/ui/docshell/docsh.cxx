@@ -83,7 +83,6 @@
 
 #include <scabstdlg.hxx>
 #include <sot/formats.hxx>
-#include <svx/compatflags.hxx>
 #include <svx/dialogs.hrc>
 #include <svx/svdpagv.hxx>
 #include <svx/svdpage.hxx>
@@ -666,20 +665,6 @@ bool ScDocShell::Load( SfxMedium& rMedium )
     //  only the latin script language is loaded
     //  -> initialize the others from options (before loading)
     InitOptions(true);
-
-    // If this is an ODF file being loaded, then by default, use legacy processing
-    // (if required, it will be overridden in *::ReadUserDataSequence())
-    if (IsOwnStorageFormatWithSettings(rMedium))
-    {
-        m_pDocument->SetCompatibilityFlag(SdrCompatibilityFlag::AnchoredTextOverflowLegacy,
-                                          true); // for tdf#99729
-        m_pDocument->SetCompatibilityFlag(SdrCompatibilityFlag::LegacyFontwork,
-                                          true); // for tdf#148000
-        m_pDocument->SetCompatibilityFlag(SdrCompatibilityFlag::LineSpacingBelowBaselineLegacy,
-                                          true); // for tdf#163590
-        m_pDocument->SetCompatibilityFlag(SdrCompatibilityFlag::TextFittingLegacy,
-                                          true); // for tdf#163590
-    }
 
     GetUndoManager()->Clear();
 

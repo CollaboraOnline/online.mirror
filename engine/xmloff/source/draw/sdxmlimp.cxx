@@ -732,6 +732,20 @@ void SdXMLImport::SetConfigurationSettings(const cpo::uno::Sequence<css::beans::
     if( !xInfo.is() )
         return;
 
+    // Documents written after these were introduced store them, in the settings below or in the
+    // view settings, and those values replace these.
+    static constexpr OUString aLegacyFlags[] = {
+        u"AnchoredTextOverflowLegacy"_ustr, // tdf#99729
+        u"LegacySingleLineFontwork"_ustr, // tdf#148000
+        u"LineSpacingBelowBaselineLegacy"_ustr, // tdf#163590
+        u"TextFittingLegacy"_ustr, // tdf#163590
+    };
+    for (const OUString& rName : aLegacyFlags)
+    {
+        if (xInfo->hasPropertyByName(rName))
+            xProps->setPropertyValue(rName, uno::Any(true));
+    }
+
     const cpo::uno::Sequence<beans::PropertyValue>* pValues = &aConfigProps;
 
     DocumentSettingsSerializer *pFilter;

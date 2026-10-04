@@ -35,7 +35,6 @@
 #include <editeng/autokernitem.hxx>
 #include <com/sun/star/document/UpdateDocMode.hpp>
 #include <com/sun/star/i18n/ScriptType.hpp>
-#include <svx/compatflags.hxx>
 #include <svx/svxids.hrc>
 #include <editeng/fhgtitem.hxx>
 #include <editeng/fontitem.hxx>
@@ -481,24 +480,12 @@ bool  SwDocShell::Load( SfxMedium& rMedium )
 
         AddLink();      // set Link and update Data!!
 
-        // Define some settings for legacy ODF files that have different default values now
-        // (if required, they will be overridden later when settings will be read)
         SwDrawModel* pDrawModel(nullptr);
-        if (IsOwnStorageFormatWithSettings(rMedium))
+        if (IsOwnStorageFormat(rMedium))
         {
             pDrawModel = m_xDoc->getIDocumentDrawModelAccess().GetDrawModel();
             if (pDrawModel)
-            {
-                pDrawModel->SetCompatibilityFlag(SdrCompatibilityFlag::AnchoredTextOverflowLegacy,
-                                                 true); // legacy processing for tdf#99729
-                pDrawModel->SetCompatibilityFlag(SdrCompatibilityFlag::LegacyFontwork,
-                                                 true); // legacy processing for tdf#148000
-                pDrawModel->SetCompatibilityFlag(SdrCompatibilityFlag::LineSpacingBelowBaselineLegacy,
-                                                 true); // legacy processing for tdf#163590
-                pDrawModel->SetCompatibilityFlag(SdrCompatibilityFlag::TextFittingLegacy,
-                                                 true); // legacy processing for tdf#163590
                 pDrawModel->incImportExport();
-            }
         }
 
         // Loading

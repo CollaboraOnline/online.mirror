@@ -1904,6 +1904,18 @@ CPPUNIT_TEST_FIXTURE(Test, testNoSettingsFitsTextTheNewWay)
     CPPUNIT_ASSERT(getProperty<bool>(xSettings, u"LineSpacingBelowBaselineLegacy"_ustr));
 }
 
+CPPUNIT_TEST_FIXTURE(Test, testForeignSettingsFitsTextTheNewWay)
+{
+    // A document with a settings.xml that holds none of our settings, as other producers write
+    // it, fits text the new way.
+    createSwDoc("foreign-settings.odt");
+    uno::Reference<lang::XMultiServiceFactory> xFactory(mxComponent, uno::UNO_QUERY);
+    uno::Reference<beans::XPropertySet> xSettings(
+        xFactory->createInstance(u"com.sun.star.document.Settings"_ustr), uno::UNO_QUERY);
+    CPPUNIT_ASSERT(!getProperty<bool>(xSettings, u"TextFittingLegacy"_ustr));
+    CPPUNIT_ASSERT(!getProperty<bool>(xSettings, u"LineSpacingBelowBaselineLegacy"_ustr));
+}
+
 } // end of anonymous namespace
 CPPUNIT_PLUGIN_IMPLEMENT();
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

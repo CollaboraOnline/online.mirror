@@ -38,6 +38,7 @@
 #include <xmloff/xmltoken.hxx>
 #include <xmloff/xmlerror.hxx>
 #include <xmloff/ProgressBarHelper.hxx>
+#include <svx/compatflags.hxx>
 #include <svx/svdpage.hxx>
 
 #include <svl/languageoptions.hxx>
@@ -738,6 +739,20 @@ void ScXMLImport::SetViewSettings(const cpo::uno::Sequence<beans::PropertyValue>
 
 void ScXMLImport::SetConfigurationSettings(const cpo::uno::Sequence<beans::PropertyValue>& aConfigProps)
 {
+    // Documents written after these were introduced store them, in the settings below or in the
+    // view settings, and those values replace these.
+    if (mpDoc)
+    {
+        mpDoc->SetCompatibilityFlag(SdrCompatibilityFlag::AnchoredTextOverflowLegacy,
+                                    true); // for tdf#99729
+        mpDoc->SetCompatibilityFlag(SdrCompatibilityFlag::LegacyFontwork,
+                                    true); // for tdf#148000
+        mpDoc->SetCompatibilityFlag(SdrCompatibilityFlag::LineSpacingBelowBaselineLegacy,
+                                    true); // for tdf#163590
+        mpDoc->SetCompatibilityFlag(SdrCompatibilityFlag::TextFittingLegacy,
+                                    true); // for tdf#163590
+    }
+
     rtl::Reference<ScModelObj> xMultiServiceFactory(GetScModel());
     if (!xMultiServiceFactory.is())
         return;

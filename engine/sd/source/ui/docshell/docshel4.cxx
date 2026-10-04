@@ -269,16 +269,6 @@ bool DrawDocShell::InitNew( const cpo::uno::Reference< css::embed::XStorage >& x
  */
 bool DrawDocShell::Load( SfxMedium& rMedium )
 {
-    // If this is an ODF file being loaded, then by default, use legacy processing
-    // (if required, it will be overridden in *::ReadUserDataSequence())
-    if (IsOwnStorageFormatWithSettings(rMedium))
-    {
-        mpDoc->SetCompatibilityFlag(SdrCompatibilityFlag::AnchoredTextOverflowLegacy, true); // for tdf#99729
-        mpDoc->SetCompatibilityFlag(SdrCompatibilityFlag::LegacyFontwork, true); // for tdf#148000
-        mpDoc->SetCompatibilityFlag(SdrCompatibilityFlag::LineSpacingBelowBaselineLegacy, true); // for tdf#163590
-        mpDoc->SetCompatibilityFlag(SdrCompatibilityFlag::TextFittingLegacy, true); // for tdf#163590
-    }
-
     bool       bRet = false;
     bool       bStartPresentation = false;
     ErrCode nError = ERRCODE_NONE;

@@ -244,6 +244,18 @@ CPPUNIT_TEST_FIXTURE(TextFittingTest, testOwnFormatWithoutSettingsFitsTextTheNew
     CPPUNIT_ASSERT(!pDoc->GetCompatibilityFlag(SdrCompatibilityFlag::LineSpacingBelowBaselineLegacy));
 }
 
+CPPUNIT_TEST_FIXTURE(TextFittingTest, testForeignSettingsFitsTextTheNewWay)
+{
+    // A document with a settings.xml that holds none of our settings, as other producers write
+    // it, fits text the new way.
+    createSdImpressDoc("TextFittingForeignSettings.odp");
+    auto pXImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+    CPPUNIT_ASSERT(pXImpressDocument);
+    SdDrawDocument* pDoc = pXImpressDocument->GetDoc();
+    CPPUNIT_ASSERT(!pDoc->GetCompatibilityFlag(SdrCompatibilityFlag::TextFittingLegacy));
+    CPPUNIT_ASSERT(!pDoc->GetCompatibilityFlag(SdrCompatibilityFlag::LineSpacingBelowBaselineLegacy));
+}
+
 CPPUNIT_TEST_FIXTURE(TextFittingTest, testTitleKeepsLineSpacing)
 {
     createSdImpressDoc("TextFittingTitle.fodp");

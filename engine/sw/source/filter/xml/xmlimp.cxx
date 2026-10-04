@@ -40,6 +40,7 @@
 #include <xmloff/ProgressBarHelper.hxx>
 #include <doc.hxx>
 #include <drawdoc.hxx>
+#include <svx/compatflags.hxx>
 #include <IDocumentSettingAccess.hxx>
 #include <IDocumentDeviceAccess.hxx>
 #include <IDocumentListsAccess.hxx>
@@ -1240,6 +1241,23 @@ void SwXMLImport::SetConfigurationSettings(const Sequence < PropertyValue > & aC
 {
     // this method will modify the document directly -> lock SolarMutex
     SolarMutexGuard aGuard;
+
+    // Documents written after these were introduced store them, in the settings below or in the
+    // view settings, and those values replace these.
+    if (SwDoc* pDoc = getDoc())
+    {
+        if (SwDrawModel* pDrawModel = pDoc->getIDocumentDrawModelAccess().GetDrawModel())
+        {
+            pDrawModel->SetCompatibilityFlag(SdrCompatibilityFlag::AnchoredTextOverflowLegacy,
+                                             true); // legacy processing for tdf#99729
+            pDrawModel->SetCompatibilityFlag(SdrCompatibilityFlag::LegacyFontwork,
+                                             true); // legacy processing for tdf#148000
+            pDrawModel->SetCompatibilityFlag(SdrCompatibilityFlag::LineSpacingBelowBaselineLegacy,
+                                             true); // legacy processing for tdf#163590
+            pDrawModel->SetCompatibilityFlag(SdrCompatibilityFlag::TextFittingLegacy,
+                                             true); // legacy processing for tdf#163590
+        }
+    }
 
     Reference< lang::XMultiServiceFactory > xFac( GetModel(), UNO_QUERY );
     if( !xFac.is() )
