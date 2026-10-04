@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-07-06 08:01+0000\n"
+"PO-Revision-Date: 2026-10-04 12:51+0000\n"
 "Last-Translator: HM <goodlinuxuser@chmail.ir>\n"
 "Language-Team: Persian <https://hosted.weblate.org/projects/collabora-online/"
 "collabora-ui/fa/>\n"
-"Language: \n"
+"Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 2026.7.1.dev0\n"
+"X-Generator: Weblate 2026.10.1.dev0\n"
 
 #: admin/admin.strings.js:15
 msgid "Admin console"
@@ -419,6 +419,7 @@ msgid ""
 "Documents are not effectively contained: missing capabilities, namespaces "
 "and landlock."
 msgstr ""
+"اسناد به طور موثر محصور نیستند: قابلیت‌های گمشده، فضای نام و قفل سرزمینی."
 
 #: admin/src/AdminSocketServerAudit.js:45
 #: src/control/Control.ServerAuditDialog.ts:97
@@ -426,6 +427,8 @@ msgid ""
 "BPF filtering of potentially risky system calls (seccomp) is not enabled; a "
 "security hazard."
 msgstr ""
+"غربال BPF فراخوانی‌های سامانه ای بالقوه خطرناک (seccomp) فعال نیست؛ یک خطر "
+"امنیتی."
 
 #: admin/src/AdminSocketServerAudit.js:50
 #: src/control/Control.ServerAuditDialog.ts:109
@@ -458,7 +461,7 @@ msgstr "خطا"
 
 #: admin/src/AdminSocketServerAudit.js:108
 msgid "Learn more"
-msgstr ""
+msgstr "بیشتر بدانید"
 
 #: admin/src/AdminSocketSettings.js:46
 msgid "Are you sure you want to shut down the server?"
@@ -480,12 +483,12 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:585
 msgid "Invalid request"
-msgstr ""
+msgstr "درخواست نامعتبر"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:586
 #: src/control/Control.AIChatSidebar.ts:2187
 msgid "Invalid API key"
-msgstr ""
+msgstr "کلید API نامعتبر"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:587
 #: src/control/Control.AIChatSidebar.ts:2188
@@ -515,11 +518,11 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:652
 msgid "Signature Certificate"
-msgstr ""
+msgstr "گواهی امضا"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:653
 msgid "Signature Key"
-msgstr ""
+msgstr "کلید امضا"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:654
 msgid "Signature CA"
@@ -528,7 +531,7 @@ msgstr ""
 #: admin/src/integrator/AdminIntegratorSettings.ts:655
 #: admin/src/integrator/AdminIntegratorSettings.ts:659
 msgid "Provider"
-msgstr ""
+msgstr "فراهم کننده"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:656
 #: admin/src/integrator/AdminIntegratorSettings.ts:660
@@ -548,7 +551,7 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:663
 msgid "Image Size"
-msgstr ""
+msgstr "اندازه تصویر"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:664
 msgid "Request Timeout (seconds)"
@@ -580,7 +583,7 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:671
 msgid "Smart Zoom"
-msgstr ""
+msgstr "بزرگنمایی هوشمند"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:672
 msgid "Default Zoom"
@@ -1316,7 +1319,7 @@ msgstr ""
 
 #: src/app/Debug.ts:169
 msgid "Ctrl+Shift+Alt+D to exit"
-msgstr ""
+msgstr "Ctrl + Shift +Alt+D برای خروج"
 
 #: src/app/Debug.ts:1665
 msgid "Event handling has been delayed for an unexpectedly long time: {0}ms"
@@ -1693,7 +1696,7 @@ msgstr "ارائه شده توسط:"
 
 #: src/control/Control.AboutDialog.ts:178
 msgid "View widgets"
-msgstr ""
+msgstr "مشاهده ویجت ها"
 
 #: src/control/Control.AboutDialog.ts:213
 msgid "\"Slow Proxy\""
@@ -2018,7 +2021,7 @@ msgstr ""
 #: src/control/Control.AIChatSidebar.ts:1494
 #: src/control/jsdialog/Widget.EmojiPicker.ts:410
 msgid "Search emojis"
-msgstr ""
+msgstr "جستجوی ایموجی ها"
 
 #: src/control/Control.AIChatSidebar.ts:1495
 #: src/control/jsdialog/Widget.EmojiPicker.ts:401
@@ -3131,11 +3134,11 @@ msgstr ""
 
 #: src/control/backstage/TemplatesView.tsx:148
 msgid "No templates match your search."
-msgstr ""
+msgstr "الگویی با جستجوی شما همخوانی نداشت."
 
 #: src/control/backstage/TemplatesView.tsx:165
 msgid "Search templates"
-msgstr ""
+msgstr "جستجوی الگوها"
 
 #: src/control/backstage/InfoView.tsx:31 src/control/Control.Menubar.ts:418
 #: src/control/Control.Menubar.ts:1438
@@ -3817,7 +3820,7 @@ msgstr "زبان"
 
 #: src/control/Control.Mention.ts:193
 msgid "No search results found!"
-msgstr ""
+msgstr "نتیجه‌ای یافت نشد"
 
 #: src/control/Control.Menubar.ts:52
 msgid "PDF Document (.pdf) as..."
@@ -3835,7 +3838,7 @@ msgstr "سند PDF (.pdf) به عنوان..."
 #: src/control/Control.NotebookbarImpress.js:395
 #: src/control/Control.NotebookbarWriter.js:341
 msgid "Export as"
-msgstr "صادرات به عنوان"
+msgstr "صادر به صورت"
 
 #: src/control/Control.Menubar.ts:136 src/control/Control.UIManager.ts:650
 msgid "Rename Document"
@@ -4099,7 +4102,7 @@ msgstr ""
 #: src/control/Control.Menubar.ts:523
 #: src/control/Control.NotebookbarImpress.js:743
 msgid "View Notes"
-msgstr ""
+msgstr "مشاهده یادداشت ها"
 
 #: src/control/Control.Menubar.ts:524
 #: src/control/Control.NotebookbarImpress.js:745
@@ -4257,7 +4260,7 @@ msgstr ""
 #: src/control/Control.Zotero.js:220 src/control/Toolbar.js:558
 #: src/control/Toolbar.js:559 src/control/Toolbar.js:604
 msgid "Search"
-msgstr "جستجو کردن"
+msgstr "جستجو"
 
 #: src/control/Control.Menubar.ts:1207
 #: src/control/Control.NotebookbarCalc.js:1179
@@ -4364,7 +4367,7 @@ msgstr ""
 #: src/control/jsdialog/Widget.Combobox.js:497
 #: src/control/jsdialog/Widget.TreeView.ts:2580
 msgid "Search..."
-msgstr ""
+msgstr "جستجو..."
 
 #: src/control/Control.QuickFindPanel.ts:122
 msgid "Type in the search box to find anything in your document"
@@ -4706,7 +4709,7 @@ msgstr "راهنما"
 #: src/control/Control.NotebookbarImpress.js:271
 #: src/control/Control.NotebookbarWriter.js:217
 msgid "Export As"
-msgstr "صادرات به عنوان"
+msgstr "صادر به صورت"
 
 #: src/control/Control.NotebookbarCalc.js:235
 #: src/control/Control.NotebookbarCalc.js:284
@@ -4915,7 +4918,7 @@ msgstr ""
 
 #: src/control/Control.NotebookbarCalc.js:1480
 msgid "Sheet View"
-msgstr ""
+msgstr "نمای برگه"
 
 #: src/control/Control.NotebookbarCalc.js:1494
 msgid "Default View"
@@ -4935,7 +4938,7 @@ msgstr ""
 
 #: src/control/Control.NotebookbarCalc.js:1532
 msgid "Exit Sheet View"
-msgstr ""
+msgstr "خروج از نمای برگه"
 
 #: src/control/Control.NotebookbarCalc.js:1547
 msgid "Freeze"
@@ -8172,9 +8175,8 @@ msgid "Present to all"
 msgstr ""
 
 #: src/slideshow/PresenterConsole.js:43
-#, fuzzy
 msgid "Exit"
-msgstr "ویرایش کنید"
+msgstr "خروج"
 
 #: src/slideshow/PresenterConsole.js:44
 msgid "Go Back"
@@ -8230,7 +8232,7 @@ msgstr[1] ""
 #: src/slideshow/PresenterConsole.js:1716
 #: src/slideshow/SlideShowPresenter.ts:696
 msgid "Click to exit presentation..."
-msgstr ""
+msgstr "برای خروج از ارائه کلیک کنید ..."
 
 #: src/slideshow/SlideShowPresenter.ts:868
 msgid "You are on the first slide"
