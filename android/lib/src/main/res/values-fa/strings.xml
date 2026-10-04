@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="temp_file_saving_disabled">این فایل فقط برای خواندن است، ذخیره غیر فعال شده است.</string>
+    <string name="temp_file_saving_disabled">همرسانی به صورت فقط خواندنی توسط برنامه مبدا انجام شده است برای انجام تغییرات از «ویرایش یک رونوشت» استفاده کنید.</string>
     <string name="storage_permission_required">دسترسی به حافظه لازم است</string>
     <string name="failed_to_load_file">تعیین کردن فایل برای خوانش فایل ناموفق بود</string>
+    <string name="loading">بار کردن…</string>
+    <string name="exiting">خروج ...</string>
 </resources>
