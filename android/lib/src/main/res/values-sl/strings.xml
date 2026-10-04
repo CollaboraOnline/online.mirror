@@ -27,4 +27,5 @@
     <string name="all_files_access_grant">Dovoli dostop</string>
     <string name="do_not_ask_again">Ne sprašuj več</string>
     <string name="failed_to_save_file">Sprememb ni možno shraniti v datoteko</string>
+    <string name="all_files_access_message">Aplikacija, ki deli to datoteko, ne dovoli shranjevanja sprememb vanjo.\n\nOmogočite \"Dostop do vseh datotek\", da bo ta aplikacija lahko zapisala datoteko na mestu, kjer je shranjena, tako da jo tu lahko uredite.</string>
 </resources>
