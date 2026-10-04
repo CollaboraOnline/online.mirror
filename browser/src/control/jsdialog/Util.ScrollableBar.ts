@@ -16,6 +16,8 @@
 
 declare var JSDialog: any;
 
+const refreshScrollablesEvent = 'refreshscrollables';
+
 let pendingTask: TaskId | null = null;
 let resizePriorityTask: TaskId | null = null;
 
@@ -107,6 +109,7 @@ function setupResizeHandler(container: Element, scrollable: Element) {
 	};
 
 	window.addEventListener('resize', handler);
+	window.addEventListener(refreshScrollablesEvent, handler);
 	window.addEventListener('scroll', handler);
 	scrollable.addEventListener('wheel', wheelHandler);
 }
@@ -192,6 +195,7 @@ function setupPriorityStatusHandler(scrollable: Element, toolItems: any[]) {
 		resizePriorityTask = app.layoutingService.appendLayoutingTask(handlerImpl);
 	};
 	window.addEventListener('resize', handler);
+	window.addEventListener(refreshScrollablesEvent, handler);
 }
 
 JSDialog.MakeScrollable = function (parent: Element, scrollable: Element) {
@@ -207,5 +211,5 @@ JSDialog.MakeStatusPriority = function (scrollable: Element, toolItems: any[]) {
 
 JSDialog.RefreshScrollables = function () {
 	app.console.debug('JSDialog.RefreshScrollables');
-	window.dispatchEvent(new Event('resize'));
+	window.dispatchEvent(new Event(refreshScrollablesEvent));
 };
