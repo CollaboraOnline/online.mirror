@@ -388,13 +388,23 @@ class Socket {
 		}
 		this.socket.onerror = function () {};
 		this.socket.onclose = function () {};
-		this.socket.onmessage = function () {};
+		// In a mobile app the socket stays open as the link to the native shell, so events like
+		// OS back button still arrive.
+		this.socket.onmessage = window.ThisIsAMobileApp
+			? this._onShellEventWhileClosed.bind(this)
+			: function () {};
 		this.socket.close();
 
 		// Reset wopi's app loaded so that reconnecting again informs outerframe about initialization
 		this._map['wopi'].resetAppLoaded();
 		this._map.fire('docloaded', { status: false });
 		clearTimeout(this._accessTokenExpireTimeout);
+	}
+
+	private _onShellEventWhileClosed(evt: MessageEvent): void {
+		if (typeof evt.data === 'string' && evt.data.startsWith('mobile:')) {
+			this._onMessage({ textMsg: evt.data });
+		}
 	}
 
 	private _doSend(msg: MessageInterface): void {
@@ -1905,28 +1915,34 @@ class Socket {
 	}
 
 	private _askForDocumentPassword(passwordType: string, msg: string): void {
+		// Runs when the user dismisses the dialog
+		const giveUp = (): void => {
+			if (passwordType === 'to-modify') {
+				this._map._docPassword = '';
+				this._map.loadDocument();
+			} else if (window.ThisIsAMobileApp && !window.ThisIsTheEmscriptenApp) {
+				window.postMobileMessage('BYE');
+			} else {
+				this._map.fire('postMessage', { msgId: 'UI_Cancel_Password' });
+				this._map.hideBusy();
+			}
+		};
+
 		this._map.uiManager.showInputModal(
 			'password-popup',
 			'',
 			msg,
 			'',
 			_('OK'),
-			function (this: Socket, data: string): void {
-				if (data) {
-					this._map._docPassword = data;
-					if (window.ThisIsAMobileApp) {
-						window.postMobileMessage('loadwithpassword password=' + data);
-					}
-					this._map.loadDocument();
-				} else if (passwordType === 'to-modify') {
-					this._map._docPassword = '';
-					this._map.loadDocument();
-				} else {
-					this._map.fire('postMessage', { msgId: 'UI_Cancel_Password' });
-					this._map.hideBusy();
+			(data: string): void => {
+				this._map._docPassword = data;
+				if (window.ThisIsAMobileApp) {
+					window.postMobileMessage('loadwithpassword password=' + data);
 				}
-			}.bind(this),
+				this._map.loadDocument();
+			},
 			true /* password input */,
+			giveUp,
 		);
 	}
 

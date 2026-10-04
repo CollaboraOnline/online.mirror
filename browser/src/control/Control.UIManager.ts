@@ -2815,6 +2815,8 @@ class UIManager extends window.L.Control {
 	/// defaultValue - default value of an input
 	/// buttonText - text inside OK button
 	/// callback - callback on button press
+	/// passwordInput - the input hides the typed characters
+	/// cancelCallback - runs when the dialog is dismissed
 	showInputModal(
 		id: string,
 		title: string,
@@ -2823,6 +2825,7 @@ class UIManager extends window.L.Control {
 		buttonText: string,
 		callback: (input: string) => void,
 		passwordInput?: boolean,
+		cancelCallback?: () => void,
 	): void {
 		var dialogId = this.generateModalId(id);
 		var json = this._modalDialogJSON(id, title, !window.mode.isDesktop(), [
@@ -2862,7 +2865,7 @@ class UIManager extends window.L.Control {
 			},
 		], 'input-modal-input');
 
-		this.showModal(json, [
+		var callbacks: any[] = [
 			{id: 'response-ok', func: () => {
 				if (typeof callback === 'function') {
 					var input = document.getElementById('input-modal-input') as HTMLInputElement;
@@ -2870,7 +2873,14 @@ class UIManager extends window.L.Control {
 				}
 				this.closeModal(dialogId);
 			}}
-		]);
+		];
+
+		if (typeof cancelCallback === 'function') {
+			callbacks.push({id: 'response-cancel', func: cancelCallback});
+			callbacks.push({id: '__POPOVER__', func: cancelCallback});
+		}
+
+		this.showModal(json, callbacks);
 	}
 
 	/**
