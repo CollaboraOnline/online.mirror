@@ -3063,6 +3063,39 @@ CPPUNIT_TEST_FIXTURE(SdImportTest2, testPlaceholderInheritsNoWrapFromLayout)
     CPPUNIT_ASSERT(!xShape->getPropertyValue(u"TextWordWrap"_ustr).get<bool>());
 }
 
+CPPUNIT_TEST_FIXTURE(SdImportTest2, testCool16279_LayoutPlaceholderKeepsMasterAutofit)
+{
+    // The slide master autofits the text of its title and body, and the Title and Content
+    // layout's placeholders have an empty bodyPr, so they inherit that
+    createSdImpressDoc("pptx/master-and-eleven-layouts.pptx");
+
+    uno::Reference<drawing::XMasterPagesSupplier> xDoc(mxComponent, uno::UNO_QUERY);
+    CPPUNIT_ASSERT(xDoc.is());
+    uno::Reference<drawing::XShapes> xLayout(xDoc->getMasterPages()->getByIndex(1),
+                                             uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT_EQUAL(u"Title and Content"_ustr,
+                         xLayout.queryThrow<container::XNamed>()->getName());
+
+    static constexpr std::u16string_view aPlaceholders[] = { u"Title 1", u"Content Placeholder 2" };
+    for (const std::u16string_view& aName : aPlaceholders)
+    {
+        uno::Reference<beans::XPropertySet> xShape;
+        for (sal_Int32 i = 0; i < xLayout->getCount() && !xShape; i++)
+        {
+            if (xLayout->getByIndex(i).queryThrow<container::XNamed>()->getName() == aName)
+                xShape.set(xLayout->getByIndex(i), uno::UNO_QUERY_THROW);
+        }
+        CPPUNIT_ASSERT(xShape);
+
+        // Without the fix in place, this test would have failed with:
+        // - Expected: 3 (TextFitToSizeType_AUTOFIT)
+        // - Actual  : 0 (TextFitToSizeType_NONE)
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(
+            OUString(aName).toUtf8().getStr(), drawing::TextFitToSizeType_AUTOFIT,
+            xShape->getPropertyValue(u"TextFitToSize"_ustr).get<drawing::TextFitToSizeType>());
+    }
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
