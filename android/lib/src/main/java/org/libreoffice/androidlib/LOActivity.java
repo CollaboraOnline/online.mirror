@@ -1232,24 +1232,16 @@ public class LOActivity extends AppCompatActivity {
             return;
         }
         mProgressDialog.indeterminate(R.string.exiting);
+        documentLoaded = false;
 
-        // The 'BYE' takes a considerable amount of time, we need to post it
-        // so that it starts after the saving progress is actually shown
-        getMainHandler().post(new Runnable() {
-            @Override
-            public void run() {
-                documentLoaded = false;
-                postMobileMessageNative("BYE");
-                //copyTempBackToIntent();
+        // The 'BYE' blocks until the document has closed, so it runs off the UI thread and the
+        // progress dialog keeps drawing.
+        nativeHandler.post(() -> {
+            postMobileMessageNative("BYE");
+            //copyTempBackToIntent();
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mProgressDialog.dismiss();
-                    }
-                });
-                finishAndRemoveTask();
-            }
+            mProgressDialog.dismiss();
+            runOnUiThread(this::finishAndRemoveTask);
         });
     }
 
