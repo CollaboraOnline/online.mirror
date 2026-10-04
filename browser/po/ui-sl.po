@@ -5,7 +5,7 @@ msgstr ""
 "Project-Id-Version: Collabora Online UI\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-26 10:00+0000\n"
+"PO-Revision-Date: 2026-10-04 12:51+0000\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian <https://hosted.weblate.org/projects/collabora-"
 "online/collabora-ui/sl/>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
 "n%100==4 ? 2 : 3;\n"
 "X-Accelerator-Marker: ~\n"
-"X-Generator: Weblate 2026.10.dev0\n"
+"X-Generator: Weblate 2026.10.1.dev0\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
 #: admin/admin.strings.js:15
@@ -1203,12 +1203,16 @@ msgid ""
 "This document is using the document settings it was opened with. What you "
 "change here applies to the next document you open."
 msgstr ""
+"Ta dokument uporablja nastavitve dokumenta, s katerimi je bil odprt. Kar tu "
+"spremenite, se uveljavi na naslednjem dokumentu, ki ga odprete."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:3944
 msgid ""
 "This document is open in more than one window, so what you change here "
 "applies to the next document you open rather than this one."
 msgstr ""
+"Ta dokument je odprt v več oknih, zato se tu opravljene spremembe uveljavijo "
+"na naslednjem dokumentu, ki ga odprete, namesto na tem."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:4032
 #: admin/src/integrator/Xcu.ts:439
@@ -2226,7 +2230,7 @@ msgstr "Urejeni oris ni veljaven: {0}"
 
 #: src/control/Control.AIChatSidebar.ts:2179
 msgid "Could not build any slides from the outline. Please try again."
-msgstr ""
+msgstr "Iz orisa ni možno izdelati prosojnic. Poskusite znova."
 
 #: src/control/Control.AIChatSidebar.ts:2180
 msgid "AI image settings not configured"
