@@ -158,6 +158,8 @@ public class LOActivity extends AppCompatActivity {
     /** In case the mobile-wizard is visible, we have to intercept the Android's Back button. */
     private boolean mMobileWizardVisible = false;
     private boolean mIsEditModeActive = false;
+    /// True while a slide show is on screen in the WebView.
+    private volatile boolean mSlideShowActive = false;
 
     /// True while a physical keyboard is attached and can be typed on. Written on the main thread
     /// and read on the thread that serves the JavaScript bridge, so it is volatile.
@@ -364,7 +366,10 @@ public class LOActivity extends AppCompatActivity {
                     return;
                 }
 
-                if (mMobileWizardVisible) {
+                if (mSlideShowActive) {
+                    callFakeWebsocketOnMessage("mobile: slideshowback");
+                    return;
+                } else if (mMobileWizardVisible) {
                     // just return one level up in the mobile-wizard (or close it)
                     callFakeWebsocketOnMessage("mobile: mobilewizardback");
                     return;
@@ -1552,6 +1557,17 @@ public class LOActivity extends AppCompatActivity {
                         break;
                     case "off":
                         mIsEditModeActive = false;
+                        break;
+                }
+                return false;
+            }
+            case "SLIDESHOW": {
+                switch (messageAndParam[1]) {
+                    case "on":
+                        mSlideShowActive = true;
+                        break;
+                    case "off":
+                        mSlideShowActive = false;
                         break;
                 }
                 return false;

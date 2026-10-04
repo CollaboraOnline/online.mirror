@@ -125,6 +125,8 @@ class SlideShowPresenter {
 	_slideCompositor: SlideCompositor = null;
 	_fullscreen: Element = null;
 	_fullscreenResizeObserver: ResizeObserver = null;
+	// True while the Android shell has been told that a slide show is on screen.
+	private _androidSlideShowReported: boolean = false;
 	_presenterContainer: HTMLDivElement = null;
 	_slideShowCanvas: HTMLCanvasElement = null;
 	// On the web build this is the in-page iframe the slideshow renders into.
@@ -184,6 +186,7 @@ class SlideShowPresenter {
 		this._map.on('presentationinfo', this.onSlideShowInfo, this);
 		this._map.on('newfullscreen', this._onStart, this);
 		this._map.on('newpresentinwindow', this._onStartInWindow, this);
+		this._map.on('slideshowback', this._onAndroidBack, this);
 		window.L.DomEvent.on(
 			document,
 			'fullscreenchange',
@@ -214,6 +217,7 @@ class SlideShowPresenter {
 		this._map.off('presentationinfo', this.onSlideShowInfo, this);
 		this._map.off('newfullscreen', this._onStart, this);
 		this._map.off('newpresentinwindow', this._onStartInWindow, this);
+		this._map.off('slideshowback', this._onAndroidBack, this);
 		window.L.DomEvent.off(
 			document,
 			'fullscreenchange',
@@ -475,6 +479,28 @@ class SlideShowPresenter {
 		}
 	}
 
+	// Tells the Android shell whether a slide show is on screen.
+	private _postAndroidSlideShow(active: boolean) {
+		this._androidSlideShowReported = active;
+		window.postMobileMessage('SLIDESHOW ' + (active ? 'on' : 'off'));
+	}
+
+	// Tells the Android shell whether a slide show is on screen, once per change.
+	private _reportAndroidSlideShow(active: boolean) {
+		if (!window.ThisIsTheAndroidApp) return;
+		if (active === this._androidSlideShowReported) return;
+		this._postAndroidSlideShow(active);
+	}
+
+	// The hardware back button on Android ends the slide show, like Escape.
+	private _onAndroidBack() {
+		if (!this._slideShowCanvas) {
+			this._postAndroidSlideShow(false);
+			return;
+		}
+		this._slideShowNavigator.quit();
+	}
+
 	private _stopWatchingFullscreenSize() {
 		if (!this._fullscreenResizeObserver) return;
 		this._fullscreenResizeObserver.disconnect();
@@ -482,6 +508,7 @@ class SlideShowPresenter {
 	}
 
 	_stopFullScreen() {
+		this._reportAndroidSlideShow(false);
 		if (!this._slideShowCanvas) return;
 
 		this._stopWatchingFullscreenSize();
@@ -596,6 +623,7 @@ class SlideShowPresenter {
 			height,
 			showSwitchMonitors,
 		);
+		this._reportAndroidSlideShow(true);
 
 		if (this._isWelcomePresentation) {
 			const closeBtn = window.L.DomUtil.create(
@@ -1277,6 +1305,7 @@ class SlideShowPresenter {
 
 	slideshowWindowCleanUp = () => {
 		app.timerRegistry.clearInterval(this._windowCloseInterval);
+		this._reportAndroidSlideShow(false);
 		this._slideShowNavigator.quit();
 		this._map.uiManager.closeSnackbar();
 		this._slideShowCanvas = null;
