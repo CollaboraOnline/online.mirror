@@ -987,6 +987,10 @@ class Dispatcher {
 			else app.map.setPart('next');
 		};
 
+		this.actionsMap['selectallslides'] = function () {
+			app.map._docLayer._preview._selectAllParts();
+		};
+
 		this.actionsMap['lastpart'] = function () {
 			if (app && app.file.fileBasedView === true) {
 				const partToSelect = app.map._docLayer._parts - 1;

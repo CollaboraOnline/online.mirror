@@ -1663,6 +1663,17 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 			this._scrollToPart(end);
 	},
 
+	// Selects every part. The current part stays the current one, so the view does not jump.
+	_selectAllParts: function () {
+		if (app.file.fileBasedView)
+			return;
+
+		this._selectedPartRange = undefined;
+		for (let id = 0; id < app.impress.partList.length; ++id)
+			this._map.selectPart(id, 1, false, false);
+		this._map.fire('updateparts', {});
+	},
+
 	_modifySelectedPartRange: function (direction) {
 		var start, end;
 		if (this._selectedPartRange) {
