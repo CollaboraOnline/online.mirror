@@ -4635,15 +4635,11 @@ bool ChildSession::selectClientPart(const StringVector& tokens)
 
     if (getLOKitDocument()->getDocumentType() != COKitDocumentType::TEXT)
     {
+        // The request carries a change the client has already made, so the selection is
+        // applied without a reply. A range comes as one request per slide, and a status
+        // after each would show the range only partly selected.
         if (part != getLOKitDocument()->getPart())
-        {
             getLOKitDocument()->selectPart(part.c_str(), select);
-
-            // Notify the client of the selection update.
-            const std::string status = LOKitHelper::documentStatus(getLOKitDocument().get());
-            if (!status.empty())
-                return sendTextFrame("statusupdate: " + status);
-        }
     }
     else
     {
