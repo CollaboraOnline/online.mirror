@@ -318,9 +318,44 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		this._remoteSelectionEnd = undefined;
 	},
 
+	// One description carries every piece, so setting it alone would drop the others.
+	_caretDescription: function() {
+		const parts = [];
+		if (this._headingLevel)
+			parts.push(_('Heading level {0}').replace('{0}', this._headingLevel));
+		return parts.join('. ');
+	},
+
+	_describeCaretState: function() {
+		const description = this._caretDescription();
+		if (!description && !this._caretDescribed)
+			return;
+
+		this._caretDescribed = !!description;
+		this._setDescription(description);
+	},
+
+	// TextInput empties the description on blur.
+	_onFocusBlur: function(ev) {
+		if (ev.type === 'blur')
+			this._caretDescribed = false;
+		else
+			this._describeCaretState();
+		window.L.TextInput.prototype._onFocusBlur.call(this, ev);
+	},
+
+	_setHeadingLevel: function(level) {
+		const parsed = parseInt(level) || 0;
+		if (parsed === (this._headingLevel || 0))
+			return;
+		this._headingLevel = parsed;
+		this._describeCaretState();
+	},
+
 	onAccessibilityFocusChanged: function(content, pos, start, end, listPrefixLength, force, before, after,
-		beforeRects, afterRects) {
+		beforeRects, afterRects, headingLevel) {
 		this._listPrefixLength = listPrefixLength;
+		this._setHeadingLevel(headingLevel);
 		this._endContextJump();
 		this._setContextParagraphs(before, after, beforeRects, afterRects);
 		this._requestHeadings();
@@ -338,7 +373,8 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		}
 	},
 
-	setA11yFocusedParagraph: function(content, pos, start, end, before, after, beforeRects, afterRects) {
+	setA11yFocusedParagraph: function(content, pos, start, end, before, after, beforeRects, afterRects, headingLevel) {
+		this._setHeadingLevel(headingLevel);
 		if (this._isComposing) {
 			this._remoteContent = content;
 			this._remotePosition = pos;
@@ -785,16 +821,15 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 			eventDescription += '. ';
 			this._lastColSpan = colSpan;
 		}
-		this._setDescription(eventDescription);
+		this._setDescription(eventDescription + this._caretDescription());
+		this._caretDescribed = true;
 
-		var that = this;
-		this._timeoutForA11yDescription = setTimeout(function() {
-			that._setDescription('');
-		}, 1000);
+		this._timeoutForA11yDescription = setTimeout(this._describeCaretState.bind(this), 1000);
 	},
 
 	onAccessibilityFocusedCellChanged: function(outCount, inList, row, col, rowSpan, colSpan, paragraph) {
 		this._setFocusedParagraph(paragraph.content, parseInt(paragraph.position), parseInt(paragraph.start), parseInt(paragraph.end));
+		this._setHeadingLevel(paragraph.headingLevel);
 		this._updateTable(outCount, inList, row + 1, col + 1, rowSpan, colSpan);
 	},
 
