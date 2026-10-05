@@ -472,7 +472,7 @@ label.notebookbar.ui-checkbox-label {
 }
 
 .ui-combobox.notebookbar[disabled] img {
-	opacity: 0.35;
+	opacity: var(--opacity-icon-disabled-light);
 }
 
 .ui-combobox-button.notebookbar[disabled] .ui-listbox-arrow,
