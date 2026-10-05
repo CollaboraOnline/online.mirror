@@ -94,8 +94,12 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Calc clipboard tests.', { 
 		// When pasting C1 to D1:
 		helper.typeIntoInputField(helper.addressInputSelector, 'D1');
 		cy.cGet(helper.addressInputSelector).should('have.prop', 'value', 'D1');
+		cy.spy(this.win.app.socket, 'sendMessage').as('sendMessage');
 		cy.cGet('#Home .ui-overflow-group-content > .unoPaste .arrowbackground').click();
 		helper.getMenuEntry(0).click(); // Paste
+		// The paste reads the clipboard asynchronously before it sends .uno:Paste, so the copy
+		// below waits for that to be sent.
+		cy.get('@sendMessage').should('have.been.calledWith', 'uno .uno:Paste');
 
 		// Then make sure the formula gets rewritten as expected:
 		// Internal paste: B1 is 2, C1 is 3, so D1 is 5.
