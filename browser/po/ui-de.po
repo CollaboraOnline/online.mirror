@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-09-30 17:58+0000\n"
+"PO-Revision-Date: 2026-10-05 21:51+0000\n"
 "Last-Translator: Ettore Atalan <atalanttore@googlemail.com>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/collabora-online/"
 "collabora-ui/de/>\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2026.10.dev0\n"
+"X-Generator: Weblate 2026.10.1.dev0\n"
 
 #: admin/admin.strings.js:15
 msgid "Admin console"
@@ -2473,7 +2473,7 @@ msgstr[1] "%n %1 Befehle ausführen"
 
 #: src/control/Control.AIChatSidebar.ts:2661
 msgid "apply the design template '%1'"
-msgstr "Die Designvorlage '%1' anwenden"
+msgstr "Designvorlage ‚%1‘ anwenden"
 
 #: src/control/Control.AIChatSidebar.ts:2664
 msgid "This will: %1."
@@ -2552,11 +2552,11 @@ msgstr "Der Inhalt der Auswahl konnte nicht analysiert werden"
 
 #: src/control/Control.AIChatSidebar.ts:3218
 msgid "Design (optional):"
-msgstr ""
+msgstr "Design (optional):"
 
 #: src/control/Control.AIChatSidebar.ts:3235
 msgid "No design"
-msgstr ""
+msgstr "Kein Design"
 
 #: src/control/Control.AIChatSidebar.ts:3236
 msgid "Continue without a design template"
@@ -4606,7 +4606,7 @@ msgstr "Effekt"
 #: src/control/Notebookbar.WriterTableTab.ts:472
 #: src/control/Control.NotebookbarImpress.js:102
 msgid "Design"
-msgstr "Vorlage"
+msgstr "Design"
 
 #: src/control/Notebookbar.ImpressTableDesignTab.ts:99
 #: src/control/Notebookbar.WriterTableTab.ts:514
@@ -5741,7 +5741,7 @@ msgstr "Folien importieren"
 #: src/control/Control.SlideImportPane.tsx:965
 #: src/control/Control.SlideImportPane.tsx:966
 msgid "Expand slide import"
-msgstr ""
+msgstr "Folienimport erweitern"
 
 #: src/control/Control.SlideImportPane.tsx:980
 #: src/control/Control.SlideImportPane.tsx:981
@@ -5760,6 +5760,8 @@ msgstr "Noch keine Präsentation"
 msgid ""
 "Add a presentation to browse its slides and insert them into this deck."
 msgstr ""
+"Fügen Sie eine Präsentation hinzu, um deren Folien durchzublättern und sie "
+"in diese Präsentation einzufügen."
 
 #: src/control/Control.SlideImportPane.tsx:1048
 msgid "Hide all slides"
@@ -5816,7 +5818,7 @@ msgstr "Folien in {0}"
 
 #: src/control/Control.SlideImportPane.tsx:1391
 msgid "Original design"
-msgstr ""
+msgstr "Originaldesign"
 
 #: src/control/Control.SlideImportPane.tsx:1394
 msgid "Linked, follows the slide number"
@@ -5828,7 +5830,7 @@ msgstr "Verlinkt, folgt der Folie"
 
 #: src/control/Control.SlideImportPane.tsx:1432
 msgid "Keep original design"
-msgstr ""
+msgstr "Originaldesign beibehalten"
 
 #: src/control/Control.SlideImportPane.tsx:1446
 msgid "Stay linked to the source file"
