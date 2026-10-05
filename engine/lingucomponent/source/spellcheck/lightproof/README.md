@@ -29,6 +29,14 @@ The middle two files are committed rather than generated at build time,
 because one of the four packages has no rule source at all. See
 *Where the sources are* below.
 
+The rule tables are themselves generated, and upstream, where the generator
+lived, is gone. Without it here a rule could only be changed by editing the
+generated table, and a fix made that way is lost the next time the table is
+regenerated. So the compiler is kept in `generator/`, with the fixes it
+needed to run on a current Python, listed in its header. It is a tool for
+maintainers: neither it nor the tables it writes are installed, only the
+`.lpr` files compiled from them.
+
 ## The pieces
 
 | Path | What it is |
@@ -187,8 +195,9 @@ the rule sources under `dictionaries/<pkg>/lightproof/`.
 
 The record is in `readlicense_oo/license/license.xml`, which is what the
 shipped licence file is generated from. The compiled rules are listed there
-per language, under Dictionaries, and the compiler under Libraries as
-`lightproof`. Change a rule source's copyright line and that file needs the
+per language, under Dictionaries. The compiler is mentioned under Libraries
+as the origin of the rules, without an SBOM entry, because it is not part of
+the product. Change a rule source's copyright line and that file needs the
 same change.
 
 ## Where the sources are
