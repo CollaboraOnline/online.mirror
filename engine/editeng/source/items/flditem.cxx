@@ -840,11 +840,11 @@ SvxAuthorField::SvxAuthorField( const OUString& rFirstName,
                                 const OUString& rShortName,
                                     SvxAuthorType eT, SvxAuthorFormat eF )
 {
-    aName      = rLastName;
-    aFirstName = rFirstName;
-    aShortName = rShortName;
-    eType   = eT;
-    eFormat = eF;
+    m_aName      = rLastName;
+    m_aFirstName = rFirstName;
+    m_aShortName = rShortName;
+    m_eType   = eT;
+    m_eFormat = eF;
 }
 
 
@@ -860,11 +860,11 @@ bool SvxAuthorField::operator==( const SvxFieldData& rOther ) const
         return false;
 
     const SvxAuthorField& rOtherFld = static_cast<const SvxAuthorField&>(rOther);
-    return ( ( aName == rOtherFld.aName ) &&
-                ( aFirstName == rOtherFld.aFirstName ) &&
-                ( aShortName == rOtherFld.aShortName ) &&
-                ( eType == rOtherFld.eType ) &&
-                ( eFormat == rOtherFld.eFormat ) );
+    return ( ( m_aName == rOtherFld.m_aName ) &&
+                ( m_aFirstName == rOtherFld.m_aFirstName ) &&
+                ( m_aShortName == rOtherFld.m_aShortName ) &&
+                ( m_eType == rOtherFld.m_eType ) &&
+                ( m_eFormat == rOtherFld.m_eFormat ) );
 }
 
 
@@ -872,21 +872,21 @@ OUString SvxAuthorField::GetFormatted() const
 {
     OUString aString;
 
-    switch( eFormat )
+    switch( m_eFormat )
     {
         case SvxAuthorFormat::FullName:
-            aString = aFirstName + " " + aName;
+            aString = m_aFirstName + " " + m_aName;
         break;
         case SvxAuthorFormat::LastName:
-            aString = aName;
+            aString = m_aName;
         break;
 
         case SvxAuthorFormat::FirstName:
-            aString = aFirstName;
+            aString = m_aFirstName;
         break;
 
         case SvxAuthorFormat::ShortName:
-            aString = aShortName;
+            aString = m_aShortName;
         break;
     }
 

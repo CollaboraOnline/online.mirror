@@ -359,11 +359,11 @@ enum class SvxAuthorFormat {
 class EDITENG_DLLPUBLIC SvxAuthorField final : public SvxFieldData
 {
 private:
-    OUString   aName;
-    OUString   aFirstName;
-    OUString   aShortName;
-    SvxAuthorType   eType;
-    SvxAuthorFormat eFormat;
+    OUString   m_aName;
+    OUString   m_aFirstName;
+    OUString   m_aShortName;
+    SvxAuthorType   m_eType;
+    SvxAuthorFormat m_eFormat;
 
 public:
     static constexpr auto CLASS_ID = css::text::textfield::Type::AUTHOR;
@@ -375,11 +375,11 @@ public:
                                 SvxAuthorType eType = SvxAuthorType::Var,
                                 SvxAuthorFormat eFormat = SvxAuthorFormat::FullName );
 
-    SvxAuthorType           GetType() const { return eType; }
-    void                    SetType( SvxAuthorType eTp ) { eType = eTp; }
+    SvxAuthorType           GetType() const { return m_eType; }
+    void                    SetType( SvxAuthorType eTp ) { m_eType = eTp; }
 
-    SvxAuthorFormat         GetFormat() const { return eFormat; }
-    void                    SetFormat( SvxAuthorFormat eFmt ) { eFormat = eFmt; }
+    SvxAuthorFormat         GetFormat() const { return m_eFormat; }
+    void                    SetFormat( SvxAuthorFormat eFmt ) { m_eFormat = eFmt; }
 
     OUString                GetFormatted() const;
 
