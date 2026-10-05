@@ -573,16 +573,24 @@ void ScPatternAttr::fillFont(
 
 bool ScPatternAttr::CanApplyTableItemToCell(const SfxItemSet& rItemSet, sal_uInt16 nWhich)
 {
-    const SfxPoolItem* pDirect = nullptr;
-    if (rItemSet.GetItemState(nWhich, false, &pDirect) != SfxItemState::SET)
-        return true;
-
     if (nWhich == ATTR_BACKGROUND)
+    {
+        const SfxPoolItem* pDirect = nullptr;
+        if (rItemSet.GetItemState(nWhich, false, &pDirect) != SfxItemState::SET)
+            return true;
         return *pDirect == rItemSet.GetPool()->GetUserOrPoolDefaultItem(nWhich);
+    }
 
-    const SfxItemSet* pParent = rItemSet.GetParent();
-    const SfxPoolItem& rInherited
-        = pParent ? pParent->Get(nWhich) : rItemSet.GetPool()->GetUserOrPoolDefaultItem(nWhich);
+    // A font value wins only when it differs from the one the Default cell style gives, set on
+    // the cell or by another cell style. Like e.g., a Bad cell style keeps its red over the
+    // header row colour, but its regular weight is Normal's too, so the header stays bold.
+    // The Default cell style is the root of every cell style's parent chain.
+    const SfxItemSet* pDefault = rItemSet.GetParent();
+    while (pDefault && pDefault->GetParent())
+        pDefault = pDefault->GetParent();
+    const SfxPoolItem& rDefault
+        = pDefault ? pDefault->Get(nWhich) : rItemSet.GetPool()->GetUserOrPoolDefaultItem(nWhich);
+    const SfxPoolItem& rCellValue = rItemSet.Get(nWhich);
 
     if (nWhich == ATTR_FONT_COLOR)
     {
@@ -590,10 +598,10 @@ bool ScPatternAttr::CanApplyTableItemToCell(const SfxItemSet& rItemSet, sal_uInt
             const Color& rColor = static_cast<const SvxColorItem&>(rItem).getColor();
             return rColor == COL_AUTO ? COL_BLACK : rColor;
         };
-        return getFontColor(*pDirect) == getFontColor(rInherited);
+        return getFontColor(rCellValue) == getFontColor(rDefault);
     }
 
-    return *pDirect == rInherited;
+    return rCellValue == rDefault;
 }
 
 template <class T>

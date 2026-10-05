@@ -859,6 +859,49 @@ CPPUNIT_TEST_FIXTURE(ScFiltersTest5, testTableStyleHeaderFontPosture)
     CPPUNIT_ASSERT_EQUAL(ITALIC_NONE, aPlainFont.GetItalic());
 }
 
+CPPUNIT_TEST_FIXTURE(ScFiltersTest5, testTableStyleHeaderCellStyleFontColor)
+{
+    // Table1 is B2:G13 in TableStyleLight4, the E2 and F2 header cells have the Bad cell style.
+    createScDoc("xlsx/tablestyle-cellstyle-font-color.xlsx");
+    ScDocument* pDoc = getScDoc();
+    CPPUNIT_ASSERT(pDoc);
+
+    ScDBData* pDBData = pDoc->GetDBCollection()->getNamedDBs().findByUpperName(u"TABLE1"_ustr);
+    CPPUNIT_ASSERT(pDBData);
+    const ScTableStyleParam* pParam = pDBData->GetTableStyleInfo();
+    CPPUNIT_ASSERT(pParam);
+    CPPUNIT_ASSERT_EQUAL(u"TableStyleLight4"_ustr, pParam->maStyleID);
+    const ScTableStyle* pStyle = pDoc->GetTableStyles()->GetTableStyle(pParam->maStyleID);
+    CPPUNIT_ASSERT(pStyle);
+
+    // The header row is row 2, so fillinfo's row index for it is -1.
+    const SfxItemSet* pHeaderFont = pStyle->GetFontItemSet(*pDBData, 1, 1, -1);
+    CPPUNIT_ASSERT(pHeaderFont);
+    const Color aHeaderColor = pHeaderFont->Get(ATTR_FONT_COLOR).getColor();
+    CPPUNIT_ASSERT_EQUAL(WEIGHT_BOLD, pHeaderFont->Get(ATTR_FONT_WEIGHT).GetWeight());
+
+    auto getRenderedColor = [pDoc, pHeaderFont](SCCOL nCol) {
+        model::ComplexColor aComplexColor;
+        pDoc->GetPattern(nCol, 1, 0)->fillColor(aComplexColor, ScAutoFontColorMode::Raw, nullptr,
+                                                pHeaderFont);
+        return aComplexColor.getFinalColor();
+    };
+
+    // MSO paints E2 in the red of the Bad cell style, which differs from Normal's colour...
+    const Color aBadColor(0x9C0006);
+    CPPUNIT_ASSERT_EQUAL(aBadColor, pDoc->GetAttr(4, 1, 0, ATTR_FONT_COLOR).getColor());
+    CPPUNIT_ASSERT_EQUAL(aBadColor, getRenderedColor(4));
+    CPPUNIT_ASSERT_EQUAL(aBadColor, getRenderedColor(5));
+
+    // ...but bold, because the regular weight of Bad is Normal's too.
+    vcl::Font aFont;
+    pDoc->GetPattern(4, 1, 0)->fillFontOnly(aFont, nullptr, nullptr, nullptr, pHeaderFont);
+    CPPUNIT_ASSERT_EQUAL(WEIGHT_BOLD, aFont.GetWeight());
+
+    // B2 has only the Normal cell style, so the header row colour paints there.
+    CPPUNIT_ASSERT_EQUAL(aHeaderColor, getRenderedColor(1));
+}
+
 CPPUNIT_TEST_FIXTURE(ScFiltersTest5, testTableStyleDirectBorderEdge)
 {
     // Table1 is C3:F20 in TableStyleMedium2. Row 11 carries a thick top border applied in MSO

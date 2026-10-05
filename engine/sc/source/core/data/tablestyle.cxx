@@ -575,7 +575,8 @@ void ScTableStyle::BakeInto(ScDocument& rDoc, const ScDBData& rDBData) const
                 }
             }
 
-            // Font: table style beats the cell style (direct-only test); see lcl_fontItemToBake.
+            // Font: a value that differs from the Default cell style's beats the table style;
+            // see lcl_fontItemToBake.
             if (const SfxItemSet* pFontSet = GetFontItemSet(rDBData, nCol, nRow, nRowIndex))
             {
                 for (sal_uInt16 nWhich : aTableStyleFontWhich)
