@@ -376,10 +376,21 @@ static bool InnerYield(bool i_bWait, bool i_bAllEvents)
     // is in OSX specific code
     pSVData->maAppData.mnDispatchLevel++;
 
+    ViewShellDocId nOldDocId(-1);
+    if (comphelper::COKit::isActive())
+        nOldDocId = comphelper::COKit::getDocId();
+
     // do not wait for events if application was already quit; in that
     // case only dispatch events already available
     bool bProcessedEvent = pSVData->mpDefInst->DoYield(
             i_bWait && !pSVData->maAppData.mbAppQuit, i_bAllEvents );
+
+    // Yield may have loaded another document and changed the current docId, restore the old
+    // value. If there is a view to restore this doesn't matter much, but if there isn't yet, as
+    // in the case of loading a new document, then this ensures that the next view to be created
+    // is created with the expected document id.
+    if (nOldDocId.get() != -1)
+        comphelper::COKit::setDocId(nOldDocId);
 
     pSVData->maAppData.mnDispatchLevel--;
 
@@ -398,23 +409,11 @@ bool Application::Reschedule( bool i_bAllEvents )
         return false;
     }
     int nOldView = -1;
-    ViewShellDocId nOldDocId(-1);
     if (comphelper::COKit::isActive())
-    {
         nOldView = comphelper::COKit::getView();
-        nOldDocId = comphelper::COKit::getDocId();
-    }
     bool bRet = InnerYield(false, i_bAllEvents);
     if (comphelper::COKit::isActive())
     {
-        // Yield may have changed the current docId, restore the old value,
-        // (which is cheap). If there is a view to restore this doesn't matter
-        // much, but if there isn't yet, as in the case of loading a new
-        // document, then this ensures that the next view to be created is
-        // created with the expected document id.
-        assert(nOldDocId.get() != -1 && "won't be unset");
-        comphelper::COKit::setDocId(nOldDocId);
-
         int nNewView = comphelper::COKit::getView();
         if (nOldView != -1 && nNewView != -1 && nOldView != nNewView)
         {
