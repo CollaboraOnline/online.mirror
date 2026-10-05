@@ -27,6 +27,7 @@ namespace drawinglayer::primitive2d
 /* Returns 8-bit alpha mask created from passed mask.
 
    Negative fErodeDilateRadius values mean erode, positive - dilate.
+   fBlurRadius is how far the blur reaches in pixels, three deviations of its Gaussian.
    nTransparency defines minimal transparency level.
 */
 AlphaMask ProcessAndBlurAlphaMask(const AlphaMask& rMask, double fErodeDilateRadius,

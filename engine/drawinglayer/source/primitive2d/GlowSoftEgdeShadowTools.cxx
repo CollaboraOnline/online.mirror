@@ -21,7 +21,6 @@
 #include <EuclideanDistanceTransform.hxx>
 #include <GaussianGridBlur.hxx>
 #include <vcl/bitmap/BitmapBasicMorphologyFilter.hxx>
-#include <vcl/bitmap/BitmapFilterStackBlur.hxx>
 #include <vcl/BitmapReadAccess.hxx>
 #include <vcl/Scanline.hxx>
 #include <vcl/BitmapWriteAccess.hxx>
@@ -31,9 +30,74 @@
 
 namespace drawinglayer::primitive2d
 {
+namespace
+{
+// The pixels of an 8-bit gray bitmap as floats, one a pixel, row after row. Empty when the bitmap
+// cannot be read.
+std::vector<float> readGrays(const Bitmap& rGrays)
+{
+    const tools::Long nWidth = rGrays.GetSizePixel().Width();
+    const tools::Long nHeight = rGrays.GetSizePixel().Height();
+    BitmapScopedReadAccess pRead(rGrays);
+
+    if (!pRead || nWidth <= 0 || nHeight <= 0)
+        return {};
+
+    std::vector<float> aGrays(nWidth * nHeight);
+    // Eight bit grays are one byte a pixel, so read them straight off the scanline.
+    const bool bBytePerPixel = pRead->GetScanlineFormat() == ScanlineFormat::N8BitPal;
+    float* pTarget = aGrays.data();
+
+    for (tools::Long nY = 0; nY < nHeight; ++nY)
+    {
+        Scanline pScanline = pRead->GetScanline(nY);
+
+        for (tools::Long nX = 0; nX < nWidth; ++nX)
+            *pTarget++
+                = float(bBytePerPixel ? pScanline[nX] : pRead->GetIndexFromData(pScanline, nX));
+    }
+
+    return aGrays;
+}
+
+// Write floats back into an 8-bit gray bitmap of the same size, each scaled by fScale and clamped
+// to the byte range. False when the bitmap cannot be written.
+bool writeGrays(Bitmap& rGrays, const std::vector<float>& rValues, float fScale)
+{
+    const tools::Long nWidth = rGrays.GetSizePixel().Width();
+    const tools::Long nHeight = rGrays.GetSizePixel().Height();
+    BitmapScopedWriteAccess pWrite(rGrays);
+
+    if (!pWrite)
+        return false;
+
+    const bool bBytePerPixel = pWrite->GetScanlineFormat() == ScanlineFormat::N8BitPal;
+    const float* pSource = rValues.data();
+
+    for (tools::Long nY = 0; nY < nHeight; ++nY)
+    {
+        Scanline pScanline = pWrite->GetScanline(nY);
+
+        for (tools::Long nX = 0; nX < nWidth; ++nX)
+        {
+            const sal_uInt8 nGray
+                = static_cast<sal_uInt8>(std::clamp(fScale * *pSource++, 0.0f, 255.0f));
+
+            if (bBytePerPixel)
+                pScanline[nX] = nGray;
+            else
+                pWrite->SetPixelOnData(pScanline, nX, BitmapColor(nGray));
+        }
+    }
+
+    return true;
+}
+} // anonymous namespace
+
 /* Returns 8-bit alpha mask created from passed mask.
 
    Negative fErodeDilateRadius values mean erode, positive - dilate.
+   fBlurRadius is how far the blur reaches in pixels, three deviations of its Gaussian.
    nTransparency defines minimal transparency level.
 */
 AlphaMask ProcessAndBlurAlphaMask(const AlphaMask& rMask, double fErodeDilateRadius,
@@ -48,11 +112,10 @@ AlphaMask ProcessAndBlurAlphaMask(const AlphaMask& rMask, double fErodeDilateRad
     // other color must be treated as black. This creates 1-bit B&W bitmap.
     Bitmap mask = bConvertTo1Bit ? tmpMask.GetBitmap().CreateMask(COL_WHITE) : tmpMask.GetBitmap();
 
-    // Scaling down increases performance without noticeable quality loss. Additionally,
-    // current blur implementation can only handle blur radius between 2 and 254.
+    // Scaling down increases performance without noticeable quality loss.
     Size aSize = mask.GetSizePixel();
     double fScale = 1.0;
-    while (fBlurRadius > 254 || aSize.Height() > 1000 || aSize.Width() > 1000)
+    while (aSize.Height() > 1000 || aSize.Width() > 1000)
     {
         fScale /= 2;
         fBlurRadius /= 2;
@@ -77,8 +140,16 @@ AlphaMask ProcessAndBlurAlphaMask(const AlphaMask& rMask, double fErodeDilateRad
     // We need 8-bit grey mask for blurring
     mask.Convert(BmpConversion::N8BitGreys);
 
-    // calculate blurry effect
-    BitmapFilter::Filter(mask, BitmapFilterStackBlur(fBlurRadius));
+    // A blur radius is three deviations of the Gaussian, so the blur fades out at the radius. The
+    // OOXML reference renderer blurs the same way.
+    std::vector<float> aGrays(readGrays(mask));
+    if (!aGrays.empty())
+    {
+        const Size aMaskSize(mask.GetSizePixel());
+        GaussianGridBlur(aMaskSize.Width(), aMaskSize.Height(), fBlurRadius / 3.0)
+            .execute(aGrays.data());
+        writeGrays(mask, aGrays, 1.0f);
+    }
 
     mask.Scale(rMask.GetSizePixel());
 
@@ -111,44 +182,20 @@ AlphaMask CreateGlowAlphaMask(const AlphaMask& rMask, double fGlowRadius, sal_uI
     const tools::Long nWidth = aMask.GetSizePixel().Width();
     const tools::Long nHeight = aMask.GetSizePixel().Height();
 
-    if (nWidth <= 0 || nHeight <= 0)
+    // Coverage of the object per pixel, and the most any pixel holds, which is its solid opacity.
+    std::vector<float> aField(readGrays(aMask));
+    if (aField.empty())
         return createTransparentMask(rMask.GetSizePixel());
 
-    // Coverage of the object per pixel, and the most any pixel holds, which is its solid opacity.
-    std::vector<float> aField(nWidth * nHeight);
     float* pField = aField.data();
-    sal_uInt8 nPeakCoverage = 0;
+    const float fPeakCoverage = *std::max_element(aField.begin(), aField.end());
 
-    {
-        BitmapScopedReadAccess pRead(aMask);
-
-        if (!pRead)
-            return createTransparentMask(rMask.GetSizePixel());
-
-        // Eight bit greys are one byte a pixel, so read them straight off the scanline.
-        const bool bBytePerPixel = pRead->GetScanlineFormat() == ScanlineFormat::N8BitPal;
-        float* pTarget = pField;
-
-        for (tools::Long nY = 0; nY < nHeight; ++nY)
-        {
-            Scanline pScanline = pRead->GetScanline(nY);
-
-            for (tools::Long nX = 0; nX < nWidth; ++nX)
-            {
-                const sal_uInt8 nCoverage
-                    = bBytePerPixel ? pScanline[nX] : pRead->GetIndexFromData(pScanline, nX);
-                nPeakCoverage = std::max(nPeakCoverage, nCoverage);
-                *pTarget++ = float(nCoverage);
-            }
-        }
-    }
-
-    if (nPeakCoverage == 0)
+    if (fPeakCoverage <= 0.0f)
         return createTransparentMask(rMask.GetSizePixel());
 
     // Half the peak opacity is the object's outline to within a fraction of a pixel, however wide
     // the anti-aliased fringe, and it holds when the whole object is transparent.
-    const float fContour = float(nPeakCoverage) * 0.5f;
+    const float fContour = fPeakCoverage * 0.5f;
     const float fFarAway = float(nWidth + nHeight) * float(nWidth + nHeight);
 
     for (tools::Long nIndex = 0; nIndex < nWidth * nHeight; ++nIndex)
@@ -162,7 +209,7 @@ AlphaMask CreateGlowAlphaMask(const AlphaMask& rMask, double fGlowRadius, sal_uI
     const double fSigma = fGlowRadius / 6.0;
 
     // A halo is as opaque as the object's most opaque part. A half transparent shape halves it.
-    const float fAmplitude = float(nPeakCoverage) * (1.0f / 255.0f);
+    const float fAmplitude = fPeakCoverage * (1.0f / 255.0f);
 
     // Half a pixel of ramp each side anti-aliases the grown outline. Only that band needs a square
     // root, the value is flat on either side of it.
@@ -185,32 +232,8 @@ AlphaMask CreateGlowAlphaMask(const AlphaMask& rMask, double fGlowRadius, sal_uI
 
     GaussianGridBlur(nWidth, nHeight, fSigma).execute(pField);
 
-    {
-        BitmapScopedWriteAccess pWrite(aMask);
-
-        if (!pWrite)
-            return createTransparentMask(rMask.GetSizePixel());
-
-        const bool bBytePerPixel = pWrite->GetScanlineFormat() == ScanlineFormat::N8BitPal;
-        const float fMaximumAlpha = 255.0f - float(nTransparency);
-        const float* pSource = pField;
-
-        for (tools::Long nY = 0; nY < nHeight; ++nY)
-        {
-            Scanline pScanline = pWrite->GetScanline(nY);
-
-            for (tools::Long nX = 0; nX < nWidth; ++nX)
-            {
-                const sal_uInt8 nAlpha
-                    = static_cast<sal_uInt8>(std::clamp(fMaximumAlpha * *pSource++, 0.0f, 255.0f));
-
-                if (bBytePerPixel)
-                    pScanline[nX] = nAlpha;
-                else
-                    pWrite->SetPixelOnData(pScanline, nX, BitmapColor(nAlpha));
-            }
-        }
-    }
+    if (!writeGrays(aMask, aField, 255.0f - float(nTransparency)))
+        return createTransparentMask(rMask.GetSizePixel());
 
     return AlphaMask(aMask);
 }
