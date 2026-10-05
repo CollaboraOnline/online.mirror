@@ -164,45 +164,6 @@ MO_FILELIST_ALL_LANG(vcl)
 MO_FILELIST_ALL_LANG(wpt)
 MO_FILELIST_ALL_LANG(xsc)
 
-#if defined UNX && ! defined MACOSX
-
-File gid_File_Txt_Pagein_Calc
-    TXT_FILE_BODY;
-    Dir = gid_Brand_Dir_Program;
-    Styles = (PACKED);
-    Name = "pagein-calc";
-End
-
-File gid_File_Txt_Pagein_Common
-    TXT_FILE_BODY;
-    Dir = gid_Brand_Dir_Program;
-    Styles = (PACKED);
-    Name = "pagein-common";
-End
-
-File gid_File_Txt_Pagein_Draw
-    TXT_FILE_BODY;
-    Dir = gid_Brand_Dir_Program;
-    Styles = (PACKED);
-    Name = "pagein-draw";
-End
-
-File gid_File_Txt_Pagein_Impress
-    TXT_FILE_BODY;
-    Dir = gid_Brand_Dir_Program;
-    Styles = (PACKED);
-    Name = "pagein-impress";
-End
-
-File gid_File_Txt_Pagein_Writer
-    TXT_FILE_BODY;
-    Dir = gid_Brand_Dir_Program;
-    Styles = (PACKED);
-    Name = "pagein-writer";
-End
-
-#endif
-
 File gid_Starregistry_Services_Rdb
     TXT_FILE_BODY;
     Name = "services.rdb";

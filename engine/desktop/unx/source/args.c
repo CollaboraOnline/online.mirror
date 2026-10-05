@@ -22,39 +22,31 @@ is_env_arg (rtl_uString const *str)
 static const struct {
     const char   *name;
     unsigned int  bInhibitSplash : 1;
-    unsigned int  bInhibitPagein : 1;
     unsigned int  bInhibitJavaLdx : 1;
     unsigned int  bInhibitPipe : 1;
-    const char   *pPageinType;
 } pArgDescr[] = {
     /* have a trailing argument */
-    { "pt",         1, 0, 0, 0, NULL },
-    { "p",          1, 0, 0, 0, NULL },
-    { "display",    0, 0, 0, 0, NULL },
+    { "pt",         1, 0, 0 },
+    { "p",          1, 0, 0 },
+    { "display",    0, 0, 0 },
 
     /* no splash */
-    { "nologo",     1, 0, 0, 0, NULL },
-    { "headless",   1, 0, 0, 0, NULL },
-    { "invisible",  1, 0, 0, 0, NULL },
-    { "quickstart", 1, 0, 0, 0, NULL },
-    { "minimized",  1, 0, 0, 0, NULL },
-    { "convert-to", 1, 0, 0, 0, NULL },
-    { "cat",        1, 0, 0, 0, NULL },
-
-    /* pagein bits */
-    { "writer",     0, 0, 0, 0, "pagein-writer"  },
-    { "calc",       0, 0, 0, 0, "pagein-calc"    },
-    { "draw",       0, 0, 0, 0, "pagein-draw"    },
-    { "impress",    0, 0, 0, 0, "pagein-impress" },
+    { "nologo",     1, 0, 0 },
+    { "headless",   1, 0, 0 },
+    { "invisible",  1, 0, 0 },
+    { "quickstart", 1, 0, 0 },
+    { "minimized",  1, 0, 0 },
+    { "convert-to", 1, 0, 0 },
+    { "cat",        1, 0, 0 },
 
     /* Do not send --help/--version over the pipe, as their output shall go to
        the calling process's stdout (ideally, this would also happen in the
-       presence of unknown options); also prevent splash/pagein/javaldx overhead
+       presence of unknown options); also prevent splash/javaldx overhead
        (as these options will be processed early in soffice_main): */
-    { "version",    1, 1, 1, 1, NULL },
-    { "help",       1, 1, 1, 1, NULL },
-    { "h",          1, 1, 1, 1, NULL },
-    { "?",          1, 1, 1, 1, NULL },
+    { "version",    1, 1, 1 },
+    { "help",       1, 1, 1 },
+    { "h",          1, 1, 1 },
+    { "?",          1, 1, 1 },
 };
 
 Args *args_parse (void)
@@ -114,11 +106,8 @@ Args *args_parse (void)
                 == 0)
             {
                 args->bInhibitSplash  |= (bool)pArgDescr[j].bInhibitSplash;
-                args->bInhibitPagein  |= (bool)pArgDescr[j].bInhibitPagein;
                 args->bInhibitJavaLdx |= (bool)pArgDescr[j].bInhibitJavaLdx;
                 args->bInhibitPipe    |= (bool)pArgDescr[j].bInhibitPipe;
-                if (pArgDescr[j].pPageinType)
-                    args->pPageinType = pArgDescr[j].pPageinType;
                 break;
             }
         }

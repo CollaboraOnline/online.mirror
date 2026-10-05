@@ -320,7 +320,6 @@ include $(foreach class, \
 	CustomTarget \
 	ExternalProject \
 	Gallery \
-	Pagein \
 	PrecompiledHeaders \
 	Pyuno \
 	PythonTest \

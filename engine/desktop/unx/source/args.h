@@ -15,9 +15,7 @@ extern "C" {
 
 typedef struct {
   rtl_uString *pAppPath;
-  const char  *pPageinType;     // @pagein-writer for - writer etc. else NULL
   bool     bInhibitSplash;  // should we show a splash screen
-  bool     bInhibitPagein;  // should we run pagein ?
   bool     bInhibitJavaLdx; // should we run javaldx ?
   bool     bInhibitPipe;    // for --help and --version
 

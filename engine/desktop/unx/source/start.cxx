@@ -33,7 +33,6 @@
 #include <sal/main.h>
 
 #include "args.h"
-#include "pagein.h"
 #include "splashx.h"
 
 #define PIPEDEFAULTPATH      "/tmp"
@@ -558,17 +557,6 @@ static void system_checks(void)
 #endif
 }
 
-static void exec_pagein (Args *args)
-{
-    rtl_String * path = ustr_to_str(args->pAppPath);
-    pagein_execute(rtl_string_getStr(path), "pagein-common");
-
-    if (args->pPageinType)
-        pagein_execute(rtl_string_getStr(path), args->pPageinType);
-
-    rtl_string_release(path);
-}
-
 #if HAVE_FEATURE_JAVA
 
 static void extend_library_path(const char *new_element)
@@ -804,10 +792,6 @@ SAL_IMPLEMENT_MAIN_WITH_ARGS(argc, argv)
         /* load splash image and create window */
         if (!args->bInhibitSplash)
             splash = splash_create(args->pAppPath, argc, argv);
-
-        /* pagein */
-        if (!args->bInhibitPagein)
-            exec_pagein(args);
 
         /* javaldx */
 #if HAVE_FEATURE_JAVA

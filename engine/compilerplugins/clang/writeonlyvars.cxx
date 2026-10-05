@@ -181,9 +181,6 @@ void WriteOnlyVars::run()
         // playing paging-in games with volatile
         if (loplugin::isSamePathname(fn, SRCDIR "/sal/osl/unx/file.cxx"))
             return;
-        // playing paging-in games with volatile
-        if (loplugin::isSamePathname(fn, SRCDIR "/desktop/unx/source/file_image_unx.c"))
-            return;
         // false+
         if (loplugin::isSamePathname(fn, SRCDIR "/store/source/storpage.cxx"))
             return;

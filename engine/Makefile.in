@@ -186,7 +186,6 @@ gbuild_TARGETS := AllLangHelp \
 	Module \
 	Package \
 	PackageSet \
-	Pagein \
 	Postprocess \
 	Pyuno \
 	PythonTest \

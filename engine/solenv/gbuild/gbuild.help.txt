@@ -94,7 +94,6 @@ AVAILABLE TARGETS
            o JunitTest
            o Library
            o Package
-           o Pagein
            o PythonTest
            o Pyuno
            o Rdb

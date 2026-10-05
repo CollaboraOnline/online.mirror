@@ -1095,7 +1095,6 @@ cygwin*|wsl*)
     fi
     using_x11=no
     test_unix_dlapi=no
-    enable_pagein=no
     build_skia=yes
     _os=WINNT
 
@@ -1116,7 +1115,6 @@ darwin*) # macOS
     fi
     using_x11=no
     build_skia=yes
-    enable_pagein=no
     # macOS ships libxml/libxslt; prefer the system copy unless overridden.
     default_with_system_libxml=yes
     if test -n "$LODE_HOME" ; then
@@ -6390,17 +6388,6 @@ if test $_os != "WINNT" -a $_os != "Darwin"; then
     fi
 fi
 AC_SUBST(ENABLE_OOENV)
-
-AC_MSG_CHECKING([whether to build the pagein binaries for oosplash])
-if test "${enable_pagein}" != no -a -z "$DISABLE_DYNLOADING"; then
-    AC_MSG_RESULT([yes])
-    ENABLE_PAGEIN=TRUE
-    AC_DEFINE(HAVE_FEATURE_PAGEIN)
-else
-    AC_MSG_RESULT([no])
-fi
-AC_SUBST(ENABLE_PAGEIN)
-
 
 AC_MSG_CHECKING([whether to enable CPDB support])
 ENABLE_CPDB=""
@@ -14280,7 +14267,7 @@ rm -f a.out a.wasm a.out.js a.out.wasm
 dnl cspell:ignore Randr Xext alignof altlinuxhyph appex bzlib ccached coreutils createmsi cxxabi
 dnl cspell:ignore cygdrive devel devenv dlsym dtrace emconfigure fpch frobozz gnucp
 dnl cspell:ignore ifdef ifndef libc libdl libjpipe libstdc longjmp memcpy msicreator
-dnl cspell:ignore msiglobal mspdb msys nmake omindex optimised pagein qconfig qtbase
+dnl cspell:ignore msiglobal mspdb msys nmake omindex optimised qconfig qtbase
 dnl cspell:ignore quadrigraph rbbi rpms sccache strbuf stringop tosvg ucrt ustring uuidgen vclplugs
 dnl cspell:ignore vswhere werror wilangid xcent xcrun
 

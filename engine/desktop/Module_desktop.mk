@@ -25,13 +25,6 @@ ifneq (,$(filter DESKTOP,$(BUILD_TYPE)))
 $(eval $(call gb_Module_add_targets,desktop,\
     Executable_soffice_bin \
     Package_scripts \
-    $(if $(ENABLE_PAGEIN), \
-        Pagein_calc \
-        Pagein_common \
-        Pagein_draw \
-        Pagein_impress \
-        Pagein_writer \
-    ) \
 ))
 
 ifneq (,$(filter-out EMSCRIPTEN HAIKU MACOSX WNT,$(OS)))
