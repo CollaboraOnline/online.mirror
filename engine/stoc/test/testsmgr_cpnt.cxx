@@ -163,10 +163,7 @@ Sequence< OUString > Test_Manager_Impl::getSupportedServiceNames_Static() throw 
 
 extern "C" void test_ServiceManager()
 {
-#if ! defined SAL_DLLPREFIX
-#define SAL_DLLPREFIX ""
-#endif
-     OUString atUModule2 = SAL_DLLPREFIX "testsmgr_component" SAL_DLLEXTENSION ;
+    OUString atUModule2 = SAL_DLLPREFIX "testsmgr_component" SAL_DLLEXTENSION ;
 
     // expand shared library name
     OString  atModule2( OUStringToOString(atUModule2, RTL_TEXTENCODING_ASCII_US) );

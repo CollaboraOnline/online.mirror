@@ -37,11 +37,6 @@
 // probably because java.lang.System.loadLibrary uses RTLD_LOCAL, so uniqueness
 // of GCC RTTI symbols needed for exception handling would not be guaranteed.
 
-#if ! defined SAL_DLLPREFIX
-#define SAL_DLLPREFIX ""
-#endif
-
-
 extern "C"
 {
 

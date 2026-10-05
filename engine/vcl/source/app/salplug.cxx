@@ -107,11 +107,7 @@ SalInstance* tryInstance( const OUString& rModuleBase, bool bForce = false )
 
     SalInstance* pInst = nullptr;
     OUString aUsedModuleBase(rModuleBase);
-    OUString aModule(
-#ifdef SAL_DLLPREFIX
-            SAL_DLLPREFIX
-#endif
-            "vclplug_" + aUsedModuleBase + "lo" SAL_DLLEXTENSION );
+    OUString aModule( SAL_DLLPREFIX "vclplug_" + aUsedModuleBase + "lo" SAL_DLLEXTENSION );
 
     osl::Module aMod;
     if (aMod.loadRelative(reinterpret_cast<oslGenericFunction>(&tryInstance), aModule, SAL_LOADMODULE_GLOBAL))

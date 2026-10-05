@@ -51,19 +51,10 @@ typedef OUString const * (* MyFunc_FormatCode)( sal_Int16&, sal_Unicode const *&
 
 #ifndef DISABLE_DYNLOADING
 
-#ifdef SAL_DLLPREFIX
-// mostly "lib*.so"
 constexpr const char* lcl_DATA_EN = SAL_DLLPREFIX "localedata_en" SAL_DLLEXTENSION;
 constexpr const char* lcl_DATA_ES = SAL_DLLPREFIX "localedata_es" SAL_DLLEXTENSION;
 constexpr const char* lcl_DATA_EURO = SAL_DLLPREFIX "localedata_euro" SAL_DLLEXTENSION;
 constexpr const char* lcl_DATA_OTHERS = SAL_DLLPREFIX "localedata_others" SAL_DLLEXTENSION;
-#else
-// mostly "*.dll"
-constexpr const char* lcl_DATA_EN = "localedata_en" SAL_DLLEXTENSION;
-constexpr const char* lcl_DATA_ES = "localedata_es" SAL_DLLEXTENSION;
-constexpr const char* lcl_DATA_EURO = "localedata_euro" SAL_DLLEXTENSION;
-constexpr const char* lcl_DATA_OTHERS = "localedata_others" SAL_DLLEXTENSION;
-#endif
 
 static const char* getLibraryName(DataLocaleLibrary aLib) {
     switch(aLib) {

@@ -39,7 +39,7 @@ namespace cppu::detail
 
     @return false if the module could not be loaded, otherwise true
 */
-bool loadModule(osl::Module& rModule, OUString const& name);
+bool loadModule(osl::Module& rModule, std::u16string_view name);
 
 #endif
 }

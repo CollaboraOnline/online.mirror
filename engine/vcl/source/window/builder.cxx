@@ -1350,10 +1350,6 @@ static ModuleMap g_aModuleMap;
 static std::shared_ptr<NoAutoUnloadModule> g_pMergedLib = std::make_shared<NoAutoUnloadModule>();
 #endif
 
-#ifndef SAL_DLLPREFIX
-#  define SAL_DLLPREFIX ""
-#endif
-
 #endif
 
 namespace vcl {

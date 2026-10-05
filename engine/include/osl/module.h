@@ -29,11 +29,7 @@
 extern "C" {
 #endif
 
-#ifdef SAL_DLLPREFIX
 #define SAL_MODULENAME(name) SAL_DLLPREFIX name SAL_DLLEXTENSION
-#else
-#define SAL_MODULENAME(name) name SAL_DLLEXTENSION
-#endif
 
 #if defined(_WIN32)
 #define SAL_MODULENAME_WITH_VERSION(name, version) name version SAL_DLLEXTENSION

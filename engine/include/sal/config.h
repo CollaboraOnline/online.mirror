@@ -88,6 +88,13 @@
 #define SAL_CONFIGFILE(name) name "rc"
 #endif
 
+#ifndef SAL_DLLPREFIX
+#define SAL_DLLPREFIX ""
+#endif
+#ifndef SAL_DLLEXTENSION
+#define SAL_DLLEXTENSION ""
+#endif
+
 /* The following spell is for Solaris and its descendants.
  * See the "Solaris" section of
  * <http://sourceforge.net/p/predef/wiki/OperatingSystems/>, and
