@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-10-04 12:51+0000\n"
+"PO-Revision-Date: 2026-10-05 21:51+0000\n"
 "Last-Translator: H2Oufoe <regularwater@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "collabora-online/collabora-ui/pt_BR/>\n"
@@ -5845,28 +5845,28 @@ msgstr "Não disponível"
 
 #: src/control/SlideSectionHeader.tsx:68
 msgid "Toggle section %1"
-msgstr ""
+msgstr "Alternar seção % 1"
 
 #: src/slideimport/SlideImportSession.ts:257
 msgid "The slides of the source could not be read."
-msgstr ""
+msgstr "Os slides da fonte não puderam ser lidos."
 
 #: src/slideimport/SlideImportSession.ts:308
 #: src/slideimport/SlideImportSession.ts:317
 msgid "Inserting the slides failed."
-msgstr ""
+msgstr "A inserção dos slides falhou."
 
 #: src/slideimport/SlideImportSession.ts:326
 msgid "Importing slides failed."
-msgstr ""
+msgstr "A importação de slides falhou."
 
 #: src/slideimport/SlideLinks.ts:237
 msgid "No slide of this presentation is linked to another file."
-msgstr ""
+msgstr "Nenhum slide dessa apresentação está vinculado a outro arquivo."
 
 #: src/slideimport/SlideLinks.ts:275
 msgid "This slide is not linked to another file."
-msgstr ""
+msgstr "Esse slide não está vinculado a nenhum arquivo."
 
 #: src/slideimport/SlideLinks.ts:426 src/slideimport/SlideLinks.ts:738
 msgid ""
