@@ -555,6 +555,26 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 			img.focus();
 		}, this);
 
+		// A double-click on a slide in the maximized grid returns to the normal layout. The first
+		// click of the pair has already selected the slide, so the strip scrolls to show it and it
+		// keeps the focus. While a comment is being edited a click stays on the comment and the
+		// slide does not change, so the double-click leaves the layout as it is too.
+		window.L.DomEvent.on(img, 'dblclick', function (e) {
+			var expander = this._map.paneExpander;
+			if (!expander || expander.getMode() !== 'expanded')
+				return;
+			if (e.ctrlKey || e.shiftKey || e.altKey || e.metaKey)
+				return;
+			if (cool.Comment.isAnyEdit())
+				return;
+			window.L.DomEvent.stop(e);
+			var part = this._findClickedPart(img.parentNode);
+			expander.reset();
+			if (part !== null && part !== -1)
+				this._scrollToPart(parseInt(part) - 1);
+			img.focus();
+		}, this);
+
 		var that = this;
 		img.onfocus = function () {
 			that._map._clip.clearSelection();
