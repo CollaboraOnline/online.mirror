@@ -1103,6 +1103,9 @@ int forkit_main(int argc, char** argv)
 
     LOG_INF("Preinit stage OK.");
 
+    if (!Util::isKitInProcess())
+        UnitBase::startKitTimeout();
+
     // We must have at least one child, more are created dynamically.
     // Ask this first child to send version information to master process and trace startup.
     ::setenv("COOL_TRACE_STARTUP", "1", 1);

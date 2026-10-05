@@ -151,6 +151,11 @@ public:
     /// Load unit test hook shared library from this path
     static bool init(UnitType type, const std::string& unitLibPath);
 
+    /// Start the timeout of a kit test loaded by init(). ForKit calls this once the engine
+    /// preinit is done, so the time spent there, which can be long in a sanitizer build, does
+    /// not count against the test.
+    static void startKitTimeout();
+
     /// Uninitialize the unit-test and return the global exit code.
     /// Returns 0 on success.
     static int uninit();

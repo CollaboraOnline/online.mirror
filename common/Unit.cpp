@@ -52,6 +52,8 @@ std::thread TimeoutThread;
 [[maybe_unused]] std::mutex TimeoutThreadMutex;
 std::condition_variable TimeoutConditionVariable;
 bool KitWorkFinished = false;
+// The kit test whose timeout is started by startKitTimeout().
+[[maybe_unused]] UnitBase* PendingKitTimeoutInstance = nullptr;
 
 } // namespace
 
@@ -228,29 +230,8 @@ bool UnitBase::init([[maybe_unused]] UnitType type, [[maybe_unused]] const std::
                          "Starting test #1: " << GlobalArray[GlobalIndex]->getTestname());
             instance->initialize();
 
-            if (instance && type == UnitType::Kit)
-            {
-                std::unique_lock<std::mutex> lock(TimeoutThreadMutex);
-                TimeoutThread = std::thread(
-                    [instance]
-                    {
-                        ProcUtil::setThreadName("unit timeout");
-
-                        std::unique_lock<std::mutex> lock2(TimeoutThreadMutex);
-                        if (TimeoutConditionVariable.wait_for(lock2,
-                                                              instance->_timeoutMilliSeconds,
-                                                              [] { return KitWorkFinished; }))
-                        {
-                            LOG_DBG(instance->getTestname() << ": Unit test finished in time");
-                        }
-                        else
-                        {
-                            LOG_ERR(instance->getTestname() << ": Unit test timeout after "
-                                                            << instance->_timeoutMilliSeconds);
-                            instance->timeout();
-                        }
-                    });
-            }
+            if (type == UnitType::Kit)
+                PendingKitTimeoutInstance = instance;
         }
     }
     else
@@ -262,6 +243,36 @@ bool UnitBase::init([[maybe_unused]] UnitType type, [[maybe_unused]] const std::
     }
 
     return GlobalArray[GlobalIndex] != nullptr;
+}
+
+void UnitBase::startKitTimeout()
+{
+#if ENABLE_DEBUG
+    UnitBase* const instance = PendingKitTimeoutInstance;
+    PendingKitTimeoutInstance = nullptr;
+    if (!instance)
+        return;
+
+    std::unique_lock<std::mutex> lock(TimeoutThreadMutex);
+    TimeoutThread = std::thread(
+        [instance]
+        {
+            ProcUtil::setThreadName("unit timeout");
+
+            std::unique_lock<std::mutex> lock2(TimeoutThreadMutex);
+            if (TimeoutConditionVariable.wait_for(lock2, instance->_timeoutMilliSeconds,
+                                                  [] { return KitWorkFinished; }))
+            {
+                LOG_DBG(instance->getTestname() << ": Unit test finished in time");
+            }
+            else
+            {
+                LOG_ERR(instance->getTestname() << ": Unit test timeout after "
+                                                << instance->_timeoutMilliSeconds);
+                instance->timeout();
+            }
+        });
+#endif // ENABLE_DEBUG
 }
 
 int UnitBase::uninit()
