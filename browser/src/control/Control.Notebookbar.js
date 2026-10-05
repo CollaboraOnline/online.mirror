@@ -129,9 +129,7 @@ window.L.Control.Notebookbar = window.L.Control.extend({
 			}
 		}
 
-		const isDarkMode = window.prefs.getBoolean('darkTheme');
-		if (!isDarkMode)
-			$('#invertbackground').hide();
+		this.onDarkModeToggleChange();
 
 		if (!this.map.serverAuditDialog) {
 			this.hideItem('server-audit');
@@ -1194,12 +1192,10 @@ window.L.Control.Notebookbar = window.L.Control.extend({
 	},
 
 	onDarkModeToggleChange: function() {
-		if (window.prefs.getBoolean('darkTheme')) {
-			$('#invertbackground').show();
-		}
-		else {
-			$('#invertbackground').hide();
-		}
+		if (window.prefs.getBoolean('darkTheme'))
+			this.showItem('invertbackground');
+		else
+			this.hideItem('invertbackground');
 	},
 
 	onShowAnnotationsChange: function(e) {

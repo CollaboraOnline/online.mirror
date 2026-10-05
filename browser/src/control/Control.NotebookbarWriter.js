@@ -1879,6 +1879,7 @@ window.L.Control.NotebookbarWriter = window.L.Control.Notebookbar.extend({
 			    'id':'invertbackground',
 			    'class': 'unoinvertbackground',
 			    'type': 'bigcustomtoolitem',
+			    'visible': window.prefs.getBoolean('darkTheme'),
 			    'text': _('Invert Background'),
 			    'accessibility': { focusBack: true, combination: 'BG', de: null }
 			},

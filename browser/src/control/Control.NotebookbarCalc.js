@@ -1710,6 +1710,7 @@ window.L.Control.NotebookbarCalc = window.L.Control.NotebookbarWriter.extend({
 				'id':'invertbackground',
 				'class': 'unoinvertbackground',
 				'type': 'bigcustomtoolitem',
+				'visible': window.prefs.getBoolean('darkTheme'),
 				'text': _('Invert Background'),
 				'accessibility': { focusBack: true, combination: 'BG', de: null }
 			},
