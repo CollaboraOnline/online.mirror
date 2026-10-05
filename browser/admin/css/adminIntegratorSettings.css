@@ -339,40 +339,40 @@ ul {
   text-decoration: underline;
 }
 
-/* AI model-fetch status. A compact inline alert, deliberately distinct from the
-   neutral .view-setting-description help text it sits below: an accent bar, a
-   tinted ground and a state indicator carry the meaning at a glance. Hidden
-   until a state is set; shown via the [data-state] attribute. */
+/* A small label beside a title in the AI section. */
+.ai-badge {
+  padding: 2px 8px;
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.5;
+  border-radius: 4px;
+}
+
+/* AI model-fetch status, a badge beside the group title. Hidden until a state
+   is set; shown via the [data-state] attribute. */
 .ai-model-status {
   display: none;
-  gap: 8px;
+  gap: 6px;
   align-items: flex-start;
-  margin-top: 0.5rem;
-  margin-bottom: 1rem;
-  padding: 10px 12px;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  border-radius: var(--border-radius-element, 6px);
-  border-inline-start: 3px solid var(--ai-status-color);
-  background-color: color-mix(in srgb, var(--ai-status-color) 10%, transparent);
-  color: color-mix(in srgb, var(--ai-status-color) 62%, var(--settings-text));
-  /* Break long unbreakable tokens (masked keys, URLs) so the message stays
-     inside the panel; "anywhere" also lets the text flex item shrink. */
+  background-color: color-mix(in srgb, var(--ai-status-color) 14%, transparent);
+  color: color-mix(in srgb, var(--ai-status-color) 50%, var(--settings-text));
+  /* Break long unbreakable tokens (masked keys, URLs) so an error stays
+     inside the badge. */
   overflow-wrap: anywhere;
 }
 
 .ai-model-status[data-state] {
-  display: flex;
+  display: inline-flex;
 }
 
-/* State indicator: a filled dot, sized to align with the first text line. */
+/* State indicator: a dot, centred on the first line of text. */
 .ai-model-status::before {
   content: '';
   box-sizing: border-box;
   flex: 0 0 auto;
-  width: 12px;
-  height: 12px;
-  margin-top: 0.18em;
+  width: 10px;
+  height: 10px;
+  margin-top: calc((1.5em - 10px) / 2);
   border-radius: 50%;
   background-color: var(--ai-status-color);
 }
@@ -388,6 +388,18 @@ ul {
 .ai-model-status[data-state='info'],
 .ai-model-status[data-state='loading'] {
   --ai-status-color: var(--color-warning);
+}
+
+/* Connected: the dot becomes the lc_ok tick, masked so it takes the text
+   colour. */
+.ai-model-status[data-state='success']::before {
+  width: 14px;
+  height: 14px;
+  margin-top: calc((1.5em - 14px) / 2);
+  border-radius: 0;
+  background-color: currentColor;
+  -webkit-mask: url('../../images/lc_ok.svg') no-repeat center / contain;
+  mask: url('../../images/lc_ok.svg') no-repeat center / contain;
 }
 
 /* Loading: the dot becomes a spinner so the "Fetching models..." moment reads
@@ -408,107 +420,6 @@ ul {
 .view-setting-small-label {
   font-size: 0.85rem !important;
   font-weight: 500 !important;
-}
-
-/* Label row carrying a heading plus an inline info affordance. */
-.ai-label-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-/* Zero the heading's margins (including the UA default top margin) so it
-   centers against the info icon on the shared flex line. */
-.ai-label-row h3 {
-  margin: 0;
-  line-height: 1.2;
-}
-
-/* Info tooltip: a muted icon that reveals long guidance on hover/focus,
-   keeping the form uncluttered. The bubble is positioned relative to the wrap. */
-.ai-tip-wrap {
-  position: relative;
-  display: inline-flex;
-}
-
-.ai-info-tip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--settings-text);
-  opacity: 0.55;
-  cursor: help;
-  transition: opacity 0.15s ease;
-}
-
-.ai-info-tip:hover,
-.ai-info-tip:focus-visible {
-  opacity: 1;
-}
-
-.ai-info-tip .material-design-icon svg {
-  display: block;
-  width: 16px;
-  height: 16px;
-}
-
-.ai-tip-bubble {
-  position: absolute;
-  top: calc(100% + 8px);
-  inset-inline-start: 0;
-  z-index: 10;
-  width: max-content;
-  max-width: 280px;
-  padding: 10px 12px;
-  font-size: 0.8rem;
-  font-weight: 400;
-  line-height: 1.5;
-  color: var(--settings-text);
-  background-color: var(--settings-background);
-  border: 1px solid var(--settings-border);
-  border-radius: var(--border-radius-element, 6px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-2px);
-  transition:
-    opacity 0.15s ease,
-    transform 0.15s ease,
-    visibility 0.15s;
-}
-
-/* Bordered caret pointing up to the icon. */
-.ai-tip-bubble::before,
-.ai-tip-bubble::after {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  border: 6px solid transparent;
-}
-
-.ai-tip-bubble::before {
-  inset-inline-start: 8px;
-  border-bottom-color: var(--settings-border);
-}
-
-.ai-tip-bubble::after {
-  inset-inline-start: 9px;
-  border-width: 5px;
-  border-bottom-color: var(--settings-background);
-}
-
-.ai-tip-wrap:hover .ai-tip-bubble,
-.ai-tip-wrap:focus-within .ai-tip-bubble {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
 }
 
 .view-input-container input[type='text'],
@@ -535,14 +446,32 @@ ul {
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	max-width: 400px;
 	margin-bottom: 16px;
 }
 
+/* Grows up to the max-width every field shares, so the key field lines up
+   with the others and the button stands outside it. */
 .view-input-container .secret-input-row input[type='password'] {
 	flex: 1;
 	min-width: 0;
 	margin-bottom: 0;
+}
+
+/* A saved key: filled in, but locked until it is deleted. It keeps the
+   colours of the other fields. */
+.view-input-container .secret-input-row input[type='password']:disabled {
+	cursor: default;
+}
+
+.secret-delete-button {
+	background-image: url('../../images/lc_trash.svg');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 24px;
+}
+
+[data-theme='dark'] .secret-delete-button {
+	background-image: url('../../images/dark/lc_trash.svg');
 }
 
 .view-input-container input[type='text']:focus,
@@ -735,21 +664,136 @@ ul {
   margin-bottom: 4px;
 }
 
-/* AI Settings sub-sections */
-.ai-settings-group {
-  box-sizing: border-box;
-  border: 1px solid var(--settings-border);
-  border-radius: 6px;
-  padding: 16px 20px 8px;
-  margin: 16px 0;
+/* AI Assistant section */
+/* Title and description on the left, Reset on the right, centred against
+   both of them. */
+.ai-section-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 16px;
+}
+
+.ai-section-intro {
+  flex: 1 1 auto;
   min-width: 0;
 }
 
-.ai-settings-group legend {
+.ai-section-intro h3 {
+  margin: 0 0 4px;
+}
+
+.ai-section-intro p {
+  margin: 0;
+}
+
+#ai-reset-button {
+  flex: 0 0 auto;
+  color: var(--color-primary-text);
+}
+
+.ai-providers-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding-bottom: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--settings-border);
+  font-size: 1.05rem;
   font-weight: 600;
-  font-size: 0.9rem;
+}
+
+.ai-admin-tag {
+  background-color: var(--settings-background-hover);
+}
+
+.ai-empty-state-title {
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+#ai-add-provider-button {
+  background-color: var(--settings-background-hover);
+  border: 1px solid var(--settings-border);
+}
+
+#ai-add-provider-button .button__text {
+  font-weight: 400;
+}
+
+/* A dropdown from createSelectField. Its chevron is the menu chevron turned
+   to point down, masked so it takes the text colour, with the same inset as
+   the text. */
+.select-field {
+  position: relative;
+  max-width: 400px;
+}
+
+.select-field select {
+  appearance: none;
+  padding-inline-end: 40px;
+}
+
+.select-field::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  inset-inline-end: 16px;
+  width: 9px;
+  height: 9px;
+  transform: translateY(-50%) rotate(90deg);
+  background-color: var(--settings-text);
+  -webkit-mask: url('../../images/lc_menu_chevron.svg') no-repeat center / contain;
+  mask: url('../../images/lc_menu_chevron.svg') no-repeat center / contain;
+  pointer-events: none;
+}
+
+.select-field:has(select:disabled)::after {
+  opacity: 0.5;
+}
+
+.ai-settings-group {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ai-settings-group:not(:last-child) {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--settings-border);
+}
+
+.ai-settings-group legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 4px;
+  font-size: 1.05rem;
+  font-weight: 600;
   color: var(--settings-text);
-  padding: 0 8px;
+}
+
+/* Close under the field it explains. */
+#aiModelHint {
+  margin-top: -8px;
+}
+
+.ai-input-with-unit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.view-input-container .ai-input-with-unit input[type='number'] {
+  max-width: 120px;
+  margin-bottom: 0;
 }
 
 .ai-settings-group .view-input-container {
@@ -878,6 +922,14 @@ ul {
   overflow: auto;
 }
 
+#lightproof .xcu-settings-fieldset {
+  min-width: 0;
+}
+
+#lightproof .xcu-settings-grid {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
 .xcu-editor-actions,
 .browser-settings-editor-actions {
   display: flex;
@@ -902,6 +954,8 @@ ul {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	flex: 0 1 300px;
+	min-width: 0;
 	cursor: pointer;
 }
 

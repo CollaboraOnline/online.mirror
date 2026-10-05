@@ -112,6 +112,10 @@ const SECRET_SETTING_FIELDS = [
 
 const SECRET_FIELDS_WITH_DELETE = ['aiProviderAPIKey', 'aiImageProviderAPIKey'];
 
+// Fills the locked field of a saved key. It is never sent: the key itself is
+// not in the browser, and the field is disabled while it shows this.
+const STORED_SECRET_MASK = '*'.repeat(16);
+
 interface AIProvider {
 	id: string;
 	name: string;
@@ -559,6 +563,18 @@ try {
 
 const DEFAULT_PROVIDER = 'default';
 
+// Sizes the common image models accept. With none saved, the server uses
+// ai.image_size from coolwsd.xml, or else the first one here.
+const AI_IMAGE_SIZES = [
+	'1024x1024',
+	'1536x1024',
+	'1024x1536',
+	'1792x1024',
+	'1024x1792',
+	'512x512',
+	'256x256',
+];
+
 // Keep in sync with the pre-canned provider map in wsd/FileServer.cpp
 // fetchModels. The server ignores the baseUrl from the client for non-custom
 // providers and uses its own copy, so a caller cannot pair a pre-canned id
@@ -684,15 +700,15 @@ class SettingIframe {
 		signatureKey: _('Signature Key'),
 		signatureCa: _('Signature CA'),
 		aiProvider: _('Provider'),
-		aiProviderAPIKey: _('API Key'),
+		aiProviderAPIKey: _('API key'),
 		aiProviderModel: _('Model'),
 		aiProviderURL: _('Base URL'),
 		aiImageProvider: _('Provider'),
-		aiImageProviderAPIKey: _('API Key'),
+		aiImageProviderAPIKey: _('API key'),
 		aiImageProviderURL: _('Base URL'),
 		aiImageModel: _('Model'),
-		aiImageSize: _('Image Size'),
-		aiRequestTimeout: _('Request Timeout (seconds)'),
+		aiImageSize: _('Image size'),
+		aiRequestTimeout: _('Request timeout'),
 	};
 	private _serverPrivateSettingLabels: Record<string, string> = {
 		ESignatureClientId: _('Client ID'),
@@ -1058,10 +1074,10 @@ class SettingIframe {
 		download: `<svg fill="currentColor" width="20" height="20" viewBox="0 0 24 24"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"></path></svg>`,
 		delete: `<svg fill="currentColor" width="20" height="20" viewBox="0 0 24 24"><path d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z"></path></svg>`,
 		edit: `<svg fill="currentColor" width="20" height="20" viewBox="0 0 24 24"><path d="M3 17.25V21h3.75l11-11.03-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>`,
+		add: `<svg fill="currentColor" width="20" height="20" viewBox="0 0 24 24"><path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z"></path></svg>`,
 		reset: `<svg fill="currentColor" width="24" height="24" viewBox="0 0 24 24"><path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 .34-.03.67-.08 1h2.02c.05-.33.06-.66.06-1 0-4.42-3.58-8-8-8zm-6 7c0-.34.03-.67.08-1H4.06c-.05.33-.06.66-.06 1 0 4.42 3.58 8 8 8v3l4-4-4-4v3c-3.31 0-6-2.69-6-6z"></path></svg>`,
 		checkboxMarked: `<svg fill="currentColor" width="24" height="24" viewBox="0 0 24 24"><path d="M10,17L5,12L6.41,10.58L10,14.17L17.59,6.58L19,8M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3Z"></path></svg>`,
 		checkboxBlankOutline: `<svg fill="currentColor" width="24" height="24" viewBox="0 0 24 24"><path d="M19,3H5C3.89,3 3,3.89 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5C21,3.89 20.1,3 19,3M19,5V19H5V5H19Z"></path></svg>`,
-		info: `<svg fill="currentColor" width="24" height="24" viewBox="0 0 24 24"><path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"></path></svg>`,
 	};
 	private _allConfigSection: HTMLElement | null;
 	private _sectionObserver: IntersectionObserver | null = null;
@@ -2085,33 +2101,6 @@ class SettingIframe {
 
 		return materialIconContainer;
 	}
-	// A small focusable info affordance that reveals explanatory text on hover
-	// or keyboard focus, keeping long guidance out of the form flow. The bubble
-	// is linked via aria-describedby so assistive tech reads it on focus.
-	private createInfoTooltip(text: string, bubbleId: string): HTMLElement {
-		const wrap = document.createElement('span');
-		/* todo: make it generic, remove ai- prefix, also adjust the css then. */
-		wrap.classList.add('ai-tip-wrap');
-
-		const button = document.createElement('button');
-		button.type = 'button';
-		button.classList.add('ai-info-tip');
-		button.setAttribute('aria-label', text);
-		button.setAttribute('aria-describedby', bubbleId);
-		button.appendChild(
-			this.createMaterialDesignIconContainer(this.SVG_ICONS.info),
-		);
-
-		const bubble = document.createElement('span');
-		bubble.id = bubbleId;
-		bubble.setAttribute('role', 'tooltip');
-		bubble.classList.add('ai-tip-bubble');
-		bubble.textContent = text;
-
-		wrap.appendChild(button);
-		wrap.appendChild(bubble);
-		return wrap;
-	}
 
 	private createButtonWithIcon(
 		id: string,
@@ -2130,7 +2119,7 @@ class SettingIframe {
 		if (isIconOnly) {
 			buttonEl.classList.add('button--icon-only');
 		} else {
-			buttonEl.classList.add('button--text-only');
+			buttonEl.classList.add('button--icon-and-text');
 		}
 		buttonEl.title = title;
 
@@ -3013,41 +3002,46 @@ class SettingIframe {
 		aiContainer.id = 'ai-section';
 		aiContainer.classList.add('section');
 
-		aiContainer.appendChild(this.createHeading(_('AI Assistant')));
+		const header = document.createElement('div');
+		header.classList.add('ai-section-header');
+		const intro = document.createElement('div');
+		intro.classList.add('ai-section-intro');
+		intro.appendChild(this.createHeading(_('AI Assistant')));
 		const aiDesc = document.createElement('p');
+		aiDesc.id = 'ai-description';
 		aiDesc.className = 'view-setting-description';
-		aiDesc.textContent = _(
-			'Configure AI provider credentials and model. Models are fetched automatically when credentials change.',
+		intro.appendChild(aiDesc);
+		header.appendChild(intro);
+		const resetButton = this.createButtonWithIcon(
+			'ai-reset-button',
+			'reset',
+			_('Reset'),
+			['button-primary'],
+			() => this.resetAIProviders(data, aiContainer),
 		);
-		aiContainer.appendChild(aiDesc);
+		resetButton.title = _('Use the AI provider set on the server');
+		header.appendChild(resetButton);
+		aiContainer.appendChild(header);
+
+		aiContainer.appendChild(this.createAIEmptyState(data, aiContainer));
 
 		const aiDivContainer = document.createElement('div');
 		aiDivContainer.id = 'ai-editor';
 		aiContainer.appendChild(aiDivContainer);
 
 		aiDivContainer.appendChild(this.createAISettingsBlock(data));
+		this.showAIEmptyState(
+			aiContainer,
+			!data.aiProviderURL && this.isImageProviderSameAsText(data, aiContainer),
+		);
 
 		aiContainer.appendChild(
 			this.createSettingsActions(
 				'ai',
 				_('AI Assistant'),
 				'viewsetting.json',
-				() => {
-					const defaultSettings = this.getDefaultViewSettings();
-					return {
-						...this._viewSetting,
-						aiProviderURL: defaultSettings.aiProviderURL,
-						aiProviderAPIKey: defaultSettings.aiProviderAPIKey,
-						aiProviderModel: defaultSettings.aiProviderModel,
-						aiImageProviderURL: defaultSettings.aiImageProviderURL,
-						aiImageProviderAPIKey: defaultSettings.aiImageProviderAPIKey,
-						aiImageModel: defaultSettings.aiImageModel,
-						aiImageSize: defaultSettings.aiImageSize,
-						aiRequestTimeout: defaultSettings.aiRequestTimeout,
-						aiProviderAPIKeyStored: false,
-						aiImageProviderAPIKeyStored: false,
-					};
-				},
+				// The section header has its own Reset.
+				null,
 				() => this._viewSetting,
 				(settings) =>
 					this.uploadViewSettingFile(
@@ -3061,6 +3055,80 @@ class SettingIframe {
 			this._aiSection,
 			aiContainer,
 		);
+	}
+
+	// Shown while the user has no provider of their own, so the one set on
+	// the server answers for both text and image generation.
+	private createAIEmptyState(
+		data: ViewSettings,
+		root: HTMLElement,
+	): HTMLDivElement {
+		const emptyState = document.createElement('div');
+		emptyState.id = 'ai-empty-state';
+
+		const header = document.createElement('div');
+		header.classList.add('ai-providers-header');
+		const title = document.createElement('span');
+		title.textContent = _('Providers');
+		const tag = document.createElement('span');
+		tag.classList.add('ai-badge', 'ai-admin-tag');
+		tag.textContent = _('Managed by your admin');
+		header.append(title, tag);
+		emptyState.appendChild(header);
+
+		const emptyTitle = document.createElement('div');
+		emptyTitle.classList.add('ai-empty-state-title');
+		emptyTitle.textContent = _('No providers added yet');
+		emptyState.appendChild(emptyTitle);
+
+		const emptyDesc = document.createElement('p');
+		emptyDesc.className = 'view-setting-description';
+		emptyDesc.textContent = _(
+			"Add a provider to start using AI for text generation, image generation, or both. Your administrator's provider is filled in for you.",
+		);
+		emptyState.appendChild(emptyDesc);
+
+		emptyState.appendChild(
+			this.createButtonWithIcon(
+				'ai-add-provider-button',
+				'add',
+				_('Add provider...'),
+				['button--vue-tertiary'],
+				() => this.addAIProvider(data, root),
+			),
+		);
+		return emptyState;
+	}
+
+	private showAIEmptyState(root: HTMLElement, empty: boolean): void {
+		const show = (selector: string, visible: boolean) => {
+			const el = root.querySelector(selector) as HTMLElement | null;
+			if (el) el.style.display = visible ? '' : 'none';
+		};
+		show('#ai-empty-state', empty);
+		show('#ai-editor', !empty);
+		show('#ai-reset-button', !empty);
+
+		const description = root.querySelector('#ai-description');
+		if (description) {
+			description.textContent = empty
+				? _('Choose the AI provider to use for text and image generation.')
+				: _(
+						'Use your own AI provider instead of the one set up by your administrator. This applies only to you.',
+					);
+		}
+	}
+
+	private addAIProvider(data: ViewSettings, root: HTMLElement): void {
+		const providerSelect = root.querySelector(
+			'#aiProvider',
+		) as HTMLSelectElement | null;
+		if (providerSelect) {
+			providerSelect.value = AI_PROVIDERS[0].id;
+			providerSelect.dispatchEvent(new Event('change'));
+		}
+		this.showAIEmptyState(root, false);
+		providerSelect?.focus();
 	}
 
 	private createViewSettingsTextBox(
@@ -3088,33 +3156,7 @@ class SettingIframe {
 
 		container.appendChild(this.createTextAIGroup(data));
 		container.appendChild(this.createImageAIGroup(data));
-		if (window.showLeftNav) {
-			container.appendChild(
-				this.createButtonWithText(
-					'ai-reset-button',
-					_('Reset'),
-					_('Use the AI provider set on the server'),
-					['button--vue-secondary'],
-					() => this.resetAIProviders(data, container),
-				),
-			);
-		}
-
-		const timeoutBox = this.createViewSettingsTextBox(
-			'aiRequestTimeout',
-			data,
-			false,
-			true,
-		);
-		container.appendChild(timeoutBox);
-		const timeoutInput = timeoutBox.querySelector(
-			'#aiRequestTimeout',
-		) as HTMLInputElement | null;
-		if (timeoutInput) {
-			timeoutInput.placeholder = '300';
-			timeoutInput.type = 'number';
-			timeoutInput.min = '10';
-		}
+		container.appendChild(this.createRequestTimeoutField(data));
 
 		this.attachAISettingsAutoFetch(data, container);
 		this.attachAIImageSettingsAutoFetch(data, container);
@@ -3127,44 +3169,137 @@ class SettingIframe {
 		return container;
 	}
 
-	private createTextAIGroup(data: ViewSettings): HTMLFieldSetElement {
+	// A group of AI fields under a title, with the status of its model fetch
+	// beside the title. The group is named by the title alone, so the status
+	// is not read out as part of its name.
+	private createAIGroup(
+		id: string,
+		title: string,
+		statusId: string,
+	): HTMLFieldSetElement {
 		const group = document.createElement('fieldset');
 		group.classList.add('ai-settings-group');
+		group.setAttribute('aria-labelledby', `${id}-title`);
+
 		const legend = document.createElement('legend');
-		legend.textContent = _('Text Generation');
+		const titleEl = document.createElement('span');
+		titleEl.id = `${id}-title`;
+		titleEl.textContent = title;
+		legend.appendChild(titleEl);
+
+		const status = document.createElement('span');
+		status.id = statusId;
+		status.className = 'ai-badge ai-model-status';
+		status.setAttribute('role', 'status');
+		legend.appendChild(status);
+
 		group.appendChild(legend);
+		return group;
+	}
 
-		const providerOptions = [
-			{ value: DEFAULT_PROVIDER, label: _('Default') },
-			...AI_PROVIDERS.map((provider) => ({
-				value: provider.id,
-				label: provider.name,
-			})),
-		];
-
-		const providerField = document.createElement('div');
-		providerField.id = 'aiProvidercontainer';
-		providerField.classList.add('view-input-container');
-
-		const providerHeading = this.createHeading(
-			this._viewSettingLabels.aiProvider,
-		);
-		providerHeading.classList.add('view-setting-small-label');
-		providerField.appendChild(providerHeading);
-
-		const providerSelect = this.createSelectInput(
-			'aiProvider',
-			providerOptions,
-			this.getSelectedProviderId(data, group),
+	private createImageSizeField(data: ViewSettings): HTMLDivElement {
+		// A size saved by hand before this became a list stays on offer, so
+		// opening the dialog does not change it.
+		const sizes =
+			data.aiImageSize && !AI_IMAGE_SIZES.includes(data.aiImageSize)
+				? [...AI_IMAGE_SIZES, data.aiImageSize]
+				: AI_IMAGE_SIZES;
+		return this.createSelectField(
+			'aiImageSizecontainer',
+			this._viewSettingLabels.aiImageSize,
+			'aiImageSize',
+			sizes.map((size) => ({ value: size, label: size.replace('x', ' × ') })),
+			data.aiImageSize || AI_IMAGE_SIZES[0],
 			(selectEl) => {
-				const provider = this.getProviderById(selectEl.value);
-				if (provider && !provider.isCustom) {
-					data.aiProviderURL = provider.baseUrl;
-				}
+				data.aiImageSize = selectEl.value;
 			},
 		);
-		providerField.appendChild(providerSelect);
-		group.appendChild(providerField);
+	}
+
+	// A labelled dropdown, laid out like the text fields of createInputField.
+	private createSelectField(
+		containerId: string,
+		label: string,
+		selectId: string,
+		options: Array<{ value: string; label: string }>,
+		selectedValue: string,
+		onChangeHandler: (select: HTMLSelectElement) => void,
+	): HTMLDivElement {
+		const field = document.createElement('div');
+		field.id = containerId;
+		field.classList.add('view-input-container');
+
+		const heading = this.createHeading(label);
+		heading.classList.add('view-setting-small-label');
+		field.appendChild(heading);
+
+		// The wrapper draws the chevron, in the text colour of the theme.
+		const selectWrapper = document.createElement('div');
+		selectWrapper.classList.add('select-field');
+		selectWrapper.appendChild(
+			this.createSelectInput(selectId, options, selectedValue, onChangeHandler),
+		);
+		field.appendChild(selectWrapper);
+		return field;
+	}
+
+	private getAIProviderOptions(): Array<{ value: string; label: string }> {
+		return AI_PROVIDERS.map((provider) => ({
+			value: provider.id,
+			label: provider.name,
+		}));
+	}
+
+	private createRequestTimeoutField(data: ViewSettings): HTMLDivElement {
+		const field = this.createViewSettingsTextBox(
+			'aiRequestTimeout',
+			data,
+			false,
+			true,
+		);
+		const input = field.querySelector(
+			'#aiRequestTimeout',
+		) as HTMLInputElement | null;
+		if (input) {
+			input.type = 'number';
+			input.min = '10';
+			input.placeholder = '300';
+
+			const row = document.createElement('div');
+			row.classList.add('ai-input-with-unit');
+			input.replaceWith(row);
+			const unit = document.createElement('span');
+			unit.textContent = _('seconds');
+			row.append(input, unit);
+		}
+		return field;
+	}
+
+	private createTextAIGroup(data: ViewSettings): HTMLFieldSetElement {
+		const group = this.createAIGroup(
+			'aiTextGroup',
+			_('Text generation'),
+			'ai-model-status',
+		);
+
+		group.appendChild(
+			this.createSelectField(
+				'aiProvidercontainer',
+				this._viewSettingLabels.aiProvider,
+				'aiProvider',
+				[
+					{ value: DEFAULT_PROVIDER, label: _('Default') },
+					...this.getAIProviderOptions(),
+				],
+				this.getSelectedProviderId(data, group),
+				(selectEl) => {
+					const provider = this.getProviderById(selectEl.value);
+					if (provider && !provider.isCustom) {
+						data.aiProviderURL = provider.baseUrl;
+					}
+				},
+			),
+		);
 
 		group.appendChild(
 			this.createViewSettingsTextBox('aiProviderURL', data, false, true),
@@ -3193,35 +3328,15 @@ class SettingIframe {
 		const apiKeyInput = group.querySelector(
 			'#aiProviderAPIKey',
 		) as HTMLInputElement | null;
-		if (apiKeyInput && !data.aiProviderAPIKeyStored) {
+		if (apiKeyInput) {
 			apiKeyInput.placeholder = _(
 				'Leave empty if your server does not require one',
 			);
 		}
 
-		const modelField = document.createElement('div');
-		modelField.id = 'aiModelcontainer';
-		modelField.classList.add('view-input-container');
-
-		const modelHeading = this.createHeading(
+		const modelField = this.createSelectField(
+			'aiModelcontainer',
 			this._viewSettingLabels.aiProviderModel,
-		);
-		modelHeading.classList.add('view-setting-small-label');
-
-		const modelLabelRow = document.createElement('div');
-		modelLabelRow.classList.add('ai-label-row');
-		modelLabelRow.appendChild(modelHeading);
-		modelLabelRow.appendChild(
-			this.createInfoTooltip(
-				_(
-					'For document actions (inspecting and editing), choose a model with native function/tool calling, such as gpt-4o, llama3.1, or qwen2.5. Models without it (e.g. base llama3, gemma) can still chat but cannot use document tools.',
-				),
-				'aiModelTip',
-			),
-		);
-		modelField.appendChild(modelLabelRow);
-
-		const modelSelect = this.createSelectInput(
 			'aiProviderModel',
 			this.initialModelOptions(data.aiProviderModel),
 			data.aiProviderModel || '',
@@ -3229,15 +3344,19 @@ class SettingIframe {
 				data.aiProviderModel = selectEl.value;
 			},
 		);
+		const modelSelect = modelField.querySelector('select') as HTMLSelectElement;
 		modelSelect.disabled = true;
-		modelField.appendChild(modelSelect);
+
+		const modelHint = document.createElement('p');
+		modelHint.id = 'aiModelHint';
+		modelHint.className = 'view-setting-description';
+		modelHint.textContent = _(
+			'To edit documents, pick a model with tool calling, e.g. gpt-4o or llama3.1. Models without it (e.g. base llama3, gemma) can still chat but cannot use document tools.',
+		);
+		modelSelect.setAttribute('aria-describedby', modelHint.id);
+		modelField.appendChild(modelHint);
 
 		group.appendChild(modelField);
-
-		const status = document.createElement('div');
-		status.id = 'ai-model-status';
-		status.className = 'ai-model-status';
-		group.appendChild(status);
 
 		if (this.getProviderIdFromUrl(data.aiProviderURL) === 'custom') {
 			this._lastCustomAIProviderURL = data.aiProviderURL;
@@ -3249,11 +3368,11 @@ class SettingIframe {
 	}
 
 	private createImageAIGroup(data: ViewSettings): HTMLFieldSetElement {
-		const group = document.createElement('fieldset');
-		group.classList.add('ai-settings-group');
-		const legend = document.createElement('legend');
-		legend.textContent = _('Image Generation');
-		group.appendChild(legend);
+		const group = this.createAIGroup(
+			'aiImageGroup',
+			_('Image generation'),
+			'ai-image-model-status',
+		);
 
 		group.appendChild(
 			this.createCheckbox(
@@ -3273,38 +3392,24 @@ class SettingIframe {
 		providerFields.id = 'aiImageProviderFields';
 		group.appendChild(providerFields);
 		this._imageProviderMemo = null;
-		const imageProviderOptions = AI_PROVIDERS.map((provider) => ({
-			value: provider.id,
-			label: provider.name,
-		}));
 
-		const providerField = document.createElement('div');
-		providerField.id = 'aiImageProvidercontainer';
-		providerField.classList.add('view-input-container');
-
-		const providerHeading = this.createHeading(
-			this._viewSettingLabels.aiImageProvider,
+		providerFields.appendChild(
+			this.createSelectField(
+				'aiImageProvidercontainer',
+				this._viewSettingLabels.aiImageProvider,
+				'aiImageProvider',
+				this.getAIProviderOptions(),
+				this.getProviderIdFromUrl(
+					data.aiImageProviderURL || data.aiProviderURL || '',
+				),
+				(selectEl) => {
+					const provider = this.getProviderById(selectEl.value);
+					if (provider && !provider.isCustom) {
+						data.aiImageProviderURL = provider.baseUrl;
+					}
+				},
+			),
 		);
-		providerHeading.classList.add('view-setting-small-label');
-		providerField.appendChild(providerHeading);
-
-		const selectedImageProvider = this.getProviderIdFromUrl(
-			data.aiImageProviderURL || data.aiProviderURL || '',
-		);
-
-		const providerSelect = this.createSelectInput(
-			'aiImageProvider',
-			imageProviderOptions,
-			selectedImageProvider,
-			(selectEl) => {
-				const provider = this.getProviderById(selectEl.value);
-				if (provider && !provider.isCustom) {
-					data.aiImageProviderURL = provider.baseUrl;
-				}
-			},
-		);
-		providerField.appendChild(providerSelect);
-		providerFields.appendChild(providerField);
 
 		providerFields.appendChild(
 			this.createViewSettingsTextBox('aiImageProviderURL', data, false, true),
@@ -3331,17 +3436,9 @@ class SettingIframe {
 			imageApiKeyInput.type = 'password';
 		}
 
-		const modelField = document.createElement('div');
-		modelField.id = 'aiImageModelcontainer';
-		modelField.classList.add('view-input-container');
-
-		const modelHeading = this.createHeading(
+		const modelField = this.createSelectField(
+			'aiImageModelcontainer',
 			this._viewSettingLabels.aiImageModel,
-		);
-		modelHeading.classList.add('view-setting-small-label');
-		modelField.appendChild(modelHeading);
-
-		const modelSelect = this.createSelectInput(
 			'aiImageModel',
 			this.initialModelOptions(data.aiImageModel),
 			data.aiImageModel || '',
@@ -3349,38 +3446,10 @@ class SettingIframe {
 				data.aiImageModel = selectEl.value;
 			},
 		);
-		modelSelect.disabled = true;
-		modelField.appendChild(modelSelect);
+		(modelField.querySelector('select') as HTMLSelectElement).disabled = true;
 		group.appendChild(modelField);
 
-		const status = document.createElement('div');
-		status.id = 'ai-image-model-status';
-		status.className = 'ai-model-status';
-		group.appendChild(status);
-
-		group.appendChild(
-			this.createViewSettingsTextBox('aiImageSize', data, false, true),
-		);
-		const imageSizeInput = group.querySelector(
-			'#aiImageSize',
-		) as HTMLInputElement | null;
-		if (imageSizeInput) {
-			imageSizeInput.placeholder = '1024x1024';
-			imageSizeInput.addEventListener('input', () => {
-				const val = imageSizeInput.value.trim();
-				if (val === '' || /^\d+x\d+$/.test(val)) {
-					const parts = val ? val.split('x') : [];
-					const valid =
-						val === '' || (Number(parts[0]) > 0 && Number(parts[1]) > 0);
-					imageSizeInput.style.borderColor = valid ? '' : 'red';
-					if (valid) {
-						data.aiImageSize = val;
-					}
-				} else {
-					imageSizeInput.style.borderColor = 'red';
-				}
-			});
-		}
+		group.appendChild(this.createImageSizeField(data));
 
 		if (
 			data.aiImageProviderURL &&
@@ -3450,7 +3519,7 @@ class SettingIframe {
 						'Leave empty if your server does not require one',
 					);
 				}
-				this.syncSecretDeleteButton('aiProviderAPIKey', data, root);
+				this.syncSecretField('aiProviderAPIKey', data, root);
 			} else if (selectedProvider && !selectedProvider.isCustom) {
 				if (customUrlInput) {
 					this._lastCustomAIProviderURL = customUrlInput.value;
@@ -3704,7 +3773,7 @@ class SettingIframe {
 		if (url) setValue('#aiImageProvider', this.getProviderIdFromUrl(url));
 		setValue('#aiImageProviderURL', url);
 		setValue('#aiImageProviderAPIKey', data.aiImageProviderAPIKey);
-		this.syncSecretDeleteButton('aiImageProviderAPIKey', data, root);
+		this.syncSecretField('aiImageProviderAPIKey', data, root);
 
 		this.syncAIImageSettingsVisibility(data, root);
 		this.scheduleAIImageModelFetch(data);
@@ -3845,7 +3914,7 @@ class SettingIframe {
 			data.aiImageModel = selectedModel;
 			this.updateAIImageModelSelect(modelIds, selectedModel);
 
-			this.setAIImageStatus(_('Models fetched successfully'), 'success');
+			this.setAIImageStatus(_('Connected'), 'success');
 		} catch (error) {
 			if ((error as any)?.name === 'AbortError') {
 				return;
@@ -3961,7 +4030,7 @@ class SettingIframe {
 			data.aiProviderModel = selectedModel;
 			this.updateAIModelSelect(modelIds, selectedModel);
 
-			this.setAIStatus(_('Models fetched successfully'), 'success');
+			this.setAIStatus(_('Connected'), 'success');
 		} catch (error) {
 			if ((error as any)?.name === 'AbortError') {
 				return;
@@ -4765,45 +4834,59 @@ class SettingIframe {
 		row.classList.add('secret-input-row');
 
 		const storedFlag = `${key}Stored`;
-		const syncDeleteButton = () => this.syncSecretDeleteButton(key, data, row);
+		const syncField = () => this.syncSecretField(key, data, row);
 
-		const deleteButton = this.createButtonWithIcon(
-			`${key}-delete`,
-			'delete',
-			_('Delete {0}').replace('{0}', label),
-			['button--vue-secondary', 'delete-icon'],
-			() => {
-				input.value = '';
-				data[key] = '';
-				data[storedFlag] = false;
-				input.dispatchEvent(new Event('input', { bubbles: true }));
-				input.focus();
-			},
-			true,
+		// The trash icon comes from the stylesheet, which picks the light or
+		// dark version for the theme.
+		const deleteButton = document.createElement('button');
+		deleteButton.type = 'button';
+		deleteButton.id = `${key}-delete`;
+		deleteButton.classList.add(
+			'button',
+			'button--icon-only',
+			'button--vue-tertiary',
+			'secret-delete-button',
 		);
+		deleteButton.title = _('Delete {0}').replace('{0}', label);
+		deleteButton.setAttribute('aria-label', deleteButton.title);
+		deleteButton.addEventListener('click', () => {
+			input.value = '';
+			data[key] = '';
+			data[storedFlag] = false;
+			syncField();
+			input.dispatchEvent(new Event('input', { bubbles: true }));
+			input.focus();
+		});
 
-		input.addEventListener('input', syncDeleteButton);
+		input.addEventListener('input', syncField);
 
 		row.appendChild(input);
 		row.appendChild(deleteButton);
-		syncDeleteButton();
+		syncField();
 		return row;
 	}
 
-	// Nothing to clear, nothing to press: the one rule for a secret field's
-	// delete button, for the field's own input event and for the places that
-	// change the field without the user typing in it.
-	private syncSecretDeleteButton(
+	// The one rule for a secret field and its delete button, for the field's
+	// own input event and for the places that change it without the user
+	// typing in it. A saved key shows as a filled, locked field: deleting it
+	// is how to enter a new one. Nothing to clear, nothing to press.
+	private syncSecretField(
 		key: string,
 		data: any,
 		root: ParentNode = document,
 	): void {
+		const input = root.querySelector(`#${key}`) as HTMLInputElement | null;
 		const button = root.querySelector(
 			`#${key}-delete`,
 		) as HTMLButtonElement | null;
-		const input = root.querySelector(`#${key}`) as HTMLInputElement | null;
+		const stored = !!data[`${key}Stored`];
+		if (input) {
+			if (stored) input.value = STORED_SECRET_MASK;
+			else if (input.disabled) input.value = data[key] || '';
+			input.disabled = stored;
+		}
 		if (button) {
-			button.disabled = !data[`${key}Stored`] && !input?.value;
+			button.disabled = !stored && !input?.value;
 		}
 	}
 
@@ -4811,7 +4894,8 @@ class SettingIframe {
 		prefix: string,
 		settingsName: string,
 		filename: string,
-		getDefaultSettings: () => any,
+		// Null leaves the Reset button out.
+		getDefaultSettings: (() => any) | null,
 		getCurrentSettings: () => any,
 		uploadSettings: (settings: any) => Promise<void>,
 	): HTMLDivElement {
@@ -4822,25 +4906,30 @@ class SettingIframe {
 		const actionsContainer = document.createElement('div');
 		actionsContainer.classList.add('xcu-editor-actions');
 
-		const resetButton = this.createButtonWithText(
-			`${prefix}-reset-button`,
-			_('Reset'),
-			_('Reset to default {0}').replace('{0}', settingsName),
-			['button--vue-secondary', `${prefix}-reset-icon`],
-			async (button) => {
-				const confirmed = window.confirm(
-					_('Are you sure you want to reset {0}?').replace('{0}', settingsName),
-				);
-				if (!confirmed) {
-					return;
-				}
-				button.disabled = true;
-				const defaultSettings = getDefaultSettings();
-				await uploadSettings(defaultSettings);
-				button.disabled = false;
-			},
-		);
-		actionsContainer.appendChild(resetButton);
+		if (getDefaultSettings) {
+			const resetButton = this.createButtonWithText(
+				`${prefix}-reset-button`,
+				_('Reset'),
+				_('Reset to default {0}').replace('{0}', settingsName),
+				['button--vue-secondary', `${prefix}-reset-icon`],
+				async (button) => {
+					const confirmed = window.confirm(
+						_('Are you sure you want to reset {0}?').replace(
+							'{0}',
+							settingsName,
+						),
+					);
+					if (!confirmed) {
+						return;
+					}
+					button.disabled = true;
+					const defaultSettings = getDefaultSettings();
+					await uploadSettings(defaultSettings);
+					button.disabled = false;
+				},
+			);
+			actionsContainer.appendChild(resetButton);
+		}
 
 		const saveButton = this.createButtonWithText(
 			`${prefix}-save-button`,
@@ -4906,7 +4995,7 @@ class SettingIframe {
 		);
 	}
 
-	private resetAIProviders(data: ViewSettings, root: ParentNode): void {
+	private resetAIProviders(data: ViewSettings, root: HTMLElement): void {
 		const providerSelect = root.querySelector(
 			'#aiProvider',
 		) as HTMLSelectElement | null;
@@ -4920,6 +5009,11 @@ class SettingIframe {
 		if (sameAsText && !sameAsText.checked) sameAsText.click();
 		data.aiImageModel = '';
 		this.resetAIImageModelSelect('');
+
+		this.showAIEmptyState(root, true);
+		(
+			root.querySelector('#ai-add-provider-button') as HTMLElement | null
+		)?.focus();
 	}
 
 	private getProviderIdFromUrl(url: string): string {
