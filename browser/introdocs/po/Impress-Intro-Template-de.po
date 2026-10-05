@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Impress-Intro-Template.odp\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-09-25 21:45+0000\n"
+"PO-Revision-Date: 2026-10-05 21:51+0000\n"
 "Last-Translator: Ettore Atalan <atalanttore@googlemail.com>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/collabora-online/"
 "impress-intro-template/de/>\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2026.10.dev0\n"
+"X-Generator: Weblate 2026.10.1.dev0\n"
 
 #. content.xml (slide 'page1')
 msgid "👋 Introduction"
@@ -30,19 +30,19 @@ msgstr ""
 #. content.xml (slide 'page1'); styles.xml (master page
 #. 'Introduction_20_slide')
 msgid "Next Chapter: 🖼 Slides & Layouts"
-msgstr ""
+msgstr "Nächstes Kapitel: 🖼 Folien & Layouts"
 
 #. content.xml (slide 'page1')
 msgid "Here's what you'll discover"
-msgstr ""
+msgstr "Das erwartet Sie"
 
 #. content.xml (slide 'page1'); content.xml (slide 'page2')
 msgid "🖼 Slides & Layouts"
-msgstr ""
+msgstr "🖼 Folien & Layouts"
 
 #. content.xml (slide 'page1'); content.xml (slide 'page3')
 msgid "🎨 Design & Master Slides"
-msgstr ""
+msgstr "🎨 Design & Folienmaster"
 
 #. content.xml (slide 'page1'); content.xml (slide 'page4')
 msgid "✏️ Style & Visual"
@@ -85,7 +85,7 @@ msgstr ""
 
 #. content.xml (slide 'page2')
 msgid "Next Chapter: 🎨 Design & Master Slides"
-msgstr ""
+msgstr "Nächstes Kapitel: 🎨 Design & Folienmaster"
 
 #. content.xml (slide 'page3')
 msgid ""
@@ -122,6 +122,9 @@ msgid ""
 "Less is more. One strong visual, a clear headline, and a few well-formatted "
 "lines will always beat a slide packed with text and decorations."
 msgstr ""
+"Weniger ist mehr. Ein aussagekräftiges Bild, eine klare Überschrift und ein "
+"paar gut formatierte Zeilen sind immer besser als eine Folie, die mit Text "
+"und Verzierungen überladen ist."
 
 #. content.xml (slide 'page4')
 msgid "Next Chapter: 🎬 Slide Transitions"
@@ -133,12 +136,19 @@ msgid ""
 "during your slide show. The right transition makes your deck feel polished "
 "and professional, while the wrong one distracts from your message.</3>"
 msgstr ""
+"<1>Ein </1><2>Übergang</2><3> bestimmt, wie während Ihrer Präsentation eine "
+"Folie zur nächsten wechselt. Der richtige Übergang verleiht Ihrer "
+"Präsentation einen ausgefeilten und professionellen Eindruck, während der "
+"falsche von Ihrer Botschaft ablenkt.</3>"
 
 #. content.xml (slide 'page5')
 msgid ""
 "Use one transition across your whole deck to keep things consistent. Save a "
 "different transition for the slides you really want to stand out."
 msgstr ""
+"Verwenden Sie in Ihrer gesamten Präsentation einen einheitlichen Übergang, "
+"um für Konsistenz zu sorgen. Heben Sie sich einen anderen Übergang für die "
+"Folien auf, die Sie besonders hervorheben möchten."
 
 #. content.xml (slide 'page5')
 msgid "Next Chapter: 🎤 Presenting"
@@ -165,7 +175,7 @@ msgstr ""
 
 #. content.xml (slide 'page7')
 msgid "📤 Document sharing"
-msgstr ""
+msgstr "📤 Dokumentenaustausch"
 
 #. content.xml (slide 'page7')
 msgid ""
@@ -176,13 +186,16 @@ msgstr ""
 
 #. content.xml (slide 'page7')
 msgid "⌨️ Shortcuts"
-msgstr ""
+msgstr "⌨️ Tastenkombinationen"
 
 #. content.xml (slide 'page7')
 msgid ""
 "<1>Keyboard shortcuts speed up your workflow. Find the full list under Help "
 "tab in </1><2>Keyboard shortcuts</2>"
 msgstr ""
+"<1>Tastenkombinationen beschleunigen Ihren Arbeitsablauf. Die vollständige "
+"Liste finden Sie auf der Registerkarte Hilfe unter </1><2>"
+"Tastenkombinationen</2>"
 
 #. content.xml (slide 'page7')
 msgid "▶️ Video tutorials"
@@ -193,6 +206,8 @@ msgid ""
 "Want to keep learning? Short video introductions cover additional features "
 "and help you build on what you’ve learned."
 msgstr ""
+"Möchten Sie weiterlernen? In kurzen Einführungsvideos werden weitere "
+"Funktionen vorgestellt, mit denen Sie das Gelernte vertiefen können."
 
 #. styles.xml (master page 'Content_20_slide'); styles.xml (master page
 #. 'Default')
