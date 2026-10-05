@@ -106,6 +106,39 @@ describe(['tagdesktop'], 'Writer paragraph swap for the reader', { testIsolation
 		});
 	});
 
+	it('on Windows a paragraph change never leaves the editable empty', function () {
+		let emptied = false;
+		let observer;
+		let wasWin;
+		cy.then(function () {
+			wasWin = win.L.Browser.win;
+			win.L.Browser.win = true;
+			observer = new win.MutationObserver(function () {
+				if (editableText() === '')
+					emptied = true;
+			});
+			observer.observe(win.document.getElementById('clipboard-area'),
+				{ childList: true, subtree: true, characterData: true });
+		});
+
+		helper.typeIntoDocument('{ctrl}{home}');
+		cy.then(function () {
+			return helper.processToIdle(win);
+		});
+		helper.typeIntoDocument('{downarrow}');
+		cy.then(function () {
+			return helper.processToIdle(win);
+		});
+
+		cy.then(function () {
+			observer.disconnect();
+			win.L.Browser.win = wasWin;
+			expect(emptied, 'NVDA reads the line at the caret, so the editable is never caught empty')
+				.to.equal(false);
+		});
+		expectWholeParagraphInEditable('after Down on Windows');
+	});
+
 	it('a scroll leaves alone what an input method is still composing', function () {
 		const uncommitted = ' still composing';
 		let requests = 0;
