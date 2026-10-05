@@ -19,7 +19,9 @@
 
 #include <sdr/contact/viewcontactofgraphic.hxx>
 #include <sdr/contact/viewobjectcontactofgraphic.hxx>
+#include <svx/svdmodel.hxx>
 #include <svx/svdograf.hxx>
+#include <svx/svdoutl.hxx>
 #include <sdgtritm.hxx>
 #include <svx/sdgluitm.hxx>
 #include <sdgcoitm.hxx>
@@ -29,20 +31,26 @@
 #include <sdr/primitive2d/sdrattributecreator.hxx>
 #include <svl/itemset.hxx>
 #include <tools/debug.hxx>
+#include <unotools/weakref.hxx>
 
 #include <sdgclitm.hxx>
 #include <svx/sdgcpitm.hxx>
 #include <svx/sdr/contact/viewobjectcontact.hxx>
 #include <svx/sdr/contact/objectcontact.hxx>
+#include <svx/sdr/primitive2d/svx_primitivetypes2d.hxx>
+#include <basegfx/color/bcolormodifier.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <sdr/primitive2d/sdrgrafprimitive2d.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
+#include <drawinglayer/geometry/viewinformation2d.hxx>
 #include <drawinglayer/primitive2d/PolygonHairlinePrimitive2D.hxx>
 #include <drawinglayer/primitive2d/bitmapprimitive2d.hxx>
+#include <drawinglayer/primitive2d/groupprimitive2d.hxx>
 #include <drawinglayer/primitive2d/maskprimitive2d.hxx>
+#include <drawinglayer/primitive2d/modifiedcolorprimitive2d.hxx>
 #include <sdr/primitive2d/sdrtextprimitive2d.hxx>
 #include <editeng/eeitem.hxx>
 #include <editeng/colritem.hxx>
@@ -51,6 +59,85 @@
 #include <drawinglayer/primitive2d/exclusiveeditviewprimitive2d.hxx>
 
 #include <bitmaps.hlst>
+
+namespace drawinglayer::primitive2d
+{
+namespace
+{
+/*  Content made to be black on white paper. On a view with a dark background it is drawn with
+    its lightness inverted and its hue kept, so black becomes white and red stays red. Print,
+    print preview and PDF export are not a view and get the content as it is.
+ */
+class LightOnDarkPrimitive2D final : public GroupPrimitive2D
+{
+private:
+    /// The object the content belongs to.
+    unotools::WeakReference<SdrObject> mxSdrObject;
+
+    bool isOnDarkBackground(const geometry::ViewInformation2D& rViewInformation) const
+    {
+        // The automatic color is the document background of the view, and COL_AUTO when the
+        // output is not a view.
+        const Color aAutoColor(rViewInformation.getAutoColor());
+        if (COL_AUTO == aAutoColor)
+            return false;
+
+        // The background color of the draw outliner is the color behind the drawing objects.
+        // Automatic text colors are chosen against it. COL_AUTO means the document background.
+        Color aBackground(aAutoColor);
+        if (const rtl::Reference<SdrObject> xSdrObject = mxSdrObject.get())
+        {
+            const Color aOutlinerBackground(
+                xSdrObject->getSdrModelFromSdrObject().GetDrawOutliner().GetBackgroundColor());
+            if (COL_AUTO != aOutlinerBackground)
+                aBackground = aOutlinerBackground;
+        }
+
+        return aBackground.IsDark();
+    }
+
+public:
+    LightOnDarkPrimitive2D(Primitive2DContainer&& aChildren, const SdrObject& rSdrObject)
+        : GroupPrimitive2D(std::move(aChildren))
+        , mxSdrObject(const_cast<SdrObject*>(&rSdrObject))
+    {
+    }
+
+    virtual void
+    get2DDecomposition(Primitive2DDecompositionVisitor& rVisitor,
+                       const geometry::ViewInformation2D& rViewInformation) const override
+    {
+        if (!isOnDarkBackground(rViewInformation))
+        {
+            getChildren(rVisitor);
+            return;
+        }
+
+        // Inverting a color inverts both its lightness and its hue. Rotating the hue by half a
+        // turn brings the hue back.
+        Primitive2DContainer aHueRotated{ new ModifiedColorPrimitive2D(
+            Primitive2DContainer(getChildren()),
+            std::make_shared<basegfx::BColorModifier_hueRotate>(M_PI)) };
+        rVisitor.visit(new ModifiedColorPrimitive2D(
+            std::move(aHueRotated), std::make_shared<basegfx::BColorModifier_invert>()));
+    }
+
+    virtual bool operator==(const BasePrimitive2D& rPrimitive) const override
+    {
+        if (!GroupPrimitive2D::operator==(rPrimitive))
+            return false;
+
+        const auto& rCompare = static_cast<const LightOnDarkPrimitive2D&>(rPrimitive);
+        return mxSdrObject.get() == rCompare.mxSdrObject.get();
+    }
+
+    virtual sal_uInt32 getPrimitive2DID() const override
+    {
+        return PRIMITIVE2D_ID_LIGHTONDARKPRIMITIVE2D;
+    }
+};
+}
+}
 
 namespace sdr::contact
 {
@@ -398,6 +485,15 @@ namespace sdr::contact
                     drawinglayer::primitive2d::Primitive2DReference(
                         new drawinglayer::primitive2d::MaskPrimitive2D(
                             std::move(aClip), std::move(aContent))) };
+            }
+
+            // A signature line is black on white paper, and a view with a dark background shows
+            // it light.
+            if (GetGrafObject().isSignatureLine() && !aContent.empty())
+            {
+                aContent = drawinglayer::primitive2d::Primitive2DContainer {
+                    new drawinglayer::primitive2d::LightOnDarkPrimitive2D(
+                        std::move(aContent), GetGrafObject()) };
             }
 
             rVisitor.visit(std::move(aContent));

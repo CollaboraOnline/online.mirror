@@ -18,10 +18,15 @@
 #include <drawinglayer/primitive2d/groupprimitive2d.hxx>
 #include <com/sun/star/drawing/PolyPolygonBezierCoords.hpp>
 #include <com/sun/star/drawing/XShapes.hpp>
+#include <com/sun/star/graphic/XGraphic.hpp>
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
 
+#include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <comphelper/embeddedobjectcontainer.hxx>
 #include <comphelper/propertysequence.hxx>
+#include <drawinglayer/geometry/viewinformation2d.hxx>
+#include <drawinglayer/processor2d/baseprocessor2d.hxx>
+#include <drawinglayer/processor2d/processor2dtools.hxx>
 #include <extendedprimitive2dxmldump.hxx>
 #include <rtl/ustring.hxx>
 #include <sfx2/linkmgr.hxx>
@@ -29,6 +34,7 @@
 #include <svx/sdr/contact/displayinfo.hxx>
 #include <svx/sdr/contact/viewcontact.hxx>
 #include <svx/sdr/contact/viewobjectcontact.hxx>
+#include <svx/signaturelinehelper.hxx>
 #include <svx/svdmodel.hxx>
 #include <svx/svdoashp.hxx>
 #include <svx/svdomedia.hxx>
@@ -504,6 +510,60 @@ CPPUNIT_TEST_FIXTURE(SdrTest, testReflectionOfShapeHasNoShadow)
     assertXPath(pDocument, "//shadow", 1);
     assertXPath(pDocument, "//reflection", 1);
     assertXPath(pDocument, "//reflection//shadow", 0);
+}
+
+/// The color in the middle of the given primitives, drawn for a view with the given automatic
+/// color. COL_AUTO draws them the way print and PDF export do.
+Color renderCenterPixel(const drawinglayer::primitive2d::Primitive2DContainer& rPrimitives,
+                        Color aAutoColor)
+{
+    // Page coordinates from 1000 to 11000 map to pixels from 0 to 100.
+    ScopedVclPtrInstance<VirtualDevice> pDevice;
+    pDevice->SetOutputSizePixel(Size(100, 100));
+    pDevice->SetBackground(Wallpaper(COL_GRAY));
+    pDevice->Erase();
+    drawinglayer::geometry::ViewInformation2D aViewInformation;
+    aViewInformation.setViewTransformation(
+        basegfx::utils::createScaleTranslateB2DHomMatrix(0.01, 0.01, -10.0, -10.0));
+    aViewInformation.setAutoColor(aAutoColor);
+    std::unique_ptr<drawinglayer::processor2d::BaseProcessor2D> pProcessor(
+        drawinglayer::processor2d::createPixelProcessor2DFromOutputDevice(*pDevice,
+                                                                          aViewInformation));
+    pProcessor->process(rPrimitives);
+    // The processor finishes its output on the device when it is destroyed.
+    pProcessor.reset();
+    return pDevice->GetPixel(Point(50, 50));
+}
+
+CPPUNIT_TEST_FIXTURE(SdrTest, testSignatureLineIsLightOnDarkView)
+{
+    // Given a signature line whose graphic is black:
+    loadFromURL(u"private:factory/sdraw"_ustr);
+    auto xFactory = mxComponent.queryThrow<lang::XMultiServiceFactory>();
+    auto xShape = xFactory->createInstance(u"com.sun.star.drawing.GraphicObjectShape"_ustr)
+                      .queryThrow<drawing::XShape>();
+    xShape->setPosition(awt::Point(1000, 1000));
+    xShape->setSize(awt::Size(10000, 10000));
+    auto xDrawPage = mxComponent.queryThrow<drawing::XDrawPagesSupplier>()
+                         ->getDrawPages()
+                         ->getByIndex(0)
+                         .queryThrow<drawing::XDrawPage>();
+    xDrawPage.queryThrow<drawing::XShapes>()->add(xShape);
+    uno::Reference<graphic::XGraphic> xGraphic = svx::SignatureLineHelper::importSVG(
+        u"<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"10mm\" height=\"10mm\" "
+        "viewBox=\"0 0 100 100\"><rect x=\"0\" y=\"0\" width=\"100\" height=\"100\" "
+        "fill=\"rgb(0,0,0)\"/></svg>");
+    auto xShapeProperties = xShape.queryThrow<beans::XPropertySet>();
+    xShapeProperties->setPropertyValue(u"Graphic"_ustr, cpo::uno::Any(xGraphic));
+    xShapeProperties->setPropertyValue(u"IsSignatureLine"_ustr, cpo::uno::Any(true));
+    drawinglayer::primitive2d::Primitive2DContainer aPrimitives = renderPageToPrimitives(xDrawPage);
+
+    // Then a view with the dark document background shows it white:
+    CPPUNIT_ASSERT_EQUAL(COL_WHITE, renderCenterPixel(aPrimitives, Color(0x1c, 0x1c, 0x1c)));
+    // A view with a light document background shows it black:
+    CPPUNIT_ASSERT_EQUAL(COL_BLACK, renderCenterPixel(aPrimitives, COL_WHITE));
+    // And so do print and PDF export:
+    CPPUNIT_ASSERT_EQUAL(COL_BLACK, renderCenterPixel(aPrimitives, COL_AUTO));
 }
 }
 
