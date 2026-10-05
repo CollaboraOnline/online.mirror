@@ -4644,7 +4644,7 @@ void DocumentBroker::uploadPresetsToWopiHost()
             httpRequest.setBodyFile(bodyPath);
             httpRequest.set("Content-Type", "application/octet-stream");
 
-            auto httpSession = StorageConnectionManager::getHttpSession(uriObject);
+            auto httpSession = StorageConnectionManager::getWopiHttpSession(uriObject);
             auto httpResponse = httpSession->syncRequest(httpRequest);
 
             if (!scrubbedPath.empty())
