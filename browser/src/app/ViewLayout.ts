@@ -897,6 +897,10 @@ class ViewLayoutBase {
 		part: PartNumber,
 		added: Set<string>,
 	): void {
+		// The tiles are of the shown view mode, such as the notes page or
+		// the master page of a presentation. Mode 0 is the normal view.
+		const mode = app.activeDocument ? app.activeDocument.activeModes[0] : 0;
+
 		for (let c = 0; c <= columnCount; c++) {
 			for (let r = 0; r <= rowCount; r++) {
 				const coords = new TileCoordData(
@@ -904,7 +908,7 @@ class ViewLayoutBase {
 					startY + r * tileSize,
 					zoom,
 					part,
-					0,
+					mode,
 				);
 
 				const key = coords.key();

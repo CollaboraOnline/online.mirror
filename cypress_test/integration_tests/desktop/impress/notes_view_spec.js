@@ -2,6 +2,7 @@
 
 var helper = require('../../common/helper');
 var impressHelper = require('../../common/impress_helper');
+var desktopHelper = require('../../common/desktop_helper');
 
 // Count the dark pixels on the main tile canvas to detect notes typing.
 function countDarkPixels(canvasElement) {
@@ -14,6 +15,18 @@ function countDarkPixels(canvasElement) {
 			dark++;
 	}
 	return dark;
+}
+
+// Count the white pixels of the page on the main tile canvas. The area around the page is grey.
+function countPagePixels(canvasElement) {
+	var context = canvasElement.getContext('2d');
+	var pixels = context.getImageData(0, 0, canvasElement.width, canvasElement.height).data;
+	var white = 0;
+	for (var i = 0; i < pixels.length; i += 4) {
+		if (pixels[i + 3] > 0 && pixels[i] >= 250 && pixels[i + 1] >= 250 && pixels[i + 2] >= 250)
+			white++;
+	}
+	return white;
 }
 
 describe(['tagdesktop'], 'Impress notes view editing.', function() {
@@ -65,6 +78,34 @@ describe(['tagdesktop'], 'Impress notes view editing.', function() {
 			var afterDark = countDarkPixels(canvas[0]);
 			expect(afterDark - this.baselineDark,
 				'dark pixels added by the typed notes text').to.be.greaterThan(50);
+		});
+	});
+
+	it('The notes page stays visible after a zoom change.', function() {
+		cy.then(() => {
+			helper.processToIdle(this.win);
+			this.win.app.map.sendUnoCommand('.uno:NotesMode');
+		}).then(() => {
+			helper.processToIdle(this.win);
+		});
+		cy.getFrameWindow().its('app.impress.notesMode').should('be.true');
+
+		// The page covers a large part of the canvas before the zoom.
+		cy.cGet('#document-canvas').should((canvas) => {
+			var pagePixels = countPagePixels(canvas[0]);
+			expect(pagePixels, 'page pixels before the zoom').to.be.greaterThan(
+				canvas[0].width * canvas[0].height / 10);
+		});
+
+		desktopHelper.zoomIn();
+		cy.then(() => {
+			helper.processToIdle(this.win);
+		});
+
+		cy.cGet('#document-canvas').should((canvas) => {
+			var pagePixels = countPagePixels(canvas[0]);
+			expect(pagePixels, 'page pixels after the zoom').to.be.greaterThan(
+				canvas[0].width * canvas[0].height / 10);
 		});
 	});
 });
