@@ -119,11 +119,6 @@ protected:
         makeActive();
     }
 
-    void loadActivePresentation() {
-        mxComponent = loadFromDesktop(u"private:factory/simpress"_ustr);
-        makeActive();
-    }
-
     // The libraries are the elements of the runner's libraries argument, as made by library and
     // separated by commas:
     void runScript(
@@ -427,7 +422,7 @@ CPPUNIT_TEST_FIXTURE(Test, testSession) {
 }
 
 CPPUNIT_TEST_FIXTURE(Test, testSlidesApp) {
-    loadActivePresentation();
+    loadActiveDocument(u"slidesapp-test.pptx");
     runScript(createFileURL(u"slidesapp-test.js"), {}, u"");
 }
 

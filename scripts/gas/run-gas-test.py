@@ -25,20 +25,21 @@ document-test.rtf, "utilities" runs utilities-test.js (no RTF needed),
 and so on for any future <stem>-test.js / <stem>-test.rtf pair.  Every
 such test file names its entry function test.  A stem starting with
 "slides" runs against a Google Slides presentation instead of a Doc,
-one that has a single blank slide at the start of every run.
+and needs a <stem>-test.pptx fixture: "slidesapp" runs
+slidesapp-test.js against slidesapp-test.pptx.
 
-For a stem that has an .rtf fixture, uploads it to Drive (asking Drive
-to convert it to a Google Doc on the way in), creates a bound Apps
-Script project holding the .js file, executes test() server-side
-through the Apps Script API, and prints PASS or FAIL with the
-exception text.  For a stem without an .rtf fixture, reuses the cached
-Doc as-is (its content is not observed by the test).
+For a stem that has a fixture, uploads it to Drive (asking Drive to
+convert it to a Google Doc or presentation on the way in), creates a
+bound Apps Script project holding the .js file, executes test()
+server-side through the Apps Script API, and prints PASS or FAIL with
+the exception text.  For a Doc stem without an .rtf fixture, reuses
+the cached Doc as-is (its content is not observed by the test).
 
-The Doc and the script are created on first run and cached in
-test-state.json in the --state-dir directory (~/.gas by default),
-so every subsequent run just overwrites the Doc's content (via a fresh
-RTF upload that Drive re-converts in place) and pushes the current
-<stem>-test.js source, then invokes test.  The one-time GCP
+The Doc or presentation and the script are created on first run and
+cached in test-state.json in the --state-dir directory (~/.gas by
+default), so every subsequent run just overwrites the file's content
+(via a fresh fixture upload that Drive re-converts in place) and
+pushes the current <stem>-test.js source, then invokes test.  The one-time GCP
 project pairing chore in step 2 below is done once, ever.  Use
 --reset to throw the cache away and start over.
 
@@ -64,6 +65,7 @@ One-time setup for the Google side:
 Usage:
     scripts/gas/run-gas-test.py document
     scripts/gas/run-gas-test.py utilities
+    scripts/gas/run-gas-test.py slidesapp
     scripts/gas/run-gas-test.py document --reset   # throw away the cache
 """
 
@@ -102,52 +104,37 @@ def save_state(state_file, s):
     state_file.write_text(json.dumps(s, indent=2))
 
 
-def upload_rtf(drive, rtf_path):
-    body = {
-        "name": "gas-test " + rtf_path.name,
-        "mimeType": "application/vnd.google-apps.document",
-    }
-    media = MediaFileUpload(
-        str(rtf_path), mimetype="application/rtf", resumable=False
-    )
+# The fixture of a Doc test is RTF and the fixture of a presentation test is PPTX.  Each entry
+# maps the fixture's file extension to the media type of the upload and to the Google file type
+# that Drive converts the upload into.
+FIXTURE_KINDS = {
+    "rtf": ("application/rtf", "application/vnd.google-apps.document"),
+    "pptx": (
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "application/vnd.google-apps.presentation",
+    ),
+}
+
+
+def upload_fixture(drive, fixture_path):
+    """Upload the fixture as a new file, converted by Drive into a Doc or a presentation."""
+    media_type, google_type = FIXTURE_KINDS[fixture_path.suffix[1:]]
+    body = {"name": "gas-test " + fixture_path.name, "mimeType": google_type}
+    media = MediaFileUpload(str(fixture_path), mimetype=media_type, resumable=False)
     result = drive.files().create(
         body=body, media_body=media, fields="id"
     ).execute()
     return result["id"]
 
 
-PPTX_TYPE = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-
-
-def create_presentation(drive, snapshot_path):
-    """Create a blank presentation, and save its PPTX export at snapshot_path for
-    replace_presentation_content."""
-    result = drive.files().create(
-        body={
-            "name": "gas-test presentation",
-            "mimeType": "application/vnd.google-apps.presentation",
-        },
-        fields="id",
-    ).execute()
-    snapshot_path.write_bytes(
-        drive.files().export(fileId=result["id"], mimeType=PPTX_TYPE).execute()
-    )
-    return result["id"]
-
-
-def replace_presentation_content(drive, presentation_id, snapshot_path):
-    media = MediaFileUpload(str(snapshot_path), mimetype=PPTX_TYPE, resumable=False)
-    drive.files().update(fileId=presentation_id, media_body=media).execute()
-
-
-def replace_doc_content(drive, doc_id, rtf_path):
-    """Replace the target Docs file's content with a fresh RTF upload; Drive
-    re-runs its RTF-to-Docs conversion on the media, so the resulting Doc has
-    the same content it would have if we had uploaded the RTF as a new file."""
-    media = MediaFileUpload(
-        str(rtf_path), mimetype="application/rtf", resumable=False
-    )
-    drive.files().update(fileId=doc_id, media_body=media).execute()
+def replace_file_content(drive, file_id, fixture_path):
+    """Replace the target file's content with a fresh fixture upload; Drive
+    re-runs its conversion on the media, so the resulting Doc or presentation
+    has the same content it would have if we had uploaded the fixture as a new
+    file."""
+    media_type, _ = FIXTURE_KINDS[fixture_path.suffix[1:]]
+    media = MediaFileUpload(str(fixture_path), mimetype=media_type, resumable=False)
+    drive.files().update(fileId=file_id, media_body=media).execute()
 
 
 def push_script_content(script, script_id, js_path):
@@ -216,14 +203,17 @@ def main():
     ap = argparse.ArgumentParser(
         description=(
             "Run a Google Apps Script test named by its stem, against a"
-            " Doc built from an RTF fixture when the stem has one."
+            " Doc built from an RTF fixture when the stem has one, or"
+            " against a presentation built from a PPTX fixture for a"
+            " stem that starts with slides."
         )
     )
     ap.add_argument(
         "stem",
         help=(
             "test stem: run <stem>-test.js, invoke test, refresh"
-            " the Doc from <stem>-test.rtf when that fixture exists"
+            " the Doc from <stem>-test.rtf when that fixture exists,"
+            " or the presentation from <stem>-test.pptx"
         ),
     )
     ap.add_argument(
@@ -240,16 +230,17 @@ def main():
 
     args.js = DATA_DIR / (args.stem + "-test.js")
     args.function = "test"
-    rtf_candidate = DATA_DIR / (args.stem + "-test.rtf")
-    args.rtf = rtf_candidate if rtf_candidate.exists() else None
     is_presentation = args.stem.startswith("slides")
-    if is_presentation and args.rtf is not None:
-        sys.exit("a presentation test cannot have a fixture: " + str(args.rtf))
+    fixture_candidate = DATA_DIR / (
+        args.stem + "-test." + ("pptx" if is_presentation else "rtf")
+    )
+    args.fixture = fixture_candidate if fixture_candidate.exists() else None
+    if is_presentation and args.fixture is None:
+        sys.exit("missing fixture: " + str(fixture_candidate))
     file_key, script_key = (
         ("presentation_id", "presentation_script_id") if is_presentation
         else ("doc_id", "script_id")
     )
-    snapshot_path = args.state_dir / "test-presentation.pptx"
 
     if not args.js.exists():
         sys.exit("missing fixture: " + str(args.js))
@@ -270,22 +261,20 @@ def main():
     script_id = state.get(script_key)
 
     if doc_id is None or script_id is None:
-        if is_presentation:
-            print(
-                "first-run bootstrap: creating presentation and bound script...",
-                flush=True,
+        if args.fixture is None:
+            sys.exit(
+                "first-run bootstrap needs a fixture at "
+                + str(fixture_candidate)
+                + " to create the file; run with a stem that has one first"
+                " (e.g. document)"
             )
-            doc_id = create_presentation(drive, snapshot_path)
-        else:
-            if args.rtf is None:
-                sys.exit(
-                    "first-run bootstrap needs an .rtf fixture at "
-                    + str(rtf_candidate)
-                    + " to create the Doc; run with a stem that has one first"
-                    " (e.g. document)"
-                )
-            print("first-run bootstrap: creating Doc and bound script...", flush=True)
-            doc_id = upload_rtf(drive, args.rtf)
+        print(
+            "first-run bootstrap: creating "
+            + ("presentation" if is_presentation else "Doc")
+            + " and bound script...",
+            flush=True,
+        )
+        doc_id = upload_fixture(drive, args.fixture)
         print("  file id: " + doc_id)
         script_id = create_bound_script(script, doc_id, args.js)
         print("  script id: " + script_id)
@@ -305,20 +294,22 @@ def main():
         return 2
 
     try:
-        if is_presentation:
-            print("resetting the presentation to one blank slide...", flush=True)
-            replace_presentation_content(drive, doc_id, snapshot_path)
-        if args.rtf is not None:
-            print("refreshing Doc content from " + args.rtf.name + "...", flush=True)
-            replace_doc_content(drive, doc_id, args.rtf)
+        if args.fixture is not None:
+            print(
+                "refreshing "
+                + ("presentation" if is_presentation else "Doc")
+                + " content from " + args.fixture.name + "...",
+                flush=True,
+            )
+            replace_file_content(drive, doc_id, args.fixture)
         print("pushing " + args.js.name + " to the script...", flush=True)
         push_script_content(script, script_id, args.js)
     except HttpError as e:
         if e.resp.status != 404:
             raise
         print(
-            "cached Doc or script is gone from Drive.  Run with --reset to"
-            " rebootstrap."
+            "cached Doc, presentation or script is gone from Drive.  Run with"
+            " --reset to rebootstrap."
         )
         return 1
 
