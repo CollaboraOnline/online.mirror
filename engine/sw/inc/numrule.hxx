@@ -223,6 +223,9 @@ public:
     static sal_uInt16 GetNumIndent( sal_uInt8 nLvl );
     static sal_uInt16 GetBullIndent( sal_uInt8 nLvl );
 
+    /// Apply the defaults a UI-created list uses at the given level.
+    static void ApplyDefaultLabelAlignmentIndents(SvxNumberFormat& rFormat, sal_uInt8 nLvl);
+
     SwNumRuleType GetRuleType() const           { return meRuleType; }
     void SetRuleType( SwNumRuleType eNew )      { meRuleType = eNew;
                                                   mbInvalidRuleFlag = true; }

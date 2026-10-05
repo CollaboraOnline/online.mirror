@@ -5330,6 +5330,12 @@ namespace {
 
 bool SwTextNode::SetAttr( const SfxPoolItem& pItem )
 {
+    if (GetDoc().IsInMergedPaste() && !SwTextNode::IsParaItemKeptInMergedPaste(pItem.Which()))
+    {
+        // Merged paste and the paragraph property is to be ignored.
+        return false;
+    }
+
     const bool bOldIsSetOrResetAttr( mbInSetOrResetAttr );
     mbInSetOrResetAttr = true;
 
@@ -5369,6 +5375,22 @@ bool SwTextNode::IsCharItemKeptInMergedPaste(sal_uInt16 nWhich)
     return false;
 }
 
+bool SwTextNode::IsParaItemKeptInMergedPaste(sal_uInt16 nWhich)
+{
+    switch (nWhich)
+    {
+        // List membership, level, number format, start value
+        case sal_uInt16(RES_PARATR_LIST_ISCOUNTED):
+        case sal_uInt16(RES_PARATR_LIST_LEVEL):
+        case sal_uInt16(RES_PARATR_NUMRULE):
+        case sal_uInt16(RES_PARATR_LIST_ISRESTART):
+        case sal_uInt16(RES_PARATR_LIST_RESTARTVALUE):
+            return true;
+    }
+    // A character property set on the full paragraph.
+    return IsCharItemKeptInMergedPaste(nWhich);
+}
+
 bool SwTextNode::SetAttr( const SfxItemSet& rSet )
 {
     return SetAttr(rSet, std::nullopt);
@@ -5386,23 +5408,9 @@ bool SwTextNode::SetAttr( const SfxItemSet& rSet, std::optional<bool> oInMergedP
         SfxWhichIter aIter(aFiltered);
         for (sal_uInt16 nWhich = aIter.FirstWhich(); nWhich; nWhich = aIter.NextWhich())
         {
-            switch (nWhich)
+            if (!SwTextNode::IsParaItemKeptInMergedPaste(nWhich))
             {
-                // List membership, level, number format, start value
-                case sal_uInt16(RES_PARATR_LIST_ISCOUNTED):
-                case sal_uInt16(RES_PARATR_LIST_LEVEL):
-                case sal_uInt16(RES_PARATR_NUMRULE):
-                case sal_uInt16(RES_PARATR_LIST_ISRESTART):
-                case sal_uInt16(RES_PARATR_LIST_RESTARTVALUE):
-                    continue;
-                default:
-                    if (SwTextNode::IsCharItemKeptInMergedPaste(nWhich))
-                    {
-                        // A character property on the full paragraph.
-                        continue;
-                    }
-                    aFiltered.ClearItem(nWhich);
-                    break;
+                aFiltered.ClearItem(nWhich);
             }
         }
     }

@@ -24,6 +24,7 @@
 #include <editeng/colritem.hxx>
 #include <editeng/escapementitem.hxx>
 #include <editeng/wghtitem.hxx>
+#include <numrule.hxx>
 #include <paratr.hxx>
 #include <fmtautofmt.hxx>
 #include <ndhints.hxx>
@@ -845,6 +846,42 @@ CPPUNIT_TEST_FIXTURE(SwCoreTxtnodeTest, testMergedPasteParaProps)
     const SfxItemSet& rSet = pTextNode->GetSwAttrSet();
     // Without the accompanying fix in place, this failed, alignment was set by the HTML import.
     CPPUNIT_ASSERT(!rSet.GetItemIfSet(RES_PARATR_ADJUST));
+}
+
+CPPUNIT_TEST_FIXTURE(SwCoreTxtnodeTest, testMergedPasteListIndent)
+{
+    // Given an empty Writer document with the merged-paste flag on:
+    createSwDoc();
+    SwDoc* pDoc = getSwDocShell()->GetDoc();
+    pDoc->SetInMergedPaste(true);
+    comphelper::ScopeGuard g([pDoc] { pDoc->SetInMergedPaste(false); });
+
+    // When importing an HTML file with a nested unordered list into it:
+    cpo::uno::Sequence<beans::PropertyValue> aArgs
+        = { comphelper::makePropertyValue(u"Name"_ustr, createFileURL(u"merged-paste-list.html")) };
+    dispatchCommand(mxComponent, u".uno:InsertDoc"_ustr, aArgs);
+
+    // Then the inner bullet's indent-at is larger than the outer one:
+    SwTextNode* pInnerNode = nullptr;
+    SwNodes& rNodes = pDoc->GetNodes();
+    for (SwNodeOffset i(0); i < rNodes.Count(); ++i)
+    {
+        SwTextNode* pCandidate = rNodes[i]->GetTextNode();
+        if (pCandidate && pCandidate->GetText() == u"inner")
+        {
+            pInnerNode = pCandidate;
+            break;
+        }
+    }
+    CPPUNIT_ASSERT(pInnerNode);
+    const SwNumRule* pRule = pInnerNode->GetNumRule();
+    CPPUNIT_ASSERT(pRule);
+    const SwNumFormat& rOuter = pRule->Get(0);
+    const SwNumFormat& rInner = pRule->Get(1);
+    // Without the accompanying fix in place, this failed with both indents
+    // at 0: a default-constructed SwNumFormat is LABEL_WIDTH_AND_POSITION
+    // with zero indent-at, so neither bullet moved from the left margin.
+    CPPUNIT_ASSERT_GREATER(rOuter.GetIndentAt(), rInner.GetIndentAt());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

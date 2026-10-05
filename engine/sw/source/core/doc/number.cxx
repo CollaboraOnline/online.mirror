@@ -212,6 +212,19 @@ sal_uInt16 SwNumRule::GetBullIndent( sal_uInt8 nLvl )
     return saDefNumIndents[ nLvl ];
 }
 
+void SwNumRule::ApplyDefaultLabelAlignmentIndents(SvxNumberFormat& rFormat, sal_uInt8 nLvl)
+{
+    // first-line indent of general numbering: -0.25 inch
+    constexpr tools::Long cFirstLineIndent = o3tl::toTwips(-0.25, o3tl::Length::in);
+    // indent-at starts at 0.50 inch for level 0 and grows by 0.25 inch per level
+    const tools::Long nIndentAt = o3tl::toTwips(50 + 25 * nLvl, o3tl::Length::in100);
+    rFormat.SetPositionAndSpaceMode(SvxNumberFormat::LABEL_ALIGNMENT);
+    rFormat.SetLabelFollowedBy(SvxNumberFormat::LISTTAB);
+    rFormat.SetListtabPos(nIndentAt);
+    rFormat.SetFirstLineIndent(cFirstLineIndent);
+    rFormat.SetIndentAt(nIndentAt);
+}
+
 static void lcl_SetRuleChgd( SwTextNode& rNd, sal_uInt8 nLevel )
 {
     if( rNd.GetActualListLevel() == nLevel )
@@ -452,31 +465,12 @@ SwNumRule::SwNumRule( UIName aNm,
             SwNumRule::saBaseFormats[ NUM_RULE ][ n ] = pFormat;
         }
         // position-and-space mode LABEL_ALIGNMENT
-        // first line indent of general numbering in inch: -0,25 inch
-        const tools::Long cFirstLineIndent = o3tl::toTwips(-0.25, o3tl::Length::in);
-        // indent values of general numbering in inch:
-        const tools::Long cIndentAt[ MAXLEVEL ] = {
-            o3tl::toTwips(50, o3tl::Length::in100),
-            o3tl::toTwips(75, o3tl::Length::in100),
-            o3tl::toTwips(100, o3tl::Length::in100),
-            o3tl::toTwips(125, o3tl::Length::in100),
-            o3tl::toTwips(150, o3tl::Length::in100),
-            o3tl::toTwips(175, o3tl::Length::in100),
-            o3tl::toTwips(200, o3tl::Length::in100),
-            o3tl::toTwips(225, o3tl::Length::in100),
-            o3tl::toTwips(250, o3tl::Length::in100),
-            o3tl::toTwips(275, o3tl::Length::in100),
-        };
         for( n = 0; n < MAXLEVEL; ++n )
         {
             pFormat = new SwNumFormat;
             pFormat->SetIncludeUpperLevels( 1 );
             pFormat->SetStart( 1 );
-            pFormat->SetPositionAndSpaceMode( SvxNumberFormat::LABEL_ALIGNMENT );
-            pFormat->SetLabelFollowedBy( SvxNumberFormat::LISTTAB );
-            pFormat->SetListtabPos( cIndentAt[ n ] );
-            pFormat->SetFirstLineIndent( cFirstLineIndent );
-            pFormat->SetIndentAt( cIndentAt[ n ] );
+            SwNumRule::ApplyDefaultLabelAlignmentIndents( *pFormat, n );
             pFormat->SetListFormat( "%" + OUString::number(n + 1) + "%.");
             pFormat->SetBulletChar( numfunc::GetBulletChar(n));
             SwNumRule::saLabelAlignmentBaseFormats[ NUM_RULE ][ n ] = pFormat;
@@ -805,6 +799,7 @@ void SwNumRule::Set( sal_uInt16 i, const SwNumFormat& rNumFormat )
                 aFiltered.SetStart(rNumFormat.GetStart());
                 aFiltered.SetListFormat(rNumFormat.GetListFormat());
             }
+            SwNumRule::ApplyDefaultLabelAlignmentIndents(aFiltered, i);
         }
         else
         {

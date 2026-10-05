@@ -403,6 +403,9 @@ public:
     /// Whether nWhich is a character property that is kept during a merged paste.
     static bool IsCharItemKeptInMergedPaste(sal_uInt16 nWhich);
 
+    /// Whether nWhich is a paragraph property that is kept during a merged paste.
+    static bool IsParaItemKeptInMergedPaste(sal_uInt16 nWhich);
+
     void        CutText(SwTextNode * const pDest,
                     const SwContentIndex & rStart, const sal_Int32 nLen);
     inline void CutText(SwTextNode * const pDest, const SwContentIndex &rDestStart,
