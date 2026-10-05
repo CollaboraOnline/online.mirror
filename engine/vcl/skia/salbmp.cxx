@@ -45,6 +45,8 @@
 #include <skia_opts.hxx>
 #include <iomanip>
 
+#include <iomanip>
+
 #ifdef DBG_UTIL
 #include <fstream>
 #define CANARY "skia-canary"
