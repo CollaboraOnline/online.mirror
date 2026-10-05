@@ -50,6 +50,40 @@ constexpr std::string_view aDescriptorMime
     = "application/x-openoffice-objectdescriptor-xml;classname=\"47BBB4CB-CE4C-4E80-A591-"
       "42D9AE74950F\";typename=\"Spreadsheet\";viewaspect=\"1\";width=\"1000\";height=\"500\"";
 
+/**
+ * A copy made in this process, as every engine module makes one: a TransferableHelper that
+ * produces each format when it is asked for it. This one offers the marked HTML, and counts how
+ * often it has to produce anything.
+ */
+class InProcessCopy : public TransferableHelper
+{
+    int& m_rProduced;
+
+public:
+    explicit InProcessCopy(int& rProduced)
+        : m_rProduced(rProduced)
+    {
+    }
+
+private:
+    void AddSupportedFormats() override
+    {
+        AddFormat(SotClipboardFormatId::HTML);
+        AddFormat(SotClipboardFormatId::STRING);
+    }
+
+    bool GetData(const css::datatransfer::DataFlavor& rFlavor, const OUString&) override
+    {
+        ++m_rProduced;
+        if (rFlavor.MimeType == "text/html")
+        {
+            return SetAny(Any(Sequence<sal_Int8>(
+                reinterpret_cast<const sal_Int8*>(aBrowserHtml.data()), aBrowserHtml.size())));
+        }
+        return SetString(u"Hello"_ustr);
+    }
+};
+
 class RemoteClipboardTest : public test::BootstrapFixture
 {
 public:
@@ -76,6 +110,7 @@ public:
     void testPasteGetsTheDownloadedContent();
     void testPasteDoesNotRetryAFailedDownloadAtOnce();
     void testPasteLeavesOtherClipboardsAlone();
+    void testPasteDoesNotReadAnInProcessCopy();
     void testNewCopyUnderTheSameUrlIsDownloadedAgain();
     void testLargeSelectionStubIsDownloadedEveryTime();
 
@@ -91,6 +126,7 @@ public:
     CPPUNIT_TEST(testPasteGetsTheDownloadedContent);
     CPPUNIT_TEST(testPasteDoesNotRetryAFailedDownloadAtOnce);
     CPPUNIT_TEST(testPasteLeavesOtherClipboardsAlone);
+    CPPUNIT_TEST(testPasteDoesNotReadAnInProcessCopy);
     CPPUNIT_TEST(testNewCopyUnderTheSameUrlIsDownloadedAgain);
     CPPUNIT_TEST(testLargeSelectionStubIsDownloadedEveryTime);
     CPPUNIT_TEST_SUITE_END();
@@ -300,6 +336,22 @@ void RemoteClipboardTest::testPasteLeavesOtherClipboardsAlone()
     TransferableDataHelper aEmpty;
     CPPUNIT_ASSERT_EQUAL(Outcome::Untouched, resolveForPaste(aEmpty, nullptr));
     CPPUNIT_ASSERT_EQUAL(0, nCalls);
+}
+
+void RemoteClipboardTest::testPasteDoesNotReadAnInProcessCopy()
+{
+    int nCalls = 0;
+    OUString aLastUrl;
+    setFetcherForTesting(createRichFetcher(nCalls, aLastUrl));
+
+    // A copy made in this process has everything already. Even with the marker in its HTML,
+    // nothing is downloaded, and the copy is not asked to produce the HTML just to find that out.
+    int nProduced = 0;
+    TransferableDataHelper aData(new InProcessCopy(nProduced));
+    CPPUNIT_ASSERT(aData.HasFormat(SotClipboardFormatId::HTML));
+    CPPUNIT_ASSERT_EQUAL(Outcome::Untouched, resolveForPaste(aData, nullptr));
+    CPPUNIT_ASSERT_EQUAL(0, nCalls);
+    CPPUNIT_ASSERT_EQUAL(0, nProduced);
 }
 
 void RemoteClipboardTest::testNewCopyUnderTheSameUrlIsDownloadedAgain()

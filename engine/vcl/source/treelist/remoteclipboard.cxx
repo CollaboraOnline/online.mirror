@@ -678,7 +678,12 @@ Outcome resolveForPaste(TransferableDataHelper& rData, weld::Window* pParent)
     if (!pDownloads)
         return Outcome::Untouched;
 
-    const std::string aHtml = peekHtml(rData);
+    // A copy made in this process holds every format already, so there is nothing to download.
+    // Reading its HTML would not be a look at the clipboard either: an in-process transferable
+    // produces each format on demand, and for HTML that runs the HTML export of the copied
+    // content.
+    const bool bOwnCopy = dynamic_cast<TransferableHelper*>(rData.GetTransferable().get());
+    const std::string aHtml = bOwnCopy ? std::string() : peekHtml(rData);
     const OUString aOrigin = getOrigin(aHtml);
     if (aOrigin.isEmpty())
     {
