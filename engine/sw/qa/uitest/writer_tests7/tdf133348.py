@@ -22,12 +22,16 @@ class tdf133348(UITestCase):
             xArgs = mkPropertyValues({"Text": "C1"})
             self.xUITest.executeCommandWithParameters(".uno:InsertAnnotation", xArgs)
 
+            # The new comment becomes the active one in a posted event, and a reply goes to the
+            # active comment, so let that event run first.
+            xToolkit = self.xContext.ServiceManager.createInstance('com.sun.star.awt.Toolkit')
+            xToolkit.processEventsToIdle()
+
             with self.ui_test.set_config(self.GIVEN_NAME, "Known Author"):
                 xArgs = mkPropertyValues({"Text": "C2"})
                 self.xUITest.executeCommandWithParameters(".uno:ReplyComment", xArgs)
 
                 # Wait for async events to be processed
-                xToolkit = self.xContext.ServiceManager.createInstance('com.sun.star.awt.Toolkit')
                 xToolkit.processEventsToIdle()
 
                 xEnum = document.TextFields.createEnumeration()
