@@ -203,7 +203,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Sheet Operations.', { test
 		calcHelper.selectOptionFromContextMenu('Show Sheet');
 		cy.cGet('#show-sheets-modal').should('exist');
 		cy.cGet('#hidden-part-checkbox-0-input').check();
-		cy.cGet('#show-sheets-modal-response').click();
+		cy.cGet('#show-sheets-modal-response-button').click();
 		calcHelper.assertNumberofSheets(2);
 	});
 
