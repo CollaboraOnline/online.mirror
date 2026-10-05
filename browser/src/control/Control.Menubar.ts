@@ -2764,8 +2764,7 @@ class Menubar extends window.L.Control {
 		} else if (id === 'inserttextbox') {
 			this._map.sendUnoCommand('.uno:Text?CreateDirectly:bool=true');
 		} else if (id === 'pagesetup') {
-			this._map.sendUnoCommand('.uno:SidebarShow');
-			this._map.sendUnoCommand('.uno:LOKSidebarWriterPage');
+			this._map.sendUnoCommand('.uno:KitSidebarWriterPage');
 			this._map.fire('showwizardsidebar');
 			window.pageMobileWizard = true;
 		} else if (id === 'showslide') {
