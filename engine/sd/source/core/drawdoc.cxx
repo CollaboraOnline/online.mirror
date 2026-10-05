@@ -55,7 +55,6 @@
 #include <com/sun/star/animations/XAudio.hpp>
 #include <com/sun/star/animations/AnimationNodeType.hpp>
 #include <com/sun/star/container/XEnumerationAccess.hpp>
-#include <unotools/securityoptions.hxx>
 #include <Outliner.hxx>
 #include <sdmod.hxx>
 #include <editeng/editstat.hxx>
@@ -1347,9 +1346,7 @@ void SdDrawDocument::UpdateAllLinks()
             bAskUpdate = false;
             break;
         case css::document::UpdateDocMode::ACCORDING_TO_CONFIG:
-            bAskUpdate = !pMedium
-                || !SvtSecurityOptions::isTrustedLocationUriForUpdatingLinks(
-                       pMedium->GetName());
+            bAskUpdate = !pMedium || !pDocShell->IsTrustedLocationForUpdatingLinks();
             break;
     }
 
