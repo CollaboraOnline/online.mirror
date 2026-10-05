@@ -635,6 +635,7 @@ struct ContextParagraph
 {
     OUString aText;
     tools::Rectangle aTwips;
+    sal_Int32 nLevel = 0;
 };
 
 ContextParagraph contextParagraph(const uno::Reference<accessibility::XAccessibleContext>& xContext,
@@ -643,7 +644,10 @@ ContextParagraph contextParagraph(const uno::Reference<accessibility::XAccessibl
     ContextParagraph aParagraph;
     uno::Reference<accessibility::XAccessibleText> xText(xContext, uno::UNO_QUERY);
     if (xText.is())
+    {
         aParagraph.aText = xText->getText();
+        aParagraph.nLevel = getHeadingLevel(xText);
+    }
     uno::Reference<accessibility::XAccessibleComponent> xComponent(xContext, uno::UNO_QUERY);
     if (xComponent.is())
     {
@@ -1166,23 +1170,30 @@ void KitDocumentFocusListener::paragraphPropertiesToTree(boost::property_tree::p
         aPayloadTree.put("headingLevel", m_nHeadingLevel);
     if (!m_aParagraphsBefore.empty() || !m_aParagraphsAfter.empty())
     {
-        auto toArray = [](const std::vector<ContextParagraph>& rParagraphs, bool bRects) {
+        auto toArray = [](const std::vector<ContextParagraph>& rParagraphs, auto aValue) {
             boost::property_tree::ptree aArray;
             for (const ContextParagraph& rParagraph : rParagraphs)
             {
                 boost::property_tree::ptree aNode;
-                if (bRects)
-                    aNode.put("", rParagraph.aTwips.toString().getStr());
-                else
-                    aNode.put("", rParagraph.aText.toUtf8().getStr());
+                aNode.put("", aValue(rParagraph));
                 aArray.push_back(std::make_pair("", aNode));
             }
             return aArray;
         };
-        aPayloadTree.add_child("before", toArray(m_aParagraphsBefore, false));
-        aPayloadTree.add_child("after", toArray(m_aParagraphsAfter, false));
-        aPayloadTree.add_child("beforeRects", toArray(m_aParagraphsBefore, true));
-        aPayloadTree.add_child("afterRects", toArray(m_aParagraphsAfter, true));
+        auto aText = [](const ContextParagraph& r) { return std::string(r.aText.toUtf8()); };
+        auto aRect = [](const ContextParagraph& r) { return std::string(r.aTwips.toString()); };
+        auto aLevel = [](const ContextParagraph& r) { return r.nLevel; };
+        aPayloadTree.add_child("before", toArray(m_aParagraphsBefore, aText));
+        aPayloadTree.add_child("after", toArray(m_aParagraphsAfter, aText));
+        aPayloadTree.add_child("beforeRects", toArray(m_aParagraphsBefore, aRect));
+        aPayloadTree.add_child("afterRects", toArray(m_aParagraphsAfter, aRect));
+        auto isHeading = [](const ContextParagraph& r) { return r.nLevel > 0; };
+        if (std::any_of(m_aParagraphsBefore.begin(), m_aParagraphsBefore.end(), isHeading)
+            || std::any_of(m_aParagraphsAfter.begin(), m_aParagraphsAfter.end(), isHeading))
+        {
+            aPayloadTree.add_child("beforeLevels", toArray(m_aParagraphsBefore, aLevel));
+            aPayloadTree.add_child("afterLevels", toArray(m_aParagraphsAfter, aLevel));
+        }
     }
     if (force)
         aPayloadTree.put("force", 1);
