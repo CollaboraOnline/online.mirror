@@ -598,10 +598,17 @@ WindowSide windowSide(const uno::Reference<accessibility::XAccessibleContext>& x
     return WindowSide::Inside;
 }
 
+// Writer gives a heading paragraph its own role.
+bool isParagraphRole(sal_Int16 nRole)
+{
+    return nRole == accessibility::AccessibleRole::PARAGRAPH
+           || nRole == accessibility::AccessibleRole::HEADING;
+}
+
 bool isSiblingParagraph(const uno::Reference<accessibility::XAccessibleContext>& xContext,
                         const uno::Reference<accessibility::XAccessible>& xParent)
 {
-    return xContext->getAccessibleRole() == accessibility::AccessibleRole::PARAGRAPH
+    return isParagraphRole(xContext->getAccessibleRole())
            && xContext->getAccessibleParent() == xParent;
 }
 
@@ -707,7 +714,7 @@ paragraphInWindow(const uno::Reference<accessibility::XAccessible>& xParent, sal
                 = xHit->getAccessibleContext();
             if (!xHitContext.is())
                 break;
-            if (xHitContext->getAccessibleRole() == accessibility::AccessibleRole::PARAGRAPH)
+            if (isParagraphRole(xHitContext->getAccessibleRole()))
                 return xHitContext;
             xComponent.set(xHitContext, uno::UNO_QUERY);
             if (!xComponent.is())
@@ -1677,7 +1684,7 @@ void KitDocumentFocusListener::notifyEvent(const accessibility::AccessibleEventO
 
                 sal_Int16 nRole = xContext->getAccessibleRole();
 
-                if (nRole == AccessibleRole::PARAGRAPH)
+                if (isParagraphRole(nRole))
                 {
                     uno::Reference<XAccessibleText> xAccText(xAccessibleObject, uno::UNO_QUERY);
                     if (!xAccText.is())
