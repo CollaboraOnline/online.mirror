@@ -898,6 +898,8 @@ function axNode(node) {
 		description: (node.description && node.description.value) || '',
 		ignored: node.ignored,
 		backendDOMNodeId: node.backendDOMNodeId,
+		nodeId: node.nodeId,
+		childIds: node.childIds || [],
 		properties: props,
 	};
 }
