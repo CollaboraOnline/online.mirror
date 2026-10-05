@@ -801,7 +801,7 @@ Size ScModelObj::getDocumentSize(SCCOL& rnTiledRenderingAreaEndCol, SCROW& rnTil
     Size aSize(10, 10); // minimum size
 
     ScViewData* pViewData = ScDocShell::GetViewData();
-    if (!pViewData)
+    if (!pViewData || !pDocShell)
         return aSize;
 
     SCTAB nTab = pViewData->CurrentTabForData();
