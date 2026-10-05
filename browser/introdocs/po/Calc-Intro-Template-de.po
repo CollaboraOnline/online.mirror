@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Calc-Intro-Template.ods\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2026-09-30 17:58+0000\n"
+"PO-Revision-Date: 2026-10-05 21:51+0000\n"
 "Last-Translator: Ettore Atalan <atalanttore@googlemail.com>\n"
 "Language-Team: German <https://hosted.weblate.org/projects/collabora-online/"
 "calc-intro-template/de/>\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2026.10.dev0\n"
+"X-Generator: Weblate 2026.10.1.dev0\n"
 
 #. content.xml (validation title)
 msgid "Try formatting"
@@ -34,7 +34,7 @@ msgstr ""
 
 #. content.xml (validation title)
 msgid "Use other options"
-msgstr ""
+msgstr "Andere Optionen verwenden"
 
 #. content.xml (validation help message)
 msgid ""
@@ -143,6 +143,9 @@ msgid ""
 "Calc is designed with accessibility in mind, helping ensure that everyone "
 "can easily create, edit, and work with spreadsheets."
 msgstr ""
+"Calc wurde unter Berücksichtigung der Barrierefreiheit entwickelt, um "
+"sicherzustellen, dass jeder problemlos Tabellenkalkulationen erstellen, "
+"bearbeiten und damit arbeiten kann."
 
 #. content.xml (sheet name)
 msgid "✚ Formulas & Functions"
@@ -321,29 +324,31 @@ msgstr ""
 
 #. content.xml (sheet '📋 Tables')
 msgid "Create a table from existing data"
-msgstr ""
+msgstr "Aus vorhandenen Daten eine Tabelle erstellen"
 
 #. content.xml (sheet '📋 Tables'); content.xml (sheet '🔍 Data & filtering')
 msgid "Category"
-msgstr ""
+msgstr "Kategorie"
 
 #. content.xml (sheet '📋 Tables'); content.xml (sheet '🔍 Data & filtering')
 msgid "Supplier"
-msgstr ""
+msgstr "Lieferant"
 
 #. content.xml (sheet '📋 Tables'); content.xml (sheet '📊 Charts'); content.xml
 #. (sheet '🔍 Data & filtering')
 msgid ""
 "1. Select the range of cells that contains your data (including headers)"
 msgstr ""
+"1. Wählen Sie den Bereich der Zellen aus, der Ihre Daten enthält "
+"(einschließlich der Überschriften)"
 
 #. content.xml (sheet '📋 Tables')
 msgid "Electronics"
-msgstr ""
+msgstr "Elektronik"
 
 #. content.xml (sheet '📋 Tables')
 msgid "Dell"
-msgstr ""
+msgstr "Dell"
 
 #. content.xml (sheet '📋 Tables')
 msgid "<1>2. Open the </1><2>Insert tab</2><3> in the toolbar</3>"
@@ -351,15 +356,15 @@ msgstr ""
 
 #. content.xml (sheet '📋 Tables')
 msgid "Logitech"
-msgstr ""
+msgstr "Logitech"
 
 #. content.xml (sheet '📋 Tables')
 msgid "<1>3. Click </1><2>Table</2>"
-msgstr ""
+msgstr "<1>3. Klicken Sie auf </1><2>Tabelle</2>"
 
 #. content.xml (sheet '📋 Tables')
 msgid "Office supplies"
-msgstr ""
+msgstr "Bürobedarf"
 
 #. content.xml (sheet '📋 Tables')
 msgid "Staples"
@@ -367,30 +372,30 @@ msgstr ""
 
 #. content.xml (sheet '📋 Tables')
 msgid "<1>4. Click </1><2>OK</2>"
-msgstr ""
+msgstr "<1>4. Klicken Sie auf </1><2>OK</2>"
 
 #. content.xml (sheet '📋 Tables'); content.xml (sheet '🎨 Conditional
 #. Formatting'); content.xml (sheet '📊 Charts')
 msgid "Keyboard"
-msgstr ""
+msgstr "Tastatur"
 
 #. content.xml (sheet '📋 Tables'); content.xml (sheet '📊 Charts')
 msgid "10"
-msgstr ""
+msgstr "10"
 
 #. content.xml (sheet '📋 Tables')
 msgid "5. Your data is now organised as a table"
-msgstr ""
+msgstr "5. Ihre Daten sind nun in einer Tabelle angeordnet"
 
 #. content.xml (sheet '📋 Tables'); content.xml (sheet '🎨 Conditional
 #. Formatting'); content.xml (sheet '📊 Charts')
 msgid "Pen"
-msgstr ""
+msgstr "Stift"
 
 #. content.xml (sheet '📋 Tables'); content.xml (sheet '🎨 Conditional
 #. Formatting'); content.xml (sheet '📊 Charts')
 msgid "100"
-msgstr ""
+msgstr "100"
 
 #. content.xml (sheet '📋 Tables')
 msgid "Bic"
@@ -398,7 +403,7 @@ msgstr ""
 
 #. content.xml (sheet '📋 Tables')
 msgid "Create a table from scratch"
-msgstr ""
+msgstr "Eine Tabelle von Grund auf neu erstellen"
 
 #. content.xml (sheet '📋 Tables')
 msgid "<1>1. Open the </1><2>Insert tab</2><3> in the toolbar</3>"
@@ -406,19 +411,21 @@ msgstr ""
 
 #. content.xml (sheet '📋 Tables')
 msgid "<1>2. Click </1><2>Table</2>"
-msgstr ""
+msgstr "<1>2. Klicken Sie auf </1><2>Tabelle</2>"
 
 #. content.xml (sheet '📋 Tables')
 msgid "3. Select the range of cells where you want to create the table"
 msgstr ""
+"3. Wählen Sie den Bereich der Zellen aus, in dem Sie die Tabelle erstellen "
+"möchten"
 
 #. content.xml (sheet '📋 Tables')
 msgid "5. Your table is now ready to be filled with data"
-msgstr ""
+msgstr "5. Ihre Tabelle ist nun bereit, mit Daten gefüllt zu werden"
 
 #. content.xml (sheet '📋 Tables')
 msgid "Editing tables"
-msgstr ""
+msgstr "Tabellen bearbeiten"
 
 #. content.xml (sheet '📋 Tables')
 msgid ""
@@ -438,7 +445,7 @@ msgstr ""
 
 #. content.xml (sheet '📋 Tables')
 msgid "Pivot table"
-msgstr ""
+msgstr "Pivot-Tabelle"
 
 #. content.xml (sheet '📋 Tables')
 msgid ""
@@ -456,15 +463,15 @@ msgstr ""
 
 #. content.xml (sheet '📋 Tables')
 msgid "Next Chapter: 🎨 Conditional Formatting"
-msgstr ""
+msgstr "Nächstes Kapitel: 🎨 Bedingte Formatierung"
 
 #. content.xml (sheet name)
 msgid "🎨 Conditional Formatting"
-msgstr ""
+msgstr "🎨 Bedingte Formatierung"
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "🎨Conditional formatting"
-msgstr ""
+msgstr "🎨Bedingte Formatierung"
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid ""
@@ -482,7 +489,7 @@ msgstr ""
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "Apply conditional formatting"
-msgstr ""
+msgstr "Bedingte Formatierung anwenden"
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "1. Select the range of cells you want to format"
@@ -513,7 +520,7 @@ msgstr "<1>6. Klicken Sie auf </1><2>OK</2><3> zum Anwenden</3>"
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid "➜Try it: Inventory stock overview"
-msgstr ""
+msgstr "➜Probieren Sie es aus: Lagerbestandsübersicht"
 
 #. content.xml (sheet '🎨 Conditional Formatting')
 msgid ""
@@ -785,7 +792,7 @@ msgstr "➜Probieren Sie es aus: Externe Freigaben"
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid "Shortcuts"
-msgstr ""
+msgstr "Tastenkombinationen"
 
 #. content.xml (sheet '🤝 Productivity & collaboration')
 msgid ""
