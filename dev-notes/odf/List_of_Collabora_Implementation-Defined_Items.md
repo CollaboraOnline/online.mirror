@@ -107,9 +107,8 @@ to the first, previous, next, and last record.
 
 The following events may be implemented:
 
-|                                      |                        |
-|--------------------------------------|------------------------|
 | Value of script:event-name Attribute | Internal event name    |
+|--------------------------------------|------------------------|
 | dom:select                           | "OnSelect"             |
 | office:insert-start                  | "OnInsertStart"        |
 | office:insert-done                   | "OnInsertDone"         |
@@ -173,9 +172,8 @@ The following events may be implemented:
 
 Forms may support the following events:
 
-|  |  |
-|----|----|
 | Value of script:event-name Attribute | Internal event name |
+|----|----|
 | form:approveaction | "XApproveActionListener::approveAction" |
 | form:performaction | "XActionListener::actionPerformed" |
 | dom:change | "XChangeListener::changed" |
@@ -217,9 +215,8 @@ Forms may support the following events:
 
 The default values for `text:note-class="footnote"`:
 
-|                                        |                       |
-|----------------------------------------|-----------------------|
 | Attribute                              | Default value         |
+|----------------------------------------|-----------------------|
 | style:num-format                       | "1"                   |
 | style:num-letter-sync                  | "false"               |
 | style:num-prefix                       | ""                    |
@@ -236,9 +233,8 @@ The default values for `text:note-class="footnote"`:
 
 The default values for `text:note-class="endnote"`:
 
-|                                        |                      |
-|----------------------------------------|----------------------|
 | Attribute                              | Default value        |
+|----------------------------------------|----------------------|
 | style:num-format                       | "i"                  |
 | style:num-letter-sync                  | "false"              |
 | style:num-prefix                       | ""                   |
@@ -333,9 +329,8 @@ The logo can be retrieved from:
 19.417 presentation:speed, Part 1, ODF 1.2  
 19.421 presentation:speed, Part 3, ODF 1.3
 
-|                                       |      |
-|---------------------------------------|------|
 | Value of presentation:speed attribute | rate |
+|---------------------------------------|------|
 | slow                                  | 2.0s |
 | medium                                | 1.0s |
 | fast                                  | 0.5s |
