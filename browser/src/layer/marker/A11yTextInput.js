@@ -353,11 +353,11 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 	},
 
 	onAccessibilityFocusChanged: function(content, pos, start, end, listPrefixLength, force, before, after,
-		beforeRects, afterRects, headingLevel) {
+		beforeRects, afterRects, headingLevel, beforeLevels, afterLevels) {
 		this._listPrefixLength = listPrefixLength;
 		this._setHeadingLevel(headingLevel);
 		this._endContextJump();
-		this._setContextParagraphs(before, after, beforeRects, afterRects);
+		this._setContextParagraphs(before, after, beforeRects, afterRects, beforeLevels, afterLevels);
 		this._requestHeadings();
 		if (!this.hasFocus() || (this._isComposing && !force)) {
 			this._log('onAccessibilityFocusChanged: skipped updating: '
@@ -373,7 +373,8 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		}
 	},
 
-	setA11yFocusedParagraph: function(content, pos, start, end, before, after, beforeRects, afterRects, headingLevel) {
+	setA11yFocusedParagraph: function(content, pos, start, end, before, after, beforeRects, afterRects, headingLevel,
+		beforeLevels, afterLevels) {
 		this._setHeadingLevel(headingLevel);
 		if (this._isComposing) {
 			this._remoteContent = content;
@@ -383,7 +384,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		} else {
 			this._setFocusedParagraph(content, pos, start, end);
 		}
-		this._setContextParagraphs(before, after, beforeRects, afterRects);
+		this._setContextParagraphs(before, after, beforeRects, afterRects, beforeLevels, afterLevels);
 	},
 
 	// getPlainTextContent() reads the whole editable, and every caret offset is
@@ -531,22 +532,29 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		this._contextRequestTimer = setTimeout(this._requestFocusedParagraph.bind(this), 250);
 	},
 
-	_setContextParagraphs: function(before, after, beforeRects, afterRects) {
+	_setContextParagraphs: function(before, after, beforeRects, afterRects, beforeLevels, afterLevels) {
 		this._initContextRegions();
 		if (!this._contextBefore)
 			return;
 
 		// The spans are reused: a reader whose position is on one that goes away looks for
 		// another nearby and leaves focus mode.
-		const fillContextRegion = function (region, paragraphs, rects) {
+		const fillContextRegion = function (region, paragraphs, rects, levels) {
 			const texts = Array.isArray(paragraphs) ? paragraphs : [];
 			while (region.children.length > texts.length)
 				region.lastElementChild.remove();
 			texts.forEach(function (text, index) {
+				const level = Array.isArray(levels) ? parseInt(levels[index]) || 0 : 0;
+				const role = level > 0 ? 'heading' : 'paragraph';
 				let span = region.children[index];
+				// Orca keeps the level a node had when it first met it.
+				if (span && span.getAttribute('role') !== role) {
+					const fresh = document.createElement('span');
+					span.replaceWith(fresh);
+					span = fresh;
+				}
 				if (!span) {
 					span = document.createElement('span');
-					span.setAttribute('role', 'paragraph');
 					region.appendChild(span);
 				}
 				// NVDA and JAWS focus it on leaving browse mode; Orca would focus every one it reads.
@@ -556,6 +564,12 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 					span.removeAttribute('tabindex');
 				if (span.textContent !== text)
 					span.textContent = text;
+				if (span.getAttribute('role') !== role)
+					span.setAttribute('role', role);
+				if (level > 0 && span.getAttribute('aria-level') !== String(level))
+					span.setAttribute('aria-level', level);
+				else if (level === 0 && span.hasAttribute('aria-level'))
+					span.removeAttribute('aria-level');
 				if (Array.isArray(rects) && typeof rects[index] === 'string')
 					span.dataset.twips = rects[index];
 				else
@@ -563,8 +577,8 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 			});
 		};
 
-		fillContextRegion(this._contextBefore, before, beforeRects);
-		fillContextRegion(this._contextAfter, after, afterRects);
+		fillContextRegion(this._contextBefore, before, beforeRects, beforeLevels);
+		fillContextRegion(this._contextAfter, after, afterRects, afterLevels);
 		this._fillHeadingRegions();
 		this._placeContextRegions();
 		this._endHeadingJump();
