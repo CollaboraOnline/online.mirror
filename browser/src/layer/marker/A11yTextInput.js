@@ -842,6 +842,9 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 	},
 
 	onAccessibilityFocusedCellChanged: function(outCount, inList, row, col, rowSpan, colSpan, paragraph) {
+		this._endContextJump();
+		this._setContextParagraphs(paragraph.before, paragraph.after, paragraph.beforeRects, paragraph.afterRects,
+			paragraph.beforeLevels, paragraph.afterLevels);
 		this._setFocusedParagraph(paragraph.content, parseInt(paragraph.position), parseInt(paragraph.start), parseInt(paragraph.end));
 		this._setHeadingLevel(paragraph.headingLevel);
 		this._updateTable(outCount, inList, row + 1, col + 1, rowSpan, colSpan);
