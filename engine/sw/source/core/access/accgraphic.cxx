@@ -40,7 +40,7 @@ SwAccessibleGraphic::~SwAccessibleGraphic()
 }
 
 //  Return this object's role.
-sal_Int16 SAL_CALL SwAccessibleGraphic::getAccessibleRole()
+sal_Int16 SwAccessibleGraphic::getAccessibleRole()
 {
     SolarMutexGuard g;
 

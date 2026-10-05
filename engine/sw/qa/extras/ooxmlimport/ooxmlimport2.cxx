@@ -1477,7 +1477,7 @@ CPPUNIT_TEST_FIXTURE(Test, testTdf165348_lockFileOnRepair)
     class ApproveRepairHandler : public cppu::WeakImplHelper<task::XInteractionHandler>
     {
     public:
-        void SAL_CALL handle(const uno::Reference<task::XInteractionRequest>& xRequest) override
+        void handle(const uno::Reference<task::XInteractionRequest>& xRequest) override
         {
             for (auto& xCont : xRequest->getContinuations())
             {

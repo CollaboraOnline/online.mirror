@@ -1965,7 +1965,7 @@ public:
     {
     }
 
-    virtual void SAL_CALL dispatchFinished(const css::frame::DispatchResultEvent& rEvent) override
+    virtual void dispatchFinished(const css::frame::DispatchResultEvent& rEvent) override
     {
         if (rEvent.State == frame::DispatchResultState::SUCCESS)
         {
@@ -1973,7 +1973,7 @@ public:
         }
     }
 
-    virtual void SAL_CALL disposing(const css::lang::EventObject&) override {}
+    virtual void disposing(const css::lang::EventObject&) override {}
 };
 }
 

@@ -79,7 +79,7 @@ class PasteListener : public cppu::WeakImplHelper<text::XPasteListener>
     uno::Reference<text::XTextContent> m_xTextGraphicObject;
 
 public:
-    void SAL_CALL notifyPasteEvent(const cpo::uno::Sequence<beans::PropertyValue>& rEvent) override;
+    void notifyPasteEvent(const cpo::uno::Sequence<beans::PropertyValue>& rEvent) override;
 
     OUString& GetString();
     uno::Reference<text::XTextContent>& GetTextGraphicObject();
@@ -1468,17 +1468,17 @@ CPPUNIT_TEST_FIXTURE(SwUnoWriter, testTdf164885)
     public:
         LocalDispatch() = default;
 
-        void SAL_CALL dispatch(const css::util::URL& URL,
+        void dispatch(const css::util::URL& URL,
                                const cpo::uno::Sequence<css::beans::PropertyValue>&) override
         {
             sLastCommand = URL.Complete;
         }
-        void SAL_CALL addStatusListener(const cpo::uno::Reference<css::frame::XStatusListener>&,
+        void addStatusListener(const cpo::uno::Reference<css::frame::XStatusListener>&,
                                         const css::util::URL&) override
         {
             // empty
         }
-        void SAL_CALL removeStatusListener(const cpo::uno::Reference<css::frame::XStatusListener>&,
+        void removeStatusListener(const cpo::uno::Reference<css::frame::XStatusListener>&,
                                            const css::util::URL&) override
         {
             // empty
@@ -1495,7 +1495,7 @@ CPPUNIT_TEST_FIXTURE(SwUnoWriter, testTdf164885)
 
         // XDispatchProvider
         cpo::uno::Reference<css::frame::XDispatch>
-            SAL_CALL queryDispatch(const css::util::URL& URL, const OUString& TargetFrameName,
+            queryDispatch(const css::util::URL& URL, const OUString& TargetFrameName,
                                    sal_Int32 SearchFlags) override
         {
             if (URL.Complete == ".uno:Open")
@@ -1504,7 +1504,7 @@ CPPUNIT_TEST_FIXTURE(SwUnoWriter, testTdf164885)
                 return m_slave->queryDispatch(URL, TargetFrameName, SearchFlags);
             return {};
         }
-        cpo::uno::Sequence<cpo::uno::Reference<css::frame::XDispatch>> SAL_CALL
+        cpo::uno::Sequence<cpo::uno::Reference<css::frame::XDispatch>>
         queryDispatches(const cpo::uno::Sequence<css::frame::DispatchDescriptor>&) override
         {
             return {};
@@ -1512,21 +1512,21 @@ CPPUNIT_TEST_FIXTURE(SwUnoWriter, testTdf164885)
 
         // XDispatchProviderInterceptor
         cpo::uno::Reference<css::frame::XDispatchProvider>
-            SAL_CALL getSlaveDispatchProvider() override
+            getSlaveDispatchProvider() override
         {
             return m_slave;
         }
-        void SAL_CALL setSlaveDispatchProvider(
+        void setSlaveDispatchProvider(
             const cpo::uno::Reference<css::frame::XDispatchProvider>& val) override
         {
             m_slave = val;
         }
         cpo::uno::Reference<css::frame::XDispatchProvider>
-            SAL_CALL getMasterDispatchProvider() override
+            getMasterDispatchProvider() override
         {
             return m_master;
         }
-        void SAL_CALL setMasterDispatchProvider(
+        void setMasterDispatchProvider(
             const cpo::uno::Reference<css::frame::XDispatchProvider>& val) override
         {
             m_master = val;

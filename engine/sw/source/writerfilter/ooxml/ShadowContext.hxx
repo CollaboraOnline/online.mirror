@@ -127,24 +127,24 @@ public:
     virtual ~ShadowContext() override;
 
     //XFastContextHandler
-    virtual void SAL_CALL startFastElement(
+    virtual void startFastElement(
         ::sal_Int32 Element,
         const ::cpo::uno::Reference<::css::xml::sax::XFastAttributeList>& Attribs) override;
-    virtual void SAL_CALL startUnknownElement(
+    virtual void startUnknownElement(
         const ::rtl::OUString& Namespace, const ::rtl::OUString& Name,
         const ::cpo::uno::Reference<::css::xml::sax::XFastAttributeList>& Attribs) override;
-    virtual void SAL_CALL endFastElement(::sal_Int32 Element) override;
-    virtual void SAL_CALL endUnknownElement(const ::rtl::OUString& Namespace,
+    virtual void endFastElement(::sal_Int32 Element) override;
+    virtual void endUnknownElement(const ::rtl::OUString& Namespace,
                                             const ::rtl::OUString& Name) override;
     virtual ::cpo::uno::Reference<::css::xml::sax::XFastContextHandler>
-        SAL_CALL createFastChildContext(
+        createFastChildContext(
             ::sal_Int32 Element,
             const ::cpo::uno::Reference<::css::xml::sax::XFastAttributeList>& Attribs) override;
     virtual ::cpo::uno::Reference<::css::xml::sax::XFastContextHandler>
-        SAL_CALL createUnknownChildContext(
+        createUnknownChildContext(
             const ::rtl::OUString& Namespace, const ::rtl::OUString& Name,
             const ::cpo::uno::Reference<::css::xml::sax::XFastAttributeList>& Attribs) override;
-    virtual void SAL_CALL characters(const ::rtl::OUString& aChars) override;
+    virtual void characters(const ::rtl::OUString& aChars) override;
 
     sal_uInt16 getElementLevel() const { return m_nElementLevel; }
     bool isWriterFrame() const { return m_bImportAsWriterFrame; }

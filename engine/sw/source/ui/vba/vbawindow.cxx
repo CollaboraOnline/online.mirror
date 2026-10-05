@@ -62,13 +62,13 @@ SwVbaWindow::Close( const cpo::uno::Any& SaveChanges, const cpo::uno::Any& Route
     document->Close(SaveChanges, FileName, RouteDocument );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaWindow::getView()
 {
     return cpo::uno::Any( uno::Reference< word::XView >( new SwVbaView( this,  mxContext, m_xModel ) ) );
 }
 
-void SAL_CALL SwVbaWindow::setView( const cpo::uno::Any& _view )
+void SwVbaWindow::setView( const cpo::uno::Any& _view )
 {
     sal_Int32 nType = 0;
     if( _view >>= nType )
@@ -78,7 +78,7 @@ void SAL_CALL SwVbaWindow::setView( const cpo::uno::Any& _view )
     }
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaWindow::getWindowState()
 {
     sal_Int32 nwindowState = word::WdWindowState::wdWindowStateNormal;
@@ -95,7 +95,7 @@ SwVbaWindow::getWindowState()
     return cpo::uno::Any( nwindowState );
 }
 
-void SAL_CALL
+void
 SwVbaWindow::setWindowState( const cpo::uno::Any& _windowstate )
 {
     sal_Int32 nwindowState = word::WdWindowState::wdWindowStateMaximize;
@@ -116,7 +116,7 @@ SwVbaWindow::setWindowState( const cpo::uno::Any& _windowstate )
     }
 }
 
-OUString SAL_CALL
+OUString
 SwVbaWindow::getCaption()
 {
     SwView* pView = word::getView( m_xModel );
@@ -133,7 +133,7 @@ SwVbaWindow::getCaption()
     return sTitle;
 }
 
-void SAL_CALL
+void
 SwVbaWindow::setCaption( const OUString& _caption )
 {
     SwView* pView = word::getView( m_xModel );
@@ -147,7 +147,7 @@ SwVbaWindow::setCaption( const OUString& _caption )
     xFrameProps->setPropertyValue( u"Title"_ustr, cpo::uno::Any( _caption ) );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaWindow::Panes( const cpo::uno::Any& aIndex )
 {
     uno::Reference< XCollection > xPanes( new SwVbaPanes( this,  mxContext, m_xModel ) );
@@ -157,7 +157,7 @@ SwVbaWindow::Panes( const cpo::uno::Any& aIndex )
     return xPanes->Item( aIndex, cpo::uno::Any() );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaWindow::ActivePane()
 {
     return cpo::uno::Any( uno::Reference< word::XPane >( new SwVbaPane( this,  mxContext, m_xModel ) ) );

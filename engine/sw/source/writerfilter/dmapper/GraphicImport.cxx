@@ -114,11 +114,11 @@ class XInputStreamHelper : public cppu::WeakImplHelper<io::XInputStream>
 public:
     XInputStreamHelper(const sal_uInt8* buf, size_t len);
 
-    virtual ::sal_Int32 SAL_CALL readBytes( cpo::uno::Sequence< ::sal_Int8 >& aData, ::sal_Int32 nBytesToRead ) override;
-    virtual ::sal_Int32 SAL_CALL readSomeBytes( cpo::uno::Sequence< ::sal_Int8 >& aData, ::sal_Int32 nMaxBytesToRead ) override;
-    virtual void SAL_CALL skipBytes( ::sal_Int32 nBytesToSkip ) override;
-    virtual ::sal_Int32 SAL_CALL available(  ) override;
-    virtual void SAL_CALL closeInput(  ) override;
+    virtual ::sal_Int32 readBytes( cpo::uno::Sequence< ::sal_Int8 >& aData, ::sal_Int32 nBytesToRead ) override;
+    virtual ::sal_Int32 readSomeBytes( cpo::uno::Sequence< ::sal_Int8 >& aData, ::sal_Int32 nMaxBytesToRead ) override;
+    virtual void skipBytes( ::sal_Int32 nBytesToSkip ) override;
+    virtual ::sal_Int32 available(  ) override;
+    virtual void closeInput(  ) override;
 };
 
 }

@@ -49,16 +49,16 @@ public:
     ~RtfExportFilter() override;
 
     // XFilter
-    bool SAL_CALL filter(const cpo::uno::Sequence<css::beans::PropertyValue>& aDescriptor) override;
-    void SAL_CALL cancel() override;
+    bool filter(const cpo::uno::Sequence<css::beans::PropertyValue>& aDescriptor) override;
+    void cancel() override;
 
     // XExporter
-    void SAL_CALL
+    void
     setSourceDocument(const cpo::uno::Reference<css::lang::XComponent>& xDoc) override;
 
-    OUString SAL_CALL getImplementationName() override;
-    bool SAL_CALL supportsService(OUString const& ServiceName) override;
-    cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override;
+    OUString getImplementationName() override;
+    bool supportsService(OUString const& ServiceName) override;
+    cpo::uno::Sequence<OUString> getSupportedServiceNames() override;
 
     Writer& GetWriter() { return m_aWriter; }
 };

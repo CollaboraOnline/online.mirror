@@ -44,7 +44,7 @@ SwFilterDetect::~SwFilterDetect()
 {
 }
 
-OUString SAL_CALL SwFilterDetect::detect( Sequence< PropertyValue >& lDescriptor )
+OUString SwFilterDetect::detect( Sequence< PropertyValue >& lDescriptor )
 {
     comphelper::SequenceAsHashMap aMediaDesc(lDescriptor);
     OUString aTypeName = aMediaDesc.getUnpackedValueOrDefault( utl::MediaDescriptor::PROP_TYPENAME, OUString() );
@@ -145,19 +145,19 @@ OUString SAL_CALL SwFilterDetect::detect( Sequence< PropertyValue >& lDescriptor
 }
 
 /* XServiceInfo */
-OUString SAL_CALL SwFilterDetect::getImplementationName()
+OUString SwFilterDetect::getImplementationName()
 {
     return u"com.sun.star.comp.writer.FormatDetector"_ustr;
 }
 
 /* XServiceInfo */
-bool SAL_CALL SwFilterDetect::supportsService( const OUString& sServiceName )
+bool SwFilterDetect::supportsService( const OUString& sServiceName )
 {
     return cppu::supportsService(this, sServiceName);
 }
 
 /* XServiceInfo */
-Sequence< OUString > SAL_CALL SwFilterDetect::getSupportedServiceNames()
+Sequence< OUString > SwFilterDetect::getSupportedServiceNames()
 {
     return { u"com.sun.star.frame.ExtendedTypeDetection"_ustr, u"com.sun.star.text.FormatDetector"_ustr, u"com.sun.star.text.W4WFormatDetector"_ustr };
 }

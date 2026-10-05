@@ -46,9 +46,9 @@ public:
     virtual ~SwVbaParagraph() override;
 
     // XParagraph
-    virtual cpo::uno::Reference< ooo::vba::word::XRange > SAL_CALL getRange() override;
-    virtual cpo::uno::Any SAL_CALL getStyle() override;
-    virtual void SAL_CALL setStyle( const cpo::uno::Any& style ) override;
+    virtual cpo::uno::Reference< ooo::vba::word::XRange > getRange() override;
+    virtual cpo::uno::Any getStyle() override;
+    virtual void setStyle( const cpo::uno::Any& style ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;
@@ -70,8 +70,8 @@ public:
                     const rtl::Reference< SwXTextDocument >& xDocument );
 
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     // SwVbaParagraphs_BASE
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;

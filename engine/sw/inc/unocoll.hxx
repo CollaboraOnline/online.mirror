@@ -274,22 +274,22 @@ public:
     SwXTextTables(SwDoc* pDoc);
 
     //XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount(  ) override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount(  ) override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     //XNameAccess
-    virtual cpo::uno::Any SAL_CALL getByName(const OUString& Name) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames() override;
-    virtual bool SAL_CALL hasByName(const OUString& Name) override;
+    virtual cpo::uno::Any getByName(const OUString& Name) override;
+    virtual cpo::uno::Sequence< OUString > getElementNames() override;
+    virtual bool hasByName(const OUString& Name) override;
 
     //XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-    virtual bool SAL_CALL hasElements(  ) override;
+    virtual cpo::uno::Type getElementType(  ) override;
+    virtual bool hasElements(  ) override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
     rtl::Reference<SwXTextTable> getTextTableByName(std::u16string_view Name);
     rtl::Reference<SwXTextTable> getTextTableByIndex(sal_Int32 nIndex);
@@ -314,25 +314,25 @@ public:
     SwXFrames(SwDoc* pDoc, FlyCntType eSet);
 
     //XEnumerationAccess
-    virtual SW_DLLPUBLIC cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual SW_DLLPUBLIC cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     //XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount() override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     //XNameAccess
-    virtual cpo::uno::Any SAL_CALL getByName(const OUString& Name) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames() override;
-    virtual bool SAL_CALL hasByName(const OUString& Name) override;
+    virtual cpo::uno::Any getByName(const OUString& Name) override;
+    virtual cpo::uno::Sequence< OUString > getElementNames() override;
+    virtual bool hasByName(const OUString& Name) override;
 
     //XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-    virtual bool SAL_CALL hasElements(  ) override;
+    virtual cpo::uno::Type getElementType(  ) override;
+    virtual bool hasElements(  ) override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 };
 
 class SwXTextFrames final : public SwXFrames
@@ -342,9 +342,9 @@ public:
     SwXTextFrames(SwDoc* pDoc);
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
 };
 
@@ -355,9 +355,9 @@ public:
         SwXTextGraphicObjects(SwDoc* pDoc);
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
 };
 
@@ -368,9 +368,9 @@ public:
     SwXTextEmbeddedObjects(SwDoc* pDoc);
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
 };
 
@@ -382,22 +382,22 @@ public:
     SwXTextSections(SwDoc* pDoc);
 
     //XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount() override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     //XNameAccess
-    virtual cpo::uno::Any SAL_CALL getByName(const OUString& Name) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames() override;
-    virtual bool SAL_CALL hasByName(const OUString& Name) override;
+    virtual cpo::uno::Any getByName(const OUString& Name) override;
+    virtual cpo::uno::Sequence< OUString > getElementNames() override;
+    virtual bool hasByName(const OUString& Name) override;
 
     //XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-    virtual bool SAL_CALL hasElements(  ) override;
+    virtual cpo::uno::Type getElementType(  ) override;
+    virtual bool hasElements(  ) override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
     SW_DLLPUBLIC rtl::Reference<SwXTextSection> getSwTextSectionByName(const OUString& Name);
     rtl::Reference<SwXTextSection> getSwTextSectionByIndex(sal_Int32 nIndex);
@@ -411,22 +411,22 @@ class SwXBookmarks final : public SwCollectionBaseClass,
         SwXBookmarks(SwDoc* pDoc);
 
         //XIndexAccess
-        virtual sal_Int32 SAL_CALL getCount() override;
-        virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+        virtual sal_Int32 getCount() override;
+        virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
         //XNameAccess
-        virtual cpo::uno::Any SAL_CALL getByName(const OUString& Name) override;
-        virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames() override;
-        virtual bool SAL_CALL hasByName(const OUString& Name) override;
+        virtual cpo::uno::Any getByName(const OUString& Name) override;
+        virtual cpo::uno::Sequence< OUString > getElementNames() override;
+        virtual bool hasByName(const OUString& Name) override;
 
         //XElementAccess
-        virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-        virtual bool SAL_CALL hasElements(  ) override;
+        virtual cpo::uno::Type getElementType(  ) override;
+        virtual bool hasElements(  ) override;
 
         //XServiceInfo
-        virtual OUString SAL_CALL getImplementationName() override;
-        virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-        virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+        virtual OUString getImplementationName() override;
+        virtual bool supportsService(const OUString& ServiceName) override;
+        virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
         rtl::Reference<SwXBookmark> getBookmarkByIndex(sal_Int32 nIndex);
 };
@@ -443,12 +443,12 @@ public:
     SwXNumberingRulesCollection( SwDoc* pDoc );
 
     //XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount() override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     //XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-    virtual bool SAL_CALL hasElements(  ) override;
+    virtual cpo::uno::Type getElementType(  ) override;
+    virtual bool hasElements(  ) override;
 };
 
 typedef
@@ -469,17 +469,17 @@ public:
     SwXFootnotes(bool bEnd, SwDoc* pDoc);
 
     //XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount() override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     //XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-    virtual bool SAL_CALL hasElements(  ) override;
+    virtual cpo::uno::Type getElementType(  ) override;
+    virtual bool hasElements(  ) override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
     rtl::Reference<SwXFootnote> getFootnoteByIndex(sal_Int32 nIndex) ;
 };
@@ -492,22 +492,22 @@ public:
     SwXReferenceMarks(SwDoc* pDoc);
 
     //XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount() override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     //XNameAccess
-    virtual cpo::uno::Any SAL_CALL getByName(const OUString& Name) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames() override;
-    virtual bool SAL_CALL hasByName(const OUString& Name) override;
+    virtual cpo::uno::Any getByName(const OUString& Name) override;
+    virtual cpo::uno::Sequence< OUString > getElementNames() override;
+    virtual bool hasByName(const OUString& Name) override;
 
     //XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-    virtual bool SAL_CALL hasElements(  ) override;
+    virtual cpo::uno::Type getElementType(  ) override;
+    virtual bool hasElements(  ) override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
 };
 

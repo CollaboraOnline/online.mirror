@@ -54,7 +54,7 @@ SwVbaListFormat::~SwVbaListFormat()
 {
 }
 
-void SAL_CALL SwVbaListFormat::ApplyListTemplate( const cpo::uno::Reference< word::XListTemplate >& ListTemplate, const cpo::uno::Any& ContinuePreviousList, const cpo::uno::Any& ApplyTo, const cpo::uno::Any& DefaultListBehavior )
+void SwVbaListFormat::ApplyListTemplate( const cpo::uno::Reference< word::XListTemplate >& ListTemplate, const cpo::uno::Any& ContinuePreviousList, const cpo::uno::Any& ApplyTo, const cpo::uno::Any& DefaultListBehavior )
 {
     bool bContinuePreviousList = true;
     if( ContinuePreviousList.hasValue() )
@@ -133,7 +133,7 @@ static void addParagraphsToList(const Ref& a,
     }
 }
 
-void SAL_CALL SwVbaListFormat::ConvertNumbersToText(  )
+void SwVbaListFormat::ConvertNumbersToText(  )
 {
     rtl::Reference<SwXTextDocument> xModel(getThisWordDoc(mxContext));
     cpo::uno::Reference<css::document::XUndoManager> xUndoManager(xModel->getUndoManager());

@@ -526,9 +526,9 @@ class TestSimpleFileTransferable : public cppu::WeakImplHelper<css::datatransfer
 {
 public:
     TestSimpleFileTransferable(const OUString& fileURL);
-    cpo::uno::Any SAL_CALL getTransferData(const css::datatransfer::DataFlavor& flavor) override;
-    cpo::uno::Sequence<css::datatransfer::DataFlavor> SAL_CALL getTransferDataFlavors() override;
-    bool SAL_CALL isDataFlavorSupported(const css::datatransfer::DataFlavor& flavor) override;
+    cpo::uno::Any getTransferData(const css::datatransfer::DataFlavor& flavor) override;
+    cpo::uno::Sequence<css::datatransfer::DataFlavor> getTransferDataFlavors() override;
+    bool isDataFlavorSupported(const css::datatransfer::DataFlavor& flavor) override;
 
 private:
     OUString m_fileURL;

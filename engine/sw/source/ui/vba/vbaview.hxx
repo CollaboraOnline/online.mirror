@@ -48,16 +48,16 @@ public:
     virtual ~SwVbaView() override;
 
    // XView
-    bool SAL_CALL getShowAll() override;
-    void SAL_CALL setShowAll(bool bSet) override;
-    virtual ::sal_Int32 SAL_CALL getSeekView() override;
-    virtual void SAL_CALL setSeekView( ::sal_Int32 _seekview ) override;
-    virtual ::sal_Int32 SAL_CALL getSplitSpecial() override;
-    virtual void SAL_CALL setSplitSpecial( ::sal_Int32 _splitspecial ) override;
-    virtual bool SAL_CALL getTableGridLines() override;
-    virtual void SAL_CALL setTableGridLines( bool _tablegridlines ) override;
-    virtual ::sal_Int32 SAL_CALL getType() override;
-    virtual void SAL_CALL setType( ::sal_Int32 _type ) override;
+    bool getShowAll() override;
+    void setShowAll(bool bSet) override;
+    virtual ::sal_Int32 getSeekView() override;
+    virtual void setSeekView( ::sal_Int32 _seekview ) override;
+    virtual ::sal_Int32 getSplitSpecial() override;
+    virtual void setSplitSpecial( ::sal_Int32 _splitspecial ) override;
+    virtual bool getTableGridLines() override;
+    virtual void setTableGridLines( bool _tablegridlines ) override;
+    virtual ::sal_Int32 getType() override;
+    virtual void setType( ::sal_Int32 _type ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

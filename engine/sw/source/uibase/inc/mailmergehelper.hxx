@@ -151,8 +151,8 @@ public:
     {}
     virtual ~SwAuthenticator() override;
 
-    virtual OUString SAL_CALL getUserName() override;
-    virtual OUString SAL_CALL getPassword() override;
+    virtual OUString getUserName() override;
+    virtual OUString getPassword() override;
 
 };
 
@@ -166,7 +166,7 @@ public:
     SwConnectionContext(OUString aMailServer, sal_Int16 nPort, OUString aConnectionType);
     virtual ~SwConnectionContext() override;
 
-    virtual cpo::uno::Any SAL_CALL getValueByName(const OUString& Name) override;
+    virtual cpo::uno::Any getValueByName(const OUString& Name) override;
 };
 
 class SW_DLLPUBLIC SwConnectionListener final :
@@ -177,11 +177,11 @@ class SW_DLLPUBLIC SwConnectionListener final :
 public:
     virtual ~SwConnectionListener() override;
 
-    virtual void SAL_CALL connected(const css::lang::EventObject& aEvent) override;
+    virtual void connected(const css::lang::EventObject& aEvent) override;
 
-    virtual void SAL_CALL disconnected(const css::lang::EventObject& aEvent) override;
+    virtual void disconnected(const css::lang::EventObject& aEvent) override;
 
-    virtual void SAL_CALL disposing(const css::lang::EventObject& aEvent) override;
+    virtual void disposing(const css::lang::EventObject& aEvent) override;
 };
 
 class SW_DLLPUBLIC SwMailTransferable final :
@@ -197,23 +197,23 @@ class SW_DLLPUBLIC SwMailTransferable final :
     SwMailTransferable(OUString aURL, OUString aName, OUString aMimeType);
     SwMailTransferable(OUString aBody, OUString aMimeType);
     virtual ~SwMailTransferable() override;
-    virtual cpo::uno::Any SAL_CALL getTransferData(const css::datatransfer::DataFlavor& aFlavor) override;
+    virtual cpo::uno::Any getTransferData(const css::datatransfer::DataFlavor& aFlavor) override;
 
-    virtual cpo::uno::Sequence<css::datatransfer::DataFlavor> SAL_CALL getTransferDataFlavors() override;
-    virtual bool SAL_CALL isDataFlavorSupported(const css::datatransfer::DataFlavor& aFlavor) override;
+    virtual cpo::uno::Sequence<css::datatransfer::DataFlavor> getTransferDataFlavors() override;
+    virtual bool isDataFlavorSupported(const css::datatransfer::DataFlavor& aFlavor) override;
 
     //XPropertySet
-    virtual cpo::uno::Reference<css::beans::XPropertySetInfo> SAL_CALL getPropertySetInfo() override;
-    virtual void SAL_CALL setPropertyValue(const OUString& aPropertyName, const cpo::uno::Any& aValue) override;
+    virtual cpo::uno::Reference<css::beans::XPropertySetInfo> getPropertySetInfo() override;
+    virtual void setPropertyValue(const OUString& aPropertyName, const cpo::uno::Any& aValue) override;
 
-    virtual cpo::uno::Any SAL_CALL getPropertyValue(const OUString& PropertyName) override;
-    virtual void SAL_CALL addPropertyChangeListener(const OUString& aPropertyName,
+    virtual cpo::uno::Any getPropertyValue(const OUString& PropertyName) override;
+    virtual void addPropertyChangeListener(const OUString& aPropertyName,
                                                     const cpo::uno::Reference<css::beans::XPropertyChangeListener>& xListener) override;
-    virtual void SAL_CALL removePropertyChangeListener(const OUString& aPropertyName,
+    virtual void removePropertyChangeListener(const OUString& aPropertyName,
                                                        const cpo::uno::Reference<css::beans::XPropertyChangeListener >& aListener) override;
-    virtual void SAL_CALL addVetoableChangeListener(const OUString& PropertyName,
+    virtual void addVetoableChangeListener(const OUString& PropertyName,
                                                     const cpo::uno::Reference<css::beans::XVetoableChangeListener>& aListener) override;
-    virtual void SAL_CALL removeVetoableChangeListener(const OUString& PropertyName,
+    virtual void removeVetoableChangeListener(const OUString& PropertyName,
                                                        const cpo::uno::Reference<css::beans::XVetoableChangeListener>& aListener) override;
 
 };
@@ -239,25 +239,25 @@ public:
     virtual ~SwMailMessage() override;
 
     // attributes
-    virtual OUString SAL_CALL getSenderName() override;
-    virtual OUString SAL_CALL getSenderAddress() override;
-    virtual OUString SAL_CALL getReplyToAddress() override;
-    virtual void SAL_CALL setReplyToAddress( const OUString& _replytoaddress ) override;
-    virtual OUString SAL_CALL getSubject() override;
-    virtual void SAL_CALL setSubject(const OUString& _subject) override;
+    virtual OUString getSenderName() override;
+    virtual OUString getSenderAddress() override;
+    virtual OUString getReplyToAddress() override;
+    virtual void setReplyToAddress( const OUString& _replytoaddress ) override;
+    virtual OUString getSubject() override;
+    virtual void setSubject(const OUString& _subject) override;
 
-    virtual cpo::uno::Reference<css::datatransfer::XTransferable> SAL_CALL getBody() override;
-    virtual void SAL_CALL setBody(const cpo::uno::Reference<css::datatransfer::XTransferable>& _body) override;
+    virtual cpo::uno::Reference<css::datatransfer::XTransferable> getBody() override;
+    virtual void setBody(const cpo::uno::Reference<css::datatransfer::XTransferable>& _body) override;
 
     // methods
-    virtual void SAL_CALL addRecipient( const OUString& sRecipientAddress ) override;
-    virtual void SAL_CALL addCcRecipient( const OUString& sRecipientAddress ) override;
-    virtual void SAL_CALL addBccRecipient( const OUString& sRecipientAddress ) override;
-    virtual cpo::uno::Sequence<OUString> SAL_CALL getRecipients() override;
-    virtual cpo::uno::Sequence<OUString> SAL_CALL getCcRecipients() override;
-    virtual cpo::uno::Sequence<OUString> SAL_CALL getBccRecipients() override;
-    virtual void SAL_CALL addAttachment(const css::mail::MailAttachment& aMailAttachment) override;
-    virtual cpo::uno::Sequence<css::mail::MailAttachment> SAL_CALL getAttachments() override;
+    virtual void addRecipient( const OUString& sRecipientAddress ) override;
+    virtual void addCcRecipient( const OUString& sRecipientAddress ) override;
+    virtual void addBccRecipient( const OUString& sRecipientAddress ) override;
+    virtual cpo::uno::Sequence<OUString> getRecipients() override;
+    virtual cpo::uno::Sequence<OUString> getCcRecipients() override;
+    virtual cpo::uno::Sequence<OUString> getBccRecipients() override;
+    virtual void addAttachment(const css::mail::MailAttachment& aMailAttachment) override;
+    virtual cpo::uno::Sequence<css::mail::MailAttachment> getAttachments() override;
     void SetSenderName(const OUString& rSenderName)
     {
         m_sSenderName = rSenderName;

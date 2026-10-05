@@ -41,14 +41,14 @@ void ObservableThread::SetListener( std::weak_ptr< IFinishedThreadListener > con
     mnThreadID = nThreadID;
 }
 
-void SAL_CALL ObservableThread::run()
+void ObservableThread::run()
 {
     acquire();
 
     threadFunction();
 }
 
-void SAL_CALL ObservableThread::onTerminated()
+void ObservableThread::onTerminated()
 {
     // notify observer
     std::shared_ptr< IFinishedThreadListener > pThreadListener = mpThreadListener.lock();

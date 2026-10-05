@@ -628,7 +628,7 @@ bool SwAccessibleParagraph::GetTextBoundary(
     }
 }
 
-OUString SAL_CALL SwAccessibleParagraph::getAccessibleDescription()
+OUString SwAccessibleParagraph::getAccessibleDescription()
 {
     SolarMutexGuard aGuard;
     ThrowIfDisposed();
@@ -636,7 +636,7 @@ OUString SAL_CALL SwAccessibleParagraph::getAccessibleDescription()
     return OUString();
 }
 
-lang::Locale SAL_CALL SwAccessibleParagraph::getLocale()
+lang::Locale SwAccessibleParagraph::getLocale()
 {
     SolarMutexGuard aGuard;
 
@@ -652,7 +652,7 @@ lang::Locale SAL_CALL SwAccessibleParagraph::getLocale()
 }
 
 // #i27138# - paragraphs are in relation CONTENT_FLOWS_FROM and/or CONTENT_FLOWS_TO
-uno::Reference<XAccessibleRelationSet> SAL_CALL SwAccessibleParagraph::getAccessibleRelationSet()
+uno::Reference<XAccessibleRelationSet> SwAccessibleParagraph::getAccessibleRelationSet()
 {
     SolarMutexGuard aGuard;
 
@@ -683,7 +683,7 @@ uno::Reference<XAccessibleRelationSet> SAL_CALL SwAccessibleParagraph::getAccess
     return pHelper;
 }
 
-void SAL_CALL SwAccessibleParagraph::grabFocus()
+void SwAccessibleParagraph::grabFocus()
 {
     SolarMutexGuard aGuard;
 
@@ -749,7 +749,7 @@ static bool lcl_GetBackgroundColor( Color & rColor,
     return false;
 }
 
-sal_Int32 SAL_CALL SwAccessibleParagraph::getForeground()
+sal_Int32 SwAccessibleParagraph::getForeground()
 {
     SolarMutexGuard g;
 
@@ -770,7 +770,7 @@ sal_Int32 SAL_CALL SwAccessibleParagraph::getForeground()
     return SwAccessibleContext::getForeground();
 }
 
-sal_Int32 SAL_CALL SwAccessibleParagraph::getBackground()
+sal_Int32 SwAccessibleParagraph::getBackground()
 {
     SolarMutexGuard g;
 
@@ -848,7 +848,7 @@ sal_Int32 SwAccessibleParagraph::getCaretPosition()
     return nRet;
 }
 
-bool SAL_CALL SwAccessibleParagraph::setCaretPosition( sal_Int32 nIndex )
+bool SwAccessibleParagraph::setCaretPosition( sal_Int32 nIndex )
 {
     SolarMutexGuard aGuard;
 
@@ -2606,7 +2606,7 @@ const SwTextAttr *SwHyperlinkIter_Impl::next(SwTextNode const** ppNode)
     return pAttr;
 };
 
-sal_Int32 SAL_CALL SwAccessibleParagraph::getHyperLinkCount()
+sal_Int32 SwAccessibleParagraph::getHyperLinkCount()
 {
     SolarMutexGuard aGuard;
 
@@ -2623,7 +2623,7 @@ sal_Int32 SAL_CALL SwAccessibleParagraph::getHyperLinkCount()
     return nCount;
 }
 
-uno::Reference< XAccessibleHyperlink > SAL_CALL
+uno::Reference< XAccessibleHyperlink >
     SwAccessibleParagraph::getHyperLink( sal_Int32 nLinkIndex )
 {
     SolarMutexGuard aGuard;
@@ -2670,7 +2670,7 @@ uno::Reference< XAccessibleHyperlink > SAL_CALL
     return xRet;
 }
 
-sal_Int32 SAL_CALL SwAccessibleParagraph::getHyperLinkIndex( sal_Int32 nCharIndex )
+sal_Int32 SwAccessibleParagraph::getHyperLinkIndex( sal_Int32 nCharIndex )
 {
     SolarMutexGuard aGuard;
 
@@ -2710,7 +2710,7 @@ sal_Int32 SAL_CALL SwAccessibleParagraph::getHyperLinkIndex( sal_Int32 nCharInde
 }
 
 // #i71360#, #i108125# - adjustments for change tracking text markup
-sal_Int32 SAL_CALL SwAccessibleParagraph::getTextMarkupCount( sal_Int32 nTextMarkupType )
+sal_Int32 SwAccessibleParagraph::getTextMarkupCount( sal_Int32 nTextMarkupType )
 {
     SolarMutexGuard g;
 
@@ -2737,12 +2737,12 @@ sal_Int32 SAL_CALL SwAccessibleParagraph::getTextMarkupCount( sal_Int32 nTextMar
 }
 
 //MSAA Extension Implementation in app  module
-bool SAL_CALL SwAccessibleParagraph::scrollToPosition( const css::awt::Point&, bool )
+bool SwAccessibleParagraph::scrollToPosition( const css::awt::Point&, bool )
 {
     return false;
 }
 
-sal_Int32 SAL_CALL SwAccessibleParagraph::getSelectedPortionCount(  )
+sal_Int32 SwAccessibleParagraph::getSelectedPortionCount(  )
 {
     SolarMutexGuard g;
 
@@ -2786,7 +2786,7 @@ sal_Int32 SAL_CALL SwAccessibleParagraph::getSelectedPortionCount(  )
 
 }
 
-sal_Int32 SAL_CALL SwAccessibleParagraph::getSeletedPositionStart( sal_Int32 nSelectedPortionIndex )
+sal_Int32 SwAccessibleParagraph::getSeletedPositionStart( sal_Int32 nSelectedPortionIndex )
 {
     SolarMutexGuard aGuard;
 
@@ -2797,7 +2797,7 @@ sal_Int32 SAL_CALL SwAccessibleParagraph::getSeletedPositionStart( sal_Int32 nSe
     return nStart;
 }
 
-sal_Int32 SAL_CALL SwAccessibleParagraph::getSeletedPositionEnd( sal_Int32 nSelectedPortionIndex )
+sal_Int32 SwAccessibleParagraph::getSeletedPositionEnd( sal_Int32 nSelectedPortionIndex )
 {
     SolarMutexGuard aGuard;
 
@@ -2808,7 +2808,7 @@ sal_Int32 SAL_CALL SwAccessibleParagraph::getSeletedPositionEnd( sal_Int32 nSele
     return nEnd;
 }
 
-bool SAL_CALL SwAccessibleParagraph::removeSelection( sal_Int32 selectionIndex )
+bool SwAccessibleParagraph::removeSelection( sal_Int32 selectionIndex )
 {
     SolarMutexGuard g;
 
@@ -2870,7 +2870,7 @@ bool SAL_CALL SwAccessibleParagraph::removeSelection( sal_Int32 selectionIndex )
     return true;
 }
 
-sal_Int32 SAL_CALL SwAccessibleParagraph::addSelection(sal_Int32 startOffset, sal_Int32 endOffset)
+sal_Int32 SwAccessibleParagraph::addSelection(sal_Int32 startOffset, sal_Int32 endOffset)
 {
     SolarMutexGuard aGuard;
 
@@ -2932,7 +2932,7 @@ sal_Int32 SAL_CALL SwAccessibleParagraph::addSelection(sal_Int32 startOffset, sa
     return 0;
 }
 
-TextSegment SAL_CALL SwAccessibleParagraph::getTextMarkup(sal_Int32 nTextMarkupIndex,
+TextSegment SwAccessibleParagraph::getTextMarkup(sal_Int32 nTextMarkupIndex,
                                                           sal_Int32 nTextMarkupType)
 {
     SolarMutexGuard g;
@@ -2959,7 +2959,7 @@ TextSegment SAL_CALL SwAccessibleParagraph::getTextMarkup(sal_Int32 nTextMarkupI
     return pTextMarkupHelper->getTextMarkup( nTextMarkupIndex, nTextMarkupType );
 }
 
-cpo::uno::Sequence<TextSegment> SAL_CALL
+cpo::uno::Sequence<TextSegment>
 SwAccessibleParagraph::getTextMarkupAtIndex(sal_Int32 nCharIndex, sal_Int32 nTextMarkupType)
 {
     SolarMutexGuard g;
@@ -2994,7 +2994,7 @@ SwAccessibleParagraph::getTextMarkupAtIndex(sal_Int32 nCharIndex, sal_Int32 nTex
 }
 
 // #i89175#
-sal_Int32 SAL_CALL SwAccessibleParagraph::getLineNumberAtIndex( sal_Int32 nIndex )
+sal_Int32 SwAccessibleParagraph::getLineNumberAtIndex( sal_Int32 nIndex )
 {
     SolarMutexGuard g;
 
@@ -3009,7 +3009,7 @@ sal_Int32 SAL_CALL SwAccessibleParagraph::getLineNumberAtIndex( sal_Int32 nIndex
     return nLineNo;
 }
 
-TextSegment SAL_CALL SwAccessibleParagraph::getTextAtLineNumber(sal_Int32 nLineNo)
+TextSegment SwAccessibleParagraph::getTextAtLineNumber(sal_Int32 nLineNo)
 {
     SolarMutexGuard g;
 
@@ -3033,7 +3033,7 @@ TextSegment SAL_CALL SwAccessibleParagraph::getTextAtLineNumber(sal_Int32 nLineN
     return aTextAtLine;
 }
 
-TextSegment SAL_CALL SwAccessibleParagraph::getTextAtLineWithCaret()
+TextSegment SwAccessibleParagraph::getTextAtLineWithCaret()
 {
     SolarMutexGuard g;
 
@@ -3048,7 +3048,7 @@ TextSegment SAL_CALL SwAccessibleParagraph::getTextAtLineWithCaret()
     return TextSegment();
 }
 
-sal_Int32 SAL_CALL SwAccessibleParagraph::getNumberOfLineWithCaret()
+sal_Int32 SwAccessibleParagraph::getNumberOfLineWithCaret()
 {
     SolarMutexGuard g;
 
@@ -3258,7 +3258,7 @@ bool SwAccessibleParagraph::GetSelectionAtIndex(
     return bRet;
 }
 
-sal_Int16 SAL_CALL SwAccessibleParagraph::getAccessibleRole()
+sal_Int16 SwAccessibleParagraph::getAccessibleRole()
 {
     std::scoped_lock aGuard( m_Mutex );
 
@@ -3303,7 +3303,7 @@ bool SwAccessibleParagraph::IsBlockQuote()
     return false;
 }
 
-OUString SAL_CALL SwAccessibleParagraph::getExtendedAttributes()
+OUString SwAccessibleParagraph::getExtendedAttributes()
 {
     SolarMutexGuard g;
 

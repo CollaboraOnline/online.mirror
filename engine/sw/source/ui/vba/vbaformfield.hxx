@@ -35,52 +35,52 @@ public:
     ~SwVbaFormField() override;
 
     // XFormField Methods
-    OUString SAL_CALL getDefaultPropertyName() override;
+    OUString getDefaultPropertyName() override;
 
-    cpo::uno::Any SAL_CALL CheckBox() override;
-    cpo::uno::Any SAL_CALL DropDown() override;
-    cpo::uno::Any SAL_CALL TextInput() override;
-    cpo::uno::Any SAL_CALL Previous() override;
-    cpo::uno::Any SAL_CALL Next() override;
-    cpo::uno::Reference<ooo::vba::word::XRange> SAL_CALL Range() override;
+    cpo::uno::Any CheckBox() override;
+    cpo::uno::Any DropDown() override;
+    cpo::uno::Any TextInput() override;
+    cpo::uno::Any Previous() override;
+    cpo::uno::Any Next() override;
+    cpo::uno::Reference<ooo::vba::word::XRange> Range() override;
 
     // Indicates which of the three form fields this is: oovbaapi/ooo/vba/word/WdFieldType.idl
-    sal_Int32 SAL_CALL getType() override;
+    sal_Int32 getType() override;
     // True if references to the specified form field
     // are automatically updated whenever the field is exited
-    bool SAL_CALL getCalculateOnExit() override;
-    void SAL_CALL setCalculateOnExit(bool bSet) override;
-    bool SAL_CALL getEnabled() override;
-    void SAL_CALL setEnabled(bool bSet) override;
-    OUString SAL_CALL getEntryMacro() override;
-    void SAL_CALL setEntryMacro(const OUString& rSet) override;
-    OUString SAL_CALL getExitMacro() override;
-    void SAL_CALL setExitMacro(const OUString& rSet) override;
+    bool getCalculateOnExit() override;
+    void setCalculateOnExit(bool bSet) override;
+    bool getEnabled() override;
+    void setEnabled(bool bSet) override;
+    OUString getEntryMacro() override;
+    void setEntryMacro(const OUString& rSet) override;
+    OUString getExitMacro() override;
+    void setExitMacro(const OUString& rSet) override;
     /*
      * If the OwnHelp property is set to True,
      * HelpText specifies the text string value.
      * If OwnHelp is set to False, HelpText specifies the name of an AutoText entry
      * that contains help text for the form field.
      */
-    OUString SAL_CALL getHelpText() override;
-    void SAL_CALL setHelpText(const OUString& rSet) override;
-    bool SAL_CALL getOwnHelp() override;
-    void SAL_CALL setOwnHelp(bool bSet) override;
+    OUString getHelpText() override;
+    void setHelpText(const OUString& rSet) override;
+    bool getOwnHelp() override;
+    void setOwnHelp(bool bSet) override;
 
-    OUString SAL_CALL getName() override;
-    void SAL_CALL setName(const OUString& rSet) override;
-    OUString SAL_CALL getResult() override;
-    void SAL_CALL setResult(const OUString& rSet) override;
+    OUString getName() override;
+    void setName(const OUString& rSet) override;
+    OUString getResult() override;
+    void setResult(const OUString& rSet) override;
     /*
      * If the OwnStatus property is set to True,
      * StatusText specifies the status bar value.
      * If OwnStatus is set to False, StatusText specifies the name of an AutoText entry
      * that contains status bar text for the form field.
      */
-    OUString SAL_CALL getStatusText() override;
-    void SAL_CALL setStatusText(const OUString& rSet) override;
-    bool SAL_CALL getOwnStatus() override;
-    void SAL_CALL setOwnStatus(bool bSet) override;
+    OUString getStatusText() override;
+    void setStatusText(const OUString& rSet) override;
+    bool getOwnStatus() override;
+    void setOwnStatus(bool bSet) override;
 
     // XHelperInterface
     OUString getServiceImplName() override;

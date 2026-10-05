@@ -55,24 +55,24 @@ public:
     SwVbaRows( const cpo::uno::Reference< ov::XHelperInterface >& xParent, const cpo::uno::Reference< cpo::uno::XComponentContext > & xContext, rtl::Reference< SwXTextTable >  xTextTable, const cpo::uno::Reference< css::table::XTableRows >& xTableRows, sal_Int32 nStarIndex, sal_Int32 nEndIndex );
 
     // Attributes
-    virtual ::sal_Int32 SAL_CALL getAlignment() override;
-    virtual void SAL_CALL setAlignment( ::sal_Int32 _alignment ) override;
-    virtual cpo::uno::Any SAL_CALL getAllowBreakAcrossPages() override;
-    virtual void SAL_CALL setAllowBreakAcrossPages( const cpo::uno::Any& _allowbreakacrosspages ) override;
-    virtual float SAL_CALL getSpaceBetweenColumns() override;
-    virtual void SAL_CALL setSpaceBetweenColumns( float _spacebetweencolumns ) override;
+    virtual ::sal_Int32 getAlignment() override;
+    virtual void setAlignment( ::sal_Int32 _alignment ) override;
+    virtual cpo::uno::Any getAllowBreakAcrossPages() override;
+    virtual void setAllowBreakAcrossPages( const cpo::uno::Any& _allowbreakacrosspages ) override;
+    virtual float getSpaceBetweenColumns() override;
+    virtual void setSpaceBetweenColumns( float _spacebetweencolumns ) override;
 
     // Methods
-    virtual void SAL_CALL Delete(  ) override;
-    virtual void SAL_CALL SetLeftIndent( float LeftIndent, ::sal_Int32 RulerStyle ) override;
-    virtual void SAL_CALL Select(  ) override;
+    virtual void Delete(  ) override;
+    virtual void SetLeftIndent( float LeftIndent, ::sal_Int32 RulerStyle ) override;
+    virtual void Select(  ) override;
 
     //XCollection
-    virtual ::sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ ) override;
+    virtual ::sal_Int32 getCount() override;
+    virtual cpo::uno::Any Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ ) override;
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     // SwVbaRows_BASE
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;

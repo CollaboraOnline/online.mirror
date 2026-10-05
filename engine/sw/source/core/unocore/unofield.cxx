@@ -470,7 +470,7 @@ protected:
     virtual void Notify(const SfxHint& rHint) override;
 };
 
-OUString SAL_CALL
+OUString
 SwXFieldMaster::getImplementationName()
 {
     return u"SwXFieldMaster"_ustr;
@@ -508,12 +508,12 @@ OUString getServiceName(const SwFieldIds aId)
 
 }
 
-bool SAL_CALL SwXFieldMaster::supportsService(const OUString& rServiceName)
+bool SwXFieldMaster::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXFieldMaster::getSupportedServiceNames()
 {
     return { u"com.sun.star.text.TextFieldMaster"_ustr, getServiceName(m_pImpl->m_nResTypeId) };
@@ -559,7 +559,7 @@ SwXFieldMaster::CreateXFieldMaster(SwDoc * pDoc, SwFieldType *const pType,
     return xFM;
 }
 
-uno::Reference<beans::XPropertySetInfo> SAL_CALL
+uno::Reference<beans::XPropertySetInfo>
 SwXFieldMaster::getPropertySetInfo()
 {
     SolarMutexGuard aGuard;
@@ -569,7 +569,7 @@ SwXFieldMaster::getPropertySetInfo()
     return aRef;
 }
 
-void SAL_CALL SwXFieldMaster::setPropertyValue(
+void SwXFieldMaster::setPropertyValue(
         const OUString& rPropertyName, const cpo::uno::Any& rValue)
 {
     SolarMutexGuard aGuard;
@@ -799,7 +799,7 @@ SwFieldType* SwXFieldMaster::GetFieldType(bool const bDontCreate) const
     return m_pImpl->m_pType;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwXFieldMaster::getPropertyValue(const OUString& rPropertyName)
 {
     SolarMutexGuard aGuard;
@@ -944,7 +944,7 @@ void SwXFieldMaster::removeVetoableChangeListener(const OUString& /*PropertyName
     OSL_FAIL("not implemented");
 }
 
-void SAL_CALL SwXFieldMaster::dispose()
+void SwXFieldMaster::dispose()
 {
     SolarMutexGuard aGuard;
     SwFieldType *const pFieldType = GetFieldType(true);
@@ -967,14 +967,14 @@ void SAL_CALL SwXFieldMaster::dispose()
     m_pImpl->m_pDoc->getIDocumentFieldsAccess().RemoveFieldType(nTypeIdx);
 }
 
-void SAL_CALL SwXFieldMaster::addEventListener(
+void SwXFieldMaster::addEventListener(
         const uno::Reference<lang::XEventListener> & xListener)
 {
     std::unique_lock aGuard(m_pImpl->m_Mutex);
     m_pImpl->m_EventListeners.addInterface(aGuard, xListener);
 }
 
-void SAL_CALL SwXFieldMaster::removeEventListener(
+void SwXFieldMaster::removeEventListener(
         const uno::Reference<lang::XEventListener> & xListener)
 {
     std::unique_lock aGuard(m_pImpl->m_Mutex);
@@ -1303,7 +1303,7 @@ void SwXTextField::TransmuteLeadToInputField(SwSetExpField & rField,
     }
 }
 
-void SAL_CALL SwXTextField::attachTextFieldMaster(
+void SwXTextField::attachTextFieldMaster(
         const uno::Reference< beans::XPropertySet > & xFieldMaster)
 {
     SolarMutexGuard aGuard;
@@ -1322,7 +1322,7 @@ void SAL_CALL SwXTextField::attachTextFieldMaster(
     m_pImpl->SetFieldType(*pFieldType);
 }
 
-uno::Reference< beans::XPropertySet > SAL_CALL
+uno::Reference< beans::XPropertySet >
 SwXTextField::getTextFieldMaster()
 {
     SolarMutexGuard aGuard;
@@ -1335,7 +1335,7 @@ SwXTextField::getTextFieldMaster()
     return xRet;
 }
 
-OUString SAL_CALL SwXTextField::getPresentation(bool bShowCommand)
+OUString SwXTextField::getPresentation(bool bShowCommand)
 {
     SolarMutexGuard aGuard;
 
@@ -1347,7 +1347,7 @@ OUString SAL_CALL SwXTextField::getPresentation(bool bShowCommand)
     return bShowCommand ? pField->GetFieldName() : pField->ExpandField(true, nullptr);
 }
 
-void SAL_CALL SwXTextField::attach(
+void SwXTextField::attach(
         const uno::Reference< text::XTextRange > & xTextRange)
 {
     SolarMutexGuard aGuard;
@@ -2076,7 +2076,7 @@ void SAL_CALL SwXTextField::attach(
         throw lang::IllegalArgumentException();
 }
 
-uno::Reference< text::XTextRange > SAL_CALL
+uno::Reference< text::XTextRange >
 SwXTextField::getAnchor()
 {
     SolarMutexGuard aGuard;
@@ -2114,7 +2114,7 @@ SwXTextField::getAnchor()
     return xRange;
 }
 
-void SAL_CALL SwXTextField::dispose()
+void SwXTextField::dispose()
 {
     SolarMutexGuard aGuard;
     SwField const*const pField = m_pImpl->GetField();
@@ -2133,21 +2133,21 @@ void SAL_CALL SwXTextField::dispose()
     m_pImpl->Invalidate();
 }
 
-void SAL_CALL SwXTextField::addEventListener(
+void SwXTextField::addEventListener(
         const uno::Reference<lang::XEventListener> & xListener)
 {
     std::unique_lock aGuard(m_pImpl->m_Mutex);
     m_pImpl->m_EventListeners.addInterface(aGuard, xListener);
 }
 
-void SAL_CALL SwXTextField::removeEventListener(
+void SwXTextField::removeEventListener(
         const uno::Reference<lang::XEventListener> & xListener)
 {
     std::unique_lock aGuard(m_pImpl->m_Mutex);
     m_pImpl->m_EventListeners.removeInterface(aGuard, xListener);
 }
 
-uno::Reference< beans::XPropertySetInfo > SAL_CALL
+uno::Reference< beans::XPropertySetInfo >
 SwXTextField::getPropertySetInfo()
 {
     SolarMutexGuard aGuard;
@@ -2168,7 +2168,7 @@ SwXTextField::getPropertySetInfo()
     return aRef;
 }
 
-void SAL_CALL
+void
 SwXTextField::setPropertyValue(
         const OUString& rPropertyName, const cpo::uno::Any& rValue)
 {
@@ -2346,7 +2346,7 @@ SwXTextField::setPropertyValue(
         throw cpo::uno::RuntimeException();
 }
 
-cpo::uno::Any SAL_CALL SwXTextField::getPropertyValue(const OUString& rPropertyName)
+cpo::uno::Any SwXTextField::getPropertyValue(const OUString& rPropertyName)
 {
     SolarMutexGuard aGuard;
     cpo::uno::Any aRet;
@@ -2564,7 +2564,7 @@ void SwXTextField::removeVetoableChangeListener(const OUString& /*PropertyName*/
     OSL_FAIL("not implemented");
 }
 
-void SAL_CALL SwXTextField::update()
+void SwXTextField::update()
 {
     SolarMutexGuard aGuard;
     SwField * pField = const_cast<SwField*>(m_pImpl->GetField());
@@ -2619,7 +2619,7 @@ void SAL_CALL SwXTextField::update()
         m_pImpl->m_bCallUpdate = true;
 }
 
-OUString SAL_CALL SwXTextField::getImplementationName()
+OUString SwXTextField::getImplementationName()
 {
     return u"SwXTextField"_ustr;
 }
@@ -2638,12 +2638,12 @@ static OUString OldNameToNewName_Impl( const OUString &rOld )
     return sServiceNameCC;
 }
 
-bool SAL_CALL SwXTextField::supportsService(const OUString& rServiceName)
+bool SwXTextField::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL SwXTextField::getSupportedServiceNames()
+cpo::uno::Sequence< OUString > SwXTextField::getSupportedServiceNames()
 {
     const OUString sServiceName =
         SwXServiceProvider::GetProviderName(m_pImpl->m_nServiceId);
@@ -2951,7 +2951,7 @@ bool SwXTextFieldTypes::hasElements()
     return true; // they always exist
 }
 
-void SAL_CALL SwXTextFieldTypes::refresh()
+void SwXTextFieldTypes::refresh()
 {
     {
         SolarMutexGuard aGuard;
@@ -2967,14 +2967,14 @@ void SAL_CALL SwXTextFieldTypes::refresh()
             & util::XRefreshListener::refreshed, event);
 }
 
-void SAL_CALL SwXTextFieldTypes::addRefreshListener(
+void SwXTextFieldTypes::addRefreshListener(
         const uno::Reference<util::XRefreshListener> & xListener)
 {
     std::unique_lock aGuard(m_pImpl->m_Mutex);
     m_pImpl->m_RefreshListeners.addInterface(aGuard, xListener);
 }
 
-void SAL_CALL SwXTextFieldTypes::removeRefreshListener(
+void SwXTextFieldTypes::removeRefreshListener(
         const uno::Reference<util::XRefreshListener> & xListener)
 {
     std::unique_lock aGuard(m_pImpl->m_Mutex);
@@ -2982,7 +2982,7 @@ void SAL_CALL SwXTextFieldTypes::removeRefreshListener(
 }
 
 // This is specifically for looking up annotations, so we only need to search a couple of places
-cpo::uno::Any SAL_CALL SwXTextFieldTypes::getByUniqueID(const OUString& ID)
+cpo::uno::Any SwXTextFieldTypes::getByUniqueID(const OUString& ID)
 {
     SolarMutexGuard aGuard;
     cpo::uno::Any aRet;
@@ -3020,7 +3020,7 @@ cpo::uno::Any SAL_CALL SwXTextFieldTypes::getByUniqueID(const OUString& ID)
     return aRet;
 }
 
-void SAL_CALL SwXTextFieldTypes::removeByUniqueID(const OUString& /*ID*/)
+void SwXTextFieldTypes::removeByUniqueID(const OUString& /*ID*/)
 {
     throw cpo::uno::RuntimeException(u"unsupported"_ustr);
 }
@@ -3047,18 +3047,18 @@ public:
     }
 };
 
-OUString SAL_CALL
+OUString
 SwXFieldEnumeration::getImplementationName()
 {
     return u"SwXFieldEnumeration"_ustr;
 }
 
-bool SAL_CALL SwXFieldEnumeration::supportsService(const OUString& rServiceName)
+bool SwXFieldEnumeration::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL
+cpo::uno::Sequence<OUString>
 SwXFieldEnumeration::getSupportedServiceNames()
 {
     return { u"com.sun.star.text.FieldEnumeration"_ustr };
@@ -3099,14 +3099,14 @@ SwXFieldEnumeration::~SwXFieldEnumeration()
 {
 }
 
-bool SAL_CALL SwXFieldEnumeration::hasMoreElements()
+bool SwXFieldEnumeration::hasMoreElements()
 {
     SolarMutexGuard aGuard;
 
     return m_pImpl->m_nNextIndex < static_cast<sal_Int32>(m_pImpl->m_Items.size());
 }
 
-cpo::uno::Any SAL_CALL SwXFieldEnumeration::nextElement()
+cpo::uno::Any SwXFieldEnumeration::nextElement()
 {
     SolarMutexGuard aGuard;
 

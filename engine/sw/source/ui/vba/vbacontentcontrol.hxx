@@ -35,107 +35,107 @@ public:
     ~SwVbaContentControl() override;
 
     // XContentControl Properties
-    bool SAL_CALL getAllowInsertDeleteSection() override;
-    void SAL_CALL setAllowInsertDeleteSection(bool bSet) override;
+    bool getAllowInsertDeleteSection() override;
+    void setAllowInsertDeleteSection(bool bSet) override;
 
-    sal_Int32 SAL_CALL getAppearance() override;
-    void SAL_CALL setAppearance(sal_Int32 nSet) override;
+    sal_Int32 getAppearance() override;
+    void setAppearance(sal_Int32 nSet) override;
 
-    OUString SAL_CALL getBuildingBlockCategory() override;
-    void SAL_CALL setBuildingBlockCategory(const OUString& sSet) override;
+    OUString getBuildingBlockCategory() override;
+    void setBuildingBlockCategory(const OUString& sSet) override;
 
-    sal_Int32 SAL_CALL getBuildingBlockType() override;
-    void SAL_CALL setBuildingBlockType(sal_Int32 nSet) override;
+    sal_Int32 getBuildingBlockType() override;
+    void setBuildingBlockType(sal_Int32 nSet) override;
 
-    bool SAL_CALL getChecked() override;
-    void SAL_CALL setChecked(bool bSet) override;
+    bool getChecked() override;
+    void setChecked(bool bSet) override;
 
     // returns or sets a WdColor (@since after 2010 I assume)
-    sal_Int32 SAL_CALL getColor() override;
-    void SAL_CALL setColor(sal_Int32 nSet) override;
+    sal_Int32 getColor() override;
+    void setColor(sal_Int32 nSet) override;
 
-    sal_Int32 SAL_CALL getDateCalendarType() override;
-    void SAL_CALL setDateCalendarType(sal_Int32 nSet) override;
+    sal_Int32 getDateCalendarType() override;
+    void setDateCalendarType(sal_Int32 nSet) override;
 
-    OUString SAL_CALL getDateDisplayFormat() override;
-    void SAL_CALL setDateDisplayFormat(const OUString& sSet) override;
+    OUString getDateDisplayFormat() override;
+    void setDateDisplayFormat(const OUString& sSet) override;
 
-    sal_Int32 SAL_CALL getDateDisplayLocale() override;
+    sal_Int32 getDateDisplayLocale() override;
 
-    sal_Int32 SAL_CALL getDateStorageFormat() override;
-    void SAL_CALL setDateStorageFormat(sal_Int32 nSet) override;
+    sal_Int32 getDateStorageFormat() override;
+    void setDateStorageFormat(sal_Int32 nSet) override;
 
-    cpo::uno::Any SAL_CALL getDropdownListEntries() override;
+    cpo::uno::Any getDropdownListEntries() override;
 
     // This is an integer used as a unique identifier string
-    OUString SAL_CALL getID() override;
+    OUString getID() override;
 
-    sal_Int32 SAL_CALL getLevel() override;
+    sal_Int32 getLevel() override;
 
     // returns or sets if the user can delete the control
-    bool SAL_CALL getLockContentControl() override;
-    void SAL_CALL setLockContentControl(bool bSet) override;
+    bool getLockContentControl() override;
+    void setLockContentControl(bool bSet) override;
 
     // returns or sets if the user can edit the contents (i.e. read-only flag)
-    bool SAL_CALL getLockContents() override;
-    void SAL_CALL setLockContents(bool bSet) override;
+    bool getLockContents() override;
+    void setLockContents(bool bSet) override;
 
-    bool SAL_CALL getMultiLine() override;
-    void SAL_CALL setMultiLine(bool bSet) override;
+    bool getMultiLine() override;
+    void setMultiLine(bool bSet) override;
 
     // WRONG- THIS SHOULD RETURN XBUILDINGBLOCK
-    OUString SAL_CALL getPlaceholderText() override;
+    OUString getPlaceholderText() override;
 
-    bool SAL_CALL getShowingPlaceholderText() override;
+    bool getShowingPlaceholderText() override;
 
-    OUString SAL_CALL getRepeatingSectionItemTitle() override;
-    void SAL_CALL setRepeatingSectionItemTitle(const OUString& rSet) override;
+    OUString getRepeatingSectionItemTitle() override;
+    void setRepeatingSectionItemTitle(const OUString& rSet) override;
 
-    cpo::uno::Reference<ooo::vba::word::XRange> SAL_CALL getRange() override;
+    cpo::uno::Reference<ooo::vba::word::XRange> getRange() override;
 
-    OUString SAL_CALL getTag() override;
-    void SAL_CALL setTag(const OUString& rSet) override;
+    OUString getTag() override;
+    void setTag(const OUString& rSet) override;
 
     // returns or sets if the control is removed after accepting user change (i.e. control -> text)
-    bool SAL_CALL getTemporary() override;
-    void SAL_CALL setTemporary(bool bSet) override;
+    bool getTemporary() override;
+    void setTemporary(bool bSet) override;
 
-    OUString SAL_CALL getTitle() override;
-    void SAL_CALL setTitle(const OUString& rSet) override;
+    OUString getTitle() override;
+    void setTitle(const OUString& rSet) override;
 
     // returns or sets a WdContentControlType that represents the type for a content control.
-    sal_Int32 SAL_CALL getType() override;
-    void SAL_CALL setType(sal_Int32 nSet) override;
+    sal_Int32 getType() override;
+    void setType(sal_Int32 nSet) override;
 
     // XContentControl Methods
 
     // Copies the content control from the active document to the Clipboard.
     // Retrieve from the clipboard using the Paste method of the Selection object
     // or of the Range object, or use the Paste function from within Microsoft Word.
-    void SAL_CALL Copy() override;
+    void Copy() override;
 
     // Removes the control from the active document and moves it to the Clipboard.
-    void SAL_CALL Cut() override;
+    void Cut() override;
 
     // Specifies whether to delete the contents of the content control. The default value is False.
     // True removes both the content control and its contents.
     // False removes the control but leaves the contents of the content control in the document.
-    void SAL_CALL Delete(const cpo::uno::Any& bDeleteContents) override;
+    void Delete(const cpo::uno::Any& bDeleteContents) override;
 
     // Set the Unicode character used to display the checked state.
-    void SAL_CALL SetCheckedSymbol(sal_Int32 Character, const cpo::uno::Any& sFont) override;
+    void SetCheckedSymbol(sal_Int32 Character, const cpo::uno::Any& sFont) override;
 
     // Set the Unicode character used to display the unchecked state.
-    void SAL_CALL SetUnCheckedSymbol(sal_Int32 Character, const cpo::uno::Any& sFont) override;
+    void SetUnCheckedSymbol(sal_Int32 Character, const cpo::uno::Any& sFont) override;
 
     // Sets the placeholder text that displays until a user enters their own text.
     // Only one of the parameters is used when specifying placeholder text.
     // If more than one parameter is provided, use the text specified in the first parameter.
     // If all parameters are omitted, the placeholder text is blank.
-    void SAL_CALL SetPlaceholderText(const cpo::uno::Any& BuildingBlock, const cpo::uno::Any& Range,
+    void SetPlaceholderText(const cpo::uno::Any& BuildingBlock, const cpo::uno::Any& Range,
                                      const cpo::uno::Any& sText) override;
 
-    void SAL_CALL Ungroup() override;
+    void Ungroup() override;
 
     // XHelperInterface
     OUString getServiceImplName() override;

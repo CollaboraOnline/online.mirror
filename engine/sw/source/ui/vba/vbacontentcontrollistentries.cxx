@@ -28,12 +28,12 @@ public:
     {
     }
 
-    virtual bool SAL_CALL hasMoreElements() override
+    virtual bool hasMoreElements() override
     {
         return (mnIndex < mxIndexAccess->getCount());
     }
 
-    virtual cpo::uno::Any SAL_CALL nextElement() override
+    virtual cpo::uno::Any nextElement() override
     {
         if (mnIndex < mxIndexAccess->getCount())
         {
@@ -62,9 +62,9 @@ public:
     {
     }
 
-    sal_Int32 SAL_CALL getCount() override { return m_pCC->GetListItems().size(); }
+    sal_Int32 getCount() override { return m_pCC->GetListItems().size(); }
 
-    cpo::uno::Any SAL_CALL getByIndex(sal_Int32 Index) override
+    cpo::uno::Any getByIndex(sal_Int32 Index) override
     {
         if (Index < 0 || Index >= getCount())
             throw lang::IndexOutOfBoundsException();
@@ -73,15 +73,15 @@ public:
             new SwVbaContentControlListEntry(mxParent, mxContext, m_pCC, Index)));
     }
 
-    cpo::uno::Type SAL_CALL getElementType() override
+    cpo::uno::Type getElementType() override
     {
         return cppu::UnoType<word::XContentControlListEntry>::get();
     }
 
-    bool SAL_CALL hasElements() override { return getCount() != 0; }
+    bool hasElements() override { return getCount() != 0; }
 
     // XEnumerationAccess
-    uno::Reference<container::XEnumeration> SAL_CALL createEnumeration() override
+    uno::Reference<container::XEnumeration> createEnumeration() override
     {
         return new ContentControlListEntriesEnumWrapper(this);
     }

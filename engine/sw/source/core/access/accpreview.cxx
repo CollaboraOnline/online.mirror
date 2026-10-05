@@ -33,12 +33,12 @@ SwAccessiblePreview::~SwAccessiblePreview()
 {
 }
 
-OUString SAL_CALL SwAccessiblePreview::getAccessibleDescription()
+OUString SwAccessiblePreview::getAccessibleDescription()
 {
     return GetResource( STR_ACCESS_PREVIEW_DOC_NAME );
 }
 
-OUString SAL_CALL SwAccessiblePreview::getAccessibleName()
+OUString SwAccessiblePreview::getAccessibleName()
 {
     return SwAccessibleDocumentBase::getAccessibleName() + " " + GetResource( STR_ACCESS_PREVIEW_DOC_SUFFIX );
 }

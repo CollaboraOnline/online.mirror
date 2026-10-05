@@ -522,7 +522,7 @@ SwAccessibleContext::~SwAccessibleContext()
     }
 }
 
-sal_Int64 SAL_CALL SwAccessibleContext::getAccessibleChildCount()
+sal_Int64 SwAccessibleContext::getAccessibleChildCount()
 {
     SolarMutexGuard aGuard;
 
@@ -531,7 +531,7 @@ sal_Int64 SAL_CALL SwAccessibleContext::getAccessibleChildCount()
     return m_isDisposing ? 0 : GetChildCount( *(GetMap()) );
 }
 
-uno::Reference< XAccessible> SAL_CALL
+uno::Reference< XAccessible>
     SwAccessibleContext::getAccessibleChild( sal_Int64 nIndex )
 {
     SolarMutexGuard aGuard;
@@ -578,7 +578,7 @@ uno::Reference< XAccessible> SAL_CALL
     return pChild;
 }
 
-cpo::uno::Sequence<uno::Reference<XAccessible>> SAL_CALL
+cpo::uno::Sequence<uno::Reference<XAccessible>>
     SwAccessibleContext::getAccessibleChildren()
 {
     SolarMutexGuard aGuard;
@@ -641,7 +641,7 @@ rtl::Reference< SwAccessibleContext> SwAccessibleContext::getAccessibleParentImp
     return xAcc;
 }
 
-uno::Reference< XAccessible> SAL_CALL SwAccessibleContext::getAccessibleParent()
+uno::Reference< XAccessible> SwAccessibleContext::getAccessibleParent()
 {
     SolarMutexGuard aGuard;
 
@@ -650,7 +650,7 @@ uno::Reference< XAccessible> SAL_CALL SwAccessibleContext::getAccessibleParent()
     return getAccessibleParentImpl();
 }
 
-sal_Int64 SAL_CALL SwAccessibleContext::getAccessibleIndexInParent()
+sal_Int64 SwAccessibleContext::getAccessibleIndexInParent()
 {
     SolarMutexGuard aGuard;
 
@@ -672,17 +672,17 @@ sal_Int64 SAL_CALL SwAccessibleContext::getAccessibleIndexInParent()
     return nIndex;
 }
 
-sal_Int16 SAL_CALL SwAccessibleContext::getAccessibleRole()
+sal_Int16 SwAccessibleContext::getAccessibleRole()
 {
     return m_nRole;
 }
 
-OUString SAL_CALL SwAccessibleContext::getAccessibleName()
+OUString SwAccessibleContext::getAccessibleName()
 {
     return m_sName;
 }
 
-uno::Reference< XAccessibleRelationSet> SAL_CALL
+uno::Reference< XAccessibleRelationSet>
     SwAccessibleContext::getAccessibleRelationSet()
 {
     // by default there are no relations
@@ -690,7 +690,7 @@ uno::Reference< XAccessibleRelationSet> SAL_CALL
     return xRet;
 }
 
-sal_Int64 SAL_CALL SwAccessibleContext::getAccessibleStateSet()
+sal_Int64 SwAccessibleContext::getAccessibleStateSet()
 {
     SolarMutexGuard aGuard;
 
@@ -706,7 +706,7 @@ sal_Int64 SAL_CALL SwAccessibleContext::getAccessibleStateSet()
     return nStateSet;
 }
 
-lang::Locale SAL_CALL SwAccessibleContext::getLocale()
+lang::Locale SwAccessibleContext::getLocale()
 {
     SolarMutexGuard aGuard;
 
@@ -716,7 +716,7 @@ lang::Locale SAL_CALL SwAccessibleContext::getLocale()
 
 css::awt::Rectangle SwAccessibleContext::implGetBounds() { return getBoundsImpl(true); }
 
-uno::Reference< XAccessible > SAL_CALL SwAccessibleContext::getAccessibleAtPoint(
+uno::Reference< XAccessible > SwAccessibleContext::getAccessibleAtPoint(
                 const awt::Point& aPoint )
 {
     SolarMutexGuard aGuard;
@@ -820,7 +820,7 @@ awt::Rectangle SwAccessibleContext::getBoundsImpl(bool bRelative)
     return vcl::unohelper::ConvertToAWTRect(aPixBounds);
 }
 
-awt::Point SAL_CALL SwAccessibleContext::getLocationOnScreen()
+awt::Point SwAccessibleContext::getLocationOnScreen()
 {
     SolarMutexGuard aGuard;
 
@@ -840,7 +840,7 @@ awt::Point SAL_CALL SwAccessibleContext::getLocationOnScreen()
     return aPoint;
 }
 
-void SAL_CALL SwAccessibleContext::grabFocus()
+void SwAccessibleContext::grabFocus()
 {
     SolarMutexGuard aGuard;
 
@@ -879,12 +879,12 @@ void SAL_CALL SwAccessibleContext::grabFocus()
     }
 }
 
-sal_Int32 SAL_CALL SwAccessibleContext::getForeground()
+sal_Int32 SwAccessibleContext::getForeground()
 {
     return sal_Int32(COL_BLACK);
 }
 
-sal_Int32 SAL_CALL SwAccessibleContext::getBackground()
+sal_Int32 SwAccessibleContext::getBackground()
 {
     return sal_Int32(COL_WHITE);
 }

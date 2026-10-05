@@ -42,25 +42,25 @@ public:
     SwWordBasic(SwVbaApplication* pApp);
 
     // XWordBasic
-    virtual sal_Int32 SAL_CALL getMailMergeMainDocumentType() override;
-    virtual void SAL_CALL
+    virtual sal_Int32 getMailMergeMainDocumentType() override;
+    virtual void
     setMailMergeMainDocumentType(sal_Int32 _mailmergemaindocumenttype) override;
 
-    virtual void SAL_CALL FileOpen(const OUString& Name, const cpo::uno::Any& ConfirmConversions,
+    virtual void FileOpen(const OUString& Name, const cpo::uno::Any& ConfirmConversions,
                                    const cpo::uno::Any& ReadOnly, const cpo::uno::Any& AddToMru,
                                    const cpo::uno::Any& PasswordDoc,
                                    const cpo::uno::Any& PasswordDot, const cpo::uno::Any& Revert,
                                    const cpo::uno::Any& WritePasswordDoc,
                                    const cpo::uno::Any& WritePasswordDot) override;
-    virtual void SAL_CALL FileSave() override;
-    virtual void SAL_CALL FileSaveAs(
+    virtual void FileSave() override;
+    virtual void FileSaveAs(
         const cpo::uno::Any& Name, const cpo::uno::Any& Format, const cpo::uno::Any& LockAnnot,
         const cpo::uno::Any& Password, const cpo::uno::Any& AddToMru,
         const cpo::uno::Any& WritePassword, const cpo::uno::Any& RecommendReadOnly,
         const cpo::uno::Any& EmbedFonts, const cpo::uno::Any& NativePictureFormat,
         const cpo::uno::Any& FormsData, const cpo::uno::Any& SaveAsAOCELetter) override;
-    virtual void SAL_CALL FileClose(const cpo::uno::Any& Save) override;
-    virtual void SAL_CALL ToolsOptionsView(
+    virtual void FileClose(const cpo::uno::Any& Save) override;
+    virtual void ToolsOptionsView(
         const cpo::uno::Any& DraftFont, const cpo::uno::Any& WrapToWindow,
         const cpo::uno::Any& PicturePlaceHolders, const cpo::uno::Any& FieldCodes,
         const cpo::uno::Any& BookMarks, const cpo::uno::Any& FieldShading,
@@ -70,9 +70,9 @@ public:
         const cpo::uno::Any& ShowAll, const cpo::uno::Any& Drawings, const cpo::uno::Any& Anchors,
         const cpo::uno::Any& TextBoundaries, const cpo::uno::Any& VRuler,
         const cpo::uno::Any& Highlight) override;
-    virtual cpo::uno::Any SAL_CALL WindowName(const cpo::uno::Any& Number) override;
-    virtual cpo::uno::Any SAL_CALL ExistingBookmark(const OUString& Name) override;
-    virtual void SAL_CALL MailMergeOpenDataSource(
+    virtual cpo::uno::Any WindowName(const cpo::uno::Any& Number) override;
+    virtual cpo::uno::Any ExistingBookmark(const OUString& Name) override;
+    virtual void MailMergeOpenDataSource(
         const OUString& Name, const cpo::uno::Any& Format, const cpo::uno::Any& ConfirmConversions,
         const cpo::uno::Any& ReadOnly, const cpo::uno::Any& LinkToSource,
         const cpo::uno::Any& AddToRecentFiles, const cpo::uno::Any& PasswordDocument,
@@ -81,13 +81,13 @@ public:
         const cpo::uno::Any& Connection, const cpo::uno::Any& SQLStatement,
         const cpo::uno::Any& SQLStatement1, const cpo::uno::Any& OpenExclusive,
         const cpo::uno::Any& SubType) override;
-    virtual cpo::uno::Any SAL_CALL AppMaximize(const cpo::uno::Any& WindowName,
+    virtual cpo::uno::Any AppMaximize(const cpo::uno::Any& WindowName,
                                                const cpo::uno::Any& State) override;
-    virtual cpo::uno::Any SAL_CALL DocMaximize(const cpo::uno::Any& State) override;
-    virtual void SAL_CALL AppShow(const cpo::uno::Any& WindowName) override;
-    virtual cpo::uno::Any SAL_CALL AppCount() override;
-    virtual void SAL_CALL MsgBox(const OUString& sPrompt) override;
-    virtual void SAL_CALL ScreenUpdating(const cpo::uno::Any& On) override;
+    virtual cpo::uno::Any DocMaximize(const cpo::uno::Any& State) override;
+    virtual void AppShow(const cpo::uno::Any& WindowName) override;
+    virtual cpo::uno::Any AppCount() override;
+    virtual void MsgBox(const OUString& sPrompt) override;
+    virtual void ScreenUpdating(const cpo::uno::Any& On) override;
 };
 
 #endif // INCLUDED_SW_SOURCE_UI_VBA_VBAWORDBASIC_HXX

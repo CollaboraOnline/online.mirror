@@ -48,11 +48,11 @@ public:
     virtual ~SwVbaBookmark() override;
 
     // Methods
-    virtual OUString SAL_CALL getName() override;
-    virtual void SAL_CALL setName(const OUString&) override;
-    virtual void SAL_CALL Delete() override;
-    virtual void SAL_CALL Select() override;
-    virtual cpo::uno::Any SAL_CALL Range() override;
+    virtual OUString getName() override;
+    virtual void setName(const OUString&) override;
+    virtual void Delete() override;
+    virtual void Select() override;
+    virtual cpo::uno::Any Range() override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

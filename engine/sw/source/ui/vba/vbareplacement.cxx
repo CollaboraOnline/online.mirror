@@ -33,17 +33,17 @@ SwVbaReplacement::~SwVbaReplacement()
 {
 }
 
-OUString SAL_CALL SwVbaReplacement::getText()
+OUString SwVbaReplacement::getText()
 {
     return mxPropertyReplace->getReplaceString();
 }
 
-void SAL_CALL SwVbaReplacement::setText( const OUString& _text )
+void SwVbaReplacement::setText( const OUString& _text )
 {
     mxPropertyReplace->setReplaceString( _text );
 }
 
-void SAL_CALL SwVbaReplacement::ClearFormatting( )
+void SwVbaReplacement::ClearFormatting( )
 {
     cpo::uno::Sequence< beans::PropertyValue > aPropValues;
     mxPropertyReplace->setReplaceAttributes( aPropValues );

@@ -150,7 +150,7 @@ protected:
 public:
     SwVbaBorder( const uno::Reference< beans::XPropertySet > & xProps, const uno::Reference< cpo::uno::XComponentContext >& xContext, sal_Int32 lineType ) : SwVbaBorder_Base( uno::Reference< XHelperInterface >( xProps, uno::UNO_QUERY ), xContext ), m_xProps( xProps ), m_LineType( lineType ) {}
 
-    cpo::uno::Any SAL_CALL getLineStyle() override
+    cpo::uno::Any getLineStyle() override
     {
         sal_Int32 nLineStyle = word::WdLineStyle::wdLineStyleNone;
         table::BorderLine aBorderLine;
@@ -171,7 +171,7 @@ public:
         }
         return cpo::uno::Any( nLineStyle );
     }
-    void SAL_CALL setLineStyle( const cpo::uno::Any& _linestyle ) override
+    void setLineStyle( const cpo::uno::Any& _linestyle ) override
     {
         // Urk no choice but to silently ignore we don't support this attribute
         // #TODO would be nice to support the word line styles
@@ -250,11 +250,11 @@ public:
     {
     }
     // XIndexAccess
-    virtual ::sal_Int32 SAL_CALL getCount(  ) override
+    virtual ::sal_Int32 getCount(  ) override
     {
         return std::ssize( supportedIndexTable );
     }
-    virtual cpo::uno::Any SAL_CALL getByIndex( ::sal_Int32 Index ) override
+    virtual cpo::uno::Any getByIndex( ::sal_Int32 Index ) override
     {
 
         sal_Int32 nIndex = getTableIndex( Index );
@@ -265,11 +265,11 @@ public:
         }
         throw lang::IndexOutOfBoundsException();
     }
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override
+    virtual cpo::uno::Type getElementType(  ) override
     {
         return  cppu::UnoType<word::XBorder>::get();
     }
-    virtual bool SAL_CALL hasElements(  ) override
+    virtual bool hasElements(  ) override
     {
         return true;
     }
@@ -291,12 +291,12 @@ class RangeBorderEnumWrapper : public EnumerationHelper_BASE
     sal_Int32 m_nIndex;
 public:
     explicit RangeBorderEnumWrapper( uno::Reference< container::XIndexAccess > xIndexAccess ) : m_xIndexAccess(std::move( xIndexAccess )), m_nIndex( 0 ) {}
-    virtual bool SAL_CALL hasMoreElements(  ) override
+    virtual bool hasMoreElements(  ) override
     {
         return ( m_nIndex < m_xIndexAccess->getCount() );
     }
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         if ( m_nIndex < m_xIndexAccess->getCount() )
             return m_xIndexAccess->getByIndex( m_nIndex++ );
@@ -336,13 +336,13 @@ SwVbaBorders::getItemByIntIndex( const sal_Int32 nIndex )
     return createCollectionObject( m_xIndexAccess->getByIndex( nIndex ) );
 }
 
-bool SAL_CALL SwVbaBorders::getShadow()
+bool SwVbaBorders::getShadow()
 {
     // always return False for table border in MS Word
     return false;
 }
 
-void SAL_CALL SwVbaBorders::setShadow( bool /*_shadow*/ )
+void SwVbaBorders::setShadow( bool /*_shadow*/ )
 {
     // not support in Table border in Word
     // TODO:

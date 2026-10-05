@@ -46,8 +46,8 @@ public:
     virtual ~SwVbaRevision() override;
 
     // Methods
-    virtual void SAL_CALL Accept(  ) override;
-    virtual void SAL_CALL Reject(  ) override;
+    virtual void Accept(  ) override;
+    virtual void Reject(  ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

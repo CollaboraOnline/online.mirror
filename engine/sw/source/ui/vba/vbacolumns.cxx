@@ -44,12 +44,12 @@ public:
     {
         mxIndexAccess = mxTextTable->getColumns();
     }
-    virtual bool SAL_CALL hasMoreElements(  ) override
+    virtual bool hasMoreElements(  ) override
     {
         return ( mnIndex < mxIndexAccess->getCount() );
     }
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         if( mnIndex < mxIndexAccess->getCount() )
         {
@@ -79,12 +79,12 @@ uno::Reference< word::XColumn > SwVbaColumns::getColumnAtIndex( sal_Int32 index 
     return uno::Reference< word::XColumn >( new SwVbaColumn( this, mxContext, mxTextTable, index ) );
 }
 
-::sal_Int32 SAL_CALL SwVbaColumns::getWidth()
+::sal_Int32 SwVbaColumns::getWidth()
 {
     return getColumnAtIndex( mnStartColumnIndex )->getWidth();
 }
 
-void SAL_CALL SwVbaColumns::setWidth( ::sal_Int32 _width )
+void SwVbaColumns::setWidth( ::sal_Int32 _width )
 {
     for( sal_Int32 index = mnStartColumnIndex; index <= mnEndColumnIndex; index++ )
     {
@@ -92,17 +92,17 @@ void SAL_CALL SwVbaColumns::setWidth( ::sal_Int32 _width )
     }
 }
 
-void SAL_CALL SwVbaColumns::Select(  )
+void SwVbaColumns::Select(  )
 {
     SwVbaColumn::SelectColumn( getCurrentWordDoc(mxContext), mxTextTable, mnStartColumnIndex, mnEndColumnIndex );
 }
 
-::sal_Int32 SAL_CALL SwVbaColumns::getCount()
+::sal_Int32 SwVbaColumns::getCount()
 {
     return ( mnEndColumnIndex - mnStartColumnIndex + 1 );
 }
 
-cpo::uno::Any SAL_CALL SwVbaColumns::Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ )
+cpo::uno::Any SwVbaColumns::Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ )
 {
     sal_Int32 nIndex = 0;
     if( Index1 >>= nIndex )

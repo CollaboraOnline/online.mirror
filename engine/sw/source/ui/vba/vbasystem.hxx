@@ -50,9 +50,9 @@ public:
     virtual ~SwVbaSystem() override;
 
     // XSystem
-    virtual sal_Int32 SAL_CALL getCursor() override;
-    virtual void SAL_CALL setCursor( sal_Int32 _cursor ) override;
-    virtual cpo::uno::Any SAL_CALL PrivateProfileString( const OUString& rFilename, const OUString& rSection, const OUString& rKey ) override;
+    virtual sal_Int32 getCursor() override;
+    virtual void setCursor( sal_Int32 _cursor ) override;
+    virtual cpo::uno::Any PrivateProfileString( const OUString& rFilename, const OUString& rSection, const OUString& rKey ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

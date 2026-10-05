@@ -43,7 +43,7 @@ public:
     virtual bool        exportDocument() override;
 
 private:
-    virtual OUString SAL_CALL getImplementationName() override;
+    virtual OUString getImplementationName() override;
 
     virtual ::oox::ole::VbaProject* implCreateVbaProject() const override
     {

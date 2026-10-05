@@ -232,19 +232,19 @@ bool SwXParagraph::SelectPaM(SwPaM & rPaM)
     return true;
 }
 
-OUString SAL_CALL
+OUString
 SwXParagraph::getImplementationName()
 {
     return u"SwXParagraph"_ustr;
 }
 
-bool SAL_CALL
+bool
 SwXParagraph::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXParagraph::getSupportedServiceNames()
 {
     return {
@@ -279,7 +279,7 @@ SwXParagraph::attachToText(SwXText & rParent, SwTextNode & rTextNode)
     }
 }
 
-uno::Reference< beans::XPropertySetInfo > SAL_CALL
+uno::Reference< beans::XPropertySetInfo >
 SwXParagraph::getPropertySetInfo()
 {
     SolarMutexGuard g;
@@ -288,7 +288,7 @@ SwXParagraph::getPropertySetInfo()
     return xRef;
 }
 
-void SAL_CALL
+void
 SwXParagraph::setPropertyValue(const OUString& rPropertyName,
         const cpo::uno::Any& rValue)
 {
@@ -339,7 +339,7 @@ void SwXParagraph::SetPropertyValues_Impl(
     SwUnoCursorHelper::SetPropertyValues(aCursor, m_rPropSet, aValues);
 }
 
-void SAL_CALL SwXParagraph::setPropertyValues(
+void SwXParagraph::setPropertyValues(
     const cpo::uno::Sequence< OUString >& rPropertyNames,
     const cpo::uno::Sequence< cpo::uno::Any >& rValues )
 {
@@ -528,7 +528,7 @@ cpo::uno::Sequence< cpo::uno::Any > SwXParagraph::GetPropertyValues_Impl(
     return aValues;
 }
 
-cpo::uno::Sequence< cpo::uno::Any > SAL_CALL
+cpo::uno::Sequence< cpo::uno::Any >
 SwXParagraph::getPropertyValues(const cpo::uno::Sequence< OUString >& rPropertyNames)
 {
     SolarMutexGuard aGuard;
@@ -555,20 +555,20 @@ SwXParagraph::getPropertyValues(const cpo::uno::Sequence< OUString >& rPropertyN
     return aValues;
 }
 
-void SAL_CALL SwXParagraph::addPropertiesChangeListener(
+void SwXParagraph::addPropertiesChangeListener(
     const cpo::uno::Sequence< OUString >& /*aPropertyNames*/,
     const uno::Reference< beans::XPropertiesChangeListener >& /*xListener*/ )
 {
     OSL_FAIL("SwXParagraph::addPropertiesChangeListener(): not implemented");
 }
 
-void SAL_CALL SwXParagraph::removePropertiesChangeListener(
+void SwXParagraph::removePropertiesChangeListener(
     const uno::Reference< beans::XPropertiesChangeListener >& /*xListener*/ )
 {
     OSL_FAIL("SwXParagraph::removePropertiesChangeListener(): not implemented");
 }
 
-void SAL_CALL SwXParagraph::firePropertiesChangeEvent(
+void SwXParagraph::firePropertiesChangeEvent(
     const cpo::uno::Sequence< OUString >& /*aPropertyNames*/,
     const uno::Reference< beans::XPropertiesChangeListener >& /*xListener*/ )
 {
@@ -577,7 +577,7 @@ void SAL_CALL SwXParagraph::firePropertiesChangeEvent(
 
 /* disabled for #i46921# */
 
-cpo::uno::Sequence< beans::SetPropertyTolerantFailed > SAL_CALL
+cpo::uno::Sequence< beans::SetPropertyTolerantFailed >
 SwXParagraph::setPropertyValuesTolerant(
         const cpo::uno::Sequence< OUString >& rPropertyNames,
         const cpo::uno::Sequence< cpo::uno::Any >& rValues )
@@ -668,7 +668,7 @@ SwXParagraph::setPropertyValuesTolerant(
     return aFailed;
 }
 
-cpo::uno::Sequence< beans::GetPropertyTolerantResult > SAL_CALL
+cpo::uno::Sequence< beans::GetPropertyTolerantResult >
 SwXParagraph::getPropertyValuesTolerant(
         const cpo::uno::Sequence< OUString >& rPropertyNames )
 {
@@ -684,7 +684,7 @@ SwXParagraph::getPropertyValuesTolerant(
     return aRes;
 }
 
-cpo::uno::Sequence< beans::GetDirectPropertyTolerantResult > SAL_CALL
+cpo::uno::Sequence< beans::GetDirectPropertyTolerantResult >
 SwXParagraph::getDirectPropertyValuesTolerant(
         const cpo::uno::Sequence< OUString >& rPropertyNames )
 {
@@ -834,7 +834,7 @@ bool ::sw::GetDefaultTextContentValue(
     return true;
 }
 
-void SAL_CALL
+void
 SwXParagraph::addPropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/)
@@ -842,7 +842,7 @@ SwXParagraph::addPropertyChangeListener(
     OSL_FAIL("SwXParagraph::addPropertyChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXParagraph::removePropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/)
@@ -850,7 +850,7 @@ SwXParagraph::removePropertyChangeListener(
     OSL_FAIL("SwXParagraph::removePropertyChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXParagraph::addVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/)
@@ -858,7 +858,7 @@ SwXParagraph::addVetoableChangeListener(
     OSL_FAIL("SwXParagraph::addVetoableChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXParagraph::removeVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/)
@@ -971,7 +971,7 @@ static beans::PropertyState lcl_SwXParagraph_getPropertyState(
     return eRet;
 }
 
-beans::PropertyState SAL_CALL
+beans::PropertyState
 SwXParagraph::getPropertyState(const OUString& rPropertyName)
 {
     SolarMutexGuard aGuard;
@@ -993,7 +993,7 @@ SwXParagraph::getPropertyState(const OUString& rPropertyName)
     return eRet;
 }
 
-cpo::uno::Sequence< beans::PropertyState > SAL_CALL
+cpo::uno::Sequence< beans::PropertyState >
 SwXParagraph::getPropertyStates(
         const cpo::uno::Sequence< OUString >& PropertyNames)
 {
@@ -1034,7 +1034,7 @@ SwXParagraph::getPropertyStates(
     return aRet;
 }
 
-void SAL_CALL
+void
 SwXParagraph::setPropertyToDefault(const OUString& rPropertyName)
 {
     SolarMutexGuard aGuard;
@@ -1123,7 +1123,7 @@ SwXParagraph::setPropertyToDefault(const OUString& rPropertyName)
     }
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwXParagraph::getPropertyDefault(const OUString& rPropertyName)
 {
     SolarMutexGuard g;
@@ -1158,7 +1158,7 @@ SwXParagraph::getPropertyDefault(const OUString& rPropertyName)
     return aRet;
 }
 
-void SAL_CALL
+void
 SwXParagraph::attach(const uno::Reference< text::XTextRange > & /*xTextRange*/)
 {
     // SwXParagraph will only created in order to be inserted by
@@ -1167,7 +1167,7 @@ SwXParagraph::attach(const uno::Reference< text::XTextRange > & /*xTextRange*/)
     throw cpo::uno::RuntimeException();
 }
 
-uno::Reference< text::XTextRange > SAL_CALL
+uno::Reference< text::XTextRange >
 SwXParagraph::getAnchor()
 {
     SolarMutexGuard aGuard;
@@ -1183,7 +1183,7 @@ SwXParagraph::getAnchor()
     return xRet;
 }
 
-void SAL_CALL SwXParagraph::dispose()
+void SwXParagraph::dispose()
 {
     SolarMutexGuard aGuard;
 
@@ -1206,7 +1206,7 @@ void SAL_CALL SwXParagraph::dispose()
     }
 }
 
-void SAL_CALL SwXParagraph::addEventListener(
+void SwXParagraph::addEventListener(
         const uno::Reference< lang::XEventListener > & xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -1214,7 +1214,7 @@ void SAL_CALL SwXParagraph::addEventListener(
     m_EventListeners.addInterface(aGuard, xListener);
 }
 
-void SAL_CALL SwXParagraph::removeEventListener(
+void SwXParagraph::removeEventListener(
         const uno::Reference< lang::XEventListener > & xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -1222,7 +1222,7 @@ void SAL_CALL SwXParagraph::removeEventListener(
     m_EventListeners.removeInterface(aGuard, xListener);
 }
 
-uno::Reference< container::XEnumeration >  SAL_CALL
+uno::Reference< container::XEnumeration >
 SwXParagraph::createEnumeration()
 {
     SolarMutexGuard aGuard;
@@ -1249,18 +1249,18 @@ SwXParagraph::createTextFieldsEnumeration()
             m_nSelectionStartPos, m_nSelectionEndPos, /*bOnlyTextFields*/true);
 }
 
-cpo::uno::Type SAL_CALL SwXParagraph::getElementType()
+cpo::uno::Type SwXParagraph::getElementType()
 {
     return cppu::UnoType<text::XTextRange>::get();
 }
 
-bool SAL_CALL SwXParagraph::hasElements()
+bool SwXParagraph::hasElements()
 {
     SolarMutexGuard aGuard;
     return GetTextNode() != nullptr;
 }
 
-uno::Reference< text::XText > SAL_CALL
+uno::Reference< text::XText >
 SwXParagraph::getText()
 {
     SolarMutexGuard g;
@@ -1268,7 +1268,7 @@ SwXParagraph::getText()
     return m_xParentText;
 }
 
-uno::Reference< text::XTextRange > SAL_CALL
+uno::Reference< text::XTextRange >
 SwXParagraph::getStart()
 {
     SolarMutexGuard aGuard;
@@ -1285,7 +1285,7 @@ SwXParagraph::getStart()
     return xRet;
 }
 
-uno::Reference< text::XTextRange > SAL_CALL
+uno::Reference< text::XTextRange >
 SwXParagraph::getEnd()
 {
     SolarMutexGuard aGuard;
@@ -1302,7 +1302,7 @@ SwXParagraph::getEnd()
     return xRet;
 }
 
-OUString SAL_CALL SwXParagraph::getString()
+OUString SwXParagraph::getString()
 {
     SolarMutexGuard aGuard;
     OUString aRet;
@@ -1327,7 +1327,7 @@ OUString SAL_CALL SwXParagraph::getString()
     return aRet;
 }
 
-void SAL_CALL SwXParagraph::setString(const OUString& aString)
+void SwXParagraph::setString(const OUString& aString)
 {
     SolarMutexGuard aGuard;
 
@@ -1356,7 +1356,7 @@ void SAL_CALL SwXParagraph::setString(const OUString& aString)
     }
 }
 
-uno::Reference< container::XEnumeration > SAL_CALL
+uno::Reference< container::XEnumeration >
 SwXParagraph::createContentEnumeration(const OUString& rServiceName)
 {
     SolarMutexGuard g;
@@ -1374,7 +1374,7 @@ SwXParagraph::createContentEnumeration(const OUString& rServiceName)
     return xRet;
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXParagraph::getAvailableServiceNames()
 {
     cpo::uno::Sequence<OUString> aRet { u"com.sun.star.text.TextContent"_ustr };

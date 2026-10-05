@@ -39,18 +39,18 @@ public:
     virtual ~SwVbaTableOfContents() override;
 
     // Attributes
-    virtual ::sal_Int32 SAL_CALL getLowerHeadingLevel() override;
-    virtual void SAL_CALL setLowerHeadingLevel( ::sal_Int32 _lowerheadinglevel ) override;
-    virtual ::sal_Int32 SAL_CALL getTabLeader() override;
-    virtual void SAL_CALL setTabLeader( ::sal_Int32 _tableader ) override;
-    virtual bool SAL_CALL getUseFields() override;
-    virtual void SAL_CALL setUseFields( bool _useFields ) override;
-    virtual bool SAL_CALL getUseOutlineLevels() override;
-    virtual void SAL_CALL setUseOutlineLevels( bool _useOutlineLevels ) override;
+    virtual ::sal_Int32 getLowerHeadingLevel() override;
+    virtual void setLowerHeadingLevel( ::sal_Int32 _lowerheadinglevel ) override;
+    virtual ::sal_Int32 getTabLeader() override;
+    virtual void setTabLeader( ::sal_Int32 _tableader ) override;
+    virtual bool getUseFields() override;
+    virtual void setUseFields( bool _useFields ) override;
+    virtual bool getUseOutlineLevels() override;
+    virtual void setUseOutlineLevels( bool _useOutlineLevels ) override;
 
     // Methods
-    virtual void SAL_CALL Delete(  ) override;
-    virtual void SAL_CALL Update(  ) override;
+    virtual void Delete(  ) override;
+    virtual void Update(  ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

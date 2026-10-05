@@ -224,7 +224,7 @@ SwAccessibleCell::~SwAccessibleCell()
 {
 }
 
-OUString SAL_CALL SwAccessibleCell::getAccessibleDescription()
+OUString SwAccessibleCell::getAccessibleDescription()
 {
     return GetName();
 }
@@ -301,7 +301,7 @@ cpo::uno::Any SwAccessibleCell::getMinimumIncrement(  )
     return cpo::uno::Any();
 }
 
-OUString SAL_CALL SwAccessibleCell::getExtendedAttributes()
+OUString SwAccessibleCell::getExtendedAttributes()
 {
     SolarMutexGuard g;
 
@@ -319,7 +319,7 @@ OUString SAL_CALL SwAccessibleCell::getExtendedAttributes()
     return "Formula:" + strFormula + ";";
 }
 
-sal_Int32 SAL_CALL SwAccessibleCell::getBackground()
+sal_Int32 SwAccessibleCell::getBackground()
 {
     SolarMutexGuard g;
 

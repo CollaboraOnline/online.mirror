@@ -32,10 +32,10 @@ public:
         const cpo::uno::Reference<cpo::uno::XComponentContext>& xContext);
 
     // XMailMerge
-    virtual sal_Int32 SAL_CALL getMainDocumentType() override;
-    virtual void SAL_CALL setMainDocumentType(sal_Int32 _maindocumenttype) override;
+    virtual sal_Int32 getMainDocumentType() override;
+    virtual void setMainDocumentType(sal_Int32 _maindocumenttype) override;
 
-    virtual void SAL_CALL
+    virtual void
     OpenDataSource(const OUString& Name, const cpo::uno::Any& Format,
                    const cpo::uno::Any& ConfirmConversions, const cpo::uno::Any& ReadOnly,
                    const cpo::uno::Any& LinkToSource, const cpo::uno::Any& AddToRecentFiles,

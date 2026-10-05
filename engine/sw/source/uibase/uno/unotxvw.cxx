@@ -384,7 +384,7 @@ uno::Reference< awt::XControl >  SwXTextView::getControl(const uno::Reference< a
     return xRet;
 }
 
-uno::Reference< form::runtime::XFormController > SAL_CALL SwXTextView::getFormController( const uno::Reference< form::XForm >& Form )
+uno::Reference< form::runtime::XFormController > SwXTextView::getFormController( const uno::Reference< form::XForm >& Form )
 {
     SolarMutexGuard aGuard;
 
@@ -400,7 +400,7 @@ uno::Reference< form::runtime::XFormController > SAL_CALL SwXTextView::getFormCo
     return xController;
 }
 
-bool SAL_CALL SwXTextView::isFormDesignMode(  )
+bool SwXTextView::isFormDesignMode(  )
 {
     SolarMutexGuard aGuard;
     SwView* pView2 = GetView();
@@ -408,7 +408,7 @@ bool SAL_CALL SwXTextView::isFormDesignMode(  )
     return !pFormShell || pFormShell->IsDesignMode();
 }
 
-void SAL_CALL SwXTextView::setFormDesignMode( bool DesignMode )
+void SwXTextView::setFormDesignMode( bool DesignMode )
 {
     SolarMutexGuard aGuard;
     SwView* pView2 = GetView();
@@ -535,7 +535,7 @@ Sequence< Sequence< PropertyValue > > SwXTextView::getRubyList( bool /*bAutomati
     return aRet;
 }
 
-void SAL_CALL SwXTextView::setRubyList(
+void SwXTextView::setRubyList(
     const Sequence< Sequence< PropertyValue > >& rRubyList, bool /*bAutomatic*/ )
 {
     SolarMutexGuard aGuard;
@@ -674,14 +674,14 @@ void SwXTextView::NotifyDBChanged()
         });
 }
 
-uno::Reference< beans::XPropertySetInfo > SAL_CALL SwXTextView::getPropertySetInfo(  )
+uno::Reference< beans::XPropertySetInfo > SwXTextView::getPropertySetInfo(  )
 {
     SolarMutexGuard aGuard;
     static uno::Reference< XPropertySetInfo > aRef = m_pPropSet->getPropertySetInfo();
     return aRef;
 }
 
-void SAL_CALL SwXTextView::setPropertyValue(
+void SwXTextView::setPropertyValue(
         const OUString& rPropertyName, const cpo::uno::Any& rValue )
 {
     SolarMutexGuard aGuard;
@@ -729,7 +729,7 @@ void SAL_CALL SwXTextView::setPropertyValue(
     }
 }
 
-cpo::uno::Any SAL_CALL SwXTextView::getPropertyValue(
+cpo::uno::Any SwXTextView::getPropertyValue(
         const OUString& rPropertyName )
 {
     SolarMutexGuard aGuard;
@@ -783,28 +783,28 @@ cpo::uno::Any SAL_CALL SwXTextView::getPropertyValue(
     return aRet;
 }
 
-void SAL_CALL SwXTextView::addPropertyChangeListener(
+void SwXTextView::addPropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*rxListener*/ )
 {
     OSL_FAIL("not implemented");
 }
 
-void SAL_CALL SwXTextView::removePropertyChangeListener(
+void SwXTextView::removePropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*rxListener*/ )
 {
     OSL_FAIL("not implemented");
 }
 
-void SAL_CALL SwXTextView::addVetoableChangeListener(
+void SwXTextView::addVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*rxListener*/ )
 {
     OSL_FAIL("not implemented");
 }
 
-void SAL_CALL SwXTextView::removeVetoableChangeListener(
+void SwXTextView::removeVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*rxListener*/ )
 {
@@ -1649,7 +1649,7 @@ SwPaM*  SwXTextViewCursor::GetPaM()
     return rSh.GetCursor();
 }
 
-uno::Reference<datatransfer::XTransferable> SAL_CALL
+uno::Reference<datatransfer::XTransferable>
 SwXTextView::getTransferableForTextRange(uno::Reference<text::XTextRange> const& xTextRange)
 {
     SolarMutexGuard aGuard;
@@ -1672,7 +1672,7 @@ SwXTextView::getTransferableForTextRange(uno::Reference<text::XTextRange> const&
     return pTransfer;
 }
 
-OUString SAL_CALL SwXTextView::dump(const OUString& rKind)
+OUString SwXTextView::dump(const OUString& rKind)
 {
     if (rKind == "layout")
     {
@@ -1684,7 +1684,7 @@ OUString SAL_CALL SwXTextView::dump(const OUString& rKind)
     return OUString();
 }
 
-uno::Reference< datatransfer::XTransferable > SAL_CALL SwXTextView::getTransferable()
+uno::Reference< datatransfer::XTransferable > SwXTextView::getTransferable()
 {
     SolarMutexGuard aGuard;
 
@@ -1708,7 +1708,7 @@ uno::Reference< datatransfer::XTransferable > SAL_CALL SwXTextView::getTransfera
     }
 }
 
-void SAL_CALL SwXTextView::insertTransferable( const uno::Reference< datatransfer::XTransferable >& xTrans )
+void SwXTextView::insertTransferable( const uno::Reference< datatransfer::XTransferable >& xTrans )
 {
     SolarMutexGuard aGuard;
 

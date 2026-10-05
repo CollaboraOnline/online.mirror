@@ -37,7 +37,7 @@ public:
                                const SwFlyFrame* pFlyFrame);
 
     // XAccessibleExtendedAttributes
-    virtual OUString SAL_CALL getExtendedAttributes() override;
+    virtual OUString getExtendedAttributes() override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

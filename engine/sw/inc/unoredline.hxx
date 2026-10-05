@@ -42,12 +42,12 @@ class SwXRedlineText final :
 public:
     SwXRedlineText(SwDoc* pDoc, const SwNodeIndex& aNodeIndex);
 
-    virtual     cpo::uno::Any SAL_CALL queryInterface( const cpo::uno::Type& aType ) override;
-    virtual void SAL_CALL acquire(  ) noexcept override {OWeakObject::acquire();}
-    virtual void SAL_CALL release(  ) noexcept override {OWeakObject::release();}
+    virtual     cpo::uno::Any queryInterface( const cpo::uno::Type& aType ) override;
+    virtual void acquire(  ) noexcept override {OWeakObject::acquire();}
+    virtual void release(  ) noexcept override {OWeakObject::release();}
 
-    virtual cpo::uno::Sequence< cpo::uno::Type > SAL_CALL getTypes(  ) override;
-    virtual cpo::uno::Sequence< sal_Int8 > SAL_CALL getImplementationId(  ) override;
+    virtual cpo::uno::Sequence< cpo::uno::Type > getTypes(  ) override;
+    virtual cpo::uno::Sequence< sal_Int8 > getImplementationId(  ) override;
 
     //XText
     virtual rtl::Reference< SwXTextCursor > createXTextCursor() override;
@@ -55,11 +55,11 @@ public:
             const ::cpo::uno::Reference< ::css::text::XTextRange >& aTextPosition ) override;
 
     //XEnumerationAccess
-    virtual cpo::uno::Reference< css::container::XEnumeration >  SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration >  createEnumeration() override;
 
     //XElementAccess (via XEnumerationAccess)
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-    virtual bool SAL_CALL hasElements(  ) override;
+    virtual cpo::uno::Type getElementType(  ) override;
+    virtual bool hasElements(  ) override;
 };
 
 typedef cppu::WeakImplHelper<css::container::XEnumerationAccess> SwXRedlineBaseClass;
@@ -75,12 +75,12 @@ public:
     virtual ~SwXRedline() override;
 
 
-    virtual     cpo::uno::Any SAL_CALL queryInterface( const cpo::uno::Type& aType ) override;
-    virtual void SAL_CALL acquire(  ) noexcept override {OWeakObject::acquire();}
-    virtual void SAL_CALL release(  ) noexcept override {OWeakObject::release();}
+    virtual     cpo::uno::Any queryInterface( const cpo::uno::Type& aType ) override;
+    virtual void acquire(  ) noexcept override {OWeakObject::acquire();}
+    virtual void release(  ) noexcept override {OWeakObject::release();}
 
-    virtual cpo::uno::Sequence< cpo::uno::Type > SAL_CALL getTypes(  ) override;
-    virtual cpo::uno::Sequence< sal_Int8 > SAL_CALL getImplementationId(  ) override;
+    virtual cpo::uno::Sequence< cpo::uno::Type > getTypes(  ) override;
+    virtual cpo::uno::Sequence< sal_Int8 > getImplementationId(  ) override;
 
     //XText
     virtual rtl::Reference< SwXTextCursor > createXTextCursor() override;
@@ -88,20 +88,20 @@ public:
             const ::cpo::uno::Reference< ::css::text::XTextRange >& aTextPosition ) override;
 
     //XPropertySet
-    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > SAL_CALL getPropertySetInfo(  ) override;
-    virtual void SAL_CALL setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue ) override;
-    virtual cpo::uno::Any SAL_CALL getPropertyValue( const OUString& PropertyName ) override;
-    virtual void SAL_CALL addPropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener ) override;
-    virtual void SAL_CALL removePropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& aListener ) override;
-    virtual void SAL_CALL addVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
-    virtual void SAL_CALL removeVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
+    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > getPropertySetInfo(  ) override;
+    virtual void setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue ) override;
+    virtual cpo::uno::Any getPropertyValue( const OUString& PropertyName ) override;
+    virtual void addPropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener ) override;
+    virtual void removePropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& aListener ) override;
+    virtual void addVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
+    virtual void removeVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
 
     //XEnumerationAccess
-    virtual cpo::uno::Reference< css::container::XEnumeration >  SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration >  createEnumeration() override;
 
     //XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-    virtual bool SAL_CALL hasElements(  ) override;
+    virtual cpo::uno::Type getElementType(  ) override;
+    virtual bool hasElements(  ) override;
 
     const SwRangeRedline*    GetRedline() const {return m_pRedline;}
     virtual void Notify( const SfxHint& ) override;

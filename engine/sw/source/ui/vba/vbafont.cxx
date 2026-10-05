@@ -117,7 +117,7 @@ SwVbaFont::SwVbaFont( const uno::Reference< XHelperInterface >& xParent, const u
 {
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaFont::getUnderline()
 {
     sal_Int32 nOOVal = 0;
@@ -125,7 +125,7 @@ SwVbaFont::getUnderline()
     return cpo::uno::Any( UnderLineMapper::instance().getMSOFromOOO( nOOVal ) );
 }
 
-void SAL_CALL
+void
 SwVbaFont::setUnderline( const cpo::uno::Any& _underline )
 {
     sal_Int32 nMSOVal = 0;
@@ -143,7 +143,7 @@ SwVbaFont::getServiceImplName()
     return u"SwVbaFont"_ustr;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaFont::getColorIndex()
 {
     sal_Int32 nColor = 0;
@@ -163,7 +163,7 @@ SwVbaFont::getColorIndex()
     }
     return cpo::uno::Any( nIndex );
 }
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaFont::getSubscript()
 {
     bool bRes = false;
@@ -173,7 +173,7 @@ SwVbaFont::getSubscript()
     return aLongAnyFalse;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaFont::getSuperscript()
 {
     bool bRes = false;
@@ -183,7 +183,7 @@ SwVbaFont::getSuperscript()
     return aLongAnyFalse;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaFont::getBold()
 {
     bool bRes = false;
@@ -193,7 +193,7 @@ SwVbaFont::getBold()
     return aLongAnyFalse;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaFont::getItalic()
 {
     bool bRes = false;
@@ -203,7 +203,7 @@ SwVbaFont::getItalic()
     return aLongAnyFalse;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaFont::getStrikethrough()
 {
     bool bRes = false;
@@ -213,7 +213,7 @@ SwVbaFont::getStrikethrough()
     return aLongAnyFalse;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaFont::getShadow()
 {
     bool bRes = false;

@@ -47,7 +47,7 @@ public:
         : EnumerationHelperImpl( xParent, xContext, xEnumeration ),
         mxModel(std::move( xModel )) {}
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         uno::Reference< container::XNamed > xNamed( m_xEnumeration->nextElement(), uno::UNO_QUERY_THROW );
         return cpo::uno::Any(uno::Reference<word::XBookmark>(new SwVbaBookmark(m_xParent, m_xContext, mxModel, xNamed->getName())));
@@ -70,20 +70,20 @@ public:
         mxNameAccess.set( mxIndexAccess, uno::UNO_QUERY_THROW );
     }
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override { return  mxIndexAccess->getElementType(); }
-    virtual bool SAL_CALL hasElements(  ) override { return mxIndexAccess->hasElements(); }
+    virtual cpo::uno::Type getElementType(  ) override { return  mxIndexAccess->getElementType(); }
+    virtual bool hasElements(  ) override { return mxIndexAccess->hasElements(); }
     // XNameAccess
-    virtual cpo::uno::Any SAL_CALL getByName( const OUString& aName ) override
+    virtual cpo::uno::Any getByName( const OUString& aName ) override
     {
         if ( !hasByName(aName) )
             throw container::NoSuchElementException();
         return m_cachePos;
     }
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames(  ) override
+    virtual cpo::uno::Sequence< OUString > getElementNames(  ) override
     {
         return mxNameAccess->getElementNames();
     }
-    virtual bool SAL_CALL hasByName( const OUString& aName ) override
+    virtual bool hasByName( const OUString& aName ) override
     {
         if( mxNameAccess->hasByName( aName ) )
         {
@@ -106,11 +106,11 @@ public:
         return false;
     }
     // XIndexAccess
-    virtual ::sal_Int32 SAL_CALL getCount(  ) override
+    virtual ::sal_Int32 getCount(  ) override
     {
         return mxIndexAccess->getCount();
     }
-    virtual cpo::uno::Any SAL_CALL getByIndex( ::sal_Int32 Index ) override
+    virtual cpo::uno::Any getByIndex( ::sal_Int32 Index ) override
     {
         return mxIndexAccess->getByIndex( Index );
     }
@@ -160,7 +160,7 @@ void SwVbaBookmarks::addBookmarkByName( const rtl::Reference< SwXTextDocument >&
     rTextRange->getText()->insertTextContent( rTextRange, xBookmark, false );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaBookmarks::Add( const OUString& rName, const cpo::uno::Any& rRange )
 {
     uno::Reference< text::XTextRange > xTextRange;
@@ -186,31 +186,31 @@ SwVbaBookmarks::Add( const OUString& rName, const cpo::uno::Any& rRange )
     return cpo::uno::Any( uno::Reference< word::XBookmark >( new SwVbaBookmark( getParent(), mxContext, mxModel, rName ) ) );
 }
 
-sal_Int32 SAL_CALL
+sal_Int32
 SwVbaBookmarks::getDefaultSorting()
 {
     return word::WdBookmarkSortBy::wdSortByName;
 }
 
-void SAL_CALL
+void
 SwVbaBookmarks::setDefaultSorting( sal_Int32/* _type*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL
+bool
 SwVbaBookmarks::getShowHidden()
 {
     return true;
 }
 
-void SAL_CALL
+void
 SwVbaBookmarks::setShowHidden( bool /*_hidden*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL
+bool
 SwVbaBookmarks::Exists( const OUString& rName )
 {
     bool bExist = m_xNameAccess->hasByName( rName );

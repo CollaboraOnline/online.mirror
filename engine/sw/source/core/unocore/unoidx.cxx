@@ -181,22 +181,22 @@ public:
     explicit StyleAccess_Impl(SwXDocumentIndex& rParentIdx);
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL
+    virtual OUString getImplementationName() override;
+    virtual bool
         supportsService(const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getSupportedServiceNames() override;
 
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual bool SAL_CALL hasElements() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual bool hasElements() override;
 
     // XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount() override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     // XIndexReplace
-    virtual void SAL_CALL
+    virtual void
         replaceByIndex(sal_Int32 Index, const cpo::uno::Any& rElement) override;
 
 };
@@ -221,22 +221,22 @@ public:
     explicit TokenAccess_Impl(SwXDocumentIndex& rParentIdx);
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL
+    virtual OUString getImplementationName() override;
+    virtual bool
         supportsService(const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getSupportedServiceNames() override;
 
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual bool SAL_CALL hasElements() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual bool hasElements() override;
 
     // XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount() override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     // XIndexReplace
-    virtual void SAL_CALL
+    virtual void
         replaceByIndex(sal_Int32 Index, const cpo::uno::Any& rElement) override;
 
 };
@@ -424,19 +424,19 @@ SwXDocumentIndex::CreateXDocumentIndex(
     return xIndex;
 }
 
-OUString SAL_CALL
+OUString
 SwXDocumentIndex::getImplementationName()
 {
     return u"SwXDocumentIndex"_ustr;
 }
 
-bool SAL_CALL
+bool
 SwXDocumentIndex::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXDocumentIndex::getSupportedServiceNames()
 {
     SolarMutexGuard g;
@@ -471,7 +471,7 @@ SwXDocumentIndex::getSupportedServiceNames()
     return aRet;
 }
 
-OUString SAL_CALL SwXDocumentIndex::getServiceName()
+OUString SwXDocumentIndex::getServiceName()
 {
     SolarMutexGuard g;
 
@@ -496,12 +496,12 @@ OUString SAL_CALL SwXDocumentIndex::getServiceName()
     return SwXServiceProvider::GetProviderName(nObjectType);
 }
 
-void SAL_CALL SwXDocumentIndex::update()
+void SwXDocumentIndex::update()
 {
     return refresh(); // update is from deprecated XDocumentIndex
 }
 
-uno::Reference< beans::XPropertySetInfo > SAL_CALL
+uno::Reference< beans::XPropertySetInfo >
 SwXDocumentIndex::getPropertySetInfo()
 {
     SolarMutexGuard g;
@@ -511,7 +511,7 @@ SwXDocumentIndex::getPropertySetInfo()
     return xRef;
 }
 
-void SAL_CALL
+void
 SwXDocumentIndex::setPropertyValue(
         const OUString& rPropertyName, const cpo::uno::Any& rValue)
 {
@@ -861,7 +861,7 @@ SwXDocumentIndex::setPropertyValue(
     }
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwXDocumentIndex::getPropertyValue(const OUString& rPropertyName)
 {
     SolarMutexGuard aGuard;
@@ -1207,7 +1207,7 @@ SwXDocumentIndex::getPropertyValue(const OUString& rPropertyName)
     return aRet;
 }
 
-void SAL_CALL
+void
 SwXDocumentIndex::addPropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/)
@@ -1215,7 +1215,7 @@ SwXDocumentIndex::addPropertyChangeListener(
     OSL_FAIL("SwXDocumentIndex::addPropertyChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXDocumentIndex::removePropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/)
@@ -1223,7 +1223,7 @@ SwXDocumentIndex::removePropertyChangeListener(
     OSL_FAIL("SwXDocumentIndex::removePropertyChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXDocumentIndex::addVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/)
@@ -1231,7 +1231,7 @@ SwXDocumentIndex::addVetoableChangeListener(
     OSL_FAIL("SwXDocumentIndex::addVetoableChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXDocumentIndex::removeVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/)
@@ -1260,7 +1260,7 @@ static void lcl_CalcLayout(SwDoc *pDoc)
 }
 
 // XRefreshable
-void SAL_CALL SwXDocumentIndex::refresh()
+void SwXDocumentIndex::refresh()
 {
     {
         SolarMutexGuard g;
@@ -1291,7 +1291,7 @@ void SAL_CALL SwXDocumentIndex::refresh()
     }
 }
 
-void SAL_CALL SwXDocumentIndex::addRefreshListener(
+void SwXDocumentIndex::addRefreshListener(
         const uno::Reference<util::XRefreshListener>& xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -1299,7 +1299,7 @@ void SAL_CALL SwXDocumentIndex::addRefreshListener(
     m_pImpl->m_RefreshListeners.addInterface(g, xListener);
 }
 
-void SAL_CALL SwXDocumentIndex::removeRefreshListener(
+void SwXDocumentIndex::removeRefreshListener(
         const uno::Reference<util::XRefreshListener>& xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -1307,7 +1307,7 @@ void SAL_CALL SwXDocumentIndex::removeRefreshListener(
     m_pImpl->m_RefreshListeners.removeInterface(g, xListener);
 }
 
-void SAL_CALL
+void
 SwXDocumentIndex::attach(const uno::Reference< text::XTextRange > & xTextRange)
 {
     SolarMutexGuard aGuard;
@@ -1366,7 +1366,7 @@ SwXDocumentIndex::attach(const uno::Reference< text::XTextRange > & xTextRange)
     m_pImpl->m_bIsDescriptor = false;
 }
 
-uno::Reference< text::XTextRange > SAL_CALL
+uno::Reference< text::XTextRange >
 SwXDocumentIndex::getAnchor()
 {
     SolarMutexGuard aGuard;
@@ -1392,7 +1392,7 @@ SwXDocumentIndex::getAnchor()
     return xRet;
 }
 
-void SAL_CALL SwXDocumentIndex::dispose()
+void SwXDocumentIndex::dispose()
 {
     SolarMutexGuard aGuard;
 
@@ -1405,7 +1405,7 @@ void SAL_CALL SwXDocumentIndex::dispose()
     }
 }
 
-void SAL_CALL
+void
 SwXDocumentIndex::addEventListener(
         const uno::Reference< lang::XEventListener > & xListener)
 {
@@ -1414,7 +1414,7 @@ SwXDocumentIndex::addEventListener(
     m_pImpl->m_EventListeners.addInterface(g, xListener);
 }
 
-void SAL_CALL
+void
 SwXDocumentIndex::removeEventListener(
         const uno::Reference< lang::XEventListener > & xListener)
 {
@@ -1423,7 +1423,7 @@ SwXDocumentIndex::removeEventListener(
     m_pImpl->m_EventListeners.removeInterface(g, xListener);
 }
 
-OUString SAL_CALL SwXDocumentIndex::getName()
+OUString SwXDocumentIndex::getName()
 {
     SolarMutexGuard g;
 
@@ -1441,7 +1441,7 @@ OUString SAL_CALL SwXDocumentIndex::getName()
     return pSectionFormat->GetSection()->GetSectionName().toString();
 }
 
-void SAL_CALL
+void
 SwXDocumentIndex::setName(const OUString& rName)
 {
     SolarMutexGuard g;
@@ -1672,18 +1672,18 @@ namespace
 {
 }
 
-OUString SAL_CALL
+OUString
 SwXDocumentIndexMark::getImplementationName()
 {
     return u"SwXDocumentIndexMark"_ustr;
 }
 
-bool SAL_CALL SwXDocumentIndexMark::supportsService(const OUString& rServiceName)
+bool SwXDocumentIndexMark::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXDocumentIndexMark::getSupportedServiceNames()
 {
     SolarMutexGuard g;
@@ -1712,7 +1712,7 @@ SwXDocumentIndexMark::getSupportedServiceNames()
     return aRet;
 }
 
-OUString SAL_CALL
+OUString
 SwXDocumentIndexMark::getMarkEntry()
 {
     SolarMutexGuard aGuard;
@@ -1731,7 +1731,7 @@ SwXDocumentIndexMark::getMarkEntry()
     return m_pImpl->m_sAltText;
 }
 
-void SAL_CALL
+void
 SwXDocumentIndexMark::setMarkEntry(const OUString& rIndexEntry)
 {
     SolarMutexGuard aGuard;
@@ -1764,7 +1764,7 @@ SwXDocumentIndexMark::setMarkEntry(const OUString& rIndexEntry)
     }
 }
 
-void SAL_CALL
+void
 SwXDocumentIndexMark::attach(
         const uno::Reference< text::XTextRange > & xTextRange)
 {
@@ -1951,7 +1951,7 @@ void SwXDocumentIndexMark::Impl::InsertTOXMark(
     StartListening(const_cast<SwTOXType*>(m_pTOXType)->GetNotifier());
 }
 
-uno::Reference< text::XTextRange > SAL_CALL
+uno::Reference< text::XTextRange >
 SwXDocumentIndexMark::getAnchor()
 {
     SolarMutexGuard aGuard;
@@ -1984,7 +1984,7 @@ SwXDocumentIndexMark::getAnchor()
     return new SwXTextRange(aPam, xModel->getText());
 }
 
-void SAL_CALL
+void
 SwXDocumentIndexMark::dispose()
 {
     SolarMutexGuard aGuard;
@@ -1996,7 +1996,7 @@ SwXDocumentIndexMark::dispose()
     }
 }
 
-void SAL_CALL
+void
 SwXDocumentIndexMark::addEventListener(
         const uno::Reference< lang::XEventListener > & xListener)
 {
@@ -2005,7 +2005,7 @@ SwXDocumentIndexMark::addEventListener(
     m_pImpl->m_EventListeners.addInterface(aGuard, xListener);
 }
 
-void SAL_CALL
+void
 SwXDocumentIndexMark::removeEventListener(
         const uno::Reference< lang::XEventListener > & xListener)
 {
@@ -2014,7 +2014,7 @@ SwXDocumentIndexMark::removeEventListener(
     m_pImpl->m_EventListeners.removeInterface(aGuard, xListener);
 }
 
-uno::Reference< beans::XPropertySetInfo > SAL_CALL
+uno::Reference< beans::XPropertySetInfo >
 SwXDocumentIndexMark::getPropertySetInfo()
 {
     SolarMutexGuard g;
@@ -2043,7 +2043,7 @@ SwXDocumentIndexMark::getPropertySetInfo()
     return xInfos[nPos];
 }
 
-void SAL_CALL
+void
 SwXDocumentIndexMark::setPropertyValue(
         const OUString& rPropertyName, const cpo::uno::Any& rValue)
 {
@@ -2172,7 +2172,7 @@ SwXDocumentIndexMark::setPropertyValue(
     }
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwXDocumentIndexMark::getPropertyValue(const OUString& rPropertyName)
 {
     SolarMutexGuard aGuard;
@@ -2279,7 +2279,7 @@ SwXDocumentIndexMark::getPropertyValue(const OUString& rPropertyName)
     return aRet;
 }
 
-void SAL_CALL
+void
 SwXDocumentIndexMark::addPropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/)
@@ -2287,7 +2287,7 @@ SwXDocumentIndexMark::addPropertyChangeListener(
     OSL_FAIL("SwXDocumentIndexMark::addPropertyChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXDocumentIndexMark::removePropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/)
@@ -2295,7 +2295,7 @@ SwXDocumentIndexMark::removePropertyChangeListener(
     OSL_FAIL("SwXDocumentIndexMark::removePropertyChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXDocumentIndexMark::addVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/)
@@ -2303,7 +2303,7 @@ SwXDocumentIndexMark::addVetoableChangeListener(
     OSL_FAIL("SwXDocumentIndexMark::addVetoableChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXDocumentIndexMark::removeVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/)
@@ -2320,24 +2320,24 @@ SwXDocumentIndexes::~SwXDocumentIndexes()
 {
 }
 
-OUString SAL_CALL
+OUString
 SwXDocumentIndexes::getImplementationName()
 {
     return u"SwXDocumentIndexes"_ustr;
 }
 
-bool SAL_CALL SwXDocumentIndexes::supportsService(const OUString& rServiceName)
+bool SwXDocumentIndexes::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXDocumentIndexes::getSupportedServiceNames()
 {
     return { u"com.sun.star.text.DocumentIndexes"_ustr };
 }
 
-sal_Int32 SAL_CALL
+sal_Int32
 SwXDocumentIndexes::getCount()
 {
     SolarMutexGuard aGuard;
@@ -2356,7 +2356,7 @@ SwXDocumentIndexes::getCount()
     return nRet;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwXDocumentIndexes::getByIndex(sal_Int32 nIndex)
 {
     rtl::Reference< SwXDocumentIndex > xTmp = getDocumentIndexByIndex(nIndex);
@@ -2389,7 +2389,7 @@ SwXDocumentIndexes::getDocumentIndexByIndex(sal_Int32 nIndex)
     throw lang::IndexOutOfBoundsException();
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwXDocumentIndexes::getByName(const OUString& rName)
 {
     SolarMutexGuard aGuard;
@@ -2413,7 +2413,7 @@ SwXDocumentIndexes::getByName(const OUString& rName)
     throw container::NoSuchElementException();
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXDocumentIndexes::getElementNames()
 {
     SolarMutexGuard aGuard;
@@ -2445,7 +2445,7 @@ SwXDocumentIndexes::getElementNames()
     return aRet;
 }
 
-bool SAL_CALL
+bool
 SwXDocumentIndexes::hasByName(const OUString& rName)
 {
     SolarMutexGuard aGuard;
@@ -2467,13 +2467,13 @@ SwXDocumentIndexes::hasByName(const OUString& rName)
     return false;
 }
 
-cpo::uno::Type SAL_CALL
+cpo::uno::Type
 SwXDocumentIndexes::getElementType()
 {
     return cppu::UnoType<text::XDocumentIndex>::get();
 }
 
-bool SAL_CALL
+bool
 SwXDocumentIndexes::hasElements()
 {
     return 0 != getCount();
@@ -2489,25 +2489,25 @@ SwXDocumentIndex::StyleAccess_Impl::~StyleAccess_Impl()
 {
 }
 
-OUString SAL_CALL
+OUString
 SwXDocumentIndex::StyleAccess_Impl::getImplementationName()
 {
     return u"SwXDocumentIndex::StyleAccess_Impl"_ustr;
 }
 
-bool SAL_CALL
+bool
 SwXDocumentIndex::StyleAccess_Impl::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXDocumentIndex::StyleAccess_Impl::getSupportedServiceNames()
 {
     return { u"com.sun.star.text.DocumentIndexParagraphStyles"_ustr };
 }
 
-void SAL_CALL
+void
 SwXDocumentIndex::StyleAccess_Impl::replaceByIndex(
         sal_Int32 nIndex, const cpo::uno::Any& rElement)
 {
@@ -2543,13 +2543,13 @@ SwXDocumentIndex::StyleAccess_Impl::replaceByIndex(
     rTOXBase.SetStyleNames(UIName(sSetStyles.makeStringAndClear()), o3tl::narrowing<sal_uInt16>(nIndex));
 }
 
-sal_Int32 SAL_CALL
+sal_Int32
 SwXDocumentIndex::StyleAccess_Impl::getCount()
 {
     return MAXLEVEL;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwXDocumentIndex::StyleAccess_Impl::getByIndex(sal_Int32 nIndex)
 {
     SolarMutexGuard aGuard;
@@ -2580,13 +2580,13 @@ SwXDocumentIndex::StyleAccess_Impl::getByIndex(sal_Int32 nIndex)
     return aRet;
 }
 
-cpo::uno::Type SAL_CALL
+cpo::uno::Type
 SwXDocumentIndex::StyleAccess_Impl::getElementType()
 {
     return cppu::UnoType<cpo::uno::Sequence<OUString>>::get();
 }
 
-bool SAL_CALL
+bool
 SwXDocumentIndex::StyleAccess_Impl::hasElements()
 {
     return true;
@@ -2602,19 +2602,19 @@ SwXDocumentIndex::TokenAccess_Impl::~TokenAccess_Impl()
 {
 }
 
-OUString SAL_CALL
+OUString
 SwXDocumentIndex::TokenAccess_Impl::getImplementationName()
 {
     return u"SwXDocumentIndex::TokenAccess_Impl"_ustr;
 }
 
-bool SAL_CALL SwXDocumentIndex::TokenAccess_Impl::supportsService(
+bool SwXDocumentIndex::TokenAccess_Impl::supportsService(
         const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXDocumentIndex::TokenAccess_Impl::getSupportedServiceNames()
 {
     return { u"com.sun.star.text.DocumentIndexLevelFormat"_ustr };
@@ -2643,7 +2643,7 @@ const struct TokenType_ g_TokenTypes[] =
     { nullptr, static_cast<enum FormTokenType>(0) }
 };
 
-void SAL_CALL
+void
 SwXDocumentIndex::TokenAccess_Impl::replaceByIndex(
         sal_Int32 nIndex, const cpo::uno::Any& rElement)
 {
@@ -2825,7 +2825,7 @@ SwXDocumentIndex::TokenAccess_Impl::replaceByIndex(
     rTOXBase.SetTOXForm(aForm);
 }
 
-sal_Int32 SAL_CALL
+sal_Int32
 SwXDocumentIndex::TokenAccess_Impl::getCount()
 {
     SolarMutexGuard aGuard;
@@ -2834,7 +2834,7 @@ SwXDocumentIndex::TokenAccess_Impl::getCount()
     return nRet;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwXDocumentIndex::TokenAccess_Impl::getByIndex(sal_Int32 nIndex)
 {
     SolarMutexGuard aGuard;
@@ -3078,13 +3078,13 @@ SwXDocumentIndex::TokenAccess_Impl::getByIndex(sal_Int32 nIndex)
     return aRet;
 }
 
-cpo::uno::Type SAL_CALL
+cpo::uno::Type
 SwXDocumentIndex::TokenAccess_Impl::getElementType()
 {
     return cppu::UnoType<cpo::uno::Sequence< beans::PropertyValues >>::get();
 }
 
-bool SAL_CALL
+bool
 SwXDocumentIndex::TokenAccess_Impl::hasElements()
 {
     return true;

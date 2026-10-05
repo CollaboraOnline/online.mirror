@@ -39,7 +39,7 @@ public:
     virtual ~SwVbaAutoTextEntry() override;
 
     // XAutoTextEntry
-    virtual cpo::uno::Reference< ooo::vba::word::XRange > SAL_CALL Insert( const cpo::uno::Reference< ooo::vba::word::XRange >& _where, const cpo::uno::Any& _richtext ) override;
+    virtual cpo::uno::Reference< ooo::vba::word::XRange > Insert( const cpo::uno::Reference< ooo::vba::word::XRange >& _where, const cpo::uno::Any& _richtext ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;
@@ -55,8 +55,8 @@ public:
     SwVbaAutoTextEntries( const cpo::uno::Reference< ov::XHelperInterface >& xParent, const cpo::uno::Reference< cpo::uno::XComponentContext > & xContext, const cpo::uno::Reference< css::container::XIndexAccess >& xIndexAccess );
 
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     // SwVbaAutoTextEntries_BASE
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;

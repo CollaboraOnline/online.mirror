@@ -42,12 +42,12 @@ class SectionEnumeration : public ::cppu::WeakImplHelper< container::XEnumeratio
 
 public:
     explicit SectionEnumeration( XSectionVec&& rVec ) : mxSections( std::move(rVec) ), mIt( mxSections.begin() ) {}
-    virtual bool SAL_CALL hasMoreElements(  ) override
+    virtual bool hasMoreElements(  ) override
     {
         return ( mIt != mxSections.end() );
     }
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         if ( hasMoreElements() )
             return cpo::uno::Any( *mIt++ );
@@ -105,11 +105,11 @@ public:
     }
 
     // XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount(  ) override
+    virtual sal_Int32 getCount(  ) override
     {
         return mxSections.size();
     }
-    virtual cpo::uno::Any SAL_CALL getByIndex( sal_Int32 Index ) override
+    virtual cpo::uno::Any getByIndex( sal_Int32 Index ) override
     {
         if ( Index < 0 || Index >= getCount() )
             throw css::lang::IndexOutOfBoundsException();
@@ -117,16 +117,16 @@ public:
         uno::Reference< beans::XPropertySet > xPageProps( mxSections[ Index ], uno::UNO_SET_THROW );
         return cpo::uno::Any( uno::Reference< word::XSection >( new SwVbaSection( mxParent,  mxContext, mxModel, xPageProps ) ) );
     }
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override
+    virtual cpo::uno::Type getElementType(  ) override
     {
         return cppu::UnoType<word::XSection>::get();
     }
-    virtual bool SAL_CALL hasElements(  ) override
+    virtual bool hasElements(  ) override
     {
         return true;
     }
     // XEnumerationAccess
-    virtual uno::Reference< container::XEnumeration > SAL_CALL createEnumeration(  ) override
+    virtual uno::Reference< container::XEnumeration > createEnumeration(  ) override
     {
         return new SectionEnumeration( std::vector(mxSections) );
     }
@@ -144,7 +144,7 @@ public:
     : EnumerationHelperImpl( xParent, xContext, xEnumeration ),
       mxModel(std::move( xModel )){}
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         uno::Reference< beans::XPropertySet > xPageProps( m_xEnumeration->nextElement(), uno::UNO_QUERY_THROW );
         return cpo::uno::Any( uno::Reference< word::XSection > ( new SwVbaSection( m_xParent, m_xContext, mxModel, xPageProps ) ) );
@@ -170,7 +170,7 @@ SwVbaSections::SwVbaSections( const uno::Reference< XHelperInterface >& xParent,
 {
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaSections::PageSetup( )
 {
     if( m_xIndexAccess->getCount() )
@@ -183,13 +183,13 @@ SwVbaSections::PageSetup( )
 }
 
 // XEnumerationAccess
-cpo::uno::Type SAL_CALL
+cpo::uno::Type
 SwVbaSections::getElementType()
 {
     return cppu::UnoType<word::XSection>::get();
 }
 
-uno::Reference< container::XEnumeration > SAL_CALL
+uno::Reference< container::XEnumeration >
 SwVbaSections::createEnumeration()
 {
     uno::Reference< container::XEnumerationAccess > xEnumAccess( m_xIndexAccess, uno::UNO_QUERY_THROW );

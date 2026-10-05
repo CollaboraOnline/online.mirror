@@ -643,7 +643,7 @@ void SwAccessibleTable::ClearTableData()
     mpTableData.reset();
 }
 
-OUString SAL_CALL SwAccessibleTable::getAccessibleDescription()
+OUString SwAccessibleTable::getAccessibleDescription()
 {
     SolarMutexGuard aGuard;
 
@@ -652,7 +652,7 @@ OUString SAL_CALL SwAccessibleTable::getAccessibleDescription()
     return m_sDesc;
 }
 
-sal_Int32 SAL_CALL SwAccessibleTable::getAccessibleRowCount()
+sal_Int32 SwAccessibleTable::getAccessibleRowCount()
 {
     SolarMutexGuard aGuard;
 
@@ -661,7 +661,7 @@ sal_Int32 SAL_CALL SwAccessibleTable::getAccessibleRowCount()
     return  GetTableData().GetRowCount();
 }
 
-sal_Int32 SAL_CALL SwAccessibleTable::getAccessibleColumnCount(  )
+sal_Int32 SwAccessibleTable::getAccessibleColumnCount(  )
 {
     SolarMutexGuard aGuard;
 
@@ -670,7 +670,7 @@ sal_Int32 SAL_CALL SwAccessibleTable::getAccessibleColumnCount(  )
     return GetTableData().GetColumnCount();
 }
 
-OUString SAL_CALL SwAccessibleTable::getAccessibleRowDescription(
+OUString SwAccessibleTable::getAccessibleRowDescription(
             sal_Int32 nRow )
 {
     // #i87532# - determine table cell in <nRow>th row and
@@ -703,7 +703,7 @@ OUString SAL_CALL SwAccessibleTable::getAccessibleRowDescription(
     return sRowDesc.makeStringAndClear();
 }
 
-OUString SAL_CALL SwAccessibleTable::getAccessibleColumnDescription(
+OUString SwAccessibleTable::getAccessibleColumnDescription(
             sal_Int32 nColumn )
 {
     // #i87532# - determine table cell in first row and
@@ -736,7 +736,7 @@ OUString SAL_CALL SwAccessibleTable::getAccessibleColumnDescription(
     return sColumnDesc.makeStringAndClear();
 }
 
-sal_Int32 SAL_CALL SwAccessibleTable::getAccessibleRowExtentAt(
+sal_Int32 SwAccessibleTable::getAccessibleRowExtentAt(
             sal_Int32 nRow, sal_Int32 nColumn )
 {
     sal_Int32 nExtend = -1;
@@ -766,7 +766,7 @@ sal_Int32 SAL_CALL SwAccessibleTable::getAccessibleRowExtentAt(
     return nExtend;
 }
 
-sal_Int32 SAL_CALL SwAccessibleTable::getAccessibleColumnExtentAt(
+sal_Int32 SwAccessibleTable::getAccessibleColumnExtentAt(
                sal_Int32 nRow, sal_Int32 nColumn )
 {
     sal_Int32 nExtend = -1;
@@ -796,14 +796,14 @@ sal_Int32 SAL_CALL SwAccessibleTable::getAccessibleColumnExtentAt(
     return nExtend;
 }
 
-uno::Reference< XAccessibleTable > SAL_CALL
+uno::Reference< XAccessibleTable >
         SwAccessibleTable::getAccessibleRowHeaders(  )
 {
     // Row headers aren't supported
     return uno::Reference< XAccessibleTable >();
 }
 
-uno::Reference< XAccessibleTable > SAL_CALL
+uno::Reference< XAccessibleTable >
         SwAccessibleTable::getAccessibleColumnHeaders(  )
 {
     SolarMutexGuard aGuard;
@@ -821,7 +821,7 @@ uno::Reference< XAccessibleTable > SAL_CALL
     return pTableColHeaders;
 }
 
-cpo::uno::Sequence< sal_Int32 > SAL_CALL SwAccessibleTable::getSelectedAccessibleRows()
+cpo::uno::Sequence< sal_Int32 > SwAccessibleTable::getSelectedAccessibleRows()
 {
     SolarMutexGuard aGuard;
 
@@ -844,7 +844,7 @@ cpo::uno::Sequence< sal_Int32 > SAL_CALL SwAccessibleTable::getSelectedAccessibl
     }
 }
 
-cpo::uno::Sequence< sal_Int32 > SAL_CALL SwAccessibleTable::getSelectedAccessibleColumns()
+cpo::uno::Sequence< sal_Int32 > SwAccessibleTable::getSelectedAccessibleColumns()
 {
     SolarMutexGuard aGuard;
 
@@ -866,7 +866,7 @@ cpo::uno::Sequence< sal_Int32 > SAL_CALL SwAccessibleTable::getSelectedAccessibl
     }
 }
 
-bool SAL_CALL SwAccessibleTable::isAccessibleRowSelected( sal_Int32 nRow )
+bool SwAccessibleTable::isAccessibleRowSelected( sal_Int32 nRow )
 {
     SolarMutexGuard aGuard;
 
@@ -891,7 +891,7 @@ bool SAL_CALL SwAccessibleTable::isAccessibleRowSelected( sal_Int32 nRow )
     return bRet;
 }
 
-bool SAL_CALL SwAccessibleTable::isAccessibleColumnSelected(
+bool SwAccessibleTable::isAccessibleColumnSelected(
         sal_Int32 nColumn )
 {
     SolarMutexGuard aGuard;
@@ -918,7 +918,7 @@ bool SAL_CALL SwAccessibleTable::isAccessibleColumnSelected(
     return bRet;
 }
 
-uno::Reference< XAccessible > SAL_CALL SwAccessibleTable::getAccessibleCellAt(
+uno::Reference< XAccessible > SwAccessibleTable::getAccessibleCellAt(
         sal_Int32 nRow, sal_Int32 nColumn )
 {
     uno::Reference< XAccessible > xRet;
@@ -934,19 +934,19 @@ uno::Reference< XAccessible > SAL_CALL SwAccessibleTable::getAccessibleCellAt(
     return xRet;
 }
 
-uno::Reference< XAccessible > SAL_CALL SwAccessibleTable::getAccessibleCaption()
+uno::Reference< XAccessible > SwAccessibleTable::getAccessibleCaption()
 {
     // captions aren't supported
     return uno::Reference< XAccessible >();
 }
 
-uno::Reference< XAccessible > SAL_CALL SwAccessibleTable::getAccessibleSummary()
+uno::Reference< XAccessible > SwAccessibleTable::getAccessibleSummary()
 {
     // summaries aren't supported
     return uno::Reference< XAccessible >();
 }
 
-bool SAL_CALL SwAccessibleTable::isAccessibleSelected(
+bool SwAccessibleTable::isAccessibleSelected(
             sal_Int32 nRow, sal_Int32 nColumn )
 {
     bool bRet = false;
@@ -970,7 +970,7 @@ bool SAL_CALL SwAccessibleTable::isAccessibleSelected(
     return bRet;
 }
 
-sal_Int64 SAL_CALL SwAccessibleTable::getAccessibleIndex(
+sal_Int64 SwAccessibleTable::getAccessibleIndex(
             sal_Int32 nRow, sal_Int32 nColumn )
 {
     sal_Int32 nRet = -1;
@@ -988,7 +988,7 @@ sal_Int64 SAL_CALL SwAccessibleTable::getAccessibleIndex(
     return nRet;
 }
 
-sal_Int32 SAL_CALL SwAccessibleTable::getAccessibleRow( sal_Int64 nChildIndex )
+sal_Int32 SwAccessibleTable::getAccessibleRow( sal_Int64 nChildIndex )
 {
     sal_Int32 nRet = -1;
 
@@ -1024,7 +1024,7 @@ sal_Int32 SAL_CALL SwAccessibleTable::getAccessibleRow( sal_Int64 nChildIndex )
     return nRet;
 }
 
-sal_Int32 SAL_CALL SwAccessibleTable::getAccessibleColumn(
+sal_Int32 SwAccessibleTable::getAccessibleColumn(
         sal_Int64 nChildIndex )
 {
     sal_Int32 nRet = -1;
@@ -1160,7 +1160,7 @@ void SwAccessibleTable::InvalidateChildPosOrSize( const SwAccessibleChild& rChil
 
 // XAccessibleSelection
 
-void SAL_CALL SwAccessibleTable::selectAccessibleChild(
+void SwAccessibleTable::selectAccessibleChild(
     sal_Int64 nChildIndex )
 {
     SolarMutexGuard aGuard;
@@ -1238,7 +1238,7 @@ void SAL_CALL SwAccessibleTable::selectAccessibleChild(
     }
 }
 
-bool SAL_CALL SwAccessibleTable::isAccessibleChildSelected(
+bool SwAccessibleTable::isAccessibleChildSelected(
     sal_Int64 nChildIndex )
 {
     SolarMutexGuard aGuard;
@@ -1251,7 +1251,7 @@ bool SAL_CALL SwAccessibleTable::isAccessibleChildSelected(
     return IsChildSelected( nChildIndex );
 }
 
-void SAL_CALL SwAccessibleTable::clearAccessibleSelection(  )
+void SwAccessibleTable::clearAccessibleSelection(  )
 {
     SolarMutexGuard aGuard;
 
@@ -1266,7 +1266,7 @@ void SAL_CALL SwAccessibleTable::clearAccessibleSelection(  )
     }
 }
 
-void SAL_CALL SwAccessibleTable::selectAllAccessibleChildren(  )
+void SwAccessibleTable::selectAllAccessibleChildren(  )
 {
     // first clear selection, then select first and last child
     clearAccessibleSelection();
@@ -1274,7 +1274,7 @@ void SAL_CALL SwAccessibleTable::selectAllAccessibleChildren(  )
     selectAccessibleChild( getAccessibleChildCount()-1 ); // #i77106#
 }
 
-sal_Int64 SAL_CALL SwAccessibleTable::getSelectedAccessibleChildCount(  )
+sal_Int64 SwAccessibleTable::getSelectedAccessibleChildCount(  )
 {
     SolarMutexGuard aGuard;
 
@@ -1291,7 +1291,7 @@ sal_Int64 SAL_CALL SwAccessibleTable::getSelectedAccessibleChildCount(  )
     return nCount;
 }
 
-uno::Reference<XAccessible> SAL_CALL SwAccessibleTable::getSelectedAccessibleChild(
+uno::Reference<XAccessible> SwAccessibleTable::getSelectedAccessibleChild(
     sal_Int64 nSelectedChildIndex )
 {
     SolarMutexGuard aGuard;
@@ -1318,7 +1318,7 @@ uno::Reference<XAccessible> SAL_CALL SwAccessibleTable::getSelectedAccessibleChi
 }
 
 // index has to be treated as global child index.
-void SAL_CALL SwAccessibleTable::deselectAccessibleChild(
+void SwAccessibleTable::deselectAccessibleChild(
     sal_Int64 nChildIndex )
 {
     SolarMutexGuard aGuard;
@@ -1368,7 +1368,7 @@ void SAL_CALL SwAccessibleTable::deselectAccessibleChild(
     pCursorShell->EndAction();
 }
 
-sal_Int32 SAL_CALL SwAccessibleTable::getBackground()
+sal_Int32 SwAccessibleTable::getBackground()
 {
     const SvxBrushItem &rBack = GetFrame()->GetAttrSet()->GetBackground();
     Color crBack = rBack.GetColor();
@@ -1437,7 +1437,7 @@ void SwAccessibleTable::AddSelectionCell(
 }
 
 // XAccessibleTableSelection
-bool SAL_CALL SwAccessibleTable::selectRow( sal_Int32 row )
+bool SwAccessibleTable::selectRow( sal_Int32 row )
 {
     SolarMutexGuard g;
 
@@ -1453,7 +1453,7 @@ bool SAL_CALL SwAccessibleTable::selectRow( sal_Int32 row )
 
     return true;
 }
-bool SAL_CALL SwAccessibleTable::selectColumn( sal_Int32 column )
+bool SwAccessibleTable::selectColumn( sal_Int32 column )
 {
     SolarMutexGuard g;
 
@@ -1470,7 +1470,7 @@ bool SAL_CALL SwAccessibleTable::selectColumn( sal_Int32 column )
     return true;
 }
 
-bool SAL_CALL SwAccessibleTable::unselectRow( sal_Int32 row )
+bool SwAccessibleTable::unselectRow( sal_Int32 row )
 {
     SolarMutexGuard g;
 
@@ -1488,7 +1488,7 @@ bool SAL_CALL SwAccessibleTable::unselectRow( sal_Int32 row )
     return true;
 }
 
-bool SAL_CALL SwAccessibleTable::unselectColumn( sal_Int32 column )
+bool SwAccessibleTable::unselectColumn( sal_Int32 column )
 {
     SolarMutexGuard g;
 
@@ -1538,7 +1538,7 @@ void SwAccessibleTableColHeaders::Notify(const SfxHint& )
 }
 
 // XAccessibleContext
-sal_Int64 SAL_CALL SwAccessibleTableColHeaders::getAccessibleChildCount()
+sal_Int64 SwAccessibleTableColHeaders::getAccessibleChildCount()
 {
     SolarMutexGuard aGuard;
 
@@ -1574,7 +1574,7 @@ sal_Int64 SAL_CALL SwAccessibleTableColHeaders::getAccessibleChildCount()
     return nCount;
 }
 
-uno::Reference< XAccessible> SAL_CALL
+uno::Reference< XAccessible>
         SwAccessibleTableColHeaders::getAccessibleChild (sal_Int64 nIndex)
 {
     if ( nIndex < 0 || nIndex >= getAccessibleChildCount() )
@@ -1587,13 +1587,13 @@ uno::Reference< XAccessible> SAL_CALL
 
 // XAccessibleTable
 uno::Reference< XAccessibleTable >
-        SAL_CALL SwAccessibleTableColHeaders::getAccessibleRowHeaders()
+        SwAccessibleTableColHeaders::getAccessibleRowHeaders()
 {
     return uno::Reference< XAccessibleTable >();
 }
 
 uno::Reference< XAccessibleTable >
-        SAL_CALL SwAccessibleTableColHeaders::getAccessibleColumnHeaders()
+        SwAccessibleTableColHeaders::getAccessibleColumnHeaders()
 {
     return uno::Reference< XAccessibleTable >();
 }

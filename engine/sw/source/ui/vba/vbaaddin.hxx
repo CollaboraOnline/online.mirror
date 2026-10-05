@@ -37,12 +37,12 @@ public:
     virtual ~SwVbaAddin() override;
 
     // Attributes
-    virtual OUString SAL_CALL getName() override;
-    virtual void SAL_CALL setName(const OUString& _name) override;
-    virtual OUString SAL_CALL getPath() override;
-    virtual bool SAL_CALL getAutoload() override;
-    virtual bool SAL_CALL getInstalled() override;
-    virtual void SAL_CALL setInstalled(bool _installed) override;
+    virtual OUString getName() override;
+    virtual void setName(const OUString& _name) override;
+    virtual OUString getPath() override;
+    virtual bool getAutoload() override;
+    virtual bool getInstalled() override;
+    virtual void setInstalled(bool _installed) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

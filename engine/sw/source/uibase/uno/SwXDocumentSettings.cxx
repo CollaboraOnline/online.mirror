@@ -363,7 +363,7 @@ SwXDocumentSettings::~SwXDocumentSettings()
 {
 }
 
-Any SAL_CALL SwXDocumentSettings::queryInterface( const Type& rType )
+Any SwXDocumentSettings::queryInterface( const Type& rType )
 {
         return ::cppu::queryInterface(rType,
                                       // OWeakObject interfaces
@@ -387,7 +387,7 @@ void SwXDocumentSettings::release ()
     OWeakObject::release();
 }
 
-cpo::uno::Sequence< cpo::uno::Type > SAL_CALL SwXDocumentSettings::getTypes(  )
+cpo::uno::Sequence< cpo::uno::Type > SwXDocumentSettings::getTypes(  )
 {
     static const cpo::uno::Sequence< cpo::uno::Type > aTypes {
         // from MasterPropertySet
@@ -400,7 +400,7 @@ cpo::uno::Sequence< cpo::uno::Type > SAL_CALL SwXDocumentSettings::getTypes(  )
     return aTypes;
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL SwXDocumentSettings::getImplementationId(  )
+cpo::uno::Sequence< sal_Int8 > SwXDocumentSettings::getImplementationId(  )
 {
     return cpo::uno::Sequence<sal_Int8>();
 }
@@ -2004,17 +2004,17 @@ void SwXDocumentSettings::_postGetValues ()
 }
 
 // XServiceInfo
-OUString SAL_CALL SwXDocumentSettings::getImplementationName(  )
+OUString SwXDocumentSettings::getImplementationName(  )
 {
     return u"SwXDocumentSettings"_ustr;
 }
 
-bool SAL_CALL SwXDocumentSettings::supportsService( const OUString& ServiceName )
+bool SwXDocumentSettings::supportsService( const OUString& ServiceName )
 {
     return cppu::supportsService(this, ServiceName);
 }
 
-Sequence< OUString > SAL_CALL SwXDocumentSettings::getSupportedServiceNames(  )
+Sequence< OUString > SwXDocumentSettings::getSupportedServiceNames(  )
 {
     return { u"com.sun.star.document.Settings"_ustr, u"com.sun.star.text.DocumentSettings"_ustr, u"com.sun.star.text.PrintSettings"_ustr };
 }

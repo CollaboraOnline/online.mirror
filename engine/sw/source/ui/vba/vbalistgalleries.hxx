@@ -34,11 +34,11 @@ public:
     /// @throws cpo::uno::RuntimeException
     SwVbaListGalleries( const cpo::uno::Reference< ov::XHelperInterface >& xParent, const cpo::uno::Reference< cpo::uno::XComponentContext > & xContext, cpo::uno::Reference< css::text::XTextDocument >  xTextDoc );
 
-    virtual ::sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ ) override;
+    virtual ::sal_Int32 getCount() override;
+    virtual cpo::uno::Any Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ ) override;
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     // SwVbaListGalleries_BASE
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;

@@ -33,7 +33,7 @@ SwVbaListGallery::~SwVbaListGallery()
 {
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaListGallery::ListTemplates( const cpo::uno::Any& index )
 {
     uno::Reference< XCollection > xCol( new SwVbaListTemplates( mxParent, mxContext, mxTextDocument, mnType ) );

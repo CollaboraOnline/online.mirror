@@ -33,13 +33,13 @@ public:
 
     SwXMLBodyContentContext_Impl( SwXMLImport& rImport );
 
-    cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createFastChildContext(
+    cpo::uno::Reference< css::xml::sax::XFastContextHandler > createFastChildContext(
         sal_Int32 nElement,
         const cpo::uno::Reference< css::xml::sax::XFastAttributeList >& xAttrList ) override;
 
     // The body element's text:global attribute can be ignored, because
     // we must have the correct object shell already.
-    virtual void SAL_CALL endFastElement(sal_Int32 nElement) override;
+    virtual void endFastElement(sal_Int32 nElement) override;
 };
 
 }

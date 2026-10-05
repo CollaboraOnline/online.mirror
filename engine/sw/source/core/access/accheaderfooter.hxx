@@ -39,10 +39,10 @@ public:
     // XAccessibleContext
 
     /// Return this object's description.
-    virtual OUString SAL_CALL getAccessibleDescription() override;
+    virtual OUString getAccessibleDescription() override;
 
     // XAccessibleComponent
-    sal_Int32 SAL_CALL getBackground() override;
+    sal_Int32 getBackground() override;
 };
 
 #endif

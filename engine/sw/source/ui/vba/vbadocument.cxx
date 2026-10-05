@@ -87,8 +87,8 @@ public:
     SwVbaDocumentOutgoingConnectionPoint( SwVbaDocument* pDoc );
 
     // XConnectionPoint
-    sal_uInt32 SAL_CALL Advise(const uno::Reference< XSink >& Sink ) override;
-    void SAL_CALL Unadvise( sal_uInt32 Cookie ) override;
+    sal_uInt32 Advise(const uno::Reference< XSink >& Sink ) override;
+    void Unadvise( sal_uInt32 Cookie ) override;
 };
 
 }
@@ -137,7 +137,7 @@ SwVbaDocument::RemoveSink( sal_uInt32 nNumber )
     mvSinks[nNumber-1] = uno::Reference< XSink >();
 }
 
-uno::Reference< word::XRange > SAL_CALL
+uno::Reference< word::XRange >
 SwVbaDocument::getContent()
 {
     uno::Reference< text::XTextRange > xStart = mxTextDocument->getText()->getStart();
@@ -145,7 +145,7 @@ SwVbaDocument::getContent()
     return uno::Reference< word::XRange >( new SwVbaRange( this, mxContext, mxTextDocument, xStart, xEnd ) );
 }
 
-uno::Reference< word::XRange > SAL_CALL
+uno::Reference< word::XRange >
 SwVbaDocument::Range( const cpo::uno::Any& rStart, const cpo::uno::Any& rEnd )
 {
     if( !rStart.hasValue() && !rEnd.hasValue() )
@@ -201,7 +201,7 @@ SwVbaDocument::Range( const cpo::uno::Any& rStart, const cpo::uno::Any& rEnd )
     return uno::Reference< word::XRange >( new SwVbaRange( this, mxContext, mxTextDocument, xStart, xEnd ) );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::BuiltInDocumentProperties( const cpo::uno::Any& index )
 {
     uno::Reference< XCollection > xCol( new SwVbaBuiltinDocumentProperties( mxParent, mxContext, mxTextDocument ) );
@@ -210,7 +210,7 @@ SwVbaDocument::BuiltInDocumentProperties( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::CustomDocumentProperties( const cpo::uno::Any& index )
 {
     uno::Reference< XCollection > xCol( new SwVbaCustomDocumentProperties( mxParent, mxContext, mxTextDocument ) );
@@ -219,7 +219,7 @@ SwVbaDocument::CustomDocumentProperties( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::Bookmarks( const cpo::uno::Any& rIndex )
 {
     uno::Reference<container::XIndexAccess > xBookmarks( mxTextDocument->getBookmarks(), uno::UNO_QUERY_THROW );
@@ -283,7 +283,7 @@ uno::Reference<word::XWindow> SwVbaDocument::getActiveWindow()
                            mxTextDocument->getCurrentController());
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::Variables( const cpo::uno::Any& rIndex )
 {
     uno::Reference< css::document::XDocumentProperties > xDocumentProperties =  mxTextDocument->getDocumentProperties();
@@ -296,7 +296,7 @@ SwVbaDocument::Variables( const cpo::uno::Any& rIndex )
     return xVariables->Item( rIndex, cpo::uno::Any() );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::Paragraphs( const cpo::uno::Any& index )
 {
     uno::Reference< XCollection > xCol( new SwVbaParagraphs( mxParent, mxContext, mxTextDocument ) );
@@ -305,7 +305,7 @@ SwVbaDocument::Paragraphs( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::Styles( const cpo::uno::Any& index )
 {
     uno::Reference< XCollection > xCol( new SwVbaStyles( mxParent, mxContext, mxTextDocument ) );
@@ -314,7 +314,7 @@ SwVbaDocument::Styles( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::Fields( const cpo::uno::Any& index )
 {
     uno::Reference< XCollection > xCol( new SwVbaFields( mxParent, mxContext, mxTextDocument ) );
@@ -323,7 +323,7 @@ SwVbaDocument::Fields( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::Shapes( const cpo::uno::Any& index )
 {
     rtl::Reference< SwFmDrawPage > xIndexAccess( mxTextDocument->getSwDrawPage() );
@@ -334,7 +334,7 @@ SwVbaDocument::Shapes( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-void SAL_CALL
+void
 SwVbaDocument::Select()
 {
     auto xRange = getContent();
@@ -342,7 +342,7 @@ SwVbaDocument::Select()
         xRange->Select();
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::Sections( const cpo::uno::Any& index )
 {
     uno::Reference< XCollection > xCol( new SwVbaSections( mxParent, mxContext, mxTextDocument ) );
@@ -351,7 +351,7 @@ SwVbaDocument::Sections( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::TablesOfContents( const cpo::uno::Any& index )
 {
     uno::Reference< XCollection > xCol( new SwVbaTablesOfContents( this, mxContext, mxTextDocument ) );
@@ -360,7 +360,7 @@ SwVbaDocument::TablesOfContents( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL SwVbaDocument::FormFields(const cpo::uno::Any& index)
+cpo::uno::Any SwVbaDocument::FormFields(const cpo::uno::Any& index)
 {
     uno::Reference<XCollection> xCol(new SwVbaFormFields(this, mxContext, mxTextDocument));
     if (index.hasValue())
@@ -368,7 +368,7 @@ cpo::uno::Any SAL_CALL SwVbaDocument::FormFields(const cpo::uno::Any& index)
     return cpo::uno::Any(xCol);
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::PageSetup( )
 {
     rtl::Reference< SwXBaseStyle > xPageProps( word::getCurrentPageStyle( mxTextDocument ) );
@@ -381,7 +381,7 @@ SwVbaDocument::getServiceImplName()
     return u"SwVbaDocument"_ustr;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::getAttachedTemplate()
 {
     uno::Reference< word::XTemplate > xTemplate;
@@ -391,7 +391,7 @@ SwVbaDocument::getAttachedTemplate()
     return cpo::uno::Any( xTemplate );
 }
 
-void SAL_CALL
+void
 SwVbaDocument::setAttachedTemplate( const cpo::uno::Any& _attachedtemplate )
 {
     OUString sTemplate;
@@ -412,7 +412,7 @@ SwVbaDocument::setAttachedTemplate( const cpo::uno::Any& _attachedtemplate )
     xDocProps->setTemplateURL( aURL );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::Tables( const cpo::uno::Any& aIndex )
 {
     uno::Reference< XCollection > xColl( new SwVbaTables( mxParent, mxContext, mxTextDocument ) );
@@ -422,34 +422,34 @@ SwVbaDocument::Tables( const cpo::uno::Any& aIndex )
     return cpo::uno::Any( xColl );
 }
 
-void SAL_CALL SwVbaDocument::Activate()
+void SwVbaDocument::Activate()
 {
     VbaDocumentBase::Activate();
 }
 
-::sal_Int32 SAL_CALL SwVbaDocument::getProtectionType()
+::sal_Int32 SwVbaDocument::getProtectionType()
 {
     //TODO
     return word::WdProtectionType::wdNoProtection;
 }
 
-void SAL_CALL SwVbaDocument::setProtectionType( ::sal_Int32 /*_protectiontype*/ )
+void SwVbaDocument::setProtectionType( ::sal_Int32 /*_protectiontype*/ )
 {
     //TODO
 }
 
-bool SAL_CALL SwVbaDocument::getUpdateStylesOnOpen()
+bool SwVbaDocument::getUpdateStylesOnOpen()
 {
     //TODO
     return false;
 }
 
-void SAL_CALL SwVbaDocument::setUpdateStylesOnOpen( bool /*_updatestylesonopen*/ )
+void SwVbaDocument::setUpdateStylesOnOpen( bool /*_updatestylesonopen*/ )
 {
     //TODO
 }
 
-bool SAL_CALL SwVbaDocument::getAutoHyphenation()
+bool SwVbaDocument::getAutoHyphenation()
 {
     // check this property only in default paragraph style
     bool IsAutoHyphenation = false;
@@ -458,25 +458,25 @@ bool SAL_CALL SwVbaDocument::getAutoHyphenation()
     return IsAutoHyphenation;
 }
 
-void SAL_CALL SwVbaDocument::setAutoHyphenation( bool _autohyphenation )
+void SwVbaDocument::setAutoHyphenation( bool _autohyphenation )
 {
     //TODO
     rtl::Reference< SwXBaseStyle > xParaProps( word::getDefaultParagraphStyle( mxTextDocument ) );
     xParaProps->setPropertyValue(u"ParaIsHyphenation"_ustr, cpo::uno::Any( _autohyphenation ) );
 }
 
-::sal_Int32 SAL_CALL SwVbaDocument::getHyphenationZone()
+::sal_Int32 SwVbaDocument::getHyphenationZone()
 {
     //TODO
     return 0;
 }
 
-void SAL_CALL SwVbaDocument::setHyphenationZone( ::sal_Int32 /*_hyphenationzone*/ )
+void SwVbaDocument::setHyphenationZone( ::sal_Int32 /*_hyphenationzone*/ )
 {
     //TODO
 }
 
-::sal_Int32 SAL_CALL SwVbaDocument::getConsecutiveHyphensLimit()
+::sal_Int32 SwVbaDocument::getConsecutiveHyphensLimit()
 {
     //TODO
     sal_Int16 nHyphensLimit = 0;
@@ -485,40 +485,40 @@ void SAL_CALL SwVbaDocument::setHyphenationZone( ::sal_Int32 /*_hyphenationzone*
     return nHyphensLimit;
 }
 
-void SAL_CALL SwVbaDocument::setConsecutiveHyphensLimit( ::sal_Int32 _consecutivehyphenslimit )
+void SwVbaDocument::setConsecutiveHyphensLimit( ::sal_Int32 _consecutivehyphenslimit )
 {
     sal_Int16 nHyphensLimit = static_cast< sal_Int16 >( _consecutivehyphenslimit );
     rtl::Reference< SwXBaseStyle > xParaProps( word::getDefaultParagraphStyle( mxTextDocument ) );
     xParaProps->setPropertyValue(u"ParaHyphenationMaxHyphens"_ustr, cpo::uno::Any( nHyphensLimit ) );
 }
 
-uno::Reference< ooo::vba::word::XMailMerge > SAL_CALL SwVbaDocument::getMailMerge()
+uno::Reference< ooo::vba::word::XMailMerge > SwVbaDocument::getMailMerge()
 {
     return SwVbaMailMerge::get(mxParent, mxContext);
 }
 
-void SAL_CALL SwVbaDocument::Protect( ::sal_Int32 /*Type*/, const cpo::uno::Any& /*NOReset*/, const cpo::uno::Any& /*Password*/, const cpo::uno::Any& /*UseIRM*/, const cpo::uno::Any& /*EnforceStyleLock*/ )
+void SwVbaDocument::Protect( ::sal_Int32 /*Type*/, const cpo::uno::Any& /*NOReset*/, const cpo::uno::Any& /*Password*/, const cpo::uno::Any& /*UseIRM*/, const cpo::uno::Any& /*EnforceStyleLock*/ )
 {
     // Seems not support in Writer
     // VbaDocumentBase::Protect( Password );
 }
 
-void SAL_CALL SwVbaDocument::PrintOut( const cpo::uno::Any& /*Background*/, const cpo::uno::Any& /*Append*/, const cpo::uno::Any& /*Range*/, const cpo::uno::Any& /*OutputFileName*/, const cpo::uno::Any& /*From*/, const cpo::uno::Any& /*To*/, const cpo::uno::Any& /*Item*/, const cpo::uno::Any& /*Copies*/, const cpo::uno::Any& /*Pages*/, const cpo::uno::Any& /*PageType*/, const cpo::uno::Any& /*PrintToFile*/, const cpo::uno::Any& /*Collate*/, const cpo::uno::Any& /*FileName*/, const cpo::uno::Any& /*ActivePrinterMacGX*/, const cpo::uno::Any& /*ManualDuplexPrint*/, const cpo::uno::Any& /*PrintZoomColumn*/, const cpo::uno::Any& /*PrintZoomRow*/, const cpo::uno::Any& /*PrintZoomPaperWidth*/, const cpo::uno::Any& /*PrintZoomPaperHeight*/ )
+void SwVbaDocument::PrintOut( const cpo::uno::Any& /*Background*/, const cpo::uno::Any& /*Append*/, const cpo::uno::Any& /*Range*/, const cpo::uno::Any& /*OutputFileName*/, const cpo::uno::Any& /*From*/, const cpo::uno::Any& /*To*/, const cpo::uno::Any& /*Item*/, const cpo::uno::Any& /*Copies*/, const cpo::uno::Any& /*Pages*/, const cpo::uno::Any& /*PageType*/, const cpo::uno::Any& /*PrintToFile*/, const cpo::uno::Any& /*Collate*/, const cpo::uno::Any& /*FileName*/, const cpo::uno::Any& /*ActivePrinterMacGX*/, const cpo::uno::Any& /*ManualDuplexPrint*/, const cpo::uno::Any& /*PrintZoomColumn*/, const cpo::uno::Any& /*PrintZoomRow*/, const cpo::uno::Any& /*PrintZoomPaperWidth*/, const cpo::uno::Any& /*PrintZoomPaperHeight*/ )
 {
     //TODO
 }
 
-void SAL_CALL SwVbaDocument::PrintPreview(  )
+void SwVbaDocument::PrintPreview(  )
 {
     dispatchRequests( static_cast<SfxBaseModel*>(mxTextDocument.get()), u".uno:PrintPreview"_ustr );
 }
 
-void SAL_CALL SwVbaDocument::ClosePrintPreview(  )
+void SwVbaDocument::ClosePrintPreview(  )
 {
     dispatchRequests( static_cast<SfxBaseModel*>(mxTextDocument.get()), u".uno:ClosePreview"_ustr );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::Revisions( const cpo::uno::Any& index )
 {
     rtl::Reference< SwXRedlines > xRedlines( mxTextDocument->getSwRedlines() );
@@ -528,7 +528,7 @@ SwVbaDocument::Revisions( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::Frames( const cpo::uno::Any& index )
 {
     rtl::Reference< SwXTextFrames > xFrames( mxTextDocument->getSwTextFrames() );
@@ -538,7 +538,7 @@ SwVbaDocument::Frames( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-void SAL_CALL
+void
 SwVbaDocument::SaveAs2000( const cpo::uno::Any& FileName, const cpo::uno::Any& FileFormat, const cpo::uno::Any& /*LockComments*/, const cpo::uno::Any& /*Password*/, const cpo::uno::Any& /*AddToRecentFiles*/, const cpo::uno::Any& /*WritePassword*/, const cpo::uno::Any& /*ReadOnlyRecommended*/, const cpo::uno::Any& /*EmbedTrueTypeFonts*/, const cpo::uno::Any& /*SaveNativePictureFormat*/, const cpo::uno::Any& /*SaveFormsData*/, const cpo::uno::Any& /*SaveAsAOCELetter*/ )
 {
     SAL_INFO("sw.vba", "Document.SaveAs2000(FileName:=" << FileName << ",FileFormat:=" << FileFormat << ")");
@@ -593,19 +593,19 @@ SwVbaDocument::SaveAs2000( const cpo::uno::Any& FileName, const cpo::uno::Any& F
     mxTextDocument->storeAsURL( sURL, storeProps );
 }
 
-void SAL_CALL
+void
 SwVbaDocument::SaveAs( const cpo::uno::Any& FileName, const cpo::uno::Any& FileFormat, const cpo::uno::Any& LockComments, const cpo::uno::Any& Password, const cpo::uno::Any& AddToRecentFiles, const cpo::uno::Any& WritePassword, const cpo::uno::Any& ReadOnlyRecommended, const cpo::uno::Any& EmbedTrueTypeFonts, const cpo::uno::Any& SaveNativePictureFormat, const cpo::uno::Any& SaveFormsData, const cpo::uno::Any& SaveAsAOCELetter, const cpo::uno::Any& /*Encoding*/, const cpo::uno::Any& /*InsertLineBreaks*/, const cpo::uno::Any& /*AllowSubstitutions*/, const cpo::uno::Any& /*LineEnding*/, const cpo::uno::Any& /*AddBiDiMarks*/ )
 {
     return SaveAs2000( FileName, FileFormat, LockComments, Password, AddToRecentFiles, WritePassword, ReadOnlyRecommended, EmbedTrueTypeFonts, SaveNativePictureFormat, SaveFormsData, SaveAsAOCELetter );
 }
 
-void SAL_CALL
+void
 SwVbaDocument::Close( const cpo::uno::Any& SaveChanges, const cpo::uno::Any& /*OriginalFormat*/, const cpo::uno::Any& /*RouteDocument*/ )
 {
     VbaDocumentBase::Close( SaveChanges, cpo::uno::Any(), cpo::uno::Any() );
 }
 
-void SAL_CALL
+void
 SwVbaDocument::SavePreviewPngAs( const cpo::uno::Any& FileName )
 {
     OUString sFileName;
@@ -642,25 +642,25 @@ SwVbaDocument::getControlShape( std::u16string_view sName )
     return cpo::uno::Any();
 }
 
-uno::Reference< beans::XIntrospectionAccess > SAL_CALL
+uno::Reference< beans::XIntrospectionAccess >
 SwVbaDocument::getIntrospection(  )
 {
     return uno::Reference< beans::XIntrospectionAccess >();
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::invoke( const OUString& aFunctionName, const cpo::uno::Sequence< cpo::uno::Any >& /*aParams*/, cpo::uno::Sequence< ::sal_Int16 >& /*aOutParamIndex*/, cpo::uno::Sequence< cpo::uno::Any >& /*aOutParam*/ )
 {
     SAL_INFO("sw.vba", "** will barf " << aFunctionName );
     throw cpo::uno::RuntimeException(); // unsupported operation
 }
 
-void SAL_CALL
+void
 SwVbaDocument::setValue( const OUString& /*aPropertyName*/, const cpo::uno::Any& /*aValue*/ )
 {
     throw cpo::uno::RuntimeException(); // unsupported operation
 }
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocument::getValue( const OUString& aPropertyName )
 {
     uno::Reference< drawing::XControlShape > xControlShape( getControlShape( aPropertyName ), uno::UNO_QUERY_THROW );
@@ -671,13 +671,13 @@ SwVbaDocument::getValue( const OUString& aPropertyName )
     return cpo::uno::Any( xControl );
 }
 
-bool SAL_CALL
+bool
 SwVbaDocument::hasMethod( const OUString& /*aName*/ )
 {
     return false;
 }
 
-bool SAL_CALL
+bool
 SwVbaDocument::hasProperty( const OUString& aName )
 {
     uno::Reference< container::XNameAccess > xFormControls( getFormControls() );
@@ -711,7 +711,7 @@ SwVbaDocument::getFormControls() const
 
 // XInterfaceWithIID
 
-OUString SAL_CALL
+OUString
 SwVbaDocument::getIID()
 {
     return u"{82154424-0FBF-11d4-8313-005004526AB4}"_ustr;
@@ -719,13 +719,13 @@ SwVbaDocument::getIID()
 
 // XConnectable
 
-OUString SAL_CALL
+OUString
 SwVbaDocument::GetIIDForClassItselfNotCoclass()
 {
     return u"{82154428-0FBF-11D4-8313-005004526AB4}"_ustr;
 }
 
-TypeAndIID SAL_CALL
+TypeAndIID
 SwVbaDocument::GetConnectionPoint()
 {
     TypeAndIID aResult =
@@ -738,7 +738,7 @@ SwVbaDocument::GetConnectionPoint()
 
 // XSinkCaller
 
-void SAL_CALL
+void
 SwVbaDocument::CallSinks( const OUString& Method, cpo::uno::Sequence< cpo::uno::Any >& Arguments )
 {
     for (auto& i : mvSinks)
@@ -748,7 +748,7 @@ SwVbaDocument::CallSinks( const OUString& Method, cpo::uno::Sequence< cpo::uno::
     }
 }
 
-uno::Reference<XConnectionPoint> SAL_CALL
+uno::Reference<XConnectionPoint>
 SwVbaDocument::FindConnectionPoint()
 {
     uno::Reference<XConnectionPoint> xCP(new SwVbaDocumentOutgoingConnectionPoint(this));
@@ -764,13 +764,13 @@ SwVbaDocumentOutgoingConnectionPoint::SwVbaDocumentOutgoingConnectionPoint( SwVb
 
 // XConnectionPoint
 
-sal_uInt32 SAL_CALL
+sal_uInt32
 SwVbaDocumentOutgoingConnectionPoint::Advise( const uno::Reference< XSink >& Sink )
 {
     return mpDoc->AddSink(Sink);
 }
 
-void SAL_CALL
+void
 SwVbaDocumentOutgoingConnectionPoint::Unadvise( sal_uInt32 Cookie )
 {
     mpDoc->RemoveSink( Cookie );

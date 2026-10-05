@@ -40,14 +40,14 @@ SwVbaColumn::~SwVbaColumn()
 {
 }
 
-sal_Int32 SAL_CALL
+sal_Int32
 SwVbaColumn::getWidth( )
 {
     SwVbaTableHelper aTableHelper( mxTextTable );
     return aTableHelper.GetColWidth( mnIndex );
 }
 
-void SAL_CALL
+void
 SwVbaColumn::setWidth( sal_Int32 _width )
 {
 
@@ -55,7 +55,7 @@ SwVbaColumn::setWidth( sal_Int32 _width )
     aTableHelper.SetColWidth( _width, mnIndex );
 }
 
-void SAL_CALL
+void
 SwVbaColumn::Select( )
 {
     SelectColumn( getCurrentWordDoc(mxContext), mxTextTable, mnIndex, mnIndex );

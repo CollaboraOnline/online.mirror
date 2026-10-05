@@ -162,7 +162,7 @@ bool OOXMLFastContextHandler::prepareMceContext(Token_t nElement, const uno::Ref
 }
 
 // xml::sax::XFastContextHandler:
-void SAL_CALL OOXMLFastContextHandler::startFastElement
+void OOXMLFastContextHandler::startFastElement
 (sal_Int32 Element,
  const uno::Reference< xml::sax::XFastAttributeList > & Attribs)
 {
@@ -210,13 +210,13 @@ void SAL_CALL OOXMLFastContextHandler::startFastElement
     }
 }
 
-void SAL_CALL OOXMLFastContextHandler::startUnknownElement
+void OOXMLFastContextHandler::startUnknownElement
 (const OUString & /*Namespace*/, const OUString & /*Name*/,
  const uno::Reference< xml::sax::XFastAttributeList > & /*Attribs*/)
 {
 }
 
-void SAL_CALL OOXMLFastContextHandler::endFastElement(sal_Int32 Element)
+void OOXMLFastContextHandler::endFastElement(sal_Int32 Element)
 {
     if (Element == (NMSP_mce | XML_Choice) || Element == (NMSP_mce | XML_Fallback))
         m_bDiscardChildren = false;
@@ -248,12 +248,12 @@ void OOXMLFastContextHandler::lcl_endFastElement
     OOXMLFactory::endAction(this);
 }
 
-void SAL_CALL OOXMLFastContextHandler::endUnknownElement
+void OOXMLFastContextHandler::endUnknownElement
 (const OUString & , const OUString & )
 {
 }
 
-uno::Reference< xml::sax::XFastContextHandler > SAL_CALL
+uno::Reference< xml::sax::XFastContextHandler >
  OOXMLFastContextHandler::createFastChildContext
 (sal_Int32 Element,
  const uno::Reference< xml::sax::XFastAttributeList > & Attribs)
@@ -275,7 +275,7 @@ uno::Reference< xml::sax::XFastContextHandler >
     return OOXMLFactory::createFastChildContext(this, Element);
 }
 
-uno::Reference< xml::sax::XFastContextHandler > SAL_CALL
+uno::Reference< xml::sax::XFastContextHandler >
 OOXMLFastContextHandler::createUnknownChildContext
 (const OUString &,
  const OUString &,
@@ -284,7 +284,7 @@ OOXMLFastContextHandler::createUnknownChildContext
     return uno::Reference<xml::sax::XFastContextHandler>(new OOXMLFastContextHandler(*this));
 }
 
-void SAL_CALL OOXMLFastContextHandler::characters
+void OOXMLFastContextHandler::characters
 (const OUString & aChars)
 {
     lcl_characters(aChars);
@@ -1342,7 +1342,7 @@ OOXMLFastContextHandlerTable::~OOXMLFastContextHandlerTable()
 {
 }
 
-uno::Reference< xml::sax::XFastContextHandler > SAL_CALL
+uno::Reference< xml::sax::XFastContextHandler >
 OOXMLFastContextHandlerTable::createFastChildContext
 (sal_Int32 Element,
  const uno::Reference< xml::sax::XFastAttributeList > & Attribs)
@@ -1818,7 +1818,7 @@ void OOXMLFastContextHandlerShape::lcl_startFastElement
     }
 }
 
-void SAL_CALL OOXMLFastContextHandlerShape::startUnknownElement
+void OOXMLFastContextHandlerShape::startUnknownElement
 (const OUString & Namespace,
  const OUString & Name,
  const uno::Reference< xml::sax::XFastAttributeList > & Attribs)
@@ -1931,7 +1931,7 @@ void OOXMLFastContextHandlerShape::lcl_endFastElement
         mpStream->endShape( );
 }
 
-void SAL_CALL OOXMLFastContextHandlerShape::endUnknownElement
+void OOXMLFastContextHandlerShape::endUnknownElement
 (const OUString & Namespace,
  const OUString & Name)
 {
@@ -2012,7 +2012,7 @@ OOXMLFastContextHandlerShape::lcl_createFastChildContext
     return xContextHandler;
 }
 
-uno::Reference< xml::sax::XFastContextHandler > SAL_CALL
+uno::Reference< xml::sax::XFastContextHandler >
 OOXMLFastContextHandlerShape::createUnknownChildContext
 (const OUString & Namespace,
  const OUString & Name,
@@ -2074,7 +2074,7 @@ OOXMLFastContextHandlerWrapper::~OOXMLFastContextHandlerWrapper()
 {
 }
 
-void SAL_CALL OOXMLFastContextHandlerWrapper::startUnknownElement
+void OOXMLFastContextHandlerWrapper::startUnknownElement
 (const OUString & Namespace,
  const OUString & Name,
  const uno::Reference< xml::sax::XFastAttributeList > & Attribs)
@@ -2083,7 +2083,7 @@ void SAL_CALL OOXMLFastContextHandlerWrapper::startUnknownElement
         mxWrappedContext->startUnknownElement(Namespace, Name, Attribs);
 }
 
-void SAL_CALL OOXMLFastContextHandlerWrapper::endUnknownElement
+void OOXMLFastContextHandlerWrapper::endUnknownElement
 (const OUString & Namespace,
  const OUString & Name)
 {
@@ -2091,7 +2091,7 @@ void SAL_CALL OOXMLFastContextHandlerWrapper::endUnknownElement
         mxWrappedContext->endUnknownElement(Namespace, Name);
 }
 
-void SAL_CALL OOXMLFastContextHandlerWrapper::endFastElement(::sal_Int32 Element)
+void OOXMLFastContextHandlerWrapper::endFastElement(::sal_Int32 Element)
 {
     OOXMLFastContextHandler::endFastElement(Element);
     if (mxShadowContext.is())
@@ -2203,7 +2203,7 @@ void SAL_CALL OOXMLFastContextHandlerWrapper::endFastElement(::sal_Int32 Element
     }
 }
 
-uno::Reference< xml::sax::XFastContextHandler > SAL_CALL
+uno::Reference< xml::sax::XFastContextHandler >
 OOXMLFastContextHandlerWrapper::createUnknownChildContext
 (const OUString & Namespace,
  const OUString & Name,

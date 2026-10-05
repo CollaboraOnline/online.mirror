@@ -92,109 +92,109 @@ public:
           SwDoc*    GetDoc() { return m_pDoc; }
 
     // declare these here to resolve ambiguity when we declared rtl::Reference<subtype-of-SwXText>
-    virtual void SAL_CALL acquire() override = 0;
-    virtual void SAL_CALL release() override = 0;
+    virtual void acquire() override = 0;
+    virtual void release() override = 0;
 
     // XInterface
-    virtual cpo::uno::Any SAL_CALL queryInterface(
+    virtual cpo::uno::Any queryInterface(
             const cpo::uno::Type& rType) override;
 
     // XTypeProvider
     virtual cpo::uno::Sequence< cpo::uno::Type >
-        SAL_CALL getTypes() override;
+        getTypes() override;
 
     // XPropertySet
-    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > SAL_CALL
+    virtual cpo::uno::Reference< css::beans::XPropertySetInfo >
         getPropertySetInfo() override;
-    virtual void SAL_CALL setPropertyValue(
+    virtual void setPropertyValue(
             const OUString& rPropertyName,
             const cpo::uno::Any& rValue) override;
-    virtual cpo::uno::Any SAL_CALL getPropertyValue(
+    virtual cpo::uno::Any getPropertyValue(
             const OUString& rPropertyName) override;
-    virtual void SAL_CALL addPropertyChangeListener(
+    virtual void addPropertyChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference<
                 css::beans::XPropertyChangeListener >& xListener) override;
-    virtual void SAL_CALL removePropertyChangeListener(
+    virtual void removePropertyChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener) override;
-    virtual void SAL_CALL addVetoableChangeListener(
+    virtual void addVetoableChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XVetoableChangeListener >& xListener) override;
-    virtual void SAL_CALL removeVetoableChangeListener(
+    virtual void removeVetoableChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XVetoableChangeListener >& xListener) override;
 
     // XTextRange
     virtual cpo::uno::Reference< css::text::XText >
-        SAL_CALL getText() override;
-    SW_DLLPUBLIC virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL getStart() override;
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL getEnd() override;
-    SW_DLLPUBLIC virtual OUString SAL_CALL getString() override;
-    SW_DLLPUBLIC virtual void SAL_CALL setString(const OUString& rString) override;
+        getText() override;
+    SW_DLLPUBLIC virtual cpo::uno::Reference< css::text::XTextRange > getStart() override;
+    virtual cpo::uno::Reference< css::text::XTextRange > getEnd() override;
+    SW_DLLPUBLIC virtual OUString getString() override;
+    SW_DLLPUBLIC virtual void setString(const OUString& rString) override;
 
     // XSimpleText
-    virtual void SAL_CALL insertString(
+    virtual void insertString(
             const cpo::uno::Reference< css::text::XTextRange > & xRange,
             const OUString& aString, bool bAbsorb) override;
-    virtual void SAL_CALL insertControlCharacter(
+    virtual void insertControlCharacter(
             const cpo::uno::Reference< css::text::XTextRange > & xRange,
             sal_Int16 nControlCharacter, bool bAbsorb) override;
-    SW_DLLPUBLIC virtual cpo::uno::Reference< css::text::XTextCursor > SAL_CALL createTextCursorByRange(
+    SW_DLLPUBLIC virtual cpo::uno::Reference< css::text::XTextCursor > createTextCursorByRange(
             const ::cpo::uno::Reference< ::css::text::XTextRange >& aTextPosition ) override final;
     virtual rtl::Reference< SwXTextCursor > createXTextCursorByRange(
             const ::cpo::uno::Reference< ::css::text::XTextRange >& aTextPosition ) = 0;
-    virtual cpo::uno::Reference< css::text::XTextCursor >  SAL_CALL createTextCursor() override final;
+    virtual cpo::uno::Reference< css::text::XTextCursor >  createTextCursor() override final;
     virtual rtl::Reference< SwXTextCursor > createXTextCursor() = 0;
 
     // XText
-    virtual void SAL_CALL insertTextContent(
+    virtual void insertTextContent(
             const cpo::uno::Reference< css::text::XTextRange > & xRange,
             const cpo::uno::Reference< css::text::XTextContent > & xContent,
             bool bAbsorb) override;
-    virtual void SAL_CALL removeTextContent(
+    virtual void removeTextContent(
             const cpo::uno::Reference< css::text::XTextContent > & xContent) override;
 
     // XParagraphAppend
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL
+    virtual cpo::uno::Reference< css::text::XTextRange >
         finishParagraph(
             const cpo::uno::Sequence< css::beans::PropertyValue >&  rCharacterAndParagraphProperties) override;
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL
+    virtual cpo::uno::Reference< css::text::XTextRange >
         finishParagraphInsert(
             const cpo::uno::Sequence< css::beans::PropertyValue >&  rCharacterAndParagraphProperties,
             const cpo::uno::Reference< css::text::XTextRange >&     xInsertPosition) override final;
 
     // XTextPortionAppend
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL
+    virtual cpo::uno::Reference< css::text::XTextRange >
         appendTextPortion(
             const OUString& rText,
             const cpo::uno::Sequence< css::beans::PropertyValue >& rCharacterAndParagraphProperties) override;
 
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL
+    virtual cpo::uno::Reference< css::text::XTextRange >
         insertTextPortion(
             const OUString& rText,
             const cpo::uno::Sequence< css::beans::PropertyValue >&  rCharacterAndParagraphProperties,
             const cpo::uno::Reference< css::text::XTextRange >&     rTextRange) override;
 
     // XTextContentAppend
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL
+    virtual cpo::uno::Reference< css::text::XTextRange >
         appendTextContent(
             const cpo::uno::Reference< css::text::XTextContent >&   xTextContent,
             const cpo::uno::Sequence< css::beans::PropertyValue >&  rCharacterAndParagraphProperties) override;
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL
+    virtual cpo::uno::Reference< css::text::XTextRange >
         insertTextContentWithProperties(
             const cpo::uno::Reference< css::text::XTextContent >&  xTextContent,
             const cpo::uno::Sequence< css::beans::PropertyValue >& rCharacterAndParagraphProperties,
             const cpo::uno::Reference< css::text::XTextRange >& xInsertPosition) override;
 
     // XTextConvert
-    virtual cpo::uno::Reference< css::text::XTextContent > SAL_CALL
+    virtual cpo::uno::Reference< css::text::XTextContent >
         convertToTextFrame(
             const cpo::uno::Reference< css::text::XTextRange >& xStart,
             const cpo::uno::Reference< css::text::XTextRange >& xEnd,
             const cpo::uno::Sequence< css::beans::PropertyValue >& xFrameProperties) override final;
     virtual cpo::uno::Reference<
-                css::text::XTextTable > SAL_CALL
+                css::text::XTextTable >
         convertToTable(
             cpo::uno::Sequence<
                 cpo::uno::Sequence<
@@ -216,29 +216,29 @@ public:
                 rTableProperties) override;
 
     // XTextCopy
-    SW_DLLPUBLIC virtual void SAL_CALL copyText(
+    SW_DLLPUBLIC virtual void copyText(
             const cpo::uno::Reference< css::text::XTextCopy >& xSource ) override;
 
     // XTextRangeCompare
-    sal_Int16 SAL_CALL compareRegionStarts(
+    sal_Int16 compareRegionStarts(
             const cpo::uno::Reference< css::text::XTextRange >& xR1,
             const cpo::uno::Reference< css::text::XTextRange >& xR2) override;
-    sal_Int16 SAL_CALL compareRegionEnds(
+    sal_Int16 compareRegionEnds(
             const cpo::uno::Reference< css::text::XTextRange >& xR1,
             const cpo::uno::Reference< css::text::XTextRange >& xR2) override;
 
     // XRelativeTextContentInsert
-    virtual void SAL_CALL insertTextContentBefore(
+    virtual void insertTextContentBefore(
             const cpo::uno::Reference< css::text::XTextContent>& xNewContent,
             const cpo::uno::Reference< css::text::XTextContent>& xSuccessor) override;
-    virtual void SAL_CALL insertTextContentAfter(
+    virtual void insertTextContentAfter(
             const cpo::uno::Reference< css::text::XTextContent>& xNewContent,
             const cpo::uno::Reference< css::text::XTextContent>& xPredecessor) override;
 
     // XRelativeTextContentRemove
-    virtual void SAL_CALL removeTextContentBefore(
+    virtual void removeTextContentBefore(
             const cpo::uno::Reference< css::text::XTextContent>& xSuccessor) override;
-    virtual void SAL_CALL removeTextContentAfter(
+    virtual void removeTextContentAfter(
             const cpo::uno::Reference< css::text::XTextContent>& xPredecessor) override;
 
     SW_DLLPUBLIC rtl::Reference< SwXParagraph >

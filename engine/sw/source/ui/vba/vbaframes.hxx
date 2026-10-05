@@ -37,8 +37,8 @@ public:
     SwVbaFrames( const cpo::uno::Reference< ov::XHelperInterface >& xParent, const cpo::uno::Reference< cpo::uno::XComponentContext > & xContext, const cpo::uno::Reference< css::container::XIndexAccess >& xFrames, rtl::Reference< SwXTextDocument >  xModel );
 
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     // SwVbaFrames_BASE
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;

@@ -33,14 +33,14 @@ public:
                                    std::shared_ptr<SwContentControl> pCC);
 
     // XContentControlListEntries
-    cpo::uno::Reference<ooo::vba::word::XContentControlListEntry> SAL_CALL
+    cpo::uno::Reference<ooo::vba::word::XContentControlListEntry>
     Add(const OUString& rName, const cpo::uno::Any& rValue, const cpo::uno::Any& rIndex) override;
-    void SAL_CALL Clear() override;
-    sal_Int32 SAL_CALL getCount() override;
+    void Clear() override;
+    sal_Int32 getCount() override;
 
     // XEnumerationAccess
-    cpo::uno::Type SAL_CALL getElementType() override;
-    cpo::uno::Reference<css::container::XEnumeration> SAL_CALL createEnumeration() override;
+    cpo::uno::Type getElementType() override;
+    cpo::uno::Reference<css::container::XEnumeration> createEnumeration() override;
 
     // SwVbaContentControlListEntries_BASE
     cpo::uno::Any createCollectionObject(const cpo::uno::Any& aSource) override;

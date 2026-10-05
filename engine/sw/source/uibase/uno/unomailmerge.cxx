@@ -198,11 +198,11 @@ namespace
         virtual ~DelayedFileDeletion( ) override;
 
         // XCloseListener
-        virtual void SAL_CALL queryClosing( const EventObject& _rSource, bool _bGetsOwnership ) override;
-        virtual void SAL_CALL notifyClosing( const EventObject& _rSource ) override;
+        virtual void queryClosing( const EventObject& _rSource, bool _bGetsOwnership ) override;
+        virtual void notifyClosing( const EventObject& _rSource ) override;
 
         // XEventListener
-        virtual void SAL_CALL disposing( const EventObject& Source ) override;
+        virtual void disposing( const EventObject& Source ) override;
 
     private:
         void implTakeOwnership( );
@@ -294,7 +294,7 @@ namespace
         m_aDeleteTimer.Start( );
     }
 
-    void SAL_CALL DelayedFileDeletion::queryClosing( const EventObject& , bool _bGetsOwnership )
+    void DelayedFileDeletion::queryClosing( const EventObject& , bool _bGetsOwnership )
     {
         ::osl::MutexGuard aGuard( m_aMutex );
         if ( _bGetsOwnership )
@@ -305,7 +305,7 @@ namespace
         throw util::CloseVetoException( );
     }
 
-    void SAL_CALL DelayedFileDeletion::notifyClosing( const EventObject&  )
+    void DelayedFileDeletion::notifyClosing( const EventObject&  )
     {
         OSL_FAIL("DelayedFileDeletion::notifyClosing: how this?" );
         // this should not happen:
@@ -313,7 +313,7 @@ namespace
         // Or, we ourself close the document, then we should not be a listener anymore
     }
 
-    void SAL_CALL DelayedFileDeletion::disposing( const EventObject&  )
+    void DelayedFileDeletion::disposing( const EventObject&  )
     {
         OSL_FAIL("DelayedFileDeletion::disposing: how this?" );
         // this should not happen:
@@ -426,7 +426,7 @@ private:
     SwXMailMerge *m_pMailMerge;
 };
 
-cpo::uno::Any SAL_CALL SwXMailMerge::execute(
+cpo::uno::Any SwXMailMerge::execute(
         const cpo::uno::Sequence< beans::NamedValue >& rArguments )
 {
     SolarMutexGuard aGuard;
@@ -813,7 +813,7 @@ cpo::uno::Any SAL_CALL SwXMailMerge::execute(
         return Any( true );
 }
 
-void SAL_CALL SwXMailMerge::cancel()
+void SwXMailMerge::cancel()
 {
     // Cancel may be called from a second thread, so this protects from m_pMgr
     /// cleanup in the execute function.
@@ -841,14 +841,14 @@ void SwXMailMerge::launchEvent( const PropertyChangeEvent &rEvt ) const
     }
 }
 
-uno::Reference< beans::XPropertySetInfo > SAL_CALL SwXMailMerge::getPropertySetInfo(  )
+uno::Reference< beans::XPropertySetInfo > SwXMailMerge::getPropertySetInfo(  )
 {
     SolarMutexGuard aGuard;
     static Reference< XPropertySetInfo > aRef = m_pPropSet->getPropertySetInfo();
     return aRef;
 }
 
-void SAL_CALL SwXMailMerge::setPropertyValue(
+void SwXMailMerge::setPropertyValue(
         const OUString& rPropertyName, const cpo::uno::Any& rValue )
 {
     SolarMutexGuard aGuard;
@@ -998,7 +998,7 @@ void SAL_CALL SwXMailMerge::setPropertyValue(
     }
 }
 
-cpo::uno::Any SAL_CALL SwXMailMerge::getPropertyValue(
+cpo::uno::Any SwXMailMerge::getPropertyValue(
         const OUString& rPropertyName )
 {
     SolarMutexGuard aGuard;
@@ -1048,7 +1048,7 @@ cpo::uno::Any SAL_CALL SwXMailMerge::getPropertyValue(
     return aRet;
 }
 
-void SAL_CALL SwXMailMerge::addPropertyChangeListener(
+void SwXMailMerge::addPropertyChangeListener(
         const OUString& rPropertyName,
         const uno::Reference< beans::XPropertyChangeListener >& rListener )
 {
@@ -1062,7 +1062,7 @@ void SAL_CALL SwXMailMerge::addPropertyChangeListener(
     }
 }
 
-void SAL_CALL SwXMailMerge::removePropertyChangeListener(
+void SwXMailMerge::removePropertyChangeListener(
         const OUString& rPropertyName,
         const uno::Reference< beans::XPropertyChangeListener >& rListener )
 {
@@ -1076,7 +1076,7 @@ void SAL_CALL SwXMailMerge::removePropertyChangeListener(
     }
 }
 
-void SAL_CALL SwXMailMerge::addVetoableChangeListener(
+void SwXMailMerge::addVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*rListener*/ )
 {
@@ -1084,7 +1084,7 @@ void SAL_CALL SwXMailMerge::addVetoableChangeListener(
     OSL_FAIL("not implemented");
 }
 
-void SAL_CALL SwXMailMerge::removeVetoableChangeListener(
+void SwXMailMerge::removeVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*rListener*/ )
 {
@@ -1092,7 +1092,7 @@ void SAL_CALL SwXMailMerge::removeVetoableChangeListener(
     OSL_FAIL("not implemented");
 }
 
-void SAL_CALL SwXMailMerge::dispose()
+void SwXMailMerge::dispose()
 {
     SolarMutexGuard aGuard;
 
@@ -1107,7 +1107,7 @@ void SAL_CALL SwXMailMerge::dispose()
     }
 }
 
-void SAL_CALL SwXMailMerge::addEventListener(
+void SwXMailMerge::addEventListener(
         const Reference< XEventListener >& rxListener )
 {
     SolarMutexGuard aGuard;
@@ -1115,7 +1115,7 @@ void SAL_CALL SwXMailMerge::addEventListener(
         m_aEvtListeners.addInterface( rxListener );
 }
 
-void SAL_CALL SwXMailMerge::removeEventListener(
+void SwXMailMerge::removeEventListener(
         const Reference< XEventListener >& rxListener )
 {
     SolarMutexGuard aGuard;
@@ -1123,7 +1123,7 @@ void SAL_CALL SwXMailMerge::removeEventListener(
         m_aEvtListeners.removeInterface( rxListener );
 }
 
-void SAL_CALL SwXMailMerge::addMailMergeEventListener(
+void SwXMailMerge::addMailMergeEventListener(
         const uno::Reference< XMailMergeListener >& rxListener )
 {
     SolarMutexGuard aGuard;
@@ -1131,7 +1131,7 @@ void SAL_CALL SwXMailMerge::addMailMergeEventListener(
         m_aMergeListeners.addInterface( rxListener );
 }
 
-void SAL_CALL SwXMailMerge::removeMailMergeEventListener(
+void SwXMailMerge::removeMailMergeEventListener(
         const uno::Reference< XMailMergeListener >& rxListener )
 {
     SolarMutexGuard aGuard;
@@ -1139,17 +1139,17 @@ void SAL_CALL SwXMailMerge::removeMailMergeEventListener(
         m_aMergeListeners.removeInterface( rxListener );
 }
 
-OUString SAL_CALL SwXMailMerge::getImplementationName()
+OUString SwXMailMerge::getImplementationName()
 {
     return u"SwXMailMerge"_ustr;
 }
 
-bool SAL_CALL SwXMailMerge::supportsService( const OUString& rServiceName )
+bool SwXMailMerge::supportsService( const OUString& rServiceName )
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL SwXMailMerge::getSupportedServiceNames()
+cpo::uno::Sequence< OUString > SwXMailMerge::getSupportedServiceNames()
 {
     return { u"com.sun.star.text.MailMerge"_ustr, u"com.sun.star.sdb.DataAccessDescriptor"_ustr };
 }

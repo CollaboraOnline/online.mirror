@@ -282,7 +282,7 @@ SwScannerEventListener::~SwScannerEventListener()
 {
 }
 
-void SAL_CALL SwScannerEventListener::disposing( const EventObject& /*rEventObject*/)
+void SwScannerEventListener::disposing( const EventObject& /*rEventObject*/)
 {
 #if defined(_WIN32) || defined UNX
     SolarMutexGuard aGuard;
@@ -295,13 +295,13 @@ SwClipboardChangeListener::~SwClipboardChangeListener()
 {
 }
 
-void SAL_CALL SwClipboardChangeListener::disposing( const EventObject& /*rEventObject*/ )
+void SwClipboardChangeListener::disposing( const EventObject& /*rEventObject*/ )
 {
     SolarMutexGuard aGuard;
     m_pView = nullptr; // so we don't touch the view if changedContents somehow fires afterwards
 }
 
-void SAL_CALL SwClipboardChangeListener::changedContents( const css::datatransfer::clipboard::ClipboardEvent& rEventObject )
+void SwClipboardChangeListener::changedContents( const css::datatransfer::clipboard::ClipboardEvent& rEventObject )
 
 {
     const SolarMutexGuard aGuard;

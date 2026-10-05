@@ -57,26 +57,26 @@ public:
     SwXAutoTextContainer();
 
     //XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount(  ) override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount(  ) override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     //XNameAccess
-    virtual cpo::uno::Any SAL_CALL getByName(const OUString& Name) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames() override;
-    virtual bool SAL_CALL hasByName(const OUString& Name) override;
+    virtual cpo::uno::Any getByName(const OUString& Name) override;
+    virtual cpo::uno::Sequence< OUString > getElementNames() override;
+    virtual bool hasByName(const OUString& Name) override;
 
     //XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-    virtual bool SAL_CALL hasElements(  ) override;
+    virtual cpo::uno::Type getElementType(  ) override;
+    virtual bool hasElements(  ) override;
 
     //XAutoTextContainer
-    virtual cpo::uno::Reference< css::text::XAutoTextGroup >  SAL_CALL insertNewByName(const OUString& aGroupName) override;
-    virtual void SAL_CALL removeByName(const OUString& aGroupName) override;
+    virtual cpo::uno::Reference< css::text::XAutoTextGroup >  insertNewByName(const OUString& aGroupName) override;
+    virtual void removeByName(const OUString& aGroupName) override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
 };
 
@@ -100,41 +100,41 @@ public:
         SwXAutoTextGroup(const OUString& rName, SwGlossaries* pGloss);
 
     //XAutoTextGroup
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getTitles() override;
-    virtual void SAL_CALL renameByName(const OUString& aElementName, const OUString& aNewElementName, const OUString& aNewElementTitle) override;
-    virtual cpo::uno::Reference< css::text::XAutoTextEntry >  SAL_CALL insertNewByName(const OUString& aName, const OUString& aTitle, const cpo::uno::Reference< css::text::XTextRange > & xTextRange) override;
-    virtual void SAL_CALL removeByName(const OUString& aEntryName) override;
+    virtual cpo::uno::Sequence< OUString > getTitles() override;
+    virtual void renameByName(const OUString& aElementName, const OUString& aNewElementName, const OUString& aNewElementTitle) override;
+    virtual cpo::uno::Reference< css::text::XAutoTextEntry >  insertNewByName(const OUString& aName, const OUString& aTitle, const cpo::uno::Reference< css::text::XTextRange > & xTextRange) override;
+    virtual void removeByName(const OUString& aEntryName) override;
 
     //XNamed
-    virtual OUString SAL_CALL getName() override;
-    virtual void SAL_CALL setName(const OUString& Name_) override;
+    virtual OUString getName() override;
+    virtual void setName(const OUString& Name_) override;
 
     //XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount(  ) override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount(  ) override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     //XNameAccess
-    virtual cpo::uno::Any SAL_CALL getByName(const OUString& Name) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames() override;
-    virtual bool SAL_CALL hasByName(const OUString& Name) override;
+    virtual cpo::uno::Any getByName(const OUString& Name) override;
+    virtual cpo::uno::Sequence< OUString > getElementNames() override;
+    virtual bool hasByName(const OUString& Name) override;
 
     //XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-    virtual bool SAL_CALL hasElements(  ) override;
+    virtual cpo::uno::Type getElementType(  ) override;
+    virtual bool hasElements(  ) override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
     //XPropertySet
-    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > SAL_CALL getPropertySetInfo(  ) override;
-    virtual void SAL_CALL setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue ) override;
-    virtual cpo::uno::Any SAL_CALL getPropertyValue( const OUString& PropertyName ) override;
-    virtual void SAL_CALL addPropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener ) override;
-    virtual void SAL_CALL removePropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& aListener ) override;
-    virtual void SAL_CALL addVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
-    virtual void SAL_CALL removeVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
+    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > getPropertySetInfo(  ) override;
+    virtual void setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue ) override;
+    virtual cpo::uno::Any getPropertyValue( const OUString& PropertyName ) override;
+    virtual void addPropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener ) override;
+    virtual void removePropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& aListener ) override;
+    virtual void addVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
+    virtual void removeVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
 
     void    Invalidate();
 };
@@ -187,30 +187,30 @@ public:
     SwXAutoTextEntry(SwGlossaries* , OUString aGroupName, OUString aEntryName);
 
     //XText
-    virtual cpo::uno::Reference< css::text::XTextCursor >  SAL_CALL createTextCursor() override;
-    virtual cpo::uno::Reference< css::text::XTextCursor >  SAL_CALL createTextCursorByRange(const cpo::uno::Reference< css::text::XTextRange > & aTextPosition) override;
-    virtual void SAL_CALL insertString(const cpo::uno::Reference< css::text::XTextRange > & xRange, const OUString& aString, bool bAbsorb) override;
-    virtual void SAL_CALL insertControlCharacter(const cpo::uno::Reference< css::text::XTextRange > & xRange, sal_Int16 nControlCharacter, bool bAbsorb) override;
-    virtual void SAL_CALL insertTextContent(const cpo::uno::Reference< css::text::XTextRange > & xRange, const cpo::uno::Reference< css::text::XTextContent > & xContent, bool bAbsorb) override;
-    virtual void SAL_CALL removeTextContent(const cpo::uno::Reference< css::text::XTextContent > & xContent) override;
+    virtual cpo::uno::Reference< css::text::XTextCursor >  createTextCursor() override;
+    virtual cpo::uno::Reference< css::text::XTextCursor >  createTextCursorByRange(const cpo::uno::Reference< css::text::XTextRange > & aTextPosition) override;
+    virtual void insertString(const cpo::uno::Reference< css::text::XTextRange > & xRange, const OUString& aString, bool bAbsorb) override;
+    virtual void insertControlCharacter(const cpo::uno::Reference< css::text::XTextRange > & xRange, sal_Int16 nControlCharacter, bool bAbsorb) override;
+    virtual void insertTextContent(const cpo::uno::Reference< css::text::XTextRange > & xRange, const cpo::uno::Reference< css::text::XTextContent > & xContent, bool bAbsorb) override;
+    virtual void removeTextContent(const cpo::uno::Reference< css::text::XTextContent > & xContent) override;
 
     //XTextRange
-    virtual cpo::uno::Reference< css::text::XText >  SAL_CALL getText() override;
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL  getStart() override;
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL   getEnd() override;
-    virtual OUString SAL_CALL  getString() override;
-    virtual void SAL_CALL  setString(const OUString& aString) override;
+    virtual cpo::uno::Reference< css::text::XText >  getText() override;
+    virtual cpo::uno::Reference< css::text::XTextRange >  getStart() override;
+    virtual cpo::uno::Reference< css::text::XTextRange >   getEnd() override;
+    virtual OUString  getString() override;
+    virtual void  setString(const OUString& aString) override;
 
     //XAutoTextEntry
-    virtual void    SAL_CALL applyTo(const cpo::uno::Reference< css::text::XTextRange > & xRange) override;
+    virtual void    applyTo(const cpo::uno::Reference< css::text::XTextRange > & xRange) override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
     // XEventsSupplier
-    virtual cpo::uno::Reference< css::container::XNameReplace > SAL_CALL getEvents(  ) override;
+    virtual cpo::uno::Reference< css::container::XNameReplace > getEvents(  ) override;
 
     void    Invalidate() {m_pGlossaries = nullptr;}
     const SwGlossaries* GetGlossaries() const { return m_pGlossaries; }
@@ -231,7 +231,7 @@ public:
 
     virtual ~SwAutoTextEventDescriptor() override;
 
-    virtual OUString SAL_CALL getImplementationName() override;
+    virtual OUString getImplementationName() override;
 
 private:
 

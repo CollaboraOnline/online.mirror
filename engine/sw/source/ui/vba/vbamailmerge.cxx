@@ -29,15 +29,15 @@ SwVbaMailMerge::get(const cpo::uno::Reference<ooo::vba::XHelperInterface>& xPare
     return xInstance;
 }
 
-sal_Int32 SAL_CALL SwVbaMailMerge::getMainDocumentType() { return m_nMainDocType; }
+sal_Int32 SwVbaMailMerge::getMainDocumentType() { return m_nMainDocType; }
 
-void SAL_CALL SwVbaMailMerge::setMainDocumentType(sal_Int32 _maindocumenttype)
+void SwVbaMailMerge::setMainDocumentType(sal_Int32 _maindocumenttype)
 {
     m_nMainDocType = _maindocumenttype;
 }
 
 // Completely dummy, no-op.
-void SAL_CALL SwVbaMailMerge::OpenDataSource(
+void SwVbaMailMerge::OpenDataSource(
     const OUString&, const cpo::uno::Any&, const cpo::uno::Any&, const cpo::uno::Any&,
     const cpo::uno::Any&, const cpo::uno::Any&, const cpo::uno::Any&, const cpo::uno::Any&,
     const cpo::uno::Any&, const cpo::uno::Any&, const cpo::uno::Any&, const cpo::uno::Any&,

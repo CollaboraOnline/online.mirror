@@ -41,11 +41,11 @@ public:
                          const cpo::uno::Reference< css::beans::XPropertySet >& xProps,
                          bool isHeader );
 
-    virtual ::sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL Item( const cpo::uno::Any& Index1, const cpo::uno::Any& ) override;
+    virtual ::sal_Int32 getCount() override;
+    virtual cpo::uno::Any Item( const cpo::uno::Any& Index1, const cpo::uno::Any& ) override;
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     // SwVbaHeadersFooters_BASE
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;

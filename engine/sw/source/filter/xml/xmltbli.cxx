@@ -333,10 +333,10 @@ public:
             const Reference< xml::sax::XFastAttributeList > & xAttrList,
             SwXMLTableContext *pTable );
 
-    virtual cpo::uno::Reference<css::xml::sax::XFastContextHandler> SAL_CALL createFastChildContext(
+    virtual cpo::uno::Reference<css::xml::sax::XFastContextHandler> createFastChildContext(
             sal_Int32 nElement,
             const Reference< xml::sax::XFastAttributeList > & xAttrList ) override;
-    virtual void SAL_CALL endFastElement(sal_Int32 nElement) override;
+    virtual void endFastElement(sal_Int32 nElement) override;
 
     SwXMLImport& GetSwImport() { return static_cast<SwXMLImport&>(GetImport()); }
 };
@@ -730,7 +730,7 @@ public:
             SwXMLImport& rImport,
             SwXMLTableContext *pTable );
 
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createFastChildContext(
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > createFastChildContext(
         sal_Int32 Element, const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & xAttrList ) override;
 
     SwXMLImport& GetSwImport() { return static_cast<SwXMLImport&>(GetImport()); }
@@ -777,10 +777,10 @@ public:
             const Reference< xml::sax::XFastAttributeList > & xAttrList,
             SwXMLTableContext *pTable, bool bInHead=false );
 
-    virtual cpo::uno::Reference<css::xml::sax::XFastContextHandler> SAL_CALL createFastChildContext( sal_Int32 nElement,
+    virtual cpo::uno::Reference<css::xml::sax::XFastContextHandler> createFastChildContext( sal_Int32 nElement,
             const Reference< xml::sax::XFastAttributeList > & xAttrList ) override;
 
-    virtual void SAL_CALL endFastElement(sal_Int32 nElement) override;
+    virtual void endFastElement(sal_Int32 nElement) override;
 
     SwXMLImport& GetSwImport() { return static_cast<SwXMLImport&>(GetImport()); }
 };
@@ -887,7 +887,7 @@ public:
             SwXMLTableContext *pTable,
             bool bHead );
 
-    virtual cpo::uno::Reference<css::xml::sax::XFastContextHandler> SAL_CALL createFastChildContext(
+    virtual cpo::uno::Reference<css::xml::sax::XFastContextHandler> createFastChildContext(
             sal_Int32 nElement,
             const Reference< xml::sax::XFastAttributeList > & xAttrList ) override;
 
@@ -932,7 +932,7 @@ public:
 
     SwXMLDDETableContext_Impl(SwXMLImport& rImport);
 
-    virtual void SAL_CALL startFastElement(
+    virtual void startFastElement(
         sal_Int32 nElement,
         const Reference<xml::sax::XFastAttributeList> & xAttrList) override;
 

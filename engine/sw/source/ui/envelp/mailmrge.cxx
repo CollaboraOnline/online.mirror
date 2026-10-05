@@ -85,8 +85,8 @@ class SwXSelChgLstnr_Impl : public cppu::WeakImplHelper
 public:
     explicit SwXSelChgLstnr_Impl(SwMailMergeDlg& rParentDlg);
 
-    virtual void SAL_CALL selectionChanged( const EventObject& aEvent ) override;
-    virtual void SAL_CALL disposing( const EventObject& Source ) override;
+    virtual void selectionChanged( const EventObject& aEvent ) override;
+    virtual void disposing( const EventObject& Source ) override;
 };
 
 SwXSelChgLstnr_Impl::SwXSelChgLstnr_Impl(SwMailMergeDlg& rParentDlg) :

@@ -33,12 +33,12 @@ public:
     ~SwVbaFormFieldDropDownListEntry() override;
 
     // XListEntry
-    sal_Int32 SAL_CALL getIndex() override;
+    sal_Int32 getIndex() override;
 
-    OUString SAL_CALL getName() override;
-    void SAL_CALL setName(const OUString& sSet) override;
+    OUString getName() override;
+    void setName(const OUString& sSet) override;
 
-    void SAL_CALL Delete() override;
+    void Delete() override;
 
     // XHelperInterface
     OUString getServiceImplName() override;

@@ -45,11 +45,11 @@ public:
                        bool isHeader, sal_Int32 index );
 
     // Attributes
-    virtual bool SAL_CALL getIsHeader() override;
-    virtual bool SAL_CALL getLinkToPrevious() override;
-    virtual void SAL_CALL setLinkToPrevious( bool _linktoprevious ) override;
-    virtual cpo::uno::Reference< ::ooo::vba::word::XRange > SAL_CALL getRange() override;
-    virtual cpo::uno::Any SAL_CALL Shapes( const cpo::uno::Any& aIndex ) override;
+    virtual bool getIsHeader() override;
+    virtual bool getLinkToPrevious() override;
+    virtual void setLinkToPrevious( bool _linktoprevious ) override;
+    virtual cpo::uno::Reference< ::ooo::vba::word::XRange > getRange() override;
+    virtual cpo::uno::Any Shapes( const cpo::uno::Any& aIndex ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

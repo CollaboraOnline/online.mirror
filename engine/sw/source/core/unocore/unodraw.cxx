@@ -517,13 +517,13 @@ namespace
             explicit SwXShapesEnumeration(SwFmDrawPage* const pDrawPage);
 
             //XEnumeration
-            virtual bool SAL_CALL hasMoreElements() override;
-            virtual cpo::uno::Any SAL_CALL nextElement() override;
+            virtual bool hasMoreElements() override;
+            virtual cpo::uno::Any nextElement() override;
 
             //XServiceInfo
-            virtual OUString SAL_CALL getImplementationName() override;
-            virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-            virtual cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override;
+            virtual OUString getImplementationName() override;
+            virtual bool supportsService(const OUString& ServiceName) override;
+            virtual cpo::uno::Sequence<OUString> getSupportedServiceNames() override;
     };
 }
 
@@ -886,7 +886,7 @@ const cpo::uno::Sequence< sal_Int8 > & SwXShape::getUnoTunnelId()
     return theSwXShapeUnoTunnelId.getSeq();
 }
 
-sal_Int64 SAL_CALL SwXShape::getSomething( const cpo::uno::Sequence< sal_Int8 >& rId )
+sal_Int64 SwXShape::getSomething( const cpo::uno::Sequence< sal_Int8 >& rId )
 {
     if( comphelper::isUnoTunnelId<SwXShape>(rId) )
     {
@@ -2257,7 +2257,7 @@ SvxShape*   SwXShape::GetSvxShape()
 
 // #i31698#
 // implementation of virtual methods from drawing::XShape
-awt::Point SAL_CALL SwXShape::getPosition()
+awt::Point SwXShape::getPosition()
 {
     awt::Point aPos( GetAttrPosition() );
 
@@ -2295,7 +2295,7 @@ awt::Point SAL_CALL SwXShape::getPosition()
     return aPos;
 }
 
-void SAL_CALL SwXShape::setPosition( const awt::Point& aPosition )
+void SwXShape::setPosition( const awt::Point& aPosition )
 {
     SdrObject* pTopGroupObj = GetTopGroupObj();
     if ( !pTopGroupObj )
@@ -2377,7 +2377,7 @@ void SAL_CALL SwXShape::setPosition( const awt::Point& aPosition )
     }
 }
 
-awt::Size SAL_CALL SwXShape::getSize()
+awt::Size SwXShape::getSize()
 {
     awt::Size aSize;
     if ( mxShape.is() )
@@ -2387,7 +2387,7 @@ awt::Size SAL_CALL SwXShape::getSize()
     return aSize;
 }
 
-void SAL_CALL SwXShape::setSize( const awt::Size& aSize )
+void SwXShape::setSize( const awt::Size& aSize )
 {
     comphelper::ProfileZone aZone("SwXShape::setSize");
 
@@ -2399,7 +2399,7 @@ void SAL_CALL SwXShape::setSize( const awt::Size& aSize )
 }
 // #i31698#
 // implementation of virtual methods from drawing::XShapeDescriptor
-OUString SAL_CALL SwXShape::getShapeType()
+OUString SwXShape::getShapeType()
 {
     if ( mxShape.is() )
     {

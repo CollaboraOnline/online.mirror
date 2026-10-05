@@ -35,49 +35,49 @@ SwVbaCell::~SwVbaCell()
 {
 }
 
-::sal_Int32 SAL_CALL SwVbaCell::getWidth()
+::sal_Int32 SwVbaCell::getWidth()
 {
     SwVbaTableHelper aTableHelper( mxTextTable );
     return aTableHelper.GetColWidth( mnColumn, mnRow );
 }
 
-void SAL_CALL SwVbaCell::setWidth( ::sal_Int32 _width )
+void SwVbaCell::setWidth( ::sal_Int32 _width )
 {
     SwVbaTableHelper aTableHelper( mxTextTable );
     aTableHelper.SetColWidth( _width, mnColumn, mnRow, true );
 }
 
-cpo::uno::Any SAL_CALL SwVbaCell::getHeight()
+cpo::uno::Any SwVbaCell::getHeight()
 {
     uno::Reference< word::XRow > xRow( new SwVbaRow( getParent(), mxContext, mxTextTable, mnRow ) );
     return xRow->getHeight();
 }
 
-void SAL_CALL SwVbaCell::setHeight( const cpo::uno::Any& _height )
+void SwVbaCell::setHeight( const cpo::uno::Any& _height )
 {
     uno::Reference< word::XRow > xRow( new SwVbaRow( getParent(), mxContext, mxTextTable, mnRow ) );
     xRow->setHeight( _height );
 }
 
-::sal_Int32 SAL_CALL SwVbaCell::getHeightRule()
+::sal_Int32 SwVbaCell::getHeightRule()
 {
     uno::Reference< word::XRow > xRow( new SwVbaRow( getParent(), mxContext, mxTextTable, mnRow ) );
     return xRow->getHeightRule();
 }
 
-void SAL_CALL SwVbaCell::setHeightRule( ::sal_Int32 _heightrule )
+void SwVbaCell::setHeightRule( ::sal_Int32 _heightrule )
 {
     uno::Reference< word::XRow > xRow( new SwVbaRow( getParent(), mxContext, mxTextTable, mnRow ) );
     xRow->setHeightRule( _heightrule );
 }
 
-void SAL_CALL SwVbaCell::SetWidth( float width, sal_Int32 /*rulestyle*/ )
+void SwVbaCell::SetWidth( float width, sal_Int32 /*rulestyle*/ )
 {
     // FIXME: handle the argument: rulestyle
     setWidth( static_cast<sal_Int32>(width) );
 }
 
-void SAL_CALL SwVbaCell::SetHeight( float height, sal_Int32 heightrule )
+void SwVbaCell::SetHeight( float height, sal_Int32 heightrule )
 {
     // FIXME: handle the argument: heightrule
     setHeightRule( heightrule );

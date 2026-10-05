@@ -39,7 +39,7 @@ SwVbaAutoTextEntry::~SwVbaAutoTextEntry()
 {
 }
 
-uno::Reference< word::XRange > SAL_CALL SwVbaAutoTextEntry::Insert( const uno::Reference< word::XRange >& _where, const cpo::uno::Any& _richtext )
+uno::Reference< word::XRange > SwVbaAutoTextEntry::Insert( const uno::Reference< word::XRange >& _where, const cpo::uno::Any& _richtext )
 {
     SwVbaRange* pWhere = dynamic_cast<SwVbaRange*>( _where.get() );
     if( pWhere )

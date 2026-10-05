@@ -44,16 +44,16 @@ public:
     /// @throws cpo::uno::RuntimeException
     SwVbaColumns( const cpo::uno::Reference< ov::XHelperInterface >& xParent, const cpo::uno::Reference< cpo::uno::XComponentContext > & xContext, cpo::uno::Reference< css::text::XTextTable >  xTextTable, const cpo::uno::Reference< css::table::XTableColumns >& xTableColumns, sal_Int32 nStartCol, sal_Int32 nEndCol );
 
-    virtual sal_Int32 SAL_CALL getWidth(  ) override;
-    virtual void SAL_CALL setWidth( sal_Int32 _width ) override;
-    virtual void SAL_CALL Select(  ) override;
+    virtual sal_Int32 getWidth(  ) override;
+    virtual void setWidth( sal_Int32 _width ) override;
+    virtual void Select(  ) override;
 
     //XCollection
-    virtual ::sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ ) override;
+    virtual ::sal_Int32 getCount() override;
+    virtual cpo::uno::Any Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ ) override;
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     // SwVbaColumns_BASE
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;

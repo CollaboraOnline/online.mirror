@@ -111,7 +111,7 @@ void   SwXFilterOptions::setSourceDocument( const uno::Reference<XComponent >& x
     m_xModel = xDoc;
 }
 
-void SAL_CALL SwXFilterOptions::initialize(const cpo::uno::Sequence<cpo::uno::Any>& rArguments)
+void SwXFilterOptions::initialize(const cpo::uno::Sequence<cpo::uno::Any>& rArguments)
 {
     ::comphelper::NamedValueCollection aProperties(rArguments);
     if (aProperties.has(u"ParentWindow"_ustr))

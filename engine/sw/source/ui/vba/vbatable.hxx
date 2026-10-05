@@ -39,21 +39,21 @@ class SwVbaTable : public SwVbaTable_BASE
 public:
     /// @throws cpo::uno::RuntimeException
     SwVbaTable( const cpo::uno::Reference< ooo::vba::XHelperInterface >& rParent, const cpo::uno::Reference< cpo::uno::XComponentContext >& rContext, rtl::Reference< SwXTextDocument > xDocument, const rtl::Reference< SwXTextTable >& xTextTable);
-    virtual cpo::uno::Reference< ::ooo::vba::word::XRange > SAL_CALL Range(  ) override;
-    virtual void SAL_CALL Select(  ) override;
-    virtual void SAL_CALL Delete(  ) override;
-    virtual OUString SAL_CALL getName(  ) override;
-    virtual cpo::uno::Any SAL_CALL Borders( const cpo::uno::Any& aIndex ) override;
-    virtual float SAL_CALL getBottomPadding(  ) override;
-    virtual void SAL_CALL setBottomPadding( float fValue ) override;
-    virtual float SAL_CALL getLeftPadding(  ) override;
-    virtual void SAL_CALL setLeftPadding( float fValue ) override;
-    virtual float SAL_CALL getRightPadding(  ) override;
-    virtual void SAL_CALL setRightPadding( float fValue ) override;
-    virtual float SAL_CALL getTopPadding(  ) override;
-    virtual void SAL_CALL setTopPadding( float fValue ) override;
-    virtual cpo::uno::Any SAL_CALL Rows( const cpo::uno::Any& aIndex ) override;
-    virtual cpo::uno::Any SAL_CALL Columns( const cpo::uno::Any& aIndex ) override;
+    virtual cpo::uno::Reference< ::ooo::vba::word::XRange > Range(  ) override;
+    virtual void Select(  ) override;
+    virtual void Delete(  ) override;
+    virtual OUString getName(  ) override;
+    virtual cpo::uno::Any Borders( const cpo::uno::Any& aIndex ) override;
+    virtual float getBottomPadding(  ) override;
+    virtual void setBottomPadding( float fValue ) override;
+    virtual float getLeftPadding(  ) override;
+    virtual void setLeftPadding( float fValue ) override;
+    virtual float getRightPadding(  ) override;
+    virtual void setRightPadding( float fValue ) override;
+    virtual float getTopPadding(  ) override;
+    virtual void setTopPadding( float fValue ) override;
+    virtual cpo::uno::Any Rows( const cpo::uno::Any& aIndex ) override;
+    virtual cpo::uno::Any Columns( const cpo::uno::Any& aIndex ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

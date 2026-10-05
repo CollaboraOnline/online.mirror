@@ -40,8 +40,8 @@ public:
     virtual ~SidebarWinAccessible() override;
 
     virtual cpo::uno::Reference<css::accessibility::XAccessible>
-        SAL_CALL getAccessibleParent() override;
-    virtual sal_Int64 SAL_CALL getAccessibleIndexInParent() override;
+        getAccessibleParent() override;
+    virtual sal_Int64 getAccessibleIndexInParent() override;
 
     void ChangeSidebarItem(const SwAnnotationItem& rSidebarItem);
 

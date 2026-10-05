@@ -114,17 +114,17 @@ public:
     }
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override
+    virtual OUString getImplementationName() override
     {
         return u"lo.writer.MMCurrentEntryController"_ustr;
     }
 
-    virtual bool SAL_CALL supportsService(const OUString& rServiceName) override
+    virtual bool supportsService(const OUString& rServiceName) override
     {
         return cppu::supportsService(this, rServiceName);
     }
 
-    virtual cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override
+    virtual cpo::uno::Sequence<OUString> getSupportedServiceNames() override
     {
         return { u"com.sun.star.frame.ToolbarController"_ustr };
     }
@@ -134,10 +134,10 @@ public:
     virtual void disposing(std::unique_lock<std::mutex>& rGuard) override;
 
     // XToolbarController
-    virtual uno::Reference<awt::XWindow> SAL_CALL createItemWindow(const uno::Reference<awt::XWindow>& rParent) override;
+    virtual uno::Reference<awt::XWindow> createItemWindow(const uno::Reference<awt::XWindow>& rParent) override;
 
     // XStatusListener
-    virtual void SAL_CALL statusChanged(const frame::FeatureStateEvent& rEvent) override;
+    virtual void statusChanged(const frame::FeatureStateEvent& rEvent) override;
 };
 
 class ExcludeCheckBox final : public InterimItemWindow
@@ -207,17 +207,17 @@ public:
     }
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override
+    virtual OUString getImplementationName() override
     {
         return u"lo.writer.MMExcludeEntryController"_ustr;
     }
 
-    virtual bool SAL_CALL supportsService(const OUString& rServiceName) override
+    virtual bool supportsService(const OUString& rServiceName) override
     {
         return cppu::supportsService(this, rServiceName);
     }
 
-    virtual cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override
+    virtual cpo::uno::Sequence<OUString> getSupportedServiceNames() override
     {
         return { u"com.sun.star.frame.ToolbarController"_ustr };
     }
@@ -227,10 +227,10 @@ public:
     virtual void disposing(std::unique_lock<std::mutex>& rGuard) override;
 
     // XToolbarController
-    virtual uno::Reference<awt::XWindow> SAL_CALL createItemWindow(const uno::Reference<awt::XWindow>& rParent) override;
+    virtual uno::Reference<awt::XWindow> createItemWindow(const uno::Reference<awt::XWindow>& rParent) override;
 
     // XStatusListener
-    virtual void SAL_CALL statusChanged(const frame::FeatureStateEvent& rEvent) override;
+    virtual void statusChanged(const frame::FeatureStateEvent& rEvent) override;
 };
 
 void MMCurrentEntryController::disposing(std::unique_lock<std::mutex>& rGuard)

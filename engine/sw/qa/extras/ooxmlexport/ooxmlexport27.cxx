@@ -52,15 +52,15 @@ public:
     sal_Int32 mnLastValue = -1;
     OUString maText;
 
-    void SAL_CALL start(const OUString& rText, sal_Int32 /*nRange*/) override
+    void start(const OUString& rText, sal_Int32 /*nRange*/) override
     {
         ++mnStartCount;
         maText = rText;
     }
-    void SAL_CALL end() override { ++mnEndCount; }
-    void SAL_CALL setText(const OUString& rText) override { maText = rText; }
-    void SAL_CALL setValue(sal_Int32 nValue) override { mnLastValue = nValue; }
-    void SAL_CALL reset() override {}
+    void end() override { ++mnEndCount; }
+    void setText(const OUString& rText) override { maText = rText; }
+    void setValue(sal_Int32 nValue) override { mnLastValue = nValue; }
+    void reset() override {}
 };
 
 DECLARE_OOXMLEXPORT_TEST(testTdf38575_fullWidthLine, "tdf38575_fullWidthLine.docx")

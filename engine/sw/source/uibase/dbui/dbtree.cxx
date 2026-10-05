@@ -62,10 +62,10 @@ class SwDBTreeList_Impl : public cppu::WeakImplHelper < XContainerListener >
         }
         virtual ~SwDBTreeList_Impl() override;
 
-    virtual void SAL_CALL elementInserted( const ContainerEvent& Event ) override;
-    virtual void SAL_CALL elementRemoved( const ContainerEvent& Event ) override;
-    virtual void SAL_CALL elementReplaced( const ContainerEvent& Event ) override;
-    virtual void SAL_CALL disposing( const EventObject& Source ) override;
+    virtual void elementInserted( const ContainerEvent& Event ) override;
+    virtual void elementRemoved( const ContainerEvent& Event ) override;
+    virtual void elementReplaced( const ContainerEvent& Event ) override;
+    virtual void disposing( const EventObject& Source ) override;
 
     bool                        HasContext();
     SwWrtShell*                 GetWrtShell() { return m_pWrtShell;}

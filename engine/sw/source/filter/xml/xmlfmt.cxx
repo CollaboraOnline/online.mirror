@@ -272,7 +272,7 @@ public:
             XmlStyleFamily nFamily,
             SvXMLStylesContext& rStyles );
 
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createFastChildContext(
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > createFastChildContext(
         sal_Int32 nElement, const cpo::uno::Reference< css::xml::sax::XFastAttributeList >& AttrList ) override;
 };
 
@@ -418,7 +418,7 @@ public:
 
     virtual void CreateAndInsert( bool bOverwrite ) override;
 
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createFastChildContext(
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > createFastChildContext(
         sal_Int32 nElement, const cpo::uno::Reference< css::xml::sax::XFastAttributeList >& AttrList ) override;
 
     // The item set may be empty!
@@ -735,7 +735,7 @@ public:
 
     virtual bool InsertStyleFamily( XmlStyleFamily nFamily ) const override;
 
-    virtual void SAL_CALL endFastElement(sal_Int32 nElement) override;
+    virtual void endFastElement(sal_Int32 nElement) override;
 
 private:
     mutable std::unique_ptr<SvXMLImportPropertyMapper> mxTableTablePropMapper;
@@ -962,7 +962,7 @@ public:
 
     SwXMLMasterStylesContext_Impl( SwXMLImport& rImport );
 
-    virtual void SAL_CALL endFastElement(sal_Int32 nElement) override;
+    virtual void endFastElement(sal_Int32 nElement) override;
 };
 
 }

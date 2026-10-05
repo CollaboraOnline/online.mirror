@@ -129,8 +129,8 @@ public:
     void addListener(::rtl::Reference<IMailDispatcherListener> const& listener);
 
 private:
-    virtual void SAL_CALL run() override;
-    virtual void SAL_CALL onTerminated() override;
+    virtual void run() override;
+    virtual void onTerminated() override;
 
     std::vector<::rtl::Reference<IMailDispatcherListener>> cloneListener();
     void sendMailMessageNotifyListener(cpo::uno::Reference<css::mail::XMailMessage> const& message);

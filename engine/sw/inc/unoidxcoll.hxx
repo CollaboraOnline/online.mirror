@@ -37,26 +37,26 @@ public:
     SwXDocumentIndexes(SwDoc *const pDoc);
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(
             const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getSupportedServiceNames() override;
 
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual bool SAL_CALL hasElements() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual bool hasElements() override;
 
     // XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount() override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount() override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     // XNameAccess
-    virtual cpo::uno::Any SAL_CALL getByName(
+    virtual cpo::uno::Any getByName(
             const OUString& rName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getElementNames() override;
-    virtual bool SAL_CALL hasByName(const OUString& rName) override;
+    virtual bool hasByName(const OUString& rName) override;
 
     rtl::Reference< SwXDocumentIndex > getDocumentIndexByIndex(sal_Int32 nIndex);
 };

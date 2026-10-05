@@ -49,21 +49,21 @@ public:
     virtual ~OOXMLFastContextHandler() override;
 
     // css::xml::sax::XFastContextHandler:
-    virtual void SAL_CALL startFastElement (sal_Int32 Element, const cpo::uno::Reference< css::xml::sax::XFastAttributeList >& Attribs) override final;
+    virtual void startFastElement (sal_Int32 Element, const cpo::uno::Reference< css::xml::sax::XFastAttributeList >& Attribs) override final;
 
-    virtual void SAL_CALL startUnknownElement(const OUString & Namespace, const OUString & Name, const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
+    virtual void startUnknownElement(const OUString & Namespace, const OUString & Name, const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
 
-    virtual void SAL_CALL endFastElement(sal_Int32 Element) override;
+    virtual void endFastElement(sal_Int32 Element) override;
 
-    virtual void SAL_CALL endUnknownElement(const OUString & Namespace, const OUString & Name) override;
+    virtual void endUnknownElement(const OUString & Namespace, const OUString & Name) override;
 
-    virtual cpo::uno::Reference<css::xml::sax::XFastContextHandler> SAL_CALL createFastChildContext(sal_Int32 Element,
+    virtual cpo::uno::Reference<css::xml::sax::XFastContextHandler> createFastChildContext(sal_Int32 Element,
         const cpo::uno::Reference<css::xml::sax::XFastAttributeList>& Attribs) override;
 
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createUnknownChildContext(const OUString & Namespace, const OUString & Name,
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > createUnknownChildContext(const OUString & Namespace, const OUString & Name,
         const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
 
-    virtual void SAL_CALL characters(const OUString & aChars) override;
+    virtual void characters(const OUString & aChars) override;
 
     // local
 
@@ -358,7 +358,7 @@ public:
     explicit OOXMLFastContextHandlerTable(OOXMLFastContextHandler * pContext);
     virtual ~OOXMLFastContextHandlerTable() override;
 
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createFastChildContext (sal_Int32 Element,
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > createFastChildContext (sal_Int32 Element,
         const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
 
 private:
@@ -458,11 +458,11 @@ public:
     virtual std::string getType() const override { return "Shape"; }
 
     // css::xml::sax::XFastContextHandler:
-    virtual void SAL_CALL startUnknownElement (const OUString & Namespace, const OUString & Name, const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
+    virtual void startUnknownElement (const OUString & Namespace, const OUString & Name, const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
 
-    virtual void SAL_CALL endUnknownElement(const OUString & Namespace, const OUString & Name) override;
+    virtual void endUnknownElement(const OUString & Namespace, const OUString & Name) override;
 
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createUnknownChildContext(const OUString & Namespace, const OUString & Name,
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > createUnknownChildContext(const OUString & Namespace, const OUString & Name,
         const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
 
     virtual void setToken(Token_t nToken) override;
@@ -503,12 +503,12 @@ public:
     virtual ~OOXMLFastContextHandlerWrapper() override;
 
     // css::xml::sax::XFastContextHandler:
-    virtual void SAL_CALL endFastElement( ::sal_Int32 Element ) override;
-    virtual void SAL_CALL startUnknownElement(const OUString & Namespace, const OUString & Name, const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
+    virtual void endFastElement( ::sal_Int32 Element ) override;
+    virtual void startUnknownElement(const OUString & Namespace, const OUString & Name, const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
 
-    virtual void SAL_CALL endUnknownElement(const OUString & Namespace, const OUString & Name) override;
+    virtual void endUnknownElement(const OUString & Namespace, const OUString & Name) override;
 
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createUnknownChildContext (const OUString & Namespace, const OUString & Name,
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > createUnknownChildContext (const OUString & Namespace, const OUString & Name,
         const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
 
     virtual void attributes(const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;

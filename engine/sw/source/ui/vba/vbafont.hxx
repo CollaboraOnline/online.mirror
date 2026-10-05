@@ -31,16 +31,16 @@ public:
     SwVbaFont( const cpo::uno::Reference< ov::XHelperInterface >& xParent, const cpo::uno::Reference< cpo::uno::XComponentContext >& xContext, const cpo::uno::Reference< css::container::XIndexAccess >& xPalette, cpo::uno::Reference< css::beans::XPropertySet > const & xPropertySet );
 
     // Attributes
-    virtual cpo::uno::Any SAL_CALL getColorIndex() override;
-    virtual cpo::uno::Any SAL_CALL getUnderline() override;
-    virtual void SAL_CALL setUnderline( const cpo::uno::Any& _underline ) override;
-    virtual cpo::uno::Any SAL_CALL getSubscript() override;
-    virtual cpo::uno::Any SAL_CALL getSuperscript() override;
+    virtual cpo::uno::Any getColorIndex() override;
+    virtual cpo::uno::Any getUnderline() override;
+    virtual void setUnderline( const cpo::uno::Any& _underline ) override;
+    virtual cpo::uno::Any getSubscript() override;
+    virtual cpo::uno::Any getSuperscript() override;
 
-    virtual cpo::uno::Any SAL_CALL getBold() override;
-    virtual cpo::uno::Any SAL_CALL getItalic() override;
-    virtual cpo::uno::Any SAL_CALL getStrikethrough() override;
-    virtual cpo::uno::Any SAL_CALL getShadow() override;
+    virtual cpo::uno::Any getBold() override;
+    virtual cpo::uno::Any getItalic() override;
+    virtual cpo::uno::Any getStrikethrough() override;
+    virtual cpo::uno::Any getShadow() override;
     // XHelperInterface
     virtual OUString getServiceImplName() override;
     virtual cpo::uno::Sequence<OUString> getServiceNames() override;

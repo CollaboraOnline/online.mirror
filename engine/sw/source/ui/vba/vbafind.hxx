@@ -72,32 +72,32 @@ public:
     virtual ~SwVbaFind() override;
 
     // Attributes
-    virtual OUString SAL_CALL getText() override;
-    virtual void SAL_CALL setText( const OUString& _text ) override;
-    virtual cpo::uno::Any SAL_CALL getReplacement() override;
-    virtual void SAL_CALL setReplacement( const cpo::uno::Any& _replacement ) override;
-    virtual bool SAL_CALL getForward() override;
-    virtual void SAL_CALL setForward( bool _forward ) override;
-    virtual ::sal_Int32 SAL_CALL getWrap() override;
-    virtual void SAL_CALL setWrap( ::sal_Int32 _wrap ) override;
-    virtual bool SAL_CALL getFormat() override;
-    virtual void SAL_CALL setFormat( bool _format ) override;
-    virtual bool SAL_CALL getMatchCase() override;
-    virtual void SAL_CALL setMatchCase( bool _matchcase ) override;
-    virtual bool SAL_CALL getMatchWholeWord() override;
-    virtual void SAL_CALL setMatchWholeWord( bool _matchwholeword ) override;
-    virtual bool SAL_CALL getMatchWildcards() override;
-    virtual void SAL_CALL setMatchWildcards( bool _matchwildcards ) override;
-    virtual bool SAL_CALL getMatchSoundsLike() override;
-    virtual void SAL_CALL setMatchSoundsLike( bool _matchsoundslike ) override;
-    virtual bool SAL_CALL getMatchAllWordForms() override;
-    virtual void SAL_CALL setMatchAllWordForms( bool _matchallwordforms ) override;
-    virtual cpo::uno::Any SAL_CALL getStyle() override;
-    virtual void SAL_CALL setStyle( const cpo::uno::Any& _style ) override;
+    virtual OUString getText() override;
+    virtual void setText( const OUString& _text ) override;
+    virtual cpo::uno::Any getReplacement() override;
+    virtual void setReplacement( const cpo::uno::Any& _replacement ) override;
+    virtual bool getForward() override;
+    virtual void setForward( bool _forward ) override;
+    virtual ::sal_Int32 getWrap() override;
+    virtual void setWrap( ::sal_Int32 _wrap ) override;
+    virtual bool getFormat() override;
+    virtual void setFormat( bool _format ) override;
+    virtual bool getMatchCase() override;
+    virtual void setMatchCase( bool _matchcase ) override;
+    virtual bool getMatchWholeWord() override;
+    virtual void setMatchWholeWord( bool _matchwholeword ) override;
+    virtual bool getMatchWildcards() override;
+    virtual void setMatchWildcards( bool _matchwildcards ) override;
+    virtual bool getMatchSoundsLike() override;
+    virtual void setMatchSoundsLike( bool _matchsoundslike ) override;
+    virtual bool getMatchAllWordForms() override;
+    virtual void setMatchAllWordForms( bool _matchallwordforms ) override;
+    virtual cpo::uno::Any getStyle() override;
+    virtual void setStyle( const cpo::uno::Any& _style ) override;
 
     // Methods
-    virtual bool SAL_CALL Execute( const cpo::uno::Any& FindText, const cpo::uno::Any& MatchCase, const cpo::uno::Any& MatchWholeWord, const cpo::uno::Any& MatchWildcards, const cpo::uno::Any& MatchSoundsLike, const cpo::uno::Any& MatchAllWordForms, const cpo::uno::Any& Forward, const cpo::uno::Any& Wrap, const cpo::uno::Any& Format, const cpo::uno::Any& ReplaceWith, const cpo::uno::Any& Replace, const cpo::uno::Any& MatchKashida, const cpo::uno::Any& MatchDiacritics, const cpo::uno::Any& MatchAlefHamza, const cpo::uno::Any& MatchControl, const cpo::uno::Any& MatchPrefix, const cpo::uno::Any& MatchSuffix, const cpo::uno::Any& MatchPhrase, const cpo::uno::Any& IgnoreSpace, const cpo::uno::Any& IgnorePunct ) override;
-    virtual void SAL_CALL ClearFormatting(  ) override;
+    virtual bool Execute( const cpo::uno::Any& FindText, const cpo::uno::Any& MatchCase, const cpo::uno::Any& MatchWholeWord, const cpo::uno::Any& MatchWildcards, const cpo::uno::Any& MatchSoundsLike, const cpo::uno::Any& MatchAllWordForms, const cpo::uno::Any& Forward, const cpo::uno::Any& Wrap, const cpo::uno::Any& Format, const cpo::uno::Any& ReplaceWith, const cpo::uno::Any& Replace, const cpo::uno::Any& MatchKashida, const cpo::uno::Any& MatchDiacritics, const cpo::uno::Any& MatchAlefHamza, const cpo::uno::Any& MatchControl, const cpo::uno::Any& MatchPrefix, const cpo::uno::Any& MatchSuffix, const cpo::uno::Any& MatchPhrase, const cpo::uno::Any& IgnoreSpace, const cpo::uno::Any& IgnorePunct ) override;
+    virtual void ClearFormatting(  ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

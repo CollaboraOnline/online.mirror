@@ -34,7 +34,7 @@ public:
     explicit CancellableJob(::rtl::Reference<ObservableThread> xThread);
 
     // css::util::XCancellable:
-    virtual void SAL_CALL cancel() override;
+    virtual void cancel() override;
 
 private:
     CancellableJob(CancellableJob const&) = delete;

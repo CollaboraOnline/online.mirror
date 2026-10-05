@@ -38,11 +38,11 @@ public:
     virtual ~SwVbaVariable() override;
 
    // XVariable
-    virtual OUString SAL_CALL getName() override;
-    virtual void SAL_CALL setName( const OUString& ) override;
-    virtual cpo::uno::Any SAL_CALL getValue() override;
-    virtual void SAL_CALL setValue( const cpo::uno::Any& rValue ) override;
-    virtual sal_Int32 SAL_CALL getIndex() override;
+    virtual OUString getName() override;
+    virtual void setName( const OUString& ) override;
+    virtual cpo::uno::Any getValue() override;
+    virtual void setValue( const cpo::uno::Any& rValue ) override;
+    virtual sal_Int32 getIndex() override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

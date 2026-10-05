@@ -29,20 +29,20 @@ public:
     ~SwVbaFormFieldDropDown() override;
 
     // XDropDown
-    OUString SAL_CALL getDefaultPropertyName() override;
+    OUString getDefaultPropertyName() override;
 
     // Default member: True if the specified form field object is a valid listbox field
-    bool SAL_CALL getValid() override;
+    bool getValid() override;
 
     // Returns and sets the index for the default listbox entry
-    sal_Int32 SAL_CALL getDefault() override;
-    void SAL_CALL setDefault(sal_Int32 nSet) override;
+    sal_Int32 getDefault() override;
+    void setDefault(sal_Int32 nSet) override;
     // Returns and sets the index of the selected listbox entry
-    sal_Int32 SAL_CALL getValue() override;
-    void SAL_CALL setValue(sal_Int32 nIndex) override;
+    sal_Int32 getValue() override;
+    void setValue(sal_Int32 nIndex) override;
 
     // Returns a ListEntries collection that represents all the available entries
-    cpo::uno::Any SAL_CALL ListEntries(const cpo::uno::Any& rIndex) override;
+    cpo::uno::Any ListEntries(const cpo::uno::Any& rIndex) override;
 
     // XHelperInterface
     OUString getServiceImplName() override;

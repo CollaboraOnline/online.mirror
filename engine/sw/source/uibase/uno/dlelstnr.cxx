@@ -71,7 +71,7 @@ SwLinguServiceEventListener::~SwLinguServiceEventListener()
 {
 }
 
-void SAL_CALL SwLinguServiceEventListener::processLinguServiceEvent(
+void SwLinguServiceEventListener::processLinguServiceEvent(
             const LinguServiceEvent& rLngSvcEvent )
 {
     SolarMutexGuard aGuard;
@@ -100,7 +100,7 @@ void SAL_CALL SwLinguServiceEventListener::processLinguServiceEvent(
     }
 }
 
-void SAL_CALL SwLinguServiceEventListener::disposing(
+void SwLinguServiceEventListener::disposing(
             const EventObject& rEventObj )
 {
     SolarMutexGuard aGuard;
@@ -111,12 +111,12 @@ void SAL_CALL SwLinguServiceEventListener::disposing(
         m_xGCIterator = nullptr;
 }
 
-void SAL_CALL SwLinguServiceEventListener::queryTermination(
+void SwLinguServiceEventListener::queryTermination(
             const EventObject& /*rEventObj*/ )
 {
 }
 
-void SAL_CALL SwLinguServiceEventListener::notifyTermination(
+void SwLinguServiceEventListener::notifyTermination(
             const EventObject& rEventObj )
 {
     SolarMutexGuard aGuard;

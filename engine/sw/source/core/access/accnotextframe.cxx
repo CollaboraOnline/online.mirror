@@ -130,7 +130,7 @@ void SwAccessibleNoTextFrame::Dispose(bool bRecursive, bool bCanSkipInvisible)
 }
 
 // #i73249#
-OUString SAL_CALL SwAccessibleNoTextFrame::getAccessibleName()
+OUString SwAccessibleNoTextFrame::getAccessibleName()
 {
     SolarMutexGuard aGuard;
 
@@ -144,7 +144,7 @@ OUString SAL_CALL SwAccessibleNoTextFrame::getAccessibleName()
     return SwAccessibleFrameBase::getAccessibleName();
 }
 
-OUString SAL_CALL SwAccessibleNoTextFrame::getAccessibleDescription()
+OUString SwAccessibleNoTextFrame::getAccessibleDescription()
 {
     SolarMutexGuard aGuard;
 
@@ -158,63 +158,63 @@ OUString SAL_CALL SwAccessibleNoTextFrame::getAccessibleDescription()
     all relevant information is already accessible through other
     methods. So we just delegate to those. */
 
-OUString SAL_CALL SwAccessibleNoTextFrame::getAccessibleImageDescription()
+OUString SwAccessibleNoTextFrame::getAccessibleImageDescription()
 {
     return getAccessibleDescription();
 }
 
-sal_Int32 SAL_CALL SwAccessibleNoTextFrame::getAccessibleImageHeight(  )
+sal_Int32 SwAccessibleNoTextFrame::getAccessibleImageHeight(  )
 {
     return getSize().Height;
 }
 
-sal_Int32 SAL_CALL SwAccessibleNoTextFrame::getAccessibleImageWidth(  )
+sal_Int32 SwAccessibleNoTextFrame::getAccessibleImageWidth(  )
 {
     return getSize().Width;
 }
 
 // XAccessibleText
-sal_Int32 SAL_CALL SwAccessibleNoTextFrame::getCaretPosition(  ){return 0;}
-bool SAL_CALL SwAccessibleNoTextFrame::setCaretPosition( sal_Int32 ){return false;}
-sal_Unicode SAL_CALL SwAccessibleNoTextFrame::getCharacter( sal_Int32 ){return 0;}
-cpo::uno::Sequence< css::beans::PropertyValue > SAL_CALL SwAccessibleNoTextFrame::getCharacterAttributes( sal_Int32 , const cpo::uno::Sequence< OUString >& )
+sal_Int32 SwAccessibleNoTextFrame::getCaretPosition(  ){return 0;}
+bool SwAccessibleNoTextFrame::setCaretPosition( sal_Int32 ){return false;}
+sal_Unicode SwAccessibleNoTextFrame::getCharacter( sal_Int32 ){return 0;}
+cpo::uno::Sequence< css::beans::PropertyValue > SwAccessibleNoTextFrame::getCharacterAttributes( sal_Int32 , const cpo::uno::Sequence< OUString >& )
 {
     return cpo::uno::Sequence<beans::PropertyValue>();
 }
-css::awt::Rectangle SAL_CALL SwAccessibleNoTextFrame::getCharacterBounds( sal_Int32 )
+css::awt::Rectangle SwAccessibleNoTextFrame::getCharacterBounds( sal_Int32 )
 {
     return css::awt::Rectangle(0, 0, 0, 0 );
 }
-sal_Int32 SAL_CALL SwAccessibleNoTextFrame::getCharacterCount(  ){return 0;}
-sal_Int32 SAL_CALL SwAccessibleNoTextFrame::getIndexAtPoint( const css::awt::Point& ){return 0;}
-OUString SAL_CALL SwAccessibleNoTextFrame::getSelectedText(  ){return OUString();}
-sal_Int32 SAL_CALL SwAccessibleNoTextFrame::getSelectionStart(  ){return 0;}
-sal_Int32 SAL_CALL SwAccessibleNoTextFrame::getSelectionEnd(  ){return 0;}
-bool SAL_CALL SwAccessibleNoTextFrame::setSelection( sal_Int32 , sal_Int32 ){return true;}
-OUString SAL_CALL SwAccessibleNoTextFrame::getText(  ){return OUString();}
-OUString SAL_CALL SwAccessibleNoTextFrame::getTextRange( sal_Int32 , sal_Int32 ){return OUString();}
-css::accessibility::TextSegment SAL_CALL SwAccessibleNoTextFrame::getTextAtIndex( sal_Int32 , sal_Int16 )
+sal_Int32 SwAccessibleNoTextFrame::getCharacterCount(  ){return 0;}
+sal_Int32 SwAccessibleNoTextFrame::getIndexAtPoint( const css::awt::Point& ){return 0;}
+OUString SwAccessibleNoTextFrame::getSelectedText(  ){return OUString();}
+sal_Int32 SwAccessibleNoTextFrame::getSelectionStart(  ){return 0;}
+sal_Int32 SwAccessibleNoTextFrame::getSelectionEnd(  ){return 0;}
+bool SwAccessibleNoTextFrame::setSelection( sal_Int32 , sal_Int32 ){return true;}
+OUString SwAccessibleNoTextFrame::getText(  ){return OUString();}
+OUString SwAccessibleNoTextFrame::getTextRange( sal_Int32 , sal_Int32 ){return OUString();}
+css::accessibility::TextSegment SwAccessibleNoTextFrame::getTextAtIndex( sal_Int32 , sal_Int16 )
 {
     css::accessibility::TextSegment aResult;
     return aResult;
 }
-css::accessibility::TextSegment SAL_CALL SwAccessibleNoTextFrame::getTextBeforeIndex( sal_Int32, sal_Int16 )
+css::accessibility::TextSegment SwAccessibleNoTextFrame::getTextBeforeIndex( sal_Int32, sal_Int16 )
 {
     css::accessibility::TextSegment aResult;
     return aResult;
 }
-css::accessibility::TextSegment SAL_CALL SwAccessibleNoTextFrame::getTextBehindIndex( sal_Int32 , sal_Int16 )
+css::accessibility::TextSegment SwAccessibleNoTextFrame::getTextBehindIndex( sal_Int32 , sal_Int16 )
 {
     css::accessibility::TextSegment aResult;
     return aResult;
 }
 
-bool SAL_CALL SwAccessibleNoTextFrame::copyText( sal_Int32, sal_Int32 ){return true;}
-bool SAL_CALL SwAccessibleNoTextFrame::scrollSubstringTo( sal_Int32, sal_Int32, AccessibleScrollType ){return false;}
+bool SwAccessibleNoTextFrame::copyText( sal_Int32, sal_Int32 ){return true;}
+bool SwAccessibleNoTextFrame::scrollSubstringTo( sal_Int32, sal_Int32, AccessibleScrollType ){return false;}
 
 //  XAccessibleHyperText
 
-sal_Int32 SAL_CALL SwAccessibleNoTextFrame::getHyperLinkCount()
+sal_Int32 SwAccessibleNoTextFrame::getHyperLinkCount()
 {
     SolarMutexGuard aGuard;
 
@@ -229,7 +229,7 @@ sal_Int32 SAL_CALL SwAccessibleNoTextFrame::getHyperLinkCount()
     return nCount;
 }
 
-uno::Reference< XAccessibleHyperlink > SAL_CALL
+uno::Reference< XAccessibleHyperlink >
     SwAccessibleNoTextFrame::getHyperLink( sal_Int32 nLinkIndex )
 {
     SolarMutexGuard aGuard;
@@ -254,12 +254,12 @@ uno::Reference< XAccessibleHyperlink > SAL_CALL
     return nullptr;
 }
 
-sal_Int32 SAL_CALL SwAccessibleNoTextFrame::getHyperLinkIndex( sal_Int32 )
+sal_Int32 SwAccessibleNoTextFrame::getHyperLinkIndex( sal_Int32 )
 {
     return 0;
 }
 
-uno::Reference<XAccessibleRelationSet> SAL_CALL SwAccessibleNoTextFrame::getAccessibleRelationSet( )
+uno::Reference<XAccessibleRelationSet> SwAccessibleNoTextFrame::getAccessibleRelationSet( )
 {
     return new AccessibleRelationSetHelper();
 }

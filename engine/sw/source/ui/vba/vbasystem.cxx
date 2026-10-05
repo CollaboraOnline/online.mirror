@@ -176,7 +176,7 @@ SwVbaSystem::~SwVbaSystem()
 {
 }
 
-sal_Int32 SAL_CALL
+sal_Int32
 SwVbaSystem::getCursor()
 {
     PointerStyle nPointerStyle = getPointerStyle( static_cast<SfxBaseModel*>(getCurrentWordDoc(mxContext).get()) );
@@ -196,7 +196,7 @@ SwVbaSystem::getCursor()
     }
 }
 
-void SAL_CALL
+void
 SwVbaSystem::setCursor( sal_Int32 _cursor )
 {
     try
@@ -236,7 +236,7 @@ SwVbaSystem::setCursor( sal_Int32 _cursor )
     }
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaSystem::PrivateProfileString( const OUString& rFilename, const OUString& rSection, const OUString& rKey )
 {
     // FIXME: need to detect whether it is a relative file path

@@ -81,7 +81,7 @@ SwVbaTemplate::getPath()
     return sPath;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaTemplate::AutoTextEntries( const cpo::uno::Any& index )
 {
     const uno::Reference< cpo::uno::XComponentContext >& xContext = comphelper::getProcessComponentContext();

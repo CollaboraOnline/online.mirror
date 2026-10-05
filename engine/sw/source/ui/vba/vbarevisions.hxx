@@ -45,12 +45,12 @@ public:
                     const cpo::uno::Reference< css::container::XIndexAccess >& xIndexAccess );
 
     // Methods
-    virtual void SAL_CALL AcceptAll(  ) override;
-    virtual void SAL_CALL RejectAll(  ) override;
+    virtual void AcceptAll(  ) override;
+    virtual void RejectAll(  ) override;
 
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     // SwVbaRevisions_BASE
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;

@@ -85,7 +85,7 @@ void SwVbaWrapFormat::makeWrap()
     m_xPropertySet->setPropertyValue(u"TextWrap"_ustr, cpo::uno::Any( eTextMode ) );
 }
 
-::sal_Int32 SAL_CALL SwVbaWrapFormat::getType()
+::sal_Int32 SwVbaWrapFormat::getType()
 {
     sal_Int32 nType = word::WdWrapType::wdWrapSquare;
     text::WrapTextMode eTextMode;
@@ -127,13 +127,13 @@ void SwVbaWrapFormat::makeWrap()
     return nType;
 }
 
-void SAL_CALL SwVbaWrapFormat::setType( ::sal_Int32 _type )
+void SwVbaWrapFormat::setType( ::sal_Int32 _type )
 {
     mnWrapFormatType = _type;
     makeWrap();
 }
 
-::sal_Int32 SAL_CALL SwVbaWrapFormat::getSide()
+::sal_Int32 SwVbaWrapFormat::getSide()
 {
     sal_Int32 nSide = word::WdWrapSideType::wdWrapBoth;
     text::WrapTextMode eTextMode;
@@ -158,7 +158,7 @@ void SAL_CALL SwVbaWrapFormat::setType( ::sal_Int32 _type )
     return nSide;
 }
 
-void SAL_CALL SwVbaWrapFormat::setSide( ::sal_Int32 _side )
+void SwVbaWrapFormat::setSide( ::sal_Int32 _side )
 {
     mnSide = _side;
     makeWrap();
@@ -177,42 +177,42 @@ void SwVbaWrapFormat::setDistance( const OUString& sName, float _distance )
     m_xPropertySet->setPropertyValue( sName, cpo::uno::Any( nDistance ) );
 }
 
-float SAL_CALL SwVbaWrapFormat::getDistanceTop()
+float SwVbaWrapFormat::getDistanceTop()
 {
     return getDistance( u"TopMargin"_ustr );
 }
 
-void SAL_CALL SwVbaWrapFormat::setDistanceTop( float _distancetop )
+void SwVbaWrapFormat::setDistanceTop( float _distancetop )
 {
     setDistance( u"TopMargin"_ustr, _distancetop );
 }
 
-float SAL_CALL SwVbaWrapFormat::getDistanceBottom()
+float SwVbaWrapFormat::getDistanceBottom()
 {
     return getDistance( u"BottomMargin"_ustr );
 }
 
-void SAL_CALL SwVbaWrapFormat::setDistanceBottom( float _distancebottom )
+void SwVbaWrapFormat::setDistanceBottom( float _distancebottom )
 {
     setDistance( u"BottomMargin"_ustr, _distancebottom );
 }
 
-float SAL_CALL SwVbaWrapFormat::getDistanceLeft()
+float SwVbaWrapFormat::getDistanceLeft()
 {
     return getDistance( u"LeftMargin"_ustr );
 }
 
-void SAL_CALL SwVbaWrapFormat::setDistanceLeft( float _distanceleft )
+void SwVbaWrapFormat::setDistanceLeft( float _distanceleft )
 {
     setDistance( u"LeftMargin"_ustr, _distanceleft );
 }
 
-float SAL_CALL SwVbaWrapFormat::getDistanceRight()
+float SwVbaWrapFormat::getDistanceRight()
 {
     return getDistance( u"RightMargin"_ustr );
 }
 
-void SAL_CALL SwVbaWrapFormat::setDistanceRight( float _distanceright )
+void SwVbaWrapFormat::setDistanceRight( float _distanceright )
 {
     setDistance( u"RightMargin"_ustr, _distanceright );
 }

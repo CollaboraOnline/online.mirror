@@ -122,7 +122,7 @@ void SwAccessibleDocumentBase::RemoveChild( vcl::Window *pWin )
     }
 }
 
-sal_Int64 SAL_CALL SwAccessibleDocumentBase::getAccessibleChildCount()
+sal_Int64 SwAccessibleDocumentBase::getAccessibleChildCount()
 {
     SolarMutexGuard aGuard;
 
@@ -135,7 +135,7 @@ sal_Int64 SAL_CALL SwAccessibleDocumentBase::getAccessibleChildCount()
     return nChildren;
 }
 
-uno::Reference< XAccessible> SAL_CALL
+uno::Reference< XAccessible>
     SwAccessibleDocumentBase::getAccessibleChild( sal_Int64 nIndex )
 {
     SolarMutexGuard aGuard;
@@ -153,12 +153,12 @@ uno::Reference< XAccessible> SAL_CALL
     return SwAccessibleContext::getAccessibleChild( nIndex );
 }
 
-uno::Reference< XAccessible> SAL_CALL SwAccessibleDocumentBase::getAccessibleParent()
+uno::Reference< XAccessible> SwAccessibleDocumentBase::getAccessibleParent()
 {
     return mxParent;
 }
 
-sal_Int64 SAL_CALL SwAccessibleDocumentBase::getAccessibleIndexInParent()
+sal_Int64 SwAccessibleDocumentBase::getAccessibleIndexInParent()
 {
     SolarMutexGuard aGuard;
 
@@ -181,12 +181,12 @@ sal_Int64 SAL_CALL SwAccessibleDocumentBase::getAccessibleIndexInParent()
     return -1;
 }
 
-OUString SAL_CALL SwAccessibleDocumentBase::getAccessibleDescription()
+OUString SwAccessibleDocumentBase::getAccessibleDescription()
 {
     return GetResource( STR_ACCESS_DOC_DESC );
 }
 
-OUString SAL_CALL SwAccessibleDocumentBase::getAccessibleName()
+OUString SwAccessibleDocumentBase::getAccessibleName()
 {
     SolarMutexGuard g;
 
@@ -232,7 +232,7 @@ awt::Rectangle SwAccessibleDocumentBase::implGetBounds()
     }
 }
 
-css::awt::Point SAL_CALL SwAccessibleDocumentBase::getLocationOnScreen()
+css::awt::Point SwAccessibleDocumentBase::getLocationOnScreen()
 {
     SolarMutexGuard aGuard;
 
@@ -248,7 +248,7 @@ css::awt::Point SAL_CALL SwAccessibleDocumentBase::getLocationOnScreen()
     return aLoc;
 }
 
-uno::Reference< XAccessible > SAL_CALL SwAccessibleDocumentBase::getAccessibleAtPoint(
+uno::Reference< XAccessible > SwAccessibleDocumentBase::getAccessibleAtPoint(
                 const awt::Point& aPoint )
 {
     SolarMutexGuard aGuard;
@@ -399,7 +399,7 @@ void SwAccessibleDocument::deselectAccessibleChild(
     maSelectionHelper.deselectAccessibleChild( nChildIndex );
 }
 
-OUString SAL_CALL SwAccessibleDocument::getExtendedAttributes()
+OUString SwAccessibleDocument::getExtendedAttributes()
 {
     SolarMutexGuard g;
 
@@ -599,7 +599,7 @@ OUString SAL_CALL SwAccessibleDocument::getExtendedAttributes()
     return sValue;
 }
 
-sal_Int32 SAL_CALL SwAccessibleDocument::getBackground()
+sal_Int32 SwAccessibleDocument::getBackground()
 {
     SolarMutexGuard aGuard;
     return sal_Int32(SwModule::get()->GetColorConfig().GetColorValue(::svtools::DOCCOLOR).nColor);

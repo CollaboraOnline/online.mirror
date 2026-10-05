@@ -91,7 +91,7 @@ uno::Reference< frame::XDispatch > SwXDispatchProviderInterceptor::queryDispatch
     return xResult;
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL SwXDispatchProviderInterceptor::getInterceptedURLs()
+cpo::uno::Sequence<OUString> SwXDispatchProviderInterceptor::getInterceptedURLs()
 {
     cpo::uno::Sequence<OUString> aRet =
     {

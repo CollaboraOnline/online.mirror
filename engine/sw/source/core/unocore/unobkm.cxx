@@ -243,13 +243,13 @@ void SwXBookmark::attachToRange( const uno::Reference< text::XTextRange > & xTex
     attachToRangeEx(xTextRange, IDocumentMarkAccess::MarkType::BOOKMARK);
 }
 
-void SAL_CALL SwXBookmark::attach( const uno::Reference< text::XTextRange > & xTextRange )
+void SwXBookmark::attach( const uno::Reference< text::XTextRange > & xTextRange )
 {
     SolarMutexGuard aGuard;
     attachToRange( xTextRange );
 }
 
-uno::Reference< text::XTextRange > SAL_CALL SwXBookmark::getAnchor()
+uno::Reference< text::XTextRange > SwXBookmark::getAnchor()
 {
     SolarMutexGuard aGuard;
 
@@ -266,7 +266,7 @@ uno::Reference< text::XTextRange > SAL_CALL SwXBookmark::getAnchor()
             SwXTextRange::RANGE_IS_BOOKMARK);
 }
 
-void SAL_CALL SwXBookmark::dispose()
+void SwXBookmark::dispose()
 {
     SolarMutexGuard aGuard;
     if (m_pImpl->m_pRegisteredBookmark)
@@ -275,7 +275,7 @@ void SAL_CALL SwXBookmark::dispose()
     }
 }
 
-void SAL_CALL SwXBookmark::addEventListener(
+void SwXBookmark::addEventListener(
         const uno::Reference< lang::XEventListener > & xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -283,7 +283,7 @@ void SAL_CALL SwXBookmark::addEventListener(
     m_pImpl->m_EventListeners.addInterface(aGuard, xListener);
 }
 
-void SAL_CALL SwXBookmark::removeEventListener(
+void SwXBookmark::removeEventListener(
         const uno::Reference< lang::XEventListener > & xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -291,7 +291,7 @@ void SAL_CALL SwXBookmark::removeEventListener(
     m_pImpl->m_EventListeners.removeInterface(aGuard, xListener);
 }
 
-OUString SAL_CALL SwXBookmark::getName()
+OUString SwXBookmark::getName()
 {
     SolarMutexGuard aGuard;
 
@@ -300,7 +300,7 @@ OUString SAL_CALL SwXBookmark::getName()
         :   m_pImpl->m_sMarkName.toString();
 }
 
-void SAL_CALL SwXBookmark::setName(const OUString& rName)
+void SwXBookmark::setName(const OUString& rName)
 {
     SolarMutexGuard aGuard;
 
@@ -331,18 +331,18 @@ void SAL_CALL SwXBookmark::setName(const OUString& rName)
     pMarkAccess->renameMark(m_pImpl->m_pRegisteredBookmark, SwMarkName(rName));
 }
 
-OUString SAL_CALL
+OUString
 SwXBookmark::getImplementationName()
 {
     return u"SwXBookmark"_ustr;
 }
 
-bool SAL_CALL SwXBookmark::supportsService(const OUString& rServiceName)
+bool SwXBookmark::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXBookmark::getSupportedServiceNames()
 {
     return {
@@ -368,7 +368,7 @@ uno::Reference<frame::XModel> SwXBookmark::GetModel()
     return nullptr;
 }
 
-uno::Reference< beans::XPropertySetInfo > SAL_CALL
+uno::Reference< beans::XPropertySetInfo >
 SwXBookmark::getPropertySetInfo()
 {
     SolarMutexGuard g;
@@ -379,7 +379,7 @@ SwXBookmark::getPropertySetInfo()
     return xRef;
 }
 
-void SAL_CALL
+void
 SwXBookmark::setPropertyValue(const OUString& PropertyName,
         const cpo::uno::Any& rValue)
 {
@@ -425,7 +425,7 @@ SwXBookmark::setPropertyValue(const OUString& PropertyName,
             + PropertyName, getXWeak(), 0 );
 }
 
-cpo::uno::Any SAL_CALL SwXBookmark::getPropertyValue(const OUString& rPropertyName)
+cpo::uno::Any SwXBookmark::getPropertyValue(const OUString& rPropertyName)
 {
     SolarMutexGuard g;
 
@@ -464,7 +464,7 @@ cpo::uno::Any SAL_CALL SwXBookmark::getPropertyValue(const OUString& rPropertyNa
     return aRet;
 }
 
-void SAL_CALL
+void
 SwXBookmark::addPropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/)
@@ -472,7 +472,7 @@ SwXBookmark::addPropertyChangeListener(
     OSL_FAIL("SwXBookmark::addPropertyChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXBookmark::removePropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/)
@@ -480,7 +480,7 @@ SwXBookmark::removePropertyChangeListener(
     OSL_FAIL("SwXBookmark::removePropertyChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXBookmark::addVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/)
@@ -488,7 +488,7 @@ SwXBookmark::addVetoableChangeListener(
     OSL_FAIL("SwXBookmark::addVetoableChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXBookmark::removeVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/)
@@ -578,13 +578,13 @@ SwXFieldmark::SwXFieldmark(bool const isReplacementObject, SwDoc *const pDoc)
 {
 }
 
-OUString SAL_CALL
+OUString
 SwXFieldmark::getImplementationName()
 {
     return u"SwXFieldmark"_ustr;
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL
+cpo::uno::Sequence<OUString>
 SwXFieldmark::getSupportedServiceNames()
 {
     // is const, no lock needed
@@ -720,7 +720,7 @@ SwXFieldmark::getCheckboxFieldmark()
 // support 'hidden' "Checked" property ( note: this property is just for convenience to support
 // docx import filter thus not published via PropertySet info )
 
-void SAL_CALL
+void
 SwXFieldmark::setPropertyValue(const OUString& PropertyName,
         const cpo::uno::Any& rValue)
 {
@@ -749,7 +749,7 @@ SwXFieldmark::setPropertyValue(const OUString& PropertyName,
 // support 'hidden' "Checked" property ( note: this property is just for convenience to support
 // docx import filter thus not published via PropertySet info )
 
-cpo::uno::Any SAL_CALL SwXFieldmark::getPropertyValue(const OUString& rPropertyName)
+cpo::uno::Any SwXFieldmark::getPropertyValue(const OUString& rPropertyName)
 {
     SolarMutexGuard g;
     if ( rPropertyName == "Checked" )
@@ -764,7 +764,7 @@ cpo::uno::Any SAL_CALL SwXFieldmark::getPropertyValue(const OUString& rPropertyN
     return cpo::uno::Any(); // this doesn't support any SwXBookmark property
 }
 
-uno::Reference<beans::XPropertySetInfo> SAL_CALL
+uno::Reference<beans::XPropertySetInfo>
 SwXFieldmark::getPropertySetInfo()
 {
     SolarMutexGuard g;
@@ -776,29 +776,29 @@ SwXFieldmark::getPropertySetInfo()
 }
 
 // XComponent
-void SAL_CALL SwXFieldmark::dispose()
+void SwXFieldmark::dispose()
 {
     return SwXBookmark::dispose();
 }
-void SAL_CALL SwXFieldmark::addEventListener(
+void SwXFieldmark::addEventListener(
         uno::Reference<lang::XEventListener> const& xListener)
 {
     return SwXBookmark::addEventListener(xListener);
 }
-void SAL_CALL SwXFieldmark::removeEventListener(
+void SwXFieldmark::removeEventListener(
         uno::Reference<lang::XEventListener> const& xListener)
 {
     return SwXBookmark::removeEventListener(xListener);
 }
 
 // XTextContent
-void SAL_CALL SwXFieldmark::attach(
+void SwXFieldmark::attach(
             uno::Reference<text::XTextRange> const& xTextRange)
 {
     return SwXBookmark::attach(xTextRange);
 }
 
-uno::Reference<text::XTextRange> SAL_CALL SwXFieldmark::getAnchor()
+uno::Reference<text::XTextRange> SwXFieldmark::getAnchor()
 {
     return SwXBookmark::getAnchor();
 }
@@ -822,7 +822,7 @@ SwXFieldmark::GetResult(Fieldmark const& rMark)
 }
 
 // XTextField
-OUString SAL_CALL
+OUString
 SwXFieldmark::getPresentation(bool const bShowCommand)
 {
     SolarMutexGuard g;

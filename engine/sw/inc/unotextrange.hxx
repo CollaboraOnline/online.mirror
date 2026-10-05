@@ -142,70 +142,70 @@ public:
             RangePosition eRange = RANGE_IN_TEXT);
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(
             const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getSupportedServiceNames() override;
 
     // XPropertySet
-    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > SAL_CALL
+    virtual cpo::uno::Reference< css::beans::XPropertySetInfo >
         getPropertySetInfo() override;
-    virtual void SAL_CALL setPropertyValue(
+    virtual void setPropertyValue(
             const OUString& rPropertyName,
             const cpo::uno::Any& rValue) override;
-    virtual cpo::uno::Any SAL_CALL getPropertyValue(
+    virtual cpo::uno::Any getPropertyValue(
             const OUString& rPropertyName) override;
-    virtual void SAL_CALL addPropertyChangeListener(
+    virtual void addPropertyChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener) override;
-    virtual void SAL_CALL removePropertyChangeListener(
+    virtual void removePropertyChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener) override;
-    virtual void SAL_CALL addVetoableChangeListener(
+    virtual void addVetoableChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XVetoableChangeListener >& xListener) override;
-    virtual void SAL_CALL removeVetoableChangeListener(
+    virtual void removeVetoableChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XVetoableChangeListener >& xListener) override;
 
     // XPropertyState
-    virtual css::beans::PropertyState SAL_CALL
+    virtual css::beans::PropertyState
         getPropertyState(const OUString& rPropertyName) override;
-    virtual cpo::uno::Sequence< css::beans::PropertyState > SAL_CALL
+    virtual cpo::uno::Sequence< css::beans::PropertyState >
         getPropertyStates(
             const cpo::uno::Sequence< OUString >& rPropertyNames) override;
-    virtual void SAL_CALL setPropertyToDefault(
+    virtual void setPropertyToDefault(
             const OUString& rPropertyName) override;
-    virtual cpo::uno::Any SAL_CALL getPropertyDefault(
+    virtual cpo::uno::Any getPropertyDefault(
             const OUString& rPropertyName) override;
 
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual bool SAL_CALL hasElements() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual bool hasElements() override;
 
     // XEnumerationAccess
-    virtual cpo::uno::Reference< css::container::XEnumeration >  SAL_CALL
+    virtual cpo::uno::Reference< css::container::XEnumeration >
         createEnumeration() override;
 
     // XContentEnumerationAccess
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL
+    virtual cpo::uno::Reference< css::container::XEnumeration >
         createContentEnumeration(const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getAvailableServiceNames() override;
 
     // XTextRange
     virtual cpo::uno::Reference< css::text::XText >
-        SAL_CALL getText() override;
+        getText() override;
     virtual cpo::uno::Reference<
-                css::text::XTextRange > SAL_CALL getStart() override;
+                css::text::XTextRange > getStart() override;
     virtual cpo::uno::Reference<
-                css::text::XTextRange > SAL_CALL getEnd() override;
-    virtual OUString SAL_CALL getString() override;
-    virtual void SAL_CALL setString(const OUString& rString) override;
+                css::text::XTextRange > getEnd() override;
+    virtual OUString getString() override;
+    virtual void setString(const OUString& rString) override;
 
     // XRedline
-    virtual void SAL_CALL makeRedline(
+    virtual void makeRedline(
             const OUString& rRedlineType,
             const cpo::uno::Sequence< css::beans::PropertyValue >& RedlineProperties) override;
 

@@ -33,12 +33,12 @@ class ListLevelsEnumWrapper : public EnumerationHelper_BASE
     sal_Int32 m_nIndex;
 public:
     explicit ListLevelsEnumWrapper( SwVbaListLevels* pLevels ) : m_pListLevels( pLevels ), m_nIndex( 1 ) {}
-    virtual bool SAL_CALL hasMoreElements(  ) override
+    virtual bool hasMoreElements(  ) override
     {
         return ( m_nIndex <= m_pListLevels->getCount() );
     }
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         if ( m_nIndex <= m_pListLevels->getCount() )
             return m_pListLevels->Item( cpo::uno::Any( m_nIndex++ ), cpo::uno::Any() );
@@ -52,7 +52,7 @@ SwVbaListLevels::SwVbaListLevels( const uno::Reference< XHelperInterface >& xPar
 {
 }
 
-::sal_Int32 SAL_CALL SwVbaListLevels::getCount()
+::sal_Int32 SwVbaListLevels::getCount()
 {
     sal_Int32 nGalleryType = m_pListHelper->getGalleryType();
     if( nGalleryType == word::WdListGalleryType::wdBulletGallery
@@ -63,7 +63,7 @@ SwVbaListLevels::SwVbaListLevels( const uno::Reference< XHelperInterface >& xPar
     return 0;
 }
 
-cpo::uno::Any SAL_CALL SwVbaListLevels::Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ )
+cpo::uno::Any SwVbaListLevels::Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ )
 {
     sal_Int32 nIndex = 0;
     if( !( Index1 >>= nIndex ) )

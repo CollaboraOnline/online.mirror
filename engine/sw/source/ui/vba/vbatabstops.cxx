@@ -56,12 +56,12 @@ public:
     explicit TabStopsEnumWrapper( uno::Reference< container::XIndexAccess > xIndexAccess ) : mxIndexAccess(std::move( xIndexAccess )), m_nIndex( 0 )
     {
     }
-    virtual bool SAL_CALL hasMoreElements(  ) override
+    virtual bool hasMoreElements(  ) override
     {
         return ( m_nIndex < mxIndexAccess->getCount() );
     }
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         if( m_nIndex < mxIndexAccess->getCount() )
         {
@@ -85,27 +85,27 @@ public:
     {
     }
 
-    virtual sal_Int32 SAL_CALL getCount(  ) override
+    virtual sal_Int32 getCount(  ) override
     {
         return mnTabStops;
     }
-    virtual cpo::uno::Any SAL_CALL getByIndex( sal_Int32 Index ) override
+    virtual cpo::uno::Any getByIndex( sal_Int32 Index ) override
     {
         if ( Index < 0 || Index >= getCount() )
             throw css::lang::IndexOutOfBoundsException();
 
         return cpo::uno::Any( uno::Reference< word::XTabStop >( new SwVbaTabStop( mxParent, mxContext ) ) );
     }
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override
+    virtual cpo::uno::Type getElementType(  ) override
     {
         return cppu::UnoType<word::XTabStop>::get();
     }
-    virtual bool SAL_CALL hasElements(  ) override
+    virtual bool hasElements(  ) override
     {
         return true;
     }
     // XEnumerationAccess
-    virtual uno::Reference< container::XEnumeration > SAL_CALL createEnumeration(  ) override
+    virtual uno::Reference< container::XEnumeration > createEnumeration(  ) override
     {
         return new TabStopsEnumWrapper( this );
     }
@@ -117,7 +117,7 @@ SwVbaTabStops::SwVbaTabStops( const uno::Reference< XHelperInterface >& xParent,
 {
 }
 
-uno::Reference< word::XTabStop > SAL_CALL SwVbaTabStops::Add( float Position, const cpo::uno::Any& Alignment, const cpo::uno::Any& Leader )
+uno::Reference< word::XTabStop > SwVbaTabStops::Add( float Position, const cpo::uno::Any& Alignment, const cpo::uno::Any& Leader )
 {
     sal_Int32 nPosition = Millimeter::getInHundredthsOfOneMillimeter( Position );
 
@@ -228,7 +228,7 @@ uno::Reference< word::XTabStop > SAL_CALL SwVbaTabStops::Add( float Position, co
     return uno::Reference< word::XTabStop >( new SwVbaTabStop( this, mxContext ) );
 }
 
-void SAL_CALL SwVbaTabStops::ClearAll()
+void SwVbaTabStops::ClearAll()
 {
     cpo::uno::Sequence< style::TabStop > aSeq;
     lcl_setTabStops( mxParaProps, aSeq );

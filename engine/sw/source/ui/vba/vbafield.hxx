@@ -38,7 +38,7 @@ public:
     /// @throws cpo::uno::RuntimeException
     SwVbaField( const cpo::uno::Reference< ooo::vba::XHelperInterface >& rParent, const cpo::uno::Reference< cpo::uno::XComponentContext >& rContext, const cpo::uno::Reference< css::text::XTextField >& xTextField);
 
-    virtual bool SAL_CALL Update() override;
+    virtual bool Update() override;
     // XHelperInterface
     virtual OUString getServiceImplName() override;
     virtual cpo::uno::Sequence<OUString> getServiceNames() override;
@@ -61,11 +61,11 @@ public:
                  const cpo::uno::Reference< cpo::uno::XComponentContext > & xContext,
                  const rtl::Reference< SwXTextDocument >& xModel );
     // XFields
-    virtual cpo::uno::Reference< ::ooo::vba::word::XField > SAL_CALL Add( const cpo::uno::Reference< ::ooo::vba::word::XRange >& Range, const cpo::uno::Any& Type, const cpo::uno::Any& Text, const cpo::uno::Any& PreserveFormatting ) override;
-    virtual sal_Int32 SAL_CALL Update() override;
+    virtual cpo::uno::Reference< ::ooo::vba::word::XField > Add( const cpo::uno::Reference< ::ooo::vba::word::XRange >& Range, const cpo::uno::Any& Type, const cpo::uno::Any& Text, const cpo::uno::Any& PreserveFormatting ) override;
+    virtual sal_Int32 Update() override;
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
     // ScVbaCollectionBaseImpl
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;
 

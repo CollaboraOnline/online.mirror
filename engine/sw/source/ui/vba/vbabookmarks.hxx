@@ -45,8 +45,8 @@ public:
     /// @throws cpo::uno::RuntimeException
     static void addBookmarkByName( const rtl::Reference< SwXTextDocument >& xModel, const OUString& rName, const cpo::uno::Reference< css::text::XTextRange >& rTextRange );
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     // SwVbaBookmarks_BASE
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;
@@ -54,13 +54,13 @@ public:
     virtual cpo::uno::Sequence<OUString> getServiceNames() override;
 
     // XBookmarks
-    virtual sal_Int32 SAL_CALL getDefaultSorting() override;
-    virtual void SAL_CALL setDefaultSorting( sal_Int32 _type ) override;
-    virtual bool SAL_CALL getShowHidden() override;
-    virtual void SAL_CALL setShowHidden( bool _hidden ) override;
+    virtual sal_Int32 getDefaultSorting() override;
+    virtual void setDefaultSorting( sal_Int32 _type ) override;
+    virtual bool getShowHidden() override;
+    virtual void setShowHidden( bool _hidden ) override;
 
-    virtual cpo::uno::Any SAL_CALL Add( const OUString& rName, const cpo::uno::Any& rRange ) override;
-    virtual bool SAL_CALL Exists( const OUString& rName ) override;
+    virtual cpo::uno::Any Add( const OUString& rName, const cpo::uno::Any& rRange ) override;
+    virtual bool Exists( const OUString& rName ) override;
 };
 
 #endif // INCLUDED_SW_SOURCE_UI_VBA_VBABOOKMARKS_HXX

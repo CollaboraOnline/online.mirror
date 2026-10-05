@@ -43,14 +43,14 @@ public:
     virtual ~SwVbaRow() override;
 
     // Attributes
-    virtual cpo::uno::Any SAL_CALL getHeight() override;
-    virtual void SAL_CALL setHeight( const cpo::uno::Any& _height ) override;
-    virtual ::sal_Int32 SAL_CALL getHeightRule() override;
-    virtual void SAL_CALL setHeightRule( ::sal_Int32 _heightrule ) override;
+    virtual cpo::uno::Any getHeight() override;
+    virtual void setHeight( const cpo::uno::Any& _height ) override;
+    virtual ::sal_Int32 getHeightRule() override;
+    virtual void setHeightRule( ::sal_Int32 _heightrule ) override;
 
     // Methods
-    virtual void SAL_CALL Select(  ) override;
-    virtual void SAL_CALL SetHeight( float height, sal_Int32 heightrule ) override;
+    virtual void Select(  ) override;
+    virtual void SetHeight( float height, sal_Int32 heightrule ) override;
 
     /// @throws cpo::uno::RuntimeException
     static void SelectRow( const rtl::Reference< SwXTextDocument >& xModel, const cpo::uno::Reference< css::text::XTextTable >& xTextTable, sal_Int32 nStartRow, sal_Int32 nEndRow );

@@ -109,151 +109,151 @@ public:
     virtual SwDoc*              GetDoc() override;
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(
             const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getSupportedServiceNames() override;
 
     // XPropertySet
-    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > SAL_CALL
+    virtual cpo::uno::Reference< css::beans::XPropertySetInfo >
         getPropertySetInfo() override;
-    virtual void SAL_CALL setPropertyValue(
+    virtual void setPropertyValue(
             const OUString& rPropertyName,
             const cpo::uno::Any& rValue) override;
-    virtual cpo::uno::Any SAL_CALL getPropertyValue(
+    virtual cpo::uno::Any getPropertyValue(
             const OUString& rPropertyName) override;
-    virtual void SAL_CALL addPropertyChangeListener(
+    virtual void addPropertyChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference<
                 css::beans::XPropertyChangeListener >& xListener) override;
-    virtual void SAL_CALL removePropertyChangeListener(
+    virtual void removePropertyChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference<
                 css::beans::XPropertyChangeListener >& xListener) override;
-    virtual void SAL_CALL addVetoableChangeListener(
+    virtual void addVetoableChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference<
                 css::beans::XVetoableChangeListener >& xListener) override;
-    virtual void SAL_CALL removeVetoableChangeListener(
+    virtual void removeVetoableChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference<
                 css::beans::XVetoableChangeListener >& xListener) override;
 
     // XPropertyState
-    virtual css::beans::PropertyState SAL_CALL
+    virtual css::beans::PropertyState
         getPropertyState(const OUString& rPropertyName) override;
-    virtual cpo::uno::Sequence< css::beans::PropertyState > SAL_CALL
+    virtual cpo::uno::Sequence< css::beans::PropertyState >
         getPropertyStates(
             const cpo::uno::Sequence< OUString >& rPropertyNames) override;
-    virtual void SAL_CALL setPropertyToDefault(
+    virtual void setPropertyToDefault(
             const OUString& rPropertyName) override;
-    virtual cpo::uno::Any SAL_CALL getPropertyDefault(
+    virtual cpo::uno::Any getPropertyDefault(
             const OUString& rPropertyName) override;
 
     // XMultiPropertySet
-    virtual void SAL_CALL setPropertyValues(
+    virtual void setPropertyValues(
             const cpo::uno::Sequence< OUString >& aPropertyNames,
             const cpo::uno::Sequence< cpo::uno::Any >& aValues ) override;
 
-    virtual cpo::uno::Sequence< cpo::uno::Any > SAL_CALL
+    virtual cpo::uno::Sequence< cpo::uno::Any >
         getPropertyValues( const cpo::uno::Sequence< OUString >& aPropertyNames ) override;
 
-    virtual void SAL_CALL addPropertiesChangeListener(
+    virtual void addPropertiesChangeListener(
         const cpo::uno::Sequence< OUString >& aPropertyNames,
         const cpo::uno::Reference< css::beans::XPropertiesChangeListener >& xListener ) override;
 
-    virtual void SAL_CALL removePropertiesChangeListener(
+    virtual void removePropertiesChangeListener(
         const cpo::uno::Reference< css::beans::XPropertiesChangeListener >& xListener ) override;
 
-    virtual void SAL_CALL firePropertiesChangeEvent(
+    virtual void firePropertiesChangeEvent(
         const cpo::uno::Sequence< OUString >& aPropertyNames,
         const cpo::uno::Reference< css::beans::XPropertiesChangeListener >& xListener ) override;
 
     // XMultiPropertyStates
-    virtual void SAL_CALL setAllPropertiesToDefault() override;
-    virtual void SAL_CALL setPropertiesToDefault(
+    virtual void setAllPropertiesToDefault() override;
+    virtual void setPropertiesToDefault(
             const cpo::uno::Sequence< OUString >&  rPropertyNames) override;
     virtual cpo::uno::Sequence< cpo::uno::Any >
-        SAL_CALL getPropertyDefaults(
+        getPropertyDefaults(
             const cpo::uno::Sequence< OUString >&  rPropertyNames) override;
 
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual bool SAL_CALL hasElements() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual bool hasElements() override;
 
     // XEnumerationAccess
-    virtual cpo::uno::Reference< css::container::XEnumeration >  SAL_CALL
+    virtual cpo::uno::Reference< css::container::XEnumeration >
         createEnumeration() override;
 
     // XContentEnumerationAccess
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL
+    virtual cpo::uno::Reference< css::container::XEnumeration >
         createContentEnumeration(const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getAvailableServiceNames() override;
 
     // XSortable
-    virtual cpo::uno::Sequence< css::beans::PropertyValue > SAL_CALL
+    virtual cpo::uno::Sequence< css::beans::PropertyValue >
         createSortDescriptor() override;
-    virtual void SAL_CALL sort(
+    virtual void sort(
             const cpo::uno::Sequence< css::beans::PropertyValue >& xDescriptor) override;
 
     // XDocumentInsertable
-    virtual void SAL_CALL insertDocumentFromURL(
+    virtual void insertDocumentFromURL(
             const OUString& rURL,
             const cpo::uno::Sequence< css::beans::PropertyValue >& rOptions) override;
 
     // XTextRange
     virtual cpo::uno::Reference< css::text::XText >
-        SAL_CALL getText() override;
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL getStart() override;
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL getEnd() override;
-    virtual OUString SAL_CALL getString() override;
-    virtual void SAL_CALL setString(const OUString& rString) override;
+        getText() override;
+    virtual cpo::uno::Reference< css::text::XTextRange > getStart() override;
+    virtual cpo::uno::Reference< css::text::XTextRange > getEnd() override;
+    virtual OUString getString() override;
+    virtual void setString(const OUString& rString) override;
 
     // XTextCursor
-    virtual void SAL_CALL collapseToStart() override;
-    virtual void SAL_CALL collapseToEnd() override;
-    virtual bool SAL_CALL isCollapsed() override;
-    virtual bool SAL_CALL goLeft(sal_Int16 nCount, bool bExpand) override;
-    virtual bool SAL_CALL goRight(sal_Int16 nCount, bool bExpand) override;
-    virtual void SAL_CALL gotoStart(bool bExpand) override;
-    virtual void SAL_CALL gotoEnd(bool bExpand) override;
-    virtual void SAL_CALL gotoRange(
+    virtual void collapseToStart() override;
+    virtual void collapseToEnd() override;
+    virtual bool isCollapsed() override;
+    virtual bool goLeft(sal_Int16 nCount, bool bExpand) override;
+    virtual bool goRight(sal_Int16 nCount, bool bExpand) override;
+    virtual void gotoStart(bool bExpand) override;
+    virtual void gotoEnd(bool bExpand) override;
+    virtual void gotoRange(
             const cpo::uno::Reference< css::text::XTextRange >& xRange,
             bool bExpand) override;
 
     // XWordCursor
-    virtual bool SAL_CALL isStartOfWord() override;
-    virtual bool SAL_CALL isEndOfWord() override;
-    virtual bool SAL_CALL gotoNextWord(bool bExpand) override;
-    virtual bool SAL_CALL gotoPreviousWord(bool bExpand) override;
-    virtual bool SAL_CALL gotoEndOfWord(bool bExpand) override;
-    virtual bool SAL_CALL gotoStartOfWord(bool bExpand) override;
+    virtual bool isStartOfWord() override;
+    virtual bool isEndOfWord() override;
+    virtual bool gotoNextWord(bool bExpand) override;
+    virtual bool gotoPreviousWord(bool bExpand) override;
+    virtual bool gotoEndOfWord(bool bExpand) override;
+    virtual bool gotoStartOfWord(bool bExpand) override;
 
     // XSentenceCursor
-    virtual bool SAL_CALL isStartOfSentence() override;
-    virtual bool SAL_CALL isEndOfSentence() override;
-    virtual bool SAL_CALL gotoNextSentence(bool Expand) override;
-    virtual bool SAL_CALL gotoPreviousSentence(bool Expand) override;
-    virtual bool SAL_CALL gotoStartOfSentence(bool Expand) override;
-    virtual bool SAL_CALL gotoEndOfSentence(bool Expand) override;
+    virtual bool isStartOfSentence() override;
+    virtual bool isEndOfSentence() override;
+    virtual bool gotoNextSentence(bool Expand) override;
+    virtual bool gotoPreviousSentence(bool Expand) override;
+    virtual bool gotoStartOfSentence(bool Expand) override;
+    virtual bool gotoEndOfSentence(bool Expand) override;
 
     // XParagraphCursor
-    virtual bool SAL_CALL isStartOfParagraph() override;
-    virtual bool SAL_CALL isEndOfParagraph() override;
-    virtual bool SAL_CALL gotoStartOfParagraph(bool Expand) override;
-    virtual bool SAL_CALL gotoEndOfParagraph(bool Expand) override;
-    virtual bool SAL_CALL gotoNextParagraph(bool Expand) override;
-    virtual bool SAL_CALL gotoPreviousParagraph(bool Expand) override;
+    virtual bool isStartOfParagraph() override;
+    virtual bool isEndOfParagraph() override;
+    virtual bool gotoStartOfParagraph(bool Expand) override;
+    virtual bool gotoEndOfParagraph(bool Expand) override;
+    virtual bool gotoNextParagraph(bool Expand) override;
+    virtual bool gotoPreviousParagraph(bool Expand) override;
 
     // XRedline
-    virtual void SAL_CALL makeRedline(
+    virtual void makeRedline(
             const OUString& rRedlineType,
             const cpo::uno::Sequence< css::beans::PropertyValue >& RedlineProperties) override;
 
     //XMarkingAccess
-    virtual void SAL_CALL invalidateMarkings(::sal_Int32 nType) override;
+    virtual void invalidateMarkings(::sal_Int32 nType) override;
 
 private:
     void gotoRangeImpl(

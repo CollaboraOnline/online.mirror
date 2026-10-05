@@ -44,13 +44,13 @@ OOXMLFastDocumentHandler::OOXMLFastDocumentHandler(
 OOXMLFastDocumentHandler::~OOXMLFastDocumentHandler() {}
 
 // css::xml::sax::XFastContextHandler:
-void SAL_CALL OOXMLFastDocumentHandler::startFastElement(sal_Int32 Element
+void OOXMLFastDocumentHandler::startFastElement(sal_Int32 Element
 , const uno::Reference< xml::sax::XFastAttributeList > & /*Attribs*/)
 {
     SAL_INFO("writerfilter", "start element:" << fastTokenToId(Element));
 }
 
-void SAL_CALL OOXMLFastDocumentHandler::startUnknownElement
+void OOXMLFastDocumentHandler::startUnknownElement
 (const OUString & Namespace
 , const OUString & Name
 , const uno::Reference< xml::sax::XFastAttributeList > & /*Attribs*/)
@@ -58,12 +58,12 @@ void SAL_CALL OOXMLFastDocumentHandler::startUnknownElement
     SAL_INFO("writerfilter", "start unknown element:" << Namespace  << ":" << Name);
 }
 
-void SAL_CALL OOXMLFastDocumentHandler::endFastElement(sal_Int32 Element)
+void OOXMLFastDocumentHandler::endFastElement(sal_Int32 Element)
 {
     SAL_INFO("writerfilter", "end element:" << fastTokenToId(Element));
 }
 
-void SAL_CALL OOXMLFastDocumentHandler::endUnknownElement
+void OOXMLFastDocumentHandler::endUnknownElement
 (const OUString & Namespace
 , const OUString & Name)
 {
@@ -85,7 +85,7 @@ OOXMLFastDocumentHandler::getContextHandler() const
     return mxContextHandler;
 }
 
-uno::Reference< xml::sax::XFastContextHandler > SAL_CALL
+uno::Reference< xml::sax::XFastContextHandler >
  OOXMLFastDocumentHandler::createFastChildContext
 (::sal_Int32 Element,
  const uno::Reference< xml::sax::XFastAttributeList > & /*Attribs*/)
@@ -100,7 +100,7 @@ uno::Reference< xml::sax::XFastContextHandler > SAL_CALL
     return OOXMLFactory::createFastChildContextFromStart(getContextHandler().get(), Element);
 }
 
-uno::Reference< xml::sax::XFastContextHandler > SAL_CALL
+uno::Reference< xml::sax::XFastContextHandler >
 OOXMLFastDocumentHandler::createUnknownChildContext
 (const OUString & Namespace
 , const OUString & Name
@@ -112,24 +112,24 @@ OOXMLFastDocumentHandler::createUnknownChildContext
         ( new OOXMLFastDocumentHandler( m_xContext, nullptr, nullptr, 0 ) );
 }
 
-void SAL_CALL OOXMLFastDocumentHandler::characters(const OUString & /*aChars*/)
+void OOXMLFastDocumentHandler::characters(const OUString & /*aChars*/)
 {
 }
 
 // css::xml::sax::XFastDocumentHandler:
-void SAL_CALL OOXMLFastDocumentHandler::startDocument()
+void OOXMLFastDocumentHandler::startDocument()
 {
 }
 
-void SAL_CALL OOXMLFastDocumentHandler::endDocument()
+void OOXMLFastDocumentHandler::endDocument()
 {
 }
 
-void SAL_CALL OOXMLFastDocumentHandler::processingInstruction( const OUString& /*rTarget*/, const OUString& /*rData*/ )
+void OOXMLFastDocumentHandler::processingInstruction( const OUString& /*rTarget*/, const OUString& /*rData*/ )
 {
 }
 
-void SAL_CALL OOXMLFastDocumentHandler::setDocumentLocator
+void OOXMLFastDocumentHandler::setDocumentLocator
 (const uno::Reference< xml::sax::XLocator > & /*xLocator*/)
 {
 }

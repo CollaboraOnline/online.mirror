@@ -41,13 +41,13 @@ SwVbaPageSetup::SwVbaPageSetup(const uno::Reference< XHelperInterface >& xParent
     mnOrientLandscape = word::WdOrientation::wdOrientLandscape;
 }
 
-double SAL_CALL SwVbaPageSetup::getGutter()
+double SwVbaPageSetup::getGutter()
 {
     // not support in Writer
     return 0;
 }
 
-void SAL_CALL SwVbaPageSetup::setGutter( double _gutter )
+void SwVbaPageSetup::setGutter( double _gutter )
 {
     // default add gutter into left margin
     if( _gutter != 0 )
@@ -57,7 +57,7 @@ void SAL_CALL SwVbaPageSetup::setGutter( double _gutter )
     }
 }
 
-double SAL_CALL SwVbaPageSetup::getHeaderDistance()
+double SwVbaPageSetup::getHeaderDistance()
 {
     bool isHeaderOn = false;
     mxPageProps->getPropertyValue(u"HeaderIsOn"_ustr) >>= isHeaderOn;
@@ -75,7 +75,7 @@ double SAL_CALL SwVbaPageSetup::getHeaderDistance()
      * @param: headerDistance is the value that is set in MS Word for the distance from the top of the page
      *          to the header
      */
-void SAL_CALL SwVbaPageSetup::setHeaderDistance( double _headerdistance )
+void SwVbaPageSetup::setHeaderDistance( double _headerdistance )
 {
     sal_Int32 newHeaderDistance = Millimeter::getInHundredthsOfOneMillimeter( _headerdistance );
     bool isHeaderOn = false;
@@ -100,7 +100,7 @@ void SAL_CALL SwVbaPageSetup::setHeaderDistance( double _headerdistance )
     mxPageProps->setPropertyValue(u"HeaderHeight"_ustr, cpo::uno::Any( newHeaderHeight ) );
 }
 
-double SAL_CALL SwVbaPageSetup::getFooterDistance()
+double SwVbaPageSetup::getFooterDistance()
 {
     bool isFooterOn = false;
     mxPageProps->getPropertyValue(u"FooterIsOn"_ustr) >>= isFooterOn;
@@ -109,7 +109,7 @@ double SAL_CALL SwVbaPageSetup::getFooterDistance()
     return VbaPageSetupBase::getFooterMargin();
 }
 
-void SAL_CALL SwVbaPageSetup::setFooterDistance( double _footerdistance )
+void SwVbaPageSetup::setFooterDistance( double _footerdistance )
 {
     sal_Int32 newFooterDistance = Millimeter::getInHundredthsOfOneMillimeter( _footerdistance );
     bool isFooterOn = false;
@@ -134,7 +134,7 @@ void SAL_CALL SwVbaPageSetup::setFooterDistance( double _footerdistance )
     mxPageProps->setPropertyValue(u"FooterHeight"_ustr, cpo::uno::Any( newFooterHeight ) );
 }
 
-bool SAL_CALL SwVbaPageSetup::getDifferentFirstPageHeaderFooter()
+bool SwVbaPageSetup::getDifferentFirstPageHeaderFooter()
 {
     OUString pageStyle = getStyleOfFirstPage();
     if ( pageStyle == "First Page" )
@@ -143,7 +143,7 @@ bool SAL_CALL SwVbaPageSetup::getDifferentFirstPageHeaderFooter()
     return false;
 }
 
-void SAL_CALL SwVbaPageSetup::setDifferentFirstPageHeaderFooter( bool status )
+void SwVbaPageSetup::setDifferentFirstPageHeaderFooter( bool status )
 {
     if( status == getDifferentFirstPageHeaderFooter() )
         return;
@@ -223,7 +223,7 @@ OUString SwVbaPageSetup::getStyleOfFirstPage() const
     return styleFirstPage;
 }
 
-::sal_Int32 SAL_CALL SwVbaPageSetup::getSectionStart()
+::sal_Int32 SwVbaPageSetup::getSectionStart()
 {
     // FIXME:
     sal_Int32 wdSectionStart = word::WdSectionStart::wdSectionNewPage;
@@ -238,7 +238,7 @@ OUString SwVbaPageSetup::getStyleOfFirstPage() const
     return wdSectionStart;
 }
 
-void SAL_CALL SwVbaPageSetup::setSectionStart( ::sal_Int32 /*_sectionstart*/ )
+void SwVbaPageSetup::setSectionStart( ::sal_Int32 /*_sectionstart*/ )
 {
     // fail to find corresponding feature in Writer
     // #FIXME:

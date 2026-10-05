@@ -29,36 +29,36 @@ public:
     IndexingExportFilter() {}
 
     // XFilter
-    virtual bool SAL_CALL
+    virtual bool
     filter(const cpo::uno::Sequence<css::beans::PropertyValue>& aDescriptor) override;
 
-    virtual void SAL_CALL cancel() override {}
+    virtual void cancel() override {}
 
     // XExporter
-    virtual void SAL_CALL
+    virtual void
     setSourceDocument(const cpo::uno::Reference<css::lang::XComponent>& xDocument) override
     {
         m_xSourceDocument = xDocument;
     }
 
     // XInitialization
-    virtual void SAL_CALL
+    virtual void
     initialize(const cpo::uno::Sequence<cpo::uno::Any>& /*aArguments*/) override
     {
     }
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override
+    virtual OUString getImplementationName() override
     {
         return u"com.sun.star.comp.Writer.IndexingExportFilter"_ustr;
     }
 
-    virtual bool SAL_CALL supportsService(OUString const& rServiceName) override
+    virtual bool supportsService(OUString const& rServiceName) override
     {
         return cppu::supportsService(this, rServiceName);
     }
 
-    virtual cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override
+    virtual cpo::uno::Sequence<OUString> getSupportedServiceNames() override
     {
         return { u"com.sun.star.document.ExportFilter"_ustr };
     }

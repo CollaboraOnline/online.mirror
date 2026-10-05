@@ -44,24 +44,24 @@ public:
     explicit FinalThreadManager(cpo::uno::Reference< cpo::uno::XComponentContext > context);
 
     // css::lang::XServiceInfo:
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString & ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString & ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
     // css::util::XJobManager:
-    virtual void SAL_CALL registerJob(const cpo::uno::Reference< css::util::XCancellable > & Job) override;
-    virtual void SAL_CALL releaseJob(const cpo::uno::Reference< css::util::XCancellable > & Job) override;
-    virtual void SAL_CALL cancelAllJobs() override;
+    virtual void registerJob(const cpo::uno::Reference< css::util::XCancellable > & Job) override;
+    virtual void releaseJob(const cpo::uno::Reference< css::util::XCancellable > & Job) override;
+    virtual void cancelAllJobs() override;
 
     // css::frame::XTerminateListener2
-    virtual void SAL_CALL cancelTermination( const css::lang::EventObject& Event ) override;
+    virtual void cancelTermination( const css::lang::EventObject& Event ) override;
 
     // css::frame::XTerminateListener (inherited via css::frame::XTerminateListener2)
-    virtual void SAL_CALL queryTermination( const css::lang::EventObject& Event ) override;
-    virtual void SAL_CALL notifyTermination( const css::lang::EventObject& Event ) override;
+    virtual void queryTermination( const css::lang::EventObject& Event ) override;
+    virtual void notifyTermination( const css::lang::EventObject& Event ) override;
 
     // ::com::sun::star::lang::XEventListener (inherited via css::frame::XTerminateListener)
-    virtual void SAL_CALL disposing( const css::lang::EventObject& Source ) override;
+    virtual void disposing( const css::lang::EventObject& Source ) override;
 
 private:
     FinalThreadManager(FinalThreadManager const &) = delete;

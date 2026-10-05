@@ -54,7 +54,7 @@ public:
     /// @throws uno::RuntimeException
     DocumentEnumImpl( const uno::Reference< XHelperInterface >& xParent, const uno::Reference< cpo::uno::XComponentContext >& xContext, const uno::Reference< container::XEnumeration >& xEnumeration, cpo::uno::Any  aApplication ) : EnumerationHelperImpl( xParent, xContext, xEnumeration ), m_aApplication(std::move( aApplication )) {}
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         uno::Reference< text::XTextDocument > xDoc( m_xEnumeration->nextElement(), uno::UNO_QUERY_THROW );
         return getDocument( m_xContext, dynamic_cast<SwXTextDocument*>(xDoc.get()), m_aApplication );
@@ -90,7 +90,7 @@ SwVbaDocuments::createCollectionObject( const cpo::uno::Any& aSource )
     return getDocument( mxContext, dynamic_cast<SwXTextDocument*>(xDoc.get()), Application() );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocuments::Add( const cpo::uno::Any& Template, const cpo::uno::Any& /*NewTemplate*/, const cpo::uno::Any& /*DocumentType*/, const cpo::uno::Any& /*Visible*/ )
 {
     OUString sFileName;
@@ -104,13 +104,13 @@ SwVbaDocuments::Add( const cpo::uno::Any& Template, const cpo::uno::Any& /*NewTe
 
 // #TODO# #FIXME# can any of the unused params below be used?
 // #TODO# #FIXME# surely we should actually close the document here
-void SAL_CALL
+void
 SwVbaDocuments::Close( const cpo::uno::Any& /*SaveChanges*/, const cpo::uno::Any& /*OriginalFormat*/, const cpo::uno::Any& /*RouteDocument*/ )
 {
 }
 
 // #TODO# #FIXME# can any of the unused params below be used?
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocuments::Open( const OUString& Filename, const cpo::uno::Any& /*ConfirmConversions*/, const cpo::uno::Any& ReadOnly, const cpo::uno::Any& /*AddToRecentFiles*/, const cpo::uno::Any& /*PasswordDocument*/, const cpo::uno::Any& /*PasswordTemplate*/, const cpo::uno::Any& /*Revert*/, const cpo::uno::Any& /*WritePasswordDocument*/, const cpo::uno::Any& /*WritePasswordTemplate*/, const cpo::uno::Any& /*Format*/, const cpo::uno::Any& /*Encoding*/, const cpo::uno::Any& /*Visible*/, const cpo::uno::Any& /*OpenAndRepair*/, const cpo::uno::Any& /*DocumentDirection*/, const cpo::uno::Any& /*NoEncodingDialog*/, const cpo::uno::Any& /*XMLTransform*/ )
 {
     SAL_INFO("sw.vba", "Documents.Open(Filename:=" << Filename << ",ReadOnly:=" << ReadOnly << ")");
@@ -133,13 +133,13 @@ SwVbaDocuments::Open( const OUString& Filename, const cpo::uno::Any& /*ConfirmCo
     return aRet;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocuments::OpenNoRepairDialog( const OUString& Filename, const cpo::uno::Any& ConfirmConversions, const cpo::uno::Any& ReadOnly, const cpo::uno::Any& AddToRecentFiles, const cpo::uno::Any& PasswordDocument, const cpo::uno::Any& PasswordTemplate, const cpo::uno::Any& Revert, const cpo::uno::Any& WritePasswordDocument, const cpo::uno::Any& WritePasswordTemplate, const cpo::uno::Any& Format, const cpo::uno::Any& Encoding, const cpo::uno::Any& Visible, const cpo::uno::Any& OpenAndRepair, const cpo::uno::Any& DocumentDirection, const cpo::uno::Any& NoEncodingDialog, const cpo::uno::Any& XMLTransform )
 {
     return Open( Filename, ConfirmConversions, ReadOnly, AddToRecentFiles, PasswordDocument, PasswordTemplate, Revert, WritePasswordDocument, WritePasswordTemplate, Format, Encoding, Visible, OpenAndRepair, DocumentDirection, NoEncodingDialog, XMLTransform );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaDocuments::OpenOld( const OUString& FileName, const cpo::uno::Any& ConfirmConversions, const cpo::uno::Any& ReadOnly, const cpo::uno::Any& AddToRecentFiles, const cpo::uno::Any& PasswordDocument, const cpo::uno::Any& PasswordTemplate, const cpo::uno::Any& Revert, const cpo::uno::Any& WritePasswordDocument, const cpo::uno::Any& WritePasswordTemplate, const cpo::uno::Any& Format )
 {
     return Open( FileName, ConfirmConversions, ReadOnly, AddToRecentFiles, PasswordDocument, PasswordTemplate, Revert, WritePasswordDocument, WritePasswordTemplate, Format, cpo::uno::Any(), cpo::uno::Any(), cpo::uno::Any(), cpo::uno::Any(), cpo::uno::Any(), cpo::uno::Any() );

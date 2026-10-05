@@ -47,32 +47,32 @@ void SwVbaBookmark::checkVality()
         throw cpo::uno::RuntimeException(u"The bookmark is not valid"_ustr );
 }
 
-void SAL_CALL SwVbaBookmark::Delete()
+void SwVbaBookmark::Delete()
 {
     checkVality();
     mxModel->getText()->removeTextContent( mxBookmark );
     mbValid = false;
 }
 
-void SAL_CALL SwVbaBookmark::Select()
+void SwVbaBookmark::Select()
 {
     checkVality();
     uno::Reference< view::XSelectionSupplier > xSelectSupp( mxModel->getCurrentController(), uno::UNO_QUERY_THROW );
     xSelectSupp->select( cpo::uno::Any( mxBookmark ) );
 }
 
-OUString SAL_CALL SwVbaBookmark::getName()
+OUString SwVbaBookmark::getName()
 {
     return maBookmarkName;
 }
 
-void SAL_CALL SwVbaBookmark::setName( const OUString& _name )
+void SwVbaBookmark::setName( const OUString& _name )
 {
     uno::Reference< container::XNamed > xNamed( mxBookmark, uno::UNO_QUERY_THROW );
     xNamed->setName( _name );
 }
 
-cpo::uno::Any SAL_CALL SwVbaBookmark::Range()
+cpo::uno::Any SwVbaBookmark::Range()
 {
     uno::Reference< text::XTextContent > xTextContent( mxBookmark, uno::UNO_SET_THROW );
     uno::Reference< text::XTextRange > xTextRange( xTextContent->getAnchor(), uno::UNO_SET_THROW );

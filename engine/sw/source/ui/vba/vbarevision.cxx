@@ -68,7 +68,7 @@ sal_Int32 SwVbaRevision::GetPosition()
     return nPos;
 }
 
-void SAL_CALL
+void
 SwVbaRevision::Accept()
 {
     SwDoc* pDoc = mxModel->GetDocShell()->GetDoc();
@@ -76,7 +76,7 @@ SwVbaRevision::Accept()
         pDoc->getIDocumentRedlineAccess().AcceptRedline( GetPosition(), true );
 }
 
-void SAL_CALL
+void
 SwVbaRevision::Reject( )
 {
     SwDoc* pDoc = mxModel->GetDocShell()->GetDoc();

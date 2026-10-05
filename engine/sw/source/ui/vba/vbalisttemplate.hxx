@@ -40,7 +40,7 @@ public:
     void applyListTemplate( cpo::uno::Reference< css::beans::XPropertySet > const & xProps );
 
     // Methods
-    virtual cpo::uno::Any SAL_CALL ListLevels( const cpo::uno::Any& index ) override;
+    virtual cpo::uno::Any ListLevels( const cpo::uno::Any& index ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

@@ -100,11 +100,11 @@ public:
     explicit SwDrawModellListener_Impl( SdrModel& rDrawModel );
 
     // css::document::XEventBroadcaster
-    virtual void SAL_CALL addEventListener( const uno::Reference< document::XEventListener >& xListener ) override;
-    virtual void SAL_CALL removeEventListener( const uno::Reference< document::XEventListener >& xListener ) override;
+    virtual void addEventListener( const uno::Reference< document::XEventListener >& xListener ) override;
+    virtual void removeEventListener( const uno::Reference< document::XEventListener >& xListener ) override;
     // css::document::XShapeEventBroadcaster
-    virtual void SAL_CALL addShapeEventListener( const cpo::uno::Reference< css::drawing::XShape >& xShape, const cpo::uno::Reference< css::document::XShapeEventListener >& xListener ) override;
-    virtual void SAL_CALL removeShapeEventListener( const cpo::uno::Reference< css::drawing::XShape >& xShape, const cpo::uno::Reference< css::document::XShapeEventListener >& xListener ) override;
+    virtual void addShapeEventListener( const cpo::uno::Reference< css::drawing::XShape >& xShape, const cpo::uno::Reference< css::document::XShapeEventListener >& xListener ) override;
+    virtual void removeShapeEventListener( const cpo::uno::Reference< css::drawing::XShape >& xShape, const cpo::uno::Reference< css::document::XShapeEventListener >& xListener ) override;
 
     virtual void        Notify( SfxBroadcaster& rBC, const SfxHint& rHint ) override;
     void Dispose();
@@ -123,19 +123,19 @@ SwDrawModellListener_Impl::~SwDrawModellListener_Impl()
     Dispose();
 }
 
-void SAL_CALL SwDrawModellListener_Impl::addEventListener( const uno::Reference< document::XEventListener >& xListener )
+void SwDrawModellListener_Impl::addEventListener( const uno::Reference< document::XEventListener >& xListener )
 {
     std::unique_lock g(maListenerMutex);
     maEventListeners.addInterface( g, xListener );
 }
 
-void SAL_CALL SwDrawModellListener_Impl::removeEventListener( const uno::Reference< document::XEventListener >& xListener )
+void SwDrawModellListener_Impl::removeEventListener( const uno::Reference< document::XEventListener >& xListener )
 {
     std::unique_lock g(maListenerMutex);
     maEventListeners.removeInterface( g, xListener );
 }
 
-void SAL_CALL SwDrawModellListener_Impl::addShapeEventListener(
+void SwDrawModellListener_Impl::addShapeEventListener(
                 const cpo::uno::Reference< css::drawing::XShape >& xShape,
                 const uno::Reference< document::XShapeEventListener >& xListener )
 {
@@ -144,7 +144,7 @@ void SAL_CALL SwDrawModellListener_Impl::addShapeEventListener(
     maShapeListeners.emplace(xShape, xListener);
 }
 
-void SAL_CALL SwDrawModellListener_Impl::removeShapeEventListener(
+void SwDrawModellListener_Impl::removeShapeEventListener(
                 const cpo::uno::Reference< css::drawing::XShape >& xShape,
                 const uno::Reference< document::XShapeEventListener >& xListener )
 {

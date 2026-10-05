@@ -42,13 +42,13 @@ public:
     virtual ~SwVbaSection() override;
 
     // Attributes
-    virtual bool SAL_CALL getProtectedForForms() override;
-    virtual void SAL_CALL setProtectedForForms( bool _protectedforforms ) override;
+    virtual bool getProtectedForForms() override;
+    virtual void setProtectedForForms( bool _protectedforforms ) override;
 
     // Methods
-    virtual cpo::uno::Any SAL_CALL Headers( const cpo::uno::Any& index ) override;
-    virtual cpo::uno::Any SAL_CALL Footers( const cpo::uno::Any& index ) override;
-    virtual cpo::uno::Any SAL_CALL PageSetup(  ) override;
+    virtual cpo::uno::Any Headers( const cpo::uno::Any& index ) override;
+    virtual cpo::uno::Any Footers( const cpo::uno::Any& index ) override;
+    virtual cpo::uno::Any PageSetup(  ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

@@ -83,66 +83,66 @@ public:
     const cpo::uno::Reference<SwXText>& GetParentText() const;
 
     // XServiceInfo
-    OUString SAL_CALL getImplementationName() override;
-    bool SAL_CALL supportsService(const OUString& rServiceName) override;
-    cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override;
+    OUString getImplementationName() override;
+    bool supportsService(const OUString& rServiceName) override;
+    cpo::uno::Sequence<OUString> getSupportedServiceNames() override;
 
     // XComponent
-    void SAL_CALL dispose() override;
-    void SAL_CALL
+    void dispose() override;
+    void
     addEventListener(const cpo::uno::Reference<css::lang::XEventListener>& xListener) override;
-    void SAL_CALL
+    void
     removeEventListener(const cpo::uno::Reference<css::lang::XEventListener>& xListener) override;
 
     // XElementAccess
-    cpo::uno::Type SAL_CALL getElementType() override;
-    bool SAL_CALL hasElements() override;
+    cpo::uno::Type getElementType() override;
+    bool hasElements() override;
 
     // XEnumerationAccess
-    cpo::uno::Reference<css::container::XEnumeration> SAL_CALL createEnumeration() override;
+    cpo::uno::Reference<css::container::XEnumeration> createEnumeration() override;
 
     // XTextContent
-    void SAL_CALL attach(const cpo::uno::Reference<css::text::XTextRange>& xTextRange) override;
-    cpo::uno::Reference<css::text::XTextRange> SAL_CALL getAnchor() override;
+    void attach(const cpo::uno::Reference<css::text::XTextRange>& xTextRange) override;
+    cpo::uno::Reference<css::text::XTextRange> getAnchor() override;
 
     // XTextRange
-    cpo::uno::Reference<css::text::XText> SAL_CALL getText() override;
-    cpo::uno::Reference<css::text::XTextRange> SAL_CALL getStart() override;
-    cpo::uno::Reference<css::text::XTextRange> SAL_CALL getEnd() override;
-    OUString SAL_CALL getString() override;
-    void SAL_CALL setString(const OUString& rString) override;
+    cpo::uno::Reference<css::text::XText> getText() override;
+    cpo::uno::Reference<css::text::XTextRange> getStart() override;
+    cpo::uno::Reference<css::text::XTextRange> getEnd() override;
+    OUString getString() override;
+    void setString(const OUString& rString) override;
 
     // XSimpleText
-    cpo::uno::Reference<css::text::XTextCursor> SAL_CALL createTextCursor() override;
-    cpo::uno::Reference<css::text::XTextCursor> SAL_CALL createTextCursorByRange(
+    cpo::uno::Reference<css::text::XTextCursor> createTextCursor() override;
+    cpo::uno::Reference<css::text::XTextCursor> createTextCursorByRange(
         const cpo::uno::Reference<css::text::XTextRange>& xTextPosition) override;
-    void SAL_CALL insertString(const cpo::uno::Reference<css::text::XTextRange>& xRange,
+    void insertString(const cpo::uno::Reference<css::text::XTextRange>& xRange,
                                const OUString& aString, bool bAbsorb) override;
-    void SAL_CALL insertControlCharacter(const cpo::uno::Reference<css::text::XTextRange>& xRange,
+    void insertControlCharacter(const cpo::uno::Reference<css::text::XTextRange>& xRange,
                                          sal_Int16 nControlCharacter, bool bAbsorb) override;
 
     // XText
-    void SAL_CALL insertTextContent(const cpo::uno::Reference<css::text::XTextRange>& xRange,
+    void insertTextContent(const cpo::uno::Reference<css::text::XTextRange>& xRange,
                                     const cpo::uno::Reference<css::text::XTextContent>& xContent,
                                     bool bAbsorb) override;
-    void SAL_CALL
+    void
     removeTextContent(const cpo::uno::Reference<css::text::XTextContent>& xContent) override;
 
     // XPropertySet
-    cpo::uno::Reference<css::beans::XPropertySetInfo> SAL_CALL getPropertySetInfo() override;
-    void SAL_CALL setPropertyValue(const OUString& rPropertyName,
+    cpo::uno::Reference<css::beans::XPropertySetInfo> getPropertySetInfo() override;
+    void setPropertyValue(const OUString& rPropertyName,
                                    const cpo::uno::Any& rValue) override;
-    cpo::uno::Any SAL_CALL getPropertyValue(const OUString& rPropertyName) override;
-    void SAL_CALL addPropertyChangeListener(
+    cpo::uno::Any getPropertyValue(const OUString& rPropertyName) override;
+    void addPropertyChangeListener(
         const OUString& rPropertyName,
         const cpo::uno::Reference<css::beans::XPropertyChangeListener>& xListener) override;
-    void SAL_CALL removePropertyChangeListener(
+    void removePropertyChangeListener(
         const OUString& rPropertyName,
         const cpo::uno::Reference<css::beans::XPropertyChangeListener>& xListener) override;
-    void SAL_CALL addVetoableChangeListener(
+    void addVetoableChangeListener(
         const OUString& rPropertyName,
         const cpo::uno::Reference<css::beans::XVetoableChangeListener>& xListener) override;
-    void SAL_CALL removeVetoableChangeListener(
+    void removeVetoableChangeListener(
         const OUString& rPropertyName,
         const cpo::uno::Reference<css::beans::XVetoableChangeListener>& xListener) override;
 };
@@ -157,12 +157,12 @@ public:
     SwXContentControls(SwDoc* pDoc);
 
     // XIndexAccess
-    sal_Int32 SAL_CALL getCount() override;
-    cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    sal_Int32 getCount() override;
+    cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     // XElementAccess
-    cpo::uno::Type SAL_CALL getElementType() override;
-    bool SAL_CALL hasElements() override;
+    cpo::uno::Type getElementType() override;
+    bool hasElements() override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

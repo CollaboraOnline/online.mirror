@@ -32,8 +32,8 @@ public:
                 const cpo::uno::Reference<cpo::uno::XComponentContext>& xContext);
 
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference<css::container::XEnumeration> SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference<css::container::XEnumeration> createEnumeration() override;
 
     // SwVbaAddins_BASE
     virtual cpo::uno::Any createCollectionObject(const cpo::uno::Any& aSource) override;

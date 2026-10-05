@@ -756,7 +756,7 @@ SwXCell::~SwXCell()
     EndListeningAll();
 }
 
-cpo::uno::Sequence< cpo::uno::Type > SAL_CALL SwXCell::getTypes(  )
+cpo::uno::Sequence< cpo::uno::Type > SwXCell::getTypes(  )
 {
     return comphelper::concatSequences(
             SwXCellBaseClass::getTypes(),
@@ -764,24 +764,24 @@ cpo::uno::Sequence< cpo::uno::Type > SAL_CALL SwXCell::getTypes(  )
         );
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL SwXCell::getImplementationId(  )
+cpo::uno::Sequence< sal_Int8 > SwXCell::getImplementationId(  )
 {
     return cpo::uno::Sequence<sal_Int8>();
 }
 
-void SAL_CALL SwXCell::acquire(  ) noexcept
+void SwXCell::acquire(  ) noexcept
 {
     SwXCellBaseClass::acquire();
 }
 
-void SAL_CALL SwXCell::release(  ) noexcept
+void SwXCell::release(  ) noexcept
 {
     SolarMutexGuard aGuard;
 
     SwXCellBaseClass::release();
 }
 
-cpo::uno::Any SAL_CALL SwXCell::queryInterface( const cpo::uno::Type& aType )
+cpo::uno::Any SwXCell::queryInterface( const cpo::uno::Type& aType )
 {
     cpo::uno::Any aRet = SwXText::queryInterface(aType);
     if(aRet.getValueType() == cppu::UnoType<void>::get())
@@ -1113,7 +1113,7 @@ rtl::Reference<SwXParagraphEnumeration> SwXCell::createSwEnumeration()
     return SwXParagraphEnumeration::Create(this, pUnoCursor, CursorType::TableText, m_pBox);
 }
 
-cpo::uno::Type SAL_CALL SwXCell::getElementType()
+cpo::uno::Type SwXCell::getElementType()
 {
     return cppu::UnoType<text::XTextRange>::get();
 }
@@ -2022,7 +2022,7 @@ void SwXTextTable::initialize(sal_Int32 nR, sal_Int32 nC)
     m_pImpl->m_nColumns = o3tl::narrowing<sal_uInt16>(nC);
 }
 
-uno::Reference<table::XTableRows> SAL_CALL SwXTextTable::getRows()
+uno::Reference<table::XTableRows> SwXTextTable::getRows()
 {
     return getSwRows();
 }
@@ -2043,7 +2043,7 @@ rtl::Reference<SwXTableRows> SwXTextTable::getSwRows()
     return xResult;
 }
 
-uno::Reference<table::XTableColumns> SAL_CALL SwXTextTable::getColumns()
+uno::Reference<table::XTableColumns> SwXTextTable::getColumns()
 {
     SolarMutexGuard aGuard;
     rtl::Reference<SwXTableColumns> xResult(m_pImpl->m_xColumns.get());
@@ -2100,7 +2100,7 @@ uno::Reference<text::XTextTableCursor> SwXTextTable::createCursorByCellName(cons
     return new SwXTextTableCursor(pFormat, pBox);
 }
 
-void SAL_CALL
+void
 SwXTextTable::attach(const uno::Reference<text::XTextRange> & xTextRange)
 {
     SolarMutexGuard aGuard;
@@ -2187,7 +2187,7 @@ void SwXTextTable::dispose()
     pFormat->GetDoc().DeleteRowCol(aSelBoxes, SwDoc::RowColMode::DeleteProtected);
 }
 
-void SAL_CALL SwXTextTable::addEventListener(
+void SwXTextTable::addEventListener(
         const uno::Reference<lang::XEventListener> & xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -2195,7 +2195,7 @@ void SAL_CALL SwXTextTable::addEventListener(
     m_pImpl->m_EventListeners.addInterface(aGuard, xListener);
 }
 
-void SAL_CALL SwXTextTable::removeEventListener(
+void SwXTextTable::removeEventListener(
         const uno::Reference< lang::XEventListener > & xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -2303,7 +2303,7 @@ uno::Reference<table::XCellRange> SwXTextTable::getCellRangeByName(const OUStrin
     return GetRangeByName(pFormat, pTable, sTLName, sBRName, aDesc);
 }
 
-cpo::uno::Sequence< cpo::uno::Sequence< cpo::uno::Any > > SAL_CALL SwXTextTable::getDataArray()
+cpo::uno::Sequence< cpo::uno::Sequence< cpo::uno::Any > > SwXTextTable::getDataArray()
 {
     SolarMutexGuard aGuard;
     std::pair<sal_uInt16, sal_uInt16> const RowsAndColumns(SwXTextTable::Impl::ThrowIfComplex(*this));
@@ -2313,7 +2313,7 @@ cpo::uno::Sequence< cpo::uno::Sequence< cpo::uno::Any > > SAL_CALL SwXTextTable:
     return xAllRange->getDataArray();
 }
 
-void SAL_CALL SwXTextTable::setDataArray(const cpo::uno::Sequence< cpo::uno::Sequence< cpo::uno::Any > >& rArray)
+void SwXTextTable::setDataArray(const cpo::uno::Sequence< cpo::uno::Sequence< cpo::uno::Any > >& rArray)
 {
     SolarMutexGuard aGuard;
     std::pair<sal_uInt16, sal_uInt16> const RowsAndColumns(SwXTextTable::Impl::ThrowIfComplex(*this));
@@ -2397,7 +2397,7 @@ void SwXTextTable::setColumnDescriptions(const cpo::uno::Sequence<OUString>& rCo
     return xAllRange->setColumnDescriptions(rColumnDesc);
 }
 
-void SAL_CALL SwXTextTable::addChartDataChangeEventListener(
+void SwXTextTable::addChartDataChangeEventListener(
     const uno::Reference<chart::XChartDataChangeEventListener> & xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -2405,7 +2405,7 @@ void SAL_CALL SwXTextTable::addChartDataChangeEventListener(
     m_pImpl->m_ChartListeners.addInterface(aGuard, xListener);
 }
 
-void SAL_CALL SwXTextTable::removeChartDataChangeEventListener(
+void SwXTextTable::removeChartDataChangeEventListener(
     const uno::Reference<chart::XChartDataChangeEventListener> & xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -3089,7 +3089,7 @@ void SwXTextTable::Impl::Notify(const SfxHint& rHint)
     }
 }
 
-OUString SAL_CALL SwXTextTable::getImplementationName()
+OUString SwXTextTable::getImplementationName()
     { return u"SwXTextTable"_ustr; }
 
 bool SwXTextTable::supportsService(const OUString& rServiceName)
@@ -3212,7 +3212,7 @@ std::vector< uno::Reference< table::XCell > > SwXCellRange::GetCells()
     return vResult;
 }
 
-uno::Reference<table::XCell> SAL_CALL
+uno::Reference<table::XCell>
 SwXCellRange::getCellByPosition(sal_Int32 nColumn, sal_Int32 nRow)
 {
     SolarMutexGuard aGuard;
@@ -3233,7 +3233,7 @@ SwXCellRange::getCellByPosition(sal_Int32 nColumn, sal_Int32 nRow)
     return pXCell;
 }
 
-uno::Reference<table::XCellRange> SAL_CALL
+uno::Reference<table::XCellRange>
 SwXCellRange::getCellRangeByPosition(
         sal_Int32 nLeft, sal_Int32 nTop, sal_Int32 nRight, sal_Int32 nBottom)
 {
@@ -3286,7 +3286,7 @@ SwXCellRange::getCellRangeByPosition(
     return aRet;
 }
 
-uno::Reference<table::XCellRange> SAL_CALL
+uno::Reference<table::XCellRange>
 SwXCellRange::getCellRangeByName(const OUString& rRange)
 {
     SolarMutexGuard aGuard;
@@ -3313,7 +3313,7 @@ uno::Reference< beans::XPropertySetInfo >  SwXCellRange::getPropertySetInfo()
     return xRef;
 }
 
-void SAL_CALL
+void
 SwXCellRange::setPropertyValue(const OUString& rPropertyName, const cpo::uno::Any& aValue)
 {
     SolarMutexGuard aGuard;
@@ -3432,7 +3432,7 @@ SwXCellRange::setPropertyValue(const OUString& rPropertyName, const cpo::uno::An
     }
 }
 
-cpo::uno::Any SAL_CALL SwXCellRange::getPropertyValue(const OUString& rPropertyName)
+cpo::uno::Any SwXCellRange::getPropertyValue(const OUString& rPropertyName)
 {
     SolarMutexGuard aGuard;
     cpo::uno::Any aRet;
@@ -3529,7 +3529,7 @@ void SwXCellRange::removeVetoableChangeListener(const OUString& /*PropertyName*/
     { throw cpo::uno::RuntimeException(u"Not implemented"_ustr, getXWeak()); }
 
 ///@see SwXCellRange::getData
-cpo::uno::Sequence<cpo::uno::Sequence<cpo::uno::Any>> SAL_CALL SwXCellRange::getDataArray()
+cpo::uno::Sequence<cpo::uno::Sequence<cpo::uno::Any>> SwXCellRange::getDataArray()
 {
     SolarMutexGuard aGuard;
     const sal_Int32 nRowCount = m_pImpl->GetRowCount();
@@ -3556,7 +3556,7 @@ cpo::uno::Sequence<cpo::uno::Sequence<cpo::uno::Any>> SAL_CALL SwXCellRange::get
 }
 
 ///@see SwXCellRange::setData
-void SAL_CALL SwXCellRange::setDataArray(const cpo::uno::Sequence< cpo::uno::Sequence< cpo::uno::Any > >& rArray)
+void SwXCellRange::setDataArray(const cpo::uno::Sequence< cpo::uno::Sequence< cpo::uno::Any > >& rArray)
 {
     SolarMutexGuard aGuard;
     const sal_Int32 nRowCount = m_pImpl->GetRowCount();
@@ -3590,7 +3590,7 @@ void SAL_CALL SwXCellRange::setDataArray(const cpo::uno::Sequence< cpo::uno::Seq
     }
 }
 
-cpo::uno::Sequence<cpo::uno::Sequence<double>> SAL_CALL
+cpo::uno::Sequence<cpo::uno::Sequence<double>>
 SwXCellRange::getData()
 {
     SolarMutexGuard aGuard;
@@ -3623,7 +3623,7 @@ SwXCellRange::getData()
     return vRows;
 }
 
-void SAL_CALL
+void
 SwXCellRange::setData(const cpo::uno::Sequence< cpo::uno::Sequence<double> >& rData)
 {
     SolarMutexGuard aGuard;
@@ -3693,12 +3693,12 @@ SwXCellRange::Impl::GetLabelDescriptions(SwXCellRange & rThis, bool bRow)
     return vResult;
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL SwXCellRange::getRowDescriptions()
+cpo::uno::Sequence<OUString> SwXCellRange::getRowDescriptions()
 {
     return m_pImpl->GetLabelDescriptions(*this, true);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL SwXCellRange::getColumnDescriptions()
+cpo::uno::Sequence<OUString> SwXCellRange::getColumnDescriptions()
 {
     return m_pImpl->GetLabelDescriptions(*this, false);
 }
@@ -3725,19 +3725,19 @@ void SwXCellRange::Impl::SetLabelDescriptions(SwXCellRange & rThis,
         uno::Reference<text::XText>(xCell, uno::UNO_QUERY_THROW)->setString(*pDescIterator++);
 }
 
-void SAL_CALL SwXCellRange::setRowDescriptions(
+void SwXCellRange::setRowDescriptions(
         const cpo::uno::Sequence<OUString>& rRowDesc)
 {
     m_pImpl->SetLabelDescriptions(*this, rRowDesc, true);
 }
 
-void SAL_CALL SwXCellRange::setColumnDescriptions(
+void SwXCellRange::setColumnDescriptions(
         const cpo::uno::Sequence<OUString>& rColumnDesc)
 {
     m_pImpl->SetLabelDescriptions(*this, rColumnDesc, false);
 }
 
-void SAL_CALL SwXCellRange::addChartDataChangeEventListener(
+void SwXCellRange::addChartDataChangeEventListener(
         const uno::Reference<chart::XChartDataChangeEventListener> & xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -3745,7 +3745,7 @@ void SAL_CALL SwXCellRange::addChartDataChangeEventListener(
     m_pImpl->m_ChartListeners.addInterface(aGuard, xListener);
 }
 
-void SAL_CALL SwXCellRange::removeChartDataChangeEventListener(
+void SwXCellRange::removeChartDataChangeEventListener(
         const uno::Reference<chart::XChartDataChangeEventListener> & xListener)
 {
     // no need to lock here as m_pImpl is const and container threadsafe
@@ -3765,7 +3765,7 @@ cpo::uno::Sequence< beans::PropertyValue > SwXCellRange::createSortDescriptor()
     return SwUnoCursorHelper::CreateSortDescriptor(true);
 }
 
-void SAL_CALL SwXCellRange::sort(const cpo::uno::Sequence< beans::PropertyValue >& rDescriptor)
+void SwXCellRange::sort(const cpo::uno::Sequence< beans::PropertyValue >& rDescriptor)
 {
     SolarMutexGuard aGuard;
     SwSortOptions aSortOpt;
@@ -3885,7 +3885,7 @@ cpo::uno::Any SwXTableRows::getByIndex(sal_Int32 nIndex)
     return cpo::uno::Any(xRet);
 }
 
-cpo::uno::Type SAL_CALL SwXTableRows::getElementType()
+cpo::uno::Type SwXTableRows::getElementType()
 {
     return cppu::UnoType<beans::XPropertySet>::get();
 }
@@ -4044,7 +4044,7 @@ cpo::uno::Any SwXTableColumns::getByIndex(sal_Int32 nIndex)
     return cpo::uno::Any(uno::Reference<cpo::uno::XInterface>()); // i#21699 not supported
 }
 
-cpo::uno::Type SAL_CALL SwXTableColumns::getElementType()
+cpo::uno::Type SwXTableColumns::getElementType()
 {
     return cppu::UnoType<cpo::uno::XInterface>::get();
 }

@@ -35,60 +35,60 @@ SwVbaTableOfContents::~SwVbaTableOfContents()
 {
 }
 
-::sal_Int32 SAL_CALL SwVbaTableOfContents::getLowerHeadingLevel()
+::sal_Int32 SwVbaTableOfContents::getLowerHeadingLevel()
 {
     sal_Int16 nLevel = 0;
     mxTocProps->getPropertyValue(u"Level"_ustr) >>= nLevel;
     return nLevel;
 }
 
-void SAL_CALL SwVbaTableOfContents::setLowerHeadingLevel( ::sal_Int32 _lowerheadinglevel )
+void SwVbaTableOfContents::setLowerHeadingLevel( ::sal_Int32 _lowerheadinglevel )
 {
     mxTocProps->setPropertyValue(u"Level"_ustr, cpo::uno::Any( sal_Int8( _lowerheadinglevel ) ) );
 }
 
-::sal_Int32 SAL_CALL SwVbaTableOfContents::getTabLeader()
+::sal_Int32 SwVbaTableOfContents::getTabLeader()
 {
     // not support in Writer
     return word::WdTabLeader::wdTabLeaderDots;
 }
 
-void SAL_CALL SwVbaTableOfContents::setTabLeader( ::sal_Int32 /*_tableader*/ )
+void SwVbaTableOfContents::setTabLeader( ::sal_Int32 /*_tableader*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL SwVbaTableOfContents::getUseFields()
+bool SwVbaTableOfContents::getUseFields()
 {
     bool bUseFields = false;
     mxTocProps->getPropertyValue(u"CreateFromMarks"_ustr) >>= bUseFields;
     return bUseFields;
 }
 
-void SAL_CALL SwVbaTableOfContents::setUseFields( bool _useFields )
+void SwVbaTableOfContents::setUseFields( bool _useFields )
 {
     mxTocProps->setPropertyValue(u"CreateFromMarks"_ustr, cpo::uno::Any( _useFields ) );
 }
 
-bool SAL_CALL SwVbaTableOfContents::getUseOutlineLevels()
+bool SwVbaTableOfContents::getUseOutlineLevels()
 {
     bool bUseOutlineLevels = false;
     mxTocProps->getPropertyValue(u"CreateFromOutline"_ustr) >>= bUseOutlineLevels;
     return bUseOutlineLevels;
 }
 
-void SAL_CALL SwVbaTableOfContents::setUseOutlineLevels( bool _useOutlineLevels )
+void SwVbaTableOfContents::setUseOutlineLevels( bool _useOutlineLevels )
 {
     mxTocProps->setPropertyValue(u"CreateFromOutline"_ustr, cpo::uno::Any( _useOutlineLevels ) );
 }
 
-void SAL_CALL SwVbaTableOfContents::Delete(  )
+void SwVbaTableOfContents::Delete(  )
 {
     uno::Reference< text::XTextContent > xTextContent( mxDocumentIndex, uno::UNO_QUERY_THROW );
     mxTextDocument->getText()->removeTextContent( xTextContent );
 }
 
-void SAL_CALL SwVbaTableOfContents::Update(  )
+void SwVbaTableOfContents::Update(  )
 {
     mxDocumentIndex->update();
 }

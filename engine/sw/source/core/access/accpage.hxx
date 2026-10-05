@@ -56,7 +56,7 @@ public:
 
     // XAccessibleContext methods that need to be overridden
 
-    virtual OUString SAL_CALL getAccessibleDescription() override;
+    virtual OUString getAccessibleDescription() override;
 
     virtual bool HasCursor() override;   // required by map to remember that object
 };

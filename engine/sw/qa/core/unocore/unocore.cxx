@@ -944,10 +944,10 @@ struct SelectionChangeListener : public cppu::WeakImplHelper<view::XSelectionCha
 public:
     SelectionChangeListener();
     // view::XSelectionChangeListener
-    void SAL_CALL selectionChanged(const lang::EventObject& rEvent) override;
+    void selectionChanged(const lang::EventObject& rEvent) override;
 
     // lang::XEventListener
-    void SAL_CALL disposing(const lang::EventObject& rSource) override;
+    void disposing(const lang::EventObject& rSource) override;
 };
 }
 

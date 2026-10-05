@@ -38,13 +38,13 @@ SwVbaPane::~SwVbaPane()
 {
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaPane::View()
 {
     return cpo::uno::Any( uno::Reference< word::XView >( new SwVbaView( this,  mxContext, mxModel ) ) );
 }
 
-void SAL_CALL
+void
 SwVbaPane::Close( )
 {
     dispatchRequests( static_cast<SfxBaseModel*>(mxModel.get()), u".uno:CloseWin"_ustr );

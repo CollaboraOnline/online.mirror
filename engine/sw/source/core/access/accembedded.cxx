@@ -39,7 +39,7 @@ SwAccessibleEmbeddedObject::SwAccessibleEmbeddedObject(
 SwAccessibleEmbeddedObject::~SwAccessibleEmbeddedObject() {}
 
 // XAccessibleExtendedAttributes
-OUString SAL_CALL SwAccessibleEmbeddedObject::getExtendedAttributes()
+OUString SwAccessibleEmbeddedObject::getExtendedAttributes()
 {
     SolarMutexGuard g;
 

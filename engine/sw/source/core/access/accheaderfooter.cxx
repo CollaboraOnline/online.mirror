@@ -50,7 +50,7 @@ SwAccessibleHeaderFooter::~SwAccessibleHeaderFooter()
 {
 }
 
-OUString SAL_CALL SwAccessibleHeaderFooter::getAccessibleDescription()
+OUString SwAccessibleHeaderFooter::getAccessibleDescription()
 {
     SolarMutexGuard aGuard;
 
@@ -65,7 +65,7 @@ OUString SAL_CALL SwAccessibleHeaderFooter::getAccessibleDescription()
     return GetResource(pResId, &sArg);
 }
 
-sal_Int32 SAL_CALL SwAccessibleHeaderFooter::getBackground()
+sal_Int32 SwAccessibleHeaderFooter::getBackground()
 {
     Reference< XAccessible > xParent =  getAccessibleParent();
     if (xParent.is())

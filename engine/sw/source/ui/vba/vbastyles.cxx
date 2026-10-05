@@ -186,20 +186,20 @@ public:
         mxParaStyles = xStyleFamilies->GetParagraphStyles();
     }
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override { return  cppu::UnoType<style::XStyle>::get(); }
-    virtual bool SAL_CALL hasElements(  ) override { return getCount() > 0; }
+    virtual cpo::uno::Type getElementType(  ) override { return  cppu::UnoType<style::XStyle>::get(); }
+    virtual bool hasElements(  ) override { return getCount() > 0; }
     // XNameAccess
-    virtual cpo::uno::Any SAL_CALL getByName( const OUString& aName ) override
+    virtual cpo::uno::Any getByName( const OUString& aName ) override
     {
         if ( !hasByName(aName) )
             throw container::NoSuchElementException();
         return m_cachePos;
     }
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames(  ) override
+    virtual cpo::uno::Sequence< OUString > getElementNames(  ) override
     {
         return mxParaStyles->getElementNames();
     }
-    virtual bool SAL_CALL hasByName( const OUString& aName ) override
+    virtual bool hasByName( const OUString& aName ) override
     {
         // search in the MSOStyleName table first
         for( const MSOStyleNameTable* pTable = aMSOStyleNameTable; pTable->pMSOStyleName != nullptr; pTable++ )
@@ -237,11 +237,11 @@ public:
     }
 
     // XIndexAccess
-    virtual ::sal_Int32 SAL_CALL getCount(  ) override
+    virtual ::sal_Int32 getCount(  ) override
     {
         return mxParaStyles->getCount();
     }
-    virtual cpo::uno::Any SAL_CALL getByIndex( ::sal_Int32 Index ) override
+    virtual cpo::uno::Any getByIndex( ::sal_Int32 Index ) override
     {
         if ( Index < 0 || Index >= getCount() )
             throw lang::IndexOutOfBoundsException();
@@ -249,7 +249,7 @@ public:
         return mxParaStyles->getByIndex( Index );
     }
     // XEnumerationAccess
-    virtual uno::Reference< container::XEnumeration > SAL_CALL createEnumeration(  ) override
+    virtual uno::Reference< container::XEnumeration > createEnumeration(  ) override
     {
         throw cpo::uno::RuntimeException(u"Not implemented"_ustr );
     }
@@ -261,12 +261,12 @@ class StylesEnumWrapper : public EnumerationHelper_BASE
     sal_Int32 m_nIndex;
 public:
     explicit StylesEnumWrapper( SwVbaStyles* _pStyles ) : m_pStyles( _pStyles ), m_nIndex( 1 ) {}
-    virtual bool SAL_CALL hasMoreElements(  ) override
+    virtual bool hasMoreElements(  ) override
     {
         return ( m_nIndex <= m_pStyles->getCount() );
     }
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         if ( m_nIndex <= m_pStyles->getCount() )
             return m_pStyles->Item( cpo::uno::Any( m_nIndex++ ), cpo::uno::Any() );
@@ -291,19 +291,19 @@ SwVbaStyles::createCollectionObject(const cpo::uno::Any& aObject)
     return cpo::uno::Any( uno::Reference< word::XStyle >( new SwVbaStyle( this, mxContext, mxModel, xStyleProp ) ) );
 }
 
-cpo::uno::Type SAL_CALL
+cpo::uno::Type
 SwVbaStyles::getElementType()
 {
     return cppu::UnoType<word::XStyle>::get();
 }
 
-uno::Reference< container::XEnumeration > SAL_CALL
+uno::Reference< container::XEnumeration >
 SwVbaStyles::createEnumeration()
 {
     return new StylesEnumWrapper( this );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaStyles::Item( const cpo::uno::Any& Index1, const cpo::uno::Any& Index2 )
 {
     //handle WdBuiltinStyle

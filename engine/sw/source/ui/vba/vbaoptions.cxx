@@ -39,7 +39,7 @@ SwVbaOptions::~SwVbaOptions()
 {
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaOptions::DefaultFilePath( sal_Int32 _path )
 {
     switch( _path )
@@ -126,132 +126,132 @@ cpo::uno::Any SwVbaOptions::getValueEvent()
     return cpo::uno::Any( sPath );
 }
 
-sal_Int32 SAL_CALL SwVbaOptions::getDefaultBorderLineStyle()
+sal_Int32 SwVbaOptions::getDefaultBorderLineStyle()
 {
     return word::WdLineStyle::wdLineStyleSingle;
 }
 
-void SAL_CALL SwVbaOptions::setDefaultBorderLineStyle( ::sal_Int32 /*_defaultborderlinestyle*/ )
+void SwVbaOptions::setDefaultBorderLineStyle( ::sal_Int32 /*_defaultborderlinestyle*/ )
 {
     // not support in Writer
 }
 
-sal_Int32 SAL_CALL SwVbaOptions::getDefaultBorderLineWidth()
+sal_Int32 SwVbaOptions::getDefaultBorderLineWidth()
 {
     return word::WdLineWidth::wdLineWidth050pt;
 }
 
-void SAL_CALL SwVbaOptions::setDefaultBorderLineWidth( ::sal_Int32 /*_defaultborderlinewidth*/ )
+void SwVbaOptions::setDefaultBorderLineWidth( ::sal_Int32 /*_defaultborderlinewidth*/ )
 {
     // not support in Writer
 }
 
-sal_Int32 SAL_CALL SwVbaOptions::getDefaultBorderColorIndex()
+sal_Int32 SwVbaOptions::getDefaultBorderColorIndex()
 {
     return word::WdColorIndex::wdAuto;
 }
 
-void SAL_CALL SwVbaOptions::setDefaultBorderColorIndex( ::sal_Int32 /*_defaultbordercolorindex*/ )
+void SwVbaOptions::setDefaultBorderColorIndex( ::sal_Int32 /*_defaultbordercolorindex*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL SwVbaOptions::getReplaceSelection()
+bool SwVbaOptions::getReplaceSelection()
 {
     return true;
 }
 
-void SAL_CALL SwVbaOptions::setReplaceSelection( bool /*_replaceselection*/ )
+void SwVbaOptions::setReplaceSelection( bool /*_replaceselection*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL SwVbaOptions::getMapPaperSize()
+bool SwVbaOptions::getMapPaperSize()
 {
     return false;
 }
 
-void SAL_CALL SwVbaOptions::setMapPaperSize( bool /*_mappapersize*/ )
+void SwVbaOptions::setMapPaperSize( bool /*_mappapersize*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL SwVbaOptions::getAutoFormatAsYouTypeApplyHeadings()
+bool SwVbaOptions::getAutoFormatAsYouTypeApplyHeadings()
 {
     return false;
 }
 
-void SAL_CALL SwVbaOptions::setAutoFormatAsYouTypeApplyHeadings( bool /*_autoformatasyoutypeapplyheadings*/ )
+void SwVbaOptions::setAutoFormatAsYouTypeApplyHeadings( bool /*_autoformatasyoutypeapplyheadings*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL SwVbaOptions::getAutoFormatAsYouTypeApplyBulletedLists()
+bool SwVbaOptions::getAutoFormatAsYouTypeApplyBulletedLists()
 {
     return false;
 }
 
-void SAL_CALL SwVbaOptions::setAutoFormatAsYouTypeApplyBulletedLists( bool /*_autoformatasyoutypeapplybulletedlists*/ )
+void SwVbaOptions::setAutoFormatAsYouTypeApplyBulletedLists( bool /*_autoformatasyoutypeapplybulletedlists*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL SwVbaOptions::getAutoFormatAsYouTypeApplyNumberedLists()
+bool SwVbaOptions::getAutoFormatAsYouTypeApplyNumberedLists()
 {
     return false;
 }
 
-void SAL_CALL SwVbaOptions::setAutoFormatAsYouTypeApplyNumberedLists( bool /*_autoformatasyoutypeapplynumberedlists*/ )
+void SwVbaOptions::setAutoFormatAsYouTypeApplyNumberedLists( bool /*_autoformatasyoutypeapplynumberedlists*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL SwVbaOptions::getAutoFormatAsYouTypeFormatListItemBeginning()
+bool SwVbaOptions::getAutoFormatAsYouTypeFormatListItemBeginning()
 {
     return false;
 }
 
-void SAL_CALL SwVbaOptions::setAutoFormatAsYouTypeFormatListItemBeginning( bool /*_autoformatasyoutypeformatlistitembeginning*/ )
+void SwVbaOptions::setAutoFormatAsYouTypeFormatListItemBeginning( bool /*_autoformatasyoutypeformatlistitembeginning*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL SwVbaOptions::getAutoFormatAsYouTypeDefineStyles()
+bool SwVbaOptions::getAutoFormatAsYouTypeDefineStyles()
 {
     return false;
 }
 
-void SAL_CALL SwVbaOptions::setAutoFormatAsYouTypeDefineStyles( bool /*_autoformatasyoutypedefinestyles*/ )
+void SwVbaOptions::setAutoFormatAsYouTypeDefineStyles( bool /*_autoformatasyoutypedefinestyles*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL SwVbaOptions::getAutoFormatApplyHeadings()
+bool SwVbaOptions::getAutoFormatApplyHeadings()
 {
     return false;
 }
 
-void SAL_CALL SwVbaOptions::setAutoFormatApplyHeadings( bool /*_autoformatapplyheadings*/ )
+void SwVbaOptions::setAutoFormatApplyHeadings( bool /*_autoformatapplyheadings*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL SwVbaOptions::getAutoFormatApplyLists()
+bool SwVbaOptions::getAutoFormatApplyLists()
 {
     return false;
 }
 
-void SAL_CALL SwVbaOptions::setAutoFormatApplyLists( bool /*_autoformatapplylists*/ )
+void SwVbaOptions::setAutoFormatApplyLists( bool /*_autoformatapplylists*/ )
 {
     // not support in Writer
 }
 
-bool SAL_CALL SwVbaOptions::getAutoFormatApplyBulletedLists()
+bool SwVbaOptions::getAutoFormatApplyBulletedLists()
 {
     return false;
 }
 
-void SAL_CALL SwVbaOptions::setAutoFormatApplyBulletedLists( bool /*_autoformatapplybulletedlists*/ )
+void SwVbaOptions::setAutoFormatApplyBulletedLists( bool /*_autoformatapplybulletedlists*/ )
 {
     // not support in Writer
 }

@@ -953,12 +953,12 @@ OUString SwXTextCursor::getImplementationName()
     return u"SwXTextCursor"_ustr;
 }
 
-bool SAL_CALL SwXTextCursor::supportsService(const OUString& rServiceName)
+bool SwXTextCursor::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXTextCursor::getSupportedServiceNames()
 {
     return {
@@ -973,7 +973,7 @@ SwXTextCursor::getSupportedServiceNames()
     };
 }
 
-void SAL_CALL SwXTextCursor::collapseToStart()
+void SwXTextCursor::collapseToStart()
 {
     SolarMutexGuard aGuard;
 
@@ -986,7 +986,7 @@ void SAL_CALL SwXTextCursor::collapseToStart()
     }
 }
 
-void SAL_CALL SwXTextCursor::collapseToEnd()
+void SwXTextCursor::collapseToEnd()
 {
     SolarMutexGuard aGuard;
 
@@ -999,7 +999,7 @@ void SAL_CALL SwXTextCursor::collapseToEnd()
     }
 }
 
-bool SAL_CALL SwXTextCursor::isCollapsed()
+bool SwXTextCursor::isCollapsed()
 {
     SolarMutexGuard aGuard;
 
@@ -1012,7 +1012,7 @@ bool SAL_CALL SwXTextCursor::isCollapsed()
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::goLeft(sal_Int16 nCount, bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1035,7 +1035,7 @@ SwXTextCursor::goLeft(sal_Int16 nCount, bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::goRight(sal_Int16 nCount, bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1058,7 +1058,7 @@ SwXTextCursor::goRight(sal_Int16 nCount, bool Expand)
     return bRet;
 }
 
-void SAL_CALL
+void
 SwXTextCursor::gotoStart(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1110,7 +1110,7 @@ SwXTextCursor::gotoStart(bool Expand)
     }
 }
 
-void SAL_CALL
+void
 SwXTextCursor::gotoEnd(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1142,7 +1142,7 @@ SwXTextCursor::gotoEnd(bool Expand)
     }
 }
 
-void SAL_CALL
+void
 SwXTextCursor::gotoRange(
     const uno::Reference< text::XTextRange > & xRange, bool bExpand)
 {
@@ -1302,7 +1302,7 @@ SwXTextCursor::gotoRangeImpl(
     }
 }
 
-bool SAL_CALL SwXTextCursor::isStartOfWord()
+bool SwXTextCursor::isStartOfWord()
 {
     SolarMutexGuard aGuard;
 
@@ -1313,7 +1313,7 @@ bool SAL_CALL SwXTextCursor::isStartOfWord()
     return bRet;
 }
 
-bool SAL_CALL SwXTextCursor::isEndOfWord()
+bool SwXTextCursor::isEndOfWord()
 {
     SolarMutexGuard aGuard;
 
@@ -1324,7 +1324,7 @@ bool SAL_CALL SwXTextCursor::isEndOfWord()
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoNextWord(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1375,7 +1375,7 @@ SwXTextCursor::gotoNextWord(bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoPreviousWord(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1419,7 +1419,7 @@ SwXTextCursor::gotoPreviousWord(bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoEndOfWord(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1458,7 +1458,7 @@ SwXTextCursor::gotoEndOfWord(bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoStartOfWord(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1497,7 +1497,7 @@ SwXTextCursor::gotoStartOfWord(bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::isStartOfSentence()
 {
     SolarMutexGuard aGuard;
@@ -1520,7 +1520,7 @@ SwXTextCursor::isStartOfSentence()
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::isEndOfSentence()
 {
     SolarMutexGuard aGuard;
@@ -1544,7 +1544,7 @@ SwXTextCursor::isEndOfSentence()
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoNextSentence(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1584,7 +1584,7 @@ SwXTextCursor::gotoNextSentence(bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoPreviousSentence(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1617,7 +1617,7 @@ SwXTextCursor::gotoPreviousSentence(bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoStartOfSentence(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1645,7 +1645,7 @@ SwXTextCursor::gotoStartOfSentence(bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoEndOfSentence(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1674,7 +1674,7 @@ SwXTextCursor::gotoEndOfSentence(bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::isStartOfParagraph()
 {
     SolarMutexGuard aGuard;
@@ -1685,7 +1685,7 @@ SwXTextCursor::isStartOfParagraph()
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::isEndOfParagraph()
 {
     SolarMutexGuard aGuard;
@@ -1696,7 +1696,7 @@ SwXTextCursor::isEndOfParagraph()
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoStartOfParagraph(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1721,7 +1721,7 @@ SwXTextCursor::gotoStartOfParagraph(bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoEndOfParagraph(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1746,7 +1746,7 @@ SwXTextCursor::gotoEndOfParagraph(bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoNextParagraph(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1762,7 +1762,7 @@ SwXTextCursor::gotoNextParagraph(bool Expand)
     return bRet;
 }
 
-bool SAL_CALL
+bool
 SwXTextCursor::gotoPreviousParagraph(bool Expand)
 {
     SolarMutexGuard aGuard;
@@ -1778,7 +1778,7 @@ SwXTextCursor::gotoPreviousParagraph(bool Expand)
     return bRet;
 }
 
-uno::Reference< text::XText > SAL_CALL
+uno::Reference< text::XText >
 SwXTextCursor::getText()
 {
     SolarMutexGuard g;
@@ -1786,7 +1786,7 @@ SwXTextCursor::getText()
     return m_xParentText;
 }
 
-uno::Reference< text::XTextRange > SAL_CALL
+uno::Reference< text::XTextRange >
 SwXTextCursor::getStart()
 {
     SolarMutexGuard aGuard;
@@ -1812,7 +1812,7 @@ SwXTextCursor::getStart()
     return xRet;
 }
 
-uno::Reference< text::XTextRange > SAL_CALL
+uno::Reference< text::XTextRange >
 SwXTextCursor::getEnd()
 {
     SolarMutexGuard aGuard;
@@ -1838,7 +1838,7 @@ SwXTextCursor::getEnd()
     return xRet;
 }
 
-OUString SAL_CALL SwXTextCursor::getString()
+OUString SwXTextCursor::getString()
 {
     SolarMutexGuard aGuard;
 
@@ -1849,7 +1849,7 @@ OUString SAL_CALL SwXTextCursor::getString()
     return aText;
 }
 
-void SAL_CALL
+void
 SwXTextCursor::setString(const OUString& aString)
 {
     SolarMutexGuard aGuard;
@@ -2216,7 +2216,7 @@ cpo::uno::Any SwUnoCursorHelper::GetPropertyDefault(
     return aRet;
 }
 
-uno::Reference< beans::XPropertySetInfo > SAL_CALL
+uno::Reference< beans::XPropertySetInfo >
 SwXTextCursor::getPropertySetInfo()
 {
     SolarMutexGuard g;
@@ -2240,7 +2240,7 @@ SwXTextCursor::getPropertySetInfo()
     return xRef;
 }
 
-void SAL_CALL
+void
 SwXTextCursor::setPropertyValue(
         const OUString& rPropertyName, const cpo::uno::Any& rValue)
 {
@@ -2339,7 +2339,7 @@ SwXTextCursor::setPropertyValue(
     }
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwXTextCursor::getPropertyValue(const OUString& rPropertyName)
 {
     SolarMutexGuard aGuard;
@@ -2365,7 +2365,7 @@ SwXTextCursor::getPropertyValue(const OUString& rPropertyName)
     return aAny;
 }
 
-void SAL_CALL
+void
 SwXTextCursor::addPropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/)
@@ -2373,7 +2373,7 @@ SwXTextCursor::addPropertyChangeListener(
     OSL_FAIL("SwXTextCursor::addPropertyChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXTextCursor::removePropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/)
@@ -2381,7 +2381,7 @@ SwXTextCursor::removePropertyChangeListener(
     OSL_FAIL("SwXTextCursor::removePropertyChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXTextCursor::addVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/)
@@ -2389,7 +2389,7 @@ SwXTextCursor::addVetoableChangeListener(
     OSL_FAIL("SwXTextCursor::addVetoableChangeListener(): not implemented");
 }
 
-void SAL_CALL
+void
 SwXTextCursor::removeVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/)
@@ -2397,7 +2397,7 @@ SwXTextCursor::removeVetoableChangeListener(
     OSL_FAIL("SwXTextCursor::removeVetoableChangeListener(): not implemented");
 }
 
-beans::PropertyState SAL_CALL
+beans::PropertyState
 SwXTextCursor::getPropertyState(const OUString& rPropertyName)
 {
     SolarMutexGuard aGuard;
@@ -2409,7 +2409,7 @@ SwXTextCursor::getPropertyState(const OUString& rPropertyName)
     return eRet;
 }
 
-cpo::uno::Sequence< beans::PropertyState > SAL_CALL
+cpo::uno::Sequence< beans::PropertyState >
 SwXTextCursor::getPropertyStates(
         const cpo::uno::Sequence< OUString >& rPropertyNames)
 {
@@ -2421,7 +2421,7 @@ SwXTextCursor::getPropertyStates(
             rUnoCursor, m_rPropSet, rPropertyNames);
 }
 
-void SAL_CALL
+void
 SwXTextCursor::setPropertyToDefault(const OUString& rPropertyName)
 {
     // forward: need no solar mutex here
@@ -2429,7 +2429,7 @@ SwXTextCursor::setPropertyToDefault(const OUString& rPropertyName)
     setPropertiesToDefault ( aSequence );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwXTextCursor::getPropertyDefault(const OUString& rPropertyName)
 {
     // forward: need no solar mutex here
@@ -2437,7 +2437,7 @@ SwXTextCursor::getPropertyDefault(const OUString& rPropertyName)
     return getPropertyDefaults ( aSequence ).getConstArray()[0];
 }
 
-void SAL_CALL SwXTextCursor::setPropertyValues(
+void SwXTextCursor::setPropertyValues(
     const cpo::uno::Sequence< OUString >& aPropertyNames,
     const cpo::uno::Sequence< cpo::uno::Any >& aValues )
 {
@@ -2479,7 +2479,7 @@ void SAL_CALL SwXTextCursor::setPropertyValues(
     }
 }
 
-cpo::uno::Sequence< cpo::uno::Any > SAL_CALL
+cpo::uno::Sequence< cpo::uno::Any >
 SwXTextCursor::getPropertyValues( const cpo::uno::Sequence< OUString >& aPropertyNames )
 {
     // a banal implementation for now
@@ -2489,19 +2489,19 @@ SwXTextCursor::getPropertyValues( const cpo::uno::Sequence< OUString >& aPropert
     return aValues;
 }
 
-void SAL_CALL SwXTextCursor::addPropertiesChangeListener(
+void SwXTextCursor::addPropertiesChangeListener(
         const cpo::uno::Sequence< OUString >& /* aPropertyNames */,
         const uno::Reference< css::beans::XPropertiesChangeListener >& /* xListener */ )
 {
     OSL_FAIL("SwXTextCursor::addPropertiesChangeListener(): not implemented");
 }
-void SAL_CALL SwXTextCursor::removePropertiesChangeListener(
+void SwXTextCursor::removePropertiesChangeListener(
         const uno::Reference< css::beans::XPropertiesChangeListener >& /* xListener */ )
 {
     OSL_FAIL("SwXTextCursor::removePropertiesChangeListener(): not implemented");
 }
 
-void SAL_CALL SwXTextCursor::firePropertiesChangeEvent(
+void SwXTextCursor::firePropertiesChangeEvent(
         const cpo::uno::Sequence< OUString >& /* aPropertyNames */,
         const uno::Reference< css::beans::XPropertiesChangeListener >& /* xListener */ )
 {
@@ -2541,7 +2541,7 @@ lcl_EnumerateIds(sal_uInt16 const* pIdRange, o3tl::sorted_vector<sal_uInt16> &rW
     }
 }
 
-void SAL_CALL
+void
 SwXTextCursor::setAllPropertiesToDefault()
 {
     SolarMutexGuard aGuard;
@@ -2563,7 +2563,7 @@ SwXTextCursor::setAllPropertiesToDefault()
     }
 }
 
-void SAL_CALL
+void
 SwXTextCursor::setPropertiesToDefault(
         const cpo::uno::Sequence< OUString >& rPropertyNames)
 {
@@ -2626,7 +2626,7 @@ SwXTextCursor::setPropertiesToDefault(
     }
 }
 
-cpo::uno::Sequence< cpo::uno::Any > SAL_CALL
+cpo::uno::Sequence< cpo::uno::Any >
 SwXTextCursor::getPropertyDefaults(
         const cpo::uno::Sequence< OUString >& rPropertyNames)
 {
@@ -2667,7 +2667,7 @@ SwXTextCursor::getPropertyDefaults(
     return aRet;
 }
 
-void SAL_CALL SwXTextCursor::invalidateMarkings(::sal_Int32 nType)
+void SwXTextCursor::invalidateMarkings(::sal_Int32 nType)
 {
     SolarMutexGuard aGuard;
 
@@ -2703,7 +2703,7 @@ void SAL_CALL SwXTextCursor::invalidateMarkings(::sal_Int32 nType)
     txtNode->CallSwClientNotify(SwFormatChangeHint(nullptr, fmtColl));
 }
 
-void SAL_CALL
+void
 SwXTextCursor::makeRedline(
     const OUString& rRedlineType,
     const cpo::uno::Sequence< beans::PropertyValue >& rRedlineProperties)
@@ -2715,7 +2715,7 @@ SwXTextCursor::makeRedline(
     SwUnoCursorHelper::makeRedline(rUnoCursor, rRedlineType, rRedlineProperties);
 }
 
-void SAL_CALL SwXTextCursor::insertDocumentFromURL(const OUString& rURL,
+void SwXTextCursor::insertDocumentFromURL(const OUString& rURL,
     const cpo::uno::Sequence< beans::PropertyValue >& rOptions)
 {
     SolarMutexGuard aGuard;
@@ -2775,7 +2775,7 @@ SwUnoCursorHelper::CreateSortDescriptor(const bool bFromTable)
     return aRet;
 }
 
-cpo::uno::Sequence< beans::PropertyValue > SAL_CALL
+cpo::uno::Sequence< beans::PropertyValue >
 SwXTextCursor::createSortDescriptor()
 {
     SolarMutexGuard aGuard;
@@ -3034,7 +3034,7 @@ bool SwUnoCursorHelper::ConvertSortProperties(
     return bRet && !rSortOpt.aKeys.empty();
 }
 
-void SAL_CALL
+void
 SwXTextCursor::sort(const cpo::uno::Sequence< beans::PropertyValue >& rDescriptor)
 {
     SolarMutexGuard aGuard;
@@ -3079,7 +3079,7 @@ SwXTextCursor::sort(const cpo::uno::Sequence< beans::PropertyValue >& rDescripto
 
 }
 
-uno::Reference< container::XEnumeration > SAL_CALL
+uno::Reference< container::XEnumeration >
 SwXTextCursor::createContentEnumeration(const OUString& rServiceName)
 {
     SolarMutexGuard g;
@@ -3089,7 +3089,7 @@ SwXTextCursor::createContentEnumeration(const OUString& rServiceName)
     return SwXParaFrameEnumeration::Create(rUnoCursor, PARAFRAME_PORTION_TEXTRANGE);
 }
 
-uno::Reference< container::XEnumeration > SAL_CALL
+uno::Reference< container::XEnumeration >
 SwXTextCursor::createEnumeration()
 {
     SolarMutexGuard g;
@@ -3114,18 +3114,18 @@ SwXTextCursor::createEnumeration()
     return SwXParagraphEnumeration::Create(pParentText, pNewCursor, eSetType);
 }
 
-cpo::uno::Type SAL_CALL
+cpo::uno::Type
 SwXTextCursor::getElementType()
 {
     return cppu::UnoType<text::XTextRange>::get();
 }
 
-bool SAL_CALL SwXTextCursor::hasElements()
+bool SwXTextCursor::hasElements()
 {
     return true;
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 SwXTextCursor::getAvailableServiceNames()
 {
     cpo::uno::Sequence<OUString> aRet { u"com.sun.star.text.TextContent"_ustr };

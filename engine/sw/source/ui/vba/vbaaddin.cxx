@@ -34,7 +34,7 @@ SwVbaAddin::~SwVbaAddin()
 {
 }
 
-OUString SAL_CALL SwVbaAddin::getName()
+OUString SwVbaAddin::getName()
 {
     OUString sName;
     INetURLObject aURL( msFileURL );
@@ -42,30 +42,30 @@ OUString SAL_CALL SwVbaAddin::getName()
     return sName;
 }
 
-void SAL_CALL
+void
 SwVbaAddin::setName( const OUString& )
 {
     throw cpo::uno::RuntimeException(u" Fail to set name"_ustr );
 }
 
-OUString SAL_CALL SwVbaAddin::getPath()
+OUString SwVbaAddin::getPath()
 {
     INetURLObject aURL( msFileURL );
     aURL.CutLastName();
     return aURL.GetURLPath();
 }
 
-bool SAL_CALL SwVbaAddin::getAutoload()
+bool SwVbaAddin::getAutoload()
 {
     return true;
 }
 
-bool SAL_CALL SwVbaAddin::getInstalled()
+bool SwVbaAddin::getInstalled()
 {
     return mbInstalled;
 }
 
-void SAL_CALL SwVbaAddin::setInstalled( bool _installed )
+void SwVbaAddin::setInstalled( bool _installed )
 {
     if( bool(_installed) != mbInstalled )
     {

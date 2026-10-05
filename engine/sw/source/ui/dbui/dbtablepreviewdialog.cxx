@@ -39,7 +39,7 @@ class DBTablePreviewFrame
 private:
     cpo::uno::Reference<css::frame::XFrame2> m_xFrame;
 
-    virtual void SAL_CALL disposing(const lang::EventObject& /*Source*/) override
+    virtual void disposing(const lang::EventObject& /*Source*/) override
     {
         m_xFrame.clear();
     }

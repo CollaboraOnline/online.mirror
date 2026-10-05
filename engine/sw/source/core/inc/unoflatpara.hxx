@@ -48,45 +48,45 @@ public:
     virtual ~SwXFlatParagraph() override;
 
     // XPropertySet
-    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > SAL_CALL
+    virtual cpo::uno::Reference< css::beans::XPropertySetInfo >
         getPropertySetInfo() override;
-    virtual void SAL_CALL setPropertyValue(
+    virtual void setPropertyValue(
             const OUString& rPropertyName,
             const cpo::uno::Any& rValue) override;
-    virtual cpo::uno::Any SAL_CALL getPropertyValue(
+    virtual cpo::uno::Any getPropertyValue(
             const OUString& rPropertyName) override;
-    virtual void SAL_CALL addPropertyChangeListener(
+    virtual void addPropertyChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener) override;
-    virtual void SAL_CALL removePropertyChangeListener(
+    virtual void removePropertyChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener) override;
-    virtual void SAL_CALL addVetoableChangeListener(
+    virtual void addVetoableChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XVetoableChangeListener >& xListener) override;
-    virtual void SAL_CALL removeVetoableChangeListener(
+    virtual void removeVetoableChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XVetoableChangeListener >& xListener) override;
 
     // text::XTextMarkup:
-    virtual cpo::uno::Reference< css::container::XStringKeyMap > SAL_CALL getMarkupInfoContainer() override;
+    virtual cpo::uno::Reference< css::container::XStringKeyMap > getMarkupInfoContainer() override;
 
-    virtual void SAL_CALL commitStringMarkup(::sal_Int32 nType, const OUString & aIdentifier, ::sal_Int32 nStart, ::sal_Int32 nLength,
+    virtual void commitStringMarkup(::sal_Int32 nType, const OUString & aIdentifier, ::sal_Int32 nStart, ::sal_Int32 nLength,
                                    const cpo::uno::Reference< css::container::XStringKeyMap > & xMarkupInfoContainer) override;
 
-    virtual void SAL_CALL commitTextRangeMarkup(::sal_Int32 nType, const OUString & aIdentifier, const cpo::uno::Reference< css::text::XTextRange> & xRange,
+    virtual void commitTextRangeMarkup(::sal_Int32 nType, const OUString & aIdentifier, const cpo::uno::Reference< css::text::XTextRange> & xRange,
                                                 const cpo::uno::Reference< css::container::XStringKeyMap > & xMarkupInfoContainer) override;
 
     // text::XFlatParagraph:
-    virtual OUString SAL_CALL getText() override;
-    virtual bool SAL_CALL isModified() override;
-    virtual void SAL_CALL setChecked(::sal_Int32 nType, bool bVal) override;
-    virtual bool SAL_CALL isChecked(::sal_Int32 nType) override;
-    virtual css::lang::Locale SAL_CALL getLanguageOfText(::sal_Int32 nPos, ::sal_Int32 nLen) override;
-    virtual css::lang::Locale SAL_CALL getPrimaryLanguageOfText(::sal_Int32 nPos, ::sal_Int32 nLen) override;
-    virtual void SAL_CALL changeText(::sal_Int32 nPos, ::sal_Int32 nLen, const OUString & aNewText, const cpo::uno::Sequence< css::beans::PropertyValue > & aAttributes) override;
-    virtual void SAL_CALL changeAttributes(::sal_Int32 nPos, ::sal_Int32 nLen, const cpo::uno::Sequence< css::beans::PropertyValue > & aAttributes) override;
-    virtual cpo::uno::Sequence< ::sal_Int32 > SAL_CALL getLanguagePortions() override;
+    virtual OUString getText() override;
+    virtual bool isModified() override;
+    virtual void setChecked(::sal_Int32 nType, bool bVal) override;
+    virtual bool isChecked(::sal_Int32 nType) override;
+    virtual css::lang::Locale getLanguageOfText(::sal_Int32 nPos, ::sal_Int32 nLen) override;
+    virtual css::lang::Locale getPrimaryLanguageOfText(::sal_Int32 nPos, ::sal_Int32 nLen) override;
+    virtual void changeText(::sal_Int32 nPos, ::sal_Int32 nLen, const OUString & aNewText, const cpo::uno::Sequence< css::beans::PropertyValue > & aAttributes) override;
+    virtual void changeAttributes(::sal_Int32 nPos, ::sal_Int32 nLen, const cpo::uno::Sequence< css::beans::PropertyValue > & aAttributes) override;
+    virtual cpo::uno::Sequence< ::sal_Int32 > getLanguagePortions() override;
 
     using SwXTextMarkup::GetTextNode;
 
@@ -110,11 +110,11 @@ public:
     virtual ~SwXFlatParagraphIterator() override;
 
     // text::XFlatParagraphIterator:
-    virtual cpo::uno::Reference< css::text::XFlatParagraph > SAL_CALL getFirstPara() override;
-    virtual cpo::uno::Reference< css::text::XFlatParagraph > SAL_CALL getNextPara() override;
-    virtual cpo::uno::Reference< css::text::XFlatParagraph > SAL_CALL getLastPara() override;
-    virtual cpo::uno::Reference< css::text::XFlatParagraph > SAL_CALL getParaBefore(const cpo::uno::Reference< css::text::XFlatParagraph > & xPara) override;
-    virtual cpo::uno::Reference< css::text::XFlatParagraph > SAL_CALL getParaAfter(const cpo::uno::Reference< css::text::XFlatParagraph > & xPara) override;
+    virtual cpo::uno::Reference< css::text::XFlatParagraph > getFirstPara() override;
+    virtual cpo::uno::Reference< css::text::XFlatParagraph > getNextPara() override;
+    virtual cpo::uno::Reference< css::text::XFlatParagraph > getLastPara() override;
+    virtual cpo::uno::Reference< css::text::XFlatParagraph > getParaBefore(const cpo::uno::Reference< css::text::XFlatParagraph > & xPara) override;
+    virtual cpo::uno::Reference< css::text::XFlatParagraph > getParaAfter(const cpo::uno::Reference< css::text::XFlatParagraph > & xPara) override;
 
     virtual void Notify( const SfxHint& ) override;
 

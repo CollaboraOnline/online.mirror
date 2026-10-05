@@ -98,29 +98,29 @@ public:
     ~SwXRedlineAutoStyle() override;
 
     // XPropertySet
-    uno::Reference<beans::XPropertySetInfo> SAL_CALL getPropertySetInfo() override;
-    void SAL_CALL setPropertyValue(const OUString& rPropertyName,
+    uno::Reference<beans::XPropertySetInfo> getPropertySetInfo() override;
+    void setPropertyValue(const OUString& rPropertyName,
             const cpo::uno::Any& rValue) override;
-    cpo::uno::Any SAL_CALL getPropertyValue(const OUString& rPropertyName) override;
-    void SAL_CALL addPropertyChangeListener(
+    cpo::uno::Any getPropertyValue(const OUString& rPropertyName) override;
+    void addPropertyChangeListener(
         const OUString& rPropertyName,
         const uno::Reference<beans::XPropertyChangeListener>& xListener) override;
-    void SAL_CALL removePropertyChangeListener(
+    void removePropertyChangeListener(
         const OUString& rPropertyName,
         const uno::Reference<beans::XPropertyChangeListener>& xListener) override;
-    void SAL_CALL addVetoableChangeListener(
+    void addVetoableChangeListener(
         const OUString& rPropertyName,
         const uno::Reference<beans::XVetoableChangeListener>& xListener) override;
-    void SAL_CALL removeVetoableChangeListener(
+    void removeVetoableChangeListener(
         const OUString& rPropertyName,
         const uno::Reference<beans::XVetoableChangeListener>& xListener) override;
 
     // XPropertyState
-    beans::PropertyState SAL_CALL getPropertyState(const OUString& PropertyName) override;
+    beans::PropertyState getPropertyState(const OUString& PropertyName) override;
     cpo::uno::Sequence<beans::PropertyState>
-        SAL_CALL getPropertyStates(const cpo::uno::Sequence<OUString>& aPropertyName) override;
-    void SAL_CALL setPropertyToDefault(const OUString& PropertyName) override;
-    cpo::uno::Any SAL_CALL getPropertyDefault(const OUString& aPropertyName) override;
+        getPropertyStates(const cpo::uno::Sequence<OUString>& aPropertyName) override;
+    void setPropertyToDefault(const OUString& PropertyName) override;
+    cpo::uno::Any getPropertyDefault(const OUString& aPropertyName) override;
 };
 
 SwXRedlineAutoStyle::SwXRedlineAutoStyle(const std::shared_ptr<SfxItemSet>& pItemSet)
@@ -130,7 +130,7 @@ SwXRedlineAutoStyle::SwXRedlineAutoStyle(const std::shared_ptr<SfxItemSet>& pIte
 
 SwXRedlineAutoStyle::~SwXRedlineAutoStyle() = default;
 
-uno::Reference<beans::XPropertySetInfo> SAL_CALL SwXRedlineAutoStyle::getPropertySetInfo()
+uno::Reference<beans::XPropertySetInfo> SwXRedlineAutoStyle::getPropertySetInfo()
 {
     SolarMutexGuard aGuard;
 
@@ -139,7 +139,7 @@ uno::Reference<beans::XPropertySetInfo> SAL_CALL SwXRedlineAutoStyle::getPropert
     return xRet;
 }
 
-void SAL_CALL SwXRedlineAutoStyle::setPropertyValue(const OUString& rPropertyName,
+void SwXRedlineAutoStyle::setPropertyValue(const OUString& rPropertyName,
         const cpo::uno::Any& rValue)
 {
     SolarMutexGuard aGuard;
@@ -148,7 +148,7 @@ void SAL_CALL SwXRedlineAutoStyle::setPropertyValue(const OUString& rPropertyNam
     pPropertySet->setPropertyValue(rPropertyName, rValue, *m_pItemSet);
 }
 
-cpo::uno::Any SAL_CALL SwXRedlineAutoStyle::getPropertyValue(const OUString& rPropertyName)
+cpo::uno::Any SwXRedlineAutoStyle::getPropertyValue(const OUString& rPropertyName)
 {
     SolarMutexGuard aGuard;
 
@@ -156,28 +156,28 @@ cpo::uno::Any SAL_CALL SwXRedlineAutoStyle::getPropertyValue(const OUString& rPr
     return pPropertySet->getPropertyValue(rPropertyName, *m_pItemSet);
 }
 
-void SAL_CALL SwXRedlineAutoStyle::addPropertyChangeListener(
+void SwXRedlineAutoStyle::addPropertyChangeListener(
     const OUString& /*rPropertyName*/,
     const uno::Reference<beans::XPropertyChangeListener>& /*xListener*/)
 {
     SAL_WARN("sw.uno", "SwXRedlineAutoStyle::addPropertyChangeListener: not implemented");
 }
 
-void SAL_CALL SwXRedlineAutoStyle::removePropertyChangeListener(
+void SwXRedlineAutoStyle::removePropertyChangeListener(
     const OUString& /*rPropertyName*/,
     const uno::Reference<beans::XPropertyChangeListener>& /*xListener*/)
 {
     SAL_WARN("sw.uno", "SwXRedlineAutoStyle::removePropertyChangeListener: not implemented");
 }
 
-void SAL_CALL SwXRedlineAutoStyle::addVetoableChangeListener(
+void SwXRedlineAutoStyle::addVetoableChangeListener(
     const OUString& /*rPropertyName*/,
     const uno::Reference<beans::XVetoableChangeListener>& /*xListener*/)
 {
     SAL_WARN("sw.uno", "SwXRedlineAutoStyle::addVetoableChangeListener: not implemented");
 }
 
-void SAL_CALL SwXRedlineAutoStyle::removeVetoableChangeListener(
+void SwXRedlineAutoStyle::removeVetoableChangeListener(
     const OUString& /*rPropertyName*/,
     const uno::Reference<beans::XVetoableChangeListener>& /*xListener*/)
 {
@@ -486,7 +486,7 @@ bool SwXRedlinePortion::Validate()
     // don't throw; the only caller can return void instead
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL SwXRedlinePortion::getImplementationId(  )
+cpo::uno::Sequence< sal_Int8 > SwXRedlinePortion::getImplementationId(  )
 {
     return cpo::uno::Sequence<sal_Int8>();
 }

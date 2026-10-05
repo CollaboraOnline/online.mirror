@@ -37,8 +37,8 @@ public:
     virtual ~SwVbaListFormat() override;
 
     // Methods
-    virtual void SAL_CALL ApplyListTemplate( const cpo::uno::Reference< ::ooo::vba::word::XListTemplate >& ListTemplate, const cpo::uno::Any& ContinuePreviousList, const cpo::uno::Any& ApplyTo, const cpo::uno::Any& DefaultListBehavior ) override;
-    virtual void SAL_CALL ConvertNumbersToText(  ) override;
+    virtual void ApplyListTemplate( const cpo::uno::Reference< ::ooo::vba::word::XListTemplate >& ListTemplate, const cpo::uno::Any& ContinuePreviousList, const cpo::uno::Any& ApplyTo, const cpo::uno::Any& DefaultListBehavior ) override;
+    virtual void ConvertNumbersToText(  ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

@@ -45,7 +45,7 @@ public:
     virtual ~SwScannerEventListener() override;
 
     // XEventListener
-    virtual void SAL_CALL disposing(
+    virtual void disposing(
                     const css::lang::EventObject& rEventObject ) override;
 
     void ViewDestroyed() { m_pView = nullptr; }
@@ -58,10 +58,10 @@ class SwClipboardChangeListener final : public ::cppu::WeakImplHelper<
     SwView* m_pView;
 
     // XEventListener
-    virtual void SAL_CALL disposing( const css::lang::EventObject& rEventObject ) override;
+    virtual void disposing( const css::lang::EventObject& rEventObject ) override;
 
     // XClipboardListener
-    virtual void SAL_CALL changedContents( const css::datatransfer::clipboard::ClipboardEvent& rEventObject ) override;
+    virtual void changedContents( const css::datatransfer::clipboard::ClipboardEvent& rEventObject ) override;
 
 public:
     SwClipboardChangeListener( SwView& rView ) : m_pView( &rView ) {}

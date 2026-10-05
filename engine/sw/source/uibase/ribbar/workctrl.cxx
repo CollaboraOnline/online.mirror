@@ -687,17 +687,17 @@ NavElementToolBoxControl::NavElementToolBoxControl( const uno::Reference< cpo::u
 }
 
 // XServiceInfo
-bool SAL_CALL NavElementToolBoxControl::supportsService( const OUString& ServiceName )
+bool NavElementToolBoxControl::supportsService( const OUString& ServiceName )
 {
     return cppu::supportsService( this, ServiceName );
 }
 
-OUString SAL_CALL NavElementToolBoxControl::getImplementationName()
+OUString NavElementToolBoxControl::getImplementationName()
 {
     return u"lo.writer.NavElementToolBoxController"_ustr;
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL NavElementToolBoxControl::getSupportedServiceNames()
+cpo::uno::Sequence< OUString > NavElementToolBoxControl::getSupportedServiceNames()
 {
     return { u"com.sun.star.frame.ToolbarController"_ustr };
 }
@@ -714,7 +714,7 @@ void NavElementToolBoxControl::disposing(std::unique_lock<std::mutex>& rGuard)
 }
 
 // XStatusListener
-void SAL_CALL NavElementToolBoxControl::statusChanged( const frame::FeatureStateEvent& rEvent )
+void NavElementToolBoxControl::statusChanged( const frame::FeatureStateEvent& rEvent )
 {
     if (!m_pBox)
         return;
@@ -739,24 +739,24 @@ void SAL_CALL NavElementToolBoxControl::statusChanged( const frame::FeatureState
 }
 
 // XToolbarController
-void SAL_CALL NavElementToolBoxControl::execute( sal_Int16 /*KeyModifier*/ )
+void NavElementToolBoxControl::execute( sal_Int16 /*KeyModifier*/ )
 {
 }
 
-void SAL_CALL NavElementToolBoxControl::click()
+void NavElementToolBoxControl::click()
 {
 }
 
-void SAL_CALL NavElementToolBoxControl::doubleClick()
+void NavElementToolBoxControl::doubleClick()
 {
 }
 
-uno::Reference< awt::XWindow > SAL_CALL NavElementToolBoxControl::createPopupWindow()
+uno::Reference< awt::XWindow > NavElementToolBoxControl::createPopupWindow()
 {
     return uno::Reference< awt::XWindow >();
 }
 
-uno::Reference< awt::XWindow > SAL_CALL NavElementToolBoxControl::createItemWindow(
+uno::Reference< awt::XWindow > NavElementToolBoxControl::createItemWindow(
     const uno::Reference< awt::XWindow >& xParent )
 {
     uno::Reference< awt::XWindow > xItemWindow;
@@ -806,12 +806,12 @@ public:
     PrevNextScrollToolboxController( const cpo::uno::Reference< cpo::uno::XComponentContext >& rxContext, Type eType );
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService( const OUString& ServiceName ) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService( const OUString& ServiceName ) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
     // XStatusListener
-    virtual void SAL_CALL statusChanged( const css::frame::FeatureStateEvent& rEvent ) override;
+    virtual void statusChanged( const css::frame::FeatureStateEvent& rEvent ) override;
 
 private:
     Type                     meType;
@@ -829,25 +829,25 @@ PrevNextScrollToolboxController::PrevNextScrollToolboxController( const cpo::uno
 }
 
 // XServiceInfo
-OUString SAL_CALL PrevNextScrollToolboxController::getImplementationName()
+OUString PrevNextScrollToolboxController::getImplementationName()
 {
     return meType == PrevNextScrollToolboxController::PREVIOUS?
         u"lo.writer.PreviousScrollToolboxController"_ustr :
         u"lo.writer.NextScrollToolboxController"_ustr;
 }
 
-bool SAL_CALL PrevNextScrollToolboxController::supportsService( const OUString& ServiceName )
+bool PrevNextScrollToolboxController::supportsService( const OUString& ServiceName )
 {
     return cppu::supportsService(this, ServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL PrevNextScrollToolboxController::getSupportedServiceNames()
+cpo::uno::Sequence< OUString > PrevNextScrollToolboxController::getSupportedServiceNames()
 {
     return { u"com.sun.star.frame.ToolbarController"_ustr };
 }
 
 // XStatusListener
-void SAL_CALL PrevNextScrollToolboxController::statusChanged( const css::frame::FeatureStateEvent& rEvent )
+void PrevNextScrollToolboxController::statusChanged( const css::frame::FeatureStateEvent& rEvent )
 {
     if (rEvent.FeatureURL.Path == "NavElement")
     {

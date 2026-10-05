@@ -46,20 +46,20 @@ public:
     SwXRedlines(SwDoc* pDoc);
 
     //XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount(  ) override;
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 nIndex) override;
+    virtual sal_Int32 getCount(  ) override;
+    virtual cpo::uno::Any getByIndex(sal_Int32 nIndex) override;
 
     //XEnumerationAccess - was: XParagraphEnumerationAccess
-    virtual cpo::uno::Reference< css::container::XEnumeration >  SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration >  createEnumeration() override;
 
     //XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override;
-    virtual bool SAL_CALL hasElements(  ) override;
+    virtual cpo::uno::Type getElementType(  ) override;
+    virtual bool hasElements(  ) override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
     static cpo::uno::Reference<css::beans::XPropertySet> GetObject(SwRangeRedline& rRedline);
 };
@@ -76,13 +76,13 @@ public:
     SwXRedlineEnumeration(SwDoc& rDoc);
 
     //XEnumeration
-    virtual bool SAL_CALL hasMoreElements() override;
-    virtual cpo::uno::Any SAL_CALL nextElement() override;
+    virtual bool hasMoreElements() override;
+    virtual cpo::uno::Any nextElement() override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
     virtual void Notify( const SfxHint& ) override;
 };

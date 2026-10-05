@@ -67,34 +67,34 @@ public:
     SwXTextSearch();
 
     //XSearchDescriptor
-    virtual OUString SAL_CALL getSearchString(  ) override;
-    virtual void SAL_CALL setSearchString( const OUString& aString ) override;
+    virtual OUString getSearchString(  ) override;
+    virtual void setSearchString( const OUString& aString ) override;
 
     //XReplaceDescriptor
-    virtual OUString SAL_CALL getReplaceString() override;
-    virtual void SAL_CALL setReplaceString(const OUString& aReplaceString) override;
+    virtual OUString getReplaceString() override;
+    virtual void setReplaceString(const OUString& aReplaceString) override;
 
     //XPropertySet
-    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > SAL_CALL getPropertySetInfo(  ) override;
-    virtual void SAL_CALL setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue ) override;
-    virtual cpo::uno::Any SAL_CALL getPropertyValue( const OUString& PropertyName ) override;
-    virtual void SAL_CALL addPropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener ) override;
-    virtual void SAL_CALL removePropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& aListener ) override;
-    virtual void SAL_CALL addVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
-    virtual void SAL_CALL removeVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
+    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > getPropertySetInfo(  ) override;
+    virtual void setPropertyValue( const OUString& aPropertyName, const cpo::uno::Any& aValue ) override;
+    virtual cpo::uno::Any getPropertyValue( const OUString& PropertyName ) override;
+    virtual void addPropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener ) override;
+    virtual void removePropertyChangeListener( const OUString& aPropertyName, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& aListener ) override;
+    virtual void addVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
+    virtual void removeVetoableChangeListener( const OUString& PropertyName, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& aListener ) override;
 
     //XPropertyReplace
-    virtual bool SAL_CALL getValueSearch() override;
-    virtual void SAL_CALL setValueSearch(bool ValueSearch_) override;
-    virtual cpo::uno::Sequence< css::beans::PropertyValue > SAL_CALL getSearchAttributes() override;
-    virtual void SAL_CALL setSearchAttributes(const cpo::uno::Sequence< css::beans::PropertyValue >& aSearchAttribs) override;
-    virtual cpo::uno::Sequence< css::beans::PropertyValue > SAL_CALL getReplaceAttributes() override;
-    virtual void SAL_CALL setReplaceAttributes(const cpo::uno::Sequence< css::beans::PropertyValue >& aSearchAttribs) override;
+    virtual bool getValueSearch() override;
+    virtual void setValueSearch(bool ValueSearch_) override;
+    virtual cpo::uno::Sequence< css::beans::PropertyValue > getSearchAttributes() override;
+    virtual void setSearchAttributes(const cpo::uno::Sequence< css::beans::PropertyValue >& aSearchAttribs) override;
+    virtual cpo::uno::Sequence< css::beans::PropertyValue > getReplaceAttributes() override;
+    virtual void setReplaceAttributes(const cpo::uno::Sequence< css::beans::PropertyValue >& aSearchAttribs) override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
     void    FillSearchItemSet(SfxItemSet& rSet) const;
     void    FillReplaceItemSet(SfxItemSet& rSet) const;

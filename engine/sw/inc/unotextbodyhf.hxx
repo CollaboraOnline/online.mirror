@@ -52,30 +52,30 @@ public:
     rtl::Reference<SwXTextCursor> CreateTextCursor(const bool bIgnoreTables = false);
 
     // XInterface
-    virtual cpo::uno::Any SAL_CALL queryInterface(
+    virtual cpo::uno::Any queryInterface(
             const cpo::uno::Type& rType) override;
-    virtual void SAL_CALL acquire() noexcept override { OWeakObject::acquire(); }
-    virtual void SAL_CALL release() noexcept override { OWeakObject::release(); }
+    virtual void acquire() noexcept override { OWeakObject::acquire(); }
+    virtual void release() noexcept override { OWeakObject::release(); }
 
     // XTypeProvider
     virtual cpo::uno::Sequence< cpo::uno::Type >
-        SAL_CALL getTypes() override;
-    virtual cpo::uno::Sequence< sal_Int8 > SAL_CALL
+        getTypes() override;
+    virtual cpo::uno::Sequence< sal_Int8 >
         getImplementationId() override;
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(
             const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getSupportedServiceNames() override;
 
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual bool SAL_CALL hasElements() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual bool hasElements() override;
 
     // XEnumerationAccess
-    virtual cpo::uno::Reference< css::container::XEnumeration >  SAL_CALL
+    virtual cpo::uno::Reference< css::container::XEnumeration >
         createEnumeration() override;
     rtl::Reference< SwXParagraphEnumeration > createParagraphEnumeration();
 
@@ -114,30 +114,30 @@ public:
     rtl::Reference< SwXTextCursor > CreateTextCursor(const bool bIgnoreTables = false);
 
     // XInterface
-    virtual cpo::uno::Any SAL_CALL queryInterface(
+    virtual cpo::uno::Any queryInterface(
             const cpo::uno::Type& rType) override;
-    virtual void SAL_CALL acquire() noexcept override { OWeakObject::acquire(); }
-    virtual void SAL_CALL release() noexcept override { OWeakObject::release(); }
+    virtual void acquire() noexcept override { OWeakObject::acquire(); }
+    virtual void release() noexcept override { OWeakObject::release(); }
 
     // XTypeProvider
     virtual cpo::uno::Sequence< cpo::uno::Type >
-        SAL_CALL getTypes() override;
-    virtual cpo::uno::Sequence< sal_Int8 > SAL_CALL
+        getTypes() override;
+    virtual cpo::uno::Sequence< sal_Int8 >
         getImplementationId() override;
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(
             const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getSupportedServiceNames() override;
 
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual bool SAL_CALL hasElements() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual bool hasElements() override;
 
     // XEnumerationAccess
-    virtual cpo::uno::Reference< css::container::XEnumeration >  SAL_CALL
+    virtual cpo::uno::Reference< css::container::XEnumeration >
         createEnumeration() override;
 
     // XSimpleText

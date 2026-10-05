@@ -36,7 +36,7 @@ private:
 public:
     SvXMLSectionListContext(SwXMLSectionList& rImport);
 
-    virtual cpo::uno::Reference<css::xml::sax::XFastContextHandler> SAL_CALL createFastChildContext(
+    virtual cpo::uno::Reference<css::xml::sax::XFastContextHandler> createFastChildContext(
         sal_Int32 Element,
         const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & xAttrList ) override;
 };
@@ -52,7 +52,7 @@ public:
     {
     }
 
-    virtual cpo::uno::Reference<XFastContextHandler> SAL_CALL createFastChildContext(
+    virtual cpo::uno::Reference<XFastContextHandler> createFastChildContext(
         sal_Int32 Element, const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & /*xAttrList*/ ) override
     {
         if (Element == XML_ELEMENT(OFFICE, XML_BODY) ||

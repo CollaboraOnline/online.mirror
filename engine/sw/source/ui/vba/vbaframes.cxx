@@ -50,12 +50,12 @@ public:
       mnCurrentPos(0)
     {
     }
-    virtual bool SAL_CALL hasMoreElements(  ) override
+    virtual bool hasMoreElements(  ) override
     {
         return ( mnCurrentPos < mxIndexAccess->getCount() );
     }
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         if ( !hasMoreElements() )
             throw container::NoSuchElementException();

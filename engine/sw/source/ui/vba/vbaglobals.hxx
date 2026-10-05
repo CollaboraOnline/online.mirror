@@ -44,32 +44,32 @@ public:
     virtual ~SwVbaGlobals() override;
 
     // XGlobals
-    virtual OUString SAL_CALL getName() override;
-    virtual cpo::uno::Reference<ooo::vba::word::XSystem> SAL_CALL getSystem() override;
-    virtual cpo::uno::Reference<ov::word::XDocument> SAL_CALL getActiveDocument() override;
-    virtual cpo::uno::Reference<ov::word::XWindow> SAL_CALL getActiveWindow() override;
-    virtual cpo::uno::Reference<ooo::vba::word::XOptions> SAL_CALL getOptions() override;
-    virtual cpo::uno::Reference<ooo::vba::word::XSelection> SAL_CALL getSelection() override;
-    virtual cpo::uno::Reference<ooo::vba::word::XGlobals> SAL_CALL getWord() override;
-    virtual cpo::uno::Reference<ooo::vba::word::XWordBasic> SAL_CALL getWordBasic() override;
-    virtual cpo::uno::Any SAL_CALL CommandBars(const cpo::uno::Any& aIndex) override;
-    virtual cpo::uno::Any SAL_CALL Documents(const cpo::uno::Any& aIndex) override;
-    virtual cpo::uno::Any SAL_CALL Addins(const cpo::uno::Any& aIndex) override;
-    virtual cpo::uno::Any SAL_CALL Dialogs(const cpo::uno::Any& aIndex) override;
-    virtual cpo::uno::Any SAL_CALL ListGalleries(const cpo::uno::Any& aIndex) override;
-    virtual float SAL_CALL CentimetersToPoints(float Centimeters) override;
-    virtual float SAL_CALL PointsToCentimeters(float Points) override;
-    virtual float SAL_CALL PixelsToPoints(float Pixels, bool fVertical) override;
-    virtual float SAL_CALL PointsToPixels(float Pixels, bool fVertical) override;
-    virtual float SAL_CALL InchesToPoints(float Inches) override;
-    virtual float SAL_CALL PointsToInches(float Points) override;
-    virtual float SAL_CALL MillimetersToPoints(float Millimeters) override;
-    virtual float SAL_CALL PointsToMillimeters(float Points) override;
-    virtual float SAL_CALL PicasToPoints(float Picas) override;
-    virtual float SAL_CALL PointsToPicas(float Points) override;
+    virtual OUString getName() override;
+    virtual cpo::uno::Reference<ooo::vba::word::XSystem> getSystem() override;
+    virtual cpo::uno::Reference<ov::word::XDocument> getActiveDocument() override;
+    virtual cpo::uno::Reference<ov::word::XWindow> getActiveWindow() override;
+    virtual cpo::uno::Reference<ooo::vba::word::XOptions> getOptions() override;
+    virtual cpo::uno::Reference<ooo::vba::word::XSelection> getSelection() override;
+    virtual cpo::uno::Reference<ooo::vba::word::XGlobals> getWord() override;
+    virtual cpo::uno::Reference<ooo::vba::word::XWordBasic> getWordBasic() override;
+    virtual cpo::uno::Any CommandBars(const cpo::uno::Any& aIndex) override;
+    virtual cpo::uno::Any Documents(const cpo::uno::Any& aIndex) override;
+    virtual cpo::uno::Any Addins(const cpo::uno::Any& aIndex) override;
+    virtual cpo::uno::Any Dialogs(const cpo::uno::Any& aIndex) override;
+    virtual cpo::uno::Any ListGalleries(const cpo::uno::Any& aIndex) override;
+    virtual float CentimetersToPoints(float Centimeters) override;
+    virtual float PointsToCentimeters(float Points) override;
+    virtual float PixelsToPoints(float Pixels, bool fVertical) override;
+    virtual float PointsToPixels(float Pixels, bool fVertical) override;
+    virtual float InchesToPoints(float Inches) override;
+    virtual float PointsToInches(float Points) override;
+    virtual float MillimetersToPoints(float Millimeters) override;
+    virtual float PointsToMillimeters(float Points) override;
+    virtual float PicasToPoints(float Picas) override;
+    virtual float PointsToPicas(float Points) override;
 
     // XMultiServiceFactory
-    virtual cpo::uno::Sequence<OUString> SAL_CALL getAvailableServiceNames() override;
+    virtual cpo::uno::Sequence<OUString> getAvailableServiceNames() override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

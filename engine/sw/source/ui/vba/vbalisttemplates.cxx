@@ -33,12 +33,12 @@ class ListTemplatesEnumWrapper : public EnumerationHelper_BASE
     sal_Int32 m_nIndex;
 public:
     explicit ListTemplatesEnumWrapper( SwVbaListTemplates* pTemplates ) : m_pListTemplates( pTemplates ), m_nIndex( 1 ) {}
-    virtual bool SAL_CALL hasMoreElements(  ) override
+    virtual bool hasMoreElements(  ) override
     {
         return ( m_nIndex <= m_pListTemplates->getCount() );
     }
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         if ( m_nIndex <= m_pListTemplates->getCount() )
             return m_pListTemplates->Item( cpo::uno::Any( m_nIndex++ ), cpo::uno::Any() );
@@ -52,13 +52,13 @@ SwVbaListTemplates::SwVbaListTemplates( const uno::Reference< XHelperInterface >
 {
 }
 
-::sal_Int32 SAL_CALL SwVbaListTemplates::getCount()
+::sal_Int32 SwVbaListTemplates::getCount()
 {
     // 3 types of list( bullet, numbered and outline )
     return 7;
 }
 
-cpo::uno::Any SAL_CALL SwVbaListTemplates::Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ )
+cpo::uno::Any SwVbaListTemplates::Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ )
 {
     sal_Int32 nIndex = 0;
     if( !( Index1 >>= nIndex ) )

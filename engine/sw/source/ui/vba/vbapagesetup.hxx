@@ -47,16 +47,16 @@ public:
                     const cpo::uno::Reference< css::beans::XPropertySet >& xProps );
 
     // Attributes
-    virtual double SAL_CALL getGutter() override;
-    virtual void SAL_CALL setGutter( double _gutter ) override;
-    virtual double SAL_CALL getHeaderDistance() override;
-    virtual void SAL_CALL setHeaderDistance( double _headerdistance ) override;
-    virtual double SAL_CALL getFooterDistance() override;
-    virtual void SAL_CALL setFooterDistance( double _footerdistance ) override;
-    virtual bool SAL_CALL getDifferentFirstPageHeaderFooter() override;
-    virtual void SAL_CALL setDifferentFirstPageHeaderFooter( bool status ) override;
-    virtual ::sal_Int32 SAL_CALL getSectionStart() override;
-    virtual void SAL_CALL setSectionStart( ::sal_Int32 _sectionstart ) override;
+    virtual double getGutter() override;
+    virtual void setGutter( double _gutter ) override;
+    virtual double getHeaderDistance() override;
+    virtual void setHeaderDistance( double _headerdistance ) override;
+    virtual double getFooterDistance() override;
+    virtual void setFooterDistance( double _footerdistance ) override;
+    virtual bool getDifferentFirstPageHeaderFooter() override;
+    virtual void setDifferentFirstPageHeaderFooter( bool status ) override;
+    virtual ::sal_Int32 getSectionStart() override;
+    virtual void setSectionStart( ::sal_Int32 _sectionstart ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

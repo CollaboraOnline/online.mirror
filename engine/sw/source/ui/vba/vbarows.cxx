@@ -52,12 +52,12 @@ public:
     {
         mxIndexAccess = mxTextTable->getRows();
     }
-    virtual bool SAL_CALL hasMoreElements(  ) override
+    virtual bool hasMoreElements(  ) override
     {
         return ( m_nIndex < mxIndexAccess->getCount() );
     }
 
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         if( m_nIndex < mxIndexAccess->getCount() )
         {
@@ -95,7 +95,7 @@ SwVbaRows::SwVbaRows( const uno::Reference< XHelperInterface >& xParent,
  * is mapped to WdRowAlignment in Word
  * @return the alignment
  */
-::sal_Int32 SAL_CALL SwVbaRows::getAlignment()
+::sal_Int32 SwVbaRows::getAlignment()
 {
     sal_Int16 nAlignment = text::HoriOrientation::LEFT;
     mxTextTable->getPropertyValue(u"HoriOrient"_ustr) >>= nAlignment;
@@ -120,7 +120,7 @@ SwVbaRows::SwVbaRows( const uno::Reference< XHelperInterface >& xParent,
     return nRet;
 }
 
-void SAL_CALL SwVbaRows::setAlignment( ::sal_Int32 _alignment )
+void SwVbaRows::setAlignment( ::sal_Int32 _alignment )
 {
     sal_Int16 nAlignment = text::HoriOrientation::LEFT;
     switch( _alignment )
@@ -143,7 +143,7 @@ void SAL_CALL SwVbaRows::setAlignment( ::sal_Int32 _alignment )
     mxTextTable->setPropertyValue(u"HoriOrient"_ustr, cpo::uno::Any( nAlignment ) );
 }
 
-cpo::uno::Any SAL_CALL SwVbaRows::getAllowBreakAcrossPages()
+cpo::uno::Any SwVbaRows::getAllowBreakAcrossPages()
 {
     bool bAllowBreak = false;
     uno::Reference< container::XIndexAccess > xRowsAccess( mxTableRows, uno::UNO_QUERY_THROW );
@@ -164,7 +164,7 @@ cpo::uno::Any SAL_CALL SwVbaRows::getAllowBreakAcrossPages()
     return cpo::uno::Any( bAllowBreak );
 }
 
-void SAL_CALL SwVbaRows::setAllowBreakAcrossPages( const cpo::uno::Any& _allowbreakacrosspages )
+void SwVbaRows::setAllowBreakAcrossPages( const cpo::uno::Any& _allowbreakacrosspages )
 {
     bool bAllowBreak = false;
     _allowbreakacrosspages >>= bAllowBreak;
@@ -176,7 +176,7 @@ void SAL_CALL SwVbaRows::setAllowBreakAcrossPages( const cpo::uno::Any& _allowbr
     }
 }
 
-float SAL_CALL SwVbaRows::getSpaceBetweenColumns()
+float SwVbaRows::getSpaceBetweenColumns()
 {
     // just get the first spacing of the first cell
     rtl::Reference< SwXCell > xCellProps( mxTextTable->getSwCellByPosition( 0, mnStartRowIndex ) );
@@ -187,7 +187,7 @@ float SAL_CALL SwVbaRows::getSpaceBetweenColumns()
     return static_cast< float >( Millimeter::getInPoints( nLeftBorderDistance + nRightBorderDistance ) );
 }
 
-void SAL_CALL SwVbaRows::setSpaceBetweenColumns( float _spacebetweencolumns )
+void SwVbaRows::setSpaceBetweenColumns( float _spacebetweencolumns )
 {
     sal_Int32 nSpace = Millimeter::getInHundredthsOfOneMillimeter( _spacebetweencolumns ) / 2;
     uno::Reference< container::XIndexAccess > xColumnAccess( mxTextTable->getColumns(), uno::UNO_QUERY_THROW );
@@ -204,12 +204,12 @@ void SAL_CALL SwVbaRows::setSpaceBetweenColumns( float _spacebetweencolumns )
     }
 }
 
-void SAL_CALL SwVbaRows::Delete(  )
+void SwVbaRows::Delete(  )
 {
     mxTableRows->removeByIndex( mnStartRowIndex, getCount() );
 }
 
-void SAL_CALL SwVbaRows::SetLeftIndent( float LeftIndent, ::sal_Int32 RulerStyle )
+void SwVbaRows::SetLeftIndent( float LeftIndent, ::sal_Int32 RulerStyle )
 {
     uno::Reference< word::XColumns > xColumns( new SwVbaColumns( getParent(), mxContext, mxTextTable, mxTextTable->getColumns() ) );
     sal_Int32 nIndent = static_cast<sal_Int32>(LeftIndent);
@@ -316,17 +316,17 @@ void SwVbaRows::setIndentWithAdjustNone( sal_Int32 indent )
     mxTextTable->setPropertyValue(u"Width"_ustr, cpo::uno::Any( nNewWidth ) );
  }
 
-void SAL_CALL SwVbaRows::Select(  )
+void SwVbaRows::Select(  )
 {
     SwVbaRow::SelectRow( getCurrentWordDoc(mxContext), mxTextTable, mnStartRowIndex, mnEndRowIndex );
 }
 
-::sal_Int32 SAL_CALL SwVbaRows::getCount()
+::sal_Int32 SwVbaRows::getCount()
 {
     return ( mnEndRowIndex - mnStartRowIndex + 1 );
 }
 
-cpo::uno::Any SAL_CALL SwVbaRows::Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ )
+cpo::uno::Any SwVbaRows::Item( const cpo::uno::Any& Index1, const cpo::uno::Any& /*not processed in this base class*/ )
 {
     sal_Int32 nIndex = 0;
     if( Index1 >>= nIndex )

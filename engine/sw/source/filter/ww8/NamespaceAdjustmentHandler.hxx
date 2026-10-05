@@ -45,7 +45,7 @@ public:
     {
     }
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override
     {
@@ -69,19 +69,19 @@ public:
         m_xNext->startElement(rName, pList);
     }
 
-    void SAL_CALL startDocument() override { m_xNext->startDocument(); }
-    void SAL_CALL endDocument() override { m_xNext->endDocument(); }
-    void SAL_CALL endElement(const OUString& rName) override { m_xNext->endElement(rName); }
-    void SAL_CALL characters(const OUString& rChars) override { m_xNext->characters(rChars); }
-    void SAL_CALL ignorableWhitespace(const OUString& rWs) override
+    void startDocument() override { m_xNext->startDocument(); }
+    void endDocument() override { m_xNext->endDocument(); }
+    void endElement(const OUString& rName) override { m_xNext->endElement(rName); }
+    void characters(const OUString& rChars) override { m_xNext->characters(rChars); }
+    void ignorableWhitespace(const OUString& rWs) override
     {
         m_xNext->ignorableWhitespace(rWs);
     }
-    void SAL_CALL processingInstruction(const OUString& rTarget, const OUString& rData) override
+    void processingInstruction(const OUString& rTarget, const OUString& rData) override
     {
         m_xNext->processingInstruction(rTarget, rData);
     }
-    void SAL_CALL
+    void
     setDocumentLocator(const cpo::uno::Reference<css::xml::sax::XLocator>& xLocator) override
     {
         m_xNext->setDocumentLocator(xLocator);

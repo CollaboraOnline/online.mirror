@@ -42,7 +42,7 @@ SwVbaField::SwVbaField(  const uno::Reference< ooo::vba::XHelperInterface >& rPa
     mxTextField.set( xTextField, uno::UNO_SET_THROW );
 }
 
-bool SAL_CALL SwVbaField::Update()
+bool SwVbaField::Update()
 {
     uno::Reference< util::XUpdatable > xUpdatable( mxTextField, uno::UNO_QUERY );
     if( xUpdatable.is() )
@@ -248,11 +248,11 @@ public:
       mxEnumeration(std::move( xEnumeration ))
     {
     }
-    virtual bool SAL_CALL hasMoreElements(  ) override
+    virtual bool hasMoreElements(  ) override
     {
         return mxEnumeration->hasMoreElements();
     }
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         if ( !hasMoreElements() )
             throw container::NoSuchElementException();
@@ -277,10 +277,10 @@ public:
         mxEnumerationAccess = xModel->getSwTextFields();
     }
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override { return  mxEnumerationAccess->getElementType(); }
-    virtual bool SAL_CALL hasElements(  ) override { return mxEnumerationAccess->hasElements(); }
+    virtual cpo::uno::Type getElementType(  ) override { return  mxEnumerationAccess->getElementType(); }
+    virtual bool hasElements(  ) override { return mxEnumerationAccess->hasElements(); }
     // XIndexAccess
-    virtual ::sal_Int32 SAL_CALL getCount(  ) override
+    virtual ::sal_Int32 getCount(  ) override
     {
         uno::Reference< container::XEnumeration > xEnumeration =  mxEnumerationAccess->createEnumeration();
         sal_Int32 nCount = 0;
@@ -291,7 +291,7 @@ public:
         }
         return nCount;
     }
-    virtual cpo::uno::Any SAL_CALL getByIndex( ::sal_Int32 Index ) override
+    virtual cpo::uno::Any getByIndex( ::sal_Int32 Index ) override
     {
         if( Index < 0 || Index >= getCount() )
             throw lang::IndexOutOfBoundsException();
@@ -309,7 +309,7 @@ public:
         throw lang::IndexOutOfBoundsException();
     }
     // XEnumerationAccess
-    virtual uno::Reference< container::XEnumeration > SAL_CALL createEnumeration(  ) override
+    virtual uno::Reference< container::XEnumeration > createEnumeration(  ) override
     {
         uno::Reference< container::XEnumeration > xEnumeration =  mxEnumerationAccess->createEnumeration();
         return uno::Reference< container::XEnumeration >( new FieldEnumeration( mxParent, mxContext, mxModel, xEnumeration ) );
@@ -326,7 +326,7 @@ SwVbaFields::SwVbaFields( const uno::Reference< XHelperInterface >& xParent,
 {
 }
 
-uno::Reference< word::XField > SAL_CALL
+uno::Reference< word::XField >
 SwVbaFields::Add( const cpo::uno::Reference< ::ooo::vba::word::XRange >& Range, const cpo::uno::Any& Type, const cpo::uno::Any& Text, const cpo::uno::Any& /*PreserveFormatting*/ )
 {
     sal_Int32 nType = word::WdFieldType::wdFieldEmpty;
@@ -496,7 +496,7 @@ uno::Reference< text::XTextField > SwVbaFields::Create_Field_DocProperty( const 
     return xTextField;
 }
 
-uno::Reference< container::XEnumeration > SAL_CALL
+uno::Reference< container::XEnumeration >
 SwVbaFields::createEnumeration()
 {
     uno::Reference< container::XEnumerationAccess > xEnumerationAccess( m_xIndexAccess, uno::UNO_QUERY_THROW );
@@ -510,7 +510,7 @@ SwVbaFields::createCollectionObject( const cpo::uno::Any& aSource )
     return lcl_createField( mxParent, mxContext, aSource );
 }
 
-sal_Int32 SAL_CALL SwVbaFields::Update()
+sal_Int32 SwVbaFields::Update()
 {
     sal_Int32 nUpdate = 1;
     try
@@ -534,7 +534,7 @@ SwVbaFields::getServiceImplName()
 }
 
 // XEnumerationAccess
-cpo::uno::Type SAL_CALL
+cpo::uno::Type
 SwVbaFields::getElementType()
 {
     return  cppu::UnoType<word::XField>::get();

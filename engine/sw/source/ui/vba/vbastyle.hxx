@@ -54,25 +54,25 @@ public:
     static void setLanguageID( const cpo::uno::Reference< css::beans::XPropertySet >& xTCProps, LanguageType _languageid );
 
     // Attributes
-    virtual OUString SAL_CALL getName() override;
-    virtual void SAL_CALL setName( const OUString& Name ) override;
-    virtual ::sal_Int32 SAL_CALL getLanguageID( ) override;
-    virtual void SAL_CALL setLanguageID( ::sal_Int32 _languageid ) override;
-    virtual ::sal_Int32 SAL_CALL getType() override;
-    virtual cpo::uno::Reference< ooo::vba::word::XFont > SAL_CALL getFont() override;
-    virtual OUString SAL_CALL getNameLocal() override;
-    virtual void SAL_CALL setNameLocal( const OUString& _namelocal ) override;
-    virtual cpo::uno::Reference< ::ooo::vba::word::XParagraphFormat > SAL_CALL getParagraphFormat() override;
-    virtual bool SAL_CALL getAutomaticallyUpdate() override;
-    virtual void SAL_CALL setAutomaticallyUpdate( bool _automaticallyupdate ) override;
-    virtual cpo::uno::Any SAL_CALL getBaseStyle() override;
-    virtual void SAL_CALL setBaseStyle( const cpo::uno::Any& _basestyle ) override;
-    virtual cpo::uno::Any SAL_CALL getNextParagraphStyle() override;
-    virtual void SAL_CALL setNextParagraphStyle( const cpo::uno::Any& _nextparagraphstyle ) override;
-    virtual ::sal_Int32 SAL_CALL getListLevelNumber() override;
+    virtual OUString getName() override;
+    virtual void setName( const OUString& Name ) override;
+    virtual ::sal_Int32 getLanguageID( ) override;
+    virtual void setLanguageID( ::sal_Int32 _languageid ) override;
+    virtual ::sal_Int32 getType() override;
+    virtual cpo::uno::Reference< ooo::vba::word::XFont > getFont() override;
+    virtual OUString getNameLocal() override;
+    virtual void setNameLocal( const OUString& _namelocal ) override;
+    virtual cpo::uno::Reference< ::ooo::vba::word::XParagraphFormat > getParagraphFormat() override;
+    virtual bool getAutomaticallyUpdate() override;
+    virtual void setAutomaticallyUpdate( bool _automaticallyupdate ) override;
+    virtual cpo::uno::Any getBaseStyle() override;
+    virtual void setBaseStyle( const cpo::uno::Any& _basestyle ) override;
+    virtual cpo::uno::Any getNextParagraphStyle() override;
+    virtual void setNextParagraphStyle( const cpo::uno::Any& _nextparagraphstyle ) override;
+    virtual ::sal_Int32 getListLevelNumber() override;
 
     //XDefaultProperty
-    virtual OUString SAL_CALL getDefaultPropertyName(  ) override { return u"Name"_ustr; }
+    virtual OUString getDefaultPropertyName(  ) override { return u"Name"_ustr; }
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

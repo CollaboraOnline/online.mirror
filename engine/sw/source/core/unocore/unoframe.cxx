@@ -2576,14 +2576,14 @@ cpo::uno::Any SwXFrame::getPropertyDefault( const OUString& rPropertyName )
     return aRet;
 }
 
-void SAL_CALL SwXFrame::addEventListener(
+void SwXFrame::addEventListener(
         const uno::Reference<lang::XEventListener> & xListener)
 {
     std::unique_lock aGuard(m_Mutex);
     m_EventListeners.addInterface(aGuard, xListener);
 }
 
-void SAL_CALL SwXFrame::removeEventListener(
+void SwXFrame::removeEventListener(
         const uno::Reference<lang::XEventListener> & xListener)
 {
     std::unique_lock aGuard(m_Mutex);
@@ -3179,17 +3179,17 @@ SwXTextFrame::CreateXTextFrame(SwDoc & rDoc, SwFrameFormat *const pFrameFormat)
     return CreateXFrame<SwXTextFrame>(rDoc, pFrameFormat);
 }
 
-void SAL_CALL SwXTextFrame::acquire(  )noexcept
+void SwXTextFrame::acquire(  )noexcept
 {
     SwXFrame::acquire();
 }
 
-void SAL_CALL SwXTextFrame::release(  )noexcept
+void SwXTextFrame::release(  )noexcept
 {
     SwXFrame::release();
 }
 
-::cpo::uno::Any SAL_CALL SwXTextFrame::queryInterface( const cpo::uno::Type& aType )
+::cpo::uno::Any SwXTextFrame::queryInterface( const cpo::uno::Type& aType )
 {
     ::cpo::uno::Any aRet = SwXFrame::queryInterface(aType);
     if(aRet.getValueType() == cppu::UnoType<void>::get())
@@ -3199,7 +3199,7 @@ void SAL_CALL SwXTextFrame::release(  )noexcept
     return aRet;
 }
 
-cpo::uno::Sequence< cpo::uno::Type > SAL_CALL SwXTextFrame::getTypes(  )
+cpo::uno::Sequence< cpo::uno::Type > SwXTextFrame::getTypes(  )
 {
     return comphelper::concatSequences(
         SwXTextFrameBaseClass::getTypes(),
@@ -3208,7 +3208,7 @@ cpo::uno::Sequence< cpo::uno::Type > SAL_CALL SwXTextFrame::getTypes(  )
     );
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL SwXTextFrame::getImplementationId(  )
+cpo::uno::Sequence< sal_Int8 > SwXTextFrame::getImplementationId(  )
 {
     return cpo::uno::Sequence<sal_Int8>();
 }
@@ -3364,7 +3364,7 @@ cpo::uno::Sequence< OUString > SwXTextFrame::getSupportedServiceNames()
     return aRet;
 }
 
-uno::Reference<container::XNameReplace > SAL_CALL SwXTextFrame::getEvents()
+uno::Reference<container::XNameReplace > SwXTextFrame::getEvents()
 {
     return new SwFrameEventDescriptor( *this );
 }
@@ -3433,7 +3433,7 @@ cpo::uno::Sequence< OUString > SwXTextGraphicObject::getSupportedServiceNames()
     return aRet;
 }
 
-uno::Reference<container::XNameReplace> SAL_CALL
+uno::Reference<container::XNameReplace>
     SwXTextGraphicObject::getEvents()
 {
     return new SwFrameEventDescriptor( *this );
@@ -3467,7 +3467,7 @@ uno::Reference< lang::XComponent >  SwXTextEmbeddedObject::getEmbeddedObject()
     return xObj.is() ? uno::Reference<lang::XComponent>(xObj->getComponent(), uno::UNO_QUERY) : nullptr;
 }
 
-uno::Reference< embed::XEmbeddedObject > SAL_CALL SwXTextEmbeddedObject::getExtendedControlOverEmbeddedObject()
+uno::Reference< embed::XEmbeddedObject > SwXTextEmbeddedObject::getExtendedControlOverEmbeddedObject()
 {
     uno::Reference< embed::XEmbeddedObject > xResult;
     SwFrameFormat*   pFormat = GetFrameFormat();
@@ -3501,7 +3501,7 @@ uno::Reference< embed::XEmbeddedObject > SAL_CALL SwXTextEmbeddedObject::getExte
     return xResult;
 }
 
-sal_Int64 SAL_CALL SwXTextEmbeddedObject::getAspect()
+sal_Int64 SwXTextEmbeddedObject::getAspect()
 {
     SwFrameFormat*   pFormat = GetFrameFormat();
     if(pFormat)
@@ -3518,7 +3518,7 @@ sal_Int64 SAL_CALL SwXTextEmbeddedObject::getAspect()
     return embed::Aspects::MSOLE_CONTENT; // return the default value
 }
 
-void SAL_CALL SwXTextEmbeddedObject::setAspect( sal_Int64 nAspect )
+void SwXTextEmbeddedObject::setAspect( sal_Int64 nAspect )
 {
     SwFrameFormat*   pFormat = GetFrameFormat();
     if(pFormat)
@@ -3533,7 +3533,7 @@ void SAL_CALL SwXTextEmbeddedObject::setAspect( sal_Int64 nAspect )
     }
 }
 
-uno::Reference< graphic::XGraphic > SAL_CALL SwXTextEmbeddedObject::getReplacementGraphic()
+uno::Reference< graphic::XGraphic > SwXTextEmbeddedObject::getReplacementGraphic()
 {
     SwFrameFormat*   pFormat = GetFrameFormat();
     if(pFormat)
@@ -3571,7 +3571,7 @@ cpo::uno::Sequence< OUString > SwXTextEmbeddedObject::getSupportedServiceNames()
     return aRet;
 }
 
-uno::Reference<container::XNameReplace> SAL_CALL
+uno::Reference<container::XNameReplace>
     SwXTextEmbeddedObject::getEvents()
 {
     return new SwFrameEventDescriptor( *this );

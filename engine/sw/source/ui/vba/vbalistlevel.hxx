@@ -37,29 +37,29 @@ public:
     virtual ~SwVbaListLevel() override;
 
     // Attributes
-    virtual ::sal_Int32 SAL_CALL getAlignment() override;
-    virtual void SAL_CALL setAlignment( ::sal_Int32 _alignment ) override;
-    virtual cpo::uno::Reference< ::ooo::vba::word::XFont > SAL_CALL getFont() override;
-    virtual void SAL_CALL setFont( const cpo::uno::Reference< ::ooo::vba::word::XFont >& _font ) override;
-    virtual ::sal_Int32 SAL_CALL getIndex() override;
-    virtual OUString SAL_CALL getLinkedStyle() override;
-    virtual void SAL_CALL setLinkedStyle( const OUString& _linkedstyle ) override;
-    virtual OUString SAL_CALL getNumberFormat() override;
-    virtual void SAL_CALL setNumberFormat( const OUString& _numberformat ) override;
-    virtual float SAL_CALL getNumberPosition() override;
-    virtual void SAL_CALL setNumberPosition( float _numberposition ) override;
-    virtual ::sal_Int32 SAL_CALL getNumberStyle() override;
-    virtual void SAL_CALL setNumberStyle( ::sal_Int32 _numberstyle ) override;
-    virtual ::sal_Int32 SAL_CALL getResetOnHigher() override;
-    virtual void SAL_CALL setResetOnHigher( ::sal_Int32 _resetonhigher ) override;
-    virtual ::sal_Int32 SAL_CALL getStartAt() override;
-    virtual void SAL_CALL setStartAt( ::sal_Int32 _startat ) override;
-    virtual float SAL_CALL getTabPosition() override;
-    virtual void SAL_CALL setTabPosition( float _tabposition ) override;
-    virtual float SAL_CALL getTextPosition() override;
-    virtual void SAL_CALL setTextPosition( float _textposition ) override;
-    virtual ::sal_Int32 SAL_CALL getTrailingCharacter() override;
-    virtual void SAL_CALL setTrailingCharacter( ::sal_Int32 _trailingcharacter ) override;
+    virtual ::sal_Int32 getAlignment() override;
+    virtual void setAlignment( ::sal_Int32 _alignment ) override;
+    virtual cpo::uno::Reference< ::ooo::vba::word::XFont > getFont() override;
+    virtual void setFont( const cpo::uno::Reference< ::ooo::vba::word::XFont >& _font ) override;
+    virtual ::sal_Int32 getIndex() override;
+    virtual OUString getLinkedStyle() override;
+    virtual void setLinkedStyle( const OUString& _linkedstyle ) override;
+    virtual OUString getNumberFormat() override;
+    virtual void setNumberFormat( const OUString& _numberformat ) override;
+    virtual float getNumberPosition() override;
+    virtual void setNumberPosition( float _numberposition ) override;
+    virtual ::sal_Int32 getNumberStyle() override;
+    virtual void setNumberStyle( ::sal_Int32 _numberstyle ) override;
+    virtual ::sal_Int32 getResetOnHigher() override;
+    virtual void setResetOnHigher( ::sal_Int32 _resetonhigher ) override;
+    virtual ::sal_Int32 getStartAt() override;
+    virtual void setStartAt( ::sal_Int32 _startat ) override;
+    virtual float getTabPosition() override;
+    virtual void setTabPosition( float _tabposition ) override;
+    virtual float getTextPosition() override;
+    virtual void setTextPosition( float _textposition ) override;
+    virtual ::sal_Int32 getTrailingCharacter() override;
+    virtual void setTrailingCharacter( ::sal_Int32 _trailingcharacter ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

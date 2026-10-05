@@ -36,14 +36,14 @@ public:
     SwVbaBorders( const cpo::uno::Reference< ov::XHelperInterface >& xParent, const cpo::uno::Reference< cpo::uno::XComponentContext > & xContext, const cpo::uno::Reference< css::table::XCellRange >& xRange, VbaPalette const & rPalette );
 
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     // SwVbaCollectionBaseImpl
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;
 
-    virtual bool SAL_CALL getShadow() override;
-    virtual void SAL_CALL setShadow( bool _shadow ) override;
+    virtual bool getShadow() override;
+    virtual void setShadow( bool _shadow ) override;
 
     virtual OUString getServiceImplName() override;
     virtual cpo::uno::Sequence<OUString> getServiceNames() override;

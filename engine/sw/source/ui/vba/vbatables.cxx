@@ -84,28 +84,28 @@ public:
         m_cachePos = mxTables.begin();
     }
     // XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount(  ) override
+    virtual sal_Int32 getCount(  ) override
     {
         return mxTables.size();
     }
-    virtual cpo::uno::Any SAL_CALL getByIndex( sal_Int32 Index ) override
+    virtual cpo::uno::Any getByIndex( sal_Int32 Index ) override
     {
         if ( Index < 0 || Index >= getCount() )
             throw lang::IndexOutOfBoundsException();
         return cpo::uno::Any( uno::Reference< text::XTextTable >( mxTables[ Index ] ) );
     }
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override { return  cppu::UnoType<text::XTextTable>::get(); }
-    virtual bool SAL_CALL hasElements(  ) override { return getCount() > 0 ; }
+    virtual cpo::uno::Type getElementType(  ) override { return  cppu::UnoType<text::XTextTable>::get(); }
+    virtual bool hasElements(  ) override { return getCount() > 0 ; }
     // XNameAccess
-    virtual cpo::uno::Any SAL_CALL getByName( const OUString& aName ) override
+    virtual cpo::uno::Any getByName( const OUString& aName ) override
     {
         if ( !hasByName(aName) )
             throw container::NoSuchElementException();
         uno::Reference< text::XTextTable > xTable( *m_cachePos, uno::UNO_SET_THROW );
         return cpo::uno::Any( xTable );
     }
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames(  ) override
+    virtual cpo::uno::Sequence< OUString > getElementNames(  ) override
     {
         cpo::uno::Sequence< OUString > sNames( mxTables.size() );
         OUString* pString = sNames.getArray();
@@ -116,7 +116,7 @@ public:
         }
         return sNames;
     }
-    virtual bool SAL_CALL hasByName( const OUString& aName ) override
+    virtual bool hasByName( const OUString& aName ) override
     {
         m_cachePos = mxTables.begin();
         auto it_end = mxTables.end();
@@ -145,11 +145,11 @@ public:
       mxDocument(std::move( xDocument )), mxIndexAccess(std::move( xIndexAccess )), mnCurIndex(0)
     {
     }
-    virtual bool SAL_CALL hasMoreElements(  ) override
+    virtual bool hasMoreElements(  ) override
     {
         return ( mnCurIndex < mxIndexAccess->getCount() );
     }
-    virtual cpo::uno::Any SAL_CALL nextElement(  ) override
+    virtual cpo::uno::Any nextElement(  ) override
     {
         if ( !hasMoreElements() )
             throw container::NoSuchElementException();
@@ -168,7 +168,7 @@ SwVbaTables::SwVbaTables( const uno::Reference< XHelperInterface >& xParent,
 {
 }
 
-uno::Reference< word::XTable > SAL_CALL
+uno::Reference< word::XTable >
 SwVbaTables::Add( const uno::Reference< word::XRange >& Range, const cpo::uno::Any& NumRows, const cpo::uno::Any& NumColumns, const cpo::uno::Any& /*DefaultTableBehavior*/, const cpo::uno::Any& /*AutoFitBehavior*/ )
 {
     sal_Int32 nCols = 0;
@@ -199,7 +199,7 @@ SwVbaTables::Add( const uno::Reference< word::XRange >& Range, const cpo::uno::A
     return xVBATable;
 }
 
-uno::Reference< container::XEnumeration > SAL_CALL
+uno::Reference< container::XEnumeration >
 SwVbaTables::createEnumeration()
 {
     return new TableEnumerationImpl( mxParent, mxContext, mxDocument, m_xIndexAccess );
@@ -220,7 +220,7 @@ SwVbaTables::getServiceImplName()
 }
 
 // XEnumerationAccess
-cpo::uno::Type SAL_CALL
+cpo::uno::Type
 SwVbaTables::getElementType()
 {
     return  cppu::UnoType<word::XTable>::get();

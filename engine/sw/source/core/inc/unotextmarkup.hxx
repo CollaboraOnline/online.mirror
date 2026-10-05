@@ -46,16 +46,16 @@ public:
     virtual ~SwXTextMarkup() override;
 
     // css::text::XTextMarkup:
-    virtual cpo::uno::Reference< css::container::XStringKeyMap > SAL_CALL getMarkupInfoContainer() override;
+    virtual cpo::uno::Reference< css::container::XStringKeyMap > getMarkupInfoContainer() override;
 
-    virtual void SAL_CALL commitStringMarkup(::sal_Int32 nType, const OUString & aIdentifier, ::sal_Int32 nStart, ::sal_Int32 nLength,
+    virtual void commitStringMarkup(::sal_Int32 nType, const OUString & aIdentifier, ::sal_Int32 nStart, ::sal_Int32 nLength,
                                            const cpo::uno::Reference< css::container::XStringKeyMap > & xMarkupInfoContainer) override;
 
-    virtual void SAL_CALL commitTextRangeMarkup(::sal_Int32 nType, const OUString & aIdentifier, const cpo::uno::Reference< css::text::XTextRange> & xRange,
+    virtual void commitTextRangeMarkup(::sal_Int32 nType, const OUString & aIdentifier, const cpo::uno::Reference< css::text::XTextRange> & xRange,
                                                 const cpo::uno::Reference< css::container::XStringKeyMap > & xMarkupInfoContainer) override;
 
     // css::text::XMultiTextMarkup:
-    virtual void SAL_CALL commitMultiTextMarkup( const cpo::uno::Sequence< css::text::TextMarkupDescriptor >& aMarkups ) override;
+    virtual void commitMultiTextMarkup( const cpo::uno::Sequence< css::text::TextMarkupDescriptor >& aMarkups ) override;
 
 private:
     SwXTextMarkup( const SwXTextMarkup & ) = delete;
@@ -80,12 +80,12 @@ public:
     SwXStringKeyMap();
 
     // css::container::XStringKeyMap:
-    virtual cpo::uno::Any SAL_CALL getValue(const OUString & aKey) override;
-    virtual bool SAL_CALL hasValue(const OUString & aKey) override;
-    virtual void SAL_CALL insertValue(const OUString & aKey, const cpo::uno::Any & aValue) override;
-    virtual ::sal_Int32 SAL_CALL getCount() override;
-    virtual OUString SAL_CALL getKeyByIndex(::sal_Int32 nIndex) override;
-    virtual cpo::uno::Any SAL_CALL getValueByIndex(::sal_Int32 nIndex) override;
+    virtual cpo::uno::Any getValue(const OUString & aKey) override;
+    virtual bool hasValue(const OUString & aKey) override;
+    virtual void insertValue(const OUString & aKey, const cpo::uno::Any & aValue) override;
+    virtual ::sal_Int32 getCount() override;
+    virtual OUString getKeyByIndex(::sal_Int32 nIndex) override;
+    virtual cpo::uno::Any getValueByIndex(::sal_Int32 nIndex) override;
 
 private:
     SwXStringKeyMap(SwXStringKeyMap const &) = delete;

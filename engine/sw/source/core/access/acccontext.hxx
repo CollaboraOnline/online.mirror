@@ -197,56 +197,56 @@ public:
     // XAccessibleContext
 
     // Return the number of currently visible children.
-    virtual sal_Int64 SAL_CALL getAccessibleChildCount() override;
+    virtual sal_Int64 getAccessibleChildCount() override;
 
     // Return the specified child or NULL if index is invalid.
-    virtual cpo::uno::Reference< css::accessibility::XAccessible> SAL_CALL
+    virtual cpo::uno::Reference< css::accessibility::XAccessible>
         getAccessibleChild (sal_Int64 nIndex) override;
 
-    virtual cpo::uno::Sequence<cpo::uno::Reference< css::accessibility::XAccessible>> SAL_CALL
+    virtual cpo::uno::Sequence<cpo::uno::Reference< css::accessibility::XAccessible>>
         getAccessibleChildren() override;
 
     // Return a reference to the parent.
-    virtual cpo::uno::Reference< css::accessibility::XAccessible> SAL_CALL
+    virtual cpo::uno::Reference< css::accessibility::XAccessible>
         getAccessibleParent() override;
 
     // Return this objects index among the parents children.
-    virtual sal_Int64 SAL_CALL
+    virtual sal_Int64
         getAccessibleIndexInParent() override;
 
     // Return this object's role.
-    virtual sal_Int16 SAL_CALL
+    virtual sal_Int16
         getAccessibleRole() override;
 
     // getAccessibleDescription() is abstract
 
     // Return the object's current name.
-    virtual OUString SAL_CALL
+    virtual OUString
         getAccessibleName() override;
 
     // Return NULL to indicate that an empty relation set.
     virtual cpo::uno::Reference<
-            css::accessibility::XAccessibleRelationSet> SAL_CALL
+            css::accessibility::XAccessibleRelationSet>
         getAccessibleRelationSet() override;
 
     // Return the set of current states.
-    virtual sal_Int64 SAL_CALL getAccessibleStateSet() override;
+    virtual sal_Int64 getAccessibleStateSet() override;
 
     /** Return the parents locale or throw exception if this object has no
         parent yet/anymore. */
-    virtual css::lang::Locale SAL_CALL
+    virtual css::lang::Locale
         getLocale() override;
 
     // XAccessibleComponent
-    virtual cpo::uno::Reference< css::accessibility::XAccessible > SAL_CALL getAccessibleAtPoint(
+    virtual cpo::uno::Reference< css::accessibility::XAccessible > getAccessibleAtPoint(
                 const css::awt::Point& aPoint ) override;
 
-    virtual css::awt::Point SAL_CALL getLocationOnScreen() override;
+    virtual css::awt::Point getLocationOnScreen() override;
 
-    virtual void SAL_CALL grabFocus() override;
+    virtual void grabFocus() override;
 
-    virtual sal_Int32 SAL_CALL getForeground() override;
-    virtual sal_Int32 SAL_CALL getBackground() override;
+    virtual sal_Int32 getForeground() override;
+    virtual sal_Int32 getBackground() override;
 
     // thread safe C++ interface
 

@@ -35,12 +35,12 @@ public:
     SwVbaTabStops( const cpo::uno::Reference< ov::XHelperInterface >& xParent, const cpo::uno::Reference< cpo::uno::XComponentContext > & xContext, const cpo::uno::Reference< css::beans::XPropertySet >& xParaProps );
 
     // Methods
-    virtual cpo::uno::Reference< ::ooo::vba::word::XTabStop > SAL_CALL Add( float Position, const cpo::uno::Any& Alignment, const cpo::uno::Any& Leader ) override;
-    virtual void SAL_CALL ClearAll(  ) override;
+    virtual cpo::uno::Reference< ::ooo::vba::word::XTabStop > Add( float Position, const cpo::uno::Any& Alignment, const cpo::uno::Any& Leader ) override;
+    virtual void ClearAll(  ) override;
 
     // XEnumerationAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual cpo::uno::Reference< css::container::XEnumeration > SAL_CALL createEnumeration() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual cpo::uno::Reference< css::container::XEnumeration > createEnumeration() override;
 
     // SwVbaTabStops_BASE
     virtual cpo::uno::Any createCollectionObject( const cpo::uno::Any& aSource ) override;

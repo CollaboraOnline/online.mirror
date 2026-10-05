@@ -104,9 +104,9 @@ class SwOLEListener_Impl : public ::cppu::WeakImplHelper< embed::XStateChangeLis
 public:
     explicit SwOLEListener_Impl( SwOLEObj* pObj );
     void dispose();
-    virtual void SAL_CALL changingState( const lang::EventObject& aEvent, ::sal_Int32 nOldState, ::sal_Int32 nNewState ) override;
-    virtual void SAL_CALL stateChanged( const lang::EventObject& aEvent, ::sal_Int32 nOldState, ::sal_Int32 nNewState ) override;
-    virtual void SAL_CALL disposing( const lang::EventObject& aEvent ) override;
+    virtual void changingState( const lang::EventObject& aEvent, ::sal_Int32 nOldState, ::sal_Int32 nNewState ) override;
+    virtual void stateChanged( const lang::EventObject& aEvent, ::sal_Int32 nOldState, ::sal_Int32 nNewState ) override;
+    virtual void disposing( const lang::EventObject& aEvent ) override;
 };
 
 SwOLEListener_Impl::SwOLEListener_Impl( SwOLEObj* pObj )
@@ -118,11 +118,11 @@ SwOLEListener_Impl::SwOLEListener_Impl( SwOLEObj* pObj )
     }
 }
 
-void SAL_CALL SwOLEListener_Impl::changingState( const lang::EventObject&, ::sal_Int32 , ::sal_Int32 )
+void SwOLEListener_Impl::changingState( const lang::EventObject&, ::sal_Int32 , ::sal_Int32 )
 {
 }
 
-void SAL_CALL SwOLEListener_Impl::stateChanged( const lang::EventObject&, ::sal_Int32 nOldState, ::sal_Int32 nNewState )
+void SwOLEListener_Impl::stateChanged( const lang::EventObject&, ::sal_Int32 nOldState, ::sal_Int32 nNewState )
 {
     if ( mpObj && nOldState == embed::EmbedStates::LOADED && nNewState == embed::EmbedStates::RUNNING )
     {
@@ -148,7 +148,7 @@ void SwOLEListener_Impl::dispose()
     mpObj = nullptr;
 }
 
-void SAL_CALL SwOLEListener_Impl::disposing( const lang::EventObject& )
+void SwOLEListener_Impl::disposing( const lang::EventObject& )
 {
     if (mpObj && g_pOLELRU_Cache)
         g_pOLELRU_Cache->RemoveObj( *mpObj );

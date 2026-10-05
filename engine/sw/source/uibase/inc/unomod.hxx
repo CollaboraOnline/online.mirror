@@ -35,7 +35,7 @@ class SwDoc;
 class SwXViewSettings;
 class SwXPrintSettings;
 
-cpo::uno::Reference< cpo::uno::XInterface >  SAL_CALL SwXModule_CreateInstance(const cpo::uno::Reference< css::lang::XMultiServiceFactory > & );
+cpo::uno::Reference< cpo::uno::XInterface >  SwXModule_CreateInstance(const cpo::uno::Reference< css::lang::XMultiServiceFactory > & );
 
 class SwXModule final : public cppu::WeakImplHelper
 <
@@ -53,15 +53,15 @@ public:
     SwXModule();
 
     //XViewSettings
-    virtual cpo::uno::Reference< css::beans::XPropertySet >  SAL_CALL getViewSettings() override;
+    virtual cpo::uno::Reference< css::beans::XPropertySet >  getViewSettings() override;
 
     //XPrintSettings
-    virtual cpo::uno::Reference< css::beans::XPropertySet >  SAL_CALL getPrintSettings() override;
+    virtual cpo::uno::Reference< css::beans::XPropertySet >  getPrintSettings() override;
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 };
 
 enum class SwXPrintSettingsType
@@ -93,9 +93,9 @@ public:
     SwXPrintSettings( SwXPrintSettingsType eType, SwDoc * pDoc = nullptr );
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 };
 
 /**
@@ -130,9 +130,9 @@ public:
     SwXViewSettings(SwView*  pView);
 
     //XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
     bool    IsValid() const {return m_bObjectValid;}
     void    Invalidate() {m_bObjectValid = false;}

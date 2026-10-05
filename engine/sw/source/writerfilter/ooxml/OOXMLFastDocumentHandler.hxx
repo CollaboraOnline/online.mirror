@@ -42,34 +42,34 @@ public:
     virtual ~OOXMLFastDocumentHandler() override;
 
     // css::xml::sax::XFastDocumentHandler:
-    virtual void SAL_CALL startDocument() override;
-    virtual void SAL_CALL endDocument() override;
-    virtual void SAL_CALL processingInstruction( const OUString& rTarget, const OUString& rData ) override;
-    virtual void SAL_CALL setDocumentLocator
+    virtual void startDocument() override;
+    virtual void endDocument() override;
+    virtual void processingInstruction( const OUString& rTarget, const OUString& rData ) override;
+    virtual void setDocumentLocator
     (const cpo::uno::Reference< css::xml::sax::XLocator > & xLocator) override;
 
     // css::xml::sax::XFastContextHandler:
-    virtual void SAL_CALL startFastElement
+    virtual void startFastElement
     (::sal_Int32 Element,
      const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
-    virtual void SAL_CALL startUnknownElement
+    virtual void startUnknownElement
     (const OUString & Namespace,
      const OUString & Name,
      const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
-    virtual void SAL_CALL endFastElement(::sal_Int32 Element) override;
-    virtual void SAL_CALL endUnknownElement
+    virtual void endFastElement(::sal_Int32 Element) override;
+    virtual void endUnknownElement
     (const OUString & Namespace,
      const OUString & Name) override;
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler >
     createFastChildContext
     (::sal_Int32 Element,
      const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler >
     createUnknownChildContext
     (const OUString & Namespace,
      const OUString & Name,
      const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & Attribs) override;
-    virtual void SAL_CALL characters(const OUString & aChars) override;
+    virtual void characters(const OUString & aChars) override;
 
     void setIsSubstream( bool bSubstream );
 

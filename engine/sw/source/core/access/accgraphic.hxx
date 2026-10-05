@@ -32,7 +32,7 @@ public:
                          const SwFlyFrame *pFlyFrame );
 
     /// Return this object's role.
-    virtual sal_Int16 SAL_CALL getAccessibleRole() override;
+    virtual sal_Int16 getAccessibleRole() override;
 };
 
 #endif

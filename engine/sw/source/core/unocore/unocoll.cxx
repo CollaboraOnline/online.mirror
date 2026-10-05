@@ -97,13 +97,13 @@ public:
     explicit SwVbaCodeNameProvider( SwDocShell* pDocShell ) : mpDocShell( pDocShell ) {}
         // XCodeNameQuery
 
-    OUString SAL_CALL getCodeNameForContainer( const uno::Reference< cpo::uno::XInterface >& /*xIf*/ ) override
+    OUString getCodeNameForContainer( const uno::Reference< cpo::uno::XInterface >& /*xIf*/ ) override
     {
         // #FIXME not implemented...
         return OUString();
     }
 
-    OUString SAL_CALL getCodeNameForObject( const uno::Reference< cpo::uno::XInterface >& xIf ) override
+    OUString getCodeNameForObject( const uno::Reference< cpo::uno::XInterface >& xIf ) override
     {
         // Initialise the code name
         if ( msThisDocumentCodeName.isEmpty() )
@@ -178,22 +178,22 @@ public:
     SwVbaProjectNameProvider()
     {
     }
-    virtual bool SAL_CALL hasByName( const OUString& aName ) override
+    virtual bool hasByName( const OUString& aName ) override
     {
         return ( mTemplateToProject.find( aName ) != mTemplateToProject.end() );
     }
-    virtual cpo::uno::Any SAL_CALL getByName( const OUString& aName ) override
+    virtual cpo::uno::Any getByName( const OUString& aName ) override
     {
         if ( !hasByName( aName ) )
             throw container::NoSuchElementException();
         return cpo::uno::Any( mTemplateToProject.find( aName )->second );
     }
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames(  ) override
+    virtual cpo::uno::Sequence< OUString > getElementNames(  ) override
     {
         return comphelper::mapKeysToSequence( mTemplateToProject );
     }
 
-    virtual void SAL_CALL insertByName( const OUString& aName, const cpo::uno::Any& aElement ) override
+    virtual void insertByName( const OUString& aName, const cpo::uno::Any& aElement ) override
     {
 
         OUString sProjectName;
@@ -203,24 +203,24 @@ public:
         mTemplateToProject[ aName ] = sProjectName;
     }
 
-    virtual void SAL_CALL removeByName( const OUString& Name ) override
+    virtual void removeByName( const OUString& Name ) override
     {
         if ( !hasByName( Name ) )
             throw container::NoSuchElementException();
         mTemplateToProject.erase( Name );
     }
-    virtual void SAL_CALL replaceByName( const OUString& aName, const cpo::uno::Any& aElement ) override
+    virtual void replaceByName( const OUString& aName, const cpo::uno::Any& aElement ) override
     {
         if ( !hasByName( aName ) )
             throw container::NoSuchElementException();
         insertByName( aName, aElement ); // insert will overwrite
     }
     // XElemenAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override
+    virtual cpo::uno::Type getElementType(  ) override
     {
         return ::cppu::UnoType<OUString>::get();
     }
-    virtual bool SAL_CALL hasElements(  ) override
+    virtual bool hasElements(  ) override
     {
 
         return ( !mTemplateToProject.empty() );
@@ -237,7 +237,7 @@ public:
         // #FIXME #TODO is the code name for ThisDocument read anywhere?
     }
 
-    virtual bool SAL_CALL hasByName( const OUString& aName ) override
+    virtual bool hasByName( const OUString& aName ) override
     {
         // #FIXME #TODO we really need to be checking against the codename for
         // ThisDocument
@@ -246,7 +246,7 @@ public:
         return false;
     }
 
-    cpo::uno::Any SAL_CALL getByName( const OUString& aName ) override
+    cpo::uno::Any getByName( const OUString& aName ) override
     {
         if ( !hasByName( aName ) )
              throw container::NoSuchElementException();
@@ -257,14 +257,14 @@ public:
             "Creating Object ( ooo.vba.word.Document ) 0x" << xDocObj.get());
         return  cpo::uno::Any( xDocObj );
     }
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getElementNames(  ) override
+    virtual cpo::uno::Sequence< OUString > getElementNames(  ) override
     {
         cpo::uno::Sequence< OUString > aNames;
         return aNames;
     }
     // XElemenAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override { return cpo::uno::Type(); }
-    virtual bool SAL_CALL hasElements(  ) override { return true; }
+    virtual cpo::uno::Type getElementType(  ) override { return cpo::uno::Type(); }
+    virtual bool hasElements(  ) override { return true; }
 
 };
 
@@ -870,7 +870,7 @@ sal_Int32 SwXTextTables::getCount()
     return nRet;
 }
 
-cpo::uno::Any SAL_CALL SwXTextTables::getByIndex(sal_Int32 nInputIndex)
+cpo::uno::Any SwXTextTables::getByIndex(sal_Int32 nInputIndex)
 {
     rtl::Reference<SwXTextTable> xTable = getTextTableByIndex(nInputIndex);
     return cpo::uno::Any(uno::Reference<XTextTable>(xTable));
@@ -960,7 +960,7 @@ bool SwXTextTables::hasByName(const OUString& rName)
     return bRet;
 }
 
-cpo::uno::Type SAL_CALL
+cpo::uno::Type
     SwXTextTables::getElementType(  )
 {
     return cppu::UnoType<XTextTable>::get();
@@ -1062,13 +1062,13 @@ namespace
             SwXFrameEnumeration(const SwDoc& rDoc);
 
             //XEnumeration
-            virtual bool SAL_CALL hasMoreElements() override;
-            virtual Any SAL_CALL nextElement() override;
+            virtual bool hasMoreElements() override;
+            virtual Any nextElement() override;
 
             //XServiceInfo
-            virtual OUString SAL_CALL getImplementationName() override;
-            virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-            virtual Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+            virtual OUString getImplementationName() override;
+            virtual bool supportsService(const OUString& ServiceName) override;
+            virtual Sequence< OUString > getSupportedServiceNames() override;
     };
 }
 
@@ -1238,7 +1238,7 @@ bool SwXFrames::hasByName(const OUString& rName)
     }
 }
 
-cpo::uno::Type SAL_CALL SwXFrames::getElementType()
+cpo::uno::Type SwXFrames::getElementType()
 {
     SolarMutexGuard aGuard;
     switch(m_eType)
@@ -1479,7 +1479,7 @@ bool SwXTextSections::hasByName(const OUString& rName)
     return bRet;
 }
 
-cpo::uno::Type SAL_CALL SwXTextSections::getElementType()
+cpo::uno::Type SwXTextSections::getElementType()
 {
     return cppu::UnoType<XTextSection>::get();
 }
@@ -1609,7 +1609,7 @@ bool SwXBookmarks::hasByName(const OUString& rName)
     return pMarkAccess->findBookmark(SwMarkName(rName)) != pMarkAccess->getBookmarksEnd();
 }
 
-cpo::uno::Type SAL_CALL SwXBookmarks::getElementType()
+cpo::uno::Type SwXBookmarks::getElementType()
 {
     return cppu::UnoType<XTextContent>::get();
 }
@@ -1664,7 +1664,7 @@ cpo::uno::Any SwXNumberingRulesCollection::getByIndex(sal_Int32 nIndex)
     throw IndexOutOfBoundsException();
 }
 
-cpo::uno::Type SAL_CALL SwXNumberingRulesCollection::getElementType()
+cpo::uno::Type SwXNumberingRulesCollection::getElementType()
 {
     return cppu::UnoType<XIndexReplace>::get();
 }
@@ -1740,7 +1740,7 @@ rtl::Reference<SwXFootnote> SwXFootnotes::getFootnoteByIndex(sal_Int32 nIndex)
     throw IndexOutOfBoundsException();
 }
 
-cpo::uno::Type SAL_CALL SwXFootnotes::getElementType()
+cpo::uno::Type SwXFootnotes::getElementType()
 {
     return cppu::UnoType<XFootnote>::get();
 }
@@ -1821,7 +1821,7 @@ bool SwXReferenceMarks::hasByName(const OUString& rName)
     return nullptr != GetDoc().GetRefMark( SwMarkName(rName) );
 }
 
-cpo::uno::Type SAL_CALL SwXReferenceMarks::getElementType()
+cpo::uno::Type SwXReferenceMarks::getElementType()
 {
     return cppu::UnoType<XTextContent>::get();
 }

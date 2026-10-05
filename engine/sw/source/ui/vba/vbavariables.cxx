@@ -63,7 +63,7 @@ SwVbaVariables::createCollectionObject( const cpo::uno::Any& aSource )
     return aSource;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaVariables::Add( const OUString& rName, const cpo::uno::Any& rValue )
 {
     cpo::uno::Any aValue;

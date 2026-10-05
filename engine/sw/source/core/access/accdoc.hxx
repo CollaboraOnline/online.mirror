@@ -49,31 +49,31 @@ public:
     // XAccessibleContext
 
     // Return the number of currently visible children.
-    virtual sal_Int64 SAL_CALL getAccessibleChildCount() override;
+    virtual sal_Int64 getAccessibleChildCount() override;
 
-    virtual cpo::uno::Reference< css::accessibility::XAccessible> SAL_CALL
+    virtual cpo::uno::Reference< css::accessibility::XAccessible>
         getAccessibleChild (sal_Int64 nIndex) override;
 
-    virtual cpo::uno::Reference< css::accessibility::XAccessible> SAL_CALL
+    virtual cpo::uno::Reference< css::accessibility::XAccessible>
         getAccessibleParent() override;
 
-    virtual sal_Int64 SAL_CALL
+    virtual sal_Int64
         getAccessibleIndexInParent() override;
 
-    virtual OUString SAL_CALL
+    virtual OUString
         getAccessibleDescription() override;
 
-    virtual OUString SAL_CALL getAccessibleName() override;
+    virtual OUString getAccessibleName() override;
 
     // OAccessible
     virtual css::awt::Rectangle implGetBounds() override;
 
     // XAccessibleComponent
     virtual cpo::uno::Reference<
-        css::accessibility::XAccessible > SAL_CALL getAccessibleAtPoint(
+        css::accessibility::XAccessible > getAccessibleAtPoint(
                 const css::awt::Point& aPoint ) override;
 
-    virtual css::awt::Point SAL_CALL getLocationOnScreen() override;
+    virtual css::awt::Point getLocationOnScreen() override;
 };
 
 using SwAccessibleDocument_BASE = cppu::ImplInheritanceHelper<SwAccessibleDocumentBase,
@@ -101,22 +101,22 @@ public:
 
     // XAccessibleSelection
 
-    virtual void SAL_CALL selectAccessibleChild(
+    virtual void selectAccessibleChild(
         sal_Int64 nChildIndex ) override;
 
-    virtual bool SAL_CALL isAccessibleChildSelected(
+    virtual bool isAccessibleChildSelected(
         sal_Int64 nChildIndex ) override;
-    virtual void SAL_CALL clearAccessibleSelection(  ) override;
-    virtual void SAL_CALL selectAllAccessibleChildren(  ) override;
-    virtual sal_Int64 SAL_CALL getSelectedAccessibleChildCount(  ) override;
-    virtual cpo::uno::Reference< css::accessibility::XAccessible > SAL_CALL getSelectedAccessibleChild(
+    virtual void clearAccessibleSelection(  ) override;
+    virtual void selectAllAccessibleChildren(  ) override;
+    virtual sal_Int64 getSelectedAccessibleChildCount(  ) override;
+    virtual cpo::uno::Reference< css::accessibility::XAccessible > getSelectedAccessibleChild(
         sal_Int64 nSelectedChildIndex ) override;
 
     // index has to be treated as global child index.
-    virtual void SAL_CALL deselectAccessibleChild(
+    virtual void deselectAccessibleChild(
         sal_Int64 nChildIndex ) override;
 
-    virtual OUString SAL_CALL getExtendedAttributes() override;
+    virtual OUString getExtendedAttributes() override;
 
     // thread safe C++ interface
 
@@ -124,7 +124,7 @@ public:
     virtual void Dispose(bool bRecursive, bool bCanSkipInvisible = true) override;
 
     // XAccessibleComponent
-    sal_Int32 SAL_CALL getBackground() override;
+    sal_Int32 getBackground() override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

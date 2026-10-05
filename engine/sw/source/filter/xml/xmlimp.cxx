@@ -107,7 +107,7 @@ public:
 
     SwXMLBodyContext_Impl( SwXMLImport& rImport );
 
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createFastChildContext(
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > createFastChildContext(
             sal_Int32 nElement, const cpo::uno::Reference< css::xml::sax::XFastAttributeList >& AttrList ) override;
 };
 
@@ -165,7 +165,7 @@ protected: // #i69629#
 public:
     SwXMLDocContext_Impl( SwXMLImport& rImport, sal_Int32 nElement );
 
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createFastChildContext(
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > createFastChildContext(
         sal_Int32 nElement, const cpo::uno::Reference< css::xml::sax::XFastAttributeList >& xAttrList ) override;
 };
 
@@ -176,7 +176,7 @@ SwXMLDocContext_Impl::SwXMLDocContext_Impl( SwXMLImport& rImport, sal_Int32 nEle
 {
 }
 
-uno::Reference< xml::sax::XFastContextHandler > SAL_CALL SwXMLDocContext_Impl::createFastChildContext(
+uno::Reference< xml::sax::XFastContextHandler > SwXMLDocContext_Impl::createFastChildContext(
     sal_Int32 nElement, const uno::Reference< xml::sax::XFastAttributeList >& /*xAttrList*/ )
 {
     switch (nElement)
@@ -223,7 +223,7 @@ public:
     SwXMLOfficeDocContext_Impl( SwXMLImport& rImport, sal_Int32 nElement,
                 const Reference< document::XDocumentProperties >& xDocProps);
 
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createFastChildContext(
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > createFastChildContext(
         sal_Int32 nElement, const cpo::uno::Reference< css::xml::sax::XFastAttributeList >& Attribs ) override;
 };
 
@@ -239,7 +239,7 @@ SwXMLOfficeDocContext_Impl::SwXMLOfficeDocContext_Impl(
 {
 }
 
-uno::Reference< xml::sax::XFastContextHandler > SAL_CALL SwXMLOfficeDocContext_Impl::createFastChildContext(
+uno::Reference< xml::sax::XFastContextHandler > SwXMLOfficeDocContext_Impl::createFastChildContext(
     sal_Int32 nElement, const uno::Reference< xml::sax::XFastAttributeList >& xAttrList )
 {
     // assign paragraph styles to list levels of outline style after all styles
@@ -271,7 +271,7 @@ public:
 
     SwXMLDocStylesContext_Impl( SwXMLImport& rImport, sal_Int32 nElement );
 
-    virtual void SAL_CALL endFastElement(sal_Int32 nElement) override;
+    virtual void endFastElement(sal_Int32 nElement) override;
 };
 
 }

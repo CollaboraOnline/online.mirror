@@ -59,7 +59,7 @@ SwAccessibleFootnote::~SwAccessibleFootnote()
 {
 }
 
-OUString SAL_CALL SwAccessibleFootnote::getAccessibleDescription()
+OUString SwAccessibleFootnote::getAccessibleDescription()
 {
     SolarMutexGuard aGuard;
 

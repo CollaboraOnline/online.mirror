@@ -34,10 +34,10 @@ public:
     static SwSmartTagMgr& Get();
 
     // css::util::XModifyListener
-    virtual void SAL_CALL modified(const css::lang::EventObject& aEvent) override;
+    virtual void modified(const css::lang::EventObject& aEvent) override;
 
     // css::util::XChangesListener
-    virtual void SAL_CALL changesOccurred(const css::util::ChangesEvent& Event) override;
+    virtual void changesOccurred(const css::util::ChangesEvent& Event) override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

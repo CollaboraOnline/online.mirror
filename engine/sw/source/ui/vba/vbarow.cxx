@@ -45,7 +45,7 @@ SwVbaRow::~SwVbaRow()
 {
 }
 
-cpo::uno::Any SAL_CALL SwVbaRow::getHeight()
+cpo::uno::Any SwVbaRow::getHeight()
 {
     if( getHeightRule() == word::WdRowHeightRule::wdRowHeightAuto )
         return cpo::uno::Any( sal_Int32( word::WdConstants::wdUndefined ) );
@@ -55,7 +55,7 @@ cpo::uno::Any SAL_CALL SwVbaRow::getHeight()
     return cpo::uno::Any( static_cast<float>(Millimeter::getInPoints( nHeight )) );
 }
 
-void SAL_CALL SwVbaRow::setHeight( const cpo::uno::Any& _height )
+void SwVbaRow::setHeight( const cpo::uno::Any& _height )
 {
     float height = 0;
     _height >>= height;
@@ -64,20 +64,20 @@ void SAL_CALL SwVbaRow::setHeight( const cpo::uno::Any& _height )
     mxRowProps->setPropertyValue(u"Height"_ustr, cpo::uno::Any( nHeight ) );
 }
 
-::sal_Int32 SAL_CALL SwVbaRow::getHeightRule()
+::sal_Int32 SwVbaRow::getHeightRule()
 {
     bool isAutoHeight = false;
     mxRowProps->getPropertyValue(u"IsAutoHeight"_ustr) >>= isAutoHeight;
     return isAutoHeight ? word::WdRowHeightRule::wdRowHeightAuto : word::WdRowHeightRule::wdRowHeightExactly;
 }
 
-void SAL_CALL SwVbaRow::setHeightRule( ::sal_Int32 _heightrule )
+void SwVbaRow::setHeightRule( ::sal_Int32 _heightrule )
 {
     bool isAutoHeight = ( _heightrule == word::WdRowHeightRule::wdRowHeightAuto );
     mxRowProps->setPropertyValue(u"IsAutoHeight"_ustr, cpo::uno::Any( isAutoHeight ) );
 }
 
-void SAL_CALL
+void
 SwVbaRow::Select( )
 {
     SelectRow( getCurrentWordDoc(mxContext), mxTextTable, mnIndex, mnIndex );
@@ -100,7 +100,7 @@ void SwVbaRow::SelectRow( const rtl::Reference< SwXTextDocument >& xModel, const
     xSelection->select( cpo::uno::Any( xSelRange ) );
 }
 
-void SAL_CALL SwVbaRow::SetHeight( float height, sal_Int32 heightrule )
+void SwVbaRow::SetHeight( float height, sal_Int32 heightrule )
 {
     setHeightRule( heightrule );
     setHeight( cpo::uno::Any( height ) );

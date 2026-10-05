@@ -150,7 +150,7 @@ public:
 
     virtual ~SwXMLTableContext() override;
 
-    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > SAL_CALL createFastChildContext(
+    virtual cpo::uno::Reference< css::xml::sax::XFastContextHandler > createFastChildContext(
         sal_Int32 Element,
         const cpo::uno::Reference< css::xml::sax::XFastAttributeList > & xAttrList ) override;
 
@@ -194,7 +194,7 @@ public:
     const SwStartNode *InsertTableSection(const SwStartNode *pPrevSttNd = nullptr,
                                   OUString const* pStringValueStyleName = nullptr);
 
-    virtual void SAL_CALL endFastElement(sal_Int32 nElement) override;
+    virtual void endFastElement(sal_Int32 nElement) override;
 
     void SetHasSubTables( bool bNew ) { m_bHasSubTables = bNew; }
 };

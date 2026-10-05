@@ -36,11 +36,11 @@ public:
     virtual ~SwVbaReplacement() override;
 
     // Attributes
-    virtual OUString SAL_CALL getText() override;
-    virtual void SAL_CALL setText( const OUString& _text ) override;
+    virtual OUString getText() override;
+    virtual void setText( const OUString& _text ) override;
 
     //Methods
-    virtual void SAL_CALL ClearFormatting() override;
+    virtual void ClearFormatting() override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

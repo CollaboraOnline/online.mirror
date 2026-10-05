@@ -888,7 +888,7 @@ uno::Reference< chart2::data::XDataSource > SwChartDataProvider::Impl_createData
     return new SwChartDataSource(aLDS);
 }
 
-bool SAL_CALL SwChartDataProvider::createDataSourcePossible(
+bool SwChartDataProvider::createDataSourcePossible(
         const cpo::uno::Sequence< beans::PropertyValue >& rArguments )
 {
     SolarMutexGuard aGuard;
@@ -906,7 +906,7 @@ bool SAL_CALL SwChartDataProvider::createDataSourcePossible(
     return bPossible;
 }
 
-uno::Reference< chart2::data::XDataSource > SAL_CALL SwChartDataProvider::createDataSource(
+uno::Reference< chart2::data::XDataSource > SwChartDataProvider::createDataSource(
         const cpo::uno::Sequence< beans::PropertyValue >& rArguments )
 {
     SolarMutexGuard aGuard;
@@ -950,7 +950,7 @@ OUString SwChartDataProvider::GetBrokenCellRangeForExport(
     return OUString();
 }
 
-cpo::uno::Sequence< beans::PropertyValue > SAL_CALL SwChartDataProvider::detectArguments(
+cpo::uno::Sequence< beans::PropertyValue > SwChartDataProvider::detectArguments(
         const uno::Reference< chart2::data::XDataSource >& xDataSource )
 {
     SolarMutexGuard aGuard;
@@ -1308,7 +1308,7 @@ uno::Reference< chart2::data::XDataSequence > SwChartDataProvider::Impl_createDa
     return new SwChartDataSequence( *this, *pTableFormat, pUnoCursor );
 }
 
-bool SAL_CALL SwChartDataProvider::createDataSequenceByRangeRepresentationPossible(
+bool SwChartDataProvider::createDataSequenceByRangeRepresentationPossible(
         const OUString& rRangeRepresentation )
 {
     SolarMutexGuard aGuard;
@@ -1326,20 +1326,20 @@ bool SAL_CALL SwChartDataProvider::createDataSequenceByRangeRepresentationPossib
     return bPossible;
 }
 
-uno::Reference< chart2::data::XDataSequence > SAL_CALL SwChartDataProvider::createDataSequenceByRangeRepresentation(
+uno::Reference< chart2::data::XDataSequence > SwChartDataProvider::createDataSequenceByRangeRepresentation(
         const OUString& rRangeRepresentation )
 {
     SolarMutexGuard aGuard;
     return Impl_createDataSequenceByRangeRepresentation( rRangeRepresentation );
 }
 
-uno::Reference< sheet::XRangeSelection > SAL_CALL SwChartDataProvider::getRangeSelection(  )
+uno::Reference< sheet::XRangeSelection > SwChartDataProvider::getRangeSelection(  )
 {
     // note: it is no error to return nothing here
     return uno::Reference< sheet::XRangeSelection >();
 }
 
-uno::Reference<css::chart2::data::XDataSequence> SAL_CALL
+uno::Reference<css::chart2::data::XDataSequence>
     SwChartDataProvider::createDataSequenceByValueArray(
         const OUString& /*aRole*/, const OUString& /*aRangeRepresentation*/,
         const OUString& /*aRoleQualifier*/ )
@@ -1347,7 +1347,7 @@ uno::Reference<css::chart2::data::XDataSequence> SAL_CALL
     return uno::Reference<css::chart2::data::XDataSequence>();
 }
 
-void SAL_CALL SwChartDataProvider::dispose(  )
+void SwChartDataProvider::dispose(  )
 {
     bool bMustDispose( false );
     {
@@ -1373,7 +1373,7 @@ void SAL_CALL SwChartDataProvider::dispose(  )
     m_aEventListeners.disposeAndClear( aGuard, aEvtObj );
 }
 
-void SAL_CALL SwChartDataProvider::addEventListener(
+void SwChartDataProvider::addEventListener(
         const uno::Reference< lang::XEventListener >& rxListener )
 {
     std::unique_lock aGuard( GetChartMutex() );
@@ -1381,7 +1381,7 @@ void SAL_CALL SwChartDataProvider::addEventListener(
         m_aEventListeners.addInterface( aGuard, rxListener );
 }
 
-void SAL_CALL SwChartDataProvider::removeEventListener(
+void SwChartDataProvider::removeEventListener(
         const uno::Reference< lang::XEventListener >& rxListener )
 {
     std::unique_lock aGuard( GetChartMutex() );
@@ -1389,17 +1389,17 @@ void SAL_CALL SwChartDataProvider::removeEventListener(
         m_aEventListeners.removeInterface( aGuard, rxListener );
 }
 
-OUString SAL_CALL SwChartDataProvider::getImplementationName(  )
+OUString SwChartDataProvider::getImplementationName(  )
 {
     return u"SwChartDataProvider"_ustr;
 }
 
-bool SAL_CALL SwChartDataProvider::supportsService(const OUString& rServiceName )
+bool SwChartDataProvider::supportsService(const OUString& rServiceName )
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL SwChartDataProvider::getSupportedServiceNames(  )
+cpo::uno::Sequence< OUString > SwChartDataProvider::getSupportedServiceNames(  )
 {
     return { u"com.sun.star.chart2.data.DataProvider"_ustr};
 }
@@ -1612,7 +1612,7 @@ void SwChartDataProvider::AddRowCols(
 }
 
 // XRangeXMLConversion
-OUString SAL_CALL SwChartDataProvider::convertRangeToXML( const OUString& rRangeRepresentation )
+OUString SwChartDataProvider::convertRangeToXML( const OUString& rRangeRepresentation )
 {
     SolarMutexGuard aGuard;
     if (m_bDisposed)
@@ -1682,7 +1682,7 @@ OUString SAL_CALL SwChartDataProvider::convertRangeToXML( const OUString& rRange
     return aRes.makeStringAndClear();
 }
 
-OUString SAL_CALL SwChartDataProvider::convertRangeFromXML( const OUString& rXMLRange )
+OUString SwChartDataProvider::convertRangeFromXML( const OUString& rXMLRange )
 {
     SolarMutexGuard aGuard;
     if (m_bDisposed)
@@ -1740,23 +1740,23 @@ SwChartDataSource::~SwChartDataSource()
 {
 }
 
-cpo::uno::Sequence< uno::Reference< chart2::data::XLabeledDataSequence > > SAL_CALL SwChartDataSource::getDataSequences(  )
+cpo::uno::Sequence< uno::Reference< chart2::data::XLabeledDataSequence > > SwChartDataSource::getDataSequences(  )
 {
     SolarMutexGuard aGuard;
     return m_aLDS;
 }
 
-OUString SAL_CALL SwChartDataSource::getImplementationName(  )
+OUString SwChartDataSource::getImplementationName(  )
 {
     return u"SwChartDataSource"_ustr;
 }
 
-bool SAL_CALL SwChartDataSource::supportsService(const OUString& rServiceName )
+bool SwChartDataSource::supportsService(const OUString& rServiceName )
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL SwChartDataSource::getSupportedServiceNames(  )
+cpo::uno::Sequence< OUString > SwChartDataSource::getSupportedServiceNames(  )
 {
     return { u"com.sun.star.chart2.data.DataSource"_ustr };
 }
@@ -1856,7 +1856,7 @@ SwChartDataSequence::~SwChartDataSequence()
 {
 }
 
-OUString SAL_CALL SwChartDataSequence::getSourceRangeRepresentation(  )
+OUString SwChartDataSequence::getSourceRangeRepresentation(  )
 {
     SolarMutexGuard aGuard;
     if (m_bDisposed)
@@ -1873,7 +1873,7 @@ OUString SAL_CALL SwChartDataSequence::getSourceRangeRepresentation(  )
     return aRes;
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL SwChartDataSequence::generateLabel(
+cpo::uno::Sequence< OUString > SwChartDataSequence::generateLabel(
         chart2::data::LabelOrigin eLabelOrigin )
 {
     SolarMutexGuard aGuard;
@@ -1980,7 +1980,7 @@ cpo::uno::Sequence< OUString > SAL_CALL SwChartDataSequence::generateLabel(
     return aLabels;
 }
 
-::sal_Int32 SAL_CALL SwChartDataSequence::getNumberFormatKeyByIndex(
+::sal_Int32 SwChartDataSequence::getNumberFormatKeyByIndex(
     ::sal_Int32 /*nIndex*/ )
 {
     return 0;
@@ -2002,7 +2002,7 @@ std::vector< cpo::uno::Reference< css::table::XCell > > SwChartDataSequence::Get
     return SwXCellRange::CreateXCellRange(m_pTableCursor, *pTableFormat, aDesc)->GetCells();
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL SwChartDataSequence::getTextualData()
+cpo::uno::Sequence< OUString > SwChartDataSequence::getTextualData()
 {
     SolarMutexGuard aGuard;
     auto vCells(GetCells());
@@ -2015,7 +2015,7 @@ cpo::uno::Sequence< OUString > SAL_CALL SwChartDataSequence::getTextualData()
     return vTextData;
 }
 
-cpo::uno::Sequence< cpo::uno::Any > SAL_CALL SwChartDataSequence::getData()
+cpo::uno::Sequence< cpo::uno::Any > SwChartDataSequence::getData()
 {
     SolarMutexGuard aGuard;
     try
@@ -2036,7 +2036,7 @@ cpo::uno::Sequence< cpo::uno::Any > SAL_CALL SwChartDataSequence::getData()
     return cpo::uno::Sequence< cpo::uno::Any >{};
 }
 
-cpo::uno::Sequence< double > SAL_CALL SwChartDataSequence::getNumericalData()
+cpo::uno::Sequence< double > SwChartDataSequence::getNumericalData()
 {
     SolarMutexGuard aGuard;
     auto vCells(GetCells());
@@ -2049,7 +2049,7 @@ cpo::uno::Sequence< double > SAL_CALL SwChartDataSequence::getNumericalData()
     return vNumData;
 }
 
-uno::Reference< util::XCloneable > SAL_CALL SwChartDataSequence::createClone(  )
+uno::Reference< util::XCloneable > SwChartDataSequence::createClone(  )
 {
     SolarMutexGuard aGuard;
     if (m_bDisposed)
@@ -2057,7 +2057,7 @@ uno::Reference< util::XCloneable > SAL_CALL SwChartDataSequence::createClone(  )
     return new SwChartDataSequence( *this );
 }
 
-uno::Reference< beans::XPropertySetInfo > SAL_CALL SwChartDataSequence::getPropertySetInfo(  )
+uno::Reference< beans::XPropertySetInfo > SwChartDataSequence::getPropertySetInfo(  )
 {
     SolarMutexGuard aGuard;
     if (m_bDisposed)
@@ -2067,7 +2067,7 @@ uno::Reference< beans::XPropertySetInfo > SAL_CALL SwChartDataSequence::getPrope
     return xRes;
 }
 
-void SAL_CALL SwChartDataSequence::setPropertyValue(
+void SwChartDataSequence::setPropertyValue(
         const OUString& rPropertyName,
         const cpo::uno::Any& rValue )
 {
@@ -2082,7 +2082,7 @@ void SAL_CALL SwChartDataSequence::setPropertyValue(
         throw lang::IllegalArgumentException();
 }
 
-cpo::uno::Any SAL_CALL SwChartDataSequence::getPropertyValue(
+cpo::uno::Any SwChartDataSequence::getPropertyValue(
         const OUString& rPropertyName )
 {
     SolarMutexGuard aGuard;
@@ -2095,45 +2095,45 @@ cpo::uno::Any SAL_CALL SwChartDataSequence::getPropertyValue(
     return cpo::uno::Any(m_aRole);
 }
 
-void SAL_CALL SwChartDataSequence::addPropertyChangeListener(
+void SwChartDataSequence::addPropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/ )
 {
     OSL_FAIL( "not implemented" );
 }
 
-void SAL_CALL SwChartDataSequence::removePropertyChangeListener(
+void SwChartDataSequence::removePropertyChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XPropertyChangeListener >& /*xListener*/ )
 {
     OSL_FAIL( "not implemented" );
 }
 
-void SAL_CALL SwChartDataSequence::addVetoableChangeListener(
+void SwChartDataSequence::addVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/ )
 {
     OSL_FAIL( "not implemented" );
 }
 
-void SAL_CALL SwChartDataSequence::removeVetoableChangeListener(
+void SwChartDataSequence::removeVetoableChangeListener(
         const OUString& /*rPropertyName*/,
         const uno::Reference< beans::XVetoableChangeListener >& /*xListener*/ )
 {
     OSL_FAIL( "not implemented" );
 }
 
-OUString SAL_CALL SwChartDataSequence::getImplementationName(  )
+OUString SwChartDataSequence::getImplementationName(  )
 {
     return u"SwChartDataSequence"_ustr;
 }
 
-bool SAL_CALL SwChartDataSequence::supportsService(const OUString& rServiceName )
+bool SwChartDataSequence::supportsService(const OUString& rServiceName )
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL SwChartDataSequence::getSupportedServiceNames(  )
+cpo::uno::Sequence< OUString > SwChartDataSequence::getSupportedServiceNames(  )
 {
     return { u"com.sun.star.chart2.data.DataSequence"_ustr };
 }
@@ -2158,7 +2158,7 @@ void SwChartDataSequence::Notify( const SfxHint& rHint)
     }
 }
 
-bool SAL_CALL SwChartDataSequence::isModified(  )
+bool SwChartDataSequence::isModified(  )
 {
     SolarMutexGuard aGuard;
     if (m_bDisposed)
@@ -2167,7 +2167,7 @@ bool SAL_CALL SwChartDataSequence::isModified(  )
     return true;
 }
 
-void SAL_CALL SwChartDataSequence::setModified(
+void SwChartDataSequence::setModified(
         bool bModified )
 {
     SolarMutexGuard aGuard;
@@ -2178,7 +2178,7 @@ void SAL_CALL SwChartDataSequence::setModified(
         LaunchModifiedEvent( m_aModifyListeners, static_cast< XModifyBroadcaster * >(this) );
 }
 
-void SAL_CALL SwChartDataSequence::addModifyListener(
+void SwChartDataSequence::addModifyListener(
         const uno::Reference< util::XModifyListener >& rxListener )
 {
     std::unique_lock aGuard( GetChartMutex() );
@@ -2186,7 +2186,7 @@ void SAL_CALL SwChartDataSequence::addModifyListener(
         m_aModifyListeners.addInterface( aGuard, rxListener );
 }
 
-void SAL_CALL SwChartDataSequence::removeModifyListener(
+void SwChartDataSequence::removeModifyListener(
         const uno::Reference< util::XModifyListener >& rxListener )
 {
     std::unique_lock aGuard( GetChartMutex() );
@@ -2194,7 +2194,7 @@ void SAL_CALL SwChartDataSequence::removeModifyListener(
         m_aModifyListeners.removeInterface( aGuard, rxListener );
 }
 
-void SAL_CALL SwChartDataSequence::disposing( const lang::EventObject& rSource )
+void SwChartDataSequence::disposing( const lang::EventObject& rSource )
 {
     if (m_bDisposed)
         throw lang::DisposedException();
@@ -2204,7 +2204,7 @@ void SAL_CALL SwChartDataSequence::disposing( const lang::EventObject& rSource )
     }
 }
 
-void SAL_CALL SwChartDataSequence::dispose(  )
+void SwChartDataSequence::dispose(  )
 {
     {
         std::unique_lock aGuard( GetChartMutex() );
@@ -2255,7 +2255,7 @@ void SAL_CALL SwChartDataSequence::dispose(  )
     m_aEvtListeners.disposeAndClear( aGuard, aEvtObj );
 }
 
-void SAL_CALL SwChartDataSequence::addEventListener(
+void SwChartDataSequence::addEventListener(
         const uno::Reference< lang::XEventListener >& rxListener )
 {
     std::unique_lock aGuard( GetChartMutex() );
@@ -2263,7 +2263,7 @@ void SAL_CALL SwChartDataSequence::addEventListener(
         m_aEvtListeners.addInterface( aGuard, rxListener );
 }
 
-void SAL_CALL SwChartDataSequence::removeEventListener(
+void SwChartDataSequence::removeEventListener(
         const uno::Reference< lang::XEventListener >& rxListener )
 {
     std::unique_lock aGuard( GetChartMutex() );
@@ -2497,7 +2497,7 @@ SwChartLabeledDataSequence::~SwChartLabeledDataSequence()
 {
 }
 
-uno::Reference< chart2::data::XDataSequence > SAL_CALL SwChartLabeledDataSequence::getValues(  )
+uno::Reference< chart2::data::XDataSequence > SwChartLabeledDataSequence::getValues(  )
 {
     SolarMutexGuard aGuard;
     if (m_bDisposed)
@@ -2531,7 +2531,7 @@ void SwChartLabeledDataSequence::SetDataSequence(
         xMB->addModifyListener( xML );
 }
 
-void SAL_CALL SwChartLabeledDataSequence::setValues(
+void SwChartLabeledDataSequence::setValues(
         const uno::Reference< chart2::data::XDataSequence >& rxSequence )
 {
     SolarMutexGuard aGuard;
@@ -2546,7 +2546,7 @@ void SAL_CALL SwChartLabeledDataSequence::setValues(
     }
 }
 
-uno::Reference< chart2::data::XDataSequence > SAL_CALL SwChartLabeledDataSequence::getLabel(  )
+uno::Reference< chart2::data::XDataSequence > SwChartLabeledDataSequence::getLabel(  )
 {
     SolarMutexGuard aGuard;
     if (m_bDisposed)
@@ -2554,7 +2554,7 @@ uno::Reference< chart2::data::XDataSequence > SAL_CALL SwChartLabeledDataSequenc
     return m_xLabels;
 }
 
-void SAL_CALL SwChartLabeledDataSequence::setLabel(
+void SwChartLabeledDataSequence::setLabel(
         const uno::Reference< chart2::data::XDataSequence >& rxSequence )
 {
     SolarMutexGuard aGuard;
@@ -2569,7 +2569,7 @@ void SAL_CALL SwChartLabeledDataSequence::setLabel(
     }
 }
 
-uno::Reference< util::XCloneable > SAL_CALL SwChartLabeledDataSequence::createClone(  )
+uno::Reference< util::XCloneable > SwChartLabeledDataSequence::createClone(  )
 {
     SolarMutexGuard aGuard;
     if (m_bDisposed)
@@ -2592,23 +2592,23 @@ uno::Reference< util::XCloneable > SAL_CALL SwChartLabeledDataSequence::createCl
     return pRes;
 }
 
-OUString SAL_CALL SwChartLabeledDataSequence::getImplementationName(  )
+OUString SwChartLabeledDataSequence::getImplementationName(  )
 {
     return u"SwChartLabeledDataSequence"_ustr;
 }
 
-bool SAL_CALL SwChartLabeledDataSequence::supportsService(
+bool SwChartLabeledDataSequence::supportsService(
         const OUString& rServiceName )
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL SwChartLabeledDataSequence::getSupportedServiceNames(  )
+cpo::uno::Sequence< OUString > SwChartLabeledDataSequence::getSupportedServiceNames(  )
 {
     return { u"com.sun.star.chart2.data.LabeledDataSequence"_ustr };
 }
 
-void SAL_CALL SwChartLabeledDataSequence::disposing(
+void SwChartLabeledDataSequence::disposing(
         const lang::EventObject& rSource )
 {
     std::unique_lock aGuard( GetChartMutex() );
@@ -2624,7 +2624,7 @@ void SAL_CALL SwChartLabeledDataSequence::disposing(
     }
 }
 
-void SAL_CALL SwChartLabeledDataSequence::modified(
+void SwChartLabeledDataSequence::modified(
         const lang::EventObject& rEvent )
 {
     if (rEvent.Source == m_xData || rEvent.Source == m_xLabels)
@@ -2633,7 +2633,7 @@ void SAL_CALL SwChartLabeledDataSequence::modified(
     }
 }
 
-void SAL_CALL SwChartLabeledDataSequence::addModifyListener(
+void SwChartLabeledDataSequence::addModifyListener(
         const uno::Reference< util::XModifyListener >& rxListener )
 {
     std::unique_lock aGuard( GetChartMutex() );
@@ -2641,7 +2641,7 @@ void SAL_CALL SwChartLabeledDataSequence::addModifyListener(
         m_aModifyListeners.addInterface( aGuard, rxListener );
 }
 
-void SAL_CALL SwChartLabeledDataSequence::removeModifyListener(
+void SwChartLabeledDataSequence::removeModifyListener(
         const uno::Reference< util::XModifyListener >& rxListener )
 {
     std::unique_lock aGuard( GetChartMutex() );
@@ -2649,7 +2649,7 @@ void SAL_CALL SwChartLabeledDataSequence::removeModifyListener(
         m_aModifyListeners.removeInterface( aGuard, rxListener );
 }
 
-void SAL_CALL SwChartLabeledDataSequence::dispose(  )
+void SwChartLabeledDataSequence::dispose(  )
 {
     std::unique_lock aGuard( GetChartMutex() );
     if (m_bDisposed)
@@ -2662,7 +2662,7 @@ void SAL_CALL SwChartLabeledDataSequence::dispose(  )
     m_aEventListeners.disposeAndClear( aGuard, aEvtObj );
 }
 
-void SAL_CALL SwChartLabeledDataSequence::addEventListener(
+void SwChartLabeledDataSequence::addEventListener(
         const uno::Reference< lang::XEventListener >& rxListener )
 {
     std::unique_lock aGuard( GetChartMutex() );
@@ -2670,7 +2670,7 @@ void SAL_CALL SwChartLabeledDataSequence::addEventListener(
         m_aEventListeners.addInterface( aGuard, rxListener );
 }
 
-void SAL_CALL SwChartLabeledDataSequence::removeEventListener(
+void SwChartLabeledDataSequence::removeEventListener(
         const uno::Reference< lang::XEventListener >& rxListener )
 {
     std::unique_lock aGuard( GetChartMutex() );

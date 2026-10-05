@@ -41,36 +41,36 @@ public:
     SwAccessibleTextFrame(std::shared_ptr<SwAccessibleMap> const& pInitMap,
                           const SwFlyFrame& rFlyFrame);
 
-    virtual cpo::uno::Any SAL_CALL queryInterface(
+    virtual cpo::uno::Any queryInterface(
         cpo::uno::Type const & rType ) override;
-    virtual void SAL_CALL acquire() noexcept override;
-    virtual void SAL_CALL release() noexcept override;
+    virtual void acquire() noexcept override;
+    virtual void release() noexcept override;
     // XAccessibleSelection
-    virtual void SAL_CALL selectAccessibleChild(
+    virtual void selectAccessibleChild(
         sal_Int64 nChildIndex ) override;
 
-    virtual bool SAL_CALL isAccessibleChildSelected(
+    virtual bool isAccessibleChildSelected(
         sal_Int64 nChildIndex ) override;
 
-    virtual void SAL_CALL clearAccessibleSelection(  ) override;
+    virtual void clearAccessibleSelection(  ) override;
 
-    virtual void SAL_CALL selectAllAccessibleChildren(  ) override;
+    virtual void selectAllAccessibleChildren(  ) override;
 
-    virtual sal_Int64 SAL_CALL getSelectedAccessibleChildCount(  ) override;
+    virtual sal_Int64 getSelectedAccessibleChildCount(  ) override;
 
-    virtual cpo::uno::Reference< css::accessibility::XAccessible > SAL_CALL getSelectedAccessibleChild(
+    virtual cpo::uno::Reference< css::accessibility::XAccessible > getSelectedAccessibleChild(
         sal_Int64 nSelectedChildIndex ) override;
 
-    virtual void SAL_CALL deselectAccessibleChild(
+    virtual void deselectAccessibleChild(
         sal_Int64 nSelectedChildIndex ) override;
 
     // XAccessibleContext
 
     // #i73249# - Return the object's current name.
-    virtual OUString SAL_CALL
+    virtual OUString
         getAccessibleName() override;
     /// Return this object's description.
-    virtual OUString SAL_CALL
+    virtual OUString
         getAccessibleDescription() override;
 
     // XAccessibleContext::getAccessibleRelationSet
@@ -86,7 +86,7 @@ private:
         css::accessibility::AccessibleRelationType eType, const SwFlyFrame* pFrame);
 
 public:
-    virtual cpo::uno::Reference< css::accessibility::XAccessibleRelationSet> SAL_CALL getAccessibleRelationSet() override;
+    virtual cpo::uno::Reference< css::accessibility::XAccessibleRelationSet> getAccessibleRelationSet() override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -55,13 +55,13 @@ SwXTextDefaults::~SwXTextDefaults ()
 {
 }
 
-uno::Reference< XPropertySetInfo > SAL_CALL SwXTextDefaults::getPropertySetInfo(  )
+uno::Reference< XPropertySetInfo > SwXTextDefaults::getPropertySetInfo(  )
 {
     static uno::Reference < XPropertySetInfo > xRef = m_pPropSet->getPropertySetInfo();
     return xRef;
 }
 
-void SAL_CALL SwXTextDefaults::setPropertyValue( const OUString& rPropertyName, const Any& aValue )
+void SwXTextDefaults::setPropertyValue( const OUString& rPropertyName, const Any& aValue )
 {
     SolarMutexGuard aGuard;
     if (!m_pDoc)
@@ -121,7 +121,7 @@ void SAL_CALL SwXTextDefaults::setPropertyValue( const OUString& rPropertyName, 
     }
 }
 
-Any SAL_CALL SwXTextDefaults::getPropertyValue( const OUString& rPropertyName )
+Any SwXTextDefaults::getPropertyValue( const OUString& rPropertyName )
 {
     SolarMutexGuard aGuard;
     if (!m_pDoc)
@@ -135,28 +135,28 @@ Any SAL_CALL SwXTextDefaults::getPropertyValue( const OUString& rPropertyName )
     return aRet;
 }
 
-void SAL_CALL SwXTextDefaults::addPropertyChangeListener( const OUString& /*rPropertyName*/, const uno::Reference< XPropertyChangeListener >& /*xListener*/ )
+void SwXTextDefaults::addPropertyChangeListener( const OUString& /*rPropertyName*/, const uno::Reference< XPropertyChangeListener >& /*xListener*/ )
 {
     OSL_FAIL ( "not implemented" );
 }
 
-void SAL_CALL SwXTextDefaults::removePropertyChangeListener( const OUString& /*rPropertyName*/, const uno::Reference< XPropertyChangeListener >& /*xListener*/ )
+void SwXTextDefaults::removePropertyChangeListener( const OUString& /*rPropertyName*/, const uno::Reference< XPropertyChangeListener >& /*xListener*/ )
 {
     OSL_FAIL ( "not implemented" );
 }
 
-void SAL_CALL SwXTextDefaults::addVetoableChangeListener( const OUString& /*rPropertyName*/, const uno::Reference< XVetoableChangeListener >& /*xListener*/ )
+void SwXTextDefaults::addVetoableChangeListener( const OUString& /*rPropertyName*/, const uno::Reference< XVetoableChangeListener >& /*xListener*/ )
 {
     OSL_FAIL ( "not implemented" );
 }
 
-void SAL_CALL SwXTextDefaults::removeVetoableChangeListener( const OUString& /*rPropertyName*/, const uno::Reference< XVetoableChangeListener >& /*xListener*/ )
+void SwXTextDefaults::removeVetoableChangeListener( const OUString& /*rPropertyName*/, const uno::Reference< XVetoableChangeListener >& /*xListener*/ )
 {
     OSL_FAIL ( "not implemented" );
 }
 
 // XPropertyState
-PropertyState SAL_CALL SwXTextDefaults::getPropertyState( const OUString& rPropertyName )
+PropertyState SwXTextDefaults::getPropertyState( const OUString& rPropertyName )
 {
     SolarMutexGuard aGuard;
     PropertyState eRet = PropertyState_DIRECT_VALUE;
@@ -172,7 +172,7 @@ PropertyState SAL_CALL SwXTextDefaults::getPropertyState( const OUString& rPrope
     return eRet;
 }
 
-Sequence< PropertyState > SAL_CALL SwXTextDefaults::getPropertyStates( const Sequence< OUString >& rPropertyNames )
+Sequence< PropertyState > SwXTextDefaults::getPropertyStates( const Sequence< OUString >& rPropertyNames )
 {
     const sal_Int32 nCount = rPropertyNames.getLength();
     Sequence < PropertyState > aRet ( nCount );
@@ -183,7 +183,7 @@ Sequence< PropertyState > SAL_CALL SwXTextDefaults::getPropertyStates( const Seq
     return aRet;
 }
 
-void SAL_CALL SwXTextDefaults::setPropertyToDefault( const OUString& rPropertyName )
+void SwXTextDefaults::setPropertyToDefault( const OUString& rPropertyName )
 {
     if (!m_pDoc)
         throw RuntimeException();
@@ -196,7 +196,7 @@ void SAL_CALL SwXTextDefaults::setPropertyToDefault( const OUString& rPropertyNa
     rSet.ResetUserDefaultItem ( pMap->nWID );
 }
 
-Any SAL_CALL SwXTextDefaults::getPropertyDefault( const OUString& rPropertyName )
+Any SwXTextDefaults::getPropertyDefault( const OUString& rPropertyName )
 {
     if (!m_pDoc)
         throw RuntimeException();
@@ -213,17 +213,17 @@ Any SAL_CALL SwXTextDefaults::getPropertyDefault( const OUString& rPropertyName 
     return aRet;
 }
 
-OUString SAL_CALL SwXTextDefaults::getImplementationName(  )
+OUString SwXTextDefaults::getImplementationName(  )
 {
     return u"SwXTextDefaults"_ustr;
 }
 
-bool SAL_CALL SwXTextDefaults::supportsService( const OUString& rServiceName )
+bool SwXTextDefaults::supportsService( const OUString& rServiceName )
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL SwXTextDefaults::getSupportedServiceNames(  )
+cpo::uno::Sequence< OUString > SwXTextDefaults::getSupportedServiceNames(  )
 {
     return { u"com.sun.star.text.Defaults"_ustr,
              u"com.sun.star.style.CharacterProperties"_ustr,

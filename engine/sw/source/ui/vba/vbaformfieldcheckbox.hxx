@@ -29,22 +29,22 @@ public:
     ~SwVbaFormFieldCheckBox() override;
 
     // XCheckBox
-    OUString SAL_CALL getDefaultPropertyName() override;
+    OUString getDefaultPropertyName() override;
 
     // Default member: True if the specified form field object is a valid check box form field
-    bool SAL_CALL getValid() override;
+    bool getValid() override;
 
-    bool SAL_CALL getAutoSize() override;
-    void SAL_CALL setAutoSize(bool bSet) override;
+    bool getAutoSize() override;
+    void setAutoSize(bool bSet) override;
     // Returns the default check box value
-    bool SAL_CALL getDefault() override;
-    void SAL_CALL setDefault(bool bSet) override;
+    bool getDefault() override;
+    void setDefault(bool bSet) override;
     // Returns the size of a check box, in points
-    sal_Int32 SAL_CALL getSize() override;
-    void SAL_CALL setSize(sal_Int32 nSet) override;
+    sal_Int32 getSize() override;
+    void setSize(sal_Int32 nSet) override;
 
-    bool SAL_CALL getValue() override;
-    void SAL_CALL setValue(bool bSet) override;
+    bool getValue() override;
+    void setValue(bool bSet) override;
 
     // XHelperInterface
     OUString getServiceImplName() override;

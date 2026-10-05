@@ -117,37 +117,37 @@ public:
     }
 
     // XPropertySet
-    virtual uno::Reference<css::beans::XPropertySetInfo> SAL_CALL getPropertySetInfo() override
+    virtual uno::Reference<css::beans::XPropertySetInfo> getPropertySetInfo() override
     {
         return m_xParagraph->getPropertySetInfo();
     }
-    virtual void SAL_CALL setPropertyValue(const OUString& rName, const uno::Any& rValue) override
+    virtual void setPropertyValue(const OUString& rName, const uno::Any& rValue) override
     {
         m_xParagraph->setPropertyValue(rName, rValue);
     }
-    virtual uno::Any SAL_CALL getPropertyValue(const OUString& rName) override
+    virtual uno::Any getPropertyValue(const OUString& rName) override
     {
         return m_xParagraph->getPropertyValue(rName);
     }
-    virtual void SAL_CALL addPropertyChangeListener(
+    virtual void addPropertyChangeListener(
         const OUString& rName,
         const uno::Reference<css::beans::XPropertyChangeListener>& xListener) override
     {
         m_xParagraph->addPropertyChangeListener(rName, xListener);
     }
-    virtual void SAL_CALL removePropertyChangeListener(
+    virtual void removePropertyChangeListener(
         const OUString& rName,
         const uno::Reference<css::beans::XPropertyChangeListener>& xListener) override
     {
         m_xParagraph->removePropertyChangeListener(rName, xListener);
     }
-    virtual void SAL_CALL addVetoableChangeListener(
+    virtual void addVetoableChangeListener(
         const OUString& rName,
         const uno::Reference<css::beans::XVetoableChangeListener>& xListener) override
     {
         m_xParagraph->addVetoableChangeListener(rName, xListener);
     }
-    virtual void SAL_CALL removeVetoableChangeListener(
+    virtual void removeVetoableChangeListener(
         const OUString& rName,
         const uno::Reference<css::beans::XVetoableChangeListener>& xListener) override
     {
@@ -155,13 +155,13 @@ public:
     }
 
     // XPropertyState
-    virtual css::beans::PropertyState SAL_CALL getPropertyState(const OUString& rName) override
+    virtual css::beans::PropertyState getPropertyState(const OUString& rName) override
     {
         if (m_aRoleProperties.count(rName))
             return css::beans::PropertyState_DIRECT_VALUE;
         return m_xParagraphState->getPropertyState(rName);
     }
-    virtual uno::Sequence<css::beans::PropertyState> SAL_CALL
+    virtual uno::Sequence<css::beans::PropertyState>
     getPropertyStates(const uno::Sequence<OUString>& rNames) override
     {
         uno::Sequence<css::beans::PropertyState> aStates
@@ -172,11 +172,11 @@ public:
                 pStates[i] = css::beans::PropertyState_DIRECT_VALUE;
         return aStates;
     }
-    virtual void SAL_CALL setPropertyToDefault(const OUString& rName) override
+    virtual void setPropertyToDefault(const OUString& rName) override
     {
         m_xParagraphState->setPropertyToDefault(rName);
     }
-    virtual uno::Any SAL_CALL getPropertyDefault(const OUString& rName) override
+    virtual uno::Any getPropertyDefault(const OUString& rName) override
     {
         return m_xParagraphState->getPropertyDefault(rName);
     }

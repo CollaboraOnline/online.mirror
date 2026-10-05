@@ -71,41 +71,41 @@ public:
     virtual ~SwVbaRange() override;
     const rtl::Reference< SwXTextDocument >& getDocument() const { return mxTextDocument; }
 
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL getXTextRange() override;
+    virtual cpo::uno::Reference< css::text::XTextRange > getXTextRange() override;
     const cpo::uno::Reference< css::text::XText >& getXText() const { return mxText; }
     void setXTextCursor( const cpo::uno::Reference< css::text::XTextCursor >& xTextCursor ) { mxTextCursor = xTextCursor; }
 
     // Attribute
-    virtual OUString SAL_CALL getText() override;
-    virtual void SAL_CALL setText( const OUString& rText ) override;
-    virtual cpo::uno::Reference< ooo::vba::word::XParagraphFormat > SAL_CALL getParagraphFormat() override;
-    virtual void SAL_CALL setParagraphFormat( const cpo::uno::Reference< ooo::vba::word::XParagraphFormat >& rParagraphFormat ) override;
-    virtual cpo::uno::Any SAL_CALL getStyle() override;
-    virtual void SAL_CALL setStyle( const cpo::uno::Any& _xStyle ) override;
-    virtual cpo::uno::Reference< ooo::vba::word::XFont > SAL_CALL getFont() override;
-    virtual cpo::uno::Reference< ooo::vba::word::XFind > SAL_CALL getFind() override;
-    virtual cpo::uno::Reference< ooo::vba::word::XListFormat > SAL_CALL getListFormat() override;
+    virtual OUString getText() override;
+    virtual void setText( const OUString& rText ) override;
+    virtual cpo::uno::Reference< ooo::vba::word::XParagraphFormat > getParagraphFormat() override;
+    virtual void setParagraphFormat( const cpo::uno::Reference< ooo::vba::word::XParagraphFormat >& rParagraphFormat ) override;
+    virtual cpo::uno::Any getStyle() override;
+    virtual void setStyle( const cpo::uno::Any& _xStyle ) override;
+    virtual cpo::uno::Reference< ooo::vba::word::XFont > getFont() override;
+    virtual cpo::uno::Reference< ooo::vba::word::XFind > getFind() override;
+    virtual cpo::uno::Reference< ooo::vba::word::XListFormat > getListFormat() override;
 
     //XDefaultProperty
-    virtual OUString SAL_CALL getDefaultPropertyName() override { return u"Text"_ustr; }
+    virtual OUString getDefaultPropertyName() override { return u"Text"_ustr; }
 
     // Methods
-    virtual void SAL_CALL InsertBreak(const cpo::uno::Any& _breakType) override;
-    virtual void SAL_CALL Select() override;
-    virtual void SAL_CALL InsertParagraph() override;
-    virtual void SAL_CALL InsertParagraphBefore() override;
-    virtual void SAL_CALL InsertParagraphAfter() override;
-    virtual ::sal_Int32 SAL_CALL getLanguageID() override;
-    virtual void SAL_CALL setLanguageID( ::sal_Int32 _languageid ) override;
-    virtual cpo::uno::Any SAL_CALL PageSetup() override;
-    virtual ::sal_Int32 SAL_CALL getStart() override;
-    virtual void SAL_CALL setStart( ::sal_Int32 _start ) override;
-    virtual ::sal_Int32 SAL_CALL getEnd() override;
-    virtual void SAL_CALL setEnd( ::sal_Int32 _end ) override;
-    virtual bool SAL_CALL InRange( const cpo::uno::Reference< ::ooo::vba::word::XRange >& Range ) override;
-    virtual cpo::uno::Any SAL_CALL Revisions( const cpo::uno::Any& aIndex ) override;
-    virtual cpo::uno::Any SAL_CALL Sections( const cpo::uno::Any& aIndex ) override;
-    virtual cpo::uno::Any SAL_CALL Fields( const cpo::uno::Any& aIndex ) override;
+    virtual void InsertBreak(const cpo::uno::Any& _breakType) override;
+    virtual void Select() override;
+    virtual void InsertParagraph() override;
+    virtual void InsertParagraphBefore() override;
+    virtual void InsertParagraphAfter() override;
+    virtual ::sal_Int32 getLanguageID() override;
+    virtual void setLanguageID( ::sal_Int32 _languageid ) override;
+    virtual cpo::uno::Any PageSetup() override;
+    virtual ::sal_Int32 getStart() override;
+    virtual void setStart( ::sal_Int32 _start ) override;
+    virtual ::sal_Int32 getEnd() override;
+    virtual void setEnd( ::sal_Int32 _end ) override;
+    virtual bool InRange( const cpo::uno::Reference< ::ooo::vba::word::XRange >& Range ) override;
+    virtual cpo::uno::Any Revisions( const cpo::uno::Any& aIndex ) override;
+    virtual cpo::uno::Any Sections( const cpo::uno::Any& aIndex ) override;
+    virtual cpo::uno::Any Fields( const cpo::uno::Any& aIndex ) override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

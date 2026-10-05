@@ -104,33 +104,33 @@ uno::Reference< text::XTextRange > SwVbaSelection::GetSelectedRange()
     return xTextRange;
 }
 
-uno::Reference< word::XRange > SAL_CALL
+uno::Reference< word::XRange >
 SwVbaSelection::getRange()
 {
     uno::Reference< text::XTextRange > xTextRange = GetSelectedRange();
     return uno::Reference< word::XRange >( new SwVbaRange( this, mxContext, mxModel, xTextRange->getStart(), xTextRange->getEnd(), mxTextViewCursor->getText() ) );
 }
 
-OUString SAL_CALL
+OUString
 SwVbaSelection::getText()
 {
     return getRange()->getText();
 }
 
-void SAL_CALL
+void
 SwVbaSelection::setText( const OUString& rText )
 {
     getRange()->setText( rText );
 }
 
-void SAL_CALL
+void
 SwVbaSelection::TypeText( const OUString& rText )
 {
     // FIXME: handle the property Options.ReplaceSelection, the default value is true
     setText( rText );
 }
 
-void SAL_CALL
+void
 SwVbaSelection::HomeKey( const cpo::uno::Any& _unit, const cpo::uno::Any& _extend )
 {
     sal_Int32 nUnit = word::WdUnits::wdLine;
@@ -165,7 +165,7 @@ SwVbaSelection::HomeKey( const cpo::uno::Any& _unit, const cpo::uno::Any& _exten
     }
 }
 
-void SAL_CALL
+void
 SwVbaSelection::EndKey( const cpo::uno::Any& _unit, const cpo::uno::Any& _extend )
 {
     sal_Int32 nUnit = word::WdUnits::wdLine;
@@ -200,7 +200,7 @@ SwVbaSelection::EndKey( const cpo::uno::Any& _unit, const cpo::uno::Any& _extend
     }
 }
 
-void SAL_CALL
+void
 SwVbaSelection::Delete( const cpo::uno::Any& _unit, const cpo::uno::Any& _count )
 {
     sal_Int32 nUnit = word::WdUnits::wdLine;
@@ -405,7 +405,7 @@ void SwVbaSelection::NextCell(sal_Int32 nCount, word::E_DIRECTION eDirection)
     mxTextViewCursor->gotoRange( uno::Reference< text::XTextRange >( xCell, uno::UNO_QUERY_THROW ), false );
 }
 
-void SAL_CALL
+void
 SwVbaSelection::MoveRight(const cpo::uno::Any& _unit, const cpo::uno::Any& _count, const cpo::uno::Any& _extend)
 {
     sal_Int32 nCount = 1;
@@ -425,7 +425,7 @@ SwVbaSelection::MoveRight(const cpo::uno::Any& _unit, const cpo::uno::Any& _coun
     Move( _unit, _count, _extend, word::MOVE_RIGHT );
 }
 
-void SAL_CALL
+void
 SwVbaSelection::MoveLeft(const cpo::uno::Any& _unit, const cpo::uno::Any& _count, const cpo::uno::Any& _extend)
 {
     sal_Int32 nCount = 1;
@@ -444,7 +444,7 @@ SwVbaSelection::MoveLeft(const cpo::uno::Any& _unit, const cpo::uno::Any& _count
     Move( _unit, _count, _extend, word::MOVE_LEFT );
 }
 
-void SAL_CALL
+void
 SwVbaSelection::MoveDown(const cpo::uno::Any& _unit, const cpo::uno::Any& _count, const cpo::uno::Any& _extend)
 {
     sal_Int32 nCount = 1;
@@ -464,7 +464,7 @@ SwVbaSelection::MoveDown(const cpo::uno::Any& _unit, const cpo::uno::Any& _count
     Move( _unit, _count, _extend, word::MOVE_DOWN );
 }
 
-void SAL_CALL
+void
 SwVbaSelection::MoveUp(const cpo::uno::Any& _unit, const cpo::uno::Any& _count, const cpo::uno::Any& _extend)
 {
     sal_Int32 nCount = 1;
@@ -484,7 +484,7 @@ SwVbaSelection::MoveUp(const cpo::uno::Any& _unit, const cpo::uno::Any& _count, 
     Move( _unit, _count, _extend, word::MOVE_UP );
 }
 
-void SAL_CALL
+void
 SwVbaSelection::TypeParagraph()
 {
     // #FIXME: if the selection is an entire paragraph, it's replaced
@@ -495,38 +495,38 @@ SwVbaSelection::TypeParagraph()
         mxTextViewCursor->collapseToStart();
 }
 
-void SAL_CALL
+void
 SwVbaSelection::InsertParagraph()
 {
     // #FIXME: the selection should include the new paragraph.
     getRange()->InsertParagraph();
 }
 
-void SAL_CALL
+void
 SwVbaSelection::InsertParagraphBefore()
 {
     getRange()->InsertParagraphBefore();
 }
 
-void SAL_CALL
+void
 SwVbaSelection::InsertParagraphAfter()
 {
     getRange()->InsertParagraphAfter();
 }
 
-uno::Reference< word::XParagraphFormat > SAL_CALL
+uno::Reference< word::XParagraphFormat >
 SwVbaSelection::getParagraphFormat()
 {
     return getRange()->getParagraphFormat();
 }
 
-void SAL_CALL
+void
 SwVbaSelection::setParagraphFormat( const uno::Reference< word::XParagraphFormat >& rParagraphFormat )
 {
     return getRange()->setParagraphFormat( rParagraphFormat );
 }
 
-uno::Reference< word::XFind > SAL_CALL
+uno::Reference< word::XFind >
 SwVbaSelection::getFind()
 {
     uno::Reference< text::XTextRange > xTextRange = GetSelectedRange();
@@ -542,32 +542,32 @@ SwVbaSelection::getFind()
     return SwVbaFind::GetOrCreateFind(this, mxContext, mxModel, xTextRange);
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaSelection::getStyle()
 {
     return getRange()->getStyle();
 }
 
-void SAL_CALL
+void
 SwVbaSelection::setStyle( const cpo::uno::Any& rStyle )
 {
     uno::Reference< beans::XPropertySet > xParaProps( mxTextViewCursor, uno::UNO_QUERY_THROW );
     return SwVbaStyle::setStyle( xParaProps, rStyle );
 }
 
-uno::Reference< word::XFont > SAL_CALL
+uno::Reference< word::XFont >
 SwVbaSelection::getFont()
 {
     return getRange()->getFont();
 }
 
-void SAL_CALL
+void
 SwVbaSelection::TypeBackspace()
 {
     dispatchRequests( static_cast<SfxBaseModel*>(mxModel.get()), u".uno:SwBackspace"_ustr );
 }
 
-uno::Reference< word::XRange > SAL_CALL SwVbaSelection::GoTo( const cpo::uno::Any& _what, const cpo::uno::Any& _which, const cpo::uno::Any& _count, const cpo::uno::Any& _name )
+uno::Reference< word::XRange > SwVbaSelection::GoTo( const cpo::uno::Any& _what, const cpo::uno::Any& _which, const cpo::uno::Any& _count, const cpo::uno::Any& _name )
 {
     sal_Int32 nWhat = 0;
     if( !( _what >>= nWhat ) )
@@ -671,17 +671,17 @@ uno::Reference< word::XRange > SAL_CALL SwVbaSelection::GoTo( const cpo::uno::An
     return getRange();
 }
 
-::sal_Int32 SAL_CALL SwVbaSelection::getLanguageID()
+::sal_Int32 SwVbaSelection::getLanguageID()
 {
     return getRange()->getLanguageID();
 }
 
-void SAL_CALL SwVbaSelection::setLanguageID( ::sal_Int32 _languageid )
+void SwVbaSelection::setLanguageID( ::sal_Int32 _languageid )
 {
     getRange()->setLanguageID( _languageid );
 }
 
-cpo::uno::Any SAL_CALL SwVbaSelection::Information( sal_Int32 _type )
+cpo::uno::Any SwVbaSelection::Information( sal_Int32 _type )
 {
     cpo::uno::Any result;
     switch( _type )
@@ -780,12 +780,12 @@ cpo::uno::Any SAL_CALL SwVbaSelection::Information( sal_Int32 _type )
     return result;
 }
 
-void SAL_CALL SwVbaSelection::InsertBreak( const cpo::uno::Any& _breakType )
+void SwVbaSelection::InsertBreak( const cpo::uno::Any& _breakType )
 {
     getRange()->InsertBreak( _breakType );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaSelection::Tables( const cpo::uno::Any& aIndex )
 {
     // Hacky implementation due to missing api ( and lack of knowledge )
@@ -830,7 +830,7 @@ SwVbaSelection::Tables( const cpo::uno::Any& aIndex )
 
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaSelection::Fields( const cpo::uno::Any& index )
 {
     uno::Reference< XCollection > xCol( new SwVbaFields( mxParent, mxContext, mxModel ) );
@@ -839,7 +839,7 @@ SwVbaSelection::Fields( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-uno::Reference< word::XHeaderFooter > SAL_CALL
+uno::Reference< word::XHeaderFooter >
 SwVbaSelection::getHeaderFooter()
 {
     if( HeaderFooterHelper::isHeaderFooter( mxModel ) )
@@ -858,7 +858,7 @@ SwVbaSelection::getHeaderFooter()
     return uno::Reference< word::XHeaderFooter >();
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaSelection::ShapeRange( )
 {
     uno::Reference< drawing::XShapes > xShapes( mxModel->getCurrentSelection(), uno::UNO_QUERY );
@@ -874,38 +874,38 @@ SwVbaSelection::ShapeRange( )
     return cpo::uno::Any( uno::Reference< msforms::XShapeRange >( new ScVbaShapeRange( this, mxContext, xShapesAccess, xDrawPage, static_cast<SfxBaseModel*>(mxModel.get()) ) ) );
 }
 
-::sal_Int32 SAL_CALL SwVbaSelection::getStart()
+::sal_Int32 SwVbaSelection::getStart()
 {
     return getRange()->getStart();
 }
 
-void SAL_CALL SwVbaSelection::setStart( ::sal_Int32 _start )
+void SwVbaSelection::setStart( ::sal_Int32 _start )
 {
     getRange()->setStart( _start );
 }
-::sal_Int32 SAL_CALL SwVbaSelection::getEnd()
+::sal_Int32 SwVbaSelection::getEnd()
 {
     return getRange()->getEnd();
 }
 
-void SAL_CALL SwVbaSelection::setEnd( ::sal_Int32 _end )
+void SwVbaSelection::setEnd( ::sal_Int32 _end )
 {
     getRange()->setEnd( _end );
 }
 
-void SAL_CALL SwVbaSelection::SelectRow()
+void SwVbaSelection::SelectRow()
 {
     uno::Reference< word::XRows > xRows( Rows( cpo::uno::Any() ), uno::UNO_QUERY_THROW );
     xRows->Select();
 }
 
-void SAL_CALL SwVbaSelection::SelectColumn()
+void SwVbaSelection::SelectColumn()
 {
     uno::Reference< word::XColumns > xColumns( Columns( cpo::uno::Any() ), uno::UNO_QUERY_THROW );
     xColumns->Select();
 }
 
-cpo::uno::Any SAL_CALL SwVbaSelection::Rows( const cpo::uno::Any& index )
+cpo::uno::Any SwVbaSelection::Rows( const cpo::uno::Any& index )
 {
     OUString sTLName;
     OUString sBRName;
@@ -931,7 +931,7 @@ cpo::uno::Any SAL_CALL SwVbaSelection::Rows( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL SwVbaSelection::Columns( const cpo::uno::Any& index )
+cpo::uno::Any SwVbaSelection::Columns( const cpo::uno::Any& index )
 {
     OUString sTLName;
     OUString sBRName;
@@ -1015,7 +1015,7 @@ void SwVbaSelection::GetSelectedCellRange( OUString& sTLName, OUString& sBRName 
     }
 }
 
-cpo::uno::Any SAL_CALL SwVbaSelection::Cells( const cpo::uno::Any& index )
+cpo::uno::Any SwVbaSelection::Cells( const cpo::uno::Any& index )
 {
     OUString sTLName;
     OUString sBRName;
@@ -1046,23 +1046,23 @@ cpo::uno::Any SAL_CALL SwVbaSelection::Cells( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-void SAL_CALL SwVbaSelection::Copy(  )
+void SwVbaSelection::Copy(  )
 {
     dispatchRequests( static_cast<SfxBaseModel*>(mxModel.get()), u".uno:Copy"_ustr );
 }
 
-void SAL_CALL SwVbaSelection::CopyAsPicture(  )
+void SwVbaSelection::CopyAsPicture(  )
 {
     // seems not support in Writer
     Copy();
 }
 
-void SAL_CALL SwVbaSelection::Paste(  )
+void SwVbaSelection::Paste(  )
 {
     dispatchRequests( static_cast<SfxBaseModel*>(mxModel.get()), u".uno:Paste"_ustr );
 }
 
-void SAL_CALL SwVbaSelection::Collapse( const cpo::uno::Any& Direction )
+void SwVbaSelection::Collapse( const cpo::uno::Any& Direction )
 {
     if( word::gotoSelectedObjectAnchor( mxModel ) )
         return;
@@ -1091,7 +1091,7 @@ void SAL_CALL SwVbaSelection::Collapse( const cpo::uno::Any& Direction )
     }
 }
 
-void SAL_CALL SwVbaSelection::WholeStory(  )
+void SwVbaSelection::WholeStory(  )
 {
     uno::Reference< text::XText > xText = word::getCurrentXText( mxModel );
     // FIXME: for i#7747,if the first line is a table, it fails to select all the contents in the story.
@@ -1115,12 +1115,12 @@ void SAL_CALL SwVbaSelection::WholeStory(  )
     mxTextViewCursor->gotoRange( xEnd, true );
 }
 
-bool SAL_CALL SwVbaSelection::InRange( const uno::Reference< ::ooo::vba::word::XRange >& Range )
+bool SwVbaSelection::InRange( const uno::Reference< ::ooo::vba::word::XRange >& Range )
 {
     return getRange()->InRange( Range );
 }
 
-void SAL_CALL SwVbaSelection::SplitTable()
+void SwVbaSelection::SplitTable()
 {
     if( !IsInTable() )
         throw cpo::uno::RuntimeException();
@@ -1133,7 +1133,7 @@ void SAL_CALL SwVbaSelection::SplitTable()
     }
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaSelection::Paragraphs( const cpo::uno::Any& aIndex )
 {
     // Hacky implementation due to missing api ( and lack of knowledge )

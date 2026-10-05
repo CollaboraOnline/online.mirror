@@ -33,7 +33,7 @@ SwVbaListTemplate::~SwVbaListTemplate()
 {
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaListTemplate::ListLevels( const cpo::uno::Any& index )
 {
     uno::Reference< XCollection > xCol( new SwVbaListLevels( mxParent, mxContext, m_pListHelper ) );

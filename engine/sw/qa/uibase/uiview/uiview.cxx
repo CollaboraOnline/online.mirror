@@ -177,18 +177,18 @@ public:
     ImageInterceptor(const uno::Reference<lang::XComponent>& xComponent);
 
     // XDispatchProviderInterceptor
-    uno::Reference<frame::XDispatchProvider> SAL_CALL getMasterDispatchProvider() override;
-    uno::Reference<frame::XDispatchProvider> SAL_CALL getSlaveDispatchProvider() override;
-    void SAL_CALL setMasterDispatchProvider(
+    uno::Reference<frame::XDispatchProvider> getMasterDispatchProvider() override;
+    uno::Reference<frame::XDispatchProvider> getSlaveDispatchProvider() override;
+    void setMasterDispatchProvider(
         const uno::Reference<frame::XDispatchProvider>& xNewSupplier) override;
-    void SAL_CALL
+    void
     setSlaveDispatchProvider(const uno::Reference<frame::XDispatchProvider>& xNewSupplier) override;
 
     // XDispatchProvider
-    uno::Reference<frame::XDispatch> SAL_CALL queryDispatch(const util::URL& rURL,
+    uno::Reference<frame::XDispatch> queryDispatch(const util::URL& rURL,
                                                             const OUString& rTargetFrameName,
                                                             sal_Int32 SearchFlags) override;
-    cpo::uno::Sequence<uno::Reference<frame::XDispatch>> SAL_CALL
+    cpo::uno::Sequence<uno::Reference<frame::XDispatch>>
     queryDispatches(const cpo::uno::Sequence<frame::DispatchDescriptor>& rRequests) override;
 };
 }

@@ -47,22 +47,22 @@ public:
     static bool getInstanceName(const SwFieldType& rFieldType, OUString& rName);
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(
             const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getSupportedServiceNames() override;
 
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual bool SAL_CALL hasElements() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual bool hasElements() override;
 
     // XNameAccess
-    virtual cpo::uno::Any SAL_CALL getByName(
+    virtual cpo::uno::Any getByName(
             const OUString& rName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getElementNames() override;
-    SW_DLLPUBLIC virtual bool SAL_CALL hasByName(const OUString& rName) override;
+    SW_DLLPUBLIC virtual bool hasByName(const OUString& rName) override;
 
     SW_DLLPUBLIC rtl::Reference<SwXFieldMaster> getFieldMasterByName(const OUString& rName);
 };
@@ -91,33 +91,33 @@ public:
     virtual void    Invalidate() override;
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(
             const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getSupportedServiceNames() override;
 
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual bool SAL_CALL hasElements() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual bool hasElements() override;
 
     // XEnumerationAccess
     virtual cpo::uno::Reference<
-            css::container::XEnumeration >  SAL_CALL
+            css::container::XEnumeration >
         createEnumeration() override;
 
     // XRefreshable
-    virtual void SAL_CALL refresh() override;
-    virtual void SAL_CALL addRefreshListener(
+    virtual void refresh() override;
+    virtual void addRefreshListener(
             const cpo::uno::Reference<
                 css::util::XRefreshListener>& xListener) override;
-    virtual void SAL_CALL removeRefreshListener(
+    virtual void removeRefreshListener(
             const cpo::uno::Reference<
                 css::util::XRefreshListener>& xListener) override;
 
     // container::XUniqueIDAccess
-    virtual cpo::uno::Any SAL_CALL getByUniqueID( const OUString& ID ) override;
-    virtual void SAL_CALL removeByUniqueID( const OUString& ID ) override;
+    virtual cpo::uno::Any getByUniqueID( const OUString& ID ) override;
+    virtual void removeByUniqueID( const OUString& ID ) override;
 
     rtl::Reference<SwXFieldEnumeration> createFieldEnumeration();
 };

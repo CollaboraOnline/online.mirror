@@ -39,20 +39,20 @@ SwVbaParagraph::~SwVbaParagraph()
 {
 }
 
-uno::Reference< word::XRange > SAL_CALL
+uno::Reference< word::XRange >
 SwVbaParagraph::getRange( )
 {
     return uno::Reference< word::XRange >( new SwVbaRange( this, mxContext, mxTextDocument, mxTextRange->getStart(), mxTextRange->getEnd(), mxTextRange->getText() ) );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaParagraph::getStyle( )
 {
     uno::Reference< word::XRange > xRange = getRange();
     return xRange->getStyle();
 }
 
-void SAL_CALL
+void
 SwVbaParagraph::setStyle( const cpo::uno::Any& style )
 {
     uno::Reference< word::XRange > xRange = getRange();
@@ -96,10 +96,10 @@ public:
     {
     }
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType(  ) override { return  cppu::UnoType<text::XTextRange>::get(); }
-    virtual bool SAL_CALL hasElements(  ) override { return true; }
+    virtual cpo::uno::Type getElementType(  ) override { return  cppu::UnoType<text::XTextRange>::get(); }
+    virtual bool hasElements(  ) override { return true; }
     // XIndexAccess
-    virtual ::sal_Int32 SAL_CALL getCount(  ) override
+    virtual ::sal_Int32 getCount(  ) override
     {
         sal_Int32 nCount = 0;
         uno::Reference< container::XEnumeration > xParEnum = getEnumeration();
@@ -113,7 +113,7 @@ public:
         }
         return nCount;
     }
-    virtual cpo::uno::Any SAL_CALL getByIndex( ::sal_Int32 Index ) override
+    virtual cpo::uno::Any getByIndex( ::sal_Int32 Index ) override
     {
         if( Index < getCount() )
         {
@@ -133,7 +133,7 @@ public:
         throw lang::IndexOutOfBoundsException();
     }
     // XEnumerationAccess
-    virtual uno::Reference< container::XEnumeration > SAL_CALL createEnumeration(  ) override
+    virtual uno::Reference< container::XEnumeration > createEnumeration(  ) override
     {
         return getEnumeration();
     }

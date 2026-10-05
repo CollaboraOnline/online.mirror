@@ -35,35 +35,35 @@ public:
     virtual ~SwVbaOptions() override;
 
     // Attributes
-    virtual ::sal_Int32 SAL_CALL getDefaultBorderLineStyle() override;
-    virtual void SAL_CALL setDefaultBorderLineStyle( ::sal_Int32 _defaultborderlinestyle ) override;
-    virtual ::sal_Int32 SAL_CALL getDefaultBorderLineWidth() override;
-    virtual void SAL_CALL setDefaultBorderLineWidth( ::sal_Int32 _defaultborderlinewidth ) override;
-    virtual ::sal_Int32 SAL_CALL getDefaultBorderColorIndex() override;
-    virtual void SAL_CALL setDefaultBorderColorIndex( ::sal_Int32 _defaultbordercolorindex ) override;
-    virtual bool SAL_CALL getReplaceSelection() override;
-    virtual void SAL_CALL setReplaceSelection( bool _replaceselection ) override;
-    virtual bool SAL_CALL getMapPaperSize() override;
-    virtual void SAL_CALL setMapPaperSize( bool _mappapersize ) override;
-    virtual bool SAL_CALL getAutoFormatAsYouTypeApplyHeadings() override;
-    virtual void SAL_CALL setAutoFormatAsYouTypeApplyHeadings( bool _autoformatasyoutypeapplyheadings ) override;
-    virtual bool SAL_CALL getAutoFormatAsYouTypeApplyBulletedLists() override;
-    virtual void SAL_CALL setAutoFormatAsYouTypeApplyBulletedLists( bool _autoformatasyoutypeapplybulletedlists ) override;
-    virtual bool SAL_CALL getAutoFormatAsYouTypeApplyNumberedLists() override;
-    virtual void SAL_CALL setAutoFormatAsYouTypeApplyNumberedLists( bool _autoformatasyoutypeapplynumberedlists ) override;
-    virtual bool SAL_CALL getAutoFormatAsYouTypeFormatListItemBeginning() override;
-    virtual void SAL_CALL setAutoFormatAsYouTypeFormatListItemBeginning( bool _autoformatasyoutypeformatlistitembeginning ) override;
-    virtual bool SAL_CALL getAutoFormatAsYouTypeDefineStyles() override;
-    virtual void SAL_CALL setAutoFormatAsYouTypeDefineStyles( bool _autoformatasyoutypedefinestyles ) override;
-    virtual bool SAL_CALL getAutoFormatApplyHeadings() override;
-    virtual void SAL_CALL setAutoFormatApplyHeadings( bool _autoformatapplyheadings ) override;
-    virtual bool SAL_CALL getAutoFormatApplyLists() override;
-    virtual void SAL_CALL setAutoFormatApplyLists( bool _autoformatapplylists ) override;
-    virtual bool SAL_CALL getAutoFormatApplyBulletedLists() override;
-    virtual void SAL_CALL setAutoFormatApplyBulletedLists( bool _autoformatapplybulletedlists ) override;
+    virtual ::sal_Int32 getDefaultBorderLineStyle() override;
+    virtual void setDefaultBorderLineStyle( ::sal_Int32 _defaultborderlinestyle ) override;
+    virtual ::sal_Int32 getDefaultBorderLineWidth() override;
+    virtual void setDefaultBorderLineWidth( ::sal_Int32 _defaultborderlinewidth ) override;
+    virtual ::sal_Int32 getDefaultBorderColorIndex() override;
+    virtual void setDefaultBorderColorIndex( ::sal_Int32 _defaultbordercolorindex ) override;
+    virtual bool getReplaceSelection() override;
+    virtual void setReplaceSelection( bool _replaceselection ) override;
+    virtual bool getMapPaperSize() override;
+    virtual void setMapPaperSize( bool _mappapersize ) override;
+    virtual bool getAutoFormatAsYouTypeApplyHeadings() override;
+    virtual void setAutoFormatAsYouTypeApplyHeadings( bool _autoformatasyoutypeapplyheadings ) override;
+    virtual bool getAutoFormatAsYouTypeApplyBulletedLists() override;
+    virtual void setAutoFormatAsYouTypeApplyBulletedLists( bool _autoformatasyoutypeapplybulletedlists ) override;
+    virtual bool getAutoFormatAsYouTypeApplyNumberedLists() override;
+    virtual void setAutoFormatAsYouTypeApplyNumberedLists( bool _autoformatasyoutypeapplynumberedlists ) override;
+    virtual bool getAutoFormatAsYouTypeFormatListItemBeginning() override;
+    virtual void setAutoFormatAsYouTypeFormatListItemBeginning( bool _autoformatasyoutypeformatlistitembeginning ) override;
+    virtual bool getAutoFormatAsYouTypeDefineStyles() override;
+    virtual void setAutoFormatAsYouTypeDefineStyles( bool _autoformatasyoutypedefinestyles ) override;
+    virtual bool getAutoFormatApplyHeadings() override;
+    virtual void setAutoFormatApplyHeadings( bool _autoformatapplyheadings ) override;
+    virtual bool getAutoFormatApplyLists() override;
+    virtual void setAutoFormatApplyLists( bool _autoformatapplylists ) override;
+    virtual bool getAutoFormatApplyBulletedLists() override;
+    virtual void setAutoFormatApplyBulletedLists( bool _autoformatapplybulletedlists ) override;
 
     // Methods
-    virtual cpo::uno::Any SAL_CALL DefaultFilePath( sal_Int32 _path ) override;
+    virtual cpo::uno::Any DefaultFilePath( sal_Int32 _path ) override;
 
     //PropListener
     virtual void setValueEvent( const cpo::uno::Any& value ) override;

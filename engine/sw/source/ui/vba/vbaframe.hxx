@@ -43,7 +43,7 @@ public:
     virtual ~SwVbaFrame() override;
 
    // Methods
-    virtual void SAL_CALL Select() override;
+    virtual void Select() override;
 
     // XHelperInterface
     virtual OUString getServiceImplName() override;

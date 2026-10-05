@@ -514,7 +514,7 @@ namespace
     }
 }
 
-bool SAL_CALL SwTransferable::isComplex()
+bool SwTransferable::isComplex()
 {
     sal_Int32 nTextLength = 0;
     SwNodes& aNodes = m_pWrtShell->GetDoc()->GetNodes();

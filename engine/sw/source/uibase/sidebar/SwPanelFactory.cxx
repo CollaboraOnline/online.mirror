@@ -65,17 +65,17 @@ public:
     SwPanelFactory();
 
     // XUIElementFactory
-    cpo::uno::Reference<css::ui::XUIElement> SAL_CALL createUIElement(
+    cpo::uno::Reference<css::ui::XUIElement> createUIElement(
         const OUString& rsResourceURL,
         const cpo::uno::Sequence<css::beans::PropertyValue>& rArguments) override;
 
-    OUString SAL_CALL getImplementationName() override
+    OUString getImplementationName() override
     { return u"org.apache.openoffice.comp.sw.sidebar.SwPanelFactory"_ustr; }
 
-    bool SAL_CALL supportsService(OUString const & ServiceName) override
+    bool supportsService(OUString const & ServiceName) override
     { return cppu::supportsService(this, ServiceName); }
 
-    cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override
+    cpo::uno::Sequence<OUString> getSupportedServiceNames() override
     { return {u"com.sun.star.ui.UIElementFactory"_ustr}; }
 };
 
@@ -83,7 +83,7 @@ SwPanelFactory::SwPanelFactory()
 {
 }
 
-Reference<ui::XUIElement> SAL_CALL SwPanelFactory::createUIElement (
+Reference<ui::XUIElement> SwPanelFactory::createUIElement (
     const OUString& rsResourceURL,
     const cpo::uno::Sequence<css::beans::PropertyValue>& rArguments)
 {

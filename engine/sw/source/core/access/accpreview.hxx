@@ -37,8 +37,8 @@ class SwAccessiblePreview : public  SwAccessibleDocumentBase
 public:
     SwAccessiblePreview(std::shared_ptr<SwAccessibleMap> const& pMap);
 
-    OUString SAL_CALL getAccessibleDescription() override;
-    OUString SAL_CALL getAccessibleName() override;
+    OUString getAccessibleDescription() override;
+    OUString getAccessibleName() override;
     virtual void InvalidateFocus_() override;
 };
 

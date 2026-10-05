@@ -70,8 +70,8 @@ public:
     SwVbaApplicationOutgoingConnectionPoint( SwVbaApplication* pApp );
 
     // XConnectionPoint
-    sal_uInt32 SAL_CALL Advise(const uno::Reference< XSink >& Sink ) override;
-    void SAL_CALL Unadvise( sal_uInt32 Cookie ) override;
+    sal_uInt32 Advise(const uno::Reference< XSink >& Sink ) override;
+    void Unadvise( sal_uInt32 Cookie ) override;
 };
 
 }
@@ -107,13 +107,13 @@ SwVbaApplication::RemoveSink( sal_uInt32 nNumber )
     mvSinks[nNumber-1] = uno::Reference< XSink >();
 }
 
-OUString SAL_CALL
+OUString
 SwVbaApplication::getName()
 {
     return u"Microsoft Word"_ustr;
 }
 
-uno::Reference< word::XDocument > SAL_CALL
+uno::Reference< word::XDocument >
 SwVbaApplication::getActiveDocument()
 {
     return new SwVbaDocument( this, mxContext, getCurrentSwDocument() );
@@ -134,25 +134,25 @@ SwVbaApplication::getContext() const
     return mxContext;
 }
 
-uno::Reference< word::XWindow > SAL_CALL
+uno::Reference< word::XWindow >
 SwVbaApplication::getActiveWindow()
 {
     return getActiveSwVbaWindow();
 }
 
-uno::Reference<word::XSystem > SAL_CALL
+uno::Reference<word::XSystem >
 SwVbaApplication::getSystem()
 {
     return uno::Reference< word::XSystem >( new SwVbaSystem( mxContext ) );
 }
 
-uno::Reference<word::XOptions > SAL_CALL
+uno::Reference<word::XOptions >
 SwVbaApplication::getOptions()
 {
     return uno::Reference< word::XOptions >( new SwVbaOptions( mxContext ) );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaApplication::CommandBars( const cpo::uno::Any& aIndex )
 {
     try
@@ -165,20 +165,20 @@ SwVbaApplication::CommandBars( const cpo::uno::Any& aIndex )
     }
 }
 
-uno::Reference< word::XSelection > SAL_CALL
+uno::Reference< word::XSelection >
 SwVbaApplication::getSelection()
 {
     return new SwVbaSelection( this, mxContext, getCurrentSwDocument() );
 }
 
-uno::Reference< word::XWordBasic > SAL_CALL
+uno::Reference< word::XWordBasic >
 SwVbaApplication::getWordBasic()
 {
     uno::Reference< word::XWordBasic > xWB( new SwWordBasic( this ) );
     return xWB;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaApplication::Documents( const cpo::uno::Any& index )
 {
     uno::Reference< XCollection > xCol( new SwVbaDocuments( this, mxContext ) );
@@ -187,7 +187,7 @@ SwVbaApplication::Documents( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaApplication::Addins( const cpo::uno::Any& index )
 {
     static uno::Reference< XCollection > xCol( new SwVbaAddins( this, mxContext ) );
@@ -196,7 +196,7 @@ SwVbaApplication::Addins( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaApplication::Dialogs( const cpo::uno::Any& index )
 {
     uno::Reference< word::XDialogs > xCol( new SwVbaDialogs( this, mxContext, getCurrentSwDocument() ));
@@ -205,7 +205,7 @@ SwVbaApplication::Dialogs( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaApplication::ListGalleries( const cpo::uno::Any& index )
 {
     rtl::Reference< SwXTextDocument > xTextDoc( getCurrentSwDocument() );
@@ -215,28 +215,28 @@ SwVbaApplication::ListGalleries( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-bool SAL_CALL SwVbaApplication::getDisplayAutoCompleteTips()
+bool SwVbaApplication::getDisplayAutoCompleteTips()
 {
     return SvxAutoCorrCfg::Get().IsAutoTextTip();
 }
 
-void SAL_CALL SwVbaApplication::setDisplayAutoCompleteTips( bool _displayAutoCompleteTips )
+void SwVbaApplication::setDisplayAutoCompleteTips( bool _displayAutoCompleteTips )
 {
     SvxAutoCorrCfg::Get().SetAutoTextTip( _displayAutoCompleteTips );
 }
 
-sal_Int32 SAL_CALL SwVbaApplication::getEnableCancelKey()
+sal_Int32 SwVbaApplication::getEnableCancelKey()
 {
     // the default value is wdCancelInterrupt in Word
     return word::WdEnableCancelKey::wdCancelInterrupt;
 }
 
-void SAL_CALL SwVbaApplication::setEnableCancelKey( sal_Int32/* _enableCancelKey */)
+void SwVbaApplication::setEnableCancelKey( sal_Int32/* _enableCancelKey */)
 {
     // seems not supported in Writer
 }
 
-sal_Int32 SAL_CALL SwVbaApplication::getWindowState()
+sal_Int32 SwVbaApplication::getWindowState()
 {
     auto xWindow = getActiveWindow();
     if (xWindow.is())
@@ -250,7 +250,7 @@ sal_Int32 SAL_CALL SwVbaApplication::getWindowState()
     return word::WdWindowState::wdWindowStateNormal; // ?
 }
 
-void SAL_CALL SwVbaApplication::setWindowState( sal_Int32 _windowstate )
+void SwVbaApplication::setWindowState( sal_Int32 _windowstate )
 {
     try
     {
@@ -267,70 +267,70 @@ void SAL_CALL SwVbaApplication::setWindowState( sal_Int32 _windowstate )
     }
 }
 
-sal_Int32 SAL_CALL SwVbaApplication::getWidth()
+sal_Int32 SwVbaApplication::getWidth()
 {
     auto pWindow = getActiveSwVbaWindow();
     return pWindow->getWidth();
 }
 
-void SAL_CALL SwVbaApplication::setWidth( sal_Int32 _width )
+void SwVbaApplication::setWidth( sal_Int32 _width )
 {
     auto pWindow = getActiveSwVbaWindow();
     pWindow->setWidth( _width );
 }
 
-sal_Int32 SAL_CALL SwVbaApplication::getHeight()
+sal_Int32 SwVbaApplication::getHeight()
 {
     auto pWindow = getActiveSwVbaWindow();
     return pWindow->getHeight();
 }
 
-void SAL_CALL SwVbaApplication::setHeight( sal_Int32 _height )
+void SwVbaApplication::setHeight( sal_Int32 _height )
 {
     auto pWindow = getActiveSwVbaWindow();
     pWindow->setHeight( _height );
 }
 
-sal_Int32 SAL_CALL SwVbaApplication::getLeft()
+sal_Int32 SwVbaApplication::getLeft()
 {
     auto pWindow = getActiveSwVbaWindow();
     return pWindow->getLeft();
 }
 
-void SAL_CALL SwVbaApplication::setLeft( sal_Int32 _left )
+void SwVbaApplication::setLeft( sal_Int32 _left )
 {
     auto pWindow = getActiveSwVbaWindow();
     pWindow->setLeft( _left );
 }
 
-sal_Int32 SAL_CALL SwVbaApplication::getTop()
+sal_Int32 SwVbaApplication::getTop()
 {
     auto pWindow = getActiveSwVbaWindow();
     return pWindow->getTop();
 }
 
-void SAL_CALL SwVbaApplication::setTop( sal_Int32 _top )
+void SwVbaApplication::setTop( sal_Int32 _top )
 {
     auto pWindow = getActiveSwVbaWindow();
     pWindow->setTop( _top );
 }
 
-OUString SAL_CALL SwVbaApplication::getStatusBar()
+OUString SwVbaApplication::getStatusBar()
 {
     return u""_ustr;
 }
 
-cpo::uno::Any SAL_CALL SwVbaApplication::getCustomizationContext()
+cpo::uno::Any SwVbaApplication::getCustomizationContext()
 {
     return cpo::uno::Any(); // ???
 }
 
-void SAL_CALL SwVbaApplication::setCustomizationContext(const cpo::uno::Any& /*_customizationcontext*/)
+void SwVbaApplication::setCustomizationContext(const cpo::uno::Any& /*_customizationcontext*/)
 {
     // ???
 }
 
-void SAL_CALL SwVbaApplication::setStatusBar( const OUString& _statusbar )
+void SwVbaApplication::setStatusBar( const OUString& _statusbar )
 {
     // ScVbaAppSettings::setStatusBar() also uses the XStatusIndicator to show this, so maybe that is OK?
     rtl::Reference< SwXTextDocument > xModel = getCurrentSwDocument();
@@ -355,17 +355,17 @@ void SAL_CALL SwVbaApplication::setStatusBar( const OUString& _statusbar )
     SAL_INFO("extensions.olebridge", "Client debug output: " << _statusbar);
 }
 
-float SAL_CALL SwVbaApplication::CentimetersToPoints( float Centimeters )
+float SwVbaApplication::CentimetersToPoints( float Centimeters )
 {
     return o3tl::convert(Centimeters, o3tl::Length::cm, o3tl::Length::pt);
 }
 
-float SAL_CALL SwVbaApplication::PointsToCentimeters( float Points )
+float SwVbaApplication::PointsToCentimeters( float Points )
 {
     return o3tl::convert(Points, o3tl::Length::pt, o3tl::Length::cm);
 }
 
-float SAL_CALL SwVbaApplication::PixelsToPoints( float Pixels, bool fVertical )
+float SwVbaApplication::PixelsToPoints( float Pixels, bool fVertical )
 {
     //Set up xDevice
     rtl::Reference< SwXTextDocument > xModel( getCurrentSwDocument() );
@@ -377,7 +377,7 @@ float SAL_CALL SwVbaApplication::PixelsToPoints( float Pixels, bool fVertical )
     return ooo::vba::PixelsToPoints(xDevice, Pixels, fVertical);
 }
 
-float SAL_CALL SwVbaApplication::PointsToPixels( float Pixels, bool fVertical )
+float SwVbaApplication::PointsToPixels( float Pixels, bool fVertical )
 {
     rtl::Reference< SwXTextDocument > xModel( getCurrentSwDocument() );
     uno::Reference< frame::XController > xController( xModel->getCurrentController(), uno::UNO_SET_THROW );
@@ -388,42 +388,42 @@ float SAL_CALL SwVbaApplication::PointsToPixels( float Pixels, bool fVertical )
     return ooo::vba::PointsToPixels(xDevice, Pixels, fVertical);
 }
 
-float SAL_CALL SwVbaApplication::InchesToPoints( float Inches )
+float SwVbaApplication::InchesToPoints( float Inches )
 {
     return o3tl::convert(Inches, o3tl::Length::in, o3tl::Length::pt);
 }
 
-float SAL_CALL SwVbaApplication::PointsToInches( float Points )
+float SwVbaApplication::PointsToInches( float Points )
 {
     return o3tl::convert(Points, o3tl::Length::pt, o3tl::Length::in);
 }
 
-float SAL_CALL SwVbaApplication::MillimetersToPoints( float Millimeters )
+float SwVbaApplication::MillimetersToPoints( float Millimeters )
 {
     return o3tl::convert(Millimeters, o3tl::Length::mm, o3tl::Length::pt);
 }
 
-float SAL_CALL SwVbaApplication::PointsToMillimeters( float Points )
+float SwVbaApplication::PointsToMillimeters( float Points )
 {
     return o3tl::convert(Points, o3tl::Length::pt, o3tl::Length::mm);
 }
 
-float SAL_CALL SwVbaApplication::PicasToPoints( float Picas )
+float SwVbaApplication::PicasToPoints( float Picas )
 {
     return o3tl::convert(Picas, o3tl::Length::pc, o3tl::Length::pt);
 }
 
-float SAL_CALL SwVbaApplication::PointsToPicas( float Points )
+float SwVbaApplication::PointsToPicas( float Points )
 {
     return o3tl::convert(Points, o3tl::Length::pt, o3tl::Length::pc);
 }
 
-void SAL_CALL SwVbaApplication::ShowMe()
+void SwVbaApplication::ShowMe()
 {
     // Method no longer supported in word - deprecated
 }
 
-void SAL_CALL SwVbaApplication::Resize( sal_Int32 Width, sal_Int32 Height )
+void SwVbaApplication::Resize( sal_Int32 Width, sal_Int32 Height )
 {
     // Have to do it like this as the Width and Height are hidden away in the ooo::vba::XWindowBase
     // which ooo::vba::word::XApplication does not inherit from. SwVbaWindow, however, does inherit
@@ -433,7 +433,7 @@ void SAL_CALL SwVbaApplication::Resize( sal_Int32 Width, sal_Int32 Height )
     pWindow->setHeight( Height );
 }
 
-void SAL_CALL SwVbaApplication::Move( sal_Int32 Left, sal_Int32 Top )
+void SwVbaApplication::Move( sal_Int32 Left, sal_Int32 Top )
 {
     // See comment in Resize().
     auto pWindow = getActiveSwVbaWindow();
@@ -443,7 +443,7 @@ void SAL_CALL SwVbaApplication::Move( sal_Int32 Left, sal_Int32 Top )
 
 // XInterfaceWithIID
 
-OUString SAL_CALL
+OUString
 SwVbaApplication::getIID()
 {
     return u"{82154421-0FBF-11d4-8313-005004526AB4}"_ustr;
@@ -451,13 +451,13 @@ SwVbaApplication::getIID()
 
 // XConnectable
 
-OUString SAL_CALL
+OUString
 SwVbaApplication::GetIIDForClassItselfNotCoclass()
 {
     return u"{82154423-0FBF-11D4-8313-005004526AB4}"_ustr;
 }
 
-TypeAndIID SAL_CALL
+TypeAndIID
 SwVbaApplication::GetConnectionPoint()
 {
     TypeAndIID aResult =
@@ -468,7 +468,7 @@ SwVbaApplication::GetConnectionPoint()
     return aResult;
 }
 
-uno::Reference<XConnectionPoint> SAL_CALL
+uno::Reference<XConnectionPoint>
 SwVbaApplication::FindConnectionPoint()
 {
     uno::Reference<XConnectionPoint> xCP(new SwVbaApplicationOutgoingConnectionPoint(this));
@@ -505,7 +505,7 @@ SwVbaApplication::getCurrentSwDocument()
 
 // XSinkCaller
 
-void SAL_CALL
+void
 SwVbaApplication::CallSinks( const OUString& Method, cpo::uno::Sequence< cpo::uno::Any >& Arguments )
 {
     for (auto& i : mvSinks)
@@ -523,13 +523,13 @@ SwVbaApplicationOutgoingConnectionPoint::SwVbaApplicationOutgoingConnectionPoint
 }
 
 // XConnectionPoint
-sal_uInt32 SAL_CALL
+sal_uInt32
 SwVbaApplicationOutgoingConnectionPoint::Advise( const uno::Reference< XSink >& Sink )
 {
     return mpApp->AddSink(Sink);
 }
 
-void SAL_CALL
+void
 SwVbaApplicationOutgoingConnectionPoint::Unadvise( sal_uInt32 Cookie )
 {
     mpApp->RemoveSink( Cookie );

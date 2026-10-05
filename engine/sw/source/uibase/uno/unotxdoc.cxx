@@ -292,7 +292,7 @@ const Sequence< sal_Int8 > & SwXTextDocument::getUnoTunnelId()
     return theSwXTextDocumentUnoTunnelId.getSeq();
 }
 
-sal_Int64 SAL_CALL SwXTextDocument::getSomething( const Sequence< sal_Int8 >& rId )
+sal_Int64 SwXTextDocument::getSomething( const Sequence< sal_Int8 >& rId )
 {
     if( comphelper::isUnoTunnelId<SwXTextDocument>(rId) )
     {
@@ -312,7 +312,7 @@ sal_Int64 SAL_CALL SwXTextDocument::getSomething( const Sequence< sal_Int8 >& rI
     return (xNumTunnel.is()) ? xNumTunnel->getSomething(rId) : 0;
 }
 
-Any SAL_CALL SwXTextDocument::queryInterface( const cpo::uno::Type& rType )
+Any SwXTextDocument::queryInterface( const cpo::uno::Type& rType )
 {
     Any aRet = SwXTextDocumentBaseClass::queryInterface(rType);
     if ( !aRet.hasValue() )
@@ -339,17 +339,17 @@ Any SAL_CALL SwXTextDocument::queryInterface( const cpo::uno::Type& rType )
     return aRet;
 }
 
-void SAL_CALL SwXTextDocument::acquire()noexcept
+void SwXTextDocument::acquire()noexcept
 {
     SfxBaseModel::acquire();
 }
 
-void SAL_CALL SwXTextDocument::release()noexcept
+void SwXTextDocument::release()noexcept
 {
     SfxBaseModel::release();
 }
 
-Sequence< cpo::uno::Type > SAL_CALL SwXTextDocument::getTypes()
+Sequence< cpo::uno::Type > SwXTextDocument::getTypes()
 {
     Sequence< cpo::uno::Type > aNumTypes;
     GetNumberFormatter();
@@ -668,7 +668,7 @@ rtl::Reference< SwXFootnotes >  SwXTextDocument::getSwXFootnotes()
     return mxXFootnotes;
 }
 
-Reference< XPropertySet >  SAL_CALL
+Reference< XPropertySet >
         SwXTextDocument::getFootnoteSettings()
 {
     SolarMutexGuard aGuard;
@@ -1391,18 +1391,18 @@ public:
     SwDrawPagesObj(cpo::uno::Reference< css::drawing::XDrawPageSupplier > xDoc) : m_xDoc(std::move(xDoc)) {}
 
     // XDrawPages
-    virtual cpo::uno::Reference< css::drawing::XDrawPage > SAL_CALL
+    virtual cpo::uno::Reference< css::drawing::XDrawPage >
         insertNewByIndex(sal_Int32 /*nIndex*/) override { throw css::lang::NoSupportException(); }
 
-    virtual void SAL_CALL remove(const cpo::uno::Reference< css::drawing::XDrawPage >& /*xPage*/) override
+    virtual void remove(const cpo::uno::Reference< css::drawing::XDrawPage >& /*xPage*/) override
     {
         throw css::lang::NoSupportException();
     }
 
     // XIndexAccess
-    virtual sal_Int32 SAL_CALL getCount() override { return 1; }
+    virtual sal_Int32 getCount() override { return 1; }
 
-    virtual cpo::uno::Any SAL_CALL getByIndex(sal_Int32 Index) override
+    virtual cpo::uno::Any getByIndex(sal_Int32 Index) override
     {
         if (Index != 0)
             throw css::lang::IndexOutOfBoundsException(u"Writer documents have only one DrawPage!"_ustr);
@@ -1410,25 +1410,25 @@ public:
     }
 
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override
+    virtual cpo::uno::Type getElementType() override
     {
         return cppu::UnoType<drawing::XDrawPage>::get();
     }
 
-    virtual bool SAL_CALL hasElements() override { return true; }
+    virtual bool hasElements() override { return true; }
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override
+    virtual OUString getImplementationName() override
     {
         return u"SwDrawPagesObj"_ustr;
     }
 
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override
+    virtual bool supportsService(const OUString& ServiceName) override
     {
         return cppu::supportsService(this, ServiceName);
     }
 
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override
     {
         return { u"com.sun.star.drawing.DrawPages"_ustr };
     }
@@ -1438,7 +1438,7 @@ public:
 
 // XDrawPagesSupplier
 
-uno::Reference<drawing::XDrawPages> SAL_CALL SwXTextDocument::getDrawPages()
+uno::Reference<drawing::XDrawPages> SwXTextDocument::getDrawPages()
 {
     SolarMutexGuard aGuard;
     return new SwDrawPagesObj(this);
@@ -2431,7 +2431,7 @@ void SwXTextDocument::refresh()
         pViewShell->Reformat();
 }
 
-void SAL_CALL SwXTextDocument::addRefreshListener(
+void SwXTextDocument::addRefreshListener(
         const Reference<util::XRefreshListener> & xListener)
 {
     if (xListener)
@@ -2441,7 +2441,7 @@ void SAL_CALL SwXTextDocument::addRefreshListener(
     }
 }
 
-void SAL_CALL SwXTextDocument::removeRefreshListener(
+void SwXTextDocument::removeRefreshListener(
         const Reference<util::XRefreshListener> & xListener)
 {
     if (xListener)
@@ -2466,7 +2466,7 @@ void SwXTextDocument::updateLinks(  )
 }
 
 //XPropertyState
-PropertyState SAL_CALL SwXTextDocument::getPropertyState( const OUString& rPropertyName )
+PropertyState SwXTextDocument::getPropertyState( const OUString& rPropertyName )
 {
     SolarMutexGuard aGuard;
     ThrowIfInvalid();
@@ -2477,7 +2477,7 @@ PropertyState SAL_CALL SwXTextDocument::getPropertyState( const OUString& rPrope
     return PropertyState_DIRECT_VALUE;
 }
 
-Sequence< PropertyState > SAL_CALL SwXTextDocument::getPropertyStates( const Sequence< OUString >& rPropertyNames )
+Sequence< PropertyState > SwXTextDocument::getPropertyStates( const Sequence< OUString >& rPropertyNames )
 {
     const sal_Int32 nCount = rPropertyNames.getLength();
     Sequence < PropertyState > aRet ( nCount );
@@ -2488,7 +2488,7 @@ Sequence< PropertyState > SAL_CALL SwXTextDocument::getPropertyStates( const Seq
     return aRet;
 }
 
-void SAL_CALL SwXTextDocument::setPropertyToDefault( const OUString& rPropertyName )
+void SwXTextDocument::setPropertyToDefault( const OUString& rPropertyName )
 {
     SolarMutexGuard aGuard;
     ThrowIfInvalid();
@@ -2502,7 +2502,7 @@ void SAL_CALL SwXTextDocument::setPropertyToDefault( const OUString& rPropertyNa
     }
 }
 
-Any SAL_CALL SwXTextDocument::getPropertyDefault( const OUString& rPropertyName )
+Any SwXTextDocument::getPropertyDefault( const OUString& rPropertyName )
 {
     SolarMutexGuard aGuard;
     ThrowIfInvalid();
@@ -2676,7 +2676,7 @@ static void lcl_SavePrintUIOptionsToDocumentPrintData(
     rDoc.getIDocumentDeviceAccess().setPrintData( aDocPrintData );
 }
 
-sal_Int32 SAL_CALL SwXTextDocument::getRendererCount(
+sal_Int32 SwXTextDocument::getRendererCount(
         const cpo::uno::Any& rSelection,
         const cpo::uno::Sequence< beans::PropertyValue >& rxOptions )
 {
@@ -2851,7 +2851,7 @@ sal_Int32 SAL_CALL SwXTextDocument::getRendererCount(
     return nRet;
 }
 
-cpo::uno::Sequence< beans::PropertyValue > SAL_CALL SwXTextDocument::getRenderer(
+cpo::uno::Sequence< beans::PropertyValue > SwXTextDocument::getRenderer(
         sal_Int32 nRenderer,
         const cpo::uno::Any& rSelection,
         const cpo::uno::Sequence< beans::PropertyValue >& rxOptions )
@@ -3161,7 +3161,7 @@ SfxViewShell * SwXTextDocument::GuessViewShell(
     return pView;
 }
 
-void SAL_CALL SwXTextDocument::render(
+void SwXTextDocument::render(
         sal_Int32 nRenderer,
         const cpo::uno::Any& rSelection,
         const cpo::uno::Sequence< beans::PropertyValue >& rxOptions )
@@ -3325,7 +3325,7 @@ void SAL_CALL SwXTextDocument::render(
 }
 
 // xforms::XFormsSupplier
-Reference<XNameContainer> SAL_CALL SwXTextDocument::getXForms()
+Reference<XNameContainer> SwXTextDocument::getXForms()
 {
     SolarMutexGuard aGuard;
     if ( !m_pDocShell )
@@ -3333,7 +3333,7 @@ Reference<XNameContainer> SAL_CALL SwXTextDocument::getXForms()
     return GetDocOrThrow().getXForms();
 }
 
-uno::Reference< text::XFlatParagraphIterator > SAL_CALL SwXTextDocument::getFlatParagraphIterator(::sal_Int32 nTextMarkupType, bool bAutomatic)
+uno::Reference< text::XFlatParagraphIterator > SwXTextDocument::getFlatParagraphIterator(::sal_Int32 nTextMarkupType, bool bAutomatic)
 {
     SolarMutexGuard aGuard;
     ThrowIfInvalid();
@@ -4206,7 +4206,7 @@ void SwXTextDocument::resetSelection()
 /**
  * retrieve languages already used in current document
  */
-cpo::uno::Sequence< lang::Locale > SAL_CALL SwXTextDocument::getDocumentLanguages(
+cpo::uno::Sequence< lang::Locale > SwXTextDocument::getDocumentLanguages(
         ::sal_Int16 nScriptTypes,
         ::sal_Int16 nMaxCount )
 {

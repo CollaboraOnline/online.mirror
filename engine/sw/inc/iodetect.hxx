@@ -114,8 +114,8 @@ public:
     static OUString GetSubStorageName( const SfxFilter& rFltr );
 };
 
-extern "C" SAL_DLLPUBLIC_EXPORT bool SAL_CALL TestImportFODT(SvStream &rStream);
-extern "C" SAL_DLLPUBLIC_EXPORT bool SAL_CALL TestPDFExportFODT(SvStream &rStream);
+extern "C" SAL_DLLPUBLIC_EXPORT bool TestImportFODT(SvStream &rStream);
+extern "C" SAL_DLLPUBLIC_EXPORT bool TestPDFExportFODT(SvStream &rStream);
 
 #endif
 

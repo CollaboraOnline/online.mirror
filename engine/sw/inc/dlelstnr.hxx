@@ -56,14 +56,14 @@ public:
     virtual ~SwLinguServiceEventListener() override;
 
     /// XEventListener
-    virtual void SAL_CALL disposing( const css::lang::EventObject& rEventObj ) override;
+    virtual void disposing( const css::lang::EventObject& rEventObj ) override;
 
     /// XLinguServiceEventListener
-    virtual void SAL_CALL processLinguServiceEvent( const css::linguistic2::LinguServiceEvent& rLngSvcEvent ) override;
+    virtual void processLinguServiceEvent( const css::linguistic2::LinguServiceEvent& rLngSvcEvent ) override;
 
     /// XTerminateListener
-    virtual void SAL_CALL queryTermination( const css::lang::EventObject& rEventObj ) override;
-    virtual void SAL_CALL notifyTermination( const css::lang::EventObject& rEventObj ) override;
+    virtual void queryTermination( const css::lang::EventObject& rEventObj ) override;
+    virtual void notifyTermination( const css::lang::EventObject& rEventObj ) override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

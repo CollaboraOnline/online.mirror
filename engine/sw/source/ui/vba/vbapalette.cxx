@@ -58,12 +58,12 @@ public:
    DefaultPalette(){}
 
     // Methods XIndexAccess
-    virtual ::sal_Int32 SAL_CALL getCount() override
+    virtual ::sal_Int32 getCount() override
     {
         return std::ssize(ColorTable);
     }
 
-    virtual cpo::uno::Any SAL_CALL getByIndex( ::sal_Int32 Index ) override
+    virtual cpo::uno::Any getByIndex( ::sal_Int32 Index ) override
     {
         if ( Index < 0 || Index >= getCount() )
             throw lang::IndexOutOfBoundsException();
@@ -71,11 +71,11 @@ public:
     }
 
     // Methods XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override
+    virtual cpo::uno::Type getElementType() override
     {
         return ::cppu::UnoType<sal_Int32>::get();
     }
-    virtual bool SAL_CALL hasElements() override
+    virtual bool hasElements() override
     {
         return true;
     }

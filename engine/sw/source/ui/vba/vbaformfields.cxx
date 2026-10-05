@@ -89,9 +89,9 @@ public:
         , mnIndex(0)
     {
     }
-    bool SAL_CALL hasMoreElements() override { return (mnIndex < mxIndexAccess->getCount()); }
+    bool hasMoreElements() override { return (mnIndex < mxIndexAccess->getCount()); }
 
-    cpo::uno::Any SAL_CALL nextElement() override
+    cpo::uno::Any nextElement() override
     {
         if (mnIndex < mxIndexAccess->getCount())
         {
@@ -124,14 +124,14 @@ public:
     }
 
     // XIndexAccess
-    sal_Int32 SAL_CALL getCount() override
+    sal_Int32 getCount() override
     {
         sal_Int32 nCount = SAL_MAX_INT32;
         lcl_getFieldmark("", nCount, mxTextDocument);
         return nCount == SAL_MAX_INT32 ? 0 : nCount;
     }
 
-    cpo::uno::Any SAL_CALL getByIndex(sal_Int32 Index) override
+    cpo::uno::Any getByIndex(sal_Int32 Index) override
     {
         m_pCache = lcl_getFieldmark("", Index, mxTextDocument);
         if (!m_pCache)
@@ -142,7 +142,7 @@ public:
     }
 
     // XNameAccess
-    cpo::uno::Sequence<OUString> SAL_CALL getElementNames() override
+    cpo::uno::Sequence<OUString> getElementNames() override
     {
         sal_Int32 nCount = SAL_MAX_INT32;
         cpo::uno::Sequence<OUString> aSeq;
@@ -150,7 +150,7 @@ public:
         return aSeq;
     }
 
-    cpo::uno::Any SAL_CALL getByName(const OUString& aName) override
+    cpo::uno::Any getByName(const OUString& aName) override
     {
         if (!hasByName(aName))
             throw container::NoSuchElementException();
@@ -159,7 +159,7 @@ public:
             new SwVbaFormField(mxParent, mxContext, mxTextDocument, *m_pCache)));
     }
 
-    bool SAL_CALL hasByName(const OUString& aName) override
+    bool hasByName(const OUString& aName) override
     {
         sal_Int32 nCount = -1;
         m_pCache = lcl_getFieldmark(aName.toUtf8(), nCount, mxTextDocument);
@@ -167,15 +167,15 @@ public:
     }
 
     // XElementAccess
-    cpo::uno::Type SAL_CALL getElementType() override
+    cpo::uno::Type getElementType() override
     {
         return cppu::UnoType<word::XFormField>::get();
     }
 
-    bool SAL_CALL hasElements() override { return getCount() != 0; }
+    bool hasElements() override { return getCount() != 0; }
 
     // XEnumerationAccess
-    uno::Reference<container::XEnumeration> SAL_CALL createEnumeration() override
+    uno::Reference<container::XEnumeration> createEnumeration() override
     {
         return new FormFieldsEnumWrapper(this);
     }

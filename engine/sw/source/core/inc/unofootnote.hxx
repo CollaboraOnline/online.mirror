@@ -63,68 +63,68 @@ public:
                 bool isEndnote = false);
 
     // XInterface
-    virtual cpo::uno::Any SAL_CALL queryInterface(
+    virtual cpo::uno::Any queryInterface(
             const cpo::uno::Type& rType) override;
-    virtual void SAL_CALL acquire() noexcept override { OWeakObject::acquire(); }
-    virtual void SAL_CALL release() noexcept override { OWeakObject::release(); }
+    virtual void acquire() noexcept override { OWeakObject::acquire(); }
+    virtual void release() noexcept override { OWeakObject::release(); }
 
     // XTypeProvider
     virtual cpo::uno::Sequence< cpo::uno::Type >
-        SAL_CALL getTypes() override;
-    virtual cpo::uno::Sequence< sal_Int8 > SAL_CALL
+        getTypes() override;
+    virtual cpo::uno::Sequence< sal_Int8 >
         getImplementationId() override;
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(
             const OUString& rServiceName) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
         getSupportedServiceNames() override;
 
     // XComponent
-    virtual void SAL_CALL dispose() override;
-    virtual void SAL_CALL addEventListener(
+    virtual void dispose() override;
+    virtual void addEventListener(
             const cpo::uno::Reference< css::lang::XEventListener > & xListener) override;
-    virtual void SAL_CALL removeEventListener(
+    virtual void removeEventListener(
             const cpo::uno::Reference< css::lang::XEventListener > & xListener) override;
 
     // XPropertySet
-    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > SAL_CALL
+    virtual cpo::uno::Reference< css::beans::XPropertySetInfo >
         getPropertySetInfo() override;
-    virtual void SAL_CALL setPropertyValue(
+    virtual void setPropertyValue(
             const OUString& rPropertyName,
             const cpo::uno::Any& rValue) override;
-    virtual cpo::uno::Any SAL_CALL getPropertyValue(
+    virtual cpo::uno::Any getPropertyValue(
             const OUString& rPropertyName) override;
-    virtual void SAL_CALL addPropertyChangeListener(
+    virtual void addPropertyChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener) override;
-    virtual void SAL_CALL removePropertyChangeListener(
+    virtual void removePropertyChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XPropertyChangeListener >& xListener) override;
-    virtual void SAL_CALL addVetoableChangeListener(
+    virtual void addVetoableChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XVetoableChangeListener >& xListener) override;
-    virtual void SAL_CALL removeVetoableChangeListener(
+    virtual void removeVetoableChangeListener(
             const OUString& rPropertyName,
             const cpo::uno::Reference< css::beans::XVetoableChangeListener >& xListener) override;
 
     // XElementAccess
-    virtual cpo::uno::Type SAL_CALL getElementType() override;
-    virtual bool SAL_CALL hasElements() override;
+    virtual cpo::uno::Type getElementType() override;
+    virtual bool hasElements() override;
 
     // XEnumerationAccess
-    virtual cpo::uno::Reference< css::container::XEnumeration >  SAL_CALL
+    virtual cpo::uno::Reference< css::container::XEnumeration >
         createEnumeration() override;
 
     // XTextContent
-    virtual void SAL_CALL attach(
+    virtual void attach(
             const cpo::uno::Reference< css::text::XTextRange > & xTextRange) override;
-    virtual cpo::uno::Reference< css::text::XTextRange > SAL_CALL getAnchor() override;
+    virtual cpo::uno::Reference< css::text::XTextRange > getAnchor() override;
 
     // XFootnote
-    virtual OUString SAL_CALL getLabel() override;
-    virtual void SAL_CALL setLabel(const OUString& rLabel) override;
+    virtual OUString getLabel() override;
+    virtual void setLabel(const OUString& rLabel) override;
 
     // XSimpleText
     virtual rtl::Reference< SwXTextCursor > createXTextCursor() override;

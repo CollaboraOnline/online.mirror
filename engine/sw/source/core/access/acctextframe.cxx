@@ -102,7 +102,7 @@ void SwAccessibleTextFrame::Notify(const SfxHint& rHint)
 
 // XInterface
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
     SwAccessibleTextFrame::queryInterface (const cpo::uno::Type & rType)
 {
     cpo::uno::Any aReturn = SwAccessibleContext::queryInterface (rType);
@@ -113,14 +113,14 @@ cpo::uno::Any SAL_CALL
     return aReturn;
 }
 
-void SAL_CALL
+void
     SwAccessibleTextFrame::acquire()
     noexcept
 {
     SwAccessibleContext::acquire ();
 }
 
-void SAL_CALL
+void
     SwAccessibleTextFrame::release()
     noexcept
 {
@@ -129,12 +129,12 @@ void SAL_CALL
 
 // XAccessibleSelection
 
-void SAL_CALL SwAccessibleTextFrame::selectAccessibleChild( sal_Int64 )
+void SwAccessibleTextFrame::selectAccessibleChild( sal_Int64 )
 {
     SAL_WARN("sw.a11y", "SwAccessibleTextFrame::selectAccessibleChild - missing implementation");
 }
 
-bool SAL_CALL SwAccessibleTextFrame::isAccessibleChildSelected( sal_Int64 nChildIndex )
+bool SwAccessibleTextFrame::isAccessibleChildSelected( sal_Int64 nChildIndex )
 {
     SolarMutexGuard g;
 
@@ -160,17 +160,17 @@ bool SAL_CALL SwAccessibleTextFrame::isAccessibleChildSelected( sal_Int64 nChild
     return false;
 }
 
-void SAL_CALL SwAccessibleTextFrame::clearAccessibleSelection(  )
+void SwAccessibleTextFrame::clearAccessibleSelection(  )
 {
     SAL_WARN("sw.a11y", "<SwAccessibleTextFrame::clearAccessibleSelection()> - missing implementation");
 }
 
-void SAL_CALL SwAccessibleTextFrame::selectAllAccessibleChildren(  )
+void SwAccessibleTextFrame::selectAllAccessibleChildren(  )
 {
     SAL_WARN("sw.a11y", "<SwAccessibleTextFrame::selectAllAccessibleChildren()> - missing implementation");
 }
 
-sal_Int64 SAL_CALL SwAccessibleTextFrame::getSelectedAccessibleChildCount()
+sal_Int64 SwAccessibleTextFrame::getSelectedAccessibleChildCount()
 {
     sal_Int64 nCount = 0;
     sal_Int64 TotalCount = getAccessibleChildCount();
@@ -180,7 +180,7 @@ sal_Int64 SAL_CALL SwAccessibleTextFrame::getSelectedAccessibleChildCount()
     return nCount;
 }
 
-uno::Reference<XAccessible> SAL_CALL SwAccessibleTextFrame::getSelectedAccessibleChild( sal_Int64 nSelectedChildIndex )
+uno::Reference<XAccessible> SwAccessibleTextFrame::getSelectedAccessibleChild( sal_Int64 nSelectedChildIndex )
 {
     SolarMutexGuard g;
 
@@ -197,13 +197,13 @@ uno::Reference<XAccessible> SAL_CALL SwAccessibleTextFrame::getSelectedAccessibl
     return uno::Reference<XAccessible>();
 }
 
-void SAL_CALL SwAccessibleTextFrame::deselectAccessibleChild( sal_Int64 )
+void SwAccessibleTextFrame::deselectAccessibleChild( sal_Int64 )
 {
     SAL_WARN("sw.a11y", "SwAccessibleTextFrame::selectAllAccessibleChildren - missing implementation");
 }
 
 // #i73249#
-OUString SAL_CALL SwAccessibleTextFrame::getAccessibleName()
+OUString SwAccessibleTextFrame::getAccessibleName()
 {
     SolarMutexGuard aGuard;
 
@@ -217,7 +217,7 @@ OUString SAL_CALL SwAccessibleTextFrame::getAccessibleName()
     return SwAccessibleFrameBase::getAccessibleName();
 }
 
-OUString SAL_CALL SwAccessibleTextFrame::getAccessibleDescription()
+OUString SwAccessibleTextFrame::getAccessibleDescription()
 {
     SolarMutexGuard aGuard;
 
@@ -249,7 +249,7 @@ AccessibleRelation SwAccessibleTextFrame::makeRelation(AccessibleRelationType eT
     return AccessibleRelation(eType, aSequence);
 }
 
-uno::Reference<XAccessibleRelationSet> SAL_CALL SwAccessibleTextFrame::getAccessibleRelationSet( )
+uno::Reference<XAccessibleRelationSet> SwAccessibleTextFrame::getAccessibleRelationSet( )
 {
     SolarMutexGuard aGuard;
 

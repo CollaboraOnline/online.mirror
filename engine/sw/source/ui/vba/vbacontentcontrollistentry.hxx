@@ -32,19 +32,19 @@ public:
     ~SwVbaContentControlListEntry() override;
 
     // XContentControlListEntry
-    sal_Int32 SAL_CALL getIndex() override;
-    void SAL_CALL setIndex(sal_Int32 nSet) override;
+    sal_Int32 getIndex() override;
+    void setIndex(sal_Int32 nSet) override;
 
-    OUString SAL_CALL getText() override;
-    void SAL_CALL setText(const OUString& sSet) override;
+    OUString getText() override;
+    void setText(const OUString& sSet) override;
 
-    OUString SAL_CALL getValue() override;
-    void SAL_CALL setValue(const OUString& sSet) override;
+    OUString getValue() override;
+    void setValue(const OUString& sSet) override;
 
-    void SAL_CALL Delete() override;
-    void SAL_CALL MoveDown() override;
-    void SAL_CALL MoveUp() override;
-    void SAL_CALL Select() override;
+    void Delete() override;
+    void MoveDown() override;
+    void MoveUp() override;
+    void Select() override;
 
     // XHelperInterface
     OUString getServiceImplName() override;

@@ -113,11 +113,11 @@ public:
     virtual ~SwXMLImport() noexcept override;
 
     // css::xml::sax::XDocumentHandler
-    virtual void SAL_CALL startDocument() override;
-    virtual void SAL_CALL endDocument() override;
+    virtual void startDocument() override;
+    virtual void endDocument() override;
 
     // XInitialization
-    virtual void SAL_CALL initialize( const cpo::uno::Sequence< cpo::uno::Any >& aArguments ) override;
+    virtual void initialize( const cpo::uno::Sequence< cpo::uno::Any >& aArguments ) override;
 
     void                    InsertStyles( bool bAuto );
     void                    FinishStyles();

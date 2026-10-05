@@ -40,9 +40,9 @@ public:
     virtual ~SwVbaColumn() override;
 
     // Methods
-    virtual sal_Int32 SAL_CALL getWidth() override;
-    virtual void SAL_CALL setWidth( sal_Int32 _width ) override;
-    virtual void SAL_CALL Select(  ) override;
+    virtual sal_Int32 getWidth() override;
+    virtual void setWidth( sal_Int32 _width ) override;
+    virtual void Select(  ) override;
 
     /// @throws cpo::uno::RuntimeException
     static void SelectColumn( const rtl::Reference< SwXTextDocument >& xModel, const cpo::uno::Reference< css::text::XTextTable >& xTextTable, sal_Int32 nStartColumn, sal_Int32 nEndColumn );

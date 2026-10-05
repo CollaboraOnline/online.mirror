@@ -103,7 +103,7 @@ void SwVbaRange::initialize( const uno::Reference< text::XTextRange >& rStart, c
         mxTextCursor->gotoEnd( true );
 }
 
-uno::Reference< text::XTextRange > SAL_CALL
+uno::Reference< text::XTextRange >
 SwVbaRange::getXTextRange()
 {
     uno::Reference< text::XTextRange > xTextRange( mxTextCursor, uno::UNO_QUERY_THROW );
@@ -115,7 +115,7 @@ SwVbaRange::getXTextRange()
 * an issue that the last paragraph in a document does not have a trailing CRLF.
 * @return
 */
-OUString SAL_CALL
+OUString
 SwVbaRange::getText()
 {
     OUString aText = mxTextCursor->getString();
@@ -144,7 +144,7 @@ SwVbaRange::getText()
     return aText;
 }
 
-void SAL_CALL
+void
 SwVbaRange::setText( const OUString& rText )
 {
     // Emulate the MSWord behavior, Don't delete the bookmark
@@ -189,7 +189,7 @@ SwVbaRange::setText( const OUString& rText )
 }
 
 // FIXME: test is not pass
-void SAL_CALL SwVbaRange::InsertBreak(const cpo::uno::Any& _breakType)
+void SwVbaRange::InsertBreak(const cpo::uno::Any& _breakType)
 {
     // default type is wdPageBreak;
     sal_Int32 nBreakType = word::WdBreakType::wdPageBreak;
@@ -232,7 +232,7 @@ void SAL_CALL SwVbaRange::InsertBreak(const cpo::uno::Any& _breakType)
     }
 }
 
-void SAL_CALL
+void
 SwVbaRange::Select()
 {
     uno::Reference< text::XTextViewCursor > xTextViewCursor = word::getXTextViewCursor( mxTextDocument );
@@ -240,14 +240,14 @@ SwVbaRange::Select()
     xTextViewCursor->gotoRange( mxTextCursor->getEnd(), true );
 }
 
-void SAL_CALL
+void
 SwVbaRange::InsertParagraph()
 {
     mxTextCursor->setString( u""_ustr );
     InsertParagraphBefore();
 }
 
-void SAL_CALL
+void
 SwVbaRange::InsertParagraphBefore()
 {
     uno::Reference< text::XTextRange > xTextRange = mxTextCursor->getStart();
@@ -255,21 +255,21 @@ SwVbaRange::InsertParagraphBefore()
     mxTextCursor->gotoRange( xTextRange, true );
 }
 
-void SAL_CALL
+void
 SwVbaRange::InsertParagraphAfter()
 {
     uno::Reference< text::XTextRange > xTextRange = mxTextCursor->getEnd();
     mxText->insertControlCharacter( xTextRange, text::ControlCharacter::PARAGRAPH_BREAK, true );
 }
 
-uno::Reference< word::XParagraphFormat > SAL_CALL
+uno::Reference< word::XParagraphFormat >
 SwVbaRange::getParagraphFormat()
 {
     uno::Reference< beans::XPropertySet > xParaProps( mxTextCursor, uno::UNO_QUERY_THROW );
     return uno::Reference< word::XParagraphFormat >( new SwVbaParagraphFormat( this, mxContext, xParaProps ) );
 }
 
-void SAL_CALL
+void
 SwVbaRange::setParagraphFormat( const uno::Reference< word::XParagraphFormat >& /*rParagraphFormat*/ )
 {
     throw cpo::uno::RuntimeException(u"Not implemented"_ustr );
@@ -292,7 +292,7 @@ void SwVbaRange::GetStyleInfo(OUString& aStyleName, OUString& aStyleType )
     }
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaRange::getStyle()
 {
     OUString aStyleName;
@@ -303,46 +303,46 @@ SwVbaRange::getStyle()
     return cpo::uno::Any( uno::Reference< word::XStyle >( new SwVbaStyle( this, mxContext, mxTextDocument, xStyleProps ) ) );
 }
 
-void SAL_CALL
+void
 SwVbaRange::setStyle( const cpo::uno::Any& rStyle )
 {
     uno::Reference< beans::XPropertySet > xParaProps( mxTextCursor, uno::UNO_QUERY_THROW );
     SwVbaStyle::setStyle( xParaProps, rStyle );
 }
 
-uno::Reference< word::XFont > SAL_CALL
+uno::Reference< word::XFont >
 SwVbaRange::getFont()
 {
     VbaPalette aColors;
     return new SwVbaFont( mxParent, mxContext, aColors.getPalette(), uno::Reference< beans::XPropertySet >( getXTextRange(), uno::UNO_QUERY_THROW ) );
 }
 
-uno::Reference< word::XFind > SAL_CALL
+uno::Reference< word::XFind >
 SwVbaRange::getFind()
 {
     uno::Reference< text::XTextRange > xTextRange = getXTextRange();
     return SwVbaFind::GetOrCreateFind(this, mxContext, mxTextDocument, xTextRange);
 }
 
-uno::Reference< word::XListFormat > SAL_CALL
+uno::Reference< word::XListFormat >
 SwVbaRange::getListFormat()
 {
     return uno::Reference< word::XListFormat >( new SwVbaListFormat( this, mxContext, getXTextRange() ) );
 }
 
-::sal_Int32 SAL_CALL SwVbaRange::getLanguageID()
+::sal_Int32 SwVbaRange::getLanguageID()
 {
     uno::Reference< beans::XPropertySet > xParaProps( mxTextCursor, uno::UNO_QUERY_THROW );
     return static_cast<sal_uInt16>(SwVbaStyle::getLanguageID( xParaProps ));
 }
 
-void SAL_CALL SwVbaRange::setLanguageID( ::sal_Int32 _languageid )
+void SwVbaRange::setLanguageID( ::sal_Int32 _languageid )
 {
     uno::Reference< beans::XPropertySet > xParaProps( mxTextCursor, uno::UNO_QUERY_THROW );
     SwVbaStyle::setLanguageID( xParaProps, LanguageType(_languageid) );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaRange::PageSetup( )
 {
     uno::Reference< beans::XPropertySet > xParaProps( mxTextCursor, uno::UNO_QUERY_THROW );
@@ -354,13 +354,13 @@ SwVbaRange::PageSetup( )
     return cpo::uno::Any( uno::Reference< word::XPageSetup >( new SwVbaPageSetup( this, mxContext, mxTextDocument, xPageProps ) ) );
 }
 
-::sal_Int32 SAL_CALL SwVbaRange::getStart()
+::sal_Int32 SwVbaRange::getStart()
 {
     uno::Reference< text::XText > xText = mxTextDocument->getText();
     return SwVbaRangeHelper::getPosition( xText, mxTextCursor->getStart() );
 }
 
-void SAL_CALL SwVbaRange::setStart( ::sal_Int32 _start )
+void SwVbaRange::setStart( ::sal_Int32 _start )
 {
     uno::Reference< text::XText > xText = mxTextDocument->getText();
     uno::Reference< text::XTextRange > xStart = SwVbaRangeHelper::getRangeByPosition( xText, _start );
@@ -370,13 +370,13 @@ void SAL_CALL SwVbaRange::setStart( ::sal_Int32 _start )
     mxTextCursor->gotoRange( xEnd, true );
 }
 
-::sal_Int32 SAL_CALL SwVbaRange::getEnd()
+::sal_Int32 SwVbaRange::getEnd()
 {
     uno::Reference< text::XText > xText = mxTextDocument->getText();
     return SwVbaRangeHelper::getPosition( xText, mxTextCursor->getEnd() );
 }
 
-void SAL_CALL SwVbaRange::setEnd( ::sal_Int32 _end )
+void SwVbaRange::setEnd( ::sal_Int32 _end )
 {
     uno::Reference< text::XText > xText = mxTextDocument->getText();
     uno::Reference< text::XTextRange > xEnd = SwVbaRangeHelper::getRangeByPosition( xText, _end );
@@ -385,7 +385,7 @@ void SAL_CALL SwVbaRange::setEnd( ::sal_Int32 _end )
     mxTextCursor->gotoRange( xEnd, true );
 }
 
-bool SAL_CALL SwVbaRange::InRange( const uno::Reference< ::ooo::vba::word::XRange >& Range )
+bool SwVbaRange::InRange( const uno::Reference< ::ooo::vba::word::XRange >& Range )
 {
     SwVbaRange* pRange = dynamic_cast< SwVbaRange* >( Range.get() );
     if( !pRange )
@@ -397,7 +397,7 @@ bool SAL_CALL SwVbaRange::InRange( const uno::Reference< ::ooo::vba::word::XRang
     return false;
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaRange::Revisions( const cpo::uno::Any& index )
 {
     uno::Reference< text::XTextRange > xTextRange = getXTextRange();
@@ -407,7 +407,7 @@ SwVbaRange::Revisions( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaRange::Sections( const cpo::uno::Any& index )
 {
     uno::Reference< text::XTextRange > xTextRange = getXTextRange();
@@ -417,7 +417,7 @@ SwVbaRange::Sections( const cpo::uno::Any& index )
     return cpo::uno::Any( xCol );
 }
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 SwVbaRange::Fields( const cpo::uno::Any& index )
 {
     //FIXME: should be get the field in current range
