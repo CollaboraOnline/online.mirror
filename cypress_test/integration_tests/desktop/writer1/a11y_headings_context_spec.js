@@ -214,6 +214,37 @@ describe(['tagdesktop'], 'Writer headings given to the reader', { testIsolation:
 		});
 	});
 
+	it('the headings around the caret are headings of their level', function () {
+		move('{ctrl}{home}{downarrow}');
+		editing('Opening paragraph.');
+
+		const check = function (region, near) {
+			return a11yHelper.getAXNodesWithin(region).then(function (nodes) {
+				const found = nodes.filter(function (node) {
+					return !node.ignored && node.role === 'heading';
+				}).map(function (node) {
+					return { level: node.properties.level, text: node.name.trim() };
+				});
+				const spans = Array.from(win.document.querySelectorAll(region + ' > span'));
+				const expected = spans.map(function (span) {
+					return OUTLINE.find(function (heading) { return heading.text === span.textContent; });
+				}).filter(Boolean);
+				const given = spans.map(function (span) {
+					return span.textContent + ' (' + span.getAttribute('role') + ' ' + span.getAttribute('aria-level') + ')';
+				}).join(', ');
+				expect(found, 'the headings in ' + region + ': ' + given).to.deep.equal(expected);
+				expect(found, 'the heading next to the caret').to.deep.include(near);
+			});
+		};
+
+		cy.then(function () {
+			return check('#a11y-context-before', OUTLINE[0]);
+		});
+		cy.then(function () {
+			return check('#a11y-context-after', OUTLINE[1]);
+		});
+	});
+
 	function applyStyle(style) {
 		cy.then(function () {
 			win.app.map.sendUnoCommand('.uno:StyleApply', {
