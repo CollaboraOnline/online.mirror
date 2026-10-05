@@ -23,7 +23,7 @@
 
 #include <o3tl/typed_flags_set.hxx>
 
-#include <iostream>
+#include <iosfwd>
 
 class SwContentNode;
 

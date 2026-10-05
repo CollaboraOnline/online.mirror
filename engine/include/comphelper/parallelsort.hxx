@@ -20,8 +20,13 @@
 #include <cmath>
 #include <random>
 #include <functional>
-#include <iostream>
 #include <chrono>
+
+#define PARALLELSORT_ENABLEPZ 0
+
+#if PARALLELSORT_ENABLEPZ
+#include <iostream>
+#endif
 
 namespace comphelper
 {
@@ -31,7 +36,6 @@ static comphelper::ThreadPool& rTPool(comphelper::ThreadPool::getSharedOptimalPo
 
 static thread_local std::mt19937 aGenerator{ std::random_device{}() };
 
-#define PARALLELSORT_ENABLEPZ 0
 
 namespace
 {

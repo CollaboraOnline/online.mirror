@@ -19,7 +19,7 @@
 #ifndef INCLUDED_SW_INC_NDINDEX_HXX
 #define INCLUDED_SW_INC_NDINDEX_HXX
 
-#include <iostream>
+#include <iosfwd>
 
 #include "node.hxx"
 #include "ring.hxx"
@@ -117,10 +117,7 @@ public:
     SwNode& GetNode() const { return *m_pNode; }
 };
 
-inline std::ostream &operator <<(std::ostream& s, const SwNodeIndex& index)
-{
-    return s << "SwNodeIndex (node " << sal_Int32(index.GetIndex()) << ")";
-}
+SW_DLLPUBLIC std::ostream &operator <<(std::ostream& s, const SwNodeIndex&);
 
 // SwRange
 

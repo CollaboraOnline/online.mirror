@@ -1327,5 +1327,9 @@ std::ostream &operator <<(std::ostream& s, const SwPaM& pam)
         return s << "SwPaM (point " << *pam.GetPoint() << ")";
 }
 
+std::ostream &operator <<(std::ostream& s, const SwNodeIndex& index)
+{
+    return s << "SwNodeIndex (node " << sal_Int32(index.GetIndex()) << ")";
+}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -26,7 +26,7 @@
 #include "swdllapi.h"
 #include "nodeoffset.hxx"
 
-#include <iostream>
+#include <iosfwd>
 #include <utility>
 
 class SwDoc;
