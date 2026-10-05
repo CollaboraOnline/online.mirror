@@ -45,9 +45,10 @@ private:
 
     void checkFileInfo(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& uri,
                        std::optional<std::string> const & postBody, int redirectionLimit);
+    /// hostChecked is true when the host of uriPublic passed the WOPI host check.
     void transfer(const std::shared_ptr<TerminatingPoll>& poll, const std::string& url,
                   std::optional<std::string> const & postBody,
-                  const Poco::URI& uriPublic, int redirectionLimit);
+                  const Poco::URI& uriPublic, int redirectionLimit, bool hostChecked);
 
     const std::string _id;
     const RequestDetails _requestDetails;

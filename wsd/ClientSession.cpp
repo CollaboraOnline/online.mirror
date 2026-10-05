@@ -1838,7 +1838,7 @@ void ClientSession::uploadSettingsToWopiHost(const std::string& filePath,
 
         auto httpRequest = StorageConnectionManager::createHttpRequest(uriObject, auth);
         httpRequest.setVerb(http::Request::VERB_POST);
-        auto httpSession = StorageConnectionManager::getHttpSession(uriObject);
+        auto httpSession = StorageConnectionManager::getWopiHttpSession(uriObject);
 
         httpRequest.setBody(jsonBody, "application/json; charset=utf-8");
 

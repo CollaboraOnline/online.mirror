@@ -288,7 +288,7 @@ void RemoteLinks::requestLinkAccess(DocumentBroker& docBroker, const std::string
     request.setVerb(http::Request::VERB_POST);
     request.setBody(bodyStream.str(), "application/json; charset=utf-8");
 
-    std::shared_ptr<http::Session> httpSession = StorageConnectionManager::getHttpSession(uri);
+    std::shared_ptr<http::Session> httpSession = StorageConnectionManager::getWopiHttpSession(uri);
     if (!httpSession)
     {
         LOG_WRN("Not asking for the source [" << linkAnonym << "] of [" << docBroker.getDocKey()

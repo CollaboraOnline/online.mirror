@@ -5992,7 +5992,7 @@ void DocumentBroker::uploadPresetsToWopiHost()
                                                               << ']');
             };
 
-            auto httpSession = StorageConnectionManager::getHttpSession(uriObject);
+            auto httpSession = StorageConnectionManager::getWopiHttpSession(uriObject);
 
             const std::shared_ptr<TerminatingPoll> webServerPoll = COOLWSD::getWebServerPoll();
             if (!webServerPoll || !webServerPoll->isAlive())

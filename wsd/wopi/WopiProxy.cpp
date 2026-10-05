@@ -183,8 +183,8 @@ void WopiProxy::checkFileInfo(const std::shared_ptr<TerminatingPoll>& poll, cons
                 try
                 {
                     LOG_INF("WOPI::GetFile using FileUrl: " << fileUrlAnonym);
-                    return transfer(
-                        poll, url, postBody, Poco::URI(fileUrl), HTTP_REDIRECTION_LIMIT);
+                    return transfer(poll, url, postBody, Poco::URI(fileUrl),
+                                    HTTP_REDIRECTION_LIMIT, false);
                 }
                 catch (const std::exception& ex)
                 {
@@ -205,7 +205,7 @@ void WopiProxy::checkFileInfo(const std::shared_ptr<TerminatingPoll>& poll, cons
             try
             {
                 LOG_INF("WOPI::GetFile using default URI: " << uriAnonym);
-                return transfer(poll, url, postBody, uriObject, HTTP_REDIRECTION_LIMIT);
+                return transfer(poll, url, postBody, uriObject, HTTP_REDIRECTION_LIMIT, true);
             }
             catch (const std::exception& ex)
             {
@@ -227,12 +227,13 @@ void WopiProxy::checkFileInfo(const std::shared_ptr<TerminatingPoll>& poll, cons
 
 void WopiProxy::transfer(const std::shared_ptr<TerminatingPoll>& poll, const std::string& url,
                          std::optional<std::string> const & postBody,
-                         const Poco::URI& uriPublic, int redirectLimit)
+                         const Poco::URI& uriPublic, int redirectLimit, bool hostChecked)
 {
     std::string uriAnonym = Anonymizer::anonymizeUrl(uriPublic.toString());
 
     LOG_DBG("Getting info for wopi uri [" << uriAnonym << ']');
-    _httpSession = StorageConnectionManager::getHttpSession(uriPublic);
+    _httpSession = hostChecked ? StorageConnectionManager::getWopiHttpSession(uriPublic)
+                               : StorageConnectionManager::getHttpSession(uriPublic);
     Authorization auth = Authorization::create(uriPublic);
     http::Request httpRequest = StorageConnectionManager::createHttpRequest(uriPublic, auth);
     if (postBody) {
@@ -272,7 +273,7 @@ void WopiProxy::transfer(const std::shared_ptr<TerminatingPoll>& poll, const std
                 LOG_TRC("WOPI::GetFile redirect to URI [" << Anonymizer::anonymizeUrl(location)
                                                           << "]");
 
-                transfer(poll, location, postBody, Poco::URI(location), redirectLimit - 1);
+                transfer(poll, location, postBody, Poco::URI(location), redirectLimit - 1, false);
                 return;
             }
             else
