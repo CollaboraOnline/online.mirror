@@ -1329,6 +1329,10 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 		else if (obj.commandName === '.uno:CellCursor') {
 			this._onCellCursorMsg(obj.commandValues);
 		}
+		else if (obj.commandName === '.uno:Headings') {
+			if (this._map._textInput.setA11yHeadings)
+				this._map._textInput.setA11yHeadings(obj.commandValues);
+		}
 		else if (this._map.unoToolbarCommands.indexOf(obj.commandName) !== -1) {
 			this._toolbarCommandValues[obj.commandName] = obj.commandValues;
 			this._map.fire('updatetoolbarcommandvalues', {

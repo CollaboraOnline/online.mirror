@@ -299,6 +299,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		this._listPrefixLength = listPrefixLength;
 		this._endContextJump();
 		this._setContextParagraphs(before, after, beforeRects, afterRects);
+		this._requestHeadings();
 		if (!this.hasFocus() || (this._isComposing && !force)) {
 			this._log('onAccessibilityFocusChanged: skipped updating: '
 				+ '\n  hasFocus: ' + this.hasFocus()
@@ -340,12 +341,118 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 			return region;
 		};
 
+		this._headingsAbove = createContextRegion('a11y-headings-above');
 		this._contextBefore = createContextRegion('a11y-context-before');
 		this._contextAfter = createContextRegion('a11y-context-after');
+		this._headingsBelow = createContextRegion('a11y-headings-below');
 		window.L.DomEvent.on(this._contextBefore, 'focusin', this._onContextFocus, this);
 		window.L.DomEvent.on(this._contextAfter, 'focusin', this._onContextFocus, this);
+		this._container.insertBefore(this._headingsAbove, this._textArea);
 		this._container.insertBefore(this._contextBefore, this._textArea);
 		this._container.insertBefore(this._contextAfter, this._textArea.nextSibling);
+		this._container.insertBefore(this._headingsBelow, this._contextAfter.nextSibling);
+	},
+
+	_requestHeadings: function() {
+		if (this._map.getDocType() !== 'text')
+			return;
+
+		clearTimeout(this._headingsRequestTimer);
+		this._headingsRequestTimer = setTimeout(function () {
+			app.socket.sendMessage('commandvalues command=.uno:Headings');
+		}, 250);
+	},
+
+	setA11yHeadings: function(values) {
+		this._headings = values && Array.isArray(values.headings) ? values.headings : [];
+		this._initContextRegions();
+		this._fillHeadingRegions();
+	},
+
+	// A heading given around the caret, or the one being edited, is left out: the
+	// reader would list it twice.
+	_fillHeadingRegions: function() {
+		if (!this._headingsAbove || !this._headings)
+			return;
+
+		const toRect = function (twips) {
+			return typeof twips === 'string' ? twips.split(',').map(Number) : null;
+		};
+		const holds = function (rect, x, y) {
+			return rect && x >= rect[0] && x <= rect[0] + rect[2] && y >= rect[1] && y <= rect[1] + rect[3];
+		};
+		const given = Array.from(this._contextBefore.children).concat(Array.from(this._contextAfter.children))
+			.map(function (span) { return toRect(span.dataset.twips); }).filter(Boolean);
+		const before = given.slice(0, this._contextBefore.children.length);
+		const after = given.slice(before.length);
+		const caret = app.file.textCursor.rectangle;
+		const caretX = caret.x1 + 1;
+		const caretY = (caret.y1 + caret.y2) / 2;
+		let splitY = caret.y1;
+		if (before.length)
+			splitY = before[before.length - 1][1] + before[before.length - 1][3];
+		else if (after.length)
+			splitY = after[0][1];
+
+		const above = [];
+		const below = [];
+		this._headings.forEach(function (heading) {
+			const rect = toRect(heading.rect);
+			if (!rect) {
+				below.push(heading);
+				return;
+			}
+			const x = rect[0] + 1;
+			const y = rect[1] + rect[3] / 2;
+			if (given.some(function (span) { return holds(span, x, y); }))
+				return;
+			if (holds(rect, caretX, caretY))
+				return;
+			(y < splitY ? above : below).push(heading);
+		});
+
+		const key = JSON.stringify([above, below]);
+		if (key === this._headingsKey)
+			return;
+		this._headingsKey = key;
+
+		const fill = function (region, headings) {
+			region.replaceChildren();
+			headings.forEach(function (heading) {
+				const element = document.createElement('div');
+				element.setAttribute('role', 'heading');
+				element.setAttribute('aria-level', heading.level);
+				const link = document.createElement('a');
+				link.href = '#';
+				link.textContent = heading.text;
+				link.dataset.target = heading.target;
+				link.addEventListener('click', function (event) {
+					event.preventDefault();
+					this._jumpToHeading(heading.target);
+				}.bind(this));
+				element.appendChild(link);
+				region.appendChild(element);
+			}.bind(this));
+		}.bind(this);
+		fill(this._headingsAbove, above);
+		fill(this._headingsBelow, below);
+		this._placeContextRegions();
+	},
+
+	// NVDA puts its browse cursor where the focus lands, so the paragraphs around must be there first.
+	_jumpToHeading: function(target) {
+		app.map.sendUnoCommand('.uno:JumpToMark?Bookmark:string='
+			+ encodeURIComponent(target + '|outline'));
+		clearTimeout(this._headingJump);
+		this._headingJump = setTimeout(this._endHeadingJump.bind(this), 1000);
+	},
+
+	_endHeadingJump: function() {
+		if (!this._headingJump)
+			return;
+		clearTimeout(this._headingJump);
+		this._headingJump = null;
+		this.focus();
 	},
 
 	onVisibleAreaChanged: function() {
@@ -390,7 +497,9 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 
 		fillContextRegion(this._contextBefore, before, beforeRects);
 		fillContextRegion(this._contextAfter, after, afterRects);
+		this._fillHeadingRegions();
 		this._placeContextRegions();
+		this._endHeadingJump();
 	},
 
 	_onContextFocus: function(ev) {
@@ -398,12 +507,22 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 			this._jumpToContextParagraph(ev.target.dataset.twips);
 	},
 
-	// Orca leaves the focus on the page and the selection on the paragraph it was reading when
-	// it enters focus mode, so the first key decides where the caret goes.
+	// Orca leaves the focus on the outline link, or on the page with the selection on the
+	// paragraph, it was reading when it enters focus mode, so the first key decides where the
+	// caret goes.
 	_onStrayKeyDown: function(ev) {
-		if (document.activeElement !== document.body || !this._contextBefore)
+		if (!this._contextBefore)
 			return;
 		if (['Tab', 'Shift', 'Control', 'Alt', 'Meta', 'Insert', 'CapsLock'].includes(ev.key))
+			return;
+		const active = document.activeElement;
+		if (ev.key !== 'Enter' && active && active.dataset && active.dataset.target
+			&& (this._headingsAbove.contains(active) || this._headingsBelow.contains(active))) {
+			window.L.DomEvent.stop(ev);
+			this._jumpToHeading(active.dataset.target);
+			return;
+		}
+		if (active !== document.body)
 			return;
 		const anchor = window.getSelection() ? window.getSelection().anchorNode : null;
 		const element = anchor && anchor.nodeType === Node.TEXT_NODE ? anchor.parentNode : anchor;
