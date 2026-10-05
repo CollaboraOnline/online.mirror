@@ -2523,7 +2523,20 @@ window.L.Control.JSDialogBuilder = window.L.Control.extend({
 				builder.callback('combobox', 'change', data, value, builder);
 			};
 
-			return builder._controlHandlers['edit'](parentContainer, data, builder, callback);
+			const result = builder._controlHandlers['edit'](parentContainer, data, builder, callback);
+
+			// Keep what the combobox did on setText: leave the field alone while the user
+			// types in it. The dialog's initial setText can be applied after typing started.
+			const container = parentContainer.querySelector(':scope > [id=\'' + data.id + '\']');
+			const input = container ? container.querySelector('input') : null;
+			if (input) {
+				container.onSetText = function (text) {
+					if (input.ownerDocument.activeElement !== input)
+						input.value = text;
+				};
+			}
+
+			return result;
 		} else if (data.id === 'showlocation' && data.type === 'linkbutton') {
 			data.type = 'fixedtext';
 			return builder._controlHandlers['fixedtext'](parentContainer, data, builder);
