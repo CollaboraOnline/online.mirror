@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-10-05 21:51+0000\n"
+"PO-Revision-Date: 2026-10-06 00:01+0000\n"
 "Last-Translator: H2Oufoe <regularwater@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "collabora-online/collabora-ui/pt_BR/>\n"
@@ -5873,14 +5873,17 @@ msgid ""
 "{0} is not one of the documents this one is related to, so the server "
 "cannot read it."
 msgstr ""
+"{0} não é um dos documentos com os quais esse aqui está relacionado, "
+"portanto o servidor não pode lê-lo."
 
 #: src/slideimport/SlideLinks.ts:438
 msgid "These slides come from {0} which is currently not accessible."
-msgstr ""
+msgstr "Esses slides vêm de {0} que atualmente não está acessível."
 
 #: src/slideimport/SlideLinks.ts:462
 msgid "You do not have access to {0}, so its pages cannot be refreshed."
 msgstr ""
+"Você não tem acesso a {0}, portanto, suas páginas não podem ser atualizadas."
 
 #: src/slideimport/SlideLinks.ts:463 src/slideimport/SlideLinks.ts:741
 msgid "{0} could not be read."
