@@ -18,6 +18,8 @@
 #include <frameformats.hxx>
 #include <textboxhelper.hxx>
 
+#include <com/sun/star/awt/Rectangle.hpp>
+#include <com/sun/star/drawing/PointSequenceSequence.hpp>
 #include <com/sun/star/table/BorderLine2.hpp>
 #include <com/sun/star/text/XTextFramesSupplier.hpp>
 
@@ -148,6 +150,47 @@ CPPUNIT_TEST_FIXTURE(SwCoreDrawTest, testSdtTextboxHeader)
     // When loading that document, then make sure that layout doesn't fail with an assertion because
     // the "master SdrObj should have the highest index" invariant doesn't hold:
     createSwDoc("sdt-textbox-header.docx");
+}
+
+CPPUNIT_TEST_FIXTURE(SwCoreDrawTest, testHeaderPolylineCopyPolyPolygon)
+{
+    // Page 2 shows an SwDrawVirtObj copy of the header's polyline.
+    createSwDoc("header-polyline.fodt");
+    CPPUNIT_ASSERT_EQUAL(2, getPages());
+    CPPUNIT_ASSERT_EQUAL(2, getShapes());
+
+    auto xOriginal = getShape(1).queryThrow<beans::XPropertySet>();
+    auto xCopy = getShape(2).queryThrow<beans::XPropertySet>();
+    auto aOriginalBounds = getProperty<awt::Rectangle>(xOriginal, u"BoundRect"_ustr);
+    auto aCopyBounds = getProperty<awt::Rectangle>(xCopy, u"BoundRect"_ustr);
+    if (aCopyBounds.Y < aOriginalBounds.Y)
+    {
+        std::swap(xOriginal, xCopy);
+        std::swap(aOriginalBounds, aCopyBounds);
+    }
+    CPPUNIT_ASSERT_GREATER(aOriginalBounds.Y + 5000, aCopyBounds.Y);
+
+    // The copy's points are the original's, moved as far as its bounds are.
+    auto aOriginalPoints
+        = getProperty<drawing::PointSequenceSequence>(xOriginal, u"PolyPolygon"_ustr);
+    auto aCopyPoints = getProperty<drawing::PointSequenceSequence>(xCopy, u"PolyPolygon"_ustr);
+    const sal_Int32 nDX = aCopyBounds.X - aOriginalBounds.X;
+    const sal_Int32 nDY = aCopyBounds.Y - aOriginalBounds.Y;
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(1), aCopyPoints.getLength());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(2), aCopyPoints[0].getLength());
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOriginalPoints[0][0].X + nDX, aCopyPoints[0][0].X, 2);
+    // Without the accompanying fix in place, this test would have failed with:
+    // - Expected: 12101
+    // - Actual  : 1601
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOriginalPoints[0][0].Y + nDY, aCopyPoints[0][0].Y, 2);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOriginalPoints[0][1].X + nDX, aCopyPoints[0][1].X, 2);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOriginalPoints[0][1].Y + nDY, aCopyPoints[0][1].Y, 2);
+
+    // Writing the copy's points back leaves the original where it was.
+    xCopy->setPropertyValue(u"PolyPolygon"_ustr, uno::Any(aCopyPoints));
+    auto aOriginalPointsAfter
+        = getProperty<drawing::PointSequenceSequence>(xOriginal, u"PolyPolygon"_ustr);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOriginalPoints[0][0].Y, aOriginalPointsAfter[0][0].Y, 2);
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

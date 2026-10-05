@@ -1147,8 +1147,18 @@ void SvxShapePolyPolygon::SetPolygon(const basegfx::B2DPolyPolygon& rNew)
 {
     ::SolarMutexGuard aGuard;
 
-    if (SdrPathObj* pPath = ReferencedSdrObject<SdrPathObj>(GetSdrObject()))
-        pPath->SetPathPoly(rNew);
+    SdrPathObj* pPath = ReferencedSdrObject<SdrPathObj>(GetSdrObject());
+    if (!pPath)
+        return;
+
+    basegfx::B2DPolyPolygon aPolyPolygon(rNew);
+    // A stand-in is drawn moved by its offset.
+    if (auto* pStandIn = dynamic_cast<SdrVirtObj*>(GetSdrObject()))
+    {
+        const Point aOffset(pStandIn->GetOffset());
+        aPolyPolygon.translate(-aOffset.X(), -aOffset.Y());
+    }
+    pPath->SetPathPoly(aPolyPolygon);
 }
 
 
@@ -1156,10 +1166,18 @@ basegfx::B2DPolyPolygon SvxShapePolyPolygon::GetPolygon() const noexcept
 {
     ::SolarMutexGuard aGuard;
 
-    if (SdrPathObj* pPath = ReferencedSdrObject<SdrPathObj>(GetSdrObject()))
-        return pPath->GetPathPoly();
+    SdrPathObj* pPath = ReferencedSdrObject<SdrPathObj>(GetSdrObject());
+    if (!pPath)
+        return {};
 
-    return basegfx::B2DPolyPolygon();
+    basegfx::B2DPolyPolygon aPolyPolygon(pPath->GetPathPoly());
+    // A stand-in is drawn moved by its offset.
+    if (auto* pStandIn = dynamic_cast<SdrVirtObj*>(GetSdrObject()))
+    {
+        const Point aOffset(pStandIn->GetOffset());
+        aPolyPolygon.translate(aOffset.X(), aOffset.Y());
+    }
+    return aPolyPolygon;
 }
 
 //////////////////////////////////////////////////////////////////////////////
