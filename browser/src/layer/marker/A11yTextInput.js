@@ -265,12 +265,12 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 
 		const current = this.getPlainTextContent();
 		this._pendingFocusedParagraph = null;
-		if (!this._lineNavigation || current === '' || content === '' || content === current) {
+		if (window.L.Browser.win || !this._lineNavigation || current === '' || content === '' || content === current) {
 			this._fillFocusedParagraph(content, pos, start, end);
 			return;
 		}
 
-		// Emptied first, so Chrome reports the new paragraph whole, not only what differs from the last.
+		// Emptied first so Orca hears the new paragraph whole; NVDA would catch the editable empty.
 		const pending = { content: content, pos: pos, start: start, end: end };
 		this._pendingFocusedParagraph = pending;
 		this.resetContent();
