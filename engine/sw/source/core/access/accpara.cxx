@@ -266,6 +266,7 @@ void SwAccessibleParagraph::InvalidateContent_( bool bVisibleDataFired )
 
     bool bNewIsBlockQuote = IsBlockQuote();
     bool bNewIsHeading = IsHeading();
+    const sal_Int32 nOldHeadingLevel = m_nHeadingLevel;
     //Get the real heading level, Heading1 ~ Heading10
     m_nHeadingLevel = GetRealHeadingLevel();
     bool bOldIsBlockQuote;
@@ -283,6 +284,12 @@ void SwAccessibleParagraph::InvalidateContent_( bool bVisibleDataFired )
     {
         // The role has changed
         FireAccessibleEvent(AccessibleEventId::ROLE_CHANGED, cpo::uno::Any(), cpo::uno::Any());
+    }
+    else if (m_nHeadingLevel != nOldHeadingLevel)
+    {
+        // The level reported by getExtendedAttributes() has changed
+        FireAccessibleEvent(AccessibleEventId::TEXT_ATTRIBUTE_CHANGED, cpo::uno::Any(),
+                            cpo::uno::Any());
     }
 }
 

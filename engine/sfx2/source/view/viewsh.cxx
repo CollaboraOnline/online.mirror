@@ -60,6 +60,7 @@
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
 #include <com/sun/star/accessibility/XAccessibleText.hpp>
 #include <com/sun/star/accessibility/XAccessibleComponent.hpp>
+#include <com/sun/star/accessibility/XAccessibleExtendedAttributes.hpp>
 #include <com/sun/star/accessibility/AccessibleRelationType.hpp>
 #include <com/sun/star/accessibility/XAccessibleRelationSet.hpp>
 #include <com/sun/star/accessibility/XAccessibleTable.hpp>
@@ -612,6 +613,24 @@ bool isSiblingParagraph(const uno::Reference<accessibility::XAccessibleContext>&
            && xContext->getAccessibleParent() == xParent;
 }
 
+// Writer reports a heading as "level:N;", following the ARIA level object attribute.
+sal_Int32 getHeadingLevel(const uno::Reference<css::accessibility::XAccessibleText>& xAccText)
+{
+    uno::Reference<accessibility::XAccessibleContext> xContext(xAccText, uno::UNO_QUERY);
+    if (!xContext.is() || xContext->getAccessibleRole() != accessibility::AccessibleRole::HEADING)
+        return 0;
+
+    uno::Reference<accessibility::XAccessibleExtendedAttributes> xAttributes(xAccText,
+                                                                             uno::UNO_QUERY);
+    if (!xAttributes.is())
+        return 0;
+
+    OUString sLevel;
+    if (!xAttributes->getExtendedAttributes().startsWith(u"level:", &sLevel))
+        return 0;
+    return std::max<sal_Int32>(0, sLevel.toInt32());
+}
+
 struct ContextParagraph
 {
     OUString aText;
@@ -1025,6 +1044,7 @@ class KitDocumentFocusListener :
     sal_Int32 m_nSelectionStart;
     sal_Int32 m_nSelectionEnd;
     sal_Int32 m_nListPrefixLength;
+    sal_Int32 m_nHeadingLevel;
     mutable std::vector<ContextParagraph> m_aParagraphsBefore;
     mutable std::vector<ContextParagraph> m_aParagraphsAfter;
     uno::Reference<accessibility::XAccessibleText> m_xFocusedText;
@@ -1127,6 +1147,7 @@ KitDocumentFocusListener::KitDocumentFocusListener(const SfxViewShell* pViewShel
     , m_nSelectionStart(0)
     , m_nSelectionEnd(0)
     , m_nListPrefixLength(0)
+    , m_nHeadingLevel(0)
     , m_bIsEditingCell(false)
     , m_bIsEditingInSelection(false)
 {
@@ -1141,6 +1162,8 @@ void KitDocumentFocusListener::paragraphPropertiesToTree(boost::property_tree::p
     aPayloadTree.put("end", bLeftToRight ? m_nSelectionEnd : m_nSelectionStart);
     if (m_nListPrefixLength > 0)
         aPayloadTree.put("listPrefixLength", m_nListPrefixLength);
+    if (m_nHeadingLevel > 0)
+        aPayloadTree.put("headingLevel", m_nHeadingLevel);
     if (!m_aParagraphsBefore.empty() || !m_aParagraphsAfter.empty())
     {
         auto toArray = [](const std::vector<ContextParagraph>& rParagraphs, bool bRects) {
@@ -1492,6 +1515,7 @@ bool KitDocumentFocusListener::updateParagraphInfo(const uno::Reference<css::acc
         m_nSelectionStart = xAccText->getSelectionStart();
         m_nSelectionEnd = xAccText->getSelectionEnd();
         m_nListPrefixLength = getListPrefixSize(xAccText);
+        const sal_Int32 nHeadingLevel = getHeadingLevel(xAccText);
 
         // Inside a text shape when there is no selection, selection-start and selection-end are
         // set to current caret position instead of -1. Moreover, inside a text shape pressing
@@ -1510,9 +1534,10 @@ bool KitDocumentFocusListener::updateParagraphInfo(const uno::Reference<css::acc
         }
 
         // In case only caret position or text selection are different we can rely on specific events.
-        if (m_sFocusedParagraph != sText)
+        if (m_sFocusedParagraph != sText || m_nHeadingLevel != nHeadingLevel)
         {
             m_sFocusedParagraph = sText;
+            m_nHeadingLevel = nHeadingLevel;
             m_xFocusedText = xAccText;
             collectParagraphWindow(xAccText, PARAGRAPH_WINDOW, visibleArea(), m_aParagraphsBefore, m_aParagraphsAfter);
             bNotify = true;
@@ -1547,6 +1572,7 @@ void KitDocumentFocusListener::resetParagraphInfo()
     m_nSelectionStart = -1;
     m_nSelectionEnd = -1;
     m_nListPrefixLength = 0;
+    m_nHeadingLevel = 0;
     m_aParagraphsBefore.clear();
     m_aParagraphsAfter.clear();
     m_xFocusedText.clear();
@@ -1844,6 +1870,22 @@ void KitDocumentFocusListener::notifyEvent(const accessibility::AccessibleEventO
                 // We make a guess that if the paragraph accessibility node is not focused,
                 // it means that the text change has been performed in another view.
                 updateAndNotifyParagraph(xAccText, !isFocused(aEvent), "TEXT_CHANGED");
+
+                break;
+            }
+            case AccessibleEventId::ROLE_CHANGED:
+            {
+                // Writer raises this when a paragraph style makes a heading or undoes one.
+                uno::Reference<XAccessibleText> xAccText(getAccessible(aEvent), uno::UNO_QUERY);
+                updateAndNotifyParagraph(xAccText, false, "ROLE_CHANGED");
+
+                break;
+            }
+            case AccessibleEventId::TEXT_ATTRIBUTE_CHANGED:
+            {
+                // Writer raises this when a heading moves to another level.
+                uno::Reference<XAccessibleText> xAccText(getAccessible(aEvent), uno::UNO_QUERY);
+                updateAndNotifyParagraph(xAccText, false, "TEXT_ATTRIBUTE_CHANGED");
 
                 break;
             }
