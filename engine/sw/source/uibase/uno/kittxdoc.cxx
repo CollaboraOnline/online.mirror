@@ -35,6 +35,7 @@
 #include <sfx2/kit/helper.hxx>
 
 #include <IDocumentMarkAccess.hxx>
+#include <IDocumentOutlineNodes.hxx>
 #include <IDocumentRedlineAccess.hxx>
 #include <svx/seclabel/SecLabelStore.hxx>
 #include <doc.hxx>
@@ -56,6 +57,7 @@
 #include <unocontentcontrol.hxx>
 #include <rootfrm.hxx>
 #include <pagefrm.hxx>
+#include <cntfrm.hxx>
 #include <com/sun/star/text/XTextContent.hpp>
 
 #include <com/sun/star/text/XPageCursor.hpp>
@@ -1411,6 +1413,34 @@ void GetSecurityLabel(tools::JsonWriter& rJsonWriter, SwDocShell* pDocShell)
     rJsonWriter.put("supported", xModel.is() && svx::seclabel::modelSupportsLabel(xModel));
 }
 
+/// Implements getCommandValues(".uno:Headings"): every heading of the document in order,
+/// which the accessibility tree cannot give since it only holds what is near the view.
+void GetHeadings(tools::JsonWriter& rJsonWriter, SwDocShell* pDocShell)
+{
+    rJsonWriter.put("commandName", ".uno:Headings");
+    auto aValues = rJsonWriter.startNode("commandValues");
+    auto aHeadings = rJsonWriter.startArray("headings");
+
+    SwWrtShell* pWrtShell = pDocShell ? pDocShell->GetWrtShell() : nullptr;
+    if (!pWrtShell)
+        return;
+
+    const SwRootFrame* pLayout = pWrtShell->GetLayout();
+    const IDocumentOutlineNodes& rOutline = pDocShell->GetDoc()->getIDocumentOutlineNodes();
+    for (IDocumentOutlineNodes::tSortedOutlineNodeList::size_type i = 0;
+         i < rOutline.getOutlineNodesCount(); ++i)
+    {
+        if (!rOutline.isOutlineInLayout(i, *pLayout))
+            continue;
+        auto aHeading = rJsonWriter.startStruct();
+        rJsonWriter.put("level", rOutline.getOutlineLevel(i) + 1);
+        rJsonWriter.put("text", rOutline.getOutlineText(i, pLayout, true, false, false));
+        rJsonWriter.put("target", SwGetOutlineLinkName(i, pDocShell->GetDoc()));
+        if (const SwContentFrame* pFrame = rOutline.getOutlineNode(i)->getLayoutFrame(pLayout))
+            rJsonWriter.put("rect", pFrame->getFrameArea().SVRect().toString());
+    }
+}
+
 /// Implements getCommandValues(".uno:Sections").
 ///
 /// Parameters:
@@ -1457,7 +1487,8 @@ bool SwXTextDocument::supportsCommand(std::u16string_view rCommand)
             u"Layout",
             u"ExtractDocumentStructure",
             u"ExtractLinkTargets",
-            u"SecurityLabel" };
+            u"SecurityLabel",
+            u"Headings" };
 
     return std::find(vForward.begin(), vForward.end(), rCommand) != vForward.end();
 }
@@ -1562,6 +1593,10 @@ void SwXTextDocument::getCommandValues(tools::JsonWriter& rJsonWriter, std::stri
     else if (o3tl::starts_with(rCommand, ".uno:SecurityLabel"sv))
     {
         GetSecurityLabel(rJsonWriter, m_pDocShell);
+    }
+    else if (o3tl::starts_with(rCommand, ".uno:Headings"sv))
+    {
+        GetHeadings(rJsonWriter, m_pDocShell);
     }
 }
 
