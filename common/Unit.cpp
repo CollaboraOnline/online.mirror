@@ -182,10 +182,10 @@ bool UnitBase::init([[maybe_unused]] UnitType type, [[maybe_unused]] const std::
     GlobalArray = nullptr;
     GlobalIndex = -1;
 
+#if ENABLE_DEBUG
     int testCount = 0;
 
     // Only in debug builds do we support tests.
-#if ENABLE_DEBUG
     if (!unitLibPath.empty())
     {
         auto tests = linkAndCreateUnit(type, unitLibPath);
