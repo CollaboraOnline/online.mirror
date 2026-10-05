@@ -251,45 +251,6 @@ void DestroySalInstance( SalInstance *pInst )
 #endif
 }
 
-void SalAbort( const OUString& rErrorText, bool bDumpCore )
-{
-    if (GetSalInstance())
-        GetSalInstance()->BeforeAbort(rErrorText, bDumpCore);
-
-#if defined _WIN32
-    if( rErrorText.isEmpty() )
-    {
-        // make sure crash reporter is triggered
-        RaiseException( 0, EXCEPTION_NONCONTINUABLE, 0, nullptr );
-        FatalAppExitW( 0, L"Application Error" );
-    }
-    else
-    {
-        // make sure crash reporter is triggered
-        RaiseException( 0, EXCEPTION_NONCONTINUABLE, 0, nullptr );
-        FatalAppExitW( 0, o3tl::toW(rErrorText.getStr()) );
-    }
-#else // !_WIN32
-#if defined ANDROID
-    OUString aError(rErrorText.isEmpty() ? u"Unspecified application error"_ustr : rErrorText);
-    LOGE("SalAbort: '%s'", OUStringToOString(aError, osl_getThreadTextEncoding()).getStr());
-#elif defined(iOS)
-    NSLog(@"SalAbort: %s", OUStringToOString(rErrorText, osl_getThreadTextEncoding()).getStr());
-#else
-    OUString sMsg = rErrorText;
-    if( sMsg.isEmpty() )
-        sMsg = u"Unspecified Application Error"_ustr;
-    std::unique_ptr<sal::BacktraceState> backtrace = sal::backtrace_get( 32 );
-    sMsg += "\n" + sal::backtrace_to_string( backtrace.get() );
-    std::fprintf( stderr, "%s\n", OUStringToOString(sMsg, osl_getThreadTextEncoding()).getStr() );
-#endif
-    if( bDumpCore )
-        abort();
-    else
-        _exit(1);
-#endif // !_WIN32
-}
-
 const OUString& SalGetDesktopEnvironment()
 {
 #if !HAVE_FEATURE_UI

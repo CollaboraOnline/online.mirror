@@ -448,6 +448,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/app/help \
     vcl/source/app/i18nhelp \
     vcl/source/app/idle \
+    vcl/source/app/salabort \
     vcl/source/app/salplug \
     vcl/source/app/salusereventlist \
     vcl/source/app/salvtables \
