@@ -79,19 +79,7 @@ span.notebookbar.static-label,
 	display: inline-flex;
 	flex: 0.1 0.1 auto;
 	margin-inline-start: 5px;
-	overflow-x: auto;
-	scrollbar-width: thin;
 	min-width: 0;
-}
-
-.notebookbar-tabs-container::-webkit-scrollbar {
-	height: 3px;
-	background-color: var(--color-background-darker);
-}
-
-.notebookbar-tabs-container::-webkit-scrollbar-thumb {
-	background-color: var(--color-border-darker);
-	border-radius: 2px;
 }
 
 .ui-tabs.notebookbar {
@@ -100,18 +88,15 @@ span.notebookbar.static-label,
 	padding: 0px;
 	height: 100%;
 	overflow-x: auto;
-	scrollbar-width: thin;
+	scrollbar-color: var(--scrollbar-color);
+	scrollbar-width: none;
 	max-width: 100%;
 }
 
-.ui-tabs.notebookbar::-webkit-scrollbar {
-	height: 3px;
-	background-color: var(--color-background-darker);
-}
-
-.ui-tabs.notebookbar::-webkit-scrollbar-thumb {
-	background-color: var(--color-border-darker);
-	border-radius: 2px;
+@media (max-width: 480px) {
+	.ui-tabs.notebookbar {
+		scrollbar-width: var(--scrollbar-width);
+	}
 }
 
 .ui-tab.notebookbar {
