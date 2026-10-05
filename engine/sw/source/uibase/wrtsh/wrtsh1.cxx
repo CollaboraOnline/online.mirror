@@ -1281,8 +1281,10 @@ void SwWrtShell::InsertContentControl(SwContentControlType eType)
                 /*bBasicCall=*/false);
     }
 
+    // Only the recording bit is cleared while the content control attribute goes in, so the
+    // placeholder text is a tracked insert and the control around it is not.
     const RedlineFlags oldRedlineFlags = getIDocumentRedlineAccess().GetRedlineFlags();
-    getIDocumentRedlineAccess().SetRedlineFlags(RedlineFlags::Ignore);
+    getIDocumentRedlineAccess().SetRedlineFlags(oldRedlineFlags & ~RedlineFlags::On);
     SwFormatContentControl aContentControl(pContentControl, RES_TXTATR_CONTENTCONTROL);
     SetAttrItem(aContentControl);
     getIDocumentRedlineAccess().SetRedlineFlags(oldRedlineFlags);
