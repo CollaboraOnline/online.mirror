@@ -1372,7 +1372,6 @@ class Dispatcher {
 			const configuration = window as any;
 			if (configuration.mobileWizard) {
 				configuration.mobileWizard = false;
-				app.map.sendUnoCommand('.uno:SidebarHide');
 				app.map.fire('closemobilewizard');
 				app.map.mobileTopBar.selectItem('mobile_wizard', false);
 			} else {

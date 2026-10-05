@@ -64,11 +64,20 @@ window.L.Control.MobileWizard = window.L.Control.extend({
 	},
 
 	_closeWizard: function() {
+		const sidebarRequested = this.map.showSidebar
+			|| window.mobileWizard === true || window.pageMobileWizard === true;
+		let sidebarClosed = false;
 		var items = this.contents.length;
 		while (items--) {
 			const content = this.contents[0];
+			if (content.isSidebar)
+				sidebarClosed = true;
 			this.removeWindow(content);
 			content.notifyPopupDismissed();
+		}
+		if (sidebarRequested && !sidebarClosed) {
+			this.map.sendUnoCommand('.uno:SidebarHide');
+			this.map.showSidebar = false;
 		}
 	},
 
@@ -118,9 +127,6 @@ window.L.Control.MobileWizard = window.L.Control.extend({
 
 		if (window.insertionMobileWizard === true)
 			window.insertionMobileWizard = false;
-
-		if (window.pageMobileWizard === true)
-			window.pageMobilewizard = false;
 
 		if (window.commentWizard === true)
 			window.commentWizard = false;
@@ -215,6 +221,11 @@ window.L.Control.MobileWizard = window.L.Control.extend({
 
 			this.map.removeControl(window);
 			this.contents.splice(pos, 1);
+			// The engine keeps the sidebar deck open until it is told otherwise, and
+			// it sends the deck contents only when the deck opens. Closing it here
+			// makes the next show of the same deck arrive with its contents.
+			if (window.isSidebar)
+				this.map.sendUnoCommand('.uno:SidebarHide');
 			if (this.contents.length) {
 				var parentWindow = this.contents[this.contents.length - 1];
 				parentWindow.showWindow();

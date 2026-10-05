@@ -123,6 +123,7 @@ window.L.Control.MobileWizardWindow = window.L.Control.extend({
 		this.tabs = null;
 		this._currentScrollPosition = 0;
 		this.isPopup = false;
+		this.isSidebar = false;
 	},
 
 	// reset back button to the original state
@@ -539,6 +540,7 @@ window.L.Control.MobileWizardWindow = window.L.Control.extend({
 
 			this._reset();
 			this.isPopup = isPopupJson;
+			this.isSidebar = isSidebar;
 			this.isAutoCompletePopup = data.isAutoCompletePopup;
 			this.isPopupPartialScreen = data.isPopupPartialScreen;
 			this.persistKeyboard = data.persistKeyboard;

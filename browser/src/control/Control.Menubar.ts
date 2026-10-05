@@ -2089,9 +2089,6 @@ class Menubar extends window.L.Control {
 						$nav.css({height:'', bottom: ''});
 					} else {
 						window.mobileMenuWizard = false;
-						// FIXME: unify all code paths by single call when legacy refresh is removed
-						if ((window as any).mobileWizard === true)
-							this._map.sendUnoCommand('.uno:SidebarHide');
 						this._map.fire('closemobilewizard');
 						$('#toolbar-hamburger').removeClass('menuwizard-opened').addClass('menuwizard-closed');
 						$('#toolbar-mobile-back').css('visibility', '');
