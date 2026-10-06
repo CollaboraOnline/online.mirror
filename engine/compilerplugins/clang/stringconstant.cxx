@@ -265,10 +265,7 @@ private:
 };
 
 void StringConstant::run() {
-    if (compiler.getLangOpts().CPlusPlus
-        && compiler.getPreprocessor().getIdentifierInfo(
-            "LIBO_INTERNAL_ONLY")->hasMacroDefinition())
-            //TODO: some parts of it are useful for external code, too
+    if (compiler.getLangOpts().CPlusPlus)
     {
         TraverseDecl(compiler.getASTContext().getTranslationUnitDecl());
     }
