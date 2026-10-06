@@ -28,6 +28,7 @@ $(eval $(call gb_UnoApi_add_idlfiles,scriptinterop,,\
 $(eval $(call gb_UnoApi_add_idlfiles,scriptinterop,scriptinterop,\
     AlignmentPosition \
     ArrowStyle \
+    AuthMode \
     AutofitType \
     AutoTextType \
     CellMergeState \

@@ -580,21 +580,6 @@ globalThis.__gasKitRunner = function(
             getActiveUserLocale: cool.getActiveUserLocale.bind(cool)
         };
 
-        // A GAS enum value is an object of its own that prints as its name and has the name(),
-        // ordinal() and compareTo() of a Java enum:
-        function gasEnum(names) {
-            const values = {};
-            names.forEach(function(name, ordinal) {
-                values[name] = Object.freeze({
-                    toString: function() { return name; },
-                    toJSON: function() { return name; },
-                    name: function() { return name; },
-                    ordinal: function() { return ordinal; },
-                    compareTo: function(other) { return ordinal - other.ordinal(); }
-                });
-            });
-            return Object.freeze(values);
-        }
         function scriptAppNotSupported(name) {
             return function() {
                 throw new Error(
@@ -602,7 +587,7 @@ globalThis.__gasKitRunner = function(
             };
         }
         globalThis.ScriptApp = {
-            AuthMode: gasEnum(['NONE', 'CUSTOM_FUNCTION', 'LIMITED', 'FULL']),
+            AuthMode: uno.idl.scriptinterop.AuthMode,
             getScriptId: function() { return extensionId; },
             getOAuthToken: scriptAppNotSupported('getOAuthToken'),
             getIdentityToken: scriptAppNotSupported('getIdentityToken'),

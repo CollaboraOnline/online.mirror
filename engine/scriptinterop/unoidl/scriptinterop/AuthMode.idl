@@ -1,4 +1,4 @@
-/* -*- fill-column: 100 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * Copyright the Collabora Office contributors.
  *
@@ -9,14 +9,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-// GAS doesn't have console.assert:
-if (!globalThis.cool) {
-    console.assert = console.assert || (cond => { if (!cond) throw new Error('failed: ' + cond); });
-}
+module scriptinterop {
 
-function test() {
-    const id = ScriptApp.getScriptId();
-    console.assert(typeof id === 'string' && id.length > 0);
-}
+enum AuthMode {
+    NONE,
+    CUSTOM_FUNCTION,
+    LIMITED,
+    FULL
+};
+
+};
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
