@@ -46,11 +46,11 @@ L10N_JSON += $(foreach L,$(L10N_LANGS),$(if $(wildcard $(srcdir)/po/ui-$(L).po),
 if ENABLE_QTAPP
 # The Qt app page loads the table as its own file (see cool.html.m4). It is
 # not L10N_ALL_JS, which would paste it into the server bundle.js too.
-L10N_JSON += $(DIST_FOLDER)/l10n-all.js
+L10N_JSON += $(DIST_FOLDER)/l10n-all.js $(SETTINGS_L10N_JS)
 endif
 else
 L10N_ALL_JS = $(DIST_FOLDER)/l10n-all.js
-L10N_JSON = $(L10N_ALL_JS)
+L10N_JSON = $(L10N_ALL_JS) $(SETTINGS_L10N_JS)
 L10N_ALL_JS_ENTRY = l10n-all.js
 endif
 
@@ -64,7 +64,6 @@ $(DIST_FOLDER)/l10n-all.js : $(wildcard $(srcdir)/po/ui-*.po) $(wildcard $(srcdi
 	@find $(srcdir)/po -name 'ui-*.po.json' -delete
 	@find $(srcdir)/po -name 'help-*.po.json' -delete
 
-if ENABLE_MOBILEAPP
 # Scoped translations for the Options (integrator settings) dialog, which runs
 # in a file:// iframe where the <link rel="localizations"> loader does not work.
 # Only the dialog's strings, all languages (~200 KB), reusing l10n-all.js's
@@ -80,7 +79,6 @@ $(SETTINGS_L10N_JS): \
 		$(srcdir)/util/create-settings-l10n-js.py
 	@mkdir -p $(dir $@)
 	$(PYTHON) $(srcdir)/util/create-settings-l10n-js.py --srcdir $(srcdir) >$@
-endif
 
 QUIET_TSC = $(QUIET_TSC_$(V))
 QUIET_TSC_ = $(QUIET_TSC_$(AM_DEFAULT_VERBOSITY))
@@ -1104,7 +1102,6 @@ build-cool: \
 	$(L10N_MAPS_STAMP) \
 	$(UNO_L10N_STAMP) \
 	$(L10N_JSON) \
-	$(SETTINGS_L10N_JS) \
 	$(COOL_IMAGES_DST) \
 	$(COOL_IMAGES_CUSTOM_DST) \
 	$(JQUERY_LIGHTNESS_DIST_IMAGES) \
