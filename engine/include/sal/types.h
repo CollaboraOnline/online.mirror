@@ -360,10 +360,6 @@ namespace css = ::com::sun::star;
 */
 namespace cpo {}
 
-/** C++11 "constexpr" feature.
-*/
-#define SAL_CONSTEXPR constexpr
-
 /** Macro for C++11 "noexcept" vs. "throw ()" exception specification.
 
     The latter has been removed completely from C++20.

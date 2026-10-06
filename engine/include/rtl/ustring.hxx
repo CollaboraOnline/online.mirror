@@ -303,7 +303,7 @@ public:
         assert(
             libreoffice_internal::ConstCharArrayDetector<T>::isValid(literal));
         pData = NULL;
-        if SAL_CONSTEXPR (libreoffice_internal::ConstCharArrayDetector<T>::length == 0) {
+        if constexpr (libreoffice_internal::ConstCharArrayDetector<T>::length == 0) {
             rtl_uString_new(&pData);
         } else {
             rtl_uString_newFromLiteral(

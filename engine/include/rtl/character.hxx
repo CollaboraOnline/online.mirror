@@ -36,7 +36,7 @@ namespace rtl
 
     @return  True if code is a Unicode code point.
 */
-inline SAL_CONSTEXPR bool isUnicodeCodePoint(sal_uInt32 code) { return code <= 0x10FFFF; }
+inline constexpr bool isUnicodeCodePoint(sal_uInt32 code) { return code <= 0x10FFFF; }
 
 /// @cond INTERNAL
 namespace detail
@@ -243,7 +243,7 @@ template <detail::CodePointArgument T> constexpr sal_uInt32 toAsciiLowerCase(T c
              < 0 if code1 is less than code2,
              > 0 if code1 is greater than code2.
  */
-inline SAL_CONSTEXPR sal_Int32 compareIgnoreAsciiCase(sal_uInt32 code1, sal_uInt32 code2)
+inline constexpr sal_Int32 compareIgnoreAsciiCase(sal_uInt32 code1, sal_uInt32 code2)
 {
     assert(isUnicodeCodePoint(code1));
     assert(isUnicodeCodePoint(code2));
@@ -267,7 +267,7 @@ sal_uInt32 const surrogatesLowLast = 0xDFFF;
 
     @return  True if code is a surrogate code point (0xD800--0xDFFF).
 */
-inline SAL_CONSTEXPR bool isSurrogate(sal_uInt32 code)
+inline constexpr bool isSurrogate(sal_uInt32 code)
 {
     assert(isUnicodeCodePoint(code));
     return code >= detail::surrogatesHighFirst && code <= detail::surrogatesLowLast;
@@ -279,7 +279,7 @@ inline SAL_CONSTEXPR bool isSurrogate(sal_uInt32 code)
 
     @return  True if code is a high surrogate code point (0xD800--0xDBFF).
 */
-inline SAL_CONSTEXPR bool isHighSurrogate(sal_uInt32 code)
+inline constexpr bool isHighSurrogate(sal_uInt32 code)
 {
     assert(isUnicodeCodePoint(code));
     return code >= detail::surrogatesHighFirst && code <= detail::surrogatesHighLast;
@@ -291,7 +291,7 @@ inline SAL_CONSTEXPR bool isHighSurrogate(sal_uInt32 code)
 
     @return  True if code is a low surrogate code point (0xDC00--0xDFFF).
 */
-inline SAL_CONSTEXPR bool isLowSurrogate(sal_uInt32 code)
+inline constexpr bool isLowSurrogate(sal_uInt32 code)
 {
     assert(isUnicodeCodePoint(code));
     return code >= detail::surrogatesLowFirst && code <= detail::surrogatesLowLast;
@@ -303,7 +303,7 @@ inline SAL_CONSTEXPR bool isLowSurrogate(sal_uInt32 code)
 
     @return  The UTF-16 high surrogate half for the give code point.
  */
-inline SAL_CONSTEXPR sal_Unicode getHighSurrogate(sal_uInt32 code)
+inline constexpr sal_Unicode getHighSurrogate(sal_uInt32 code)
 {
     assert(isUnicodeCodePoint(code));
     assert(code >= 0x10000);
@@ -316,7 +316,7 @@ inline SAL_CONSTEXPR sal_Unicode getHighSurrogate(sal_uInt32 code)
 
     @return  The UTF-16 low surrogate half for the give code point.
  */
-inline SAL_CONSTEXPR sal_Unicode getLowSurrogate(sal_uInt32 code)
+inline constexpr sal_Unicode getLowSurrogate(sal_uInt32 code)
 {
     assert(isUnicodeCodePoint(code));
     assert(code >= 0x10000);
@@ -331,7 +331,7 @@ inline SAL_CONSTEXPR sal_Unicode getLowSurrogate(sal_uInt32 code)
 
     @return  The code point represented by the surrogate pair.
 */
-inline SAL_CONSTEXPR sal_uInt32 combineSurrogates(sal_uInt32 high, sal_uInt32 low)
+inline constexpr sal_uInt32 combineSurrogates(sal_uInt32 high, sal_uInt32 low)
 {
     assert(isHighSurrogate(high));
     assert(isLowSurrogate(low));
@@ -349,7 +349,7 @@ inline SAL_CONSTEXPR sal_uInt32 combineSurrogates(sal_uInt32 high, sal_uInt32 lo
     @return  The number of UTF-16 code units placed into the output (either one
     or two).
 */
-inline SAL_CONSTEXPR std::size_t splitSurrogates(sal_uInt32 code, sal_Unicode* output)
+inline constexpr std::size_t splitSurrogates(sal_uInt32 code, sal_Unicode* output)
 {
     assert(isUnicodeCodePoint(code));
     assert(output != NULL);
@@ -372,7 +372,7 @@ inline SAL_CONSTEXPR std::size_t splitSurrogates(sal_uInt32 code, sal_Unicode* o
 
     @return  True if code is a Unicode scalar value.
 */
-inline SAL_CONSTEXPR bool isUnicodeScalarValue(sal_uInt32 code)
+inline constexpr bool isUnicodeScalarValue(sal_uInt32 code)
 {
     return isUnicodeCodePoint(code) && !isSurrogate(code);
 }
