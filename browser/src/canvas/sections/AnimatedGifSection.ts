@@ -15,10 +15,9 @@
  */
 
 class AnimatedGifSection extends CanvasSectionObject {
-	processingOrder: number =
-		app.CSections.DefaultForDocumentObjects.processingOrder;
-	drawingOrder: number = app.CSections.DefaultForDocumentObjects.drawingOrder;
-	zIndex: number = app.CSections.DefaultForDocumentObjects.zIndex;
+	processingOrder: number = app.CSections.AnimatedGif.processingOrder;
+	drawingOrder: number = app.CSections.AnimatedGif.drawingOrder;
+	zIndex: number = app.CSections.AnimatedGif.zIndex;
 	documentObject: boolean = true;
 	interactable: boolean = false;
 	mirror: number = 0;
