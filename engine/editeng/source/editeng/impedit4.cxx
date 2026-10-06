@@ -662,6 +662,32 @@ ErrCode ImpEditEngine::WriteRTF( SvStream& rOutput, EditSelection aSel, bool bCl
         if ( bAttr )
             rOutput.WriteChar( ' ' ); // Separator
 
+        const SfxInt16Item& rOutlLevelItem = GetParaAttrib(nNode, EE_PARA_OUTLLEVEL);
+        sal_Int16 nOutlLevel = rOutlLevelItem.GetValue();
+        if (nOutlLevel >= 0)
+        {
+            // The paragraph has an outline level, check if that is a bullet.
+            const SvxNumBulletItem& rNumBullet = GetParaAttrib(nNode, EE_PARA_NUMBULLET);
+            const SvxNumberFormat* pFmt = rNumBullet.GetNumRule().Get(nOutlLevel);
+            if (pFmt && pFmt->GetNumberingType() == SVX_NUM_CHAR_SPECIAL)
+            {
+                sal_Unicode cBullet = static_cast<sal_Unicode>(pFmt->GetBulletChar());
+                OUString aBullet(&cBullet, 1);
+                rOutput.WriteChar('{').WriteOString(OOO_STRING_SVTOOLS_RTF_PNTEXT).WriteChar(' ');
+                RTFOutFuncs::Out_String(rOutput, aBullet, eDestEnc);
+                rOutput.WriteOString("\\tab}");
+                rOutput.WriteChar('{')
+                    .WriteOString(OOO_STRING_SVTOOLS_RTF_IGNORE)
+                    .WriteOString(OOO_STRING_SVTOOLS_RTF_PN)
+                    .WriteOString(OOO_STRING_SVTOOLS_RTF_PNLVLBLT)
+                    .WriteChar('{')
+                    .WriteOString(OOO_STRING_SVTOOLS_RTF_PNTXTB)
+                    .WriteChar(' ');
+                RTFOutFuncs::Out_String(rOutput, aBullet, eDestEnc);
+                rOutput.WriteOString("}}");
+            }
+        }
+
         ItemList aAttribItems;
         ParaPortion* pParaPortion = FindParaPortion( &rNode );
         DBG_ASSERT( pParaPortion, "Portion not found: WriteRTF" );

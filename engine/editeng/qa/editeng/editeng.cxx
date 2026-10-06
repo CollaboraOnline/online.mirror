@@ -11,8 +11,10 @@
 
 #include <editeng/eeitem.hxx>
 #include <editeng/editeng.hxx>
+#include <editeng/numitem.hxx>
 #include <editeng/wghtitem.hxx>
 #include <sfx2/app.hxx>
+#include <svl/intitem.hxx>
 #include <svtools/parrtf.hxx>
 #include <svtools/rtftoken.h>
 
@@ -198,6 +200,35 @@ CPPUNIT_TEST_FIXTURE(Test, testRTFStyleExportFollowRecursive)
     auto pData = dynamic_cast<EditDataObject*>(xData.get());
     SvMemoryStream& rStream = pData->GetRTFStream();
     CPPUNIT_ASSERT_GREATER(static_cast<sal_uInt64>(0), rStream.remainingSize());
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testRTFBullet)
+{
+    // Given a document with a paragraph that is a bulleted item:
+    EditEngine aEditEngine(mpItemPool.get());
+    OUString aText = u"mytest"_ustr;
+    aEditEngine.SetText(aText);
+    SfxItemSet aItems(aEditEngine.GetParaAttribs(0));
+    aItems.Put(SfxInt16Item(EE_PARA_OUTLLEVEL, 0));
+    SvxNumRule aRule(SvxNumRuleFlags::BULLET_REL_SIZE, 10, false);
+    SvxNumberFormat aFmt(SVX_NUM_CHAR_SPECIAL);
+    aFmt.SetBulletChar(0x2022); // bullet
+    aRule.SetLevel(0, aFmt);
+    aItems.Put(SvxNumBulletItem(std::move(aRule), EE_PARA_NUMBULLET));
+    aEditEngine.SetParaAttribs(0, aItems);
+
+    // When copying to the clipboard as RTF:
+    uno::Reference<datatransfer::XTransferable> xData
+        = aEditEngine.CreateTransferable(ESelection(0, 0, 0, aText.getLength()));
+
+    // Then make sure the RTF carries the bullet so a non-editeng reader sees it:
+    auto pData = dynamic_cast<EditDataObject*>(xData.get());
+    SvMemoryStream& rStream = pData->GetRTFStream();
+    std::string aCnt{ static_cast<const char*>(rStream.GetData()),
+                      static_cast<size_t>(rStream.GetSize()) };
+    // Without the accompanying fix in place, this failed, the export wrote
+    // only editeng's own \level0 and \pnlvlblt.
+    CPPUNIT_ASSERT(aCnt.find("\\pnlvlblt") != std::string::npos);
 }
 
 CPPUNIT_TEST_FIXTURE(Test, testTdf119192)
