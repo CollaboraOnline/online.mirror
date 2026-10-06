@@ -1351,8 +1351,9 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 	_onCellAddressMsg: function (textMsg) {
 		// When the user moves the focus to a different cell, a 'cellformula'
 		// message is received from coolwsd, *then* a 'celladdress' message.
+		// It can come first, e.g. with a whole row selected on load, before any cell text.
 		var address = textMsg.substring(13);
-		if (this._map._clip && !this._map['wopi'].DisableCopy) {
+		if (this._map._clip && !this._map['wopi'].DisableCopy && this._lastFormula !== undefined) {
 			this._map._clip.setTextSelectionText(this._lastFormula);
 		}
 		this._map.fire('celladdress', {address: address});
