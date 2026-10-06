@@ -1013,7 +1013,11 @@ OUString SdDrawDocument::CreatePageNumValue(sal_uInt16 nNum) const
 // (including ~LT~). This is unlike rNewName.
 void SdDrawDocument::RenameLayoutTemplate(const OUString& rOldLayoutName, const OUString& rNewName)
 {
-    OUString aOldName(rOldLayoutName);
+    // rOldLayoutName may be the layout name of a page this function renames, so the pages are
+    // matched against a copy of it. Every page of the layout then keeps matching, the notes
+    // master and the notes pages included.
+    const OUString aOldLayoutName(rOldLayoutName);
+    OUString aOldName(aOldLayoutName);
     sal_Int32 nPos = aOldName.indexOf( SD_LT_SEPARATOR );
 
     // erase everything after '~LT~'
@@ -1059,7 +1063,7 @@ void SdDrawDocument::RenameLayoutTemplate(const OUString& rOldLayoutName, const 
         SdPage* pPage = static_cast<SdPage*>(GetPage(nPage));
         OUString aTemp(pPage->GetLayoutName());
 
-        if (aTemp == rOldLayoutName)
+        if (aTemp == aOldLayoutName)
         {
             pPage->SetLayoutName(aPageLayoutName);
 
@@ -1098,7 +1102,7 @@ void SdDrawDocument::RenameLayoutTemplate(const OUString& rOldLayoutName, const 
         SdPage* pPage = static_cast<SdPage*>( GetMasterPage(nPage) );
         OUString aTemp(pPage->GetLayoutName());
 
-        if (aTemp == rOldLayoutName)
+        if (aTemp == aOldLayoutName)
         {
             pPage->SetLayoutName(aPageLayoutName);
             pPage->SetName(rNewName);

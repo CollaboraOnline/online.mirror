@@ -124,6 +124,8 @@ public:
     void testInsertFileAsPageKeepDesignSameMasterNameAndDesign();
     void testSlideImportRoundTripKeepsMasterBackground();
     void testInsertFileAsPageKeepDesignTwiceSharesMaster();
+    void testInsertFileAsPageKeepDesignRenamedKeepsNotesMaster();
+    void testInsertFileAsPageKeepDesignTwoDesignsOfOneName();
     void testInsertFileAsPageLinkRecordsSource();
     void testInsertFileAsPageLinkWithoutSourceRecordsMedium();
     void testInsertWholeFileAsPagesLinkRecordsSource();
@@ -175,6 +177,8 @@ public:
     CPPUNIT_TEST(testInsertFileAsPageKeepDesignSameMasterNameAndDesign);
     CPPUNIT_TEST(testSlideImportRoundTripKeepsMasterBackground);
     CPPUNIT_TEST(testInsertFileAsPageKeepDesignTwiceSharesMaster);
+    CPPUNIT_TEST(testInsertFileAsPageKeepDesignRenamedKeepsNotesMaster);
+    CPPUNIT_TEST(testInsertFileAsPageKeepDesignTwoDesignsOfOneName);
     CPPUNIT_TEST(testInsertFileAsPageLinkRecordsSource);
     CPPUNIT_TEST(testInsertFileAsPageLinkWithoutSourceRecordsMedium);
     CPPUNIT_TEST(testInsertWholeFileAsPagesLinkRecordsSource);
@@ -1652,6 +1656,89 @@ void SdMiscTest::testInsertFileAsPageAdoptDesignAtStart()
                                  .GetLayoutName()));
 }
 
+
+// Checks that the master pages of rDoc come as the handout master followed by pairs of a slide
+// master and a notes master, and that the two pages of each pair carry the same layout name.
+static void assertMasterPagesPaired(SdDrawDocument& rDoc)
+{
+    const sal_uInt16 nMasterCount = rDoc.GetMasterPageCount();
+    CPPUNIT_ASSERT_EQUAL(sal_uInt16(1), static_cast<sal_uInt16>(nMasterCount % 2));
+    CPPUNIT_ASSERT_EQUAL(PageKind::Handout,
+                         static_cast<SdPage*>(rDoc.GetMasterPage(0))->GetPageKind());
+
+    for (sal_uInt16 nMaster = 1; nMaster < nMasterCount; nMaster += 2)
+    {
+        SdPage* pSlideMaster = static_cast<SdPage*>(rDoc.GetMasterPage(nMaster));
+        SdPage* pNotesMaster = static_cast<SdPage*>(rDoc.GetMasterPage(nMaster + 1));
+        CPPUNIT_ASSERT_EQUAL(PageKind::Standard, pSlideMaster->GetPageKind());
+        CPPUNIT_ASSERT_EQUAL(PageKind::Notes, pNotesMaster->GetPageKind());
+        CPPUNIT_ASSERT_EQUAL(pSlideMaster->GetLayoutName(), pNotesMaster->GetLayoutName());
+    }
+}
+
+void SdMiscTest::testInsertFileAsPageKeepDesignRenamedKeepsNotesMaster()
+{
+    // Both presentations name their master page "Default" and the designs differ, so the
+    // inserted design arrives under a new name. Its notes master arrives under that name too,
+    // and the notes page of the inserted slide uses it. The second insert from the same
+    // presentation finds the design the first one brought and keeps the same pairing.
+    createSdImpressDoc("slide-import-same-master-name-target.odp");
+    SdXImpressDocument* pXImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+    CPPUNIT_ASSERT(pXImpressDocument);
+    SdDrawDocument* pDoc = pXImpressDocument->GetDoc();
+
+    std::vector<OUString> aBookmarkList{ u"SourceRed"_ustr };
+    for (sal_uInt16 nRun = 0; nRun < 2; ++nRun)
+    {
+        CPPUNIT_ASSERT(
+            pDoc->OpenBookmarkDoc(createFileURL(u"slide-import-same-master-name-source.odp")));
+        CPPUNIT_ASSERT(pDoc->InsertFileAsPage(aBookmarkList, nullptr,
+                                              InsertBookmarkOptions::ForSlideImport(
+                                                  /*bKeepDesign=*/true),
+                                              3, nullptr, /*oScaleObjects=*/true));
+        pDoc->CloseBookmarkDoc();
+
+        assertMasterPagesPaired(*pDoc);
+
+        SdPage* pSlide = pDoc->GetSdPage(1, PageKind::Standard);
+        SdPage* pNotes = pDoc->GetSdPage(1, PageKind::Notes);
+        CPPUNIT_ASSERT(pNotes->TRG_HasMasterPage());
+        SdPage& rNotesMaster = static_cast<SdPage&>(pNotes->TRG_GetMasterPage());
+        CPPUNIT_ASSERT_EQUAL(PageKind::Notes, rNotesMaster.GetPageKind());
+        CPPUNIT_ASSERT_EQUAL(pSlide->GetLayoutName(), rNotesMaster.GetLayoutName());
+    }
+}
+
+void SdMiscTest::testInsertFileAsPageKeepDesignTwoDesignsOfOneName()
+{
+    // Three presentations name their master page "Default", each with a design of its own:
+    // green here, red and blue in the two the slides come from. A slide from each keeps its
+    // design, and every design arrives with its notes master, so the n-th slide master is
+    // still the master page at position 2n+1 after both inserts.
+    createSdImpressDoc("slide-import-same-master-name-target.odp");
+    SdXImpressDocument* pXImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+    CPPUNIT_ASSERT(pXImpressDocument);
+    SdDrawDocument* pDoc = pXImpressDocument->GetDoc();
+
+    for (const char16_t* pSource : { u"slide-import-same-master-name-source.odp",
+                                     u"slide-import-same-master-name-source-blue.odp" })
+    {
+        CPPUNIT_ASSERT(pXImpressDocument->insertPagesFromFile(
+            createFileURL(pSource), "{\"slides\":[0],\"at\":1,\"keepDesign\":true}"_ostr));
+
+        assertMasterPagesPaired(*pDoc);
+        const sal_uInt16 nSlideMasters = pDoc->GetMasterSdPageCount(PageKind::Standard);
+        for (sal_uInt16 nMaster = 0; nMaster < nSlideMasters; ++nMaster)
+            CPPUNIT_ASSERT_EQUAL(
+                static_cast<sal_uInt16>(2 * nMaster + 1),
+                pDoc->GetMasterSdPage(nMaster, PageKind::Standard)->GetPageNum());
+    }
+
+    // The target design and the two that arrived.
+    CPPUNIT_ASSERT_EQUAL(sal_uInt16(3), pDoc->GetMasterSdPageCount(PageKind::Standard));
+    CPPUNIT_ASSERT_EQUAL(sal_uInt16(3), pDoc->GetSdPageCount(PageKind::Standard));
+}
+
 void SdMiscTest::testInsertFileAsPageKeepDesign()
 {
     // Pages inserted from another presentation keep their own design when the
@@ -1831,8 +1918,9 @@ void SdMiscTest::testInsertFileAsPageKeepDesignTwiceSharesMaster()
 
     CPPUNIT_ASSERT_EQUAL(sal_uInt16(3), pDoc->GetSdPageCount(PageKind::Standard));
 
-    // One design arrived, and the second insert added no master page of its own.
-    CPPUNIT_ASSERT_EQUAL(static_cast<sal_uInt16>(nMasterCountBefore + 1),
+    // One design arrived as a slide master and a notes master, and the second insert added no
+    // master page of its own.
+    CPPUNIT_ASSERT_EQUAL(static_cast<sal_uInt16>(nMasterCountBefore + 2),
                          pDoc->GetMasterPageCount());
 
     SdPage& rFirst = static_cast<SdPage&>(
