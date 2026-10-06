@@ -20,16 +20,16 @@
 #ifndef INCLUDED_OSL_INTERLCK_H
 #define INCLUDED_OSL_INTERLCK_H
 
-#include "sal/config.h"
+#include <sal/config.h>
 
-#include "sal/saldllapi.h"
-#include "sal/types.h"
+#include <sal/saldllapi.h>
+#include <sal/types.h>
 
 #if defined(_WIN32)
 #include <intrin.h>
 #endif
 
-#include "config_global.h"
+#include <config_global.h>
 
 #ifdef __cplusplus
 extern "C" {

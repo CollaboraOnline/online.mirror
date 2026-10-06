@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
-#include "rtl/textenc.h"
-#include "rtl/ustring.h"
-#include "sal/saldllapi.h"
-#include "sal/types.h"
+#include <rtl/textenc.h>
+#include <rtl/ustring.h>
+#include <sal/saldllapi.h>
+#include <sal/types.h>
 
 #if defined __cplusplus
 extern "C" {

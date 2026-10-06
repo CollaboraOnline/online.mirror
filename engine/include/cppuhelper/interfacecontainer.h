@@ -20,21 +20,21 @@
 #ifndef INCLUDED_CPPUHELPER_INTERFACECONTAINER_H
 #define INCLUDED_CPPUHELPER_INTERFACECONTAINER_H
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cstddef>
 #include <functional>
 #include <vector>
 #include <utility>
 
-#include "osl/diagnose.h"
-#include "osl/mutex.hxx"
-#include "rtl/alloc.h"
-#include "cpo/uno/Sequence.hxx"
-#include "com/sun/star/lang/EventObject.hpp"
+#include <osl/diagnose.h>
+#include <osl/mutex.hxx>
+#include <rtl/alloc.h>
+#include <cpo/uno/Sequence.hxx>
+#include <com/sun/star/lang/EventObject.hpp>
 
-#include "com/sun/star/lang/DisposedException.hpp"
-#include "cppuhelper/cppuhelperdllapi.h"
+#include <com/sun/star/lang/DisposedException.hpp>
+#include <cppuhelper/cppuhelperdllapi.h>
 
 namespace cpo::uno { class XInterface; }
 

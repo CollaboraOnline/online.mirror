@@ -20,9 +20,9 @@
 #ifndef INCLUDED_CPPUHELPER_PROPTYPEHLP_HXX
 #define INCLUDED_CPPUHELPER_PROPTYPEHLP_HXX
 
-#include "cppuhelper/proptypehlp.h"
-#include "com/sun/star/lang/IllegalArgumentException.hpp"
-#include "cpo/uno/TypeClass.hpp"
+#include <cppuhelper/proptypehlp.h>
+#include <com/sun/star/lang/IllegalArgumentException.hpp>
+#include <cpo/uno/TypeClass.hpp>
 
 namespace cppu
 {

@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cstddef>
 
-#include "cpo/uno/genfunc.h"
-#include "cpo/uno/Any.hxx"
-#include "cpo/uno/XInterface.hpp"
+#include <cpo/uno/genfunc.h>
+#include <cpo/uno/Any.hxx>
+#include <cpo/uno/XInterface.hpp>
 
 
 namespace cpo::uno

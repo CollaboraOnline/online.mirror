@@ -20,8 +20,8 @@
 #ifndef INCLUDED_CPPUHELPER_COMPBASE12_HXX
 #define INCLUDED_CPPUHELPER_COMPBASE12_HXX
 
-#include "cppuhelper/implbase12.hxx"
-#include "cppuhelper/compbase_ex.hxx"
+#include <cppuhelper/implbase12.hxx>
+#include <cppuhelper/compbase_ex.hxx>
 
 namespace cppu
 {

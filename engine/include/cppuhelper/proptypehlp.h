@@ -20,7 +20,7 @@
 #ifndef INCLUDED_CPPUHELPER_PROPTYPEHLP_H
 #define INCLUDED_CPPUHELPER_PROPTYPEHLP_H
 
-#include "sal/types.h"
+#include <sal/types.h>
 
 namespace cpo::uno { class Any; }
 

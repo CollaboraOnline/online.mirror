@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "sal/types.h"
+#include <sal/types.h>
 
 typedef struct _typelib_TypeDescriptionReference typelib_TypeDescriptionReference;
 

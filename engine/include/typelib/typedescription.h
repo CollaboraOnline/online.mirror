@@ -20,9 +20,9 @@
 #ifndef INCLUDED_TYPELIB_TYPEDESCRIPTION_H
 #define INCLUDED_TYPELIB_TYPEDESCRIPTION_H
 
-#include "cppu/cppudllapi.h"
-#include "typelib/typeclass.h"
-#include "rtl/ustring.h"
+#include <cppu/cppudllapi.h>
+#include <typelib/typeclass.h>
+#include <rtl/ustring.h>
 
 #ifdef __cplusplus
 extern "C"

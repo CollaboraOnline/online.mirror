@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
-#include "sal/types.h"
+#include <sal/types.h>
 
 #if defined(SAL_DLLIMPLEMENTATION)
 #define SAL_DLLPUBLIC SAL_DLLPUBLIC_EXPORT

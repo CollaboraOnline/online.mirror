@@ -20,13 +20,13 @@
 #ifndef INCLUDED_CPPUHELPER_TYPEPROVIDER_HXX
 #define INCLUDED_CPPUHELPER_TYPEPROVIDER_HXX
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cstddef>
 
-#include "rtl/alloc.h"
-#include "cpo/uno/Sequence.hxx"
-#include "cppuhelper/cppuhelperdllapi.h"
+#include <rtl/alloc.h>
+#include <cpo/uno/Sequence.hxx>
+#include <cppuhelper/cppuhelperdllapi.h>
 
 
 namespace cppu

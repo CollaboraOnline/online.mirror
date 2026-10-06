@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "osl/endian.h"
+#include <osl/endian.h>
 
 #if defined __sun
 #include <ieeefp.h>

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "sal/types.h"
+#include <sal/types.h>
 
 /** The various supported text encodings.
 

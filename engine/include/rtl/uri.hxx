@@ -18,17 +18,17 @@
  */
 #pragma once
 
-#include "rtl/malformeduriexception.hxx"
-#include "rtl/uri.h"
-#include "rtl/textenc.h"
-#include "rtl/ustring.hxx"
-#include "sal/types.h"
+#include <rtl/malformeduriexception.hxx>
+#include <rtl/uri.h>
+#include <rtl/textenc.h>
+#include <rtl/ustring.hxx>
+#include <sal/types.h>
 
 #include <array>
 #include <cassert>
 #include <cstddef>
 #include <string_view>
-#include "config_global.h"
+#include <config_global.h>
 
 namespace rtl {
 

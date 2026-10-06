@@ -8,10 +8,10 @@
  */
 #pragma once
 
-#include "sal/config.h"
-#include "sal/saldllapi.h"
-#include "sal/types.h"
-#include "rtl/ustring.hxx"
+#include <sal/config.h>
+#include <sal/saldllapi.h>
+#include <sal/types.h>
+#include <rtl/ustring.hxx>
 #include <memory>
 
 /**

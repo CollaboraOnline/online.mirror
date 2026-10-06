@@ -20,14 +20,14 @@
 #ifndef INCLUDED_OSL_TIME_H
 #define INCLUDED_OSL_TIME_H
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #if defined __cplusplus
 #include <chrono>
 #endif
 
-#include "sal/saldllapi.h"
-#include "sal/types.h"
+#include <sal/saldllapi.h>
+#include <sal/types.h>
 
 #ifdef _WIN32
 #   pragma pack(push, 8)

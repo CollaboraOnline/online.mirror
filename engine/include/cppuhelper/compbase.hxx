@@ -20,17 +20,17 @@
 #ifndef INCLUDED_CPPUHELPER_COMPBASE_HXX
 #define INCLUDED_CPPUHELPER_COMPBASE_HXX
 
-#include "sal/config.h"
+#include <sal/config.h>
 
-#include "com/sun/star/lang/XTypeProvider.hpp"
-#include "cpo/uno/Any.h"
-#include "cpo/uno/Reference.h"
-#include "cpo/uno/Sequence.h"
-#include "cpo/uno/Type.h"
-#include "cppuhelper/compbase_ex.hxx"
-#include "cppuhelper/implbase.hxx"
-#include "rtl/instance.hxx"
-#include "sal/types.h"
+#include <com/sun/star/lang/XTypeProvider.hpp>
+#include <cpo/uno/Any.h>
+#include <cpo/uno/Reference.h>
+#include <cpo/uno/Sequence.h>
+#include <cpo/uno/Type.h>
+#include <cppuhelper/compbase_ex.hxx>
+#include <cppuhelper/implbase.hxx>
+#include <rtl/instance.hxx>
+#include <sal/types.h>
 
 namespace com { namespace sun { namespace star { namespace lang {
     class XEventListener;

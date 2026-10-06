@@ -8,9 +8,9 @@
  */
 #pragma once
 
-#include "rtl/stringutils.hxx"
-#include "rtl/string.h"
-#include "rtl/ustring.h"
+#include <rtl/stringutils.hxx>
+#include <rtl/string.h>
+#include <rtl/ustring.h>
 
 #include <algorithm>
 #include <cassert>

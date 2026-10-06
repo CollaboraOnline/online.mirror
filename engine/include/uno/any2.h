@@ -20,8 +20,8 @@
 #ifndef INCLUDED_UNO_ANY2_H
 #define INCLUDED_UNO_ANY2_H
 
-#include "cppu/cppudllapi.h"
-#include "uno/data.h"
+#include <cppu/cppudllapi.h>
+#include <uno/data.h>
 
 #ifdef __cplusplus
 extern "C"

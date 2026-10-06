@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include "typelib/typedescription.h"
-#include "cpo/uno/TypeClass.hdl"
-#include "rtl/ustring.hxx"
-#include "rtl/alloc.h"
+#include <typelib/typedescription.h>
+#include <cpo/uno/TypeClass.hdl>
+#include <rtl/ustring.hxx>
+#include <rtl/alloc.h>
 
 
 namespace cpo::uno

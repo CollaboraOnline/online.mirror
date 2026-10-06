@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cassert>
 #include <concepts>
 #include <cstddef>
 
-#include "sal/types.h"
+#include <sal/types.h>
 
 #include <type_traits>
 

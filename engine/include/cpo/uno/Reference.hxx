@@ -18,16 +18,16 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cstddef>
 #include <ostream>
 
-#include "cpo/uno/Reference.h"
-#include "cpo/uno/RuntimeException.hpp"
-#include "cpo/uno/XInterface.hpp"
-#include "cpo/uno/Any.hxx"
-#include "cppu/cppudllapi.h"
+#include <cpo/uno/Reference.h>
+#include <cpo/uno/RuntimeException.hpp>
+#include <cpo/uno/XInterface.hpp>
+#include <cpo/uno/Any.hxx>
+#include <cppu/cppudllapi.h>
 
 extern "C" CPPU_DLLPUBLIC rtl_uString * cppu_unsatisfied_iquery_msg(
     typelib_TypeDescriptionReference * pType )

@@ -20,10 +20,10 @@
 #ifndef INCLUDED_CPPUHELPER_WEAKAGG_HXX
 #define INCLUDED_CPPUHELPER_WEAKAGG_HXX
 
-#include "cppuhelper/weak.hxx"
-#include "cppuhelper/weakref.hxx"
-#include "cpo/uno/XAggregation.hpp"
-#include "cppuhelper/cppuhelperdllapi.h"
+#include <cppuhelper/weak.hxx>
+#include <cppuhelper/weakref.hxx>
+#include <cpo/uno/XAggregation.hpp>
+#include <cppuhelper/cppuhelperdllapi.h>
 
 
 namespace cppu

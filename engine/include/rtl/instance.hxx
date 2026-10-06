@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cstddef>
 
-#include "osl/doublecheckedlocking.h"
-#include "osl/getglobalmutex.hxx"
+#include <osl/doublecheckedlocking.h>
+#include <osl/getglobalmutex.hxx>
 
 namespace {
 

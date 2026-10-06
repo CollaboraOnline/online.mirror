@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "rtl/ustring.hxx"
+#include <rtl/ustring.hxx>
 
 namespace rtl {
 

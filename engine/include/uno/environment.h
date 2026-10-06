@@ -20,8 +20,8 @@
 #ifndef INCLUDED_UNO_ENVIRONMENT_H
 #define INCLUDED_UNO_ENVIRONMENT_H
 
-#include "cppu/cppudllapi.h"
-#include "rtl/ustring.h"
+#include <cppu/cppudllapi.h>
+#include <rtl/ustring.h>
 
 #include <stdarg.h>
 

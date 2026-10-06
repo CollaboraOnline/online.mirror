@@ -20,7 +20,7 @@
 #ifndef INCLUDED_TYPELIB_TYPECLASS_H
 #define INCLUDED_TYPELIB_TYPECLASS_H
 
-#include "sal/types.h"
+#include <sal/types.h>
 
 /** This type class enum is binary compatible with the IDL enum cpo.uno.TypeClass.
 */

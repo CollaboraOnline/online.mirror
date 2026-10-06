@@ -20,11 +20,11 @@
 #ifndef INCLUDED_CPPUHELPER_COMPONENT_CONTEXT_HXX
 #define INCLUDED_CPPUHELPER_COMPONENT_CONTEXT_HXX
 
-#include "cpo/uno/Any.hxx"
-#include "cpo/uno/Reference.hxx"
-#include "cppuhelper/cppuhelperdllapi.h"
-#include "rtl/ustring.hxx"
-#include "sal/types.h"
+#include <cpo/uno/Any.hxx>
+#include <cpo/uno/Reference.hxx>
+#include <cppuhelper/cppuhelperdllapi.h>
+#include <rtl/ustring.hxx>
+#include <sal/types.h>
 
 namespace cpo::uno { class XComponentContext; }
 

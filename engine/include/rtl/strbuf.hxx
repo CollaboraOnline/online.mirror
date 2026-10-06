@@ -19,17 +19,17 @@
 
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cassert>
 #include <cstring>
 #include <limits>
 
-#include "rtl/strbuf.h"
-#include "rtl/string.hxx"
-#include "rtl/stringutils.hxx"
+#include <rtl/strbuf.h>
+#include <rtl/string.hxx>
+#include <rtl/stringutils.hxx>
 
-#include "rtl/stringconcat.hxx"
+#include <rtl/stringconcat.hxx>
 #include <string_view>
 #include <type_traits>
 

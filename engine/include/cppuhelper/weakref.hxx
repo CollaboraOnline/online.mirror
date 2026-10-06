@@ -20,13 +20,13 @@
 #ifndef INCLUDED_CPPUHELPER_WEAKREF_HXX
 #define INCLUDED_CPPUHELPER_WEAKREF_HXX
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cstddef>
 
-#include "cpo/uno/Reference.hxx"
-#include "cpo/uno/XInterface.hpp"
-#include "cppuhelper/cppuhelperdllapi.h"
+#include <cpo/uno/Reference.hxx>
+#include <cpo/uno/XInterface.hpp>
+#include <cppuhelper/cppuhelperdllapi.h>
 
 namespace cpo::uno
 {

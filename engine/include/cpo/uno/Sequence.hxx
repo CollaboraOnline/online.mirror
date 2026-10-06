@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cassert>
 #include <cstddef>
@@ -26,12 +26,12 @@
 # include <ostream>
 # include <utility>
 
-#include "osl/interlck.h"
-#include "cpo/uno/Sequence.h"
-#include "typelib/typedescription.h"
-#include "uno/data.h"
-#include "cpo/uno/genfunc.hxx"
-#include "cppu/unotype.hxx"
+#include <osl/interlck.h>
+#include <cpo/uno/Sequence.h>
+#include <typelib/typedescription.h>
+#include <uno/data.h>
+#include <cpo/uno/genfunc.hxx>
+#include <cppu/unotype.hxx>
 
 namespace cpo::uno
 {

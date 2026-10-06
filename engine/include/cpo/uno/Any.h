@@ -18,17 +18,17 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cstddef>
 #include <type_traits>
 
-#include "rtl/ustring.hxx"
-#include "uno/any2.h"
-#include "typelib/typedescription.h"
-#include "cppu/unotype.hxx"
-#include "cpo/uno/TypeClass.hdl"
-#include "rtl/alloc.h"
+#include <rtl/ustring.hxx>
+#include <uno/any2.h>
+#include <typelib/typedescription.h>
+#include <cppu/unotype.hxx>
+#include <cpo/uno/TypeClass.hdl>
+#include <rtl/alloc.h>
 
 namespace cpo::uno
 {

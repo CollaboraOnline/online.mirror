@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "rtl/math.h"
-#include "rtl/strbuf.hxx"
-#include "rtl/string.hxx"
-#include "rtl/ustring.hxx"
-#include "rtl/ustrbuf.hxx"
-#include "sal/mathconf.h"
-#include "sal/types.h"
+#include <rtl/math.h>
+#include <rtl/strbuf.hxx>
+#include <rtl/string.hxx>
+#include <rtl/ustring.hxx>
+#include <rtl/ustrbuf.hxx>
+#include <sal/mathconf.h>
+#include <sal/types.h>
 
 #include <cstddef>
 #include <math.h>

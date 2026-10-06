@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cassert>
 #include <cstddef>
 #include <type_traits>
 
-#include "rtl/alloc.h"
+#include <rtl/alloc.h>
 
 namespace cpo::uno { class Any; }
 namespace cpo::uno { class RuntimeException; }

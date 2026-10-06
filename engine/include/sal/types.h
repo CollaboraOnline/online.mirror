@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <stddef.h>
 
-#include "sal/macros.h"
-#include "sal/typesizes.h"
+#include <sal/macros.h>
+#include <sal/typesizes.h>
 
 #if !defined __cplusplus
 #include <stdbool.h>

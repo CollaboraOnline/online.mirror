@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cassert>
 #include <cstddef>
@@ -33,13 +33,13 @@
 #include <string_view>
 #include <type_traits>
 
-#include "rtl/math.h"
-#include "rtl/textenc.h"
-#include "rtl/string.h"
-#include "rtl/stringutils.hxx"
+#include <rtl/math.h>
+#include <rtl/textenc.h>
+#include <rtl/string.h>
+#include <rtl/stringutils.hxx>
 
-#include "config_global.h"
-#include "rtl/stringconcat.hxx"
+#include <config_global.h>
+#include <rtl/stringconcat.hxx>
 
 #ifdef RTL_STRING_UNITTEST
 extern bool rtl_string_unittest_const_literal;

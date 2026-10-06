@@ -20,20 +20,20 @@
 #ifndef INCLUDED_CPPUHELPER_IMPLBASE_HXX
 #define INCLUDED_CPPUHELPER_IMPLBASE_HXX
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <atomic>
 #include <cstddef>
 #include <utility>
 
-#include "com/sun/star/lang/XTypeProvider.hpp"
-#include "cpo/uno/Any.h"
-#include "cpo/uno/Sequence.hxx"
-#include "cpo/uno/Type.h"
-#include "cppuhelper/implbase_ex.hxx"
-#include "cppuhelper/weak.hxx"
-#include "rtl/instance.hxx"
-#include "sal/types.h"
+#include <com/sun/star/lang/XTypeProvider.hpp>
+#include <cpo/uno/Any.h>
+#include <cpo/uno/Sequence.hxx>
+#include <cpo/uno/Type.h>
+#include <cppuhelper/implbase_ex.hxx>
+#include <cppuhelper/weak.hxx>
+#include <rtl/instance.hxx>
+#include <sal/types.h>
 
 // A replacement for ImplHelperN has deliberately been left out, as ImplHelperN
 // is unlikely ever be a better choice than WeakImplHelper, so all their

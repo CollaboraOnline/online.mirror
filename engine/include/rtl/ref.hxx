@@ -18,15 +18,15 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cassert>
 #include <cstddef>
 #include <functional>
 #include <type_traits>
-#include "cpo/uno/Reference.h"
+#include <cpo/uno/Reference.h>
 
-#include "sal/types.h"
+#include <sal/types.h>
 
 namespace rtl
 {

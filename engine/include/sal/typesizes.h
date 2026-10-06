@@ -15,6 +15,6 @@
  * too.
  */
 
-#include "config_typesizes.h"
+#include <config_typesizes.h>
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

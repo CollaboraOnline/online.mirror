@@ -18,11 +18,11 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
-#include "rtl/string.h"
-#include "sal/saldllapi.h"
-#include "sal/types.h"
+#include <rtl/string.h>
+#include <sal/saldllapi.h>
+#include <sal/types.h>
 
 /**
    @file

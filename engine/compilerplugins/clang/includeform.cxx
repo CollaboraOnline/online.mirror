@@ -46,46 +46,33 @@ private:
         {
             return;
         }
-        auto const uno = isInUnoIncludeFile(HashLoc)
-            && !compiler.getSourceManager().isInMainFile(HashLoc);
-                // exclude the various compat.cxx that are included in
-                // isInUnoIncludeFile
-            //TODO: 'uno' should be false if HashLoc is inside an
-            // '#ifdef LIBO_INTERNAL_ONLY' block
-        bool shouldUseAngles;
-        if (uno) {
-            shouldUseAngles
-                = (!(loplugin::hasPathnamePrefix(SearchPath, SRCDIR "/")
-                     || loplugin::hasPathnamePrefix(SearchPath, BUILDDIR "/"))
-                   || loplugin::hasPathnamePrefix(
-                       SearchPath, WORKDIR "/UnpackedTarball/"));
-        } else {
-            auto const dir1 = std::string(loplugin::makePathnameAbsolute(SearchPath));
-            // Both directories have to be in the same form before they are compared, so the
-            // including file is made absolute too.
-            auto const file = loplugin::makePathnameAbsolute(
-                StringRef(
-                    compiler.getSourceManager().getPresumedLoc(HashLoc)
-                    .getFilename()));
-            auto pos = file.rfind('/');
+        auto const dir1 = std::string(loplugin::makePathnameAbsolute(SearchPath));
+        // Both directories have to be in the same form before they are compared, so the
+        // including file is made absolute too.
+        auto const file = loplugin::makePathnameAbsolute(
+            StringRef(
+                compiler.getSourceManager().getPresumedLoc(HashLoc)
+                .getFilename()));
+        auto pos = file.rfind('/');
 #if defined _WIN32
-            auto const pos2 = file.rfind('\\');
-            if (pos2 != StringRef::npos
-                && (pos == StringRef::npos || pos2 > pos))
-            {
-                pos = pos2;
-            }
-#endif
-            auto dir2 = std::string(file.take_front(pos));
-            loplugin::normalizeDotDotInFilePath(dir2);
-            if (loplugin::hasPathnamePrefix(file, SRCDIR "/solenv/lockfile/")
-                && FileName == "autoconf.h")
-            {
-                shouldUseAngles = false;
-            } else {
-                shouldUseAngles = !loplugin::isSamePathname(dir1, dir2);
-            }
+        auto const pos2 = file.rfind('\\');
+        if (pos2 != StringRef::npos
+            && (pos == StringRef::npos || pos2 > pos))
+        {
+            pos = pos2;
         }
+#endif
+        bool shouldUseAngles;
+        auto dir2 = std::string(file.take_front(pos));
+        loplugin::normalizeDotDotInFilePath(dir2);
+        if (loplugin::hasPathnamePrefix(file, SRCDIR "/solenv/lockfile/")
+            && FileName == "autoconf.h")
+        {
+            shouldUseAngles = false;
+        } else {
+            shouldUseAngles = !loplugin::isSamePathname(dir1, dir2);
+        }
+
         if (shouldUseAngles == IsAngled) {
             return;
         }
@@ -104,17 +91,15 @@ private:
                 return;
             }
         }
-        report(
-            DiagnosticsEngine::Warning,
-            ("%select{|in UNO API include file, }0replace"
-             " %select{\"...\"|<...>}1 include form with"
-             " %select{\"...\"|<...>}2 for inclusion of %select{%select{a"
-             " source file next to the current source file|a source file not"
-             " next to the current source file, or a header}2|%select{a source"
-             " file|a header}2}0, %3"),
-            FilenameRange.getBegin())
-            << uno << IsAngled << shouldUseAngles << File->getName()
-            << FilenameRange;
+        report(DiagnosticsEngine::Warning,
+              "replace %0 include form with %1 for inclusion of %2, %3",
+              FilenameRange.getBegin())
+          << (IsAngled ? "<...>" : "\"...\"")
+          << (shouldUseAngles ? "<...>" : "\"...\"")
+          << (shouldUseAngles
+              ? "a source file not next to the current source file, or a header"
+              : "a source file next to the current source file")
+          << File->getName() << FilenameRange;
     }
 };
 

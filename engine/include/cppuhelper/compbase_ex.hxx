@@ -20,11 +20,11 @@
 #ifndef INCLUDED_CPPUHELPER_COMPBASE_EX_HXX
 #define INCLUDED_CPPUHELPER_COMPBASE_EX_HXX
 
-#include "cppuhelper/interfacecontainer.h"
-#include "com/sun/star/lang/XComponent.hpp"
-#include "cppuhelper/cppuhelperdllapi.h"
-#include "cppuhelper/weak.hxx"
-#include "cppuhelper/weakagg.hxx"
+#include <cppuhelper/interfacecontainer.h>
+#include <com/sun/star/lang/XComponent.hpp>
+#include <cppuhelper/cppuhelperdllapi.h>
+#include <cppuhelper/weak.hxx>
+#include <cppuhelper/weakagg.hxx>
 
 /// @cond INTERNAL
 

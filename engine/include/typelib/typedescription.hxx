@@ -20,14 +20,14 @@
 #ifndef INCLUDED_TYPELIB_TYPEDESCRIPTION_HXX
 #define INCLUDED_TYPELIB_TYPEDESCRIPTION_HXX
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cstddef>
 
-#include "rtl/alloc.h"
-#include "rtl/ustring.hxx"
-#include "cpo/uno/Type.h"
-#include "typelib/typedescription.h"
+#include <rtl/alloc.h>
+#include <rtl/ustring.hxx>
+#include <cpo/uno/Type.h>
+#include <typelib/typedescription.h>
 
 
 namespace cpo::uno

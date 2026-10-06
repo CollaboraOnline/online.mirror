@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include "typelib/typedescription.h"
-#include "uno/sequence2.h"
-#include "cpo/uno/Type.h"
-#include "rtl/alloc.h"
+#include <typelib/typedescription.h>
+#include <uno/sequence2.h>
+#include <cpo/uno/Type.h>
+#include <rtl/alloc.h>
 
 #include <cassert>
 #include <initializer_list>

@@ -20,14 +20,13 @@
 #ifndef INCLUDED_CPPUHELPER_FACTORY_HXX
 #define INCLUDED_CPPUHELPER_FACTORY_HXX
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cstddef>
 
-#include "rtl/ustring.hxx"
-
-#include "cpo/uno/Reference.h"
-#include "cppuhelper/cppuhelperdllapi.h"
+#include <rtl/ustring.hxx>
+#include <cpo/uno/Reference.h>
+#include <cppuhelper/cppuhelperdllapi.h>
 
 namespace com { namespace sun { namespace star { namespace lang { class XMultiServiceFactory; } } } }
 namespace com { namespace sun { namespace star { namespace lang { class XSingleComponentFactory; } } } }

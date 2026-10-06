@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <algorithm>
 #include <cassert>
@@ -26,15 +26,15 @@
 #include <ostream>
 #include <utility>
 
-#include "cpo/uno/Any.h"
-#include "uno/data.h"
-#include "uno/sequence2.h"
-#include "cpo/uno/Type.hxx"
-#include "cpo/uno/Reference.h"
-#include "cpo/uno/genfunc.hxx"
-#include "cpo/uno/RuntimeException.hpp"
-#include "cppu/cppudllapi.h"
-#include "cppu/unotype.hxx"
+#include <cpo/uno/Any.h>
+#include <uno/data.h>
+#include <uno/sequence2.h>
+#include <cpo/uno/Type.hxx>
+#include <cpo/uno/Reference.h>
+#include <cpo/uno/genfunc.hxx>
+#include <cpo/uno/RuntimeException.hpp>
+#include <cppu/cppudllapi.h>
+#include <cppu/unotype.hxx>
 
 extern "C" CPPU_DLLPUBLIC rtl_uString * cppu_Any_extraction_failure_msg(
     uno_Any const * pAny, typelib_TypeDescriptionReference * pType )

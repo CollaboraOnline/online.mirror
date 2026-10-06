@@ -20,9 +20,9 @@
 #ifndef INCLUDED_CPPUHELPER_SHLIB_HXX
 #define INCLUDED_CPPUHELPER_SHLIB_HXX
 
-#include "cppuhelper/cppuhelperdllapi.h"
-#include "cpo/uno/Reference.h"
-#include "rtl/ustring.hxx"
+#include <cppuhelper/cppuhelperdllapi.h>
+#include <cpo/uno/Reference.h>
+#include <rtl/ustring.hxx>
 
 namespace com { namespace sun { namespace star { namespace lang { class XMultiServiceFactory; } } } }
 namespace com { namespace sun { namespace star { namespace registry { class XRegistryKey; } } } }

@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cstddef>
 
-#include "rtl/ustring.hxx"
-#include "rtl/bootstrap.h"
+#include <rtl/ustring.hxx>
+#include <rtl/bootstrap.h>
 
 namespace rtl
 {

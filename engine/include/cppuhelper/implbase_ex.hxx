@@ -22,12 +22,12 @@
 
 #include <atomic>
 
-#include "cpo/uno/Any.h"
-#include "cpo/uno/Sequence.h"
-#include "cpo/uno/Type.h"
-#include "cpo/uno/genfunc.h"
-#include "cppuhelper/cppuhelperdllapi.h"
-#include "sal/types.h"
+#include <cpo/uno/Any.h>
+#include <cpo/uno/Sequence.h>
+#include <cpo/uno/Type.h>
+#include <cpo/uno/genfunc.h>
+#include <cppuhelper/cppuhelperdllapi.h>
+#include <sal/types.h>
 
 namespace cppu { class OWeakAggObject; }
 namespace cppu { class OWeakObject; }

@@ -20,14 +20,14 @@
 #ifndef INCLUDED_OSL_CONDITN_H
 #define INCLUDED_OSL_CONDITN_H
 
-#include "sal/config.h"
+#include <sal/config.h>
 
-#include "sal/saldllapi.h"
+#include <sal/saldllapi.h>
 
 #if defined LIBO_INTERNAL_ONLY && defined __cplusplus
 struct TimeValue;
 #else
-#include "osl/time.h"
+#include <osl/time.h>
 #endif
 
 #ifdef __cplusplus

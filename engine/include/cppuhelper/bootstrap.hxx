@@ -20,11 +20,11 @@
 #ifndef INCLUDED_CPPUHELPER_BOOTSTRAP_HXX
 #define INCLUDED_CPPUHELPER_BOOTSTRAP_HXX
 
-#include "sal/config.h"
-#include "cpo/uno/Reference.h"
-#include "rtl/ustring.hxx"
-#include "sal/types.h"
-#include "cppuhelper/cppuhelperdllapi.h"
+#include <sal/config.h>
+#include <cpo/uno/Reference.h>
+#include <rtl/ustring.hxx>
+#include <sal/types.h>
+#include <cppuhelper/cppuhelperdllapi.h>
 
 namespace com { namespace sun { namespace star {
     namespace container { class XHierarchicalNameAccess; }

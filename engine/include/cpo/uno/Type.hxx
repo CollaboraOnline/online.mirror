@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cstddef>
 #include <ostream>
 
-#include "cpo/uno/Type.h"
-#include "cppu/unotype.hxx"
+#include <cpo/uno/Type.h>
+#include <cppu/unotype.hxx>
 
 namespace cpo::uno
 {

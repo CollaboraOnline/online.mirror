@@ -20,15 +20,15 @@
 #ifndef INCLUDED_CPPUHELPER_PROPERTYSETMIXIN_HXX
 #define INCLUDED_CPPUHELPER_PROPERTYSETMIXIN_HXX
 
-#include "sal/config.h"
+#include <sal/config.h>
 
-#include "com/sun/star/beans/XFastPropertySet.hpp"
-#include "com/sun/star/beans/XPropertyAccess.hpp"
-#include "com/sun/star/beans/XPropertySet.hpp"
-#include "cpo/uno/Reference.h"
-#include "cpo/uno/Sequence.hxx"
-#include "sal/types.h"
-#include "cppuhelper/cppuhelperdllapi.h"
+#include <com/sun/star/beans/XFastPropertySet.hpp>
+#include <com/sun/star/beans/XPropertyAccess.hpp>
+#include <com/sun/star/beans/XPropertySet.hpp>
+#include <cpo/uno/Reference.h>
+#include <cpo/uno/Sequence.hxx>
+#include <sal/types.h>
+#include <cppuhelper/cppuhelperdllapi.h>
 
 namespace com { namespace sun { namespace star {
     namespace beans {

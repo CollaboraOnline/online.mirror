@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "sal/config.h"
+#include <sal/config.h>
 
 #include <cassert>
 #include <cstddef>
@@ -32,15 +32,15 @@
 #include <string_view>
 #include <type_traits>
 
-#include "rtl/math.h"
-#include "rtl/ustring.h"
-#include "rtl/string.hxx"
-#include "rtl/stringutils.hxx"
-#include "rtl/textenc.h"
+#include <rtl/math.h>
+#include <rtl/ustring.h>
+#include <rtl/string.hxx>
+#include <rtl/stringutils.hxx>
+#include <rtl/textenc.h>
 
-#include "config_global.h"
-#include "o3tl/safeint.hxx"
-#include "rtl/stringconcat.hxx"
+#include <config_global.h>
+#include <o3tl/safeint.hxx>
+#include <rtl/stringconcat.hxx>
 
 #ifdef RTL_STRING_UNITTEST
 extern bool rtl_string_unittest_invalid_conversion;

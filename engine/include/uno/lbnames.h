@@ -22,9 +22,9 @@
 
 /* I assume "LB" means "Language Binding" */
 
-#include "sal/config.h"
+#include <sal/config.h>
 
-#include "sal/macros.h"
+#include <sal/macros.h>
 
 #ifdef __cplusplus
 
