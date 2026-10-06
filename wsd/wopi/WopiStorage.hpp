@@ -28,233 +28,236 @@
 #include <optional>
 #include <string>
 
+/// The file information that a WOPI host returns from CheckFileInfo.
+class WOPIFileInfo final : public StorageBase::FileInfo
+{
+    void init();
+
+public:
+    enum class TriState
+    {
+        False,
+        True,
+        Unset
+    };
+
+    /// warning - removes items from object.
+    WOPIFileInfo(const FileInfo& fileInfo, Poco::JSON::Object::Ptr& object,
+                 const Poco::URI& uriObject);
+
+    const std::string& getUserId() const { return _userId; }
+    const std::string& getUsername() const { return _username; }
+    const std::string& getUserExtraInfo() const { return _userExtraInfo; }
+    const std::string& getUserPrivateInfo() const { return _userPrivateInfo; }
+    const std::string& getServerPrivateInfo() const { return _serverPrivateInfo; }
+    const std::string& getUserSettingsUri() const { return _userSettingsUri; }
+    const std::string& getWatermarkText() const { return _watermarkText; }
+    const std::string& getTemplateSaveAs() const { return _templateSaveAs; }
+    const std::string& getTemplateSource() const { return _templateSource; }
+    const std::string& getBreadcrumbDocName() const { return _breadcrumbDocName; }
+    const std::string& getFileUrl() const { return _fileUrl; }
+    const std::string& getPostMessageOrigin() const { return _postMessageOrigin; }
+    const std::string& getHideUserList() const { return _hideUserList; }
+    const std::string& getPresentationLeader() const { return _presentationLeader; }
+
+    // Public part
+    struct RemoteLink
+    {
+        /// The remote document's WOPISrc.
+        std::string wopiSrc;
+        /// The remote document as the user knows it, from the BaseFileName
+        /// of the entry. Empty when the integrator named none, and the
+        /// file name at the end of the WOPISrc stands for it then.
+        std::string name;
+        /// The time the remote document was last modified, as the
+        /// integrator reported it. Empty when none was provided.
+        std::string lastModifiedTime;
+        /// The persistent link the pages of the document record for the remote document,
+        /// from the PersistentLink of the entry.
+        std::string persistentLink;
+    };
+
+    // Private part
+    struct RemoteLinkToken
+    {
+        /// The remote document's WOPISrc.
+        std::string wopiSrc;
+        /// The access token to reach the remote document with.
+        std::string accessToken;
+    };
+
+    /// Remote links this document may subscribe to, without tokens.
+    const std::vector<RemoteLink>& getRemoteLinks() const
+    {
+        return _remoteLinks;
+    }
+
+    /// This view's access tokens for the remote links.
+    const std::vector<RemoteLinkToken>& getRemoteLinkTokens() const
+    {
+        return _remoteLinkTokens;
+    }
+
+    bool getUserCanWrite() const { return _userCanWrite; }
+    bool getIsAnonymousUser() const { return _isAnonymousUser; }
+    void setHidePrintOption(bool hidePrintOption) { _hidePrintOption = hidePrintOption; }
+    bool getHidePrintOption() const { return _hidePrintOption; }
+    bool getHideSaveOption() const { return _hideSaveOption; }
+    void setHideExportOption(bool hideExportOption) { _hideExportOption = hideExportOption; }
+    bool getHideExportOption() const { return _hideExportOption; }
+    void setHideRepairOption(bool hideRepairOption) { _hideRepairOption = hideRepairOption; }
+    bool getHideRepairOption() const { return _hideRepairOption; }
+    bool getEnableOwnerTermination() const { return _enableOwnerTermination; }
+    bool getDisablePrint() const { return _disablePrint; }
+    bool getDisableExport() const { return _disableExport; }
+    bool getDisableCopy() const { return _disableCopy; }
+    bool getDisableInactiveMessages() const { return _disableInactiveMessages; }
+    bool getDownloadAsPostMessage() const { return _downloadAsPostMessage; }
+    bool getUserCanNotWriteRelative() const { return _userCanNotWriteRelative; }
+    bool getEnableInsertRemoteImage() const { return _enableInsertRemoteImage; }
+    bool getEnableInsertRemoteFile() const { return _enableInsertRemoteFile; }
+    bool getDisableInsertLocalImage() const { return _disableInsertLocalImage; }
+    bool getEnableRemoteLinkPicker() const { return _enableRemoteLinkPicker; }
+    bool getEnableRemoteAIContent() const { return _enableRemoteAIContent; }
+    bool getDisableAISettings() const { return _disableAISettings; }
+    bool getEnableShare() const { return _enableShare; }
+    bool getSupportsRename() const { return _supportsRename; }
+    bool getSupportsLocks() const { return _supportsLocks; }
+    bool getSupportsLinkAccess() const { return _supportsLinkAccess; }
+    bool getUserCanRename() const { return _userCanRename; }
+    bool getUserCanOnlyComment() const { return _userCanOnlyComment; }
+    bool getUserCanOnlyManageRedlines() const { return _userCanOnlyManageRedlines; }
+    bool getUserCanChangeSecurityLabel() const { return _userCanChangeSecurityLabel; }
+    bool getIsUserRestricted() const { return _isUserRestricted; }
+    const std::string& getRestrictedCommands() const { return _restrictedCommands; }
+
+    std::optional<bool> getIsAdminUser() const { return _isAdminUser; }
+    const std::string& getIsAdminUserError() const { return _isAdminUserError; }
+
+    TriState getDisableChangeTrackingShow() const { return _disableChangeTrackingShow; }
+    TriState getDisableChangeTrackingRecord() const { return _disableChangeTrackingRecord; }
+    TriState getHideChangeTrackingControls() const { return _hideChangeTrackingControls; }
+
+private:
+    /// User id of the user accessing the file
+    std::string _userId;
+    /// Obfuscated User id used for logging the UserId.
+    std::string _obfuscatedUserId;
+    /// Display Name of user accessing the file
+    std::string _username;
+    /// Extra public info per user, typically mail and other links, as json, shared with everyone.
+    std::string _userExtraInfo;
+    /// Private info per user, for API keys and other non-public information.
+    std::string _userPrivateInfo;
+    /// Private info per server, for API keys and other non-public information.
+    std::string _serverPrivateInfo;
+    /// Uri to get settings json for this user, for autotext location, etc.
+    std::string _userSettingsUri;
+    /// In case a watermark has to be rendered on each tile.
+    std::string _watermarkText;
+    /// In case we want to use this file as a template, it should be first re-saved under this name (using PutRelativeFile).
+    std::string _templateSaveAs;
+    /// In case we want to use this file as a template.
+    std::string _templateSource;
+    /// User readable string of document name to show in UI, if present.
+    std::string _breadcrumbDocName;
+    /// The optional FileUrl, used to download the document if provided.
+    std::string _fileUrl;
+    /// WOPI Post message property
+    std::string _postMessageOrigin;
+    /// If set to "true", user list on the status bar will be hidden
+    /// If set to "mobile" | "tablet" | "desktop", will be hidden on a specified device
+    /// (may be joint, delimited by commas eg. "mobile,tablet")
+    std::string _hideUserList;
+    /// error code if integration does not use isAdminUser field properly
+    std::string _isAdminUserError;
+    /// If we should disable change-tracking visibility by default (meaningful at loading).
+    TriState _disableChangeTrackingShow = WOPIFileInfo::TriState::Unset;
+    /// If we should disable change-tracking ability by default (meaningful at loading).
+    TriState _disableChangeTrackingRecord = WOPIFileInfo::TriState::Unset;
+    /// If we should hide change-tracking commands for this user.
+    TriState _hideChangeTrackingControls = WOPIFileInfo::TriState::Unset;
+    /// If user is considered as admin on the integrator side
+    std::optional<bool> _isAdminUser = std::nullopt;
+    /// If user accessing the file has write permission
+    bool _userCanWrite = false;
+    /// True when the host reports the user as anonymous (for example a
+    /// public share-link visitor with no account).
+    bool _isAnonymousUser = false;
+    /// Hide print button from UI
+    bool _hidePrintOption = false;
+    /// Hide save button from UI
+    bool _hideSaveOption = false;
+    /// Hide 'Download as' button/menubar item from UI
+    bool _hideExportOption = false;
+    /// Hide the 'Repair' button/item from the UI
+    bool _hideRepairOption = false;
+    /// If WOPI host has enabled owner termination feature on
+    bool _enableOwnerTermination = false;
+    /// If WOPI host has allowed the user to print the document
+    bool _disablePrint = false;
+    /// If WOPI host has allowed the user to export the document
+    bool _disableExport = false;
+    /// If WOPI host has allowed the user to copy to/from the document
+    bool _disableCopy = false;
+    /// If WOPI host has allowed the cool to show texts on the overlay informing about
+    /// inactivity, or if the integration is handling that.
+    bool _disableInactiveMessages = false;
+    /// For the (mobile) integrations, to indicate that the downloading for printing, exporting,
+    /// or slideshows should be intercepted and sent as a postMessage instead of handling directly.
+    bool _downloadAsPostMessage = false;
+    /// If set to false, users can access the save-as functionality
+    bool _userCanNotWriteRelative = true;
+    /// If set to true, users can access the insert remote image functionality
+    bool _enableInsertRemoteImage = false;
+    /// If set to true, users can access the insert remote multimedia functionality
+    bool _enableInsertRemoteFile = false;
+    /// If set to true, users can't insert an image from the local machine
+    bool _disableInsertLocalImage = false;
+    /// If set to true, users can access the remote link picker functionality
+    bool _enableRemoteLinkPicker = false;
+    /// If set to true, users can insert remote AI-generated content
+    bool _enableRemoteAIContent = false;
+    /// If set to true, AI settings UI and AI features are disabled for the user
+    bool _disableAISettings = false;
+    /// If set to true, users can access the file share functionality
+    bool _enableShare = false;
+    /// If WOPI host supports locking
+    bool _supportsLocks = false;
+    /// If WOPI host supports rename
+    bool _supportsRename = false;
+    /// Whether the storage answers a POST to <WOPISrc>/linkaccess
+    bool _supportsLinkAccess = false;
+    /// If user is allowed to rename the document
+    bool _userCanRename = false;
+    /// If user is limited to only writing/modifying comments
+    bool _userCanOnlyComment = false;
+    /// If user is limited to only managing redlines (accept/reject)
+    bool _userCanOnlyManageRedlines = false;
+    /// If user may apply/change/remove the document's security label. Defaults to
+    /// true (absent host setting keeps today's behaviour); false locks the marking
+    /// while still allowing document editing.
+    bool _userCanChangeSecurityLabel = true;
+    /// True when the host reports this user as one whose commands are restricted
+    bool _isUserRestricted = false;
+    /// Space separated UNO commands the host restricts for this user. A release build leaves
+    /// it empty and the restricted commands come from the deployment configuration instead.
+    std::string _restrictedCommands;
+    /// Used for directly starting follow me presentation
+    std::string _presentationLeader;
+
+    /// The RemoteLinks entries this document may subscribe to
+    std::vector<RemoteLink> _remoteLinks;
+
+    /// This view's access tokens for the remote links
+    std::vector<RemoteLinkToken> _remoteLinkTokens;
+};
+
 /// WOPI protocol backed storage.
 class WopiStorage : public StorageBase
 {
 public:
-    class WOPIFileInfo final : public FileInfo
-    {
-        void init();
-
-    public:
-        enum class TriState
-        {
-            False,
-            True,
-            Unset
-        };
-
-        /// warning - removes items from object.
-        WOPIFileInfo(const FileInfo& fileInfo, Poco::JSON::Object::Ptr& object,
-                     const Poco::URI& uriObject);
-
-        const std::string& getUserId() const { return _userId; }
-        const std::string& getUsername() const { return _username; }
-        const std::string& getUserExtraInfo() const { return _userExtraInfo; }
-        const std::string& getUserPrivateInfo() const { return _userPrivateInfo; }
-        const std::string& getServerPrivateInfo() const { return _serverPrivateInfo; }
-        const std::string& getUserSettingsUri() const { return _userSettingsUri; }
-        const std::string& getWatermarkText() const { return _watermarkText; }
-        const std::string& getTemplateSaveAs() const { return _templateSaveAs; }
-        const std::string& getTemplateSource() const { return _templateSource; }
-        const std::string& getBreadcrumbDocName() const { return _breadcrumbDocName; }
-        const std::string& getFileUrl() const { return _fileUrl; }
-        const std::string& getPostMessageOrigin() const { return _postMessageOrigin; }
-        const std::string& getHideUserList() const { return _hideUserList; }
-        const std::string& getPresentationLeader() const { return _presentationLeader; }
-
-        // Public part
-        struct RemoteLink
-        {
-            /// The remote document's WOPISrc.
-            std::string wopiSrc;
-            /// The remote document as the user knows it, from the BaseFileName
-            /// of the entry. Empty when the integrator named none, and the
-            /// file name at the end of the WOPISrc stands for it then.
-            std::string name;
-            /// The time the remote document was last modified, as the
-            /// integrator reported it. Empty when none was provided.
-            std::string lastModifiedTime;
-            /// The persistent link the pages of the document record for the remote document,
-            /// from the PersistentLink of the entry.
-            std::string persistentLink;
-        };
-
-        // Private part
-        struct RemoteLinkToken
-        {
-            /// The remote document's WOPISrc.
-            std::string wopiSrc;
-            /// The access token to reach the remote document with.
-            std::string accessToken;
-        };
-
-        /// Remote links this document may subscribe to, without tokens.
-        const std::vector<RemoteLink>& getRemoteLinks() const
-        {
-            return _remoteLinks;
-        }
-
-        /// This view's access tokens for the remote links.
-        const std::vector<RemoteLinkToken>& getRemoteLinkTokens() const
-        {
-            return _remoteLinkTokens;
-        }
-
-        bool getUserCanWrite() const { return _userCanWrite; }
-        bool getIsAnonymousUser() const { return _isAnonymousUser; }
-        void setHidePrintOption(bool hidePrintOption) { _hidePrintOption = hidePrintOption; }
-        bool getHidePrintOption() const { return _hidePrintOption; }
-        bool getHideSaveOption() const { return _hideSaveOption; }
-        void setHideExportOption(bool hideExportOption) { _hideExportOption = hideExportOption; }
-        bool getHideExportOption() const { return _hideExportOption; }
-        void setHideRepairOption(bool hideRepairOption) { _hideRepairOption = hideRepairOption; }
-        bool getHideRepairOption() const { return _hideRepairOption; }
-        bool getEnableOwnerTermination() const { return _enableOwnerTermination; }
-        bool getDisablePrint() const { return _disablePrint; }
-        bool getDisableExport() const { return _disableExport; }
-        bool getDisableCopy() const { return _disableCopy; }
-        bool getDisableInactiveMessages() const { return _disableInactiveMessages; }
-        bool getDownloadAsPostMessage() const { return _downloadAsPostMessage; }
-        bool getUserCanNotWriteRelative() const { return _userCanNotWriteRelative; }
-        bool getEnableInsertRemoteImage() const { return _enableInsertRemoteImage; }
-        bool getEnableInsertRemoteFile() const { return _enableInsertRemoteFile; }
-        bool getDisableInsertLocalImage() const { return _disableInsertLocalImage; }
-        bool getEnableRemoteLinkPicker() const { return _enableRemoteLinkPicker; }
-        bool getEnableRemoteAIContent() const { return _enableRemoteAIContent; }
-        bool getDisableAISettings() const { return _disableAISettings; }
-        bool getEnableShare() const { return _enableShare; }
-        bool getSupportsRename() const { return _supportsRename; }
-        bool getSupportsLocks() const { return _supportsLocks; }
-        bool getSupportsLinkAccess() const { return _supportsLinkAccess; }
-        bool getUserCanRename() const { return _userCanRename; }
-        bool getUserCanOnlyComment() const { return _userCanOnlyComment; }
-        bool getUserCanOnlyManageRedlines() const { return _userCanOnlyManageRedlines; }
-        bool getUserCanChangeSecurityLabel() const { return _userCanChangeSecurityLabel; }
-        bool getIsUserRestricted() const { return _isUserRestricted; }
-        const std::string& getRestrictedCommands() const { return _restrictedCommands; }
-
-        std::optional<bool> getIsAdminUser() const { return _isAdminUser; }
-        const std::string& getIsAdminUserError() const { return _isAdminUserError; }
-
-        TriState getDisableChangeTrackingShow() const { return _disableChangeTrackingShow; }
-        TriState getDisableChangeTrackingRecord() const { return _disableChangeTrackingRecord; }
-        TriState getHideChangeTrackingControls() const { return _hideChangeTrackingControls; }
-
-    private:
-        /// User id of the user accessing the file
-        std::string _userId;
-        /// Obfuscated User id used for logging the UserId.
-        std::string _obfuscatedUserId;
-        /// Display Name of user accessing the file
-        std::string _username;
-        /// Extra public info per user, typically mail and other links, as json, shared with everyone.
-        std::string _userExtraInfo;
-        /// Private info per user, for API keys and other non-public information.
-        std::string _userPrivateInfo;
-        /// Private info per server, for API keys and other non-public information.
-        std::string _serverPrivateInfo;
-        /// Uri to get settings json for this user, for autotext location, etc.
-        std::string _userSettingsUri;
-        /// In case a watermark has to be rendered on each tile.
-        std::string _watermarkText;
-        /// In case we want to use this file as a template, it should be first re-saved under this name (using PutRelativeFile).
-        std::string _templateSaveAs;
-        /// In case we want to use this file as a template.
-        std::string _templateSource;
-        /// User readable string of document name to show in UI, if present.
-        std::string _breadcrumbDocName;
-        /// The optional FileUrl, used to download the document if provided.
-        std::string _fileUrl;
-        /// WOPI Post message property
-        std::string _postMessageOrigin;
-        /// If set to "true", user list on the status bar will be hidden
-        /// If set to "mobile" | "tablet" | "desktop", will be hidden on a specified device
-        /// (may be joint, delimited by commas eg. "mobile,tablet")
-        std::string _hideUserList;
-        /// error code if integration does not use isAdminUser field properly
-        std::string _isAdminUserError;
-        /// If we should disable change-tracking visibility by default (meaningful at loading).
-        TriState _disableChangeTrackingShow = WOPIFileInfo::TriState::Unset;
-        /// If we should disable change-tracking ability by default (meaningful at loading).
-        TriState _disableChangeTrackingRecord = WOPIFileInfo::TriState::Unset;
-        /// If we should hide change-tracking commands for this user.
-        TriState _hideChangeTrackingControls = WOPIFileInfo::TriState::Unset;
-        /// If user is considered as admin on the integrator side
-        std::optional<bool> _isAdminUser = std::nullopt;
-        /// If user accessing the file has write permission
-        bool _userCanWrite = false;
-        /// True when the host reports the user as anonymous (for example a
-        /// public share-link visitor with no account).
-        bool _isAnonymousUser = false;
-        /// Hide print button from UI
-        bool _hidePrintOption = false;
-        /// Hide save button from UI
-        bool _hideSaveOption = false;
-        /// Hide 'Download as' button/menubar item from UI
-        bool _hideExportOption = false;
-        /// Hide the 'Repair' button/item from the UI
-        bool _hideRepairOption = false;
-        /// If WOPI host has enabled owner termination feature on
-        bool _enableOwnerTermination = false;
-        /// If WOPI host has allowed the user to print the document
-        bool _disablePrint = false;
-        /// If WOPI host has allowed the user to export the document
-        bool _disableExport = false;
-        /// If WOPI host has allowed the user to copy to/from the document
-        bool _disableCopy = false;
-        /// If WOPI host has allowed the cool to show texts on the overlay informing about
-        /// inactivity, or if the integration is handling that.
-        bool _disableInactiveMessages = false;
-        /// For the (mobile) integrations, to indicate that the downloading for printing, exporting,
-        /// or slideshows should be intercepted and sent as a postMessage instead of handling directly.
-        bool _downloadAsPostMessage = false;
-        /// If set to false, users can access the save-as functionality
-        bool _userCanNotWriteRelative = true;
-        /// If set to true, users can access the insert remote image functionality
-        bool _enableInsertRemoteImage = false;
-        /// If set to true, users can access the insert remote multimedia functionality
-        bool _enableInsertRemoteFile = false;
-        /// If set to true, users can't insert an image from the local machine
-        bool _disableInsertLocalImage = false;
-        /// If set to true, users can access the remote link picker functionality
-        bool _enableRemoteLinkPicker = false;
-        /// If set to true, users can insert remote AI-generated content
-        bool _enableRemoteAIContent = false;
-        /// If set to true, AI settings UI and AI features are disabled for the user
-        bool _disableAISettings = false;
-        /// If set to true, users can access the file share functionality
-        bool _enableShare = false;
-        /// If WOPI host supports locking
-        bool _supportsLocks = false;
-        /// If WOPI host supports rename
-        bool _supportsRename = false;
-        /// Whether the storage answers a POST to <WOPISrc>/linkaccess
-        bool _supportsLinkAccess = false;
-        /// If user is allowed to rename the document
-        bool _userCanRename = false;
-        /// If user is limited to only writing/modifying comments
-        bool _userCanOnlyComment = false;
-        /// If user is limited to only managing redlines (accept/reject)
-        bool _userCanOnlyManageRedlines = false;
-        /// If user may apply/change/remove the document's security label. Defaults to
-        /// true (absent host setting keeps today's behaviour); false locks the marking
-        /// while still allowing document editing.
-        bool _userCanChangeSecurityLabel = true;
-        /// True when the host reports this user as one whose commands are restricted
-        bool _isUserRestricted = false;
-        /// Space separated UNO commands the host restricts for this user. A release build leaves
-        /// it empty and the restricted commands come from the deployment configuration instead.
-        std::string _restrictedCommands;
-        /// Used for directly starting follow me presentation
-        std::string _presentationLeader;
-
-        /// The RemoteLinks entries this document may subscribe to
-        std::vector<RemoteLink> _remoteLinks;
-
-        /// This view's access tokens for the remote links
-        std::vector<RemoteLinkToken> _remoteLinkTokens;
-    };
+    using WOPIFileInfo = ::WOPIFileInfo;
 
     WopiStorage(const Poco::URI& uri, const std::string& localStorePath,
                 const std::string& jailPath)

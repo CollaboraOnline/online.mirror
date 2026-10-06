@@ -26,6 +26,8 @@
 
 #import <wsd/DocumentBroker.hpp>
 
+#import <filesystem>
+
 @implementation CoolURLSchemeHandler
 - (id)initWithDocument:(CODocument *)document {
     self->document = document;

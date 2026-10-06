@@ -39,6 +39,9 @@
 #include <net/HttpHelper.hpp>
 #include <net/HttpServer.hpp>
 #include <wsd/wopi/StorageConnectionManager.hpp>
+#if !MOBILEAPP
+#include <wsd/Admin.hpp>
+#endif
 #include <wsd/COOLWSD.hpp>
 #include <wsd/DocumentBroker.hpp>
 #include <wsd/FileServer.hpp>

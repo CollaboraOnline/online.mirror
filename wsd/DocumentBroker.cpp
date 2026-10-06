@@ -83,6 +83,7 @@
 #include <chrono>
 #include <ctime>
 #include <deque>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <sstream>
@@ -362,6 +363,15 @@ static std::chrono::seconds getLimitLoadSecs()
 void DocumentBroker::assertCorrectThread(LOG_CAPTURE_CALLER) const
 {
     _poll->assertCorrectThread(LOG_PASS_PARENT_CALLER);
+}
+
+void DocumentBroker::invalidateTiles(const std::string& tiles, CanonicalViewId canonicalViewId)
+{
+    // Remove from cache.
+    _tileCache->invalidateTiles(tiles, canonicalViewId);
+    //Tiles invalidate also mean slidelayers are also invalid now
+    // slides modified so need to rerender on request
+    invalidateSlideLayerCache();
 }
 
 void DocumentBroker::clearCaches()

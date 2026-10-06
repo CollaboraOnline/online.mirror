@@ -30,13 +30,9 @@
 #include <wsd/ServerAuditUtil.hpp>
 #include <wsd/SlideCache.hpp>
 #include <wsd/Storage.hpp>
-#include <wsd/TileCache.hpp>
 #include <wsd/TileDesc.hpp>
 
-#if !MOBILEAPP
-#include <wsd/wopi/WopiStorage.hpp>
-#include <wsd/Admin.hpp>
-#else // MOBILEAPP
+#if MOBILEAPP
 #include <common/MobileApp.hpp>
 #endif // MOBILEAPP
 
@@ -44,7 +40,6 @@
 #include <atomic>
 #include <chrono>
 #include <cstddef>
-#include <filesystem>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -58,6 +53,7 @@
 #include <Poco/URI.h>
 
 // Forwards.
+class Admin;
 class PrisonerRequestDispatcher;
 class CheckFileInfo;
 class DocumentBroker;
@@ -65,6 +61,8 @@ class LockContext;
 class PresetsInstallTask;
 class TileCache;
 class Message;
+class WOPIFileInfo;
+class WopiStorage;
 class SlideLayerCacheMap;
 
 namespace Poco {
@@ -493,7 +491,7 @@ public:
 
     /// Loads and adds a new session. Returns the new number of sessions.
     std::size_t addSession(const std::shared_ptr<ClientSession>& session,
-                           std::unique_ptr<WopiStorage::WOPIFileInfo> wopiFileInfo = nullptr);
+                           std::unique_ptr<WOPIFileInfo> wopiFileInfo = nullptr);
 
     /// Removes a session by ID. Returns the new number of sessions.
     std::size_t removeSession(const std::shared_ptr<ClientSession>& session);
@@ -618,14 +616,7 @@ public:
 
     void clearCaches();
 
-    void invalidateTiles(const std::string& tiles, CanonicalViewId canonicalViewId)
-    {
-        // Remove from cache.
-        _tileCache->invalidateTiles(tiles, canonicalViewId);
-        //Tiles invalidate also mean slidelayers are also invalid now
-        // slides modified so need to rerender on request
-        invalidateSlideLayerCache();
-    }
+    void invalidateTiles(const std::string& tiles, CanonicalViewId canonicalViewId);
 
     void invalidateSlideLayerCache()
     {
@@ -907,7 +898,7 @@ private:
     bool download(const std::shared_ptr<ClientSession>& session, const std::string& jailId,
                   const Poco::URI& uriPublic,
                   const AdditionalFilePocoUris& additionalFileUrisPublic,
-                  std::unique_ptr<WopiStorage::WOPIFileInfo> wopiFileInfo);
+                  std::unique_ptr<WOPIFileInfo> wopiFileInfo);
 
     /// Actual document download and post-download processing.
     /// Must be called only when creating the storage for the first time.
@@ -920,7 +911,7 @@ private:
     /// Returns the templateSource, if any.
     std::string updateSessionWithWopiInfo(const std::shared_ptr<ClientSession>& session,
                                           WopiStorage* wopiStorage,
-                                          std::unique_ptr<WopiStorage::WOPIFileInfo> wopiFileInfo);
+                                          std::unique_ptr<WOPIFileInfo> wopiFileInfo);
 
     /// Start an asynchronous CheckFileInfo request.
     void checkFileInfo(const std::shared_ptr<ClientSession>& uri, int redirectLimit);
@@ -2053,7 +2044,7 @@ private:
 
 #if !MOBILEAPP
     /// stores timestamps of preset files when they get installed to compare later to check if they are modified
-    std::map<std::string, std::filesystem::file_time_type> _presetTimestamp;
+    std::map<std::string, std::chrono::file_clock::time_point> _presetTimestamp;
 #endif
 
     /// If we set the user-requested initial (on load) settings to be forced.

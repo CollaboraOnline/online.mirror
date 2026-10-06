@@ -25,6 +25,10 @@
 #include <wsd/SenderQueue.hpp>
 #include <wsd/ServerURL.hpp>
 #include <wsd/Storage.hpp>
+#include <wsd/TileCache.hpp>
+#if !MOBILEAPP
+#include <wsd/wopi/WopiStorage.hpp>
+#endif
 
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>

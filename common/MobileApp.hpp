@@ -67,33 +67,35 @@ public:
 #if !ENABLE_WOPI
 
 /// Stub/Dummy WOPI types/interface.
+class WOPIFileInfo final : public StorageBase::FileInfo
+{
+public:
+    enum class TriState : std::uint8_t
+    {
+        False,
+        True,
+        Unset
+    };
+
+    std::string getTemplateSource() const { return std::string(); }
+
+    bool getDisablePrint() const { return false; }
+    bool getDisableExport() const { return false; }
+    bool getDisableCopy() const { return false; }
+    bool getEnableOwnerTermination() const { return false; }
+    bool getIsUserRestricted() const { return false; }
+    std::string getRestrictedCommands() const { return std::string(); }
+    std::string getWatermarkText() const { return std::string(); }
+
+    TriState getDisableChangeTrackingShow() const { return TriState::Unset; }
+    TriState getDisableChangeTrackingRecord() const { return TriState::Unset; }
+    TriState getHideChangeTrackingControls() const { return TriState::Unset; }
+};
+
 class WopiStorage : public StorageBase
 {
 public:
-    class WOPIFileInfo final : public FileInfo
-    {
-    public:
-        enum class TriState : std::uint8_t
-        {
-            False,
-            True,
-            Unset
-        };
-
-        std::string getTemplateSource() const { return std::string(); }
-
-        bool getDisablePrint() const { return false; }
-        bool getDisableExport() const { return false; }
-        bool getDisableCopy() const { return false; }
-        bool getEnableOwnerTermination() const { return false; }
-        bool getIsUserRestricted() const { return false; }
-        std::string getRestrictedCommands() const { return std::string(); }
-        std::string getWatermarkText() const { return std::string(); }
-
-        TriState getDisableChangeTrackingShow() const { return TriState::Unset; }
-        TriState getDisableChangeTrackingRecord() const { return TriState::Unset; }
-        TriState getHideChangeTrackingControls() const { return TriState::Unset; }
-    };
+    using WOPIFileInfo = ::WOPIFileInfo;
 };
 
 #endif // !ENABLE_WOPI
