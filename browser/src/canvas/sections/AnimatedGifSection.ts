@@ -50,6 +50,11 @@ class AnimatedGifSection extends CanvasSectionObject {
 	}
 
 	onDraw(): void {
+		// The zoom animation scales the tiles, which hold the first frame, but
+		// this section keeps the rectangle of the zoom start until the zoom
+		// ends. So only the tiles show the image meanwhile.
+		if (this.containerObject.isInZoomAnimation()) return;
+
 		const frame = this.sectionProperties.source.getCurrentFrame();
 		if (!frame) return;
 
