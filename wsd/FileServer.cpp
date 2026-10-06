@@ -1531,6 +1531,28 @@ std::string getConfiguredFrameAncestors(const Poco::Util::AbstractConfiguration&
     configFrameAncestor += configCSP.getDirective("frame-ancestors");
     return configFrameAncestor;
 }
+
+/// Append to a directive only those of the space-separated sources it does not list yet. The
+/// configured frame ancestors reach the policy both through the net.content_security_policy
+/// merge and through the widened list built from them, and would be repeated otherwise.
+void appendMissingSources(ContentSecurityPolicy& csp, const std::string& directive,
+                          const std::string& sources)
+{
+    std::string present = ' ' + csp.getDirective(directive) + ' ';
+    std::string missing;
+    const StringVector tokens = StringVector::tokenize(sources, ' ');
+    for (const StringToken& token : tokens)
+    {
+        const std::string source = tokens.getParam(token);
+        if (source.empty() || present.find(' ' + source + ' ') != std::string::npos)
+            continue;
+
+        present += source + ' ';
+        missing += ' ' + source;
+    }
+
+    csp.appendDirective(directive, std::move(missing));
+}
 }
 
 FileServerRequestHandler::ResourceAccessDetails FileServerRequestHandler::preprocessFile(
@@ -1764,7 +1786,9 @@ FileServerRequestHandler::ResourceAccessDetails FileServerRequestHandler::prepro
     csp.appendDirective("default-src", "'none'");
     csp.appendDirective("frame-src", "'self'");
     csp.appendDirectiveUrl("frame-src", WELCOME_URL);
-    csp.appendDirectiveUrl("frame-src", FEEDBACK_URL);
+    // The welcome and feedback pages are usually served from the same origin.
+    if (Util::trimURI(FEEDBACK_URL) != Util::trimURI(WELCOME_URL))
+        csp.appendDirectiveUrl("frame-src", FEEDBACK_URL);
     csp.appendDirectiveUrl("frame-src", Uri::decode(urv[BUYPRODUCT_URL]));
     csp.appendDirective("frame-src", "blob:"); // Equivalent to unsafe-eval!
     csp.appendDirective("connect-src", "'self'");
@@ -1791,6 +1815,8 @@ FileServerRequestHandler::ResourceAccessDetails FileServerRequestHandler::prepro
     const std::string commentAvatarUrl = ConfigUtil::getString("comment_avatar", "");
     if (commentAvatarUrl.starts_with("http://") || commentAvatarUrl.starts_with("https://"))
         csp.appendDirectiveUrl("img-src", commentAvatarUrl);
+
+    csp.merge(config.getString("net.content_security_policy", ""));
 
     // Frame ancestors: Allow coolwsd host, wopi host and anything configured.
     const std::string configFrameAncestor = getConfiguredFrameAncestors(config);
@@ -1844,8 +1870,8 @@ FileServerRequestHandler::ResourceAccessDetails FileServerRequestHandler::prepro
         // X-Frame-Options supports only one ancestor, ignore that
         //(it's deprecated anyway and CSP works in all major browsers)
         // frame ancestors are also allowed for img-src in order to load the views avatars
-        csp.appendDirective("img-src", frameAncestors);
-        csp.appendDirective("frame-ancestors", frameAncestors);
+        appendMissingSources(csp, "img-src", frameAncestors);
+        appendMissingSources(csp, "frame-ancestors", frameAncestors);
         const std::string escapedFrameAncestors = Uri::encode(frameAncestors, "'");
         Poco::replaceInPlace(preprocess, std::string("%FRAME_ANCESTORS%"), escapedFrameAncestors);
     }
@@ -1893,8 +1919,6 @@ FileServerRequestHandler::ResourceAccessDetails FileServerRequestHandler::prepro
         csp.appendDirective("script-src", "'unsafe-eval'");
     }
 #endif // !MOBILEAPP
-
-    csp.merge(config.getString("net.content_security_policy", ""));
 
     // Append CSP to response headers too
     httpResponse.add("Content-Security-Policy", csp.generate());
@@ -3128,7 +3152,7 @@ void FileServerRequestHandler::preprocessIntegratorAdminFile(const HTTPRequest& 
         }
 
         LOG_TRC("Allowed frame ancestors:" << frameAncestors);
-        csp.appendDirective("frame-ancestors", std::move(frameAncestors));
+        appendMissingSources(csp, "frame-ancestors", frameAncestors);
     }
 
     response.add("Content-Security-Policy", csp.generate());
