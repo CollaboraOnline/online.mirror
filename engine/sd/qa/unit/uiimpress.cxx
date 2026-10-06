@@ -44,6 +44,7 @@
 #include <editeng/eeitem.hxx>
 #include <editeng/flditem.hxx>
 #include <editeng/outliner.hxx>
+#include <sfx2/cokitfilepicker.hxx>
 #include <sfx2/dispatch.hxx>
 #include <sfx2/request.hxx>
 #include <sfx2/viewfrm.hxx>
@@ -6341,6 +6342,41 @@ CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testInsertMediaWithoutSize)
                     { comphelper::makePropertyValue(u"URL"_ustr, createFileURL(u"silence.wav")) });
 
     CPPUNIT_ASSERT(findMediaObject(mxComponent));
+}
+
+CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testInsertMediaFromAppFilePicker)
+{
+    // Media picked with the file picker of a COKit app is embedded in the document, so the
+    // slideshow has an extracted copy to play.
+    createSdImpressDoc();
+    // The picked file arrives as a command for the active frame.
+    mxDesktop->setActiveFrame(uno::Reference<frame::XModel>(mxComponent, uno::UNO_QUERY_THROW)
+                                  ->getCurrentController()
+                                  ->getFrame());
+
+    static OString aPickedUrl;
+    aPickedUrl = createFileURL(u"silence.wav").toUtf8();
+    COKitFilePickerProvider aProvider{};
+    aProvider.pick = [](const char*, const COKitFilePickerFilter*, size_t,
+                        void (*pfnPicked)(void*, const char*), void* pContext)
+    { pfnPicked(pContext, aPickedUrl.getStr()); };
+
+    comphelper::COKit::setActive(true);
+    sfx2::COKitFilePicker::installProvider(&aProvider);
+    comphelper::ScopeGuard aKitGuard(
+        []
+        {
+            sfx2::COKitFilePicker::installProvider(nullptr);
+            comphelper::COKit::setActive(false);
+        });
+
+    dispatchCommand(mxComponent, u".uno:InsertAVMedia"_ustr, {});
+    Scheduler::ProcessEventsToIdle();
+
+    SdrMediaObj* pMediaObj = findMediaObject(mxComponent);
+    CPPUNIT_ASSERT(pMediaObj);
+    CPPUNIT_ASSERT(pMediaObj->getURL().startsWith("vnd.sun.star.Package:"));
+    CPPUNIT_ASSERT(!pMediaObj->getTempURL().isEmpty());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

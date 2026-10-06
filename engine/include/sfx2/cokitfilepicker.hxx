@@ -12,6 +12,7 @@
 #pragma once
 
 #include <sfx2/dllapi.h>
+#include <com/sun/star/beans/PropertyValue.hpp>
 #include <rtl/ustring.hxx>
 #include <functional>
 #include <optional>
@@ -43,14 +44,15 @@ SFX2_DLLPUBLIC void pick(const OUString& rTitle, const std::vector<Filter>& rFil
                          std::function<void(std::optional<OUString>)> aOnPicked);
 
 /** Ask the app's native file picker for a file and dispatch rCommand with the picked
-    file's URL as the string parameter named rArgument, on the view that is current now.
-    A cancelled pick dispatches nothing.
+    file's URL as the string parameter named rArgument, followed by rExtraArguments, on the
+    view that is current now. A cancelled pick dispatches nothing.
 
     Returns true when the picker was asked, so the caller skips its own file dialog;
     false when isAvailable() is false. */
-SFX2_DLLPUBLIC bool requestAndRedispatch(const OUString& rCommand, const OUString& rArgument,
-                                         const std::vector<Filter>& rFilters,
-                                         const OUString& rTitle);
+SFX2_DLLPUBLIC bool
+requestAndRedispatch(const OUString& rCommand, const OUString& rArgument,
+                     const std::vector<Filter>& rFilters, const OUString& rTitle,
+                     const std::vector<css::beans::PropertyValue>& rExtraArguments = {});
 
 /** The graphic import formats as picker filters, one entry per format the graphic filter can
     load. */

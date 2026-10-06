@@ -39,6 +39,7 @@
 #include <com/sun/star/util/URLTransformer.hpp>
 #include <comphelper/processfactory.hxx>
 #include <comphelper/propertysequence.hxx>
+#include <comphelper/propertyvalue.hxx>
 #include <memory>
 #include <sal/log.hxx>
 #include <o3tl/string_view.hxx>
@@ -212,9 +213,9 @@ const FilterNameVector & MediaWindow::getMediaFilters()
 bool MediaWindow::executeMediaURLDialog(weld::Window* pParent, OUString& rURL, bool *const o_pbLink)
 {
     // In a COKit app the picker for the insert variant runs natively, and the picked file
-    // arrives as a new dispatch of .uno:InsertAVMedia carrying the URL. Without an IsLink
-    // parameter that dispatch inserts the media as a link, which suits a file that stays
-    // on the machine.
+    // arrives as a new dispatch of .uno:InsertAVMedia carrying the URL. The media is embedded
+    // in the document, so the slideshow plays it from the extracted copy and the document
+    // keeps it when it moves to another machine.
     if (o_pbLink != nullptr && sfx2::COKitFilePicker::isAvailable())
     {
         std::vector<sfx2::COKitFilePicker::Filter> aPickerFilters;
@@ -236,7 +237,9 @@ bool MediaWindow::executeMediaURLDialog(weld::Window* pParent, OUString& rURL, b
 
         if (sfx2::COKitFilePicker::requestAndRedispatch(u".uno:InsertAVMedia"_ustr, u"URL"_ustr,
                                                         aPickerFilters,
-                                                        AvmResId(AVMEDIA_STR_INSERTMEDIA_DLG)))
+                                                        AvmResId(AVMEDIA_STR_INSERTMEDIA_DLG),
+                                                        { comphelper::makePropertyValue(
+                                                            u"IsLink"_ustr, false) }))
             return false;
     }
 

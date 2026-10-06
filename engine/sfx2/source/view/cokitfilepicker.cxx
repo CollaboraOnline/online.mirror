@@ -15,6 +15,7 @@
 #include <comphelper/dispatchcommand.hxx>
 #include <comphelper/kit.hxx>
 #include <comphelper/propertyvalue.hxx>
+#include <comphelper/sequence.hxx>
 #include <rtl/ustrbuf.hxx>
 #include <sfx2/docfilt.hxx>
 #include <sfx2/fcontnr.hxx>
@@ -104,7 +105,8 @@ void pick(const OUString& rTitle, const std::vector<Filter>& rFilters,
 }
 
 bool requestAndRedispatch(const OUString& rCommand, const OUString& rArgument,
-                          const std::vector<Filter>& rFilters, const OUString& rTitle)
+                          const std::vector<Filter>& rFilters, const OUString& rTitle,
+                          const std::vector<css::beans::PropertyValue>& rExtraArguments)
 {
     if (!isAvailable())
         return false;
@@ -112,7 +114,7 @@ bool requestAndRedispatch(const OUString& rCommand, const OUString& rArgument,
     const int nView = KitHelper::getCurrentView();
 
     pick(rTitle, rFilters,
-         [rCommand, rArgument, nView](const std::optional<OUString>& roUrl)
+         [rCommand, rArgument, rExtraArguments, nView](const std::optional<OUString>& roUrl)
          {
              if (!roUrl)
                  return;
@@ -122,8 +124,10 @@ bool requestAndRedispatch(const OUString& rCommand, const OUString& rArgument,
              if (nView >= 0 && KitHelper::getCurrentView() != nView)
                  KitHelper::setView(nView);
 
-             comphelper::dispatchCommand(rCommand,
-                                         { comphelper::makePropertyValue(rArgument, *roUrl) });
+             std::vector<css::beans::PropertyValue> aArguments{ comphelper::makePropertyValue(
+                 rArgument, *roUrl) };
+             aArguments.insert(aArguments.end(), rExtraArguments.begin(), rExtraArguments.end());
+             comphelper::dispatchCommand(rCommand, comphelper::containerToSequence(aArguments));
          });
 
     return true;
