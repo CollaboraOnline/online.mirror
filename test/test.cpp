@@ -39,7 +39,6 @@
 #include <Poco/StreamCopier.h>
 #include <Poco/Util/LayeredConfiguration.h>
 
-#include <helpers.hpp>
 #include <Unit.hpp>
 #if ENABLE_SSL
 #include <Ssl.hpp>
