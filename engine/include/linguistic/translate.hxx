@@ -11,10 +11,12 @@
 #include <linguistic/lngdllapi.h>
 #include <rtl/string.hxx>
 
+#include <string_view>
+
 namespace linguistic
 {
 LNG_DLLPUBLIC OString Translate(const OString& rTargetLang, const OString& rAPIUrl,
-                                const OString& rAuthKey, const OString& rData);
+                                std::string_view rAuthKey, const OString& rData);
 } // namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

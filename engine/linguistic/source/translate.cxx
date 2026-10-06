@@ -17,9 +17,25 @@
 #include <vcl/htmltransferable.hxx>
 #include <tools/long.hxx>
 
+#include <functional>
+#include <memory>
+#include <string_view>
+
 namespace linguistic
 {
-OString Translate(const OString& rTargetLang, const OString& rAPIUrl, const OString& rAuthKey,
+namespace
+{
+/// Percent-encodes rValue for use as a form field value.
+OString escape(CURL* pCurl, const OString& rValue)
+{
+    std::unique_ptr<char, std::function<void(char*)>> pEscaped(
+        curl_easy_escape(pCurl, rValue.getStr(), rValue.getLength()),
+        [](char* p) { curl_free(p); });
+    return pEscaped ? OString(pEscaped.get()) : OString();
+}
+}
+
+OString Translate(const OString& rTargetLang, const OString& rAPIUrl, std::string_view rAuthKey,
                   const OString& rData)
 {
     constexpr tools::Long CURL_TIMEOUT = 10L;
@@ -33,6 +49,14 @@ OString Translate(const OString& rTargetLang, const OString& rAPIUrl, const OStr
     (void)curl_easy_setopt(curl.get(), CURLOPT_FAILONERROR, 1L);
     (void)curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, CURL_TIMEOUT);
 
+    // DeepL only accepts the key in the Authorization header; the former
+    // auth_key form field is rejected with 403 since January 2026.
+    const OString aAuthHeader(OString::Concat("Authorization: DeepL-Auth-Key ") + rAuthKey);
+    std::unique_ptr<curl_slist, std::function<void(curl_slist*)>> pHeaders(
+        curl_slist_append(nullptr, aAuthHeader.getStr()),
+        [](curl_slist* p) { curl_slist_free_all(p); });
+    (void)curl_easy_setopt(curl.get(), CURLOPT_HTTPHEADER, pHeaders.get());
+
     std::string response_body;
     (void)curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION,
                            +[](void* buffer, size_t size, size_t nmemb, void* userp) -> size_t {
@@ -44,11 +68,9 @@ OString Translate(const OString& rTargetLang, const OString& rAPIUrl, const OStr
                                return real_size;
                            });
     (void)curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, static_cast<void*>(&response_body));
-    OString aLang(curl_easy_escape(curl.get(), rTargetLang.getStr(), rTargetLang.getLength()));
-    OString aAuthKey(curl_easy_escape(curl.get(), rAuthKey.getStr(), rAuthKey.getLength()));
-    OString aData(curl_easy_escape(curl.get(), rData.getStr(), rData.getLength()));
-    OString aPostData("auth_key=" + aAuthKey + "&target_lang=" + aLang + "&text=" + aData);
-
+    // rData is HTML: tag_handling keeps the markup intact across the translation.
+    const OString aPostData("target_lang=" + escape(curl.get(), rTargetLang)
+                            + "&tag_handling=html&text=" + escape(curl.get(), rData));
     (void)curl_easy_setopt(curl.get(), CURLOPT_POSTFIELDS, aPostData.getStr());
     CURLcode cc = curl_easy_perform(curl.get());
     if (cc != CURLE_OK)
