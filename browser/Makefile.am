@@ -43,12 +43,18 @@ if !ENABLE_MOBILEAPP
 # actually exists), so we don't ship languages the engine does not support.
 L10N_JSON = $(foreach L,$(L10N_LANGS),$(if $(wildcard $(srcdir)/po/help-$(L).po),$(DIST_FOLDER)/l10n/help-$(L).json))
 L10N_JSON += $(foreach L,$(L10N_LANGS),$(if $(wildcard $(srcdir)/po/ui-$(L).po),$(DIST_FOLDER)/l10n/ui-$(L).json))
+if ENABLE_QTAPP
+# The Qt app page loads the table as its own file (see cool.html.m4). It is
+# not L10N_ALL_JS, which would paste it into the server bundle.js too.
+L10N_JSON += $(DIST_FOLDER)/l10n-all.js
+endif
 else
 L10N_ALL_JS = $(DIST_FOLDER)/l10n-all.js
 L10N_JSON = $(L10N_ALL_JS)
 L10N_ALL_JS_ENTRY = l10n-all.js
+endif
 
-$(L10N_ALL_JS) : $(wildcard $(srcdir)/po/ui-*.po) $(wildcard $(srcdir)/po/help-*.po) $(UNO_GENERATED_STAMP) $(shell find $(srcdir)/l10n -name '*.*') $(srcdir)/util/create-l10n-all-js.py
+$(DIST_FOLDER)/l10n-all.js : $(wildcard $(srcdir)/po/ui-*.po) $(wildcard $(srcdir)/po/help-*.po) $(UNO_GENERATED_STAMP) $(shell find $(srcdir)/l10n -name '*.*') $(srcdir)/util/create-l10n-all-js.py
 	@for lang in $(L10N_LANGS); do \
 		$(srcdir)/util/po2json.py --quiet $(srcdir)/po/ui-$$lang.po -o $(srcdir)/po/ui-$$lang.po.json || exit 1; \
 		if test -f $(srcdir)/po/help-$$lang.po; then $(srcdir)/util/po2json.py --quiet $(srcdir)/po/help-$$lang.po -o $(srcdir)/po/help-$$lang.po.json || exit 1; fi; \
@@ -58,6 +64,7 @@ $(L10N_ALL_JS) : $(wildcard $(srcdir)/po/ui-*.po) $(wildcard $(srcdir)/po/help-*
 	@find $(srcdir)/po -name 'ui-*.po.json' -delete
 	@find $(srcdir)/po -name 'help-*.po.json' -delete
 
+if ENABLE_MOBILEAPP
 # Scoped translations for the Options (integrator settings) dialog, which runs
 # in a file:// iframe where the <link rel="localizations"> loader does not work.
 # Only the dialog's strings, all languages (~200 KB), reusing l10n-all.js's

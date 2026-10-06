@@ -97,8 +97,10 @@ m4_dnl Add branding.css for mobile apps, or the placeholder for server processin
 m4_ifelse(MOBILEAPP, [true], [<link rel="stylesheet" href="m4_ifelse(IOSAPP, [true], [Branding/])branding.css" />],
   [<!--%BRANDING_CSS%--> <!-- add your logo here -->])
 m4_dnl
-m4_dnl Handle localization
-m4_ifelse(MOBILEAPP,[true],
+m4_dnl Handle localization. The Qt app page gets l10n-all.js (see below) instead
+m4_dnl of maps, whose entries only resolve when coolwsd serves them.
+m4_ifelse(QTAPP,[true],[],
+  MOBILEAPP,[true],
   [
    m4_ifelse(IOSAPP,[true],
      [],
@@ -366,6 +368,7 @@ m4_ifelse(MOBILEAPP, [true],
 m4_ifelse(MOBILEAPP,[true],
   <!-- This is for a mobile app so the script files are in the same folder -->
   m4_ifelse(EMSCRIPTENAPP, [true], [<script src="emscripten-module.js" defer></script>])
+  m4_ifelse(QTAPP, [true], [<script src="l10n-all.js" defer></script>])
   m4_ifelse(BUNDLE, [], m4_foreachq([fileJS], [m4_include(COOL_JS.m4)], [<script src="fileJS" defer></script>]), [<script src="bundle.js" defer></script>]),
   m4_ifelse(BUNDLE, [], m4_foreachq([fileJS], [m4_include(COOL_JS.m4)],
         [<script src="%SERVICE_ROOT%/browser/%VERSION%/fileJS" defer></script>

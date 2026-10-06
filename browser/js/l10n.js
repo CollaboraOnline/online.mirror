@@ -156,7 +156,10 @@ const process_load_queue = function (locale) {
 
 let use_default; // Must be declared before localize function
 
-const localize = String_ctr.prototype[$to_locale_string] = function () {
+// The Qt app page loads l10n-all.js, and global.js looks strings up in it.
+const has_localizations_table = typeof window !== undef_type && !!window.LOCALIZATIONS;
+
+const localize = function () {
 	const using_default = use_default;
 	const current_locale = String_ctr[using_default ? $default_locale : $locale];
 	const parts = current_locale[$to_lowercase]().split("-");
@@ -186,6 +189,10 @@ const localize = String_ctr.prototype[$to_locale_string] = function () {
 
 	return this_val;
 };
+
+if (!has_localizations_table) {
+	String_ctr.prototype[$to_locale_string] = localize;
+}
 
 try
 {
@@ -245,6 +252,10 @@ String_ctr[$default_locale] = String_ctr[$default_locale] || "";
 String_ctr[$locale] = nav && (nav.language || nav.userLanguage) || "";
 
 document.documentElement.lang = window.langParam;
+
+if (has_localizations_table) {
+	return;
+}
 
 if (!browserless || typeof document !== undef_type) {
 	const elts = document.getElementsByTagName("link");
