@@ -60,6 +60,16 @@
 #include <svx/xlntrit.hxx>
 #include <svx/xfltrit.hxx>
 #include <comphelper/configuration.hxx>
+#include <svx/xflbstit.hxx>
+#include <svx/xfilluseslidebackgrounditem.hxx>
+#include <svx/svdpage.hxx>
+#include <sdr/primitive2d/sdrdecompositiontools.hxx>
+#include <drawinglayer/attribute/fillgradientattribute.hxx>
+#include <drawinglayer/attribute/sdrfillattribute.hxx>
+#include <drawinglayer/converters.hxx>
+#include <basegfx/polygon/b2dpolygontools.hxx>
+#include <vcl/canvastools.hxx>
+#include <vcl/graph.hxx>
 
 using namespace com::sun::star;
 using namespace ::cpo::uno;
@@ -240,6 +250,71 @@ void lcl_SoftLightsDirection(const basegfx::B3DVector& rLight, basegfx::B3DVecto
     rSoftRight = aRotateMat * rSoftRight;
     rSoftLeft = aRotateMat * rSoftLeft;
 }
+
+// A shape filled with the slide background shows the fill of the page it is on. This puts that
+// page fill into rSet as an ordinary fill. A solid page fill is copied as it is. Any other page
+// fill is painted into a bitmap that covers rSnapRect at its place on the page, so the shape
+// shows the part of the background behind it. Returns true when rSet holds the page fill.
+bool lcl_ApplySlideBackgroundFill(SfxItemSet& rSet, const SdrObjCustomShape& rCustomShape,
+                                  const tools::Rectangle& rSnapRect)
+{
+    if (rSet.Get(XATTR_FILLSTYLE).GetValue() != drawing::FillStyle_NONE
+        || !rSet.Get(XATTR_FILLUSESLIDEBACKGROUND).GetValue())
+        return false;
+
+    const SdrPage* pPage = rCustomShape.getSdrPageFromSdrObject();
+    if (!pPage)
+        return false;
+
+    // The page's own fill, or the master page fill when the page has none.
+    const SdrPageProperties* pPageProperties = pPage->getCorrectSdrPageProperties();
+    if (!pPageProperties)
+        return false;
+
+    const SfxItemSet& rPageSet = pPageProperties->GetItemSet();
+    const drawing::FillStyle ePageFillStyle = rPageSet.Get(XATTR_FILLSTYLE).GetValue();
+    if (ePageFillStyle == drawing::FillStyle_NONE)
+        return false;
+
+    if (ePageFillStyle == drawing::FillStyle_SOLID)
+    {
+        rSet.Put(XFillColorItem(OUString(), rPageSet.Get(XATTR_FILLCOLOR).GetColorValue()));
+        rSet.Put(rPageSet.Get(XATTR_FILLTRANSPARENCE));
+        rSet.Put(XFillStyleItem(drawing::FillStyle_SOLID));
+        return true;
+    }
+
+    const drawinglayer::attribute::SdrFillAttribute aPageFill(
+        drawinglayer::primitive2d::createNewSdrFillAttribute(rPageSet));
+    const basegfx::B2DRange aShapeRange(vcl::unotools::b2DRectangleFromRectangle(rSnapRect));
+    if (aPageFill.isDefault() || aShapeRange.isEmpty())
+        return false;
+
+    // The page range is the definition range of the fill, so a gradient or a bitmap is laid out
+    // over the whole page, and only the part inside the shape range is painted.
+    const basegfx::B2DRange aPageRange(0.0, 0.0, pPage->GetWidth(), pPage->GetHeight());
+    drawinglayer::primitive2d::Primitive2DContainer aFillSequence{
+        drawinglayer::primitive2d::createPolyPolygonFillPrimitive(
+            basegfx::B2DPolyPolygon(basegfx::utils::createPolygonFromRect(aShapeRange)),
+            aPageRange, aPageFill, drawinglayer::attribute::FillGradientAttribute())
+    };
+    const o3tl::Length eModelUnit(
+        rCustomShape.getSdrModelFromSdrObject().GetScaleUnit() == MapUnit::MapTwip
+            ? o3tl::Length::twip
+            : o3tl::Length::mm100);
+    const Bitmap aBackground(drawinglayer::convertPrimitive2DContainerToBitmap(
+        std::move(aFillSequence), aShapeRange, 500000, eModelUnit));
+    if (aBackground.IsEmpty())
+        return false;
+
+    rSet.Put(XFillBitmapItem(OUString(), Graphic(aBackground)));
+    rSet.Put(XFillBmpTileItem(false));
+    rSet.Put(XFillBmpStretchItem(true));
+    // The bitmap already holds the transparency of the page fill.
+    rSet.Put(XFillTransparenceItem(0));
+    rSet.Put(XFillStyleItem(drawing::FillStyle_BITMAP));
+    return true;
+}
 }
 
 rtl::Reference<SdrObject> EnhancedCustomShape3d::Create3DObject(
@@ -325,6 +400,8 @@ rtl::Reference<SdrObject> EnhancedCustomShape3d::Create3DObject(
 
         //SJ: vertical writing is not required, by removing this item no outliner is created
         aSet.ClearItem( SDRATTR_TEXTDIRECTION );
+
+        const bool bSlideBackgroundFill(lcl_ApplySlideBackgroundFill(aSet, rSdrObjCustomShape, aSnapRect));
 
         // #i105323# For 3D AutoShapes, the shadow attribute has to be applied to each
         // created visualisation helper model shape individually. The shadow itself
@@ -413,7 +490,11 @@ rtl::Reference<SdrObject> EnhancedCustomShape3d::Create3DObject(
         while( aIter.IsMore() )
         {
             const SdrObject* pNext = aIter.Next();
-            bool bIsPlaceholderObject = (pNext->GetMergedItem( XATTR_FILLSTYLE ).GetValue() == drawing::FillStyle_NONE )
+            // A sub object without fill that uses the slide background is filled with the page
+            // fill that aSet now holds.
+            const bool bHasFill = (pNext->GetMergedItem( XATTR_FILLSTYLE ).GetValue() != drawing::FillStyle_NONE )
+                                  || ( bSlideBackgroundFill && pNext->GetMergedItem( XATTR_FILLUSESLIDEBACKGROUND ).GetValue() );
+            bool bIsPlaceholderObject = !bHasFill
                                         && (pNext->GetMergedItem( XATTR_LINESTYLE ).GetValue() == drawing::LineStyle_NONE );
             basegfx::B2DPolyPolygon aPolyPoly;
             SfxItemSet aLocalSet(aSet);
@@ -430,9 +511,7 @@ rtl::Reference<SdrObject> EnhancedCustomShape3d::Create3DObject(
                 // invisible (all this 'hidden' logic should be migrated to primitives).
                 if(!bMultipleSubObjects)
                 {
-                    const drawing::FillStyle eStyle(rSet.Get(XATTR_FILLSTYLE).GetValue());
-
-                    if(drawing::FillStyle_NONE == eStyle)
+                    if(!bHasFill)
                     {
                         const drawinglayer::attribute::SdrLineAttribute aLine(
                             drawinglayer::primitive2d::createNewSdrLineAttribute(rSet));

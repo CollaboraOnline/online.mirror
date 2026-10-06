@@ -28,9 +28,13 @@
 #include <svx/graphichelper.hxx>
 #include <svx/svdoashp.hxx>
 #include <svx/svdogrp.hxx>
+#include <svx/scene3d.hxx>
+#include <svx/svditer.hxx>
 #include <svx/svdopath.hxx>
 #include <svx/svdview.hxx>
 #include <svx/svxids.hrc>
+#include <svx/xfillit0.hxx>
+#include <svx/xflclit.hxx>
 #include <unotools/tempfile.hxx>
 #include <vcl/filter/PngImageReader.hxx>
 #include <vcl/BitmapReadAccess.hxx>
@@ -1479,6 +1483,51 @@ CPPUNIT_TEST_FIXTURE(CustomshapesTest, testConvertRingToPolygonIsSingleObject)
     SdrObject* pConverted = SdrObject::getSdrObjectFromXShape(xConverted);
     CPPUNIT_ASSERT(pConverted);
     CPPUNIT_ASSERT(!dynamic_cast<SdrObjGroup*>(pConverted));
+}
+
+CPPUNIT_TEST_FIXTURE(CustomshapesTest, testExtrusionSlideBackgroundFill)
+{
+    // The document contains an extruded 'rectangle' custom shape without outline. Its area uses
+    // the slide background, which is solid #2a9d8f.
+    loadFromFile(u"ExtrusionSlideBackground.fodp");
+
+    uno::Reference<drawing::XShape> xShape(getShape(0));
+    SdrObjCustomShape& rSdrCustomShape(
+        static_cast<SdrObjCustomShape&>(*SdrObject::getSdrObjectFromXShape(xShape)));
+
+    // Counts the faces of the rendered 3D scene that are filled with aColor.
+    auto countFacesWithColor = [&rSdrCustomShape](Color aColor) {
+        const E3dScene* pScene = DynCastE3dScene(rSdrCustomShape.GetSdrObjectFromCustomShape());
+        CPPUNIT_ASSERT(pScene);
+        sal_Int32 nCount(0);
+        SdrObjListIter aIter(pScene->GetSubList(), SdrIterMode::DeepNoGroups);
+        while (aIter.IsMore())
+        {
+            const SdrObject* pObject = aIter.Next();
+            if (pObject->GetMergedItem(XATTR_FILLSTYLE).GetValue() == drawing::FillStyle_SOLID
+                && pObject->GetMergedItem(XATTR_FILLCOLOR).GetColorValue() == aColor)
+                ++nCount;
+        }
+        return nCount;
+    };
+
+    // The front of the shape shows the slide background.
+    CPPUNIT_ASSERT_GREATER(sal_Int32(0), countFacesWithColor(Color(0x2a9d8f)));
+
+    // The shape follows a change of the slide background.
+    uno::Reference<drawing::XDrawPagesSupplier> xDrawPagesSupplier(mxComponent,
+                                                                   uno::UNO_QUERY_THROW);
+    uno::Reference<beans::XPropertySet> xPage(xDrawPagesSupplier->getDrawPages()->getByIndex(0),
+                                              uno::UNO_QUERY_THROW);
+    uno::Reference<lang::XMultiServiceFactory> xFactory(mxComponent, uno::UNO_QUERY_THROW);
+    uno::Reference<beans::XPropertySet> xBackground(
+        xFactory->createInstance(u"com.sun.star.drawing.Background"_ustr), uno::UNO_QUERY_THROW);
+    xBackground->setPropertyValue(u"FillStyle"_ustr, cpo::uno::Any(drawing::FillStyle_SOLID));
+    xBackground->setPropertyValue(u"FillColor"_ustr, cpo::uno::Any(Color(0xcc3366)));
+    xPage->setPropertyValue(u"Background"_ustr, cpo::uno::Any(xBackground));
+
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(0), countFacesWithColor(Color(0x2a9d8f)));
+    CPPUNIT_ASSERT_GREATER(sal_Int32(0), countFacesWithColor(Color(0xcc3366)));
 }
 }
 

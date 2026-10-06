@@ -48,6 +48,8 @@
 #include <svx/xbtmpit.hxx>
 #include <svx/xdef.hxx>
 #include <svx/xfillit0.hxx>
+#include <svx/xfilluseslidebackgrounditem.hxx>
+#include <svx/svdoashp.hxx>
 
 #include <sdr/contact/viewcontactofsdrpage.hxx>
 #include <svx/sdr/contact/viewobjectcontact.hxx>
@@ -1203,8 +1205,45 @@ void SdrPageProperties::ImpAddStyleSheet(SfxStyleSheet& rNewStyleSheet)
 namespace
 {
 
+// A custom shape that uses the slide background keeps its rendering, and for a 3D shape that
+// rendering holds a copy of the page fill. The rendering is dropped, so it is built again from
+// the current page fill.
+void ImpInvalidateSlideBackgroundShapes(const SdrPage& rSdrPage)
+{
+    SdrObjListIter aIter(&rSdrPage, SdrIterMode::DeepNoGroups);
+
+    while (aIter.IsMore())
+    {
+        SdrObjCustomShape* pCustomShape = dynamic_cast<SdrObjCustomShape*>(aIter.Next());
+
+        if (pCustomShape
+            && pCustomShape->GetMergedItem(XATTR_FILLSTYLE).GetValue() == drawing::FillStyle_NONE
+            && pCustomShape->GetMergedItem(XATTR_FILLUSESLIDEBACKGROUND).GetValue())
+        {
+            pCustomShape->InvalidateRenderGeometry();
+            pCustomShape->ActionChanged();
+        }
+    }
+}
+
 void ImpPageChange(SdrPage& rSdrPage)
 {
+    ImpInvalidateSlideBackgroundShapes(rSdrPage);
+
+    // The pages that use a master page show its fill when they have none of their own.
+    if (rSdrPage.IsMasterPage())
+    {
+        const SdrModel& rModel(rSdrPage.getSdrModelFromSdrPage());
+
+        for (sal_uInt16 nPage(0); nPage < rModel.GetPageCount(); ++nPage)
+        {
+            const SdrPage* pPage(rModel.GetPage(nPage));
+
+            if (pPage->TRG_HasMasterPage() && &pPage->TRG_GetMasterPage() == &rSdrPage)
+                ImpInvalidateSlideBackgroundShapes(*pPage);
+        }
+    }
+
     rSdrPage.ActionChanged();
     rSdrPage.getSdrModelFromSdrPage().SetChanged();
     SdrHint aHint(SdrHintKind::PageOrderChange, &rSdrPage);

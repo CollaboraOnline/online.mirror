@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+  xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+  xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+  xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"
+  xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0"
+  xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0"
+  office:version="1.4" office:mimetype="application/vnd.oasis.opendocument.presentation">
+ <office:automatic-styles>
+  <style:style style:name="dp1" style:family="drawing-page">
+   <style:drawing-page-properties presentation:background-visible="true" draw:background-size="full" draw:fill="solid" draw:fill-color="#2a9d8f"/>
+  </style:style>
+  <style:style style:name="gr1" style:family="graphic">
+   <style:graphic-properties draw:stroke="none" draw:fill="none" loext:fill-use-slide-background="true" draw:secondary-fill-color="#ff0000"/>
+  </style:style>
+ </office:automatic-styles>
+ <office:master-styles>
+  <style:master-page style:name="Default"/>
+ </office:master-styles>
+ <office:body>
+  <office:presentation>
+   <draw:page draw:name="page1" draw:style-name="dp1" draw:master-page-name="Default">
+    <draw:custom-shape draw:style-name="gr1" svg:width="6cm" svg:height="4cm" svg:x="2cm" svg:y="2cm">
+     <draw:enhanced-geometry svg:viewBox="0 0 21600 21600" draw:type="rectangle" draw:extrusion="true" draw:extrusion-color="true" draw:extrusion-rotation-angle="-20 20" draw:enhanced-path="M 0 0 L 21600 0 21600 21600 0 21600 Z N"/>
+    </draw:custom-shape>
+   </draw:page>
+  </office:presentation>
+ </office:body>
+</office:document>
