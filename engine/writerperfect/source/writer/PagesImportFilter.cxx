@@ -38,17 +38,17 @@ bool PagesImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput, OUSt
 }
 
 // XServiceInfo
-OUString SAL_CALL PagesImportFilter::getImplementationName()
+OUString PagesImportFilter::getImplementationName()
 {
     return u"org.libreoffice.comp.Writer.PagesImportFilter"_ustr;
 }
 
-bool SAL_CALL PagesImportFilter::supportsService(const OUString& rServiceName)
+bool PagesImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL PagesImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> PagesImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

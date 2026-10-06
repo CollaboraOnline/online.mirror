@@ -31,17 +31,17 @@ bool MSPUBImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput, OUSt
 }
 
 // XServiceInfo
-OUString SAL_CALL MSPUBImportFilter::getImplementationName()
+OUString MSPUBImportFilter::getImplementationName()
 {
     return u"com.sun.star.comp.Draw.MSPUBImportFilter"_ustr;
 }
 
-bool SAL_CALL MSPUBImportFilter::supportsService(const OUString& rServiceName)
+bool MSPUBImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL MSPUBImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> MSPUBImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

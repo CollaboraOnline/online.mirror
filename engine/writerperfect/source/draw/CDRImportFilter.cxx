@@ -35,17 +35,17 @@ bool CDRImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput, OUStri
 }
 
 // XServiceInfo
-OUString SAL_CALL CDRImportFilter::getImplementationName()
+OUString CDRImportFilter::getImplementationName()
 {
     return u"com.sun.star.comp.Draw.CDRImportFilter"_ustr;
 }
 
-bool SAL_CALL CDRImportFilter::supportsService(const OUString& rServiceName)
+bool CDRImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL CDRImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> CDRImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

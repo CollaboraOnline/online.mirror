@@ -32,17 +32,17 @@ bool FreehandImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput, O
 }
 
 // XServiceInfo
-OUString SAL_CALL FreehandImportFilter::getImplementationName()
+OUString FreehandImportFilter::getImplementationName()
 {
     return u"com.sun.star.comp.Draw.FreehandImportFilter"_ustr;
 }
 
-bool SAL_CALL FreehandImportFilter::supportsService(const OUString& rServiceName)
+bool FreehandImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL FreehandImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> FreehandImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

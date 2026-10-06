@@ -24,7 +24,7 @@ class XMLDcTitleContext : public XMLImportContext
 public:
     XMLDcTitleContext(XMLImport& rImport, XMLMetaDocumentContext& rMeta);
 
-    void SAL_CALL characters(const OUString& rChars) override;
+    void characters(const OUString& rChars) override;
 
 private:
     XMLMetaDocumentContext& mrMeta;
@@ -52,7 +52,7 @@ class XMLDcLanguageContext : public XMLImportContext
 public:
     XMLDcLanguageContext(XMLImport& rImport, XMLMetaDocumentContext& rMeta);
 
-    void SAL_CALL characters(const OUString& rChars) override;
+    void characters(const OUString& rChars) override;
 
 private:
     XMLMetaDocumentContext& mrMeta;
@@ -80,7 +80,7 @@ class XMLDcDateContext : public XMLImportContext
 public:
     XMLDcDateContext(XMLImport& rImport, XMLMetaDocumentContext& rMeta);
 
-    void SAL_CALL characters(const OUString& rChars) override;
+    void characters(const OUString& rChars) override;
 
 private:
     XMLMetaDocumentContext& mrMeta;
@@ -108,7 +108,7 @@ class XMLMetaGeneratorContext : public XMLImportContext
 public:
     XMLMetaGeneratorContext(XMLImport& rImport, XMLMetaDocumentContext& rMeta);
 
-    void SAL_CALL characters(const OUString& rChars) override;
+    void characters(const OUString& rChars) override;
 
 private:
     XMLMetaDocumentContext& mrMeta;
@@ -135,7 +135,7 @@ class XMLMetaInitialCreatorContext : public XMLImportContext
 public:
     XMLMetaInitialCreatorContext(XMLImport& rImport, XMLMetaDocumentContext& rMeta);
 
-    void SAL_CALL characters(const OUString& rChars) override;
+    void characters(const OUString& rChars) override;
 
 private:
     XMLMetaDocumentContext& mrMeta;

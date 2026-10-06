@@ -100,7 +100,7 @@ class XMLFontFaceContext : public XMLImportContext
 {
 public:
     XMLFontFaceContext(XMLImport& rImport);
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
@@ -133,10 +133,10 @@ class XMLFontFaceUriContext : public XMLImportContext
 {
 public:
     XMLFontFaceUriContext(XMLImport& rImport, XMLFontFaceContext const& rFontFace);
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
-    void SAL_CALL endElement(const OUString& rName) override;
+    void endElement(const OUString& rName) override;
 
     rtl::Reference<XMLImportContext>
     CreateChildContext(const OUString& rName,
@@ -154,7 +154,7 @@ class XMLFontFaceFormatContext : public XMLImportContext
 {
 public:
     XMLFontFaceFormatContext(XMLImport& rImport, XMLFontFaceUriContext& rFontFaceUri);
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 

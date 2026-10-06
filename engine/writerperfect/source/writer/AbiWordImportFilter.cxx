@@ -33,17 +33,17 @@ bool AbiWordImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput, OU
 }
 
 // XServiceInfo
-OUString SAL_CALL AbiWordImportFilter::getImplementationName()
+OUString AbiWordImportFilter::getImplementationName()
 {
     return u"com.sun.star.comp.Writer.AbiWordImportFilter"_ustr;
 }
 
-bool SAL_CALL AbiWordImportFilter::supportsService(const OUString& rServiceName)
+bool AbiWordImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL AbiWordImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> AbiWordImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

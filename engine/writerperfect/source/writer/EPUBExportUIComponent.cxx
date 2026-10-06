@@ -67,7 +67,7 @@ cpo::uno::Sequence<OUString> EPUBExportUIComponent::getSupportedServiceNames()
 
 void EPUBExportUIComponent::setTitle(const OUString& /*rTitle*/) {}
 
-void SAL_CALL EPUBExportUIComponent::initialize(const cpo::uno::Sequence<cpo::uno::Any>& rArguments)
+void EPUBExportUIComponent::initialize(const cpo::uno::Sequence<cpo::uno::Any>& rArguments)
 {
     ::comphelper::NamedValueCollection aProperties(rArguments);
     if (aProperties.has(u"ParentWindow"_ustr))
@@ -85,15 +85,15 @@ sal_Int16 EPUBExportUIComponent::execute()
     return ui::dialogs::ExecutableDialogResults::CANCEL;
 }
 
-void SAL_CALL EPUBExportUIComponent::setSourceDocument(
+void EPUBExportUIComponent::setSourceDocument(
     const cpo::uno::Reference<css::lang::XComponent>& xDocument)
 {
     mxSourceDocument = xDocument;
 }
 
-void SAL_CALL EPUBExportUIComponent::setDialogTitle(const OUString& aTitle) { setTitle(aTitle); }
+void EPUBExportUIComponent::setDialogTitle(const OUString& aTitle) { setTitle(aTitle); }
 
-void SAL_CALL EPUBExportUIComponent::startExecuteModal(
+void EPUBExportUIComponent::startExecuteModal(
     const cpo::uno::Reference<css::ui::dialogs::XDialogClosedListener>& xListener)
 {
     SolarMutexGuard aSolarGuard;

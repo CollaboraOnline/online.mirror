@@ -35,17 +35,17 @@ bool ZMFImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput, OUStri
 }
 
 // XServiceInfo
-OUString SAL_CALL ZMFImportFilter::getImplementationName()
+OUString ZMFImportFilter::getImplementationName()
 {
     return u"org.libreoffice.comp.Draw.ZMFImportFilter"_ustr;
 }
 
-bool SAL_CALL ZMFImportFilter::supportsService(const OUString& rServiceName)
+bool ZMFImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-Sequence<OUString> SAL_CALL ZMFImportFilter::getSupportedServiceNames()
+Sequence<OUString> ZMFImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

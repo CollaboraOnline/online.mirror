@@ -31,17 +31,17 @@ bool VisioImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput, OUSt
 }
 
 // XServiceInfo
-OUString SAL_CALL VisioImportFilter::getImplementationName()
+OUString VisioImportFilter::getImplementationName()
 {
     return u"com.sun.star.comp.Draw.VisioImportFilter"_ustr;
 }
 
-bool SAL_CALL VisioImportFilter::supportsService(const OUString& rServiceName)
+bool VisioImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL VisioImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> VisioImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

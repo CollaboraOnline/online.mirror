@@ -149,22 +149,22 @@ bool WordPerfectImportFilter::importImpl(
                                         aUtf8Passwd.isEmpty() ? nullptr : aUtf8Passwd.getStr());
 }
 
-bool SAL_CALL
+bool
 WordPerfectImportFilter::filter(const cpo::uno::Sequence<css::beans::PropertyValue>& aDescriptor)
 {
     return importImpl(aDescriptor);
 }
-void SAL_CALL WordPerfectImportFilter::cancel() {}
+void WordPerfectImportFilter::cancel() {}
 
 // XImporter
-void SAL_CALL
+void
 WordPerfectImportFilter::setTargetDocument(const Reference<css::lang::XComponent>& xDoc)
 {
     mxDoc = xDoc;
 }
 
 // XExtendedFilterDetection
-OUString SAL_CALL
+OUString
 WordPerfectImportFilter::detect(cpo::uno::Sequence<css::beans::PropertyValue>& Descriptor)
 {
     sal_Int32 nLength = Descriptor.getLength();
@@ -202,23 +202,23 @@ WordPerfectImportFilter::detect(cpo::uno::Sequence<css::beans::PropertyValue>& D
 }
 
 // XInitialization
-void SAL_CALL
+void
 WordPerfectImportFilter::initialize(const cpo::uno::Sequence<cpo::uno::Any>& /*aArguments*/)
 {
 }
 
 // XServiceInfo
-OUString SAL_CALL WordPerfectImportFilter::getImplementationName()
+OUString WordPerfectImportFilter::getImplementationName()
 {
     return u"com.sun.star.comp.Writer.WordPerfectImportFilter"_ustr;
 }
 
-bool SAL_CALL WordPerfectImportFilter::supportsService(const OUString& rServiceName)
+bool WordPerfectImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL WordPerfectImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> WordPerfectImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

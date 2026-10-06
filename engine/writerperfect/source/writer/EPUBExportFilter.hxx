@@ -40,17 +40,17 @@ public:
     EPUBExportFilter(cpo::uno::Reference<cpo::uno::XComponentContext> xContext);
 
     // XFilter
-    bool SAL_CALL filter(const cpo::uno::Sequence<css::beans::PropertyValue>& rDescriptor) override;
-    void SAL_CALL cancel() override;
+    bool filter(const cpo::uno::Sequence<css::beans::PropertyValue>& rDescriptor) override;
+    void cancel() override;
 
     // XExporter
-    void SAL_CALL
+    void
     setSourceDocument(const cpo::uno::Reference<css::lang::XComponent>& xDocument) override;
 
     // XServiceInfo
-    OUString SAL_CALL getImplementationName() override;
-    bool SAL_CALL supportsService(const OUString& rServiceName) override;
-    cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override;
+    OUString getImplementationName() override;
+    bool supportsService(const OUString& rServiceName) override;
+    cpo::uno::Sequence<OUString> getSupportedServiceNames() override;
 
     /// Gives the default EPUB version.
     static sal_Int32 GetDefaultVersion();

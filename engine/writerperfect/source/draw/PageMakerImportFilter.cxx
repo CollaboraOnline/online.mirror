@@ -32,17 +32,17 @@ bool PageMakerImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput, 
 }
 
 // XServiceInfo
-OUString SAL_CALL PageMakerImportFilter::getImplementationName()
+OUString PageMakerImportFilter::getImplementationName()
 {
     return u"org.libreoffice.comp.Draw.PageMakerImportFilter"_ustr;
 }
 
-bool SAL_CALL PageMakerImportFilter::supportsService(const OUString& rServiceName)
+bool PageMakerImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL PageMakerImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> PageMakerImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

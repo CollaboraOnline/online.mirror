@@ -64,7 +64,7 @@ class XMLTextSequenceContext : public XMLImportContext
 public:
     XMLTextSequenceContext(XMLImport& rImport, const librevenge::RVNGPropertyList& rPropertyList);
 
-    void SAL_CALL characters(const OUString& rChars) override;
+    void characters(const OUString& rChars) override;
 
 private:
     librevenge::RVNGPropertyList m_aPropertyList;
@@ -103,10 +103,10 @@ public:
     CreateChildContext(const OUString& rName,
                        const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
-    void SAL_CALL characters(const OUString& rChars) override;
+    void characters(const OUString& rChars) override;
 
 private:
     librevenge::RVNGPropertyList m_aPropertyList;
@@ -170,7 +170,7 @@ public:
     CreateChildContext(const OUString& rName,
                        const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
-    void SAL_CALL endElement(const OUString& rName) override;
+    void endElement(const OUString& rName) override;
 
     void SetRubyText(const OUString& rRubyText) { m_sRubyText = rRubyText; }
 
@@ -192,7 +192,7 @@ public:
     {
     }
 
-    void SAL_CALL characters(const OUString& rChars) override { m_rParent.SetRubyText(rChars); }
+    void characters(const OUString& rChars) override { m_rParent.SetRubyText(rChars); }
 
 private:
     XMLRubyContext& m_rParent;
@@ -208,7 +208,7 @@ public:
     {
     }
 
-    void SAL_CALL characters(const OUString& rChars) override { m_rParent.GetRubyBase() += rChars; }
+    void characters(const OUString& rChars) override { m_rParent.GetRubyBase() += rChars; }
 
 private:
     XMLRubyContext& m_rParent;
@@ -279,7 +279,7 @@ class XMLLineBreakContext : public XMLCharContext
 public:
     XMLLineBreakContext(XMLImport& rImport, const librevenge::RVNGPropertyList& rPropertyList);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 };
@@ -308,7 +308,7 @@ class XMLSpaceContext : public XMLCharContext
 public:
     XMLSpaceContext(XMLImport& rImport, const librevenge::RVNGPropertyList& rPropertyList);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 };
@@ -337,7 +337,7 @@ class XMLTabContext : public XMLCharContext
 public:
     XMLTabContext(XMLImport& rImport, const librevenge::RVNGPropertyList& rPropertyList);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 };
@@ -369,11 +369,11 @@ public:
     CreateChildContext(const OUString& rName,
                        const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
-    void SAL_CALL endElement(const OUString& rName) override;
-    void SAL_CALL characters(const OUString& rChars) override;
+    void endElement(const OUString& rName) override;
+    void characters(const OUString& rChars) override;
 
 private:
     librevenge::RVNGPropertyList m_aPropertyList;
@@ -456,11 +456,11 @@ public:
     CreateChildContext(const OUString& rName,
                        const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
-    void SAL_CALL endElement(const OUString& rName) override;
-    void SAL_CALL characters(const OUString& rChars) override;
+    void endElement(const OUString& rName) override;
+    void characters(const OUString& rChars) override;
 
 private:
     librevenge::RVNGPropertyList m_aPropertyList;

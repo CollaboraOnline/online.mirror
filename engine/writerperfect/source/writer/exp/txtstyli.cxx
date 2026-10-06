@@ -23,7 +23,7 @@ class XMLParagraphPropertiesContext : public XMLImportContext
 public:
     XMLParagraphPropertiesContext(XMLImport& rImport, XMLStyleContext& rStyle);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
@@ -58,7 +58,7 @@ class XMLTextPropertiesContext : public XMLImportContext
 public:
     XMLTextPropertiesContext(XMLImport& rImport, XMLStyleContext& rStyle);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
@@ -92,7 +92,7 @@ class XMLGraphicPropertiesContext : public XMLImportContext
 public:
     XMLGraphicPropertiesContext(XMLImport& rImport, XMLStyleContext& rStyle);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
@@ -127,7 +127,7 @@ class XMLPageLayoutPropertiesContext : public XMLImportContext
 public:
     XMLPageLayoutPropertiesContext(XMLImport& rImport, XMLStyleContext& rStyle);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
@@ -166,7 +166,7 @@ class XMLTablePropertiesContext : public XMLImportContext
 public:
     XMLTablePropertiesContext(XMLImport& rImport, XMLStyleContext& rStyle);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
@@ -205,7 +205,7 @@ class XMLTableRowPropertiesContext : public XMLImportContext
 public:
     XMLTableRowPropertiesContext(XMLImport& rImport, XMLStyleContext& rStyle);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
@@ -240,7 +240,7 @@ class XMLTableColumnPropertiesContext : public XMLImportContext
 public:
     XMLTableColumnPropertiesContext(XMLImport& rImport, XMLStyleContext& rStyle);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
@@ -275,7 +275,7 @@ class XMLTableCellPropertiesContext : public XMLImportContext
 public:
     XMLTableCellPropertiesContext(XMLImport& rImport, XMLStyleContext& rStyle);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 

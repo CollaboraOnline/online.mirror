@@ -92,17 +92,17 @@ void MWAWImportFilter::doRegisterHandlers(OdtGenerator& rGenerator)
 }
 
 // XServiceInfo
-OUString SAL_CALL MWAWImportFilter::getImplementationName()
+OUString MWAWImportFilter::getImplementationName()
 {
     return u"com.sun.star.comp.Writer.MWAWImportFilter"_ustr;
 }
 
-bool SAL_CALL MWAWImportFilter::supportsService(const OUString& rServiceName)
+bool MWAWImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL MWAWImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> MWAWImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

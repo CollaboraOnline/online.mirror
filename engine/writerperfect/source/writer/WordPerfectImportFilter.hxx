@@ -39,25 +39,25 @@ public:
     }
 
     // XFilter
-    virtual bool SAL_CALL
+    virtual bool
     filter(const cpo::uno::Sequence<css::beans::PropertyValue>& aDescriptor) override;
-    virtual void SAL_CALL cancel() override;
+    virtual void cancel() override;
 
     // XImporter
-    virtual void SAL_CALL
+    virtual void
     setTargetDocument(const cpo::uno::Reference<css::lang::XComponent>& xDoc) override;
 
     //XExtendedFilterDetection
-    virtual OUString SAL_CALL
+    virtual OUString
     detect(cpo::uno::Sequence<css::beans::PropertyValue>& Descriptor) override;
 
     // XInitialization
-    virtual void SAL_CALL initialize(const cpo::uno::Sequence<cpo::uno::Any>& aArguments) override;
+    virtual void initialize(const cpo::uno::Sequence<cpo::uno::Any>& aArguments) override;
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence<OUString> getSupportedServiceNames() override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -33,10 +33,10 @@ public:
     int GetColumn() const;
     void SetColumn(int nColumn);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
-    void SAL_CALL endElement(const OUString& rName) override;
+    void endElement(const OUString& rName) override;
 
 private:
     int m_nColumn = 0;
@@ -52,10 +52,10 @@ public:
     CreateChildContext(const OUString& rName,
                        const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
-    void SAL_CALL endElement(const OUString& rName) override;
+    void endElement(const OUString& rName) override;
 
 private:
     XMLTableRowContext& m_rRow;
@@ -111,7 +111,7 @@ class XMLTableColumnContext : public XMLImportContext
 public:
     XMLTableColumnContext(XMLImport& rImport, librevenge::RVNGPropertyListVector& rColumns);
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 

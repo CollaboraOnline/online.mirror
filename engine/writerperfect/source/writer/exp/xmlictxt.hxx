@@ -30,16 +30,16 @@ public:
                        const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs);
 
     // XDocumentHandler
-    void SAL_CALL startDocument() override;
-    void SAL_CALL endDocument() override;
-    void SAL_CALL
+    void startDocument() override;
+    void endDocument() override;
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
-    void SAL_CALL endElement(const OUString& rName) override;
-    void SAL_CALL characters(const OUString& rChars) override;
-    void SAL_CALL ignorableWhitespace(const OUString& rWhitespaces) override;
-    void SAL_CALL processingInstruction(const OUString& rTarget, const OUString& rData) override;
-    void SAL_CALL
+    void endElement(const OUString& rName) override;
+    void characters(const OUString& rChars) override;
+    void ignorableWhitespace(const OUString& rWhitespaces) override;
+    void processingInstruction(const OUString& rTarget, const OUString& rData) override;
+    void
     setDocumentLocator(const cpo::uno::Reference<css::xml::sax::XLocator>& xLocator) override;
 
 private:

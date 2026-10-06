@@ -456,17 +456,17 @@ bool MSWorksCalcImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput
 void MSWorksCalcImportFilter::doRegisterHandlers(OdsGenerator&) {}
 
 // XServiceInfo
-OUString SAL_CALL MSWorksCalcImportFilter::getImplementationName()
+OUString MSWorksCalcImportFilter::getImplementationName()
 {
     return u"com.sun.star.comp.Calc.MSWorksCalcImportFilter"_ustr;
 }
 
-bool SAL_CALL MSWorksCalcImportFilter::supportsService(const OUString& rServiceName)
+bool MSWorksCalcImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL MSWorksCalcImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> MSWorksCalcImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

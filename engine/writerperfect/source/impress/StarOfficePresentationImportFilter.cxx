@@ -77,17 +77,17 @@ void StarOfficePresentationImportFilter::doRegisterHandlers(OdpGenerator& rGener
 }
 
 // XServiceInfo
-OUString SAL_CALL StarOfficePresentationImportFilter::getImplementationName()
+OUString StarOfficePresentationImportFilter::getImplementationName()
 {
     return u"org.libreoffice.comp.Impress.StarOfficePresentationImportFilter"_ustr;
 }
 
-bool SAL_CALL StarOfficePresentationImportFilter::supportsService(const OUString& rServiceName)
+bool StarOfficePresentationImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-Sequence<OUString> SAL_CALL StarOfficePresentationImportFilter::getSupportedServiceNames()
+Sequence<OUString> StarOfficePresentationImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

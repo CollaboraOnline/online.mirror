@@ -35,17 +35,17 @@ bool QXPImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput, OUStri
 }
 
 // XServiceInfo
-OUString SAL_CALL QXPImportFilter::getImplementationName()
+OUString QXPImportFilter::getImplementationName()
 {
     return u"org.libreoffice.comp.Draw.QXPImportFilter"_ustr;
 }
 
-bool SAL_CALL QXPImportFilter::supportsService(const OUString& rServiceName)
+bool QXPImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-Sequence<OUString> SAL_CALL QXPImportFilter::getSupportedServiceNames()
+Sequence<OUString> QXPImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

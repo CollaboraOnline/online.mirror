@@ -36,9 +36,9 @@ public:
     }
 
     // XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
-    virtual cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override;
+    virtual OUString getImplementationName() override;
+    virtual bool supportsService(const OUString& ServiceName) override;
+    virtual cpo::uno::Sequence<OUString> getSupportedServiceNames() override;
 
 private:
     virtual bool doDetectFormat(librevenge::RVNGInputStream& rInput, OUString& rTypeName) override;
@@ -63,17 +63,17 @@ bool TextImportFilter::doDetectFormat(librevenge::RVNGInputStream&, OUString& rT
 }
 
 // XServiceInfo
-OUString SAL_CALL TextImportFilter::getImplementationName()
+OUString TextImportFilter::getImplementationName()
 {
     return u"org.libreoffice.comp.Wpft.QA.TextImportFilter"_ustr;
 }
 
-bool SAL_CALL TextImportFilter::supportsService(const OUString& rServiceName)
+bool TextImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL TextImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> TextImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

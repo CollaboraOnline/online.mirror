@@ -48,7 +48,7 @@ bool KeynoteImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput, OU
 }
 
 // XExtendedFilterDetection
-OUString SAL_CALL
+OUString
 KeynoteImportFilter::detect(cpo::uno::Sequence<css::beans::PropertyValue>& Descriptor)
 {
     sal_Int32 nLength = Descriptor.getLength();
@@ -222,17 +222,17 @@ KeynoteImportFilter::detect(cpo::uno::Sequence<css::beans::PropertyValue>& Descr
 }
 
 // XServiceInfo
-OUString SAL_CALL KeynoteImportFilter::getImplementationName()
+OUString KeynoteImportFilter::getImplementationName()
 {
     return u"org.libreoffice.comp.Impress.KeynoteImportFilter"_ustr;
 }
 
-bool SAL_CALL KeynoteImportFilter::supportsService(const OUString& rServiceName)
+bool KeynoteImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL KeynoteImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> KeynoteImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

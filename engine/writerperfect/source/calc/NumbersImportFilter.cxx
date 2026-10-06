@@ -40,17 +40,17 @@ bool NumbersImportFilter::doDetectFormat(librevenge::RVNGInputStream& rInput, OU
 void NumbersImportFilter::doRegisterHandlers(OdsGenerator&) {}
 
 // XServiceInfo
-OUString SAL_CALL NumbersImportFilter::getImplementationName()
+OUString NumbersImportFilter::getImplementationName()
 {
     return u"org.libreoffice.comp.Calc.NumbersImportFilter"_ustr;
 }
 
-bool SAL_CALL NumbersImportFilter::supportsService(const OUString& rServiceName)
+bool NumbersImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL NumbersImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> NumbersImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

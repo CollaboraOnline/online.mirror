@@ -82,15 +82,15 @@ void MWAWPresentationImportFilter::doRegisterHandlers(OdpGenerator& rGenerator)
 }
 
 // XServiceInfo
-OUString SAL_CALL MWAWPresentationImportFilter::getImplementationName()
+OUString MWAWPresentationImportFilter::getImplementationName()
 {
     return u"com.sun.star.comp.Impress.MWAWPresentationImportFilter"_ustr;
 }
-bool SAL_CALL MWAWPresentationImportFilter::supportsService(const OUString& rServiceName)
+bool MWAWPresentationImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
-cpo::uno::Sequence<OUString> SAL_CALL MWAWPresentationImportFilter::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> MWAWPresentationImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

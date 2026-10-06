@@ -77,17 +77,17 @@ void StarOfficeDrawImportFilter::doRegisterHandlers(OdgGenerator& rGenerator)
 }
 
 // XServiceInfo
-OUString SAL_CALL StarOfficeDrawImportFilter::getImplementationName()
+OUString StarOfficeDrawImportFilter::getImplementationName()
 {
     return u"org.libreoffice.comp.Draw.StarOfficeDrawImportFilter"_ustr;
 }
 
-bool SAL_CALL StarOfficeDrawImportFilter::supportsService(const OUString& rServiceName)
+bool StarOfficeDrawImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-Sequence<OUString> SAL_CALL StarOfficeDrawImportFilter::getSupportedServiceNames()
+Sequence<OUString> StarOfficeDrawImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };

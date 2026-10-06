@@ -25,10 +25,10 @@ public:
     CreateChildContext(const OUString& rName,
                        const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
-    void SAL_CALL endElement(const OUString& rName) override;
+    void endElement(const OUString& rName) override;
 };
 
 } // namespace writerperfect::exp

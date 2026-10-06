@@ -56,7 +56,7 @@ public:
     }
 
     // XFilter
-    virtual bool SAL_CALL
+    virtual bool
     filter(const cpo::uno::Sequence<css::beans::PropertyValue>& rDescriptor) override
     {
         comphelper::SequenceAsHashMap aDescriptor(rDescriptor);
@@ -102,18 +102,18 @@ public:
                                 aDescriptor);
     }
 
-    virtual void SAL_CALL cancel() override {}
+    virtual void cancel() override {}
 
     // XImporter
     const cpo::uno::Reference<css::lang::XComponent>& getTargetDocument() const { return mxDoc; }
-    virtual void SAL_CALL
+    virtual void
     setTargetDocument(const cpo::uno::Reference<css::lang::XComponent>& xDoc) override
     {
         mxDoc = xDoc;
     }
 
     //XExtendedFilterDetection
-    virtual OUString SAL_CALL
+    virtual OUString
     detect(cpo::uno::Sequence<css::beans::PropertyValue>& Descriptor) override
     {
         OUString sTypeName;
@@ -151,7 +151,7 @@ public:
     }
 
     // XInitialization
-    virtual void SAL_CALL
+    virtual void
     initialize(const cpo::uno::Sequence<cpo::uno::Any>& /*aArguments*/) override
     {
     }

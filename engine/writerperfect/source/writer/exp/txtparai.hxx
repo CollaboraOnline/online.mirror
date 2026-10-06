@@ -27,11 +27,11 @@ public:
         const OUString& rName,
         const cpo::uno::Reference<css::xml::sax::XAttributeList>& /*xAttribs*/) override;
 
-    void SAL_CALL
+    void
     startElement(const OUString& rName,
                  const cpo::uno::Reference<css::xml::sax::XAttributeList>& xAttribs) override;
-    void SAL_CALL endElement(const OUString& rName) override;
-    void SAL_CALL characters(const OUString& rChars) override;
+    void endElement(const OUString& rName) override;
+    void characters(const OUString& rChars) override;
 
 private:
     OUString m_aStyleName;

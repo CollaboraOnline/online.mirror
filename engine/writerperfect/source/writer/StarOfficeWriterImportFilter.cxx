@@ -104,17 +104,17 @@ void StarOfficeWriterImportFilter::doRegisterHandlers(OdtGenerator& rGenerator)
 }
 
 // XServiceInfo
-OUString SAL_CALL StarOfficeWriterImportFilter::getImplementationName()
+OUString StarOfficeWriterImportFilter::getImplementationName()
 {
     return u"org.libreoffice.comp.Writer.StarOfficeWriterImportFilter"_ustr;
 }
 
-bool SAL_CALL StarOfficeWriterImportFilter::supportsService(const OUString& rServiceName)
+bool StarOfficeWriterImportFilter::supportsService(const OUString& rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-Sequence<OUString> SAL_CALL StarOfficeWriterImportFilter::getSupportedServiceNames()
+Sequence<OUString> StarOfficeWriterImportFilter::getSupportedServiceNames()
 {
     return { u"com.sun.star.document.ImportFilter"_ustr,
              u"com.sun.star.document.ExtendedTypeDetection"_ustr };
