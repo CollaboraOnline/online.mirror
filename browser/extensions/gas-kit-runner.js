@@ -77,7 +77,7 @@ globalThis.__gasKitRunner = function(
                     return m;
                 },
                 addSubMenu: function() { return m; },
-                addToUi: function() {}
+                addToUi: function() { return null; }
             };
             return m;
         }
@@ -102,14 +102,20 @@ globalThis.__gasKitRunner = function(
             createMenu: menuBuilder,
             showSidebar: function(html) {
                 showSidebarFile = html && html.__gasSourceFile ? html.__gasSourceFile : null;
+                return null;
             },
-            showDialog: function(html) { recordDialog('showDialog', html, undefined); },
+            showDialog: function(html) {
+                recordDialog('showDialog', html, undefined);
+                return null;
+            },
             showModalDialog: function(html, title) {
                 recordDialog('showModalDialog', html, title);
+                return null;
             },
             // The host has modal dialogs only, so a modeless one blocks the document too:
             showModelessDialog: function(html, title) {
                 recordDialog('showModelessDialog', html, title);
+                return null;
             },
             // GAS blocks the script on a modal here.  This one only records the message, which
             // travels back with the call's result, so an add-on that alerts and then keeps
@@ -266,11 +272,11 @@ globalThis.__gasKitRunner = function(
                 getFrozenRows: function() { return xs.getFrozenRows(); },
                 getFrozenColumns: function() { return xs.getFrozenColumns(); },
                 deleteRow: function(row) { xs.deleteRow(row); return s; },
-                deleteRows: function(row, numRows) { xs.deleteRows(row, numRows); return s; },
+                deleteRows: function(row, numRows) { xs.deleteRows(row, numRows); return null; },
                 deleteColumn: function(column) { xs.deleteColumn(column); return s; },
                 deleteColumns: function(column, numColumns) {
                     xs.deleteColumns(column, numColumns);
-                    return s;
+                    return null;
                 },
                 setColumnWidth: function(column, pixels) {
                     xs.setColumnWidth(column, pixels);
@@ -316,7 +322,7 @@ globalThis.__gasKitRunner = function(
                 getActiveCell: function() {
                     return sheetFacade(xss.getActiveSheet()).getActiveCell();
                 },
-                flush: function() { xss.flush(); },
+                flush: function() { xss.flush(); return null; },
                 // The older menu call, which takes the whole menu at once: an array of
                 // {name, functionName} objects, where a null entry stands for a separator.  The
                 // menu's own name is dropped, because the items are offered under the
@@ -330,12 +336,14 @@ globalThis.__gasKitRunner = function(
                             menuItems.push({ separator: true });
                         }
                     });
+                    return null;
                 },
                 // Not a modal, but the same one-way message, so it takes the alert path:
                 toast: function(message, title) {
                     pendingAlerts.push(
                         { title: title === undefined ? '' : String(title),
                           message: String(message) });
+                    return null;
                 },
                 getUi: function() { return uiStub; }
             };
@@ -354,7 +362,7 @@ globalThis.__gasKitRunner = function(
             getActiveCell: function() {
                 return sheetFacade(activeSpreadsheet().getActiveSheet()).getActiveCell();
             },
-            flush: function() { activeSpreadsheet().flush(); },
+            flush: function() { activeSpreadsheet().flush(); return null; },
             getUi: function() { return uiStub; }
         };
 
@@ -630,16 +638,18 @@ globalThis.__gasKitRunner = function(
                     const expiration = ttl === undefined ? 600 : normalizedTtl(ttl);
                     if (v == null) {
                         c.remove(key);
-                        return;
+                        return null;
                     }
                     const value = String(v);
                     if (value.length > 100 * 1024) {
                         throw new Error('Argument too large: value');
                     }
                     clientRuntime.cachePut(scope, key, value, expiration);
+                    return null;
                 },
                 remove: function(k) {
                     clientRuntime.cacheRemove(scope, String(k));
+                    return null;
                 },
                 getAll: function(keys) {
                     const out = {};
@@ -653,11 +663,13 @@ globalThis.__gasKitRunner = function(
                     for (const k of Object.keys(values)) {
                         c.put(k, values[k], ttl);
                     }
+                    return null;
                 },
                 removeAll: function(keys) {
                     for (const k of keys) {
                         c.remove(k);
                     }
+                    return null;
                 }
             };
             return c;
