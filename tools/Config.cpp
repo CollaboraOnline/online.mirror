@@ -506,7 +506,7 @@ int Config::main(const std::vector<std::string>& args)
 #if !ENABLE_DEBUG
         struct passwd* pwd;
         pwd = getpwnam(COOL_USER_ID);
-        if (pwd == NULL)
+        if (pwd == nullptr)
         {
             std::cerr << "User '" COOL_USER_ID
                          "' does not exist. Please reinstall coolwsd package, or in case of manual "

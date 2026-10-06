@@ -21,7 +21,7 @@
             assert(!(X));                                                                          \
             __builtin_trap();                                                                      \
         }                                                                                          \
-    } while (0)
+    } while (false)
 
 namespace fuzzer
 {

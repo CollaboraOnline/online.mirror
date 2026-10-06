@@ -50,7 +50,7 @@ inline std::chrono::milliseconds timeSinceTestStartMs()
         (void)NAME;                                                                                \
         std::stringstream dummyStringstream;                                                       \
         dummyStringstream << X;                                                                    \
-    } while (0)
+    } while (false)
 #endif // !ENABLE_DEBUG
 
 /// Used to log the name of the test and the time since starting to run the tests.
