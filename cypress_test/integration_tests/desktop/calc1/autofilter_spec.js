@@ -29,6 +29,12 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'AutoFilter Complex', funct
 	it('Check checkbox status in the date tree', function() {
 		helper.typeIntoInputField(helper.addressInputSelector, 'P100');
 
+		// The cell cursor still shows U126 until the jump is processed, and its corner
+		// is on the scrollbar, so a click there would scroll the view instead.
+		cy.getFrameWindow().then(function(win) {
+			helper.processToIdle(win);
+		});
+
 		cy.cGet('#test-div-OwnCellCursor').then((div) => {
 			const rect = div[0].getBoundingClientRect();
 			const x = rect.right - 5;
