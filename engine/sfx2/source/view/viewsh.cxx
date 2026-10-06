@@ -606,11 +606,30 @@ bool isParagraphRole(sal_Int16 nRole)
            || nRole == accessibility::AccessibleRole::HEADING;
 }
 
+// A paragraph in a table cell is read in the flow of the text the table is in.
+uno::Reference<accessibility::XAccessible>
+textRoot(const uno::Reference<accessibility::XAccessibleContext>& xContext)
+{
+    uno::Reference<accessibility::XAccessible> xParent = xContext->getAccessibleParent();
+    while (xParent.is())
+    {
+        uno::Reference<accessibility::XAccessibleContext> xParentContext
+            = xParent->getAccessibleContext();
+        if (!xParentContext.is())
+            break;
+        const sal_Int16 nRole = xParentContext->getAccessibleRole();
+        if (nRole != accessibility::AccessibleRole::TABLE_CELL
+            && nRole != accessibility::AccessibleRole::TABLE)
+            break;
+        xParent = xParentContext->getAccessibleParent();
+    }
+    return xParent;
+}
+
 bool isSiblingParagraph(const uno::Reference<accessibility::XAccessibleContext>& xContext,
                         const uno::Reference<accessibility::XAccessible>& xParent)
 {
-    return isParagraphRole(xContext->getAccessibleRole())
-           && xContext->getAccessibleParent() == xParent;
+    return isParagraphRole(xContext->getAccessibleRole()) && textRoot(xContext) == xParent;
 }
 
 // Writer reports a heading as "level:N;", following the ARIA level object attribute.
@@ -762,7 +781,7 @@ void collectParagraphWindow(const uno::Reference<css::accessibility::XAccessible
     if (!xContext.is())
         return;
 
-    uno::Reference<accessibility::XAccessible> xParent = xContext->getAccessibleParent();
+    uno::Reference<accessibility::XAccessible> xParent = textRoot(xContext);
     if (!xParent.is())
         return;
 
