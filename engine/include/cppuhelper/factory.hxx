@@ -25,7 +25,6 @@
 #include <cstddef>
 
 #include "rtl/ustring.hxx"
-#include "rtl/unload.h"
 
 #include "cpo/uno/Reference.h"
 #include "cppuhelper/cppuhelperdllapi.h"
@@ -135,8 +134,7 @@ CPPUHELPER_DLLPUBLIC cpo::uno::Reference< css::lang::XSingleComponentFactory >
 createSingleComponentFactory(
     ComponentFactoryFunc fptr,
     ::rtl::OUString const & rImplementationName,
-    cpo::uno::Sequence< ::rtl::OUString > const & rServiceNames,
-    rtl_ModuleCount * pModCount = NULL );
+    cpo::uno::Sequence< ::rtl::OUString > const & rServiceNames);
 
 /** Creates a single service factory which holds the instance created only once.
 
@@ -152,8 +150,7 @@ CPPUHELPER_DLLPUBLIC cpo::uno::Reference< css::lang::XSingleComponentFactory >
 createOneInstanceComponentFactory(
     ComponentFactoryFunc fptr,
     ::rtl::OUString const & rImplementationName,
-    cpo::uno::Sequence< ::rtl::OUString > const & rServiceNames,
-    rtl_ModuleCount * pModCount = NULL );
+    cpo::uno::Sequence< ::rtl::OUString > const & rServiceNames);
 
 /** Deprecated.  The type of the instantiate function used as argument of the create*Factory functions.
 
@@ -183,8 +180,7 @@ createSingleFactory(
     const cpo::uno::Reference< css::lang::XMultiServiceFactory > & rServiceManager,
     const ::rtl::OUString & rImplementationName,
     ComponentInstantiation pCreateFunction,
-    const cpo::uno::Sequence< ::rtl::OUString > & rServiceNames,
-    rtl_ModuleCount * pModCount = NULL  );
+    const cpo::uno::Sequence< ::rtl::OUString > & rServiceNames);
 
 /** Deprecated.  Creates a single service factory which holds the instance created only once.
 
@@ -205,8 +201,7 @@ createOneInstanceFactory(
     const cpo::uno::Reference< css::lang::XMultiServiceFactory > & rServiceManager,
     const ::rtl::OUString & rComponentName,
     ComponentInstantiation pCreateFunction,
-    const cpo::uno::Sequence< ::rtl::OUString > & rServiceNames,
-    rtl_ModuleCount * pModCount = NULL  );
+    const cpo::uno::Sequence< ::rtl::OUString > & rServiceNames);
 
 /** Deprecated.  Creates a single service factory based on a registry.
 

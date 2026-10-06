@@ -116,7 +116,6 @@ $(eval $(call gb_Library_add_exception_objects,sal,\
 	sal/rtl/strbuf \
 	sal/rtl/strimp \
 	sal/rtl/string \
-	sal/rtl/unload \
 	sal/rtl/uri \
 	sal/rtl/ustrbuf \
 	sal/rtl/ustring \

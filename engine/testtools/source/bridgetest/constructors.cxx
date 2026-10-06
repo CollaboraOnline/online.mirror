@@ -436,10 +436,10 @@ cpo::uno::Sequence< OUString > getSupportedServiceNames2() {
 
 ::cppu::ImplementationEntry const entries[] = {
     { &create, &getImplementationName, &getSupportedServiceNames,
-      &::cppu::createSingleComponentFactory, nullptr, 0 },
+      &::cppu::createSingleComponentFactory, 0 },
     { &create2, &getImplementationName2, &getSupportedServiceNames2,
-      &::cppu::createSingleComponentFactory, nullptr, 0 },
-    { nullptr, nullptr, nullptr, nullptr, nullptr, 0 } };
+      &::cppu::createSingleComponentFactory, 0 },
+    { nullptr, nullptr, nullptr, nullptr, 0 } };
 }
 
 extern "C" SAL_DLLPUBLIC_EXPORT void * component_getFactory(

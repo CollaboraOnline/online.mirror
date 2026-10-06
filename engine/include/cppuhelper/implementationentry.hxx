@@ -53,13 +53,7 @@ struct SAL_WARN_UNUSED ImplementationEntry
      (* createFactory)(
          ComponentFactoryFunc fptr,
          ::rtl::OUString const & rImplementationName,
-         cpo::uno::Sequence< ::rtl::OUString > const & rServiceNames,
-         rtl_ModuleCount * pModCount );
-
-    /** Backwards-compatibility remainder of a removed library unloading
-        feature; always set to null.
-    */
-     rtl_ModuleCount * moduleCounter;
+         cpo::uno::Sequence< ::rtl::OUString > const & rServiceNames);
 
     /** Must be set to 0 !
         For future extensions.

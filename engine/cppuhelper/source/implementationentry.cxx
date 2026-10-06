@@ -74,8 +74,7 @@ void * component_getFactoryHelper(
             xFactory = entries[i].createFactory(
                 entries[i].create,
                 implName,
-                entries[i].getSupportedServiceNames(),
-                entries[i].moduleCounter );
+                entries[i].getSupportedServiceNames());
         }
     }
 

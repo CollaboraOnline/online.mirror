@@ -52,7 +52,6 @@
 #include <rtl/malformeduriexception.hxx>
 #include <rtl/random.h>
 #include <rtl/ref.hxx>
-#include <rtl/unload.h>
 #include <rtl/uri.h>
 #include <rtl/uri.hxx>
 #include <rtl/ustrbuf.hxx>

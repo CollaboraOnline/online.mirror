@@ -26,7 +26,6 @@
 #include <cppuhelper/factory.hxx>
 #include <cppuhelper/implbase.hxx>
 #include <cppuhelper/supportsservice.hxx>
-#include <rtl/unload.h>
 
 #include <cppuhelper/propshlp.hxx>
 #include <o3tl/string_view.hxx>
@@ -712,8 +711,7 @@ Reference<XSingleServiceFactory > createSingleFactory(
     const Reference<XMultiServiceFactory > & rServiceManager,
     const OUString & rImplementationName,
     ComponentInstantiation pCreateFunction,
-    const Sequence< OUString > & rServiceNames,
-    rtl_ModuleCount * )
+    const Sequence< OUString > & rServiceNames)
 {
     return new OFactoryComponentHelper(
         rServiceManager, rImplementationName, pCreateFunction, nullptr, &rServiceNames, false );
@@ -724,8 +722,7 @@ Reference<XSingleServiceFactory > createOneInstanceFactory(
     const Reference<XMultiServiceFactory > & rServiceManager,
     const OUString & rImplementationName,
     ComponentInstantiation pCreateFunction,
-    const Sequence< OUString > & rServiceNames,
-    rtl_ModuleCount * )
+    const Sequence< OUString > & rServiceNames)
 {
     return new OFactoryComponentHelper(
         rServiceManager, rImplementationName, pCreateFunction, nullptr, &rServiceNames, true );
@@ -744,8 +741,7 @@ Reference<XSingleServiceFactory > createSingleRegistryFactory(
 Reference< lang::XSingleComponentFactory > createSingleComponentFactory(
     ComponentFactoryFunc fptr,
     OUString const & rImplementationName,
-    Sequence< OUString > const & rServiceNames,
-    rtl_ModuleCount *)
+    Sequence< OUString > const & rServiceNames)
 {
     return new OFactoryComponentHelper(
         Reference< XMultiServiceFactory >(), rImplementationName, nullptr, fptr, &rServiceNames, false );
@@ -754,8 +750,7 @@ Reference< lang::XSingleComponentFactory > createSingleComponentFactory(
 Reference< lang::XSingleComponentFactory > createOneInstanceComponentFactory(
     ComponentFactoryFunc fptr,
     OUString const & rImplementationName,
-    Sequence< OUString > const & rServiceNames,
-    rtl_ModuleCount *)
+    Sequence< OUString > const & rServiceNames)
 {
     return new OFactoryComponentHelper(
         Reference< XMultiServiceFactory >(), rImplementationName, nullptr, fptr, &rServiceNames, true );
