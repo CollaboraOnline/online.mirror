@@ -70,30 +70,30 @@ cpo::uno::Reference<css::frame::XModel> modelRequiring(OUString const& requiredS
 class FactoryImpl : public cppu::WeakImplHelper<scriptinterop::XFactory>
 {
 public:
-    cpo::uno::Reference<css::frame::XModel> SAL_CALL getActiveUnoModel() override
+    cpo::uno::Reference<css::frame::XModel> getActiveUnoModel() override
     {
         return currentModel();
     }
 
-    cpo::uno::Reference<scriptinterop::XDocument> SAL_CALL getActiveDocument() override
+    cpo::uno::Reference<scriptinterop::XDocument> getActiveDocument() override
     {
         return scriptinterop::detail::createDocument(
             modelRequiring(u"com.sun.star.text.TextDocument"_ustr, OUString()));
     }
 
-    cpo::uno::Reference<scriptinterop::XSpreadsheet> SAL_CALL getActiveSpreadsheet() override
+    cpo::uno::Reference<scriptinterop::XSpreadsheet> getActiveSpreadsheet() override
     {
         return scriptinterop::detail::createSpreadsheet(
             modelRequiring(u"com.sun.star.sheet.SpreadsheetDocument"_ustr, OUString()));
     }
 
-    cpo::uno::Reference<scriptinterop::XPresentation> SAL_CALL getActivePresentation() override
+    cpo::uno::Reference<scriptinterop::XPresentation> getActivePresentation() override
     {
         return scriptinterop::detail::createPresentation(
             modelRequiring(u"com.sun.star.presentation.PresentationDocument"_ustr, OUString()));
     }
 
-    cpo::uno::Reference<scriptinterop::XDrawing> SAL_CALL getActiveDrawing() override
+    cpo::uno::Reference<scriptinterop::XDrawing> getActiveDrawing() override
     {
         return scriptinterop::detail::createDrawing(
             modelRequiring(u"com.sun.star.drawing.DrawingDocument"_ustr,
@@ -108,7 +108,7 @@ public:
         return region.isEmpty() ? tag.getLanguage() : tag.getLanguage() + "_" + region;
     }
 
-    cpo::uno::Reference<scriptinterop::XAffineTransformBuilder> SAL_CALL
+    cpo::uno::Reference<scriptinterop::XAffineTransformBuilder>
     newAffineTransformBuilder() override
     {
         return scriptinterop::detail::createAffineTransformBuilder();

@@ -278,12 +278,12 @@ public:
     {
     }
 
-    cpo::uno::Reference<cpo::uno::XInterface> SAL_CALL getuno() override { return ranges_; }
+    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return ranges_; }
 
     cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XRangeElement>> getRangeElements()
         override;
 
-    OUString SAL_CALL getText() override
+    OUString getText() override
     {
         OUStringBuffer buf;
         auto const n = ranges_->getCount();
@@ -304,7 +304,7 @@ public:
         return buf.makeStringAndClear();
     }
 
-    void SAL_CALL replace(OUString const& newText) override
+    void replace(OUString const& newText) override
     {
         auto const n = ranges_->getCount();
         for (sal_Int32 i = 0; i != n; ++i)
@@ -990,7 +990,7 @@ public:
     {
     }
 
-    cpo::uno::Reference<cpo::uno::XInterface> SAL_CALL getuno() override { return content_; }
+    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return content_; }
 
     cpo::uno::Reference<scriptinterop::XText> asText() override {
         return new TextImpl(parent_, content_, getType());
@@ -1228,7 +1228,7 @@ public:
     css::beans::Optional<cpo::uno::Reference<scriptinterop::XElement>> getPreviousSibling() override
     { return maybe(siblingContent(content_, parent_, false)); }
 
-    OUString SAL_CALL getText() override
+    OUString getText() override
     {
         return textOf(
             cpo::uno::Reference<css::text::XTextRange>(content_, cpo::uno::UNO_QUERY_THROW));
@@ -2325,9 +2325,9 @@ public:
     {
     }
 
-    cpo::uno::Reference<cpo::uno::XInterface> SAL_CALL getuno() override { return model_; }
+    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return model_; }
 
-    css::beans::Optional<cpo::uno::Reference<scriptinterop::XSelection>> SAL_CALL getSelection()
+    css::beans::Optional<cpo::uno::Reference<scriptinterop::XSelection>> getSelection()
         override
     {
         cpo::uno::Reference<css::text::XTextDocument> const doc(model_, cpo::uno::UNO_QUERY_THROW);
@@ -2511,7 +2511,7 @@ public:
         return cpo::uno::Sequence(v.data(), v.size());
     }
 
-    void SAL_CALL insertImage(cpo::uno::Sequence<sal_Int8> const& data,
+    void insertImage(cpo::uno::Sequence<sal_Int8> const& data,
                               scriptinterop::ImageOptions const& opts) override
     {
         cpo::uno::Reference<css::text::XTextDocument> const doc(model_, cpo::uno::UNO_QUERY_THROW);

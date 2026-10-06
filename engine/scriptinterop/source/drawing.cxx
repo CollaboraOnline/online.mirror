@@ -28,7 +28,7 @@ public:
     {
     }
 
-    cpo::uno::Reference<cpo::uno::XInterface> SAL_CALL getuno() override { return model_; }
+    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return model_; }
 
 private:
     cpo::uno::Reference<css::frame::XModel> model_;

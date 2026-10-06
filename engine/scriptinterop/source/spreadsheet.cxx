@@ -305,18 +305,18 @@ public:
     {
     }
 
-    cpo::uno::Reference<cpo::uno::XInterface> SAL_CALL getuno() override { return liveTable(); }
+    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return liveTable(); }
 
-    OUString SAL_CALL getName() override { return name_; }
+    OUString getName() override { return name_; }
 
-    cpo::uno::Reference<scriptinterop::XPivotTable> SAL_CALL addRowGroup(sal_Int32 sourceColumn)
+    cpo::uno::Reference<scriptinterop::XPivotTable> addRowGroup(sal_Int32 sourceColumn)
         override
     {
         orient(sourceColumn, css::sheet::DataPilotFieldOrientation_ROW, u"addRowGroup"_ustr);
         return this;
     }
 
-    cpo::uno::Reference<scriptinterop::XPivotTable> SAL_CALL addColumnGroup(sal_Int32 sourceColumn)
+    cpo::uno::Reference<scriptinterop::XPivotTable> addColumnGroup(sal_Int32 sourceColumn)
         override
     {
         orient(sourceColumn, css::sheet::DataPilotFieldOrientation_COLUMN,
@@ -325,7 +325,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XPivotTable>
-        SAL_CALL addPivotValue(sal_Int32 sourceColumn, OUString const& function) override
+        addPivotValue(sal_Int32 sourceColumn, OUString const& function) override
     {
         auto const wanted = summarizeFunction(function, u"addPivotValue"_ustr);
         try
@@ -344,7 +344,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XPivotTable>
-        SAL_CALL addFilter(sal_Int32 sourceColumn, OUString const& visibleValue) override
+        addFilter(sal_Int32 sourceColumn, OUString const& visibleValue) override
     {
         try
         {
@@ -364,7 +364,7 @@ public:
         return this;
     }
 
-    void SAL_CALL remove() override
+    void remove() override
     {
         try
         {
@@ -452,25 +452,25 @@ public:
     {
     }
 
-    cpo::uno::Reference<cpo::uno::XInterface> SAL_CALL getuno() override { return range_; }
+    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return range_; }
 
-    sal_Int32 SAL_CALL getRow() override { return address().StartRow + 1; }
+    sal_Int32 getRow() override { return address().StartRow + 1; }
 
-    sal_Int32 SAL_CALL getColumn() override { return address().StartColumn + 1; }
+    sal_Int32 getColumn() override { return address().StartColumn + 1; }
 
-    sal_Int32 SAL_CALL getNumRows() override
+    sal_Int32 getNumRows() override
     {
         auto const a = address();
         return a.EndRow - a.StartRow + 1;
     }
 
-    sal_Int32 SAL_CALL getNumColumns() override
+    sal_Int32 getNumColumns() override
     {
         auto const a = address();
         return a.EndColumn - a.StartColumn + 1;
     }
 
-    cpo::uno::Any SAL_CALL getValue() override
+    cpo::uno::Any getValue() override
     {
         try
         {
@@ -483,7 +483,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XRange>
-        SAL_CALL setValue(cpo::uno::Any const& value) override
+        setValue(cpo::uno::Any const& value) override
     {
         try
         {
@@ -508,7 +508,7 @@ public:
         return this;
     }
 
-    cpo::uno::Sequence<cpo::uno::Sequence<cpo::uno::Any>> SAL_CALL getValues() override
+    cpo::uno::Sequence<cpo::uno::Sequence<cpo::uno::Any>> getValues() override
     {
         try
         {
@@ -539,7 +539,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XRange>
-        SAL_CALL setValues(cpo::uno::Sequence<cpo::uno::Sequence<cpo::uno::Any>> const& values)
+        setValues(cpo::uno::Sequence<cpo::uno::Sequence<cpo::uno::Any>> const& values)
         override
     {
         // The array has to match the range's own shape: there is no sensible way to fill in
@@ -601,7 +601,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XRange>
-        SAL_CALL offset(sal_Int32 rowOffset, sal_Int32 columnOffset, sal_Int32 numRows,
+        offset(sal_Int32 rowOffset, sal_Int32 columnOffset, sal_Int32 numRows,
                        sal_Int32 numColumns) override
     {
         auto const a = address();
@@ -610,7 +610,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XRange>
-        SAL_CALL setBackgroundColor(OUString const& color) override
+        setBackgroundColor(OUString const& color) override
     {
         cpo::uno::Reference<css::beans::XPropertySet> const props(range_,
                                                                   cpo::uno::UNO_QUERY_THROW);
@@ -619,7 +619,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XRange>
-        SAL_CALL setFontWeight(OUString const& fontWeight) override
+        setFontWeight(OUString const& fontWeight) override
     {
         float weight = css::awt::FontWeight::NORMAL;
         if (fontWeight == u"bold")
@@ -639,7 +639,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XRange>
-        SAL_CALL setFontStyle(OUString const& fontStyle) override
+        setFontStyle(OUString const& fontStyle) override
     {
         auto slant = css::awt::FontSlant_NONE;
         if (fontStyle == u"italic")
@@ -658,7 +658,7 @@ public:
         return this;
     }
 
-    cpo::uno::Reference<scriptinterop::XRange> SAL_CALL setFontColor(OUString const& color)
+    cpo::uno::Reference<scriptinterop::XRange> setFontColor(OUString const& color)
         override
     {
         cpo::uno::Reference<css::beans::XPropertySet> const props(range_,
@@ -668,7 +668,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XRange>
-        SAL_CALL setBorder(bool top, bool left, bool bottom, bool right, OUString const& color)
+        setBorder(bool top, bool left, bool bottom, bool right, OUString const& color)
         override
     {
         // A single fixed solid, medium-width line for every requested edge; no style or
@@ -700,7 +700,7 @@ public:
         return this;
     }
 
-    cpo::uno::Reference<scriptinterop::XRange> SAL_CALL setNumberFormat(OUString const& format)
+    cpo::uno::Reference<scriptinterop::XRange> setNumberFormat(OUString const& format)
         override
     {
         try
@@ -729,7 +729,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XPivotTable>
-        SAL_CALL createPivotTable(cpo::uno::Reference<scriptinterop::XRange> const& sourceData)
+        createPivotTable(cpo::uno::Reference<scriptinterop::XRange> const& sourceData)
         override
     {
         if (!sourceData.is())
@@ -916,11 +916,11 @@ public:
     {
     }
 
-    cpo::uno::Reference<cpo::uno::XInterface> SAL_CALL getuno() override { return tableChart(); }
+    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return tableChart(); }
 
-    OUString SAL_CALL getName() override { return name_; }
+    OUString getName() override { return name_; }
 
-    cpo::uno::Reference<scriptinterop::XChart> SAL_CALL setChartType(OUString const& chartType)
+    cpo::uno::Reference<scriptinterop::XChart> setChartType(OUString const& chartType)
         override
     {
         auto const kind = diagramKind(chartType, u"setChartType"_ustr);
@@ -947,7 +947,7 @@ public:
         return this;
     }
 
-    cpo::uno::Reference<scriptinterop::XChart> SAL_CALL setTitle(OUString const& title) override
+    cpo::uno::Reference<scriptinterop::XChart> setTitle(OUString const& title) override
     {
         try
         {
@@ -966,7 +966,7 @@ public:
         return this;
     }
 
-    cpo::uno::Reference<scriptinterop::XChart> SAL_CALL setLegendPosition(OUString const& position)
+    cpo::uno::Reference<scriptinterop::XChart> setLegendPosition(OUString const& position)
         override
     {
         if (position.toAsciiLowerCase() == "none")
@@ -1002,7 +1002,7 @@ public:
         return this;
     }
 
-    void SAL_CALL remove() override
+    void remove() override
     {
         try
         {
@@ -1048,52 +1048,52 @@ public:
     {
     }
 
-    cpo::uno::Reference<cpo::uno::XInterface> SAL_CALL getuno() override { return sheet_; }
+    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return sheet_; }
 
-    OUString SAL_CALL getName() override
+    OUString getName() override
     {
         cpo::uno::Reference<css::container::XNamed> const named(sheet_, cpo::uno::UNO_QUERY_THROW);
         return named->getName();
     }
 
     cpo::uno::Reference<scriptinterop::XRange>
-        SAL_CALL getRange(OUString const& a1Notation) override
+        getRange(OUString const& a1Notation) override
     {
         return new RangeImpl(model_, cellRangeByA1(a1Notation, u"getRange"_ustr));
     }
 
-    cpo::uno::Reference<scriptinterop::XRange> SAL_CALL getRangeAtCell(sal_Int32 row,
+    cpo::uno::Reference<scriptinterop::XRange> getRangeAtCell(sal_Int32 row,
                                                                        sal_Int32 column) override
     {
         return rangeAt(model_, sheet_, row, column, 1, 1);
     }
 
     cpo::uno::Reference<scriptinterop::XRange>
-        SAL_CALL getRangeAtRows(sal_Int32 row, sal_Int32 column, sal_Int32 numRows) override
+        getRangeAtRows(sal_Int32 row, sal_Int32 column, sal_Int32 numRows) override
     {
         return rangeAt(model_, sheet_, row, column, numRows, 1);
     }
 
-    cpo::uno::Reference<scriptinterop::XRange> SAL_CALL getRangeAt(sal_Int32 row, sal_Int32 column,
+    cpo::uno::Reference<scriptinterop::XRange> getRangeAt(sal_Int32 row, sal_Int32 column,
                                                                    sal_Int32 numRows,
                                                                    sal_Int32 numColumns) override
     {
         return rangeAt(model_, sheet_, row, column, numRows, numColumns);
     }
 
-    cpo::uno::Reference<scriptinterop::XRange> SAL_CALL getActiveRange() override
+    cpo::uno::Reference<scriptinterop::XRange> getActiveRange() override
     {
         return new RangeImpl(model_, activeCellRange());
     }
 
-    cpo::uno::Reference<scriptinterop::XRange> SAL_CALL getActiveCell() override
+    cpo::uno::Reference<scriptinterop::XRange> getActiveCell() override
     {
         // The top-left cell of the first selected range stands in for "the active cell".
         auto const range = activeCellRange();
         return new RangeImpl(model_, range->getCellRangeByPosition(0, 0, 0, 0));
     }
 
-    cpo::uno::Reference<scriptinterop::XRange> SAL_CALL getDataRange() override
+    cpo::uno::Reference<scriptinterop::XRange> getDataRange() override
     {
         auto const a = usedArea();
         // A cursor cannot take bulk value reads/writes; a genuine sub-range at the same address
@@ -1105,39 +1105,39 @@ public:
         return new RangeImpl(model_, range);
     }
 
-    sal_Int32 SAL_CALL getLastRow() override { return usedArea().EndRow + 1; }
+    sal_Int32 getLastRow() override { return usedArea().EndRow + 1; }
 
-    sal_Int32 SAL_CALL getLastColumn() override { return usedArea().EndColumn + 1; }
+    sal_Int32 getLastColumn() override { return usedArea().EndColumn + 1; }
 
-    sal_Int32 SAL_CALL getMaxRows() override { return columnRowRange()->getRows()->getCount(); }
+    sal_Int32 getMaxRows() override { return columnRowRange()->getRows()->getCount(); }
 
-    sal_Int32 SAL_CALL getMaxColumns() override
+    sal_Int32 getMaxColumns() override
     {
         return columnRowRange()->getColumns()->getCount();
     }
 
-    sal_Int32 SAL_CALL getFrozenRows() override { return frozenPanes().first; }
+    sal_Int32 getFrozenRows() override { return frozenPanes().first; }
 
-    sal_Int32 SAL_CALL getFrozenColumns() override { return frozenPanes().second; }
+    sal_Int32 getFrozenColumns() override { return frozenPanes().second; }
 
-    void SAL_CALL deleteRow(sal_Int32 row) override { removeRows(row, 1, u"deleteRow"_ustr); }
+    void deleteRow(sal_Int32 row) override { removeRows(row, 1, u"deleteRow"_ustr); }
 
-    void SAL_CALL deleteRows(sal_Int32 startRow, sal_Int32 numRows) override
+    void deleteRows(sal_Int32 startRow, sal_Int32 numRows) override
     {
         removeRows(startRow, numRows, u"deleteRows"_ustr);
     }
 
-    void SAL_CALL deleteColumn(sal_Int32 column) override
+    void deleteColumn(sal_Int32 column) override
     {
         removeColumns(column, 1, u"deleteColumn"_ustr);
     }
 
-    void SAL_CALL deleteColumns(sal_Int32 startColumn, sal_Int32 numColumns) override
+    void deleteColumns(sal_Int32 startColumn, sal_Int32 numColumns) override
     {
         removeColumns(startColumn, numColumns, u"deleteColumns"_ustr);
     }
 
-    void SAL_CALL setColumnWidth(sal_Int32 column, sal_Int32 pixels) override
+    void setColumnWidth(sal_Int32 column, sal_Int32 pixels) override
     {
         if (column < 1)
         {
@@ -1157,7 +1157,7 @@ public:
         }
     }
 
-    void SAL_CALL clear() override
+    void clear() override
     {
         cpo::uno::Reference<css::sheet::XSheetOperation> const op(sheet_,
                                                                   cpo::uno::UNO_QUERY_THROW);
@@ -1168,12 +1168,12 @@ public:
                           | css::sheet::CellFlags::EDITATTR | css::sheet::CellFlags::FORMATTED);
     }
 
-    void SAL_CALL autoResizeColumn(sal_Int32 column) override
+    void autoResizeColumn(sal_Int32 column) override
     {
         resizeColumnsToFit(column, 1, u"autoResizeColumn"_ustr);
     }
 
-    void SAL_CALL autoResizeColumns(sal_Int32 startColumn, sal_Int32 numColumns) override
+    void autoResizeColumns(sal_Int32 startColumn, sal_Int32 numColumns) override
     {
         resizeColumnsToFit(startColumn, numColumns, u"autoResizeColumns"_ustr);
     }
@@ -1204,7 +1204,7 @@ private:
     }
 
 public:
-    void SAL_CALL autoResizeRows(sal_Int32 startRow, sal_Int32 numRows) override
+    void autoResizeRows(sal_Int32 startRow, sal_Int32 numRows) override
     {
         if (startRow < 1 || numRows < 1)
         {
@@ -1227,7 +1227,7 @@ public:
         }
     }
 
-    cpo::uno::Reference<scriptinterop::XChart> SAL_CALL insertChart(
+    cpo::uno::Reference<scriptinterop::XChart> insertChart(
         cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XRange>> const& dataRanges,
         sal_Int32 anchorRow, sal_Int32 anchorColumn, double width, double height,
         bool firstRowAsHeaders, bool firstColumnAsHeaders) override
@@ -1286,7 +1286,7 @@ public:
 
     // The charts come back in the order the collection keeps them, which is neither the order
     // a script added them nor the order they lie on the sheet.
-    cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XChart>> SAL_CALL getCharts() override
+    cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XChart>> getCharts() override
     {
         try
         {
@@ -1309,7 +1309,7 @@ public:
         }
     }
 
-    cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XPivotTable>> SAL_CALL getPivotTables()
+    cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XPivotTable>> getPivotTables()
         override
     {
         try
@@ -1544,9 +1544,9 @@ public:
     {
     }
 
-    cpo::uno::Reference<cpo::uno::XInterface> SAL_CALL getuno() override { return model_; }
+    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return model_; }
 
-    cpo::uno::Reference<scriptinterop::XSheet> SAL_CALL getActiveSheet() override
+    cpo::uno::Reference<scriptinterop::XSheet> getActiveSheet() override
     {
         cpo::uno::Reference<css::sheet::XSpreadsheetView> const view(model_->getCurrentController(),
                                                                      cpo::uno::UNO_QUERY_THROW);
@@ -1559,7 +1559,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XSheet>
-        SAL_CALL getSheetByName(OUString const& name) override
+        getSheetByName(OUString const& name) override
     {
         cpo::uno::Reference<css::container::XNameAccess> const sheets(documentSheets(model_),
                                                                        cpo::uno::UNO_QUERY_THROW);
@@ -1574,7 +1574,7 @@ public:
         return new SheetImpl(model_, sheet);
     }
 
-    cpo::uno::Reference<scriptinterop::XSheet> SAL_CALL insertSheet(OUString const& name) override
+    cpo::uno::Reference<scriptinterop::XSheet> insertSheet(OUString const& name) override
     {
         return insertSheetNamed(name);
     }
@@ -1669,7 +1669,7 @@ public:
 
     // The name Calc's own new-sheet command would give it: "Sheet" and the lowest number that
     // leaves the name free across the document.
-    cpo::uno::Reference<scriptinterop::XSheet> SAL_CALL insertSheetWithDefaultName() override
+    cpo::uno::Reference<scriptinterop::XSheet> insertSheetWithDefaultName() override
     {
         cpo::uno::Reference<css::container::XNameAccess> const byName(documentSheets(model_),
                                                                        cpo::uno::UNO_QUERY_THROW);
@@ -1686,7 +1686,7 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XRange>
-        SAL_CALL getRangeByName(OUString const& name) override
+        getRangeByName(OUString const& name) override
     {
         // A name belongs either to the document or to one sheet, and a sheet keeps its own in a
         // list of its own. A name may say which sheet holds it, written the way SpreadsheetApp
@@ -1713,14 +1713,14 @@ public:
     // Recalculates every formula in the document, including ones a script's writes did not
     // touch. This is a full recalculation, not the narrower "commit pending changes" flush of
     // some other spreadsheet scripting APIs.
-    void SAL_CALL flush() override
+    void flush() override
     {
         cpo::uno::Reference<css::sheet::XCalculatable> const calc(model_,
                                                                   cpo::uno::UNO_QUERY_THROW);
         calc->calculateAll();
     }
 
-    OUString SAL_CALL getName() override
+    OUString getName() override
     {
         try
         {
@@ -1746,7 +1746,7 @@ public:
         }
     }
 
-    cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XSheet>> SAL_CALL getSheets() override
+    cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XSheet>> getSheets() override
     {
         try
         {
