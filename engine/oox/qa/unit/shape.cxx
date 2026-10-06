@@ -1159,17 +1159,14 @@ CPPUNIT_TEST_FIXTURE(OoxShapeTest, testPieTextArea)
     uno::Reference<drawing::XDrawPagesSupplier> xDrawPagesSupplier(mxComponent, uno::UNO_QUERY);
     uno::Reference<drawing::XDrawPage> xDrawPage(xDrawPagesSupplier->getDrawPages()->getByIndex(0),
                                                  uno::UNO_QUERY);
-    uno::Reference<beans::XPropertySet> xShapeProps(xDrawPage->getByIndex(0), uno::UNO_QUERY);
-    css::awt::Rectangle aBoundRect;
-    xShapeProps->getPropertyValue(u"BoundRect"_ustr) >>= aBoundRect;
-    // Without fix, size was 12009 x 7844, and position was 2008|2172.
-    // The text began in the upper-left corner of the logical rectangle. However it should be inside
-    // the underlaying ellipse of the pie.
-    // A BoundRect can vary depending on the system and font and therefore requires a wide tolerance.
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(sal_Int32(10247), aBoundRect.Width,10);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(sal_Int32(6673), aBoundRect.Height, 10);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(sal_Int32(3770), aBoundRect.X, 10);
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(sal_Int32(3343), aBoundRect.Y, 10);
+    auto xShape = xDrawPage->getByIndex(0).query<drawing::XShape>();
+    auto& rSdrCustomShape(
+        static_cast<SdrObjCustomShape&>(*SdrObject::getSdrObjectFromXShape(xShape)));
+    tools::Rectangle aTextBound;
+    CPPUNIT_ASSERT(rSdrCustomShape.GetTextBounds(aTextBound));
+    // The text frame is inscribed in the ellipse at 45deg. Without the fix in place, it was the
+    // whole shape, 12000x8000@(1999,1998).
+    CPPUNIT_ASSERT_EQUAL(tools::Rectangle(3756, 3169, 12241, 8826), aTextBound);
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
