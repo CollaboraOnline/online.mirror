@@ -185,7 +185,7 @@ protected:
 
     /** Destructor.
      */
-    virtual ~Timer() SAL_OVERRIDE;
+    virtual ~Timer() override;
 
     /** What should be done when the 'timer fires'.
      */

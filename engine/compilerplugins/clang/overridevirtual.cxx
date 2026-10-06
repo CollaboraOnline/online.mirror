@@ -59,18 +59,16 @@ bool OverrideVirtual::VisitCXXMethodDecl(CXXMethodDecl const * decl) {
     {
         return true;
     }
-    std::string over(
-        isInUnoIncludeFile(decl->getSourceRange().getBegin())
-        ? "SAL_OVERRIDE" : "override");
+    std::string over("override");
     if (rewriter != nullptr) {
         // In  void MACRO(...);  getSourceRange().getEnd() would (erroneously?)
         // point at "MACRO" rather than ")", so make the loop always terminate
         // at the first ";" or "{" instead of getSourceRange().getEnd():
         unsigned parens = 0;
         bool seenSpace = false;
-        //TODO: Whether to add a space after an inserted "SAL_OVERRIDE" should
+        //TODO: Whether to add a space after an inserted "override" should
         // depend on the following token at the spelling location where
-        // "SAL_OVERRIDE" is inserted, not on the following token in the fully-
+        // "override" is inserted, not on the following token in the fully-
         // macro-expanded view:
         bool addSpace = bool();
         SourceLocation loc;

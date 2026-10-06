@@ -58,19 +58,19 @@ protected:
 public:
     /** Destructor
     */
-    virtual ~WeakComponentImplHelperBase() SAL_OVERRIDE;
+    virtual ~WeakComponentImplHelperBase() override;
 
     virtual cpo::uno::Any queryInterface(
-        cpo::uno::Type const & rType ) SAL_OVERRIDE;
+        cpo::uno::Type const & rType ) override;
     virtual void acquire()
-        SAL_NOEXCEPT SAL_OVERRIDE;
+        SAL_NOEXCEPT override;
     virtual void release()
-        SAL_NOEXCEPT SAL_OVERRIDE;
-    virtual void dispose() SAL_OVERRIDE;
+        SAL_NOEXCEPT override;
+    virtual void dispose() override;
     virtual void addEventListener(
-        cpo::uno::Reference< css::lang::XEventListener > const & xListener ) SAL_OVERRIDE;
+        cpo::uno::Reference< css::lang::XEventListener > const & xListener ) override;
     virtual void removeEventListener(
-        cpo::uno::Reference< css::lang::XEventListener > const & xListener ) SAL_OVERRIDE;
+        cpo::uno::Reference< css::lang::XEventListener > const & xListener ) override;
 };
 
 /** Implementation helper base class for components. Inherits from ::cppu::OWeakAggObject and
@@ -89,21 +89,21 @@ protected:
 
     WeakAggComponentImplHelperBase( ::osl::Mutex & rMutex );
 public:
-    virtual ~WeakAggComponentImplHelperBase() SAL_OVERRIDE;
+    virtual ~WeakAggComponentImplHelperBase() override;
 
     virtual cpo::uno::Any queryInterface(
-        cpo::uno::Type const & rType ) SAL_OVERRIDE;
+        cpo::uno::Type const & rType ) override;
     virtual cpo::uno::Any queryAggregation(
-        cpo::uno::Type const & rType ) SAL_OVERRIDE;
+        cpo::uno::Type const & rType ) override;
     virtual void acquire()
-        SAL_NOEXCEPT SAL_OVERRIDE;
+        SAL_NOEXCEPT override;
     virtual void release()
-        SAL_NOEXCEPT SAL_OVERRIDE;
-    virtual void dispose() SAL_OVERRIDE;
+        SAL_NOEXCEPT override;
+    virtual void dispose() override;
     virtual void addEventListener(
-        cpo::uno::Reference< css::lang::XEventListener > const & xListener ) SAL_OVERRIDE;
+        cpo::uno::Reference< css::lang::XEventListener > const & xListener ) override;
     virtual void removeEventListener(
-        cpo::uno::Reference< css::lang::XEventListener > const & xListener ) SAL_OVERRIDE;
+        cpo::uno::Reference< css::lang::XEventListener > const & xListener ) override;
 };
 
 /** WeakComponentImplHelper

@@ -237,19 +237,19 @@ protected:
        object.
     */
     virtual cpo::uno::Any queryInterface(
-        cpo::uno::Type const & type) SAL_OVERRIDE;
+        cpo::uno::Type const & type) override;
 
     // @see css::beans::XPropertySet::getPropertySetInfo
-    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > getPropertySetInfo() SAL_OVERRIDE;
+    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > getPropertySetInfo() override;
 
     // @see css::beans::XPropertySet::setPropertyValue
     virtual void setPropertyValue(
         rtl::OUString const & propertyName,
-        cpo::uno::Any const & value) SAL_OVERRIDE;
+        cpo::uno::Any const & value) override;
 
     // @see css::beans::XPropertySet::getPropertyValue
     virtual cpo::uno::Any getPropertyValue(
-        rtl::OUString const & propertyName) SAL_OVERRIDE;
+        rtl::OUString const & propertyName) override;
 
     /**
        @short Adds a
@@ -263,13 +263,13 @@ protected:
     virtual void addPropertyChangeListener(
         rtl::OUString const & propertyName,
         cpo::uno::Reference<
-        css::beans::XPropertyChangeListener > const & listener) SAL_OVERRIDE;
+        css::beans::XPropertyChangeListener > const & listener) override;
 
     // @see css::beans::XPropertySet::removePropertyChangeListener
     virtual void removePropertyChangeListener(
         rtl::OUString const & propertyName,
         cpo::uno::Reference<
-        css::beans::XPropertyChangeListener > const & listener) SAL_OVERRIDE;
+        css::beans::XPropertyChangeListener > const & listener) override;
 
     /**
        @short Adds a
@@ -283,28 +283,28 @@ protected:
     virtual void addVetoableChangeListener(
         rtl::OUString const & propertyName,
         cpo::uno::Reference<
-        css::beans::XVetoableChangeListener > const & listener) SAL_OVERRIDE;
+        css::beans::XVetoableChangeListener > const & listener) override;
 
     // @see css::beans::XPropertySet::removeVetoableChangeListener
     virtual void removeVetoableChangeListener(
         rtl::OUString const & propertyName,
         cpo::uno::Reference<
-        css::beans::XVetoableChangeListener > const & listener) SAL_OVERRIDE;
+        css::beans::XVetoableChangeListener > const & listener) override;
 
     // @see css::beans::XFastPropertySet::setFastPropertyValue
     virtual void setFastPropertyValue(
-        sal_Int32 handle, cpo::uno::Any const & value) SAL_OVERRIDE;
+        sal_Int32 handle, cpo::uno::Any const & value) override;
 
     // @see css::beans::XFastPropertySet::getFastPropertyValue
     virtual cpo::uno::Any getFastPropertyValue(
-        sal_Int32 handle) SAL_OVERRIDE;
+        sal_Int32 handle) override;
 
     // @see css::beans::XPropertyAccess::getPropertyValues
-    virtual cpo::uno::Sequence< css::beans::PropertyValue > getPropertyValues() SAL_OVERRIDE;
+    virtual cpo::uno::Sequence< css::beans::PropertyValue > getPropertyValues() override;
 
     // @see css::beans::XPropertyAccess::setPropertyValues
     virtual void setPropertyValues(
-        cpo::uno::Sequence< css::beans::PropertyValue > const & props) SAL_OVERRIDE;
+        cpo::uno::Sequence< css::beans::PropertyValue > const & props) override;
 
 private:
     PropertySetMixinImpl( const PropertySetMixinImpl&) SAL_DELETED_FUNCTION;

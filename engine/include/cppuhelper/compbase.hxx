@@ -74,23 +74,23 @@ public:
     PartialWeakComponentImplHelper(osl::Mutex & mutex) SAL_NOEXCEPT:
         WeakComponentImplHelperBase(mutex) {}
 
-    cpo::uno::Any queryInterface(cpo::uno::Type const & aType) SAL_OVERRIDE
+    cpo::uno::Any queryInterface(cpo::uno::Type const & aType) override
     { return WeakComponentImplHelper_query(aType, cd::get(), this, this); }
 
-    void acquire() SAL_NOEXCEPT SAL_OVERRIDE
+    void acquire() SAL_NOEXCEPT override
     { WeakComponentImplHelperBase::acquire(); }
 
-    void release() SAL_NOEXCEPT SAL_OVERRIDE
+    void release() SAL_NOEXCEPT override
     { WeakComponentImplHelperBase::release(); }
 
     void dispose()
-        SAL_OVERRIDE
+        override
     { WeakComponentImplHelperBase::dispose(); }
 
-    cpo::uno::Sequence<cpo::uno::Type> getTypes() SAL_OVERRIDE
+    cpo::uno::Sequence<cpo::uno::Type> getTypes() override
     { return WeakComponentImplHelper_getTypes(cd::get()); }
 
-    cpo::uno::Sequence<sal_Int8> getImplementationId() SAL_OVERRIDE
+    cpo::uno::Sequence<sal_Int8> getImplementationId() override
     { return cpo::uno::Sequence<sal_Int8>(); }
 };
 
@@ -114,11 +114,11 @@ public:
         PartialWeakComponentImplHelper<Ifc...>(mutex) {}
 
     void addEventListener(
-        cpo::uno::Reference<css::lang::XEventListener> const & xListener) SAL_OVERRIDE
+        cpo::uno::Reference<css::lang::XEventListener> const & xListener) override
     { WeakComponentImplHelperBase::addEventListener(xListener); }
 
     void removeEventListener(
-        cpo::uno::Reference<css::lang::XEventListener> const & aListener) SAL_OVERRIDE
+        cpo::uno::Reference<css::lang::XEventListener> const & aListener) override
     { WeakComponentImplHelperBase::removeEventListener(aListener); }
 };
 

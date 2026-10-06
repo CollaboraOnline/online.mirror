@@ -52,11 +52,11 @@ public:
     /** If a delegator is set, then the delegators gets acquired.  Otherwise call is delegated to
         base class ::cppu::OWeakObject.
     */
-    virtual void acquire() SAL_NOEXCEPT SAL_OVERRIDE;
+    virtual void acquire() SAL_NOEXCEPT override;
     /** If a delegator is set, then the delegators gets released.  Otherwise call is delegated to
         base class ::cppu::OWeakObject.
     */
-    virtual void release() SAL_NOEXCEPT SAL_OVERRIDE;
+    virtual void release() SAL_NOEXCEPT override;
     /** If a delegator is set, then the delegator is queried for the demanded interface.  If the
         delegator cannot provide the demanded interface, it calls queryAggregation() on its
         aggregated objects.
@@ -65,19 +65,19 @@ public:
         @return demanded type or empty any
         @see queryAggregation.
     */
-    virtual cpo::uno::Any queryInterface( const cpo::uno::Type & rType ) SAL_OVERRIDE;
+    virtual cpo::uno::Any queryInterface( const cpo::uno::Type & rType ) override;
 
     /** Set the delegator.  The delegator member reference is a weak reference.
 
         @param Delegator the object that delegate its queryInterface to this aggregate.
     */
-    virtual void setDelegator( const cpo::uno::Reference< cpo::uno::XInterface > & Delegator ) SAL_OVERRIDE;
+    virtual void setDelegator( const cpo::uno::Reference< cpo::uno::XInterface > & Delegator ) override;
     /** Called by the delegator or queryInterface. Re-implement this method instead of
         queryInterface.
 
         @see queryInterface
     */
-    virtual cpo::uno::Any queryAggregation( const cpo::uno::Type & rType ) SAL_OVERRIDE;
+    virtual cpo::uno::Any queryAggregation( const cpo::uno::Type & rType ) override;
 
 protected:
     /** Virtual dtor. Called when reference count is 0.
@@ -86,7 +86,7 @@ protected:
         Despite the fact that a RuntimeException is allowed to be thrown, you must not throw any
         exception upon destruction!
     */
-    virtual ~OWeakAggObject() SAL_OVERRIDE;
+    virtual ~OWeakAggObject() override;
 
     /** weak reference to delegator.
     */

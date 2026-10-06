@@ -364,10 +364,6 @@ namespace cpo {}
 */
 #define SAL_DELETED_FUNCTION = delete
 
-/** C++11 "override" feature.
-*/
-#define SAL_OVERRIDE override
-
 /** C++11 "constexpr" feature.
 */
 #define SAL_CONSTEXPR constexpr

@@ -57,33 +57,33 @@ public:
     OComponentHelper( ::osl::Mutex & rMutex );
     /** Destructor. If this object was not disposed previously, object will be disposed manually.
     */
-    virtual ~OComponentHelper() SAL_OVERRIDE;
+    virtual ~OComponentHelper() override;
 
     // XAggregation
     virtual cpo::uno::Any queryInterface(
-        cpo::uno::Type const & rType ) SAL_OVERRIDE;
+        cpo::uno::Type const & rType ) override;
     virtual cpo::uno::Any queryAggregation(
-        cpo::uno::Type const & rType ) SAL_OVERRIDE;
+        cpo::uno::Type const & rType ) override;
     virtual void acquire()
-        SAL_NOEXCEPT SAL_OVERRIDE;
+        SAL_NOEXCEPT override;
     virtual void release()
-        SAL_NOEXCEPT SAL_OVERRIDE;
+        SAL_NOEXCEPT override;
 
     /** @attention
         XTypeProvider::getImplementationId() has to be implemented separately!
     */
-    virtual cpo::uno::Sequence< sal_Int8 > getImplementationId() SAL_OVERRIDE = 0;
+    virtual cpo::uno::Sequence< sal_Int8 > getImplementationId() override = 0;
     /** @attention
         XTypeProvider::getTypes() has to be re-implemented!
     */
-    virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() SAL_OVERRIDE;
+    virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() override;
 
     // XComponent
-    virtual void dispose() SAL_OVERRIDE;
+    virtual void dispose() override;
     virtual void addEventListener(
-        const cpo::uno::Reference< css::lang::XEventListener >& aListener ) SAL_OVERRIDE;
+        const cpo::uno::Reference< css::lang::XEventListener >& aListener ) override;
     virtual void removeEventListener(
-        const cpo::uno::Reference< css::lang::XEventListener >& aListener ) SAL_OVERRIDE;
+        const cpo::uno::Reference< css::lang::XEventListener >& aListener ) override;
 
 protected:
     /** Called in dispose method after the listeners were notified.

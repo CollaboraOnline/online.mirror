@@ -47,11 +47,11 @@ class SAL_NO_VTABLE SAL_DLLPUBLIC_TEMPLATE ImplHelper##N \
 { \
     static class_data##N s_cd; \
 public: \
-    virtual cpo::uno::Any queryInterface( cpo::uno::Type const & rType ) SAL_OVERRIDE \
+    virtual cpo::uno::Any queryInterface( cpo::uno::Type const & rType ) override \
         { return ImplHelper_query( rType, (class_data *)&s_cd, this ); } \
-    virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() SAL_OVERRIDE \
+    virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() override \
         { return ImplHelper_getTypes( (class_data *)&s_cd ); } \
-    virtual cpo::uno::Sequence< sal_Int8 > getImplementationId() SAL_OVERRIDE \
+    virtual cpo::uno::Sequence< sal_Int8 > getImplementationId() override \
         { return ImplHelper_getImplementationId( (class_data *)&s_cd ); } \
 }; \
 template< __CLASS_IFC##N > \
@@ -65,15 +65,15 @@ class SAL_NO_VTABLE SAL_DLLPUBLIC_TEMPLATE WeakImplHelper##N \
 { \
     static class_data##N s_cd; \
 public: \
-    virtual cpo::uno::Any queryInterface( cpo::uno::Type const & rType ) SAL_OVERRIDE \
+    virtual cpo::uno::Any queryInterface( cpo::uno::Type const & rType ) override \
         { return WeakImplHelper_query( rType, (class_data *)&s_cd, this, static_cast<OWeakObject *>(this) ); } \
-    virtual void acquire() SAL_NOEXCEPT SAL_OVERRIDE \
+    virtual void acquire() SAL_NOEXCEPT override \
         { OWeakObject::acquire(); } \
-    virtual void release() SAL_NOEXCEPT SAL_OVERRIDE \
+    virtual void release() SAL_NOEXCEPT override \
         { OWeakObject::release(); } \
-    virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() SAL_OVERRIDE \
+    virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() override \
         { return WeakImplHelper_getTypes( (class_data *)&s_cd ); } \
-    virtual cpo::uno::Sequence< sal_Int8 > getImplementationId() SAL_OVERRIDE \
+    virtual cpo::uno::Sequence< sal_Int8 > getImplementationId() override \
         { return ImplHelper_getImplementationId( (class_data *)&s_cd ); } \
 }; \
 template< __CLASS_IFC##N > \
@@ -87,17 +87,17 @@ class SAL_NO_VTABLE SAL_DLLPUBLIC_TEMPLATE WeakAggImplHelper##N \
 { \
     static class_data##N s_cd; \
 public: \
-    virtual cpo::uno::Any queryInterface( cpo::uno::Type const & rType ) SAL_OVERRIDE \
+    virtual cpo::uno::Any queryInterface( cpo::uno::Type const & rType ) override \
         { return OWeakAggObject::queryInterface( rType ); } \
-    virtual cpo::uno::Any queryAggregation( cpo::uno::Type const & rType ) SAL_OVERRIDE \
+    virtual cpo::uno::Any queryAggregation( cpo::uno::Type const & rType ) override \
         { return WeakAggImplHelper_queryAgg( rType, (class_data *)&s_cd, this, static_cast<OWeakAggObject *>(this) ); } \
-    virtual void acquire() SAL_NOEXCEPT SAL_OVERRIDE \
+    virtual void acquire() SAL_NOEXCEPT override \
         { OWeakAggObject::acquire(); } \
-    virtual void release() SAL_NOEXCEPT SAL_OVERRIDE \
+    virtual void release() SAL_NOEXCEPT override \
         { OWeakAggObject::release(); } \
-    virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() SAL_OVERRIDE \
+    virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() override \
         { return WeakAggImplHelper_getTypes( (class_data *)&s_cd ); } \
-    virtual cpo::uno::Sequence< sal_Int8 > getImplementationId() SAL_OVERRIDE \
+    virtual cpo::uno::Sequence< sal_Int8 > getImplementationId() override \
         { return ImplHelper_getImplementationId( (class_data *)&s_cd ); } \
 }; \
 template< __CLASS_IFC##N > \

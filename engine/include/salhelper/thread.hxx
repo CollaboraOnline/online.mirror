@@ -60,7 +60,7 @@ public:
     using osl::Thread::yield;
 
 protected:
-    virtual ~Thread() SAL_OVERRIDE;
+    virtual ~Thread() override;
 
     /**
        The main function executed by the thread.
@@ -70,9 +70,9 @@ protected:
     virtual void execute() = 0;
 
 private:
-    virtual void run() SAL_OVERRIDE;
+    virtual void run() override;
 
-    virtual void onTerminated() SAL_OVERRIDE;
+    virtual void onTerminated() override;
 
     char const* name_;
 };

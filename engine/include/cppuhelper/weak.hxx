@@ -110,21 +110,21 @@ public:
         @return demanded type or empty any
     */
     virtual cpo::uno::Any queryInterface(
-        const cpo::uno::Type & rType ) SAL_OVERRIDE;
+        const cpo::uno::Type & rType ) override;
     /** increasing m_refCount
     */
     virtual void acquire()
-        SAL_NOEXCEPT SAL_OVERRIDE;
+        SAL_NOEXCEPT override;
     /** decreasing m_refCount
     */
     virtual void release()
-        SAL_NOEXCEPT SAL_OVERRIDE;
+        SAL_NOEXCEPT override;
 
     /** XWeak::queryAdapter() implementation
 
         @return a cpo::uno::XAdapter reference
     */
-    virtual cpo::uno::Reference< cpo::uno::XAdapter > queryAdapter() SAL_OVERRIDE;
+    virtual cpo::uno::Reference< cpo::uno::XAdapter > queryAdapter() override;
 
     /** Cast operator to XInterface reference.
 
