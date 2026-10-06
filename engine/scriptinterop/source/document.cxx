@@ -2445,7 +2445,15 @@ public:
     }
 
     cpo::uno::Reference<scriptinterop::XContainerElement> clear() override {
-        throw cpo::uno::RuntimeException(u"Body.clear is not yet implemented"_ustr); // TODO
+        text_->setString(OUString());
+        cpo::uno::Reference<css::container::XEnumerationAccess> const paragraphs(
+            text_, cpo::uno::UNO_QUERY_THROW);
+        cpo::uno::Reference<css::text::XTextContent> const kept(
+            paragraphs->createEnumeration()->nextElement(), cpo::uno::UNO_QUERY_THROW);
+        makeNormal(
+            new ParagraphImpl(this, kept),
+            cpo::uno::Reference<css::beans::XPropertySet>(kept, cpo::uno::UNO_QUERY_THROW));
+        return this;
     }
 
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
@@ -2532,16 +2540,7 @@ private:
         cpo::uno::Reference<css::beans::XPropertySet> const props(
             lastParagraph, cpo::uno::UNO_QUERY_THROW);
         if (paraStyle.isEmpty()) {
-            // In GAS, a paragraph appended after a list item is a plain paragraph, while Writer
-            // continues the list:
-            if (paragraph->getType() == scriptinterop::ElementType_LIST_ITEM) {
-                paragraph->setHeading(scriptinterop::ParagraphHeading_NORMAL);
-                props->setPropertyValue(u"NumberingRules"_ustr, cpo::uno::Any());
-            } else if (auto const heading = paragraph->getHeading();
-                heading.IsPresent && heading.Value != scriptinterop::ParagraphHeading_NORMAL)
-            {
-                paragraph->setHeading(scriptinterop::ParagraphHeading_NORMAL);
-            }
+            makeNormal(paragraph, props);
         } else {
             try {
                 props->setPropertyValue(u"ParaStyleName"_ustr, cpo::uno::Any(paraStyle));
@@ -2553,6 +2552,22 @@ private:
             }
         }
         return paragraph;
+    }
+
+    // In GAS, an appended paragraph and the paragraph that a cleared body keeps are plain
+    // paragraphs, while Writer can carry over a list or a heading style:
+    static void makeNormal(
+        cpo::uno::Reference<scriptinterop::XParagraph> const & paragraph,
+        cpo::uno::Reference<css::beans::XPropertySet> const & props)
+    {
+        if (paragraph->getType() == scriptinterop::ElementType_LIST_ITEM) {
+            paragraph->setHeading(scriptinterop::ParagraphHeading_NORMAL);
+            props->setPropertyValue(u"NumberingRules"_ustr, cpo::uno::Any());
+        } else if (auto const heading = paragraph->getHeading();
+            heading.IsPresent && heading.Value != scriptinterop::ParagraphHeading_NORMAL)
+        {
+            paragraph->setHeading(scriptinterop::ParagraphHeading_NORMAL);
+        }
     }
 
     void applyBulletNumbering(cpo::uno::Reference<css::beans::XPropertySet> const & props) {

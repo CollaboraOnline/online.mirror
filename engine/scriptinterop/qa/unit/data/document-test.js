@@ -394,4 +394,12 @@ function test() {
     // Setting the cursor ends the selection of the image (the cursor itself is not read again here,
     // see above):
     console.assert(doc.setCursor(doc.newPosition(para5, 1)).getSelection() === null);
+
+    // Clearing the body, which still holds a table and a list item here, keeps one empty
+    // paragraph:
+    console.assert(body.clear().getNumChildren() === 1);
+    console.assert(body.getChild(0).getType() === DocumentApp.ElementType.PARAGRAPH);
+    console.assert(
+        body.getChild(0).asParagraph().getHeading() === DocumentApp.ParagraphHeading.NORMAL);
+    console.assert(body.getText() === '');
 }
