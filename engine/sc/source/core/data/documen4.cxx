@@ -1137,26 +1137,57 @@ const SfxPoolItem* ScDocument::GetEffItem(
     return nullptr;
 }
 
+namespace
+{
+// The table style of the table at the cell, and the index of the row among the visible data rows
+// of the table, as FillInfo counts them
+const ScTableStyle* lcl_getTableStyleAt(const ScDocument& rDoc, SCCOL nCol, SCROW nRow, SCTAB nTab,
+                                        const ScDBData*& rpDBData, SCROW& rnRowIndex)
+{
+    rpDBData = rDoc.GetTableDBAtCursor(nCol, nRow, nTab, ScDBDataPortion::AREA);
+    if (!rpDBData || !rDoc.GetTableStyles())
+        return nullptr;
+
+    const ScTableStyleParam* pTableStyleInfo = rpDBData->GetTableStyleInfo();
+    const ScTableStyle* pTableStyle = rDoc.GetTableStyles()->GetTableStyle(pTableStyleInfo->maStyleID);
+    if (!pTableStyle)
+        return nullptr;
+
+    rnRowIndex = -static_cast<SCROW>(rpDBData->HasHeader());
+    ScRange aDBRange;
+    rpDBData->GetArea(aDBRange);
+    if (aDBRange.aStart.Row() < nRow)
+        rnRowIndex += rDoc.CountVisibleRows(aDBRange.aStart.Row(), nRow - 1, nTab);
+    return pTableStyle;
+}
+}
+
 const SfxItemSet* ScDocument::GetTableFormatSet(SCCOL nCol, SCROW nRow, SCTAB nTab) const
 {
-    const ScDBData* pDBData = GetTableDBAtCursor(nCol, nRow, nTab, ScDBDataPortion::AREA);
-    if (pDBData && mpTableStyles)
-    {
-        const ScTableStyleParam* pTableStyleInfo = pDBData->GetTableStyleInfo();
-        const ScTableStyle* pTableStyle = mpTableStyles->GetTableStyle(pTableStyleInfo->maStyleID);
-        if (!pTableStyle)
-            return nullptr;
+    const ScDBData* pDBData = nullptr;
+    SCROW nRowIndex = 0;
+    const ScTableStyle* pTableStyle = lcl_getTableStyleAt(*this, nCol, nRow, nTab, pDBData, nRowIndex);
+    return pTableStyle ? pTableStyle->GetFontItemSet(*pDBData, nCol, nRow, nRowIndex) : nullptr;
+}
 
-        SCROW nNonEmptyRowsBeforePaintRange = -static_cast<SCROW>(pDBData->HasHeader());
-        ScRange aDBRange;
-        pDBData->GetArea(aDBRange);
-        if (aDBRange.aStart.Row() < nRow)
-        {
-            nNonEmptyRowsBeforePaintRange += this->CountVisibleRows(aDBRange.aStart.Row(), nRow - 1, nTab);
-        }
-        return pTableStyle->GetFontItemSet(*pDBData, nCol, nRow, nNonEmptyRowsBeforePaintRange);
+const SvxBrushItem* ScDocument::GetTableFillItem(SCCOL nCol, SCROW nRow, SCTAB nTab) const
+{
+    const ScDBData* pDBData = nullptr;
+    SCROW nRowIndex = 0;
+    const ScTableStyle* pTableStyle = lcl_getTableStyleAt(*this, nCol, nRow, nTab, pDBData, nRowIndex);
+    return pTableStyle ? pTableStyle->GetFillItem(*pDBData, nCol, nRow, nRowIndex) : nullptr;
+}
+
+Color ScDocument::GetCellBackgroundColor(SCCOL nCol, SCROW nRow, SCTAB nTab) const
+{
+    const ScPatternAttr* pPattern = GetPattern(nCol, nRow, nTab);
+    Color aColor = pPattern ? pPattern->GetItem(ATTR_BACKGROUND).GetColor() : COL_TRANSPARENT;
+    if (aColor.IsTransparent())
+    {
+        if (const SvxBrushItem* pTableFill = GetTableFillItem(nCol, nRow, nTab))
+            aColor = pTableFill->GetColor();
     }
-    return nullptr;
+    return aColor;
 }
 
 const SfxItemSet* ScDocument::GetCondResult( SCCOL nCol, SCROW nRow, SCTAB nTab, ScRefCellValue* pCell ) const

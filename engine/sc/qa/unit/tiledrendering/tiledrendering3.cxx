@@ -41,8 +41,10 @@
 #include <com/sun/star/embed/EmbedVerbs.hpp>
 #include <vcl/virdev.hxx>
 #include <vcl/keycodes.hxx>
+#include <editeng/brushitem.hxx>
 #include <editeng/colritem.hxx>
 #include <editeng/editview.hxx>
+#include <editeng/eeitem.hxx>
 #include <docmodel/color/ComplexColor.hxx>
 #include <tools/json_writer.hxx>
 #include <tools/datetime.hxx>
@@ -1415,6 +1417,77 @@ CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testCellEditBackgroundFollowsEditingV
     // had turned dark, so this view edited on a dark background and its automatic text was white.
     CPPUNIT_ASSERT(!pEditView->GetBackgroundColor().IsDark());
     CPPUNIT_ASSERT(!pEditView->getEditEngine().GetBackgroundColor().IsDark());
+}
+
+// A cell of a table is edited with the font colour and the fill that its table style gives it,
+// so the cell keeps its look while it is edited
+CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testTableStyleCellEditFontAndFill)
+{
+    // Table1 is A1:E7 in TableStyleLight4 with banded rows, and Text 1 of the theme is red-brown,
+    // so is the font of Normal. H10 is outside the table, with Normal like A2.
+    loadFromURL(m_directories.getURLFromSrc(u"/sc/qa/unit/data/xlsx/",
+                                            u"tablestyle-cellstyle-excluded-font.xlsx"));
+    ScModelObj* pModelObj = comphelper::getFromUnoTunnel<ScModelObj>(mxComponent);
+    CPPUNIT_ASSERT(pModelObj);
+    pModelObj->initializeForTiledRendering({});
+    ScDocument* pDoc = pModelObj->GetDocument();
+    ScTabViewShell* pViewShell = ScTabViewShell::GetActiveViewShell();
+    CPPUNIT_ASSERT(pViewShell);
+
+    // A2 is in the first data row, which has the band fill
+    const SvxBrushItem* pBandFill = pDoc->GetTableFillItem(0, 1, 0);
+    CPPUNIT_ASSERT(pBandFill);
+    const Color aBandColor = pBandFill->GetColor();
+    const SfxItemSet* pTableFont = pDoc->GetTableFormatSet(0, 1, 0);
+    CPPUNIT_ASSERT(pTableFont);
+    const Color aTableTextColor = pTableFont->Get(ATTR_FONT_COLOR).GetValue();
+    const Color aNormalColor(0x912D0A);
+    CPPUNIT_ASSERT(aTableTextColor != aNormalColor);
+
+    auto editCell = [pModelObj, pViewShell](SCCOL nCol, SCROW nRow) {
+        pViewShell->SetCursor(nCol, nRow);
+        pModelObj->postKeyEvent(COKitKeyEventType::DOWN, 0, awt::Key::F2);
+        pModelObj->postKeyEvent(COKitKeyEventType::UP, 0, awt::Key::F2);
+        Scheduler::ProcessEventsToIdle();
+        ScViewData& rViewData = pViewShell->GetViewData();
+        EditView* pEditView = rViewData.GetEditView(rViewData.GetActivePart());
+        CPPUNIT_ASSERT(pEditView);
+        return pEditView;
+    };
+    auto getTextColor = [](EditView* pEditView) {
+        const SfxItemSet aAttribs = pEditView->getEditEngine().GetAttribs(ESelection::All());
+        return aAttribs.Get(EE_CHAR_COLOR).GetValue();
+    };
+
+    // Without the fix in place, A2 was edited in the red-brown of Normal, on white
+    EditView* pEditView = editCell(0, 1);
+    CPPUNIT_ASSERT_EQUAL(aTableTextColor, getTextColor(pEditView));
+    CPPUNIT_ASSERT_EQUAL(aBandColor, pEditView->GetBackgroundColor());
+    CPPUNIT_ASSERT_EQUAL(aBandColor, pEditView->getEditEngine().GetBackgroundColor());
+
+    // Painting a tile sets the background of the edit view again
+    getTile(pModelObj, 0, 0, 3840, 3840);
+    CPPUNIT_ASSERT_EQUAL(aBandColor, pEditView->GetBackgroundColor());
+
+    pModelObj->postKeyEvent(COKitKeyEventType::DOWN, 0, awt::Key::ESCAPE);
+    pModelObj->postKeyEvent(COKitKeyEventType::UP, 0, awt::Key::ESCAPE);
+    Scheduler::ProcessEventsToIdle();
+
+    // E2 has the Zeit cell style, which defines a font with an automatic colour but does not apply
+    // it, so E2 is edited in the red-brown of Normal like it is painted, on the same band fill
+    pEditView = editCell(4, 1);
+    CPPUNIT_ASSERT_EQUAL(aNormalColor, getTextColor(pEditView));
+    CPPUNIT_ASSERT_EQUAL(aBandColor, pEditView->GetBackgroundColor());
+
+    pModelObj->postKeyEvent(COKitKeyEventType::DOWN, 0, awt::Key::ESCAPE);
+    pModelObj->postKeyEvent(COKitKeyEventType::UP, 0, awt::Key::ESCAPE);
+    Scheduler::ProcessEventsToIdle();
+
+    // H10 has the same pattern as A2, but no table style, so nothing of the table may stay from
+    // the previous edits
+    pEditView = editCell(7, 9);
+    CPPUNIT_ASSERT_EQUAL(aNormalColor, getTextColor(pEditView));
+    CPPUNIT_ASSERT(pEditView->GetBackgroundColor() != aBandColor);
 }
 
 /*

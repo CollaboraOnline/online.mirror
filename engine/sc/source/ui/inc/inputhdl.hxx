@@ -110,6 +110,8 @@ private:
 
     bool                    bProtected:1;
     bool                    bLastIsSymbol:1;
+    /// The last cell that started input mode is in a table with a table style.
+    bool                    mbLastInTable:1;
     bool                    mbDocumentDisposing:1;
     /// To indicate if there is a partial prefix completion.
     bool                    mbPartialPrefix:1;

@@ -951,6 +951,7 @@ ScInputHandler::ScInputHandler()
         bInOwnChange( false ),
         bProtected( false ),
         bLastIsSymbol( false ),
+        mbLastInTable( false ),
         mbDocumentDisposing(false),
         mbPartialPrefix(false),
         mbEditingExistingContent(false),
@@ -2716,7 +2717,17 @@ bool ScInputHandler::StartTable(sal_Unicode cTyped, bool bFromCommand, bool bInp
             const ScPatternAttr* pPattern = rDoc.GetPattern( aCursorPos.Col(),
                                                               aCursorPos.Row(),
                                                               aCursorPos.Tab() );
-            if (!ScPatternAttr::areSame(pPattern, maLastPattern.getScPatternAttr()))
+            // A table style gives cells of the same pattern different fonts and fills, e.g. in
+            // the header and in the data rows, so the pattern alone does not tell what changed.
+            const SfxItemSet* pTableSet = rDoc.GetTableFormatSet( aCursorPos.Col(),
+                                                                  aCursorPos.Row(),
+                                                                  aCursorPos.Tab() );
+            const SvxBrushItem* pTableFill = rDoc.GetTableFillItem( aCursorPos.Col(),
+                                                                    aCursorPos.Row(),
+                                                                    aCursorPos.Tab() );
+            const bool bInTable = pTableSet || pTableFill;
+            if (bInTable || mbLastInTable
+                || !ScPatternAttr::areSame(pPattern, maLastPattern.getScPatternAttr()))
             {
                 // Percent format?
                 const SfxItemSet& rAttrSet = pPattern->GetItemSet();
@@ -2747,15 +2758,17 @@ bool ScInputHandler::StartTable(sal_Unicode cTyped, bool bFromCommand, bool bInp
                 //! EditEngine changes) implemented as a SetParaAttribs.
                 //! Any problems?
 
-                pPattern->FillEditItemSet( pEditDefaults.get() );
+                pPattern->FillEditItemSet( pEditDefaults.get(), nullptr, pTableSet );
                 mpEditEngine->SetDefaults( *pEditDefaults );
                 maLastPattern.setScPatternAttr(pPattern);
                 bLastIsSymbol = pPattern->IsSymbolFont();
+                mbLastInTable = bInTable;
 
                 //  Background color must be known for automatic font color.
                 //  For transparent cell background, the document background color must be used.
 
-                Color aBackCol = pPattern->GetItem( ATTR_BACKGROUND ).GetColor();
+                Color aBackCol = rDoc.GetCellBackgroundColor( aCursorPos.Col(), aCursorPos.Row(),
+                                                              aCursorPos.Tab() );
                 ScModule* pScMod = ScModule::get();
                 if ( aBackCol.IsTransparent() ||
                         Application::GetSettings().GetStyleSettings().GetHighContrastMode() )

@@ -757,7 +757,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
                 aDocColor = aHighlightColor;
             }
 
-            Color aBackColor = rDoc.GetPattern(nEditCol, nEditRow, getViewData().CurrentTabForData())->GetItem(ATTR_BACKGROUND).GetColor();
+            Color aBackColor = rDoc.GetCellBackgroundColor(nEditCol, nEditRow, getViewData().CurrentTabForData());
             if (!aBackColor.IsTransparent())
                 aDocColor = aBackColor;
 
@@ -1158,8 +1158,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
 
             rDevice.SetLineColor();
             // Theme colors
-            const ScPatternAttr* pPattern = rDoc.GetPattern( nCol1, nRow1, nTab );
-            Color aCellColor = pPattern->GetItem(ATTR_BACKGROUND).GetColor();
+            Color aCellColor = rDoc.GetCellBackgroundColor( nCol1, nRow1, nTab );
             if (aCellColor.IsTransparent())
             {
                 if (ScTabViewShell* pCurrentViewShell = dynamic_cast<ScTabViewShell*>(SfxViewShell::Current()))

@@ -140,6 +140,7 @@ class SvMemoryStream;
 class SvStream;
 class SvxBoxInfoItem;
 class SvxBoxItem;
+class SvxBrushItem;
 class SvxForbiddenCharactersTable;
 namespace sfx2 {
     class LinkManager;
@@ -2045,6 +2046,11 @@ public:
     const ScPatternAttr*                    GetSelectionPattern( const ScMarkData& rMark );
     std::unique_ptr<ScPatternAttr>          CreateSelectionPattern( const ScMarkData& rMark, bool bDeep = true );
     SC_DLLPUBLIC const SfxItemSet*          GetTableFormatSet( SCCOL nCol, SCROW nRow, SCTAB nTab ) const;
+    /// The fill that the table style of a table gives the cell, nullptr outside a table
+    SC_DLLPUBLIC const SvxBrushItem*        GetTableFillItem( SCCOL nCol, SCROW nRow, SCTAB nTab ) const;
+    /// The background colour of the cell: its own fill, or else the fill of its table style,
+    /// transparent when it has neither
+    SC_DLLPUBLIC Color                      GetCellBackgroundColor( SCCOL nCol, SCROW nRow, SCTAB nTab ) const;
     SC_DLLPUBLIC void                       AddCondFormatData( const ScRangeList& rRange, SCTAB nTab, sal_uInt32 nIndex );
     void                                    RemoveCondFormatData( const ScRangeList& rRange, SCTAB nTab, sal_uInt32 nIndex );
 

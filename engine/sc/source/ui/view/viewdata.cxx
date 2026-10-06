@@ -1917,7 +1917,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
         rNewEngine.InsertView(pEditView[eWhich].get());
 
     //      background color of the cell
-    Color aBackCol = pPattern->GetItem(ATTR_BACKGROUND).GetColor();
+    Color aBackCol = mrDoc.GetCellBackgroundColor(nNewX, nNewY, CurrentTabForData());
 
     if ( aBackCol.IsTransparent() )
     {
