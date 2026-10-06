@@ -1029,6 +1029,7 @@ HOST_PLATFORM="$host"
 
 host_cpu_for_clang="$host_cpu"
 
+default_with_system_libxml=no
 case "$host_os" in
 
 solaris*)
@@ -1116,6 +1117,8 @@ darwin*) # macOS
     using_x11=no
     build_skia=yes
     enable_pagein=no
+    # macOS ships libxml/libxslt; prefer the system copy unless overridden.
+    default_with_system_libxml=yes
     if test -n "$LODE_HOME" ; then
         mac_sanitize_path
         AC_MSG_NOTICE([sanitized the PATH to $PATH])
@@ -2330,8 +2333,8 @@ AC_ARG_WITH(system-expat,
 
 AC_ARG_WITH(system-libxml,
     AS_HELP_STRING([--with-system-libxml],
-        [Use libxml/libxslt already on system.]),,
-    [with_system_libxml=auto])
+        [Use libxml/libxslt already on system. Disabled by default, enabled on macOS.]),,
+    [with_system_libxml="$default_with_system_libxml"])
 
 AC_ARG_WITH(system-lzma,
     AS_HELP_STRING([--with-system-lzma],
@@ -6062,9 +6065,8 @@ if test "$cross_compiling" = "yes"; then
     test "${enable_pch+set}" = set && sub_conf_opts="$sub_conf_opts --enable-pch=${enable_pch}"
     test "$enable_wasm_strip" = "yes" && sub_conf_opts="$sub_conf_opts --enable-wasm-strip"
     test "${with_system_lockfile+set}" = set && sub_conf_opts="$sub_conf_opts --with-system-lockfile=${with_system_lockfile}"
-    test "${enable_fuzzers}" = yes && sub_conf_opts="$sub_conf_opts --without-system-libxml"
     if test "$_os" = "Emscripten" -o "$_os" = "Android" -o "$_os" = "iOS"; then
-        sub_conf_opts="$sub_conf_opts --without-system-libxml --without-system-fontconfig --without-system-freetype --without-system-zlib"
+        sub_conf_opts="$sub_conf_opts --without-system-fontconfig --without-system-freetype --without-system-zlib"
     fi
     # windows uses full-internal python and that in turn relies on openssl, so also enable openssl
     # when cross-compiling for aarch64, overriding the defaults below
@@ -10015,27 +10017,6 @@ fi
 # to prevent incompatibilities between internal libxml2 and external libxslt,
 # or vice versa, use with_system_libxml here
 # ===================================================================
-if test "$with_system_libxml" = "auto"; then
-    case "$_os" in
-    WINNT|iOS|Android)
-        with_system_libxml="$with_system_libs"
-        ;;
-    Emscripten)
-        with_system_libxml=no
-        ;;
-    Darwin)
-        with_system_libxml=yes
-        ;;
-    *)
-        if test "$enable_fuzzers" != "yes"; then
-            with_system_libxml="$with_system_libs"
-        else
-            with_system_libxml=no
-        fi
-        ;;
-    esac
-fi
-
 AC_MSG_CHECKING([which libxslt to use])
 if test "$with_system_libxml" = "yes"; then
     AC_MSG_RESULT([external])
