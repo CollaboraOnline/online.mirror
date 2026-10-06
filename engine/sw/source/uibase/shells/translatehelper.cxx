@@ -355,7 +355,7 @@ static bool IsTranslationServiceConfigured(OString* pAPIUrl, OString* pKey)
     if (sApiUrlTrimmed.empty() || sKeyTrimmed.empty())
         return false;
     if (pAPIUrl)
-        *pAPIUrl = OUStringToOString(sApiUrlTrimmed, RTL_TEXTENCODING_UTF8) + "?tag_handling=html";
+        *pAPIUrl = OUStringToOString(sApiUrlTrimmed, RTL_TEXTENCODING_UTF8);
     if (pKey)
         *pKey = OUStringToOString(sKeyTrimmed, RTL_TEXTENCODING_UTF8);
     return true;
