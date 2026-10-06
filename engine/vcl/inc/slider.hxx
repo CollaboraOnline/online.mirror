@@ -74,6 +74,7 @@ public:
     virtual void    Resize() override;
     virtual void    StateChanged( StateChangedType nType ) override;
     virtual void    DataChanged( const DataChangedEvent& rDCEvt ) override;
+    virtual void    DumpAsPropertyTree(tools::JsonWriter& rJsonWriter) override;
 
     void            Slide();
 

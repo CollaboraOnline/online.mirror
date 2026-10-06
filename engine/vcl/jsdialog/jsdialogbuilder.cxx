@@ -939,6 +939,17 @@ std::unique_ptr<weld::ProgressBar> JSInstanceBuilder::weld_progress_bar(const OU
     return pWeldWidget;
 }
 
+std::unique_ptr<weld::Scale> JSInstanceBuilder::weld_scale(const OUString& id)
+{
+    ::Slider* pSlider = m_xBuilder->get<::Slider>(id);
+    auto pWeldWidget = pSlider ? std::make_unique<JSScale>(this, pSlider, this, false) : nullptr;
+
+    if (pWeldWidget)
+        RememberWidget(id, pWeldWidget.get());
+
+    return pWeldWidget;
+}
+
 std::unique_ptr<weld::LevelBar> JSInstanceBuilder::weld_level_bar(const OUString& id)
 {
     ::ProgressBar* pLevelBar = m_xBuilder->get<::ProgressBar>(id);
@@ -2348,6 +2359,30 @@ JSLevelBar::JSLevelBar(JSDialogSender* pSender, ::ProgressBar* pProgressBar,
 void JSLevelBar::set_percentage(double fPercentage)
 {
     SalInstanceLevelBar::set_percentage(fPercentage);
+    sendUpdate();
+}
+
+JSScale::JSScale(JSDialogSender* pSender, ::Slider* pSlider, SalInstanceBuilder* pBuilder,
+                 bool bTakeOwnership)
+    : JSWidget<SalInstanceScale, ::Slider>(pSender, pSlider, pBuilder, bTakeOwnership)
+{
+}
+
+void JSScale::set_value(int nValue)
+{
+    SalInstanceScale::set_value(nValue);
+    sendUpdate();
+}
+
+void JSScale::set_range(int nMin, int nMax)
+{
+    SalInstanceScale::set_range(nMin, nMax);
+    sendUpdate();
+}
+
+void JSScale::set_increments(int nStep, int nPage)
+{
+    SalInstanceScale::set_increments(nStep, nPage);
     sendUpdate();
 }
 

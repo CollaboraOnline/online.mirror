@@ -2092,6 +2092,8 @@ public:
 
 class VCL_DLLPUBLIC Scale : virtual public Widget
 {
+    friend class ::KitTrigger;
+
     Link<Scale&, void> m_aValueChangedHdl;
 
 protected:

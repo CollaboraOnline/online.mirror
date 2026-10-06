@@ -3155,49 +3155,6 @@ IMPL_LINK_NOARG(SalInstanceCheckButton, ToggleHdl, CheckBox&, void)
     signal_toggled();
 }
 
-namespace
-{
-class SalInstanceScale : public SalInstanceWidget, public virtual weld::Scale
-{
-private:
-    VclPtr<Slider> m_xScale;
-
-    DECL_LINK(SlideHdl, Slider*, void);
-
-public:
-    SalInstanceScale(Slider* pScale, SalInstanceBuilder* pBuilder, bool bTakeOwnership)
-        : SalInstanceWidget(pScale, pBuilder, bTakeOwnership)
-        , m_xScale(pScale)
-    {
-        m_xScale->SetSlideHdl(LINK(this, SalInstanceScale, SlideHdl));
-    }
-
-    virtual void set_value(int value) override { m_xScale->SetThumbPos(value); }
-
-    virtual void set_range(int min, int max) override
-    {
-        m_xScale->SetRangeMin(min);
-        m_xScale->SetRangeMax(max);
-    }
-
-    virtual int get_value() const override { return m_xScale->GetThumbPos(); }
-
-    virtual void set_increments(int step, int page) override
-    {
-        m_xScale->SetLineSize(step);
-        m_xScale->SetPageSize(page);
-    }
-
-    virtual void get_increments(int& step, int& page) const override
-    {
-        step = m_xScale->GetLineSize();
-        page = m_xScale->GetPageSize();
-    }
-
-    virtual ~SalInstanceScale() override { m_xScale->SetSlideHdl(Link<Slider*, void>()); }
-};
-}
-
 IMPL_LINK_NOARG(SalInstanceScale, SlideHdl, Slider*, void) { signal_value_changed(); }
 
 namespace

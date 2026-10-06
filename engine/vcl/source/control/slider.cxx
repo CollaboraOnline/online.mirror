@@ -21,6 +21,7 @@
 #include <vcl/decoview.hxx>
 #include <slider.hxx>
 #include <vcl/settings.hxx>
+#include <tools/json_writer.hxx>
 
 #include "thumbpos.hxx"
 
@@ -898,6 +899,15 @@ Size Slider::CalcWindowSizePixel() const
         aSize.setWidth( nHeight );
     }
     return aSize;
+}
+
+void Slider::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
+{
+    Control::DumpAsPropertyTree(rJsonWriter);
+    rJsonWriter.put("value", mnThumbPos);
+    rJsonWriter.put("min", mnMinRange);
+    rJsonWriter.put("max", mnMaxRange);
+    rJsonWriter.put("step", mnLineSize);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

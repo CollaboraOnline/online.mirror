@@ -433,6 +433,14 @@ interface SpinFieldWidgetJSON extends WidgetJSON {
 	unit?: string;
 }
 
+// type: 'slider'
+interface SliderWidgetJSON extends WidgetJSON {
+	value?: number;
+	min?: number;
+	max?: number;
+	step?: number;
+}
+
 // type: 'fixedtext'
 interface TextWidget extends WidgetJSON {
 	text: string;

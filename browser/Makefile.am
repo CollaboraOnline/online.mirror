@@ -709,6 +709,7 @@ COOL_JS_LST =\
 	src/control/jsdialog/Widget.OverflowManager.ts \
 	src/control/jsdialog/Widget.Progressbar.js \
 	src/control/jsdialog/Widget.RadioButton.ts \
+	src/control/jsdialog/Widget.Slider.ts \
 	src/control/jsdialog/Widget.PushButton.ts \
 	src/control/jsdialog/Widget.Comment.ts \
 	src/control/jsdialog/Widget.SpinField.ts \

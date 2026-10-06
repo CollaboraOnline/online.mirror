@@ -216,6 +216,7 @@ public:
     virtual std::unique_ptr<weld::Image> weld_image(const OUString& id) override;
     virtual std::unique_ptr<weld::ProgressBar> weld_progress_bar(const OUString& id) override;
     virtual std::unique_ptr<weld::LevelBar> weld_level_bar(const OUString& id) override;
+    virtual std::unique_ptr<weld::Scale> weld_scale(const OUString& id) override;
     virtual std::unique_ptr<weld::Calendar> weld_calendar(const OUString& id) override;
 
     static std::unique_ptr<weld::MessageDialog> CreateMessageDialog(weld::Widget* pParent,
@@ -978,6 +979,16 @@ public:
     JSLevelBar(JSDialogSender* pSender, ::ProgressBar* pProgressBar, SalInstanceBuilder* pBuilder,
                bool bTakeOwnership);
     virtual void set_percentage(double fPercentage) override;
+};
+
+class JSScale final : public JSWidget<SalInstanceScale, ::Slider>
+{
+public:
+    JSScale(JSDialogSender* pSender, ::Slider* pSlider, SalInstanceBuilder* pBuilder,
+            bool bTakeOwnership);
+    virtual void set_value(int nValue) override;
+    virtual void set_range(int nMin, int nMax) override;
+    virtual void set_increments(int nStep, int nPage) override;
 };
 
 class JSCalendar : public JSWidget<SalInstanceCalendar, ::Calendar>

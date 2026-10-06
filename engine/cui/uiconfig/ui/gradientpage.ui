@@ -410,6 +410,9 @@
                     <property name="adjustment">adjustment3</property>
                     <property name="round-digits">1</property>
                     <property name="draw-value">False</property>
+                    <accessibility>
+                      <relation type="labelled-by" target="borderft"/>
+                    </accessibility>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>
@@ -582,6 +585,9 @@
                     <property name="hexpand">True</property>
                     <property name="adjustment">angleadjustmentslider</property>
                     <property name="draw-value">False</property>
+                    <accessibility>
+                      <relation type="labelled-by" target="angleft"/>
+                    </accessibility>
                   </object>
                   <packing>
                     <property name="left-attach">0</property>

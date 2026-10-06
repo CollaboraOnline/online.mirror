@@ -1657,6 +1657,16 @@ img.context-menu-icon {
 	outline: none;
 }
 
+.jsdialog.ui-slider {
+	width: 100%;
+	margin: 0;
+	accent-color: var(--color-primary);
+}
+
+.jsdialog.ui-slider:disabled {
+	opacity: 0.5;
+}
+
 .spinfieldbuttons {
 	display: flex;
 	flex-direction: column;

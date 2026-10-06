@@ -194,6 +194,9 @@
             <property name="can-focus">True</property>
             <property name="round-digits">1</property>
             <property name="draw-value">False</property>
+            <accessibility>
+              <relation type="labelled-by" target="transparency_label"/>
+            </accessibility>
           </object>
           <packing>
             <property name="left-attach">1</property>

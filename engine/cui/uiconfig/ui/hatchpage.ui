@@ -226,6 +226,9 @@
                     <property name="adjustment">adjustment1</property>
                     <property name="round_digits">1</property>
                     <property name="draw_value">False</property>
+                    <accessibility>
+                      <relation type="labelled-by" target="angleft"/>
+                    </accessibility>
                   </object>
                   <packing>
                     <property name="expand">True</property>

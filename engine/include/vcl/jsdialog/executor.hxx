@@ -143,6 +143,8 @@ public:
         rSpinButton.signal_value_changed();
     }
 
+    static void trigger_value_changed(weld::Scale& rScale) { rScale.signal_value_changed(); }
+
     static void trigger_closed(weld::Popover& rPopover) { rPopover.popdown(); }
 
     /// returns true when the widget's owner handled the key

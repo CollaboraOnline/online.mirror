@@ -480,6 +480,16 @@ bool ExecuteAction(const OUString& nWindowId, const OUString& rWidget, const Str
                 }
             }
         }
+        else if (sControlType == "slider")
+        {
+            auto pScale = dynamic_cast<weld::Scale*>(pWidget);
+            if (pScale && sAction == "change")
+            {
+                pScale->set_value(rData.at(u"data"_ustr).toInt32());
+                KitTrigger::trigger_value_changed(*pScale);
+                return true;
+            }
+        }
         else if (sControlType == "spinfield")
         {
             auto pSpinField = dynamic_cast<weld::SpinButton*>(pWidget);
