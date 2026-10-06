@@ -482,6 +482,17 @@ public:
     }
 
     /**
+     * Writes the vector primitives delta of a part: the objects that changed since the part was
+     * last pushed, then moves that mark to the part's current version. rPartId names the part the
+     * way getPartId spells it and nMode the page list it sits in. Writes nothing when nothing
+     * changed since the last push or when no part carries that identifier.
+     */
+    virtual void pushVectorPrimitivesDelta(tools::JsonWriter& /*rJsonWriter*/,
+                                           std::string_view /*rPartId*/, int /*nMode*/)
+    {
+    }
+
+    /**
      * Returns an opaque string reflecting the render state of a component
      * eg. 'PD' - P for non-printing-characters, D for dark-mode.
      * @param pViewShell the view to get the options from, if nullptr the current view shell is used

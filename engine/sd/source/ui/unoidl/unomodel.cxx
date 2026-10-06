@@ -4100,64 +4100,73 @@ void SdXImpressDocument::getCommandValues(::tools::JsonWriter& rJsonWriter,
         if (aSinceIterator != aMap.end())
             nSinceVersion = aSinceIterator->second.toInt64();
 
-        const bool bPushDelta = aMap.find(u"pushdelta"_ustr) != aMap.end();
+        writeVectorPrimitives(rJsonWriter, aPartId, nMode, nSinceVersion, /*bPush*/ false);
+    }
+}
 
-        if (mpDoc)
+void SdXImpressDocument::pushVectorPrimitivesDelta(::tools::JsonWriter& rJsonWriter,
+                                                   std::string_view rPartId, int nMode)
+{
+    writeVectorPrimitives(rJsonWriter, OString(rPartId), nMode, /*nSinceVersion*/ -1,
+                          /*bPush*/ true);
+}
+
+void SdXImpressDocument::writeVectorPrimitives(::tools::JsonWriter& rJsonWriter,
+                                               const OString& rPartId, sal_Int32 nMode,
+                                               sal_Int64 nSinceVersion, bool bPush)
+{
+    if (!mpDoc)
+        return;
+
+    // This reader draws from the model, so an open edit has to broadcast.
+    mpDoc->SetDrawnFromModel(true);
+
+    // This render is not the view's own. The text edit measures a selection while it is
+    // decomposed, and the flag keeps that measurement from reaching the client as the view's
+    // selection.
+    comphelper::COKit::setVectorRendering(true);
+    comphelper::ScopeGuard aVectorRenderingGuard(
+        [] { comphelper::COKit::setVectorRendering(false); });
+
+    VectorContentWriter aContentWriter(mpDoc, this, rPartId, nMode);
+    SdPage* pPage = aContentWriter.resolvePage();
+
+    // A push steps from the version the part was last pushed at, then advances that mark. One
+    // delta is written for the part and every client that holds the part reads that same one. A
+    // page the document does not hold has no mark to move.
+    if (bPush)
+    {
+        if (!pPage)
+            return;
+        nSinceVersion = sal_Int64(maVectorParts[vectorPartKeyOf(*pPage)].mnLastSentVersion);
+    }
+
+    aContentWriter.setSinceVersion(nSinceVersion);
+    aContentWriter.write(rJsonWriter);
+
+    if (!pPage)
+        return;
+
+    VectorPartState& rState = maVectorParts[vectorPartKeyOf(*pPage)];
+    if (bPush)
+    {
+        rState.mnLastSentVersion = getVectorPartVersion(*pPage);
+    }
+    else
+    {
+        // A pull moves the mark only when nothing has served the part yet. Nothing holds the
+        // part at that point, so no reader has a step to make, and starting the mark at what
+        // this response carries keeps the delta after it down to what moved after it.
+        //
+        // A later pull leaves the mark where it is. It serves the one reader that asked, while
+        // the mark stands for where all of them are, and the readers behind it still need the
+        // step from there written for them. That holds when the pull itself counted the version
+        // up: the readers were not told, so the step from where they stand is still to be
+        // written.
+        if (!rState.mbServed)
         {
-            // This reader draws from the model, so an open edit has to broadcast.
-            mpDoc->SetDrawnFromModel(true);
-
-            // This render is not the view's own. The text edit measures a selection while it is
-            // decomposed, and the flag keeps that measurement from reaching the client as the
-            // view's selection.
-            comphelper::COKit::setVectorRendering(true);
-            comphelper::ScopeGuard aVectorRenderingGuard(
-                [] { comphelper::COKit::setVectorRendering(false); });
-
-            VectorContentWriter aContentWriter(mpDoc, this, aPartId, nMode);
-            SdPage* pPage = aContentWriter.resolvePage();
-
-            // A push asks for the delta since the version the part was last pushed at, then
-            // advances that mark, so a push request names no version. One delta is written for
-            // the part and every client that holds the part reads that same one. A page the
-            // document does not hold has no mark to move.
-            if (bPushDelta)
-            {
-                if (!pPage)
-                    return;
-                nSinceVersion = sal_Int64(
-                    maVectorParts[vectorPartKeyOf(*pPage)].mnLastSentVersion);
-            }
-
-            aContentWriter.setSinceVersion(nSinceVersion);
-            aContentWriter.write(rJsonWriter);
-
-            if (!pPage)
-                return;
-
-            VectorPartState& rState = maVectorParts[vectorPartKeyOf(*pPage)];
-            if (bPushDelta)
-            {
-                rState.mnLastSentVersion = getVectorPartVersion(*pPage);
-            }
-            else
-            {
-                // A pull moves the mark only when nothing has served the part yet. Nothing
-                // holds the part at that point, so no reader has a step to make, and starting
-                // the mark at what this response carries keeps the delta after it down to what
-                // moved after it.
-                //
-                // A later pull leaves the mark where it is. It serves the one reader that
-                // asked, while the mark stands for where all of them are, and the readers
-                // behind it still need the step from there written for them. That holds when
-                // the pull itself counted the version up: the readers were not told, so the
-                // step from where they stand is still to be written.
-                if (!rState.mbServed)
-                {
-                    rState.mbServed = true;
-                    rState.mnLastSentVersion = getVectorPartVersion(*pPage);
-                }
-            }
+            rState.mbServed = true;
+            rState.mnLastSentVersion = getVectorPartVersion(*pPage);
         }
     }
 }

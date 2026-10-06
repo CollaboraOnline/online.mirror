@@ -295,6 +295,13 @@ private:
     /// model draws.
     static sal_Int32 newVectorEpoch();
 
+    /// Writes the primitives of the page rPartId names in the page list nMode. A non-negative
+    /// nSinceVersion asks for the delta against that version instead of the whole page. A push
+    /// steps from the version the part was last pushed at and moves that mark afterwards. A
+    /// pull leaves the mark alone unless nothing has served the part yet.
+    void writeVectorPrimitives(tools::JsonWriter& rJsonWriter, const OString& rPartId,
+                               sal_Int32 nMode, sal_Int64 nSinceVersion, bool bPush);
+
     cpo::uno::Reference<cpo::uno::XInterface> create(
         OUString const & aServiceSpecifier, OUString const & referer);
 
@@ -516,6 +523,10 @@ public:
     SD_DLLPUBLIC virtual bool supportsCommand(std::u16string_view rCommand) override;
 
     SD_DLLPUBLIC virtual void getCommandValues(tools::JsonWriter& rJsonWriter, std::string_view rCommand) override;
+
+    /// @see vcl::ITiledRenderable::pushVectorPrimitivesDelta().
+    SD_DLLPUBLIC void pushVectorPrimitivesDelta(tools::JsonWriter& rJsonWriter,
+                                                std::string_view rPartId, int nMode) override;
 
     /// @see vcl::ITiledRenderable::getPresentationInfo().
     SD_DLLPUBLIC std::string getPresentationInfo(bool bAllyState = false) const override;
