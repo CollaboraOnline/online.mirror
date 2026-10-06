@@ -1414,7 +1414,9 @@ void GetSecurityLabel(tools::JsonWriter& rJsonWriter, SwDocShell* pDocShell)
 }
 
 /// Implements getCommandValues(".uno:Headings"): every heading of the document in order,
-/// which the accessibility tree cannot give since it only holds what is near the view.
+/// which the accessibility tree cannot give since it only holds what is near the view, and
+/// which side of the caret each one is on in document order, which their position cannot
+/// tell across columns.
 void GetHeadings(tools::JsonWriter& rJsonWriter, SwDocShell* pDocShell)
 {
     rJsonWriter.put("commandName", ".uno:Headings");
@@ -1427,12 +1429,15 @@ void GetHeadings(tools::JsonWriter& rJsonWriter, SwDocShell* pDocShell)
 
     const SwRootFrame* pLayout = pWrtShell->GetLayout();
     const IDocumentOutlineNodes& rOutline = pDocShell->GetDoc()->getIDocumentOutlineNodes();
+    const SwNodeOffset nCaret = pWrtShell->GetCursor()->GetPoint()->GetNodeIndex();
     for (IDocumentOutlineNodes::tSortedOutlineNodeList::size_type i = 0;
          i < rOutline.getOutlineNodesCount(); ++i)
     {
         if (!rOutline.isOutlineInLayout(i, *pLayout))
             continue;
         auto aHeading = rJsonWriter.startStruct();
+        const SwNodeOffset nNode = rOutline.getOutlineNode(i)->GetIndex();
+        rJsonWriter.put("side", nNode < nCaret ? "above" : nNode == nCaret ? "caret" : "below");
         rJsonWriter.put("level", rOutline.getOutlineLevel(i) + 1);
         rJsonWriter.put("text", rOutline.getOutlineText(i, pLayout, true, false, false));
         rJsonWriter.put("target", SwGetOutlineLinkName(i, pDocShell->GetDoc()));
