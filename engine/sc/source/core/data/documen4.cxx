@@ -1152,7 +1152,7 @@ const SfxItemSet* ScDocument::GetTableFormatSet(SCCOL nCol, SCROW nRow, SCTAB nT
         pDBData->GetArea(aDBRange);
         if (aDBRange.aStart.Row() < nRow)
         {
-            nNonEmptyRowsBeforePaintRange += this->CountNonFilteredRows(aDBRange.aStart.Row(), nRow - 1, nTab);
+            nNonEmptyRowsBeforePaintRange += this->CountVisibleRows(aDBRange.aStart.Row(), nRow - 1, nTab);
         }
         return pTableStyle->GetFontItemSet(*pDBData, nCol, nRow, nNonEmptyRowsBeforePaintRange);
     }

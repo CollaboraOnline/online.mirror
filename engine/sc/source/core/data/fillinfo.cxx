@@ -431,7 +431,7 @@ void ScDocument::FillInfo(
         SCROW nNonEmptyRowsBeforePaintRange = -static_cast<SCROW>(pDBData->HasHeader());
         if (aDBRange.aStart.Row() < aIntersectionRange.aStart.Row())
         {
-            nNonEmptyRowsBeforePaintRange += this->CountNonFilteredRows(aDBRange.aStart.Row(), aIntersectionRange.aStart.Row() - 1, nTab);
+            nNonEmptyRowsBeforePaintRange += this->CountVisibleRows(aDBRange.aStart.Row(), aIntersectionRange.aStart.Row() - 1, nTab);
         }
         SCROW nRowIndex = nNonEmptyRowsBeforePaintRange;
         for (SCROW nRow = aIntersectionRange.aStart.Row(); nRow <= aIntersectionRange.aEnd.Row(); ++nRow)

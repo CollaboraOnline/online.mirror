@@ -9,6 +9,7 @@
 
 #include "helper/qahelper.hxx"
 #include <drwlayer.hxx>
+#include <map>
 #include <memory>
 
 #include <TableStyleGenerator.hxx>
@@ -614,6 +615,55 @@ CPPUNIT_TEST_FIXTURE(TableStylesTest, testTableStyleFontsAcrossElements)
     const SvxColorItem* pDataColor = pDataFont->GetItemIfSet(ATTR_FONT_COLOR, false);
     CPPUNIT_ASSERT(pDataColor);
     CPPUNIT_ASSERT_EQUAL(COL_BLUE, pDataColor->GetValue());
+
+    m_pDoc->DeleteTab(0);
+}
+
+CPPUNIT_TEST_FIXTURE(TableStylesTest, testTableStyleStripesSkipHiddenRows)
+{
+    m_pDoc->InitDrawLayer();
+    m_pDoc->InsertTab(0, u"Test"_ustr);
+
+    auto pColorSet = createTestThemeA();
+    applyThemeToDocument(m_pDoc, pColorSet);
+    ScTableStyleGenerator::generateDefaultStyles(*m_pDoc, *pColorSet);
+
+    // A1:D20 with a header row, and row 5 hidden by hand, not by a filter
+    createTestDBData(m_pDoc, u"TableStyleMedium2"_ustr, 0, 0, 3, 19, true, false);
+    m_pDoc->SetRowHidden(4, 4, 0, true);
+    CPPUNIT_ASSERT(!m_pDoc->RowFiltered(4, 0));
+
+    // The stripe of each row, painted with the paint range starting at nStartRow
+    auto getStripes = [this](SCROW nStartRow) {
+        ScTableInfo aTabInfo(nStartRow, 19, false);
+        m_pDoc->FillInfo(aTabInfo, 0, nStartRow, 3, 19, 0, 1, 1, false, false);
+        std::map<SCROW, bool> aStripes;
+        for (SCSIZE nArrRow = 1; nArrRow + 1 < aTabInfo.mnArrCount; ++nArrRow)
+        {
+            const RowInfo& rRowInfo = aTabInfo.mpRowInfo[nArrRow];
+            const SvxBrushItem* pFill
+                = static_cast<const SvxBrushItem*>(rRowInfo.cellInfo(0).maBackground.getItem());
+            aStripes[rRowInfo.nRowNo] = pFill && !pFill->GetColor().IsTransparent();
+        }
+        return aStripes;
+    };
+
+    // MSO stripes the visible rows only: rows 4 and 6 differ, rows 4 and 7 match
+    const std::map<SCROW, bool> aFullPaint = getStripes(1);
+    CPPUNIT_ASSERT(!aFullPaint.contains(4));
+    CPPUNIT_ASSERT(aFullPaint.at(3) != aFullPaint.at(5));
+    CPPUNIT_ASSERT_EQUAL(aFullPaint.at(3), aFullPaint.at(6));
+
+    // A paint that starts lower, as a tile does, must give every row the same stripe
+    for (SCROW nStartRow = 2; nStartRow < 19; ++nStartRow)
+    {
+        for (const auto& [nRow, bStripe] : getStripes(nStartRow))
+        {
+            OString aMsg = "row " + OString::number(nRow + 1) + ", paint from row "
+                           + OString::number(nStartRow + 1);
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(aMsg.getStr(), aFullPaint.at(nRow), bStripe);
+        }
+    }
 
     m_pDoc->DeleteTab(0);
 }
