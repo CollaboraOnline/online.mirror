@@ -188,7 +188,7 @@ class SvxAreaTabPage : public SfxTabPage
 {
     static const WhichRangesContainer pAreaRanges;
 private:
-    std::unique_ptr<SfxTabPage> m_xFillTabPage;
+    std::map<FillType, std::unique_ptr<SfxTabPage>> m_aFillTabPages;
 
     XColorListRef         m_pColorList;
     XGradientListRef      m_pGradientList;
@@ -222,7 +222,8 @@ private:
     DECL_LINK(SwitchPageHdl_Impl, const OUString&, void);
 
     std::unique_ptr<SfxTabPage> CreateFillStyleTabPage(FillType eFillType);
-    void createFillTabPage(FillType eFillType);
+    void createFillTabPages();
+    SfxTabPage* getCurrentFillTabPage();
 
     OUString getPageId(FillType eFillType);
 

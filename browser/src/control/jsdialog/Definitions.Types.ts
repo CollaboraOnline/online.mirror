@@ -73,6 +73,25 @@ interface JSBuilderParent {
 		dialogId: WindowId | number,
 		tabControlId: string,
 	) => number | undefined;
+	rememberFillType: (
+		dialogId: WindowId | number,
+		notebookId: string,
+		index: number,
+	) => void;
+	lastFillType: (
+		dialogId: WindowId | number,
+		notebookId: string,
+	) => number | undefined;
+	setFillTypeOpener: (
+		dialogId: WindowId | number,
+		notebookId: string,
+		open: (index: number) => void,
+	) => void;
+	openFillType: (
+		dialogId: WindowId | number,
+		notebookId: string,
+		index: number,
+	) => boolean;
 }
 
 interface JSBuilder {

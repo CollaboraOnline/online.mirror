@@ -19,6 +19,7 @@ window.L.Control.JSDialog = window.L.Control.extend({
 	options: {},
 	dialogs: {},
 	openTabRequests: {},
+	fillTypes: {},
 	draggingObject: null,
 
 	onAdd: function (map) {
@@ -99,6 +100,7 @@ window.L.Control.JSDialog = window.L.Control.extend({
 
 		delete this.dialogs[id];
 		delete this.openTabRequests[id];
+		delete this.fillTypes[id];
 
 		return builder;
 	},
@@ -315,6 +317,35 @@ window.L.Control.JSDialog = window.L.Control.extend({
 
 		delete this.openTabRequests[dialogId];
 		return request.index;
+	},
+
+	// The fill types of each dialog, by notebook id: the one shown last, and how to open one.
+	_getFillType: function(dialogId, notebookId) {
+		if (!this.fillTypes[dialogId])
+			this.fillTypes[dialogId] = {};
+		if (!this.fillTypes[dialogId][notebookId])
+			this.fillTypes[dialogId][notebookId] = { lastIndex: undefined, open: null };
+		return this.fillTypes[dialogId][notebookId];
+	},
+
+	rememberFillType: function(dialogId, notebookId, index) {
+		this._getFillType(dialogId, notebookId).lastIndex = index;
+	},
+
+	lastFillType: function(dialogId, notebookId) {
+		return this._getFillType(dialogId, notebookId).lastIndex;
+	},
+
+	setFillTypeOpener: function(dialogId, notebookId, open) {
+		this._getFillType(dialogId, notebookId).open = open;
+	},
+
+	openFillType: function(dialogId, notebookId, index) {
+		const open = this._getFillType(dialogId, notebookId).open;
+		if (!open)
+			return false;
+		open(index);
+		return true;
 	},
 
 	_getDefaultButtonId: function(widgets) {

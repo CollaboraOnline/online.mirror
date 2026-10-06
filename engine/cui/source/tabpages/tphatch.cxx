@@ -57,7 +57,7 @@ SvxHatchTabPage::SvxHatchTabPage(weld::Container* pPage, weld::DialogController*
     , m_xMtrAngle(m_xBuilder->weld_metric_spin_button(u"anglemtr"_ustr, FieldUnit::DEGREE))
     , m_xSliderAngle(m_xBuilder->weld_scale(u"angleslider"_ustr))
     , m_xLbLineType(m_xBuilder->weld_combo_box(u"linetypelb"_ustr))
-    , m_xLbLineColor(new ColorListBox(m_xBuilder->weld_menu_button(u"linecolorlb"_ustr),
+    , m_xLbLineColor(new ColorListBox(m_xBuilder->weld_menu_button(u"hatchlinecolorlb"_ustr),
                 [this]{ return GetDialogController()->getDialog(); }))
     , m_xCbBackgroundColor(m_xBuilder->weld_check_button(u"backgroundcolor"_ustr))
     , m_xLbBackgroundColor(new ColorListBox(m_xBuilder->weld_menu_button(u"backgroundcolorlb"_ustr),

@@ -120,9 +120,6 @@ function getPageFillTabInfo(widget: WidgetJSON): PageFill | null {
   return null;
 }
 
-// The type each fill notebook showed last, so setting the checkbox comes back to it.
-const lastFillIndex = new Map<string, number>();
-
 JSDialog.tabControlHasEmptyPage = function (widget: WidgetJSON): boolean {
   return getPageFillTabInfo(widget) !== null;
 };
@@ -239,18 +236,25 @@ JSDialog.tabControl = function (
 
     checkbox.addEventListener('change', function () {
       const hasFill = checkbox.checked;
-      const remembered = lastFillIndex.get(fill.notebook.id);
-      const firstFill = fill.noneIndex === 0 ? 1 : 0;
+      const lastIndex = builder.wizard.lastFillType(
+        builder.windowId,
+        fill.notebook.id,
+      );
+      const firstFillIndex = fill.noneIndex === 0 ? 1 : 0;
+      const fillIndex = hasFill
+        ? lastIndex !== undefined
+          ? lastIndex
+          : firstFillIndex
+        : fill.noneIndex;
 
       setTabEnabled(row, tab, DISABLED_TAB_TOOLTIP, hasFill);
-      selectPage(
-        { id: fill.notebook.id },
-        hasFill
-          ? remembered !== undefined
-            ? remembered
-            : firstFill
-          : fill.noneIndex,
+      // Core no longer rebuilds the dialog on a fill switch, so show the type here too.
+      const opened = builder.wizard.openFillType(
+        builder.windowId,
+        fill.notebook.id,
+        fillIndex,
       );
+      if (!opened) selectPage({ id: fill.notebook.id }, fillIndex);
 
       // The panel changes here the way a tab click changes it, before core answers.
       if (!hasFill && selectedTabIdx !== tabIndex) return;
@@ -340,7 +344,11 @@ JSDialog.tabControl = function (
       : null;
     if (foundTabInfo) {
       if (!foundTabInfo.isNone)
-        lastFillIndex.set(foundTabInfo.notebook.id, foundTabInfo.selectedIndex);
+        builder.wizard.rememberFillType(
+          builder.windowId,
+          foundTabInfo.notebook.id,
+          foundTabInfo.selectedIndex,
+        );
       tabsContainer.appendChild(fillTabRow(tab, title, foundTabInfo, tabIdx));
     } else tabsContainer.appendChild(tab);
 
@@ -357,27 +365,37 @@ JSDialog.tabControl = function (
     if (builder.options.useSetTabs)
       builder.wizard.setTabs(tabsContainer, builder);
 
+    const selectTabs = tabs.map(function (tab, index) {
+      return builder._createTabClick(builder, index, tabs, contentDivs, tabIds);
+    });
+
+    function openTab(index: number) {
+      selectTabs[index]();
+      if (
+        ownNoneIndex >= 0 &&
+        index !== ownNoneIndex &&
+        builder.wizard.rememberFillType
+      )
+        builder.wizard.rememberFillType(builder.windowId, data.id, index);
+      if (!data.noCoreEvents)
+        builder.callback(
+          'tabcontrol',
+          'selecttab',
+          rootContainer,
+          index,
+          builder,
+        );
+    }
+
     tabs.forEach(function (tab, index) {
-      const selectTab = builder._createTabClick(
-        builder,
-        index,
-        tabs,
-        contentDivs,
-        tabIds,
-      );
       tab.addEventListener('click', function () {
         if (tab.getAttribute('aria-disabled') === 'true') return;
-        selectTab();
-        if (!data.noCoreEvents)
-          builder.callback(
-            'tabcontrol',
-            'selecttab',
-            rootContainer,
-            index,
-            builder,
-          );
+        openTab(index);
       });
     });
+
+    if (ownNoneIndex >= 0 && builder.wizard.setFillTypeOpener)
+      builder.wizard.setFillTypeOpener(builder.windowId, data.id, openTab);
 
     JSDialog.KeyboardTabNavigation(tabs, contentDivs, useVerticalRail);
   } else {
