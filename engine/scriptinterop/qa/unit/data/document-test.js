@@ -239,6 +239,7 @@ function test() {
     const cleared = body.appendParagraph('Doomed');
     console.assert(body.getNumChildren() === 9);
     console.assert(cleared.getText() === 'Doomed');
+    console.assert(cleared.getType() === DocumentApp.ElementType.PARAGRAPH);
     console.assert(cleared.clear().getText() === '');
     console.assert(body.getNumChildren() === 9);
 

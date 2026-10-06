@@ -2532,7 +2532,12 @@ private:
         cpo::uno::Reference<css::beans::XPropertySet> const props(
             lastParagraph, cpo::uno::UNO_QUERY_THROW);
         if (paraStyle.isEmpty()) {
-            if (auto const heading = paragraph->getHeading();
+            // In GAS, a paragraph appended after a list item is a plain paragraph, while Writer
+            // continues the list:
+            if (paragraph->getType() == scriptinterop::ElementType_LIST_ITEM) {
+                paragraph->setHeading(scriptinterop::ParagraphHeading_NORMAL);
+                props->setPropertyValue(u"NumberingRules"_ustr, cpo::uno::Any());
+            } else if (auto const heading = paragraph->getHeading();
                 heading.IsPresent && heading.Value != scriptinterop::ParagraphHeading_NORMAL)
             {
                 paragraph->setHeading(scriptinterop::ParagraphHeading_NORMAL);
