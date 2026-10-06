@@ -3472,6 +3472,7 @@ OUString jsuno::execute(OUString const& script, OUString const & source, int lin
     }
     {
         static JSCFunctionListEntry const functions[] = {
+            JS_CFUNC_DEF("toJSON", 0, enumeratorToString),
             JS_CFUNC_DEF("toString", 0, enumeratorToString),
         };
         ValueRef proto(ctx, JS_NewObject(ctx));
