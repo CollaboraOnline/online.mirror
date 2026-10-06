@@ -1222,6 +1222,16 @@ label.notebookbar.ui-checkbox-label {
 
 /* Formula Tab (Writer) */
 
+.notebookbar.ui-overflow-group-content[id^='elements_group'] {
+	width: 100%;
+	grid-template-columns: minmax(0, 1fr);
+	justify-items: stretch;
+}
+
+.notebookbar.ui-iconview-window[id^='elements_group'] {
+	flex: 1 1 auto;
+}
+
 .notebookbar.ui-iconview[id^='elements_'] {
 	grid-auto-flow: column;
 	grid-template-rows: repeat(2, minmax(0, 1fr));
@@ -1229,7 +1239,7 @@ label.notebookbar.ui-checkbox-label {
 	grid-template-columns: none;
 	justify-content: start;
 	width: max-content;
-	min-width: 64px;
+	min-width: max(64px, 100%);
 	max-width: 160px;
 	overflow-x: auto;
 	overflow-y: hidden;

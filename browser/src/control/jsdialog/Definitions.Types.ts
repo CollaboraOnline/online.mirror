@@ -633,6 +633,7 @@ interface IconViewListJSON extends WidgetJSON {
 	children: Array<IconViewJSON>;
 	horizontal?: boolean;
 	expanderAccessKey?: string;
+	nameFromIconView?: boolean;
 }
 
 interface IconViewElement extends HTMLElement {

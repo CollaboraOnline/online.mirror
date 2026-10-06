@@ -73,6 +73,8 @@ public:
     static const std::vector<TranslateId>& categories();
     /// The number of separator-delimited groups of a category
     static int groupCount(int nCategory);
+    /// The name of one of those groups.
+    static OUString groupName(int nCategory, int nGroup);
     void setElementSetIndex(int nSetIndex, bool bForceBuild = false, int nGroup = -1);
 
     void SetAccessibleName(const OUString& rName) { mpIconView->set_accessible_name(rName); }

@@ -39,6 +39,7 @@
 #include <vcl/uitest/logger.hxx>
 #include <vcl/virdev.hxx>
 
+#include <cassert>
 #include <unordered_map>
 
 namespace
@@ -482,12 +483,87 @@ const std::vector<std::pair<const SmElementDescr*, size_t>> s_a5CategoryDescript
     { asPair(s_a5ExamplesList) },
 };
 
+// The name of each separator-delimited group of each category above, in order
+const std::vector<std::vector<TranslateId>> s_a5CategoryGroupNames{
+    // UnaryBinaryOperators
+    { RID_ELEMENTGROUP_UNARY_OPERATORS,
+      RID_ELEMENTGROUP_BINARY_OPERATORS,
+      RID_ELEMENTGROUP_LOGICAL_OPERATORS },
+    // Relations
+    { RID_ELEMENTGROUP_COMMON_RELATIONS,
+      RID_ELEMENTGROUP_ADVANCED_RELATIONS,
+      RID_ELEMENTGROUP_DOUBLE_ARROWS,
+      RID_ELEMENTGROUP_PRECEDENCE },
+    // SetOperations
+    { RID_ELEMENTGROUP_MEMBERSHIP,
+      RID_ELEMENTGROUP_UNIONS_INTERSECTIONS,
+      RID_ELEMENTGROUP_NUMBER_SETS },
+    // Functions
+    { RID_ELEMENTGROUP_COMMON_FUNCTIONS,
+      RID_ELEMENTGROUP_TRIGONOMETRIC,
+      RID_ELEMENTGROUP_ARABIC_TRIGONOMETRIC,
+      RID_ELEMENTGROUP_ARABIC_TRIGONOMETRIC_ALT,
+      RID_ELEMENTGROUP_INVERSE_FUNCTIONS,
+      RID_ELEMENTGROUP_OTHER_FUNCTIONS },
+    // Operators
+    { RID_ELEMENTGROUP_LIMITS,
+      RID_ELEMENTGROUP_LIMIT_INFERIOR,
+      RID_ELEMENTGROUP_LIMIT_SUPERIOR,
+      RID_ELEMENTGROUP_PERSIAN_LIMITS,
+      RID_ELEMENTGROUP_SUMMATIONS,
+      RID_ELEMENTGROUP_ARABIC_SUMMATIONS,
+      RID_ELEMENTGROUP_PRODUCTS,
+      RID_ELEMENTGROUP_COPRODUCTS,
+      RID_ELEMENTGROUP_INTEGRALS,
+      RID_ELEMENTGROUP_DOUBLE_INTEGRALS,
+      RID_ELEMENTGROUP_TRIPLE_INTEGRALS,
+      RID_ELEMENTGROUP_CONTOUR_INTEGRALS,
+      RID_ELEMENTGROUP_SURFACE_INTEGRALS,
+      RID_ELEMENTGROUP_VOLUME_INTEGRALS,
+      RID_ELEMENTGROUP_OTHER_LARGE_OPERATORS },
+    // Attributes
+    { RID_ELEMENTGROUP_ACCENTS,
+      RID_ELEMENTGROUP_OVERBARS_UNDERBARS,
+      RID_ELEMENTGROUP_FONT_ATTRIBUTES,
+      RID_ELEMENTGROUP_COLORS,
+      RID_ELEMENTGROUP_MORE_COLORS },
+    // Brackets
+    { RID_ELEMENTGROUP_GROUPING,
+      RID_ELEMENTGROUP_BRACKETS,
+      RID_ELEMENTGROUP_SCALABLE_BRACKETS,
+      RID_ELEMENTGROUP_OVERBRACES_UNDERBRACES,
+      RID_ELEMENTGROUP_EVALUATION_BARS },
+    // Formats
+    { RID_ELEMENTGROUP_SCRIPTS,
+      RID_ELEMENTGROUP_SPACING_ALIGNMENT,
+      RID_ELEMENTGROUP_STACKS_MATRICES },
+    // Others
+    { RID_ELEMENTGROUP_LETTERLIKE_SYMBOLS,
+      RID_ELEMENTGROUP_ARROWS,
+      RID_ELEMENTGROUP_DOTS },
+    // Examples
+    { RID_CATEGORY_EXAMPLES },
+};
+
 } // namespace
 
 // static
 const std::vector<TranslateId>& SmElementsControl::categories()
 {
     return s_a5Categories;
+}
+
+// static
+OUString SmElementsControl::groupName(int nCategory, int nGroup)
+{
+    if (o3tl::make_unsigned(nCategory) >= s_a5CategoryGroupNames.size())
+        return SmResId(RID_CATEGORY_USERDEFINED);
+
+    const std::vector<TranslateId>& rNames = s_a5CategoryGroupNames[nCategory];
+    assert(rNames.size() == o3tl::make_unsigned(groupCount(nCategory)));
+    if (o3tl::make_unsigned(nGroup) >= rNames.size())
+        return OUString();
+    return SmResId(rNames[nGroup]);
 }
 
 // static

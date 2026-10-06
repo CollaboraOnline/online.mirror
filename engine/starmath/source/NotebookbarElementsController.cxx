@@ -79,9 +79,8 @@ typedef comphelper::WeakComponentImplHelper<css::lang::XInitialization, css::lan
     into the notebookbar (smath/ui/notebookbarelements_math.ui).
 
     The selected category is split at its separators, and each group goes into
-    an icon view of its own, which the Formula tab shows as an unnamed section,
-    the way the sidebar showed the groups with only a rule between them. The
-    sections a category does not need are hidden.
+    an icon view of its own, which the Formula tab shows as a section named
+    after the group. The sections a category does not need are hidden.
 
     This is the counterpart of the Math Elements sidebar panel for a .ui welded
     into the notebookbar rather than into a sidebar panel.
@@ -281,7 +280,6 @@ void NotebookbarElementsController::BuildElements()
 void NotebookbarElementsController::ShowCategory(int nCategory, bool bForceBuild)
 {
     SmViewShell* pViewSh = GetView();
-    const OUString sCategory = SmResId(SmElementsControl::categories()[nCategory]);
     const int nGroups = SmElementsControl::groupCount(nCategory);
 
     for (int i = 0; i < nElementGroups; ++i)
@@ -295,7 +293,8 @@ void NotebookbarElementsController::ShowCategory(int nCategory, bool bForceBuild
         }
 
         SmElementsControl& rControl = *maElementsControls[i];
-        rControl.SetAccessibleName(sCategory);
+        // Online shows it as the name of the section.
+        rControl.SetAccessibleName(SmElementsControl::groupName(nCategory, i));
         rControl.SetAllowDelete(SmElementsControl::categories()[nCategory]
                                 == RID_CATEGORY_USERDEFINED);
         rControl.setElementSetIndex(nCategory, bForceBuild, i);

@@ -2642,6 +2642,7 @@ window.L.Control.NotebookbarWriter = window.L.Control.Notebookbar.extend({
 							'id': groupId + '-iconview-list',
 							'type': 'iconviewlist',
 							'horizontal': true,
+							'nameFromIconView': true,
 							'expanderAccessKey': groupAccessKey,
 							'accessibility': { focusBack: false, combination: groupAccessKey, de: null },
 							'children': [

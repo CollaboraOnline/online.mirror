@@ -337,6 +337,28 @@ JSDialog.notebookbarIconViewList = function (
 
 	resizeObserver.observe(rootNode);
 
+	if (data.nameFromIconView) {
+		const nameGroupAfterIconView = () => {
+			const current = commonContainer.firstChild as HTMLElement;
+			const name = current ? current.getAttribute('aria-label') : null;
+			const group = rootNode.closest('.ui-overflow-group');
+			if (!name || !group) return;
+
+			const caption = group.querySelector(
+				'.ui-overflow-group-label',
+			) as HTMLElement;
+			if (caption) caption.innerText = name;
+			group
+				.querySelector('.ui-overflow-group-inner')
+				?.setAttribute('aria-label', name);
+		};
+
+		new MutationObserver(nameGroupAfterIconView).observe(commonContainer, {
+			childList: true,
+		});
+		app.layoutingService.appendLayoutingTask(nameGroupAfterIconView);
+	}
+
 	// Do not animate on creation - eg. when opening sidebar with icon view it might move the app
 	const firstSelected = $(iconview).children('.selected').get(0);
 	if (firstSelected) {
