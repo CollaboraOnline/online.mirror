@@ -154,6 +154,7 @@ m4_ifelse(MOBILEAPP, [true],
           <div class="document-title">
             <label class="visuallyhidden" for="document-name-input">Document name</label>
             <input id="document-name-input" type="text" spellcheck="false" disabled="true" />
+            <span id="document-last-saved" hidden></span>
             <div class="loading-bar-container">
               <div id="document-name-input-loading-bar"></div>
             </div>

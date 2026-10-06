@@ -158,6 +158,10 @@ nav [id^='save'].saved img {
 	filter: grayscale(0);
 }
 
+#document-last-saved {
+	display: none;
+}
+
 #document-titlebar {
 	display: inline-table; /*new*/
 	table-layout: fixed;

@@ -3449,6 +3449,8 @@ class Menubar extends window.L.Control {
 	 * @param lastmodtime - The last modification time.
 	 */
 	private _onInitModificationIndicator(lastmodtime: any): void {
+		this._initTitlebarLastSaved(lastmodtime);
+
 		var lastModButton = window.L.DomUtil.get('menu-last-mod');
 		if (lastModButton !== null && lastModButton !== undefined
 			&& lastModButton.firstChild
@@ -3476,6 +3478,31 @@ class Menubar extends window.L.Control {
 	}
 
 	/**
+	 * Shows the last saved time next to the document name in the compact
+	 * title row, and opens the revision history on click when it is enabled.
+	 * @param lastmodtime - The last modification time, or null when unknown.
+	 */
+	private _initTitlebarLastSaved(lastmodtime: any): void {
+		const titlebarLastSaved = document.getElementById('document-last-saved');
+		if (!titlebarLastSaved)
+			return;
+
+		titlebarLastSaved.hidden = lastmodtime == null;
+		if (!window.L.Params.revHistoryEnabled || titlebarLastSaved.getAttribute('role') === 'button')
+			return;
+
+		titlebarLastSaved.setAttribute('role', 'button');
+		titlebarLastSaved.tabIndex = 0;
+		titlebarLastSaved.addEventListener('click', () => app.dispatcher.dispatch('rev-history'));
+		titlebarLastSaved.addEventListener('keydown', (event: KeyboardEvent) => {
+			if (event.key === 'Enter' || event.key === ' ') {
+				event.preventDefault();
+				app.dispatcher.dispatch('rev-history');
+			}
+		});
+	}
+
+	/**
        * Updates the modification indicator.
        * @param e - Event data containing the new modification time.
        */
@@ -3483,5 +3510,8 @@ class Menubar extends window.L.Control {
 		if (this.lastModIndicator !== null && this.lastModIndicator !== undefined) {
 			this.lastModIndicator.textContent = e.lastSaved;
 		}
+		const titlebarLastSaved = document.getElementById('document-last-saved');
+		if (titlebarLastSaved && e.lastSaved !== null && e.lastSaved !== undefined)
+			titlebarLastSaved.textContent = e.lastSaved;
 	}
 }
