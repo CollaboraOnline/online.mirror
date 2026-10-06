@@ -765,10 +765,16 @@ void FuInsertAVMedia::DoExecute( SfxRequest& rReq )
         if( mpWindow )
             mpWindow->LeaveWait();
 
-        if (!bIsMediaURL && !bAPI)
-            ::avmedia::MediaWindow::executeFormatErrorBox(mpWindow->GetFrameWeld());
+        if (bIsMediaURL)
+            return;
 
-        return;
+        // No media player could open the URL to measure it. A URL that came with the command
+        // goes in at the default size.
+        if (!bAPI)
+        {
+            ::avmedia::MediaWindow::executeFormatErrorBox(mpWindow->GetFrameWeld());
+            return;
+        }
     }
 
     InsertMediaURL(aURL, aPrefSize, bLink);

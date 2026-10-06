@@ -57,6 +57,7 @@
 #include <svx/svdorect.hxx>
 #include <svx/svdhdl.hxx>
 #include <svx/svddrgmt.hxx>
+#include <svx/svdomedia.hxx>
 #include <svx/svdotable.hxx>
 #include <svx/xlineit0.hxx>
 #include <svx/xfillit0.hxx>
@@ -6315,6 +6316,31 @@ CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testReflectionCommands)
     auto pSize = dynamic_cast<const SfxUInt16Item*>(aResult.getItem());
     CPPUNIT_ASSERT(pSize);
     CPPUNIT_ASSERT_EQUAL(sal_uInt16(70), pSize->GetValue());
+}
+
+namespace
+{
+SdrMediaObj* findMediaObject(const uno::Reference<lang::XComponent>& xComponent)
+{
+    auto pImpressDocument = dynamic_cast<SdXImpressDocument*>(xComponent.get());
+    CPPUNIT_ASSERT(pImpressDocument);
+    SdPage* pPage = pImpressDocument->GetDoc()->GetSdPage(0, PageKind::Standard);
+    for (const rtl::Reference<SdrObject>& pObj : *pPage)
+        if (auto pMediaObj = dynamic_cast<SdrMediaObj*>(pObj.get()))
+            return pMediaObj;
+    return nullptr;
+}
+}
+
+CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testInsertMediaWithoutSize)
+{
+    // A media file dispatched without a size goes in at the default size, even when no media
+    // player can open the file to measure it.
+    createSdImpressDoc();
+    dispatchCommand(mxComponent, u".uno:InsertAVMedia"_ustr,
+                    { comphelper::makePropertyValue(u"URL"_ustr, createFileURL(u"silence.wav")) });
+
+    CPPUNIT_ASSERT(findMediaObject(mxComponent));
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
