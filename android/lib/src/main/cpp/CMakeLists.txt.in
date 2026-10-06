@@ -41,6 +41,7 @@ add_library(androidapp SHARED
             ../../../../../kit/KitWebSocket.cpp
             ../../../../../net/FakeSocket.cpp
             ../../../../../net/HttpRequest.cpp
+            ../../../../../net/NetUtil.cpp
             ../../../../../net/Socket-unix.cpp
             ../../../../../net/Socket.cpp
             ../../../../../wsd/ClientSession.cpp

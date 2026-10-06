@@ -29,7 +29,6 @@
 
 #include <cstdint>
 #include <memory>
-#include <netdb.h>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -1087,6 +1086,720 @@ std::shared_ptr<Session> Session::create(std::string host, Protocol protocol, in
 
     port = (port > 0 ? port : getDefaultPort(protocol));
     return std::shared_ptr<Session>(new Session(std::move(host), protocol, port));
+}
+
+void Request::setBodyFile(const std::string& path)
+{
+    auto ifs = std::make_shared<std::ifstream>(path, std::ios::binary);
+
+    ifs->seekg(0, std::ios_base::end);
+    const int64_t size = ifs->tellg();
+    ifs->seekg(0, std::ios_base::beg);
+
+    setBodySource(
+        [ifs = std::move(ifs)](char* buf, int64_t len) -> int64_t
+        {
+            ifs->read(buf, len);
+            return ifs->gcount();
+        },
+        size);
+}
+
+void Request::setBody(std::string body, std::string contentType)
+{
+    if (!body.empty()) // Type is only meaningful if there is a body.
+        editHeader().setContentType(std::move(contentType));
+
+    editHeader().setContentLength(body.size());
+
+    const size_t bodySize = body.size();
+
+    auto iss = std::make_shared<std::istringstream>(std::move(body), std::ios::binary);
+
+    setBodySource(
+        [iss = std::move(iss)](char* buf, int64_t len) -> int64_t
+        {
+            iss->read(buf, len);
+            return iss->gcount();
+        },
+        bodySize);
+}
+
+std::pair<std::string, std::string> Request::getBasicAuth() const
+{
+    const auto [scheme, param] = getCredentials();
+    if (Util::iequal(scheme, "Basic"))
+    {
+        return Util::split(Util::base64Decode(param), ':');
+    }
+
+    return {};
+}
+
+void Response::saveBodyToFile(const std::string& path)
+{
+    _bodyFile.open(path, std::ios_base::out | std::ios_base::binary);
+    if (!_bodyFile.good())
+        LOG_ERR("Unable to open [" << path << "] for saveBodyToFile");
+    _onBodyWriteCb = [this](const char* p, int64_t len)
+    {
+        LOG_TRC("Writing " << len << " bytes");
+        if (_bodyFile.good())
+            _bodyFile.write(p, len);
+        return _bodyFile.good() ? len : -1;
+    };
+}
+
+void Response::appendChunk(std::string_view chunk)
+{
+    assert(get("transfer-encoding").find("chunked") != std::string::npos &&
+           "Expected to have chunked transfer-encoding header");
+    assert(!_header.has("content-length") &&
+           "Unexpected to have content-length header with transfer-encoding defined");
+
+    _body.reserve(_body.size() + chunk.size() + 32);
+
+    std::stringstream ss;
+    ss << std::hex << chunk.size();
+    _body.append(ss.str());
+    _body.append("\r\n");
+    _body.append(chunk);
+    _body.append("\r\n");
+}
+
+bool Response::writeData(Buffer& out) const
+{
+    assert(!get("Date").empty() && "Date is always set in http::Response ctor");
+    assert(get("Server") == http::getServerString() &&
+           "Server Agent is always set in http::Response ctor");
+
+    _statusLine.writeData(out);
+    _header.writeData(out);
+    out.append("\r\n"); // End of header.
+    out.append(_body);
+    return true;
+}
+
+void Response::dumpState(std::ostream& os, const std::string& indent) const
+{
+    os << indent << "http::Response: #" << _fd;
+    os << indent << "\tstatusLine: " << _statusLine.httpVersion() << ' '
+       << getReasonPhraseForCode(_statusLine.statusCode()) << ' ' << _statusLine.reasonPhrase();
+    os << indent << "\tstate: " << name(_state);
+    os << indent << "\tparseStage: " << name(_parserStage);
+    os << indent << "\trecvBodySize: " << _recvBodySize;
+    os << indent << "\tbodySizeLimit: " << _bodySizeLimit;
+    os << indent << "\theaders: ";
+
+    std::string childIndent = indent + '\t';
+    Util::joinPair(os, _header, childIndent);
+    os << indent;
+    HexUtil::dumpHex(os, _body, "\tbody:\n", Util::replace(std::move(childIndent), "\n", "").c_str());
+}
+
+void Response::finish(State newState)
+{
+    if (!done())
+    {
+        LOG_TRC("Finishing: " << name(newState));
+        _bodyFile.close();
+        _state = newState;
+        if (_finishedCallback)
+            _finishedCallback();
+    }
+}
+
+Session::Session(std::string hostname, Protocol protocolType, int portNumber)
+    : _host(std::move(hostname))
+    , _port(std::to_string(portNumber))
+    , _protocol(protocolType)
+    , _fd(-1)
+    , _handshakeSslVerifyFailure(0)
+    , _timeout(getDefaultTimeout())
+    , _connected(false)
+    , _asyncShutdownOnFinish(false)
+    , _result(net::AsyncConnectResult::Ok)
+{
+    assert(!_host.empty() && portNumber > 0 && !_port.empty() &&
+           "Invalid hostname and portNumber for http::Sesssion");
+
+    if constexpr (Util::isDebugEnabled())
+    {
+        std::string scheme;
+        std::string hostString;
+        std::string portString;
+        assert(net::parseUri(_host, scheme, hostString, portString) && scheme.empty() &&
+               portString.empty() && hostString == _host &&
+               "http::Session expects a hostname and not a URI");
+    }
+}
+
+const char* Session::getProtocolScheme(Protocol protocol)
+{
+    switch (protocol)
+    {
+        case Protocol::HttpUnencrypted:
+            return "http";
+        case Protocol::HttpSsl:
+            return "https";
+    }
+
+    return "";
+}
+
+std::shared_ptr<Session> Session::create(const std::string& uri)
+{
+    std::string scheme;
+    std::string hostname;
+    std::string portString;
+    if (!net::parseUri(uri, scheme, hostname, portString))
+    {
+        LOG_ERR_S("Invalid URI [" << uri << "] to http::Session::create");
+        return nullptr;
+    }
+
+    const bool secure = (Util::iequal(scheme, "https://") || Util::iequal(scheme, "wss://"));
+    const auto protocol = secure ? Protocol::HttpSsl : Protocol::HttpUnencrypted;
+    if (portString.empty())
+        return create(std::move(hostname), protocol, getDefaultPort(protocol));
+
+    const auto [port, success] = NumUtil::i32FromString(portString);
+    if (success && port > 0)
+        return create(std::move(hostname), protocol, port);
+
+    LOG_ERR_S("Invalid port [" << portString << "] in URI [" << uri
+                               << "] to http::Session::create");
+    return nullptr;
+}
+
+int Session::getDefaultPort(Protocol protocol)
+{
+    switch (protocol)
+    {
+        case Protocol::HttpUnencrypted:
+            return 80;
+        case Protocol::HttpSsl:
+            return 443;
+    }
+
+    return 0;
+}
+
+std::shared_ptr<const Response>
+Session::syncDownload(const Request& req, const std::string& saveToFilePath, SocketPoll& poller)
+{
+    LOG_TRC_S("syncDownload: " << req.getVerb() << ' ' << host() << ':' << port() << ' '
+                               << req.getUrl());
+
+    newRequest(req, false);
+
+    if (!saveToFilePath.empty())
+        _response->saveBodyToFile(saveToFilePath);
+
+    syncRequestImpl(poller);
+    return _response;
+}
+
+std::shared_ptr<const Response> Session::syncRequest(const Request& req,
+                                                     std::chrono::milliseconds timeout)
+{
+    LOG_TRC("syncRequest: " << req.getVerb() << ' ' << host() << ':' << port() << ' '
+                            << req.getUrl());
+
+    const auto origTimeout = getTimeout();
+    setTimeout(timeout);
+
+    auto responsePtr = syncRequest(req);
+
+    setTimeout(origTimeout);
+
+    return responsePtr;
+}
+
+#if !MOBILEAPP
+
+bool Session::asyncRequest(const Request& req, const std::weak_ptr<SocketPoll>& poll,
+                           bool asyncShutdownOnFinish)
+{
+    std::shared_ptr<SocketPoll> socketPoll(poll.lock());
+    if (!socketPoll)
+    {
+        LOG_ERR("Cannot start new asyncRequest without a valid SocketPoll: "
+                << req.getVerb() << ' ' << host() << ':' << port() << ' ' << req.getUrl());
+
+        if (_onConnectFail)
+        {
+            // Call directly since we haven't started the async
+            // connect to pass the validation in callOnConnectFail().
+            _onConnectFail(shared_from_this());
+        }
+
+        return false;
+    }
+
+    LOG_TRC("New asyncRequest on [" << socketPoll->name() << "]: " << req.getVerb() << ' '
+                                    << host() << ':' << port() << ' ' << req.getUrl());
+
+    newRequest(req, asyncShutdownOnFinish);
+
+    if (!isConnected())
+    {
+        asyncConnect(poll);
+    }
+    else
+    {
+        // Technically, there is a race here. The socket can
+        // get disconnected and removed right after isConnected.
+        // In that case, we will timeout and no request will be sent.
+        socketPoll->wakeup();
+    }
+
+    LOG_DBG("Starting asyncRequest on [" << socketPoll->name() << "]: " << req.getVerb() << ' '
+                                         << host() << ':' << port() << ' ' << req.getUrl());
+    return true;
+}
+
+#endif // !MOBILEAPP
+
+std::string Session::getSslVerifyMessage() const
+{
+#if ENABLE_SSL
+    std::shared_ptr<StreamSocket> socket = _socket.lock();
+    if (socket)
+        return SslStreamSocket::getSslVerifyString(socket->getSslVerifyResult());
+    return SslStreamSocket::getSslVerifyString(_handshakeSslVerifyFailure);
+#else
+    return std::string();
+#endif
+}
+
+long Session::getSslVerifyResult() const
+{
+#if ENABLE_SSL
+    std::shared_ptr<StreamSocket> socket = _socket.lock();
+    if (socket)
+        return socket->getSslVerifyResult();
+    return _handshakeSslVerifyFailure;
+#else
+    return 0; // X509_V_OK
+#endif
+}
+
+std::string Session::getSslCert(std::string& subjectHash) const
+{
+#if ENABLE_SSL
+    std::shared_ptr<StreamSocket> socket = _socket.lock();
+    if (socket)
+        return socket->getSslCert(subjectHash);
+#else
+    (void) subjectHash;
+#endif
+    return std::string();
+}
+
+void Session::dumpState(std::ostream& os, const std::string& indent) const
+{
+    const auto now = std::chrono::steady_clock::now();
+    os << indent << "http::Session: #" << _fd << " (" << (_socket.lock() ? "have" : "no")
+       << " socket)";
+    os << indent << "\tconnected: " << _connected;
+    os << indent << "\tasyncShutdownOnFinish: " << _asyncShutdownOnFinish;
+    os << indent << "\ttimeout: " << _timeout;
+    os << indent << "\thost: " << _host;
+    os << indent << "\tport: " << _port;
+    os << indent << "\tprotocol: " << name(_protocol);
+    os << indent << "\taddressFilter: " << (_addressFilter ? "set" : "none");
+    os << indent << "\thandshakeSslVerifyFailure: " << _handshakeSslVerifyFailure;
+    os << indent << "\tstartTime: " << Util::getTimeForLog(now, _startTime);
+    _request.dumpState(os, indent + '\t');
+    if (_response)
+        _response->dumpState(os, indent + '\t');
+    else
+        os << indent << "\tresponse: null";
+
+    os << '\n';
+
+    // We are typically called from the StreamSocket, so don't
+    // recurse back by calling dumpState on the socket again.
+}
+
+bool Session::syncRequestImpl(SocketPoll& poller)
+{
+    const std::chrono::microseconds timeout = getTimeout();
+    const auto deadline = std::chrono::steady_clock::now() + timeout;
+
+    assert(!!_response && "Response must be set!");
+
+    if (!isConnected())
+    {
+        std::shared_ptr<StreamSocket> socket = connect();
+        if (!socket)
+        {
+            LOG_ERR("Failed to connect to " << _host << ':' << _port);
+            return false;
+        }
+
+        poller.insertNewSocket(socket);
+    }
+
+    LOG_TRC("Starting syncRequest: " << _request.getVerb() << ' ' << host() << ':' << port()
+                                     << ' ' << _request.getUrl());
+
+    poller.poll(timeout);
+    while (!_response->done())
+    {
+        const auto now = std::chrono::steady_clock::now();
+        if (checkTimeout(now))
+            return false;
+
+        const auto remaining =
+            std::chrono::duration_cast<std::chrono::microseconds>(deadline - now);
+        poller.poll(remaining);
+    }
+
+    return _response->state() == Response::State::Complete;
+}
+
+void Session::callOnFinished()
+{
+    if (_asyncShutdownOnFinish)
+        asyncShutdown();
+
+    if (!_onFinished)
+        return;
+
+    LOG_TRC("onFinished calling client");
+    std::shared_ptr<Session> self = shared_from_this();
+    try
+    {
+        [[maybe_unused]] const long references = self.use_count();
+        assert(references > 1 && "Expected more than 1 reference to http::Session.");
+
+        _onFinished(self);
+
+        assert(self.use_count() > 1 &&
+                "Erroneously onFinish reset 'this'. Use 'addCallback()' on the "
+                "SocketPoll to reset on idle instead.");
+    }
+    catch (const std::exception& exc)
+    {
+        LOG_ERR("Error while invoking onFinished client callback: " << exc.what());
+    }
+}
+
+void Session::newRequest(const Request& req, bool asyncShutdownOnFinish)
+{
+    _startTime = std::chrono::steady_clock::now();
+
+    // Called when the response is finished.
+    // We really need only delegate it to our client.
+    // We need to do this extra hop because Response
+    // doesn't have our (Session) reference. Also,
+    // it's good that we are notified that the request
+    // has retired, so we can perform housekeeping.
+    Response::FinishedCallback onFinished = [this]()
+    {
+        LOG_TRC("onFinished");
+        assert(_response && "Must have response object");
+        assert(_response->state() != Response::State::New &&
+               "Unexpected response in New state");
+        assert(_response->state() != Response::State::Incomplete &&
+               "Unexpected response in Incomplete state");
+        assert(_response->done() && "Must have response in done state");
+
+        callOnFinished();
+
+        if (_response->header().getConnectionToken() == Header::ConnectionToken::Close)
+        {
+            LOG_TRC("Our peer has sent the 'Connection: close' token. Disconnecting.");
+            onDisconnect();
+            assert(isConnected() == false);
+        }
+    };
+
+    _response.reset();
+    _response = std::make_shared<Response>(onFinished, _fd);
+
+    _request = req;
+
+    _asyncShutdownOnFinish = asyncShutdownOnFinish;
+
+    // Bracket an IPv6 literal so the Host header is well-formed, e.g.
+    // "[::1]:9980". _host is a bare host (no scheme, no port), so a colon
+    // in it can only be part of an IPv6 address.
+    const bool isIPv6 = _host.find(':') != std::string::npos;
+    std::string host = isIPv6 ? '[' + _host + ']' : _host;
+
+    if (_port != "80" && _port != "443")
+    {
+        host.push_back(':');
+        host.append(_port);
+    }
+    _request.set("Host", std::move(host)); // Make sure the host is set.
+    _request.set("Date", Util::getHttpTimeNow());
+    _request.set("User-Agent", http::getAgentString());
+}
+
+void Session::onConnect(const std::shared_ptr<StreamSocket>& socket)
+{
+    ASSERT_CORRECT_THREAD();
+
+    if (socket)
+    {
+        _fd = socket->getFD();
+        _response->setLogContext(_fd);
+        LOG_TRC("Connected");
+        _connected = true;
+    }
+    else
+    {
+        LOG_DBG("Error: onConnect without a valid socket");
+        _fd = -1;
+        _handshakeSslVerifyFailure = 0;
+        _connected = false;
+    }
+}
+
+void Session::getIOStats(uint64_t& sent, uint64_t& recv)
+{
+    LOG_TRC("getIOStats");
+    std::shared_ptr<StreamSocket> socket = _socket.lock();
+    if (socket)
+        socket->getIOStats(sent, recv);
+    else
+    {
+        sent = 0;
+        recv = 0;
+    }
+}
+
+void Session::handleIncomingMessage(SocketDisposition& disposition)
+{
+    LOG_TRC("handleIncomingMessage");
+    ASSERT_CORRECT_THREAD();
+    std::shared_ptr<StreamSocket> socket = _socket.lock();
+    if (isConnected() && socket)
+    {
+        // Consume the incoming data by parsing and processing the body.
+        Buffer& data = socket->getInBuffer();
+        if (data.empty())
+        {
+            LOG_DBG("No data to process from the socket");
+            return;
+        }
+
+        LOG_TRC("HandleIncomingMessage: buffer has:\n"
+                << HexUtil::dumpHex(
+                       std::string(data.data(), std::min<size_t>(data.size(), 256UL))));
+
+#if !(defined QTAPP || defined _WIN32 || defined(MACOS))
+        // Response::readData is not build with CODA.
+        const int64_t read = _response->readData(data.data(), data.size());
+        if (read >= 0)
+        {
+            // Remove consumed data.
+            if (read)
+                data.eraseFirst(read);
+            return;
+        }
+#endif
+    }
+    else
+    {
+        LOG_ERR("handleIncomingMessage called when not connected");
+        assert(!socket && "Expected no socket when not connected");
+        assert(!isConnected() && "Expected not connected when no socket");
+    }
+
+    // Protocol error: Interrupt the transfer.
+    disposition.setClosed();
+    onDisconnect();
+}
+
+void Session::performWrites(std::size_t capacity)
+{
+    ASSERT_CORRECT_THREAD();
+    // We may get called after disconnecting and freeing the Socket instance.
+    std::shared_ptr<StreamSocket> socket = _socket.lock();
+    if (socket)
+    {
+        Buffer& out = socket->getOutBuffer();
+        LOG_TRC("performWrites: sending request (buffered: "
+                << out.size() << " bytes, capacity: " << capacity << ')');
+
+#if !(defined QTAPP || defined _WIN32 || defined(MACOS))
+        // StreamSocket::send(...) is excluded in CODA.
+        if (!socket->send(_request))
+        {
+            _result = net::AsyncConnectResult::SocketError;
+            LOG_ERR("Error while writing to socket");
+        }
+#endif
+    }
+}
+
+void Session::callOnConnectFail()
+{
+    if (!_onConnectFail)
+        return;
+
+    std::shared_ptr<Session> self = shared_from_this();
+    try
+    {
+        [[maybe_unused]] const long references = self.use_count();
+        assert(references > 1 && "Expected more than 1 reference to http::Session.");
+
+        _onConnectFail(self);
+
+        assert(self.use_count() > 1 &&
+                "Erroneously onConnectFail reset 'this'. Use 'addCallback()' on the "
+                "SocketPoll to reset on idle instead.");
+    }
+    catch (const std::exception& exc)
+    {
+        LOG_ERR("Error while invoking onConnectFail client callback: " << exc.what());
+    }
+}
+
+void Session::onHandshakeFail()
+{
+    ASSERT_CORRECT_THREAD();
+    std::shared_ptr<StreamSocket> socket = _socket.lock();
+    if (socket)
+    {
+        LOG_TRC("onHandshakeFail");
+        _handshakeSslVerifyFailure = socket->getSslVerifyResult();
+        _result = net::AsyncConnectResult::SSLHandShakeFailure;
+    }
+
+    callOnConnectFail();
+}
+
+void Session::onDisconnect()
+{
+    ASSERT_CORRECT_THREAD();
+    // Make sure the socket is disconnected and released.
+    std::shared_ptr<StreamSocket> socket = _socket.lock();
+    if (socket)
+    {
+        LOG_TRC("onDisconnect");
+        socket->asyncShutdown(); // Flag for shutdown for housekeeping in SocketPoll.
+        socket->shutdownConnection(); // Immediately disconnect.
+        _socket.reset();
+    }
+
+    _connected = false;
+    if (_response)
+        _response->error();
+
+    _fd = -1; // No longer our socket fd.
+}
+
+std::shared_ptr<StreamSocket> Session::connect()
+{
+    ASSERT_CORRECT_THREAD();
+    _socket.reset(); // Reset to make sure we are disconnected.
+#if !MOBILEAPP
+    std::shared_ptr<StreamSocket> socket =
+        net::connect(_host, _port, isSecure(), shared_from_this(), _addressFilter);
+#else
+    // The mobile apps have no network connections, so there is no socket.
+    std::shared_ptr<StreamSocket> socket;
+#endif
+    assert((!socket || _fd == socket->getFD()) &&
+           "The socket FD must have been set in onConnect");
+
+    // When used with proxy.php we may indeed get nullptr here.
+    // assert(socket && "Unexpected nullptr returned from net::connect");
+    _socket = socket; // Hold a weak pointer to it.
+    return socket; // Return the shared pointer.
+}
+
+void Session::asyncConnectSuccess(const std::shared_ptr<StreamSocket>& socket,
+                                  net::AsyncConnectResult result)
+{
+    ASSERT_CORRECT_THREAD();
+    assert(socket && _fd == socket->getFD() && "The socket FD must have been set in onConnect");
+
+    _socket = socket; // Hold a weak pointer to it.
+    _result = result;
+
+    LOG_ASSERT_MSG(_socket.lock(), "Connect must set the _socket member.");
+    LOG_ASSERT_MSG(_socket.lock()->getFD() == socket->getFD(),
+                   "Socket FD's mismatch after connect().");
+}
+
+#if !MOBILEAPP
+
+void Session::asyncConnect(const std::weak_ptr<SocketPoll>& poll)
+{
+    ASSERT_CORRECT_THREAD();
+    _socket.reset(); // Reset to make sure we are disconnected.
+
+    auto pushConnectCompleteToPoll =
+        [this, poll](std::shared_ptr<StreamSocket> socket, net::AsyncConnectResult result)
+    {
+        std::shared_ptr<SocketPoll> socketPoll(poll.lock());
+        if (!socketPoll || !socketPoll->isAlive())
+        {
+            LOG_WRN("asyncConnect completed after poll " << (!socketPoll ? "destroyed" : "finished"));
+            return;
+        }
+
+        if (!socket)
+        {
+            // When used with proxy.php we may indeed get nullptr here.
+            socketPoll->addCallback([selfLifecycle = shared_from_this(), this, result]()
+                                    { asyncConnectFailed(result); });
+            return;
+        }
+
+        SocketDisposition disposition(socket);
+        disposition.setTransfer(*socketPoll,
+                                [selfLifecycle = shared_from_this(), this,
+                                 socket = std::move(socket),
+                                 result]([[maybe_unused]] const std::shared_ptr<Socket>& moveSocket)
+                                {
+                                    assert(socket == moveSocket);
+                                    asyncConnectSuccess(socket, result);
+                                });
+        disposition.execute();
+    };
+
+    net::asyncConnect(_host, _port, isSecure(), shared_from_this(), pushConnectCompleteToPoll,
+                      _addressFilter);
+}
+
+#endif // !MOBILEAPP
+
+bool Session::checkTimeout(std::chrono::steady_clock::time_point now)
+{
+    ASSERT_CORRECT_THREAD();
+    if (!_response || _response->done())
+        return false;
+
+    const std::chrono::microseconds timeout = getTimeout();
+    const auto duration =
+        std::chrono::duration_cast<std::chrono::milliseconds>(now - _startTime);
+
+    if (now < _startTime ||
+        (timeout > std::chrono::microseconds::zero() && duration > timeout) ||
+        SigUtil::getTerminationFlag())
+    {
+        LOG_WRN("CheckTimeout: Timeout while requesting [" << _request.getVerb() << ' ' << _host
+                                                           << _request.getUrl() << "] after " << duration);
+
+        // Flag that we timed out.
+        _response->timeout();
+
+        // Disconnect and trigger the right events and handlers.
+        // Note that this is the right way to end a request in HTTP, it's also
+        // no good maintaining a poor connection (if that's the issue).
+        onDisconnect(); // Trigger manually (why wait for poll to do it?).
+        assert(isConnected() == false);
+        return true;
+    }
+    return false;
 }
 
 } // namespace http
