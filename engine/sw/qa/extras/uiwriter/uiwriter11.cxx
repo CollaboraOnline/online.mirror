@@ -963,7 +963,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testTranslateTextSelection)
     // Select the whole paragraph and "translate" it.
     pWrtSh->SelAll();
     sal_Int32 nCalls = 0;
-    auto aTranslate = [&nCalls](const OString& rHtml) -> OString
+    auto aTranslate = [&nCalls](const OString& rHtml, OString& /*rError*/) -> OString
     {
         ++nCalls;
         return FakeTranslate(rHtml);
@@ -1006,7 +1006,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest11, testTranslateTableSelection)
     CPPUNIT_ASSERT(pWrtSh->IsTableMode());
 
     sal_Int32 nCalls = 0;
-    auto aTranslate = [&nCalls](const OString& rHtml) -> OString
+    auto aTranslate = [&nCalls](const OString& rHtml, OString& /*rError*/) -> OString
     {
         ++nCalls;
         return FakeTranslate(rHtml);

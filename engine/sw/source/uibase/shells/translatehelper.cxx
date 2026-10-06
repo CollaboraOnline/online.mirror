@@ -23,6 +23,7 @@
 
 #include <config_features.h>
 #include <wrtsh.hxx>
+#include <view.hxx>
 #include <pam.hxx>
 #include <node.hxx>
 #include <swtable.hxx>
@@ -144,8 +145,7 @@ struct TranslateRange
 };
 }
 
-bool TranslateRanges(SwWrtShell& rWrtSh,
-                     const std::function<OString(const OString&)>& rTranslate,
+bool TranslateRanges(SwWrtShell& rWrtSh, const TranslateFunc& rTranslate,
                      const bool& rCancelTranslation)
 {
     SwCursor* pCurrentPam = rWrtSh.GetCursor();
@@ -302,16 +302,28 @@ bool TranslateRanges(SwWrtShell& rWrtSh,
                 }
 
                 const auto aOut = SwTranslateHelper::ExportPaMToHTML(cursor.get());
-                const auto aTranslatedOut = rTranslate(aOut);
+                OString aError;
+                const auto aTranslatedOut = rTranslate(aOut, aError);
                 if (!aTranslatedOut.isEmpty())
                 {
                     SwTranslateHelper::PasteHTMLToPaM(rWrtSh, cursor.get(), aTranslatedOut);
                 }
                 else
                 {
+                    // Close the progress indicator first: in the LOK case it is a
+                    // dialog of its own, which would cover the error.
+                    if (xStatusIndicator.is())
+                    {
+                        xStatusIndicator->end();
+                        xStatusIndicator.clear();
+                    }
+                    // Parent the dialog to the frame: a parentless dialog has no
+                    // notifier in the LOK case, so it would never reach the client.
                     std::unique_ptr<weld::MessageDialog> xBox(Application::CreateMessageDialog(
-                        nullptr, VclMessageType::Error, VclButtonsType::Ok,
-                        SwResId(STR_SWTRANSLATE_ERROR)));
+                        rWrtSh.GetView().GetFrameWeld(), VclMessageType::Error,
+                        VclButtonsType::Ok, SwResId(STR_SWTRANSLATE_ERROR)));
+                    if (!aError.isEmpty())
+                        xBox->set_secondary_text(OStringToOUString(aError, RTL_TEXTENCODING_UTF8));
                     xBox->run();
                     bStop = true;
                     break;
@@ -336,7 +348,7 @@ bool TranslateRanges(SwWrtShell& rWrtSh,
 
     if (xStatusIndicator.is())
         xStatusIndicator->end();
-    return true;
+    return !bStop;
 }
 
 #if HAVE_FEATURE_CURL
@@ -373,10 +385,16 @@ bool TranslateDocumentCancellable(SwWrtShell& rWrtSh, const OString& rTargetLang
         return false;
     }
 
-    return TranslateRanges(rWrtSh,
-                           [&rTargetLang, &aAPIUrl, &aAuthKey](const OString& rData)
-                           { return linguistic::Translate(rTargetLang, aAPIUrl, aAuthKey, rData); },
-                           rCancelTranslation);
+    return TranslateRanges(
+        rWrtSh,
+        [&rTargetLang, &aAPIUrl, &aAuthKey](const OString& rData, OString& rError)
+        {
+            linguistic::TranslateResult aResult
+                = linguistic::Translate(rTargetLang, aAPIUrl, aAuthKey, rData);
+            rError = aResult.aError;
+            return aResult.aText;
+        },
+        rCancelTranslation);
 }
 #endif // HAVE_FEATURE_CURL
 }

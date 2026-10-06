@@ -42,12 +42,16 @@ SW_DLLPUBLIC void PasteHTMLToPaM(SwWrtShell& rWrtSh, const SwPaM* pCursor, const
 SW_DLLPUBLIC void GetTranslationNodeRange(SwWrtShell& rWrtSh, SwNodeOffset& rStartNode,
                                           SwNodeOffset& rEndNode);
 
+/// Translates the exported HTML of one text node. Returns an empty string and
+/// describes the failure in rError when the translation failed.
+using TranslateFunc = std::function<OString(const OString& rHtml, OString& rError)>;
+
 /// Translates the current selection (or the whole document when there is no
 /// selection) text node by text node, replacing the original text with the
 /// result of rTranslate for the exported HTML of each node. A table box
-/// selection is translated box by box.
-SW_DLLPUBLIC bool TranslateRanges(SwWrtShell& rWrtSh,
-                                  const std::function<OString(const OString&)>& rTranslate,
+/// selection is translated box by box. Returns false when a translation
+/// failed, after reporting the failure to the user.
+SW_DLLPUBLIC bool TranslateRanges(SwWrtShell& rWrtSh, const TranslateFunc& rTranslate,
                                   const bool& rCancelTranslation);
 #if HAVE_FEATURE_CURL
 SW_DLLPUBLIC void TranslateDocument(SwWrtShell& rWrtSh, const OString& rTargetLang);

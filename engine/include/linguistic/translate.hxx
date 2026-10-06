@@ -15,8 +15,20 @@
 
 namespace linguistic
 {
-LNG_DLLPUBLIC OString Translate(const OString& rTargetLang, const OString& rAPIUrl,
-                                std::string_view rAuthKey, const OString& rData);
+/// Outcome of a DeepL translation request.
+struct TranslateResult
+{
+    /// The translated text; empty when the request failed.
+    OString aText;
+    /// Describes the failure, e.g. the HTTP status and the message returned by
+    /// the service; empty when the request succeeded.
+    OString aError;
+};
+
+/// Translates the HTML fragment rData to rTargetLang with the DeepL API at
+/// rAPIUrl, authenticating with rAuthKey.
+LNG_DLLPUBLIC TranslateResult Translate(const OString& rTargetLang, const OString& rAPIUrl,
+                                        std::string_view rAuthKey, const OString& rData);
 } // namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
