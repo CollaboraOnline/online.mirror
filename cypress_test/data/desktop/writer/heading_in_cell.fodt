@@ -10,7 +10,7 @@
      <table:table-cell><text:p>Plain cell</text:p></table:table-cell>
     </table:table-row>
    </table:table>
-   <text:p>After the table.</text:p>
+   <text:h text:outline-level="1">After the table</text:h>
   </office:text>
  </office:body>
 </office:document>

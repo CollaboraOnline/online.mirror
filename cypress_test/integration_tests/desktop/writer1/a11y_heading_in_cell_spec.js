@@ -21,6 +21,27 @@ describe(['tagdesktop'], 'Writer heading in a table cell', { testIsolation: fals
 		});
 	}
 
+	const REGIONS = ['#a11y-headings-above a', '#a11y-context-before > span', '#a11y-context-after > span',
+		'#a11y-headings-below a'];
+
+	function headingsInReadingOrder() {
+		cy.wrap(null).should(function () {
+			const headings = win.app.map._textInput._headings || [];
+			const names = headings.map(function (heading) { return heading.text; });
+			const expected = headings.filter(function (heading) { return heading.side !== 'caret'; })
+				.map(function (heading) { return heading.text; });
+			const order = [];
+			REGIONS.forEach(function (selector) {
+				win.document.querySelectorAll(selector).forEach(function (item) {
+					if (names.indexOf(item.textContent) !== -1)
+						order.push(item.textContent);
+				});
+			});
+			expect(order.join(' | '), 'the headings a reader moves through, in document order')
+				.to.equal(expected.join(' | '));
+		});
+	}
+
 	before(function () {
 		helper.setupAndLoadDocument('writer/heading_in_cell.fodt');
 
@@ -64,6 +85,10 @@ describe(['tagdesktop'], 'Writer heading in a table cell', { testIsolation: fals
 		});
 	});
 
+	it('the heading being edited in a cell is read once, in document order', function () {
+		headingsInReadingOrder();
+	});
+
 	it('a plain cell next to it is not told a level', function () {
 		move('{end}{rightarrow}');
 		cy.cGet('#readable-content').should('have.text', 'Plain cell');
@@ -73,5 +98,15 @@ describe(['tagdesktop'], 'Writer heading in a table cell', { testIsolation: fals
 				expect(text, 'what the reader is told in the plain cell').to.not.contain('Heading level');
 			});
 		});
+	});
+
+	it('from the next cell the headings are read once, in document order', function () {
+		headingsInReadingOrder();
+	});
+
+	it('from above the table the heading in a cell is read before the one after it', function () {
+		move('{ctrl}{home}{ctrl}{home}{ctrl}{home}');
+		cy.cGet('#readable-content').should('have.text', 'Top of the document.');
+		headingsInReadingOrder();
 	});
 });
