@@ -2794,8 +2794,8 @@
         <p>© 2007 Foreningen for frit tilgængelige sprogværktøjer</p>
         <h2>Dutch</h2>
         <h3>Spelling dictionary and hyphenation patterns</h3>
-        <!-- Name: dict-nl-spell, Vendor:, Source: nl_NL, URL:, Declared: BSD-2-Clause OR CC-BY-3.0, Concluded: BSD-2-Clause OR CC-BY-3.0 -->
-        <!-- Name: dict-nl-hyph, Vendor:, Source: nl_NL, URL:, Declared: BSD-2-Clause OR CC-BY-3.0, Concluded: BSD-2-Clause OR CC-BY-3.0 -->
+        <!-- Name: dict-nl-spell, Vendor:, Source: nl_NL, URL:, Declared: BSD-2-Clause OR CC-BY-3.0, Concluded: MPL-2.0 -->
+        <!-- Name: dict-nl-hyph, Vendor:, Source: nl_NL, URL:, Declared: BSD-2-Clause OR CC-BY-3.0, Concluded: MPL-2.0 -->
         <p>The following software may be included in this product: Dutch spelling dictionary and hyphenation patterns.
         Use of any of this software is governed by the terms of the license below:</p>
         <p>1. Name: Dutch word list for spell checking - OpenTaal</p>
@@ -3930,7 +3930,7 @@
         <p>This dictionary is made available subject to the terms of GNU Lesser General Public License Version 3.</p>
         <p><a href="#a__LGPL_version_3">Jump to LGPL Version 3</a></p>
         <h3>Hyphenation patterns</h3>
-        <!-- Name: dict-sv-hyph, Vendor:, Source: sv_SE, URL:, Declared: MPL-2.0 or LGPL-3.0-or-later, Concluded: MPL-2.0 -->
+        <!-- Name: dict-sv-hyph, Vendor:, Source: sv_SE, URL:, Declared: MPL-2.0 OR LGPL-3.0-or-later, Concluded: MPL-2.0 -->
         <p>The following software may be included in this product: Swedish hyphenation patterns. Use of any of this
         software is governed by the terms of the license below:</p>
         <p><a href="#a__MPL_version_2">Jump to MPL Version 2.0</a></p>

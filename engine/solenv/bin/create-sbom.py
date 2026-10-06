@@ -610,9 +610,10 @@ def sbom_skeleton(package, gid, languages):
         ]
     })
 
-    # Add license for root package
-    graph = sbom_data[package][3]["@graph"]
-    add_license_relationship(graph, root_spdx_id, "hasConcludedLicense", root_license)
+    # Add license for root package - dictionaries are special and handled later
+    if not gid.startswith("gid_Module_Root_Extension_Dictionary_"):
+        graph = sbom_data[package][3]["@graph"]
+        add_license_relationship(graph, root_spdx_id, "hasConcludedLicense", root_license)
 
 
 def gen_packages(packinfos, ziplist, languages, product):
@@ -1324,6 +1325,9 @@ def check_externals(allexternaldeps, *externalses):
 def sbom_add_files(files_by_package, externals_by_package):
     """Add all files to the SBOM graphs."""
 
+    # license families that are commonly used by dictionaries
+    non_mpl_license_families = ["GPL", "LGPL", "GFDL", "LPPL", "CC-BY", "NOASSERTION"]
+
     for package in files_by_package:
         sbom = next(sbom_data[key] for key in sbom_data if sbom_data[key][0] == package)
         graph = sbom[3]["@graph"]
@@ -1331,13 +1335,13 @@ def sbom_add_files(files_by_package, externals_by_package):
         package_sysdeps = set()
         package_externals = {}
         package_licenses = set()
+        is_dictionary = package.startswith("gid_Module_Root_Extension_Dictionary_")
+        non_mpl_licenses = set()
 
         def add_license(license):
             if not(license in package_licenses):
                 graph.extend(license_cache[license])
                 package_licenses.add(license)
-
-        add_license(root_license)
 
         def add_external(external):
             if external is None:
@@ -1359,7 +1363,15 @@ def sbom_add_files(files_by_package, externals_by_package):
                     package_externals[external] = parent
 
                     add_license(sbom_externals[external][1])
-                    add_license(sbom_externals[external][2])
+                    concluded = sbom_externals[external][2]
+                    add_license(concluded)
+                    if is_dictionary:
+                        tokens = re.split(r"[\s()]+", concluded)
+                        if any(token.startswith(family) for token in tokens for family in non_mpl_license_families):
+                            non_mpl_licenses.add(concluded)
+                        else: # don't forget this in case 1 of 3 parts is MPL
+                            non_mpl_licenses.add(root_license)
+
             return parent
 
         for external in externals_by_package[package]:
@@ -1446,6 +1458,18 @@ def sbom_add_files(files_by_package, externals_by_package):
                             "to": sysdeps,
                             "completeness": "noAssertion"
                         })
+
+        # dictionaries contain odd mixture of licenses
+        if is_dictionary:
+            assert(len(non_mpl_licenses) != 0)
+            if len(non_mpl_licenses) == 1:
+                concluded = next(iter(non_mpl_licenses))
+            else:
+                concluded = " AND ".join([l if l.find(" ") == -1 else "(" + l + ")" for l in non_mpl_licenses])
+            add_license_relationship(graph, root_spdx_id, "hasConcludedLicense", concluded)
+            add_license(concluded)
+        else:
+            add_license(root_license)
 
 
 def gen_product(ziplist, packinfos, install_script, languages, externalsfile,
