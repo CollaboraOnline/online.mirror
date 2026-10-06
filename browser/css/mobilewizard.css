@@ -210,6 +210,10 @@ p.mobile-wizard.ui-combobox-text.selected {
 	background-size: 20px 20px;
 	color: var(--color-primary) !important;
 }
+
+#mobile-wizard-content .ui-header.mobile-wizard.menu-entry-checked > span:not(.menu-entry-icon) {
+	color: var(--color-primary);
+}
 #mobile-wizard-content {
 	overflow-y: hidden;
 	overflow-x: hidden;
