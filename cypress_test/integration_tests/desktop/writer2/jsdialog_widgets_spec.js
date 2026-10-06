@@ -18,7 +18,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'JSDialog widgets visual te
 				.contains('#js-dialog a', 'View widgets')
 				.click();
 
-			cy.cGet('.ui-dialog[aria-labelledby="Test Widgets"]').should('be.visible');
+			cy.cGet('.ui-dialog-title').filter(':contains("Test Widgets")').should('be.visible');
 			// Wait for fadein animation to complete
 			cy.cGet('.jsdialog-window.fadein').should('have.css', 'opacity', '1');
 		});

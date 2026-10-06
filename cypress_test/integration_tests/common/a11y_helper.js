@@ -217,7 +217,8 @@ function testNameDialog(win, level) {
 		})
 		.then(() => {
 			// save with default suggested name
-			cy.cGet('[role="dialog"][aria-labelledby*="Name"] #ok-button').should('be.enabled').click();
+			cy.cGet('.ui-dialog-title').filter(':contains("Name")').closest('[role="dialog"]')
+				.find('#ok-button').should('be.enabled').click();
 			return helper.processToIdle(win);
 		})
 		.then(() => {
@@ -232,7 +233,8 @@ function testNameDialog(win, level) {
 		.then(() => {
 			// save with a name that exists to force the warning subdialog
 			cy.cGet('#name_entry-input').type('{selectall}{backspace}Hatching 1');
-			cy.cGet('[role="dialog"][aria-labelledby*="Name"] #ok-button').should('be.enabled').click();
+			cy.cGet('.ui-dialog-title').filter(':contains("Name")').closest('[role="dialog"]')
+				.find('#ok-button').should('be.enabled').click();
 			return helper.processToIdle(win);
 		})
 		.then(() => {

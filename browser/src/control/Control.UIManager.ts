@@ -2715,6 +2715,20 @@ class UIManager extends window.L.Control {
 					this.closeModal(dialogId);
 			}}
 		], cancelButtonId);
+		// the message, read with the title when the dialog opens; queued after the task
+		// that attaches the dialog, and before the one that focuses it
+		app.layoutingService.appendLayoutingTask(() => {
+			const form = document.getElementById(dialogId)?.querySelector('form');
+			const messages = form ? Array.from(form.querySelectorAll('[id^="info-modal-label"]'))
+				.filter((label) => label.textContent?.trim()) : [];
+			// another open info box can have the same ids
+			messages.forEach((label) => {
+				if (document.getElementById(label.id) !== label)
+					label.id = label.id + '-' + dialogId;
+			});
+			if (form && messages.length)
+				form.setAttribute('aria-describedby', messages.map((label) => label.id).join(' '));
+		});
 		if (!buttonText && !withCancel) {
 			// if no buttons better to set tabIndex to negative so the element is not reachable via sequential keyboard navigation but can be focused programmatically
 			const dialogElement = document.getElementById(dialogId);

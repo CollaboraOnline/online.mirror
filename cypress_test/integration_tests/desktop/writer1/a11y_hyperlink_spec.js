@@ -65,6 +65,57 @@ describe(['tagdesktop'], 'Writer hyperlinks for the reader', { testIsolation: fa
 		});
 	});
 
+	it('the link opens from the keyboard, through the context menu', function () {
+		const pressKey = function (key, keyCode, shiftKey) {
+			const target = win.document.activeElement;
+			for (const type of ['keydown', 'keyup'])
+				target.dispatchEvent(new win.KeyboardEvent(type, { key: key, keyCode: keyCode,
+					which: keyCode, shiftKey: !!shiftKey, bubbles: true, cancelable: true }));
+		};
+		const moveTo = function (text, left) {
+			cy.then(function () {
+				if (left === 0 || win.document.activeElement.innerText.trim() === text)
+					return;
+				pressKey('ArrowDown', 40);
+				moveTo(text, left - 1);
+			});
+		};
+
+		helper.typeIntoDocument('{ctrl}{home}');
+		helper.typeIntoDocument('{rightarrow}'.repeat(8));
+		cy.then(function () {
+			return helper.processToIdle(win);
+		});
+		cy.then(function () {
+			win.__opened = [];
+			win.open = function (url) { win.__opened.push(String(url)); return null; };
+			pressKey('F10', 121, true);
+		});
+		cy.cGet('[id^="jsd-context-menu-entry-"]').should('have.length.greaterThan', 0);
+		moveTo('Open Hyperlink', 20);
+		cy.then(function () {
+			expect(win.document.activeElement.innerText.trim(), 'the menu entry')
+				.to.equal('Open Hyperlink');
+			pressKey('Enter', 13);
+		});
+		cy.cGet('#modal-dialog-openlink').should('be.visible');
+		cy.cGet('#openlink-response-button').should('have.focus');
+		cy.then(function () {
+			return a11yHelper.getAXNodesWithin('#modal-dialog-openlink').then(function (nodes) {
+				const dialog = nodes.find(function (node) {
+					return !node.ignored && node.role === 'dialog';
+				});
+				expect(dialog, 'the dialog node').to.exist;
+				expect(dialog.name, 'the dialog name').to.equal('External link');
+				expect(dialog.description, 'the dialog description').to.contain(LINK_URL);
+			});
+		});
+		cy.cGet('#openlink-response-button').click();
+		cy.then(function () {
+			expect(win.__opened, 'the link opened').to.deep.equal([LINK_URL]);
+		});
+	});
+
 	it('a link of a paragraph around the caret is read as a link too', function () {
 		cy.then(function () {
 			return links('#a11y-context-after').then(function (nodes) {

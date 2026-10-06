@@ -463,8 +463,6 @@ window.L.Control.JSDialog = window.L.Control.extend({
 			&& !instance.isAutoFillPreviewTooltip)
 			instance.form.setAttribute('aria-modal', 'true');
 		instance.form.setAttribute('autocomplete', 'off');
-		if (instance.title)
-			instance.form.setAttribute('aria-labelledby', instance.title);
 		// Prevent overlay from getting the click, except if we want click to dismiss
 		// Like in the case of the inactivity message.
 		// https://github.com/CollaboraOnline/online/issues/7403
@@ -497,8 +495,10 @@ window.L.Control.JSDialog = window.L.Control.extend({
 		if (instance.haveTitlebar) {
 			instance.titlebar = window.L.DomUtil.create('div', 'ui-dialog-titlebar ui-corner-all ui-widget-header ui-helper-clearfix', instance.form);
 			let title = window.L.DomUtil.create('h2', 'ui-dialog-title', instance.titlebar);
-			title.setAttribute('id', instance.title);
+			// an id, not the title text: aria-labelledby splits its value at spaces
+			title.setAttribute('id', instance.id + '-title');
 			title.innerText = instance.title;
+			instance.form.setAttribute('aria-labelledby', title.id);
 			instance.titleCloseButton = window.L.DomUtil.create('button', 'ui-button ui-corner-all ui-widget ui-button-icon-only ui-dialog-titlebar-close', instance.titlebar);
 			const titleCloseButtonText = _('Close dialog');
 			instance.titleCloseButton.setAttribute('aria-label', titleCloseButtonText);
