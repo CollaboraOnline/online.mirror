@@ -43,9 +43,7 @@ public:
     }
 
     bool preRun() override {
-        return compiler.getLangOpts().CPlusPlus
-            && compiler.getPreprocessor().getIdentifierInfo(
-                "LIBO_INTERNAL_ONLY")->hasMacroDefinition();
+        return compiler.getLangOpts().CPlusPlus;
     }
 
     void run() override {
@@ -55,9 +53,7 @@ public:
 
 private:
     void check(ExplicitCastExpr const * expr) {
-        if (ignoreLocation(expr)
-            || isInUnoIncludeFile(expr->getExprLoc()))
-                //TODO: '#ifdef LIBO_INTERNAL_ONLY' within UNO include files
+        if (ignoreLocation(expr))
         {
             return;
         }
@@ -85,7 +81,7 @@ private:
         if (isAsciiCharacterLiteral(e2) || isa<IntegerLiteral>(e2)) {
             report(
                 DiagnosticsEngine::Warning,
-                ("in LIBO_INTERNAL_ONLY code, replace literal cast to %0 with a"
+                ("replace literal cast to %0 with a"
                  " u'...' char16_t character literal"),
                 e2->getExprLoc())
                 << expr->getTypeAsWritten() << expr->getSourceRange();
