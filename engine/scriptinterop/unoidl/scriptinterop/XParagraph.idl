@@ -13,8 +13,6 @@ module scriptinterop {
 
 interface XParagraph: XContainerElement
 {
-    XText editAsText();
-
     com::sun::star::beans::Optional<HorizontalAlignment> getAlignment();
 
     com::sun::star::beans::Optional<GlyphType> getGlyphType();

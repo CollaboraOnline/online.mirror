@@ -99,6 +99,32 @@ function test() {
     console.assert(table.getRow(1).getCell(1).getText() === 'B2');
     console.assert(row0.getText() === 'A1\nB1');
     console.assert(table.getText() === 'A1\nB1\nA2\nB2');
+    // As in GAS, a container has a text view, whose offsets run across its paragraphs and the
+    // separators between them, and a separator has the attributes of the preceding character:
+    const rowText = row0.editAsText();
+    console.assert(rowText.getType() === DocumentApp.ElementType.TABLE_ROW);
+    console.assert(rowText.getText() === 'A1\nB1');
+    console.assert(row0.asText().getText() === 'A1\nB1');
+    console.assert(rowText.getParent().getType() === DocumentApp.ElementType.TABLE);
+    console.assert(table.editAsText().getText() === table.getText());
+    console.assert(body.editAsText().getText() === body.getText());
+    rowText.setBold(false).setBold(3, 4, true);
+    console.assert(rowText.isBold(2) === false);
+    console.assert(rowText.isBold(3) === true);
+    console.assert(row0.getCell(1).editAsText().isBold(0) === true);
+    console.assert(cell00.editAsText().isBold(1) === false);
+    let indexMessage = null;
+    try {
+        rowText.isBold(5);
+    } catch (e) {
+        indexMessage = e.message;
+    }
+    if (globalThis.cool) {
+        console.assert( //TODO
+            indexMessage.startsWith('Index (5) must be less than the content length (5).'));
+    } else {
+        console.assert(indexMessage === 'Index (5) must be less than the content length (5).');
+    }
 
     console.assert(body.getChildIndex(p0) === 0);
     console.assert(body.getChildIndex(body.getChild(1)) === 1);
@@ -192,10 +218,14 @@ function test() {
     console.assert(ranges[1].getEndOffsetInclusive() === 2);
     console.assert(ranges[1].getElement().getText() === 'UnderStrikeSuperPlain');
 
-    // Append a paragraph and a list item at the end:
+    // Append a paragraph and a list item at the end, which a Text of the body taken before
+    // already shows:
+    const bodyText = body.editAsText();
     const appended = body.appendParagraph('Appended');
     console.assert(appended.getType() === DocumentApp.ElementType.PARAGRAPH);
     console.assert(appended.getText() === 'Appended');
+    console.assert(bodyText.getText() === body.getText());
+    console.assert(bodyText.getText().endsWith('\nAppended'));
     console.assert(body.getNumChildren() === 7);
 
     // Exercise the setBold overload group:

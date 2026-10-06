@@ -642,20 +642,7 @@ public:
         return cast<scriptinterop::XTableRow>(scriptinterop::ElementType_TABLE_ROW);
     }
 
-    // GAS also gives the other containers a text view, which this does not have yet:
-    cpo::uno::Reference<scriptinterop::XText> asText() override {
-        switch (this->getType()) {
-        case scriptinterop::ElementType_BODY_SECTION:
-        case scriptinterop::ElementType_FOOTNOTE_SECTION:
-        case scriptinterop::ElementType_TABLE:
-        case scriptinterop::ElementType_TABLE_CELL:
-        case scriptinterop::ElementType_TABLE_ROW:
-            throw cpo::uno::RuntimeException(
-                "asText is not yet implemented for " + elementTypeName(this->getType())); // TODO
-        default:
-            return cast<scriptinterop::XText>(scriptinterop::ElementType_TEXT);
-        }
-    }
+    cpo::uno::Reference<scriptinterop::XText> asText() override;
 
 private:
     template<typename U> cpo::uno::Reference<U> cast(scriptinterop::ElementType type) {
@@ -1097,6 +1084,390 @@ private:
     scriptinterop::ElementType reportedType_;
     std::vector<cpo::uno::Reference<css::text::XTextRange>> runs_;
 };
+
+// As in GAS, the text of a container joins the texts of all the paragraphs in it, also those in
+// nested tables, and each paragraph but the last is followed by a one-character separator:
+class ContainerTextImpl: public ElementImpl<scriptinterop::XText> {
+public:
+    explicit ContainerTextImpl(
+        cpo::uno::Reference<scriptinterop::XContainerElement> const & container):
+        container_(container)
+    {}
+
+    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return container_->getuno(); }
+
+    cpo::uno::Reference<scriptinterop::XBody> asBody() override { return container_->asBody(); }
+
+    cpo::uno::Reference<scriptinterop::XFootnote> asFootnote() override {
+        return container_->asFootnote();
+    }
+
+    cpo::uno::Reference<scriptinterop::XContainerElement> asFootnoteSection() override {
+        return container_->asFootnoteSection();
+    }
+
+    cpo::uno::Reference<scriptinterop::XInlineImage> asInlineImage() override {
+        return container_->asInlineImage();
+    }
+
+    cpo::uno::Reference<scriptinterop::XParagraph> asListItem() override {
+        return container_->asListItem();
+    }
+
+    cpo::uno::Reference<scriptinterop::XParagraph> asParagraph() override {
+        return container_->asParagraph();
+    }
+
+    cpo::uno::Reference<scriptinterop::XTable> asTable() override { return container_->asTable(); }
+
+    cpo::uno::Reference<scriptinterop::XTableCell> asTableCell() override {
+        return container_->asTableCell();
+    }
+
+    cpo::uno::Reference<scriptinterop::XTableRow> asTableRow() override {
+        return container_->asTableRow();
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> asText() override { return this; }
+
+    cpo::uno::Reference<scriptinterop::XText> appendText(OUString const &) override {
+        throw notYetImplemented(u"appendText");
+    }
+
+    // TODO: return a detached deep copy, not this, as for the text of a paragraph:
+    cpo::uno::Reference<scriptinterop::XElement> copy() override { return this; }
+
+    cpo::uno::Reference<scriptinterop::XText> deleteText(sal_Int32, sal_Int32) override {
+        throw notYetImplemented(u"deleteText");
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> editAsText() override { return this; }
+
+    css::beans::Optional<OUString> getFontFamily(sal_Int32 offset) override {
+        auto const [text, inner] = at(offset);
+        return text->getFontFamily(inner);
+    }
+
+    css::beans::Optional<OUString> getLinkUrl(sal_Int32 offset) override {
+        auto const [text, inner] = at(offset);
+        return text->getLinkUrl(inner);
+    }
+
+    css::beans::Optional<cpo::uno::Reference<scriptinterop::XElement>> getNextSibling() override {
+        return container_->getNextSibling();
+    }
+
+    css::beans::Optional<cpo::uno::Reference<scriptinterop::XElement>> getParent() override {
+        return container_->getParent();
+    }
+
+    css::beans::Optional<cpo::uno::Reference<scriptinterop::XElement>> getPreviousSibling() override
+    { return container_->getPreviousSibling(); }
+
+    OUString getText() override { return contents().text; }
+
+    css::beans::Optional<scriptinterop::TextAlignment> getTextAlignment(sal_Int32 offset) override {
+        auto const [text, inner] = at(offset);
+        return text->getTextAlignment(inner);
+    }
+
+    cpo::uno::Sequence<sal_Int32> getTextAttributeIndices() override {
+        std::vector<sal_Int32> v;
+        for (auto const & paragraph: contents().paragraphs) {
+            for (auto const i: paragraph.text->getTextAttributeIndices()) {
+                v.push_back(paragraph.start + i);
+            }
+        }
+        if (v.empty()) {
+            v.push_back(0);
+        }
+        return cpo::uno::Sequence(v.data(), v.size());
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> insertText(sal_Int32, OUString const &) override {
+        throw notYetImplemented(u"insertText");
+    }
+
+    scriptinterop::ElementType getType() override { return container_->getType(); }
+
+    css::beans::Optional<bool> isBold(sal_Int32 offset) override {
+        auto const [text, inner] = at(offset);
+        return text->isBold(inner);
+    }
+
+    css::beans::Optional<bool> isItalic(sal_Int32 offset) override {
+        auto const [text, inner] = at(offset);
+        return text->isItalic(inner);
+    }
+
+    css::beans::Optional<bool> isStrikethrough(sal_Int32 offset) override {
+        auto const [text, inner] = at(offset);
+        return text->isStrikethrough(inner);
+    }
+
+    css::beans::Optional<bool> isUnderline(sal_Int32 offset) override {
+        auto const [text, inner] = at(offset);
+        return text->isUnderline(inner);
+    }
+
+    cpo::uno::Reference<scriptinterop::XElement> removeFromParent() override {
+        container_->removeFromParent();
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setBold(bool value) override {
+        for (auto const & paragraph: contents().paragraphs) {
+            paragraph.text->setBold(value);
+        }
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setBoldRange(
+        sal_Int32 startOffset, sal_Int32 endOffsetInclusive, bool value) override
+    {
+        forRange(
+            u"setBold", startOffset, endOffsetInclusive,
+            [value](auto const & text, sal_Int32 start, sal_Int32 end) {
+                text->setBoldRange(start, end, value);
+            });
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setFontFamily(OUString const & fontFamilyName)
+        override
+    {
+        for (auto const & paragraph: contents().paragraphs) {
+            paragraph.text->setFontFamily(fontFamilyName);
+        }
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setFontFamilyRange(
+        sal_Int32 startOffset, sal_Int32 endOffsetInclusive, OUString const & fontFamilyName)
+        override
+    {
+        forRange(
+            u"setFontFamily", startOffset, endOffsetInclusive,
+            [&fontFamilyName](auto const & text, sal_Int32 start, sal_Int32 end) {
+                text->setFontFamilyRange(start, end, fontFamilyName);
+            });
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setItalic(bool value) override {
+        for (auto const & paragraph: contents().paragraphs) {
+            paragraph.text->setItalic(value);
+        }
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setItalicRange(
+        sal_Int32 startOffset, sal_Int32 endOffsetInclusive, bool value) override
+    {
+        forRange(
+            u"setItalic", startOffset, endOffsetInclusive,
+            [value](auto const & text, sal_Int32 start, sal_Int32 end) {
+                text->setItalicRange(start, end, value);
+            });
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setLinkUrl(OUString const & url) override {
+        for (auto const & paragraph: contents().paragraphs) {
+            paragraph.text->setLinkUrl(url);
+        }
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setLinkUrlRange(
+        sal_Int32 startOffset, sal_Int32 endOffsetInclusive, OUString const & url) override
+    {
+        forRange(
+            u"setLinkUrl", startOffset, endOffsetInclusive,
+            [&url](auto const & text, sal_Int32 start, sal_Int32 end) {
+                text->setLinkUrlRange(start, end, url);
+            });
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setStrikethrough(bool value) override {
+        for (auto const & paragraph: contents().paragraphs) {
+            paragraph.text->setStrikethrough(value);
+        }
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setStrikethroughRange(
+        sal_Int32 startOffset, sal_Int32 endOffsetInclusive, bool value) override
+    {
+        forRange(
+            u"setStrikethrough", startOffset, endOffsetInclusive,
+            [value](auto const & text, sal_Int32 start, sal_Int32 end) {
+                text->setStrikethroughRange(start, end, value);
+            });
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setText(OUString const &) override {
+        throw notYetImplemented(u"setText");
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setTextAlignment(
+        scriptinterop::TextAlignment textAlignment) override
+    {
+        for (auto const & paragraph: contents().paragraphs) {
+            paragraph.text->setTextAlignment(textAlignment);
+        }
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setTextAlignmentRange(
+        sal_Int32 startOffset, sal_Int32 endOffsetInclusive,
+        scriptinterop::TextAlignment textAlignment) override
+    {
+        forRange(
+            u"setTextAlignment", startOffset, endOffsetInclusive,
+            [textAlignment](auto const & text, sal_Int32 start, sal_Int32 end) {
+                text->setTextAlignmentRange(start, end, textAlignment);
+            });
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setUnderline(bool value) override {
+        for (auto const & paragraph: contents().paragraphs) {
+            paragraph.text->setUnderline(value);
+        }
+        return this;
+    }
+
+    cpo::uno::Reference<scriptinterop::XText> setUnderlineRange(
+        sal_Int32 startOffset, sal_Int32 endOffsetInclusive, bool value) override
+    {
+        forRange(
+            u"setUnderline", startOffset, endOffsetInclusive,
+            [value](auto const & text, sal_Int32 start, sal_Int32 end) {
+                text->setUnderlineRange(start, end, value);
+            });
+        return this;
+    }
+
+private:
+    // The text of one paragraph, and where it starts in the text of the container:
+    struct Paragraph {
+        cpo::uno::Reference<scriptinterop::XText> text;
+        sal_Int32 start;
+        sal_Int32 length;
+    };
+
+    // The paragraphs of the container as the document has them now, and their texts joined with
+    // line ends:
+    struct Contents {
+        std::vector<Paragraph> paragraphs;
+        OUString text;
+    };
+
+    Contents contents() const {
+        Contents result;
+        collect(container_, result);
+        return result;
+    }
+
+    static void collect(
+        cpo::uno::Reference<scriptinterop::XContainerElement> const & container,
+        Contents & contents)
+    {
+        for (sal_Int32 i = 0; i != container->getNumChildren(); ++i) {
+            auto const child = container->getChild(i);
+            if (cpo::uno::Reference<scriptinterop::XParagraph> const paragraph{
+                    child, cpo::uno::UNO_QUERY})
+            {
+                if (!contents.paragraphs.empty()) {
+                    contents.text += "\n";
+                }
+                auto const text = paragraph->editAsText();
+                auto const string = text->getText();
+                contents.paragraphs.push_back(
+                    {text, contents.text.getLength(), string.getLength()});
+                contents.text += string;
+            } else if (cpo::uno::Reference<scriptinterop::XContainerElement> const nested{
+                           child, cpo::uno::UNO_QUERY})
+            {
+                collect(nested, contents);
+            } else {
+                throw cpo::uno::RuntimeException(
+                    "the text of a " + elementTypeName(container->getType())
+                    + " cannot hold a " + elementTypeName(child->getType()));
+            }
+        }
+    }
+
+    static void checkIndex(Contents const & contents, sal_Int32 offset) {
+        if (offset < 0 || offset >= contents.text.getLength()) {
+            throw cpo::uno::RuntimeException(
+                "Index (" + OUString::number(offset) + ") must be less than the content length ("
+                + OUString::number(contents.text.getLength()) + ").");
+        }
+    }
+
+    // As in GAS, the separator after a paragraph has the attributes of the paragraph's last
+    // character:
+    std::pair<cpo::uno::Reference<scriptinterop::XText>, sal_Int32> at(sal_Int32 offset) const {
+        auto const contents = this->contents();
+        checkIndex(contents, offset);
+        for (auto const & paragraph: contents.paragraphs) {
+            if (offset <= paragraph.start + paragraph.length) {
+                auto const inner = std::min(offset - paragraph.start, paragraph.length - 1);
+                return {paragraph.text, std::max<sal_Int32>(inner, 0)};
+            }
+        }
+        throw cpo::uno::RuntimeException(u"the offset is past the last paragraph"_ustr);
+    }
+
+    // Calls f with the text of each paragraph that the range reaches into, and the part of the
+    // range inside it, leaving out the separators:
+    template<typename F> void forRange(
+        std::u16string_view method, sal_Int32 startOffset, sal_Int32 endOffsetInclusive, F f) const
+    {
+        if (startOffset < 0 || endOffsetInclusive < startOffset) {
+            throw cpo::uno::RuntimeException(
+                OUString::Concat(method)
+                + ": expected 0 <= startOffset <= endOffsetInclusive, got startOffset="
+                + OUString::number(startOffset) + ", endOffsetInclusive="
+                + OUString::number(endOffsetInclusive));
+        }
+        auto const contents = this->contents();
+        checkIndex(contents, endOffsetInclusive);
+        for (auto const & paragraph: contents.paragraphs) {
+            auto const start = std::max(startOffset, paragraph.start);
+            auto const end = std::min(endOffsetInclusive, paragraph.start + paragraph.length - 1);
+            if (start <= end) {
+                f(paragraph.text, start - paragraph.start, end - paragraph.start);
+            }
+        }
+    }
+
+    cpo::uno::RuntimeException notYetImplemented(std::u16string_view method) {
+        return cpo::uno::RuntimeException(
+            OUString::Concat(method) + " is not yet implemented for the text of a "
+            + elementTypeName(container_->getType())); // TODO
+    }
+
+    cpo::uno::Reference<scriptinterop::XContainerElement> container_;
+};
+
+template<typename T> cpo::uno::Reference<scriptinterop::XText> ElementImpl<T>::asText() {
+    switch (this->getType()) {
+    case scriptinterop::ElementType_BODY_SECTION:
+    case scriptinterop::ElementType_FOOTNOTE_SECTION:
+    case scriptinterop::ElementType_TABLE:
+    case scriptinterop::ElementType_TABLE_CELL:
+    case scriptinterop::ElementType_TABLE_ROW:
+        return new ContainerTextImpl(cpo::uno::Reference<scriptinterop::XContainerElement>(
+            static_cast<T *>(this), cpo::uno::UNO_QUERY_THROW));
+    default:
+        return cast<scriptinterop::XText>(scriptinterop::ElementType_TEXT);
+    }
+}
 
 class InlineImageImpl: public ElementImpl<scriptinterop::XInlineImage> {
 public:
@@ -1601,6 +1972,8 @@ public:
         return this;
     }
 
+    cpo::uno::Reference<scriptinterop::XText> editAsText() override { return asText(); }
+
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
     // element:
     cpo::uno::Reference<scriptinterop::XElement> copy() override { return this; }
@@ -1691,6 +2064,8 @@ public:
     cpo::uno::Reference<scriptinterop::XContainerElement> clear() override {
         throw cpo::uno::RuntimeException(u"TableRow.clear is not yet implemented"_ustr); // TODO
     }
+
+    cpo::uno::Reference<scriptinterop::XText> editAsText() override { return asText(); }
 
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
     // element:
@@ -1812,6 +2187,8 @@ public:
     cpo::uno::Reference<scriptinterop::XContainerElement> clear() override {
         throw cpo::uno::RuntimeException(u"Table.clear is not yet implemented"_ustr); // TODO
     }
+
+    cpo::uno::Reference<scriptinterop::XText> editAsText() override { return asText(); }
 
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
     // element:
@@ -2318,6 +2695,8 @@ public:
         return this;
     }
 
+    cpo::uno::Reference<scriptinterop::XText> editAsText() override { return asText(); }
+
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
     // element:
     cpo::uno::Reference<scriptinterop::XElement> copy() override { return this; }
@@ -2455,6 +2834,8 @@ public:
             cpo::uno::Reference<css::beans::XPropertySet>(kept, cpo::uno::UNO_QUERY_THROW));
         return this;
     }
+
+    cpo::uno::Reference<scriptinterop::XText> editAsText() override { return asText(); }
 
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
     // element:

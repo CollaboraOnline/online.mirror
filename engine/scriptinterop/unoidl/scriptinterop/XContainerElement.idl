@@ -11,8 +11,12 @@
 
 module scriptinterop {
 
+interface XText;
+
 interface XContainerElement: XElement {
     XContainerElement clear();
+
+    XText editAsText();
 
     XElement getChild([in] long index);
 
