@@ -283,6 +283,9 @@ public:
     bool                finalizeImport( const cpo::uno::Reference< css::sheet::XDatabaseRange >& rxDatabaseRange,
                                         sal_Int16 nSheet );
 
+    /** Returns true, if an auto filter was imported. */
+    bool                hasAutoFilter() const { return !maAutoFilters.empty(); }
+
 private:
     /** Returns the auto filter object used to perform auto filtering. */
     AutoFilter*         getActiveAutoFilter();
