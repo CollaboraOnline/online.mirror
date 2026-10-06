@@ -593,11 +593,13 @@ globalThis.__gasKitRunner = function(
             getIdentityToken: scriptAppNotSupported('getIdentityToken'),
             getService: scriptAppNotSupported('getService'),
             getInstallationSource: scriptAppNotSupported('getInstallationSource'),
+            newStateToken: scriptAppNotSupported('newStateToken'),
             newTrigger: scriptAppNotSupported('newTrigger'),
             getProjectTriggers: scriptAppNotSupported('getProjectTriggers'),
             getUserTriggers: scriptAppNotSupported('getUserTriggers'),
             deleteTrigger: scriptAppNotSupported('deleteTrigger'),
             requireAllScopes: scriptAppNotSupported('requireAllScopes'),
+            requireScopes: scriptAppNotSupported('requireScopes'),
             getAuthorizationInfo: scriptAppNotSupported('getAuthorizationInfo'),
             invalidateAuth: scriptAppNotSupported('invalidateAuth')
         };
