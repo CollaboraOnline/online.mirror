@@ -33,6 +33,7 @@
 #include <wsd/RemoteDocumentBroker.hpp>
 
 #include <Poco/Exception.h>
+#include <Poco/File.h>
 #include <Poco/Net/AcceptCertificateHandler.h>
 #include <Poco/Net/Context.h>
 #include <Poco/Net/DNS.h>
@@ -43,6 +44,7 @@
 #include <Poco/Net/KeyConsoleHandler.h>
 #include <Poco/Net/NameValueCollection.h>
 #include <Poco/Net/SSLManager.h>
+#include <Poco/Path.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
 

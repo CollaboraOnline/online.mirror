@@ -21,6 +21,8 @@
 #include <common/Anonymizer.hpp>
 #include <fuzzer/Common.hpp>
 
+#include <Poco/Net/HTTPRequest.h>
+
 bool DoInitialization()
 {
     COOLWSD::ChildRoot = "/tmp/clientsession-fuzzer/child-root";

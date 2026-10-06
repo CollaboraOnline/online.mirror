@@ -42,6 +42,8 @@
 #include <wsd/COOLWSD.hpp>
 #include <wsd/DocumentBroker.hpp>
 
+#include <Poco/Path.h>
+
 // Declare the coolwsd pointer at global scope
 COOLWSD *coolwsd = nullptr;
 

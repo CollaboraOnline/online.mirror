@@ -15,6 +15,7 @@
 #include <wsd/FileServer.hpp>
 #include <wsd/RequestDetails.hpp>
 
+#include <Poco/File.h>
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Object.h>
 #include <Poco/Util/Application.h>

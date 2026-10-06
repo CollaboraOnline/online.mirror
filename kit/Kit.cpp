@@ -117,6 +117,7 @@ Util::LoadTimings KitLoadTimings;
 
 #include <Poco/File.h>
 #include <Poco/Exception.h>
+#include <Poco/Path.h>
 #include <Poco/URI.h>
 
 #ifdef QTAPP

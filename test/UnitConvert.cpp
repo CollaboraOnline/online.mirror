@@ -24,6 +24,7 @@
 #include <common/FileUtil.hpp>
 #include <helpers.hpp>
 
+#include <Poco/Path.h>
 #include <Poco/Util/LayeredConfiguration.h>
 
 using namespace std::literals;

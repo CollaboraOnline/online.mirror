@@ -70,6 +70,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Node.h>
 #include <Poco/Exception.h>
+#include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/SHA1Engine.h>
 #include <Poco/StreamCopier.h>

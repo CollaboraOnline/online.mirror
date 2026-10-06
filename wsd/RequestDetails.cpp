@@ -28,6 +28,7 @@
 #endif // !MOBILEAPP
 #include <wsd/Exceptions.hpp>
 
+#include <Poco/Net/HTTPRequest.h>
 #include <Poco/URI.h>
 
 #include <cctype>

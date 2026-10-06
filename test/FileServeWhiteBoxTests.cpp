@@ -22,6 +22,8 @@
 #include <common/Util.hpp>
 #include <test/lokassert.hpp>
 
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <Poco/String.h>
 
 #include <cppunit/TestAssert.h>

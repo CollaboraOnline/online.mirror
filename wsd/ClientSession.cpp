@@ -49,10 +49,12 @@
 
 #include <common/base64.hpp>
 
+#include <Poco/File.h>
 #include <Poco/JSON/Array.h>
 #include <Poco/JSON/Parser.h>
 #include <Poco/MemoryStream.h>
 #include <Poco/Net/HTTPResponse.h>
+#include <Poco/Path.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/Timestamp.h>
 #include <Poco/URI.h>

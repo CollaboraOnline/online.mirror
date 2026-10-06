@@ -24,6 +24,7 @@
 #include <common/Util.hpp>
 
 #include <Poco/MemoryStream.h>
+#include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 
 #include <cstdint>

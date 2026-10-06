@@ -32,6 +32,8 @@
 #include <unordered_map>
 #include <utility>
 
+#include <Poco/Path.h>
+
 struct PerfMetricInfo
 {
     std::string _phase;

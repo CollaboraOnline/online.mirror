@@ -45,6 +45,7 @@
 #include <wsd/Exceptions.hpp>
 
 #include <Poco/Exception.h>
+#include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>

@@ -30,6 +30,7 @@
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/KeyConsoleHandler.h>
 #include <Poco/Net/SSLManager.h>
+#include <Poco/Path.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
 #include <Poco/Util/Application.h>

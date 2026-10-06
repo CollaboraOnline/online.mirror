@@ -12,6 +12,7 @@
 #include <config.h>
 
 #include <ctime>
+#include <iomanip>
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

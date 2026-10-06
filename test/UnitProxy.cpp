@@ -23,6 +23,8 @@
 #include <net/HttpRequest.hpp>
 #include <test/helpers.hpp>
 
+#include <Poco/Path.h>
+
 using namespace std::literals;
 
 class UnitProxyProtocol : public UnitWSD

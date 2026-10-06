@@ -28,6 +28,8 @@
 #include <common/Util.hpp>
 #include <common/base64.hpp>
 
+#include <Poco/Net/HTTPRequest.h>
+#include <Poco/Path.h>
 #include <Poco/URI.h>
 #include <Poco/Util/Application.h>
 
@@ -744,5 +746,14 @@ namespace Util
 namespace SigUtil {
     std::atomic<int> SigHandlerTrap::SigHandling;
 } // end namespace SigUtil
+
+std::ostream& operator<<(std::ostream& os, const Poco::Net::HTTPRequest& request)
+{
+    os << request.getMethod() << ' ' << request.getVersion() << ' ' << request.getURI()
+       << ", content-length: " << request.getContentLength64()
+       << ", chunked: " << request.getChunkedTransferEncoding() << ", ";
+    Util::joinPair(os, request, " / ");
+    return os;
+}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

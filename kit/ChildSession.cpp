@@ -45,6 +45,7 @@
 
 #include <COKit/COKit.hxx>
 
+#include <Poco/Path.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/URI.h>
 #include <Poco/BinaryReader.h>
@@ -73,6 +74,7 @@
 #include <climits>
 #include <fstream>
 #include <cctype>
+#include <iomanip>
 #include <sstream>
 #include <string>
 #include <string_view>

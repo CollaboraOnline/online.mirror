@@ -19,6 +19,8 @@
 #include <WopiTestServer.hpp>
 #include <common/Log.hpp>
 
+#include <Poco/Net/HTTPRequest.h>
+
 class UnitWopiLanguages : public WopiTestServer
 {
     STATE_ENUM(Phase, Load, Save, Finish, Done) _phase;

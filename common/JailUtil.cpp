@@ -42,6 +42,9 @@
 #include <unistd.h>
 #include <vector>
 
+#include <Poco/File.h>
+#include <Poco/Path.h>
+
 #ifdef __linux__
 #include <sys/sysmacros.h>
 #endif

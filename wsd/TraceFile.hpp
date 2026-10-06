@@ -28,6 +28,7 @@
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/DeflatingStream.h>
 #include <Poco/InflatingStream.h>
+#include <Poco/Path.h>
 #include <Poco/URI.h>
 
 #include <chrono>

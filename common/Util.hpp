@@ -18,10 +18,6 @@
 
 #include <typeinfo>
 
-#include <Poco/File.h>
-#include <Poco/Net/HTTPRequest.h>
-#include <Poco/Path.h>
-
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -30,7 +26,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <iomanip>
 #include <map>
 #include <memory.h>
 #include <mutex>
@@ -39,6 +34,11 @@
 #include <string_view>
 #include <utility>
 #include <vector>
+
+namespace Poco::Net
+{
+class HTTPRequest;
+}
 
 #if CODE_COVERAGE
 extern "C"
@@ -1029,7 +1029,7 @@ int main(int argc, char**argv)
         if (elapsedSec != std::chrono::seconds::zero())
             ss << elapsedSec << ' ';
 
-        ss << std::setprecision(3) << elapsedMs;
+        ss << elapsedMs;
         ss << (past ? " ago)" : " later)");
         return ss.str();
     }
@@ -1305,14 +1305,7 @@ inline std::ostream& operator<<(std::ostream& os, const std::chrono::system_cloc
     return os;
 }
 
-inline std::ostream& operator<<(std::ostream& os, const Poco::Net::HTTPRequest& request)
-{
-    os << request.getMethod() << ' ' << request.getVersion() << ' ' << request.getURI()
-       << ", content-length: " << request.getContentLength64()
-       << ", chunked: " << request.getChunkedTransferEncoding() << ", ";
-    Util::joinPair(os, request, " / ");
-    return os;
-}
+std::ostream& operator<<(std::ostream& os, const Poco::Net::HTTPRequest& request);
 
 // std::to_underlying will be available in C++23
 template <typename Enum> constexpr std::underlying_type_t<Enum> to_underlying(Enum e)

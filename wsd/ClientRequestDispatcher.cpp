@@ -72,6 +72,7 @@
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/PartHandler.h>
+#include <Poco/Path.h>
 #include <Poco/SAX/InputSource.h>
 #include <Poco/StreamCopier.h>
 

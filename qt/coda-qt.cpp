@@ -25,6 +25,8 @@
 #include <qt/WebView.hpp>
 #include <qt/qt.hpp>
 
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <Poco/URI.h>
 
 #include <QApplication>

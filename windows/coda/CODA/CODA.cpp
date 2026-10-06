@@ -43,8 +43,10 @@
 #include <wrl.h>
 #include <wil/com.h>
 
+#include <Poco/File.h>
 #include <Poco/JSON/Array.h>
 #include <Poco/MemoryStream.h>
+#include <Poco/Path.h>
 
 #include <common/AIHttpTransport.hpp>
 #include <common/Clipboard.hpp>

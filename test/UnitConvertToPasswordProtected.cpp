@@ -27,9 +27,11 @@
 #include <common/FileUtil.hpp>
 #include <helpers.hpp>
 
+#include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTMLForm.h>
 #include <Poco/Net/FilePartSource.h>
+#include <Poco/Path.h>
 #include <Poco/StreamCopier.h>
 #include <Poco/Util/LayeredConfiguration.h>
 

@@ -21,6 +21,7 @@
 #include <net/HttpRequest.hpp>
 #include <net/NetUtil.hpp>
 
+#include <Poco/Exception.h>
 #include <Poco/URI.h>
 
 #include <memory>

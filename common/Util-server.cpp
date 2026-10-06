@@ -23,6 +23,7 @@
 #include <common/Util.hpp>
 
 #include <Poco/Exception.h>
+#include <Poco/File.h>
 
 #include <cstring>
 #include <dirent.h>

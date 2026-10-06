@@ -26,6 +26,7 @@
 #include <memory>
 #include <string>
 
+#include <Poco/Path.h>
 #include <Poco/URI.h>
 
 class ClientSession;

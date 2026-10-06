@@ -23,6 +23,7 @@
 #include <cppunit/TestAssert.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include <Poco/Path.h>
 #include <Poco/URI.h>
 
 /// Uri unit-tests.

@@ -33,6 +33,9 @@
 #include <wsd/ServerAuditUtil.hpp>
 #include <wsd/Storage.hpp>
 
+#include <Poco/File.h>
+#include <Poco/Path.h>
+
 #if !MOBILEAPP
 #include <common/JailUtil.hpp>
 #include <wsd/wopi/CheckFileInfo.hpp>

@@ -27,6 +27,7 @@
 #include <wsd/ClientSession.hpp>
 #include <wsd/DocumentBroker.hpp>
 
+#include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/URI.h>
 

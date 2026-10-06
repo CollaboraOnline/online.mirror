@@ -24,7 +24,9 @@
 #include <wsd/DocumentBroker.hpp>
 #include <wsd/Process.hpp>
 
+#include <Poco/File.h>
 #include <Poco/Net/HTTPRequest.h>
+#include <Poco/Path.h>
 #include <csignal>
 #include <ctime>
 

@@ -21,6 +21,7 @@
 #include <common/Uri.hpp>
 #include <wsd/COOLWSD.hpp>
 
+#include <Poco/Path.h>
 #include <Poco/URI.h>
 
 #include <chrono>
