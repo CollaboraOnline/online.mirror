@@ -128,13 +128,6 @@ window.L.Control.Notebookbar = window.L.Control.extend({
 				docLogo.style.backgroundImage = "url(" + window.logoURL + ")";
 			}
 		}
-
-		this.onDarkModeToggleChange();
-
-		if (!this.map.serverAuditDialog) {
-			this.hideItem('server-audit');
-			this.hideItem('help-serveraudit-break');
-		}
 	},
 
 	onRemove: function() {
@@ -229,6 +222,14 @@ window.L.Control.Notebookbar = window.L.Control.extend({
 		this.clearNotebookbar();
 
 		this.builder.build(this.container, [this.model.getSnapshot()]);
+
+		// build() rebuilds the notebookbar DOM, so re-apply the imperative
+		// item visibility that create() sets up but cannot persist here.
+		this.onDarkModeToggleChange();
+		if (!this.map.serverAuditDialog) {
+			this.hideItem('server-audit');
+			this.hideItem('help-serveraudit-break');
+		}
 
 		if (this._showNotebookbar === false)
 			this.hideTabs();
