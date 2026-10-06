@@ -93,6 +93,7 @@ public:
     void testCellLinkDestinations();
     void testPageRangeSkipsSheetStart();
     void testDatabaseRangeHeader();
+    void testTableStyleCellStyleExcludedFont();
     void testForcepoint97();
 #if ENABLE_PDFIMPORT
     void testTdf156893();
@@ -120,6 +121,7 @@ public:
     CPPUNIT_TEST(testCellLinkDestinations);
     CPPUNIT_TEST(testPageRangeSkipsSheetStart);
     CPPUNIT_TEST(testDatabaseRangeHeader);
+    CPPUNIT_TEST(testTableStyleCellStyleExcludedFont);
     CPPUNIT_TEST(testForcepoint97);
 #if ENABLE_PDFIMPORT
     CPPUNIT_TEST(testTdf156893);
@@ -1225,6 +1227,41 @@ void ScPDFExportTest::testDatabaseRangeHeader()
     CPPUNIT_ASSERT_EQUAL("TH/Column TH/Column | TD TD | TD TD | TD | TD TD | TD TD | "
                          "TH/Row TD | TH/Row TD | "_ostr,
                          aCells.makeStringAndClear());
+}
+
+void ScPDFExportTest::testTableStyleCellStyleExcludedFont()
+{
+    std::shared_ptr<vcl::pdf::PDFium> pPDFium = vcl::pdf::PDFiumLibrary::get();
+    if (!pPDFium)
+        return;
+
+    loadFromURL(m_directories.getURLFromSrc(u"/sc/qa/unit/data/xlsx/",
+                                            u"tablestyle-cellstyle-excluded-font.xlsx"));
+    exportWholeDocumentToPDF();
+
+    std::unique_ptr<vcl::pdf::PDFiumDocument> pPdfDocument = parsePDFExport();
+    std::unique_ptr<vcl::pdf::PDFiumPage> pPdfPage = pPdfDocument->openPage(0);
+    std::unique_ptr<vcl::pdf::PDFiumTextPage> pTextPage = pPdfPage->getTextPage();
+    Color aD2Color, aE2Color;
+    for (int nObject = 0; nObject < pPdfPage->getObjectCount(); ++nObject)
+    {
+        std::unique_ptr<vcl::pdf::PDFiumPageObject> pObject = pPdfPage->getObject(nObject);
+        if (pObject->getType() != vcl::pdf::PDFPageObjectType::Text)
+            continue;
+        // PDFium separates the texts of a row with a space
+        const OUString aText = pObject->getText(pTextPage).trim();
+        if (aText == "23234")
+            aD2Color = pObject->getFillColor();
+        else if (aText == "qqqqq")
+            aE2Color = pObject->getFillColor();
+    }
+
+    // D2 gets the table colour, a green with this theme
+    CPPUNIT_ASSERT_EQUAL(Color(0x13501b), aD2Color);
+
+    // E2 keeps the red-brown of Normal, like in MSO. Without the fix in place, the paint took the
+    // font of D2 over to E2, because the two patterns give the same font, so E2 was green too.
+    CPPUNIT_ASSERT_EQUAL(Color(0x912d0a), aE2Color);
 }
 
 // just needs to not crash on export to pdf

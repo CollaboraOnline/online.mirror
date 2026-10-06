@@ -153,6 +153,7 @@ static ItemInfoPackage& getItemInfoPackageScDocument()
             { ATTR_VALIDDATA, new SfxUInt32Item( ATTR_VALIDDATA, 0 ), 0, SFX_ITEMINFOFLAG_NONE },
             { ATTR_CONDITIONAL, new ScCondFormatItem, 0, SFX_ITEMINFOFLAG_NONE },
             { ATTR_HYPERLINK, new SfxStringItem( ATTR_HYPERLINK, OUString() ) , 0, SFX_ITEMINFOFLAG_NONE },
+            { ATTR_EXCLUDED_FONT, nullptr, 0, SFX_ITEMINFOFLAG_NONE },
             { ATTR_LRSPACE, new SvxLRSpaceItem( ATTR_LRSPACE ), SID_ATTR_LRSPACE, SFX_ITEMINFOFLAG_NONE },
             { ATTR_ULSPACE, new SvxULSpaceItem( ATTR_ULSPACE ), SID_ATTR_ULSPACE, SFX_ITEMINFOFLAG_NONE },
             { ATTR_PAGE, new SvxPageItem( ATTR_PAGE ), SID_ATTR_PAGE, SFX_ITEMINFOFLAG_NONE },
@@ -220,6 +221,12 @@ static ItemInfoPackage& getItemInfoPackageScDocument()
             // return immediately if we have the static entry and Item
             if (nullptr != rRetval.getItem())
                 return rRetval;
+
+            if (ATTR_EXCLUDED_FONT == rRetval.getWhich())
+            {
+                SfxItemSet aSetItemItemSet(rPool, svl::Items<ATTR_FONT, ATTR_FONT_RELIEF>);
+                return *new ItemInfoDynamic(rRetval, new SvxSetItem(ATTR_EXCLUDED_FONT, aSetItemItemSet));
+            }
 
             if (ATTR_PAGE_HEADERSET == rRetval.getWhich())
             {

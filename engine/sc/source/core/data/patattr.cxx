@@ -39,6 +39,7 @@
 #include <editeng/frmdiritem.hxx>
 #include <editeng/langitem.hxx>
 #include <editeng/postitem.hxx>
+#include <svx/pageitem.hxx>
 #include <svx/rotmodit.hxx>
 #include <editeng/scriptspaceitem.hxx>
 #include <editeng/shaditem.hxx>
@@ -592,16 +593,41 @@ bool ScPatternAttr::CanApplyTableItemToCell(const SfxItemSet& rItemSet, sal_uInt
         = pDefault ? pDefault->Get(nWhich) : rItemSet.GetPool()->GetUserOrPoolDefaultItem(nWhich);
     const SfxPoolItem& rCellValue = rItemSet.Get(nWhich);
 
-    if (nWhich == ATTR_FONT_COLOR)
-    {
+    auto isSameValue = [nWhich](const SfxPoolItem& rItem1, const SfxPoolItem& rItem2) {
+        if (nWhich != ATTR_FONT_COLOR)
+            return rItem1 == rItem2;
         auto getFontColor = [](const SfxPoolItem& rItem) {
             const Color& rColor = static_cast<const SvxColorItem&>(rItem).getColor();
             return rColor == COL_AUTO ? COL_BLACK : rColor;
         };
-        return getFontColor(rCellValue) == getFontColor(rDefault);
+        return getFontColor(rItem1) == getFontColor(rItem2);
+    };
+
+    if (!isSameValue(rCellValue, rDefault))
+        return false;
+
+    // The cell has the value of the Default cell style, but it still wins when its cell style
+    // defines another one. Like MSO, the font that a cell style defines but does not apply counts
+    // too: a cell keeps Normal's red under a style with automatic colour in that font.
+    for (const SfxItemSet* pStyle = rItemSet.GetParent(); pStyle && pStyle != pDefault;
+         pStyle = pStyle->GetParent())
+    {
+        const SfxPoolItem* pStyleValue = nullptr;
+        if (pStyle->GetItemState(nWhich, false, &pStyleValue) != SfxItemState::SET)
+        {
+            pStyleValue = nullptr;
+            if (const SvxSetItem* pExcludedFont = pStyle->GetItemIfSet(ATTR_EXCLUDED_FONT, false))
+            {
+                if (pExcludedFont->GetItemSet().GetItemState(nWhich, false, &pStyleValue)
+                    != SfxItemState::SET)
+                    pStyleValue = nullptr;
+            }
+        }
+        if (pStyleValue)
+            return isSameValue(rCellValue, *pStyleValue);
     }
 
-    return rCellValue == rDefault;
+    return true;
 }
 
 template <class T>

@@ -177,6 +177,16 @@ void ScStyleSheetPool::CopyStyleFrom( SfxStyleSheetBasePool* pSrcPool,
     }
     else if ( eFamily == SfxStyleFamily::Para )
     {
+        //  The font that the style does not apply belongs to the pool of the source document
+
+        if ( const SvxSetItem* pSetItem = rSourceSet.GetItemIfSet( ATTR_EXCLUDED_FONT, false ) )
+        {
+            const SfxItemSet& rSrcSub = pSetItem->GetItemSet();
+            SfxItemSet aDestSub( *rDestSet.GetPool(), rSrcSub.GetRanges() );
+            aDestSub.PutExtended( rSrcSub, SfxItemState::INVALID, SfxItemState::DEFAULT );
+            rDestSet.Put( SvxSetItem( ATTR_EXCLUDED_FONT, aDestSub ) );
+        }
+
         // number format exchange list has to be handled here, too
 
         const SfxUInt32Item* pItem;

@@ -54,6 +54,7 @@
 #include <editeng/boxitem.hxx>
 #include <editeng/lineitem.hxx>
 #include <editeng/brushitem.hxx>
+#include <svx/pageitem.hxx>
 #include <svx/rotmodit.hxx>
 #include <tools/fontenum.hxx>
 #include <tools/UnitConversion.hxx>
@@ -2812,7 +2813,22 @@ void CellStyle::createCellStyle()
 
     // bDefStyle==true omits default pool items in CreatePattern()
     if( bCreatePattern && mpStyleSheet && pXF )
+    {
         mpStyleSheet->GetItemSet().Put( pXF->createPattern( bDefStyle ).GetItemSet() );
+
+        // The font that the style defines but does not apply still decides, like in MSO, whether
+        // a table style may paint over the font of its cells, see
+        // ScPatternAttr::CanApplyTableItemToCell.
+        if( !bDefStyle && !pXF->isFontUsed() )
+        {
+            if( FontRef xFont = pXF->getFont() )
+            {
+                SfxItemSetFixed<ATTR_FONT, ATTR_FONT_RELIEF> aExcludedFont( *rDoc.GetPool() );
+                xFont->fillToItemSet( aExcludedFont, false );
+                mpStyleSheet->GetItemSet().Put( SvxSetItem( ATTR_EXCLUDED_FONT, aExcludedFont ) );
+            }
+        }
+    }
 }
 
 void CellStyle::finalizeImport( const OUString& rFinalName )

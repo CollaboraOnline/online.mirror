@@ -37,6 +37,7 @@
 #include <editeng/fontitem.hxx>
 #include <editeng/justifyitem.hxx>
 #include <editeng/langitem.hxx>
+#include <svx/pageitem.hxx>
 #include <document.hxx>
 #include <stlpool.hxx>
 #include <stlsheet.hxx>
@@ -2173,6 +2174,21 @@ void XclExpXF::Init( const SfxItemSet& rItemSet, sal_Int16 nScript,
     {
         mnXclFont = nForceXclFont;
         mbFontUsed = true;
+    }
+
+    // A style that does not apply a font still defines one, which decides whether a table style
+    // may paint over the font of its cells, see ScPatternAttr::CanApplyTableItemToCell. The font
+    // that such a style inherits does not count as its own then.
+    if (IsStyleXF())
+    {
+        const SvxSetItem* pExcludedFont = rItemSet.GetItemIfSet(ATTR_EXCLUDED_FONT, false);
+        if (pExcludedFont && !XclExpFontHelper::CheckItems(GetRoot(), rItemSet, nScript, false))
+        {
+            SfxItemSet aExcludedFont(pExcludedFont->GetItemSet());
+            aExcludedFont.SetParent(&rItemSet);
+            mnXclFont = GetFontBuffer().Insert(aExcludedFont, nScript, EXC_COLOR_CELLTEXT, false);
+            mbFontUsed = false;
+        }
     }
 
     // number format

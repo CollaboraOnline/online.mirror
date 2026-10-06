@@ -662,6 +662,8 @@ public:
 
     /** Returns true, if the XF is a cell XF, and false, if it is a style XF. */
     bool         isCellXf() const { return maModel.mbCellXf; }
+    /** Returns true, if the XF applies its font (applyFont). */
+    bool         isFontUsed() const { return maModel.mbFontUsed; }
 
     /** Returns the referred font object. */
     FontRef             getFont() const;

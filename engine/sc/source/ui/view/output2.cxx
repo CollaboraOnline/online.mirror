@@ -1817,7 +1817,13 @@ void ScOutputData::LayoutStringsImpl(bool const bPixelToLogic, RowInfo* const pT
         if ( !ScPatternAttr::areSame(pPattern, pOldPattern) || pCondSet != pOldCondSet ||
              pTableSet != pOldTableSet || nScript != nOldScript || mbSyntaxMode )
         {
-            if ( StringDiffer(pOldPattern,pPattern) || pCondSet != pOldCondSet ||
+            // Under a table style the cell style decides about the font too, even when both
+            // patterns give the same font, see ScPatternAttr::CanApplyTableItemToCell.
+            // Check it before StringDiffer, which takes the new pattern as the old one when it
+            // finds no difference.
+            const bool bCellStyleChanged = pTableSet && pOldPattern
+                                           && pPattern->GetStyleSheet() != pOldPattern->GetStyleSheet();
+            if ( bCellStyleChanged || StringDiffer(pOldPattern,pPattern) || pCondSet != pOldCondSet ||
                  pTableSet != pOldTableSet || nScript != nOldScript || mbSyntaxMode )
             {
                 aVars.SetPattern(pPattern, pCondSet, pTableSet, aCell, nScript);

@@ -157,48 +157,51 @@ inline constexpr TypedWhichId<SvxShadowItem> ATTR_SHADOW (152);
 inline constexpr TypedWhichId<SfxUInt32Item> ATTR_VALIDDATA (153);
 inline constexpr TypedWhichId<ScCondFormatItem> ATTR_CONDITIONAL (154);
 inline constexpr TypedWhichId<SfxStringItem> ATTR_HYPERLINK (155);
+// the font that a cell style defines but does not apply (XLSX applyFont="0"), only to decide
+// whether a table style may paint over a cell, see ScPatternAttr::CanApplyTableItemToCell
+inline constexpr TypedWhichId<SvxSetItem> ATTR_EXCLUDED_FONT (156);
 
-inline constexpr sal_uInt16 ATTR_PATTERN_END(155);     // end cell-attribute-pattern
+inline constexpr sal_uInt16 ATTR_PATTERN_END(156);     // end cell-attribute-pattern
                                         // page attributes
-inline constexpr TypedWhichId<SvxLRSpaceItem> ATTR_LRSPACE (156);    // editor: PageDesc-TabPage
-inline constexpr TypedWhichId<SvxULSpaceItem> ATTR_ULSPACE (157);
-inline constexpr TypedWhichId<SvxPageItem> ATTR_PAGE (158);
-inline constexpr TypedWhichId<SvxPaperBinItem> ATTR_PAGE_PAPERBIN (159);
-inline constexpr TypedWhichId<SvxSizeItem> ATTR_PAGE_SIZE (160);
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_HORCENTER (161);
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_VERCENTER (162);
+inline constexpr TypedWhichId<SvxLRSpaceItem> ATTR_LRSPACE (157);    // editor: PageDesc-TabPage
+inline constexpr TypedWhichId<SvxULSpaceItem> ATTR_ULSPACE (158);
+inline constexpr TypedWhichId<SvxPageItem> ATTR_PAGE (159);
+inline constexpr TypedWhichId<SvxPaperBinItem> ATTR_PAGE_PAPERBIN (160);
+inline constexpr TypedWhichId<SvxSizeItem> ATTR_PAGE_SIZE (161);
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_HORCENTER (162);
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_VERCENTER (163);
 
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_ON (163);     // editor: header/footer-page
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_DYNAMIC (164);
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_SHARED (165);
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_SHARED_FIRST (166);
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_ON (164);     // editor: header/footer-page
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_DYNAMIC (165);
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_SHARED (166);
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_SHARED_FIRST (167);
 
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_NOTES (167);     // editor: table
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_GRID (168);
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_HEADERS (169);
-inline constexpr TypedWhichId<ScViewObjectModeItem> ATTR_PAGE_CHARTS (170);
-inline constexpr TypedWhichId<ScViewObjectModeItem> ATTR_PAGE_OBJECTS (171);
-inline constexpr TypedWhichId<ScViewObjectModeItem> ATTR_PAGE_DRAWINGS (172);
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_TOPDOWN (173);
-inline constexpr TypedWhichId<SfxUInt16Item> ATTR_PAGE_SCALE (174);
-inline constexpr TypedWhichId<SfxUInt16Item> ATTR_PAGE_SCALETOPAGES (175);
-inline constexpr TypedWhichId<SfxUInt16Item> ATTR_PAGE_FIRSTPAGENO (176);
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_NOTES (168);     // editor: table
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_GRID (169);
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_HEADERS (170);
+inline constexpr TypedWhichId<ScViewObjectModeItem> ATTR_PAGE_CHARTS (171);
+inline constexpr TypedWhichId<ScViewObjectModeItem> ATTR_PAGE_OBJECTS (172);
+inline constexpr TypedWhichId<ScViewObjectModeItem> ATTR_PAGE_DRAWINGS (173);
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_TOPDOWN (174);
+inline constexpr TypedWhichId<SfxUInt16Item> ATTR_PAGE_SCALE (175);
+inline constexpr TypedWhichId<SfxUInt16Item> ATTR_PAGE_SCALETOPAGES (176);
+inline constexpr TypedWhichId<SfxUInt16Item> ATTR_PAGE_FIRSTPAGENO (177);
 
-inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_HEADERLEFT (177);     // contents of header/
-inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_FOOTERLEFT (178);     // footer (left)
-inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_HEADERRIGHT (179);    // contents of header/
-inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_FOOTERRIGHT (180);    // footer (right)
-inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_HEADERFIRST (181);    // contents of header/
-inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_FOOTERFIRST (182);    // footer (first page)
-inline constexpr TypedWhichId<SvxSetItem> ATTR_PAGE_HEADERSET (183);     // the corresponding sets
-inline constexpr TypedWhichId<SvxSetItem> ATTR_PAGE_FOOTERSET (184);
+inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_HEADERLEFT (178);     // contents of header/
+inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_FOOTERLEFT (179);     // footer (left)
+inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_HEADERRIGHT (180);    // contents of header/
+inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_FOOTERRIGHT (181);    // footer (right)
+inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_HEADERFIRST (182);    // contents of header/
+inline constexpr TypedWhichId<ScPageHFItem> ATTR_PAGE_FOOTERFIRST (183);    // footer (first page)
+inline constexpr TypedWhichId<SvxSetItem> ATTR_PAGE_HEADERSET (184);     // the corresponding sets
+inline constexpr TypedWhichId<SvxSetItem> ATTR_PAGE_FOOTERSET (185);
 
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_FORMULAS (185);
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_NULLVALS (186);
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_FORMULAS (186);
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_PAGE_NULLVALS (187);
 
-inline constexpr TypedWhichId<ScPageScaleToItem> ATTR_PAGE_SCALETO (187);     // #i8868# scale printout to width/height
+inline constexpr TypedWhichId<ScPageScaleToItem> ATTR_PAGE_SCALETO (188);     // #i8868# scale printout to width/height
 
-inline constexpr TypedWhichId<SfxBoolItem> ATTR_HIDDEN (188);
+inline constexpr TypedWhichId<SfxBoolItem> ATTR_HIDDEN (189);
 
 inline constexpr sal_uInt16 ATTR_ENDINDEX(ATTR_HIDDEN);        // end of pool-range
 

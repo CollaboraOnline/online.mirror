@@ -182,7 +182,8 @@ public:
     SvxCellOrientation GetCellOrientation( const SfxItemSet* pCondSet = nullptr ) const;
 
     /** True when a Table Style may paint nWhich over the cell's own value: for a font
-        attribute, when the cell ends up with the value of the Default cell style. */
+        attribute, when the cell ends up with the value of the Default cell style, and no cell
+        style in between defines another one, not even in its ATTR_EXCLUDED_FONT. */
     static bool CanApplyTableItemToCell(const SfxItemSet& rItemSet, sal_uInt16 nWhich);
 
     /** Static helper function to fill a font object from the passed item set. */

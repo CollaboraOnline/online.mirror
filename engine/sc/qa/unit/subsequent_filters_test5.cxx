@@ -24,6 +24,8 @@
 #include <sc.hrc>
 #include <scitems.hxx>
 #include <sortparam.hxx>
+#include <stlpool.hxx>
+#include <stlsheet.hxx>
 #include <tabvwsh.hxx>
 #include <types.hxx>
 #include <undomanager.hxx>
@@ -38,6 +40,7 @@
 #include <editeng/udlnitem.hxx>
 #include <editeng/wghtitem.hxx>
 #include <editeng/eeitem.hxx>
+#include <svx/pageitem.hxx>
 #include <tablestyle.hxx>
 
 #include <sfx2/dispatch.hxx>
@@ -818,6 +821,55 @@ CPPUNIT_TEST_FIXTURE(ScFiltersTest5, testTableStyleHeaderFontColor)
     CPPUNIT_ASSERT_EQUAL(aOwnColor, getRenderedColor(1));
     CPPUNIT_ASSERT_EQUAL(aStyleColor, getRenderedColor(2));
     CPPUNIT_ASSERT_EQUAL(aStyleColor, getRenderedColor(3));
+}
+
+CPPUNIT_TEST_FIXTURE(ScFiltersTest5, testTableStyleCellStyleExcludedFont)
+{
+    createScDoc("xlsx/tablestyle-cellstyle-excluded-font.xlsx");
+
+    auto checkColors = [this]() {
+        ScDocument* pDoc = getScDoc();
+        ScDBData* pDBData = pDoc->GetDBCollection()->getNamedDBs().findByUpperName(u"TABLE1"_ustr);
+        CPPUNIT_ASSERT(pDBData);
+        const ScTableStyleParam* pParam = pDBData->GetTableStyleInfo();
+        CPPUNIT_ASSERT(pParam);
+        CPPUNIT_ASSERT_EQUAL(u"TableStyleLight4"_ustr, pParam->maStyleID);
+        const ScTableStyle* pStyle = pDoc->GetTableStyles()->GetTableStyle(pParam->maStyleID);
+        CPPUNIT_ASSERT(pStyle);
+
+        // Zeit keeps its font out of its cells, only the table style check sees it
+        SfxStyleSheetBase* pZeit = pDoc->GetStyleSheetPool()->Find(u"Zeit"_ustr, SfxStyleFamily::Para);
+        CPPUNIT_ASSERT(pZeit);
+        CPPUNIT_ASSERT(pZeit->GetItemSet().GetItemState(ATTR_FONT_COLOR, false) != SfxItemState::SET);
+        CPPUNIT_ASSERT(pZeit->GetItemSet().GetItemIfSet(ATTR_EXCLUDED_FONT, false));
+
+        // The data rows start in row 2, so the row index is one less than the row
+        auto getRenderedColor = [pDoc, pDBData, pStyle](SCCOL nCol, SCROW nRow) {
+            const SfxItemSet* pTableSet = pStyle->GetFontItemSet(*pDBData, nCol, nRow, nRow - 1);
+            CPPUNIT_ASSERT(pTableSet);
+            model::ComplexColor aComplexColor;
+            pDoc->GetPattern(nCol, nRow, 0)->fillColor(aComplexColor, ScAutoFontColorMode::Raw,
+                                                       nullptr, pTableSet);
+            return aComplexColor.getFinalColor();
+        };
+
+        const Color aNormalColor(0x912D0A);
+        const SfxItemSet* pDataFont = pStyle->GetFontItemSet(*pDBData, 0, 1, 0);
+        CPPUNIT_ASSERT(pDataFont);
+        const Color aTableColor = pDataFont->Get(ATTR_FONT_COLOR).getColor();
+        CPPUNIT_ASSERT(aTableColor != aNormalColor);
+
+        // MSO paints the table colour over Normal's colour, under Currency too, but the font of
+        // Zeit has another colour, so its cells keep Normal's.
+        CPPUNIT_ASSERT_EQUAL(aTableColor, getRenderedColor(0, 1));
+        CPPUNIT_ASSERT_EQUAL(aTableColor, getRenderedColor(1, 4));
+        for (SCROW nRow = 1; nRow <= 6; ++nRow)
+            CPPUNIT_ASSERT_EQUAL(aNormalColor, getRenderedColor(4, nRow));
+    };
+
+    checkColors();
+    saveAndReload(TestFilter::XLSX);
+    checkColors();
 }
 
 CPPUNIT_TEST_FIXTURE(ScFiltersTest5, testTableStyleHeaderFontPosture)
