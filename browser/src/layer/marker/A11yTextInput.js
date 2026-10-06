@@ -375,6 +375,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 
 	setA11yFocusedParagraph: function(content, pos, start, end, before, after, beforeRects, afterRects, headingLevel,
 		beforeLevels, afterLevels) {
+		this._contextPending = Math.max(0, (this._contextPending || 0) - 1);
 		this._setHeadingLevel(headingLevel);
 		if (this._isComposing) {
 			this._remoteContent = content;
@@ -418,13 +419,21 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		if (this._map.getDocType() !== 'text')
 			return;
 
+		this._headingsStale = true;
 		clearTimeout(this._headingsRequestTimer);
 		this._headingsRequestTimer = setTimeout(function () {
+			this._headingsRequestTimer = null;
+			this._headingsPending = (this._headingsPending || 0) + 1;
 			app.socket.sendMessage('commandvalues command=.uno:Headings');
-		}, 250);
+		}.bind(this), 250);
 	},
 
+	// A heading's side is measured against the caret of its request; only the last answer is current.
 	setA11yHeadings: function(values) {
+		this._headingsPending = Math.max(0, (this._headingsPending || 0) - 1);
+		if (this._headingsPending || this._headingsRequestTimer)
+			return;
+		this._headingsStale = false;
 		this._headings = values && Array.isArray(values.headings) ? values.headings : [];
 		this._initContextRegions();
 		this._fillHeadingRegions();
@@ -433,7 +442,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 	// A heading given around the caret, or the one being edited, is left out: the
 	// reader would list it twice.
 	_fillHeadingRegions: function() {
-		if (!this._headingsAbove || !this._headings)
+		if (!this._headingsAbove || !this._headings || this._headingsStale)
 			return;
 
 		const toRect = function (twips) {
@@ -444,32 +453,16 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		};
 		const given = Array.from(this._contextBefore.children).concat(Array.from(this._contextAfter.children))
 			.map(function (span) { return toRect(span.dataset.twips); }).filter(Boolean);
-		const before = given.slice(0, this._contextBefore.children.length);
-		const after = given.slice(before.length);
-		const caret = app.file.textCursor.rectangle;
-		const caretX = caret.x1 + 1;
-		const caretY = (caret.y1 + caret.y2) / 2;
-		let splitY = caret.y1;
-		if (before.length)
-			splitY = before[before.length - 1][1] + before[before.length - 1][3];
-		else if (after.length)
-			splitY = after[0][1];
 
 		const above = [];
 		const below = [];
 		this._headings.forEach(function (heading) {
+			if (heading.side === 'caret')
+				return;
 			const rect = toRect(heading.rect);
-			if (!rect) {
-				below.push(heading);
+			if (rect && given.some(function (span) { return holds(span, rect[0] + rect[2] / 2, rect[1] + rect[3] / 2); }))
 				return;
-			}
-			const x = rect[0] + 1;
-			const y = rect[1] + rect[3] / 2;
-			if (given.some(function (span) { return holds(span, x, y); }))
-				return;
-			if (holds(rect, caretX, caretY))
-				return;
-			(y < splitY ? above : below).push(heading);
+			(heading.side === 'above' ? above : below).push(heading);
 		});
 
 		const key = JSON.stringify([above, below]);
@@ -495,8 +488,20 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 				region.appendChild(element);
 			}.bind(this));
 		}.bind(this);
+		const focused = document.activeElement;
+		const focusedTarget = focused && (this._headingsAbove.contains(focused) || this._headingsBelow.contains(focused))
+			? focused.dataset.target : undefined;
 		fill(this._headingsAbove, above);
 		fill(this._headingsBelow, below);
+		if (focusedTarget !== undefined) {
+			const links = Array.from(this._headingsAbove.querySelectorAll('a'))
+				.concat(Array.from(this._headingsBelow.querySelectorAll('a')));
+			const same = links.find(function (link) { return link.dataset.target === focusedTarget; });
+			if (same)
+				same.focus();
+			else
+				this.focus();
+		}
 		this._placeContextRegions();
 	},
 
@@ -529,7 +534,10 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 			return;
 
 		clearTimeout(this._contextRequestTimer);
-		this._contextRequestTimer = setTimeout(this._requestFocusedParagraph.bind(this), 250);
+		this._contextRequestTimer = setTimeout(function () {
+			this._contextRequestTimer = null;
+			this._requestFocusedParagraph();
+		}.bind(this), 250);
 	},
 
 	_setContextParagraphs: function(before, after, beforeRects, afterRects, beforeLevels, afterLevels) {
@@ -843,6 +851,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 
 	onAccessibilityFocusedCellChanged: function(outCount, inList, row, col, rowSpan, colSpan, paragraph) {
 		this._endContextJump();
+		this._requestHeadings();
 		this._setContextParagraphs(paragraph.before, paragraph.after, paragraph.beforeRects, paragraph.afterRects,
 			paragraph.beforeLevels, paragraph.afterLevels);
 		this._setFocusedParagraph(paragraph.content, parseInt(paragraph.position), parseInt(paragraph.start), parseInt(paragraph.end));
@@ -962,6 +971,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 	},
 
 	_requestFocusedParagraph: function() {
+		this._contextPending = (this._contextPending || 0) + 1;
 		app.socket.sendMessage('geta11yfocusedparagraph');
 	},
 

@@ -9,7 +9,7 @@ describe(['tagdesktop'], 'Writer heading in a table cell', { testIsolation: fals
 	function move(keys) {
 		helper.typeIntoDocument(keys);
 		cy.then(function () {
-			return helper.processToIdle(win);
+			return a11yHelper.processToIdleWithA11yContext(win);
 		});
 	}
 
@@ -30,7 +30,7 @@ describe(['tagdesktop'], 'Writer heading in a table cell', { testIsolation: fals
 
 		cy.then(function () {
 			win.app.map.setAccessibilityState(true);
-			return helper.processToIdle(win);
+			return a11yHelper.processToIdleWithA11yContext(win);
 		});
 	});
 

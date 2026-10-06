@@ -18,7 +18,7 @@ describe(['tagdesktop'], 'Writer headings given to the reader', { testIsolation:
 	function move(keys) {
 		helper.typeIntoDocument(keys);
 		cy.then(function () {
-			return helper.processToIdle(win);
+			return a11yHelper.processToIdleWithA11yContext(win);
 		});
 	}
 
@@ -129,7 +129,7 @@ describe(['tagdesktop'], 'Writer headings given to the reader', { testIsolation:
 
 		cy.then(function () {
 			win.app.map.setAccessibilityState(true);
-			return helper.processToIdle(win);
+			return a11yHelper.processToIdleWithA11yContext(win);
 		});
 
 		move('{ctrl}{home}{downarrow}');
@@ -251,7 +251,7 @@ describe(['tagdesktop'], 'Writer headings given to the reader', { testIsolation:
 				Style: { type: 'string', value: style },
 				FamilyName: { type: 'string', value: 'ParagraphStyles' },
 			});
-			return helper.processToIdle(win);
+			return a11yHelper.processToIdleWithA11yContext(win);
 		});
 	}
 
@@ -308,7 +308,7 @@ describe(['tagdesktop'], 'Writer headings given to the reader', { testIsolation:
 		move('{ctrl}{end}');
 		outlineLink(OUTLINE[0].text).click({ force: true });
 		cy.then(function () {
-			return helper.processToIdle(win);
+			return a11yHelper.processToIdleWithA11yContext(win);
 		});
 		editing(OUTLINE[0].text);
 		toldLevel(OUTLINE[0].level);
@@ -323,7 +323,7 @@ describe(['tagdesktop'], 'Writer headings given to the reader', { testIsolation:
 		});
 		cy.realPress('Enter');
 		cy.then(function () {
-			return helper.processToIdle(win);
+			return a11yHelper.processToIdleWithA11yContext(win);
 		});
 		editing(last.text);
 		toldLevel(last.level);
@@ -344,7 +344,7 @@ describe(['tagdesktop'], 'Writer headings given to the reader', { testIsolation:
 			link[0].focus();
 			cy.realPress('ArrowDown');
 			cy.then(function () {
-				return helper.processToIdle(win);
+				return a11yHelper.processToIdleWithA11yContext(win);
 			});
 			editing(OUTLINE[at].text);
 			toldLevel(OUTLINE[at].level);

@@ -845,6 +845,16 @@ function cdp(command, params) {
 	});
 }
 
+// The headings and the paragraphs around the caret are requested after a timer and answered after core is idle.
+function processToIdleWithA11yContext(win) {
+	return helper.processToIdle(win).then(function () {
+		return cy.waitUntil(function () {
+			const textInput = win.app.map._textInput;
+			return !textInput._headingsStale && !textInput._contextRequestTimer && !textInput._contextPending;
+		}, { interval: 50 });
+	});
+}
+
 function axTreeAvailable() {
 	return Cypress.browser.family === 'chromium';
 }
@@ -1186,6 +1196,7 @@ module.exports.describeFocusable = describeFocusable;
 module.exports.openSidebarPropertyDeck = openSidebarPropertyDeck;
 module.exports.sidebarKeyboard = sidebarKeyboard;
 module.exports.axTreeAvailable = axTreeAvailable;
+module.exports.processToIdleWithA11yContext = processToIdleWithA11yContext;
 /// The relative luminance WCAG defines, from a computed color string.
 function relativeLuminance(color) {
 	const parts = String(color).match(/[\d.]+/g);
