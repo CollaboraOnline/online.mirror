@@ -37,9 +37,7 @@ private:
 };
 
 bool OverrideVirtual::preRun() {
-    return compiler.getLangOpts().CPlusPlus
-        && compiler.getPreprocessor().getIdentifierInfo(
-            "LIBO_INTERNAL_ONLY")->hasMacroDefinition();
+    return compiler.getLangOpts().CPlusPlus;
 }
 
 void OverrideVirtual::run() {
