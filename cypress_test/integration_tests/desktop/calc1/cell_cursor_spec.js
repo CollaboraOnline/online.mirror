@@ -217,6 +217,10 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Test Cell Selections', fun
 	it('Should not scroll after a right click', function() {
 		helper.typeIntoInputField(helper.addressInputSelector, 'Z1000');
 
+		// Right-clicking before the jump is processed moves the cell cursor back
+		// to where the view was, and the context menu closes.
+		helper.processToIdle(this.win);
+
 		cy.cGet('#document-container').rightclick();
 		const pasteEntry = helper.getContextMenuItem('Paste');
 		pasteEntry.should('exist');
