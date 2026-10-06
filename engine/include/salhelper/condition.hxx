@@ -47,8 +47,8 @@ namespace salhelper
 
 
     private:
-        Condition(Condition &) SAL_DELETED_FUNCTION;
-        void operator =(Condition &) SAL_DELETED_FUNCTION;
+        Condition(Condition &) = delete;
+        void operator =(Condition &) = delete;
 
         osl::Mutex&     m_aMutex;
         osl::Condition  m_aCondition;
@@ -65,8 +65,8 @@ namespace salhelper
 
 
     private:
-        ConditionModifier(ConditionModifier &) SAL_DELETED_FUNCTION;
-        void operator =(ConditionModifier &) SAL_DELETED_FUNCTION;
+        ConditionModifier(ConditionModifier &) = delete;
+        void operator =(ConditionModifier &) = delete;
 
         Condition& m_aCond;
     };
@@ -96,8 +96,8 @@ namespace salhelper
 
 
     private:
-        ConditionWaiter(ConditionWaiter &) SAL_DELETED_FUNCTION;
-        void operator =(ConditionWaiter &) SAL_DELETED_FUNCTION;
+        ConditionWaiter(ConditionWaiter &) = delete;
+        void operator =(ConditionWaiter &) = delete;
 
         Condition& m_aCond;
     };

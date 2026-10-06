@@ -213,11 +213,11 @@ private:
 
     /** Copy constructor deleted.
      */
-    Timer( const Timer& rTimer ) SAL_DELETED_FUNCTION;
+    Timer( const Timer& rTimer ) = delete;
 
     /** Copy assignment operator deleted.
      */
-    void operator=( const Timer& rTimer ) SAL_DELETED_FUNCTION;
+    void operator=( const Timer& rTimer ) = delete;
 
     friend class TimerManager;
 };

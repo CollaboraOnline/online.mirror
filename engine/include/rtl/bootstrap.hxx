@@ -31,8 +31,8 @@ namespace rtl
     {
         void * _handle;
 
-        Bootstrap( Bootstrap const & ) SAL_DELETED_FUNCTION;
-        Bootstrap & operator = ( Bootstrap const & ) SAL_DELETED_FUNCTION;
+        Bootstrap( Bootstrap const & ) = delete;
+        Bootstrap & operator = ( Bootstrap const & ) = delete;
 
     public:
         /**

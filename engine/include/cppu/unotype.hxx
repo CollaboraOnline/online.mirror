@@ -277,9 +277,9 @@ public:
     }
 
 private:
-    UnoType(UnoType &) SAL_DELETED_FUNCTION;
-    ~UnoType() SAL_DELETED_FUNCTION;
-    void operator =(UnoType &) SAL_DELETED_FUNCTION;
+    UnoType(UnoType &) = delete;
+    ~UnoType() = delete;
+    void operator =(UnoType &) = delete;
 };
 
 template<> cpo::uno::Type inline const & UnoType<void>::get() {

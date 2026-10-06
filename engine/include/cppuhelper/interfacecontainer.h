@@ -113,9 +113,9 @@ private:
     sal_Int32                   nRemain;
 
     OInterfaceIteratorHelper( const OInterfaceIteratorHelper & )
-        SAL_DELETED_FUNCTION;
+        = delete;
     OInterfaceIteratorHelper &  operator = ( const OInterfaceIteratorHelper & )
-        SAL_DELETED_FUNCTION;
+        = delete;
 };
 
 
@@ -239,9 +239,9 @@ friend class OInterfaceIteratorHelper;
     bool                bIsList;
 
     OInterfaceContainerHelper( const OInterfaceContainerHelper & )
-        SAL_DELETED_FUNCTION;
+        = delete;
     OInterfaceContainerHelper & operator = ( const OInterfaceContainerHelper & )
-        SAL_DELETED_FUNCTION;
+        = delete;
 
     /*
       Duplicate content of the container and release the old one without destroying.
@@ -396,8 +396,8 @@ private:
         return iter;
     }
 
-    OMultiTypeInterfaceContainerHelperVar( const OMultiTypeInterfaceContainerHelperVar & ) SAL_DELETED_FUNCTION;
-    OMultiTypeInterfaceContainerHelperVar & operator = ( const OMultiTypeInterfaceContainerHelperVar & ) SAL_DELETED_FUNCTION;
+    OMultiTypeInterfaceContainerHelperVar( const OMultiTypeInterfaceContainerHelperVar & ) = delete;
+    OMultiTypeInterfaceContainerHelperVar & operator = ( const OMultiTypeInterfaceContainerHelperVar & ) = delete;
 };
 
 
@@ -568,8 +568,8 @@ private:
     void *          m_pMap;
     ::osl::Mutex &  rMutex;
 
-    OMultiTypeInterfaceContainerHelper( const OMultiTypeInterfaceContainerHelper & ) SAL_DELETED_FUNCTION;
-    OMultiTypeInterfaceContainerHelper & operator = ( const OMultiTypeInterfaceContainerHelper & ) SAL_DELETED_FUNCTION;
+    OMultiTypeInterfaceContainerHelper( const OMultiTypeInterfaceContainerHelper & ) = delete;
+    OMultiTypeInterfaceContainerHelper & operator = ( const OMultiTypeInterfaceContainerHelper & ) = delete;
 };
 
 typedef OBroadcastHelperVar< OMultiTypeInterfaceContainerHelper , OMultiTypeInterfaceContainerHelper::keyType > OBroadcastHelper;

@@ -92,9 +92,9 @@ protected:
     */
     cpo::uno::WeakReferenceHelper xDelegator;
 private:
-    OWeakAggObject( const OWeakAggObject & rObj ) SAL_DELETED_FUNCTION;
+    OWeakAggObject( const OWeakAggObject & rObj ) = delete;
     OWeakAggObject & operator = ( const OWeakAggObject & rObj )
-        SAL_DELETED_FUNCTION;
+        = delete;
 };
 
 }

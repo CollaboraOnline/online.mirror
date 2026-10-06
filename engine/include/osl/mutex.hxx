@@ -100,12 +100,12 @@ namespace osl
         constructed Mutex may work on an already destructed oslMutex object.
 
         */
-        Mutex(const Mutex&) SAL_DELETED_FUNCTION;
+        Mutex(const Mutex&) = delete;
 
         /** This assignment operator is deleted for the same reason as
             the copy constructor.
         */
-        Mutex& operator= (const Mutex&) SAL_DELETED_FUNCTION;
+        Mutex& operator= (const Mutex&) = delete;
     };
 
     /** Object lifetime scoped mutex object or interface lock.
@@ -118,8 +118,8 @@ namespace osl
     template<class T>
     class Guard
     {
-        Guard(const Guard&) SAL_DELETED_FUNCTION;
-        Guard& operator=(const Guard&) SAL_DELETED_FUNCTION;
+        Guard(const Guard&) = delete;
+        Guard& operator=(const Guard&) = delete;
 
     protected:
         T * pT;
@@ -156,8 +156,8 @@ namespace osl
     template<class T>
     class ClearableGuard
     {
-        ClearableGuard( const ClearableGuard& ) SAL_DELETED_FUNCTION;
-        ClearableGuard& operator=(const ClearableGuard&) SAL_DELETED_FUNCTION;
+        ClearableGuard( const ClearableGuard& ) = delete;
+        ClearableGuard& operator=(const ClearableGuard&) = delete;
 
     protected:
         T * pT;
@@ -208,8 +208,8 @@ namespace osl
     template< class T >
     class ResettableGuard : public ClearableGuard< T >
     {
-        ResettableGuard(const ResettableGuard&) SAL_DELETED_FUNCTION;
-        ResettableGuard& operator=(const ResettableGuard&) SAL_DELETED_FUNCTION;
+        ResettableGuard(const ResettableGuard&) = delete;
+        ResettableGuard& operator=(const ResettableGuard&) = delete;
 
     protected:
         T* pResetT;

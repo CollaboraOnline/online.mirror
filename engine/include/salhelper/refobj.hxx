@@ -39,8 +39,8 @@ class ReferenceObject
      */
     oslInterlockedCount m_nReferenceCount;
 
-    ReferenceObject (const ReferenceObject&) SAL_DELETED_FUNCTION;
-    ReferenceObject& operator= (const ReferenceObject&) SAL_DELETED_FUNCTION;
+    ReferenceObject (const ReferenceObject&) = delete;
+    ReferenceObject& operator= (const ReferenceObject&) = delete;
 
 public:
     /** Construction.

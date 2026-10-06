@@ -69,13 +69,13 @@ public:
         rtl::OUString const & rBaseUriRef, rtl::OUString const & rRelUriRef);
 
 private:
-    Uri() SAL_DELETED_FUNCTION;
+    Uri() = delete;
 
-    Uri(Uri &) SAL_DELETED_FUNCTION;
+    Uri(Uri &) = delete;
 
-    ~Uri() SAL_DELETED_FUNCTION;
+    ~Uri() = delete;
 
-    void operator =(Uri) SAL_DELETED_FUNCTION;
+    void operator =(Uri) = delete;
 };
 
 inline rtl::OUString Uri::encode(rtl::OUString const & rText,

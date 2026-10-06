@@ -133,8 +133,8 @@ protected:
         void notify() const;
 
     private:
-        BoundListeners( const BoundListeners&) SAL_DELETED_FUNCTION;
-        void operator=( const BoundListeners&) SAL_DELETED_FUNCTION;
+        BoundListeners( const BoundListeners&) = delete;
+        void operator=( const BoundListeners&) = delete;
 
         class Impl;
         Impl * m_impl;
@@ -307,8 +307,8 @@ protected:
         cpo::uno::Sequence< css::beans::PropertyValue > const & props) override;
 
 private:
-    PropertySetMixinImpl( const PropertySetMixinImpl&) SAL_DELETED_FUNCTION;
-    void operator=( const PropertySetMixinImpl&) SAL_DELETED_FUNCTION;
+    PropertySetMixinImpl( const PropertySetMixinImpl&) = delete;
+    void operator=( const PropertySetMixinImpl&) = delete;
 
     PropertySetMixinImpl(
         cpo::uno::Reference< cpo::uno::XComponentContext > const & context,
@@ -395,8 +395,8 @@ protected:
     ~PropertySetMixin() {}
 
 private:
-    PropertySetMixin( const PropertySetMixin&) SAL_DELETED_FUNCTION;
-    void operator=( const PropertySetMixin&) SAL_DELETED_FUNCTION;
+    PropertySetMixin( const PropertySetMixin&) = delete;
+    void operator=( const PropertySetMixin&) = delete;
 };
 
 }

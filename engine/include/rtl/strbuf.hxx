@@ -535,7 +535,7 @@ public:
     template< typename T >
     typename libreoffice_internal::Enable< void,
         !libreoffice_internal::CharPtrDetector< T* >::ok >::Type
-        append( T* ) SAL_DELETED_FUNCTION;
+        append( T* ) = delete;
     /// @endcond
 
     /**

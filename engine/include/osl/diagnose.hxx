@@ -133,8 +133,8 @@ public:
     }
 
 private:
-    ObjectRegistry( ObjectRegistry const& ) SAL_DELETED_FUNCTION;
-    ObjectRegistry const& operator=( ObjectRegistry const& ) SAL_DELETED_FUNCTION;
+    ObjectRegistry( ObjectRegistry const& ) = delete;
+    ObjectRegistry const& operator=( ObjectRegistry const& ) = delete;
 
     ObjectRegistryData m_data;
 };

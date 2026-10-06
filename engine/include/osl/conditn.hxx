@@ -149,7 +149,7 @@ namespace osl
             @deprecated use C++11's std::condition_variable instead
                 for a more robust and helpful condition.
         */
-        Condition(const Condition& condition) SAL_DELETED_FUNCTION;
+        Condition(const Condition& condition) = delete;
 
         /** This assignment operator is deleted for the same reason as
             the copy constructor.
@@ -157,7 +157,7 @@ namespace osl
             @deprecated use C++11's std::condition_variable instead
                 for a more robust and helpful condition.
         */
-        Condition& operator= (const Condition&) SAL_DELETED_FUNCTION;
+        Condition& operator= (const Condition&) = delete;
     };
 }
 

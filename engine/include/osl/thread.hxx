@@ -47,8 +47,8 @@ extern "C" inline void threadFunc( void* param);
  */
 class Thread
 {
-    Thread( const Thread& ) SAL_DELETED_FUNCTION;
-    Thread& operator= ( const Thread& ) SAL_DELETED_FUNCTION;
+    Thread( const Thread& ) = delete;
+    Thread& operator= ( const Thread& ) = delete;
 public:
     Thread(): m_hThread(NULL){}
 
@@ -178,8 +178,8 @@ extern "C" inline void threadFunc( void* param)
 
 class ThreadData
 {
-    ThreadData( const ThreadData& ) SAL_DELETED_FUNCTION;
-    ThreadData& operator= (const ThreadData& ) SAL_DELETED_FUNCTION;
+    ThreadData( const ThreadData& ) = delete;
+    ThreadData& operator= (const ThreadData& ) = delete;
 public:
      /// Create a thread specific local data key
     ThreadData( oslThreadKeyCallbackFunction pCallback= NULL )

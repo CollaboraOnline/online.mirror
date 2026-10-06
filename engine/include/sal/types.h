@@ -360,10 +360,6 @@ namespace css = ::com::sun::star;
 */
 namespace cpo {}
 
-/** C++11 "= delete" feature.
-*/
-#define SAL_DELETED_FUNCTION = delete
-
 /** C++11 "constexpr" feature.
 */
 #define SAL_CONSTEXPR constexpr

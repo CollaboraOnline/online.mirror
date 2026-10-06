@@ -274,8 +274,8 @@ private:
     void *          m_pMap;
     ::osl::Mutex &  rMutex;
 
-    OMultiTypeInterfaceContainerHelperInt32( const OMultiTypeInterfaceContainerHelperInt32 & ) SAL_DELETED_FUNCTION;
-    OMultiTypeInterfaceContainerHelperInt32 & operator = ( const OMultiTypeInterfaceContainerHelperInt32 & )SAL_DELETED_FUNCTION;
+    OMultiTypeInterfaceContainerHelperInt32( const OMultiTypeInterfaceContainerHelperInt32 & ) = delete;
+    OMultiTypeInterfaceContainerHelperInt32 & operator = ( const OMultiTypeInterfaceContainerHelperInt32 & )= delete;
 };
 
 
@@ -611,9 +611,9 @@ protected:
     Impl * const m_pReserved;
 
 private:
-    OPropertySetHelper( const OPropertySetHelper & ) SAL_DELETED_FUNCTION;
+    OPropertySetHelper( const OPropertySetHelper & ) = delete;
     OPropertySetHelper &    operator = ( const OPropertySetHelper & )
-        SAL_DELETED_FUNCTION;
+        = delete;
 
     /** notifies the given changes in property's values, <em>plus</em> all property changes collected during recent
         |setDependentFastPropertyValue| calls.
@@ -664,9 +664,9 @@ public:
 
 
 private:
-    OPropertySetHelper2( const OPropertySetHelper2 & ) SAL_DELETED_FUNCTION;
+    OPropertySetHelper2( const OPropertySetHelper2 & ) = delete;
     OPropertySetHelper2 &    operator = ( const OPropertySetHelper2 & )
-        SAL_DELETED_FUNCTION;
+        = delete;
 
 #if defined _MSC_VER // public -> protected changes mangled names there
 public:
