@@ -21,6 +21,7 @@ else
 instsetoo_SBOM_DIR := $(INSTDIR)/Resources/sbom/
 endif
 
+# invoke git here as Python is invoked with PATH that doesn't have git on WNT
 instsetoo_SBOM : $(instsetoo_create_SBOM) \
 		$(gb_CustomTarget_workdir)/readlicense_oo/license/LICENSE.html \
 		$(BUILDDIR)/instsetoo_native/util/openoffice.lst \
@@ -48,6 +49,8 @@ instsetoo_SBOM : $(instsetoo_create_SBOM) \
 	EXTERNALSFILE=$(call gb_var2file,$(shell $(gb_MKTEMP)),$(gb_Externals)) \
 	EXTERNALSTATICFILE=$(call gb_var2file,$(shell $(gb_MKTEMP)),$(gb_External_StaticLink)) \
 	EXTERNALPACKAGESTATICFILE=$(call gb_var2file,$(shell $(gb_MKTEMP)),$(gb_ExternalPackage_StaticLink)) \
+	EXTERNALFILESLIST=$(shell $(gb_MKTEMP)) \
+	&& git -C $(SRCDIR) ls-files -z -- external > $${EXTERNALFILESLIST} \
 	&& $(if $(filter LINUX,$(OS_FOR_BUILD)),$(gb_Python_PRECOMMAND) $(INSTROOT_FOR_BUILD)/program/python.bin,$(call gb_ExternalExecutable_get_command,python)) \
 		$(instsetoo_create_SBOM) \
 		$(gb_CustomTarget_workdir)/instsetoo_native/sbom \
@@ -65,7 +68,8 @@ instsetoo_SBOM : $(instsetoo_create_SBOM) \
 		$${EXTERNALSFILE} \
 		$${EXTERNALSTATICFILE} \
 		$${EXTERNALPACKAGESTATICFILE} \
-	&& rm -f $${EXTERNALSFILE} $${EXTERNALSTATICFILE} $${EXTERNALPACKAGESTATICFILE}
+		$${EXTERNALFILESLIST} \
+	&& rm -f $${EXTERNALSFILE} $${EXTERNALSTATICFILE} $${EXTERNALPACKAGESTATICFILE} $${EXTERNALFILESLIST}
 	rm -rf $(instsetoo_SBOM_DIR)
 	mkdir -p $(instsetoo_SBOM_DIR)
 	cp $(gb_CustomTarget_workdir)/instsetoo_native/sbom/*sbom.spdx.json $(instsetoo_SBOM_DIR)

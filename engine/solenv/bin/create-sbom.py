@@ -16,6 +16,7 @@ import xml.etree.ElementTree as ET
 import json
 from datetime import datetime, timezone
 import uuid
+import glob
 import hashlib
 import zipfile
 
@@ -387,7 +388,7 @@ def get_fetch_url(variable):
         for bucket, body in re.findall(
                 r'fetch_(\w+)_TARBALLS\s*:?=((?:[^\n]*\\\n)*[^\n]*)', content):
             variables = re.findall(r'fetch_Optional,\w+,(\w+)', body)
-            variables += re.findall(r'(?:^|\s)([A-Z][A-Z0-9_]+)(?=\s|\\|$)',
+            variables += re.findall(r'(?:^|[\s,])([A-Z][A-Z0-9_]+)(?=[\s)\\]|$)',
                                     body)
             buckets[bucket] = variables
         fetch_url_cache = {}
@@ -399,6 +400,70 @@ def get_fetch_url(variable):
     if variable not in fetch_url_cache:
         raise Exception(f"no Makefile.fetch bucket contains {variable}")
     return fetch_url_cache[variable]
+
+
+tarball_dir_cache = {}
+
+def init_tarball_dir_cache():
+    """Map every tarball variable to its unique subdirectory of external/"""
+
+    pattern = re.compile(r"\$\(([A-Z0-9_]+_TARBALL)\)")
+    for makefile in glob.glob(SRCDIR + "/external/*/UnpackedTarball_*.mk"):
+        makefile = makefile.replace("\\", "/")
+        subdir = makefile.split("/external/")[1].split("/")[0]
+        with open(makefile) as f:
+            variables = set(pattern.findall(f.read()))
+        for found in variables:
+            if found in tarball_dir_cache:
+                raise Exception(f"Duplicate tarball: {found}")
+            tarball_dir_cache[found] = subdir
+
+def get_tarball_dir(variable):
+    """The external subdirectory that unpacks a given tarball variable."""
+
+    global tarball_dir_cache
+    return tarball_dir_cache[variable]
+
+external_files_by_subdir = {}
+
+def read_external_dir(path):
+    """Read the git-tracked files under external/ and group them by subdirector
+."""
+
+    with open(path, "rb") as f:
+        data = f.read()
+    # A NUL terminates each path, so splitting leaves an empty final piece.
+    for entry in data.split(b"\0"):
+        if len(entry) == 0:
+            continue
+        parts = entry.split(b"/", 2)
+        if len(parts) < 2 or parts[0] != b"external":
+            raise Exception(f"unexpected path in external file list: {entry}")
+        external_files_by_subdir.setdefault(parts[1].decode(), []).append(entry)
+    for subdir in external_files_by_subdir:
+        external_files_by_subdir[subdir].sort()
+
+def external_input_digest(subdir, tarball_sha256):
+    """A digest over the build inputs of an external library.
+    The inputs are the source tarball and every git-tracked file in the
+    external subdirectory, which holds the patches and build makefiles.
+    The files are read in a deterministic order too."""
+
+    digest = hashlib.sha256()
+    digest.update(tarball_sha256.encode("ascii"))
+    for path in external_files_by_subdir[subdir]:
+        digest.update(path + b"\0")
+        with open(os.path.join(SRCDIR, path.decode()), "rb") as f:
+            while True:
+                chunk = f.read(1<<20)
+                if not chunk:
+                    break
+                digest.update(chunk)
+    return digest.hexdigest()
+
+def external_spdx_id(fragment, digest):
+    """A stable SPDX id for an external, derived from its build inputs."""
+    return f"urn:uuid:{uuid.uuid5(uuid.NAMESPACE_URL, f'{fragment}:{digest}')}"
 
 
 def extract_spdx_info(line):
@@ -434,15 +499,19 @@ def extract_spdx_info(line):
                 raise Exception(f"No SHA256SUM for {source}")
             version = extract_version_from_filename(tarball)
             locator = get_fetch_url(source) + "/" + tarball
+            externaldir = get_tarball_dir(source)
+            inputhash = external_input_digest(externaldir, sha256)
         elif name.startswith("dict"):
             # unclear how to hash these, it's an entire dir tree...
             sha256 = None
             version = extract_version_for_dictionary(source)
             locator = "https://cgit.collaboraoffice.com/c/dictionaries/tree/" + source
+            inputhash = None
         else:
             sha256 = None
             version = None
             locator = None if len(source) == 0 else "https://cgit.collaboraoffice.com/c/core/tree/" + source
+            inputhash = None
         declared = match.group("declared").strip()
         if len(declared) == 0:
             raise Exception(f"No declared in license file comment: {line}")
@@ -454,6 +523,7 @@ def extract_spdx_info(line):
             "fragment": f"SPDXRef-{name}",
             "name": name,
             "vendor": vendor,
+            "inputhash": inputhash,
             "sha256" : sha256,
             "version": version,
             "locator": locator,
@@ -477,7 +547,12 @@ def process_license_file(file_path):
                 if name in sbom_externals:
                     raise Exception(f"duplicate Name in license file: {name}")
 
-                pkg_spdx_id = make_spdx_id(spdx_info["fragment"])
+                if spdx_info["inputhash"] is not None:
+                    pkg_spdx_id = external_spdx_id(spdx_info["fragment"], spdx_info["inputhash"])
+                    source_spdx_id = external_spdx_id(f'{spdx_info["fragment"]}-source', spdx_info["inputhash"])
+                else:
+                    pkg_spdx_id = make_spdx_id(spdx_info["fragment"])
+                    source_spdx_id = make_spdx_id(f'{spdx_info["fragment"]}-source')
 
                 def cpe23_any(string):
                     return "*" if string is None or len(string) == 0 else string
@@ -513,7 +588,6 @@ def process_license_file(file_path):
 
                 if spdx_info["version"]:
                     pkg_element["software_packageVersion"] = spdx_info["version"]
-                source_spdx_id = make_spdx_id(f'{spdx_info["fragment"]}-source')
                 source_element = {
                     "type": "software_SoftwareArtifact",
                     "spdxId": source_spdx_id,
@@ -1494,9 +1568,11 @@ def gen_product(ziplist, packinfos, install_script, languages, externalsfile,
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 16:
-        print("Usage: python create-sbom.py <path of output SPDX JSON files> <path of LICENSE.html> <path of openoffice.lst> <5 packinfo> <path of install script> <packinfo> <path of install script> <languages> <externals> <externalstatic> <externalpackagestatic>")
+    if len(sys.argv) < 17:
+        print("Usage: python create-sbom.py <path of output SPDX JSON files> <path of LICENSE.html> <path of openoffice.lst> <5 packinfo> <path of install script> <packinfo> <path of install script> <languages> <externals> <externalstatic> <externalpackagestatic> <external file list>")
     else:
+        init_tarball_dir_cache()
+        read_external_dir(sys.argv[16])
         sbom_path = sys.argv[1]
         license_path = sys.argv[2]
         process_license_file(license_path)
