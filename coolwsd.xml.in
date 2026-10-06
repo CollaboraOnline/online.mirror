@@ -314,10 +314,17 @@
                 <refresh desc="How frequently we should re-acquire a lock with the storage server, in seconds (default 15 mins) or 0 for no refresh" type="int" default="900">900</refresh>
             </locking>
 
-            <alias_groups desc="default mode is 'first' it allows only the first host connecting to coolwsd when groups are not defined. set mode to 'groups' and define group to allow multiple host and its aliases" mode="first">
-            <!-- If you need to use multiple wopi hosts, change the mode to "groups" and
-                    add the hosts below. If one host is accessible under multiple ip addresses
-                    or names, add them as aliases. -->
+            <alias_groups desc="The WOPI hosts that may connect. In mode 'first' with no group defined, the first host to connect after each start becomes the only trusted host. In mode 'groups' only the hosts you list in groups are trusted." mode="first">
+            <!-- One WOPI host, the simple case: set the mode above to "groups", uncomment this
+                 group and put in the address of your WOPI host. -->
+            <!--
+            <group>
+                    <host allow="true">https://cloud.example.com:443</host>
+            </group>
+            -->
+            <!-- Several WOPI hosts, or a host also reached under other names or addresses: set
+                 the mode above to "groups" and add one group for each host instead, with its other
+                 names as aliases, as in this example. -->
             <!--
             <group>
                     <host desc="Host to allow or deny. The scheme is optional and not used for matching; only the host and port are. A regex is allowed in the host part." allow="true">scheme://hostname:port</host>
