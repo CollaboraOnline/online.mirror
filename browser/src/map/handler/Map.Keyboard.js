@@ -805,6 +805,11 @@ window.L.Map.Keyboard = window.L.Handler.extend({
 
 		var unoKeyCode = this._toUNOKeyCode(keyCode);
 
+		// A key that types "+" is the ADD key for the document core, as on the desktop. On many
+		// layouts "+" shares a key with "=" and reports the same keyCode, so check the character.
+		if (ev.key === '+')
+			unoKeyCode = UNOKey.ADD;
+
 		if (this.modifier) {
 			unoKeyCode |= this.modifier;
 			if (ev.type !== 'keyup' && (this.modifier !== shift || (keyCode === this.keyCodes.SPACE && !app.file.textCursor.visible))) {
