@@ -27,9 +27,9 @@ interface XDocument : XBase
 
     XRangeBuilder newRange();
 
-    void setCursor([in] XCursor position);
+    XDocument setCursor([in] XCursor position);
 
-    void setSelection([in] XSelection selection);
+    XDocument setSelection([in] XSelection selection);
 };
 
 };

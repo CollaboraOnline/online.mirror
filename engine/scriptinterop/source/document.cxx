@@ -852,7 +852,10 @@ public:
         return {true, underline != css::awt::FontUnderline::NONE};
     }
 
-    void removeFromParent() override { removeParagraph(content_); }
+    cpo::uno::Reference<scriptinterop::XElement> removeFromParent() override {
+        removeParagraph(content_);
+        return this;
+    }
 
     cpo::uno::Reference<scriptinterop::XText> setBold(bool value) override {
         setBoldOn(wholeRange(), value);
@@ -1162,7 +1165,10 @@ public:
         return hundredthMmToPixels(hundredthMm);
     }
 
-    void removeFromParent() override { removeContent(content_); }
+    cpo::uno::Reference<scriptinterop::XElement> removeFromParent() override {
+        removeContent(content_);
+        return this;
+    }
 
     cpo::uno::Reference<scriptinterop::XInlineImage> setAltDescription(OUString const & description)
         override
@@ -1224,9 +1230,10 @@ public:
         return new TextImpl(parent_, content_, getType());
     }
 
-    void clear() override {
+    cpo::uno::Reference<scriptinterop::XContainerElement> clear() override {
         cpo::uno::Reference<css::text::XTextRange>(content_, cpo::uno::UNO_QUERY_THROW)
             ->setString(OUString());
+        return this;
     }
 
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
@@ -1484,7 +1491,10 @@ public:
         return {true, mode != css::text::WritingMode2::RL_TB};
     }
 
-    void removeFromParent() override { removeParagraph(content_); }
+    cpo::uno::Reference<scriptinterop::XElement> removeFromParent() override {
+        removeParagraph(content_);
+        return this;
+    }
 
 private:
     std::optional<cpo::uno::Any> getParaProp(OUString const & name) {
@@ -1583,11 +1593,12 @@ public:
 
     cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return text_; }
 
-    void clear() override {
+    cpo::uno::Reference<scriptinterop::XContainerElement> clear() override {
         if (!text_.is()) {
             throw cpo::uno::RuntimeException(u"clear: the table cell has no text"_ustr);
         }
         text_->setString(OUString());
+        return this;
     }
 
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
@@ -1648,7 +1659,7 @@ public:
         return textOf(text_);
     }
 
-    void removeFromParent() override {
+    cpo::uno::Reference<scriptinterop::XElement> removeFromParent() override {
         throw cpo::uno::RuntimeException(
             u"a table cell cannot be removed on its own; remove its row instead"_ustr);
     }
@@ -1677,7 +1688,7 @@ public:
         return row;
     }
 
-    void clear() override {
+    cpo::uno::Reference<scriptinterop::XContainerElement> clear() override {
         throw cpo::uno::RuntimeException(u"TableRow.clear is not yet implemented"_ustr); // TODO
     }
 
@@ -1769,7 +1780,7 @@ public:
         return buf.makeStringAndClear();
     }
 
-    void removeFromParent() override {
+    cpo::uno::Reference<scriptinterop::XElement> removeFromParent() override {
         if (!table_.is()) {
             throw cpo::uno::RuntimeException(
                 u"removeFromParent: the row is not part of a table"_ustr);
@@ -1780,6 +1791,7 @@ public:
                 u"removeFromParent: the row is not attached to its table"_ustr);
         }
         rows->removeByIndex(rowIndex_, 1);
+        return this;
     }
 
 private:
@@ -1797,7 +1809,7 @@ public:
 
     cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return table_; }
 
-    void clear() override {
+    cpo::uno::Reference<scriptinterop::XContainerElement> clear() override {
         throw cpo::uno::RuntimeException(u"Table.clear is not yet implemented"_ustr); // TODO
     }
 
@@ -1866,8 +1878,9 @@ public:
         return buf.makeStringAndClear();
     }
 
-    void removeFromParent() override {
+    cpo::uno::Reference<scriptinterop::XElement> removeFromParent() override {
         removeContent(cpo::uno::Reference<css::text::XTextContent>(table_, cpo::uno::UNO_QUERY_THROW));
+        return this;
     }
 
 private:
@@ -2297,11 +2310,12 @@ public:
 
     cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return text_; }
 
-    void clear() override {
+    cpo::uno::Reference<scriptinterop::XContainerElement> clear() override {
         if (!text_.is()) {
             throw cpo::uno::RuntimeException(u"clear: the footnote section has no text"_ustr);
         }
         text_->setString(OUString());
+        return this;
     }
 
     // TODO: return a detached deep copy, not this; mutations on the "copy" write back to the live
@@ -2343,7 +2357,7 @@ public:
         return scriptinterop::ElementType_FOOTNOTE_SECTION;
     }
 
-    void removeFromParent() override {
+    cpo::uno::Reference<scriptinterop::XElement> removeFromParent() override {
         throw cpo::uno::RuntimeException(
             u"a footnote section cannot be removed on its own; remove its footnote instead"_ustr);
     }
@@ -2392,9 +2406,10 @@ public:
 
     scriptinterop::ElementType getType() override { return scriptinterop::ElementType_FOOTNOTE; }
 
-    void removeFromParent() override {
+    cpo::uno::Reference<scriptinterop::XElement> removeFromParent() override {
         removeContent(
             cpo::uno::Reference<css::text::XTextContent>(footnote_, cpo::uno::UNO_QUERY_THROW));
+        return this;
     }
 
 private:
@@ -2429,7 +2444,7 @@ public:
         return appendImpl(text, u""_ustr);
     }
 
-    void clear() override {
+    cpo::uno::Reference<scriptinterop::XContainerElement> clear() override {
         throw cpo::uno::RuntimeException(u"Body.clear is not yet implemented"_ustr); // TODO
     }
 
@@ -2475,7 +2490,7 @@ public:
         return scriptinterop::ElementType_BODY_SECTION;
     }
 
-    void removeFromParent() override {
+    cpo::uno::Reference<scriptinterop::XElement> removeFromParent() override {
         throw cpo::uno::RuntimeException(u"the body has no parent to remove it from"_ustr);
     }
 
@@ -2694,7 +2709,9 @@ public:
         return new RangeBuilderImpl;
     }
 
-    void setCursor(cpo::uno::Reference<scriptinterop::XCursor> const & position) override {
+    cpo::uno::Reference<scriptinterop::XDocument> setCursor(
+        cpo::uno::Reference<scriptinterop::XCursor> const & position) override
+    {
         if (!position.is()) {
             throw cpo::uno::RuntimeException(u"setCursor: the position must not be null"_ustr);
         }
@@ -2709,9 +2726,12 @@ public:
                 u"setCursor: the position is not somewhere the cursor can be"_ustr);
         }
         cursorPosition_ = position;
+        return this;
     }
 
-    void setSelection(cpo::uno::Reference<scriptinterop::XSelection> const & selection) override {
+    cpo::uno::Reference<scriptinterop::XDocument> setSelection(
+        cpo::uno::Reference<scriptinterop::XSelection> const & selection) override
+    {
         if (!selection.is()) {
             throw cpo::uno::RuntimeException(u"setSelection: the selection must not be null"_ustr);
         }
@@ -2726,10 +2746,11 @@ public:
             idx->getByIndex(0) >>= range;
             if (range.is()) {
                 sup->select(cpo::uno::Any(range));
-                return;
+                return this;
             }
         }
         sup->select(cpo::uno::Any(selection->getuno()));
+        return this;
     }
 
     cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XFootnote>> getFootnotes() override {

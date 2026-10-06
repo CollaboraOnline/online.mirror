@@ -12,7 +12,7 @@
 module scriptinterop {
 
 interface XContainerElement: XElement {
-    void clear();
+    XContainerElement clear();
 
     XElement getChild([in] long index);
 

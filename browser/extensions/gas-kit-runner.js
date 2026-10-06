@@ -134,7 +134,7 @@ globalThis.__gasKitRunner = function(
 
         globalThis.DocumentApp = {
             getActiveDocument: function() {
-                return {
+                const document = {
                     getSelection: function() { return activeDoc().getSelection(); },
                     getCursor: function() { return activeDoc().getCursor(); },
                     getBody: function() { return activeDoc().getBody(); },
@@ -143,13 +143,20 @@ globalThis.__gasKitRunner = function(
                         return activeDoc().newPosition(element, offset);
                     },
                     newRange: function() { return activeDoc().newRange(); },
-                    setCursor: function(position) { activeDoc().setCursor(position); },
-                    setSelection: function(sel) { activeDoc().setSelection(sel); },
+                    setCursor: function(position) {
+                        activeDoc().setCursor(position);
+                        return document;
+                    },
+                    setSelection: function(sel) {
+                        activeDoc().setSelection(sel);
+                        return document;
+                    },
                     getName: function() { return 'Untitled'; },
                     getUrl: function() { return ''; },
                     getId: function() { return ''; },
                     getUi: function() { return uiStub; }
                 };
+                return document;
             },
             getUi: function() { return uiStub; },
             // Members scriptinterop's ElementType has round-trip as the same enum object, so a
@@ -578,7 +585,10 @@ globalThis.__gasKitRunner = function(
         };
 
         globalThis.Logger = {
-            log: function() { console.log.apply(console, arguments); }
+            log: function() {
+                console.log.apply(console, arguments);
+                return globalThis.Logger;
+            }
         };
 
         globalThis.Session = {

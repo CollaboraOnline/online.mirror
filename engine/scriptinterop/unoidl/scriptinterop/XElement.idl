@@ -55,7 +55,7 @@ interface XElement: XBase {
 
     ElementType getType();
 
-    void removeFromParent();
+    XElement removeFromParent();
 };
 
 };
