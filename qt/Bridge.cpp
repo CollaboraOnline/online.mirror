@@ -921,12 +921,14 @@ QVariant Bridge::cool(const QString& messageStr)
         if (result.content.empty())
             return {};
 
-        QVariantMap resultMap;
-        resultMap["fileName"] = QString::fromStdString(result.fileName);
-        resultMap["mimeType"] = QString::fromStdString(result.mimeType);
-        resultMap["content"] = QString::fromStdString(result.content);
+        // A QJsonObject holds no standard-library container, so its layout is the same in this
+        // code and in the system Qt that turns the reply into JSON for the page.
+        QJsonObject resultObject;
+        resultObject["fileName"] = QString::fromStdString(result.fileName);
+        resultObject["mimeType"] = QString::fromStdString(result.mimeType);
+        resultObject["content"] = QString::fromStdString(result.content);
 
-        return resultMap;
+        return resultObject;
     }
     else if (tokens.equals(0, "FETCHSETTINGSCONFIG"))
     {

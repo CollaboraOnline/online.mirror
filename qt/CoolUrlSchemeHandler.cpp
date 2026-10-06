@@ -19,7 +19,6 @@
 
 #include <QByteArray>
 #include <QFile>
-#include <QMultiMap>
 #include <QUrl>
 #include <QUrlQuery>
 #include <QWebEngineUrlRequestJob>
@@ -76,13 +75,9 @@ void CoolUrlSchemeHandler::requestStarted(QWebEngineUrlRequestJob* job)
         return;
     }
 
-    // file:// pages have origin "null"; required for <video crossOrigin="anonymous">.
-    QMultiMap<QByteArray, QByteArray> headers;
-    headers.insert("Access-Control-Allow-Origin", "null");
-#if QT_VERSION >= QT_VERSION_CHECK(6, 6, 0)
-    job->setAdditionalResponseHeaders(headers);
-#endif
-
+    // Chromium does not run its cross-origin check on a reply from a custom scheme handler, so
+    // <video crossOrigin="anonymous"> loads the reply without an Access-Control-Allow-Origin
+    // header.
     job->reply(isVtt ? "text/vtt" : "application/octet-stream", file);
 }
 
