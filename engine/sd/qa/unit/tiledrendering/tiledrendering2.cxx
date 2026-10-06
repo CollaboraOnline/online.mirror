@@ -28,6 +28,7 @@
 #include <rtl/ustrbuf.hxx>
 #include <svl/cryptosign.hxx>
 #include <svl/undo.hxx>
+#include <svx/svdograf.hxx>
 #include <svx/svdotext.hxx>
 #include <sfx2/linkmgr.hxx>
 #include <tools/json_writer.hxx>
@@ -1258,6 +1259,32 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSlideKeptWhenLeavingMasterViewTwo
 
     KitHelper::setView(nView2);
     CPPUNIT_ASSERT_EQUAL(0, pXImpressDocument->getPart());
+}
+
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testAnimatedGifSelectableOutsidePaintedTile)
+{
+    // An animated GIF is selected by a click, whichever area of the slide was painted last.
+    SdXImpressDocument* pXImpressDocument = createDoc("animated-gif.fodp");
+    sd::ViewShell* pViewShell = pXImpressDocument->GetDocShell()->GetViewShell();
+    SdrObject* pGif = pViewShell->GetActualPage()->GetObj(0);
+    CPPUNIT_ASSERT(static_cast<SdrGrafObj*>(pGif)->IsAnimated());
+
+    // The tile is the top left corner of the slide, away from the GIF.
+    ScopedVclPtrInstance<VirtualDevice> pDevice(DeviceFormat::WITHOUT_ALPHA);
+    pDevice->SetOutputSizePixel(Size(256, 256));
+    pXImpressDocument->paintTile(*pDevice, 256, 256, 0, 0, 2268, 2268);
+
+    const Point aCenter = pGif->GetSnapRect().Center();
+    const int nX = o3tl::toTwips(aCenter.getX(), o3tl::Length::mm100);
+    const int nY = o3tl::toTwips(aCenter.getY(), o3tl::Length::mm100);
+    pXImpressDocument->postMouseEvent(COKitMouseEventType::BUTTONDOWN, nX, nY, 1, MOUSE_LEFT, 0);
+    pXImpressDocument->postMouseEvent(COKitMouseEventType::BUTTONUP, nX, nY, 1, MOUSE_LEFT, 0);
+    Scheduler::ProcessEventsToIdle();
+
+    // Without the accompanying fix in place, the click selected nothing.
+    const SdrMarkList& rMarkList = pViewShell->GetView()->GetMarkedObjectList();
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), rMarkList.GetMarkCount());
+    CPPUNIT_ASSERT_EQUAL(pGif, rMarkList.GetMark(0)->GetMarkedSdrObj());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
