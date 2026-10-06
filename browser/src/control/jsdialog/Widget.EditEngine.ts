@@ -162,6 +162,21 @@ function editEngineApplySelection(
 	);
 }
 
+/// Drops the document selection when it lies in the container.
+function editEngineDropSelection(container: HTMLElement): void {
+	const selection = window.getSelection();
+	if (!selection || selection.rangeCount === 0) return;
+
+	const range = selection.getRangeAt(0);
+	if (
+		!container.contains(range.startContainer) &&
+		!container.contains(range.endContainer)
+	)
+		return;
+
+	selection.removeAllRanges();
+}
+
 function editEngineKey(selection: EditEngineSelection): string {
 	return (
 		selection.startPara +
@@ -519,8 +534,6 @@ function editEngineUpdateInPlace(
 
 	container.replaceChildren(...paragraphs);
 
-	// The engine owns the caret, so its selection is applied as given. The container stays in the
-	// document across the update, so the caret can be placed at once with no wait for a frame.
 	const selection = widgetData.selection || {
 		startPara: 0,
 		startIndex: 0,
@@ -528,7 +541,18 @@ function editEngineUpdateInPlace(
 		endIndex: 0,
 	};
 	container.editEngineLastSelection = editEngineKey(selection);
-	editEngineApplySelection(container, selection);
+
+	// The engine owns the caret, so its selection is applied as given. The container stays in the
+	// document across the update, so the caret can be placed at once with no wait for a frame.
+	if (document.activeElement === container) {
+		editEngineApplySelection(container, selection);
+		return;
+	}
+
+	// Without the focus the widget shows no caret. A document selection that sat in the replaced
+	// paragraphs now rests on the container itself, and WebKit draws a caret for a selection in
+	// editable content whether or not that content has the focus, so the selection is dropped.
+	editEngineDropSelection(container);
 }
 
 function _editEngineControl(

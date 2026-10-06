@@ -150,6 +150,36 @@ describe(['tagdesktop'], 'Impress speaker notes pane', function () {
 		cy.cGet('#notespanel-container .ui-editengine').should('have.focus');
 	});
 
+	// A thumbnail click moves the focus to the thumbnail, so the pane shows the
+	// notes of the clicked slide with no caret in them. The document selection
+	// leaves the pane together with the focus: WebKit draws a caret for a
+	// selection in editable content whether or not that content has the focus.
+	it('a thumbnail click takes the caret out of the notes', function () {
+		openNotesPane();
+
+		var editEngine = '#notespanel-container .ui-editengine';
+		var paragraph = editEngine + ' .ui-editengine-paragraph';
+
+		cy.cGet(editEngine).click();
+		cy.cGet(editEngine).type('First slide');
+		cy.cGet(paragraph).should('have.text', 'First slide');
+
+		cy.cGet('#slide-sorter .preview-img').eq(1).click();
+
+		cy.cGet(paragraph).should('contain.text', 'Click to add Notes');
+		cy.cGet(editEngine).should('not.have.focus');
+		cy.getFrameWindow().should(function (win) {
+			var editor = win.document.querySelector(editEngine);
+			expect(editor).to.not.equal(null);
+
+			var selection = win.getSelection();
+			if (selection.rangeCount === 0) return;
+			var range = selection.getRangeAt(0);
+			expect(editor.contains(range.startContainer)).to.equal(false);
+			expect(editor.contains(range.endContainer)).to.equal(false);
+		});
+	});
+
 	it('typed text reaches the notes of the current slide', function () {
 		openNotesPane();
 
