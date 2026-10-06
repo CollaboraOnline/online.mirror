@@ -71,16 +71,16 @@ class SAL_NO_VTABLE SAL_DLLPUBLIC_TEMPLATE PartialWeakComponentImplHelper:
     {};
 
 public:
-    PartialWeakComponentImplHelper(osl::Mutex & mutex) SAL_NOEXCEPT:
+    PartialWeakComponentImplHelper(osl::Mutex & mutex) noexcept:
         WeakComponentImplHelperBase(mutex) {}
 
     cpo::uno::Any queryInterface(cpo::uno::Type const & aType) override
     { return WeakComponentImplHelper_query(aType, cd::get(), this, this); }
 
-    void acquire() SAL_NOEXCEPT override
+    void acquire() noexcept override
     { WeakComponentImplHelperBase::acquire(); }
 
-    void release() SAL_NOEXCEPT override
+    void release() noexcept override
     { WeakComponentImplHelperBase::release(); }
 
     void dispose()
@@ -110,7 +110,7 @@ class SAL_NO_VTABLE SAL_DLLPUBLIC_TEMPLATE WeakComponentImplHelper:
     public PartialWeakComponentImplHelper<Ifc...>
 {
 public:
-    WeakComponentImplHelper(osl::Mutex & mutex) SAL_NOEXCEPT:
+    WeakComponentImplHelper(osl::Mutex & mutex) noexcept:
         PartialWeakComponentImplHelper<Ifc...>(mutex) {}
 
     void addEventListener(

@@ -65,9 +65,9 @@ public:
     virtual cpo::uno::Any queryAggregation(
         cpo::uno::Type const & rType ) override;
     virtual void acquire()
-        SAL_NOEXCEPT override;
+        noexcept override;
     virtual void release()
-        SAL_NOEXCEPT override;
+        noexcept override;
 
     /** @attention
         XTypeProvider::getImplementationId() has to be implemented separately!

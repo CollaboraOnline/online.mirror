@@ -107,9 +107,9 @@ public:
     cpo::uno::Any queryInterface(cpo::uno::Type const & aType) override
     { return WeakImplHelper_query(aType, cd::get(), this, this); }
 
-    void acquire() SAL_NOEXCEPT override { OWeakObject::acquire(); }
+    void acquire() noexcept override { OWeakObject::acquire(); }
 
-    void release() SAL_NOEXCEPT override { OWeakObject::release(); }
+    void release() noexcept override { OWeakObject::release(); }
 
     cpo::uno::Sequence<cpo::uno::Type> getTypes() override
     { return WeakImplHelper_getTypes(cd::get()); }
@@ -163,9 +163,9 @@ public:
         return ret.hasValue() ? ret : BaseClass::queryInterface(aType);
     }
 
-    void acquire() SAL_NOEXCEPT override { BaseClass::acquire(); }
+    void acquire() noexcept override { BaseClass::acquire(); }
 
-    void release() SAL_NOEXCEPT override { BaseClass::release(); }
+    void release() noexcept override { BaseClass::release(); }
 
     cpo::uno::Sequence<cpo::uno::Type> getTypes() override
     { return ImplInhHelper_getTypes(cd::get(), BaseClass::getTypes()); }

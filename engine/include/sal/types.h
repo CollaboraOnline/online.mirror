@@ -360,16 +360,6 @@ namespace css = ::com::sun::star;
 */
 namespace cpo {}
 
-/** Macro for C++11 "noexcept" vs. "throw ()" exception specification.
-
-    The latter has been removed completely from C++20.
- */
-#if __cplusplus >= 201103L
-#define SAL_NOEXCEPT noexcept
-#else
-#define SAL_NOEXCEPT throw ()
-#endif
-
 #endif /* __cplusplus */
 
 #ifdef __cplusplus

@@ -63,9 +63,9 @@ public:
     virtual cpo::uno::Any queryInterface(
         cpo::uno::Type const & rType ) override;
     virtual void acquire()
-        SAL_NOEXCEPT override;
+        noexcept override;
     virtual void release()
-        SAL_NOEXCEPT override;
+        noexcept override;
     virtual void dispose() override;
     virtual void addEventListener(
         cpo::uno::Reference< css::lang::XEventListener > const & xListener ) override;
@@ -96,9 +96,9 @@ public:
     virtual cpo::uno::Any queryAggregation(
         cpo::uno::Type const & rType ) override;
     virtual void acquire()
-        SAL_NOEXCEPT override;
+        noexcept override;
     virtual void release()
-        SAL_NOEXCEPT override;
+        noexcept override;
     virtual void dispose() override;
     virtual void addEventListener(
         cpo::uno::Reference< css::lang::XEventListener > const & xListener ) override;

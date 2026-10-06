@@ -52,11 +52,11 @@ public:
     /** If a delegator is set, then the delegators gets acquired.  Otherwise call is delegated to
         base class ::cppu::OWeakObject.
     */
-    virtual void acquire() SAL_NOEXCEPT override;
+    virtual void acquire() noexcept override;
     /** If a delegator is set, then the delegators gets released.  Otherwise call is delegated to
         base class ::cppu::OWeakObject.
     */
-    virtual void release() SAL_NOEXCEPT override;
+    virtual void release() noexcept override;
     /** If a delegator is set, then the delegator is queried for the demanded interface.  If the
         delegator cannot provide the demanded interface, it calls queryAggregation() on its
         aggregated objects.

@@ -56,7 +56,7 @@ public:
                 r2 = { spl, compiler.getSourceManager().getSpellingLoc(l2) };
             }
         }
-        auto const repl = isInUnoIncludeFile(r.getBegin()) ? "SAL_NOEXCEPT" : "noexcept";
+        auto const repl = "noexcept";
         if (rewriter != nullptr && replaceText(r2, repl))
         {
             return true;

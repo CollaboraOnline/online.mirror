@@ -1131,7 +1131,7 @@ void InterfaceType::dumpDeclaration(FileStream & out)
     out << "protected:\n";
     inc();
     out << indent() << "~" << id_
-        << ("() SAL_NOEXCEPT {} // avoid warnings about virtual members and"
+        << ("() noexcept {} // avoid warnings about virtual members and"
             " non-virtual dtor\n");
     dec();
     out << "};\n\n";

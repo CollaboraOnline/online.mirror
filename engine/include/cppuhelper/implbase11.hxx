@@ -99,7 +99,7 @@ namespace cppu
 #if !defined _MSC_VER // public -> protected changes mangled names there
     protected:
 #endif
-        ~ImplHelper11() SAL_NOEXCEPT {}
+        ~ImplHelper11() noexcept {}
     };
     /** Implementation helper implementing interfaces css::lang::XTypeProvider and
         cpo::uno::XInterface which supports weak mechanism to be held weakly
@@ -119,9 +119,9 @@ namespace cppu
     public:
         virtual cpo::uno::Any queryInterface( cpo::uno::Type const & rType ) override
             { return WeakImplHelper_query( rType, cd::get(), this, static_cast<OWeakObject *>(this) ); }
-        virtual void acquire() SAL_NOEXCEPT override
+        virtual void acquire() noexcept override
             { OWeakObject::acquire(); }
-        virtual void release() SAL_NOEXCEPT override
+        virtual void release() noexcept override
             { OWeakObject::release(); }
         virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() override
             { return WeakImplHelper_getTypes( cd::get() ); }
@@ -153,9 +153,9 @@ namespace cppu
             { return OWeakAggObject::queryInterface( rType ); }
         virtual cpo::uno::Any queryAggregation( cpo::uno::Type const & rType ) override
             { return WeakAggImplHelper_queryAgg( rType, cd::get(), this, static_cast<OWeakAggObject *>(this) ); }
-        virtual void acquire() SAL_NOEXCEPT override
+        virtual void acquire() noexcept override
             { OWeakAggObject::acquire(); }
-        virtual void release() SAL_NOEXCEPT override
+        virtual void release() noexcept override
             { OWeakAggObject::release(); }
         virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() override
             { return WeakAggImplHelper_getTypes( cd::get() ); }
@@ -220,9 +220,9 @@ namespace cppu
                     return aRet;
                 return BaseClass::queryInterface( rType );
             }
-        virtual void acquire() SAL_NOEXCEPT override
+        virtual void acquire() noexcept override
             { BaseClass::acquire(); }
-        virtual void release() SAL_NOEXCEPT override
+        virtual void release() noexcept override
             { BaseClass::release(); }
         virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() override
             { return ImplInhHelper_getTypes( cd::get(), BaseClass::getTypes() ); }
@@ -290,9 +290,9 @@ namespace cppu
                     return aRet;
                 return BaseClass::queryAggregation( rType );
             }
-        virtual void acquire() SAL_NOEXCEPT override
+        virtual void acquire() noexcept override
             { BaseClass::acquire(); }
-        virtual void release() SAL_NOEXCEPT override
+        virtual void release() noexcept override
             { BaseClass::release(); }
         virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() override
             { return ImplInhHelper_getTypes( cd::get(), BaseClass::getTypes() ); }

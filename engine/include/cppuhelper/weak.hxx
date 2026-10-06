@@ -114,11 +114,11 @@ public:
     /** increasing m_refCount
     */
     virtual void acquire()
-        SAL_NOEXCEPT override;
+        noexcept override;
     /** decreasing m_refCount
     */
     virtual void release()
-        SAL_NOEXCEPT override;
+        noexcept override;
 
     /** XWeak::queryAdapter() implementation
 
