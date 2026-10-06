@@ -17,6 +17,7 @@ if (!globalThis.cool) {
 function test() {
     const body = DocumentApp.getActiveDocument().getBody();
     console.assert(body.getType() === DocumentApp.ElementType.BODY_SECTION);
+    console.assert(String(body.getType()) === 'BODY_SECTION');
     console.assert(body.getText().length > 0);
     console.assert(body.getNumChildren() === 6);
 
