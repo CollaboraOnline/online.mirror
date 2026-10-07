@@ -78,7 +78,6 @@ $(packimages_DIR)/sourceimagelist.ilst : \
 		$(SRCDIR)/framework/inc/bitmaps.hlst \
 		$(SRCDIR)/sc/inc/bitmaps.hlst \
 		$(SRCDIR)/sd/inc/bitmaps.hlst \
-		$(SRCDIR)/sdext/inc/bitmaps.hlst \
 		$(SRCDIR)/sfx2/inc/bitmaps.hlst \
 		$(SRCDIR)/svtools/inc/bitmaps.hlst \
 		$(SRCDIR)/svx/inc/bitmaps.hlst \

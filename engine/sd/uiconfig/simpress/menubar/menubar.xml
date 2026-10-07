@@ -612,7 +612,6 @@
       <menu:menuitem menu:id=".uno:RedactDoc" menu:style="text"/>
       <menu:menuitem menu:id=".uno:AutoRedactDoc" menu:style="text"/>
       <menu:menuseparator/>
-      <menu:menuitem menu:id=".uno:PresentationMinimizer"/>
       <menu:menuitem menu:id=".uno:ImageMapDialog"/>
       <menu:menuitem menu:id=".uno:BmpMask"/>
       <menu:menuitem menu:id=".uno:AVMediaPlayer"/>

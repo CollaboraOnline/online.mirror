@@ -3444,10 +3444,6 @@ sd/source/ui/slidesorter/inc/controller/SlsPageSelector.hxx:100
     _Bool sd::slidesorter::controller::PageSelector::IsPageExcluded(int)
     int nPageIndex
     0
-sdext/source/minimizer/configurationaccess.hxx:90
-    short ConfigurationAccess::GetConfigProperty(const enum PPPOptimizerTokenEnum,const short) const
-    const short nDefault
-    0
 sdext/source/pdfimport/wrapper/wrapper.cxx:1022
     oslFileError pdfi::(anonymous namespace)::Buffering::read(char *,short,unsigned long *)
     short count

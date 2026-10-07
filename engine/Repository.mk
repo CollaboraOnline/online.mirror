@@ -225,7 +225,6 @@ $(eval $(call gb_Helper_register_libraries_for_install,OOOLIBS,graphicfilter, \
 
 $(eval $(call gb_Helper_register_libraries_for_install,OOOLIBS,impress, \
 	animcore \
-	PresentationMinimizer \
 	wpftimpress \
 ))
 
@@ -954,7 +953,6 @@ $(eval $(call gb_Helper_register_mos,\
 	sc \
 	sca \
 	sd \
-	sdext \
 	sfx \
 	shell \
 	sm \

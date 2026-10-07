@@ -3924,23 +3924,6 @@ SfxVoidItem PhotoAlbumDialog SID_PHOTOALBUM
     GroupId = SfxGroupId::Options;
 ]
 
-SfxVoidItem PresentationMinimizer SID_PRESENTATION_MINIMIZER
-()
-[
-    AutoUpdate = FALSE,
-    FastCall = TRUE,
-    ReadOnlyDoc = FALSE,
-    Toggle = FALSE,
-    Container = FALSE,
-    RecordAbsolute = FALSE,
-    RecordPerItem;
-
-    AccelConfig = TRUE,
-    MenuConfig = TRUE,
-    ToolBoxConfig = TRUE,
-    GroupId = SfxGroupId::Options;
-]
-
 SfxVoidItem HideLastLevel SID_HIDE_LAST_LEVEL
 ()
 [

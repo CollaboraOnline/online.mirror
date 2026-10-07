@@ -395,8 +395,6 @@ void WriteOnlyVars::run()
             return;
         if (loplugin::isSamePathname(fn, SRCDIR "/sw/source/ui/dbui/dbinsdlg.cxx"))
             return;
-        if (loplugin::isSamePathname(fn, SRCDIR "/sdext/source/minimizer/impoptimizer.cxx"))
-            return;
         if (loplugin::isSamePathname(fn, SRCDIR "/sdext/source/presenter/PresenterTheme.cxx"))
             return;
         if (loplugin::isSamePathname(fn, SRCDIR "/starmath/source/mathmlimport.cxx"))

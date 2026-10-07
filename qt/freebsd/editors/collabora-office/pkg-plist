@@ -21,7 +21,6 @@ lib/collaboraoffice/program/gengal.bin
 lib/collaboraoffice/program/intro-highres.png
 lib/collaboraoffice/program/intro.png
 lib/collaboraoffice/program/libLanguageToollo.so
-lib/collaboraoffice/program/libPresentationMinimizerlo.so
 lib/collaboraoffice/program/libabplo.so
 lib/collaboraoffice/program/libaffine_uno_uno.so
 lib/collaboraoffice/program/libbinaryurplo.so
@@ -2430,12 +2429,6 @@ lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/noteschildwindo
 lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/notespanelcontextmenu.ui
 lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/pagesfieldbox.ui
 lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/photoalbum.ui
-lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/pmimagespage.ui
-lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/pminfodialog.ui
-lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/pmintropage.ui
-lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/pmobjectspage.ui
-lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/pmslidespage.ui
-lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/pmsummarypage.ui
 lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/presentationdialog.ui
 lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/remotedialog.ui
 lib/collaboraoffice/share/config/soffice.cfg/modules/simpress/ui/rotatemenu.ui

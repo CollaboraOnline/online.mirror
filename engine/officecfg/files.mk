@@ -33,7 +33,6 @@ officecfg_XCSFILES := \
     Office/Math \
     Office/OptionsDialog \
     Office/Paths \
-    Office/PresentationMinimizer \
     Office/ProtocolHandler \
     Office/Recovery \
     Office/Scripting \

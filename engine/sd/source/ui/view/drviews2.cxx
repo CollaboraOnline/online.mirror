@@ -44,9 +44,6 @@
 #include <com/sun/star/lang/XInitialization.hpp>
 #include <com/sun/star/ui/dialogs/XExecutableDialog.hpp>
 #include <com/sun/star/ui/dialogs/XSLTFilterDialog.hpp>
-#include <com/sun/star/frame/XDispatchProvider.hpp>
-#include <com/sun/star/util/URLTransformer.hpp>
-#include <com/sun/star/util/XURLTransformer.hpp>
 #include <com/sun/star/scanner/XScannerManager2.hpp>
 #include <com/sun/star/document/XDocumentProperties.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
@@ -5436,27 +5433,6 @@ void DrawViewShell::FuTemporary(SfxRequest& rReq)
         }
         break;
 #endif
-
-        case SID_PRESENTATION_MINIMIZER:
-        {
-            const Reference<XComponentContext>& xContext(::comphelper::getProcessComponentContext());
-            Reference<util::XURLTransformer> xParser(util::URLTransformer::create(xContext));
-            Reference<frame::XDispatchProvider> xProvider(GetViewShellBase().GetController()->getFrame(), UNO_QUERY);
-            if (xProvider.is())
-            {
-                util::URL aURL;
-                aURL.Complete = u"vnd.com.sun.star.comp.PresentationMinimizer:execute"_ustr;
-                xParser->parseStrict(aURL);
-                uno::Reference<frame::XDispatch> xDispatch(xProvider->queryDispatch(aURL, OUString(), 0));
-                if (xDispatch.is())
-                {
-                    xDispatch->dispatch(aURL, cpo::uno::Sequence< beans::PropertyValue >());
-                }
-            }
-            Cancel();
-            rReq.Ignore();
-        }
-        break;
 
         case SID_DISPLAY_MASTER_BACKGROUND:
         case SID_DISPLAY_MASTER_OBJECTS:

@@ -1552,9 +1552,6 @@ void DrawViewShell::GetMenuState( SfxItemSet &rSet )
             rSet.DisableItem(SID_SAVE_BACKGROUND);
     }
 
-    if (GetObjectShell()->isExportLocked())
-        rSet.DisableItem(SID_PRESENTATION_MINIMIZER);
-
     if (rSet.GetItemState(SID_INSERT_SIGNATURELINE) == SfxItemState::DEFAULT)
     {
         if (!GetObjectShell()->IsSignPDF())

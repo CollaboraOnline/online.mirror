@@ -2550,10 +2550,6 @@ sd/source/ui/slidesorter/view/SlsLayouter.cxx:146
     int sd::slidesorter::view::Layouter::Implementation::ResolvePositionInGap(int,enum sd::slidesorter::view::Layouter::Implementation::GapMembership,int,int)
     int nGap
     4
-sdext/source/minimizer/configurationaccess.hxx:90
-    short ConfigurationAccess::GetConfigProperty(const enum PPPOptimizerTokenEnum,const short) const
-    const enum PPPOptimizerTokenEnum 
-    20
 sfx2/inc/SfxRedactionHelper.hxx:63
     class rtl::OUString SfxRedactionHelper::getStringParam(const class SfxRequest &,unsigned short)
     unsigned short nParamId
