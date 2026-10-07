@@ -4763,8 +4763,10 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
     bool bHyphenatorSet = false;
     const ScPatternAttr* pPattern;
     const SfxItemSet*    pCondSet;
+    const SfxItemSet*    pTableSet;
     const ScPatternAttr* pOldPattern = nullptr;
     const SfxItemSet*    pOldCondSet = nullptr;
+    const SfxItemSet*    pOldTableSet = nullptr;
     ScRefCellValue aCell;
 
     tools::Long nInitPosX = mnScrX;
@@ -4809,6 +4811,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                         bool bFromDoc = false;
                         pPattern = pInfo->getPatternAttr();
                         pCondSet = pInfo->pConditionSet;
+                        pTableSet = pInfo->pTableFormatSet;
                         if (!pPattern)
                         {
                             pPattern = mpDoc->GetPattern( nX, nY, mnTab );
@@ -4816,7 +4819,10 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                         }
                         aCell = pInfo->maCell;
                         if (bFromDoc)
+                        {
                             pCondSet = mpDoc->GetCondResult( nX, nY, mnTab );
+                            pTableSet = mpDoc->GetTableFormatSet( nX, nY, mnTab );
+                        }
 
                         if (aCell.isEmpty() && nX>mnX2)
                             GetVisibleCell( nX, nY, mnTab, aCell );
@@ -4879,10 +4885,11 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                             // syntax mode is ignored here...
 
                             // StringDiffer doesn't look at hyphenate, language items
-                            if ( !ScPatternAttr::areSame(pPattern, pOldPattern) || pCondSet != pOldCondSet )
+                            if ( !ScPatternAttr::areSame(pPattern, pOldPattern) || pCondSet != pOldCondSet
+                                 || pTableSet != pOldTableSet )
                             {
                                 SfxItemSet aSet( mxOutputEditEngine->GetEmptyItemSet() );
-                                pPattern->FillEditItemSet( &aSet, pCondSet );
+                                pPattern->FillEditItemSet( &aSet, pCondSet, pTableSet );
 
                                                                     // adjustment for EditEngine
                                 SvxAdjust eSvxAdjust = SvxAdjust::Left;
@@ -4895,6 +4902,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                                 mxOutputEditEngine->SetDefaults( std::move(aSet) );
                                 pOldPattern = pPattern;
                                 pOldCondSet = pCondSet;
+                                pOldTableSet = pTableSet;
 
                                 EEControlBits nControl = mxOutputEditEngine->GetControlWord();
                                 if (eOrient==SvxCellOrientation::Stacked)

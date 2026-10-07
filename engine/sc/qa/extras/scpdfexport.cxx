@@ -94,6 +94,7 @@ public:
     void testPageRangeSkipsSheetStart();
     void testDatabaseRangeHeader();
     void testTableStyleCellStyleExcludedFont();
+    void testTableStyleRotatedText();
     void testForcepoint97();
 #if ENABLE_PDFIMPORT
     void testTdf156893();
@@ -122,6 +123,7 @@ public:
     CPPUNIT_TEST(testPageRangeSkipsSheetStart);
     CPPUNIT_TEST(testDatabaseRangeHeader);
     CPPUNIT_TEST(testTableStyleCellStyleExcludedFont);
+    CPPUNIT_TEST(testTableStyleRotatedText);
     CPPUNIT_TEST(testForcepoint97);
 #if ENABLE_PDFIMPORT
     CPPUNIT_TEST(testTdf156893);
@@ -1262,6 +1264,39 @@ void ScPDFExportTest::testTableStyleCellStyleExcludedFont()
     // E2 keeps the red-brown of Normal, like in MSO. Without the fix in place, the paint took the
     // font of D2 over to E2, because the two patterns give the same font, so E2 was green too.
     CPPUNIT_ASSERT_EQUAL(Color(0x912d0a), aE2Color);
+}
+
+void ScPDFExportTest::testTableStyleRotatedText()
+{
+    std::shared_ptr<vcl::pdf::PDFium> pPDFium = vcl::pdf::PDFiumLibrary::get();
+    if (!pPDFium)
+        return;
+
+    // C4 is a date in a data row of the table, rotated by 45 degrees
+    loadFromURL(m_directories.getURLFromSrc(u"/sc/qa/unit/data/xlsx/",
+                                            u"tablestyle-cellstyle-excluded-font.xlsx"));
+    exportWholeDocumentToPDF();
+
+    std::unique_ptr<vcl::pdf::PDFiumDocument> pPdfDocument = parsePDFExport();
+    std::unique_ptr<vcl::pdf::PDFiumPage> pPdfPage = pPdfDocument->openPage(0);
+    std::unique_ptr<vcl::pdf::PDFiumTextPage> pTextPage = pPdfPage->getTextPage();
+
+    // The rotated date reaches the PDF one character at a time, every other text as a whole
+    int nRotatedChars = 0;
+    for (int nObject = 0; nObject < pPdfPage->getObjectCount(); ++nObject)
+    {
+        std::unique_ptr<vcl::pdf::PDFiumPageObject> pObject = pPdfPage->getObject(nObject);
+        if (pObject->getType() != vcl::pdf::PDFPageObjectType::Text
+            || pObject->getText(pTextPage).getLength() != 1)
+            continue;
+        ++nRotatedChars;
+
+        // The rotated text gets the table colour, a green with this theme, like the rest of the
+        // row. Without the fix in place, it had the red-brown of Normal.
+        CPPUNIT_ASSERT_EQUAL(Color(0x13501b), pObject->getFillColor());
+    }
+    // The 10 characters of 10/11/2013
+    CPPUNIT_ASSERT_EQUAL(10, nRotatedChars);
 }
 
 // just needs to not crash on export to pdf
