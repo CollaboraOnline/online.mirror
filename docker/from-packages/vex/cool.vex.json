@@ -3,14 +3,97 @@
   "specVersion": "1.6",
   "version": 1,
   "metadata": {
+    "timestamp": "2026-10-07T20:27:23Z",
     "supplier": {
       "name": "Collabora Productivity Ltd.",
       "url": [
         "https://collaboraoffice.com"
       ]
-    }
+    },
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "name": "grype",
+          "version": "0.118.0"
+        },
+        {
+          "type": "application",
+          "name": "trivy",
+          "version": "0.74.0"
+        }
+      ]
+    },
+    "properties": [
+      {
+        "name": "collabora:vex-scope",
+        "value": "components bundled in collaboraoffice and coolwsd, matched by CPE and npm purl; the packages of the base image are covered by the base image supplier's VEX"
+      },
+      {
+        "name": "collabora:vex-source",
+        "value": "component inventory of the main branch: engine/download.lst and readlicense_oo/license/license.xml, merged with the generated collabora-online-sbom.spdx.json"
+      }
+    ]
   },
   "vulnerabilities": [
+    {
+      "id": "CVE-2013-6648",
+      "description": "skia: SkRegion::setPath in Skia allows remote attackers to cause a denial of service (crash)",
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against skia m142 on 2026-10-07, severity High. No upstream fix published yet. Not yet assessed."
+      }
+    },
+    {
+      "id": "CVE-2015-1239",
+      "description": "Double free in OpenJPEG j2k_read_ppm_v3 as bundled by 2015-era PDFium/Chrome",
+      "analysis": {
+        "state": "false_positive",
+        "detail": "Fixed upstream in OpenJPEG r2997 (2015). The bundled PDFium is the 7988 snapshot (2026), which has contained the fix for a decade."
+      }
+    },
+    {
+      "id": "CVE-2017-5436",
+      "description": "graphite2: heap buffer overflow in lz4::decompress",
+      "analysis": {
+        "state": "false_positive",
+        "detail": "Fixed upstream in graphite2 1.3.10 (2017); the bundled 1.3.15 contains the fix. Flagged only because of a sloppy NVD version range."
+      }
+    },
+    {
+      "id": "CVE-2023-37769",
+      "description": "FPE in pixman's 'stress-test' test utility",
+      "analysis": {
+        "state": "not_affected",
+        "detail": "The flaw is in pixman's stress-test test program, not in the library; the test programs are neither built nor shipped.",
+        "justification": "code_not_present"
+      }
+    },
+    {
+      "id": "CVE-2023-52356",
+      "description": "libtiff: segfault in TIFFReadRGBATileExt() (DoS)",
+      "analysis": {
+        "state": "false_positive",
+        "detail": "Fixed upstream in January 2024, first released in libtiff 4.7.0; the bundled 4.7.2 contains the fix."
+      }
+    },
+    {
+      "id": "CVE-2023-6228",
+      "description": "libtiff: heap buffer overflow in the tiffcp utility",
+      "analysis": {
+        "state": "not_affected",
+        "detail": "Only the libtiff library is built and statically linked; the tiffcp command-line utility is neither built nor shipped.",
+        "justification": "code_not_present"
+      }
+    },
+    {
+      "id": "CVE-2023-6277",
+      "description": "libtiff: out-of-memory in TIFFOpen via a crafted file (DoS)",
+      "analysis": {
+        "state": "false_positive",
+        "detail": "Fixed upstream in November 2023, first released in libtiff 4.7.0; the bundled 4.7.2 contains the fix."
+      }
+    },
     {
       "id": "CVE-2024-57822",
       "description": "Raptor RDF Syntax Library through 2.0.16: heap-based buffer over-read in the N-Triples parser when a bnode id ends in '.'",
@@ -29,149 +112,11 @@
       }
     },
     {
-      "id": "CVE-2013-2617",
-      "description": "Remote command execution in the 'curl' RUBY GEM <= 0.0.9",
-      "analysis": {
-        "state": "false_positive",
-        "detail": "Product name collision: this CVE is about the abandoned Ruby gem named 'curl', not the curl project. The bundled component is curl by the curl project (https://curl.se/)."
-      }
-    },
-    {
-      "id": "CVE-2017-5436",
-      "description": "graphite2: heap buffer overflow in lz4::decompress",
-      "analysis": {
-        "state": "false_positive",
-        "detail": "Fixed upstream in graphite2 1.3.10 (2017); the bundled 1.3.15 contains the fix. Flagged only because of a sloppy NVD version range."
-      }
-    },
-    {
-      "id": "CVE-2015-1239",
-      "description": "Double free in OpenJPEG j2k_read_ppm_v3 as bundled by 2015-era PDFium/Chrome",
-      "analysis": {
-        "state": "false_positive",
-        "detail": "Fixed upstream in OpenJPEG r2997 (2015). The bundled PDFium is the 7988 snapshot (2026), which has contained the fix for a decade."
-      }
-    },
-    {
-      "id": "CVE-2023-52356",
-      "description": "libtiff: segfault in TIFFReadRGBATileExt() (DoS)",
-      "analysis": {
-        "state": "false_positive",
-        "detail": "Fixed upstream in January 2024, first released in libtiff 4.7.0; the bundled 4.7.2 contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2023-6277",
-      "description": "libtiff: out-of-memory in TIFFOpen via a crafted file (DoS)",
-      "analysis": {
-        "state": "false_positive",
-        "detail": "Fixed upstream in November 2023, first released in libtiff 4.7.0; the bundled 4.7.2 contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2025-6021",
-      "description": "libxml2: integer overflow in xmlBuildQName() leading to a stack buffer overflow",
-      "analysis": {
-        "state": "false_positive",
-        "detail": "Fixed upstream in libxml2 2.13.8/2.14.2 (2025); the bundled 2.15.3 contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2023-6228",
-      "description": "libtiff: heap buffer overflow in the tiffcp utility",
-      "analysis": {
-        "state": "not_affected",
-        "detail": "Only the libtiff library is built and statically linked; the tiffcp command-line utility is neither built nor shipped.",
-        "justification": "code_not_present"
-      }
-    },
-    {
-      "id": "CVE-2025-6170",
-      "description": "libxml2: stack buffer overflow in the xmllint interactive shell",
-      "analysis": {
-        "state": "not_affected",
-        "detail": "Only the libxml2 library is shipped; the xmllint utility is neither built nor shipped.",
-        "justification": "code_not_present"
-      }
-    },
-    {
-      "id": "CVE-2026-11979",
-      "description": "libxml2: stack buffer overflows in the xmlcatalog utility --shell mode",
-      "analysis": {
-        "state": "not_affected",
-        "detail": "Only the libxml2 library is shipped; the xmlcatalog utility is neither built nor shipped.",
-        "justification": "code_not_present"
-      }
-    },
-    {
-      "id": "CVE-2023-37769",
-      "description": "FPE in pixman's 'stress-test' test utility",
-      "analysis": {
-        "state": "not_affected",
-        "detail": "The flaw is in pixman's stress-test test program, not in the library; the test programs are neither built nor shipped.",
-        "justification": "code_not_present"
-      }
-    },
-    {
-      "id": "CVE-2025-7425",
-      "description": "libxslt: use-after-free via attribute type corruption when processing result tree fragments",
-      "analysis": {
-        "state": "not_affected",
-        "detail": "The mitigation for this unfixed libxslt flaw lives in libxml2 >= 2.14 (per the Debian security tracker); the bundled libxml2 is 2.15.3, and libxslt only ever runs against it (both are statically linked together).",
-        "justification": "protected_by_mitigating_control"
-      }
-    },
-    {
       "id": "CVE-2025-10911",
       "description": "libxslt: use-after-free with key data stored cross-RVT",
       "analysis": {
         "state": "resolved_with_pedigree",
         "detail": "The upstream fix (GNOME libxslt merge request !77, 'Use a dedicated node type to maintain the list of cached RVTs', the same commit RHEL backports for this CVE) is applied to the bundled 1.1.45 via engine/external/libxslt/77.patch.1."
-      }
-    },
-    {
-      "id": "CVE-2026-17084",
-      "description": "Python: stringprep.map_table_b2() deviates from RFC 3454",
-      "analysis": {
-        "state": "not_affected",
-        "detail": "Python scripting is optional (the pyuno packages are separate and excluded from the container image unless built with 'withpython') and macro execution is disabled by default (security.enable_macros_execution); no product code uses this module, it is only reachable from user-authored macros.",
-        "justification": "requires_configuration"
-      }
-    },
-    {
-      "id": "CVE-2026-15806",
-      "description": "Python: HTTPPasswordMgr can send saved HTTPS credentials over HTTP",
-      "analysis": {
-        "state": "not_affected",
-        "detail": "Python scripting is optional (the pyuno packages are separate and excluded from the container image unless built with 'withpython') and macro execution is disabled by default (security.enable_macros_execution); no product code uses this module, it is only reachable from user-authored macros.",
-        "justification": "requires_configuration"
-      }
-    },
-    {
-      "id": "CVE-2026-4360",
-      "description": "Python: tarfile.extract() does not fully respect the filter parameter",
-      "analysis": {
-        "state": "not_affected",
-        "detail": "Python scripting is optional (the pyuno packages are separate and excluded from the container image unless built with 'withpython') and macro execution is disabled by default (security.enable_macros_execution); no product code uses this module, it is only reachable from user-authored macros.",
-        "justification": "requires_configuration"
-      }
-    },
-    {
-      "id": "CVE-2026-19672",
-      "description": "Python: tarfile can create directories outside the extraction path on POSIX",
-      "analysis": {
-        "state": "not_affected",
-        "detail": "Python scripting is optional (the pyuno packages are separate and excluded from the container image unless built with 'withpython') and macro execution is disabled by default (security.enable_macros_execution); no product code uses this module, it is only reachable from user-authored macros.",
-        "justification": "requires_configuration"
-      }
-    },
-    {
-      "id": "CVE-2026-15310",
-      "description": "Python: zipfile decompresses bzip2/LZMA/zstd members without a max_length bound",
-      "analysis": {
-        "state": "not_affected",
-        "detail": "Python scripting is optional (the pyuno packages are separate and excluded from the container image unless built with 'withpython') and macro execution is disabled by default (security.enable_macros_execution); no product code uses this module, it is only reachable from user-authored macros.",
-        "justification": "requires_configuration"
       }
     },
     {
@@ -193,6 +138,102 @@
       }
     },
     {
+      "id": "CVE-2025-6021",
+      "description": "libxml2: integer overflow in xmlBuildQName() leading to a stack buffer overflow",
+      "analysis": {
+        "state": "false_positive",
+        "detail": "Fixed upstream in libxml2 2.13.8/2.14.2 (2025); the bundled 2.15.3 contains the fix."
+      }
+    },
+    {
+      "id": "CVE-2025-6170",
+      "description": "libxml2: stack buffer overflow in the xmllint interactive shell",
+      "analysis": {
+        "state": "not_affected",
+        "detail": "Only the libxml2 library is shipped; the xmllint utility is neither built nor shipped.",
+        "justification": "code_not_present"
+      }
+    },
+    {
+      "id": "CVE-2025-7425",
+      "description": "libxslt: use-after-free via attribute type corruption when processing result tree fragments",
+      "analysis": {
+        "state": "not_affected",
+        "detail": "The mitigation for this unfixed libxslt flaw lives in libxml2 >= 2.14 (per the Debian security tracker); the bundled libxml2 is 2.15.3, and libxslt only ever runs against it (both are statically linked together).",
+        "justification": "protected_by_mitigating_control"
+      }
+    },
+    {
+      "id": "CVE-2026-12345",
+      "description": "python: The cleanup of tempfile.TemporaryDirectory is vulnerable to a race condition",
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against python 3.14.7 on 2026-10-07, severity Medium. Upstream fix in 3.15.0. Not yet assessed."
+      }
+    },
+    {
+      "id": "CVE-2026-15310",
+      "description": "Python: zipfile decompresses bzip2/LZMA/zstd members without a max_length bound",
+      "analysis": {
+        "state": "not_affected",
+        "detail": "Python scripting is optional (the pyuno packages are separate and excluded from the container image unless built with 'withpython') and macro execution is disabled by default (security.enable_macros_execution); no product code uses this module, it is only reachable from user-authored macros.",
+        "justification": "requires_configuration"
+      }
+    },
+    {
+      "id": "CVE-2026-15806",
+      "description": "Python: HTTPPasswordMgr can send saved HTTPS credentials over HTTP",
+      "analysis": {
+        "state": "not_affected",
+        "detail": "Python scripting is optional (the pyuno packages are separate and excluded from the container image unless built with 'withpython') and macro execution is disabled by default (security.enable_macros_execution); no product code uses this module, it is only reachable from user-authored macros.",
+        "justification": "requires_configuration"
+      }
+    },
+    {
+      "id": "CVE-2026-17084",
+      "description": "Python: stringprep.map_table_b2() deviates from RFC 3454",
+      "analysis": {
+        "state": "not_affected",
+        "detail": "Python scripting is optional (the pyuno packages are separate and excluded from the container image unless built with 'withpython') and macro execution is disabled by default (security.enable_macros_execution); no product code uses this module, it is only reachable from user-authored macros.",
+        "justification": "requires_configuration"
+      }
+    },
+    {
+      "id": "CVE-2026-19672",
+      "description": "Python: tarfile can create directories outside the extraction path on POSIX",
+      "analysis": {
+        "state": "not_affected",
+        "detail": "Python scripting is optional (the pyuno packages are separate and excluded from the container image unless built with 'withpython') and macro execution is disabled by default (security.enable_macros_execution); no product code uses this module, it is only reachable from user-authored macros.",
+        "justification": "requires_configuration"
+      }
+    },
+    {
+      "id": "CVE-2026-35189",
+      "description": "openssl: A certificate with many nameRelativeToCRLIssuer CRL distribution points causes disproportionate heap growth when OpenSSL caches X.509 extensions",
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Collabora security assessment: low severity for this product, with no argument that the code is unreachable, so it stands until openssl is updated. Fixed upstream in openssl 3.5.9."
+      }
+    },
+    {
+      "id": "CVE-2026-35191",
+      "description": "openssl: The OpenSSL QUIC server, when configured to not preform address validation, can be forced to count incoming packets multiple times in its unvalidated credit\u2026",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "code_not_reachable",
+        "detail": "Collabora security assessment: QUIC is not used by Collabora Online, so the vulnerable code is never reached. Rated low severity for this product. Fixed upstream in openssl 3.5.9."
+      }
+    },
+    {
+      "id": "CVE-2026-42772",
+      "description": "openssl: The QUIC stream reassembly algorithm performance deteriorates progressively as packets are arriving out of order",
+      "analysis": {
+        "state": "not_affected",
+        "justification": "code_not_reachable",
+        "detail": "Collabora security assessment: QUIC is not used by Collabora Online, so the vulnerable code is never reached. Rated low severity for this product. Fixed upstream in openssl 3.5.9."
+      }
+    },
+    {
       "id": "CVE-2026-4775",
       "description": "libtiff: signed integer overflow in putcontig8bitYCbCr44tile leading to heap overflow in YCbCr tile decoding",
       "analysis": {
@@ -201,279 +242,170 @@
       }
     },
     {
-      "id": "CVE-2026-10536",
-      "description": "curl: HTTP/2 stream-dependency tree use-after-free",
+      "id": "CVE-2026-54872",
+      "description": "openssl: The generic elliptic-curve scalar multiplication used for ECDSA and SM2 signature operations with curves that do not have a dedicated implementation leaks information\u2026",
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Collabora security assessment: low severity for this product, with no argument that the code is unreachable, so it stands until openssl is updated. Fixed upstream in openssl 3.5.9."
+      }
+    },
+    {
+      "id": "CVE-2026-54873",
+      "description": "openssl: QUIC process may keep memory for QUIC packet buffer for much longer period than necessary",
       "analysis": {
         "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: --without-nghttp2, so HTTP/2 is not built."
+        "justification": "code_not_reachable",
+        "detail": "Collabora security assessment: QUIC is not used by Collabora Online, so the vulnerable code is never reached. Rated low severity for this product. Fixed upstream in openssl 3.5.9."
       }
     },
     {
-      "id": "CVE-2026-12064",
-      "description": "curl: proto-default skips SSH verification",
+      "id": "CVE-2026-54875",
+      "description": "openssl: A non-constant-time optimized implementation of scalar point multiplication is used for SM2 private key operations on ARM64 and RISC-V platforms",
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Collabora security assessment: low severity, and only the ARM and RISC-V implementations are affected. We publish an arm64 image, so this is not dismissed as inapplicable. Fixed upstream in openssl 3.5.9."
+      }
+    },
+    {
+      "id": "CVE-2026-72897",
+      "description": "openssl: A TLS server that calls SSL_set_SSL_CTX() to switch a connection to a different SSL_CTX part way through a handshake may access memory beyond the end of an internal\u2026",
       "analysis": {
         "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: --without-libssh --without-libssh2, no SSH/SFTP/SCP."
+        "justification": "code_not_reachable",
+        "detail": "Collabora security assessment: SSL_set_SSL_CTX is never called by Collabora Online, so the vulnerable path is not reached. Rated low severity for this product. Fixed upstream in openssl 3.5.9."
       }
     },
     {
-      "id": "CVE-2026-9547",
-      "description": "curl: SSH improper host validation",
+      "id": "CVE-2026-75804",
+      "description": "openssl: OpenSSL QUIC stack does not enforce connection level flow control for streams",
       "analysis": {
         "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: --without-libssh --without-libssh2, no SSH/SFTP/SCP."
+        "justification": "code_not_reachable",
+        "detail": "Collabora security assessment: QUIC is not used by Collabora Online, so the vulnerable code is never reached. Rated low severity for this product. Fixed upstream in openssl 3.5.9."
       }
     },
     {
-      "id": "CVE-2025-10966",
-      "description": "curl: missing SFTP host verification with wolfSSH",
+      "id": "CVE-2026-75805",
+      "description": "openssl: A CMP client that requests certificate revocation on the basis of a PKCS#10 CSR may dereference a NULL pointer and terminate abnormally when processing a crafted\u2026",
       "analysis": {
         "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: --without-libssh --without-libssh2, no SSH/SFTP/SCP, and OpenSSL is the only TLS backend selected (--with-openssl), so neither wolfSSH nor wolfSSL is built."
+        "justification": "code_not_reachable",
+        "detail": "Collabora security assessment: the CMP protocol is not used by Collabora Online, so the vulnerable code is never reached. Rated low severity for this product. Fixed upstream in openssl 3.5.9."
       }
     },
     {
-      "id": "CVE-2025-15079",
-      "description": "curl: libssh global known_hosts override",
+      "id": "CVE-2026-75806",
+      "description": "openssl: An established DTLS 1.2 association using an AEAD cipher suite can be terminated by a single unauthenticated datagram whose encrypted fragment is shorter than the\u2026",
       "analysis": {
         "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: --without-libssh, no SSH backend."
+        "justification": "code_not_reachable",
+        "detail": "Collabora security assessment: DTLS is not used by Collabora Online, so the vulnerable code is never reached. Rated low severity for this product. Fixed upstream in openssl 3.5.9."
       }
     },
     {
-      "id": "CVE-2025-15224",
-      "description": "curl: libssh key passphrase bypass without agent set",
+      "id": "CVE-2026-77696",
+      "description": "openssl: SM2 signature generation uses non-constant-time arithmetic on secret values, forming a timing side-channel",
+      "analysis": {
+        "state": "in_triage",
+        "detail": "Collabora security assessment: low severity for this product, with no argument that the code is unreachable, so it stands until openssl is updated. Fixed upstream in openssl 3.5.9."
+      }
+    },
+    {
+      "id": "CVE-2026-84782",
+      "description": "openssl: The DTLS retransmission logic does not correctly handle a handshake message write that is suspended part-way through",
       "analysis": {
         "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: --without-libssh, no SSH backend."
+        "justification": "code_not_reachable",
+        "detail": "Collabora security assessment: DTLS is not used by Collabora Online, so the vulnerable code is never reached. Rated low severity for this product. Fixed upstream in openssl 3.5.9."
       }
     },
     {
-      "id": "CVE-2026-3805",
-      "description": "curl: use after free in SMB connection reuse",
+      "id": "CVE-2026-84784",
+      "description": "openssl: A malicious remote peer may flood the local QUIC stack with NEW_CONNECTION_ID frames by avoiding a limit check on how many connection IDs the remote QUIC stack can use",
       "analysis": {
         "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: --disable-smb."
+        "justification": "code_not_reachable",
+        "detail": "Collabora security assessment: QUIC is not used by Collabora Online, so the vulnerable code is never reached. Rated low severity for this product. Fixed upstream in openssl 3.5.9."
       }
     },
     {
-      "id": "CVE-2026-5773",
-      "description": "curl: wrong reuse of SMB connection",
+      "id": "CVE-2026-85091",
+      "description": "zlib: zlib versions 1.3.1.2 through 1.3.2 contain a heap buffer overflow vulnerability in the gz_vacate() function when processing non-blocking gzwrite() operations with\u2026",
       "analysis": {
-        "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: --disable-smb."
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against zlib 1.3.2 on 2026-10-07, severity High. No upstream fix published yet. Not yet assessed."
       }
     },
     {
-      "id": "CVE-2026-8286",
-      "description": "curl: wrong STARTTLS connection reuse",
+      "id": "CVE-2026-87910",
+      "description": "python: When tarfile extracts a link on a system that doesn't support links, it falls back to extracting a member from the archive",
       "analysis": {
-        "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: every STARTTLS protocol is off: --disable-imap --disable-pop3 --disable-smtp --disable-ftp."
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against python 3.14.7 on 2026-10-07, severity Medium. Upstream fix in 3.10.22, 3.11.17, 3.12.15, 3.13.16, 3.15.0. Not yet assessed."
       }
     },
     {
-      "id": "CVE-2026-9545",
-      "description": "curl: exposing HTTP/3 early data",
+      "id": "CVE-2026-89156",
+      "description": "pcre2: PCRE2 before 10.48 has a pcre2_match out-of-bounds read after a JIT fallback when an attacker can provide invalid UTF data",
       "analysis": {
-        "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: --without-ngtcp2 --without-quiche, no HTTP/3."
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against pcre2 10.47 on 2026-10-07, severity Medium. Upstream fix in 10.48. Not yet assessed."
       }
     },
     {
-      "id": "CVE-2025-13034",
-      "description": "curl: no QUIC certificate pinning with GnuTLS",
+      "id": "CVE-2026-89157",
+      "description": "pcre2: PCRE2 before 10.48, on 32-bit platforms, has a pcre2_pattern_convert out-of-bounds write when an attacker can provide a large pattern",
       "analysis": {
-        "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: OpenSSL is the only TLS backend selected (--with-openssl), GnuTLS is not built, and there is no QUIC (--without-ngtcp2 --without-quiche)."
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against pcre2 10.47 on 2026-10-07, severity High. Upstream fix in 10.48. Not yet assessed."
       }
     },
     {
-      "id": "CVE-2025-14017",
-      "description": "curl: broken TLS options for threaded LDAPS",
+      "id": "CVE-2026-89158",
+      "description": "pcre2: PCRE2 before 10.48, on 32-bit platforms, has a pcre2_compile_32 integer overflow and resultant out-of-bounds write",
       "analysis": {
-        "state": "not_affected",
-        "justification": "code_not_present",
-        "detail": "engine/external/curl/ExternalProject_curl.mk builds curl for HTTP/HTTPS only: --disable-ldap --disable-ldaps."
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against pcre2 10.47 on 2026-10-07, severity Medium. Upstream fix in 10.48. Not yet assessed."
       }
     },
     {
-      "id": "CVE-2025-9086",
-      "description": "curl: out of bounds read for cookie path",
+      "id": "CVE-2026-89160",
+      "description": "pcre2: PCRE2 before 10.48 has a pcre2_match out-of-bounds read during the PCRE2_MATCH_INVALID_UTF matching of an invalid UTF subject",
       "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.16.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix. The local backport patch was dropped in the curl 8.22.0 upgrade."
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against pcre2 10.47 on 2026-10-07, severity Medium. Upstream fix in 10.48. Not yet assessed."
       }
     },
     {
-      "id": "CVE-2025-10148",
-      "description": "curl: predictable WebSocket mask",
+      "id": "CVE-2026-89161",
+      "description": "pcre2: In PCRE2 before 10.48, pcre2_jit_match mishandles a previously copied subject being passed in as a context",
       "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.16.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix. The local backport patch was dropped in the curl 8.22.0 upgrade."
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against pcre2 10.47 on 2026-10-07, severity High. Upstream fix in 10.48. Not yet assessed."
       }
     },
     {
-      "id": "CVE-2026-11856",
-      "description": "curl: cross-origin Digest auth state leak",
+      "id": "CVE-2026-89162",
+      "description": "pcre2: In PCRE2 before 10.48, pcre2_serialize_encode might disclose two bytes to an adversary, typically in a situation where the access available to the adversary is\u2026",
       "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.21.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against pcre2 10.47 on 2026-10-07, severity Low. Upstream fix in 10.48. Not yet assessed."
       }
     },
     {
-      "id": "CVE-2026-8924",
-      "description": "curl: trailing dot domain super cookie",
+      "id": "GHSA-6688-9rhm-gjv2",
+      "description": "dompurify: DOMPurify: IN_PLACE returns a force-removed rawtext root whose text carries attacker markup \u2014 pure HTML reparse executes",
       "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.21.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against dompurify 3.4.14 on 2026-10-07, severity Low. Upstream fix in 3.4.16. Not yet assessed."
       }
     },
     {
-      "id": "CVE-2026-8926",
-      "description": "curl: password leak with netrc and user in URL",
+      "id": "GHSA-p98j-92pf-mc4p",
+      "description": "dompurify: DOMPurify: IN_PLACE: node-removing afterSanitize hook leaves detached subtree event handlers armed, causing DOM XSS",
       "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.21.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-8927",
-      "description": "curl: env-set cross-proxy Digest auth state leak",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.21.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-9079",
-      "description": "curl: stale proxy password leak",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.21.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-6276",
-      "description": "curl: stale custom cookie host causes cookie leak",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.20.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-8932",
-      "description": "curl: incomplete mTLS config matching in connection reuse",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.21.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-9080",
-      "description": "curl: use-after-free after pause in socket callback",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.21.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2025-14524",
-      "description": "curl: bearer token leak on cross-protocol redirect",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.18.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2025-14819",
-      "description": "curl: OpenSSL partial chain store policy bypass",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.18.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-1965",
-      "description": "curl: bad reuse of HTTP Negotiate connection",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.19.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-3783",
-      "description": "curl: token leak with redirect and netrc",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.19.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-3784",
-      "description": "curl: wrong proxy connection reuse with credentials",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.19.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-4873",
-      "description": "curl: connection reuse ignores TLS requirement",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.20.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-5545",
-      "description": "curl: wrong reuse of HTTP Negotiate connection",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.20.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-6253",
-      "description": "curl: proxy credentials leak over redirect-to proxy",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.20.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-6429",
-      "description": "curl: netrc credential leak with reused proxy connection",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.20.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-7168",
-      "description": "curl: cross-proxy Digest auth state leak",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.20.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
-      }
-    },
-    {
-      "id": "CVE-2026-8458",
-      "description": "curl: wrong reuse for different services",
-      "analysis": {
-        "state": "resolved",
-        "detail": "Fixed upstream in curl 8.21.0; the bundled curl is 8.22.0 (engine/download.lst), which contains the fix."
+        "state": "in_triage",
+        "detail": "Reported by grype 0.118.0 against dompurify 3.4.14 on 2026-10-07, severity Low. Upstream fix in 3.4.16. Not yet assessed."
       }
     }
   ]
