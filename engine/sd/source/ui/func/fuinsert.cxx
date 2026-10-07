@@ -818,7 +818,7 @@ void FuInsertAVMedia::InsertMediaURL(const OUString& rURL, const Size& rPrefSize
 
     if( mpWindow )
     {
-        aPos = mpWindow->PixelToLogic( ::tools::Rectangle( aPos, mpWindow->GetOutputSizePixel() ).Center() );
+        aPos = mpWindow->GetVisibleCenter();
         aPos.AdjustX( -(aSize.Width() >> 1) );
         aPos.AdjustY( -(aSize.Height() >> 1) );
     }
