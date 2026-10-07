@@ -769,12 +769,13 @@ void FuInsertAVMedia::DoExecute( SfxRequest& rReq )
             return;
 
         // No media player could open the URL to measure it. A URL that came with the command
-        // goes in at the default size.
+        // goes in at the size its file headers give, or at the default size.
         if (!bAPI)
         {
             ::avmedia::MediaWindow::executeFormatErrorBox(mpWindow->GetFrameWeld());
             return;
         }
+        aPrefSize = ::avmedia::MediaWindow::readVideoSize(aURL);
     }
 
     InsertMediaURL(aURL, aPrefSize, bLink);
@@ -803,6 +804,17 @@ void FuInsertAVMedia::InsertMediaURL(const OUString& rURL, const Size& rPrefSize
     }
     else
         aSize = Size( 5000, 5000 );
+
+    // A video's own pixel size can be larger than the page. It shrinks to fit inside the page
+    // borders, keeping its shape.
+    if (SdrPageView* pPageView = mpView->GetSdrPageView())
+    {
+        const SdrPage* pPage = pPageView->GetPage();
+        Size aPageSize(pPage->GetSize());
+        aPageSize.AdjustWidth(-(pPage->GetLeftBorder() + pPage->GetRightBorder()));
+        aPageSize.AdjustHeight(-(pPage->GetUpperBorder() + pPage->GetLowerBorder()));
+        aSize = ::avmedia::MediaWindow::shrinkToFit(aSize, aPageSize);
+    }
 
     if( mpWindow )
     {

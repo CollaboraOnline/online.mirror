@@ -60,6 +60,7 @@ $(eval $(call gb_Library_add_exception_objects,avmedia,\
 	avmedia/source/viewer/mediaevent_impl \
 	avmedia/source/viewer/mediawindow \
 	avmedia/source/viewer/mediawindow_impl \
+	avmedia/source/viewer/videosize \
 ))
 
 endif # AVMEDIA

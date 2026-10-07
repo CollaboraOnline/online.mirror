@@ -23,6 +23,7 @@
 #include <cpo/uno/Reference.hxx>
 #include <com/sun/star/media/XPlayerListener.hpp>
 #include <comphelper/compbase.hxx>
+#include <tools/gen.hxx>
 #include <vcl/vclptr.hxx>
 #include <avmedia/avmediadllapi.h>
 
@@ -139,6 +140,16 @@ namespace avmedia
 
         static cpo::uno::Reference< css::graphic::XGraphic > grabFrame(const OUString& rURL, const OUString& rReferer,
             const OUString& sMimeType, const rtl::Reference<PlayerListener>& xPreferredPixelSizeListener);
+
+        /** The display size in pixels of the first video track of a local MP4, QuickTime,
+            Matroska or WebM file, read from the container headers. Empty when the URL is not a
+            local file in one of these formats, the file has no video track, or the headers are
+            broken. */
+        static Size readVideoSize(std::u16string_view rURL);
+
+        /** rSize scaled down to fit inside rBounds, keeping its shape. rSize itself when it
+            already fits or when rBounds is empty. */
+        static Size shrinkToFit(const Size& rSize, const Size& rBounds);
 
         static void dispatchInsertAVMedia(const cpo::uno::Reference<css::frame::XDispatchProvider>&,
                                           const css::awt::Size& rSize, const OUString& rURL, bool bLink);

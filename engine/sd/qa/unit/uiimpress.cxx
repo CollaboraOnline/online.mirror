@@ -6379,6 +6379,91 @@ CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testInsertMediaFromAppFilePicker)
     CPPUNIT_ASSERT(!pMediaObj->getTempURL().isEmpty());
 }
 
+namespace
+{
+double aspectRatio(const Size& rSize) { return rSize.Width() / double(rSize.Height()); }
+}
+
+CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testInsertVideoKeepsItsShape)
+{
+    // With no media player to measure the video, its shape comes from the file headers.
+    createSdImpressDoc();
+    dispatchCommand(mxComponent, u".uno:InsertAVMedia"_ustr,
+                    { comphelper::makePropertyValue(u"URL"_ustr,
+                                                    createFileURL(u"video-320x240.webm")) });
+
+    SdrMediaObj* pMediaObj = findMediaObject(mxComponent);
+    CPPUNIT_ASSERT(pMediaObj);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(4.0 / 3.0, aspectRatio(pMediaObj->GetLogicRect().GetSize()), 0.01);
+}
+
+CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testInsertLargeVideoFitsTheSlide)
+{
+    // A full HD video is wider than the slide at its pixel size.
+    createSdImpressDoc();
+    dispatchCommand(mxComponent, u".uno:InsertAVMedia"_ustr,
+                    { comphelper::makePropertyValue(u"URL"_ustr,
+                                                    createFileURL(u"video-1920x1080.mp4")) });
+
+    SdrMediaObj* pMediaObj = findMediaObject(mxComponent);
+    CPPUNIT_ASSERT(pMediaObj);
+    const Size aSize = pMediaObj->GetLogicRect().GetSize();
+    const Size aPageSize = pMediaObj->getSdrPageFromSdrObject()->GetSize();
+    CPPUNIT_ASSERT_LESSEQUAL(aPageSize.Width(), aSize.Width());
+    CPPUNIT_ASSERT_LESSEQUAL(aPageSize.Height(), aSize.Height());
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(16.0 / 9.0, aspectRatio(aSize), 0.01);
+}
+
+CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testInsertRotatedVideoIsPortrait)
+{
+    // The file stores 640x360 frames with a quarter turn, as phones record upright video.
+    createSdImpressDoc();
+    dispatchCommand(mxComponent, u".uno:InsertAVMedia"_ustr,
+                    { comphelper::makePropertyValue(u"URL"_ustr,
+                                                    createFileURL(u"video-640x360-rotated.mp4")) });
+
+    SdrMediaObj* pMediaObj = findMediaObject(mxComponent);
+    CPPUNIT_ASSERT(pMediaObj);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(9.0 / 16.0, aspectRatio(pMediaObj->GetLogicRect().GetSize()),
+                                 0.01);
+}
+
+CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testInsertVideoTakesItsDisplayShape)
+{
+    // The file stores 320x240 frames and asks for them to be shown at an aspect ratio of 16:9.
+    createSdImpressDoc();
+    dispatchCommand(mxComponent, u".uno:InsertAVMedia"_ustr,
+                    { comphelper::makePropertyValue(u"URL"_ustr,
+                                                    createFileURL(u"video-320x240-wide.webm")) });
+
+    SdrMediaObj* pMediaObj = findMediaObject(mxComponent);
+    CPPUNIT_ASSERT(pMediaObj);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(16.0 / 9.0, aspectRatio(pMediaObj->GetLogicRect().GetSize()),
+                                 0.01);
+}
+
+CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testInsertLargeVideoFitsInsideTheMargins)
+{
+    // A Draw page has margins, and a full HD video is wider than the space between them.
+    createSdDrawDoc();
+    dispatchCommand(mxComponent, u".uno:InsertAVMedia"_ustr,
+                    { comphelper::makePropertyValue(u"URL"_ustr,
+                                                    createFileURL(u"video-1920x1080.mp4")) });
+
+    SdrMediaObj* pMediaObj = findMediaObject(mxComponent);
+    CPPUNIT_ASSERT(pMediaObj);
+    const SdrPage* pPage = pMediaObj->getSdrPageFromSdrObject();
+    CPPUNIT_ASSERT(pPage->GetLeftBorder() + pPage->GetRightBorder() > 0);
+    const Size aSize = pMediaObj->GetLogicRect().GetSize();
+    CPPUNIT_ASSERT_LESSEQUAL(
+        pPage->GetSize().Width() - pPage->GetLeftBorder() - pPage->GetRightBorder(),
+        aSize.Width());
+    CPPUNIT_ASSERT_LESSEQUAL(
+        pPage->GetSize().Height() - pPage->GetUpperBorder() - pPage->GetLowerBorder(),
+        aSize.Height());
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(16.0 / 9.0, aspectRatio(aSize), 0.01);
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
