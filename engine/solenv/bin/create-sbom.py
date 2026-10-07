@@ -1318,9 +1318,15 @@ def add_merge_module(files_by_package, externals_by_package, install_script):
             license_spdx_id = make_spdx_id("License-msvcrt")
             license_cache["License-msvcrt"] = ([
                 {
+                    "type": "Organization",
+                    "spdxId": "https://microsoft.com",
+                    "creationInfo": "_:creationinfo",
+                    "name": "Microsoft Corporation"
+                },
+                {
                     "type": "simplelicensing_LicenseExpression",
                     "spdxId": license_spdx_id,
-                    "creationInfo": "_:creationInfo",
+                    "creationInfo": "_:creationinfo",
                     "simplelicensing_licenseExpression": f"LicenseRef-Microsoft-Visual-Studio-{vcyear}-Distributable-Code",
                     "simplelicensing_customIdToUri": [{
                         "type": "DictionaryEntry",
@@ -1331,7 +1337,7 @@ def add_merge_module(files_by_package, externals_by_package, install_script):
                 {
                     "type": "expandedlicensing_CustomLicense",
                     "spdxId": custom_license_spdx_id,
-                    "creationInfo": "_:creationInfo",
+                    "creationInfo": "_:creationinfo",
                     "name": f"Microsoft Visual Studio {vcyear} License Terms, Distributable Code",
                     "simplelicensing_licenseText": "...verbatim terms...",
                     "expandedlicensing_isOsiApproved": False,
@@ -1561,6 +1567,31 @@ def sbom_add_files(files_by_package, externals_by_package):
             add_license(root_license)
 
 
+def add_external_maps():
+    """Declare references that point outside each package as imports.
+    This is required for SHACL validation to pass."""
+
+    for package in sbom_data:
+        graph = sbom_data[package][3]["@graph"]
+        document = None
+        defined = set()
+        referenced = set()
+        for element in graph:
+            if "spdxId" in element:
+                defined.add(element["spdxId"])
+            if element.get("type") == "SpdxDocument":
+                document = element
+            if element.get("type") == "Relationship":
+                referenced.add(element["from"])
+                referenced.update(element["to"])
+        external = sorted(referenced.difference(defined))
+        if len(external) != 0:
+            assert document is not None
+            document["import"] = [
+                {"type": "ExternalMap", "externalSpdxId": spdx_id} for spdx_id in external
+            ]
+
+
 def gen_product(ziplist, packinfos, install_script, languages, externalsfile,
         externalstaticfile, externalpackagestaticfile, product, filelistdirs,
         files_extra_deps = None):
@@ -1626,6 +1657,8 @@ if __name__ == "__main__":
             allexternaldeps = check_files(files_product)
             check_externals(allexternaldeps, externals_product)
             sbom_add_files(files_product, externals_product)
+
+        add_external_maps()
 
         for package, data in sbom_data.items():
             filename = f"{package}-sbom.spdx.json"
