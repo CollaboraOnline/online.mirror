@@ -30,6 +30,7 @@
 
 #include <conditio.hxx>
 #include <document.hxx>
+#include <formulacell.hxx>
 #include <tabvwsh.hxx>
 #include <scitems.hxx>
 
@@ -49,6 +50,10 @@
 #include <com/sun/star/drawing/XDrawPageSupplier.hpp>
 #include <com/sun/star/script/XLibraryContainer.hpp>
 #include <editeng/brushitem.hxx>
+#include <basic/sbmod.hxx>
+#include <basic/sbstar.hxx>
+#include <formula/errorcodes.hxx>
+#include <sfx2/app.hxx>
 
 using namespace ::com::sun::star;
 using namespace ::cpo;
@@ -1220,6 +1225,34 @@ CPPUNIT_TEST_FIXTURE(ScMacrosTest, testTdf173160)
     // the macro in the order their names happened to hash, so the first one was not the URL
     CPPUNIT_ASSERT_EQUAL(aScriptUrl, pDoc->GetString(0, 0, 0));
     CPPUNIT_ASSERT_EQUAL(6.0, pDoc->GetValue(1, 0, 0));
+}
+
+CPPUNIT_TEST_FIXTURE(ScMacrosTest, testFormulaCallingApplicationBasicIsMacroUse)
+{
+    // a function the user keeps in application Basic
+    StarBASIC* pAppBasic = SfxApplication::GetBasic();
+    CPPUNIT_ASSERT(pAppBasic);
+    SbModule* pModule = pAppBasic->MakeModule(u"ScMacrosTestModule"_ustr,
+                                              u"Function SCMACROSTESTAPPFUNCTION()\n"
+                                              "    SCMACROSTESTAPPFUNCTION = 42\n"
+                                              "End Function\n"_ustr);
+    CPPUNIT_ASSERT(pModule);
+    CPPUNIT_ASSERT(pModule->Compile());
+
+    // a document with no Basic of its own calls it from a formula, opened at the default macro
+    // security level, where unsigned macros are refused
+    mxComponent = mxDesktop->loadComponentFromURL(
+        createFileURL(u"application-basic-function.fods"), u"_default"_ustr, 0,
+        { comphelper::makePropertyValue(u"MacroExecutionMode"_ustr,
+                                        document::MacroExecMode::FROM_LIST_AND_SIGNED_WARN) });
+    CPPUNIT_ASSERT(mxComponent.is());
+
+    // the formula counts as macro use, so the document got the macro decision on load and the
+    // call is refused the way a document macro would be
+    CPPUNIT_ASSERT(getScDocShell()->GetMacroCallsSeenWhileLoading());
+    ScFormulaCell* pCell = getScDoc()->GetFormulaCell(ScAddress(0, 0, 0));
+    CPPUNIT_ASSERT(pCell);
+    CPPUNIT_ASSERT_EQUAL(int(FormulaError::NoMacro), int(pCell->GetErrCode()));
 }
 
 ScMacrosTest::ScMacrosTest()
