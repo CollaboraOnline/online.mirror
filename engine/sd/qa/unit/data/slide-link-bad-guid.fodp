@@ -33,6 +33,14 @@
      <draw:text-box><text:p>Linked three</text:p></draw:text-box>
     </draw:frame>
    </draw:page>
+   <draw:page xlink:href="vnd.collabora.slide-source:Q3%20deck.odp#"
+              xlink:type="simple" xlink:show="replace" xlink:actuate="onRequest"
+              coext:source-modified-time="2021-01-01T00:00:00Zxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              coext:source-page-guid="{22222222-2222-2222-2222-222222222222}">
+    <draw:frame svg:width="10cm" svg:height="2cm" svg:x="2cm" svg:y="2cm">
+     <draw:text-box><text:p>Linked four</text:p></draw:text-box>
+    </draw:frame>
+   </draw:page>
   </office:presentation>
  </office:body>
 </office:document>

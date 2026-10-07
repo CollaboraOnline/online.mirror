@@ -836,6 +836,14 @@ void SdGenericDrawPage::setPropertyValue( const OUString& aPropertyName, const A
             if( ! ( aValue >>= aSourceModifiedTime ) )
                 throw lang::IllegalArgumentException();
 
+            constexpr sal_Int32 nMaxSourceModifiedTimeLength = 128;
+            if (aSourceModifiedTime.getLength() > nMaxSourceModifiedTimeLength)
+                throw lang::IllegalArgumentException();
+
+            for (sal_Int32 nChar = 0; nChar < aSourceModifiedTime.getLength(); ++nChar)
+                if (aSourceModifiedTime[nChar] < 0x20)
+                    throw lang::IllegalArgumentException();
+
             setSourceModifiedTime( aSourceModifiedTime );
             break;
         }

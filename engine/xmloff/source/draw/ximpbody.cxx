@@ -236,8 +236,18 @@ SdXMLDrawPageContext::SdXMLDrawPageContext( SdXMLImport& rImport,
             xProps->setPropertyValue(u"BookmarkURL"_ustr, cpo::uno::Any( sHREF ) );
 
             if( !sSourceModifiedTime.isEmpty() )
-                xProps->setPropertyValue(u"SourceModifiedTime"_ustr,
-                                         cpo::uno::Any( sSourceModifiedTime ) );
+            {
+                try
+                {
+                    xProps->setPropertyValue(u"SourceModifiedTime"_ustr,
+                                             cpo::uno::Any( sSourceModifiedTime ) );
+                }
+                catch( const cpo::uno::Exception& )
+                {
+                    TOOLS_WARN_EXCEPTION("xmloff.draw",
+                                         "while importing the source modified time of the page");
+                }
+            }
 
             if( !sSourcePageGuid.isEmpty() )
             {

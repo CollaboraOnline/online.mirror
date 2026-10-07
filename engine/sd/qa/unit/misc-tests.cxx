@@ -130,6 +130,7 @@ public:
     void testInsertFileAsPageLinkWithoutSourceRecordsMedium();
     void testInsertWholeFileAsPagesLinkRecordsSource();
     void testSlideLinkKeepsOnlyAReadableSourceGuid();
+    void testSlideLinkKeepsOnlyAReadableSourceTime();
 
 private:
     SdDrawDocument* loadSlideImportDocs();
@@ -183,6 +184,7 @@ public:
     CPPUNIT_TEST(testInsertFileAsPageLinkWithoutSourceRecordsMedium);
     CPPUNIT_TEST(testInsertWholeFileAsPagesLinkRecordsSource);
     CPPUNIT_TEST(testSlideLinkKeepsOnlyAReadableSourceGuid);
+    CPPUNIT_TEST(testSlideLinkKeepsOnlyAReadableSourceTime);
     CPPUNIT_TEST_SUITE_END();
 };
 
@@ -2027,7 +2029,7 @@ void SdMiscTest::testSlideLinkKeepsOnlyAReadableSourceGuid()
     SdXImpressDocument* pXImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
     CPPUNIT_ASSERT(pXImpressDocument);
     SdDrawDocument* pDoc = pXImpressDocument->GetDoc();
-    CPPUNIT_ASSERT_EQUAL(sal_uInt16(3), pDoc->GetSdPageCount(PageKind::Standard));
+    CPPUNIT_ASSERT_EQUAL(sal_uInt16(4), pDoc->GetSdPageCount(PageKind::Standard));
 
     SdPage* pRead = pDoc->GetSdPage(0, PageKind::Standard);
     CPPUNIT_ASSERT_EQUAL(u"vnd.collabora.slide-source:Q3%20deck.odp"_ustr, pRead->GetFileName());
@@ -2045,6 +2047,24 @@ void SdMiscTest::testSlideLinkKeepsOnlyAReadableSourceGuid()
     SdPage* pLowercase = pDoc->GetSdPage(2, PageKind::Standard);
     CPPUNIT_ASSERT_EQUAL(u"{ABCDEF01-2345-6789-ABCD-EF0123456789}"_ustr,
                          pLowercase->GetSourcePageGuid());
+}
+
+void SdMiscTest::testSlideLinkKeepsOnlyAReadableSourceTime()
+{
+    // The fourth page of the file records a time the source was last modified that is far
+    // longer than any time stamp: the page is left with no time, and keeps the rest of what
+    // it records.
+    createSdImpressDoc("slide-link-bad-guid.fodp");
+    SdXImpressDocument* pXImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+    CPPUNIT_ASSERT(pXImpressDocument);
+    SdDrawDocument* pDoc = pXImpressDocument->GetDoc();
+    CPPUNIT_ASSERT_EQUAL(sal_uInt16(4), pDoc->GetSdPageCount(PageKind::Standard));
+
+    SdPage* pPage = pDoc->GetSdPage(3, PageKind::Standard);
+    CPPUNIT_ASSERT_EQUAL(u"vnd.collabora.slide-source:Q3%20deck.odp"_ustr, pPage->GetFileName());
+    CPPUNIT_ASSERT_EQUAL(u"{22222222-2222-2222-2222-222222222222}"_ustr,
+                         pPage->GetSourcePageGuid());
+    CPPUNIT_ASSERT_EQUAL(OUString(), pPage->GetSourceModifiedTime());
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SdMiscTest);
