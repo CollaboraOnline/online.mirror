@@ -166,13 +166,13 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		return this._lastCursorPosition;
 	},
 
-	_getCaretOffsetX: function() {
-		return this._getTextOffsetX(this._getLastCursorPosition());
+	_getCaretOffset: function() {
+		return this._getTextOffset(this._getLastCursorPosition());
 	},
 
-	// x of the given position in the text, from the editable's left edge
-	_getTextOffsetX: function(nPos) {
-		let offset = nPos;
+	// the given position in the text, from the editable's top left corner
+	_getTextOffset: function(nPos) {
+		let offset = Math.min(Math.max(nPos, 0), this.getPlainTextContent().length);
 		const walker = document.createTreeWalker(this._textArea, NodeFilter.SHOW_TEXT);
 		for (let node = walker.nextNode(); node; node = walker.nextNode()) {
 			if (offset <= node.length) {
@@ -180,12 +180,14 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 				range.setStart(node, offset);
 				const caret = range.getBoundingClientRect();
 				if (caret.height === 0)
-					return 0; // not laid out
-				return caret.left - this._textArea.getBoundingClientRect().left;
+					return { x: 0, y: 0 }; // not laid out
+				const area = this._textArea.getBoundingClientRect();
+				// a line break in the paragraph puts the caret below the first line
+				return { x: caret.left - area.left, y: caret.top - area.top };
 			}
 			offset -= node.length;
 		}
-		return 0;
+		return { x: 0, y: 0 };
 	},
 
 	_setLastCursorPosition: function(nPos) {
@@ -707,7 +709,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		const anySpan = this._contextBefore.firstElementChild
 			|| this._contextAfter.firstElementChild;
 		const pageLeft = anySpan ? getDocumentLeft(anySpan) : NaN;
-		const textLeft = textArea.offsetLeft + this._getTextOffsetX(0);
+		const textLeft = textArea.offsetLeft + this._getTextOffset(0).x;
 		const left = (isNaN(pageLeft) ? textLeft : Math.max(textLeft, pageLeft)) + 'px';
 		regions.forEach(function (region) { region.style.left = left; });
 

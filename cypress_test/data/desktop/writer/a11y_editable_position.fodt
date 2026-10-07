@@ -11,7 +11,7 @@
  <office:body>
   <office:text>
    <text:p>First paragraph</text:p>
-   <text:p>Second paragraph</text:p>
+   <text:p>Second<text:line-break/>paragraph</text:p>
    <text:p>Third paragraph</text:p>
   </office:text>
  </office:body>

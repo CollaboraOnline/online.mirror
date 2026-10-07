@@ -593,13 +593,15 @@ window.L.TextInput = window.L.Layer.extend({
 		this._map.fire('handlerstatus', {hidden: false});
 	},
 
-	// x of the editable's caret from its left edge
-	_getCaretOffsetX: function() {
-		return 0;
+	// the editable's caret from its top left corner
+	_getCaretOffset: function() {
+		return { x: 0, y: 0 };
 	},
 
 	_setPos: function(pos) {
-		pos.x -= this._getCaretOffsetX();
+		const caret = this._getCaretOffset();
+		pos.x -= caret.x;
+		pos.y -= caret.y;
 		if (window.L.Browser.cypressTest) {
 			// Some cypress tests require for the editable area to be as near as possible
 			// to the caret overlay when editing. In fact a synthetic mouse click on

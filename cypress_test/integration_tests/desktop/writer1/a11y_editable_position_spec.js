@@ -18,7 +18,7 @@ describe(['tagdesktop'], 'Writer editable for the reader', { testIsolation: fals
 		});
 
 		helper.typeIntoDocument('{ctrl}{home}');
-		// into the second paragraph
+		// into the second paragraph, after its line break
 		helper.typeIntoDocument('{downarrow}' + '{rightarrow}'.repeat(10));
 		cy.then(function () {
 			return helper.processToIdle(win);
@@ -34,9 +34,11 @@ describe(['tagdesktop'], 'Writer editable for the reader', { testIsolation: fals
 			const selection = doc.getSelection();
 			expect(selection.rangeCount, 'the editable has a caret').to.equal(1);
 			const editableCaret = selection.getRangeAt(0).getBoundingClientRect();
+			expect(editableCaret.top - $area[0].getBoundingClientRect().top,
+				'the editable caret below its first line').to.be.above(5);
 			// Cypress moves the editable 10px off the caret
 			expect(editableCaret.top, 'the editable caret top')
-				.to.be.within(caret.top, caret.bottom);
+				.to.be.within(caret.top - 1, caret.top + 11);
 			expect(editableCaret.left, 'the editable caret left')
 				.to.be.within(caret.left - 1, caret.left + 11);
 		});
