@@ -66,23 +66,23 @@ public:
     virtual ~SignatureCreatorImpl() override;
 
     /* XBlockerMonitor */
-    virtual void SAL_CALL setBlockerId( sal_Int32 id ) override;
+    virtual void setBlockerId( sal_Int32 id ) override;
 
     /* XSignatureCreationResultBroadcaster */
-    void SAL_CALL addSignatureCreationResultListener(
+    void addSignatureCreationResultListener(
         const cpo::uno::Reference< css::xml::crypto::sax::XSignatureCreationResultListener >& listener ) override;
 
-    void SAL_CALL removeSignatureCreationResultListener(
+    void removeSignatureCreationResultListener(
         const cpo::uno::Reference< css::xml::crypto::sax::XSignatureCreationResultListener >& listener ) override;
 
     /* XInitialization */
-    virtual void SAL_CALL initialize(
+    virtual void initialize(
         const cpo::uno::Sequence< cpo::uno::Any >& aArguments ) override;
 
     /* XServiceInfo */
-    virtual OUString SAL_CALL getImplementationName(  ) override;
-    virtual bool SAL_CALL supportsService( const OUString& ServiceName ) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames(  ) override;
+    virtual OUString getImplementationName(  ) override;
+    virtual bool supportsService( const OUString& ServiceName ) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames(  ) override;
 };
 
 /// @throws cpo::uno::RuntimeException

@@ -97,16 +97,16 @@ protected:
 
 public:
     /* XReferenceCollector */
-    virtual void SAL_CALL setReferenceCount( sal_Int32 count ) override;
+    virtual void setReferenceCount( sal_Int32 count ) override;
 
-    virtual void SAL_CALL setReferenceId( sal_Int32 id ) override;
+    virtual void setReferenceId( sal_Int32 id ) override;
 
     /* XUriBinding */
-    virtual void SAL_CALL setUriBinding(
+    virtual void setUriBinding(
         const OUString& uri,
         const cpo::uno::Reference< css::io::XInputStream >& aInputStream ) override;
     virtual cpo::uno::Reference< css::io::XInputStream >
-        SAL_CALL getUriBinding( const OUString& uri ) override;
+        getUriBinding( const OUString& uri ) override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

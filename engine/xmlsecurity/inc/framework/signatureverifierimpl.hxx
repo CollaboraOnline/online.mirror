@@ -58,19 +58,19 @@ public:
     virtual ~SignatureVerifierImpl() override;
 
     /* XSignatureVerifyResultBroadcaster */
-    virtual void SAL_CALL addSignatureVerifyResultListener(
+    virtual void addSignatureVerifyResultListener(
         const cpo::uno::Reference< css::xml::crypto::sax::XSignatureVerifyResultListener >& listener ) override;
-    virtual void SAL_CALL removeSignatureVerifyResultListener(
+    virtual void removeSignatureVerifyResultListener(
         const cpo::uno::Reference< css::xml::crypto::sax::XSignatureVerifyResultListener >& listener ) override;
 
     /* XInitialization */
-    virtual void SAL_CALL initialize(
+    virtual void initialize(
         const cpo::uno::Sequence< cpo::uno::Any >& aArguments ) override;
 
     /* XServiceInfo */
-    virtual OUString SAL_CALL getImplementationName(  ) override;
-    virtual bool SAL_CALL supportsService( const OUString& ServiceName ) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames(  ) override;
+    virtual OUString getImplementationName(  ) override;
+    virtual bool supportsService( const OUString& ServiceName ) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames(  ) override;
 
     void updateSignature( const cpo::uno::Reference< css::xml::crypto::XXMLSignature >& xSignature,
                           const cpo::uno::Reference< css::xml::crypto::XXMLSecurityContext >& xContext ) { m_xXMLSignature = xSignature; m_xXMLSecurityContext = xContext; }

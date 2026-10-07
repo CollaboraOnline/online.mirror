@@ -35,7 +35,7 @@ ODigestContext::~ODigestContext()
     }
 }
 
-void SAL_CALL ODigestContext::updateDigest( const cpo::uno::Sequence< ::sal_Int8 >& aData )
+void ODigestContext::updateDigest( const cpo::uno::Sequence< ::sal_Int8 >& aData )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -63,7 +63,7 @@ void SAL_CALL ODigestContext::updateDigest( const cpo::uno::Sequence< ::sal_Int8
     m_nDigested += aToDigest.getLength();
 }
 
-cpo::uno::Sequence< ::sal_Int8 > SAL_CALL ODigestContext::finalizeDigestAndDispose()
+cpo::uno::Sequence< ::sal_Int8 > ODigestContext::finalizeDigestAndDispose()
 {
     std::scoped_lock aGuard( m_aMutex );
 

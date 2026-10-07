@@ -115,16 +115,16 @@ public:
         const cpo::uno::Reference<cpo::uno::XComponentContext>& rxCtx);
 
     //XInitialization
-    void SAL_CALL initialize(const cpo::uno::Sequence<cpo::uno::Any>& aArguments) override;
+    void initialize(const cpo::uno::Sequence<cpo::uno::Any>& aArguments) override;
 
-    OUString SAL_CALL getImplementationName() override;
+    OUString getImplementationName() override;
 
-    bool SAL_CALL supportsService(OUString const& ServiceName) override;
+    bool supportsService(OUString const& ServiceName) override;
 
-    cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override;
+    cpo::uno::Sequence<OUString> getSupportedServiceNames() override;
 
     // XDocumentDigitalSignatures
-    bool SAL_CALL signSignatureLine(
+    bool signSignatureLine(
         const cpo::uno::Reference<css::embed::XStorage>& Storage,
         const cpo::uno::Reference<css::io::XStream>& xSignStream, const OUString& aSignatureLineId,
         const Reference<css::security::XCertificate>& xCertificate,
@@ -132,56 +132,56 @@ public:
         const Reference<css::graphic::XGraphic>& xInvalidGraphic,
         const OUString& aComment) override;
     cpo::uno::Sequence<css::security::DocumentSignatureInformation>
-        SAL_CALL verifyDocumentContentSignatures(
+        verifyDocumentContentSignatures(
             const cpo::uno::Reference<css::embed::XStorage>& xStorage,
             const cpo::uno::Reference<css::io::XInputStream>& xSignInStream) override;
-    void SAL_CALL showDocumentContentSignatures(
+    void showDocumentContentSignatures(
         const cpo::uno::Reference<css::embed::XStorage>& xStorage,
         const cpo::uno::Reference<css::io::XInputStream>& xSignInStream) override;
-    OUString SAL_CALL getDocumentContentSignatureDefaultStreamName() override;
+    OUString getDocumentContentSignatureDefaultStreamName() override;
     cpo::uno::Sequence<css::security::DocumentSignatureInformation>
-        SAL_CALL verifyScriptingContentSignatures(
+        verifyScriptingContentSignatures(
             const cpo::uno::Reference<css::embed::XStorage>& xStorage,
             const cpo::uno::Reference<css::io::XInputStream>& xSignInStream) override;
-    void SAL_CALL showScriptingContentSignatures(
+    void showScriptingContentSignatures(
         const cpo::uno::Reference<css::embed::XStorage>& xStorage,
         const cpo::uno::Reference<css::io::XInputStream>& xSignInStream) override;
-    OUString SAL_CALL getScriptingContentSignatureDefaultStreamName() override;
-    void SAL_CALL
+    OUString getScriptingContentSignatureDefaultStreamName() override;
+    void
     showCertificate(const cpo::uno::Reference<css::security::XCertificate>& Certificate) override;
-    void SAL_CALL manageTrustedSources() override;
-    bool SAL_CALL
+    void manageTrustedSources() override;
+    bool
     isAuthorTrusted(const cpo::uno::Reference<css::security::XCertificate>& Author) override;
-    bool SAL_CALL isLocationTrusted(const OUString& Location) override;
-    void SAL_CALL addAuthorToTrustedSources(
+    bool isLocationTrusted(const OUString& Location) override;
+    void addAuthorToTrustedSources(
         const cpo::uno::Reference<css::security::XCertificate>& Author) override;
-    void SAL_CALL addLocationToTrustedSources(const OUString& Location) override;
+    void addLocationToTrustedSources(const OUString& Location) override;
 
     cpo::uno::Reference<css::security::XCertificate>
-        SAL_CALL chooseCertificate(OUString& rDescription) override;
+        chooseCertificate(OUString& rDescription) override;
     cpo::uno::Reference<css::security::XCertificate>
-        SAL_CALL chooseSigningCertificate(OUString& rDescription) override;
+        chooseSigningCertificate(OUString& rDescription) override;
     cpo::uno::Reference<css::security::XCertificate>
-        SAL_CALL selectSigningCertificate(OUString& rDescription) override;
+        selectSigningCertificate(OUString& rDescription) override;
     cpo::uno::Reference<css::security::XCertificate>
-        SAL_CALL selectSigningCertificateWithType(const CertificateKind certificateKind,
+        selectSigningCertificateWithType(const CertificateKind certificateKind,
                                                   OUString& rDescription) override;
     cpo::uno::Sequence<cpo::uno::Reference<css::security::XCertificate>>
-        SAL_CALL chooseEncryptionCertificate(const CertificateKind certificateKind) override;
-    cpo::uno::Reference<css::security::XCertificate> SAL_CALL chooseCertificateWithProps(
+        chooseEncryptionCertificate(const CertificateKind certificateKind) override;
+    cpo::uno::Reference<css::security::XCertificate> chooseCertificateWithProps(
         cpo::uno::Sequence<css::beans::PropertyValue>& Properties) override;
 
-    bool SAL_CALL signDocumentWithCertificate(
+    bool signDocumentWithCertificate(
                             cpo::uno::Reference<css::security::XCertificate> const & xCertificate,
                             cpo::uno::Reference<css::embed::XStorage> const & xStoragexStorage,
                             cpo::uno::Reference<css::io::XStream> const & xStream) override;
 
-    bool SAL_CALL signScriptingContentWithCertificate(
+    bool signScriptingContentWithCertificate(
                             cpo::uno::Reference<css::security::XCertificate> const& xCertificate,
                             cpo::uno::Reference<css::embed::XStorage> const& xStoragexStorage,
                             cpo::uno::Reference<css::io::XStream> const& xStream) override;
 
-    void SAL_CALL setParentWindow(const cpo::uno::Reference<css::awt::XWindow>& rParentwindow) override
+    void setParentWindow(const cpo::uno::Reference<css::awt::XWindow>& rParentwindow) override
     {
         mxParentWindow = rParentwindow;
     }

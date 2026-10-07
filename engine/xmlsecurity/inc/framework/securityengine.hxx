@@ -128,13 +128,13 @@ protected:
 
 public:
     /* XReferenceResolvedListener */
-    virtual void SAL_CALL referenceResolved( sal_Int32 referenceId ) override;
+    virtual void referenceResolved( sal_Int32 referenceId ) override;
 
     /* XKeyCollector */
-    virtual void SAL_CALL setKeyId( sal_Int32 id ) override;
+    virtual void setKeyId( sal_Int32 id ) override;
 
         /* XMissionTaker */
-        virtual bool SAL_CALL endMission(  ) override;
+        virtual bool endMission(  ) override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

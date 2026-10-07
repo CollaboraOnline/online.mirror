@@ -26,7 +26,7 @@ public:
     virtual ~SEInitializer_AppleImpl() override;
 
     virtual cpo::uno::Reference<css::xml::crypto::XXMLSecurityContext>
-        SAL_CALL createSecurityContext(const OUString&) override;
+        createSecurityContext(const OUString&) override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

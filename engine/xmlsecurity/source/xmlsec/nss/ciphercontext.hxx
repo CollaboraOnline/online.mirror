@@ -74,8 +74,8 @@ public:
     static cpo::uno::Reference< css::xml::crypto::XCipherContext > Create( CK_MECHANISM_TYPE nNSSCipherID, const cpo::uno::Sequence< ::sal_Int8 >& aKey, const cpo::uno::Sequence< ::sal_Int8 >& aInitializationVector, bool bEncryption, bool bW3CPadding );
 
     // XCipherContext
-    virtual cpo::uno::Sequence< ::sal_Int8 > SAL_CALL convertWithCipherContext( const cpo::uno::Sequence< ::sal_Int8 >& aData ) override;
-    virtual cpo::uno::Sequence< ::sal_Int8 > SAL_CALL finalizeCipherContextAndDispose(  ) override;
+    virtual cpo::uno::Sequence< ::sal_Int8 > convertWithCipherContext( const cpo::uno::Sequence< ::sal_Int8 >& aData ) override;
+    virtual cpo::uno::Sequence< ::sal_Int8 > finalizeCipherContextAndDispose(  ) override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

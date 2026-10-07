@@ -26,7 +26,7 @@ public:
     XMLSignature_AppleImpl();
     virtual ~XMLSignature_AppleImpl() override;
 
-    virtual cpo::uno::Reference<css::xml::crypto::XXMLSignatureTemplate> SAL_CALL generate(
+    virtual cpo::uno::Reference<css::xml::crypto::XXMLSignatureTemplate> generate(
         const cpo::uno::Reference<css::xml::crypto::XXMLSignatureTemplate>& aTemplate,
         const cpo::uno::Reference<css::xml::crypto::XSecurityEnvironment>& aEnvironment) override;
 };

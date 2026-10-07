@@ -111,27 +111,27 @@ void SignatureCreatorImpl::clearUp() const
 }
 
 /* XBlockerMonitor */
-void SAL_CALL SignatureCreatorImpl::setBlockerId( sal_Int32 id )
+void SignatureCreatorImpl::setBlockerId( sal_Int32 id )
 {
     m_nIdOfBlocker = id;
     tryToPerform();
 }
 
 /* XSignatureCreationResultBroadcaster */
-void SAL_CALL SignatureCreatorImpl::addSignatureCreationResultListener(
+void SignatureCreatorImpl::addSignatureCreationResultListener(
     const cpo::uno::Reference< css::xml::crypto::sax::XSignatureCreationResultListener >& listener )
 {
     m_xResultListener = listener;
     tryToPerform();
 }
 
-void SAL_CALL SignatureCreatorImpl::removeSignatureCreationResultListener(
+void SignatureCreatorImpl::removeSignatureCreationResultListener(
     const cpo::uno::Reference< css::xml::crypto::sax::XSignatureCreationResultListener >&)
 {
 }
 
 /* XInitialization */
-void SAL_CALL SignatureCreatorImpl::initialize( const cpo::uno::Sequence< cpo::uno::Any >& aArguments )
+void SignatureCreatorImpl::initialize( const cpo::uno::Sequence< cpo::uno::Any >& aArguments )
 {
     OSL_ASSERT(aArguments.getLength() == 5);
 
@@ -158,17 +158,17 @@ cpo::uno::Sequence< OUString > SignatureCreatorImpl_getSupportedServiceNames(  )
 }
 
 /* XServiceInfo */
-OUString SAL_CALL SignatureCreatorImpl::getImplementationName(  )
+OUString SignatureCreatorImpl::getImplementationName(  )
 {
     return SignatureCreatorImpl_getImplementationName();
 }
 
-bool SAL_CALL SignatureCreatorImpl::supportsService( const OUString& rServiceName )
+bool SignatureCreatorImpl::supportsService( const OUString& rServiceName )
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL SignatureCreatorImpl::getSupportedServiceNames(  )
+cpo::uno::Sequence< OUString > SignatureCreatorImpl::getSupportedServiceNames(  )
 {
     return SignatureCreatorImpl_getSupportedServiceNames();
 }

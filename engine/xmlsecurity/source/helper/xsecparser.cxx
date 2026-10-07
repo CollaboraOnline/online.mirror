@@ -1471,7 +1471,7 @@ OUString XSecParser::getIdAttr(const cpo::uno::Reference< css::xml::sax::XAttrib
 /*
  * XDocumentHandler
  */
-void SAL_CALL XSecParser::startDocument(  )
+void XSecParser::startDocument(  )
 {
     if (m_xNextHandler.is())
     {
@@ -1479,7 +1479,7 @@ void SAL_CALL XSecParser::startDocument(  )
     }
 }
 
-void SAL_CALL XSecParser::endDocument(  )
+void XSecParser::endDocument(  )
 {
     if (m_xNextHandler.is())
     {
@@ -1487,7 +1487,7 @@ void SAL_CALL XSecParser::endDocument(  )
     }
 }
 
-void SAL_CALL XSecParser::startElement(
+void XSecParser::startElement(
     const OUString& rName,
     const cpo::uno::Reference< css::xml::sax::XAttributeList >& xAttribs )
 {
@@ -1545,7 +1545,7 @@ void SAL_CALL XSecParser::startElement(
     }
 }
 
-void SAL_CALL XSecParser::endElement(const OUString& rName)
+void XSecParser::endElement(const OUString& rName)
 {
     assert(!m_ContextStack.empty()); // this should be checked by sax parser?
 
@@ -1579,7 +1579,7 @@ void SAL_CALL XSecParser::endElement(const OUString& rName)
     m_ContextStack.pop();
 }
 
-void SAL_CALL XSecParser::characters(const OUString& rChars)
+void XSecParser::characters(const OUString& rChars)
 {
     assert(!m_ContextStack.empty()); // this should be checked by sax parser?
     m_ContextStack.top()->Characters(rChars);
@@ -1590,7 +1590,7 @@ void SAL_CALL XSecParser::characters(const OUString& rChars)
     }
 }
 
-void SAL_CALL XSecParser::ignorableWhitespace( const OUString& aWhitespaces )
+void XSecParser::ignorableWhitespace( const OUString& aWhitespaces )
 {
     if (m_xNextHandler.is())
     {
@@ -1598,7 +1598,7 @@ void SAL_CALL XSecParser::ignorableWhitespace( const OUString& aWhitespaces )
     }
 }
 
-void SAL_CALL XSecParser::processingInstruction( const OUString& aTarget, const OUString& aData )
+void XSecParser::processingInstruction( const OUString& aTarget, const OUString& aData )
 {
     if (m_xNextHandler.is())
     {
@@ -1606,7 +1606,7 @@ void SAL_CALL XSecParser::processingInstruction( const OUString& aTarget, const 
     }
 }
 
-void SAL_CALL XSecParser::setDocumentLocator( const cpo::uno::Reference< css::xml::sax::XLocator >& xLocator )
+void XSecParser::setDocumentLocator( const cpo::uno::Reference< css::xml::sax::XLocator >& xLocator )
 {
     if (m_xNextHandler.is())
     {
@@ -1617,7 +1617,7 @@ void SAL_CALL XSecParser::setDocumentLocator( const cpo::uno::Reference< css::xm
 /*
  * XInitialization
  */
-void SAL_CALL XSecParser::initialize(
+void XSecParser::initialize(
     const cpo::uno::Sequence< cpo::uno::Any >& aArguments )
 {
     aArguments[0] >>= m_xNextHandler;

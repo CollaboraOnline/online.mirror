@@ -161,16 +161,16 @@ SecurityEnvironment_MSCryptImpl::~SecurityEnvironment_MSCryptImpl() {
 }
 
 /* XServiceInfo */
-OUString SAL_CALL SecurityEnvironment_MSCryptImpl::getImplementationName() {
+OUString SecurityEnvironment_MSCryptImpl::getImplementationName() {
     return u"com.sun.star.xml.crypto.SecurityEnvironment"_ustr;
 }
 
 /* XServiceInfo */
-bool SAL_CALL SecurityEnvironment_MSCryptImpl::supportsService( const OUString& serviceName) {
+bool SecurityEnvironment_MSCryptImpl::supportsService( const OUString& serviceName) {
     return cppu::supportsService(this, serviceName);
 }
 /* XServiceInfo */
-cpo::uno::Sequence< OUString > SAL_CALL SecurityEnvironment_MSCryptImpl::getSupportedServiceNames() {
+cpo::uno::Sequence< OUString > SecurityEnvironment_MSCryptImpl::getSupportedServiceNames() {
     return { u"com.sun.star.xml.crypto.SecurityEnvironment"_ustr };
 }
 

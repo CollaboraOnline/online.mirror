@@ -51,17 +51,17 @@ public:
 
     /* XSEInitializer */
     virtual cpo::uno::Reference< css::xml::crypto::XXMLSecurityContext >
-        SAL_CALL createSecurityContext( const OUString& certDB ) override;
+        createSecurityContext( const OUString& certDB ) override;
 
-    virtual void SAL_CALL freeSecurityContext( const cpo::uno::Reference<
+    virtual void freeSecurityContext( const cpo::uno::Reference<
         css::xml::crypto::XXMLSecurityContext >& securityContext ) override;
 
     /* XServiceInfo */
-    virtual OUString SAL_CALL getImplementationName(  ) override;
+    virtual OUString getImplementationName(  ) override;
 
-    virtual bool SAL_CALL supportsService( const OUString& ServiceName ) override;
+    virtual bool supportsService( const OUString& ServiceName ) override;
 
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames(  ) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames(  ) override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

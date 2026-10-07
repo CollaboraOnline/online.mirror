@@ -23,20 +23,20 @@ public:
     explicit XMLSignature_NssImpl();
 
     //Methods from XXMLSignature
-    virtual cpo::uno::Reference<css::xml::crypto::XXMLSignatureTemplate> SAL_CALL generate(
+    virtual cpo::uno::Reference<css::xml::crypto::XXMLSignatureTemplate> generate(
         const cpo::uno::Reference<css::xml::crypto::XXMLSignatureTemplate>& aTemplate,
         const cpo::uno::Reference<css::xml::crypto::XSecurityEnvironment>& aEnvironment) override;
 
-    virtual cpo::uno::Reference<css::xml::crypto::XXMLSignatureTemplate> SAL_CALL
+    virtual cpo::uno::Reference<css::xml::crypto::XXMLSignatureTemplate>
     validate(const cpo::uno::Reference<css::xml::crypto::XXMLSignatureTemplate>& aTemplate,
              const cpo::uno::Reference<css::xml::crypto::XXMLSecurityContext>& aContext) override;
 
     //Methods from XServiceInfo
-    virtual OUString SAL_CALL getImplementationName() override;
+    virtual OUString getImplementationName() override;
 
-    virtual bool SAL_CALL supportsService(const OUString& ServiceName) override;
+    virtual bool supportsService(const OUString& ServiceName) override;
 
-    virtual cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override;
+    virtual cpo::uno::Sequence<OUString> getSupportedServiceNames() override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

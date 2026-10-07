@@ -54,7 +54,7 @@ namespace {
 }
 
 //Methods from XSanExtension
-cpo::uno::Sequence< css::security::CertAltNameEntry > SAL_CALL SanExtensionImpl::getAlternativeNames()
+cpo::uno::Sequence< css::security::CertAltNameEntry > SanExtensionImpl::getAlternativeNames()
 {
     if (m_Entries.empty())
     {

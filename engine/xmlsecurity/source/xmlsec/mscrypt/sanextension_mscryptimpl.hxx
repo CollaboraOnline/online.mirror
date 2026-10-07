@@ -49,15 +49,15 @@ class SanExtensionImpl : public ::cppu::WeakImplHelper<
         virtual ~SanExtensionImpl() override;
 
         //Methods from XCertificateExtension
-        virtual bool SAL_CALL isCritical() override;
+        virtual bool isCritical() override;
 
-        virtual cpo::uno::Sequence< sal_Int8 > SAL_CALL getExtensionId() override;
+        virtual cpo::uno::Sequence< sal_Int8 > getExtensionId() override;
 
-        virtual cpo::uno::Sequence< sal_Int8 > SAL_CALL getExtensionValue() override;
+        virtual cpo::uno::Sequence< sal_Int8 > getExtensionValue() override;
 
         //Methods from XSanExtension
 
-        virtual cpo::uno::Sequence< css::security::CertAltNameEntry > SAL_CALL getAlternativeNames() override;
+        virtual cpo::uno::Sequence< css::security::CertAltNameEntry > getAlternativeNames() override;
 
         //Helper method
         void setCertExtn( unsigned char* value, unsigned int vlen, unsigned char* id, unsigned int idlen, bool critical ) ;

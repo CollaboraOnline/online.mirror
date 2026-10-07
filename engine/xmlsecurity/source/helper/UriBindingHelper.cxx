@@ -45,11 +45,11 @@ UriBindingHelper::UriBindingHelper( const cpo::uno::Reference < css::embed::XSto
     mxScriptingSignatureStream = xScriptingSignatureStream;
 }
 
-void SAL_CALL UriBindingHelper::setUriBinding( const OUString& /*uri*/, const uno::Reference< io::XInputStream >&)
+void UriBindingHelper::setUriBinding( const OUString& /*uri*/, const uno::Reference< io::XInputStream >&)
 {
 }
 
-uno::Reference< io::XInputStream > SAL_CALL UriBindingHelper::getUriBinding( const OUString& uri )
+uno::Reference< io::XInputStream > UriBindingHelper::getUriBinding( const OUString& uri )
 {
     uno::Reference< io::XInputStream > xInputStream;
     if ( mxStorage.is() )

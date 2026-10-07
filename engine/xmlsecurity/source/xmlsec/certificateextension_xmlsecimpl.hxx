@@ -32,17 +32,17 @@ class CertificateExtension_XmlSecImpl : public ::cppu::WeakImplHelper<
 
     public:
         //Methods from XCertificateExtension
-        virtual bool SAL_CALL isCritical() override
+        virtual bool isCritical() override
         {
             return m_Extn.m_critical;
         }
 
-        virtual cpo::uno::Sequence< sal_Int8 > SAL_CALL getExtensionId() override
+        virtual cpo::uno::Sequence< sal_Int8 > getExtensionId() override
         {
             return m_Extn.m_xExtnId;
         }
 
-        virtual cpo::uno::Sequence< sal_Int8 > SAL_CALL getExtensionValue() override
+        virtual cpo::uno::Sequence< sal_Int8 > getExtensionValue() override
         {
             return m_Extn.m_xExtnValue;
         }

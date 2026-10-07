@@ -48,38 +48,38 @@ class XMLSignatureTemplateImpl final : public ::cppu::WeakImplHelper<
         virtual ~XMLSignatureTemplateImpl() override;
 
         //Methods from XXMLSignatureTemplate
-        virtual void SAL_CALL setTemplate(
+        virtual void setTemplate(
             const cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper >& aXmlElement
             ) override;
 
-        virtual cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper > SAL_CALL getTemplate(
+        virtual cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper > getTemplate(
         ) override;
 
-        virtual void SAL_CALL setTarget(
+        virtual void setTarget(
             const cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper >& aXmlElement
         ) override;
 
-        virtual cpo::uno::Sequence< cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper > > SAL_CALL getTargets(
+        virtual cpo::uno::Sequence< cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper > > getTargets(
         ) override;
 
-        virtual void SAL_CALL setBinding(
+        virtual void setBinding(
             const cpo::uno::Reference< css::xml::crypto::XUriBinding >& aUriBinding ) override;
         virtual cpo::uno::Reference< css::xml::crypto::XUriBinding >
-            SAL_CALL getBinding(  ) override;
+            getBinding(  ) override;
 
-        virtual void SAL_CALL setStatus(
+        virtual void setStatus(
             css::xml::crypto::SecurityOperationStatus status ) override;
         virtual css::xml::crypto::SecurityOperationStatus
-            SAL_CALL getStatus(  ) override;
+            getStatus(  ) override;
 
         //Methods from XServiceInfo
-        virtual OUString SAL_CALL getImplementationName() override ;
+        virtual OUString getImplementationName() override ;
 
-        virtual bool SAL_CALL supportsService(
+        virtual bool supportsService(
             const OUString& ServiceName
         ) override ;
 
-        virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override ;
+        virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override ;
 
         //Helper for XServiceInfo
         static cpo::uno::Sequence< OUString > impl_getSupportedServiceNames() ;

@@ -146,7 +146,7 @@ void OCipherContext::Dispose()
     m_bDisposed = true;
 }
 
-cpo::uno::Sequence< ::sal_Int8 > SAL_CALL OCipherContext::convertWithCipherContext( const cpo::uno::Sequence< ::sal_Int8 >& aData )
+cpo::uno::Sequence< ::sal_Int8 > OCipherContext::convertWithCipherContext( const cpo::uno::Sequence< ::sal_Int8 >& aData )
 {
     std::unique_lock aGuard( m_aMutex );
 
@@ -239,7 +239,7 @@ cpo::uno::Sequence< ::sal_Int8 > SAL_CALL OCipherContext::convertWithCipherConte
     return aResult;
 }
 
-cpo::uno::Sequence< ::sal_Int8 > SAL_CALL OCipherContext::finalizeCipherContextAndDispose()
+cpo::uno::Sequence< ::sal_Int8 > OCipherContext::finalizeCipherContextAndDispose()
 {
     std::unique_lock aGuard( m_aMutex );
 

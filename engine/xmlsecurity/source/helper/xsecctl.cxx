@@ -950,20 +950,20 @@ SignatureInformations XSecController::getSignatureInformations() const
  * XSAXEventKeeperStatusChangeListener
  */
 
-void SAL_CALL XSecController::blockingStatusChanged( bool isBlocking )
+void XSecController::blockingStatusChanged( bool isBlocking )
 {
     m_bIsBlocking = isBlocking;
     checkChainingStatus();
 }
 
-void SAL_CALL XSecController::collectionStatusChanged(
+void XSecController::collectionStatusChanged(
     bool isInsideCollectedElement )
 {
     m_bIsCollectingElement = isInsideCollectedElement;
     checkChainingStatus();
 }
 
-void SAL_CALL XSecController::bufferStatusChanged( bool /*isBufferEmpty*/)
+void XSecController::bufferStatusChanged( bool /*isBufferEmpty*/)
 {
 
 }
@@ -971,7 +971,7 @@ void SAL_CALL XSecController::bufferStatusChanged( bool /*isBufferEmpty*/)
 /*
  * XSignatureCreationResultListener
  */
-void SAL_CALL XSecController::signatureCreated( sal_Int32 securityId, css::xml::crypto::SecurityOperationStatus nResult )
+void XSecController::signatureCreated( sal_Int32 securityId, css::xml::crypto::SecurityOperationStatus nResult )
 {
     int index = findSignatureInfor(securityId);
     assert(index != -1 && "Signature Not Found!");
@@ -982,7 +982,7 @@ void SAL_CALL XSecController::signatureCreated( sal_Int32 securityId, css::xml::
 /*
  * XSignatureVerifyResultListener
  */
-void SAL_CALL XSecController::signatureVerified( sal_Int32 securityId, css::xml::crypto::SecurityOperationStatus nResult )
+void XSecController::signatureVerified( sal_Int32 securityId, css::xml::crypto::SecurityOperationStatus nResult )
 {
     int index = findSignatureInfor(securityId);
     assert(index != -1 && "Signature Not Found!");

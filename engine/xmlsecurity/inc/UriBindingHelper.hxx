@@ -45,9 +45,9 @@ public:
     UriBindingHelper();
     explicit UriBindingHelper( const cpo::uno::Reference < css::embed::XStorage >& rxStorage, const cpo::uno::Reference<css::io::XStream>& xScriptingSignatureStream );
 
-    void SAL_CALL setUriBinding( const OUString& uri, const cpo::uno::Reference< css::io::XInputStream >& aInputStream ) override;
+    void setUriBinding( const OUString& uri, const cpo::uno::Reference< css::io::XInputStream >& aInputStream ) override;
 
-    cpo::uno::Reference< css::io::XInputStream > SAL_CALL getUriBinding( const OUString& uri ) override;
+    cpo::uno::Reference< css::io::XInputStream > getUriBinding( const OUString& uri ) override;
 
     static cpo::uno::Reference < css::io::XInputStream > OpenInputStream( const cpo::uno::Reference < css::embed::XStorage >& rxStore, const OUString& rURI, const cpo::uno::Reference<css::io::XStream>& xScriptingSignatureStream );
 };

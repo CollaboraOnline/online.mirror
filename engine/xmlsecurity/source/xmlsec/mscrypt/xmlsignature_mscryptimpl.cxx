@@ -58,24 +58,24 @@ class XMLSignature_MSCryptImpl : public ::cppu::WeakImplHelper<
         explicit XMLSignature_MSCryptImpl();
 
         //Methods from XXMLSignature
-        virtual cpo::uno::Reference< css::xml::crypto::XXMLSignatureTemplate > SAL_CALL generate(
+        virtual cpo::uno::Reference< css::xml::crypto::XXMLSignatureTemplate > generate(
             const cpo::uno::Reference< css::xml::crypto::XXMLSignatureTemplate >& aTemplate ,
             const cpo::uno::Reference< css::xml::crypto::XSecurityEnvironment >& aEnvironment
         ) override;
 
-        virtual cpo::uno::Reference< css::xml::crypto::XXMLSignatureTemplate > SAL_CALL validate(
+        virtual cpo::uno::Reference< css::xml::crypto::XXMLSignatureTemplate > validate(
             const cpo::uno::Reference< css::xml::crypto::XXMLSignatureTemplate >& aTemplate ,
             const cpo::uno::Reference< css::xml::crypto::XXMLSecurityContext >& aContext
         ) override;
 
         //Methods from XServiceInfo
-        virtual OUString SAL_CALL getImplementationName() override;
+        virtual OUString getImplementationName() override;
 
-        virtual bool SAL_CALL supportsService(
+        virtual bool supportsService(
             const OUString& ServiceName
         ) override;
 
-        virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+        virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 } ;
 
 }
@@ -85,7 +85,7 @@ XMLSignature_MSCryptImpl::XMLSignature_MSCryptImpl() {
 
 /* XXMLSignature */
 Reference< XXMLSignatureTemplate >
-SAL_CALL XMLSignature_MSCryptImpl::generate(
+XMLSignature_MSCryptImpl::generate(
     const Reference< XXMLSignatureTemplate >& aTemplate ,
     const Reference< XSecurityEnvironment >& aEnvironment
 )
@@ -171,7 +171,7 @@ SAL_CALL XMLSignature_MSCryptImpl::generate(
 
 /* XXMLSignature */
 Reference< XXMLSignatureTemplate >
-SAL_CALL XMLSignature_MSCryptImpl::validate(
+XMLSignature_MSCryptImpl::validate(
     const Reference< XXMLSignatureTemplate >& aTemplate ,
     const Reference< XXMLSecurityContext >& aSecurityCtx
 ) {
@@ -284,17 +284,17 @@ SAL_CALL XMLSignature_MSCryptImpl::validate(
 }
 
 /* XServiceInfo */
-OUString SAL_CALL XMLSignature_MSCryptImpl::getImplementationName() {
+OUString XMLSignature_MSCryptImpl::getImplementationName() {
     return u"com.sun.star.xml.crypto.XMLSignature"_ustr;
 }
 
 /* XServiceInfo */
-bool SAL_CALL XMLSignature_MSCryptImpl::supportsService( const OUString& serviceName) {
+bool XMLSignature_MSCryptImpl::supportsService( const OUString& serviceName) {
 return cppu::supportsService(this, serviceName);
 }
 
 /* XServiceInfo */
-Sequence< OUString > SAL_CALL XMLSignature_MSCryptImpl::getSupportedServiceNames() {
+Sequence< OUString > XMLSignature_MSCryptImpl::getSupportedServiceNames() {
     return { u"com.sun.star.xml.crypto.XMLSignature"_ustr };
 }
 

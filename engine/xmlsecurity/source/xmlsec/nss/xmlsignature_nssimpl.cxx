@@ -68,7 +68,7 @@ XMLSignature_NssImpl::XMLSignature_NssImpl() {
 
 /* XXMLSignature */
 Reference< XXMLSignatureTemplate >
-SAL_CALL XMLSignature_NssImpl::generate(
+XMLSignature_NssImpl::generate(
     const Reference< XXMLSignatureTemplate >& aTemplate ,
     const Reference< XSecurityEnvironment >& aEnvironment
 )
@@ -151,7 +151,7 @@ SAL_CALL XMLSignature_NssImpl::generate(
 
 /* XXMLSignature */
 Reference< XXMLSignatureTemplate >
-SAL_CALL XMLSignature_NssImpl::validate(
+XMLSignature_NssImpl::validate(
     const Reference< XXMLSignatureTemplate >& aTemplate ,
     const Reference< XXMLSecurityContext >& aSecurityCtx
 ) {
@@ -266,13 +266,13 @@ SAL_CALL XMLSignature_NssImpl::validate(
 }
 
 /* XServiceInfo */
-OUString SAL_CALL XMLSignature_NssImpl::getImplementationName()
+OUString XMLSignature_NssImpl::getImplementationName()
 {
     return u"com.sun.star.xml.crypto.XMLSignature"_ustr;
 }
 
 /* XServiceInfo */
-bool SAL_CALL XMLSignature_NssImpl::supportsService(const OUString& rServiceName)
+bool XMLSignature_NssImpl::supportsService(const OUString& rServiceName)
 {
     const cpo::uno::Sequence<OUString> aServiceNames = getSupportedServiceNames();
     for (OUString const & rCurrentServiceName : aServiceNames)
@@ -284,7 +284,7 @@ bool SAL_CALL XMLSignature_NssImpl::supportsService(const OUString& rServiceName
 }
 
 /* XServiceInfo */
-Sequence<OUString> SAL_CALL XMLSignature_NssImpl::getSupportedServiceNames()
+Sequence<OUString> XMLSignature_NssImpl::getSupportedServiceNames()
 {
     return { u"com.sun.star.xml.crypto.XMLSignature"_ustr };
 }

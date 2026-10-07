@@ -1248,19 +1248,19 @@ OUString OOXMLSecParser::HandleIdAttr(cpo::uno::Reference<css::xml::sax::XAttrib
     return aId;
 }
 
-void SAL_CALL OOXMLSecParser::startDocument()
+void OOXMLSecParser::startDocument()
 {
     if (m_xNextHandler.is())
         m_xNextHandler->startDocument();
 }
 
-void SAL_CALL OOXMLSecParser::endDocument()
+void OOXMLSecParser::endDocument()
 {
     if (m_xNextHandler.is())
         m_xNextHandler->endDocument();
 }
 
-void SAL_CALL OOXMLSecParser::startElement(const OUString& rName, const uno::Reference<xml::sax::XAttributeList>& xAttribs)
+void OOXMLSecParser::startElement(const OUString& rName, const uno::Reference<xml::sax::XAttributeList>& xAttribs)
 {
     assert(m_pNamespaceMap);
     std::optional<SvXMLNamespaceMap> pRewindMap(
@@ -1300,7 +1300,7 @@ void SAL_CALL OOXMLSecParser::startElement(const OUString& rName, const uno::Ref
 
 }
 
-void SAL_CALL OOXMLSecParser::endElement(const OUString& rName)
+void OOXMLSecParser::endElement(const OUString& rName)
 {
     assert(!m_ContextStack.empty()); // this should be checked by sax parser?
 
@@ -1318,7 +1318,7 @@ void SAL_CALL OOXMLSecParser::endElement(const OUString& rName)
     m_ContextStack.pop();
 }
 
-void SAL_CALL OOXMLSecParser::characters(const OUString& rChars)
+void OOXMLSecParser::characters(const OUString& rChars)
 {
     assert(!m_ContextStack.empty()); // this should be checked by sax parser?
     m_ContextStack.top()->Characters(rChars);
@@ -1327,25 +1327,25 @@ void SAL_CALL OOXMLSecParser::characters(const OUString& rChars)
         m_xNextHandler->characters(rChars);
 }
 
-void SAL_CALL OOXMLSecParser::ignorableWhitespace(const OUString& rWhitespace)
+void OOXMLSecParser::ignorableWhitespace(const OUString& rWhitespace)
 {
     if (m_xNextHandler.is())
         m_xNextHandler->ignorableWhitespace(rWhitespace);
 }
 
-void SAL_CALL OOXMLSecParser::processingInstruction(const OUString& rTarget, const OUString& rData)
+void OOXMLSecParser::processingInstruction(const OUString& rTarget, const OUString& rData)
 {
     if (m_xNextHandler.is())
         m_xNextHandler->processingInstruction(rTarget, rData);
 }
 
-void SAL_CALL OOXMLSecParser::setDocumentLocator(const uno::Reference<xml::sax::XLocator>& xLocator)
+void OOXMLSecParser::setDocumentLocator(const uno::Reference<xml::sax::XLocator>& xLocator)
 {
     if (m_xNextHandler.is())
         m_xNextHandler->setDocumentLocator(xLocator);
 }
 
-void SAL_CALL OOXMLSecParser::initialize(const cpo::uno::Sequence<cpo::uno::Any>& rArguments)
+void OOXMLSecParser::initialize(const cpo::uno::Sequence<cpo::uno::Any>& rArguments)
 {
     rArguments[0] >>= m_xNextHandler;
 }

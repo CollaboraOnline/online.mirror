@@ -46,7 +46,7 @@ SEInitializer_MSCryptImpl::~SEInitializer_MSCryptImpl()
 }
 
 /* XSEInitializer */
-uno::Reference< cssxc::XXMLSecurityContext > SAL_CALL
+uno::Reference< cssxc::XXMLSecurityContext >
     SEInitializer_MSCryptImpl::createSecurityContext(
     const OUString& sCertDB )
 {
@@ -118,7 +118,7 @@ uno::Reference< cssxc::XXMLSecurityContext > SAL_CALL
     }
 }
 
-void SAL_CALL SEInitializer_MSCryptImpl::freeSecurityContext( const uno::Reference< cssxc::XXMLSecurityContext >&)
+void SEInitializer_MSCryptImpl::freeSecurityContext( const uno::Reference< cssxc::XXMLSecurityContext >&)
 {
     /*
     uno::Reference< cssxc::XSecurityEnvironment > xSecEnv
@@ -147,17 +147,17 @@ void SAL_CALL SEInitializer_MSCryptImpl::freeSecurityContext( const uno::Referen
 }
 
 /* XServiceInfo */
-OUString SAL_CALL SEInitializer_MSCryptImpl::getImplementationName()
+OUString SEInitializer_MSCryptImpl::getImplementationName()
 {
     return u"com.sun.star.xml.crypto.SEInitializer"_ustr;
 }
 
-bool SAL_CALL SEInitializer_MSCryptImpl::supportsService( const OUString& rServiceName )
+bool SEInitializer_MSCryptImpl::supportsService( const OUString& rServiceName )
 {
     return cppu::supportsService( this, rServiceName );
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL SEInitializer_MSCryptImpl::getSupportedServiceNames()
+cpo::uno::Sequence< OUString > SEInitializer_MSCryptImpl::getSupportedServiceNames()
 {
     return { u"com.sun.star.xml.crypto.SEInitializer"_ustr };
 }

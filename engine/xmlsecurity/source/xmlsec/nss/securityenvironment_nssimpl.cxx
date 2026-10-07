@@ -147,17 +147,17 @@ SecurityEnvironment_NssImpl::~SecurityEnvironment_NssImpl() {
 }
 
 /* XServiceInfo */
-OUString SAL_CALL SecurityEnvironment_NssImpl::getImplementationName() {
+OUString SecurityEnvironment_NssImpl::getImplementationName() {
     return u"com.sun.star.xml.crypto.SecurityEnvironment"_ustr;
 }
 
 /* XServiceInfo */
-bool SAL_CALL SecurityEnvironment_NssImpl::supportsService( const OUString& serviceName) {
+bool SecurityEnvironment_NssImpl::supportsService( const OUString& serviceName) {
     return cppu::supportsService(this, serviceName);
 }
 
 /* XServiceInfo */
-Sequence< OUString > SAL_CALL SecurityEnvironment_NssImpl::getSupportedServiceNames() {
+Sequence< OUString > SecurityEnvironment_NssImpl::getSupportedServiceNames() {
     Sequence<OUString> seqServiceNames{ u"com.sun.star.xml.crypto.SecurityEnvironment"_ustr };
     return seqServiceNames;
 }

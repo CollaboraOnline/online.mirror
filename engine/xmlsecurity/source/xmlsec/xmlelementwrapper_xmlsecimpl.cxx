@@ -30,17 +30,17 @@ XMLElementWrapper_XmlSecImpl::XMLElementWrapper_XmlSecImpl(const xmlNodePtr pNod
 }
 
 /* XServiceInfo */
-OUString SAL_CALL XMLElementWrapper_XmlSecImpl::getImplementationName(  )
+OUString XMLElementWrapper_XmlSecImpl::getImplementationName(  )
 {
     return u"com.sun.star.xml.wrapper.XMLElementWrapper"_ustr;
 }
 
-bool SAL_CALL XMLElementWrapper_XmlSecImpl::supportsService( const OUString& rServiceName )
+bool XMLElementWrapper_XmlSecImpl::supportsService( const OUString& rServiceName )
 {
     return cppu::supportsService( this, rServiceName );
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL XMLElementWrapper_XmlSecImpl::getSupportedServiceNames(  )
+cpo::uno::Sequence< OUString > XMLElementWrapper_XmlSecImpl::getSupportedServiceNames(  )
 {
     return { u"com.sun.star.xml.wrapper.XMLElementWrapper"_ustr };
 }

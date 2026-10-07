@@ -31,18 +31,18 @@ public:
     virtual ~SecurityEnvironment_AppleImpl() override;
 
     virtual cpo::uno::Sequence<cpo::uno::Reference<css::security::XCertificate>>
-        SAL_CALL getPersonalCertificates() override;
+        getPersonalCertificates() override;
 
-    virtual sal_Int32 SAL_CALL
+    virtual sal_Int32
     verifyCertificate(const cpo::uno::Reference<css::security::XCertificate>& xCert,
                       const cpo::uno::Sequence<cpo::uno::Reference<css::security::XCertificate>>&
                           intermediateCerts) override;
 
-    virtual sal_Int32 SAL_CALL getCertificateCharacters(
+    virtual sal_Int32 getCertificateCharacters(
         const cpo::uno::Reference<css::security::XCertificate>& xCert) override;
 
     virtual cpo::uno::Sequence<cpo::uno::Reference<css::security::XCertificate>>
-        SAL_CALL buildCertificatePath(
+        buildCertificatePath(
             const cpo::uno::Reference<css::security::XCertificate>& beginCert) override;
 
     /// The certificate remembered by buildCertificatePath(), when it was a Keychain one.

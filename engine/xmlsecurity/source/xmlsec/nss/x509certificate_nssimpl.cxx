@@ -52,7 +52,7 @@ X509Certificate_NssImpl::~X509Certificate_NssImpl() {
 }
 
 //Methods from XCertificate
-sal_Int16 SAL_CALL X509Certificate_NssImpl::getVersion() {
+sal_Int16 X509Certificate_NssImpl::getVersion() {
     if( m_pCert != nullptr ) {
         if( m_pCert->version.len > 0 ) {
             return static_cast<char>(*( m_pCert->version.data )) ;
@@ -63,7 +63,7 @@ sal_Int16 SAL_CALL X509Certificate_NssImpl::getVersion() {
     }
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL X509Certificate_NssImpl::getSerialNumber() {
+cpo::uno::Sequence< sal_Int8 > X509Certificate_NssImpl::getSerialNumber() {
     if( m_pCert != nullptr && m_pCert->serialNumber.len > 0 ) {
         return comphelper::arrayToSequence<sal_Int8>(m_pCert->serialNumber.data,
                                                      m_pCert->serialNumber.len) ;
@@ -72,7 +72,7 @@ cpo::uno::Sequence< sal_Int8 > SAL_CALL X509Certificate_NssImpl::getSerialNumber
     }
 }
 
-OUString SAL_CALL X509Certificate_NssImpl::getIssuerName() {
+OUString X509Certificate_NssImpl::getIssuerName() {
     if( m_pCert != nullptr ) {
         return OUString(m_pCert->issuerName , PL_strlen(m_pCert->issuerName) , RTL_TEXTENCODING_UTF8) ;
     } else {
@@ -80,7 +80,7 @@ OUString SAL_CALL X509Certificate_NssImpl::getIssuerName() {
     }
 }
 
-OUString SAL_CALL X509Certificate_NssImpl::getSubjectName() {
+OUString X509Certificate_NssImpl::getSubjectName() {
     if( m_pCert != nullptr ) {
         return OUString(m_pCert->subjectName , PL_strlen(m_pCert->subjectName) , RTL_TEXTENCODING_UTF8);
     } else {
@@ -88,7 +88,7 @@ OUString SAL_CALL X509Certificate_NssImpl::getSubjectName() {
     }
 }
 
-css::util::DateTime SAL_CALL X509Certificate_NssImpl::getNotValidBefore() {
+css::util::DateTime X509Certificate_NssImpl::getNotValidBefore() {
     if( m_pCert != nullptr ) {
         SECStatus rv ;
         PRTime notBefore ;
@@ -117,7 +117,7 @@ css::util::DateTime SAL_CALL X509Certificate_NssImpl::getNotValidBefore() {
     }
 }
 
-css::util::DateTime SAL_CALL X509Certificate_NssImpl::getNotValidAfter() {
+css::util::DateTime X509Certificate_NssImpl::getNotValidAfter() {
     if( m_pCert != nullptr ) {
         SECStatus rv ;
         PRTime notAfter ;
@@ -146,7 +146,7 @@ css::util::DateTime SAL_CALL X509Certificate_NssImpl::getNotValidAfter() {
     }
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL X509Certificate_NssImpl::getIssuerUniqueID() {
+cpo::uno::Sequence< sal_Int8 > X509Certificate_NssImpl::getIssuerUniqueID() {
     if( m_pCert != nullptr && m_pCert->issuerID.len > 0 ) {
         return comphelper::arrayToSequence<sal_Int8>(m_pCert->issuerID.data, m_pCert->issuerID.len) ;
     } else {
@@ -154,7 +154,7 @@ cpo::uno::Sequence< sal_Int8 > SAL_CALL X509Certificate_NssImpl::getIssuerUnique
     }
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL X509Certificate_NssImpl::getSubjectUniqueID() {
+cpo::uno::Sequence< sal_Int8 > X509Certificate_NssImpl::getSubjectUniqueID() {
     if( m_pCert != nullptr && m_pCert->subjectID.len > 0 ) {
         return comphelper::arrayToSequence<sal_Int8>(m_pCert->subjectID.data,
                                                      m_pCert->subjectID.len) ;
@@ -163,7 +163,7 @@ cpo::uno::Sequence< sal_Int8 > SAL_CALL X509Certificate_NssImpl::getSubjectUniqu
     }
 }
 
-cpo::uno::Sequence< cpo::uno::Reference< css::security::XCertificateExtension > > SAL_CALL X509Certificate_NssImpl::getExtensions() {
+cpo::uno::Sequence< cpo::uno::Reference< css::security::XCertificateExtension > > X509Certificate_NssImpl::getExtensions() {
     if( m_pCert != nullptr && m_pCert->extensions != nullptr ) {
         CERTCertExtension** extns ;
         int len ;
@@ -215,7 +215,7 @@ cpo::uno::Sequence< cpo::uno::Reference< css::security::XCertificateExtension > 
     }
 }
 
-cpo::uno::Reference< css::security::XCertificateExtension > SAL_CALL X509Certificate_NssImpl::findCertificateExtension( const cpo::uno::Sequence< sal_Int8 >& oid ) {
+cpo::uno::Reference< css::security::XCertificateExtension > X509Certificate_NssImpl::findCertificateExtension( const cpo::uno::Sequence< sal_Int8 >& oid ) {
     if( m_pCert != nullptr && m_pCert->extensions != nullptr ) {
         CERTCertExtension** extns ;
         SECItem idItem ;
@@ -265,7 +265,7 @@ cpo::uno::Reference< css::security::XCertificateExtension > SAL_CALL X509Certifi
 }
 
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL X509Certificate_NssImpl::getEncoded() {
+cpo::uno::Sequence< sal_Int8 > X509Certificate_NssImpl::getEncoded() {
     if( m_pCert != nullptr && m_pCert->derCert.len > 0 ) {
         return comphelper::arrayToSequence<sal_Int8>(m_pCert->derCert.data, m_pCert->derCert.len) ;
     } else {
@@ -372,7 +372,7 @@ static cpo::uno::Sequence< sal_Int8 > getThumbprint(CERTCertificate const *pCert
     return cpo::uno::Sequence< sal_Int8 >();
 }
 
-OUString SAL_CALL X509Certificate_NssImpl::getSubjectPublicKeyAlgorithm()
+OUString X509Certificate_NssImpl::getSubjectPublicKeyAlgorithm()
 {
     if( m_pCert != nullptr )
     {
@@ -384,7 +384,7 @@ OUString SAL_CALL X509Certificate_NssImpl::getSubjectPublicKeyAlgorithm()
     }
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL X509Certificate_NssImpl::getSubjectPublicKeyValue()
+cpo::uno::Sequence< sal_Int8 > X509Certificate_NssImpl::getSubjectPublicKeyValue()
 {
     if( m_pCert != nullptr )
     {
@@ -400,7 +400,7 @@ cpo::uno::Sequence< sal_Int8 > SAL_CALL X509Certificate_NssImpl::getSubjectPubli
     return cpo::uno::Sequence< sal_Int8 >();
 }
 
-OUString SAL_CALL X509Certificate_NssImpl::getSignatureAlgorithm()
+OUString X509Certificate_NssImpl::getSignatureAlgorithm()
 {
     if( m_pCert != nullptr )
     {
@@ -426,7 +426,7 @@ svl::crypto::SignatureMethodAlgorithm X509Certificate_NssImpl::getSignatureMetho
     return nRet;
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL X509Certificate_NssImpl::getSHA1Thumbprint()
+cpo::uno::Sequence< sal_Int8 > X509Certificate_NssImpl::getSHA1Thumbprint()
 {
     return getThumbprint(m_pCert, SEC_OID_SHA1);
 }
@@ -436,17 +436,17 @@ cpo::uno::Sequence<sal_Int8> X509Certificate_NssImpl::getSHA256Thumbprint()
     return getThumbprint(m_pCert, SEC_OID_SHA256);
 }
 
-cpo::uno::Sequence< sal_Int8 > SAL_CALL X509Certificate_NssImpl::getMD5Thumbprint()
+cpo::uno::Sequence< sal_Int8 > X509Certificate_NssImpl::getMD5Thumbprint()
 {
     return getThumbprint(m_pCert, SEC_OID_MD5);
 }
 
-css::security::CertificateKind SAL_CALL X509Certificate_NssImpl::getCertificateKind()
+css::security::CertificateKind X509Certificate_NssImpl::getCertificateKind()
 {
     return css::security::CertificateKind_X509;
 }
 
-sal_Int32 SAL_CALL X509Certificate_NssImpl::getCertificateUsage(  )
+sal_Int32 X509Certificate_NssImpl::getCertificateUsage(  )
 {
     SECStatus rv;
     SECItem tmpitem;
@@ -479,19 +479,19 @@ sal_Int32 SAL_CALL X509Certificate_NssImpl::getCertificateUsage(  )
 }
 
 /* XServiceInfo */
-OUString SAL_CALL X509Certificate_NssImpl::getImplementationName()
+OUString X509Certificate_NssImpl::getImplementationName()
 {
     return u"com.sun.star.xml.security.gpg.XCertificate_NssImpl"_ustr;
 }
 
 /* XServiceInfo */
-bool SAL_CALL X509Certificate_NssImpl::supportsService(const OUString& serviceName)
+bool X509Certificate_NssImpl::supportsService(const OUString& serviceName)
 {
     return cppu::supportsService(this, serviceName);
 }
 
 /* XServiceInfo */
-cpo::uno::Sequence<OUString> SAL_CALL X509Certificate_NssImpl::getSupportedServiceNames() { return { OUString() }; }
+cpo::uno::Sequence<OUString> X509Certificate_NssImpl::getSupportedServiceNames() { return { OUString() }; }
 
 namespace xmlsecurity {
 

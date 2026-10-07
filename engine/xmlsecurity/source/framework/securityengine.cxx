@@ -32,21 +32,21 @@ SecurityEngine::SecurityEngine()
 }
 
 /* XReferenceResolvedListener */
-void SAL_CALL SecurityEngine::referenceResolved( sal_Int32 /*referenceId*/)
+void SecurityEngine::referenceResolved( sal_Int32 /*referenceId*/)
 {
     m_nNumOfResolvedReferences++;
     tryToPerform();
 }
 
 /* XKeyCollector */
-void SAL_CALL SecurityEngine::setKeyId( sal_Int32 id )
+void SecurityEngine::setKeyId( sal_Int32 id )
 {
     m_nIdOfKeyEC = id;
     tryToPerform();
 }
 
 /* XMissionTaker */
-bool SAL_CALL SecurityEngine::endMission(  )
+bool SecurityEngine::endMission(  )
 {
     bool rc = m_bMissionDone;
 

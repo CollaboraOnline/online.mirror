@@ -155,19 +155,19 @@ void SignatureEngine::clearUp( ) const
 }
 
 /* XReferenceCollector */
-void SAL_CALL SignatureEngine::setReferenceCount( sal_Int32 count )
+void SignatureEngine::setReferenceCount( sal_Int32 count )
 {
     m_nTotalReferenceNumber = count;
     tryToPerform();
 }
 
-void SAL_CALL SignatureEngine::setReferenceId( sal_Int32 id )
+void SignatureEngine::setReferenceId( sal_Int32 id )
 {
     m_vReferenceIds.push_back( id );
 }
 
 /* XUriBinding */
-void SAL_CALL SignatureEngine::setUriBinding(
+void SignatureEngine::setUriBinding(
     const OUString& uri,
     const cpo::uno::Reference< css::io::XInputStream >& aInputStream )
 {
@@ -175,7 +175,7 @@ void SAL_CALL SignatureEngine::setUriBinding(
     m_vXInputStreams.push_back(aInputStream);
 }
 
-cpo::uno::Reference< css::io::XInputStream > SAL_CALL SignatureEngine::getUriBinding( const OUString& uri )
+cpo::uno::Reference< css::io::XInputStream > SignatureEngine::getUriBinding( const OUString& uri )
 {
     cpo::uno::Reference< css::io::XInputStream > xInputStream;
 

@@ -216,67 +216,67 @@ public:
     SAXEventKeeperImpl& operator=(const SAXEventKeeperImpl&) = delete;
 
     /* XSAXEventKeeper */
-    virtual sal_Int32 SAL_CALL addElementCollector(  ) override;
-    virtual void SAL_CALL removeElementCollector( sal_Int32 id ) override;
-    virtual sal_Int32 SAL_CALL addBlocker(  ) override;
-    virtual void SAL_CALL removeBlocker( sal_Int32 id ) override;
-    virtual bool SAL_CALL isBlocking(  ) override;
-    virtual cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper > SAL_CALL
+    virtual sal_Int32 addElementCollector(  ) override;
+    virtual void removeElementCollector( sal_Int32 id ) override;
+    virtual sal_Int32 addBlocker(  ) override;
+    virtual void removeBlocker( sal_Int32 id ) override;
+    virtual bool isBlocking(  ) override;
+    virtual cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper >
         getElement( sal_Int32 id ) override;
-    virtual void SAL_CALL setElement(
+    virtual void setElement(
         sal_Int32 id,
         const cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper >& aElement ) override;
     virtual cpo::uno::Reference<
-        css::xml::sax::XDocumentHandler > SAL_CALL
+        css::xml::sax::XDocumentHandler >
         setNextHandler( const cpo::uno::Reference<
             css::xml::sax::XDocumentHandler >& xNewHandler ) override;
-    virtual OUString SAL_CALL printBufferNodeTree() override;
-    virtual cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper > SAL_CALL
+    virtual OUString printBufferNodeTree() override;
+    virtual cpo::uno::Reference< css::xml::wrapper::XXMLElementWrapper >
         getCurrentBlockingNode() override;
 
     /* XSecuritySAXEventKeeper */
-    virtual sal_Int32 SAL_CALL addSecurityElementCollector(
+    virtual sal_Int32 addSecurityElementCollector(
         css::xml::crypto::sax::ElementMarkPriority priority,
         bool modifyElement ) override;
-    virtual void SAL_CALL setSecurityId( sal_Int32 id, sal_Int32 securityId ) override;
+    virtual void setSecurityId( sal_Int32 id, sal_Int32 securityId ) override;
 
     /* XReferenceResolvedBroadcaster */
-    virtual void SAL_CALL addReferenceResolvedListener(
+    virtual void addReferenceResolvedListener(
         sal_Int32 referenceId,
         const cpo::uno::Reference< css::xml::crypto::sax::XReferenceResolvedListener >& listener ) override;
-    virtual void SAL_CALL removeReferenceResolvedListener(
+    virtual void removeReferenceResolvedListener(
         sal_Int32 referenceId,
         const cpo::uno::Reference< css::xml::crypto::sax::XReferenceResolvedListener >& listener ) override;
 
     /* XSAXEventKeeperStatusChangeBroadcaster */
-    virtual void SAL_CALL addSAXEventKeeperStatusChangeListener(
+    virtual void addSAXEventKeeperStatusChangeListener(
         const cpo::uno::Reference< css::xml::crypto::sax::XSAXEventKeeperStatusChangeListener >& listener ) override;
-    virtual void SAL_CALL removeSAXEventKeeperStatusChangeListener(
+    virtual void removeSAXEventKeeperStatusChangeListener(
         const cpo::uno::Reference< css::xml::crypto::sax::XSAXEventKeeperStatusChangeListener >& listener ) override;
 
     /* XDocumentHandler */
-    virtual void SAL_CALL startDocument(  ) override;
-    virtual void SAL_CALL endDocument(  ) override;
-    virtual void SAL_CALL startElement(
+    virtual void startDocument(  ) override;
+    virtual void endDocument(  ) override;
+    virtual void startElement(
         const OUString& aName,
         const cpo::uno::Reference< css::xml::sax::XAttributeList >&
         xAttribs ) override;
-    virtual void SAL_CALL endElement( const OUString& aName ) override;
-    virtual void SAL_CALL characters( const OUString& aChars ) override;
-    virtual void SAL_CALL ignorableWhitespace( const OUString& aWhitespaces ) override;
-    virtual void SAL_CALL processingInstruction(
+    virtual void endElement( const OUString& aName ) override;
+    virtual void characters( const OUString& aChars ) override;
+    virtual void ignorableWhitespace( const OUString& aWhitespaces ) override;
+    virtual void processingInstruction(
         const OUString& aTarget, const OUString& aData ) override;
-    virtual void SAL_CALL setDocumentLocator(
+    virtual void setDocumentLocator(
         const cpo::uno::Reference< css::xml::sax::XLocator >& xLocator ) override;
 
     /* XInitialization */
-    virtual void SAL_CALL initialize(
+    virtual void initialize(
         const cpo::uno::Sequence< cpo::uno::Any >& aArguments ) override;
 
     /* XServiceInfo */
-    virtual OUString SAL_CALL getImplementationName(  ) override;
-    virtual bool SAL_CALL supportsService( const OUString& ServiceName ) override;
-    virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames(  ) override;
+    virtual OUString getImplementationName(  ) override;
+    virtual bool supportsService( const OUString& ServiceName ) override;
+    virtual cpo::uno::Sequence< OUString > getSupportedServiceNames(  ) override;
 };
 
 /// @throws cpo::uno::RuntimeException

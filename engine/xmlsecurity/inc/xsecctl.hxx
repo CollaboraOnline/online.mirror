@@ -377,20 +377,20 @@ public:
     /*
      * XSAXEventKeeperStatusChangeListener
      */
-    virtual void SAL_CALL blockingStatusChanged( bool isBlocking ) override;
-    virtual void SAL_CALL collectionStatusChanged(
+    virtual void blockingStatusChanged( bool isBlocking ) override;
+    virtual void collectionStatusChanged(
         bool isInsideCollectedElement ) override;
-    virtual void SAL_CALL bufferStatusChanged( bool isBufferEmpty ) override;
+    virtual void bufferStatusChanged( bool isBufferEmpty ) override;
 
     /*
      * XSignatureCreationResultListener
      */
-    virtual void SAL_CALL signatureCreated( sal_Int32 securityId, css::xml::crypto::SecurityOperationStatus nResult ) override;
+    virtual void signatureCreated( sal_Int32 securityId, css::xml::crypto::SecurityOperationStatus nResult ) override;
 
     /*
      * XSignatureVerifyResultListener
      */
-    virtual void SAL_CALL signatureVerified( sal_Int32 securityId, css::xml::crypto::SecurityOperationStatus nResult ) override;
+    virtual void signatureVerified( sal_Int32 securityId, css::xml::crypto::SecurityOperationStatus nResult ) override;
 
     /// Writes XML elements inside a single OOXML signature's <Signature> element.
     bool WriteOOXMLSignature(const cpo::uno::Reference<css::embed::XStorage>& xRootStorage, const cpo::uno::Reference<css::xml::sax::XDocumentHandler>& xDocumentHandler);

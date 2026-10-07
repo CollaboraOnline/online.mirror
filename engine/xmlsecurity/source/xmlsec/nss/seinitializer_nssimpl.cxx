@@ -46,7 +46,7 @@ SEInitializer_NssImpl::~SEInitializer_NssImpl()
 }
 
 /* XSEInitializer */
-uno::Reference< css::xml::crypto::XXMLSecurityContext > SAL_CALL
+uno::Reference< css::xml::crypto::XXMLSecurityContext >
     SEInitializer_NssImpl::createSecurityContext( const OUString& )
 {
     CERTCertDBHandle    *pCertHandle = nullptr ;
@@ -79,7 +79,7 @@ uno::Reference< css::xml::crypto::XXMLSecurityContext > SAL_CALL
     }
 }
 
-void SAL_CALL SEInitializer_NssImpl::freeSecurityContext( const uno::Reference< css::xml::crypto::XXMLSecurityContext >& )
+void SEInitializer_NssImpl::freeSecurityContext( const uno::Reference< css::xml::crypto::XXMLSecurityContext >& )
 {
     /*
      * because the security context will free all its content when it
@@ -91,15 +91,15 @@ void SAL_CALL SEInitializer_NssImpl::freeSecurityContext( const uno::Reference< 
 }
 
 /* XServiceInfo */
-OUString SAL_CALL SEInitializer_NssImpl::getImplementationName(  )
+OUString SEInitializer_NssImpl::getImplementationName(  )
 {
     return u"com.sun.star.xml.crypto.SEInitializer"_ustr;
 }
-bool SAL_CALL SEInitializer_NssImpl::supportsService( const OUString& rServiceName )
+bool SEInitializer_NssImpl::supportsService( const OUString& rServiceName )
 {
     return cppu::supportsService( this, rServiceName );
 }
-cpo::uno::Sequence< OUString > SAL_CALL SEInitializer_NssImpl::getSupportedServiceNames(  )
+cpo::uno::Sequence< OUString > SEInitializer_NssImpl::getSupportedServiceNames(  )
 {
     return { u"com.sun.star.xml.crypto.SEInitializer"_ustr };
 }
@@ -110,8 +110,8 @@ class NSSInitializer_NssImpl : public SEInitializer_NssImpl
 {
 public:
     explicit NSSInitializer_NssImpl(const uno::Reference<cpo::uno::XComponentContext>& xContext);
-    OUString SAL_CALL getImplementationName() override;
-    cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override;
+    OUString getImplementationName() override;
+    cpo::uno::Sequence<OUString> getSupportedServiceNames() override;
 };
 
 }
@@ -126,7 +126,7 @@ OUString NSSInitializer_NssImpl::getImplementationName()
     return u"com.sun.star.xml.crypto.NSSInitializer"_ustr;
 }
 
-cpo::uno::Sequence<OUString> SAL_CALL NSSInitializer_NssImpl::getSupportedServiceNames()
+cpo::uno::Sequence<OUString> NSSInitializer_NssImpl::getSupportedServiceNames()
 {
     return { u"com.sun.star.xml.crypto.NSSInitializer"_ustr };
 }
