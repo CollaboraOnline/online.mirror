@@ -45,10 +45,17 @@
 #include <wrl.h>
 #include <wil/com.h>
 
+#include <Poco/AutoPtr.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
+#include <Poco/FileStream.h>
 #include <Poco/JSON/Array.h>
 #include <Poco/MemoryStream.h>
 #include <Poco/Path.h>
+#include <Poco/SAX/InputSource.h>
 
 #include <common/AIHttpTransport.hpp>
 #include <common/Clipboard.hpp>
@@ -302,6 +309,88 @@ void load_next_document()
             openCOOLWindow(nextDocument, DocumentMode::EDIT);
         }
     }
+}
+
+// The strings that CODA-W shows itself, in the user interface language, by context and source
+// text. They come from the coda_*.ts catalogs that CODA-Q uses too, in the Qt Linguist XML format.
+static std::map<std::pair<std::string, std::string>, std::wstring> translations;
+
+// Read the catalog for the user interface language. The catalogs are named with an underscore, as
+// coda_pt_BR.ts, and a region that has no catalog of its own falls back to the one for its
+// language, so de-AT gets coda_de.ts. English is the source language and has no catalog.
+static void loadTranslations()
+{
+    // A LANG environment variable can name a character set too, as in de_DE.UTF-8.
+    std::string language = uiLanguage.substr(0, uiLanguage.find('.'));
+    std::replace(language.begin(), language.end(), '-', '_');
+
+    std::string path;
+    for (const std::string& name : { language, language.substr(0, language.find('_')) })
+    {
+        const std::string candidate = app_installation_path + "translations\\coda_" + name + ".ts";
+        if (Poco::File(candidate).exists())
+        {
+            path = candidate;
+            break;
+        }
+    }
+    if (path.empty())
+        return;
+
+    try
+    {
+        // The parser gets the file as a stream, as it would take a path name for a URI.
+        Poco::FileInputStream stream(path);
+        Poco::XML::InputSource input(stream);
+        Poco::XML::DOMParser parser;
+        Poco::AutoPtr<Poco::XML::Document> document = parser.parse(&input);
+        Poco::AutoPtr<Poco::XML::NodeList> contexts = document->getElementsByTagName("context");
+        for (unsigned long i = 0; i < contexts->length(); ++i)
+        {
+            auto context = static_cast<Poco::XML::Element*>(contexts->item(i));
+            Poco::XML::Element* contextName = context->getChildElement("name");
+            if (!contextName)
+                continue;
+
+            Poco::AutoPtr<Poco::XML::NodeList> messages = context->getElementsByTagName("message");
+            for (unsigned long j = 0; j < messages->length(); ++j)
+            {
+                auto message = static_cast<Poco::XML::Element*>(messages->item(j));
+                // A string with plural forms has a translation for each, and CODA-W has none.
+                if (message->getAttribute("numerus") == "yes")
+                    continue;
+
+                Poco::XML::Element* source = message->getChildElement("source");
+                Poco::XML::Element* translation = message->getChildElement("translation");
+                if (!source || !translation || translation->innerText().empty())
+                    continue;
+
+                // As in a catalog that lrelease compiles for CODA-Q, a translation that is still
+                // marked unfinished is used too, and one for a string that is gone is not.
+                const std::string type = translation->getAttribute("type");
+                if (type == "vanished" || type == "obsolete")
+                    continue;
+
+                translations[{ contextName->innerText(), source->innerText() }] =
+                    Util::string_to_wide_string(translation->innerText());
+            }
+        }
+    }
+    catch (const Poco::Exception& exception)
+    {
+        LOG_ERR("Could not read the translations in '" << path << "': " << exception.displayText());
+    }
+}
+
+// The text of a string that CODA-W shows, in the user interface language, or in English when the
+// catalog has no translation for it. The call has the form that lupdate looks for, with both
+// arguments as string literals, so update-translations finds the string.
+static std::wstring translate(const char* context, const char* source)
+{
+    const auto it = translations.find({ context, source });
+    if (it != translations.end())
+        return it->second;
+    return Util::string_to_wide_string(source);
 }
 
 static void processMessage(DocumentTab& tab, wil::unique_cotaskmem_string& message);
@@ -2980,9 +3069,10 @@ static void showTabContextMenu(HWND hWnd, int tabId, POINT point)
     };
 
     HMENU menu = CreatePopupMenu();
-    AppendMenuW(menu, MF_STRING, CLOSE, L"Close");
-    AppendMenuW(menu, MF_STRING, CLOSE_OTHERS, L"Close Others");
-    AppendMenuW(menu, MF_STRING, MOVE_TO_NEW_WINDOW, L"Move Tab to New Window");
+    AppendMenuW(menu, MF_STRING, CLOSE, translate("CODA-W", "Close").c_str());
+    AppendMenuW(menu, MF_STRING, CLOSE_OTHERS, translate("CODA-W", "Close Others").c_str());
+    AppendMenuW(menu, MF_STRING, MOVE_TO_NEW_WINDOW,
+                translate("CODA-W", "Move Tab to New Window").c_str());
 
     ClientToScreen(hWnd, &point);
     const int command = static_cast<int>(TrackPopupMenu(
@@ -4930,6 +5020,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int showWindowMode)
         loglevel = COOLWSD_LOGLEVEL;
     Log::initialize("CODA", loglevel);
     ProcUtil::setThreadName("main");
+
+    loadTranslations();
 
     recentFiles.load(localAppData + "\\recentFiles.txt", 10);
 

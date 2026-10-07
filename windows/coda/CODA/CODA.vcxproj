@@ -188,6 +188,7 @@
         rem DLL is never removed, only the 21-byte stubs.
         for %%F in ("$(OutDir)..\..\Release\program\*.dll") do if %%~zF EQU 21 ( echo Removing merge stub %%~nxF &amp; del "%%F" )
         xcopy ..\..\..\browser\templates $(OutDir)..\templates\ /s /q /y
+        xcopy ..\..\..\qt\translations\*.ts $(OutDir)translations\ /q /y
       </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
