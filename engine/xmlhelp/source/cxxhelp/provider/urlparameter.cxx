@@ -289,25 +289,25 @@ public:
                             Databases*    pDatatabases,
                             bool isRoot );
 
-    virtual Any SAL_CALL queryInterface( const Type& rType ) override;
-    virtual void SAL_CALL acquire() noexcept override;
-    virtual void SAL_CALL release() noexcept override;
+    virtual Any queryInterface( const Type& rType ) override;
+    virtual void acquire() noexcept override;
+    virtual void release() noexcept override;
 
-    virtual sal_Int32 SAL_CALL readBytes( Sequence< sal_Int8 >& aData,sal_Int32 nBytesToRead ) override;
+    virtual sal_Int32 readBytes( Sequence< sal_Int8 >& aData,sal_Int32 nBytesToRead ) override;
 
-    virtual sal_Int32 SAL_CALL readSomeBytes( Sequence< sal_Int8 >& aData,sal_Int32 nMaxBytesToRead ) override;
+    virtual sal_Int32 readSomeBytes( Sequence< sal_Int8 >& aData,sal_Int32 nMaxBytesToRead ) override;
 
-    virtual void SAL_CALL skipBytes( sal_Int32 nBytesToSkip ) override;
+    virtual void skipBytes( sal_Int32 nBytesToSkip ) override;
 
-    virtual sal_Int32 SAL_CALL available() override;
+    virtual sal_Int32 available() override;
 
-    virtual void SAL_CALL closeInput() override;
+    virtual void closeInput() override;
 
-    virtual void SAL_CALL seek( sal_Int64 location ) override;
+    virtual void seek( sal_Int64 location ) override;
 
-    virtual sal_Int64 SAL_CALL getPosition() override;
+    virtual sal_Int64 getPosition() override;
 
-    virtual sal_Int64 SAL_CALL getLength() override;
+    virtual sal_Int64 getLength() override;
 
     void addToBuffer( const char* buffer,int len );
 
@@ -835,7 +835,7 @@ InputStreamTransformer::InputStreamTransformer( URLParameter* urlParam,
 }
 
 
-Any SAL_CALL InputStreamTransformer::queryInterface( const Type& rType )
+Any InputStreamTransformer::queryInterface( const Type& rType )
 {
     Any aRet = ::cppu::queryInterface( rType,
                                        static_cast< XInputStream* >(this),
@@ -845,19 +845,19 @@ Any SAL_CALL InputStreamTransformer::queryInterface( const Type& rType )
 }
 
 
-void SAL_CALL InputStreamTransformer::acquire() noexcept
+void InputStreamTransformer::acquire() noexcept
 {
     OWeakObject::acquire();
 }
 
 
-void SAL_CALL InputStreamTransformer::release() noexcept
+void InputStreamTransformer::release() noexcept
 {
     OWeakObject::release();
 }
 
 
-sal_Int32 SAL_CALL InputStreamTransformer::readBytes( Sequence< sal_Int8 >& aData,sal_Int32 nBytesToRead )
+sal_Int32 InputStreamTransformer::readBytes( Sequence< sal_Int8 >& aData,sal_Int32 nBytesToRead )
 {
     std::scoped_lock aGuard( m_aMutex );
 
@@ -877,32 +877,32 @@ sal_Int32 SAL_CALL InputStreamTransformer::readBytes( Sequence< sal_Int8 >& aDat
 }
 
 
-sal_Int32 SAL_CALL InputStreamTransformer::readSomeBytes( Sequence< sal_Int8 >& aData,sal_Int32 nMaxBytesToRead )
+sal_Int32 InputStreamTransformer::readSomeBytes( Sequence< sal_Int8 >& aData,sal_Int32 nMaxBytesToRead )
 {
     return readBytes( aData,nMaxBytesToRead );
 }
 
 
-void SAL_CALL InputStreamTransformer::skipBytes( sal_Int32 nBytesToSkip )
+void InputStreamTransformer::skipBytes( sal_Int32 nBytesToSkip )
 {
     std::scoped_lock aGuard( m_aMutex );
     while( nBytesToSkip-- ) ++pos;
 }
 
 
-sal_Int32 SAL_CALL InputStreamTransformer::available()
+sal_Int32 InputStreamTransformer::available()
 {
     std::scoped_lock aGuard( m_aMutex );
     return std::min<sal_Int64>(SAL_MAX_INT32, buffer.getLength() - pos);
 }
 
 
-void SAL_CALL InputStreamTransformer::closeInput()
+void InputStreamTransformer::closeInput()
 {
 }
 
 
-void SAL_CALL InputStreamTransformer::seek( sal_Int64 location )
+void InputStreamTransformer::seek( sal_Int64 location )
 {
     std::scoped_lock aGuard( m_aMutex );
     if( location < 0 )
@@ -915,14 +915,14 @@ void SAL_CALL InputStreamTransformer::seek( sal_Int64 location )
 }
 
 
-sal_Int64 SAL_CALL InputStreamTransformer::getPosition()
+sal_Int64 InputStreamTransformer::getPosition()
 {
     std::scoped_lock aGuard( m_aMutex );
     return sal_Int64( pos );
 }
 
 
-sal_Int64 SAL_CALL InputStreamTransformer::getLength()
+sal_Int64 InputStreamTransformer::getLength()
 {
     std::scoped_lock aGuard( m_aMutex );
 

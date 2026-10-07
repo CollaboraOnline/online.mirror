@@ -49,7 +49,7 @@ ResultSetBase::~ResultSetBase()
 
 // XInterface
 
-void SAL_CALL
+void
 ResultSetBase::acquire()
     noexcept
 {
@@ -57,7 +57,7 @@ ResultSetBase::acquire()
 }
 
 
-void SAL_CALL
+void
 ResultSetBase::release()
     noexcept
 {
@@ -65,7 +65,7 @@ ResultSetBase::release()
 }
 
 
-cpo::uno::Any SAL_CALL
+cpo::uno::Any
 ResultSetBase::queryInterface( const cpo::uno::Type& rType )
 {
     cpo::uno::Any aRet = cppu::queryInterface( rType,
@@ -82,7 +82,7 @@ ResultSetBase::queryInterface( const cpo::uno::Type& rType )
 // XComponent
 
 
-void SAL_CALL
+void
 ResultSetBase::addEventListener(
     const uno::Reference< lang::XEventListener >& Listener )
 {
@@ -91,7 +91,7 @@ ResultSetBase::addEventListener(
 }
 
 
-void SAL_CALL
+void
 ResultSetBase::removeEventListener(
     const uno::Reference< lang::XEventListener >& Listener )
 {
@@ -100,7 +100,7 @@ ResultSetBase::removeEventListener(
 }
 
 
-void SAL_CALL
+void
 ResultSetBase::dispose()
 {
     std::unique_lock aGuard( m_aMutex );
@@ -125,7 +125,7 @@ ResultSetBase::dispose()
 
 //  XResultSet
 
-bool SAL_CALL
+bool
 ResultSetBase::next()
 {
     m_nRow++;
@@ -133,28 +133,28 @@ ResultSetBase::next()
 }
 
 
-bool SAL_CALL
+bool
 ResultSetBase::isBeforeFirst()
 {
     return m_nRow == -1;
 }
 
 
-bool SAL_CALL
+bool
 ResultSetBase::isAfterLast()
 {
     return sal::static_int_cast<sal_uInt32>( m_nRow ) >= m_aItems.size();   // Cannot happen, if m_aFolder.isOpen()
 }
 
 
-bool SAL_CALL
+bool
 ResultSetBase::isFirst()
 {
     return m_nRow == 0;
 }
 
 
-bool SAL_CALL
+bool
 ResultSetBase::isLast()
 {
     if( sal::static_int_cast<sal_uInt32>( m_nRow ) ==  m_aItems.size() - 1 )
@@ -164,21 +164,21 @@ ResultSetBase::isLast()
 }
 
 
-void SAL_CALL
+void
 ResultSetBase::beforeFirst()
 {
     m_nRow = -1;
 }
 
 
-void SAL_CALL
+void
 ResultSetBase::afterLast()
 {
     m_nRow = m_aItems.size();
 }
 
 
-bool SAL_CALL
+bool
 ResultSetBase::first()
 {
     m_nRow = -1;
@@ -186,7 +186,7 @@ ResultSetBase::first()
 }
 
 
-bool SAL_CALL
+bool
 ResultSetBase::last()
 {
     m_nRow = m_aItems.size() - 1;
@@ -194,7 +194,7 @@ ResultSetBase::last()
 }
 
 
-sal_Int32 SAL_CALL
+sal_Int32
 ResultSetBase::getRow()
 {
     // Test, whether behind last row
@@ -205,7 +205,7 @@ ResultSetBase::getRow()
 }
 
 
-bool SAL_CALL ResultSetBase::absolute( sal_Int32 row )
+bool ResultSetBase::absolute( sal_Int32 row )
 {
     if( row >= 0 )
         m_nRow = row - 1;
@@ -221,7 +221,7 @@ bool SAL_CALL ResultSetBase::absolute( sal_Int32 row )
 }
 
 
-bool SAL_CALL
+bool
 ResultSetBase::relative( sal_Int32 row )
 {
     if( isAfterLast() || isBeforeFirst() )
@@ -238,7 +238,7 @@ ResultSetBase::relative( sal_Int32 row )
 }
 
 
-bool SAL_CALL
+bool
 ResultSetBase::previous()
 {
     if( sal::static_int_cast<sal_uInt32>( m_nRow ) > m_aItems.size() )
@@ -249,32 +249,32 @@ ResultSetBase::previous()
 }
 
 
-void SAL_CALL
+void
 ResultSetBase::refreshRow()
 {
 }
 
 
-bool SAL_CALL
+bool
 ResultSetBase::rowUpdated()
 {
     return false;
 }
 
-bool SAL_CALL
+bool
 ResultSetBase::rowInserted()
 {
     return false;
 }
 
-bool SAL_CALL
+bool
 ResultSetBase::rowDeleted()
 {
     return false;
 }
 
 
-uno::Reference< cpo::uno::XInterface > SAL_CALL
+uno::Reference< cpo::uno::XInterface >
 ResultSetBase::getStatement()
 {
     return uno::Reference< cpo::uno::XInterface >();
@@ -283,13 +283,13 @@ ResultSetBase::getStatement()
 
 // XCloseable
 
-void SAL_CALL
+void
 ResultSetBase::close()
 {
 }
 
 
-OUString SAL_CALL
+OUString
 ResultSetBase::queryContentIdentifierString()
 {
     if( 0 <= m_nRow && sal::static_int_cast<sal_uInt32>( m_nRow ) < m_aItems.size() )
@@ -299,7 +299,7 @@ ResultSetBase::queryContentIdentifierString()
 }
 
 
-uno::Reference< ucb::XContentIdentifier > SAL_CALL
+uno::Reference< ucb::XContentIdentifier >
 ResultSetBase::queryContentIdentifier()
 {
     if( 0 <= m_nRow && sal::static_int_cast<sal_uInt32>( m_nRow ) < m_aItems.size() )
@@ -314,7 +314,7 @@ ResultSetBase::queryContentIdentifier()
 }
 
 
-uno::Reference< ucb::XContent > SAL_CALL
+uno::Reference< ucb::XContent >
 ResultSetBase::queryContent()
 {
     if( 0 <= m_nRow && sal::static_int_cast<sal_uInt32>( m_nRow ) < m_aItems.size() )
@@ -336,32 +336,32 @@ public:
     {
     }
 
-    void SAL_CALL acquire()
+    void acquire()
         noexcept override
     {
         OWeakObject::acquire();
     }
 
 
-    void SAL_CALL release()
+    void release()
         noexcept override
     {
         OWeakObject::release();
     }
 
-    cpo::uno::Any SAL_CALL queryInterface( const cpo::uno::Type& rType ) override
+    cpo::uno::Any queryInterface( const cpo::uno::Type& rType ) override
     {
         cpo::uno::Any aRet = cppu::queryInterface( rType,
                                               static_cast< beans::XPropertySetInfo* >(this) );
         return aRet.hasValue() ? aRet : OWeakObject::queryInterface( rType );
     }
 
-    cpo::uno::Sequence< beans::Property > SAL_CALL getProperties() override
+    cpo::uno::Sequence< beans::Property > getProperties() override
     {
         return m_aSeq;
     }
 
-    beans::Property SAL_CALL getPropertyByName( const OUString& aName ) override
+    beans::Property getPropertyByName( const OUString& aName ) override
     {
         auto pProp = std::find_if(std::cbegin(m_aSeq), std::cend(m_aSeq),
             [&aName](const beans::Property& rProp) { return aName == rProp.Name; });
@@ -370,7 +370,7 @@ public:
         throw beans::UnknownPropertyException(aName);
     }
 
-    bool SAL_CALL hasPropertyByName( const OUString& Name ) override
+    bool hasPropertyByName( const OUString& Name ) override
     {
         return std::any_of(std::cbegin(m_aSeq), std::cend(m_aSeq),
             [&Name](const beans::Property& rProp) { return Name == rProp.Name; });
@@ -384,7 +384,7 @@ private:
 }
 
 // XPropertySet
-uno::Reference< beans::XPropertySetInfo > SAL_CALL
+uno::Reference< beans::XPropertySetInfo >
 ResultSetBase::getPropertySetInfo()
 {
     cpo::uno::Sequence< beans::Property > seq
@@ -398,7 +398,7 @@ ResultSetBase::getPropertySetInfo()
 }
 
 
-void SAL_CALL ResultSetBase::setPropertyValue(
+void ResultSetBase::setPropertyValue(
     const OUString& aPropertyName, const cpo::uno::Any& )
 {
     if( aPropertyName == "IsRowCountFinal" ||
@@ -409,7 +409,7 @@ void SAL_CALL ResultSetBase::setPropertyValue(
 }
 
 
-cpo::uno::Any SAL_CALL ResultSetBase::getPropertyValue(
+cpo::uno::Any ResultSetBase::getPropertyValue(
     const OUString& PropertyName )
 {
     if( PropertyName == "IsRowCountFinal" )
@@ -426,7 +426,7 @@ cpo::uno::Any SAL_CALL ResultSetBase::getPropertyValue(
 }
 
 
-void SAL_CALL ResultSetBase::addPropertyChangeListener(
+void ResultSetBase::addPropertyChangeListener(
     const OUString& aPropertyName,
     const uno::Reference< beans::XPropertyChangeListener >& xListener )
 {
@@ -445,7 +445,7 @@ void SAL_CALL ResultSetBase::addPropertyChangeListener(
 }
 
 
-void SAL_CALL ResultSetBase::removePropertyChangeListener(
+void ResultSetBase::removePropertyChangeListener(
     const OUString& aPropertyName,
     const uno::Reference< beans::XPropertyChangeListener >& aListener )
 {
@@ -464,20 +464,20 @@ void SAL_CALL ResultSetBase::removePropertyChangeListener(
 }
 
 
-void SAL_CALL ResultSetBase::addVetoableChangeListener(
+void ResultSetBase::addVetoableChangeListener(
     const OUString&,
     const uno::Reference< beans::XVetoableChangeListener >& )
 {}
 
 
-void SAL_CALL ResultSetBase::removeVetoableChangeListener(
+void ResultSetBase::removeVetoableChangeListener(
     const OUString&,
     const uno::Reference< beans::XVetoableChangeListener >& )
 {}
 
 
 // XResultSetMetaDataSupplier
-uno::Reference< sdbc::XResultSetMetaData > SAL_CALL
+uno::Reference< sdbc::XResultSetMetaData >
 ResultSetBase::getMetaData()
 {
     return new ::ucbhelper::ResultSetMetaData( m_xContext, m_sProperty );

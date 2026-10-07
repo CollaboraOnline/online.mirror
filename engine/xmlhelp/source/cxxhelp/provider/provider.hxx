@@ -49,42 +49,42 @@ inline constexpr OUString MYUCP_CONTENT_TYPE = u"application/vnd.sun.star.xmlhel
         virtual ~ContentProvider() override;
 
         // XServiceInfo
-        virtual OUString SAL_CALL getImplementationName() override;
-        virtual bool SAL_CALL supportsService( const OUString& ServiceName ) override;
-        virtual cpo::uno::Sequence< OUString > SAL_CALL getSupportedServiceNames() override;
+        virtual OUString getImplementationName() override;
+        virtual bool supportsService( const OUString& ServiceName ) override;
+        virtual cpo::uno::Sequence< OUString > getSupportedServiceNames() override;
 
         // XContentProvider
-        virtual cpo::uno::Reference< css::ucb::XContent > SAL_CALL queryContent(
+        virtual cpo::uno::Reference< css::ucb::XContent > queryContent(
                 const cpo::uno::Reference< css::ucb::XContentIdentifier >& Identifier ) override;
 
         // Additional interfaces
 
         // XComponent
 
-        virtual void SAL_CALL
+        virtual void
         dispose(  ) override;
 
-        virtual void SAL_CALL
+        virtual void
         addEventListener( const cpo::uno::Reference< css::lang::XEventListener >& ) override {}
 
-        virtual void SAL_CALL
+        virtual void
         removeEventListener( const cpo::uno::Reference< css::lang::XEventListener >& ) override {}
 
         // XContainerListener ( derive from XEventListener )
 
-        virtual void SAL_CALL
+        virtual void
         disposing( const css::lang::EventObject& /*Source*/ ) override
         {
             m_xContainer.clear();
         }
 
-        virtual void SAL_CALL
+        virtual void
         elementInserted( const css::container::ContainerEvent& ) override {}
 
-        virtual void SAL_CALL
+        virtual void
         elementRemoved( const css::container::ContainerEvent& ) override {}
 
-        virtual void SAL_CALL
+        virtual void
         elementReplaced( const css::container::ContainerEvent& Event ) override;
 
         // Non-interface methods.

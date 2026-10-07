@@ -56,18 +56,18 @@ ContentProvider::~ContentProvider()
 
 // XServiceInfo methods.
 
-OUString SAL_CALL ContentProvider::getImplementationName()
+OUString ContentProvider::getImplementationName()
 {
     return u"CHelpContentProvider"_ustr;
 }
 
-bool SAL_CALL
+bool
 ContentProvider::supportsService(const OUString& ServiceName )
 {
     return cppu::supportsService(this, ServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 ContentProvider::getSupportedServiceNames()
 {
     return { u"com.sun.star.help.XMLHelp"_ustr, u"com.sun.star.ucb.HelpContentProvider"_ustr };
@@ -76,7 +76,7 @@ ContentProvider::getSupportedServiceNames()
 // XContentProvider methods.
 
 // virtual
-uno::Reference< ucb::XContent > SAL_CALL
+uno::Reference< ucb::XContent >
 ContentProvider::queryContent(
         const uno::Reference< ucb::XContentIdentifier >& xCanonicId )
 {
@@ -114,7 +114,7 @@ ContentProvider::queryContent(
     return xContent;
 }
 
-void SAL_CALL
+void
 ContentProvider::dispose()
 {
     if(m_xContainer.is())
@@ -124,7 +124,7 @@ ContentProvider::dispose()
     }
 }
 
-void SAL_CALL
+void
 ContentProvider::elementReplaced(const container::ContainerEvent& Event)
 {
     if(!m_pDatabases)

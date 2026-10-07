@@ -47,30 +47,30 @@ namespace chelp
         virtual ~Content() override;
 
         // XInterface
-        virtual cpo::uno::Any SAL_CALL queryInterface( const cpo::uno::Type & rType ) override;
+        virtual cpo::uno::Any queryInterface( const cpo::uno::Type & rType ) override;
 
         // XTypeProvider
-        virtual cpo::uno::Sequence< sal_Int8 > SAL_CALL getImplementationId() override;
-        virtual cpo::uno::Sequence< cpo::uno::Type > SAL_CALL getTypes() override;
+        virtual cpo::uno::Sequence< sal_Int8 > getImplementationId() override;
+        virtual cpo::uno::Sequence< cpo::uno::Type > getTypes() override;
 
         // XServiceInfo
-        virtual OUString SAL_CALL
+        virtual OUString
         getImplementationName() override;
 
-        virtual cpo::uno::Sequence< OUString > SAL_CALL
+        virtual cpo::uno::Sequence< OUString >
         getSupportedServiceNames() override;
 
         // XContent
-        virtual OUString SAL_CALL
+        virtual OUString
         getContentType() override;
 
         // XCommandProcessor
-        virtual cpo::uno::Any SAL_CALL
+        virtual cpo::uno::Any
         execute( const css::ucb::Command& aCommand,
                  sal_Int32 CommandId,
                  const cpo::uno::Reference< css::ucb::XCommandEnvironment >& Environment ) override;
 
-        virtual void SAL_CALL
+        virtual void
         abort( sal_Int32 CommandId ) override;
 
     private:

@@ -46,18 +46,18 @@ TVFactory::~TVFactory()
 
 // XServiceInfo methods.
 
-OUString SAL_CALL
+OUString
 TVFactory::getImplementationName()
 {
     return u"com.sun.star.help.TreeViewImpl"_ustr;
 }
 
-bool SAL_CALL TVFactory::supportsService( const OUString& ServiceName )
+bool TVFactory::supportsService( const OUString& ServiceName )
 {
     return cppu::supportsService( this, ServiceName );
 }
 
-Sequence< OUString > SAL_CALL
+Sequence< OUString >
 TVFactory::getSupportedServiceNames()
 {
     return { u"com.sun.star.help.TreeView"_ustr, u"com.sun.star.ucb.HiearchyDataSource"_ustr };
@@ -65,7 +65,7 @@ TVFactory::getSupportedServiceNames()
 
 // XMultiServiceFactory
 
-Reference< XInterface > SAL_CALL
+Reference< XInterface >
 TVFactory::createInstance(
     const OUString& aServiceSpecifier )
 {
@@ -77,7 +77,7 @@ TVFactory::createInstance(
     return createInstanceWithArguments( aServiceSpecifier, seq );
 }
 
-Reference< XInterface > SAL_CALL
+Reference< XInterface >
 TVFactory::createInstanceWithArguments(
     const OUString& /*ServiceSpecifier*/,
     const Sequence< Any >& Arguments )
@@ -115,7 +115,7 @@ TVFactory::createInstanceWithArguments(
         return m_xHDS;
 }
 
-Sequence< OUString > SAL_CALL
+Sequence< OUString >
 TVFactory::getAvailableServiceNames( )
 {
     return { u"com.sun.star.ucb.HierarchyDataReadAccess"_ustr };

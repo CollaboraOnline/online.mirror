@@ -68,7 +68,7 @@ Content::~Content()
 }
 
 // virtual
-cpo::uno::Any SAL_CALL Content::queryInterface( const cpo::uno::Type & rType )
+cpo::uno::Any Content::queryInterface( const cpo::uno::Type & rType )
 {
     cpo::uno::Any aRet;
     return aRet.hasValue() ? aRet : ContentImplHelper::queryInterface( rType );
@@ -79,7 +79,7 @@ cpo::uno::Any SAL_CALL Content::queryInterface( const cpo::uno::Type & rType )
 XTYPEPROVIDER_COMMON_IMPL( Content );
 
 // virtual
-cpo::uno::Sequence< cpo::uno::Type > SAL_CALL Content::getTypes()
+cpo::uno::Sequence< cpo::uno::Type > Content::getTypes()
 {
     static cppu::OTypeCollection ourTypeCollection(
                    CPPU_TYPE_REF( lang::XTypeProvider ),
@@ -99,13 +99,13 @@ cpo::uno::Sequence< cpo::uno::Type > SAL_CALL Content::getTypes()
 // XServiceInfo methods.
 
 // virtual
-OUString SAL_CALL Content::getImplementationName()
+OUString Content::getImplementationName()
 {
     return u"CHelpContent"_ustr;
 }
 
 // virtual
-cpo::uno::Sequence< OUString > SAL_CALL Content::getSupportedServiceNames()
+cpo::uno::Sequence< OUString > Content::getSupportedServiceNames()
 {
     return { u"com.sun.star.ucb.CHelpContent"_ustr };
 }
@@ -113,7 +113,7 @@ cpo::uno::Sequence< OUString > SAL_CALL Content::getSupportedServiceNames()
 // XContent methods.
 
 // virtual
-OUString SAL_CALL Content::getContentType()
+OUString Content::getContentType()
 {
     return MYUCP_CONTENT_TYPE;
 }
@@ -121,7 +121,7 @@ OUString SAL_CALL Content::getContentType()
 // XCommandProcessor methods.
 
 //virtual
-void SAL_CALL Content::abort( sal_Int32 /*CommandId*/ )
+void Content::abort( sal_Int32 /*CommandId*/ )
 {
 }
 
@@ -204,7 +204,7 @@ public:
 }
 
 // virtual
-cpo::uno::Any SAL_CALL Content::execute(
+cpo::uno::Any Content::execute(
         const ucb::Command& aCommand,
         sal_Int32,
         const uno::Reference< ucb::XCommandEnvironment >& Environment )

@@ -230,7 +230,7 @@ TVRead::~TVRead()
 
 // XNameAccess
 
-Any SAL_CALL
+Any
 TVRead::getByName( const OUString& aName )
 {
     bool found( true );
@@ -253,13 +253,13 @@ TVRead::getByName( const OUString& aName )
     throw NoSuchElementException();
 }
 
-Sequence< OUString > SAL_CALL
+Sequence< OUString >
 TVRead::getElementNames( )
 {
     return { u"Title"_ustr, u"TargetURL"_ustr, u"Children"_ustr };
 }
 
-bool SAL_CALL
+bool
 TVRead::hasByName( const OUString& aName )
 {
     if( aName == "Title"     ||
@@ -272,7 +272,7 @@ TVRead::hasByName( const OUString& aName )
 
 // XHierarchicalNameAccess
 
-Any SAL_CALL
+Any
 TVRead::getByHierarchicalName( const OUString& aName )
 {
     OUString aRest;
@@ -282,7 +282,7 @@ TVRead::getByHierarchicalName( const OUString& aName )
     return getByName( aName );
 }
 
-bool SAL_CALL
+bool
 TVRead::hasByHierarchicalName( const OUString& aName )
 {
     OUString aRest;
@@ -494,7 +494,7 @@ TVChildTarget::SearchAndInsert(std::unique_ptr<TVDom> p, TVDom* tvDom)
     }
 }
 
-Any SAL_CALL
+Any
 TVChildTarget::getByName( const OUString& aName )
 {
     std::u16string_view num( aName.subView( 2, aName.getLength()-4 ) );
@@ -506,7 +506,7 @@ TVChildTarget::getByName( const OUString& aName )
     return Any( Reference< XInterface >( p ) );
 }
 
-Sequence< OUString > SAL_CALL
+Sequence< OUString >
 TVChildTarget::getElementNames( )
 {
     Sequence< OUString > seq( Elements.size() );
@@ -517,7 +517,7 @@ TVChildTarget::getElementNames( )
     return seq;
 }
 
-bool SAL_CALL
+bool
 TVChildTarget::hasByName( const OUString& aName )
 {
     std::u16string_view num( aName.subView( 2, aName.getLength()-4 ) );
@@ -530,7 +530,7 @@ TVChildTarget::hasByName( const OUString& aName )
 
 // XHierarchicalNameAccess
 
-Any SAL_CALL
+Any
 TVChildTarget::getByHierarchicalName( const OUString& aName )
 {
     sal_Int32 idx;
@@ -549,7 +549,7 @@ TVChildTarget::getByHierarchicalName( const OUString& aName )
         return getByName( aName );
 }
 
-bool SAL_CALL
+bool
 TVChildTarget::hasByHierarchicalName( const OUString& aName )
 {
     sal_Int32 idx;
