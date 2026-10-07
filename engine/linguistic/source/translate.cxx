@@ -45,8 +45,9 @@ OString getErrorMessage(const std::string& rResponseBody)
         boost::property_tree::read_json(aStream, aRoot);
         return OString(aRoot.get<std::string>("message", std::string()));
     }
-    catch (const boost::property_tree::ptree_error&)
+    catch (const boost::property_tree::ptree_error& rException)
     {
+        SAL_WARN("linguistic", "Translate: unexpected error response: " << rException.what());
         return {};
     }
 }

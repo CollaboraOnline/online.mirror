@@ -319,12 +319,12 @@ bool TranslateRanges(SwWrtShell& rWrtSh, const TranslateFunc& rTranslate,
                     }
                     // Parent the dialog to the frame: a parentless dialog has no
                     // notifier in the LOK case, so it would never reach the client.
-                    std::unique_ptr<weld::MessageDialog> xBox(Application::CreateMessageDialog(
+                    std::shared_ptr<weld::MessageDialog> xBox(Application::CreateMessageDialog(
                         rWrtSh.GetView().GetFrameWeld(), VclMessageType::Error,
                         VclButtonsType::Ok, SwResId(STR_SWTRANSLATE_ERROR)));
                     if (!aError.isEmpty())
                         xBox->set_secondary_text(OStringToOUString(aError, RTL_TEXTENCODING_UTF8));
-                    xBox->run();
+                    xBox->runAsync(xBox, [](sal_uInt32) {});
                     bStop = true;
                     break;
                 }
