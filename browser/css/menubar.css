@@ -271,6 +271,10 @@ nav [id^='save'].saved img {
 	border-bottom: 1px solid var(--color-border-darker);
 	padding: var(--spacing-m);
 }
+.main-nav > #document-header {
+	display: flex;
+	align-items: center;
+}
 .main-nav > #document-header > a.document-logo,
 .main-nav > #document-header > a.document-logo:hover,
 .main-nav > #document-header > a.document-logo:focus,
