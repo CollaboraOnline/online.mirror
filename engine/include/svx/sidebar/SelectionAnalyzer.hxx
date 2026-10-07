@@ -50,13 +50,13 @@ public:
     static vcl::EnumContext::Context GetContextForSelection_SD (
         const SdrMarkList& rMarkList,
         const ViewType eViewType);
+    static vcl::EnumContext::Context GetContextForObjectId_SD (
+        const SdrObjKind nObjectId,
+        const ViewType eViewType);
 
 private:
     static vcl::EnumContext::Context GetContextForObjectId_SC (
         const SdrObjKind nObjectId);
-    static vcl::EnumContext::Context GetContextForObjectId_SD (
-        const SdrObjKind nObjectId,
-        const ViewType eViewType);
     static SdrInventor GetInventorTypeFromMark (
         const SdrMarkList& rMarkList);
     static SdrObjKind GetObjectTypeFromMark (

@@ -74,19 +74,53 @@ describe(['tagdesktop'], 'Notebookbar tests', function() {
 
 describe(['tagdesktop'], 'Notebookbar contextual tabs (Impress)', function() {
 
-	beforeEach(function() {
-		helper.setupAndLoadDocument('impress/top_toolbar.odp');
+	function loadDocument(fileName) {
+		helper.setupAndLoadDocument(fileName);
 		desktopHelper.switchUIToNotebookbar();
 		desktopHelper.hideSidebarImpress();
-	});
+	}
+
+	function waitForCore() {
+		cy.getFrameWindow().then(function(win) {
+			return helper.processToIdle(win);
+		});
+	}
+
+	// Select the text object in the center of the slide, edit its text, and
+	// check that the Shape tab is hidden both while it is selected and while
+	// its text is edited.
+	function checkShapeTabHiddenWhileEditingText() {
+		impressHelper.selectTextShapeInTheCenter();
+		waitForCore();
+		cy.cGet('#Shape-tab-label').should('not.be.visible');
+
+		impressHelper.dblclickOnSelectedShape();
+		helper.typeIntoDocument('x');
+		waitForCore();
+		cy.cGet('#Shape-tab-label').should('not.be.visible');
+	}
 
 	it('Shape tab stays available while editing shape text', function() {
-		// Select the text shape in the center of the slide.
+		// The slide has a rectangle in its center.
+		loadDocument('impress/anim-spin.odp');
 		impressHelper.selectTextShapeInTheCenter();
 
 		// Enter text edit inside the shape. The Shape tab must stay offered so
 		// the shape can still be formatted while its text is edited.
 		impressHelper.dblclickOnSelectedShape();
 		cy.cGet('#Shape-tab-label').should('be.visible');
+	});
+
+	it('Shape tab stays hidden while editing text box text', function() {
+		// The slide has a plain text box in its center. Its text sits in the top left corner,
+		// so a click in the center lands on the fill and selects the text box.
+		loadDocument('impress/text_box.fodp');
+		checkShapeTabHiddenWhileEditingText();
+	});
+
+	it('Shape tab stays hidden while editing placeholder text', function() {
+		// The slide has a subtitle placeholder in its center.
+		loadDocument('impress/top_toolbar.odp');
+		checkShapeTabHiddenWhileEditingText();
 	});
 });

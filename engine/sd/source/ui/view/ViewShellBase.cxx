@@ -87,6 +87,7 @@
 #include <View.hxx>
 #include <svx/svdedxv.hxx>
 #include <svx/svdobjkind.hxx>
+#include <svx/sidebar/SelectionAnalyzer.hxx>
 #include <vcl/EnumContext.hxx>
 #include <tools/svborder.hxx>
 #include <o3tl/unreachable.hxx>
@@ -850,19 +851,27 @@ std::vector<OUString> ViewShellBase::GetParentContextNames() const
 {
     std::vector<OUString> aParents;
 
-    // While text inside a shape is edited the primary context is the text
-    // context, which maps to the home tab. Report the shape context too so the
-    // Shape tab stays available. A table carries its own context that already
-    // covers its text, and an OLE object owns the ribbon during in-place edit,
-    // so leave those out.
+    // While text inside an object is edited the primary context is the text
+    // context, which maps to the home tab. Report the context the object has
+    // when it is selected too, so its tab stays available, but only when that
+    // is a shape context. A text box or a placeholder has the text object
+    // context, a table carries its own context that already covers its text,
+    // and an OLE object owns the ribbon during in-place edit, so none of these
+    // report a parent context.
     SdrView* pView = GetDrawView();
     if (pView && pView->IsTextEdit())
     {
         const SdrObject* pObj = pView->GetTextEditObject();
-        if (pObj && pObj->GetObjIdentifier() != SdrObjKind::Table
-            && pObj->GetObjIdentifier() != SdrObjKind::OLE2)
-            aParents.push_back(
-                vcl::EnumContext::GetContextName(vcl::EnumContext::Context::Draw));
+        if (pObj)
+        {
+            const vcl::EnumContext::Context eContext
+                = svx::sidebar::SelectionAnalyzer::GetContextForObjectId_SD(
+                    pObj->GetObjIdentifier(),
+                    svx::sidebar::SelectionAnalyzer::ViewType::Standard);
+            if (eContext == vcl::EnumContext::Context::Draw
+                || eContext == vcl::EnumContext::Context::DrawLine)
+                aParents.push_back(vcl::EnumContext::GetContextName(eContext));
+        }
     }
 
     return aParents;
