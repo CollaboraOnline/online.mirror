@@ -74,7 +74,11 @@ void XMLCALL onStartElement(void* userData, const XML_Char* name, const XML_Char
     auto element = std::make_unique<XmlNode>();
     element->type = XmlNode::Type::Element;
     splitTriplet(name, element->nsHref, element->localName, element->prefix);
+#if XML_MAJOR_VERSION > 2 || (XML_MAJOR_VERSION == 2 && XML_MINOR_VERSION > 8)
+    element->line = static_cast<int>(XML_GetCurrentLineNumber64(context->parser));
+#else
     element->line = static_cast<int>(XML_GetCurrentLineNumber(context->parser));
+#endif
     element->nsDecls = std::move(context->pendingNsDecls);
     context->pendingNsDecls.clear();
 
@@ -252,7 +256,11 @@ XmlDocPtr parseXmlMemory(const std::string& bytes, const std::string& documentNa
     {
         errorMessage = XML_ErrorString(XML_GetErrorCode(parser));
         errorMessage += " (" + documentName + " line "
+#if XML_MAJOR_VERSION > 2 || (XML_MAJOR_VERSION == 2 && XML_MINOR_VERSION > 8)
+                        + std::to_string(XML_GetCurrentLineNumber64(parser)) + ")";
+#else
                         + std::to_string(XML_GetCurrentLineNumber(parser)) + ")";
+#endif
         XML_ParserFree(parser);
         return nullptr;
     }
