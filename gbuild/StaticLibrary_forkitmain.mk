@@ -9,17 +9,17 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
 
-$(eval $(call gb_StaticLibrary_StaticLibrary,forkit))
+$(eval $(call gb_StaticLibrary_StaticLibrary,forkitmain))
 
-$(eval $(call gb_StaticLibrary_set_visibility_default,forkit))
+$(eval $(call gb_StaticLibrary_set_visibility_default,forkitmain))
 
-$(eval $(call gb_StaticLibrary_set_generated_cxx_suffix,forkit,cpp))
+$(eval $(call gb_StaticLibrary_set_generated_cxx_suffix,forkitmain,cpp))
 
-$(eval $(call gb_StaticLibrary_set_generated_cxx_base,forkit,$(online_srcdir)))
+$(eval $(call gb_StaticLibrary_set_generated_cxx_base,forkitmain,$(online_srcdir)))
 
-$(eval $(call gb_StaticLibrary_set_generated_warnings_as_errors,forkit))
+$(eval $(call gb_StaticLibrary_set_generated_warnings_as_errors,forkitmain))
 
-$(eval $(call gb_StaticLibrary_set_include,forkit, \
+$(eval $(call gb_StaticLibrary_set_include,forkitmain, \
     -I$(or $(ONLINE.BUILDDIR),$(realpath $(BUILDDIR)/..)) \
     -I$(online_srcdir) \
     -I$(online_srcdir)/common \
@@ -31,7 +31,7 @@ $(eval $(call gb_StaticLibrary_set_include,forkit, \
     -I$(gb_UnpackedTarball_workdir)/poco/include \
 ))
 
-$(eval $(call gb_StaticLibrary_use_externals,forkit, \
+$(eval $(call gb_StaticLibrary_use_externals,forkitmain, \
     expat \
     libpng \
     openssl_headers \
@@ -39,16 +39,9 @@ $(eval $(call gb_StaticLibrary_use_externals,forkit, \
     zstd \
 ))
 
-# Set in Makefile.am's build-fuzzer-gbuild-libs target.
-$(eval $(call gb_StaticLibrary_add_cxxflags,forkit, \
-    $(ONLINE.FUZZER_CFLAGS) \
-))
-
-$(eval $(call gb_StaticLibrary_add_generated_exception_objects,forkit, \
-    kit/ChildSession \
-    kit/ForKit \
-    kit/Kit \
-    kit/KitWebSocket \
+# kit/forkit-main holds main() and the process-wide globals of the forkit executables.
+$(eval $(call gb_StaticLibrary_add_generated_exception_objects,forkitmain, \
+    kit/forkit-main \
 ))
 
 # vim: set noet sw=4 ts=4:

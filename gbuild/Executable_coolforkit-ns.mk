@@ -28,6 +28,7 @@ $(eval $(call gb_Executable_set_include,coolforkit-ns, \
 
 $(eval $(call gb_Executable_use_static_libraries,coolforkit-ns, \
     forkit \
+    forkitmain \
     kitglobals \
     shared \
     simd \

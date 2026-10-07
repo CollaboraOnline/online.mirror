@@ -578,6 +578,7 @@ EXTRA_DIST = \
              gbuild/Module_gbuild.mk \
              gbuild/StaticLibrary_dummytraceevent.mk \
              gbuild/StaticLibrary_forkit.mk \
+             gbuild/StaticLibrary_forkitmain.mk \
              gbuild/StaticLibrary_globals.mk \
              gbuild/StaticLibrary_kitglobals.mk \
              gbuild/StaticLibrary_shared.mk \
