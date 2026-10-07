@@ -2888,6 +2888,48 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest3, testTdf140061)
     CPPUNIT_ASSERT_EQUAL(1, getPages());
 }
 
+CPPUNIT_TEST_FIXTURE(SwUiWriterTest3, testHTMLPasteElementClassFromStyleSheet)
+{
+    // Given a document with an empty paragraph that has a direct font of its own:
+    createSwDoc();
+    uno::Reference<beans::XPropertySet> xParagraph(getParagraph(1), uno::UNO_QUERY);
+    xParagraph->setPropertyValue(u"CharFontName"_ustr, uno::Any(u"DejaVu Sans"_ustr));
+    xParagraph->setPropertyValue(u"CharHeight"_ustr, uno::Any(float(14)));
+
+    // When pasting HTML in the shape a word processor puts on the clipboard, where the font is only
+    // in a style sheet rule for the element and class:
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->SttEndDoc(/*bStt=*/true);
+    OString const aHtml
+        = "<html><head><style><!--\n"
+          "p.MsoNormal, li.MsoNormal, div.MsoNormal\n"
+          "{margin:0cm; font-size:11.0pt; font-family:\"Calibri\",sans-serif;"
+          " mso-fareast-language:EN-US;}\n"
+          "--></style></head><body><!--StartFragment-->"
+          "<p class=MsoNormal><span lang=SK>first</span></p>"
+          "<p class=MsoNormal><span lang=SK>second</span></p>"
+          "<p class=MsoNormal><span lang=SK>third</span></p>"
+          "<!--EndFragment--></body></html>"_ostr;
+    rtl::Reference<TransferDataContainer> xTransferable(new TransferDataContainer);
+    xTransferable->CopyByteString(SotClipboardFormatId::HTML, aHtml);
+    TransferableDataHelper aHelper(xTransferable);
+    SwTransferable::PasteFormat(*pWrtShell, aHelper, SotClipboardFormatId::HTML);
+
+    // Then make sure every pasted paragraph has the font from the style sheet:
+    const std::u16string_view aTexts[] = { u"first", u"second", u"third" };
+    for (int i = 0; i < 3; ++i)
+    {
+        uno::Reference<text::XTextRange> xRun = getRun(getParagraph(i + 1), 1, OUString(aTexts[i]));
+        // Without the fix in place, this test would have failed with:
+        // - Expected: Calibri;sans-serif
+        // - Actual  : DejaVu Sans
+        // i.e. the style sheet rule was dropped when pasting into an existing document.
+        CPPUNIT_ASSERT_EQUAL(u"Calibri;sans-serif"_ustr,
+                             getProperty<OUString>(xRun, u"CharFontName"_ustr));
+        CPPUNIT_ASSERT_EQUAL(float(11), getProperty<float>(xRun, u"CharHeight"_ustr));
+    }
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -776,7 +776,8 @@ private:
     bool ParseStyleOptions( const OUString &rStyle, const OUString &rId,
                             const OUString &rClass, SfxItemSet &rItemSet,
                             SvxCSS1PropertyInfo &rPropInfo,
-                            const OUString *pLang=nullptr, const OUString *pDir=nullptr );
+                            const OUString *pLang=nullptr, const OUString *pDir=nullptr,
+                            std::u16string_view rElement = {} );
 
     // Inserting Controls and Forms (htmlform.cxx)
 

@@ -3967,16 +3967,19 @@ void SwHTMLParser::NewPara()
                                              SwPoolFormatId::COLL_TEXT, aClass )
                      : new HTMLAttrContext( HtmlTokenId::PARABREAK_ON ));
 
-    // parse styles (Don't consider class. This is only possible as long as none of
-    // the CSS1 properties of the class must be formatted hard!!!)
-    if (HasStyleOptions(aStyle, aId, {}, &aLang, &aDir))
+    // parse styles. When inserting, the receiving document's styles stay unchanged, so the class
+    // rules are hard formatting instead of a paragraph style.
+    const OUString aHardClass = IsNewDoc() ? OUString() : aClass;
+    if (HasStyleOptions(aStyle, aId, aHardClass, &aLang, &aDir))
     {
         SfxItemSet aItemSet( m_xDoc->GetAttrPool(), m_pCSS1Parser->GetWhichMap() );
         SvxCSS1PropertyInfo aPropInfo;
 
-        if (ParseStyleOptions(aStyle, aId, OUString(), aItemSet, aPropInfo, &aLang, &aDir))
+        if (ParseStyleOptions(aStyle, aId, aHardClass, aItemSet, aPropInfo, &aLang, &aDir,
+                              u"" OOO_STRING_SVTOOLS_HTML_parabreak))
         {
-            OSL_ENSURE( aClass.isEmpty() || !m_pCSS1Parser->GetClass( aClass ),
+            OSL_ENSURE( !aHardClass.isEmpty() || aClass.isEmpty() ||
+                        !m_pCSS1Parser->GetClass( aClass ),
                     "Class is not considered" );
             DoPositioning( aItemSet, aPropInfo, xCntxt.get() );
             InsertAttrs( aItemSet, aPropInfo, xCntxt.get() );
