@@ -254,6 +254,7 @@
 	const CALLS = [
 		'tabActivated',
 		'tabCloseRequested',
+		'tabContextMenuRequested',
 		'newTabRequested',
 		'tabReordered',
 		'tabDragStarted',

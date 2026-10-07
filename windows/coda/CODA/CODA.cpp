@@ -7,7 +7,9 @@
 #include <config.h>
 
 #include <algorithm>
+#include <atomic>
 #include <cctype>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -102,8 +104,9 @@ struct FilenameAndUri
 struct DocumentTab
 {
     int tabId = 0;
-    // The window this document is shown in.
-    HWND hWnd = 0;
+    // The window this document is shown in. A document can move to another window, and the
+    // thread that forwards the engine's messages to the page reads this too.
+    std::atomic<HWND> hWnd{ nullptr };
     // The presenter console this document opened, while it is presenting.
     HWND hConsoleWnd = 0;
     // For a presenter console, the document that opened it.
@@ -132,6 +135,9 @@ struct DocumentTab
 struct WindowState
 {
     HWND hWnd = 0;
+    // The window shows documents as tabs, rather than being the welcome slideshow, the starter
+    // backstage or a presenter console.
+    bool isTabbed = false;
     std::vector<int> tabIds;
     int activeTabId = 0;
     // The tab strip. It is created with the window and shown at two documents.
@@ -155,8 +161,9 @@ struct WindowState
 static std::map<int, DocumentTab> documentTabs;
 static std::map<HWND, WindowState> windows;
 
-// The window that shows documents as tabs. There is one, created with the first
-// document and gone once its last tab closes.
+// The window that shows documents as tabs and that a newly opened document goes to. There can
+// be several such windows once a tab has been moved out into a window of its own, and this is the
+// one that was active last.
 static HWND tabbedWindow = 0;
 
 static DocumentTab* findTab(int tabId)
@@ -229,6 +236,9 @@ static const int CODA_WM_CLOSETAB = WM_APP + 5;
 // Brings the next document of the window to the front, or the previous one when the wParam is -1
 // rather than 1. Posted for the same reason the close above is.
 static const int CODA_WM_ACTIVATEADJACENTTAB = WM_APP + 6;
+// Pops up the menu for the tab named in the wParam, at the point of the window's client area in
+// the lParam. Posted, so the menu's modal loop does not run inside a callback of the strip.
+static const int CODA_WM_SHOWTABMENU = WM_APP + 7;
 
 // One file pick the engine asked for, posted as CODA_WM_SHOWFILEPICKER to the hidden owner
 // window; the wide strings own the dialog's title and filter text.
@@ -299,6 +309,8 @@ static void processMessage(DocumentTab& tab, wil::unique_cotaskmem_string& messa
 static void closeTab(WindowState& window, int tabId);
 
 static void activateAdjacentTab(WindowState& window, int direction);
+
+static void showTabContextMenu(HWND hWnd, int tabId, POINT point);
 
 static void layoutTabs(WindowState& window);
 
@@ -1971,9 +1983,20 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                     window->stripController = nullptr;
                 }
                 window->stripWebView = nullptr;
-                if (tabbedWindow == hWnd)
-                    tabbedWindow = 0;
                 windows.erase(hWnd);
+                // New documents go to another tabbed window, if there is one left.
+                if (tabbedWindow == hWnd)
+                {
+                    tabbedWindow = 0;
+                    for (const auto& i : windows)
+                    {
+                        if (i.second.isTabbed)
+                        {
+                            tabbedWindow = i.first;
+                            break;
+                        }
+                    }
+                }
             }
             break;
         }
@@ -2007,13 +2030,16 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
         case CODA_WM_CLOSETAB:
         {
-            WindowState* window = findWindow(hWnd);
+            // The document can have moved to another window since the close was posted.
+            DocumentTab* tab = findTab((int)wParam);
+            WindowState* window = tab ? findWindow(tab->hWnd) : nullptr;
             if (!window)
                 break;
+            const HWND tabWindow = window->hWnd;
             closeTab(*window, (int)wParam);
             // The window is what is left of the last document, so it goes too.
             if (window->tabIds.empty())
-                DestroyWindow(hWnd);
+                DestroyWindow(tabWindow);
             break;
         }
 
@@ -2023,6 +2049,11 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 activateAdjacentTab(*window, (int)wParam);
             break;
         }
+
+        case CODA_WM_SHOWTABMENU:
+            showTabContextMenu(hWnd, (int)wParam,
+                               { (short)LOWORD(lParam), (short)HIWORD(lParam) });
+            break;
 
         case CODA_WM_LOADNEXTDOCUMENT:
             if (filenamesAndUrisToOpen.size() > 0)
@@ -2065,8 +2096,14 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             if (LOWORD(wParam) == WA_INACTIVE)
                 UnregisterHotKey(hWnd, HOTKEY_ID_DEVTOOLS);
             else
+            {
                 RegisterHotKey(hWnd, HOTKEY_ID_DEVTOOLS,
                                MOD_CONTROL | MOD_SHIFT | MOD_NOREPEAT, 'I');
+                // The tabbed window the user worked in last takes the next document opened.
+                const WindowState* window = findWindow(hWnd);
+                if (window && window->isTabbed)
+                    tabbedWindow = hWnd;
+            }
             break;
 
         case WM_HOTKEY:
@@ -2804,6 +2841,8 @@ static void activateTab(WindowState& window, int tabId)
     pushTabsToStrip(window);
 }
 
+static void removeTabFromWindow(WindowState& window, int tabId);
+
 static void closeTab(WindowState& window, int tabId)
 {
     DocumentTab* tab = findTab(tabId);
@@ -2860,6 +2899,15 @@ static void closeTab(WindowState& window, int tabId)
     }
     tab->webView = nullptr;
 
+    documentTabs.erase(tabId);
+
+    removeTabFromWindow(window, tabId);
+}
+
+// Take a document out of the tab order of its window. If it was the one on show, the one that
+// moves up into its place, or the last one, comes to the front instead.
+static void removeTabFromWindow(WindowState& window, int tabId)
+{
     const auto position = std::find(window.tabIds.begin(), window.tabIds.end(), tabId);
     size_t index = 0;
     if (position != window.tabIds.end())
@@ -2867,7 +2915,6 @@ static void closeTab(WindowState& window, int tabId)
         index = static_cast<size_t>(std::distance(window.tabIds.begin(), position));
         window.tabIds.erase(position);
     }
-    documentTabs.erase(tabId);
 
     if (window.tabIds.empty())
     {
@@ -2875,7 +2922,6 @@ static void closeTab(WindowState& window, int tabId)
         return;
     }
 
-    // The document that moved up into the closed one's place, or the last one.
     if (window.activeTabId == tabId)
     {
         activateTab(window, window.tabIds[std::min(index, window.tabIds.size() - 1)]);
@@ -2918,15 +2964,65 @@ static void activateAdjacentTab(WindowState& window, int direction)
     activateTab(window, window.tabIds[((index + direction) % count + count) % count]);
 }
 
+static void moveTabToNewWindow(HWND hWnd, int tabId);
+
+// The menu a right click on a tab brings up.
+static void showTabContextMenu(HWND hWnd, int tabId, POINT point)
+{
+    if (!findWindow(hWnd) || !findTab(tabId))
+        return;
+
+    enum
+    {
+        CLOSE = 1,
+        CLOSE_OTHERS,
+        MOVE_TO_NEW_WINDOW
+    };
+
+    HMENU menu = CreatePopupMenu();
+    AppendMenuW(menu, MF_STRING, CLOSE, L"Close");
+    AppendMenuW(menu, MF_STRING, CLOSE_OTHERS, L"Close Others");
+    AppendMenuW(menu, MF_STRING, MOVE_TO_NEW_WINDOW, L"Move Tab to New Window");
+
+    ClientToScreen(hWnd, &point);
+    const int command = static_cast<int>(TrackPopupMenu(
+        menu, TPM_RETURNCMD | TPM_RIGHTBUTTON, point.x, point.y, 0, hWnd, nullptr));
+    DestroyMenu(menu);
+
+    // The menu runs a message loop of its own, which can have taken the window or the tab away.
+    WindowState* window = findWindow(hWnd);
+    if (!window || !findTab(tabId))
+        return;
+
+    // Each close is posted, as from a tab's close button, so the window goes with its last
+    // document.
+    if (command == CLOSE)
+    {
+        PostMessageW(hWnd, CODA_WM_CLOSETAB, (WPARAM)tabId, 0);
+    }
+    else if (command == CLOSE_OTHERS)
+    {
+        for (int otherId : window->tabIds)
+        {
+            if (otherId != tabId)
+                PostMessageW(hWnd, CODA_WM_CLOSETAB, (WPARAM)otherId, 0);
+        }
+    }
+    else if (command == MOVE_TO_NEW_WINDOW)
+    {
+        moveTabToNewWindow(hWnd, tabId);
+    }
+}
+
 // Ctrl+Tab and Ctrl+Shift+Tab move between the documents of a window. The app takes those keys
 // rather than leaving them to the page, because a document knows nothing about the other tabs.
-static void installTabSwitchAccelerator(ICoreWebView2Controller* controller, HWND hWnd)
+static void installTabSwitchAccelerator(ICoreWebView2Controller* controller)
 {
     EventRegistrationToken token;
     controller->add_AcceleratorKeyPressed(
         Microsoft::WRL::Callback<ICoreWebView2AcceleratorKeyPressedEventHandler>(
-            [hWnd](ICoreWebView2Controller* sender,
-                   ICoreWebView2AcceleratorKeyPressedEventArgs* args) -> HRESULT
+            [](ICoreWebView2Controller* sender,
+               ICoreWebView2AcceleratorKeyPressedEventArgs* args) -> HRESULT
             {
                 COREWEBVIEW2_KEY_EVENT_KIND kind;
                 UINT key;
@@ -2939,6 +3035,11 @@ static void installTabSwitchAccelerator(ICoreWebView2Controller* controller, HWN
                     return S_OK;
 
                 if (key != VK_TAB || !(GetKeyState(VK_CONTROL) & 0x8000))
+                    return S_OK;
+
+                // The window the WebView2 is in now, as a document can move to another one.
+                HWND hWnd;
+                if (FAILED(sender->get_ParentWindow(&hWnd)))
                     return S_OK;
 
                 const WindowState* window = findWindow(hWnd);
@@ -2997,6 +3098,19 @@ static void processStripMessage(WindowState& window, const std::string& message)
     {
         PostMessageW(window.hWnd, CODA_WM_CLOSETAB, (WPARAM)args->getElement<int>(0), 0);
     }
+    else if (call == "tabContextMenuRequested" && argCount >= 3)
+    {
+        // The page gives the click in its own CSS pixels from the top left of the strip, which is
+        // that of the window's client area. The strip does not zoom, so the window's DPI is all
+        // that tells the two units apart.
+        const UINT dpi = GetDpiForWindow(window.hWnd);
+        const int x = MulDiv(static_cast<int>(std::lround(args->getElement<double>(1))), dpi,
+                             USER_DEFAULT_SCREEN_DPI);
+        const int y = MulDiv(static_cast<int>(std::lround(args->getElement<double>(2))), dpi,
+                             USER_DEFAULT_SCREEN_DPI);
+        PostMessageW(window.hWnd, CODA_WM_SHOWTABMENU, (WPARAM)args->getElement<int>(0),
+                     MAKELPARAM(x, y));
+    }
     else if (call == "tabReordered" && argCount >= 2)
     {
         reorderTab(window, args->getElement<int>(0), args->getElement<int>(1));
@@ -3012,8 +3126,9 @@ static void processStripMessage(WindowState& window, const std::string& message)
     else if (call == "tabDragStarted" || call == "tabDragEnded" || call == "targetDragOver" ||
              call == "tabAdoptFromOtherWindow")
     {
-        // Dragging a tab from one window to another. There is a single window
-        // here, and a drag that stays inside the strip arrives as tabReordered.
+        // Dragging a tab from one window to another, which CODA-W does not do. A drag that stays
+        // inside the strip arrives as tabReordered, and the context menu moves a tab out into a
+        // window of its own.
     }
     else
     {
@@ -3086,7 +3201,7 @@ static void createTabStrip(WindowState& window)
                                 .Get(),
                             &token);
 
-                        installTabSwitchAccelerator(controller, hWnd);
+                        installTabSwitchAccelerator(controller);
 
                         controller->put_IsVisible(FALSE);
                         controller->put_Bounds(stripBounds(*window));
@@ -3174,7 +3289,11 @@ static void createDocumentView(int tabId)
                         if (settings4)
                             settings4->put_AreBrowserAcceleratorKeysEnabled(FALSE);
 
-                        installTabSwitchAccelerator(controller, data->hWnd);
+                        // The document can have moved to another window while its WebView2 was
+                        // being made.
+                        controller->put_ParentWindow(data->hWnd);
+
+                        installTabSwitchAccelerator(controller);
 
                         // Fit the WebView to the part of the window below the tab strip. It stays
                         // hidden until its page has something styled to show, so what fills the
@@ -3477,25 +3596,55 @@ static void defaultWindowSize(int& width, int& height)
     }
 }
 
-// The window that shows documents as tabs. There is one, made with the first
-// document and gone once its last tab closes.
-static WindowState& getOrCreateTabbedWindow()
+// A new window that shows documents as tabs. It goes once its last tab closes.
+static WindowState& createTabbedWindow()
 {
-    WindowState* existing = findWindow(tabbedWindow);
-    if (existing)
-        return *existing;
-
     int width, height;
     defaultWindowSize(width, height);
 
     WindowState& window = createAppWindow(Util::string_to_wide_string(APP_NAME),
                                           WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,
                                           width, height);
+    window.isTabbed = true;
     tabbedWindow = window.hWnd;
 
     createTabStrip(window);
 
     return window;
+}
+
+// The tabbed window that a newly opened document goes to, made with the first document.
+static WindowState& getOrCreateTabbedWindow()
+{
+    WindowState* existing = findWindow(tabbedWindow);
+    if (existing)
+        return *existing;
+
+    return createTabbedWindow();
+}
+
+// Take a document out of its window, and show it in a new tabbed window of its own. The WebView2
+// moves with it, so the document stays loaded as it is.
+static void moveTabToNewWindow(HWND hWnd, int tabId)
+{
+    WindowState* source = findWindow(hWnd);
+    DocumentTab* tab = findTab(tabId);
+    if (!source || !tab || tab->hWnd != hWnd || source->tabIds.size() < 2)
+        return;
+
+    WindowState& target = createTabbedWindow();
+
+    removeTabFromWindow(*source, tabId);
+
+    tab->hWnd = target.hWnd;
+    target.tabIds.push_back(tabId);
+    if (tab->webViewController)
+    {
+        tab->webViewController->put_ParentWindow(target.hWnd);
+        tab->webViewController->put_Bounds(documentArea(target));
+    }
+
+    activateTab(target, tabId);
 }
 
 // The window the welcome slideshow plays in. It is displayed without
