@@ -139,6 +139,20 @@ button:not(.ui-corner-all):not(.button):not(.button-primary):not(.unobutton):not
 	grid-column: 5;
 }
 
+[data-userinterfacemode='classic'] .main-nav > #shareAsContainer #shareas {
+	height: var(--btn-size-s);
+	border-color: var(--color-btn-border);
+}
+
+[data-userinterfacemode='classic'] .main-nav > #shareAsContainer #shareas img {
+	display: none;
+}
+
+[data-userinterfacemode='classic'] .main-nav > #shareAsContainer #shareas .unobutton {
+	height: 100%;
+	padding-block: 0;
+}
+
 [data-userinterfacemode='classic'] .main-nav > #closebuttonwrapperseparator {
 	grid-row: 1;
 	grid-column: 6;

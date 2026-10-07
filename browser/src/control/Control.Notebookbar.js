@@ -139,6 +139,8 @@ window.L.Control.Notebookbar = window.L.Control.extend({
 			this.floatingNavIcon.classList.remove('hasnotebookbar');
 		$('.main-nav #document-header').remove();
 		this.clearNotebookbar();
+		$('.main-nav > #shareas').remove();
+		$('.notebookbar-options-section').remove();
 		this.setInitialized(false);
 		$(this.container).remove();
 		this.container = null;

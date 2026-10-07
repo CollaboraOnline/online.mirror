@@ -1564,6 +1564,7 @@ class UIManager extends window.L.Control {
 		}
 
 		window.prefs.set('compactMode', uiMode.mode === 'classic');
+		this.permissionViewMode?.updateShareButton();
 		this.initializeLateComponents();
 		this.insertCustomButtons();
 

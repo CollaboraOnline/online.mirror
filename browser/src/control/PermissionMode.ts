@@ -147,25 +147,29 @@ class PermissionViewMode extends JSDialogComponent {
 			this.builder?.build(this.viewModeDropdown, data, false);
 		}
 
-		if (this.shareAsContainer) {
-			const data = [
-				{
-					type: 'customtoolitem',
-					id: 'shareas',
-					text: _('Share'),
-					command: 'shareas',
-					inlineLabel: true,
-					accessibility: {
-						focusBack: false,
-						combination: 'ZS',
-						de: null as any,
-					},
-					tabIndex: 0,
-					visible: false,
+		this._buildShareButton();
+	}
+
+	private _buildShareButton(): void {
+		if (!this.shareAsContainer) return;
+
+		const data = [
+			{
+				type: 'customtoolitem',
+				id: 'shareas',
+				text: _('Share'),
+				command: 'shareas',
+				inlineLabel: true,
+				accessibility: {
+					focusBack: false,
+					combination: 'ZS',
+					de: null as any,
 				},
-			];
-			this.notebookbarBuilder?.build(this.shareAsContainer, data, false);
-		}
+				tabIndex: 0,
+				visible: false,
+			},
+		];
+		this.notebookbarBuilder?.build(this.shareAsContainer, data, false);
 	}
 
 	onJSDialogEvent(
@@ -199,6 +203,12 @@ class PermissionViewMode extends JSDialogComponent {
 		}
 
 		this.map.setPermission('readonly');
+	}
+
+	private _isStrictReadonly(): boolean {
+		const isEditMode = this.map.isEditMode ? this.map.isEditMode() : false;
+		const userCanWrite = this.map['wopi'] && this.map['wopi'].UserCanWrite;
+		return !isEditMode && app.file.permission === 'readonly' && !userCanWrite;
 	}
 
 	updateReadonlyIndicator(): void {
@@ -253,11 +263,25 @@ class PermissionViewMode extends JSDialogComponent {
 			}
 		}
 
-		if (this.map && (this.map.wopi as any).EnableShare) {
+		this.updateShareButton(showReadonly);
+	}
+
+	updateShareButton(showReadonly: boolean = this._isStrictReadonly()): void {
+		if (!this.map._docLoaded) return;
+
+		if ((this.map.wopi as any).EnableShare) {
+			const isCompact = this.map.uiManager.getCurrentMode() === 'classic';
+			if (
+				isCompact &&
+				this.shareAsContainer &&
+				!this.shareAsContainer.querySelector('#shareas')
+			)
+				this._buildShareButton();
+
 			if (this.builder && this.viewModeContainer) {
 				this.notebookbarBuilder.executeAction(this.shareAsContainer, {
 					control_id: 'shareas',
-					action_type: showReadonly ? 'show' : 'hide',
+					action_type: showReadonly || isCompact ? 'show' : 'hide',
 				} as ActionData);
 			}
 		}
