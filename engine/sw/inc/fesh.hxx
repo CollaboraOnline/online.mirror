@@ -448,6 +448,10 @@ public:
      The @return value is the applied size. */
     Size RequestObjectResize( const SwRect &rRect, const cpo::uno::Reference < css::embed::XEmbeddedObject >& );
 
+    /// Returns the size that the layout takes a relative width and a relative height in rSize of
+    /// the selected frame as percentages of, or an empty size when no frame is selected.
+    Size GetFlyPercentReference(const SwFormatFrameSize& rSize) const;
+
     /// The layout has been changed, so the active object has to be moved after that
     virtual void MoveObjectIfActive( svt::EmbeddedObjectRef& xObj, const Point& rOffset );
 

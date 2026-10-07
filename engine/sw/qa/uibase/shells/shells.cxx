@@ -9,6 +9,8 @@
 
 #include <swmodeltestbase.hxx>
 
+#include <cmath>
+
 #include <com/sun/star/frame/Desktop.hpp>
 #include <com/sun/star/frame/XStorable.hpp>
 #include <com/sun/star/packages/zip/ZipFileAccess.hpp>
@@ -38,6 +40,7 @@
 #include <IDocumentRedlineAccess.hxx>
 #include <cmdid.h>
 #include <fmtanchr.hxx>
+#include <fmtfsize.hxx>
 #include <view.hxx>
 #include <wrtsh.hxx>
 #include <IDocumentDrawModelAccess.hxx>
@@ -1851,6 +1854,61 @@ CPPUNIT_TEST_FIXTURE(SwUibaseShellsTest, testUpdateSelectedField)
 
     // Check that the selected field has changed:
     CPPUNIT_ASSERT(aTimeFieldAfter != aTimeFieldBefore);
+}
+
+CPPUNIT_TEST_FIXTURE(SwUibaseShellsTest, testSidebarWidthOfRelativeFrame)
+{
+    // Given a frame that is 50% of the paragraph area wide:
+    createSwDoc("relative-frame.fodt");
+    SwDocShell* pDocShell = getSwDocShell();
+    SwWrtShell* pWrtShell = pDocShell->GetWrtShell();
+    SwRect aPagePrintRect = pWrtShell->GetAnyCurRect(CurRectType::PagePrt);
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    pDocShell->GetView()->SelectShell();
+    SwRect aOldRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+
+    // When the sidebar sets its width to 30% of the paragraph area:
+    const auto nWidth = static_cast<tools::Long>(std::round(aPagePrintRect.Width() * 0.3));
+    SfxUInt32Item aWidthItem(SID_ATTR_TRANSFORM_WIDTH, nWidth);
+    SfxUInt32Item aHeightItem(SID_ATTR_TRANSFORM_HEIGHT, aOldRect.Height());
+    pDocShell->GetView()->GetViewFrame().GetDispatcher()->ExecuteList(
+        SID_ATTR_TRANSFORM, SfxCallMode::SYNCHRON, { &aWidthItem, &aHeightItem });
+
+    // Then the frame has the new width:
+    calcLayout();
+    SwRect aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    // Without the accompanying fix in place, this test would have failed, because the frame kept
+    // the width that its old percentage gave it.
+    CPPUNIT_ASSERT_EQUAL(nWidth, aNewRect.Width());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUibaseShellsTest, testSidebarWidthOfRelativeFrameInFrame)
+{
+    // Given a frame that is 50% of the 4 inch frame it is anchored to wide:
+    createSwDoc("relative-frame-in-frame.fodt");
+    SwDocShell* pDocShell = getSwDocShell();
+    SwWrtShell* pWrtShell = pDocShell->GetWrtShell();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame2"_ustr), FLYCNTTYPE_FRM));
+    CPPUNIT_ASSERT_EQUAL(RndStdIds::FLY_AT_FLY,
+                         pWrtShell->GetFlyFrameFormat()->GetAnchor().GetAnchorId());
+    pDocShell->GetView()->SelectShell();
+    SwRect aOldRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(2880), aOldRect.Width());
+
+    // When the sidebar sets its width to 3 inches:
+    SfxUInt32Item aWidthItem(SID_ATTR_TRANSFORM_WIDTH, 4320);
+    SfxUInt32Item aHeightItem(SID_ATTR_TRANSFORM_HEIGHT, aOldRect.Height());
+    pDocShell->GetView()->GetViewFrame().GetDispatcher()->ExecuteList(
+        SID_ATTR_TRANSFORM, SfxCallMode::SYNCHRON, { &aWidthItem, &aHeightItem });
+
+    // Then the frame has the new width, as a percentage of the frame it is anchored to:
+    calcLayout();
+    SwRect aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    // Without the accompanying fix in place, this test would have failed with:
+    // - Expected: 4320
+    // - Actual  : 2880
+    // i.e. the frame kept the width that its old percentage gave it.
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(4320), aNewRect.Width());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

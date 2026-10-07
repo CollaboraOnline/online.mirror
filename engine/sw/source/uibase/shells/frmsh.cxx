@@ -72,6 +72,7 @@
 #include <docsh.hxx>
 #include <svx/drawitem.hxx>
 #include <svx/drawstyleutils.hxx>
+#include <algorithm>
 #include <memory>
 
 #define ShellClass_SwFrameShell
@@ -122,6 +123,35 @@ void SwFrameShell::ExecField(const SfxRequest& rReq)
             rSh.InsertPostIt(aFieldMgr, rReq);
             break;
     }
+}
+
+// The layout sizes a frame from its percentage when it has one, so a changed width or height also
+// updates that percentage, measured against the same reference area as the layout uses. A
+// percentage synced to the other side by the size ratio follows the new size as it is.
+static void lcl_UpdateSizePercent(SwWrtShell& rSh, SwFlyFrameAttrMgr& rMgr, const Size& rOldSize)
+{
+    SwFormatFrameSize aFrameSize(rMgr.GetFrameSize());
+    const bool bRelativeWidth = aFrameSize.GetWidthPercent()
+                                && aFrameSize.GetWidthPercent() != SwFormatFrameSize::SYNCED
+                                && rOldSize.Width() != aFrameSize.GetWidth();
+    const bool bRelativeHeight = aFrameSize.GetHeightPercent()
+                                 && aFrameSize.GetHeightPercent() != SwFormatFrameSize::SYNCED
+                                 && rOldSize.Height() != aFrameSize.GetHeight();
+    if (!bRelativeWidth && !bRelativeHeight)
+        return;
+
+    const Size aPercentReference = rSh.GetFlyPercentReference(aFrameSize);
+    if (bRelativeWidth && aPercentReference.Width() > 0)
+    {
+        const double fPercent = aFrameSize.GetWidth() * 100.0 / aPercentReference.Width() + 0.5;
+        aFrameSize.SetWidthPercent(sal_uInt8(std::clamp(fPercent, 1.0, 254.0)));
+    }
+    if (bRelativeHeight && aPercentReference.Height() > 0)
+    {
+        const double fPercent = aFrameSize.GetHeight() * 100.0 / aPercentReference.Height() + 0.5;
+        aFrameSize.SetHeightPercent(sal_uInt8(std::clamp(fPercent, 1.0, 254.0)));
+    }
+    rMgr.GetAttrSet().Put(aFrameSize);
 }
 
 void SwFrameShell::Execute(SfxRequest &rReq)
@@ -426,7 +456,9 @@ void SwFrameShell::Execute(SfxRequest &rReq)
             }
             if ( bApplyNewSize )
             {
+                const Size aOldSize = aMgr.GetSize();
                 aMgr.SetSize( aNewSize );
+                lcl_UpdateSizePercent(rSh, aMgr, aOldSize);
             }
             if (!bApplyNewPos && !bApplyNewSize)
             {

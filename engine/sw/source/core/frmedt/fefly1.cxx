@@ -1422,6 +1422,12 @@ void SwFEShell::SetObjRect( const SwRect& rRect )
     }
 }
 
+Size SwFEShell::GetFlyPercentReference(const SwFormatFrameSize& rSize) const
+{
+    const SwFlyFrame* pFly = GetSelectedFlyFrame();
+    return pFly ? pFly->GetPercentReference(rSize) : Size();
+}
+
 Size SwFEShell::RequestObjectResize( const SwRect &rRect, const uno::Reference < embed::XEmbeddedObject >& xObj )
 {
     Size aResult;
