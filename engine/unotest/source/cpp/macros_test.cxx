@@ -113,11 +113,11 @@ public:
     {
     }
 
-    virtual void SAL_CALL disposing(lang::EventObject const&) override
+    virtual void disposing(lang::EventObject const&) override
     {
         CPPUNIT_ASSERT(m_Received);
     }
-    virtual void SAL_CALL statusChanged(frame::FeatureStateEvent const& rEvent) override
+    virtual void statusChanged(frame::FeatureStateEvent const& rEvent) override
     {
         if (!m_Received)
         {

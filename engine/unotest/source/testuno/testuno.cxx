@@ -743,84 +743,84 @@ private:
 
 class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::XTest>
 {
-    OUString SAL_CALL getImplementationName() override
+    OUString getImplementationName() override
     {
         return u"com.sun.star.comp.testuno.Test"_ustr;
     }
 
-    bool SAL_CALL supportsService(OUString const& ServiceName) override
+    bool supportsService(OUString const& ServiceName) override
     {
         return cppu::supportsService(this, ServiceName);
     }
 
-    cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override
+    cpo::uno::Sequence<OUString> getSupportedServiceNames() override
     {
         return { u"com.sun.star.testuno.Test"_ustr };
     }
 
-    bool SAL_CALL getBoolean() override { return true; }
+    bool getBoolean() override { return true; }
 
-    bool SAL_CALL isBoolean(bool value) override { return value; }
+    bool isBoolean(bool value) override { return value; }
 
-    sal_Int8 SAL_CALL getByte() override { return -12; }
+    sal_Int8 getByte() override { return -12; }
 
-    bool SAL_CALL isByte(sal_Int8 value) override { return value == -12; }
+    bool isByte(sal_Int8 value) override { return value == -12; }
 
-    sal_Int16 SAL_CALL getShort() override { return -1234; }
+    sal_Int16 getShort() override { return -1234; }
 
-    bool SAL_CALL isShort(sal_Int16 value) override { return value == -1234; }
+    bool isShort(sal_Int16 value) override { return value == -1234; }
 
-    sal_uInt16 SAL_CALL getUnsignedShort() override { return 54321; }
+    sal_uInt16 getUnsignedShort() override { return 54321; }
 
-    bool SAL_CALL isUnsignedShort(sal_uInt16 value) override { return value == 54321; }
+    bool isUnsignedShort(sal_uInt16 value) override { return value == 54321; }
 
-    sal_Int32 SAL_CALL getLong() override { return -123456; }
+    sal_Int32 getLong() override { return -123456; }
 
-    bool SAL_CALL isLong(sal_Int32 value) override { return value == -123456; }
+    bool isLong(sal_Int32 value) override { return value == -123456; }
 
-    sal_uInt32 SAL_CALL getUnsignedLong() override { return 3456789012; }
+    sal_uInt32 getUnsignedLong() override { return 3456789012; }
 
-    bool SAL_CALL isUnsignedLong(sal_uInt32 value) override { return value == 3456789012; }
+    bool isUnsignedLong(sal_uInt32 value) override { return value == 3456789012; }
 
-    sal_Int64 SAL_CALL getHyper() override { return -123456789; }
+    sal_Int64 getHyper() override { return -123456789; }
 
-    bool SAL_CALL isHyper(sal_Int64 value) override { return value == -123456789; }
+    bool isHyper(sal_Int64 value) override { return value == -123456789; }
 
-    sal_uInt64 SAL_CALL getUnsignedHyper() override { return 9876543210; }
+    sal_uInt64 getUnsignedHyper() override { return 9876543210; }
 
-    bool SAL_CALL isUnsignedHyper(sal_uInt64 value) override { return value == 9876543210; }
+    bool isUnsignedHyper(sal_uInt64 value) override { return value == 9876543210; }
 
-    float SAL_CALL getFloat() override { return -10.25; }
+    float getFloat() override { return -10.25; }
 
-    bool SAL_CALL isFloat(float value) override { return value == -10.25; }
+    bool isFloat(float value) override { return value == -10.25; }
 
-    double SAL_CALL getDouble() override { return 100.5; }
+    double getDouble() override { return 100.5; }
 
-    bool SAL_CALL isDouble(double value) override { return value == 100.5; }
+    bool isDouble(double value) override { return value == 100.5; }
 
-    sal_Unicode SAL_CALL getChar() override { return u'Ö'; }
+    sal_Unicode getChar() override { return u'Ö'; }
 
-    bool SAL_CALL isChar(sal_Unicode value) override { return value == u'Ö'; }
+    bool isChar(sal_Unicode value) override { return value == u'Ö'; }
 
-    OUString SAL_CALL getString() override { return u"hä"_ustr; }
+    OUString getString() override { return u"hä"_ustr; }
 
-    bool SAL_CALL isString(OUString const& value) override { return value == u"hä"; }
+    bool isString(OUString const& value) override { return value == u"hä"; }
 
-    cpo::uno::Type SAL_CALL getType() override { return cppu::UnoType<sal_Int32>::get(); }
+    cpo::uno::Type getType() override { return cppu::UnoType<sal_Int32>::get(); }
 
-    bool SAL_CALL isType(cpo::uno::Type const& value) override
+    bool isType(cpo::uno::Type const& value) override
     {
         return value == cppu::UnoType<sal_Int32>::get();
     }
 
-    css::testuno::Enum SAL_CALL getEnum() override { return css::testuno::Enum_E_2; }
+    css::testuno::Enum getEnum() override { return css::testuno::Enum_E_2; }
 
-    bool SAL_CALL isEnum(css::testuno::Enum value) override
+    bool isEnum(css::testuno::Enum value) override
     {
         return value == css::testuno::Enum_E_2;
     }
 
-    css::testuno::Struct SAL_CALL getStruct() override
+    css::testuno::Struct getStruct() override
     {
         return { true,
                  -12,
@@ -843,7 +843,7 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
                  static_cast<OWeakObject*>(this) };
     }
 
-    bool SAL_CALL isStruct(css::testuno::Struct const& value) override
+    bool isStruct(css::testuno::Struct const& value) override
     {
         return value
                == css::testuno::Struct{ true,
@@ -870,27 +870,27 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
                                         static_cast<OWeakObject*>(this) };
     }
 
-    css::testuno::StructLong SAL_CALL getStructLong() override { return { -123456 }; }
+    css::testuno::StructLong getStructLong() override { return { -123456 }; }
 
-    bool SAL_CALL isStructLong(css::testuno::StructLong const& value) override
+    bool isStructLong(css::testuno::StructLong const& value) override
     {
         return value.m == -123456;
     }
 
-    css::testuno::StructString SAL_CALL getStructString() override { return { u"hä"_ustr }; }
+    css::testuno::StructString getStructString() override { return { u"hä"_ustr }; }
 
-    bool SAL_CALL isStructString(css::testuno::StructString const& value) override
+    bool isStructString(css::testuno::StructString const& value) override
     {
         return value.m == u"hä";
     }
 
     css::testuno::Template<cpo::uno::Any, css::testuno::StructString>
-        SAL_CALL getTemplate() override
+        getTemplate() override
     {
         return { { u"foo"_ustr }, -123456, cpo::uno::Any(sal_Int32(-123456)), { u"barr"_ustr } };
     }
 
-    bool SAL_CALL isTemplate(
+    bool isTemplate(
         css::testuno::Template<cpo::uno::Any, css::testuno::StructString> const& value) override
     {
         return value
@@ -899,101 +899,101 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
                   };
     }
 
-    cpo::uno::Any SAL_CALL getAnyVoid() override { return {}; }
+    cpo::uno::Any getAnyVoid() override { return {}; }
 
-    bool SAL_CALL isAnyVoid(cpo::uno::Any const& value) override { return checkAnyVoid(value); }
+    bool isAnyVoid(cpo::uno::Any const& value) override { return checkAnyVoid(value); }
 
-    cpo::uno::Any SAL_CALL getAnyBoolean() override { return cpo::uno::Any(true); }
+    cpo::uno::Any getAnyBoolean() override { return cpo::uno::Any(true); }
 
-    bool SAL_CALL isAnyBoolean(cpo::uno::Any const& value) override
+    bool isAnyBoolean(cpo::uno::Any const& value) override
     {
         return checkAnyBoolean(value);
     }
 
-    cpo::uno::Any SAL_CALL getAnyByte() override { return cpo::uno::Any(sal_Int8(-12)); }
+    cpo::uno::Any getAnyByte() override { return cpo::uno::Any(sal_Int8(-12)); }
 
-    bool SAL_CALL isAnyByte(cpo::uno::Any const& value) override { return checkAnyByte(value); }
+    bool isAnyByte(cpo::uno::Any const& value) override { return checkAnyByte(value); }
 
-    cpo::uno::Any SAL_CALL getAnyShort() override { return cpo::uno::Any(sal_Int16(-1234)); }
+    cpo::uno::Any getAnyShort() override { return cpo::uno::Any(sal_Int16(-1234)); }
 
-    bool SAL_CALL isAnyShort(cpo::uno::Any const& value) override { return checkAnyShort(value); }
+    bool isAnyShort(cpo::uno::Any const& value) override { return checkAnyShort(value); }
 
-    cpo::uno::Any SAL_CALL getAnyUnsignedShort() override
+    cpo::uno::Any getAnyUnsignedShort() override
     {
         return cpo::uno::Any(sal_uInt16(54321));
     }
 
-    bool SAL_CALL isAnyUnsignedShort(cpo::uno::Any const& value) override
+    bool isAnyUnsignedShort(cpo::uno::Any const& value) override
     {
         return checkAnyUnsignedShort(value);
     }
 
-    cpo::uno::Any SAL_CALL getAnyLong() override { return cpo::uno::Any(sal_Int32(-123456)); }
+    cpo::uno::Any getAnyLong() override { return cpo::uno::Any(sal_Int32(-123456)); }
 
-    bool SAL_CALL isAnyLong(cpo::uno::Any const& value) override { return checkAnyLong(value); }
+    bool isAnyLong(cpo::uno::Any const& value) override { return checkAnyLong(value); }
 
-    cpo::uno::Any SAL_CALL getAnyUnsignedLong() override
+    cpo::uno::Any getAnyUnsignedLong() override
     {
         return cpo::uno::Any(sal_uInt32(3456789012));
     }
 
-    bool SAL_CALL isAnyUnsignedLong(cpo::uno::Any const& value) override
+    bool isAnyUnsignedLong(cpo::uno::Any const& value) override
     {
         return checkAnyUnsignedLong(value);
     }
 
-    cpo::uno::Any SAL_CALL getAnyHyper() override { return cpo::uno::Any(sal_Int64(-123456789)); }
+    cpo::uno::Any getAnyHyper() override { return cpo::uno::Any(sal_Int64(-123456789)); }
 
-    bool SAL_CALL isAnyHyper(cpo::uno::Any const& value) override { return checkAnyHyper(value); }
+    bool isAnyHyper(cpo::uno::Any const& value) override { return checkAnyHyper(value); }
 
-    cpo::uno::Any SAL_CALL getAnyUnsignedHyper() override
+    cpo::uno::Any getAnyUnsignedHyper() override
     {
         return cpo::uno::Any(sal_uInt64(9876543210));
     }
 
-    bool SAL_CALL isAnyUnsignedHyper(cpo::uno::Any const& value) override
+    bool isAnyUnsignedHyper(cpo::uno::Any const& value) override
     {
         return checkAnyUnsignedHyper(value);
     }
 
-    cpo::uno::Any SAL_CALL getAnyFloat() override { return cpo::uno::Any(-10.25f); }
+    cpo::uno::Any getAnyFloat() override { return cpo::uno::Any(-10.25f); }
 
-    bool SAL_CALL isAnyFloat(cpo::uno::Any const& value) override { return checkAnyFloat(value); }
+    bool isAnyFloat(cpo::uno::Any const& value) override { return checkAnyFloat(value); }
 
-    cpo::uno::Any SAL_CALL getAnyDouble() override { return cpo::uno::Any(100.5); }
+    cpo::uno::Any getAnyDouble() override { return cpo::uno::Any(100.5); }
 
-    bool SAL_CALL isAnyDouble(cpo::uno::Any const& value) override { return checkAnyDouble(value); }
+    bool isAnyDouble(cpo::uno::Any const& value) override { return checkAnyDouble(value); }
 
-    cpo::uno::Any SAL_CALL getAnyChar() override { return cpo::uno::Any(u'Ö'); }
+    cpo::uno::Any getAnyChar() override { return cpo::uno::Any(u'Ö'); }
 
-    bool SAL_CALL isAnyChar(cpo::uno::Any const& value) override { return checkAnyChar(value); }
+    bool isAnyChar(cpo::uno::Any const& value) override { return checkAnyChar(value); }
 
-    cpo::uno::Any SAL_CALL getAnyString() override { return cpo::uno::Any(u"hä"_ustr); }
+    cpo::uno::Any getAnyString() override { return cpo::uno::Any(u"hä"_ustr); }
 
-    bool SAL_CALL isAnyString(cpo::uno::Any const& value) override { return checkAnyString(value); }
+    bool isAnyString(cpo::uno::Any const& value) override { return checkAnyString(value); }
 
-    cpo::uno::Any SAL_CALL getAnyType() override
+    cpo::uno::Any getAnyType() override
     {
         return cpo::uno::Any(cppu::UnoType<sal_Int32>::get());
     }
 
-    bool SAL_CALL isAnyType(cpo::uno::Any const& value) override { return checkAnyType(value); }
+    bool isAnyType(cpo::uno::Any const& value) override { return checkAnyType(value); }
 
-    cpo::uno::Any SAL_CALL getAnySequence() override
+    cpo::uno::Any getAnySequence() override
     {
         return cpo::uno::Any(cpo::uno::Sequence{ u"foo"_ustr, u"barr"_ustr, u"bazzz"_ustr });
     }
 
-    bool SAL_CALL isAnySequence(cpo::uno::Any const& value) override
+    bool isAnySequence(cpo::uno::Any const& value) override
     {
         return checkAnySequence(value);
     }
 
-    cpo::uno::Any SAL_CALL getAnyEnum() override { return cpo::uno::Any(css::testuno::Enum_E_2); }
+    cpo::uno::Any getAnyEnum() override { return cpo::uno::Any(css::testuno::Enum_E_2); }
 
-    bool SAL_CALL isAnyEnum(cpo::uno::Any const& value) override { return checkAnyEnum(value); }
+    bool isAnyEnum(cpo::uno::Any const& value) override { return checkAnyEnum(value); }
 
-    cpo::uno::Any SAL_CALL getAnyStruct() override
+    cpo::uno::Any getAnyStruct() override
     {
         return cpo::uno::Any(css::testuno::Struct{
             true,
@@ -1017,156 +1017,156 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
             static_cast<OWeakObject*>(this) });
     }
 
-    bool SAL_CALL isAnyStruct(cpo::uno::Any const& value) override
+    bool isAnyStruct(cpo::uno::Any const& value) override
     {
         return checkAnyStruct(value, static_cast<OWeakObject*>(this));
     }
 
-    cpo::uno::Any SAL_CALL getAnyException() override
+    cpo::uno::Any getAnyException() override
     {
         return cpo::uno::Any(
             css::testuno::Exception{ u"error"_ustr, {}, -123456, 100.5, u"hä"_ustr });
     }
 
-    bool SAL_CALL isAnyException(cpo::uno::Any const& value) override
+    bool isAnyException(cpo::uno::Any const& value) override
     {
         return checkAnyException(value);
     }
 
-    cpo::uno::Any SAL_CALL getAnyInterface() override
+    cpo::uno::Any getAnyInterface() override
     {
         return cpo::uno::Any(cpo::uno::Reference<css::testuno::XTest>(this));
     }
 
-    bool SAL_CALL isAnyInterface(cpo::uno::Any const& value) override
+    bool isAnyInterface(cpo::uno::Any const& value) override
     {
         return checkAnyInterface(value, this);
     }
 
-    cpo::uno::Sequence<bool> SAL_CALL getSequenceBoolean() override
+    cpo::uno::Sequence<bool> getSequenceBoolean() override
     {
         return { true, true, false };
     }
 
-    bool SAL_CALL isSequenceBoolean(cpo::uno::Sequence<bool> const& value) override
+    bool isSequenceBoolean(cpo::uno::Sequence<bool> const& value) override
     {
         return value == cpo::uno::Sequence<bool>{ true, true, false };
     }
 
-    cpo::uno::Sequence<sal_Int8> SAL_CALL getSequenceByte() override { return { -12, 1, 12 }; }
+    cpo::uno::Sequence<sal_Int8> getSequenceByte() override { return { -12, 1, 12 }; }
 
-    bool SAL_CALL isSequenceByte(cpo::uno::Sequence<sal_Int8> const& value) override
+    bool isSequenceByte(cpo::uno::Sequence<sal_Int8> const& value) override
     {
         return value == cpo::uno::Sequence<sal_Int8>{ -12, 1, 12 };
     }
 
-    cpo::uno::Sequence<sal_Int16> SAL_CALL getSequenceShort() override
+    cpo::uno::Sequence<sal_Int16> getSequenceShort() override
     {
         return { -1234, 1, 1234 };
     }
 
-    bool SAL_CALL isSequenceShort(cpo::uno::Sequence<sal_Int16> const& value) override
+    bool isSequenceShort(cpo::uno::Sequence<sal_Int16> const& value) override
     {
         return value == cpo::uno::Sequence<sal_Int16>{ -1234, 1, 1234 };
     }
 
-    cpo::uno::Sequence<sal_uInt16> SAL_CALL getSequenceUnsignedShort() override
+    cpo::uno::Sequence<sal_uInt16> getSequenceUnsignedShort() override
     {
         return { 1, 10, 54321 };
     }
 
-    bool SAL_CALL isSequenceUnsignedShort(cpo::uno::Sequence<sal_uInt16> const& value) override
+    bool isSequenceUnsignedShort(cpo::uno::Sequence<sal_uInt16> const& value) override
     {
         return value == cpo::uno::Sequence<sal_uInt16>{ 1, 10, 54321 };
     }
 
-    cpo::uno::Sequence<sal_Int32> SAL_CALL getSequenceLong() override
+    cpo::uno::Sequence<sal_Int32> getSequenceLong() override
     {
         return { -123456, 1, 123456 };
     }
 
-    bool SAL_CALL isSequenceLong(cpo::uno::Sequence<sal_Int32> const& value) override
+    bool isSequenceLong(cpo::uno::Sequence<sal_Int32> const& value) override
     {
         return value == cpo::uno::Sequence<sal_Int32>{ -123456, 1, 123456 };
     }
 
-    cpo::uno::Sequence<sal_uInt32> SAL_CALL getSequenceUnsignedLong() override
+    cpo::uno::Sequence<sal_uInt32> getSequenceUnsignedLong() override
     {
         return { 1, 10, 3456789012 };
     }
 
-    bool SAL_CALL isSequenceUnsignedLong(cpo::uno::Sequence<sal_uInt32> const& value) override
+    bool isSequenceUnsignedLong(cpo::uno::Sequence<sal_uInt32> const& value) override
     {
         return value == cpo::uno::Sequence<sal_uInt32>{ 1, 10, 3456789012 };
     }
 
-    cpo::uno::Sequence<sal_Int64> SAL_CALL getSequenceHyper() override
+    cpo::uno::Sequence<sal_Int64> getSequenceHyper() override
     {
         return { -123456789, 1, 123456789 };
     }
 
-    bool SAL_CALL isSequenceHyper(cpo::uno::Sequence<sal_Int64> const& value) override
+    bool isSequenceHyper(cpo::uno::Sequence<sal_Int64> const& value) override
     {
         return value == cpo::uno::Sequence<sal_Int64>{ -123456789, 1, 123456789 };
     }
 
-    cpo::uno::Sequence<sal_uInt64> SAL_CALL getSequenceUnsignedHyper() override
+    cpo::uno::Sequence<sal_uInt64> getSequenceUnsignedHyper() override
     {
         return { 1, 10, 9876543210 };
     }
 
-    bool SAL_CALL isSequenceUnsignedHyper(cpo::uno::Sequence<sal_uInt64> const& value) override
+    bool isSequenceUnsignedHyper(cpo::uno::Sequence<sal_uInt64> const& value) override
     {
         return value == cpo::uno::Sequence<sal_uInt64>{ 1, 10, 9876543210 };
     }
 
-    cpo::uno::Sequence<float> SAL_CALL getSequenceFloat() override
+    cpo::uno::Sequence<float> getSequenceFloat() override
     {
         return { -10.25, 1.5, 10.75 };
     }
 
-    bool SAL_CALL isSequenceFloat(cpo::uno::Sequence<float> const& value) override
+    bool isSequenceFloat(cpo::uno::Sequence<float> const& value) override
     {
         return value == cpo::uno::Sequence<float>{ -10.25, 1.5, 10.75 };
     }
 
-    cpo::uno::Sequence<double> SAL_CALL getSequenceDouble() override
+    cpo::uno::Sequence<double> getSequenceDouble() override
     {
         return { -100.5, 1.25, 100.75 };
     }
 
-    bool SAL_CALL isSequenceDouble(cpo::uno::Sequence<double> const& value) override
+    bool isSequenceDouble(cpo::uno::Sequence<double> const& value) override
     {
         return value == cpo::uno::Sequence<double>{ -100.5, 1.25, 100.75 };
     }
 
-    cpo::uno::Sequence<sal_Unicode> SAL_CALL getSequenceChar() override
+    cpo::uno::Sequence<sal_Unicode> getSequenceChar() override
     {
         return { 'a', 'B', u'Ö' };
     }
 
-    bool SAL_CALL isSequenceChar(cpo::uno::Sequence<sal_Unicode> const& value) override
+    bool isSequenceChar(cpo::uno::Sequence<sal_Unicode> const& value) override
     {
         return value == cpo::uno::Sequence<sal_Unicode>{ 'a', 'B', u'Ö' };
     }
 
-    cpo::uno::Sequence<OUString> SAL_CALL getSequenceString() override
+    cpo::uno::Sequence<OUString> getSequenceString() override
     {
         return { u"foo"_ustr, u"barr"_ustr, u"bazzz"_ustr };
     }
 
-    bool SAL_CALL isSequenceString(cpo::uno::Sequence<OUString> const& value) override
+    bool isSequenceString(cpo::uno::Sequence<OUString> const& value) override
     {
         return value == cpo::uno::Sequence<OUString>{ u"foo"_ustr, u"barr"_ustr, u"bazzz"_ustr };
     }
 
-    cpo::uno::Sequence<cpo::uno::Type> SAL_CALL getSequenceType() override
+    cpo::uno::Sequence<cpo::uno::Type> getSequenceType() override
     {
         return { cppu::UnoType<sal_Int32>::get(), cppu::UnoType<void>::get(),
                  cppu::UnoType<cpo::uno::Sequence<css::testuno::Enum>>::get() };
     }
 
-    bool SAL_CALL isSequenceType(cpo::uno::Sequence<cpo::uno::Type> const& value) override
+    bool isSequenceType(cpo::uno::Sequence<cpo::uno::Type> const& value) override
     {
         return value
                == cpo::uno::Sequence<cpo::uno::Type>{
@@ -1175,14 +1175,14 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
                   };
     }
 
-    cpo::uno::Sequence<cpo::uno::Any> SAL_CALL getSequenceAny() override
+    cpo::uno::Sequence<cpo::uno::Any> getSequenceAny() override
     {
         return { cpo::uno::Any(sal_Int32(-123456)), cpo::uno::Any(),
                  cpo::uno::Any(cpo::uno::Sequence<css::testuno::Enum>{
                      css::testuno::Enum_E_2, css::testuno::Enum_E3, css::testuno::Enum_E_10 }) };
     }
 
-    bool SAL_CALL isSequenceAny(cpo::uno::Sequence<cpo::uno::Any> const& value) override
+    bool isSequenceAny(cpo::uno::Sequence<cpo::uno::Any> const& value) override
     {
         return value
                == cpo::uno::Sequence<cpo::uno::Any>{
@@ -1192,12 +1192,12 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
                   };
     }
 
-    cpo::uno::Sequence<cpo::uno::Sequence<OUString>> SAL_CALL getSequenceSequenceString() override
+    cpo::uno::Sequence<cpo::uno::Sequence<OUString>> getSequenceSequenceString() override
     {
         return { {}, { u"foo"_ustr, u"barr"_ustr }, { u"baz"_ustr } };
     }
 
-    bool SAL_CALL
+    bool
     isSequenceSequenceString(cpo::uno::Sequence<cpo::uno::Sequence<OUString>> const& value) override
     {
         return value
@@ -1206,12 +1206,12 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
                                                                     { u"baz"_ustr } };
     }
 
-    cpo::uno::Sequence<css::testuno::Enum> SAL_CALL getSequenceEnum() override
+    cpo::uno::Sequence<css::testuno::Enum> getSequenceEnum() override
     {
         return { css::testuno::Enum_E_2, css::testuno::Enum_E3, css::testuno::Enum_E_10 };
     }
 
-    bool SAL_CALL isSequenceEnum(cpo::uno::Sequence<css::testuno::Enum> const& value) override
+    bool isSequenceEnum(cpo::uno::Sequence<css::testuno::Enum> const& value) override
     {
         return value
                == cpo::uno::Sequence<css::testuno::Enum>{ css::testuno::Enum_E_2,
@@ -1219,7 +1219,7 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
                                                           css::testuno::Enum_E_10 };
     }
 
-    cpo::uno::Sequence<css::testuno::Struct> SAL_CALL getSequenceStruct() override
+    cpo::uno::Sequence<css::testuno::Struct> getSequenceStruct() override
     {
         return {
             { true,
@@ -1287,7 +1287,7 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
         };
     }
 
-    bool SAL_CALL isSequenceStruct(cpo::uno::Sequence<css::testuno::Struct> const& value) override
+    bool isSequenceStruct(cpo::uno::Sequence<css::testuno::Struct> const& value) override
     {
         return value
                == cpo::uno::Sequence<css::testuno::Struct>{
@@ -1361,14 +1361,14 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
                   };
     }
 
-    cpo::uno::Reference<css::testuno::XTest> SAL_CALL getNull() override { return {}; }
+    cpo::uno::Reference<css::testuno::XTest> getNull() override { return {}; }
 
-    bool SAL_CALL isNull(cpo::uno::Reference<css::testuno::XTest> const& value) override
+    bool isNull(cpo::uno::Reference<css::testuno::XTest> const& value) override
     {
         return !value;
     }
 
-    void SAL_CALL getOut(bool& value1, sal_Int8& value2, sal_Int16& value3, sal_uInt16& value4,
+    void getOut(bool& value1, sal_Int8& value2, sal_Int16& value3, sal_uInt16& value4,
                          sal_Int32& value5, sal_uInt32& value6, sal_Int64& value7,
                          sal_uInt64& value8, float& value9, double& value10, sal_Unicode& value11,
                          OUString& value12, cpo::uno::Type& value13, cpo::uno::Any& value14,
@@ -1449,12 +1449,12 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
         return value.IsPresent ? value.Value.m : u"absent"_ustr;
     }
 
-    void SAL_CALL throwRuntimeException() override
+    void throwRuntimeException() override
     {
         throw cpo::uno::RuntimeException(u"test"_ustr);
     }
 
-    void SAL_CALL passJob(cpo::uno::Reference<css::task::XJob> const& object) override
+    void passJob(cpo::uno::Reference<css::task::XJob> const& object) override
     {
         try
         {
@@ -1466,7 +1466,7 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
         }
     }
 
-    void SAL_CALL passJobExecutor(cpo::uno::Reference<css::task::XJobExecutor> const& object,
+    void passJobExecutor(cpo::uno::Reference<css::task::XJobExecutor> const& object,
                                   bool newThread) override
     {
         if (newThread)
@@ -1481,7 +1481,7 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
         }
     }
 
-    void SAL_CALL passInterface(cpo::uno::Reference<cpo::uno::XInterface> const& object) override
+    void passInterface(cpo::uno::Reference<cpo::uno::XInterface> const& object) override
     {
         cpo::uno::Reference<css::task::XJob>(object, cpo::uno::UNO_QUERY_THROW)
             ->execute({ { u"name"_ustr, cpo::uno::Any(u"queried job"_ustr) } });
@@ -1489,7 +1489,7 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
             ->trigger(u"queried executor"_ustr);
     }
 
-    bool SAL_CALL
+    bool
     checkAttributes(cpo::uno::Reference<css::testuno::XAttributes> const& object) override
     {
         auto const ok1 = object->getLongAttribute() == 789;
@@ -1501,11 +1501,11 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
         return ok1 && ok2 && ok3;
     }
 
-    OUString SAL_CALL getStringAttribute() override { return stringAttribute_; }
+    OUString getStringAttribute() override { return stringAttribute_; }
 
-    void SAL_CALL setStringAttribute(OUString const& value) override { stringAttribute_ = value; }
+    void setStringAttribute(OUString const& value) override { stringAttribute_ = value; }
 
-    bool SAL_CALL testSolarMutex() override
+    bool testSolarMutex() override
     {
         DBG_TESTNOTSOLARMUTEX();
         rtl::Reference t(new TestThread);
@@ -1515,7 +1515,7 @@ class Test : public cppu::WeakImplHelper<css::lang::XServiceInfo, css::testuno::
         return t->value;
     }
 
-    void SAL_CALL executeTest(cpo::uno::Reference<css::testuno::XTest> const& test) override
+    void executeTest(cpo::uno::Reference<css::testuno::XTest> const& test) override
     {
         doExecuteTest(test);
     }
@@ -1532,7 +1532,7 @@ public:
     }
 
 private:
-    cpo::uno::Any SAL_CALL
+    cpo::uno::Any
     execute(cpo::uno::Sequence<css::beans::NamedValue> const& Arguments) override
     {
         if (Arguments.hasElements())

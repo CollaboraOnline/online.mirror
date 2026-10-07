@@ -21,22 +21,22 @@ class SingletonTest
     : public cppu::WeakImplHelper<css::testuno::XStringFactory, css::lang::XServiceInfo>
 {
 public:
-    OUString SAL_CALL getImplementationName() override
+    OUString getImplementationName() override
     {
         return u"com.sun.star.comp.testuno.Singleton"_ustr;
     }
 
-    bool SAL_CALL supportsService(OUString const& ServiceName) override
+    bool supportsService(OUString const& ServiceName) override
     {
         return cppu::supportsService(this, ServiceName);
     }
 
-    cpo::uno::Sequence<OUString> SAL_CALL getSupportedServiceNames() override
+    cpo::uno::Sequence<OUString> getSupportedServiceNames() override
     {
         return { u"com.sun.star.testuno.Singleton"_ustr };
     }
 
-    OUString SAL_CALL getString() override { return u"this is a string from XStringFactory"_ustr; }
+    OUString getString() override { return u"this is a string from XStringFactory"_ustr; }
 };
 }
 
