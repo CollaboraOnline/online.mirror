@@ -37,6 +37,7 @@
 #include <comphelper/servicehelper.hxx>
 #include <cppuhelper/supportsservice.hxx>
 #include <rtl/ustrbuf.hxx>
+#include <rtl/uri.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/filter/SvmWriter.hxx>
 #include <vcl/metaact.hxx>
@@ -1658,7 +1659,9 @@ OUString SdGenericDrawPage::getBookmarkURL() const
         if( !aFileName.isEmpty() )
         {
             const OUString aBookmarkName( SdDrawPage::getPageApiNameFromUiName( static_cast<SdPage*>(SvxDrawPage::mpPage)->GetBookmarkName() ) );
-            aRet = aFileName + "#" + aBookmarkName;
+            // The name is the fragment of the URL after the last '#'.
+            aRet = aFileName + "#"
+                   + aBookmarkName.replaceAll( "%", "%25" ).replaceAll( "#", "%23" );
         }
     }
 
@@ -1675,7 +1678,9 @@ void SdGenericDrawPage::setBookmarkURL( std::u16string_view rURL )
         return;
 
     const OUString aFileName( rURL.substr( 0, nIndex ) );
-    const OUString aBookmarkName( SdDrawPage::getUiNameFromPageApiName( OUString(rURL.substr( nIndex+1 ))  ) );
+    const OUString aBookmarkName( SdDrawPage::getUiNameFromPageApiName(
+        rtl::Uri::decode( OUString( rURL.substr( nIndex+1 ) ), rtl_UriDecodeWithCharset,
+                          RTL_TEXTENCODING_UTF8 ) ) );
 
     // A page tracked by the identifier of the slide it came from names no slide, so the reference
     // it records is the whole of what it holds.

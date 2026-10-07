@@ -814,6 +814,33 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSlideLinkModifiedTimeRoundtrip)
                          pReloadedDoc->GetSdPage(1, PageKind::Standard)->GetSourceModifiedTime());
 }
 
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSlideLinkNameRoundtrip)
+{
+    loadFromURL(m_directories.getURLFromSrc(gSlideImportDataDir, u"slide-import-target.odp"));
+    SdXImpressDocument* pXImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+    CPPUNIT_ASSERT(pXImpressDocument);
+    SdDrawDocument* pDoc = pXImpressDocument->GetDoc();
+
+    const OUString aSourceUrl
+        = m_directories.getURLFromSrc(gSlideImportDataDir, u"slide-import-source.odp");
+    CPPUNIT_ASSERT(pXImpressDocument->insertPagesFromFile(
+        aSourceUrl, "{\"slides\":[0],\"at\":1,\"link\":true,\"source\":\"Q3 deck.odp\"}"_ostr));
+
+    // The page records the name of its source slide, which holds the character that separates
+    // the slide from the document in the link and the one that escapes it.
+    SdPage* pPage = pDoc->GetSdPage(1, PageKind::Standard);
+    pPage->SetBookmarkName(u"Q3 #1 100%"_ustr);
+
+    // Both the source document and the slide name come back as they were.
+    saveAndReload(TestFilter::ODP);
+    SdXImpressDocument* pReloaded = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+    CPPUNIT_ASSERT(pReloaded);
+    SdPage* pReloadedPage = pReloaded->GetDoc()->GetSdPage(1, PageKind::Standard);
+    CPPUNIT_ASSERT_EQUAL(u"Q3 deck.odp"_ustr,
+                         sd::SlideLink::GetSourceName(pReloadedPage->GetFileName()));
+    CPPUNIT_ASSERT_EQUAL(u"Q3 #1 100%"_ustr, pReloadedPage->GetBookmarkName());
+}
+
 CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSlideLinkRefresh)
 {
     loadFromURL(m_directories.getURLFromSrc(gSlideImportDataDir, u"slide-import-target.odp"));
