@@ -2131,7 +2131,7 @@ struct COKitDocument
     /**
      * Sets the start or end of a text selection.
      *
-     * @param eType @see COKitSetTextSelectionType
+     * @param eType for type @see COKitSetTextSelectionType
      * @param nX horizontal position in document coordinates
      * @param nY vertical position in document coordinates
      */
@@ -2159,7 +2159,7 @@ struct COKitDocument
     /**
      * Adjusts the graphic selection.
      *
-     * @param eType @see COKitSetGraphicSelectionType
+     * @param eType for type @see COKitSetGraphicSelectionType
      * @param nX horizontal position in document coordinates
      * @param nY vertical position in document coordinates
      */
@@ -2271,7 +2271,7 @@ struct COKitDocument
     /**
      * Posts a command to the window (dialog, popup, etc.) with given id
      *
-     * @param nWindowid
+     * @param nWindowId ID of window to pass command to
      */
     virtual void postWindow(unsigned nWindowId, COKitWindowAction eAction, const char* pData) = 0;
 
@@ -2468,7 +2468,7 @@ struct COKitDocument
      * Renders a window (dialog, popup, etc.) with the given id, switching to
      * viewId first when that is >= 0.
      *
-     * @param pBuffer Buffer with enough memory allocated to render any dialog
+     * @param aBuffer Buffer with enough memory allocated to render any dialog
      * @param x x-coordinate from where the dialog should start painting
      * @param y y-coordinate from where the dialog should start painting
      * @param width The width of the dialog image to be painted
