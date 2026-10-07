@@ -269,7 +269,6 @@ namespace Log
 
     void reset() { Prefix::Instance.reset(); }
 
-#ifdef BUILDING_TESTS
     char* prefixReference(const std::chrono::time_point<std::chrono::system_clock>& tp,
                           char* buffer, const std::string_view level)
     {
@@ -358,7 +357,6 @@ namespace Log
 
         return buffer;
     }
-#endif // BUILDING_TESTS
 
 } // namespace Log
 

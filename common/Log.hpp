@@ -135,11 +135,9 @@ namespace Log
         const std::string_view level,
         std::chrono::time_point<std::chrono::system_clock> tp = std::chrono::system_clock::now());
 
-#ifdef BUILDING_TESTS
     /// Generates the reference log entry prefix. Do *not* use, except for tests.
     char* prefixReference(const std::chrono::time_point<std::chrono::system_clock>& tp,
                           char* buffer, const std::string_view level);
-#endif
 
     /// is a certain level of logging enabled ?
     bool isEnabled(Level l, Area a = Area::Generic);

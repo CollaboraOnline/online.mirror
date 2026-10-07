@@ -156,60 +156,10 @@ if ENABLE_SSL
 AM_LDFLAGS += ${OPENSSL_LIBS}
 endif
 
-# We work around some of the mess of using the same sources both on
-# the server side and here in unit tests with conditional compilation
-# based on BUILDING_TESTS
+# The test sources are compiled with BUILDING_TESTS defined. The production
+# code comes from the gbuild static libraries below and is compiled without it.
 
 AM_CPPFLAGS = -pthread -I$(top_srcdir) -DBUILDING_TESTS -DLOK_ABORT_ON_ASSERTION
-
-kit_sources = \
-	../kit/Kit.cpp \
-	../kit/KitWebSocket.cpp \
-	../kit/TestStubs.cpp
-
-wsd_sources = \
-	../common/AIHttpTransport.cpp \
-	../common/Crypto.cpp \
-	../wsd/Admin.cpp \
-	../wsd/AdminModel.cpp \
-	../wsd/AIChatSession.cpp \
-	../wsd/AIUtil.cpp \
-	../wsd/Auth.cpp \
-	../wsd/COOLWSD.cpp \
-	../wsd/CacheUtil.cpp \
-	../wsd/ClientRequestDispatcher.cpp \
-	../wsd/ClientSession.cpp \
-	../wsd/CollabBroker.cpp \
-	../wsd/CollabFileProxy.cpp \
-	../wsd/CollabSocketHandler.cpp \
-	../wsd/ContentType.cpp \
-	../wsd/DeckSpec.cpp \
-	../wsd/DocumentBroker.cpp \
-	../wsd/Extensions.cpp \
-	../wsd/FileServer.cpp \
-	../wsd/FileServerUtil.cpp \
-	../wsd/HealthCheck.cpp \
-	../wsd/HostUtil.cpp \
-	../wsd/ProofKey.cpp \
-	../wsd/ProxyProtocol.cpp \
-	../wsd/ProxyRequestHandler.cpp \
-	../wsd/QuarantineUtil.cpp \
-	../wsd/RemoteConfig.cpp \
-	../wsd/RemoteDocumentBroker.cpp \
-	../wsd/RemoteLinks.cpp \
-	../wsd/RequestDetails.cpp \
-	../wsd/RequestVettingStation.cpp \
-	../wsd/ServerAuditUtil.cpp \
-	../wsd/SlideCache.cpp \
-	../wsd/SpecialBrokers.cpp \
-	../wsd/Storage.cpp \
-	../wsd/TileCache.cpp \
-	../wsd/Unzip.cpp \
-	../wsd/dumpWsdState.cpp \
-	../wsd/wopi/CheckFileInfo.cpp \
-	../wsd/wopi/StorageConnectionManager.cpp \
-	../wsd/wopi/WopiProxy.cpp \
-	../wsd/wopi/WopiStorage.cpp
 
 test_base_sources = \
 	AIUtilTests.cpp \
@@ -233,50 +183,14 @@ test_base_sources = \
 	WhiteBoxTests.cpp \
 	WopiProofTests.cpp
 
-common_sources = \
-	$(util_platform_cpp) \
-	../common/Authorization.cpp \
-	../common/CommandControl.cpp \
-	../common/ConfigUtil.cpp \
-	../common/CoolMount.cpp \
-	../common/DummyTraceEventEmitter.cpp \
-	../common/FileUtil-unix.cpp \
-	../common/FileUtil.cpp \
-	../common/JailUtil.cpp \
-	../common/Landlock.cpp \
-	../common/Log-common.cpp \
-	../common/Log-poco.cpp \
-	../common/MobileApp.cpp \
-	../common/ProcUtil.cpp \
-	../common/Protocol.cpp \
-	../common/RegexUtil.cpp \
-	../common/Seccomp.cpp \
-	../common/Session.cpp \
-	../common/SigUtil-server.cpp \
-	../common/Simd.cpp \
-	../common/SpookyV2.cpp \
-	../common/StringVector.cpp \
-	../common/Syscall.cpp \
-	../common/TraceEvent.cpp \
-	../common/Unit-server.cpp \
-	../common/Unit.cpp \
-	../common/Uri.cpp \
-	../common/Util-server.cpp \
-	../common/Util-unix.cpp \
-	../common/Util.cpp \
-	../common/Watchdog-unix.cpp \
-	../kit/KitQueue.cpp \
-	../kit/LogUI.cpp \
-	../net/FakeSocket-stub.cpp \
-	../net/HttpHelper.cpp \
-	../net/HttpRequest.cpp \
-	../net/NetUtil.cpp \
-	../net/Socket-server.cpp \
-	../net/Socket-unix.cpp \
-	../net/Socket.cpp \
-	../wsd/Exceptions.cpp
-
-globals_sources = ../common/Globals.cpp
+# The test programs link the production code from the static libraries that gbuild builds for
+# coolwsd and coolforkit, the same objects that ship. The libraries refer to each other in both
+# directions and the linker searches each archive once, in order, so the list appears twice.
+gbuild_libdir = $(ENGINE_BUILDDIR)/workdir/LinkTarget/StaticLibrary
+gbuild_test_libs = \
+	$(gbuild_libdir)/libwsd.a \
+	$(gbuild_libdir)/libforkit.a \
+	$(gbuild_libdir)/libshared.a
 
 # The engine's static Poco no longer bundles zlib, so PocoFoundation and
 # PocoZip reference the system one and must precede it on the link line.
@@ -293,46 +207,43 @@ globals_sources = ../common/Globals.cpp
 # the global LIBS to avoid.
 poco_and_zlib_libs = $(POCO_LIBS) $(ZLIB_LIBS)
 
+test_program_libs = \
+	$(gbuild_test_libs) \
+	$(gbuild_test_libs) \
+	$(top_builddir)/libsimd.a \
+	${PNG_LIBS} $(ZSTD_LIBS) \
+	$(CPPUNIT_LIBS) \
+	$(poco_and_zlib_libs) \
+	$(CAP_LIBS)
+
 unithttplib_CPPFLAGS = -I$(top_srcdir) -DBUILDING_TESTS -DSTANDALONE_CPPUNIT -g
-unithttplib_SOURCES = $(common_sources) $(globals_sources) test.cpp HttpRequestTests.cpp helpers.cpp
-unithttplib_LDADD = $(CPPUNIT_LIBS) $(poco_and_zlib_libs)
+unithttplib_SOURCES = TestGlobals.cpp TestStubs.cpp test.cpp HttpRequestTests.cpp helpers.cpp
+unithttplib_LDADD = $(test_program_libs)
+EXTRA_unithttplib_DEPENDENCIES = $(gbuild_test_libs)
 
 unittest_CPPFLAGS = -I$(top_srcdir) -DBUILDING_TESTS -DSTANDALONE_CPPUNIT -g
 unittest_SOURCES = \
-	$(common_sources) \
 	$(test_base_sources) \
-	$(kit_sources) \
-	../wsd/AIUtil.cpp \
-	../wsd/DeckSpec.cpp \
-	../wsd/FileServerUtil.cpp \
-	../wsd/HostUtil.cpp \
-	../wsd/ProofKey.cpp \
-	../wsd/RequestDetails.cpp \
-	../wsd/TestStubs.cpp \
-	../wsd/TileCache.cpp \
+	TestStubs.cpp \
 	test.cpp
 
-unittest_LDADD = $(top_builddir)/libsimd.a $(CPPUNIT_LIBS) $(poco_and_zlib_libs)
+unittest_LDADD = $(test_program_libs)
+EXTRA_unittest_DEPENDENCIES = $(gbuild_test_libs)
 
 clienttest_CPPFLAGS = -I$(top_srcdir) -DBUILDING_TESTS -DSTANDALONE_CPPUNIT -g
 
 clienttest_SOURCES = \
-	$(common_sources) \
-	$(globals_sources) \
-	$(wsd_sources) \
-	ClientTestStubs.cpp \
+	TestGlobals.cpp \
+	TestStubs.cpp \
 	ClientRequestDispatcherTests.cpp \
 	XcuScrubWhiteBoxTests.cpp \
 	test.cpp
 
-clienttest_LDADD = $(top_builddir)/libsimd.a $(CPPUNIT_LIBS) $(poco_and_zlib_libs)
+clienttest_LDADD = $(test_program_libs)
+EXTRA_clienttest_DEPENDENCIES = $(gbuild_test_libs)
 
 # Add SSL dependencies if needed.
-if ENABLE_SSL
-unittest_SOURCES += ../net/Ssl.cpp
-unithttplib_SOURCES += ../net/Ssl.cpp
-clienttest_SOURCES += ../net/Ssl.cpp
-else
+if !ENABLE_SSL
 unittest_LDADD += -lssl -lcrypto
 unithttplib_LDADD += -lssl -lcrypto
 clienttest_LDADD += -lssl -lcrypto
@@ -546,8 +457,6 @@ build-tests: ${all_la_unit_tests}
 all_test_la_sources = $(sort $(foreach t,$(all_la_unit_tests),$($(subst -,_,$(basename $(t)))_SOURCES)))
 
 all_test_compiled_sources = $(sort \
-	$(common_sources) \
-	$(globals_sources) \
 	$(test_base_sources) \
 	$(unittest_SOURCES) \
 	$(unithttplib_SOURCES) \

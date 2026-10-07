@@ -95,7 +95,6 @@
 		BE74B2082D3F96CB009786DF /* KitWebSocket.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = KitWebSocket.cpp; path = ../../../kit/KitWebSocket.cpp; sourceTree = "<group>"; };
 		BE74B2092D3F96CB009786DF /* SetupKitEnvironment.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = SetupKitEnvironment.hpp; path = ../../../kit/SetupKitEnvironment.hpp; sourceTree = "<group>"; };
 		BE74B20A2D3F96CB009786DF /* StateRecorder.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = StateRecorder.hpp; path = ../../../kit/StateRecorder.hpp; sourceTree = "<group>"; };
-		BE74B20B2D3F96CB009786DF /* TestStubs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TestStubs.cpp; path = ../../../kit/TestStubs.cpp; sourceTree = "<group>"; };
 		BE74B20C2D3F96CB009786DF /* Watermark.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Watermark.hpp; path = ../../../kit/Watermark.hpp; sourceTree = "<group>"; };
 		BE74B20D2D3F971C009786DF /* AsyncDNS.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = AsyncDNS.hpp; path = ../../../net/AsyncDNS.hpp; sourceTree = "<group>"; };
 		BE74B20E2D3F971C009786DF /* Buffer.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Buffer.hpp; path = ../../../net/Buffer.hpp; sourceTree = "<group>"; };
@@ -165,7 +164,6 @@
 		BE74B24D2D3F97AB009786DF /* SpecialBrokers.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = SpecialBrokers.cpp; path = ../../../wsd/SpecialBrokers.cpp; sourceTree = "<group>"; };
 		BE74B24E2D3F97AB009786DF /* Storage.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = Storage.hpp; path = ../../../wsd/Storage.hpp; sourceTree = "<group>"; };
 		BE74B24F2D3F97AB009786DF /* Storage.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = Storage.cpp; path = ../../../wsd/Storage.cpp; sourceTree = "<group>"; };
-		BE74B2502D3F97AB009786DF /* TestStubs.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TestStubs.cpp; path = ../../../wsd/TestStubs.cpp; sourceTree = "<group>"; };
 		BE74B2512D3F97AB009786DF /* TileCache.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = TileCache.hpp; path = ../../../wsd/TileCache.hpp; sourceTree = "<group>"; };
 		BE74B2522D3F97AB009786DF /* TileCache.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = TileCache.cpp; path = ../../../wsd/TileCache.cpp; sourceTree = "<group>"; };
 		BE74B2532D3F97AB009786DF /* TileDesc.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; name = TileDesc.hpp; path = ../../../wsd/TileDesc.hpp; sourceTree = "<group>"; };
@@ -284,7 +282,6 @@
 				BE74B2082D3F96CB009786DF /* KitWebSocket.cpp */,
 				BE74B2092D3F96CB009786DF /* SetupKitEnvironment.hpp */,
 				BE74B20A2D3F96CB009786DF /* StateRecorder.hpp */,
-				BE74B20B2D3F96CB009786DF /* TestStubs.cpp */,
 				BE74B20C2D3F96CB009786DF /* Watermark.hpp */,
 			);
 			path = kit;
@@ -368,7 +365,6 @@
 				BE74B24D2D3F97AB009786DF /* SpecialBrokers.cpp */,
 				BE74B24E2D3F97AB009786DF /* Storage.hpp */,
 				BE74B24F2D3F97AB009786DF /* Storage.cpp */,
-				BE74B2502D3F97AB009786DF /* TestStubs.cpp */,
 				BE74B2512D3F97AB009786DF /* TileCache.hpp */,
 				BE74B2522D3F97AB009786DF /* TileCache.cpp */,
 				BE74B2532D3F97AB009786DF /* TileDesc.hpp */,

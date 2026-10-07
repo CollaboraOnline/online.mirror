@@ -43,9 +43,6 @@
 
 using namespace std::literals;
 
-/// The port of the coolwsd server under test. This program runs no coolwsd, so it stays unset.
-int ClientPortNumber = 0;
-
 /// When enabled, in addition to the loopback
 /// server, an external server will be used
 /// to check for regressions.

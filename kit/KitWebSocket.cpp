@@ -171,7 +171,7 @@ void KitWebSocketHandler::handleMessage(const std::vector<char>& data)
     }
     else if (!Util::isFuzzing() && tokens.size() == 3 && tokens.equals(0, "setconfig"))
     {
-#if !MOBILEAPP && !defined(BUILDING_TESTS)
+#if !MOBILEAPP
         // Currently only rlimit entries are supported.
         if (!Rlimit::handleSetrlimitCommand(tokens))
         {

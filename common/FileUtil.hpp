@@ -131,9 +131,6 @@ namespace FileUtil
     std::pair<std::string, std::string> buildPathsToJail(bool usingMountNamespaces, bool noCapsForKit,
                                                          std::string localJailRoot, std::string jailDir);
 
-    // We work around some of the mess of using the same sources both on the server side and in unit
-    // tests with conditional compilation based on BUILDING_TESTS.
-
     // Add the file system that 'path' is located on to a list of file systems that are periodically
     // checked for available space. The list is initially empty.
     void registerFileSystemForDiskSpaceChecks(const std::string& path);

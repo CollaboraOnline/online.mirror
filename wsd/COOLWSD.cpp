@@ -3972,16 +3972,11 @@ std::shared_ptr<ServerSocket> COOLWSDServer::findServerPort()
     const int firstPortNumber = ClientPortNumber;
 #endif
     while (!socket && ClientPortNumber > 0 &&
-#ifdef BUILDING_TESTS
-           true
-#else
            (UnitWSD::isUnitTesting()
 #if ENABLE_DEBUG
             || COOLWSD::FindFreePort
 #endif
-           )
-#endif
-        )
+           ))
     {
         ++ClientPortNumber;
         LOG_INF("Client port " << (ClientPortNumber - 1) << " is busy, trying "
@@ -4749,7 +4744,6 @@ std::set<pid_t> COOLWSD::getDocKitPids()
     return pids;
 }
 
-#if !defined(BUILDING_TESTS)
 namespace Util
 {
 
@@ -4764,7 +4758,6 @@ void alertAllUsers(const std::string& msg)
 }
 
 }
-#endif
 
 static void forwardSignal(int signum);
 

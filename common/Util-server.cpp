@@ -553,14 +553,6 @@ std::string getLinuxVersion()
     }
 }
 
-#if defined(BUILDING_TESTS)
-/// No-op implementation in the test programs
-void alertAllUsers(const std::string&) {}
-
-/// No-op implementation in the test programs
-void alertAllUsers(const std::string&, const std::string&) {}
-#endif
-
 SysStopwatch::SysStopwatch() { restart(); }
 
 void SysStopwatch::restart() { readTime(_startCPU, _startSys); }

@@ -148,9 +148,7 @@ using Poco::File;
 using Poco::JSON::Object;
 using Poco::JSON::Parser;
 
-#ifndef BUILDING_TESTS
 using Poco::Path;
-#endif
 
 using namespace COOLProtocol;
 using JsonUtil::makePropertyValue;
@@ -343,7 +341,7 @@ namespace
         consistencyCheckJail();
     }
 
-#if !defined(BUILDING_TESTS) && !MOBILEAPP
+#if !MOBILEAPP
     enum class LinkOrCopyType: std::uint8_t
     {
         All,
@@ -842,7 +840,7 @@ namespace
         cap_free(caps);
     }
 #endif // __FreeBSD__
-#endif // BUILDING_TESTS
+#endif // !MOBILEAPP
 } // namespace
 
 Document::Document(const std::shared_ptr<COKit>& loKit, const std::string& jailId,
@@ -950,10 +948,6 @@ bool Document::postMessage(const std::string_view data, const WSOpCode code) con
 
 bool Document::createSession(const std::string& sessionId)
 {
-#if defined(BUILDING_TESTS)
-    LOG_ERR("createSession stubbed for tests for " << sessionId);
-    return false;
-#else
     try
     {
         if (_sessions.find(sessionId) != _sessions.end())
@@ -990,7 +984,6 @@ bool Document::createSession(const std::string& sessionId)
                 "] on url [" << anonymizeUrl(_url) << "] - '" << ex.what() << "'.");
         return false;
     }
-#endif
 }
 
 std::size_t Document::purgeSessions()
@@ -2671,13 +2664,11 @@ bool Document::forwardToChild(const std::string_view prefix, const std::vector<c
         }
 
         std::string abbrMessage;
-#ifndef BUILDING_TESTS
         if (Anonymizer::enabled())
         {
             abbrMessage = "...";
         }
         else
-#endif
         {
             abbrMessage = getAbbreviatedMessage(data, size);
         }
@@ -3273,11 +3264,10 @@ void Document::dumpState(std::ostream& oss)
     oss << '\n';
 }
 
-#if !defined BUILDING_TESTS && !MOBILEAPP && !LIBFUZZER
+#if !MOBILEAPP && !LIBFUZZER
 
 // When building the fuzzer we link COOLWSD.cpp into the same executable so the
-// Protected::emitOneRecording() there gets used. When building the unit tests the one in
-// TraceEvent.cpp gets used.
+// Protected::emitOneRecording() there gets used.
 
 static std::mutex traceEventLock;
 static std::vector<std::string> traceEventRecords[2];
@@ -3575,8 +3565,6 @@ void documentViewCallback(COKitCallbackType eType, const char* payload, void* da
 {
     Document::ViewCallback(eType, payload, data);
 }
-
-#ifndef BUILDING_TESTS
 
 namespace
 {
@@ -4885,8 +4873,6 @@ void runKitLoopInAThread()
 
 #endif // IOS
 
-#endif // !BUILDING_TESTS
-
 void consistencyCheckJail()
 {
     static bool warned = false;
@@ -4932,11 +4918,7 @@ TileWireId getCurrentWireId(bool increment)
 
 std::string anonymizeUrl(const std::string& url)
 {
-#ifndef BUILDING_TESTS
     return Anonymizer::anonymizeUrl(url);
-#else
-    return url;
-#endif
 }
 
 #if !MOBILEAPP
@@ -5109,11 +5091,7 @@ bool globalPreinit(const std::string &loTemplate)
 /// Anonymize usernames.
 std::string anonymizeUsername(const std::string& username)
 {
-#ifndef BUILDING_TESTS
     return Anonymizer::anonymize(username);
-#else
-    return username;
-#endif
 }
 
 #endif // !MOBILEAPP

@@ -358,14 +358,12 @@ void initialize(const std::string& xml)
     initialize(XmlConfig);
 }
 
-#ifdef BUILDING_TESTS
 const Poco::Util::AbstractConfiguration* setConfigForTest(const Poco::Util::AbstractConfiguration* config)
 {
     const Poco::Util::AbstractConfiguration* previous = Config;
     Config = config;
     return previous;
 }
-#endif
 
 void initializeFromFile(const std::string& filename)
 {

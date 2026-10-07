@@ -402,7 +402,6 @@ std::string RequestDetails::getLineModeKey(const std::string& /*access_token*/) 
     return Poco::URI(getField(RequestDetails::Field::WOPISrc)).getPath();
 }
 
-#if !defined(BUILDING_TESTS)
 std::string RequestDetails::getDocKey(const Poco::URI& uri)
 {
     // resolve aliases
@@ -420,6 +419,5 @@ std::string RequestDetails::getDocKey(const Poco::URI& uri)
     LOG_INF("DocKey from URI [" << uri.toString() << "] => [" << docKey << ']');
     return docKey;
 }
-#endif // !defined(BUILDING_TESTS)
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

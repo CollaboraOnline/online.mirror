@@ -10,18 +10,17 @@
  */
 
 /*
- * Test global variable definitions.
+ * The process-level entry points that each server executable defines for itself. The standalone
+ * test programs run no forkit, so starting one reports failure.
  */
 
 #include <config.h>
 
-#include <common/Globals.hpp>
-#include <common/Util.hpp>
-#include <kit/KitGlobals.hpp>
-#include <wsd/WSDGlobals.hpp>
+#include <string>
 
-const bool Util::MobileApp = Util::isMobileAppBuild();
+#include <common/StringVector.hpp>
+#include <wsd/COOLWSD.hpp>
 
-const bool Util::KitInProcess = Util::isFuzzing() || Util::isMobileAppBuild();
+int createForkit(const std::string&, const StringVector&) { return -1; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -170,12 +170,7 @@ public:
 
     TilePrioritizer::Priority getTilePriority(const TileDesc &desc) const;
 
-    void saveLogUiBackground()
-#if defined(BUILDING_TESTS)
-    {}
-#else
-    ;
-#endif
+    void saveLogUiBackground();
 
     /// One "download as" export: where in the jail the copy is written, the format and
     /// filter options to write it in, and the id and file name the client's reply has to
