@@ -2173,6 +2173,9 @@ fi
 AC_SUBST(ENABLE_SERVER)
 AM_CONDITIONAL([ENABLE_SERVER], [test "$ENABLE_SERVER" = "true"])
 
+dnl The tree builds a page that an app loads from file://.
+AM_CONDITIONAL([ENABLE_APP], [test "$ENABLE_MOBILEAPP" = "true" -o "$ENABLE_QTAPP" = "true"])
+
 if test "$host_os" = "emscripten" ; then
     ENABLE_EMSCRIPTENAPP=true
 fi

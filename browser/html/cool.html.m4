@@ -97,16 +97,9 @@ m4_dnl Add branding.css for mobile apps, or the placeholder for server processin
 m4_ifelse(MOBILEAPP, [true], [<link rel="stylesheet" href="m4_ifelse(IOSAPP, [true], [Branding/])branding.css" />],
   [<!--%BRANDING_CSS%--> <!-- add your logo here -->])
 m4_dnl
-m4_dnl Handle localization. The Qt app page gets l10n-all.js (see below) instead
-m4_dnl of maps, whose entries only resolve when coolwsd serves them.
-m4_ifelse(QTAPP,[true],[],
-  MOBILEAPP,[true],
-  [
-   m4_ifelse(IOSAPP,[true],
-     [],
-     [<link rel="localizations" href="l10n/localizations.json" type="application/vnd.oftn.l10n+json"/>
-      <link rel="localizations" href="l10n/help-localizations.json" type="application/vnd.oftn.l10n+json"/>
-      <link rel="localizations" href="l10n/uno-localizations.json" type="application/vnd.oftn.l10n+json"/>])],
+m4_dnl Handle localization. App pages take their strings from l10n-all.js instead of maps,
+m4_dnl whose entries only resolve when coolwsd serves them.
+m4_ifelse(MOBILEAPP,[true],[],
   [<link rel="localizations" href="%SERVICE_ROOT%/browser/%VERSION%/l10n/localizations.json" type="application/vnd.oftn.l10n+json"/>
    <link rel="localizations" href="%SERVICE_ROOT%/browser/%VERSION%/l10n/help-localizations.json" type="application/vnd.oftn.l10n+json"/>
    <link rel="localizations" href="%SERVICE_ROOT%/browser/%VERSION%/l10n/uno-localizations.json" type="application/vnd.oftn.l10n+json"/>]

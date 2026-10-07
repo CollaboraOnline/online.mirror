@@ -38,19 +38,25 @@ NODE_PATH_SEP = $(if $(MSYSTEM),;,:)
 
 export NODE_PATH=$(call node_module_dir,$(abs_builddir)/node_modules)
 
-if !ENABLE_MOBILEAPP
+L10N_JSON =
+
+if ENABLE_SERVER
 # Only convert the po files for languages in Langs.conf (and only when a po
 # actually exists), so we don't ship languages the engine does not support.
-L10N_JSON = $(foreach L,$(L10N_LANGS),$(if $(wildcard $(srcdir)/po/help-$(L).po),$(DIST_FOLDER)/l10n/help-$(L).json))
+L10N_JSON += $(foreach L,$(L10N_LANGS),$(if $(wildcard $(srcdir)/po/help-$(L).po),$(DIST_FOLDER)/l10n/help-$(L).json))
 L10N_JSON += $(foreach L,$(L10N_LANGS),$(if $(wildcard $(srcdir)/po/ui-$(L).po),$(DIST_FOLDER)/l10n/ui-$(L).json))
-if ENABLE_QTAPP
-# The Qt app page loads the table as its own file (see cool.html.m4). It is
-# not L10N_ALL_JS, which would paste it into the server bundle.js too.
+endif
+
+if ENABLE_APP
+# An app page loads from file://, where the maps in l10n/ do not resolve, so it takes every
+# translation from l10n-all.js.
 L10N_JSON += $(DIST_FOLDER)/l10n-all.js $(SETTINGS_L10N_JS)
 endif
-else
+
+if ENABLE_MOBILEAPP
+# bundle.js belongs to the app alone, so the table goes inside it. A Qt tree shares bundle.js
+# with the server, so the Qt app page loads the table as its own file (see cool.html.m4).
 L10N_ALL_JS = $(DIST_FOLDER)/l10n-all.js
-L10N_JSON = $(L10N_ALL_JS) $(SETTINGS_L10N_JS)
 L10N_ALL_JS_ENTRY = l10n-all.js
 endif
 
