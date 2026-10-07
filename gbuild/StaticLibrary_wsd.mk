@@ -51,6 +51,7 @@ $(eval $(call gb_StaticLibrary_add_generated_exception_objects,wsd, \
     wsd/Admin \
     wsd/AdminModel \
     wsd/Auth \
+    wsd/COOLWSD \
     wsd/CacheUtil \
     wsd/ClientRequestDispatcher \
     wsd/ClientSession \

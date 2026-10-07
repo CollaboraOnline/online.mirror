@@ -333,7 +333,8 @@ if ENABLE_DEBUG
 coolwsd_inproc_SOURCES = $(coolwsd_sources) \
                          $(shared_sources) \
                          $(coolforkit_sources) \
-                         wsd/coolwsd-inproc.cpp
+                         wsd/coolwsd-inproc.cpp \
+                         wsd/coolwsd-main.cpp
 
 coolwsd_inproc_LDADD = libsimd.a libkitwsdglobals.a $(POCO_LIBS_HOST)
 coolwsd_inproc_LDFLAGS = $(POCO_LIBS_WHOLE) $(AM_LDFLAGS)
@@ -917,6 +918,7 @@ all_compiled_sources = $(sort \
 	$(shared_sources) \
 	$(coolwsd_sources) \
 	$(coolforkit_sources) \
+	wsd/coolwsd-main.cpp \
 	$(libsimd_a_SOURCES) \
 	$(libkitwsdglobals_a_SOURCES) \
 )

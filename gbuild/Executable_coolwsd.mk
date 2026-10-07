@@ -64,8 +64,8 @@ $(eval $(call gb_Executable_add_ldflags,coolwsd,-Wl$(COMMA)-E))
 endif
 
 $(eval $(call gb_Executable_add_generated_exception_objects,coolwsd, \
-    wsd/COOLWSD \
     wsd/coolwsd-fork \
+    wsd/coolwsd-main \
 ))
 
 # vim: set noet sw=4 ts=4:

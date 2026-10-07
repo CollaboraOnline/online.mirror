@@ -12,7 +12,6 @@ MAINTAINERCLEANFILES = Makefile.in
 
 common_fuzzer_sources = \
                        Common.cpp \
-                       ../wsd/COOLWSD.cpp \
                        ../wsd/coolwsd-inproc.cpp \
                        ../wsd/KitWSDGlobals.cpp
 
