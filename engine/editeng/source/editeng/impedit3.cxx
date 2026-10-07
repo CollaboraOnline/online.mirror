@@ -347,9 +347,10 @@ void ImpEditEngine::ScaleContentToFitWindow(o3tl::sorted_vector<sal_Int32>& aRep
     if (!maCustomScalingParameters.areValuesDefault())
         maScalingParameters = maCustomScalingParameters;
 
+    const tools::Long nFitHeight
+        = (mnTextFittingHeight ? mnTextFittingHeight : maMaxAutoPaperSize.Height()) * mnColumns;
     tools::Long nHeight = FormatParagraphs(aRepaintParagraphList, true);
-    bool bOverflow = nHeight - GetUncountedSpaceBelowLastLine(true)
-                     > (maMaxAutoPaperSize.Height() * mnColumns);
+    bool bOverflow = nHeight - GetUncountedSpaceBelowLastLine(true) > nFitHeight;
 
     std::span<const ScalingParameters> aScaleLevels = constScaleLevels;
     if (meTextFitting == EETextFitting::Legacy)
@@ -373,8 +374,7 @@ void ImpEditEngine::ScaleContentToFitWindow(o3tl::sorted_vector<sal_Int32>& aRep
 
         // Try again with different scaling factor
         nHeight = FormatParagraphs(aRepaintParagraphList, true);
-        bOverflow = nHeight - GetUncountedSpaceBelowLastLine(true)
-                    > (maMaxAutoPaperSize.Height() * mnColumns);
+        bOverflow = nHeight - GetUncountedSpaceBelowLastLine(true) > nFitHeight;
 
         // Increase scale level
         nCurrentScaleLevel++;

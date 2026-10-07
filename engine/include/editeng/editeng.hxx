@@ -429,6 +429,7 @@ public:
     SAL_DLLPRIVATE void setLineSpacingBelowBaseline(bool bBelow);
     SAL_DLLPRIVATE bool isLineSpacingBelowBaseline() const;
     SAL_DLLPRIVATE void setTextFitting(EETextFitting eFitting);
+    SAL_DLLPRIVATE void setTextFittingHeight(tools::Long nHeight);
 
     void            SetItemPool( SfxItemPool* pPool );
     SfxItemPool*    GetItemPool() const;

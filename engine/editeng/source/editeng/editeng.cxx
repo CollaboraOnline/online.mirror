@@ -1443,6 +1443,11 @@ void EditEngine::setTextFitting(EETextFitting eFitting)
     getImpl().setTextFitting(eFitting);
 }
 
+void EditEngine::setTextFittingHeight(tools::Long nHeight)
+{
+    getImpl().setTextFittingHeight(nHeight);
+}
+
 bool EditEngine::ShouldCreateBigTextObject() const
 {
     sal_Int32 nTextPortions = 0;

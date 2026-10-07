@@ -527,6 +527,11 @@ void Outliner::setTextFitting(EETextFitting eFitting) const
     pEditEngine->setTextFitting(eFitting);
 }
 
+void Outliner::setTextFittingHeight(tools::Long nHeight) const
+{
+    pEditEngine->setTextFittingHeight(nHeight);
+}
+
 void Outliner::EraseVirtualDevice()
 {
     pEditEngine->EraseVirtualDevice();

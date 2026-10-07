@@ -196,6 +196,7 @@ void Outliner::Init( OutlinerMode nMode )
     }
 
     pEditEngine->SetControlWord( nCtrl );
+    pEditEngine->setTextFittingHeight(0);
 
     const bool bWasUndoEnabled(IsUndoEnabled());
     EnableUndo(false);

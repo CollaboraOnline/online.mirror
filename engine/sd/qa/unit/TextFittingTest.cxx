@@ -711,6 +711,38 @@ CPPUNIT_TEST_FIXTURE(TextFittingTest, testEnterAtTheEndRefitsLikeReference)
     }
 }
 
+CPPUNIT_TEST_FIXTURE(TextFittingTest, testParagraphAddedWithEnterStaysInView)
+{
+    // On slide 3 the paragraph added with Enter overflows the box, as in the reference program,
+    // and it is still shown and reachable by the cursor while the text is edited.
+    createSdImpressDoc("pptx/TextFittingTrailingEmptyParagraph.pptx");
+    SdXImpressDocument* pXImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+    CPPUNIT_ASSERT(pXImpressDocument);
+    auto pViewShell
+        = dynamic_cast<sd::DrawViewShell*>(pXImpressDocument->GetDocShell()->GetViewShell());
+    CPPUNIT_ASSERT(pViewShell);
+    pViewShell->SwitchPage(2);
+    Scheduler::ProcessEventsToIdle();
+    auto pBody = DynCastSdrTextObj(pViewShell->GetActualPage()->GetPresObj(PresObjKind::Outline));
+    CPPUNIT_ASSERT(pBody);
+
+    SdrView* pView = pViewShell->GetView();
+    pView->MarkObj(pBody, pView->GetSdrPageView());
+    Scheduler::ProcessEventsToIdle();
+    typeKey(pXImpressDocument, KEY_RETURN);
+    CPPUNIT_ASSERT(pView->IsTextEdit());
+    EditView& rEditView = pView->GetTextEditOutlinerView()->GetEditView();
+    EditEngine& rEditEngine = rEditView.getEditEngine();
+    rEditView.SetSelection(ESelection(rEditEngine.GetParagraphCount() - 1, EE_TEXTPOS_MAX));
+    typeKey(pXImpressDocument, KEY_RETURN);
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, rEditEngine.getScalingParameters().fFontY, 1E-4);
+    const tools::Long nTextHeight = rEditEngine.GetTextHeight();
+    CPPUNIT_ASSERT_GREATER(pBody->GetLogicRect().GetHeight(), nTextHeight);
+    CPPUNIT_ASSERT_GREATEREQUAL(nTextHeight, rEditView.GetOutputArea().GetHeight());
+    pView->SdrEndTextEdit();
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

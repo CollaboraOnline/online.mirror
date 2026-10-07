@@ -782,6 +782,7 @@ public:
     void setRoundFontSizeToPt(bool bRound) const;
     void setLineSpacingBelowBaseline(bool bBelow) const;
     void setTextFitting(EETextFitting eFitting) const;
+    void setTextFittingHeight(tools::Long nHeight) const;
 
     void            EraseVirtualDevice();
 

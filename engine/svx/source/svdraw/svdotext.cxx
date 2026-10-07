@@ -1237,7 +1237,11 @@ void SdrTextObj::setupAutoFitText(SdrOutliner& rOutliner, const Size& rTextBoxSi
         rOutliner.setTextFitting(EETextFitting::Title);
     else
         rOutliner.setTextFitting(EETextFitting::Body);
-    rOutliner.SetMaxAutoPaperSize(rTextBoxSize);
+    rOutliner.setTextFittingHeight(rTextBoxSize.Height());
+    // While the text is edited, its paper keeps the maximum size of text edit, so text that
+    // overflows the box stays visible and reachable by the cursor.
+    if (!mbInEditMode)
+        rOutliner.SetMaxAutoPaperSize(rTextBoxSize);
     rOutliner.SetPaperSize(rTextBoxSize);
 
     const SdrTextFitToSizeTypeItem& rItem = GetObjectItem(SDRATTR_TEXT_FITTOSIZE);

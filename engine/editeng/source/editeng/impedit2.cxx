@@ -110,6 +110,7 @@ ImpEditEngine::ImpEditEngine( EditEngine* pEE, SfxItemPool* pItemPool, Outliner*
     mbRoundToNearestPt(false),
     mbLineSpacingBelowBaseline(false),
     meTextFitting(EETextFitting::Body),
+    mnTextFittingHeight(0),
     mnAsianCompressionMode(CharCompressType::NONE),
     meDefaultHorizontalTextDirection(EEHorizontalTextDirection::Default),
     mnBigTextObjectStart(20),

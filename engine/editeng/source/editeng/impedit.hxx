@@ -599,6 +599,8 @@ private:
     bool mbRoundToNearestPt;
     bool mbLineSpacingBelowBaseline;
     EETextFitting meTextFitting;
+    // The height that text fitting fits the text into. 0 means the maximum paper height.
+    tools::Long mnTextFittingHeight;
 
     CharCompressType mnAsianCompressionMode;
 
@@ -871,6 +873,7 @@ private:
     void setLineSpacingBelowBaseline(bool bBelow) { mbLineSpacingBelowBaseline = bBelow; }
     bool isLineSpacingBelowBaseline() const { return mbLineSpacingBelowBaseline; }
     void setTextFitting(EETextFitting eFitting) { meTextFitting = eFitting; }
+    void setTextFittingHeight(tools::Long nHeight) { mnTextFittingHeight = nHeight; }
     double roundToNearestPt(double fInput) const;
 
     ContentNode*        GetPrevVisNode( ContentNode const * pCurNode );
