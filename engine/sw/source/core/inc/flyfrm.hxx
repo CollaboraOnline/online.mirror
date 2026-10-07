@@ -238,6 +238,10 @@ public:
         return _rLower.IsLowerOf( this );
     }
 
+    /// Returns the size that the layout takes a relative width and a relative height in rSz as
+    /// percentages of.
+    Size GetPercentReference(const SwFormatFrameSize& rSz) const;
+
     SwFrame *FindLastLower();
 
     // #i13147# - add parameter <_bForPaint> to avoid load of

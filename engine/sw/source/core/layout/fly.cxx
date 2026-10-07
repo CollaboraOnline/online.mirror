@@ -3106,6 +3106,59 @@ void SwFlyFrame::NotifyDrawObj()
     }
 }
 
+Size SwFlyFrame::GetPercentReference(const SwFormatFrameSize& rSz) const
+{
+    const SwFrame *pRel = IsFlyLayFrame() ? GetAnchorFrame() : GetAnchorFrame()->GetUpper();
+    if( !pRel ) // LAYER_IMPL
+        return Size();
+
+    tools::Long nRelWidth = LONG_MAX, nRelHeight = LONG_MAX;
+    const SwViewShell *pSh = getRootFrame()->GetCurrShell();
+    if ( ( pRel->IsBodyFrame() || pRel->IsPageFrame() ) &&
+         pSh && pSh->GetViewOptions()->getBrowseMode() &&
+         pSh->VisArea().HasArea() )
+    {
+        nRelWidth  = pSh->GetBrowseWidth();
+        nRelHeight = pSh->VisArea().Height();
+        Size aBorder = pSh->GetOut()->PixelToLogic( pSh->GetBrowseBorder() );
+        nRelWidth  = std::min( nRelWidth,  pRel->getFramePrintArea().Width() );
+        nRelHeight -= 2*aBorder.Height();
+        nRelHeight = std::min( nRelHeight, pRel->getFramePrintArea().Height() );
+    }
+
+    // At the moment only the "== PAGE_FRAME" and "!= PAGE_FRAME" cases are handled.
+    // When size is a relative to page size, ignore size of SwBodyFrame.
+    if (rSz.GetWidthPercentRelation() != text::RelOrientation::PAGE_FRAME)
+        nRelWidth  = std::min( nRelWidth,  pRel->getFramePrintArea().Width() );
+    else if ( pRel->IsPageFrame() )
+        nRelWidth  = std::min( nRelWidth,  pRel->getFrameArea().Width() );
+
+    if (rSz.GetHeightPercentRelation() != text::RelOrientation::PAGE_FRAME)
+        nRelHeight = std::min( nRelHeight, pRel->getFramePrintArea().Height() );
+    else if ( pRel->IsPageFrame() )
+        nRelHeight = std::min( nRelHeight, pRel->getFrameArea().Height() );
+
+    if( !pRel->IsPageFrame() )
+    {
+        const SwPageFrame* pPage = FindPageFrame();
+        if( pPage )
+        {
+            if (rSz.GetWidthPercentRelation() == text::RelOrientation::PAGE_FRAME)
+                // Ignore margins of pPage.
+                nRelWidth  = std::min( nRelWidth,  pPage->getFrameArea().Width() );
+            else
+                nRelWidth  = std::min( nRelWidth,  pPage->getFramePrintArea().Width() );
+            if (rSz.GetHeightPercentRelation() == text::RelOrientation::PAGE_FRAME)
+                // Ignore margins of pPage.
+                nRelHeight = std::min( nRelHeight, pPage->getFrameArea().Height() );
+            else
+                nRelHeight = std::min( nRelHeight, pPage->getFramePrintArea().Height() );
+        }
+    }
+
+    return Size(nRelWidth, nRelHeight);
+}
+
 Size SwFlyFrame::CalcRel( const SwFormatFrameSize &rSz ) const
 {
     Size aRet( rSz.GetSize() );
@@ -3113,49 +3166,9 @@ Size SwFlyFrame::CalcRel( const SwFormatFrameSize &rSz ) const
     const SwFrame *pRel = IsFlyLayFrame() ? GetAnchorFrame() : GetAnchorFrame()->GetUpper();
     if( pRel ) // LAYER_IMPL
     {
-        tools::Long nRelWidth = LONG_MAX, nRelHeight = LONG_MAX;
-        const SwViewShell *pSh = getRootFrame()->GetCurrShell();
-        if ( ( pRel->IsBodyFrame() || pRel->IsPageFrame() ) &&
-             pSh && pSh->GetViewOptions()->getBrowseMode() &&
-             pSh->VisArea().HasArea() )
-        {
-            nRelWidth  = pSh->GetBrowseWidth();
-            nRelHeight = pSh->VisArea().Height();
-            Size aBorder = pSh->GetOut()->PixelToLogic( pSh->GetBrowseBorder() );
-            nRelWidth  = std::min( nRelWidth,  pRel->getFramePrintArea().Width() );
-            nRelHeight -= 2*aBorder.Height();
-            nRelHeight = std::min( nRelHeight, pRel->getFramePrintArea().Height() );
-        }
-
-        // At the moment only the "== PAGE_FRAME" and "!= PAGE_FRAME" cases are handled.
-        // When size is a relative to page size, ignore size of SwBodyFrame.
-        if (rSz.GetWidthPercentRelation() != text::RelOrientation::PAGE_FRAME)
-            nRelWidth  = std::min( nRelWidth,  pRel->getFramePrintArea().Width() );
-        else if ( pRel->IsPageFrame() )
-            nRelWidth  = std::min( nRelWidth,  pRel->getFrameArea().Width() );
-
-        if (rSz.GetHeightPercentRelation() != text::RelOrientation::PAGE_FRAME)
-            nRelHeight = std::min( nRelHeight, pRel->getFramePrintArea().Height() );
-        else if ( pRel->IsPageFrame() )
-            nRelHeight = std::min( nRelHeight, pRel->getFrameArea().Height() );
-
-        if( !pRel->IsPageFrame() )
-        {
-            const SwPageFrame* pPage = FindPageFrame();
-            if( pPage )
-            {
-                if (rSz.GetWidthPercentRelation() == text::RelOrientation::PAGE_FRAME)
-                    // Ignore margins of pPage.
-                    nRelWidth  = std::min( nRelWidth,  pPage->getFrameArea().Width() );
-                else
-                    nRelWidth  = std::min( nRelWidth,  pPage->getFramePrintArea().Width() );
-                if (rSz.GetHeightPercentRelation() == text::RelOrientation::PAGE_FRAME)
-                    // Ignore margins of pPage.
-                    nRelHeight = std::min( nRelHeight, pPage->getFrameArea().Height() );
-                else
-                    nRelHeight = std::min( nRelHeight, pPage->getFramePrintArea().Height() );
-            }
-        }
+        const Size aReference = GetPercentReference(rSz);
+        const tools::Long nRelWidth = aReference.Width();
+        const tools::Long nRelHeight = aReference.Height();
 
         if ( rSz.GetWidthPercent() && rSz.GetWidthPercent() != SwFormatFrameSize::SYNCED )
             aRet.setWidth(rtl::math::round(double(nRelWidth) * rSz.GetWidthPercent() / 100));

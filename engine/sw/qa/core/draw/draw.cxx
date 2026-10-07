@@ -193,6 +193,28 @@ CPPUNIT_TEST_FIXTURE(SwCoreDrawTest, testHeaderPolylineCopyPolyPolygon)
     CPPUNIT_ASSERT_DOUBLES_EQUAL(aOriginalPoints[0][0].Y, aOriginalPointsAfter[0][0].Y, 2);
 }
 
+CPPUNIT_TEST_FIXTURE(SwCoreDrawTest, testResizePageRelativeFrame)
+{
+    // Given a frame that is 25% of the page wide:
+    createSwDoc("page-relative-frame.fodt");
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    SwRect aOldRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    SdrObject* pObject = pWrtShell->GetFlyFrameFormat()->FindRealSdrObject();
+    CPPUNIT_ASSERT(pObject);
+
+    // When the frame is made 60% as wide with the mouse:
+    pObject->Resize(pObject->GetSnapRect().TopLeft(), 0.6, 1.0);
+
+    // Then the frame has the new width, as a percentage of the page:
+    calcLayout();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    SwRect aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    // Without the accompanying fix in place, this test would have failed, because the new
+    // percentage was measured against the paragraph area and then taken of the wider page.
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOldRect.Width() * 0.6, aNewRect.Width(), 2.0);
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
