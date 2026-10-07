@@ -22,6 +22,7 @@
 #include <Poco/URI.h>
 #include <Poco/Util/LayeredConfiguration.h>
 
+#include <set>
 #include <string>
 
 /// Verifies that a frame-ancestors list in net.content_security_policy is widened, not obeyed
@@ -64,9 +65,10 @@ private:
         return Poco::URI(helpers::getTestServerURI()).getHost() + ":*";
     }
 
-    /// The frame-ancestors sources of a response, or the empty string when the response carries
-    /// no such directive.
-    std::string getFrameAncestors(const std::shared_ptr<const http::Response>& response) const
+    /// The sources of a directive in the CSP of a response, or the empty string when the response
+    /// carries no such directive.
+    std::string getDirective(const std::shared_ptr<const http::Response>& response,
+                             const std::string& name) const
     {
         const std::string csp = response->header().get("Content-Security-Policy", std::string());
         TST_LOG("CSP: " << csp);
@@ -75,12 +77,36 @@ private:
         for (std::size_t i = 0; i < directives.size(); ++i)
         {
             const std::string directive = Util::trimmed(directives[i]);
-            constexpr std::string_view name = "frame-ancestors";
-            if (directive.starts_with(name))
+            if (directive.starts_with(name + ' '))
                 return Util::trimmed(directive.substr(name.size()));
         }
 
         return std::string();
+    }
+
+    /// The frame-ancestors sources of a response, or the empty string when the response carries
+    /// no such directive.
+    std::string getFrameAncestors(const std::shared_ptr<const http::Response>& response) const
+    {
+        return getDirective(response, "frame-ancestors");
+    }
+
+    /// The configured frame ancestors reach the policy both through the
+    /// net.content_security_policy merge and through the widened list, and must still be listed
+    /// only once.
+    void assertSourcesListedOnce(const std::string& sources, const std::string& what)
+    {
+        std::set<std::string> seen;
+        const StringVector tokens = StringVector::tokenize(sources, ' ');
+        for (std::size_t i = 0; i < tokens.size(); ++i)
+        {
+            if (tokens[i].empty())
+                continue;
+
+            LOK_ASSERT_MESSAGE("Expected [" + tokens[i] + "] to be listed once in " + what +
+                                   ", which was [" + sources + ']',
+                               seen.insert(tokens[i]).second);
+        }
     }
 
     void assertHasAncestor(const std::string& frameAncestors, const std::string& expected,
@@ -121,6 +147,9 @@ private:
         const std::string frameAncestors = getFrameAncestors(response);
         assertHasAncestor(frameAncestors, kPinnedAncestor, "cool.html");
         assertHasAncestor(frameAncestors, coolwsdAncestor(), "cool.html");
+        assertSourcesListedOnce(frameAncestors, "the frame-ancestors of cool.html");
+        assertSourcesListedOnce(getDirective(response, "img-src"), "the img-src of cool.html");
+        assertSourcesListedOnce(getDirective(response, "frame-src"), "the frame-src of cool.html");
     }
 
     /// The document page, requested the way a relay requests it: the form carries the origin of
@@ -168,6 +197,7 @@ private:
         const std::string frameAncestors = getFrameAncestors(getSettingsPage(std::string()));
         assertHasAncestor(frameAncestors, kPinnedAncestor, "the settings page");
         assertHasAncestor(frameAncestors, coolwsdAncestor(), "the settings page");
+        assertSourcesListedOnce(frameAncestors, "the frame-ancestors of the settings page");
     }
 
     /// An integrator on a host of its own is allowed to frame its settings page too.
@@ -179,6 +209,7 @@ private:
         assertHasAncestor(frameAncestors, coolwsdAncestor(), "the settings page");
         assertHasAncestor(frameAncestors, std::string(kIntegratorHost) + ":*",
                           "the settings page");
+        assertSourcesListedOnce(frameAncestors, "the frame-ancestors of the settings page");
     }
 
     /// A wopi_setting_base_url that is no URL at all contributes no ancestor, and does not stop
