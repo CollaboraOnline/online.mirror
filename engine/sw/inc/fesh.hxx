@@ -452,6 +452,16 @@ public:
     /// the selected frame as percentages of, or an empty size when no frame is selected.
     Size GetFlyPercentReference(const SwFormatFrameSize& rSize) const;
 
+    /** Resize the caption frame around the selected frame, so that the selected frame gets rSize
+     instead of rOldSize. Only the sides that differ between the two sizes change.
+     The selected frame is in a caption frame when it has a relative width and is anchored to the
+     only paragraph of that frame, which contains the caption number.
+     @return false if the selected frame is not in a caption frame, if the caption frame has a
+     relative width, or if the width of the selected frame is relative to the page.
+     rUpdateHeightPercent becomes true when the selected frame has a relative height that the
+     caption frame does not take, so that relative height still has to match the new height. */
+    bool SetCaptionFlySize(const Size& rSize, const Size& rOldSize, bool& rUpdateHeightPercent);
+
     /// The layout has been changed, so the active object has to be moved after that
     virtual void MoveObjectIfActive( svt::EmbeddedObjectRef& xObj, const Point& rOffset );
 

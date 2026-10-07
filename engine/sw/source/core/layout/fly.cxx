@@ -78,6 +78,9 @@
 #include <bodyfrm.hxx>
 #include <FrameControlsManager.hxx>
 #include <ndtxt.hxx>
+#include <fldbas.hxx>
+#include <fmtfld.hxx>
+#include <txatbase.hxx>
 #include <formatflysplit.hxx>
 
 using namespace ::com::sun::star;
@@ -2759,6 +2762,117 @@ bool SwFlyFrame::IsLowerOf( const SwLayoutFrame* pUpperFrame ) const
                : pFrame->GetUpper();
     } while ( pFrame );
     return false;
+}
+
+SwFlyFrame* SwFlyFrame::FindCaptionFly() const
+{
+    if (!GetFormat()->GetFrameSize().GetWidthPercent())
+        return nullptr;
+
+    const SwFrame* pAnchor = GetAnchorFrame();
+    if (!pAnchor || !pAnchor->IsTextFrame() || pAnchor->GetNext() || pAnchor->GetPrev()
+        || !pAnchor->GetUpper()->IsFlyFrame())
+        return nullptr;
+
+    sw::MergedAttrIter aIter(*static_cast<SwTextFrame const*>(pAnchor));
+    for (SwTextAttr const* pHint = aIter.NextAttr(); pHint; pHint = aIter.NextAttr())
+    {
+        const SfxPoolItem* pItem = &pHint->GetAttr();
+        if (RES_TXTATR_FIELD == pItem->Which()
+            && SwFieldTypesEnum::Sequence
+                   == static_cast<const SwFormatField*>(pItem)->GetField()->GetTypeId())
+        {
+            return const_cast<SwFlyFrame*>(static_cast<const SwFlyFrame*>(pAnchor->GetUpper()));
+        }
+    }
+    return nullptr;
+}
+
+/// Returns the smallest whole of which nPercent percent, rounded to the nearest as the layout does,
+/// is at least nPart. Up to 100 percent, that percentage of it is exactly nPart.
+static tools::Long lcl_WholeForPercent(tools::Long nPart, sal_uInt8 nPercent)
+{
+    // The smallest whole for which whole * nPercent / 100 >= nPart - 0.5, in integers.
+    return (nPart * 200 - 100 + 2 * nPercent - 1) / (2 * nPercent);
+}
+
+bool SwFlyFrame::ChgCaptionFlySize(const Size& rNewSize, const Size& rOldSize,
+                                   bool& rUpdateHeightPercent)
+{
+    rUpdateHeightPercent = false;
+    SwFlyFrame* pCaptionFly = FindCaptionFly();
+    if (!pCaptionFly)
+        return false;
+
+    // A caption frame with a relative width is sized by the layout, and a width relative to the
+    // page does not follow the caption frame. In both cases this frame keeps resizing itself
+    // through its own percentage.
+    const SwFormatFrameSize& rFrameSize = GetFormat()->GetFrameSize();
+    SwFrameFormat* pCaptionFormat = pCaptionFly->GetFormat();
+    SwFormatFrameSize aCaptionFrameSize(pCaptionFormat->GetFrameSize());
+    const sal_uInt8 nWidthPercent = rFrameSize.GetWidthPercent();
+    if (aCaptionFrameSize.GetWidthPercent()
+        || (nWidthPercent != SwFormatFrameSize::SYNCED
+            && rFrameSize.GetWidthPercentRelation() == text::RelOrientation::PAGE_FRAME))
+        return false;
+
+    // A percentage of this frame is relative to the print area of the caption frame, so that print
+    // area is sized from the percentage, and the caption frame keeps its borders and padding around
+    // it. The layout takes a percentage of at most the print area of the page, so the print area of
+    // the caption frame is not made larger than that. A size synced to the other side by the size
+    // ratio does not follow the caption frame, so the caption frame keeps the space it has around
+    // this frame.
+    const SwPageFrame* pPage = pCaptionFly->FindPageFrame();
+    const Size aPageSize = pPage ? pPage->getFramePrintArea().SSize() : Size(LONG_MAX, LONG_MAX);
+    bool bCaptionChanged = false;
+    if (rNewSize.Width() != rOldSize.Width())
+    {
+        if (nWidthPercent != SwFormatFrameSize::SYNCED)
+            aCaptionFrameSize.SetWidth(
+                std::min(lcl_WholeForPercent(rNewSize.Width(), nWidthPercent), aPageSize.Width())
+                + pCaptionFly->getFrameArea().Width() - pCaptionFly->getFramePrintArea().Width());
+        else
+            aCaptionFrameSize.SetWidth(rNewSize.Width() + pCaptionFly->getFrameArea().Width()
+                                       - getFrameArea().Width());
+        bCaptionChanged = true;
+    }
+
+    // A caption frame with a minimum height grows with its content, and one with a relative height
+    // is sized by the layout, so only a fixed absolute height is set here. Below this frame, the
+    // caption frame also holds the caption text. A relative height of this frame that the caption
+    // frame does not take stays with this frame.
+    if (rNewSize.Height() != rOldSize.Height())
+    {
+        const sal_uInt8 nHeightPercent = rFrameSize.GetHeightPercent();
+        const bool bRelativeHeight = nHeightPercent && nHeightPercent != SwFormatFrameSize::SYNCED;
+        const bool bFixedCaptionHeight
+            = aCaptionFrameSize.GetHeightSizeType() != SwFrameSize::Minimum
+              && !aCaptionFrameSize.GetHeightPercent();
+        if (bFixedCaptionHeight && !bRelativeHeight)
+        {
+            aCaptionFrameSize.SetHeight(rNewSize.Height() + pCaptionFly->getFrameArea().Height()
+                                        - getFrameArea().Height());
+            bCaptionChanged = true;
+        }
+        else if (bFixedCaptionHeight
+                 && rFrameSize.GetHeightPercentRelation() != text::RelOrientation::PAGE_FRAME)
+        {
+            aCaptionFrameSize.SetHeight(
+                std::min(lcl_WholeForPercent(rNewSize.Height(), nHeightPercent),
+                         aPageSize.Height())
+                + pCaptionFly->getFrameArea().Height() - pCaptionFly->getFramePrintArea().Height());
+            bCaptionChanged = true;
+        }
+        else
+            rUpdateHeightPercent = bRelativeHeight;
+    }
+
+    if (bCaptionChanged)
+    {
+        // go via the Doc for UNDO
+        pCaptionFormat->GetDoc().SetAttr(aCaptionFrameSize, *pCaptionFormat);
+    }
+    return true;
 }
 
 void SwFlyFrame::Cut()

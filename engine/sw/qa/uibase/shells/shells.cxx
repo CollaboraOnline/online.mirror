@@ -22,6 +22,7 @@
 
 #include <sfx2/dispatch.hxx>
 #include <sfx2/viewfrm.hxx>
+#include <svl/intitem.hxx>
 #include <svx/svdpage.hxx>
 #include <editeng/eeitem.hxx>
 #include <editeng/adjustitem.hxx>
@@ -1856,6 +1857,122 @@ CPPUNIT_TEST_FIXTURE(SwUibaseShellsTest, testUpdateSelectedField)
     CPPUNIT_ASSERT(aTimeFieldAfter != aTimeFieldBefore);
 }
 
+CPPUNIT_TEST_FIXTURE(SwUibaseShellsTest, testSidebarWidthOfImageWithCaption)
+{
+    // Given an image with a caption: the image is 100% of the caption frame wide (3 inches) and its
+    // height is synced to its width (2 inches):
+    createSwDoc("image-caption-resize.fodt");
+    SwDocShell* pDocShell = getSwDocShell();
+    SwWrtShell* pWrtShell = pDocShell->GetWrtShell();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    pDocShell->GetView()->SelectShell();
+    SwRect aOldRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(4320), aOldRect.Width());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(2880), aOldRect.Height());
+
+    // When the sidebar sets its width to 4.5 inches, keeping its height:
+    SfxUInt32Item aWidthItem(SID_ATTR_TRANSFORM_WIDTH, 6480);
+    SfxUInt32Item aHeightItem(SID_ATTR_TRANSFORM_HEIGHT, 2880);
+    pDocShell->GetView()->GetViewFrame().GetDispatcher()->ExecuteList(
+        SID_ATTR_TRANSFORM, SfxCallMode::SYNCHRON, { &aWidthItem, &aHeightItem });
+
+    // Then the image is wider and its height is the same:
+    calcLayout();
+    SwRect aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    // Without the accompanying fix in place, this test would have failed with:
+    // - Expected: 6480
+    // - Actual  : 4320
+    // i.e. the image kept the width of the caption frame and only its height shrank.
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(6480), aNewRect.Width());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(2880), aNewRect.Height());
+
+    // And the caption frame is as wide as the image, so the image stays inside it:
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    SwRect aCaptionRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(6480), aCaptionRect.Width());
+
+    // And one undo restores the old width of both:
+    pWrtShell->Undo();
+    calcLayout();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    aCaptionRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(4320), aCaptionRect.Width());
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(4320), aNewRect.Width());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(2880), aNewRect.Height());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUibaseShellsTest, testSidebarWidthOfImageWithCaptionPercent)
+{
+    // Given an image that is 80% of its caption frame wide, with its height synced to its width, in
+    // a caption frame with borders and padding:
+    createSwDoc("image-caption-resize-percent.fodt");
+    SwDocShell* pDocShell = getSwDocShell();
+    SwWrtShell* pWrtShell = pDocShell->GetWrtShell();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    pDocShell->GetView()->SelectShell();
+    SwRect aOldRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+
+    // When the sidebar sets a width that is no whole percentage of the caption frame, keeping its
+    // height:
+    SfxUInt32Item aWidthItem(SID_ATTR_TRANSFORM_WIDTH, 4321);
+    SfxUInt32Item aHeightItem(SID_ATTR_TRANSFORM_HEIGHT, aOldRect.Height());
+    pDocShell->GetView()->GetViewFrame().GetDispatcher()->ExecuteList(
+        SID_ATTR_TRANSFORM, SfxCallMode::SYNCHRON, { &aWidthItem, &aHeightItem });
+
+    // Then the image has exactly the new width and its height is the same:
+    calcLayout();
+    SwRect aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    // Without the accompanying fix in place, this test would have failed with:
+    // - Expected: 4321
+    // - Actual  : 4307
+    // i.e. the new width became a whole percentage of the caption frame, 79%.
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(4321), aNewRect.Width());
+    CPPUNIT_ASSERT_EQUAL(aOldRect.Height(), aNewRect.Height());
+
+    // And the image is still 80% of the print area of the caption frame, which keeps its borders
+    // and padding:
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    SwRect aCaptionPrintRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbeddedPrt);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(5401), aCaptionPrintRect.Width());
+    SwRect aCaptionRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(5709), aCaptionRect.Width());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUibaseShellsTest, testSidebarSizeOfImageWithCaptionFixedHeight)
+{
+    // Given an image that is 100% of its caption frame wide (3 inches), with its height synced to
+    // its width (2 inches), in a caption frame with a fixed height of 3 inches:
+    createSwDoc("image-caption-resize-fixed-height.fodt");
+    SwDocShell* pDocShell = getSwDocShell();
+    SwWrtShell* pWrtShell = pDocShell->GetWrtShell();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    pDocShell->GetView()->SelectShell();
+
+    // When the sidebar makes the image 4.5 inches wide and 3 inches high:
+    SfxUInt32Item aWidthItem(SID_ATTR_TRANSFORM_WIDTH, 6480);
+    SfxUInt32Item aHeightItem(SID_ATTR_TRANSFORM_HEIGHT, 4320);
+    pDocShell->GetView()->GetViewFrame().GetDispatcher()->ExecuteList(
+        SID_ATTR_TRANSFORM, SfxCallMode::SYNCHRON, { &aWidthItem, &aHeightItem });
+
+    // Then the image has the new size:
+    calcLayout();
+    SwRect aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    // Without the accompanying fix in place, this test would have failed with:
+    // - Expected: 6480
+    // - Actual  : 4320
+    // i.e. the image kept the width of the caption frame.
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(6480), aNewRect.Width());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(4320), aNewRect.Height());
+
+    // And the caption frame keeps the 1 inch below the image for the caption text:
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    SwRect aCaptionRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(6480), aCaptionRect.Width());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(5760), aCaptionRect.Height());
+}
+
 CPPUNIT_TEST_FIXTURE(SwUibaseShellsTest, testSidebarWidthOfRelativeFrame)
 {
     // Given a frame that is 50% of the paragraph area wide:
@@ -1909,6 +2026,68 @@ CPPUNIT_TEST_FIXTURE(SwUibaseShellsTest, testSidebarWidthOfRelativeFrameInFrame)
     // - Actual  : 2880
     // i.e. the frame kept the width that its old percentage gave it.
     CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(4320), aNewRect.Width());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUibaseShellsTest, testSidebarWidthOfImageWithCaptionBeyondPage)
+{
+    // Given an image that is 100% of its caption frame wide:
+    createSwDoc("image-caption-resize.fodt");
+    SwDocShell* pDocShell = getSwDocShell();
+    SwWrtShell* pWrtShell = pDocShell->GetWrtShell();
+    SwRect aPagePrintRect = pWrtShell->GetAnyCurRect(CurRectType::PagePrt);
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    pDocShell->GetView()->SelectShell();
+
+    // When the sidebar sets a width that is larger than the text area of the page:
+    SfxUInt32Item aWidthItem(SID_ATTR_TRANSFORM_WIDTH, aPagePrintRect.Width() + 2000);
+    SfxUInt32Item aHeightItem(SID_ATTR_TRANSFORM_HEIGHT, 2880);
+    pDocShell->GetView()->GetViewFrame().GetDispatcher()->ExecuteList(
+        SID_ATTR_TRANSFORM, SfxCallMode::SYNCHRON, { &aWidthItem, &aHeightItem });
+
+    // Then the image is as wide as the text area of the page, which is the most that a percentage
+    // can give it:
+    calcLayout();
+    SwRect aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(aPagePrintRect.Width(), aNewRect.Width());
+
+    // And the caption frame is as wide as the image:
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    SwRect aCaptionRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(aNewRect.Width(), aCaptionRect.Width());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUibaseShellsTest, testSidebarHeightOfImageWithCaptionAfterFrameResize)
+{
+    // Given an image that is 100% of its caption frame wide, whose caption frame was then made 4.5
+    // inches wide:
+    createSwDoc("image-caption-resize.fodt");
+    SwDocShell* pDocShell = getSwDocShell();
+    SwWrtShell* pWrtShell = pDocShell->GetWrtShell();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    pDocShell->GetView()->SelectShell();
+    SfxUInt32Item aFrameWidthItem(SID_ATTR_TRANSFORM_WIDTH, 6480);
+    SfxUInt32Item aFrameHeightItem(SID_ATTR_TRANSFORM_HEIGHT, 2880);
+    pDocShell->GetView()->GetViewFrame().GetDispatcher()->ExecuteList(
+        SID_ATTR_TRANSFORM, SfxCallMode::SYNCHRON, { &aFrameWidthItem, &aFrameHeightItem });
+    calcLayout();
+
+    // When the sidebar changes only the height of the image, and sends the width that the image has
+    // stored:
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    pDocShell->GetView()->SelectShell();
+    SfxUInt32Item aWidthItem(SID_ATTR_TRANSFORM_WIDTH,
+                             pWrtShell->GetFlyFrameFormat()->GetFrameSize().GetWidth());
+    SfxUInt32Item aHeightItem(SID_ATTR_TRANSFORM_HEIGHT, 2000);
+    pDocShell->GetView()->GetViewFrame().GetDispatcher()->ExecuteList(
+        SID_ATTR_TRANSFORM, SfxCallMode::SYNCHRON, { &aWidthItem, &aHeightItem });
+
+    // Then the caption frame keeps its width, and so does the image:
+    calcLayout();
+    SwRect aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(6480), aNewRect.Width());
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    SwRect aCaptionRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(6480), aCaptionRect.Width());
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

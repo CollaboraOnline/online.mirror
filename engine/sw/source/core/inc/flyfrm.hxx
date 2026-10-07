@@ -242,6 +242,19 @@ public:
     /// percentages of.
     Size GetPercentReference(const SwFormatFrameSize& rSz) const;
 
+    /// Returns the caption frame around this frame: this frame has a relative width and is anchored
+    /// to the only paragraph of that frame, and the paragraph contains a sequence field, i.e. the
+    /// caption number.
+    SwFlyFrame* FindCaptionFly() const;
+
+    /// Resizes the caption frame around this frame, so that this frame gets rNewSize instead of
+    /// rOldSize. Only the sides that differ between the two sizes change. Returns false if this
+    /// frame is not in a caption frame, if the caption frame has a relative width, or if the width
+    /// of this frame is relative to the page. rUpdateHeightPercent becomes true when this frame has
+    /// a relative height that the caption frame does not take, so that relative height still has to
+    /// match the new height.
+    bool ChgCaptionFlySize(const Size& rNewSize, const Size& rOldSize, bool& rUpdateHeightPercent);
+
     SwFrame *FindLastLower();
 
     // #i13147# - add parameter <_bForPaint> to avoid load of

@@ -1428,6 +1428,14 @@ Size SwFEShell::GetFlyPercentReference(const SwFormatFrameSize& rSize) const
     return pFly ? pFly->GetPercentReference(rSize) : Size();
 }
 
+bool SwFEShell::SetCaptionFlySize(const Size& rSize, const Size& rOldSize,
+                                  bool& rUpdateHeightPercent)
+{
+    rUpdateHeightPercent = false;
+    SwFlyFrame* pFly = GetSelectedFlyFrame();
+    return pFly && pFly->ChgCaptionFlySize(rSize, rOldSize, rUpdateHeightPercent);
+}
+
 Size SwFEShell::RequestObjectResize( const SwRect &rRect, const uno::Reference < embed::XEmbeddedObject >& xObj )
 {
     Size aResult;
@@ -1457,44 +1465,27 @@ Size SwFEShell::RequestObjectResize( const SwRect &rRect, const uno::Reference <
 
         //JP 28.02.2001: Task 74707 - ask for fly in fly with automatic size
 
-        const SwFrame* pAnchor;
-        const SwFormatFrameSize& rFrameSz = pFly->GetFormat()->GetFrameSize();
-        if (m_bCheckForOLEInCaption &&
-            0 != rFrameSz.GetWidthPercent() &&
-            nullptr != (pAnchor = pFly->GetAnchorFrame()) &&
-            pAnchor->IsTextFrame() &&
-            !pAnchor->GetNext() && !pAnchor->GetPrev() &&
-            pAnchor->GetUpper()->IsFlyFrame())
+        if (m_bCheckForOLEInCaption)
         {
-            // search for a sequence field:
-            sw::MergedAttrIter iter(*static_cast<SwTextFrame const*>(pAnchor));
-            for (SwTextAttr const* pHint = iter.NextAttr(); pHint; pHint = iter.NextAttr())
+            if (SwFlyFrame* pChgFly = pFly->FindCaptionFly())
             {
-                const SfxPoolItem* pItem = &pHint->GetAttr();
-                if( RES_TXTATR_FIELD == pItem->Which()
-                    && SwFieldTypesEnum::Sequence == static_cast<const SwFormatField*>(pItem)->GetField()->GetTypeId() )
-                {
-                    // sequence field found
-                    SwFlyFrame* pChgFly = const_cast<SwFlyFrame*>(static_cast<const SwFlyFrame*>(pAnchor->GetUpper()));
-                    // calculate the changed size:
-                    // width must change, height can change
-                    Size aNewSz( aSz.Width() + pChgFly->getFrameArea().Width() -
-                                   pFly->getFramePrintArea().Width(), aSz.Height() );
+                // calculate the changed size:
+                // width must change, height can change
+                Size aNewSz( aSz.Width() + pChgFly->getFrameArea().Width() -
+                               pFly->getFramePrintArea().Width(), aSz.Height() );
 
-                    SwFrameFormat *pFormat = pChgFly->GetFormat();
-                    SwFormatFrameSize aFrameSz( pFormat->GetFrameSize() );
-                    aFrameSz.SetWidth( aNewSz.Width() );
-                    if( SwFrameSize::Minimum != aFrameSz.GetHeightSizeType() )
-                    {
-                        aNewSz.AdjustHeight(pChgFly->getFrameArea().Height() -
-                                               pFly->getFramePrintArea().Height() );
-                        if( std::abs( aNewSz.Height() - pChgFly->getFrameArea().Height()) > 1 )
-                            aFrameSz.SetHeight( aNewSz.Height() );
-                    }
-                    // via Doc for the Undo!
-                    pFormat->GetDoc().SetAttr( aFrameSz, *pFormat );
-                    break;
+                SwFrameFormat *pFormat = pChgFly->GetFormat();
+                SwFormatFrameSize aFrameSz( pFormat->GetFrameSize() );
+                aFrameSz.SetWidth( aNewSz.Width() );
+                if( SwFrameSize::Minimum != aFrameSz.GetHeightSizeType() )
+                {
+                    aNewSz.AdjustHeight(pChgFly->getFrameArea().Height() -
+                                           pFly->getFramePrintArea().Height() );
+                    if( std::abs( aNewSz.Height() - pChgFly->getFrameArea().Height()) > 1 )
+                        aFrameSz.SetHeight( aNewSz.Height() );
                 }
+                // via Doc for the Undo!
+                pFormat->GetDoc().SetAttr( aFrameSz, *pFormat );
             }
         }
 

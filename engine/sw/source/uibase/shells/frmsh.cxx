@@ -127,11 +127,13 @@ void SwFrameShell::ExecField(const SfxRequest& rReq)
 
 // The layout sizes a frame from its percentage when it has one, so a changed width or height also
 // updates that percentage, measured against the same reference area as the layout uses. A
-// percentage synced to the other side by the size ratio follows the new size as it is.
-static void lcl_UpdateSizePercent(SwWrtShell& rSh, SwFlyFrameAttrMgr& rMgr, const Size& rOldSize)
+// percentage synced to the other side by the size ratio follows the new size as it is. The width
+// percentage stays as it is when bUpdateWidth is false.
+static void lcl_UpdateSizePercent(SwWrtShell& rSh, SwFlyFrameAttrMgr& rMgr, const Size& rOldSize,
+                                  bool bUpdateWidth)
 {
     SwFormatFrameSize aFrameSize(rMgr.GetFrameSize());
-    const bool bRelativeWidth = aFrameSize.GetWidthPercent()
+    const bool bRelativeWidth = bUpdateWidth && aFrameSize.GetWidthPercent()
                                 && aFrameSize.GetWidthPercent() != SwFormatFrameSize::SYNCED
                                 && rOldSize.Width() != aFrameSize.GetWidth();
     const bool bRelativeHeight = aFrameSize.GetHeightPercent()
@@ -458,7 +460,25 @@ void SwFrameShell::Execute(SfxRequest &rReq)
             {
                 const Size aOldSize = aMgr.GetSize();
                 aMgr.SetSize( aNewSize );
-                lcl_UpdateSizePercent(rSh, aMgr, aOldSize);
+
+                // An image with a caption is a percentage of its caption frame wide, so the caption
+                // frame is resized to give the image the new size, and the image keeps its width
+                // percentage, both in one undo step.
+                rSh.StartAllAction();
+                rSh.StartUndo();
+                bool bUpdateHeightPercent = false;
+                if (rSh.SetCaptionFlySize(aMgr.GetSize(), aOldSize, bUpdateHeightPercent))
+                {
+                    if (bUpdateHeightPercent)
+                        lcl_UpdateSizePercent(rSh, aMgr, aOldSize, /*bUpdateWidth=*/false);
+                    aMgr.UpdateFlyFrame();
+                    bUpdateMgr = false;
+                }
+                rSh.EndUndo();
+                rSh.EndAllAction();
+
+                if (bUpdateMgr)
+                    lcl_UpdateSizePercent(rSh, aMgr, aOldSize, /*bUpdateWidth=*/true);
             }
             if (!bApplyNewPos && !bApplyNewSize)
             {

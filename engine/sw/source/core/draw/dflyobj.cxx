@@ -1100,17 +1100,23 @@ void SwVirtFlyDrawObj::NbcResize(const Point& rRef, double xFact, double yFact)
 
         SwFrameFormat *pFormat = GetFormat();
         const SwFormatFrameSize aOldFrameSz( pFormat->GetFrameSize() );
+        // An image with a caption is a percentage of its caption frame wide, so the caption frame
+        // is resized to give the image the new size, and the image keeps its width percentage.
+        bool bUpdateHeightPercent = false;
+        const bool bCaptionFly = GetFlyFrame()->ChgCaptionFlySize(
+            aSz, GetFlyFrame()->getFrameArea().SSize(), bUpdateHeightPercent );
         GetFlyFrame()->ChgSize( aSz );
         SwFormatFrameSize aFrameSz( pFormat->GetFrameSize() );
 
-        if ( aFrameSz.GetWidthPercent() || aFrameSz.GetHeightPercent() )
+        if ( bCaptionFly ? bUpdateHeightPercent
+                         : ( aFrameSz.GetWidthPercent() || aFrameSz.GetHeightPercent() ) )
         {
             // The new percentage is of the same size as the layout takes the percentage of.
             const Size aReference = GetFlyFrame()->GetPercentReference( aFrameSz );
             const tools::Long nRelWidth = aReference.Width();
             const tools::Long nRelHeight = aReference.Height();
 
-            if ( nRelWidth > 0 && aFrameSz.GetWidthPercent() &&
+            if ( !bCaptionFly && nRelWidth > 0 && aFrameSz.GetWidthPercent() &&
                  aFrameSz.GetWidthPercent() != SwFormatFrameSize::SYNCED &&
                  aOldFrameSz.GetWidth() != aFrameSz.GetWidth() )
             {

@@ -215,6 +215,142 @@ CPPUNIT_TEST_FIXTURE(SwCoreDrawTest, testResizePageRelativeFrame)
     CPPUNIT_ASSERT_DOUBLES_EQUAL(aOldRect.Width() * 0.6, aNewRect.Width(), 2.0);
 }
 
+CPPUNIT_TEST_FIXTURE(SwCoreDrawTest, testResizeImageWithCaption)
+{
+    // Given an image with a caption: the image is 100% of the caption frame wide (3 inches) and its
+    // height is synced to its width (2 inches):
+    createSwDoc("image-caption-resize.fodt");
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    SdrObject* pObject = pWrtShell->GetFlyFrameFormat()->FindRealSdrObject();
+    CPPUNIT_ASSERT(pObject);
+
+    // When the image is made 1.5 times as wide with the mouse, keeping its height:
+    pObject->Resize(pObject->GetSnapRect().TopLeft(), 1.5, 1.0);
+
+    // Then the image is wider and its height is the same:
+    calcLayout();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    SwRect aImageRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(6480), aImageRect.Width());
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(2880), aImageRect.Height());
+
+    // And the caption frame is as wide as the image, so the image stays inside it:
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    SwRect aCaptionRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    // Without the accompanying fix in place, this test would have failed with:
+    // - Expected: 6480
+    // - Actual  : 4320
+    // i.e. the image was 150% of the caption frame wide and stuck out of it.
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(6480), aCaptionRect.Width());
+}
+
+CPPUNIT_TEST_FIXTURE(SwCoreDrawTest, testResizeImageWithCaptionPercent)
+{
+    // Given an image that is 80% of its caption frame wide, with its height synced to its width, in
+    // a caption frame with borders and padding:
+    createSwDoc("image-caption-resize-percent.fodt");
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    SwRect aOldRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    SdrObject* pObject = pWrtShell->GetFlyFrameFormat()->FindRealSdrObject();
+    CPPUNIT_ASSERT(pObject);
+
+    // When the image is resized with the mouse to a width that is no whole percentage of the
+    // caption frame, keeping its height:
+    pObject->Resize(pObject->GetSnapRect().TopLeft(), 4321.0 / aOldRect.Width(), 1.0);
+
+    // Then the image has exactly the new width and its height is the same:
+    calcLayout();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    SwRect aImageRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    // Without the accompanying fix in place, this test would have failed with:
+    // - Expected: 4321
+    // - Actual  : 4307
+    // i.e. the new width became a whole percentage of the caption frame, 79%.
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(4321), aImageRect.Width());
+    CPPUNIT_ASSERT_EQUAL(aOldRect.Height(), aImageRect.Height());
+
+    // And the image is still 80% of the print area of the caption frame, which keeps its borders
+    // and padding:
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    SwRect aCaptionPrintRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbeddedPrt);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(5401), aCaptionPrintRect.Width());
+    SwRect aCaptionRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(static_cast<tools::Long>(5709), aCaptionRect.Width());
+}
+
+CPPUNIT_TEST_FIXTURE(SwCoreDrawTest, testResizeImageWithCaptionRelativeFrame)
+{
+    // Given an image that is 100% of its caption frame wide, in a caption frame that is 50% of the
+    // paragraph wide:
+    createSwDoc("image-caption-resize-relative-frame.fodt");
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    SwRect aOldRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    SdrObject* pObject = pWrtShell->GetFlyFrameFormat()->FindRealSdrObject();
+    CPPUNIT_ASSERT(pObject);
+
+    // When the image is made half as wide with the mouse, keeping its height:
+    pObject->Resize(pObject->GetSnapRect().TopLeft(), 0.5, 1.0);
+
+    // Then the caption frame keeps its relative width, and the image percentage follows the new
+    // width:
+    calcLayout();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    SwRect aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOldRect.Width() / 2.0, aNewRect.Width(), 1.0);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOldRect.Height(), aNewRect.Height(), 2.0);
+}
+
+CPPUNIT_TEST_FIXTURE(SwCoreDrawTest, testResizeImageWithCaptionPageRelative)
+{
+    // Given an image with a caption, which is 25% of the page wide:
+    createSwDoc("image-caption-resize-page-relative.fodt");
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    SwRect aOldCaptionRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    SwRect aOldRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    SdrObject* pObject = pWrtShell->GetFlyFrameFormat()->FindRealSdrObject();
+    CPPUNIT_ASSERT(pObject);
+
+    // When the image is made 60% as wide with the mouse, keeping its height:
+    pObject->Resize(pObject->GetSnapRect().TopLeft(), 0.6, 1.0);
+
+    // Then the image percentage of the page follows the new width, and the caption frame keeps its
+    // width:
+    calcLayout();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    SwRect aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOldRect.Width() * 0.6, aNewRect.Width(), 2.0);
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Frame1"_ustr), FLYCNTTYPE_FRM));
+    SwRect aCaptionRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(aOldCaptionRect.Width(), aCaptionRect.Width());
+}
+
+CPPUNIT_TEST_FIXTURE(SwCoreDrawTest, testResizeImageWithCaptionRelativeHeight)
+{
+    // Given an image that is 100% of its caption frame wide and 50% of it high, in a caption frame
+    // with a minimum height:
+    createSwDoc("image-caption-resize-relative-height.fodt");
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    SwRect aOldRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    SdrObject* pObject = pWrtShell->GetFlyFrameFormat()->FindRealSdrObject();
+    CPPUNIT_ASSERT(pObject);
+
+    // When the image is made half as high with the mouse, keeping its width:
+    pObject->Resize(pObject->GetSnapRect().TopLeft(), 1.0, 0.5);
+
+    // Then the image height percentage follows the new height:
+    calcLayout();
+    CPPUNIT_ASSERT(pWrtShell->GotoFly(UIName(u"Image1"_ustr), FLYCNTTYPE_GRF));
+    SwRect aNewRect = pWrtShell->GetAnyCurRect(CurRectType::FlyEmbedded);
+    CPPUNIT_ASSERT_EQUAL(aOldRect.Width(), aNewRect.Width());
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOldRect.Height() / 2.0, aNewRect.Height(), 1.0);
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
