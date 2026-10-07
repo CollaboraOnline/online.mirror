@@ -288,7 +288,7 @@ PasswordContainerInteractionHandler::~PasswordContainerInteractionHandler()
 
 
 // virtual
-OUString SAL_CALL
+OUString
 PasswordContainerInteractionHandler::getImplementationName()
 {
     return u"com.sun.star.comp.uui.PasswordContainerInteractionHandler"_ustr;
@@ -296,7 +296,7 @@ PasswordContainerInteractionHandler::getImplementationName()
 
 
 // virtual
-bool SAL_CALL
+bool
 PasswordContainerInteractionHandler::supportsService(
         const OUString& ServiceName )
 {
@@ -305,7 +305,7 @@ PasswordContainerInteractionHandler::supportsService(
 
 
 // virtual
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 PasswordContainerInteractionHandler::getSupportedServiceNames()
 {
     return { u"com.sun.star.task.PasswordContainerInteractionHandler"_ustr };
@@ -316,7 +316,7 @@ PasswordContainerInteractionHandler::getSupportedServiceNames()
 
 
 // virtual
-void SAL_CALL
+void
 PasswordContainerInteractionHandler::handle(
         const uno::Reference< task::XInteractionRequest >& rRequest )
 {
@@ -324,7 +324,7 @@ PasswordContainerInteractionHandler::handle(
 }
 
 // virtual
-bool SAL_CALL
+bool
 PasswordContainerInteractionHandler::handleInteractionRequest(
         const uno::Reference< task::XInteractionRequest >& rRequest )
 {

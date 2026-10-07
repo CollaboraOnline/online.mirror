@@ -37,13 +37,13 @@ UUIInteractionRequestStringResolver::~UUIInteractionRequestStringResolver()
 {
 }
 
-OUString SAL_CALL
+OUString
 UUIInteractionRequestStringResolver::getImplementationName()
 {
     return u"com.sun.star.comp.uui.UUIInteractionRequestStringResolver"_ustr;
 }
 
-bool SAL_CALL
+bool
 UUIInteractionRequestStringResolver::supportsService(
         OUString const & rServiceName)
 {
@@ -51,13 +51,13 @@ UUIInteractionRequestStringResolver::supportsService(
 }
 
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 UUIInteractionRequestStringResolver::getSupportedServiceNames()
 {
     return { u"com.sun.star.task.InteractionRequestStringResolver"_ustr };
 }
 
-beans::Optional< OUString > SAL_CALL
+beans::Optional< OUString >
 UUIInteractionRequestStringResolver::getStringFromInformationalRequest(
     const uno::Reference<
         task::XInteractionRequest >& Request )

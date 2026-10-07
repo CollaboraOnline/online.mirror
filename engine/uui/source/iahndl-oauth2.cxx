@@ -88,7 +88,7 @@ struct OAuth2Request::Impl
 
     DECL_LINK(CloseDialog, void*, void);
     bool initHTTP();
-    static void SAL_CALL listenHTTP(void* pThis);
+    static void listenHTTP(void* pThis);
     bool openBrowser() const;
     static void sendResponse(tcp::socket& socket, std::string_view body = {});
     void sendCloseResponse(tcp::socket& socket, std::u16string_view error) const;
@@ -183,7 +183,7 @@ bool OAuth2Request::Impl::initHTTP()
 // and DELETE requests, which mean stop the operation.
 
 // static
-void SAL_CALL OAuth2Request::Impl::listenHTTP(void* pThis)
+void OAuth2Request::Impl::listenHTTP(void* pThis)
 {
     Impl* impl = static_cast<Impl*>(pThis);
     assert(impl);

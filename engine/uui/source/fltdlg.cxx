@@ -156,7 +156,7 @@ public:
     {
     }
 
-    sal_Int32 SAL_CALL queryStringWidth(const OUString& sString) override
+    sal_Int32 queryStringWidth(const OUString& sString) override
     {
         return static_cast<sal_Int32>(m_pDevice->get_pixel_size(sString).Width());
     }

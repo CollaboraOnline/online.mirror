@@ -55,60 +55,60 @@ public:
     UUIInteractionHandler(const UUIInteractionHandler&) = delete;
     UUIInteractionHandler& operator=(const UUIInteractionHandler&) = delete;
 
-    virtual OUString SAL_CALL getImplementationName() override;
+    virtual OUString getImplementationName() override;
 
-    virtual bool SAL_CALL supportsService(OUString const & rServiceName) override;
+    virtual bool supportsService(OUString const & rServiceName) override;
 
-    virtual cpo::uno::Sequence< OUString > SAL_CALL
+    virtual cpo::uno::Sequence< OUString >
     getSupportedServiceNames() override;
 
-    virtual void SAL_CALL
+    virtual void
     initialize(
         cpo::uno::Sequence< cpo::uno::Any > const & rArguments) override;
 
-    virtual void SAL_CALL
+    virtual void
     handle(cpo::uno::Reference< css::task::XInteractionRequest > const & rRequest) override;
 
-    virtual bool SAL_CALL
+    virtual bool
         handleInteractionRequest(
             const cpo::uno::Reference< css::task::XInteractionRequest >& Request
         ) override;
 
-    virtual void SAL_CALL
+    virtual void
         addPropertyChangeListener( const OUString& /*aPropertyName*/, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& /*xListener*/ ) override
     {
         throw cpo::uno::RuntimeException(
             u"UUIInteractionHandler addPropertyChangeListener is not supported"_ustr);
     }
 
-    virtual void SAL_CALL
+    virtual void
         removePropertyChangeListener( const OUString& /*aPropertyName*/, const cpo::uno::Reference< css::beans::XPropertyChangeListener >& /*xListener*/ ) override
     {
         throw cpo::uno::RuntimeException(
             u"UUIInteractionHandler removePropertyChangeListener is not supported"_ustr);
     }
 
-    virtual void SAL_CALL
+    virtual void
         addVetoableChangeListener( const OUString& /*aPropertyName*/, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& /*xListener*/ ) override
     {
         throw cpo::uno::RuntimeException(
             u"UUIInteractionHandler addVetoableChangeListener is not supported"_ustr);
     }
 
-    virtual void SAL_CALL
+    virtual void
         removeVetoableChangeListener( const OUString& /*aPropertyName*/, const cpo::uno::Reference< css::beans::XVetoableChangeListener >& /*xListener*/ ) override
     {
         throw cpo::uno::RuntimeException(
             u"UUIInteractionHandler removeVetoableChangeListener is not supported"_ustr);
     }
 
-    virtual cpo::uno::Reference< css::beans::XPropertySetInfo > SAL_CALL
+    virtual cpo::uno::Reference< css::beans::XPropertySetInfo >
         getPropertySetInfo() override
     {
         return nullptr;
     }
 
-    virtual void SAL_CALL setPropertyValue(const OUString& rPropertyName, const cpo::uno::Any& rValue) override
+    virtual void setPropertyValue(const OUString& rPropertyName, const cpo::uno::Any& rValue) override
     {
         if (rPropertyName == "ParentWindow")
         {
@@ -120,7 +120,7 @@ public:
         throw css::beans::UnknownPropertyException(rPropertyName);
     }
 
-    virtual cpo::uno::Any SAL_CALL getPropertyValue(const OUString& rPropertyName) override
+    virtual cpo::uno::Any getPropertyValue(const OUString& rPropertyName) override
     {
         if (rPropertyName == "ParentWindow")
         {
@@ -136,18 +136,18 @@ UUIInteractionHandler::UUIInteractionHandler(
 {
 }
 
-OUString SAL_CALL UUIInteractionHandler::getImplementationName()
+OUString UUIInteractionHandler::getImplementationName()
 {
     return u"com.sun.star.comp.uui.UUIInteractionHandler"_ustr;
 }
 
-bool SAL_CALL
+bool
 UUIInteractionHandler::supportsService(OUString const & rServiceName)
 {
     return cppu::supportsService(this, rServiceName);
 }
 
-cpo::uno::Sequence< OUString > SAL_CALL
+cpo::uno::Sequence< OUString >
 UUIInteractionHandler::getSupportedServiceNames()
 {
     return { u"com.sun.star.task.InteractionHandler"_ustr,
@@ -157,7 +157,7 @@ UUIInteractionHandler::getSupportedServiceNames()
              u"com.sun.star.uui.InteractionHandler"_ustr };
 }
 
-void SAL_CALL
+void
 UUIInteractionHandler::initialize(
     cpo::uno::Sequence< cpo::uno::Any > const & rArguments)
 {
@@ -186,7 +186,7 @@ UUIInteractionHandler::initialize(
     m_pImpl.setContext(aContext);
 }
 
-void SAL_CALL
+void
 UUIInteractionHandler::handle(
     uno::Reference< task::XInteractionRequest > const & rRequest)
 {
@@ -202,7 +202,7 @@ UUIInteractionHandler::handle(
     }
 }
 
-bool SAL_CALL UUIInteractionHandler::handleInteractionRequest(
+bool UUIInteractionHandler::handleInteractionRequest(
     const uno::Reference< task::XInteractionRequest >& Request )
 {
     try
