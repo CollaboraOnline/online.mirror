@@ -41,6 +41,20 @@
   </kudos>
   <content_rating type="oars-1.1"/>
   <releases>
+    <release version="26.04.4.3-1" date="2026-10-08">
+      <description>
+        <p>New features and fixes in this release:</p>
+        <ul>
+          <li>Tabbed windows: open several documents in one window, switch between them, drag tabs around, and manage them from a tab context menu; quit with Ctrl+Q</li>
+          <li>Better desktop integration: windows open at a sensible size, GNOME integration fixes, native file pickers through the desktop portal, and dragging and dropping or pasting images</li>
+          <li>Table styles in Calc: create your own styles, set a default, rename and resize tables, add a totals row, remove duplicates, and summarize a table with a pivot table</li>
+          <li>Funnel charts, and a new Statistical chart group with histogram bin settings</li>
+          <li>Impress: a slide notes panel below the slide, a Table Design tab, and pausing an automatic slideshow with P</li>
+          <li>Track Changes in the Calc menu and notebookbar, and comments shown in your own time zone</li>
+          <li>All fixes and improvements from the shared codebase with Collabora Online 26.04.4, including many document compatibility fixes for Microsoft Word, Excel and PowerPoint files</li>
+        </ul>
+      </description>
+    </release>
     <release version="26.04.3.3-1" date="2026-09-10">
       <description>
         <p>New features and fixes in this release:</p>
