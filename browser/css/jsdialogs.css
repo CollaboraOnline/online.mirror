@@ -2632,6 +2632,12 @@ img.ui-combobox-value-preview {
 	box-sizing: border-box;
 }
 
+/* The menu above the check list has a fixed set of entries; the generic
+ dialog treeview cap (150px) would clip the last one (Clear Filter). */
+.autofilter-popup #menu.ui-treeview {
+	max-height: none;
+}
+
 /* Drop the 1px/3px inline padding .ui-treeview gives itself, so a highlighted row spans the full width of its list. */
 .autofilter-popup .ui-treeview,
 .autofilter-submenu-popup .ui-treeview {
