@@ -3052,8 +3052,10 @@ window.L.Control.NotebookbarCalc = window.L.Control.NotebookbarWriter.extend({
 				'vertical': 'true'
 			},
 			{ type: 'separator', id: 'shape-fliphorizontal-break', orientation: 'vertical' },
-			this.getShapeLinePropertiesSection(),
+			this.getShapeFillColorButton(),
 			{ type: 'separator', id: 'shape-fillcolor-break', orientation: 'vertical' },
+			this.getShapeLineSection(),
+			{ type: 'separator', id: 'shape-line-break', orientation: 'vertical' },
 			{
 				'type': 'overflowgroup',
 				'id': 'shape-wrap',
@@ -3348,8 +3350,10 @@ window.L.Control.NotebookbarCalc = window.L.Control.NotebookbarWriter.extend({
 				]
 			},
 			{ type: 'separator', id: 'picture-transparency-break', orientation: 'vertical' },
-			this.getPictureLinePropertiesSection(),
+			this.getPictureFillColorButton(),
 			{ type: 'separator', id: 'picture-fillcolor-break', orientation: 'vertical' },
+			this.getPictureLineSection(),
+			{ type: 'separator', id: 'picture-line-break', orientation: 'vertical' },
 			{
 				'id': 'picture-transform-dialog',
 				'type': 'bigtoolitem',

@@ -1286,6 +1286,7 @@ const OPERABLE_TYPES = [
 	'exportmenubutton',
 	'iconviewlist',
 	'linetransparency',
+	'linewidth',
 	'listbox',
 	'menubutton',
 	'toolitem',

@@ -31,6 +31,7 @@ window.L.Control.NotebookbarBuilder = window.L.Control.JSDialogBuilder.extend({
 		this._controlHandlers['iconviewlist'] = JSDialog.notebookbarIconViewList;
 		this._controlHandlers['tabpage'] = this._overriddenTabPageHandler;
 		this._controlHandlers['linetransparency'] = this._lineTransparencyControl;
+		this._controlHandlers['linewidth'] = JSDialog.LineWidthField;
 
 		this._toolitemHandlers['.uno:XLineColor'] = JSDialog.colorPickerButton;
 		this._toolitemHandlers['.uno:FontColor'] = JSDialog.colorPickerButton;
@@ -132,11 +133,14 @@ window.L.Control.NotebookbarBuilder = window.L.Control.JSDialogBuilder.extend({
 	// Line transparency spinfield
 	_lineTransparencyControl: function(parentContainer, data, builder) {
 		var command = '.uno:LineTransparence';
+		var sent = null;
 		var callback = function(objectType, eventType, object, value) {
 			var percent = parseInt(value, 10);
 			if (isNaN(percent))
 				percent = 0;
 			builder.map.sendUnoCommand(command + '?LineTransparence:short=' + percent);
+			if (sent)
+				sent(percent);
 		};
 		var result = JSDialog.spinfieldControl(parentContainer, data, builder, callback);
 
@@ -155,11 +159,7 @@ window.L.Control.NotebookbarBuilder = window.L.Control.JSDialogBuilder.extend({
 		};
 
 		setValueFromState(builder.map.stateChangeHandler.getItemValue(command));
-		builder.map.on('commandstatechanged', function(e) {
-			// a tab rebuild replaces these elements; let the stale ones go
-			if (e.commandName === command && container.isConnected)
-				setValueFromState(e.state);
-		}, this);
+		sent = JSDialog.followCommandState(builder, container, command, setValueFromState);
 
 		return result;
 	},
@@ -219,7 +219,7 @@ window.L.Control.NotebookbarBuilder = window.L.Control.JSDialogBuilder.extend({
 	},
 
 	_comboboxControl: function(parentContainer, data, builder) {
-		if ((!data.entries || data.entries.length === 0) && !data.buildWhenEmpty)
+		if (!data.entries || data.entries.length === 0)
 			return false;
 
 		// Fix exception due to undefined _createiOsFontButton function

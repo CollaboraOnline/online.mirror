@@ -2648,8 +2648,10 @@ window.L.Control.NotebookbarWriter = window.L.Control.Notebookbar.extend({
 				'vertical': 'true'
 			},
 			{ type: 'separator', id: 'shape-fliphorizontal-break', orientation: 'vertical' },
-			this.getShapeLinePropertiesSection(),
+			this.getShapeFillColorButton(),
 			{ type: 'separator', id: 'shape-fillcolor-break', orientation: 'vertical' },
+			this.getShapeLineSection(),
+			{ type: 'separator', id: 'shape-line-break', orientation: 'vertical' },
 			{
 				'type': 'overflowgroup',
 				'id': 'shape-wrap',

@@ -12,10 +12,11 @@
 /**
  * Widget.LineWidthCustom.ts
  *
- * The tail of the line thickness dropdown: the last custom thickness the user
- * typed, and the field to type a new one. The sidebar Line panel offers both
- * in its own popup (svx/ui/floatinglineproperty.ui); this is the notebookbar
- * counterpart, so the eight presets are not all that is on offer there either.
+ * LineWidthCustom is the tail of the line thickness dropdown: the last custom
+ * thickness the user typed. LineWidthField is the field next to the dropdown
+ * to type a new one. The sidebar Line panel offers both in its own popup
+ * (svx/ui/floatinglineproperty.ui); this is the notebookbar counterpart, so
+ * the eight presets are not all that is on offer there either.
  *
  * .uno:LineWidth takes and reports 1/100 mm, the field works in points.
  */
@@ -49,7 +50,13 @@ function getLastCustomWidth(): number | null {
 function getCurrentLineWidth(builder: any): number | null {
 	const state = builder.map.stateChangeHandler.getItemValue('.uno:LineWidth');
 	const hmm = parseInt(state, 10);
-	return isNaN(hmm) || hmm <= 0 ? null : hmmToPoints(hmm);
+	return isNaN(hmm) || hmm < 0 ? null : hmmToPoints(hmm);
+}
+
+function applyLineWidth(builder: any, points: number): number {
+	const hmm = pointsToHMM(points);
+	builder.map.sendUnoCommand('.uno:LineWidth?LineWidth:long=' + hmm);
+	return hmm;
 }
 
 function setWidthPreview(entry: HTMLElement, points: number) {
@@ -110,98 +117,13 @@ function createLastCustomEntry(
 	});
 }
 
-function createCustomField(
-	parentContainer: Element,
-	data: any,
-	builder: any,
-	applyWidth: (points: number) => void,
-) {
-	const row = window.L.DomUtil.create(
-		'div',
-		'ui-linewidth-custom ' + builder.options.cssClass,
-		parentContainer,
-	);
-
-	const spinId = data.id + '-spin';
-	const labelId = data.id + '-customlabel';
-
-	const label = window.L.DomUtil.create(
-		'label',
-		builder.options.cssClass,
-		row,
-	) as HTMLLabelElement;
-	label.id = labelId;
-	label.innerText = _('Custom Line Thickness:');
-	label.htmlFor = spinId + '-input';
-
-	const current = getCurrentLineWidth(builder);
-
-	JSDialog.spinfieldControl(
-		row,
-		{
-			id: spinId,
-			type: 'spinfield',
-			text: current !== null ? formatPoints(current) : '',
-			min: 0,
-			max: 50,
-			step: 0.1,
-			unit: 'pt',
-			labelledBy: labelId,
-		},
-		builder,
-		function (
-			objectType: string,
-			eventType: string,
-			object: unknown,
-			value: string,
-		) {
-			const points = parseFloat(value);
-			if (isNaN(points) || points <= 0) return;
-
-			window.prefs.set(LAST_CUSTOM_PREF, points);
-			applyWidth(points);
-		},
-	);
-
-	const spinfield = row.querySelector('input.spinfield') as HTMLInputElement;
-	if (!spinfield) return;
-
-	spinfield.tabIndex = -1;
-
-	const onTab = function (event: KeyboardEvent) {
-		if (event.key !== 'Tab') return;
-
-		const inField = row.contains(event.target as Node);
-
-		const target = (
-			!inField
-				? spinfield
-				: event.shiftKey
-					? JSDialog.FindNextFocusableSiblingElement(row, 'previous')
-					: JSDialog.FindFocusableWithin(row.parentElement, 'next')
-		) as HTMLElement | null;
-		if (!target) return;
-
-		target.focus();
-		event.preventDefault();
-		event.stopPropagation();
-	};
-
-	app.layoutingService.appendLayoutingTask(function () {
-		const list = row.parentElement;
-		if (list) list.addEventListener('keydown', onTab, true);
-	});
-}
-
 JSDialog.LineWidthCustom = function (
 	parentContainer: Element,
 	data: any,
 	builder: any,
 ): boolean {
 	const applyWidth = function (points: number) {
-		builder.map.sendUnoCommand(
-			'.uno:LineWidth?LineWidth:long=' + pointsToHMM(points),
-		);
+		applyLineWidth(builder, points);
 	};
 
 	window.L.DomUtil.create(
@@ -212,13 +134,60 @@ JSDialog.LineWidthCustom = function (
 
 	createLastCustomEntry(parentContainer, data, builder, applyWidth);
 
-	window.L.DomUtil.create(
-		'hr',
-		'jsdialog ui-separator horizontal',
+	return false;
+};
+
+JSDialog.LineWidthField = function (
+	parentContainer: Element,
+	data: any,
+	builder: any,
+): boolean {
+	const current = getCurrentLineWidth(builder);
+	data.text = current !== null ? formatPoints(current) : '';
+
+	let sent: ((value: number) => void) | null = null;
+
+	JSDialog.spinfieldControl(
 		parentContainer,
+		data,
+		builder,
+		function (
+			objectType: string,
+			eventType: string,
+			object: unknown,
+			value: string,
+		) {
+			const points = parseFloat(value);
+			if (isNaN(points) || points < 0) return;
+
+			if (points > 0) window.prefs.set(LAST_CUSTOM_PREF, points);
+			const hmm = applyLineWidth(builder, points);
+			if (sent) sent(hmm);
+		},
 	);
 
-	createCustomField(parentContainer, data, builder, applyWidth);
+	const container = parentContainer.querySelector('#' + data.id) as any;
+	const spinfield = container
+		? (container.querySelector('input') as HTMLInputElement)
+		: null;
+	if (!spinfield) return false;
+
+	sent = JSDialog.followCommandState(
+		builder,
+		container,
+		'.uno:LineWidth',
+		function (state: string) {
+			const hmm = parseInt(state, 10);
+			if (isNaN(hmm) || hmm < 0) return;
+
+			const points = hmmToPoints(hmm);
+			JSDialog._setSpinFieldValue(
+				spinfield,
+				JSDialog._formatSpinFieldValue(points.toFixed(1), container._unit),
+				points,
+			);
+		},
+	);
 
 	return false;
 };

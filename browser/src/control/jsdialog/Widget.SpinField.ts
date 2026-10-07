@@ -20,6 +20,7 @@
  * 	- _parseSpinFieldValue
  * 	- _formatSpinFieldValue
  * 	- _setSpinFieldValue
+ * 	- followCommandState
  */
 
 declare var JSDialog: any;
@@ -28,6 +29,7 @@ interface SpinFieldContainer extends HTMLDivElement {
 	_step: number;
 	_min?: number;
 	_max?: number;
+	_digits?: number;
 	_unit: string;
 }
 
@@ -108,9 +110,10 @@ const _spinFieldStep = function (
 	if (min != undefined && newVal < min) newVal = min;
 	if (max != undefined && newVal > max) newVal = max;
 
+	const shown = div._digits != undefined ? newVal.toFixed(div._digits) : newVal;
 	JSDialog._setSpinFieldValue(
 		spinfield,
-		JSDialog._formatSpinFieldValue(newVal, unit),
+		JSDialog._formatSpinFieldValue(shown, unit),
 		newVal,
 	);
 	spinfield.dispatchEvent(new Event('change'));
@@ -244,6 +247,7 @@ JSDialog.baseSpinField = function (
 	}
 
 	div._step = data.step != undefined ? data.step : 1;
+	if (data.digits != undefined) div._digits = data.digits;
 
 	const isDisabled = data.enabled === false;
 	spinfield.setAttribute('aria-disabled', isDisabled.toString());
@@ -509,4 +513,37 @@ JSDialog._setSpinFieldValue = function (
 	if (displayValue && displayValue !== '' + num)
 		spinfield.setAttribute('aria-valuetext', displayValue);
 	else spinfield.removeAttribute('aria-valuetext');
+};
+
+const IN_FLIGHT_TIMEOUT_MS = 1500;
+
+JSDialog.followCommandState = function (
+	builder: JSBuilder,
+	container: HTMLElement,
+	command: string,
+	apply: (state: string) => void,
+): (sentValue: string | number) => void {
+	const inFlight: string[] = [];
+	let lastSentAt = 0;
+
+	builder.map.on('commandstatechanged', function (e: any) {
+		if (e.commandName !== command || !container.isConnected) return;
+
+		if (Date.now() - lastSentAt > IN_FLIGHT_TIMEOUT_MS) inFlight.length = 0;
+
+		const state = String(e.state);
+		const index = inFlight.indexOf(state);
+		if (index !== -1 && index < inFlight.length - 1) {
+			inFlight.splice(0, index + 1);
+			return;
+		}
+
+		inFlight.length = 0;
+		apply(state);
+	});
+
+	return function (sentValue: string | number) {
+		inFlight.push(String(sentValue));
+		lastSentAt = Date.now();
+	};
 };

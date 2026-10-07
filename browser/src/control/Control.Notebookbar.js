@@ -638,190 +638,168 @@ window.L.Control.Notebookbar = window.L.Control.extend({
 		return arr;
 	},
 
-	_getArrowStylePicker: function(which) {
-		var isStart = which === 'start';
-		return [
-			{
-				'id': isStart ? 'startarrowlabel' : 'endarrowlabel',
-				'type': 'fixedtext',
-				'text': isStart ? _('Start:') : _('End:'),
-				'top': isStart ? '0' : '1',
-				'left': '0'
-			},
-			{
-				'id': isStart ? 'startarrowstyle' : 'endarrowstyle',
-				'type': 'combobox',
-				'text': '',
-				'entries': [],
-				'buildWhenEmpty': true,
-				'selectedCount': '0',
-				'selectedEntries': [],
-				'labelledBy': isStart ? 'startarrowlabel' : 'endarrowlabel',
-				'aria': { 'label': isStart ? _('Start arrowhead style') : _('End arrowhead style') },
-				'accessibility': { focusBack: true, combination: isStart ? 'AS' : 'AE', de: null },
-				'top': isStart ? '0' : '1',
-				'left': '1'
-			}
-		];
+	_getFillColorButton: function(opts) {
+		return {
+			'id': opts.prefix + '-fillcolor:ColorPickerMenu',
+			'type': 'bigtoolitem',
+			'text': _UNO('.uno:FillColor'),
+			'command': '.uno:FillColor',
+			'disabledTooltip': opts.fillColorNeedsTransparency
+				? _('Fill Color (Transparent Pictures Only)')
+				: undefined,
+			'accessibility': { focusBack: true, combination: 'FC', de: null }
+		};
 	},
 
-	_getLinePropertiesSection: function(opts) {
+	_getLineSection: function(opts) {
 		var p = opts.prefix;
-		var section = {
+		return {
 			'type': 'overflowgroup',
 			'id': opts.panelId,
-			'name': _('Properties'),
+			'name': _('Line'),
 			'accessibility': { focusBack: false, combination: opts.combination, de: null },
+			'more': {
+				'command': '.uno:FormatLine',
+				'accessibility': { focusBack: true, combination: 'LM', de: null }
+			},
 			'children': [
+				{
+					'id': p + '-linecolor:ColorPickerMenu',
+					'type': 'bigtoolitem',
+					'text': _UNO('.uno:XLineColor'),
+					'command': '.uno:XLineColor',
+					'accessibility': { focusBack: true, combination: 'LC', de: null }
+				},
 				{
 					'type': 'container',
 					'children': [
 						{
-							'type': 'container',
+							'type': 'toolbox',
+							'id': opts.weldedToolbarId,
 							'children': [
 								{
-									'type': 'toolbox',
-									'id': p + '-fillcolor-box',
-									'children': [
-										{
-											'id': p + '-fillcolor:ColorPickerMenu',
-											'type': 'toolitem',
-											'noLabel': true,
-											'text': _UNO('.uno:FillColor'),
-											'command': '.uno:FillColor',
-											'disabledTooltip': opts.fillColorNeedsTransparency
-												? _('Fill Color (Transparent Pictures Only)')
-												: undefined,
-											'accessibility': { focusBack: true, combination: 'FC', de: null }
-										}
-									]
-								},
-								{
-									'type': 'toolbox',
-									'id': p + '-linecolor-box',
-									'children': [
-										{
-											'id': p + '-linecolor:ColorPickerMenu',
-											'type': 'toolitem',
-											'noLabel': true,
-											'text': _UNO('.uno:XLineColor'),
-											'command': '.uno:XLineColor',
-											'accessibility': { focusBack: true, combination: 'LC', de: null }
-										}
-									]
-								},
-								{
-									'type': 'toolbox',
-									'id': opts.weldedToolbarId,
-									'children': [
-										{
-											'id': p + '-linestyle',
-											'type': 'toolitem',
-											'noLabel': true,
-											'dropdown': true,
-											'text': _UNO('.uno:XLineStyle', 'text'),
-											'command': '.uno:XLineStyle',
-											'accessibility': { focusBack: true, combination: 'LS', de: null }
-										}
-									]
-								},
-								{
-									'type': 'toolbox',
-									'id': p + '-linewidth-box',
-									'children': [
-										{
-											'id': p + '-linewidth',
-											'type': 'menubutton',
-											'noLabel': true,
-											'command': '.uno:LineWidth',
-											'icon': 'lc_selectwidth.svg',
-											'text': _('Line Width'),
-											'accessibility': { focusBack: true, combination: 'LW', de: null },
-											'menu': [
-												{ text: '0.5 pt', class: 'ui-linewidth-18', uno: 'LineWidth?LineWidth:long=18' },
-												{ text: '0.8 pt', class: 'ui-linewidth-28', uno: 'LineWidth?LineWidth:long=28' },
-												{ text: '1.0 pt', class: 'ui-linewidth-35', uno: 'LineWidth?LineWidth:long=35' },
-												{ text: '1.5 pt', class: 'ui-linewidth-53', uno: 'LineWidth?LineWidth:long=53' },
-												{ text: '2.3 pt', class: 'ui-linewidth-81', uno: 'LineWidth?LineWidth:long=81' },
-												{ text: '3.0 pt', class: 'ui-linewidth-106', uno: 'LineWidth?LineWidth:long=106' },
-												{ text: '4.5 pt', class: 'ui-linewidth-159', uno: 'LineWidth?LineWidth:long=159' },
-												{ text: '6.0 pt', class: 'ui-linewidth-212', uno: 'LineWidth?LineWidth:long=212' },
-												{
-													id: p + '-linewidth-custom',
-													type: 'json',
-													content: {
-														id: p + '-linewidth-custom',
-														type: 'linewidthcustom'
-													}
-												}
-											]
-										}
-									]
+									'id': p + '-linestyle',
+									'type': 'toolitem',
+									'noLabel': true,
+									'dropdown': true,
+									'text': _UNO('.uno:XLineStyle', 'text'),
+									'command': '.uno:XLineStyle',
+									'accessibility': { focusBack: true, combination: 'LS', de: null }
 								}
-							],
-							'vertical': false
+							]
 						},
 						{
-							'id': p + '-transparency_set',
-							'type': 'grid',
+							'type': 'toolbox',
+							'id': p + '-linewidth-box',
 							'children': [
 								{
-									'id': p + '-translabel',
-									'type': 'fixedtext',
-									'text': _('Line Transparency:'),
-									'top': '0',
-									'left': '0'
-								},
-								{
-									'id': p + '-linetransparency',
-									'type': 'linetransparency',
-									'text': '0%',
-									'min': 0,
-									'max': 100,
-									'step': 5,
-									'labelledBy': p + '-translabel',
-									'accessibility': { focusBack: true, combination: 'LT', de: null },
-									'top': '0',
-									'left': '1'
+									'id': p + '-linewidth:LineWidthMenu',
+									'type': 'menubutton',
+									'noLabel': true,
+									'inlineLabel': false,
+									'command': '.uno:LineWidth',
+									'icon': 'lc_selectwidth.svg',
+									'text': _('Line Width'),
+									'accessibility': { focusBack: true, combination: 'LW', de: null },
+									'menu': [
+										{ text: '0.5 pt', class: 'ui-linewidth-18', uno: 'LineWidth?LineWidth:long=18' },
+										{ text: '0.8 pt', class: 'ui-linewidth-28', uno: 'LineWidth?LineWidth:long=28' },
+										{ text: '1.0 pt', class: 'ui-linewidth-35', uno: 'LineWidth?LineWidth:long=35' },
+										{ text: '1.5 pt', class: 'ui-linewidth-53', uno: 'LineWidth?LineWidth:long=53' },
+										{ text: '2.3 pt', class: 'ui-linewidth-81', uno: 'LineWidth?LineWidth:long=81' },
+										{ text: '3.0 pt', class: 'ui-linewidth-106', uno: 'LineWidth?LineWidth:long=106' },
+										{ text: '4.5 pt', class: 'ui-linewidth-159', uno: 'LineWidth?LineWidth:long=159' },
+										{ text: '6.0 pt', class: 'ui-linewidth-212', uno: 'LineWidth?LineWidth:long=212' },
+										{
+											id: p + '-linewidth-custom',
+											type: 'json',
+											content: {
+												id: p + '-linewidth-custom',
+												type: 'linewidthcustom'
+											}
+										}
+									]
 								}
 							]
 						}
 					],
-					'vertical': true
+					'vertical': 'true'
+				},
+				{
+					'id': p + '-line-fields',
+					'type': 'grid',
+					'children': [
+						{
+							'id': p + '-translabel',
+							'type': 'fixedtext',
+							'text': _('Transparency:'),
+							'top': '0',
+							'left': '0'
+						},
+						{
+							'id': p + '-linetransparency',
+							'type': 'linetransparency',
+							'text': '0%',
+							'min': 0,
+							'max': 100,
+							'step': 5,
+							'labelledBy': p + '-translabel',
+							'accessibility': { focusBack: true, combination: 'LT', de: null },
+							'top': '0',
+							'left': '1'
+						},
+						{
+							'id': p + '-thicknesslabel',
+							'type': 'fixedtext',
+							'text': _('Thickness:'),
+							'top': '1',
+							'left': '0'
+						},
+						{
+							'id': p + '-thickness',
+							'type': 'linewidth',
+							'min': 0,
+							'max': 50,
+							'step': 0.1,
+							'digits': 1,
+							'unit': 'pt',
+							'labelledBy': p + '-thicknesslabel',
+							'accessibility': { focusBack: true, combination: 'TK', de: null },
+							'top': '1',
+							'left': '1'
+						}
+					]
 				}
 			]
 		};
-
-		if (opts.includeArrow) {
-			section.children.push({
-				'id': 'arrowgrid',
-				'type': 'grid',
-				'children': this._getArrowStylePicker('start')
-					.concat(this._getArrowStylePicker('end'))
-			});
-		}
-
-		return section;
 	},
 
-	getPictureLinePropertiesSection: function() {
-		return this._getLinePropertiesSection({
+	getPictureFillColorButton: function() {
+		return this._getFillColorButton({
 			prefix: 'picture',
-			panelId: 'picture-properties-panel',
-			weldedToolbarId: 'PictureLineWeldedToolbar',
-			combination: 'PL',
-			includeArrow: false,
 			fillColorNeedsTransparency: true
 		});
 	},
 
-	getShapeLinePropertiesSection: function() {
-		return this._getLinePropertiesSection({
+	getPictureLineSection: function() {
+		return this._getLineSection({
+			prefix: 'picture',
+			panelId: 'picture-line-panel',
+			weldedToolbarId: 'PictureLineWeldedToolbar',
+			combination: 'PL'
+		});
+	},
+
+	getShapeFillColorButton: function() {
+		return this._getFillColorButton({ prefix: 'shape' });
+	},
+
+	getShapeLineSection: function() {
+		return this._getLineSection({
 			prefix: 'shape',
-			panelId: 'shape-properties-panel',
+			panelId: 'shape-line-panel',
 			weldedToolbarId: 'LineWeldedToolbar',
-			combination: 'PR',
-			includeArrow: true
+			combination: 'PR'
 		});
 	},
 

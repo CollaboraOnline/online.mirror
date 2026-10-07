@@ -62,6 +62,10 @@ function _menubuttonControl(
 		const noLabels = builder.options.noLabelsForUnoButtons;
 		builder.options.noLabelsForUnoButtons = data.noLabel ? data.noLabel : false;
 
+		const inlineLabels = builder.options.useInLineLabelsForUnoButtons;
+		if (data.inlineLabel !== undefined)
+			builder.options.useInLineLabelsForUnoButtons = data.inlineLabel;
+
 		// command is needed to generate image
 		if (!data.command) data.command = menuId as string;
 
@@ -201,6 +205,7 @@ function _menubuttonControl(
 		builder._preventDocumentLosingFocusOnClick(control.container);
 
 		builder.options.noLabelsForUnoButtons = noLabels;
+		builder.options.useInLineLabelsForUnoButtons = inlineLabels;
 
 		return control;
 	} else if (data.text !== undefined || data.image) {

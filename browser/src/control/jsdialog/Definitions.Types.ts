@@ -479,6 +479,7 @@ interface MenuButtonWidgetJSON extends WidgetJSON {
 	icon?: string; // theme-aware icon file name, e.g. 'lc_recsearch.svg'
 	accessKey?: string;
 	noLabel?: boolean; // suppress text label, show icon only
+	inlineLabel?: boolean; // overrides the builder's inline label setting
 	// which end of the button the content sits at: 'left' or 'right', absent for the middle
 	xalign?: string;
 }
@@ -531,8 +532,6 @@ interface ComboBoxWidget extends WidgetJSON {
 	// entries which are values of the box but are not offered in its list
 	hiddenEntries?: Array<string | number>;
 	entrycompletion?: boolean;
-	// build the box even while it has no entries yet
-	buildWhenEmpty?: boolean;
 }
 
 interface TreeColumnJSON {
