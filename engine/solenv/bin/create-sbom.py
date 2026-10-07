@@ -470,16 +470,18 @@ def extract_spdx_info(line):
     """
     Extract relevant SPDX information from a line.
     The line format is assumed to be like:
-    <!-- Name: box2d, Vendor:, Source: BOX2D_TARBALL, URL: https://github.com/erincatto/box2d, Declared: MIT, Concluded: MPL-2.0 -->
+    <!-- Name: box2d, Vendor:, Source: BOX2D_TARBALL, URL: https://github.com/erincatto/box2d, PURL: pkg:git/github.com/erincatto/box2d, Declared: MIT, Concluded: MPL-2.0 -->
     Source may be either a tarball variable, or a path.
     Name and Vendor are used to create CPE2.3 identifier.
+    PURL is a package-url pointing at the upstream source repository, and may
+    be empty when none is known.
     """
     match = re.search(r"<!-- *Name:", line)
     if not(match):
         return
 
     CPE23_name = r"(?:[A-Za-z0-9._-]|\\[!-/:-@\[-`{-~])*"
-    pattern = rf"<!-- Name:\s*(?P<name>{CPE23_name}),\s*Vendor:\s*(?P<vendor>{CPE23_name}),\s*Source:\s*(?P<source>[\w/.]+),\s*URL:\s*(?P<url>[^\s,]*),\s*Declared:\s*(?P<declared>[\w\s.+-]+),\s*Concluded:\s*(?P<concluded>[\w\s.+-]+) -->"
+    pattern = rf"<!-- Name:\s*(?P<name>{CPE23_name}),\s*Vendor:\s*(?P<vendor>{CPE23_name}),\s*Source:\s*(?P<source>[\w/.]+),\s*URL:\s*(?P<url>[^\s,]*),\s*PURL:\s*(?P<purl>[^\s,]*),\s*Declared:\s*(?P<declared>[\w\s.+-]+),\s*Concluded:\s*(?P<concluded>[\w\s.+-]+) -->"
     match = re.search(pattern, line)
 
     if not(match):
@@ -491,6 +493,7 @@ def extract_spdx_info(line):
         vendor = match.group("vendor").strip()
         source = match.group("source").strip()
         url = match.group("url").strip()
+        purl = match.group("purl").strip()
         if source.isupper():
             tarball = os.environ.get(source)
 #            sha512 = get_sha512(os.environ.get("TARFILE_LOCATION") + "/" + tarball)
@@ -528,6 +531,7 @@ def extract_spdx_info(line):
             "version": version,
             "locator": locator,
             "url": url,
+            "purl": purl,
             "declared": declared,
             "concluded": concluded,
         }
@@ -569,7 +573,8 @@ def process_license_file(file_path):
                     "originatedBy": ["https://collaboraoffice.com"],
                     "creationInfo": "_:creationinfo",
                     "name": spdx_info["name"],
-                    "externalIdentifiers": [{
+                    "externalIdentifier": [{
+                        "type": "ExternalIdentifier",
                         "externalIdentifierType": "cpe23",
                         "identifier": cpe23(spdx_info),
                     }]
@@ -577,14 +582,12 @@ def process_license_file(file_path):
                 if len(spdx_info["url"]) != 0:
                     pkg_element["software_homePage"] = spdx_info["url"]
 
-                    # This was based on mistaken assumption that purl can be
-                    # generated from a homepage; it looks like it needs to be a
-                    # git or other VCS repository, or an actual upstream
-                    # release tarball
-#                    pkg_element["externalIdentifers"].append({
-#                            "externalIdentifierType": "packageURL",
-#                            "identifier": purl(spdx_info)}
-#                         })
+                if len(spdx_info["purl"]) != 0:
+                    pkg_element["externalIdentifier"].append({
+                        "type": "ExternalIdentifier",
+                        "externalIdentifierType": "packageUrl",
+                        "identifier": spdx_info["purl"],
+                    })
 
                 if spdx_info["version"]:
                     pkg_element["software_packageVersion"] = spdx_info["version"]
@@ -638,7 +641,7 @@ def sbom_skeleton(package, gid, languages):
                 "type": "Organization",
                 "spdxId": "https://collaboraoffice.com",
                 "creationInfo": "_:creationinfo",
-                "externalIdentifers": [{
+                "externalIdentifier": [{
                     "type": "ExternalIdentifier",
                     "externalIdentifierType": "email",
                     "identifier": "hello@collaboraoffice.com"
@@ -1298,7 +1301,8 @@ def add_merge_module(files_by_package, externals_by_package, install_script):
             "creationInfo": "_:creationinfo",
             "name": msm_file,
             "software_homePage": "https://learn.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist",
-            "externalIdentifiers": [{
+            "externalIdentifier": [{
+                "type": "ExternalIdentifier",
                 "externalIdentifierType": "cpe23",
                 "identifier": f"cpe:2.3:a:microsoft:visual_c\\+\\+:{vcyear}:*:*:*:redistributable_package:*:*:*",
             }]
