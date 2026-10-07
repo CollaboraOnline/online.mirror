@@ -410,18 +410,18 @@
           "dest-filename": "Open_Sans.zip"
         },
         {
-          "url": "https://gerrit.collaboraoffice.com/src/quickjs-v0.14.0.tar.gz",
-          "sha256": "928e9406addd99eb8623348f2cfcd916eade9a263c60d42be79bc7aee4ee8453",
+          "url": "https://gerrit.collaboraoffice.com/src/quickjs-0.16.2-amalgam.zip",
+          "sha256": "866bad1e2f148b6f8144a4a3d4c3f8a0754495a6920fe56a7dd698cf0ad27f65",
           "type": "file",
           "dest": "engine/external/tarballs",
-          "dest-filename": "quickjs-v0.14.0.tar.gz"
+          "dest-filename": "quickjs-0.16.2-amalgam.zip"
         },
         {
-          "url": "https://gerrit.collaboraoffice.com/src/pdfium-7988.tar.bz2",
-          "sha256": "0340b2fca57cecdf6e2e0366129a3340f6764c132cb090f57db96d9f0f349855",
+          "url": "https://gerrit.collaboraoffice.com/src/pdfium-8073.tar.bz2",
+          "sha256": "a3624f6f0ac46a7e190969d405aa7a07dbc342baf69f81192487575bf64055a5",
           "type": "file",
           "dest": "engine/external/tarballs",
-          "dest-filename": "pdfium-7988.tar.bz2"
+          "dest-filename": "pdfium-8073.tar.bz2"
         },
         {
           "url": "https://gerrit.collaboraoffice.com/src/poco-1.15.3-all.tar.bz2",
@@ -578,11 +578,11 @@
           "dest-filename": "libexttextcat-3.4.8.tar.xz"
         },
         {
-          "url": "https://gerrit.collaboraoffice.com/src/libfreehand-0.1.3.tar.xz",
-          "sha256": "a431d78767e5aa27ade7c6d1b7a11a9f1848cb4b9260bf0a6a44689553ecccfe",
+          "url": "https://gerrit.collaboraoffice.com/src/libfreehand-0.1.4.tar.xz",
+          "sha256": "350b10d24a76d7e8c8ae98b74c2d432a2c8ddec08935d09856d20b695a35e600",
           "type": "file",
           "dest": "engine/external/tarballs",
-          "dest-filename": "libfreehand-0.1.3.tar.xz"
+          "dest-filename": "libfreehand-0.1.4.tar.xz"
         },
         {
           "url": "https://gerrit.collaboraoffice.com/src/language-subtag-registry-2025-08-25.tar.bz2",
@@ -921,11 +921,11 @@
           "dest-filename": "dragonbox-1.1.3.tar.gz"
         },
         {
-          "url": "https://gerrit.collaboraoffice.com/src/fast_float-8.2.2.tar.gz",
-          "sha256": "e64b5fff88e04959154adbd5fb83331d91f2e04ac06454671cdfcbdff172b158",
+          "url": "https://gerrit.collaboraoffice.com/src/fast_float-8.2.10.tar.gz",
+          "sha256": "76f958dd97b1cf4d8862d1f0986a47d4bdfa8845252bae15ef0f40de3b95961f",
           "type": "file",
           "dest": "engine/external/tarballs",
-          "dest-filename": "fast_float-8.2.2.tar.gz"
+          "dest-filename": "fast_float-8.2.10.tar.gz"
         },
         {
           "url": "https://gerrit.collaboraoffice.com/src/zxing-cpp-2.3.0.tar.gz",
