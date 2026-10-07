@@ -11,6 +11,9 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		desktopHelper.switchUIToNotebookbar();
 		desktopHelper.sidebarToggle();
 		desktopHelper.selectZoomLevel('50', false);
+		cy.getFrameWindow().then((win) => {
+			this.win = win;
+		});
 	});
 
 	it('Insert', function() {
@@ -817,8 +820,8 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 
 	it('A reply outlives the comment it answered', function () {
 		desktopHelper.insertComment('first comment');
-		addReply(1, 'middle');
-		addReply(2, 'last');
+		addReply(this.win, 1, 'middle');
+		addReply(this.win, 2, 'last');
 
 		cy.cGet('#comment-container-3').then(function (card) {
 			const before = card[0].getBoundingClientRect().top;
@@ -840,12 +843,13 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 	});
 
 	// Opens the Reply pane on a comment, writes in it and posts it. The reply that comes back
-	// is the next comment in the thread.
-	function addReply(id, text) {
+	// is the next comment in the thread, and it is in its laid out place when this returns.
+	function addReply(win, id, text) {
 		cy.cGet('#comment-annotation-menu-' + id).click();
 		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
 		cy.cGet('#annotation-reply-textarea-' + id).should('have.focus').type(text);
 		cy.cGet('#annotation-reply-' + id).click();
+		helper.processToIdle(win);
 	}
 
 	it('Reply box stays in view when the comment is long', function () {
@@ -893,18 +897,9 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		});
 	});
 
-	// Opens the Reply pane on a comment, writes in it and posts it. The reply that comes back
-	// is the next comment in the thread.
-	function addReply(id, text) {
-		cy.cGet('#comment-annotation-menu-' + id).click();
-		cy.cGet('body').contains('.ui-combobox-entry.jsdialog.ui-grid-cell', 'Reply').click();
-		cy.cGet('#annotation-reply-textarea-' + id).should('have.focus').type(text);
-		cy.cGet('#annotation-reply-' + id).click();
-	}
-
 	it('A reply answers a click while its thread is selected', function () {
 		desktopHelper.insertComment('first comment');
-		addReply(1, 'a reply');
+		addReply(this.win, 1, 'a reply');
 
 		// The card's box reaches down past its reply, so its middle is over the reply.
 		// Its author row is the part of it that is drawn.
