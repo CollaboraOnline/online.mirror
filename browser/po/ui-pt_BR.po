@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-10-07 09:12+0000\n"
+"PO-Revision-Date: 2026-10-07 16:42+0000\n"
 "Last-Translator: H2Oufoe <regularwater@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "collabora-online/collabora-ui/pt_BR/>\n"
@@ -5897,15 +5897,17 @@ msgstr ""
 
 #: src/slideimport/SlideLinks.ts:565 src/slideimport/SlideLinks.ts:744
 msgid "The slides of {0} could not be read into this presentation."
-msgstr ""
+msgstr "Os slides de {0} não puderam ser lidos nesta apresentação."
 
 #: src/slideimport/SlideLinks.ts:669
 msgid "Cannot update slide {0}: the source lacks matching slide"
 msgstr ""
+"Não foi possível atualizar o slide {0}: o local de origem não tem o slide "
+"correspondente"
 
 #: src/slideimport/SlideLinks.ts:684
 msgid "Unlinking the slide failed."
-msgstr ""
+msgstr "Desvincular o slide falhou."
 
 #: src/slideimport/SlideLinks.ts:695 src/slideimport/SlideLinks.ts:756
 msgid "Updating the slides of {0} failed."
