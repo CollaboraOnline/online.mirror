@@ -2027,7 +2027,7 @@ void SdMiscTest::testSlideLinkKeepsOnlyAReadableSourceGuid()
     SdXImpressDocument* pXImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
     CPPUNIT_ASSERT(pXImpressDocument);
     SdDrawDocument* pDoc = pXImpressDocument->GetDoc();
-    CPPUNIT_ASSERT_EQUAL(sal_uInt16(2), pDoc->GetSdPageCount(PageKind::Standard));
+    CPPUNIT_ASSERT_EQUAL(sal_uInt16(3), pDoc->GetSdPageCount(PageKind::Standard));
 
     SdPage* pRead = pDoc->GetSdPage(0, PageKind::Standard);
     CPPUNIT_ASSERT_EQUAL(u"vnd.collabora.slide-source:Q3%20deck.odp"_ustr, pRead->GetFileName());
@@ -2040,6 +2040,11 @@ void SdMiscTest::testSlideLinkKeepsOnlyAReadableSourceGuid()
     CPPUNIT_ASSERT_EQUAL(u"vnd.collabora.slide-source:Q3%20deck.odp"_ustr, pUnread->GetFileName());
     CPPUNIT_ASSERT_EQUAL(u"2021-01-01T00:00:00Z"_ustr, pUnread->GetSourceModifiedTime());
     CPPUNIT_ASSERT_EQUAL(OUString(), pUnread->GetSourcePageGuid());
+
+    // An identifier is kept in the form a page writes its own (uppercase)
+    SdPage* pLowercase = pDoc->GetSdPage(2, PageKind::Standard);
+    CPPUNIT_ASSERT_EQUAL(u"{ABCDEF01-2345-6789-ABCD-EF0123456789}"_ustr,
+                         pLowercase->GetSourcePageGuid());
 }
 
 CPPUNIT_TEST_SUITE_REGISTRATION(SdMiscTest);
