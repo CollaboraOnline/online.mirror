@@ -84,11 +84,12 @@ class URLPopUpSection extends HTMLObjectSection {
 
         this.link = window.L.DomUtil.createWithId('a', this.linkId, linkRow) as HTMLAnchorElement;
 		this.link.innerText = url;
+		this.link.href = window.sanitizeUrl(url); // a link, and reachable by the keyboard
 		const copyLinkText = _('Copy link location');
-		const copyBtn = window.L.DomUtil.createWithId('div', this.copyButtonId, linkRow);
-		window.L.DomUtil.addClass(copyBtn, 'hyperlink-popup-btn');
+		const copyBtn = window.L.DomUtil.createWithId('button', this.copyButtonId, linkRow);
+		copyBtn.setAttribute('type', 'button');
+		copyBtn.classList.add('hyperlink-popup-btn', 'unobutton'); // not a dialog button
 		copyBtn.setAttribute('title', copyLinkText);
-		copyBtn.setAttribute('role', 'button');
 		copyBtn.setAttribute('aria-label', copyLinkText);
 
         const imgCopyBtn = window.L.DomUtil.create('img', 'hyperlink-pop-up-copyimg', copyBtn);
@@ -99,11 +100,11 @@ class URLPopUpSection extends HTMLObjectSection {
 		imgCopyBtn.style.padding = '4px';
 
 		const editLinkText = _('Edit link');
-		const editBtn = window.L.DomUtil.createWithId('div', this.editButtonId, linkRow);
-		window.L.DomUtil.addClass(editBtn, 'hyperlink-popup-btn');
+		const editBtn = window.L.DomUtil.createWithId('button', this.editButtonId, linkRow);
+		editBtn.setAttribute('type', 'button');
+		editBtn.classList.add('hyperlink-popup-btn', 'unobutton'); // not a dialog button
 		editBtn.setAttribute('title', editLinkText);
-		editBtn.setAttribute('role', 'button');
-		editBtn.setAttribute('aria-label', copyLinkText);
+		editBtn.setAttribute('aria-label', editLinkText);
 
 
 		const imgEditBtn = window.L.DomUtil.create('img', 'hyperlink-pop-up-editimg', editBtn);
@@ -114,10 +115,10 @@ class URLPopUpSection extends HTMLObjectSection {
 		imgEditBtn.style.padding = '4px';
 
 		const removeLinkText = _('Remove link');
-		const removeBtn = window.L.DomUtil.createWithId('div', this.removeButtonId, linkRow);
-		window.L.DomUtil.addClass(removeBtn, 'hyperlink-popup-btn');
+		const removeBtn = window.L.DomUtil.createWithId('button', this.removeButtonId, linkRow);
+		removeBtn.setAttribute('type', 'button');
+		removeBtn.classList.add('hyperlink-popup-btn', 'unobutton'); // not a dialog button
 		removeBtn.setAttribute('title', removeLinkText);
-		removeBtn.setAttribute('role', 'button');
 		removeBtn.setAttribute('aria-label', removeLinkText);
 
 		const imgRemoveBtn = window.L.DomUtil.create('img', 'hyperlink-pop-up-removeimg', removeBtn);
@@ -140,8 +141,28 @@ class URLPopUpSection extends HTMLObjectSection {
 			app.map.sendUnoCommand('.uno:JumpToMark?Bookmark:string=' + encodeURIComponent(this.sectionProperties.url.substring(1)));
 	}
 
+	// opened only through openLink(), which shows the confirmation first
+	guardLink(anchor: HTMLAnchorElement) {
+		for (const type of ['click', 'auxclick', 'contextmenu', 'dragstart']) {
+			anchor.addEventListener(type, (event) => {
+				event.preventDefault();
+				if (type === 'click')
+					this.openLink();
+			});
+		}
+	}
+
 	setUpCallbacks(linkPosition?: cool.SimplePoint) {
-		this.link.onclick = () => this.openLink();
+		this.guardLink(this.link);
+
+		// Escape gives the keyboard back to the document, which the popup belongs to
+		this.getHTMLObject().addEventListener('keydown', (event: KeyboardEvent) => {
+			if (event.key !== 'Escape')
+				return;
+			event.preventDefault();
+			event.stopPropagation();
+			app.map.focus();
+		});
 
 		var params: any;
 		if (linkPosition) {
@@ -218,7 +239,8 @@ class URLPopUpSection extends HTMLObjectSection {
 			const urlAnchor = window.L.DomUtil.create('a', '', this.preview) as HTMLAnchorElement;
 			urlAnchor.innerText = values.url;
 			urlAnchor.title = values.url;
-			urlAnchor.onclick = () => this.openLink();
+			urlAnchor.href = window.sanitizeUrl(values.url);
+			this.guardLink(urlAnchor);
 			this.link.innerText = values.title;
 			URLPopUpSection.resetPosition();
 		}
@@ -255,8 +277,14 @@ class URLPopUpSection extends HTMLObjectSection {
     }
 
     public static closeURLPopUp() {
-		if (URLPopUpSection.isOpen())
-			app.sectionContainer.removeSection(URLPopUpSection.sectionName);
+		if (!URLPopUpSection.isOpen())
+			return;
+		// the focus would stay on a removed element, out of the keyboard's reach
+		const popup = URLPopUpSection.getCurrent().getHTMLObject();
+		const hadFocus = popup.contains(document.activeElement);
+		app.sectionContainer.removeSection(URLPopUpSection.sectionName);
+		if (hadFocus)
+			app.map.focus();
 	}
 
     public static isOpen() {

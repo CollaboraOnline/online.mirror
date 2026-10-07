@@ -566,6 +566,16 @@ class Dispatcher {
 			},
 		};
 
+		// shown over the document while the caret is in a link
+		const linkPopUp = {
+			name: 'linkPopUp',
+			available: () => URLPopUpSection.isOpen(),
+			hasFocus: () =>
+				URLPopUpSection.isOpen() &&
+				contains(URLPopUpSection.getCurrent().getHTMLObject()),
+			focus: () => focusFirstIn(URLPopUpSection.getCurrent().getHTMLObject()),
+		};
+
 		const sidebar = {
 			name: 'sidebar',
 			available: () => !!app.map.sidebar && app.map.sidebar.isVisible(),
@@ -611,6 +621,7 @@ class Dispatcher {
 		}
 		regions.push(navigationSidebar);
 		regions.push(documentArea);
+		regions.push(linkPopUp);
 		regions.push(sidebar);
 		if (docType === 'spreadsheet') regions.push(sheetTabs);
 		regions.push(statusBar);

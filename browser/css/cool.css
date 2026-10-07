@@ -1408,6 +1408,7 @@ input, button {
 	text-overflow: ellipsis;
 	color: #0078A8;
 	font-size: 0.88rem;
+	text-decoration: none;
 }
 
 .hyperlink-popup-btn {
@@ -1416,9 +1417,14 @@ input, button {
 	vertical-align: middle;
 	width: 26px;
 	height: 26px;
+	padding: 0;
+	border: none;
+	background: none;
+	cursor: pointer;
 }
 
-.hyperlink-popup-btn:hover {
+.hyperlink-popup-btn:hover,
+.hyperlink-popup-btn:focus-visible {
 	background-color: var(--color-background-darker);
 	border-radius: 50%;
 }

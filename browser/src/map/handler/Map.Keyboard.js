@@ -7,7 +7,7 @@
  * at TextInput.
  */
 
-/* global app UNOKey RenderManager GraphicSelection JSDialog */
+/* global app UNOKey RenderManager GraphicSelection JSDialog URLPopUpSection */
 
 window.L.Map.mergeOptions({
 	keyboard: true,
@@ -449,6 +449,11 @@ window.L.Map.Keyboard = window.L.Handler.extend({
 	// printable characters. Those are handled by TextInput.js.
 	_onKeyDown: function (ev) {
 		if (this._map.uiManager.isUIBlocked() || this._slideSorterFocused())
+			return;
+
+		// the link popup's own controls, not the document
+		if (URLPopUpSection.isOpen()
+			&& URLPopUpSection.getCurrent().getHTMLObject().contains(ev.target))
 			return;
 
 		if (this._map._debug.logKeyboardEvents) {
