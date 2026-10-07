@@ -20,6 +20,7 @@
 #include <chrono>
 #include <optional>
 #include <queue>
+#include <set>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -281,8 +282,17 @@ public:
     /// bytes. Empty when the compression failed.
     static std::vector<char> zstdFrame(std::string_view headerName, const char* data, size_t size);
 
-    /// True once this client has asked for vector primitives.
-    bool isVectorRendering() const { return _isVectorRendering; }
+    /// The id of the part a vector primitives payload describes, read off its header, or an
+    /// empty string when it names none.
+    static std::string vectorPartIdOf(const std::string& json);
+
+    /// True when a vector primitives response served this session the part with the given id.
+    /// True for every part when the id is empty, since a delta that names no part is for every
+    /// reader.
+    bool holdsVectorPart(const std::string& partId) const
+    {
+        return _isVectorRendering && (partId.empty() || _vectorParts.contains(partId));
+    }
 
     /// Sends a vector primitives delta: the compressed frame when there is one, otherwise the
     /// payload as a command values text frame.
@@ -361,6 +371,7 @@ public:
             << "\n\tisDocLoaded: " << _isDocLoaded
             << "\n\tisDocPasswordToModifyEntered: " << _isDocPasswordToModifyEntered
             << "\n\tisVectorRendering: " << _isVectorRendering
+            << "\n\tvectorParts: " << _vectorParts.size()
             << "\n\tdocType: " << _docType
             << "\n\tcopyingToClipboard: " << _copyToClipboard
             << "\n\tdocType: " << _docType
@@ -409,6 +420,8 @@ private:
     /// True once this client has asked for vector primitives. Such a client draws the document
     /// from them rather than from bitmap tiles.
     bool _isVectorRendering = false;
+    /// The ids of the vector parts a primitives response served this session.
+    std::set<std::string> _vectorParts;
 
     std::string _docType;
 

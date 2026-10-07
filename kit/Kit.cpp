@@ -2853,15 +2853,17 @@ void Document::deliverVectorDelta(const std::string& payload)
     if (isBackgroundSaveProcess())
         return;
 
-    // Every session reads the same delta, so it is compressed once, for the first session that
-    // takes it, and the frame is handed to each of them. A session that draws bitmap tiles has
-    // no use for it. An inactive or disconnected session is sent no delta.
+    // Every session that holds the part reads the same delta, so it is compressed once, for
+    // the first session that takes it, and the frame is handed to each of them. A session that
+    // draws bitmap tiles, or was never served this part, has no use for it. An inactive or
+    // disconnected session is sent no delta.
+    const std::string partId = ChildSession::vectorPartIdOf(payload);
     std::optional<std::vector<char>> frame;
     for (const auto& it : _sessions)
     {
         ChildSession& session = *it.second;
         if (session.isCloseFrame() || session.isDisconnected() || !session.isActive() ||
-            !session.isVectorRendering())
+            !session.holdsVectorPart(partId))
             continue;
         if (!frame)
             frame = ChildSession::zstdFrame("zstdvectorprimitivesdelta:\n", payload.data(),

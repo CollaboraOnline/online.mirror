@@ -26,6 +26,7 @@ std::vector<char> ChildSession::zstdFrame(std::string_view /* headerName */,
 }
 void ChildSession::sendVectorDelta(const std::vector<char>& /* frame */,
                                    const std::string& /* payload */) {}
+std::string ChildSession::vectorPartIdOf(const std::string& /* json */) { return std::string(); }
 void ChildSession::disconnect() {}
 int ChildSession::getSpeed() { return 0; }
 bool ChildSession::_handleInput(const char* /*buffer*/, int /*length*/) { return false; }
