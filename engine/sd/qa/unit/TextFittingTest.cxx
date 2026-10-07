@@ -22,6 +22,7 @@
 #include <unomodel.hxx>
 #include <sdpage.hxx>
 #include <ViewShell.hxx>
+#include <DrawViewShell.hxx>
 
 class TextFittingTest : public SdModelTestBase
 {
@@ -652,6 +653,62 @@ CPPUNIT_TEST_FIXTURE(TextFittingTest, testStoredFitBackAfterUndo)
     dispatchCommand(mxComponent, u".uno:Redo"_ustr, {});
     CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, pBody->GetFontScale(), 1E-4);
     CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, pBody->GetSpacingScale(), 1E-4);
+}
+
+CPPUNIT_TEST_FIXTURE(TextFittingTest, testEnterAtTheEndRefitsLikeReference)
+{
+    // The reference program leaves a trailing empty paragraph out of the fit, but the paragraph
+    // before it then counts in full, its space below and the whole of its last line included.
+    // The scales after Enter are the ones the reference program saved for the same key press.
+    createSdImpressDoc("pptx/TextFittingTrailingEmptyParagraph.pptx");
+    SdXImpressDocument* pXImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+    CPPUNIT_ASSERT(pXImpressDocument);
+    auto pViewShell
+        = dynamic_cast<sd::DrawViewShell*>(pXImpressDocument->GetDocShell()->GetViewShell());
+    CPPUNIT_ASSERT(pViewShell);
+
+    struct Expected
+    {
+        double fFontBefore, fSpacingBefore, fFontAfter, fSpacingAfter;
+    };
+    // Slides 1 and 2 have spacing 1.5 and shrink. Slide 3 has double spacing and enough room.
+    const Expected aExpected[]
+        = { { 1.0, 1.0, 1.0, 0.9 }, { 0.775, 0.8, 0.625, 0.8 }, { 1.0, 1.0, 1.0, 1.0 } };
+    for (sal_uInt16 nSlide = 0; nSlide < std::size(aExpected); ++nSlide)
+    {
+        const OString sSlide = "slide " + OString::number(nSlide + 1);
+        pViewShell->SwitchPage(nSlide);
+        Scheduler::ProcessEventsToIdle();
+        SdPage* pPage = pViewShell->GetActualPage();
+        auto pBody = DynCastSdrTextObj(pPage->GetPresObj(PresObjKind::Outline));
+        CPPUNIT_ASSERT_MESSAGE(sSlide.getStr(), pBody);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(sSlide.getStr(), aExpected[nSlide].fFontBefore,
+                                             pBody->GetFontScale(), 1E-4);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(sSlide.getStr(), aExpected[nSlide].fSpacingBefore,
+                                             pBody->GetSpacingScale(), 1E-4);
+
+        // Enter on the selected shape starts editing its text, the second Enter adds a paragraph.
+        SdrView* pView = pViewShell->GetView();
+        pView->MarkObj(pBody, pView->GetSdrPageView());
+        Scheduler::ProcessEventsToIdle();
+        typeKey(pXImpressDocument, KEY_RETURN);
+        CPPUNIT_ASSERT_MESSAGE(sSlide.getStr(), pView->IsTextEdit());
+        EditView& rEditView = pView->GetTextEditOutlinerView()->GetEditView();
+        EditEngine& rEditEngine = rEditView.getEditEngine();
+        const sal_Int32 nParagraphs = rEditEngine.GetParagraphCount();
+        rEditView.SetSelection(ESelection(nParagraphs - 1, EE_TEXTPOS_MAX));
+        typeKey(pXImpressDocument, KEY_RETURN);
+        CPPUNIT_ASSERT_MESSAGE(sSlide.getStr(), pView->IsTextEdit());
+
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(sSlide.getStr(), nParagraphs + 1,
+                                     rEditEngine.GetParagraphCount());
+        CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(sSlide.getStr(), aExpected[nSlide].fFontAfter,
+                                             rEditEngine.getScalingParameters().fFontY, 1E-4);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(sSlide.getStr(), aExpected[nSlide].fSpacingAfter,
+                                             rEditEngine.getScalingParameters().fSpacingY, 1E-4);
+        pView->SdrEndTextEdit();
+        pView->UnmarkAll();
+    }
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

@@ -573,13 +573,13 @@ tools::Long ImpEditEngine::GetUncountedSpaceBelowLastLine(bool bLeaveOutEmptyAtE
         || mbLineSpacingBelowBaseline)
         return 0;
 
-    // The fitted height leaves out blank paragraphs at the end, the laid out height counts them.
+    // The fitted height leaves out blank paragraphs at the end, and the paragraph before them then
+    // counts in full, as the reference program does. The laid out height counts them.
     const ParaPortionList& rPortions = GetParaPortions();
-    sal_Int32 nLast = rPortions.lastIndex();
-    while (bLeaveOutEmptyAtEnd && nLast >= 0
-           && isInEmptyClusterAtTheEnd(rPortions.getRef(nLast), true))
-        --nLast;
+    const sal_Int32 nLast = rPortions.lastIndex();
     if (nLast < 0)
+        return 0;
+    if (bLeaveOutEmptyAtEnd && isInEmptyClusterAtTheEnd(rPortions.getRef(nLast), true))
         return 0;
 
     const EditLineList& rLines = rPortions.getRef(nLast).GetLines();
