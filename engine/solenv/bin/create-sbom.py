@@ -592,13 +592,14 @@ def process_license_file(file_path):
                 if spdx_info["version"]:
                     pkg_element["software_packageVersion"] = spdx_info["version"]
                 source_element = {
-                    "type": "software_SoftwareArtifact",
+                    "type": "software_Package",
                     "spdxId": source_spdx_id,
+                    "creationInfo": "_:creationinfo",
                     "software_primaryPurpose": "source",
                     "externalRef": [{
                         "type": "ExternalRef",
-                        "externalRefType": "SourceArtifact",
-                        "locator": spdx_info["locator"]
+                        "externalRefType": "sourceArtifact",
+                        "locator": [spdx_info["locator"]]
                     }],
                 }
 
@@ -612,6 +613,8 @@ def process_license_file(file_path):
                 graph = [pkg_element, source_element,
                     {
                         "type": "Relationship",
+                        "spdxId": next_rel_id(),
+                        "creationInfo": "_:creationinfo",
                         "from": source_spdx_id,
                         "relationshipType": "generates",
                         "to": [pkg_spdx_id],
@@ -1330,7 +1333,7 @@ def add_merge_module(files_by_package, externals_by_package, install_script):
                     "spdxId": custom_license_spdx_id,
                     "creationInfo": "_:creationInfo",
                     "name": f"Microsoft Visual Studio {vcyear} License Terms, Distributable Code",
-                    "expandedlicensing_licenseText": "...verbatim terms...",
+                    "simplelicensing_licenseText": "...verbatim terms...",
                     "expandedlicensing_isOsiApproved": False,
                     "expandedlicensing_isFsfLibre": False,
                     "expandedlicensing_seeAlso": ["https://visualstudio.microsoft.com/license-terms/"]
@@ -1473,17 +1476,20 @@ def sbom_add_files(files_by_package, externals_by_package):
             graph.append({
                 "type": "software_File",
                 "spdxId": file_spdx_id,
+                "creationInfo": "_:creationinfo",
                 "name": file["instpath"],
+                "software_additionalPurpose": flags,
+                "comment": "software_additionalPurpose field is used to indicate the properties of BSI TR-03183-2",
                 "verifiedUsing": [{
                     "type": "Hash",
                     "algorithm": "sha512",
-                    "hashValue": file["sha512"],
-                    "software_additionalPurpose": flags,
-                    "comment": "software_additionalPurpose field is used to indicate the properties of BSI TR-03183-2"
+                    "hashValue": file["sha512"]
                     }]
                 })
             graph.append({
                     "type": "Relationship",
+                    "spdxId": next_rel_id(),
+                    "creationInfo": "_:creationinfo",
                     "from": parent,
                     "relationshipType": "hasDistributionArtifact",
                     "to": [file_spdx_id],
@@ -1497,6 +1503,8 @@ def sbom_add_files(files_by_package, externals_by_package):
                 if len(deps) != 0:
                     graph.append({
                             "type": "Relationship",
+                            "spdxId": next_rel_id(),
+                            "creationInfo": "_:creationinfo",
                             "from": file_spdx_id,
                             "relationshipType": "dependsOn",
                             "to": deps,
@@ -1507,9 +1515,10 @@ def sbom_add_files(files_by_package, externals_by_package):
                 externaldeps = [add_external(dep) for dep in file["externaldeps"]]
                 graph.append({
                         "type": "Relationship",
+                        "spdxId": next_rel_id(),
+                        "creationInfo": "_:creationinfo",
                         "from": file_spdx_id,
-                        "relationshipType": "contains",
-                        "software_softwareLinkage": "static",
+                        "relationshipType": "hasStaticLink",
                         "to": externaldeps,
                         "completeness": "noAssertion"
                     })
@@ -1531,6 +1540,8 @@ def sbom_add_files(files_by_package, externals_by_package):
                 if len(sysdeps) != 0:
                     graph.append({
                             "type": "Relationship",
+                            "spdxId": next_rel_id(),
+                            "creationInfo": "_:creationinfo",
                             "from": file_spdx_id,
                             "relationshipType": "dependsOn",
                             "to": sysdeps,
