@@ -2930,6 +2930,35 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest3, testHTMLPasteElementClassFromStyleSheet)
     }
 }
 
+CPPUNIT_TEST_FIXTURE(SwUiWriterTest3, testHTMLPasteIntoEmptyParagraphKeepsParagraphFormat)
+{
+    // Given a document with an empty, left aligned paragraph that has a direct font:
+    createSwDoc();
+    uno::Reference<beans::XPropertySet> xParagraph(getParagraph(1), uno::UNO_QUERY);
+    xParagraph->setPropertyValue(u"CharFontName"_ustr, uno::Any(u"DejaVu Sans"_ustr));
+
+    // When pasting HTML with two justified paragraphs into it:
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->SttEndDoc(/*bStt=*/true);
+    OString const aHtml = "<html><body>"
+                          "<p style='text-align:justify'>first</p>"
+                          "<p style='text-align:justify'>second</p>"
+                          "</body></html>"_ostr;
+    rtl::Reference<TransferDataContainer> xTransferable(new TransferDataContainer);
+    xTransferable->CopyByteString(SotClipboardFormatId::HTML, aHtml);
+    TransferableDataHelper aHelper(xTransferable);
+    SwTransferable::PasteFormat(*pWrtShell, aHelper, SotClipboardFormatId::HTML);
+
+    // Then make sure the first pasted paragraph is justified as well:
+    CPPUNIT_ASSERT_EQUAL(u"first"_ustr, getParagraph(1)->getString());
+    // Without the fix in place, this test would have failed with:
+    // - Expected: 2
+    // - Actual  : 0
+    // i.e. the first pasted paragraph took the paragraph formatting of the empty paragraph.
+    CPPUNIT_ASSERT_EQUAL(sal_Int16(style::ParagraphAdjust_BLOCK),
+                         getProperty<sal_Int16>(getParagraph(1), u"ParaAdjust"_ustr));
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

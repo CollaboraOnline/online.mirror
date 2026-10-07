@@ -103,6 +103,7 @@
 #include <docufld.hxx>
 #include "swcss1.hxx"
 #include <fltini.hxx>
+#include <shellio.hxx>
 #include <htmltbl.hxx>
 #include "htmlnum.hxx"
 #include "swhtml.hxx"
@@ -787,7 +788,7 @@ void SwHTMLParser::Continue( HtmlTokenId nToken )
                 if (pTextNode->GetText().getLength())
                     pDelNd->FormatToTextAttr( pTextNode );
                 else
-                    pTextNode->ChgFormatColl( pDelNd->GetTextColl() );
+                    Reader::TakePastedParagraphFormat(*pTextNode, *pDelNd);
                 pTextNode->JoinNext();
             }
         }

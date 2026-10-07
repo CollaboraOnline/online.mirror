@@ -694,6 +694,14 @@ void Reader::StartPaste(SwPasteInfo& rPasteInfo)
     rPasteInfo.m_rPam.Move(fnMoveBackward);
 }
 
+void Reader::TakePastedParagraphFormat(SwTextNode& rEmptyNode, SwTextNode& rPastedNode)
+{
+    rEmptyNode.ChgFormatColl(rPastedNode.GetTextColl());
+    // Lists would need manual merging, so a list paragraph only gives its style.
+    if (!rPastedNode.GetNoCondAttr(RES_PARATR_LIST_ID, /*bInParents=*/false))
+        rPastedNode.CopyCollFormat(rEmptyNode);
+}
+
 void Reader::EndPaste(SwPasteInfo& rPasteInfo)
 {
     // Clean up the fake paragraphs.
@@ -731,15 +739,7 @@ void Reader::EndPaste(SwPasteInfo& rPasteInfo)
                     if (pTextNode->GetText().getLength())
                         pDelNd->FormatToTextAttr(pTextNode);
                     else
-                    {
-                        pTextNode->ChgFormatColl(pDelNd->GetTextColl());
-                        if (!pDelNd->GetNoCondAttr(RES_PARATR_LIST_ID, /*bInParents=*/false))
-                        {
-                            // Lists would need manual merging, but copy paragraph direct
-                            // formatting otherwise.
-                            pDelNd->CopyCollFormat(*pTextNode);
-                        }
-                    }
+                        TakePastedParagraphFormat(*pTextNode, *pDelNd);
                     pTextNode->JoinNext();
                 }
             }

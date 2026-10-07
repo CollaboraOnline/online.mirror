@@ -47,6 +47,7 @@ class SwCursorShell;
 class SwDoc;
 class SwPaM;
 class SwTextBlocks;
+class SwTextNode;
 struct SwPosition;
 struct Writer_Impl;
 namespace sw::mark { class MarkBase; }
@@ -309,6 +310,8 @@ public:
 
     static void StartPaste(SwPasteInfo& rPasteInfo);
     static void EndPaste(SwPasteInfo& rPasteInfo);
+    /// Gives rEmptyNode the paragraph style and the paragraph formatting of rPastedNode.
+    static void TakePastedParagraphFormat(SwTextNode& rEmptyNode, SwTextNode& rPastedNode);
 
 private:
     virtual ErrCodeMsg Read(SwDoc &, const OUString& rBaseURL, SwPaM &, const OUString &)=0;
