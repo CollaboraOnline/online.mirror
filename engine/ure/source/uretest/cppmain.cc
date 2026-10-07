@@ -82,7 +82,7 @@ public:
         cpo::uno::Reference< cpo::uno::XComponentContext > const & context):
         context_(context) {}
 
-    virtual ::sal_Int32 SAL_CALL run(
+    virtual ::sal_Int32 run(
         cpo::uno::Sequence< ::rtl::OUString > const &);
 
 private:
@@ -225,14 +225,14 @@ cpo::uno::Sequence< ::rtl::OUString > getSupportedServiceNames() {
 
 }
 
-extern "C" SAL_DLLPUBLIC_EXPORT bool SAL_CALL component_writeInfo(
+extern "C" SAL_DLLPUBLIC_EXPORT bool component_writeInfo(
     void * serviceManager, void * registryKey)
 {
     return ::cppu::component_writeInfoHelper(
         serviceManager, registryKey, entries);
 }
 
-extern "C" SAL_DLLPUBLIC_EXPORT void * SAL_CALL component_getFactory(
+extern "C" SAL_DLLPUBLIC_EXPORT void * component_getFactory(
     char const * implName, void * serviceManager, void * registryKey)
 {
     return ::cppu::component_getFactoryHelper(

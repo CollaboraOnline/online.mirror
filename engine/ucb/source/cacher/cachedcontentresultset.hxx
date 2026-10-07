@@ -351,7 +351,7 @@ private:
         css::script::XTypeConverter >& getTypeConverter(std::unique_lock<std::mutex>& rGuard);
 
     template<typename T> T rowOriginGet(
-        T (SAL_CALL css::sdbc::XRow::* f)(sal_Int32), sal_Int32 columnIndex);
+        T (css::sdbc::XRow::* f)(sal_Int32), sal_Int32 columnIndex);
 };
 
 

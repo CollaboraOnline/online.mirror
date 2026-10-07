@@ -357,7 +357,7 @@ OStorePageBIOS::Ace::~Ace()
 }
 
 int
-SAL_CALL OStorePageBIOS::Ace::constructor (
+OStorePageBIOS::Ace::constructor (
     void * obj, SAL_UNUSED_PARAMETER void*)
 {
   Ace * ace = static_cast<Ace*>(obj);

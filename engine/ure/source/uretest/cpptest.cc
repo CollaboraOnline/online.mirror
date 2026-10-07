@@ -41,7 +41,7 @@ class Service: public cppu::WeakImplHelper1< test::types::XTest > {
 public:
     Service() {}
 
-    virtual void SAL_CALL throwException() {
+    virtual void throwException() {
         throw test::types::TestException(
             rtl::OUString("test"),
             static_cast< cppu::OWeakObject * >(this));
@@ -81,7 +81,7 @@ cppu::ImplementationEntry entries[] = {
 
 }
 
-extern "C" SAL_DLLPUBLIC_EXPORT void * SAL_CALL component_getFactory(
+extern "C" SAL_DLLPUBLIC_EXPORT void * component_getFactory(
     char const * implName, void * serviceManager, void * registryKey)
 {
     return cppu::component_getFactoryHelper(

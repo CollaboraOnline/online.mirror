@@ -39,7 +39,7 @@ public:
     virtual ~ManifestReader() override;
 
     // XManifestReader
-    virtual cpo::uno::Sequence< cpo::uno::Sequence< css::beans::PropertyValue > > SAL_CALL readManifestSequence( const cpo::uno::Reference< css::io::XInputStream >& rStream ) override;
+    virtual cpo::uno::Sequence< cpo::uno::Sequence< css::beans::PropertyValue > > readManifestSequence( const cpo::uno::Reference< css::io::XInputStream >& rStream ) override;
 
     // XServiceInfo
     virtual OUString getImplementationName(  ) override;

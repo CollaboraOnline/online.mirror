@@ -53,7 +53,7 @@ using namespace cppu;
 //function getObject, where this is similar implemented
 
 template<typename T> T CachedContentResultSet::rowOriginGet(
-    T (SAL_CALL css::sdbc::XRow::* f)(sal_Int32), sal_Int32 columnIndex)
+    T (css::sdbc::XRow::* f)(sal_Int32), sal_Int32 columnIndex)
 {
     std::unique_lock aGuard(m_aMutex);
     impl_EnsureNotDisposed(aGuard);

@@ -45,7 +45,6 @@ FileContentIdentifier::~FileContentIdentifier()
 }
 
 OUString
-SAL_CALL
 FileContentIdentifier::getContentIdentifier()
 {
     return m_aContentId;
