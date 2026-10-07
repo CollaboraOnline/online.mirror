@@ -114,7 +114,7 @@
 }
 .ui-toolbar:not(.ui-overflow-group-popup) > div > div {
 	display: flex;
-	padding: 0px 5px;
+	padding: 0 var(--spacing-s);
 }
 .ui-toolbar .menubutton:not(.notebookbar) {
 	line-height: normal;
