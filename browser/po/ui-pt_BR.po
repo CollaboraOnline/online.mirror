@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-10-06 00:01+0000\n"
+"PO-Revision-Date: 2026-10-07 09:12+0000\n"
 "Last-Translator: H2Oufoe <regularwater@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Portuguese (Brazil) <https://hosted.weblate.org/projects/"
 "collabora-online/collabora-ui/pt_BR/>\n"
@@ -5887,11 +5887,13 @@ msgstr ""
 
 #: src/slideimport/SlideLinks.ts:463 src/slideimport/SlideLinks.ts:741
 msgid "{0} could not be read."
-msgstr ""
+msgstr "{0} não pôde ser lido."
 
 #: src/slideimport/SlideLinks.ts:562
 msgid "Cannot update the slides of {0}: source lacks the matching slides"
 msgstr ""
+"Não é possível atualizar os slides de {0}: o local de origem não tem os "
+"slides correspondentes"
 
 #: src/slideimport/SlideLinks.ts:565 src/slideimport/SlideLinks.ts:744
 msgid "The slides of {0} could not be read into this presentation."
