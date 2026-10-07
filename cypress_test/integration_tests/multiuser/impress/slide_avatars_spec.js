@@ -95,15 +95,16 @@ describe(['tagmultiuser'], 'Multiuser slide sorter avatars', function() {
 
 		// User B goes away. A has to hear it and clear the mark without a
 		// reload, otherwise the slide keeps showing someone who has left.
+		// B closes their page, which ends their session for good.
 		cy.then(function() {
-			win2.app.socket.close();
+			win2.frameElement.remove();
 		});
 
 		// No processToIdle here: the other view is gone, so asking the server
 		// to report when idle is answered by nobody. Let the assertion retry
 		// until the removeview lands.
 		cy.cSetActiveFrame('#iframe1');
-		cy.wrap(null, { timeout: 30000 }).should(function() {
+		cy.wrap(null).should(function() {
 			expect(avatarCounts(win1)[1].faces).to.equal(0);
 		});
 	});

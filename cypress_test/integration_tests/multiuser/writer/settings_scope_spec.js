@@ -32,7 +32,7 @@ describe(['tagmultiuser'], 'A joining user is told the document uses other setti
 			win.app.map.settings.showSettingsDialog('xcu-section');
 		});
 		cy.cGet('.iframe-settings-wrap').should('be.visible');
-		settingsIframeBody().find('#xcu-editor', { timeout: 30000 }).should('exist');
+		settingsIframeBody().find('#xcu-editor').should('exist');
 	}
 
 	beforeEach(function() {
@@ -105,14 +105,15 @@ describe(['tagmultiuser'], 'A joining user is told the document uses other setti
 			.first()
 			.should('have.prop', 'hidden', false);
 
-		cy.then(function() { second.app.socket.close(); });
+		// The other one closes their page, which ends their session for good.
+		cy.then(function() { second.frameElement.remove(); });
 
 		// No processToIdle: the other view is gone, so nobody answers it.
 		// The assertion retries until documentsettingslive arrives. Every
 		// note the dialog holds is asserted, because it puts one in the
 		// document settings and one in the sentence checker section.
 		settingsIframeBody()
-			.find('.settings-scope-note', { timeout: 30000 })
+			.find('.settings-scope-note')
 			.should('have.length.at.least', 1)
 			.each(function(note) {
 				cy.wrap(note).should('have.prop', 'hidden', true);
