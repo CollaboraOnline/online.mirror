@@ -6,13 +6,13 @@ m4_define([m4_foreachq],[m4_ifelse([$2],[],[],[m4_pushdef([$1])_$0([$1],[$3],[],
 m4_define([_m4_foreachq],[m4_ifelse([$#],[3],[],[m4_define([$1],[$4])$2[]$0([$1],[$2],m4_shift(m4_shift(m4_shift($@))))])])m4_dnl
 m4_define(_YEAR_,m4_esyscmd(date +%Y|tr -d '\n'))m4_dnl
 m4_dnl------------------------------------------------------------------------
-m4_dnl# Define MOBILEAPP as true if this is either for the iOS/Android app or for the Collabora Office apps
-m4_define([MOBILEAPP],[])m4_dnl
-m4_ifelse(IOSAPP,[true],[m4_define([MOBILEAPP],[true])])m4_dnl
-m4_ifelse(MACOSAPP,[true],[m4_define([MOBILEAPP],[true])])m4_dnl
-m4_ifelse(WINDOWSAPP,[true],[m4_define([MOBILEAPP],[true])])m4_dnl
-m4_ifelse(ANDROIDAPP,[true],[m4_define([MOBILEAPP],[true])])m4_dnl
-m4_ifelse(QTAPP,[true],[m4_define([MOBILEAPP],[true])])m4_dnl
+m4_dnl# Define APP as true for a page that an app loads from file://, rather than one coolwsd serves
+m4_define([APP],[])m4_dnl
+m4_ifelse(IOSAPP,[true],[m4_define([APP],[true])])m4_dnl
+m4_ifelse(MACOSAPP,[true],[m4_define([APP],[true])])m4_dnl
+m4_ifelse(WINDOWSAPP,[true],[m4_define([APP],[true])])m4_dnl
+m4_ifelse(ANDROIDAPP,[true],[m4_define([APP],[true])])m4_dnl
+m4_ifelse(QTAPP,[true],[m4_define([APP],[true])])m4_dnl
 m4_dnl
 m4_dnl# FIXME: This is temporary and not what we actually eventually want.
 m4_dnl# What we really want is not a separate HTML file (produced with M4 conditionals on the below
@@ -20,14 +20,14 @@ m4_dnl# EMSCRIPTENAPP) for a "WASM app". What we want is that the same cool.html
 m4_dnl# instead run locally using WASM, if the connection to the COOL server breaks. (And then
 m4_dnl# re-connects to the COOL server when possible.)
 m4_dnl
-m4_ifelse(EMSCRIPTENAPP,[true],[m4_define([MOBILEAPP],[true])])m4_dnl
+m4_ifelse(EMSCRIPTENAPP,[true],[m4_define([APP],[true])])m4_dnl
 m4_dnl------------------------------------------------------------------------
 <!DOCTYPE html>
 m4_ifelse(IOSAPP,[true],
 <!-- Related to issue #5841: the iOS app sets the base text direction via the "dir" parameter -->
 <html dir="" data-app-type="mobile"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" data-theme="%UI_THEME%">
 ,
-<html %UI_RTL_SETTINGS%m4_ifelse(MOBILEAPP,[],[%DARK_THEME_ATTR%],[ data-app-type="mobile"])><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html %UI_RTL_SETTINGS%m4_ifelse(APP,[],[%DARK_THEME_ATTR%],[ data-app-type="mobile"])><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 )m4_dnl
 <!--
   SPDX-License-Identifier: MPL-2.0
@@ -39,11 +39,11 @@ m4_ifelse(IOSAPP,[true],
   License, v. 2.0. If a copy of the MPL was not distributed with this
   file, You can obtain one at http://mozilla.org/MPL/2.0/.
 -->
-m4_ifelse(MOBILEAPP, [true],
+m4_ifelse(APP, [true],
 [<title>MOBILEAPPNAME</title>],
 [<title>Online Editor</title>])
 <meta charset="utf-8">
-m4_ifelse(MOBILEAPP, [true],
+m4_ifelse(APP, [true],
 [
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content">
 ],
@@ -54,7 +54,7 @@ m4_ifelse(MOBILEAPP, [true],
 <meta name="previewImg" content="data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHZpZXdCb3g9JzAgMCAyMDAgMjAwJz4KICAgPGNpcmNsZSB0cmFuc2Zvcm09J3JvdGF0ZSgwKScgdHJhbnNmb3JtLW9yaWdpbj0nY2VudGVyJyBmaWxsPSdub25lJyBzdHJva2U9JyNCNkI2QjYnIHN0cm9rZS13aWR0aD0nMTUnIHN0cm9rZS1saW5lY2FwPSdyb3VuZCcgc3Ryb2tlLWRhc2hhcnJheT0nMjMwIDEwMDAnIHN0cm9rZS1kYXNob2Zmc2V0PScwJyBjeD0nMTAwJyBjeT0nMTAwJyByPSc3MCc+CiAgICAgPGFuaW1hdGVUcmFuc2Zvcm0KICAgICAgICAgYXR0cmlidXRlTmFtZT0ndHJhbnNmb3JtJwogICAgICAgICB0eXBlPSdyb3RhdGUnCiAgICAgICAgIGZyb209JzAnCiAgICAgICAgIHRvPSczNjAnCiAgICAgICAgIGR1cj0nMicKICAgICAgICAgcmVwZWF0Q291bnQ9J2luZGVmaW5pdGUnPgogICAgICA8L2FuaW1hdGVUcmFuc2Zvcm0+CiAgIDwvY2lyY2xlPgo8L3N2Zz4=">
 <meta name="previewSmile" content="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAtOTYwIDk2MCA5NjAiIHdpZHRoPSIyNHB4IiBmaWxsPSIjNWY2MzY4Ij48cGF0aCBkPSJtNDI0LTI5NiAyODItMjgyLTU2LTU2LTIyNiAyMjYtMTE0LTExNC01NiA1NiAxNzAgMTcwWm01NiAyMTZxLTgzIDAtMTU2LTMxLjVUMTk3LTE5N3EtNTQtNTQtODUuNS0xMjdUODAtNDgwcTAtODMgMzEuNS0xNTZUMTk3LTc2M3E1NC01NCAxMjctODUuNVQ0ODAtODgwcTgzIDAgMTU2IDMxLjVUNzYzLTc2M3E1NCA1NCA4NS41IDEyN1Q4ODAtNDgwcTAgODMtMzEuNSAxNTZUNzYzLTE5N3EtNTQgNTQtMTI3IDg1LjVUNDgwLTgwWm0wLTgwcTEzNCAwIDIyNy05M3Q5My0yMjdxMC0xMzQtOTMtMjI3dC0yMjctOTNxLTEzNCAwLTIyNyA5M3QtOTMgMjI3cTAgMTM0IDkzIDIyN3QyMjcgOTNabTAtMzIwWiIvPjwvc3ZnPg==">
 
-m4_ifelse(MOBILEAPP, [true],
+m4_ifelse(APP, [true],
 [
   <input type="hidden" id="init-app-type" value="mobile" />
   <input type="hidden" id="init-help-file" value="m4_syscmd([cat html/cool-help.html | sed 's/"/\&quot;/g'])" />
@@ -73,7 +73,7 @@ m4_ifelse(MOBILEAPP, [true],
 ]
 )
 
-<input type="hidden" id="init-uri-prefix" value="m4_ifelse(MOBILEAPP, [], [%SERVICE_ROOT%/browser/%VERSION%/])" />
+<input type="hidden" id="init-uri-prefix" value="m4_ifelse(APP, [], [%SERVICE_ROOT%/browser/%VERSION%/])" />
 <input type="hidden" id="init-branding-name" value="%BRANDING_THEME%" />
 
 m4_dnl# For use in conditionals in JS:
@@ -89,17 +89,17 @@ m4_ifelse(QTAPP, [true], [<script type="text/javascript" src="qrc:///qtwebchanne
 
 m4_ifelse(BUNDLE,[],
   <!-- Using individual CSS files -->
-  m4_foreachq([fileCSS],[COOL_CSS],[<link rel="stylesheet" href="][m4_ifelse(MOBILEAPP,[],[%SERVICE_ROOT%/browser/%VERSION%/])][fileCSS" />
+  m4_foreachq([fileCSS],[COOL_CSS],[<link rel="stylesheet" href="][m4_ifelse(APP,[],[%SERVICE_ROOT%/browser/%VERSION%/])][fileCSS" />
 ]),
-[<link rel="stylesheet" href="][m4_ifelse(MOBILEAPP,[],[%SERVICE_ROOT%/browser/%VERSION%/])][bundle.css" />])
+[<link rel="stylesheet" href="][m4_ifelse(APP,[],[%SERVICE_ROOT%/browser/%VERSION%/])][bundle.css" />])
 m4_dnl
-m4_dnl Add branding.css for mobile apps, or the placeholder for server processing
-m4_ifelse(MOBILEAPP, [true], [<link rel="stylesheet" href="m4_ifelse(IOSAPP, [true], [Branding/])branding.css" />],
+m4_dnl Add branding.css for apps, or the placeholder for server processing
+m4_ifelse(APP, [true], [<link rel="stylesheet" href="m4_ifelse(IOSAPP, [true], [Branding/])branding.css" />],
   [<!--%BRANDING_CSS%--> <!-- add your logo here -->])
 m4_dnl
 m4_dnl Handle localization. App pages take their strings from l10n-all.js instead of maps,
 m4_dnl whose entries only resolve when coolwsd serves them.
-m4_ifelse(MOBILEAPP,[true],[],
+m4_ifelse(APP,[true],[],
   [<link rel="localizations" href="%SERVICE_ROOT%/browser/%VERSION%/l10n/localizations.json" type="application/vnd.oftn.l10n+json"/>
    <link rel="localizations" href="%SERVICE_ROOT%/browser/%VERSION%/l10n/help-localizations.json" type="application/vnd.oftn.l10n+json"/>
    <link rel="localizations" href="%SERVICE_ROOT%/browser/%VERSION%/l10n/uno-localizations.json" type="application/vnd.oftn.l10n+json"/>]
@@ -109,7 +109,7 @@ m4_dnl# %DARK_THEME_ATTR% attribute and the %DARK_THEME_CSS% placeholder below) 
 m4_dnl# that no inline <script> is needed - an inline script would violate the
 m4_dnl# Content-Security-Policy. The apps load cool.html from a local file with no
 m4_dnl# CSP, so there the theme is applied by this script.
-m4_ifelse(MOBILEAPP, [true],
+m4_ifelse(APP, [true],
 [<script>
 // Apply dark theme immediately if darkTheme query parameter is present
 (function() {
@@ -279,7 +279,7 @@ m4_ifelse(PREVIEW, [true],
 
     <div id="snackbar-live-region" class="visuallyhidden" role="status" aria-live="polite" aria-atomic="true"></div>
 
-m4_ifelse(MOBILEAPP, [true],
+m4_ifelse(APP, [true],
      [
       <input type="hidden" id="initial-variables"
       m4_ifelse(EMSCRIPTENAPP, [true],
@@ -359,24 +359,24 @@ m4_ifelse(MOBILEAPP, [true],
 
 m4_dnl The branding script declares the branded product name and URL globals, so in app builds it
 m4_dnl has to run before global.js reads them.
-m4_ifelse(MOBILEAPP, [true], [<script src="m4_ifelse(IOSAPP, [true], [Branding/])branding.js"></script>])
+m4_ifelse(APP, [true], [<script src="m4_ifelse(IOSAPP, [true], [Branding/])branding.js"></script>])
 
 m4_dnl This is GLOBAL_JS:
-m4_ifelse(MOBILEAPP, [true],
+m4_ifelse(APP, [true],
   [<script type="text/javascript" src="global.js"></script>],
   [<script type="text/javascript" src="%SERVICE_ROOT%/browser/%VERSION%/global.js"></script>]
 )
 
 m4_dnl Templates manifest (loaded as JS to avoid CORS issues with file:// protocol):
-m4_ifelse(MOBILEAPP, [true],
+m4_ifelse(APP, [true],
   [<script type="text/javascript" src="templates/templates.js"></script>],
   [<script type="text/javascript" src="%SERVICE_ROOT%/browser/%VERSION%/templates/templates.js"></script>]
 )
 
-m4_ifelse(MOBILEAPP, [true],
+m4_ifelse(APP, [true],
   [<script type="text/javascript" src="introdocs/introdocs.js"></script>])
 
-m4_ifelse(MOBILEAPP,[true],
+m4_ifelse(APP,[true],
   <!-- This is for a mobile app so the script files are in the same folder -->
   m4_ifelse(EMSCRIPTENAPP, [true], [<script src="emscripten-module.js" defer></script>])
   m4_ifelse(QTAPP, [true], [<script src="l10n-all.js" defer></script>])
@@ -387,5 +387,5 @@ m4_ifelse(MOBILEAPP,[true],
         ])
 )m4_dnl
 
-m4_ifelse(MOBILEAPP, [], [<!--%BRANDING_JS%--> <!-- logo onclick handler -->])
+m4_ifelse(APP, [], [<!--%BRANDING_JS%--> <!-- logo onclick handler -->])
 </body></html>
