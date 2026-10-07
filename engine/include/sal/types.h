@@ -246,9 +246,6 @@ typedef void *                   sal_Handle;
 #   error("unknown platform")
 #endif
 
-/** This can be removed piecemeal now */
-#define SAL_CALL
-
 /**
    Exporting the symbols necessary for exception handling on GCC.
 
