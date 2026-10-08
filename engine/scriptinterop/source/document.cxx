@@ -255,6 +255,15 @@ OUString textOf(cpo::uno::Reference<css::text::XTextRange> const & range)
         }
         return buf.makeStringAndClear();
     }
+    // A text portion contains a footnote reference only when it is one:
+    if (cpo::uno::Reference<css::lang::XServiceInfo> const info{range, cpo::uno::UNO_QUERY};
+        info.is() && info->supportsService(u"com.sun.star.text.TextPortion"_ustr))
+    {
+        OUString type;
+        cpo::uno::Reference<css::beans::XPropertySet>(range, cpo::uno::UNO_QUERY_THROW)
+            ->getPropertyValue(u"TextPortionType"_ustr) >>= type;
+        return type == u"Footnote" ? OUString() : range->getString();
+    }
     OUString text = range->getString();
     auto const numbers = footnoteNumbers(range, text);
     for (auto i = numbers.rbegin(); i != numbers.rend(); ++i) {
