@@ -3578,7 +3578,8 @@ window.L.Control.NotebookbarWriter = window.L.Control.Notebookbar.extend({
 
 	// filter out empty children options so that the HTML isn't cluttered
 	// and individual items missaligned
-	// Also remove the hidden items / commands.
+	// Also remove the hidden commands. Hidden buttons stay, built as not
+	// visible, so they can be shown again.
 	cleanOpts: function(children) {
 		var that = this;
 
@@ -3588,14 +3589,15 @@ window.L.Control.NotebookbarWriter = window.L.Control.Notebookbar.extend({
 			}
 
 			var uiManager = that.map.uiManager;
-			if (!uiManager.isButtonVisible(c.id)) {
-				return null;
-			}
 			if (!uiManager.isCommandVisible(c.command)) {
 				return null;
 			}
 
 			var opts = Object.assign(c, {});
+
+			if (!uiManager.isButtonVisible(c.id)) {
+				opts.visible = false;
+			}
 
 			if (c.children && c.children.length) {
 				opts.children = that.cleanOpts(c.children);

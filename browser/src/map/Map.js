@@ -383,10 +383,7 @@ window.L.Map = window.L.Evented.extend({
 					// column when not. Use the impl's refresh(), which re-runs the tab
 					// builders (getFullJSON); refreshNotebookbar() only re-renders the
 					// snapshot built at construction, so it would not pick up the flag.
-					// Only when the layout actually changes: a rebuild re-runs the tab
-					// builders through cleanOpts(), which drops every item hidden via
-					// showButton() (e.g. Impress' Follow Presenter, hidden at load by
-					// SlideShowPresenter), and a dropped item cannot be shown again.
+					// Only when the layout actually changes.
 					if (this.uiManager.notebookbar && this.uiManager.notebookbar.impl &&
 					    wasSupported !== supported) {
 						this.uiManager.notebookbar.impl.refresh();
