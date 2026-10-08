@@ -1784,6 +1784,20 @@ SfxVoidItem GotoMark FN_GOTO_MARK
     GroupId = SfxGroupId::Navigator;
 ]
 
+SfxVoidItem GotoOutlineIndex FN_GOTO_OUTLINE_INDEX
+(SfxUInt32Item Index FN_GOTO_OUTLINE_INDEX, SfxStringItem Name FN_PARAM_1)
+[
+    AutoUpdate = FALSE,
+    FastCall = TRUE,
+    ReadOnlyDoc = TRUE,
+    Toggle = FALSE,
+    Container = FALSE,
+    RecordAbsolute = FALSE,
+    RecordPerSet;
+
+    GroupId = SfxGroupId::Navigator;
+]
+
 SfxVoidItem GotoNextObject FN_GOTO_NEXT_OBJ
 ()
 [

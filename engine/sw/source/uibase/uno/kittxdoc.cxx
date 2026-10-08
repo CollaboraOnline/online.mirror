@@ -1441,6 +1441,7 @@ void GetHeadings(tools::JsonWriter& rJsonWriter, SwDocShell* pDocShell)
         rJsonWriter.put("level", rOutline.getOutlineLevel(i) + 1);
         rJsonWriter.put("text", rOutline.getOutlineText(i, pLayout, true, false, false));
         rJsonWriter.put("target", SwGetOutlineLinkName(i, pDocShell->GetDoc()));
+        rJsonWriter.put("index", static_cast<sal_Int64>(i));
         if (const SwContentFrame* pFrame = rOutline.getOutlineNode(i)->getLayoutFrame(pLayout))
             rJsonWriter.put("rect", pFrame->getFrameArea().SVRect().toString());
     }

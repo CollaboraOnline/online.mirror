@@ -154,6 +154,7 @@ class SwUINumRuleItem;
 #define FN_COPY_FIELD                (FN_EDIT2 + 48)    /* show field content in readonly documents to copy content*/
 #define FN_CONVERT_SEL_FIELD         (FN_EDIT2 + 49)    /* convert selected field to text */
 #define FN_REDLINE_REINSTATE_ALL     (FN_EDIT2 + 50)    /* redlining reinstate all */
+#define FN_GOTO_OUTLINE_INDEX        (FN_EDIT2 + 51)    /* go to a heading by its position in the outline */
 
 // Region: View
 #define FN_DRAW_WRAP_DLG        TypedWhichId<SfxInt16Item>(FN_VIEW + 3)   /* Draw wrapping dlg */

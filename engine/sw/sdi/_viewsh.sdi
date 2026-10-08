@@ -786,6 +786,12 @@ interface BaseTextEditView
         StateMethod = NoState ;
     ]
 
+    FN_GOTO_OUTLINE_INDEX
+    [
+        ExecMethod = Execute ;
+        StateMethod = NoState ;
+    ]
+
     FN_SYNC_LABELS  // status(play)
     [
         ExecMethod = Execute ;

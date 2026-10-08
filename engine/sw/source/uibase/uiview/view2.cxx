@@ -71,6 +71,8 @@
 #include <sfx2/dispatch.hxx>
 #include <svl/whiter.hxx>
 #include <svl/ptitem.hxx>
+#include <svl/intitem.hxx>
+#include <svl/stritem.hxx>
 #include <sfx2/viewfrm.hxx>
 #include <vcl/errinf.hxx>
 #include <tools/hostfilter.hxx>
@@ -134,6 +136,7 @@
 #include <swabstdlg.hxx>
 #include <fmthdft.hxx>
 #include <unotextrange.hxx>
+#include <unotxdoc.hxx>
 #include <docstat.hxx>
 #include <wordcountdialog.hxx>
 #include <OnlineAccessibilityCheck.hxx>
@@ -1556,6 +1559,22 @@ void SwView::Execute(SfxRequest &rReq)
         case SID_JUMPTOMARK:
             if( pArgs && SfxItemState::SET == pArgs->GetItemState(SID_JUMPTOMARK, false, &pItem))
                 JumpToSwMark( SwMarkName(static_cast<const SfxStringItem*>(pItem)->GetValue()) );
+        break;
+        case FN_GOTO_OUTLINE_INDEX:
+        {
+            const SfxUInt32Item* pIndex = rReq.GetArg<SfxUInt32Item>(FN_GOTO_OUTLINE_INDEX);
+            const SfxStringItem* pName = rReq.GetArg<SfxStringItem>(FN_PARAM_1);
+            if (!pIndex || !pName)
+                break;
+            // Another view may have added or removed a heading since the index was read.
+            const SwOutlineNodes::size_type nIndex = pIndex->GetValue();
+            m_pWrtShell->EnterStdMode();
+            if (nIndex < m_pWrtShell->GetDoc()->GetNodes().GetOutLineNds().size()
+                && SwGetOutlineLinkName(nIndex, m_pWrtShell->GetDoc()) == pName->GetValue())
+                m_pWrtShell->GotoOutline(nIndex);
+            else
+                m_pWrtShell->GotoOutline(pName->GetValue());
+        }
         break;
         case SID_GALLERY :
             // First make sure that the sidebar is visible
