@@ -197,8 +197,11 @@ std::vector<std::pair<sal_Int32, sal_Int32>> footnoteNumbers(
                     portion, cpo::uno::UNO_QUERY_THROW);
                 auto const before = host->createTextCursorByRange(range->getStart());
                 before->gotoRange(footnote->getStart(), true);
+                // The string of an empty selection right at a footnote reference is the number of
+                // that footnote:
                 numbers.emplace_back(
-                    before->getString().getLength(), footnote->getString().getLength());
+                    before->isCollapsed() ? 0 : before->getString().getLength(),
+                    footnote->getString().getLength());
             }
         }
         previousParagraph.set(element, cpo::uno::UNO_QUERY_THROW);
@@ -767,8 +770,12 @@ public:
         v.reserve(runs_.empty() ? 1 : runs_.size());
         sal_Int32 off = 0;
         for (auto const & r: runs_) {
-            v.push_back(off);
-            off += textOf(r).getLength();
+            // A footnote reference is a run without text:
+            auto const length = textOf(r).getLength();
+            if (length != 0) {
+                v.push_back(off);
+                off += length;
+            }
         }
         if (v.empty()) {
             v.push_back(0);

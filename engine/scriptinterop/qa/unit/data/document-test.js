@@ -126,6 +126,8 @@ function test() {
         pastFootnote = true;
     }
     console.assert(pastFootnote);
+    const trailingIndices = body.getChild(4).getChild(0).asText().getTextAttributeIndices();
+    console.assert(trailingIndices.length === 1 && trailingIndices[0] === 0);
     const fns = DocumentApp.getActiveDocument().getFootnotes();
     console.assert(fns.length === 2);
     console.assert(fns[0].getFootnoteContents().getText() === 'Cellnote');
