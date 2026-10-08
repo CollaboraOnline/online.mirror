@@ -3966,6 +3966,7 @@ void DrawingML::WriteParagraph( const Reference< XTextContent >& rParagraph,
     mpFS->startElementNS(XML_a, XML_p);
 
     bool bPropertiesWritten = false;
+    Reference<XPropertySet> xLastRunPropSet;
     while( enumeration->hasMoreElements() )
     {
         Reference< XTextRange > run;
@@ -3973,6 +3974,8 @@ void DrawingML::WriteParagraph( const Reference< XTextContent >& rParagraph,
 
         if (any >>= run)
         {
+            if (!run->getString().isEmpty())
+                xLastRunPropSet.set(run, UNO_QUERY);
             if( !bPropertiesWritten )
             {
                 float fFirstCharHeight = rnCharHeight / 1000.;
@@ -3990,7 +3993,11 @@ void DrawingML::WriteParagraph( const Reference< XTextContent >& rParagraph,
             WriteRun( run, rbOverridingCharHeight, rnCharHeight, rXShapePropSet);
         }
     }
-    Reference< XPropertySet > rXPropSet( rParagraph, UNO_QUERY );
+    // endParaRPr is the formatting for text typed after the last run, so a paragraph with text
+    // takes it from its last run.
+    Reference<XPropertySet> rXPropSet = xLastRunPropSet;
+    if (!rXPropSet.is())
+        rXPropSet.set(rParagraph, UNO_QUERY);
 
     WriteRunInput aInput;
     aInput.xShapePropSet = rXShapePropSet;
