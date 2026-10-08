@@ -97,7 +97,7 @@ $(call gb_Helper_abbreviate_dirs,\
 		$(if $(WARNINGS_NOT_ERRORS),$(if $(ENABLE_WERROR),$(if $(PLUGIN_WARNINGS_AS_ERRORS),$(gb_COMPILER_PLUGINS_WARNINGS_AS_ERRORS))),$(gb_CFLAGS_WERROR)) \
 		$(if $(3),$(gb_COMPILER_PLUGINS_TOOL)) \
 		$(T_CFLAGS) $(T_CFLAGS_APPEND) \
-		$(if $(EXTERNAL_CODE),$(gb_CXXFLAGS_Wundef),$(gb_DEFS_INTERNAL)) \
+		$(if $(EXTERNAL_CODE),$(gb_CXXFLAGS_Wundef)) \
 		-c $(2) \
 		$(INCLUDE) \
 		)
@@ -112,7 +112,7 @@ $(call gb_Helper_abbreviate_dirs,\
 		$(if $(WARNINGS_NOT_ERRORS),$(if $(ENABLE_WERROR),$(if $(PLUGIN_WARNINGS_AS_ERRORS),$(gb_COMPILER_PLUGINS_WARNINGS_AS_ERRORS))),$(gb_CFLAGS_WERROR)) \
 		$(if $(3),$(gb_COMPILER_PLUGINS_TOOL)) \
 		$(T_OBJCFLAGS) $(T_OBJCFLAGS_APPEND) \
-		$(if $(EXTERNAL_CODE),$(gb_CXXFLAGS_Wundef),$(gb_DEFS_INTERNAL)) \
+		$(if $(EXTERNAL_CODE),$(gb_CXXFLAGS_Wundef)) \
 		-c $(2) \
 		$(INCLUDE) \
 		)
@@ -127,7 +127,7 @@ $(call gb_Helper_abbreviate_dirs,\
 		$(if $(WARNINGS_NOT_ERRORS),$(if $(ENABLE_WERROR),$(if $(PLUGIN_WARNINGS_AS_ERRORS),$(gb_COMPILER_PLUGINS_WARNINGS_AS_ERRORS))),$(gb_CFLAGS_WERROR)) \
 		$(if $(3),$(gb_COMPILER_PLUGINS_TOOL)) \
 		$(T_CXXFLAGS) $(T_CXXFLAGS_APPEND) \
-		$(if $(EXTERNAL_CODE),$(gb_CXXFLAGS_Wundef),$(gb_DEFS_INTERNAL)) \
+		$(if $(EXTERNAL_CODE),$(gb_CXXFLAGS_Wundef)) \
 		-c $(2) \
 		$(INCLUDE) \
 		)
@@ -142,7 +142,7 @@ $(call gb_Helper_abbreviate_dirs,\
 		$(if $(WARNINGS_NOT_ERRORS),$(if $(ENABLE_WERROR),$(if $(PLUGIN_WARNINGS_AS_ERRORS),$(gb_COMPILER_PLUGINS_WARNINGS_AS_ERRORS))),$(gb_CFLAGS_WERROR)) \
 		$(if $(3),$(gb_COMPILER_PLUGINS_TOOL)) \
 		$(T_OBJCXXFLAGS) $(T_OBJCXXFLAGS_APPEND) \
-		$(if $(EXTERNAL_CODE),$(gb_CXXFLAGS_Wundef),$(gb_DEFS_INTERNAL)) \
+		$(if $(EXTERNAL_CODE),$(gb_CXXFLAGS_Wundef)) \
 		-c $(2) \
 		$(INCLUDE) \
 		)

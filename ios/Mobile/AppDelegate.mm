@@ -15,7 +15,6 @@
 #import <cstdlib>
 #import <cstring>
 
-#define LIBO_INTERNAL_ONLY
 #import <COKit/COKit.hxx>
 #import <COKit/COKitInit.h>
 

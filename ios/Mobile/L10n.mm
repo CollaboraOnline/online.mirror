@@ -11,8 +11,6 @@
 
 #import <cstring>
 
-#define LIBO_INTERNAL_ONLY
-
 #import <i18nlangtag/languagetag.hxx>
 #import <unotools/resmgr.hxx>
 

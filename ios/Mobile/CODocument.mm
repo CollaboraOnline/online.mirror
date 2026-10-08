@@ -13,10 +13,6 @@
 
 #import <algorithm>
 
-// This is not "external" code in the UNO-based extensions sense. To be able to include
-// <comphelper/lok.hxx>, we must #define LIBO_INTERNAL_ONLY.
-
-#define LIBO_INTERNAL_ONLY
 #include <sal/config.h>
 #include <sal/log.hxx>
 #include <rtl/ustring.hxx>

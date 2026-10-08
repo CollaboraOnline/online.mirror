@@ -681,9 +681,6 @@ def is_allowed_if(line, module):
     line = re.sub(r'(.*) *//.*', r'\1', line)
     line = line.strip()
 
-    # Our sources always build with LIBO_INTERNAL_ONLY.
-    if line == "#if defined LIBO_INTERNAL_ONLY" or line == "#ifdef LIBO_INTERNAL_ONLY":
-        return True
     # We use PCHs only for C++.
     if line == "#if defined(__cplusplus)" or line == "#if defined __cplusplus":
         return True

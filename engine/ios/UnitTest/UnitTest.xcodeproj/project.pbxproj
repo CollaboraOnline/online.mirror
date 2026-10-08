@@ -714,7 +714,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"DISABLE_DYNLOADING=1",
-					"LIBO_INTERNAL_ONLY=1",
 					"IOS=IOS",
 					"$(inherited)",
 				);
@@ -754,7 +753,6 @@
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"IOS=IOS",
 					"DISABLE_DYNLOADING=1",
-					"LIBO_INTERNAL_ONLY=1",
 				);
 				HEADER_SEARCH_PATHS = (
 					../../include,

@@ -992,23 +992,6 @@ OUString CppuType::indent() const
     return buf.makeStringAndClear();
 }
 
-bool isDeprecated(std::vector< OUString > const & annotations)
-{
-    for (const OUString& r : annotations) {
-        if (r == "deprecated") {
-            return true;
-        }
-    }
-    return false;
-}
-
-void dumpDeprecation(FileStream & out, bool deprecated)
-{
-    if (deprecated) {
-        out << "SAL_DEPRECATED_INTERNAL(\"marked @deprecated in UNOIDL\") ";
-    }
-}
-
 class BaseOffset
 {
 public:
@@ -1095,14 +1078,12 @@ private:
         std::vector< OUString > const & exceptions, bool runtimeException) const;
 
     rtl::Reference< unoidl::InterfaceTypeEntity > entity_;
-    bool m_isDeprecated;
 };
 
 InterfaceType::InterfaceType(
     rtl::Reference< unoidl::InterfaceTypeEntity > const & entity,
     OUString const & name, rtl::Reference< TypeManager > const & typeMgr):
-    CppuType(name, typeMgr), entity_(entity),
-    m_isDeprecated(isDeprecated(entity->getAnnotations()))
+    CppuType(name, typeMgr), entity_(entity)
 {
     assert(entity.is());
 }
@@ -1171,16 +1152,13 @@ void InterfaceType::dumpAttributes(FileStream & out) const
         out << "\n" << indent() << "// Attributes\n";
     }
     for (const unoidl::InterfaceTypeEntity::Attribute& attr : entity_->getDirectAttributes()) {
-        bool depr = m_isDeprecated || isDeprecated(attr.annotations);
         out << indent();
-        dumpDeprecation(out, depr);
         out << "virtual ";
         dumpType(out, attr.type);
         out << " get" << attr.name << "() = 0;\n";
         if (!attr.readOnly) {
             bool byRef = passByReference(attr.type);
             out << indent();
-            dumpDeprecation(out, depr);
             out << "virtual void set" << attr.name << "( ";
             dumpType(out, attr.type, byRef, byRef);
             out << " _" << attr.name.toAsciiLowerCase() << " ) = 0;\n";
@@ -1195,7 +1173,6 @@ void InterfaceType::dumpMethods(FileStream & out) const
     }
     for (const unoidl::InterfaceTypeEntity::Method& method : entity_->getDirectMethods()) {
         out << indent();
-        dumpDeprecation(out, m_isDeprecated || isDeprecated(method.annotations));
         out << "virtual ";
         dumpType(out, method.returnType);
         out << " " << method.name << "(";

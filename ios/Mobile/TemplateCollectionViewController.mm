@@ -9,7 +9,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#define LIBO_INTERNAL_ONLY
 #import <COKit/COKitInit.h>
 #import <COKit/COKit.hxx>
 

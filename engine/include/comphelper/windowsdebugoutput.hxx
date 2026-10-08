@@ -21,12 +21,8 @@
 #include <string>
 #include <vector>
 
-#ifdef LIBO_INTERNAL_ONLY
 #include <prewin.h>
 #include <postwin.h>
-#else
-#include <windows.h>
-#endif
 #include <initguid.h>
 
 namespace

@@ -10,7 +10,6 @@
 
 #include <config.h>
 
-#define LIBO_INTERNAL_ONLY
 #include <COKit/COKit.hxx>
 
 #import <WebKit/WebKit.h>

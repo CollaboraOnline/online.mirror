@@ -23,10 +23,7 @@
 #include <sal/config.h>
 
 #include <cstddef>
-
-#if defined LIBO_INTERNAL_ONLY
 #include <type_traits>
-#endif
 
 #include <sal/types.h>
 #include <typelib/typeclass.h>
@@ -131,13 +128,11 @@ cppu_detail_getUnoType(
         ::typelib_TypeClass_UNSIGNED_SHORT);
 }
 
-#if defined LIBO_INTERNAL_ONLY
     // cf. sal/types.h sal_Unicode
 inline cpo::uno::Type const &
 cppu_detail_getUnoType(SAL_UNUSED_PARAMETER sal_uInt16 const *) {
     return cppu::detail::getTypeFromTypeClass(typelib_TypeClass_UNSIGNED_SHORT);
 }
-#endif
 
 inline cpo::uno::Type const &
 cppu_detail_getUnoType(SAL_UNUSED_PARAMETER ::sal_Int32 const *) {
@@ -176,13 +171,11 @@ cppu_detail_getUnoType(SAL_UNUSED_PARAMETER ::cppu::UnoCharType const *) {
     return ::cppu::detail::getTypeFromTypeClass(::typelib_TypeClass_CHAR);
 }
 
-#if defined LIBO_INTERNAL_ONLY
     // cf. sal/types.h sal_Unicode
 inline cpo::uno::Type const &
 cppu_detail_getUnoType(SAL_UNUSED_PARAMETER sal_Unicode const *) {
     return cppu::detail::getTypeFromTypeClass(typelib_TypeClass_CHAR);
 }
-#endif
 
 inline cpo::uno::Type const &
 cppu_detail_getUnoType(SAL_UNUSED_PARAMETER ::rtl::OUString const *) {
@@ -267,12 +260,8 @@ template< typename T > class UnoType {
 public:
     static cpo::uno::Type const & get() {
         using namespace ::cppu::detail;
-#if defined LIBO_INTERNAL_ONLY
         typedef typename std::remove_reference<T>::type T1;
             // for certain uses of UnoType<decltype(x)>
-#else
-        typedef T T1;
-#endif
         return cppu_detail_getUnoType(static_cast< T1 * >(NULL));
     }
 

@@ -31,7 +31,6 @@
 #import "Util.hpp"
 #import "CoolURLSchemeHandler.h"
 
-#define LIBO_INTERNAL_ONLY
 #import <COKit/COKit.hxx>
 
 #import "DocumentViewController.h"

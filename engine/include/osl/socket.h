@@ -22,7 +22,7 @@
 
 #include <rtl/ustring.h>
 
-#if defined LIBO_INTERNAL_ONLY && defined __cplusplus
+#if defined __cplusplus
 struct TimeValue;
 #else
 #include <osl/time.h>

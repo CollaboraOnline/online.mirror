@@ -21,7 +21,6 @@
 #include <SetupKitEnvironment.hpp>
 #include <common/Util.hpp>
 
-#define LIBO_INTERNAL_ONLY
 #include <COKit/COKit.hxx>
 
 #include <osl/detail/android-bootstrap.h>

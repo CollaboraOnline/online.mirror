@@ -55,7 +55,6 @@ class GbuildLinkTarget:
             """Drop undefed items (if any) from previous defs"""
             for u in dparts:
                 defs.pop(u.strip(), '')
-        defs["LIBO_INTERNAL_ONLY"] = None
         return defs
 
     @staticmethod

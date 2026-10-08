@@ -84,8 +84,7 @@ $(call gb_Helper_abbreviate_dirs,\
 			$(if $(6), $(call gb_CObject__filter_out_clang_cflags,$(2)),$(2)) \
 			$(if $(WARNINGS_DISABLED),$(gb_CXXFLAGS_DISABLE_WARNINGS)) \
 			$(if $(EXTERNAL_CODE), \
-				$(if $(COM_IS_CLANG),-Wno-undef), \
-				$(gb_DEFS_INTERNAL)) \
+				$(if $(COM_IS_CLANG),-Wno-undef)) \
 			$(if $(WARNINGS_NOT_ERRORS),$(if $(ENABLE_WERROR),$(if $(PLUGIN_WARNINGS_AS_ERRORS),$(gb_COMPILER_PLUGINS_WARNINGS_AS_ERRORS))),$(gb_CFLAGS_WERROR)) \
 			$(if $(5),$(gb_COMPILER_PLUGINS)) \
 			$(if $(COMPILER_TEST),-fsyntax-only -ferror-limit=0 -Xclang -verify) \
@@ -127,7 +126,7 @@ $(call gb_Helper_abbreviate_dirs,\
 		$(call gb_Helper_remove_overridden_flags, \
 			$(4) $(if $(WARNINGS_DISABLED),$(gb_CXXFLAGS_DISABLE_WARNINGS))) \
 		-Fd$(PDBFILE) \
-		$(if $(EXTERNAL_CODE),$(if $(COM_IS_CLANG),-Wno-undef),$(gb_DEFS_INTERNAL)) \
+		$(if $(EXTERNAL_CODE),$(if $(COM_IS_CLANG),-Wno-undef)) \
 		$(if $(filter YES,$(LIBRARY_X64)), ,$(gb_LTOFLAGS)) \
 		$(gb_COMPILERDEPFLAGS) \
 		$(gb_NO_PCH_TIMESTAMP) \
@@ -156,7 +155,7 @@ $(call gb_Helper_abbreviate_dirs,\
 	$(call gb_CObject__compiler,$(4),$(3),$(7)) \
 		$(call gb_Helper_remove_overridden_flags, \
 			$(4)$(if $(WARNINGS_DISABLED),$(gb_CXXFLAGS_DISABLE_WARNINGS))) \
-		$(if $(EXTERNAL_CODE),$(if $(COM_IS_CLANG),-Wno-undef),$(gb_DEFS_INTERNAL)) \
+		$(if $(EXTERNAL_CODE),$(if $(COM_IS_CLANG),-Wno-undef)) \
 		$(gb_LTOFLAGS) \
 		$(5) \
 		-E -d1PP $(3) \

@@ -13,8 +13,6 @@
 
 #define _(id, catalog) app_translate(id, catalog)
 
-#define LIBO_INTERNAL_ONLY
-
 #import <rtl/string.hxx>
 #import <unotools/resmgr.hxx>
 

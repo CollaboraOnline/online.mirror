@@ -275,13 +275,6 @@ ifeq (,$(SAL_USE_VCLPLUGIN))
 gb_TEST_ENV_VARS += SAL_USE_VCLPLUGIN=svp
 endif
 
-# This is used to detect whether LibreOffice is being built (as opposed to building
-# 3rd-party code). Used for tag deprecation for API we want to
-# ensure is not used at all externally while we clean
-# out our internal usage, for code in sal/ that should be used only internally, etc.
-gb_DEFS_INTERNAL := \
-	-DLIBO_INTERNAL_ONLY \
-
 include $(GBUILDDIR)/Deliver.mk
 
 $(eval $(call gb_Deliver_init))
