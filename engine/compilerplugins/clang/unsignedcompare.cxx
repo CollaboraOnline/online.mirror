@@ -162,10 +162,7 @@ public:
 
     bool preRun() override
     {
-        return compiler.getLangOpts().CPlusPlus
-               && compiler.getPreprocessor()
-                      .getIdentifierInfo("LIBO_INTERNAL_ONLY")
-                      ->hasMacroDefinition();
+        return compiler.getLangOpts().CPlusPlus;
     }
 
     void run() override
