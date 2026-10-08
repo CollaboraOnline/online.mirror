@@ -82,14 +82,14 @@
                 <property name="spacing">6</property>
                 <property name="layout_style">start</property>
                 <child>
-                  <object class="GtkButton" id="add">
+                  <object class="GtkButton" id="hatchadd">
                     <property name="label" translatable="yes" context="stock">_Add</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use-underline">True</property>
                     <child internal-child="accessible">
-                      <object class="AtkObject" id="add-atkobject">
+                      <object class="AtkObject" id="hatchadd-atkobject">
                         <property name="AtkObject::accessible-description" translatable="yes" context="hatchpage|extended_tip|add">Adds a custom hatching pattern to the current list. Specify the properties of your hatching pattern, and then click this button.</property>
                       </object>
                     </child>
@@ -101,14 +101,14 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkButton" id="modify">
+                  <object class="GtkButton" id="hatchmodify">
                     <property name="label" translatable="yes" context="hatchpage|modify">_Modify</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_underline">True</property>
                     <child internal-child="accessible">
-                      <object class="AtkObject" id="modify-atkobject">
+                      <object class="AtkObject" id="hatchmodify-atkobject">
                         <property name="AtkObject::accessible-description" translatable="yes" context="hatchpage|extended_tip|modify">Applies the current hatching properties to the selected hatching pattern. If you want, you can save the pattern under a different name.</property>
                       </object>
                     </child>
@@ -199,12 +199,12 @@
               </packing>
             </child>
             <child>
-              <object class="GtkLabel" id="angleft">
+              <object class="GtkLabel" id="hatchangleft">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes" context="hatchpage|angleft">A_ngle:</property>
                 <property name="use_underline">True</property>
-                <property name="mnemonic-widget">anglemtr</property>
+                <property name="mnemonic-widget">hatchanglemtr</property>
                 <property name="xalign">0</property>
               </object>
               <packing>
@@ -219,7 +219,7 @@
                 <property name="can_focus">False</property>
                 <property name="spacing">6</property>
                 <child>
-                  <object class="GtkScale" id="angleslider">
+                  <object class="GtkScale" id="hatchangleslider">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="hexpand">True</property>
@@ -227,7 +227,7 @@
                     <property name="round_digits">1</property>
                     <property name="draw_value">False</property>
                     <accessibility>
-                      <relation type="labelled-by" target="angleft"/>
+                      <relation type="labelled-by" target="hatchangleft"/>
                     </accessibility>
                   </object>
                   <packing>
@@ -237,13 +237,13 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkSpinButton" id="anglemtr">
+                  <object class="GtkSpinButton" id="hatchanglemtr">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="adjustment">angleadjustment</property>
                     <property name="truncate-multiline">True</property>
                     <child internal-child="accessible">
-                      <object class="AtkObject" id="anglemtr-atkobject">
+                      <object class="AtkObject" id="hatchanglemtr-atkobject">
                         <property name="AtkObject::accessible-description" translatable="yes" context="hatchpage|extended_tip|anglemtr">Enter the rotation angle for the hatch lines, or click a position in the angle grid.</property>
                       </object>
                     </child>
@@ -379,7 +379,7 @@
           </object>
         </child>
         <child type="label">
-          <object class="GtkLabel" id="propfl">
+          <object class="GtkLabel" id="hatchpropfl">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes" context="hatchpage|propfl">Options</property>
@@ -416,11 +416,11 @@
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkDrawingArea" id="previewctl">
+                  <object class="GtkDrawingArea" id="hatchpreviewctl">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child internal-child="accessible">
-                      <object class="AtkObject" id="previewctl-atkobject">
+                      <object class="AtkObject" id="hatchpreviewctl-atkobject">
                         <property name="AtkObject::accessible-name" translatable="yes" context="hatchpage|previewctl-atkobject">Example</property>
                       </object>
                     </child>

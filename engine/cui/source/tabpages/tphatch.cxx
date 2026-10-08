@@ -54,8 +54,8 @@ SvxHatchTabPage::SvxHatchTabPage(weld::Container* pPage, weld::DialogController*
     , m_aFillAttributeSet(rInAttrs.getPool(), WhichRangesContainer(XATTR_FILL_FIRST, XATTR_FILL_LAST)) //m_aXFillAttr.GetItemSet())
     , aIconSize(60, 64)
     , m_xMtrDistance(m_xBuilder->weld_metric_spin_button(u"distancemtr"_ustr, FieldUnit::MM))
-    , m_xMtrAngle(m_xBuilder->weld_metric_spin_button(u"anglemtr"_ustr, FieldUnit::DEGREE))
-    , m_xSliderAngle(m_xBuilder->weld_scale(u"angleslider"_ustr))
+    , m_xMtrAngle(m_xBuilder->weld_metric_spin_button(u"hatchanglemtr"_ustr, FieldUnit::DEGREE))
+    , m_xSliderAngle(m_xBuilder->weld_scale(u"hatchangleslider"_ustr))
     , m_xLbLineType(m_xBuilder->weld_combo_box(u"linetypelb"_ustr))
     , m_xLbLineColor(new ColorListBox(m_xBuilder->weld_menu_button(u"hatchlinecolorlb"_ustr),
                 [this]{ return GetDialogController()->getDialog(); }))
@@ -63,9 +63,9 @@ SvxHatchTabPage::SvxHatchTabPage(weld::Container* pPage, weld::DialogController*
     , m_xLbBackgroundColor(new ColorListBox(m_xBuilder->weld_menu_button(u"backgroundcolorlb"_ustr),
                 [this]{ return GetDialogController()->getDialog(); }))
     , m_xHatchLB(m_xBuilder->weld_icon_view(u"hatchpresetlist"_ustr))
-    , m_xBtnAdd(m_xBuilder->weld_button(u"add"_ustr))
-    , m_xBtnModify(m_xBuilder->weld_button(u"modify"_ustr))
-    , m_xCtlPreview(new weld::CustomWeld(*m_xBuilder, u"previewctl"_ustr, m_aCtlPreview))
+    , m_xBtnAdd(m_xBuilder->weld_button(u"hatchadd"_ustr))
+    , m_xBtnModify(m_xBuilder->weld_button(u"hatchmodify"_ustr))
+    , m_xCtlPreview(new weld::CustomWeld(*m_xBuilder, u"hatchpreviewctl"_ustr, m_aCtlPreview))
 {
     Size aSize = getDrawPreviewOptimalSize(m_aCtlPreview.GetDrawingArea()->get_ref_device());
     m_xCtlPreview->set_size_request(aSize.Width(), aSize.Height());
