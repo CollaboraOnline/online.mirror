@@ -216,6 +216,7 @@ function test() {
     console.assert(ranges[1].isPartial() === true);
     console.assert(ranges[1].getStartOffset() === 0);
     console.assert(ranges[1].getEndOffsetInclusive() === 2);
+    console.assert(ranges[1].getElement().getType() === DocumentApp.ElementType.TEXT);
     console.assert(ranges[1].getElement().getText() === 'UnderStrikeSuperPlain');
 
     // Append a paragraph and a list item at the end, which a Text of the body taken before

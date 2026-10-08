@@ -2403,7 +2403,11 @@ public:
             throw cpo::uno::RuntimeException(
                 u"getElement: this range element is not inside a paragraph"_ustr);
         }
-        return new ParagraphImpl(nullptr, paragraph_);
+        cpo::uno::Reference<scriptinterop::XParagraph> const paragraph(
+            new ParagraphImpl(nullptr, paragraph_));
+        // Same as in GAS, the element of a partial range element is the Text that the offsets
+        // count in:
+        return isPartial() ? paragraph->getChild(0) : paragraph;
     }
 
     sal_Int32 getEndOffsetInclusive() override {
