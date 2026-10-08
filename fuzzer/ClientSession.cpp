@@ -20,6 +20,7 @@
 
 #include <common/Anonymizer.hpp>
 #include <fuzzer/Common.hpp>
+#include <wsd/Admin.hpp>
 
 #include <Poco/Net/HTTPRequest.h>
 
