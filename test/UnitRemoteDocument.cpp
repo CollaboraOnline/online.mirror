@@ -25,6 +25,7 @@
 #include <WopiTestServer.hpp>
 
 #include <net/HttpRequest.hpp>
+#include <wsd/COOLWSD.hpp>
 #include <wsd/ClientSession.hpp>
 #include <wsd/DocumentBroker.hpp>
 #include <wsd/RemoteDocumentBroker.hpp>
@@ -268,6 +269,287 @@ public:
             case Phase::WaitModified:
             case Phase::WaitHeadlessGone:
             case Phase::Done:
+            {
+                break;
+            }
+        }
+    }
+};
+
+/// A document (file 1) with two views: the first view subscribes to a remote document (file
+/// 2), then its WebSocket closes without unsubscribing. The second view keeps the document
+/// loaded, so the headless session leaves the remote document on the view's removal alone.
+class UnitRemoteDocumentViewClose : public WopiTestServer
+{
+    STATE_ENUM(Phase, Load, WaitFirstLoad, LoadSecond, WaitSecondView, WaitConnected,
+               WaitHeadlessGone, Done)
+    _phase;
+
+    /// The second view of the subscriber document, which stays open.
+    std::unique_ptr<UnitWebSocket> _secondWs;
+
+    std::string remoteWopiSrc() const { return getWopiHostURI() + "/wopi/files/2"; }
+
+    std::string encodedRemoteWopiSrc() const { return Uri::encode(remoteWopiSrc()); }
+
+public:
+    UnitRemoteDocumentViewClose()
+        : WopiTestServer("UnitRemoteDocumentViewClose")
+        , _phase(Phase::Load)
+    {
+    }
+
+    void configure(Poco::Util::LayeredConfiguration& config) override
+    {
+        WopiTestServer::configure(config);
+        config.setBool("remote_links.enable", true);
+    }
+
+    void configCheckFileInfo(const Poco::Net::HTTPRequest& request,
+                             Poco::JSON::Object::Ptr& fileInfo) override
+    {
+        if (Poco::URI(request.getURI()).getPath().ends_with("/1"))
+            setRemoteLink(fileInfo, remoteWopiSrc(), "remotetoken");
+    }
+
+    bool onDocumentLoaded(const std::string& message) override
+    {
+        TST_LOG("onDocumentLoaded: [" << message << ']');
+
+        if (_phase == Phase::WaitFirstLoad)
+            TRANSITION_STATE(_phase, Phase::LoadSecond);
+
+        return true;
+    }
+
+    bool onViewLoaded(const std::string& message) override
+    {
+        TST_LOG("onViewLoaded: [" << message << ']');
+
+        if (_phase == Phase::WaitSecondView)
+        {
+            TRANSITION_STATE(_phase, Phase::WaitConnected);
+            WSD_CMD("remotedocsubscribe source=" + encodedRemoteWopiSrc());
+        }
+
+        return true;
+    }
+
+    bool onFilterSendWebSocketMessage(const std::string_view message, const WSOpCode /*code*/,
+                                      const bool /*flush*/, int& /*unitReturn*/) override
+    {
+        if (!message.starts_with("remotedocevent:"))
+            return false;
+
+        TST_LOG("Got: [" << message << ']');
+
+        // The kit sends the event to both views, so only the first copy acts.
+        if (message.find("event=connected") != std::string::npos &&
+            _phase == Phase::WaitConnected)
+        {
+            TRANSITION_STATE(_phase, Phase::WaitHeadlessGone);
+
+            // The subscribed view goes away without unsubscribing.
+            TST_LOG("Closing the subscribed view's WebSocket");
+            deleteSocketAt(0);
+        }
+        else if (message.find("event=error") != std::string::npos)
+        {
+            failTest("Unexpected remote document error: " + std::string(message));
+        }
+
+        return false;
+    }
+
+    void onDocBrokerRemoveSession(const std::string& docKey,
+                                  const std::shared_ptr<ClientSession>& session) override
+    {
+        TST_LOG("onDocBrokerRemoveSession: [" << docKey << "], read-only: "
+                                              << session->isReadOnly());
+
+        if (_phase == Phase::WaitHeadlessGone && docKey.ends_with("2") && session->isReadOnly())
+        {
+            TRANSITION_STATE(_phase, Phase::Done);
+            passTest("The headless session left the remote document when the subscribed view "
+                     "closed");
+        }
+    }
+
+    void onDocBrokerDestroy(const std::string& docKey) override
+    {
+        TST_LOG("onDocBrokerDestroy: [" << docKey << ']');
+
+        // The second view holds the subscriber document open, so its unload
+        // must not be what drops the headless session.
+        if (_phase == Phase::WaitHeadlessGone && docKey.ends_with("1"))
+            failTest("The subscriber document unloaded while a view still held it");
+    }
+
+    void invokeWSDTest() override
+    {
+        switch (_phase)
+        {
+            case Phase::Load:
+            {
+                TRANSITION_STATE(_phase, Phase::WaitFirstLoad);
+
+                initWebsocket("/wopi/files/1?access_token=firsttoken");
+                WSD_CMD("load url=" + getWopiSrc());
+                break;
+            }
+            case Phase::LoadSecond:
+            {
+                TRANSITION_STATE(_phase, Phase::WaitSecondView);
+
+                const std::string secondWopiSrc =
+                    Uri::encode(getWopiHostURI() + "/wopi/files/1?access_token=secondtoken");
+                TST_LOG("Connecting a second view: " << secondWopiSrc);
+                _secondWs = std::make_unique<UnitWebSocket>(
+                    socketPoll(), "/cool/" + secondWopiSrc + "/ws", getTestname());
+                helpers::sendTextFrame(_secondWs->getWebSocket(), "load url=" + secondWopiSrc,
+                                       getTestname());
+                break;
+            }
+            default:
+            {
+                break;
+            }
+        }
+    }
+};
+
+/// A document (file 1) subscribes to a remote document (file 2), then the subscriber document
+/// is closed by the server, the way the admin console closes one. Its view never
+/// unsubscribes; the headless session leaves the remote document and the subscriber document
+/// is destroyed.
+class UnitRemoteDocumentUnload : public WopiTestServer
+{
+    STATE_ENUM(Phase, Load, WaitLoadStatus, WaitConnected, WaitUnload, Done) _phase;
+
+    /// The docKey of the subscriber document, as the server names it.
+    std::string _subscriberDocKey;
+
+    bool _headlessGone = false;
+    bool _subscriberDestroyed = false;
+
+    std::string remoteWopiSrc() const { return getWopiHostURI() + "/wopi/files/2"; }
+
+    std::string encodedRemoteWopiSrc() const { return Uri::encode(remoteWopiSrc()); }
+
+public:
+    UnitRemoteDocumentUnload()
+        : WopiTestServer("UnitRemoteDocumentUnload")
+        , _phase(Phase::Load)
+    {
+    }
+
+    void configure(Poco::Util::LayeredConfiguration& config) override
+    {
+        WopiTestServer::configure(config);
+        config.setBool("remote_links.enable", true);
+    }
+
+    void configCheckFileInfo(const Poco::Net::HTTPRequest& request,
+                             Poco::JSON::Object::Ptr& fileInfo) override
+    {
+        if (Poco::URI(request.getURI()).getPath().ends_with("/1"))
+            setRemoteLink(fileInfo, remoteWopiSrc(), "remotetoken");
+    }
+
+    void onDocBrokerCreate(const std::string& docKey) override
+    {
+        TST_LOG("onDocBrokerCreate: [" << docKey << ']');
+
+        if (docKey.ends_with("1"))
+            _subscriberDocKey = docKey;
+    }
+
+    bool onDocumentLoaded(const std::string& message) override
+    {
+        TST_LOG("onDocumentLoaded: [" << message << ']');
+
+        if (_phase == Phase::WaitLoadStatus)
+        {
+            TRANSITION_STATE(_phase, Phase::WaitConnected);
+            WSD_CMD("remotedocsubscribe source=" + encodedRemoteWopiSrc());
+        }
+
+        return true;
+    }
+
+    bool onFilterSendWebSocketMessage(const std::string_view message, const WSOpCode /*code*/,
+                                      const bool /*flush*/, int& /*unitReturn*/) override
+    {
+        if (!message.starts_with("remotedocevent:"))
+            return false;
+
+        TST_LOG("Got: [" << message << ']');
+
+        if (message.find("event=connected") != std::string::npos)
+        {
+            LOK_ASSERT_STATE(_phase, Phase::WaitConnected);
+            LOK_ASSERT_MESSAGE("The subscriber document's docKey is known",
+                               !_subscriberDocKey.empty());
+            TRANSITION_STATE(_phase, Phase::WaitUnload);
+
+            TST_LOG("Closing the subscriber document [" << _subscriberDocKey << ']');
+            COOLWSD::closeDocument(_subscriberDocKey, "test");
+        }
+        else if (message.find("event=error") != std::string::npos)
+        {
+            failTest("Unexpected remote document error: " + std::string(message));
+        }
+
+        return false;
+    }
+
+    void onDocBrokerRemoveSession(const std::string& docKey,
+                                  const std::shared_ptr<ClientSession>& session) override
+    {
+        TST_LOG("onDocBrokerRemoveSession: [" << docKey << "], read-only: "
+                                              << session->isReadOnly());
+
+        if (_phase == Phase::WaitUnload && docKey.ends_with("2") && session->isReadOnly())
+        {
+            _headlessGone = true;
+            checkOutcome();
+        }
+    }
+
+    void onDocBrokerDestroy(const std::string& docKey) override
+    {
+        TST_LOG("onDocBrokerDestroy: [" << docKey << ']');
+
+        if (_phase == Phase::WaitUnload && docKey == _subscriberDocKey)
+        {
+            _subscriberDestroyed = true;
+            checkOutcome();
+        }
+    }
+
+    void checkOutcome()
+    {
+        if (_headlessGone && _subscriberDestroyed)
+        {
+            TRANSITION_STATE(_phase, Phase::Done);
+            passTest("The headless session left the remote document when the subscriber "
+                     "document was closed");
+        }
+    }
+
+    void invokeWSDTest() override
+    {
+        switch (_phase)
+        {
+            case Phase::Load:
+            {
+                TRANSITION_STATE(_phase, Phase::WaitLoadStatus);
+
+                initWebsocket("/wopi/files/1?access_token=anything");
+                WSD_CMD("load url=" + getWopiSrc());
+                break;
+            }
+            default:
             {
                 break;
             }
@@ -2521,7 +2803,8 @@ public:
 
 UnitBase** unit_create_wsd_multi(void)
 {
-    return new UnitBase* [] { new UnitRemoteDocument(), new UnitRemoteDocumentCycle(),
+    return new UnitBase* [] { new UnitRemoteDocument(), new UnitRemoteDocumentViewClose(),
+                              new UnitRemoteDocumentUnload(), new UnitRemoteDocumentCycle(),
                               new UnitLinkPost(), new UnitLinkDelete(),
                               new UnitRemoteDocumentMutual(),
                               new UnitRemoteDocumentCommand(), new UnitRemoteDocumentMissing(),

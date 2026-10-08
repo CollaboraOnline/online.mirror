@@ -512,9 +512,15 @@ void RemoteDocument::sendEvent(const Consumer& consumer, const std::string& wopi
     if (!docBroker)
         return;
 
+    // The callback holds a weak reference, so a consumer that stops while the callback is still
+    // queued on its poll is freed together with that poll.
     docBroker->addCallback(
-        [docBroker, tag = consumer.tag, encodedWopiSrc = Uri::encode(wopiSrc), eventArguments]()
-        { docBroker->sendRemoteDocumentEvent(tag, encodedWopiSrc, eventArguments); });
+        [weakDocBroker = consumer.docBroker, tag = consumer.tag,
+         encodedWopiSrc = Uri::encode(wopiSrc), eventArguments]()
+        {
+            if (const std::shared_ptr<DocumentBroker> broker = weakDocBroker.lock())
+                broker->sendRemoteDocumentEvent(tag, encodedWopiSrc, eventArguments);
+        });
 }
 
 void RemoteDocument::sendCommand(const std::string& localDocKey, const std::string& tag,
@@ -554,8 +560,12 @@ void RemoteDocument::forwardCommandResult(const std::vector<char>& data)
             continue;
 
         docBroker->addCallback(
-            [docBroker, tag = subscriber.second, encodedWopiSrc, payload]()
-            { docBroker->sendRemoteDocumentCommandResult(tag, encodedWopiSrc, *payload); });
+            [weakDocBroker = std::weak_ptr<DocumentBroker>(docBroker), tag = subscriber.second,
+             encodedWopiSrc, payload]()
+            {
+                if (const std::shared_ptr<DocumentBroker> broker = weakDocBroker.lock())
+                    broker->sendRemoteDocumentCommandResult(tag, encodedWopiSrc, *payload);
+            });
     }
 }
 
@@ -895,8 +905,12 @@ void RemoteDocumentBroker::reject(const RemoteDocumentRequest& request, const st
     // removes that record again.
     if (std::shared_ptr<DocumentBroker> docBroker = request.consumer.lock())
     {
-        docBroker->addCallback([docBroker, wopiSrc = request.wopiSrc, tag = request.tag]()
-                               { docBroker->removeRemoteSubscription(tag, wopiSrc); });
+        docBroker->addCallback(
+            [weakDocBroker = request.consumer, wopiSrc = request.wopiSrc, tag = request.tag]()
+            {
+                if (const std::shared_ptr<DocumentBroker> broker = weakDocBroker.lock())
+                    broker->removeRemoteSubscription(tag, wopiSrc);
+            });
     }
 }
 
