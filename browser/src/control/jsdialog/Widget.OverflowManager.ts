@@ -49,12 +49,17 @@ class OverflowManager {
 		}
 
 		if (typeof MutationObserver !== 'undefined') {
-			this.contentObserver = new MutationObserver(() => this.verifyFoldState());
+			this.contentObserver = new MutationObserver((records) =>
+				this.verifyFoldState(
+					records.some((record) => this.changesFoldedItemVisibility(record)),
+				),
+			);
 			this.contentObserver.observe(this.parentContainer, {
 				childList: true,
 				subtree: true,
 				attributes: true,
 				attributeFilter: ['class', 'style'],
+				attributeOldValue: true,
 			});
 		}
 
@@ -62,11 +67,24 @@ class OverflowManager {
 			document.fonts.ready.then(() => this.verifyFoldState());
 	}
 
+	// True when the record shows an item of a folded group being hidden or
+	// shown. A folded group keeps its items in a display: none container, so
+	// such a change leaves every measured width as it was.
+	changesFoldedItemVisibility(record: MutationRecord): boolean {
+		if (record.attributeName !== 'class') return false;
+		const item = record.target as HTMLElement;
+		if (!item.parentElement?.closest('.hidden-overflow-container'))
+			return false;
+		const wasHidden = /(^|\s)hidden(\s|$)/.test(record.oldValue || '');
+		return wasHidden !== item.classList.contains('hidden');
+	}
+
 	// Runs the fold decision again when the current widths differ from the
-	// ones recorded at the end of the last onRefresh. When nothing changed
-	// this is three property reads and no DOM modification, so it is cheap
-	// enough to call from the observers on every content change.
-	verifyFoldState() {
+	// ones recorded at the end of the last onRefresh, or when force is set.
+	// When nothing changed this is three property reads and no DOM
+	// modification, so it is cheap enough to call from the observers on every
+	// content change.
+	verifyFoldState(force: boolean = false) {
 		if (!this.parentContainer) return;
 		// a scheduled refresh will run the full fold decision anyway
 		if (this.scheduledRefresh !== '') return;
@@ -74,6 +92,7 @@ class OverflowManager {
 		if (this.parentContainer.offsetParent === null) return;
 
 		if (
+			!force &&
 			this.lastContentWidth === this.parentContainer.scrollWidth &&
 			this.lastContainerWidth === this.parentContainer.offsetWidth &&
 			this.lastMaxWidth === window.innerWidth
