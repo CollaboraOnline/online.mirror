@@ -593,6 +593,22 @@ CPPUNIT_TEST_FIXTURE(TextFittingTest, testFitsLikeReference)
     }
 }
 
+CPPUNIT_TEST_FIXTURE(TextFittingTest, testEmptyParagraphFitsLikeReference)
+{
+    // Five paragraphs at 1.5 line spacing, the fourth one empty, in a box that holds four of
+    // them. The reference program fits it with these scales, the same as when the fourth
+    // paragraph holds text: the empty line gets the same spacing reduction as a line of text.
+    createSdImpressDoc("pptx/TextFittingEmptyParagraph.pptx");
+    auto pXImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+    CPPUNIT_ASSERT(pXImpressDocument);
+    SdDrawDocument* pDoc = pXImpressDocument->GetDoc();
+
+    auto pBox = DynCastSdrTextObj(pDoc->GetSdPage(0, PageKind::Standard)->GetObj(1));
+    CPPUNIT_ASSERT(pBox);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.925, pBox->GetFontScale(), 1E-4);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(0.8, pBox->GetSpacingScale(), 1E-4);
+}
+
 CPPUNIT_TEST_FIXTURE(TextFittingTest, testStoredFitKeptUntilEdited)
 {
     // The first slide stores a fit of 55 percent font with 20 percent less line spacing, though

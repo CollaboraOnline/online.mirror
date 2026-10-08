@@ -598,7 +598,8 @@ CPPUNIT_TEST_FIXTURE(SdLayoutTest, testTdf168010)
     // Now test PPTX and its round-trip. The text there imports as draw:custom-shape; it generates
     // a single textarray element.
 
-    // 5. It must be enabled for PPTX documents unconditionally
+    // 5. It must be enabled for PPTX documents unconditionally. The empty lines get the stored
+    // spacing reduction too, and the reference program draws "textbox" at this height.
     loadFromFile(u"pptx/trailing-paragraphs.pptx");
     {
         CPPUNIT_ASSERT(
@@ -606,7 +607,7 @@ CPPUNIT_TEST_FIXTURE(SdLayoutTest, testTdf168010)
 
         xmlDocUniquePtr pXml = parseLayout();
         sal_Int32 y = getXPath(pXml, "/metafile['5']/push/push/textarray", "y").toInt32();
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(6500, y, 100);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(6800, y, 100);
         assertXPathContent(pXml, "/metafile['5']/push/push/textarray/text", u"textbox");
     }
 
@@ -618,7 +619,7 @@ CPPUNIT_TEST_FIXTURE(SdLayoutTest, testTdf168010)
 
         xmlDocUniquePtr pXml = parseLayout();
         sal_Int32 y = getXPath(pXml, "/metafile['6']/push/push/textarray", "y").toInt32();
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(6500, y, 100);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(6800, y, 100);
         assertXPathContent(pXml, "/metafile['6']/push/push/textarray/text", u"textbox");
     }
 
@@ -634,7 +635,7 @@ CPPUNIT_TEST_FIXTURE(SdLayoutTest, testTdf168010)
 
         xmlDocUniquePtr pXml = parseLayout();
         sal_Int32 y = getXPath(pXml, "/metafile['7']/push/push/textarray", "y").toInt32();
-        CPPUNIT_ASSERT_DOUBLES_EQUAL(6500, y, 100);
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(6800, y, 100);
         assertXPathContent(pXml, "/metafile['7']/push/push/textarray/text", u"textbox");
     }
 }

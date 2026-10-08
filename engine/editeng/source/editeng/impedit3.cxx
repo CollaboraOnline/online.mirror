@@ -2082,19 +2082,31 @@ void ImpEditEngine::CreateAndInsertEmptyLine(ParaPortion& rParaPortion)
                 pTmpLine->SetAscentCompressed(true);
             pTmpLine->SetHeight( nFixHeight, nTxtHeight );
         }
-        else if ( rLSItem.GetInterLineSpaceRule() == SvxInterLineSpaceRule::Prop )
+        else if (rLSItem.GetInterLineSpaceRule() == SvxInterLineSpaceRule::Prop
+                 || rLSItem.GetInterLineSpaceRule() == SvxInterLineSpaceRule::Off)
         {
+            const bool bProp = rLSItem.GetInterLineSpaceRule() == SvxInterLineSpaceRule::Prop;
+            const sal_uInt16 nPropLineSpace = bProp ? rLSItem.GetPropLineSpace() : 100;
+            // The spacing reduction of fitted text applies to an empty line as to a line of text.
+            const bool bReduced = maScalingParameters.fSpacingY != 1.0
+                                  && meTextFitting != EETextFitting::Legacy;
             sal_Int32 nPara = GetParaPortions().GetPos(&rParaPortion);
             if ( nPara || pTmpLine->GetStartPortion() ) // Not the very first line
             {
                 // There are documents with PropLineSpace 0, why?
                 // (cmc: re above question :-) such documents can be seen by importing a .ppt
-                if ( rLSItem.GetPropLineSpace() && ( rLSItem.GetPropLineSpace() != 100 ) )
+                if (nPropLineSpace && (nPropLineSpace != 100 || bReduced))
                 {
                     sal_uInt16 nTxtHeight = pTmpLine->GetHeight();
                     sal_Int32 nH = nTxtHeight;
-                    nH *= rLSItem.GetPropLineSpace();
-                    nH /= 100;
+                    if (bReduced)
+                        nH = basegfx::fround(nTxtHeight
+                                             * scaleProportionalLineSpacing(nPropLineSpace / 100.0));
+                    else
+                    {
+                        nH *= nPropLineSpace;
+                        nH /= 100;
+                    }
                     // The Ascent has to be adjusted for the difference:
                     tools::Long nDiff = pTmpLine->GetHeight() - nH;
                     if ( nDiff > pTmpLine->GetMaxAscent() )
