@@ -1737,7 +1737,8 @@ function showWelcomeSVG() {
 				i += size; // skip trailing '\n' in loop-increment
 			}
 		};
-		this.sendQueue = '';
+		// Strings and Blobs: a binary message, e.g. a pasted image, must not be turned into text.
+		this.sendQueue = [];
 		this._signalErrorClose = function() {
 			clearInterval(this.pollInterval);
 			clearTimeout(this.delaySession);
@@ -1846,10 +1847,11 @@ function showWelcomeSVG() {
 				that.msgInflight--;
 			});
 			const toSend = that.sendQueue;
-			that.sendQueue = '';
+			that.sendQueue = [];
 			that.msgInflight++;
 			// terminate all messages with an end-marker
-			req.send(toSend.concat('.'));
+			toSend.push('.');
+			req.send(new Blob(toSend, { type: 'text/plain;charset=UTF-8' }));
 		};
 		this.getSessionId = function() {
 			if (this.openInflight > 0)
@@ -1908,9 +1910,10 @@ function showWelcomeSVG() {
 		};
 		this.send = function(msg) {
 			var hadData = this.sendQueue.length > 0;
-			this.sendQueue = this.sendQueue.concat(
+			const size = msg instanceof Blob ? msg.size : new TextEncoder().encode(msg).length;
+			this.sendQueue.push(
 				'B0x' + this.outSerial.toString(16) + '\n' +
-				'0x' + (new TextEncoder().encode(msg)).length.toString(16) + '\n' + msg + '\n');
+				'0x' + size.toString(16) + '\n', msg, '\n');
 			this.outSerial++;
 
 			// Send ASAP, if we have throttled.
