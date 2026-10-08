@@ -1120,6 +1120,26 @@ bool SwDoc::SetTextFormatColl(const SwPaM &rRg,
 {
     SwDataChanged aTmp( rRg );
     auto [pStart, pEnd] = rRg.StartEnd(); // SwPosition*
+
+    if (IsInMergedPaste() && pFormat)
+    {
+        // The style itself is dropped and its content is flattened into direct formatting.
+        SfxItemSet aFormatSet(pFormat->GetAttrSet());
+        if (aFormatSet.Count())
+        {
+            for (SwNodeOffset nIndex = pStart->GetNodeIndex(); nIndex <= pEnd->GetNodeIndex();
+                 ++nIndex)
+            {
+                if (SwTextNode* pTextNode = GetNodes()[nIndex]->GetTextNode())
+                {
+                    pTextNode->SetAttr(aFormatSet);
+                }
+            }
+            getIDocumentState().SetModified();
+        }
+        return true;
+    }
+
     SwHistory* pHst = nullptr;
     bool bRet = true;
 
