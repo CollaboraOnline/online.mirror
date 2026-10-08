@@ -52,6 +52,8 @@ function MicsShapeWipeTransition(transitionParameters: TransitionParameters) {
 		return new SlideShow.NoTransition(transitionParameters); //  todo: glitter transition
 	} else if (transitionSubType == TransitionSubType.HEART) {
 		return new SlideShow.NoTransition(transitionParameters); //  todo: honeycomb transition
+	} else if (transitionSubType == TransitionSubType.AIRPLANE) {
+		return SlideShow.AirplaneTransition(transitionParameters);
 	}
 }
 

@@ -912,6 +912,7 @@ COOL_JS_LST =\
 	src/slideshow/transition3d/DissolveTransition3d.ts \
 	src/slideshow/transition3d/FlipTilesTransition.ts \
 	src/slideshow/transition3d/StaticNoiseTransition.ts \
+	src/slideshow/transition3d/AirplaneTransition.ts \
 	src/slideshow/transition3d/MicsShapeWipeTransition.ts \
 	src/slideshow/operation/RotateAndScaleDepth.ts \
 	src/slideshow/operation/SEllipseTranslate.ts \
