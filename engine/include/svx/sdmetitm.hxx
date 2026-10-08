@@ -32,6 +32,7 @@ public:
     DECLARE_ITEM_TYPE_FUNCTION(SdrMetricItem)
     SdrMetricItem(TypedWhichId<SdrMetricItem> nId, sal_Int32 nVal)
         : SfxInt32Item(nId,nVal) {}
+    static SfxPoolItem * CreateDefault();
     virtual SdrMetricItem* Clone(SfxItemPool* pPool=nullptr) const override;
     virtual bool HasMetrics() const override;
     virtual void ScaleMetrics(double fScale) override;

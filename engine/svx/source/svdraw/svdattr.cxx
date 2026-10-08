@@ -844,6 +844,10 @@ SdrScaleItem* SdrScaleItem::Clone(SfxItemPool * /*pPool*/) const
 // OnOffItem
 
 
+SfxPoolItem * SdrOnOffItem::CreateDefault() {
+    return new SdrOnOffItem(TypedWhichId<SdrOnOffItem>(0), false);
+}
+
 SdrOnOffItem* SdrOnOffItem::Clone(SfxItemPool* /*pPool*/) const
 {
     return new SdrOnOffItem(TypedWhichId<SdrOnOffItem>(Which()),GetValue());
@@ -899,6 +903,10 @@ bool SdrYesNoItem::GetPresentation(SfxItemPresentation ePres,
         rText = SdrItemPool::GetItemName(Which()) + " " + rText;
     }
     return true;
+}
+
+SfxPoolItem * SdrPercentItem::CreateDefault() {
+    return new SdrPercentItem(TypedWhichId<SdrPercentItem>(0), 0);
 }
 
 SdrPercentItem* SdrPercentItem::Clone(SfxItemPool* /*pPool*/) const
@@ -1002,6 +1010,10 @@ bool SdrAngleItem::GetPresentation(
 
     rText = aText.makeStringAndClear();
     return true;
+}
+
+SfxPoolItem * SdrMetricItem::CreateDefault() {
+    return new SdrMetricItem(TypedWhichId<SdrMetricItem>(0), 0);
 }
 
 SdrMetricItem* SdrMetricItem::Clone(SfxItemPool* /*pPool*/) const

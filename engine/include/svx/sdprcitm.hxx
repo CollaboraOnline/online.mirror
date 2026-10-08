@@ -34,6 +34,7 @@ public:
     DECLARE_ITEM_TYPE_FUNCTION(SdrPercentItem)
     SdrPercentItem(TypedWhichId<SdrPercentItem> nId, sal_uInt16 nVal)
         : SfxUInt16Item(nId, nVal) {}
+    static SfxPoolItem * CreateDefault();
     virtual SdrPercentItem* Clone(SfxItemPool* pPool=nullptr) const override;
 
     virtual bool GetPresentation(SfxItemPresentation ePres, MapUnit eCoreMetric, MapUnit ePresMetric, OUString& rText, const IntlWrapper&) const override;
