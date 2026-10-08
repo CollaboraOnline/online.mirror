@@ -2875,7 +2875,9 @@ void DrawingML::WriteRunProperties(const Reference<XPropertySet>& rRun, sal_Int3
         if( color != COL_AUTO )
         {
             mpFS->startElementNS(XML_a, XML_uFill);
-            WriteSolidFill( color );
+            if (!WriteSchemeColor(u"CharUnderlineComplexColor"_ustr, rXPropSet,
+                                  rRunInput.bUseTextSchemeColors))
+                WriteSolidFill( color );
             mpFS->endElementNS( XML_a, XML_uFill );
         }
         else
