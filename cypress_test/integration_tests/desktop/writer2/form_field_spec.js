@@ -17,6 +17,12 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Form field button tests.',
 
 		cy.cGet('.blinking-cursor')
 			.should('be.visible');
+
+		// The cursor moves for the typed character too. If that arrives after the next cursor
+		// move was sent, moveCursor takes it for that move.
+		cy.getFrameWindow().then(function(win) {
+			helper.processToIdle(win);
+		});
 	}
 	function buttonShouldNotExist() {
 		cy.cGet('.form-field-frame').should('not.exist');
@@ -29,22 +35,20 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Form field button tests.',
 		cy.cGet('.form-field-button').should('exist');
 		cy.cGet('.drop-down-field-list').should('exist');
 
-		// Check also the position relative to the blinking cursor
-		cy.cGet('.blinking-cursor')
-			.then(function(cursors) {
+		// Check also the position relative to the blinking cursor. Read both on every retry,
+		// the cursor can still move after the frame is shown.
+		cy.cGet('.form-field-frame')
+			.should(function(frames) {
+				expect(frames).to.have.lengthOf(1);
 				// TODO: why we have two blinking cursors here?
-				//expect(cursors).to.have.lengthOf(1);
-
-				var cursorRect = cursors[0].getBoundingClientRect();
-				cy.cGet('.form-field-frame')
-					.should(function(frames) {
-						expect(frames).to.have.lengthOf(1);
-						var frameRect = frames[0].getBoundingClientRect();
-						expect(frameRect.top).to.at.most(cursorRect.top + 2);
-						expect(frameRect.bottom).to.be.at.least(cursorRect.bottom);
-						expect(frameRect.left).to.at.most(cursorRect.left);
-						expect(frameRect.right).to.be.at.least(cursorRect.right);
-					});
+				const cursors = frames[0].ownerDocument.querySelectorAll('.blinking-cursor');
+				expect(cursors).to.have.length.of.at.least(1);
+				const cursorRect = cursors[0].getBoundingClientRect();
+				const frameRect = frames[0].getBoundingClientRect();
+				expect(frameRect.top).to.at.most(cursorRect.top + 2);
+				expect(frameRect.bottom).to.be.at.least(cursorRect.bottom);
+				expect(frameRect.left).to.at.most(cursorRect.left);
+				expect(frameRect.right).to.be.at.least(cursorRect.right);
 			});
 	}
 
