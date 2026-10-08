@@ -60,6 +60,19 @@ function openQuickFind() {
 	cy.log('<< openQuickFind - end');
 }
 
+// Waits until the comment list has loaded again for the state that the document sends once
+// after it loads. That load builds every comment anew, so a selection in a comment lasts only
+// when it is made after it.
+function waitForCommentListLoad(win) {
+	cy.log('>> waitForCommentListLoad - start');
+
+	cy.waitUntil(() =>
+		win.app.map.stateChangeHandler.getItemValue('.uno:ShowTrackedChanges') !== undefined);
+	helper.processToIdle(win);
+
+	cy.log('<< waitForCommentListLoad - end');
+}
+
 function searchInQuickFind(text) {
 	cy.log('>> searchInQuickFind - start');
 
@@ -98,6 +111,7 @@ function assertQuickFindMatches(expectedCount) {
 module.exports.selectAllTextOfDoc = selectAllTextOfDoc;
 module.exports.openFileProperties = openFileProperties;
 module.exports.openQuickFind = openQuickFind;
+module.exports.waitForCommentListLoad = waitForCommentListLoad;
 module.exports.searchInQuickFind = searchInQuickFind;
 module.exports.assertQuickFindMatches = assertQuickFindMatches;
 module.exports.waitForPageCount = waitForPageCount;

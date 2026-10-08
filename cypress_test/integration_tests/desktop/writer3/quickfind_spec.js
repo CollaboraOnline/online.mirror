@@ -121,6 +121,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Searching in comments via 
         // Wide enough for the comments to be shown next to the page.
         cy.viewport(1400, 600);
         helper.setupAndLoadDocument('writer/quickfind_comments.fodt');
+        cy.getFrameWindow().then((win) => writerHelper.waitForCommentListLoad(win));
         writerHelper.openQuickFind();
     });
 
@@ -229,6 +230,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Searching in resolved comm
         // Wide enough for the comments to be shown next to the page.
         cy.viewport(1400, 600);
         helper.setupAndLoadDocument('writer/quickfind_resolved_comment.fodt');
+        cy.getFrameWindow().then((win) => writerHelper.waitForCommentListLoad(win));
         writerHelper.openQuickFind();
     });
 
@@ -263,6 +265,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Searching in long replies 
         // Wide enough for the comments to be shown next to the page.
         cy.viewport(1400, 600);
         helper.setupAndLoadDocument('writer/quickfind_long_comment.fodt');
+        cy.getFrameWindow().then((win) => writerHelper.waitForCommentListLoad(win));
         writerHelper.openQuickFind();
     });
 
@@ -294,6 +297,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Searching in comments with
         // Wide enough for the comments to be shown next to the page.
         cy.viewport(1400, 600);
         helper.setupAndLoadDocument('writer/quickfind_link_comment.fodt');
+        cy.getFrameWindow().then((win) => writerHelper.waitForCommentListLoad(win));
         writerHelper.openQuickFind();
     });
 
