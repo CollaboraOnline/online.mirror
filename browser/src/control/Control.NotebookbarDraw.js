@@ -1005,7 +1005,7 @@ window.L.Control.NotebookbarDraw = window.L.Control.NotebookbarImpress.extend({
 								'type': 'container',
 								'children': [
 									{
-										'id': 'SectionBottom13',
+										'id': 'home-para-spacing',
 										'type': 'toolbox',
 										'children': [
 											{
@@ -1113,6 +1113,7 @@ window.L.Control.NotebookbarDraw = window.L.Control.NotebookbarImpress.extend({
 								]
 							},
 							{
+								'id': 'home-chart-table',
 								'type': 'toolbox',
 								'children': [
 									{

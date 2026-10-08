@@ -857,11 +857,48 @@ label.notebookbar.ui-checkbox-label {
 	width: 109px;
 }
 
+[data-doctype='spreadsheet'] #View-container #showstatusbar {
+	display: grid;
+	grid-template-columns: var(--btn-img-size) auto;
+	align-items: center;
+	width: auto;
+	padding-inline-start: calc(1px + var(--btn-padding));
+}
+
+[data-doctype='spreadsheet'] #View-container #showstatusbar-input {
+	justify-self: center;
+	margin: 0;
+}
+
+[data-doctype='spreadsheet'] #View-container #showstatusbar-label {
+	margin-inline: 0;
+	padding-inline-start: 5px;
+}
+
 /* Help tab */
 
 /* File tab */
 
 /* Draw tab */
+
+#Home-container #home-chart-table,
+#Home-container #home-para-spacing {
+	width: auto;
+}
+
+#Home-container .toolbox#home-chart-table {
+	justify-self: stretch;
+	justify-content: space-between;
+}
+
+#Home-container .toolbox#home-para-spacing {
+	display: flex;
+	justify-self: stretch;
+}
+
+#Home-container .toolbox#home-para-spacing > .unoParaRightToLeft {
+	margin-inline-start: auto;
+}
 
 
 /* Calc */
