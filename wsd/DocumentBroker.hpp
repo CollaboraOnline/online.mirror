@@ -32,7 +32,9 @@
 #include <wsd/Storage.hpp>
 #include <wsd/TileDesc.hpp>
 
-#if MOBILEAPP
+#if !MOBILEAPP
+#include <wsd/wopi/WopiStorage.hpp>
+#else // MOBILEAPP
 #include <common/MobileApp.hpp>
 #endif // MOBILEAPP
 
@@ -61,8 +63,6 @@ class LockContext;
 class PresetsInstallTask;
 class TileCache;
 class Message;
-class WOPIFileInfo;
-class WopiStorage;
 class SlideLayerCacheMap;
 
 namespace Poco {
