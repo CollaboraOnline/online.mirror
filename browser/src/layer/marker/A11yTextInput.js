@@ -508,9 +508,10 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 				link.href = '#';
 				link.textContent = heading.text;
 				link.dataset.target = heading.target;
+				link.dataset.index = heading.index;
 				link.addEventListener('click', function (event) {
 					event.preventDefault();
-					this._jumpToHeading(heading.target);
+					this._jumpToHeading(heading.index, heading.target);
 				}.bind(this));
 				element.appendChild(link);
 				region.appendChild(element);
@@ -534,9 +535,12 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 	},
 
 	// NVDA puts its browse cursor where the focus lands, so the paragraphs around must be there first.
-	_jumpToHeading: function(target) {
-		app.map.sendUnoCommand('.uno:JumpToMark?Bookmark:string='
-			+ encodeURIComponent(target + '|outline'));
+	// Headings without numbering share their target, so the index tells them apart.
+	_jumpToHeading: function(index, target) {
+		app.map.sendUnoCommand('.uno:GotoOutlineIndex', {
+			Index: { type: 'unsigned long', value: index },
+			Name: { type: 'string', value: target },
+		});
 		clearTimeout(this._headingJump);
 		this._headingJump = setTimeout(this._endHeadingJump.bind(this), 1000);
 	},
@@ -656,7 +660,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		if (ev.key !== 'Enter' && active && active.dataset && active.dataset.target
 			&& (this._headingsAbove.contains(active) || this._headingsBelow.contains(active))) {
 			window.L.DomEvent.stop(ev);
-			this._jumpToHeading(active.dataset.target);
+			this._jumpToHeading(parseInt(active.dataset.index), active.dataset.target);
 			return;
 		}
 		const inContext = active
