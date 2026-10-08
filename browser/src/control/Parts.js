@@ -91,7 +91,7 @@ window.L.Map.include({
 			// If this wasn't triggered from the server,
 			// then notify the server of the change.
 			if (!external)
-				app.socket.sendMessage('setclientpart part=' + docLayer.getSelectedPart());
+				docLayer._requestPart(docLayer.getSelectedPart());
 		};
 
 		if (app.file.fileBasedView) {

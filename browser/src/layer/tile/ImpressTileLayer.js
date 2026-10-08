@@ -28,6 +28,9 @@ const IMPRESS_VIEW_MODES = {
 window.L.ImpressTileLayer = window.L.CanvasTileLayer.extend({
 	initialize: function (options) {
 		window.L.CanvasTileLayer.prototype.initialize.call(this, options);
+		// The identifiers of the slides this view asked the server to switch to, oldest
+		// first, until the server confirms them.
+		this._pendingPartPicks = [];
 		// If this is mobile view, we we'll change the layout position of 'presentation-controls-wrapper'.
 		if (window.mode.isSmallScreenDevice()) {
 			this._putPCWOutsideFlex();
@@ -369,7 +372,6 @@ window.L.ImpressTileLayer = window.L.CanvasTileLayer.extend({
 
 	_switchToPartBasedView: function () {
 		app.file.fileBasedView = false;
-		this._scrollPickedParts = [];
 		this._fbCachedFileSize = null;
 
 		// Collapse the stacked canvas back to a single slide
@@ -482,13 +484,24 @@ window.L.ImpressTileLayer = window.L.CanvasTileLayer.extend({
 		// selects nothing. The status that follows carries the selection.
 		const part = app.socket.parseServerCmd(textMsg).part || '';
 		const partIndex = this.getIndexFromPart(part);
-		// A late confirmation of a part picked by scrolling leaves the view where it is.
-		const pickedIndex = this._scrollPickedParts.indexOf(part);
+		// A confirmation of a part this view picked leaves the view where it is. The view
+		// has already shown that part, and may have moved on to a later pick since. The
+		// server can merge several confirmations into the one for the latest part, so the
+		// picks before it are dropped as well. A part picked more than once is matched to
+		// its oldest pick, because the confirmations of the later picks can still come.
+		const pickedIndex = this._pendingPartPicks.indexOf(part);
 		if (pickedIndex >= 0) {
-			this._scrollPickedParts.splice(0, pickedIndex + 1);
-		} else if (partIndex >= 0 && partIndex !== this._selectedPart) {
-			this._map.deselectAll(); // Deselect all first. This is a single selection.
-			this._map.setPart(partIndex, true);
+			this._pendingPartPicks.splice(0, pickedIndex + 1);
+		} else {
+			// The server moved the view on its own. The server gives no confirmation
+			// for a pick of the part it already shows, so the picks still waiting are
+			// dropped, and the confirmations that come for them later move the view
+			// like this one.
+			this._pendingPartPicks = [];
+			if (partIndex >= 0 && partIndex !== this._selectedPart) {
+				this._map.deselectAll(); // Deselect all first. This is a single selection.
+				this._map.setPart(partIndex, true);
+			}
 		}
 		// Fire 'setpart' even when the local _selectedPart was already updated
 		// synchronously by Parts.js setPart (fileBasedView path), so listeners
@@ -498,6 +511,12 @@ window.L.ImpressTileLayer = window.L.CanvasTileLayer.extend({
 			parts: this._parts,
 			docType: this._docType,
 		});
+	},
+
+	// The part waits in _pendingPartPicks until the server confirms it.
+	_requestPart: function (part) {
+		this._pendingPartPicks.push(part);
+		window.L.CanvasTileLayer.prototype._requestPart.call(this, part);
 	},
 
 	// The part identifier of a presentation or drawing page is the page's
@@ -629,6 +648,8 @@ window.L.ImpressTileLayer = window.L.CanvasTileLayer.extend({
 					'Incorrect viewId received: ' + this._viewId,
 				);
 				if (app.socket._reconnecting) {
+					// The new session confirms none of the earlier picks.
+					this._pendingPartPicks = [];
 					// Before the first status arrives there is no part list, so
 					// there is no identifier to restore the selection with.
 					const selectedPart = this.getSelectedPart();
@@ -670,7 +691,7 @@ window.L.ImpressTileLayer = window.L.CanvasTileLayer.extend({
 
 				app.impress.partList = Object.assign([], statusJSON.parts);
 				// A pick of a slide that is gone gets no confirmation, so it is dropped.
-				this._scrollPickedParts = this._scrollPickedParts.filter(
+				this._pendingPartPicks = this._pendingPartPicks.filter(
 					(part) => this.getIndexFromPart(part, statusJSON.parts) >= 0);
 				var refreshAnnotation = this._documentInfo !== textMsg;
 
