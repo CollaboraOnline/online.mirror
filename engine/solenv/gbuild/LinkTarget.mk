@@ -2108,22 +2108,6 @@ $(call gb_LinkTarget_use_static_libraries,$(1),vclmain)
 
 endef # gb_LinkTarget_use_vclmain
 
-# Used by URE libraries that need to keep binary compatibility.
-# Reset some flags that make sense for our internal libraries but might
-# break public ABI.
-# (clang-cl's -Zc:dllexportInlines- would not only be a problem for the URE libraries themselves but
-# also for any libraries they depend on.  While that does not appear to be a problem for -Zc:inline
-# for neither MSVC nor clang-cl, it should not really hurt to also switch that off not only for the
-# URE libraries themselves but also for their dependencies.)
-# call gb_LinkTarget_set_is_ure_library_or_dependency,linktarget,,linktargetmakefilename
-define gb_LinkTarget_set_is_ure_library_or_dependency
-$(call gb_LinkTarget_add_cxxflags,$(1),$(gb_CXXFLAGS_ZCINLINE_OFF))
-ifeq ($(HAVE_DLLEXPORTINLINES),TRUE)
-$(call gb_LinkTarget_add_cxxflags,$(1),-Zc:dllexportInlines)
-endif
-
-endef
-
 gb_LinkTarget__get_plugins_var = $(call gb_LinkTarget__get_workdir_linktargetname,$(1))<>PLUGINS
 gb_LinkTarget__get_plugins = $($(call gb_LinkTarget__get_plugins_var,$(1)))
 gb_Library__get_plugins = $($(call gb_LinkTarget__get_plugins_var,$(call gb_Library_get_linktarget,$(1))))

@@ -263,6 +263,5 @@ gb_Library_set_generated_cxx_suffix = $(call gb_Library__forward_to_Linktarget,$
 gb_Library_use_clang = $(call gb_Library__forward_to_Linktarget,$(0),$(1),$(2),$(3))
 gb_Library_set_clang_precompiled_header = $(call gb_Library__forward_to_Linktarget,$(0),$(1),$(2),$(3))
 gb_Library_use_vclmain = $(call gb_Library__forward_to_Linktarget,$(0),$(1),$(2),$(3))
-gb_Library_set_is_ure_library_or_dependency = $(call gb_Library__forward_to_Linktarget,$(0),$(1),$(2),$(3))
 
 # vim: set noet sw=4:

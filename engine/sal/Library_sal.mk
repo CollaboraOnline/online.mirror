@@ -12,8 +12,6 @@ $(eval $(call gb_Library_Library,sal))
 
 $(eval $(call gb_Library_set_precompiled_header,sal,sal/inc/pch/precompiled_sal))
 
-$(eval $(call gb_Library_set_is_ure_library_or_dependency,sal))
-
 $(eval $(call gb_Library_set_include,sal,\
 	$$(INCLUDE) \
 	-I$(SRCDIR)/sal/inc \
