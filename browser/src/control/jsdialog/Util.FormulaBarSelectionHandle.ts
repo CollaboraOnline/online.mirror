@@ -121,11 +121,12 @@ class FormulaBarSelectionHandle {
 
 			const wrapperRect = this.wrapper.getBoundingClientRect();
 			const elementRect = this.element.getBoundingClientRect();
-			// Handles are hidden if the top of the selection handle is outside of the formula bar
-			if (
-				wrapperRect.top > elementRect.top ||
-				wrapperRect.bottom < elementRect.top
-			) {
+			// The handle top sits on the bottom of the line it marks. Handles are hidden if the
+			// middle of that line is outside of the formula bar.
+			const lineHeight =
+				parseFloat(getComputedStyle(this.element).lineHeight) || 0;
+			const lineMiddle = elementRect.top - lineHeight / 2;
+			if (wrapperRect.top > lineMiddle || wrapperRect.bottom < lineMiddle) {
 				this.element.style.visibility = 'hidden';
 				return;
 			}
