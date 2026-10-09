@@ -3,8 +3,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2025-02-13 19:45+0000\n"
-"Last-Translator: Vangelis Papanastasatos <vagpap@gmail.com>\n"
+"PO-Revision-Date: 2026-10-09 10:30+0000\n"
+"Last-Translator: geonetor <geonetor@yahoo.gr>\n"
 "Language-Team: Greek <https://hosted.weblate.org/projects/collabora-online/"
 "help/el/>\n"
 "Language: el\n"
@@ -12,7 +12,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Translate Toolkit 3.6.0\n"
+"X-Generator: Weblate 2026.10.1.dev0\n"
 
 #: html/cool-help.html%2Bdiv.h1:10-5
 msgid "Keyboard Shortcuts"
@@ -91,7 +91,7 @@ msgstr "Εκτύπωση (Μεταφόρτωση ως PDF)"
 
 #: html/cool-help.html%2Bdiv.div.table.tr.td:22-70
 msgid "Print"
-msgstr ""
+msgstr "Εκτύπωση"
 
 #: html/cool-help.html%2Bdiv.div.table.tr.td:23-54
 msgid "Find"
@@ -1434,7 +1434,7 @@ msgstr "Τυπική μορφή"
 
 #: html/cool-help.html%2Bdiv.div.div.h2:200-9
 msgid "Insert"
-msgstr ""
+msgstr "Εισαγωγή"
 
 #: html/cool-help.html%2Bdiv.div.div.table.tr.td:202-38
 msgid "Insert date"
