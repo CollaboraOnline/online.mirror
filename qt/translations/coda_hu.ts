@@ -97,7 +97,7 @@
     </message>
     <message>
         <source>Failed to print document. Please check your printer settings.</source>
-        <translation>A dokumentum nyomtatása nem sikerült. Ellenőrizze a nyomtatóbeálíításokat.</translation>
+        <translation>A dokumentum nyomtatása nem sikerült. Ellenőrizze a nyomtatóbeállításokat.</translation>
     </message>
     <message>
         <source>All Files (*)</source>
