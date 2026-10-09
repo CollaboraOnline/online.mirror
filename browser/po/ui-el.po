@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-10-09 10:31+0000\n"
+"PO-Revision-Date: 2026-10-09 17:02+0000\n"
 "Last-Translator: geonetor <geonetor@yahoo.gr>\n"
 "Language-Team: Greek <https://hosted.weblate.org/projects/collabora-online/"
 "collabora-ui/el/>\n"
@@ -733,7 +733,7 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:704
 msgid "Booklet"
-msgstr "Βιβλιάριο"
+msgstr "Φυλλαδίου"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:705
 msgid "Booklet front"
@@ -741,11 +741,11 @@ msgstr "Μπροστινό μέρος φυλλαδίου"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:706
 msgid "Booklet back"
-msgstr ""
+msgstr "Πίσω μέρος φυλλαδίου"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:707
 msgid "Page name"
-msgstr ""
+msgstr "Όνομα σελίδας"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:708
 #: src/control/Control.NotebookbarCalc.js:859
@@ -761,11 +761,11 @@ msgstr "Ώρα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:710
 msgid "Hidden pages"
-msgstr ""
+msgstr "Κρυφές σελίδες"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:711
 msgid "From printer setup"
-msgstr ""
+msgstr "Από τη ρύθμιση του εκτυπωτή"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:712
 #: src/control/Control.BackstageView.ts:851
@@ -780,17 +780,17 @@ msgstr "Σημειώσεις"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:714
 msgid "Handouts"
-msgstr ""
+msgstr "Φυλλάδια"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:715
 #: src/control/Control.NavigatorPanel.ts:231
 #: src/control/Control.TopToolbar.js:528
 msgid "Outline"
-msgstr ""
+msgstr "Περίγραμμα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:716
 msgid "Handout horizontal"
-msgstr ""
+msgstr "Οριζόντιο φυλλάδιο"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:717
 msgid "Images"
@@ -806,23 +806,23 @@ msgstr "Φόντο"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:720
 msgid "Print Black"
-msgstr ""
+msgstr "Εκτύπωση Μαύρου"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:721
 msgid "Hidden text"
-msgstr ""
+msgstr "Κρυφό κείμενο"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:722
 msgid "Placeholders"
-msgstr ""
+msgstr "Δείκτες θέσης"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:723
 msgid "Left pages"
-msgstr ""
+msgstr "Αριστερές σελίδες"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:724
 msgid "Right pages"
-msgstr ""
+msgstr "Δεξιές σελίδες"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:725
 msgid "Brochure"
@@ -834,59 +834,65 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:731
 msgid "English"
-msgstr ""
+msgstr "Αγγλικά"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:732
 msgid "Hungarian"
-msgstr ""
+msgstr "Ουγγρικά"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:733
 msgid "Portuguese (Brazil)"
-msgstr ""
+msgstr "Πορτογαλικά (Βραζιλία)"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:734
 msgid "Russian"
-msgstr ""
+msgstr "Ρώσικα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1293
 msgid "Invalid JSON file"
-msgstr ""
+msgstr "Μη έγκυρο αρχείο JSON"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1297
 msgid "Error reading file"
-msgstr ""
+msgstr "Σφάλμα κατά την ανάγνωση του αρχείου"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1309
 msgid "Autotext"
-msgstr ""
+msgstr "Αυτόματο κείμενο"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1311
 msgid ""
 "Upload reusable text snippets (.bau). To insert the text in your document, "
 "type the shortcut for an AutoText entry and press F3."
 msgstr ""
+"Ανεβάστε επαναχρησιμοποιήσιμα αποσπάσματα κειμένου (.bau). Για να εισαγάγετε "
+"το κείμενο στο έγγραφό σας, πληκτρολογήστε τη συντόμευση για μια καταχώρηση "
+"Αυτόματου κειμένου και πατήστε F3."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1317
 msgid "Upload Autotext"
-msgstr ""
+msgstr "Ανέβασμα αυτόματου κειμένου"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1323
 msgid "Custom dictionaries"
-msgstr ""
+msgstr "Προσαρμοσμένα λεξικά"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1325
 msgid ""
 "Add or edit words in a spell check dictionary. Words in your wordbook (."
 "dic) will be available for spelling checks."
 msgstr ""
+"Προσθέστε ή επεξεργαστείτε λέξεις σε ένα λεξικό ορθογραφικού ελέγχου. Οι "
+"λέξεις στο βιβλίο λέξεών σας (.dic) θα είναι διαθέσιμες για ελέγχους "
+"ορθογραφίας."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1331
 msgid "Upload Wordbook"
-msgstr ""
+msgstr "Μεταφόρτωση βιβλίου εργασίας"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1337
 msgid "Document themes"
-msgstr ""
+msgstr "Θέματα εγγράφου"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1339
 msgid ""
@@ -896,7 +902,7 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1345
 msgid "Upload Theme"
-msgstr ""
+msgstr "Μεταφόρτωση θέματος"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1351
 #: src/control/Control.Menubar.ts:450 src/control/Control.Menubar.ts:662
@@ -906,27 +912,32 @@ msgstr ""
 #: src/control/Control.NotebookbarImpress.js:170
 #: src/control/Control.NotebookbarWriter.js:109
 msgid "Extensions"
-msgstr ""
+msgstr "Επεκτάσεις"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1353
 msgid ""
 "Upload a packaged extension as a .zip; its contents (manifest.json, ...) "
 "are unpacked on the server."
 msgstr ""
+"Μεταφορτώστε μια πακεταρισμένη επέκταση ως .zip· τα περιεχόμενά της "
+"(manifest.json, ...) αποσυμπιέζονται στον διακομιστή."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1359
 msgid "Upload Extension"
-msgstr ""
+msgstr "Μεταφόρτωση επέκτασης"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1366
 msgid "Security policies"
-msgstr ""
+msgstr "Πολιτικές ασφάλειας"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1368
 msgid ""
 "Upload SPIF security policies (.xml). These define the classifications and "
 "categories available when applying a security label to a document."
 msgstr ""
+"Ανεβάστε τις πολιτικές ασφαλείας SPIF (.xml). Αυτές ορίζουν τις ταξινομήσεις "
+"και τις κατηγορίες που διατίθενται κατά την εφαρμογή μιας ετικέτας ασφαλείας "
+"σε ένα έγγραφο."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1374
 msgid "Upload Security Policy"
