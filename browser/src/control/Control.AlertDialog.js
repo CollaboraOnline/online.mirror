@@ -60,7 +60,7 @@ window.L.Control.AlertDialog = window.L.Control.extend({
 						url = window.processCoolUrl({ url: url, type: 'doc' });
 					}
 
-					window.open(url, '_blank');
+					window.open(url, '_blank', 'noopener');
 				});
 		} else if (e.kind == 'network' && e.code == 24581) {
 			if (e.cmd == 'paste') {

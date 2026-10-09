@@ -2369,8 +2369,7 @@ class UIManager extends window.L.Control {
 			func : () => {
 				if (!link || !linkText)
 					return;
-				var win = window.open(window.sanitizeUrl(link), '_blank');
-				win?.focus();
+				window.open(window.sanitizeUrl(link), '_blank', 'noopener');
 			}
 		}]);
 
