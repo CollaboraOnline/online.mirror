@@ -121,8 +121,7 @@ template<typename T> inline std::optional<T const> tryGetConverted(
       }
     @endcode
 
-    @note Ideally this would be a public member function of cpo::uno::Any (at
-    least conditional on LIBO_INTERNAL_ONLY, as it requires C++11).  However, as
+    @note Ideally this would be a public member function of cpo::uno::Any.  However, as
     std::optional (which would be needed to implement the proxies) is only
     available since C++14, we need to use std::optional for now.  But To not
     make every entity that includes <cpo/uno/Any.hxx> depend on
