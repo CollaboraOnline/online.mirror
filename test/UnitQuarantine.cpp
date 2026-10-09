@@ -22,7 +22,6 @@
 #include <testlog.hpp>
 #include <common/FileUtil.hpp>
 #include <wsd/DocumentBroker.hpp>
-#include <wsd/Process.hpp>
 
 #include <Poco/File.h>
 #include <Poco/Net/HTTPRequest.h>
@@ -248,12 +247,14 @@ class UnitQuarantineCrash : public WopiTestServer
 
     STATE_ENUM(Phase, Load, WaitLoadStatus, WaitModifyStatus, WaitUpload, Unload, Done) _phase;
     std::string _quarantinePath;
-    std::vector<pid_t> _kitsPids;
+    /// The kit that hosts the document, -1 until it is attached.
+    pid_t _docKitPid;
 
 public:
     UnitQuarantineCrash()
         : Base("UnitQuarantineCrash")
         , _phase(Phase::Load)
+        , _docKitPid(-1)
     {
     }
 
@@ -281,10 +282,10 @@ public:
         FileUtil::removeFile(_quarantinePath, true);
     }
 
-    void newChild(const std::shared_ptr<ChildProcess>& child) override
+    void onDocBrokerAttachKitProcess(const std::string& docKey, int pid) override
     {
-        _kitsPids.push_back(child->getPid());
-        TST_LOG("New Kit PID: " << _kitsPids.back());
+        TST_LOG("DocBroker [" << docKey << "] attached to kit: " << pid);
+        _docKitPid = pid;
     }
 
     bool onDocumentLoaded(const std::string& message) override
@@ -333,12 +334,10 @@ public:
         {
             TRANSITION_STATE(_phase, Phase::Unload);
 
-            // Kill the kit.
-            for (const auto& pid : _kitsPids)
-            {
-                TST_LOG("Killing kit: " << pid);
-                ::kill(pid, SIGKILL);
-            }
+            // Kill only the kit that hosts the document, so the spare kits stay usable for the
+            // next test.
+            TST_LOG("Killing kit: " << _docKitPid);
+            ::kill(_docKitPid, SIGKILL);
         }
 
         return true;
@@ -347,7 +346,7 @@ public:
     void kitKilled(int count) override
     {
         TST_LOG("Kit killed");
-        LOK_ASSERT(static_cast<std::size_t>(count) <= _kitsPids.size());
+        LOK_ASSERT_EQUAL_MESSAGE("Expected only 1 killed kit", 1, count);
     }
 
     // Called when we have modified document data at exit.
@@ -411,7 +410,7 @@ public:
 UnitBase** unit_create_wsd_multi(void)
 {
     return new UnitBase*[3]{
-        new UnitQuarantineCrash(), // Crash first, since we need to know of all new Kit processes.
+        new UnitQuarantineCrash(),
         new UnitQuarantineConflict(), nullptr
     };
 }
