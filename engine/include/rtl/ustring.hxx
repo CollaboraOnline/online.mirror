@@ -1421,7 +1421,7 @@ public:
       end of this string
     */
     bool endsWith(std::u16string_view sv) const {
-        return sv.size() <= sal_uInt32(pData->length)
+        return sv.size() <= o3tl::make_unsigned(pData->length)
             && match(sv, pData->length - sv.size());
     }
     bool endsWith(std::u16string_view sv, OUString * rest) const {
@@ -1538,7 +1538,7 @@ public:
       "a"--"z")
     */
     bool endsWithIgnoreAsciiCase(std::u16string_view sv) const {
-        return sv.size() <= sal_uInt32(pData->length)
+        return sv.size() <= o3tl::make_unsigned(pData->length)
             && matchIgnoreAsciiCase(sv, pData->length - sv.size());
     }
     bool endsWithIgnoreAsciiCase(std::u16string_view sv, OUString * rest) const {

@@ -197,20 +197,6 @@ private:
         {
             return nullptr;
         }
-        auto loc = e->getBeginLoc();
-        while (compiler.getSourceManager().isMacroArgExpansion(loc))
-        {
-            loc = compiler.getSourceManager().getImmediateMacroCallerLoc(loc);
-        }
-        // This covers both "plain" code in such include files, as well as expansion of (object-like) macros like
-        //
-        //   #define SAL_MAX_INT8          ((sal_Int8)   0x7F)
-        //
-        // defined in such include files:
-        if (isInUnoIncludeFile(compiler.getSourceManager().getSpellingLoc(loc)))
-        { //TODO: '#ifdef LIBO_INTERNAL_ONLY' within UNO include files
-            return nullptr;
-        }
         return e;
     }
 };

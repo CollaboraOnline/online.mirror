@@ -33,6 +33,7 @@
 #include <string_view>
 #include <type_traits>
 
+#include <o3tl/safeint.hxx>
 #include <rtl/math.h>
 #include <rtl/textenc.h>
 #include <rtl/string.h>
@@ -525,7 +526,8 @@ public:
         if (sv.empty()) {
             return *this;
         }
-        if (sv.size() > sal_uInt32(std::numeric_limits<sal_Int32>::max() - pData->length)) {
+        if (sv.size() > o3tl::make_unsigned(std::numeric_limits<sal_Int32>::max() - pData->length))
+        {
             throw std::bad_alloc();
         }
         auto const l = pData->length + sv.size();
@@ -1167,7 +1169,7 @@ public:
       end of this string
     */
     bool endsWith(std::string_view str) const {
-        return str.size() <= sal_uInt32(getLength())
+        return str.size() <= o3tl::make_unsigned(getLength())
             && match(str, getLength() - str.size());
     }
     /**
