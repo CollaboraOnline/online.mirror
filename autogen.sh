@@ -41,14 +41,27 @@ scripts/refresh-git-hooks || failed "refresh-git-hooks"
 cd "${builddir}"
 
 if [ $# -gt 0 ]; then
-    # If we got parameters, we can execute configure directly.
-    echo -n "Result: All went OK, running $srcdir/configure "
+    # If we got parameters, we can execute configure directly. An unknown --with or --enable
+    # option stops configure, unless --best-effort asks for only a warning.
+    option_checking=fatal
+    args=()
     for arg in "$@"
+    do
+        if [ "$arg" = "--best-effort" ]; then
+            option_checking=warn
+        else
+            args+=("$arg")
+        fi
+    done
+    args+=("--enable-option-checking=$option_checking")
+
+    echo -n "Result: All went OK, running $srcdir/configure "
+    for arg in "${args[@]}"
     do
         echo -n "'${arg}' "
     done
     echo "now."
-    $srcdir/configure "$@" || failed "configure"
+    $srcdir/configure "${args[@]}" || failed "configure"
     exit 0
 fi
 
