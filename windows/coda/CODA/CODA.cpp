@@ -287,28 +287,15 @@ static std::set<std::string> currentlyOpenDocumens()
 
 // Vector of documents to open passed on the command line, or multiple documents to open selected in
 // a file open dialog. We open the next one only as soon as the previous one has finished loading.
+// Only the UI thread uses it.
 static std::deque<FilenameAndUri> filenamesAndUrisToOpen;
 
+// Open the next document waiting in filenamesAndUrisToOpen, if there is one. This can be called on
+// any thread, so it only posts a message, to the hidden window that is there for the whole run of
+// the app. The UI thread then takes the document from the queue and opens its window.
 void load_next_document()
 {
-    if (filenamesAndUrisToOpen.size() > 0)
-    {
-        // Open the next document (from the command line or selected in the file open dialog), if
-        // any.
-        if (windows.size() > 0)
-        {
-            // Post a message to one randomly selected window that can be a starter backstage window
-            // or the tabbed window, it doesn't matter, they use the same window procedure.
-            PostMessageW(windows.begin()->second.hWnd, CODA_WM_LOADNEXTDOCUMENT, 0, 0);
-        }
-        else
-        {
-            // We have no window open, so we can just call openCOOLWindow() directly.
-            auto nextDocument = filenamesAndUrisToOpen.front();
-            filenamesAndUrisToOpen.pop_front();
-            openCOOLWindow(nextDocument, DocumentMode::EDIT);
-        }
-    }
+    PostMessageW(hiddenOwnerWindow, CODA_WM_LOADNEXTDOCUMENT, 0, 0);
 }
 
 // The strings that CODA-W shows itself, in the user interface language, by context and source
@@ -1798,7 +1785,7 @@ static const int HOTKEY_ID_DEVTOOLS = 0x00DA;
 // Window procedure for a hidden window used as clipboard owner. It lives for the whole app run, so
 // its delayed-render promise only has to be materialized (WM_RENDERALLFORMATS) once, when the app
 // exits, not when an individual document window closes. Also used as parent window for the file
-// open and save dialogs.
+// open and save dialogs, and to open the documents waiting in filenamesAndUrisToOpen one at a time.
 static LRESULT CALLBACK HiddenOwnerWndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     switch (message)
@@ -1846,6 +1833,15 @@ static LRESULT CALLBACK HiddenOwnerWndProc(HWND hWnd, UINT message, WPARAM wPara
                 request->pfnPicked(request->pContext, nullptr);
             return 0;
         }
+
+        case CODA_WM_LOADNEXTDOCUMENT:
+            if (filenamesAndUrisToOpen.size() > 0)
+            {
+                auto nextDocument = filenamesAndUrisToOpen.front();
+                filenamesAndUrisToOpen.pop_front();
+                openCOOLWindow(nextDocument, DocumentMode::EDIT);
+            }
+            return 0;
     }
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
@@ -2142,15 +2138,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         case CODA_WM_SHOWTABMENU:
             showTabContextMenu(hWnd, (int)wParam,
                                { (short)LOWORD(lParam), (short)HIWORD(lParam) });
-            break;
-
-        case CODA_WM_LOADNEXTDOCUMENT:
-            if (filenamesAndUrisToOpen.size() > 0)
-            {
-                auto nextDocument = filenamesAndUrisToOpen.front();
-                filenamesAndUrisToOpen.pop_front();
-                openCOOLWindow(nextDocument, DocumentMode::EDIT);
-            }
             break;
 
         case WM_TIMER:
