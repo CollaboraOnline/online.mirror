@@ -2771,9 +2771,13 @@ void ScCellShell::ExecuteEdit( SfxRequest& rReq )
                         SetTabNoAndCursor( GetViewData(), aCellId );
                     }
 
+                    const OUString* pAuthor = pAuthorItem ? &pAuthorItem->GetValue() : nullptr;
+                    if (comphelper::COKit::isActive())
+                        pAuthor = &pTabViewShell->GetKitAuthor();
+
                     ScAddress aPos( GetViewData().GetCurX(), GetViewData().GetCurY(), GetViewData().CurrentTabForData() );
                     pTabViewShell->ReplaceNote( aPos, pTextItem->GetValue(),
-                                                pAuthorItem ? &pAuthorItem->GetValue() : nullptr,
+                                                pAuthor,
                                                 pDateItem ? &pDateItem->GetValue() : nullptr );
                 }
                 else if (!comphelper::COKit::isActive())
@@ -2974,9 +2978,11 @@ void ScCellShell::ExecuteEdit( SfxRequest& rReq )
             {
                 ScViewData& rData = GetViewData();
                 OUString aAuthor = pAuthorItem ? pAuthorItem->GetValue() : OUString();
+                if (comphelper::COKit::isActive())
+                    aAuthor = pTabViewShell->GetKitAuthor();
                 rData.GetDocShell()->GetDocFunc().InsertThreadedComment(
                     rData.GetCurPos(), pTextItem->GetValue(),
-                    pAuthorItem ? &aAuthor : nullptr, true);
+                    (pAuthorItem || comphelper::COKit::isActive()) ? &aAuthor : nullptr, true);
             }
 
             rBindings.Invalidate( SID_INSERT_THREADED_COMMENT );
