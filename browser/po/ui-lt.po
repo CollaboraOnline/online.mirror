@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2026-10-05 21:51+0000\n"
+"PO-Revision-Date: 2026-10-09 10:31+0000\n"
 "Last-Translator: dukezas <dukezas@gmail.com>\n"
 "Language-Team: Lithuanian <https://hosted.weblate.org/projects/collabora-"
 "online/collabora-ui/lt/>\n"
@@ -2797,19 +2797,19 @@ msgstr "%1 kB"
 
 #: src/control/Control.CleanupSidebar.ts:272
 msgid "%1 MB"
-msgstr ""
+msgstr "%1 MB"
 
 #: src/control/Control.CleanupSidebar.ts:278
 msgid "Fix %1"
-msgstr ""
+msgstr "Sutvarkyta %1"
 
 #: src/control/Control.CleanupSidebar.ts:331
 msgid "Master slide"
-msgstr ""
+msgstr "Pagrindinė skaidrė"
 
 #: src/control/Control.CleanupSidebar.ts:332
 msgid "Master slide, image %1"
-msgstr ""
+msgstr "Pagrindinė skaidrė, paveikslėlis %1"
 
 #: src/control/Control.CleanupSidebar.ts:335
 #: src/control/Control.PartsPreview.js:944
@@ -2818,166 +2818,170 @@ msgstr "%1 Skaidrė"
 
 #: src/control/Control.CleanupSidebar.ts:336
 msgid "Slide %1, image %2"
-msgstr ""
+msgstr "Skaidrė %1, paveikslas %2"
 
 #: src/control/Control.CleanupSidebar.ts:340
 msgid "Slide %1 is hidden and can be removed"
-msgstr ""
+msgstr "Skaidrė %1 yra paslėpta ir gali būti pašalinta"
 
 #: src/control/Control.CleanupSidebar.ts:342
 msgid "Master slide '%1' is not used by any slide"
-msgstr ""
+msgstr "Pagrindinė skaidrė „%1“ nenaudojama jokioje skaidrėje"
 
 #: src/control/Control.CleanupSidebar.ts:347
 msgid "Slide %1 has speaker notes"
-msgstr ""
+msgstr "Skaidrėje %1 yra pranešėjo pastabos"
 
 #: src/control/Control.CleanupSidebar.ts:350
 msgid "Slide %1: embedded object"
-msgstr ""
+msgstr "Skaidrė %1: įterptas objektas"
 
 #: src/control/Control.CleanupSidebar.ts:351
 msgid "Slide %1: embedded object, no image to replace it with"
 msgstr ""
+"Skaidrė %1: įterptas objektas, nėra paveikslėlio, kuriuo būtų galima jį "
+"pakeisti"
 
 #: src/control/Control.CleanupSidebar.ts:365
 msgid "%1 DPI"
-msgstr ""
+msgstr "%1 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:367
 msgid "%1 at %2 DPI"
-msgstr ""
+msgstr "%1 prie %2 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:426
 msgid "Leave images alone"
-msgstr ""
+msgstr "Palikite vaizdus"
 
 #: src/control/Control.CleanupSidebar.ts:427
 msgid "96 DPI"
-msgstr ""
+msgstr "96 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:428
 msgid "150 DPI"
-msgstr ""
+msgstr "150 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:429
 msgid "220 DPI"
-msgstr ""
+msgstr "220 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:430
 msgid "300 DPI"
-msgstr ""
+msgstr "300 DPI"
 
 #: src/control/Control.CleanupSidebar.ts:454
 msgid "Scanning..."
-msgstr ""
+msgstr "Skenuojama..."
 
 #: src/control/Control.CleanupSidebar.ts:456
 msgid "Measuring images..."
-msgstr ""
+msgstr "Matuojami vaizdai..."
 
 #: src/control/Control.CleanupSidebar.ts:458
 msgid "Preparing cleanup..."
-msgstr ""
+msgstr "Ruošiamas valymas..."
 
 #: src/control/Control.CleanupSidebar.ts:460
 msgid "Cleaning up..."
-msgstr ""
+msgstr "Valoma..."
 
 #: src/control/Control.CleanupSidebar.ts:472
 msgid "Images over %1 DPI (%2)"
-msgstr ""
+msgstr "Vaizdai virš %1 DPI (%2)"
 
 #: src/control/Control.CleanupSidebar.ts:476
 msgid "Hidden slides (%1)"
-msgstr ""
+msgstr "Paslėptos skaidrės (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:478
 msgid "Unused master slides (%1)"
-msgstr ""
+msgstr "Nepanaudotos pagrindinės skaidrės (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:480
 msgid "Speaker notes (%1)"
-msgstr ""
+msgstr "Pranešėjo pastabos (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:482
 msgid "Embedded objects (%1)"
-msgstr ""
+msgstr "Įterptieji objektai (%1)"
 
 #: src/control/Control.CleanupSidebar.ts:490
 msgid "Saved %1"
-msgstr ""
+msgstr "Išsaugota %1"
 
 #: src/control/Control.CleanupSidebar.ts:493
 msgid "Estimated saving: %1"
-msgstr ""
+msgstr "Numatomas sutaupymas: %1"
 
 #: src/control/Control.CleanupSidebar.ts:500
 msgid "%1 thing to clean up"
 msgid_plural "%1 things to clean up"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "%1 daiktas ištrynimui"
+msgstr[1] "%1 daiktai ištrynimui"
+msgstr[2] "%1 daiktų ištrynimui"
 
 #: src/control/Control.CleanupSidebar.ts:525
 msgid "Image resolution"
-msgstr ""
+msgstr "Vaizdo raiška"
 
 #: src/control/Control.CleanupSidebar.ts:547
 msgid "JPEG quality in %"
-msgstr ""
+msgstr "JPEG kokybė %"
 
 #: src/control/Control.CleanupSidebar.ts:572
 msgid "Prepare for sharing"
-msgstr ""
+msgstr "Paruošti bendrinimui"
 
 #: src/control/Control.CleanupSidebar.ts:601
 msgid "%1 of %2"
-msgstr ""
+msgstr "%1 iš %2"
 
 #: src/control/Control.CleanupSidebar.ts:614
 msgid "Cleanup progress"
-msgstr ""
+msgstr "Valymo progresas"
 
 #: src/control/Control.CleanupSidebar.ts:647
 msgid "Stop"
-msgstr ""
+msgstr "Stabdyti"
 
 #: src/control/Control.CleanupSidebar.ts:668
 msgid "Scan"
-msgstr ""
+msgstr "Skenuoti"
 
 #: src/control/Control.CleanupSidebar.ts:701
 msgid "Fix all"
-msgstr ""
+msgstr "Taisyti viską"
 
 #: src/control/Control.CleanupSidebar.ts:726
 msgid "This document cannot be changed here, so there is nothing to clean up."
-msgstr ""
+msgstr "Šio dokumento negalima pakeisti čia, tad nėra ką valyti."
 
 #: src/control/Control.CleanupSidebar.ts:730
 msgid ""
 "Choose a target resolution, then press Scan to find what can be cleaned up."
 msgstr ""
+"Pasirinkite tikslinę skiriamąją gebą ir paspauskite „Scan“, kad rastumėte, "
+"ką galima išvalyti."
 
 #: src/control/Control.CleanupSidebar.ts:733
 msgid "Nothing to clean up."
-msgstr ""
+msgstr "Nieko valymui."
 
 #: src/control/Control.CleanupSidebar.ts:791
 msgid "saves %1"
-msgstr ""
+msgstr "sutaupo %1"
 
 #: src/control/Control.CleanupSidebar.ts:801
 msgid "Fix"
-msgstr ""
+msgstr "Sutaisyti"
 
 #: src/control/Control.CleanupSidebar.ts:901
 #: src/control/Control.Menubar.ts:657
 #: src/control/Control.NotebookbarImpress.js:2184
 #: src/control/Control.NotebookbarImpress.js:2185
 msgid "Clean Up"
-msgstr ""
+msgstr "Valyti"
 
 #: src/control/Control.AlertDialog.js:55
 msgid "External link"
@@ -3093,7 +3097,7 @@ msgstr "Pasirašyti"
 
 #: src/control/Control.BackstageView.ts:213
 msgid "Quit"
-msgstr ""
+msgstr "Mesti"
 
 #: src/control/Control.BackstageView.ts:220 src/control/Control.Menubar.ts:143
 #: src/control/Control.Menubar.ts:484 src/control/Control.Menubar.ts:692
@@ -3190,7 +3194,7 @@ msgstr "Tuščias pristatymas"
 
 #: src/control/Control.BackstageView.ts:1029
 msgid "Blank Drawing"
-msgstr ""
+msgstr "Tuščias piešinys"
 
 #: src/control/Control.BackstageView.ts:1034
 msgid "Blank Document"
@@ -3266,84 +3270,84 @@ msgstr "Atidaryti kompiuteryje esantį dokumentą"
 
 #: src/control/backstage/OpenView.tsx:65
 msgid "Add Cloud +"
-msgstr ""
+msgstr "Pridėti Debesį +"
 
 #: src/control/backstage/CloudDialogs.tsx:90
 msgid "Edit account"
-msgstr ""
+msgstr "Redaguoti paskyrą"
 
 #: src/control/backstage/CloudDialogs.tsx:90
 msgid "Add new account"
-msgstr ""
+msgstr "Pridėti naują paskyrą"
 
 #: src/control/backstage/CloudDialogs.tsx:104
 msgid "Server URL"
-msgstr ""
+msgstr "Serverio URL"
 
 #: src/control/backstage/CloudDialogs.tsx:109
 msgid "Enter server URL"
-msgstr ""
+msgstr "Įvesti serverio URL"
 
 #: src/control/backstage/CloudDialogs.tsx:117
 msgid "Display name"
-msgstr ""
+msgstr "Rodomas vardas"
 
 #: src/control/backstage/CloudDialogs.tsx:123
 msgid "Enter display name"
-msgstr ""
+msgstr "Įvesti rodomą vardą"
 
 #: src/control/backstage/CloudDialogs.tsx:130
 msgid "Name displayed in your cloud list (max. 40 characters)."
-msgstr ""
+msgstr "Vardas, rodomas jūsų debesies sąraše (ne daugiau 40 simbolių)."
 
 #: src/control/backstage/CloudDialogs.tsx:143
 msgid "Save changes"
-msgstr ""
+msgstr "Išsaugoti pakeitimus"
 
 #: src/control/backstage/CloudDialogs.tsx:143
 msgid "Add Account"
-msgstr ""
+msgstr "Pridėti paskyrą"
 
 #: src/control/backstage/CloudDialogs.tsx:183
 msgid "Remove account"
-msgstr ""
+msgstr "Pašalinti paskyrą"
 
 #: src/control/backstage/CloudDialogs.tsx:185
 msgid "Disconnects this cloud"
-msgstr ""
+msgstr "Atjungia šitą debesį"
 
 #: src/control/backstage/CloudDialogs.tsx:213
 msgid "New account successfully added"
-msgstr ""
+msgstr "Nauja ppaskyra sėkmingai pridėta"
 
 #: src/control/backstage/CloudDialogs.tsx:218
 msgid "You can now access your files from this cloud."
-msgstr ""
+msgstr "Dabar galite pasiekti savo failus iš šio debesies."
 
 #: src/control/backstage/CloudDialogs.tsx:241
 msgid "Open Files"
-msgstr ""
+msgstr "Atidaryti failus"
 
 #: src/control/backstage/CloudDialogs.tsx:267
 msgid "Remove this account?"
-msgstr ""
+msgstr "Pašalinti šią paskyrą?"
 
 #: src/control/backstage/CloudDialogs.tsx:272
 msgid "You'll be disconnected from this cloud account."
-msgstr ""
+msgstr "Jūs būsite atjungtas nuo šios debesies paskyros."
 
 #: src/control/DropFileOverlay.tsx:30
 msgid "Drop file to open"
-msgstr ""
+msgstr "Įmeslkite failą atidarymui"
 
 #: src/control/AccessibilityNotice.tsx:34
 #: src/control/AccessibilityNotice.tsx:64
 msgid "This mobile view is not fully accessible."
-msgstr ""
+msgstr "Šis mobilus vaizdas nėra pilnai pasiekiamas."
 
 #: src/control/AccessibilityNotice.tsx:43
 msgid "Accessibility statement"
-msgstr ""
+msgstr "Prieinamumo pareiškimas"
 
 #: src/control/AccessibilityNotice.tsx:50
 #: src/control/jsdialog/Util.SnackbarController.ts:115
@@ -3362,14 +3366,15 @@ msgstr "Dokumento pavadinimas"
 #: src/control/Control.DocumentNameInput.js:39
 msgid "A document name cannot contain a slash or a backslash."
 msgstr ""
+"Dokumento pavadinime negali būti pasvirojo arba atgalinio pasvirojo brūkšnio."
 
 #: src/control/Control.DocumentNameInput.js:42 src/app/Socket.ts:2531
 msgid "Please enter a valid document name."
-msgstr ""
+msgstr "Prašom įvesti tinkamą dokumento pavadinimą."
 
 #: src/control/Control.DocumentNameInput.js:55
 msgid "Invalid document name"
-msgstr ""
+msgstr "Netinkamas dokumento pavadinimas"
 
 #: src/control/Control.DocumentRepair.js:27
 #: src/control/Control.DocumentRepair.js:28
@@ -4205,17 +4210,17 @@ msgstr "Pastabų puslapiai"
 #: src/control/Control.Menubar.ts:523
 #: src/control/Control.NotebookbarImpress.js:743
 msgid "View Notes"
-msgstr ""
+msgstr "Peržiūrėti pastabas"
 
 #: src/control/Control.Menubar.ts:524
 #: src/control/Control.NotebookbarImpress.js:745
 msgid "Bottom Panel"
-msgstr ""
+msgstr "Apatinis skydelis"
 
 #: src/control/Control.Menubar.ts:525
 #: src/control/Control.NotebookbarImpress.js:746
 msgid "Handout Page"
-msgstr ""
+msgstr "Dalomosios medžiagos puslapis"
 
 #: src/control/Control.Menubar.ts:526
 #: src/control/Control.NotebookbarImpress.js:747
@@ -4242,11 +4247,11 @@ msgstr "Platinti"
 
 #: src/control/Control.Menubar.ts:635
 msgid "Insert Slides from File..."
-msgstr ""
+msgstr "Įterpti skaidres iš failo..."
 
 #: src/control/Control.Menubar.ts:637
 msgid "Update Linked Slides..."
-msgstr ""
+msgstr "Atnaujinti susietas skaidres..."
 
 #: src/control/Control.Menubar.ts:644 src/control/Control.Menubar.ts:1269
 #: src/control/Control.PresentationBar.js:143
@@ -4391,7 +4396,7 @@ msgstr "Daugiau..."
 
 #: src/control/Control.Menubar.ts:2068
 msgid "Menu"
-msgstr ""
+msgstr "Meniu"
 
 #: src/control/Control.Menubar.ts:2292
 msgid "Use Compact view"
@@ -4460,11 +4465,11 @@ msgstr "Rezultatai"
 
 #: src/control/Control.NavigatorPanel.ts:317
 msgid "Maximize to grid"
-msgstr ""
+msgstr "Padidinti iki tinklelio"
 
 #: src/control/Control.NavigatorPanel.ts:629
 msgid "Find and Replace"
-msgstr ""
+msgstr "Rasti ir pakeisti"
 
 #: src/control/Control.NavigatorPanel.ts:638
 #: src/control/jsdialog/Widget.Combobox.js:497
@@ -4483,7 +4488,7 @@ msgstr "Lentelės dizainas"
 
 #: src/control/Notebookbar.CalcTableTab.ts:105
 msgid "Tools"
-msgstr ""
+msgstr "Įrankiai"
 
 #: src/control/Notebookbar.CalcTableTab.ts:190
 #: src/control/Notebookbar.ImpressTableDesignTab.ts:121
@@ -4674,7 +4679,7 @@ msgstr "Apsaugoti"
 #: src/control/Control.NotebookbarWriter.js:2891
 #: src/control/Control.NotebookbarWriter.js:3269
 msgid "Caption"
-msgstr ""
+msgstr "Antraštė"
 
 #: src/control/Sidebar.FromNotebookbarPanel.ts:154
 msgid "Animations"
@@ -4686,28 +4691,28 @@ msgstr "Pradžia:"
 
 #: src/control/Control.Notebookbar.js:634
 msgid "End:"
-msgstr ""
+msgstr "Pabaiga:"
 
 #: src/control/Control.Notebookbar.js:647
 msgid "Start arrowhead style"
-msgstr ""
+msgstr "Pradėti antgalio stilių"
 
 #: src/control/Control.Notebookbar.js:647
 msgid "End arrowhead style"
-msgstr ""
+msgstr "Užbaigti antgalio stilių"
 
 #: src/control/Control.Notebookbar.js:722
 msgid "Line Width"
-msgstr ""
+msgstr "Linijos plotis"
 
 #: src/control/Control.Notebookbar.js:755
 msgid "Line Transparency:"
-msgstr ""
+msgstr "Linijos skaidrumas:"
 
 #: src/control/Control.NotebookbarBuilder.js:202
 #: src/control/Control.NotebookbarBuilder.js:604
 msgid "Unsaved changes. Save"
-msgstr ""
+msgstr "Neišsaugoti pakeitimai. Išsaugoti"
 
 #: src/control/Control.NotebookbarBuilder.js:266
 msgid "Click to expand"
@@ -4732,7 +4737,7 @@ msgstr "PDF dokumentas (.pdf) su parinktimis"
 
 #: src/control/Control.NotebookbarBuilder.js:602
 msgid "Unsaved changes."
-msgstr ""
+msgstr "Neišsaugoti pakeitimai."
 
 #: src/control/Control.NotebookbarCalc.js:29
 #: src/control/Control.NotebookbarDraw.js:63
@@ -4826,7 +4831,7 @@ msgstr "Istorijos peržiūra"
 #: src/control/Control.NotebookbarImpress.js:444
 #: src/control/Control.NotebookbarWriter.js:390
 msgid "Security label"
-msgstr ""
+msgstr "Saugos etiketė"
 
 #: src/control/Control.NotebookbarCalc.js:406
 #: src/control/Control.NotebookbarDraw.js:403
@@ -5202,7 +5207,7 @@ msgstr "Sekimas"
 
 #: src/control/Control.NotebookbarCalc.js:2850
 msgid "Comment on Change"
-msgstr ""
+msgstr "Pakeitimo komentaras"
 
 #: src/control/Control.NotebookbarCalc.js:2861
 msgid "Protection"
@@ -5364,11 +5369,11 @@ msgstr "Tarpai ir spalva"
 
 #: src/control/Control.NotebookbarImpress.js:1584
 msgid "Import Slides"
-msgstr ""
+msgstr "Importuoti Skaidres"
 
 #: src/control/Control.NotebookbarImpress.js:1592
 msgid "Update Links"
-msgstr ""
+msgstr "Atnaujinti nuorodas"
 
 #: src/control/Control.NotebookbarImpress.js:1943
 msgid "Master Slide Templates"
@@ -5408,7 +5413,7 @@ msgstr "Atsijunkite nuo interneto"
 
 #: src/control/Control.NotebookbarWriter.js:481
 msgid "Lets a screen reader follow the cursor and read the document"
-msgstr ""
+msgstr "Leidžia ekrano skaitytuvui sekti žymeklį ir skaityti dokumentą"
 
 #: src/control/Control.NotebookbarWriter.js:605
 msgid "Validate Sidebar"
@@ -5466,11 +5471,11 @@ msgstr "Rodyti pakeitimus"
 
 #: src/control/Control.ContextToolbar.ts:154
 msgid "Switch to Editing"
-msgstr ""
+msgstr "Perjungti į redagavimą"
 
 #: src/control/Control.PartsPreview.js:451
 msgid "Show everyone on this slide"
-msgstr ""
+msgstr "Rodyti visus šioje skaidrėje"
 
 #: src/control/Control.PartsPreview.js:597
 #: src/control/Control.PartsPreview.js:672 src/map/Clipboard.js:1546
@@ -5488,36 +5493,36 @@ msgstr "Pridėti skyrių"
 #: src/control/Control.PartsPreview.js:875
 msgid "with 1 other"
 msgid_plural "with %n others"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "su 1 kitu"
+msgstr[1] "su %n kitais"
+msgstr[2] "su %n kitų"
 
 #: src/control/Control.PartsPreview.js:885
 msgid "with %1"
-msgstr ""
+msgstr "su %1"
 
 #: src/control/Control.PartsPreview.js:886
 msgid "with %1 and 1 other"
 msgid_plural "with %1 and %n others"
-msgstr[0] ""
-msgstr[1] ""
-msgstr[2] ""
+msgstr[0] "su %1 ir 1 kitu"
+msgstr[1] "su %1 ir %n kitais"
+msgstr[2] "su %1 ir %n kitų"
 
 #: src/control/Control.PartsPreview.js:916
 msgid "preview of page %1, linked to %2 in %3"
-msgstr ""
+msgstr "%1 puslapio peržiūra, susieta su %2 iš %3"
 
 #: src/control/Control.PartsPreview.js:920
 msgid "Slide %1, linked to %2 in %3"
-msgstr ""
+msgstr "Skaidrė %1, susieta su %2 iš %3"
 
 #: src/control/Control.PartsPreview.js:930
 msgid "preview of page %1, linked to %2"
-msgstr ""
+msgstr "%1 puslapio peržiūra, susieta su %2"
 
 #: src/control/Control.PartsPreview.js:934
 msgid "Slide %1, linked to %2"
-msgstr ""
+msgstr "Skaidrė %1, susieta su %2"
 
 #: src/control/Control.PartsPreview.js:940
 msgid "preview of page %1"
@@ -5565,7 +5570,7 @@ msgstr "Įveskite naują skyriaus pavadinimą:"
 
 #: src/control/Control.PresentationBar.js:99
 msgid "Import your slides"
-msgstr ""
+msgstr "Importuoti savo skaidres"
 
 #: src/control/Control.SlideImportPane.tsx:673
 msgid "Checking..."
