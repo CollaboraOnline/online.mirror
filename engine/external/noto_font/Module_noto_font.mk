@@ -10,7 +10,7 @@
 $(eval $(call gb_Module_Module,noto_font))
 
 $(eval $(call gb_Module_add_targets,noto_font,\
-	ExternalPackage_noto \
+	ExternalPackage_notomore \
 	ExternalPackage_notosansjp \
 	ExternalPackage_notosanskr \
 	ExternalPackage_notosanssc \
@@ -19,7 +19,7 @@ $(eval $(call gb_Module_add_targets,noto_font,\
 	ExternalPackage_notoserifkr \
 	ExternalPackage_notoserifsc \
 	ExternalPackage_notoseriftc \
-	UnpackedTarball_noto \
+	UnpackedTarball_notomore \
 	UnpackedTarball_notosansjp \
 	UnpackedTarball_notosanskr \
 	UnpackedTarball_notosanssc \
