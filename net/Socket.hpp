@@ -177,7 +177,8 @@ private:
 
 class SocketThreadOwnerChange;
 
-/// A non-blocking, streaming socket.
+/// A non-blocking, streaming socket. There is one per connection, so keep it small: a setting
+/// that is the same for every socket goes in net::Defaults, not in a member.
 class Socket
 {
 public:
@@ -570,7 +571,8 @@ namespace net
 class StreamSocket;
 class MessageHandlerInterface;
 
-/// Interface that decodes the actual incoming message.
+/// Interface that decodes the actual incoming message. Each StreamSocket owns one, so keep it
+/// small: a setting that is the same for every handler goes in net::Defaults, not in a member.
 class ProtocolHandlerInterface :
     public std::enable_shared_from_this<ProtocolHandlerInterface>
 {
@@ -731,7 +733,8 @@ class ProtocolThreadOwnerChange
 // Forward declare WebSocketHandler, which is inherited from ProtocolHandlerInterface.
 class WebSocketHandler;
 
-/// A ProtocolHandlerInterface with dummy sending API.
+/// A ProtocolHandlerInterface with dummy sending API. Each StreamSocket owns one, so keep it
+/// small: a setting that is the same for every handler goes in net::Defaults, not in a member.
 class SimpleSocketHandler : public ProtocolHandlerInterface
 {
 public:
@@ -1112,7 +1115,8 @@ STATE_ENUM(SharedFDType, SMAPS, URPToKit, URPFromKit);
 
 enum class HostType : uint8_t { LocalHost, Other };
 
-// A plain, non-blocking, data streaming socket.
+// A plain, non-blocking, data streaming socket. There is one per connection, so keep it small: a
+// setting that is the same for every socket goes in net::Defaults, not in a member.
 class StreamSocket : public Socket,
                      public std::enable_shared_from_this<StreamSocket>
 {

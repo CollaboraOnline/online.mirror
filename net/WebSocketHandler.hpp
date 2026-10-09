@@ -36,6 +36,8 @@
 #include <string_view>
 #include <vector>
 
+/// Each WebSocket connection owns one, so keep it small: a setting that is the same for every
+/// connection goes in net::Defaults, not in a member.
 class WebSocketHandler : public ProtocolHandlerInterface
 {
 private:
