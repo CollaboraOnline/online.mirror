@@ -966,6 +966,8 @@ bool ChildSession::loadDocument(const StringVector& tokens)
 
     std::string timestamp;
     parseDocOptions(tokens, part, timestamp);
+    // coolwsd sends infilterOptions URI-encoded on the load line.
+    setInFilterOptions(Uri::decode(getInFilterOption()));
 
     std::string renderOpts;
     if (!getDocOptions().empty())
