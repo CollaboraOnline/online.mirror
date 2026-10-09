@@ -34,11 +34,8 @@ import pefile
 sbom_data = {}
 sbom_externals = {}
 filelistdirs = []
-filelistdirs_sdk = []
 timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 productname = os.environ.get("PRODUCTNAME_WITHOUT_SPACES")
-# suffix is hard-coded in makefile :(
-productname_sdk = os.environ.get("PRODUCTNAME_WITHOUT_SPACES") + "_SDK"
 root_version = (
     os.environ.get("LIBO_VERSION_MAJOR") + "." +
     os.environ.get("LIBO_VERSION_MINOR") + "." +
@@ -723,10 +720,10 @@ def gen_packages(packinfos, ziplist, languages, product):
         gid = package["module"]
         # only Linux gets fully split packages
         if sys.platform == "win32":
-            if gid not in ("gid_Module_Root", "gid_Module_Helppack_Help", "gid_Module_Root_SDK"):
+            if gid not in ("gid_Module_Root", "gid_Module_Helppack_Help"):
                 continue
         if sys.platform == "darwin":
-            if gid not in ("gid_Module_Root", "gid_Module_Langpack_Basis", "gid_Module_Root_SDK"):
+            if gid not in ("gid_Module_Root", "gid_Module_Langpack_Basis"):
                 continue
         name_pi = package["packagename"]
         name = pattern.sub(replace, name_pi)
@@ -969,10 +966,10 @@ def locate_files(files_by_package, ziplist, product, filelistdirs):
         if len(dirs) == 1:
             assert dirs[0]["ParentID"] == "PREDEFINED_PROGDIR"
             name = dirs[0]["HostName"]
-            # gid_Dir_Sdkoo_Root gid_Dir_Brand_Root have path that doesn't exist
+            # gid_Dir_Brand_Root has path that doesn't exist
             # in instdir on WNT and unclear if it should be included in output
             gid = dirs[0]["gid"]
-            return "" if gid in ("gid_Dir_Brand_Root", "gid_Dir_Sdkoo_Root") else name + "/"
+            return "" if gid == "gid_Dir_Brand_Root" else name + "/"
         if dirs[0]["ismultilingual"] == 1 and f"HostName ({lang})" in dirs[0]:
             name = dirs[0][f"HostName ({lang})"]
         else:
@@ -1614,11 +1611,11 @@ def gen_product(ziplist, packinfos, install_script, languages, externalsfile,
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 17:
-        print("Usage: python create-sbom.py <path of output SPDX JSON files> <path of LICENSE.html> <path of openoffice.lst> <5 packinfo> <path of install script> <packinfo> <path of install script> <languages> <externals> <externalstatic> <externalpackagestatic> <external file list>")
+    if len(sys.argv) < 15:
+        print("Usage: python create-sbom.py <path of output SPDX JSON files> <path of LICENSE.html> <path of openoffice.lst> <5 packinfo> <path of install script> <languages> <externals> <externalstatic> <externalpackagestatic> <external file list>")
     else:
         init_tarball_dir_cache()
-        read_external_dir(sys.argv[16])
+        read_external_dir(sys.argv[14])
         sbom_path = sys.argv[1]
         license_path = sys.argv[2]
         process_license_file(license_path)
@@ -1631,32 +1628,19 @@ if __name__ == "__main__":
         packinfos += parse_packinfo(sys.argv[7])
         packinfos += parse_packinfo(sys.argv[8])
         install_script = parse_install_script(sys.argv[9])
-        languages = set(sys.argv[12].split())
-        externalsfile = sys.argv[13]
-        externalstaticfile = sys.argv[14]
-        externalpackagestaticfile = sys.argv[15]
+        languages = set(sys.argv[10].split())
+        externalsfile = sys.argv[11]
+        externalstaticfile = sys.argv[12]
+        externalpackagestaticfile = sys.argv[13]
 
         (files_product, externals_product) = gen_product(
             ziplist, packinfos, install_script, languages,
             externalsfile, externalstaticfile, externalpackagestaticfile,
             productname, filelistdirs)
 
-        if "ODK" in os.environ.get("BUILD_TYPE").split(" "):
-            packinfos_sdk = parse_packinfo(sys.argv[10])
-            install_script_sdk = parse_install_script(sys.argv[11])
-            (files_sdk, externals_sdk) = gen_product(
-                ziplist, packinfos_sdk, install_script_sdk, languages,
-                externalsfile, externalstaticfile, externalpackagestaticfile,
-                productname_sdk, filelistdirs_sdk, files_product)
-
-            allexternaldeps = check_files(files_product, files_sdk)
-            check_externals(allexternaldeps, externals_product, externals_sdk)
-            sbom_add_files(files_product, externals_product)
-            sbom_add_files(files_sdk, externals_sdk)
-        else:
-            allexternaldeps = check_files(files_product)
-            check_externals(allexternaldeps, externals_product)
-            sbom_add_files(files_product, externals_product)
+        allexternaldeps = check_files(files_product)
+        check_externals(allexternaldeps, externals_product)
+        sbom_add_files(files_product, externals_product)
 
         add_external_maps()
 
