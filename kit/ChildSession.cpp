@@ -1274,7 +1274,7 @@ void ChildSession::parseLoadCommand(const StringVector& tokens, std::string& par
         }
         else if (name == "infilterOptions")
         {
-            _inFilterOptions = std::move(value);
+            _inFilterOptions = Uri::decode(value);
         }
         else if (!applyBrowserLoadOption(name, value, part))
         {

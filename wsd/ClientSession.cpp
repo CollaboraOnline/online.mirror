@@ -2758,13 +2758,17 @@ bool ClientSession::loadDocument(const char* /*buffer*/, int /*length*/,
 
         if (!getInFilterOption().empty())
         {
-            oss << " infilterOptions=" << getInFilterOption();
+            std::string encodedInFilterOptions;
+            Poco::URI::encode(getInFilterOption(), "", encodedInFilterOptions);
+            oss << " infilterOptions=" << encodedInFilterOptions;
         }
         else if (auto it = docBroker->getAdditionalFileUrisJailed().find("template"); it != docBroker->getAdditionalFileUrisJailed().end())
         {
             std::string options = R"({"TemplateURL":{"type":"string","value":")" +
                                   it->second + "\"}}";
-            oss << " infilterOptions=" << options;
+            std::string encodedOptions;
+            Poco::URI::encode(options, "", encodedOptions);
+            oss << " infilterOptions=" << encodedOptions;
         }
 
 #if ENABLE_FEATURE_LOCK
