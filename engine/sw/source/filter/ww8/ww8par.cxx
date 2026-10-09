@@ -6159,7 +6159,7 @@ ErrCode SwWW8ImplReader::LoadDoc(WW8Glossary *pGloss)
     return nErrRet;
 }
 
-extern "C" SAL_DLLPUBLIC_EXPORT Reader* ImportDOC()
+Reader* ImportDOC()
 {
     return new WW8Reader;
 }

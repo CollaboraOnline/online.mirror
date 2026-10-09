@@ -1635,8 +1635,7 @@ ErrCode SwRTFWriter::WriteStream()
     return ERRCODE_NONE;
 }
 
-extern "C" SAL_DLLPUBLIC_EXPORT void ExportRTF(std::u16string_view rFltName,
-                                               const OUString& rBaseURL, WriterRef& xRet)
+void ExportRTF(std::u16string_view rFltName, const OUString& rBaseURL, WriterRef& xRet)
 {
     xRet = new SwRTFWriter(rFltName, rBaseURL);
 }

@@ -215,7 +215,7 @@ ifeq (,$(filter-out build check unitcheck slowcheck screenshot subsequentcheck u
 $(eval $(call repositorymodule_serialize,\
 	scfilt \
 	$(call gb_Helper_optional,SCRIPTING,vbaobj) \
-	sc msword \
+	sc \
 	$(call gb_Helper_optional,DESKTOP,swui) \
 	sw \
 	$(if $(MERGELIBS), merged, \

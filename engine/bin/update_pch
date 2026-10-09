@@ -91,7 +91,6 @@ DEFAULTS = \
     'svtools.svt'                       : ( 4, EXCLUDE, INCLUDE, EXCLUDE), #  17.6
     'svx.svx'                           : ( 3, EXCLUDE, EXCLUDE, INCLUDE), #  20.7
     'svx.svxcore'                       : ( 7, EXCLUDE, INCLUDE, EXCLUDE), #  37.0
-    'sw.msword'                         : ( 4, EXCLUDE, INCLUDE, INCLUDE), #  22.4
     'sw.sw'                             : ( 7, EXCLUDE, EXCLUDE, INCLUDE), # 129.6
     'sw.swui'                           : ( 3, EXCLUDE, INCLUDE, INCLUDE), #  26.1
     'sw.vbaswobj'                       : ( 4, EXCLUDE, INCLUDE, INCLUDE), #  13.1

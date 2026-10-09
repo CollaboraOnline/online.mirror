@@ -110,7 +110,7 @@ ErrCodeMsg SwRTFReader::Read(SwDoc& rDoc, const OUString& /*rBaseURL*/, SwPaM& r
     return ret;
 }
 
-extern "C" SAL_DLLPUBLIC_EXPORT Reader* ImportRTF() { return new SwRTFReader; }
+Reader* ImportRTF() { return new SwRTFReader; }
 
 extern "C" SAL_DLLPUBLIC_EXPORT bool TestImportRTF(SvStream& rStream)
 {

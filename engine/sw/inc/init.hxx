@@ -47,9 +47,6 @@ public:
     Filters();
 
     ~Filters();
-#ifndef DISABLE_DYNLOADING
-    static oslGenericFunction GetMswordLibSymbol( const char *pSymbol );
-#endif
 };
 
 }

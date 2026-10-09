@@ -41,7 +41,7 @@ constexpr OUString AUTOTEXT_GALLERY = u"autoTxt"_ustr;
 using namespace css;
 using namespace ::cpo;
 
-extern "C" SAL_DLLPUBLIC_EXPORT Reader* ImportDOCX()
+Reader* ImportDOCX()
 {
     return new SwDOCXReader;
 }

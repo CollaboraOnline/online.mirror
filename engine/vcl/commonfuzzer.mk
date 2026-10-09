@@ -168,7 +168,6 @@ fuzzer_calc_libraries = \
     guesslang \
 
 fuzzer_writer_libraries = \
-    msword \
     sw \
     swd \
     sw_writerfilter \

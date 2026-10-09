@@ -165,4 +165,12 @@
       constructor="org_apache_openoffice_comp_sw_sidebar_SwPanelFactory_get_implementation">
     <service name="com.sun.star.ui.UIElementFactory"/>
   </implementation>
+  <implementation name="com.sun.star.comp.Writer.RtfExport"
+    constructor="com_sun_star_comp_Writer_RtfExport_get_implementation">
+    <service name="com.sun.star.comp.Writer.RtfExport"/>
+  </implementation>
+  <implementation name="com.sun.star.comp.Writer.DocxExport"
+    constructor="com_sun_star_comp_Writer_DocxExport_get_implementation">
+    <service name="com.sun.star.comp.Writer.DocxExport"/>
+  </implementation>
 </component>

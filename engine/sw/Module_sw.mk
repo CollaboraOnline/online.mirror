@@ -28,7 +28,6 @@ $(eval $(call gb_Module_Module,sw))
 $(eval $(call gb_Module_add_targets,sw,\
 	CustomTarget_generated \
     CustomTarget_source \
-	Library_msword \
 	Library_sw \
 	Library_swd \
 	Library_swui \

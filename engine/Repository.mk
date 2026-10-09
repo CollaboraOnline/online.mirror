@@ -425,7 +425,6 @@ $(eval $(call gb_Helper_register_libraries_for_install,PLAINLIBS_OOO,python, \
 
 $(eval $(call gb_Helper_register_libraries_for_install,OOOLIBS,writer, \
 	hwp \
-	msword \
 	swd \
 	t602filter \
 	$(call gb_Helper_optional,SCRIPTING,vbaswobj) \

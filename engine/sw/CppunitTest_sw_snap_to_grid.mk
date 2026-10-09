@@ -13,7 +13,6 @@ $(eval $(call gb_CppunitTest_use_libraries,sw_snap_to_grid, \
     docmodel \
     editeng \
     i18nlangtag \
-    msword \
     sal \
     sfx \
     subsequenttest \

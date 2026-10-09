@@ -178,8 +178,6 @@ SwDLL::~SwDLL() COVERITY_NOEXCEPT_FALSE
 extern "C" SAL_DLLPUBLIC_EXPORT
 void kit_preload_hook()
 {
-    // msword (any symbol will do)
-    sw::Filters::GetMswordLibSymbol("ImportDOC");
     // swui
     SwAbstractDialogFactory::Create();
 }

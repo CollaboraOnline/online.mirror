@@ -622,6 +622,14 @@ void GetHTMLWriter( std::u16string_view, const OUString&, WriterRef& );
 void GetXMLWriter( std::u16string_view, const OUString&, WriterRef& );
 void GetMDWriter(std::u16string_view, const OUString&, WriterRef&);
 
+Reader *ImportRTF();
+void ExportRTF( std::u16string_view, const OUString& rBaseURL, WriterRef& );
+Reader *ImportDOC();
+void ExportDOC( std::u16string_view, const OUString& rBaseURL, WriterRef& );
+Reader *ImportDOCX();
+sal_uInt32 SaveOrDelMSVBAStorage_ww8( SfxObjectShell&, SotStorage&, bool, const OUString& );
+sal_uInt32 GetSaveWarningOfMSVBAStorage_ww8( SfxObjectShell& );
+
 #endif
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
