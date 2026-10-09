@@ -371,7 +371,8 @@ static void loadTranslations()
 
 // The text of a string that CODA-W shows, in the user interface language, or in English when the
 // catalog has no translation for it. The call has the form that lupdate looks for, with both
-// arguments as string literals, so update-translations finds the string.
+// arguments as string literals, so update-translations finds the string. A string that CODA-Q
+// shows too uses the context that it has there, so that it is translated once.
 static std::wstring translate(const char* context, const char* source)
 {
     const auto it = translations.find({ context, source });
@@ -3056,10 +3057,10 @@ static void showTabContextMenu(HWND hWnd, int tabId, POINT point)
     };
 
     HMENU menu = CreatePopupMenu();
-    AppendMenuW(menu, MF_STRING, CLOSE, translate("CODA-W", "Close").c_str());
-    AppendMenuW(menu, MF_STRING, CLOSE_OTHERS, translate("CODA-W", "Close Others").c_str());
+    AppendMenuW(menu, MF_STRING, CLOSE, translate("TabManager", "Close").c_str());
+    AppendMenuW(menu, MF_STRING, CLOSE_OTHERS, translate("TabManager", "Close Others").c_str());
     AppendMenuW(menu, MF_STRING, MOVE_TO_NEW_WINDOW,
-                translate("CODA-W", "Move Tab to New Window").c_str());
+                translate("TabManager", "Move Tab to New Window").c_str());
 
     ClientToScreen(hWnd, &point);
     const int command = static_cast<int>(TrackPopupMenu(

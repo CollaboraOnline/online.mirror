@@ -145,12 +145,15 @@ QM_FILES = $(TS_FILES:.ts=.qm)
 
 # Update .ts files from source code. Creates a catalog for any language in
 # Langs.conf that has none yet; -no-obsolete drops the entries of strings that
-# are gone from the source instead of keeping them as vanished. CODA-W takes its
-# strings from the same catalogs, so its source is scanned too. It marks them
-# with translate("CODA-W", "...") calls, which lupdate recognises in a file that
-# does not use Qt.
+# are gone from the source instead of keeping them as vanished, and -locations
+# none leaves out the source file and line of each string, which neither
+# lrelease nor CODA-W needs and which would otherwise change in every catalog
+# on every edit of the source. CODA-W takes its strings from the same
+# catalogs, so its source is scanned too. It marks them with
+# translate("Context", "...") calls, which lupdate recognises in a file that
+# does not use Qt; a string that CODA-Q shows too uses the context it has there.
 update-translations:
-	@$(LUPDATE) -no-obsolete $(srcdir) $(top_srcdir)/windows/coda/CODA -ts $(addprefix $(srcdir)/translations/coda_,$(addsuffix .ts,$(CONF_LANGS)))
+	@$(LUPDATE) -no-obsolete -locations none $(srcdir) $(top_srcdir)/windows/coda/CODA -ts $(addprefix $(srcdir)/translations/coda_,$(addsuffix .ts,$(CONF_LANGS)))
 
 # Build all translations
 translations: $(QM_FILES)
