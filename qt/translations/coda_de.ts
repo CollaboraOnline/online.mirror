@@ -2,6 +2,24 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="de_DE">
 <context>
+    <name>CODA-W</name>
+    <message>
+        <location filename="../../windows/coda/CODA/CODA.cpp" line="3059"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../windows/coda/CODA/CODA.cpp" line="3060"/>
+        <source>Close Others</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../../windows/coda/CODA/CODA.cpp" line="3062"/>
+        <source>Move Tab to New Window</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>QObject</name>
     <message>
         <location filename="../DocumentOperations.cpp" line="47"/>
@@ -130,87 +148,121 @@
         <translation>Alle Dateien (*)</translation>
     </message>
     <message>
-        <location filename="../Bridge.cpp" line="516"/>
+        <location filename="../Bridge.cpp" line="555"/>
         <source>Save Document</source>
         <translation>Dokument speichern</translation>
     </message>
     <message>
-        <location filename="../Bridge.cpp" line="1035"/>
+        <location filename="../Bridge.cpp" line="1072"/>
+        <location filename="../QtFilePicker.cpp" line="26"/>
         <source>Open File</source>
         <translation>Datei öffnen</translation>
     </message>
     <message>
-        <location filename="../Bridge.cpp" line="1036"/>
+        <location filename="../Bridge.cpp" line="1073"/>
         <source>All Files (*);;Text Documents (*.odt *.ott *.doc *.docx *.rtf *.txt);;Spreadsheets (*.ods *.ots *.xls *.xlsx *.csv);;Presentations (*.odp *.otp *.ppt *.pptx)</source>
         <translation>Alle Dateien (*);;Textdokumente (*.odt *.ott *.doc *.docx *.rtf *.txt);;Tabellendokumente (*.ods *.ots *.xls *.xlsx *.csv);;Präsentationen (*.odp *.otp *.ppt *.pptx)</translation>
     </message>
     <message>
-        <location filename="../Bridge.cpp" line="333"/>
+        <location filename="../Bridge.cpp" line="371"/>
         <source>Export As</source>
         <translation>Exportieren als</translation>
     </message>
     <message>
-        <location filename="../Bridge.cpp" line="353"/>
+        <location filename="../Bridge.cpp" line="391"/>
         <source>Export Error</source>
         <translation>Exportfehler</translation>
     </message>
     <message>
-        <location filename="../Bridge.cpp" line="354"/>
+        <location filename="../Bridge.cpp" line="392"/>
         <source>Failed to export the document.</source>
         <translation>Der Export des Dokuments ist fehlgeschlagen.</translation>
     </message>
     <message>
-        <location filename="../Bridge.cpp" line="939"/>
+        <location filename="../Bridge.cpp" line="995"/>
         <source>Cannot open remote document</source>
         <translation>Das entfernte Dokument kann nicht geöffnet werden</translation>
     </message>
     <message>
-        <location filename="../Bridge.cpp" line="942"/>
+        <location filename="../Bridge.cpp" line="998"/>
         <source>the Collabora Online server</source>
         <translation>der Collabora Online-Server</translation>
     </message>
     <message>
-        <location filename="../Bridge.cpp" line="1129"/>
-        <location filename="../Bridge.cpp" line="1166"/>
+        <location filename="../Bridge.cpp" line="1173"/>
+        <location filename="../Bridge.cpp" line="1210"/>
         <source>Save File</source>
         <translation>Datei speichern</translation>
     </message>
     <message>
-        <location filename="../WebView.cpp" line="213"/>
+        <location filename="../WebView.cpp" line="227"/>
         <source>Presentation</source>
         <translation>Präsentation</translation>
     </message>
     <message>
-        <location filename="../WebView.cpp" line="218"/>
-        <location filename="../WebView.cpp" line="234"/>
+        <location filename="../WebView.cpp" line="232"/>
+        <location filename="../WebView.cpp" line="248"/>
         <source>Text Document</source>
         <translation>Textdokument</translation>
     </message>
     <message>
-        <location filename="../WebView.cpp" line="223"/>
+        <location filename="../WebView.cpp" line="237"/>
         <source>Spreadsheet</source>
         <translation>Arbeitsmappe</translation>
     </message>
     <message>
-        <location filename="../WebView.cpp" line="228"/>
+        <location filename="../WebView.cpp" line="242"/>
         <source>Drawing</source>
         <translation>Zeichnung</translation>
     </message>
     <message>
-        <location filename="../DBusService.cpp" line="86"/>
+        <location filename="../DBusService.cpp" line="95"/>
         <source>Template Error</source>
         <translation>Vorlagenfehler</translation>
     </message>
     <message>
-        <location filename="../DBusService.cpp" line="87"/>
+        <location filename="../DBusService.cpp" line="96"/>
         <source>Could not create a new document from this template.</source>
         <translation>Aus dieser Vorlage konnte kein neues Dokument erstellt werden.</translation>
+    </message>
+    <message>
+        <location filename="../DBusService.cpp" line="131"/>
+        <source>New Document Error</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../DBusService.cpp" line="132"/>
+        <source>Could not create a new document.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../QtFilePicker.cpp" line="41"/>
+        <source>Supported files</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TabManager</name>
+    <message>
+        <location filename="../TabManager.cpp" line="726"/>
+        <source>Close</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TabManager.cpp" line="731"/>
+        <source>Close Others</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../TabManager.cpp" line="743"/>
+        <source>Move Tab to New Window</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
     <name>WebView</name>
     <message>
-        <location filename="../WebView.cpp" line="1013"/>
+        <location filename="../WebView.cpp" line="1181"/>
         <source>Start</source>
         <translation>Start</translation>
     </message>
