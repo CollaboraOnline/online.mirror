@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-22 21:46+0200\n"
-"PO-Revision-Date: 2025-02-13 19:45+0000\n"
-"Last-Translator: Vangelis Papanastasatos <vagpap@gmail.com>\n"
+"PO-Revision-Date: 2026-10-09 10:31+0000\n"
+"Last-Translator: geonetor <geonetor@yahoo.gr>\n"
 "Language-Team: Greek <https://hosted.weblate.org/projects/collabora-online/"
-"ui/el/>\n"
-"Language: \n"
+"collabora-ui/el/>\n"
+"Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.10-rc\n"
+"X-Generator: Weblate 2026.10.1.dev0\n"
 
 #: admin/admin.strings.js:15
 msgid "Admin console"
@@ -56,20 +56,19 @@ msgstr "Σύνδεση"
 #: src/control/Control.ServerAuditDialog.ts:327
 #: src/control/Control.ServerAuditDialog.ts:328
 msgid "Server audit"
-msgstr ""
+msgstr "Έλεγχος διακομιστή"
 
 #: admin/admin.strings.js:23 src/control/Control.ServerAuditDialog.ts:346
-#, fuzzy
 msgid "Status"
-msgstr "Κατάσταση:"
+msgstr "Κατάσταση"
 
 #: admin/admin.strings.js:24
 msgid "Details"
-msgstr ""
+msgstr "Λεπτομέρειες"
 
 #: admin/admin.strings.js:25 src/control/Control.ServerAuditDialog.ts:356
 msgid "No issues found"
-msgstr ""
+msgstr "Δε βρέθηκαν προβλήματα"
 
 #: admin/admin.strings.js:26
 msgid "Dashboard"
@@ -297,11 +296,11 @@ msgstr "Περί"
 
 #: admin/src/AdminClusterOverview.js:105
 msgid "CPU History"
-msgstr "Ιστορικό ΚΜΕ"
+msgstr "Ιστορικό CPU"
 
 #: admin/src/AdminClusterOverview.js:116
 msgid "Memory History"
-msgstr "Ιστορικό Μνήμης"
+msgstr "Ιστορικό μνήμης"
 
 #: admin/src/AdminClusterOverview.js:356
 msgid "Memory"
@@ -309,7 +308,7 @@ msgstr "Μνήμη"
 
 #: admin/src/AdminClusterOverview.js:540
 msgid "Please wait kubernetes cluster is scaling..."
-msgstr "Παρακαλώ περιμένετε όσο  η συστάδα kubernetes  κλιμακώνεται..."
+msgstr "Παρακαλώ περιμένετε όσο η συστάδα kubernetes κλιμακώνεται..."
 
 #: admin/src/AdminClusterOverview.js:550 admin/src/AdminSocketOverview.js:423
 msgid "Failed to set jwt authentication cookie over insecure connection"
@@ -416,7 +415,7 @@ msgstr "Είστε βέβαιοι ότι θέλετε να τερματίσετ�
 #: admin/src/AdminSocketServerAudit.js:35
 #: src/control/Control.ServerAuditDialog.ts:58
 msgid "Your WOPI server is not secure: SSL verification failed"
-msgstr ""
+msgstr "Ο διακομιστής WOPI δεν είναι ασφαλής: Η επαλήθευση SSL απέτυχε"
 
 #: admin/src/AdminSocketServerAudit.js:40
 #: src/control/Control.ServerAuditDialog.ts:72
@@ -424,6 +423,8 @@ msgid ""
 "Documents are not effectively contained: missing capabilities, namespaces "
 "and landlock."
 msgstr ""
+"Τα έγγραφα δεν περιέχονται αποτελεσματικά: λείπουν δυνατότητες, ονόματα "
+"χώρου και κλειδώματα."
 
 #: admin/src/AdminSocketServerAudit.js:45
 #: src/control/Control.ServerAuditDialog.ts:97
@@ -431,6 +432,8 @@ msgid ""
 "BPF filtering of potentially risky system calls (seccomp) is not enabled; a "
 "security hazard."
 msgstr ""
+"Η φιλτράρισμα BPF για ενδεχομένως επικίνδυνες κλήσεις συστήματος (seccomp) "
+"δεν είναι ενεργοποιημένο· ένας κίνδυνος ασφαλείας."
 
 #: admin/src/AdminSocketServerAudit.js:50
 #: src/control/Control.ServerAuditDialog.ts:109
@@ -438,6 +441,8 @@ msgid ""
 "Your server is configured with insufficient hardware resources, which may "
 "lead to poor performance."
 msgstr ""
+"Ο διακομιστής σας έχει ρυθμιστεί με ανεπαρκείς πόρους υλικού, γεγονός που "
+"μπορεί να οδηγήσει σε κακή απόδοση."
 
 #: admin/src/AdminSocketServerAudit.js:54
 #: src/control/Control.ServerAuditDialog.ts:123
@@ -454,6 +459,9 @@ msgid ""
 "Some clients connected with the old WebSocket URL form, which is planned "
 "for removal. Check that your proxy passes the compact form through."
 msgstr ""
+"Ορισμένοι πελάτες συνδέθηκαν με την παλιά μορφή URL του Web socket, η οποία "
+"προγραμματίζεται για αφαίρεση. Ελέγξτε ότι ο διακομιστής μεσολάβησής σας "
+"μεταβιβάζει τη συμπιεσμένη μορφή."
 
 #: admin/src/AdminSocketServerAudit.js:92
 #: admin/src/integrator/AdminIntegratorSettings.ts:4548
@@ -463,7 +471,7 @@ msgstr "Σφάλμα"
 
 #: admin/src/AdminSocketServerAudit.js:108
 msgid "Learn more"
-msgstr ""
+msgstr "Μάθετε περισσότερα"
 
 #: admin/src/AdminSocketSettings.js:46
 msgid "Are you sure you want to shut down the server?"
@@ -472,97 +480,101 @@ msgstr "Θέλετε σίγουρα να τερματίσετε τον διακ�
 #: admin/src/integrator/AdminIntegratorSettings.ts:387
 msgid "Shared Config URL is missing in initial variables."
 msgstr ""
+"Η διεύθυνση URL της κοινόχρηστης διαμόρφωσης λείπει στις αρχικές μεταβλητές."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:391
 msgid "Access token is missing in initial variables."
-msgstr ""
+msgstr "Το διακριτικό πρόσβασης λείπει στις αρχικές μεταβλητές."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:484
 msgid ""
 "Something went wrong while fetching setting file. Please try to refresh the "
 "page."
 msgstr ""
+"Κάτι πήγε στραβά κατά την ανάκτηση του αρχείου ρυθμίσεων. Παρακαλώ δοκιμάστε "
+"να ανανεώσετε τη σελίδα."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:585
 msgid "Invalid request"
-msgstr ""
+msgstr "Μη έγκυρο αίτημα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:586
 #: src/control/Control.AIChatSidebar.ts:2187
 msgid "Invalid API key"
-msgstr ""
+msgstr "Μη έγκυρο κλειδί API"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:587
 #: src/control/Control.AIChatSidebar.ts:2188
 msgid "API key lacks permissions"
-msgstr ""
+msgstr "Το κλειδί API δεν έχει δικαιώματα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:590
 msgid ""
 "This AI host is not in the server's allowed host list (lok_allow.host). Ask "
 "your administrator to permit it."
 msgstr ""
+"Αυτός ο φιλοξενούμενος AI δεν βρίσκεται στη λίστα επιτρεπόμενων "
+"φιλοξενούμενων του διακομιστή (lok_allow.host). Ζητήστε από τον διαχειριστή "
+"σας να τον επιτρέψει."
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:592
 #: src/control/Control.AIChatSidebar.ts:2192
 msgid "Rate limited - please wait a moment and retry"
-msgstr ""
+msgstr "Περιορισμός ρυθμού - παρακαλώ περιμένετε λίγο και προσπαθήστε ξανά"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:593
 #: src/control/Control.AIChatSidebar.ts:2193
 msgid "API server error - try again later"
-msgstr ""
+msgstr "Σφάλμα διακομιστή API - δοκιμάστε ξανά αργότερα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:594
 #: src/control/Control.AIChatSidebar.ts:2194
 msgid "Service temporarily unavailable"
-msgstr ""
+msgstr "Η υπηρεσία δεν είναι διαθέσιμη προσωρινά"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:652
 msgid "Signature Certificate"
-msgstr ""
+msgstr "Πιστοποιητικό υπογραφής"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:653
-#, fuzzy
 msgid "Signature Key"
-msgstr "Υπογραφή"
+msgstr "Κλειδί υπογραφής"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:654
-#, fuzzy
 msgid "Signature CA"
-msgstr "Υπογραφή"
+msgstr "Υπογραφή CA"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:655
 #: admin/src/integrator/AdminIntegratorSettings.ts:659
 msgid "Provider"
-msgstr ""
+msgstr "Πάροχος"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:656
 #: admin/src/integrator/AdminIntegratorSettings.ts:660
 msgid "API Key"
-msgstr ""
+msgstr "Κλειδί API"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:657
 #: admin/src/integrator/AdminIntegratorSettings.ts:662
 msgid "Model"
-msgstr ""
+msgstr "Μοντέλο"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:658
 #: admin/src/integrator/AdminIntegratorSettings.ts:661
 msgid "Base URL"
-msgstr ""
+msgstr "Βασικό URL"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:663
 msgid "Image Size"
-msgstr ""
+msgstr "Μέγεθος εικόνας"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:664
 msgid "Request Timeout (seconds)"
-msgstr ""
+msgstr "Χρονικό όριο αιτήματος (δευτερόλεπτα)"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:667
 msgid "In-document Screen Reader"
-msgstr ""
+msgstr "Αναγνώστης οθόνης εντός εγγράφων"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:668
 #: src/control/Control.Menubar.ts:197 src/control/Control.Menubar.ts:529
@@ -574,36 +586,35 @@ msgstr ""
 #: src/control/Control.NotebookbarImpress.js:795
 #: src/control/Control.NotebookbarWriter.js:1875
 msgid "Dark Mode"
-msgstr ""
+msgstr "Σκοτεινή λειτουργία"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:669
 msgid "Automatic Spell Checking"
-msgstr ""
+msgstr "Αυτόματος ορθογραφικός έλεγχος"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:670
 msgid "Use this server's zoom settings"
-msgstr ""
+msgstr "Χρησιμοποιήστε τις ρυθμίσεις ζουμ αυτού του διακομιστή"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:671
 msgid "Smart Zoom"
-msgstr ""
+msgstr "Έξυπνο ζουμ"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:672
 msgid "Default Zoom"
-msgstr ""
+msgstr "Προεπιλεγμένο ζουμ"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:673
 msgid "Smooth scrolling"
-msgstr ""
+msgstr "Ομαλή κύλιση"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:674
 msgid "Compact layout"
-msgstr ""
+msgstr "Συμπαγής διάταξη"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:675
-#, fuzzy
 msgid "Show status bar"
-msgstr "Εμφάνιση επιλεγμένων φύλλων"
+msgstr "Εμφάνιση γραμμής κατάστασης"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:676
 #: src/control/Control.Menubar.ts:194 src/control/Control.Menubar.ts:521
@@ -612,7 +623,7 @@ msgstr "Εμφάνιση χάρακα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:677
 msgid "Show Formatting Marks"
-msgstr ""
+msgstr "Σήματα μορφοποίησης"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:678
 #: src/control/Control.NotebookbarWriter.js:2359
@@ -623,24 +634,23 @@ msgstr "Εμφάνιση σχολίων"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:679
 msgid "Accessibility Checker"
-msgstr ""
+msgstr "Έλεγχος προσβασιμότητας"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:680
 #: src/control/Control.NavigatorPanel.ts:47
 #: src/control/Control.NavigatorPanel.ts:338
 msgid "Navigator"
-msgstr ""
+msgstr "Πλοηγός"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:681
 msgid "Show Sidebar"
-msgstr ""
+msgstr "Εμφάνιση πλευρικής γραμμής"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:682
 msgid "Custom Animation"
-msgstr ""
+msgstr "Προσαρμοσμένη κίνηση"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:685
-#, fuzzy
 msgid "Style List"
 msgstr "Λίστα στυλ"
 
@@ -649,18 +659,18 @@ msgstr "Λίστα στυλ"
 #: src/control/Control.NotebookbarDraw.js:560
 #: src/control/Control.NotebookbarImpress.js:764
 msgid "Grid"
-msgstr ""
+msgstr "Πλέγμα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:689
 #: src/control/Control.BackstageView.ts:177
 msgid "Print"
-msgstr ""
+msgstr "Εκτύπωση"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:690
 #: src/control/backstage/CloudProviderKinds.ts:66
 #: src/control/backstage/CloudProviderKinds.ts:85
 msgid "Other"
-msgstr ""
+msgstr "Άλλο"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:691
 #: src/control/Control.NotebookbarImpress.js:773
@@ -669,15 +679,15 @@ msgstr "Εμφάνιση πλέγματος"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:692
 msgid "Snap to grid"
-msgstr ""
+msgstr "Προσαρμογή στο πλέγμα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:693
 msgid "Synchronize axes"
-msgstr ""
+msgstr "Συγχρονισμός αξόνων"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:694
 msgid "Empty Pages"
-msgstr ""
+msgstr "Κενές σελίδες"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:695
 msgid "Force Breaks"
@@ -691,31 +701,31 @@ msgstr "Όλα τα Φύλλα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:697
 msgid "Content"
-msgstr ""
+msgstr "Περιεχόμενο"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:698
 msgid "Display"
-msgstr ""
+msgstr "Εμφάνιση"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:699
 msgid "Show Boundaries"
-msgstr ""
+msgstr "Εμφάνιση ορίων"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:700
 #: src/control/Control.BackstageView.ts:852
 msgid "Drawing"
-msgstr ""
+msgstr "Σχέδιο"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:701
 #: src/control/Control.NotebookbarDraw.js:1272
 #: src/control/Control.NotebookbarDraw.js:1553
 #: src/control/Control.NotebookbarWriter.js:1283
 msgid "Page"
-msgstr ""
+msgstr "Σελίδα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:702
 msgid "Fit to page"
-msgstr ""
+msgstr "Προσαρμογή στη σελίδα"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:703
 msgid "Tile pages"
@@ -723,11 +733,11 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:704
 msgid "Booklet"
-msgstr ""
+msgstr "Βιβλιάριο"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:705
 msgid "Booklet front"
-msgstr ""
+msgstr "Μπροστινό μέρος φυλλαδίου"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:706
 msgid "Booklet back"
@@ -766,7 +776,7 @@ msgstr "Παρουσίαση"
 #: src/control/Control.StatusBar.js:290 src/control/Control.StatusBar.js:291
 #: src/control/Control.Zotero.js:1341 src/slideshow/PresenterConsole.js:36
 msgid "Notes"
-msgstr ""
+msgstr "Σημειώσεις"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:714
 msgid "Handouts"
@@ -784,15 +794,15 @@ msgstr ""
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:717
 msgid "Images"
-msgstr ""
+msgstr "Εικόνες"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:718
 msgid "Controls"
-msgstr ""
+msgstr "Στοιχεία ελέγχου"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:719
 msgid "Background"
-msgstr ""
+msgstr "Φόντο"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:720
 msgid "Print Black"
@@ -1070,9 +1080,8 @@ msgstr ""
 #: src/control/Control.NotebookbarImpress.js:824
 #: src/control/Control.NotebookbarWriter.js:1862
 #: src/control/Control.NotebookbarWriter.js:1863
-#, fuzzy
 msgid "AI Assistant"
-msgstr "Βοηθός"
+msgstr "Βοηθός ΑΙ"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:2884
 msgid ""
@@ -1356,9 +1365,8 @@ msgid "Rich Text (.rtf)"
 msgstr "Εμπλουτισμένο κείμενο (.rtf)"
 
 #: src/app/ExportFormats.ts:69 src/app/ExportFormats.ts:80
-#, fuzzy
 msgid "HTML file (.html)"
-msgstr "HTML Αρχείο (.html)"
+msgstr "Αρχείο HTML (.html)"
 
 #: src/app/ExportFormats.ts:70
 msgid "Markdown (.md)"
@@ -1439,9 +1447,8 @@ msgid "file type icon"
 msgstr "εικονίδιο τύπου αρχείου"
 
 #: src/app/TableStylesService.ts:106
-#, fuzzy
 msgid "Light"
-msgstr "Σφιχτό"
+msgstr "Φωτεινό"
 
 #: src/app/TableStylesService.ts:108
 msgid "Medium"
@@ -1501,9 +1508,8 @@ msgid "Update"
 msgstr "Ενημέρωση"
 
 #: src/canvas/sections/CommentSection.ts:45
-#, fuzzy
 msgid "Edit comment"
-msgstr "Επεξεργασία εγγράφου"
+msgstr "Επεξεργασία σχολίου"
 
 #: src/canvas/sections/CommentSection.ts:46
 msgid "Reply comment"
@@ -1539,9 +1545,8 @@ msgid "Resolved"
 msgstr "Επιλύθηκε"
 
 #: src/canvas/sections/CommentSection.ts:647
-#, fuzzy
 msgid "Removed"
-msgstr "Αφαίρεση"
+msgstr "Αφαιρέθηκε"
 
 #: src/canvas/sections/CommentSection.ts:1284
 #: src/control/jsdialog/Widget.Comment.ts:177
@@ -1599,9 +1604,8 @@ msgstr ""
 #: src/canvas/sections/CommentSection.ts:1632
 #: src/canvas/sections/CommentSection.ts:1637
 #: src/control/Control.SaveState.tsx:196
-#, fuzzy
 msgid "Saved"
-msgstr "Αποθήκευση"
+msgstr "Αποθηκεύθηκε"
 
 #: src/canvas/sections/CompareChangesLabelSection.ts:118
 msgid "Last edited by %1 on %2"
@@ -1628,9 +1632,8 @@ msgid "%n more"
 msgstr ""
 
 #: src/canvas/sections/ShapeHandlesSection.ts:538
-#, fuzzy
 msgid "Document contains unsupported media"
-msgstr "Το έγγραφο περιέχει βίντεο που δεν υποστηρίζεται"
+msgstr "Το έγγραφο περιέχει βίντεο που δεν υποστηρίζονται"
 
 #: src/canvas/sections/URLPopUpSection.ts:87
 msgid "Copy link location"
@@ -1698,9 +1701,8 @@ msgid "(opens in new tab)"
 msgstr ""
 
 #: src/control/Control.AboutDialog.ts:155
-#, fuzzy
 msgid "Served by: "
-msgstr "Εξυπηρετούμενο από:"
+msgstr "Εξυπηρετούμενο από "
 
 #: src/control/Control.AboutDialog.ts:178
 msgid "View widgets"
@@ -1772,9 +1774,8 @@ msgid "Natural"
 msgstr ""
 
 #: src/control/Control.AIChatSidebar.ts:165
-#, fuzzy
 msgid "Formal"
-msgstr "Διαμόρφωση"
+msgstr "Επίσημο"
 
 #: src/control/Control.AIChatSidebar.ts:166
 msgid "Short"
@@ -1915,9 +1916,8 @@ msgstr ""
 #: src/control/Control.AIChatSidebar.ts:1086
 #: src/control/Control.AIChatSidebar.ts:1136
 #: src/control/Control.AIChatSidebar.ts:1545
-#, fuzzy
 msgid "tone"
-msgstr "Καμία"
+msgstr "έμφαση"
 
 #: src/control/Control.AIChatSidebar.ts:1099
 #: src/control/Control.AIChatSidebar.ts:1407
@@ -1937,9 +1937,8 @@ msgid "Your tones"
 msgstr ""
 
 #: src/control/Control.AIChatSidebar.ts:1141
-#, fuzzy
 msgid "Edit tone"
-msgstr "Λειτουργία επεξεργασίας"
+msgstr "Επεξεργασία έμφασης"
 
 #: src/control/Control.AIChatSidebar.ts:1158
 msgid "+ Add my own voice"
@@ -2549,9 +2548,8 @@ msgid "Cell"
 msgstr ""
 
 #: src/control/Control.AIChatSidebar.ts:3686
-#, fuzzy
 msgid "Sheet"
-msgstr "~Φύλλο"
+msgstr "Φύλλο"
 
 #: src/control/Control.AIChatSidebar.ts:3690
 msgid "contains"
@@ -2561,7 +2559,6 @@ msgstr ""
 #: src/control/Control.FormulaBarJSDialog.js:116
 #: src/control/Control.NotebookbarWriter.js:121
 #: src/control/Control.NotebookbarWriter.js:1626
-#, fuzzy
 msgid "Formula"
 msgstr "Τύπος"
 
@@ -2588,9 +2585,8 @@ msgid ""
 msgstr ""
 
 #: src/control/Control.AIChatSidebar.ts:3727
-#, fuzzy
 msgid "formula"
-msgstr "Τύπος"
+msgstr "τύπος"
 
 #: src/control/Control.AIChatSidebar.ts:3729
 msgid "ERROR"
@@ -2601,9 +2597,8 @@ msgid "value"
 msgstr ""
 
 #: src/control/Control.AIChatSidebar.ts:3753
-#, fuzzy
 msgid "text"
-msgstr "Κείμενο"
+msgstr "κείμενο"
 
 #: src/control/Control.AIChatSidebar.ts:3758
 msgid "empty"
@@ -3025,7 +3020,7 @@ msgstr ""
 #: src/control/Control.SlideImportPane.tsx:1462 src/control/IFrameDialog.js:36
 #: src/map/handler/Map.Settings.ts:143
 msgid "Options"
-msgstr ""
+msgstr "Επιλογές"
 
 #: src/control/Control.BackstageView.ts:279
 msgid "Start a new document from one of the following templates."
@@ -3067,9 +3062,8 @@ msgid "Spreadsheet"
 msgstr ""
 
 #: src/control/Control.BackstageView.ts:850 src/control/Control.Tabs.js:218
-#, fuzzy
 msgid "Sheets"
-msgstr "~Φύλλο"
+msgstr "Φύλλα"
 
 #: src/control/Control.BackstageView.ts:851
 #: src/control/Control.NavigatorPanel.ts:210
@@ -3106,9 +3100,8 @@ msgid "Blank Spreadsheet"
 msgstr ""
 
 #: src/control/Control.BackstageView.ts:1025
-#, fuzzy
 msgid "Blank Presentation"
-msgstr "Τερματισμός παρουσίασης"
+msgstr "Κενή παρουσίαση"
 
 #: src/control/Control.BackstageView.ts:1029
 msgid "Blank Drawing"
@@ -3841,7 +3834,6 @@ msgstr ""
 
 #: src/control/Control.LanguageDialog.js:103
 #: src/control/Control.StatusBar.js:272
-#, fuzzy
 msgid "Language"
 msgstr "Γλώσσα"
 
@@ -3850,9 +3842,8 @@ msgid "No search results found!"
 msgstr ""
 
 #: src/control/Control.Menubar.ts:52
-#, fuzzy
 msgid "PDF Document (.pdf) as..."
-msgstr "Έγγραφο PDF (.pdf)"
+msgstr "Έγγραφο PDF (.pdf) ως..."
 
 #: src/control/Control.Menubar.ts:135 src/control/Control.Menubar.ts:139
 #: src/control/Control.Menubar.ts:476 src/control/Control.Menubar.ts:480
@@ -3869,9 +3860,8 @@ msgid "Export as"
 msgstr "Εξαγωγή ως"
 
 #: src/control/Control.Menubar.ts:136 src/control/Control.UIManager.ts:650
-#, fuzzy
 msgid "Rename Document"
-msgstr "Επισκευή εγγράφου"
+msgstr "Μετονομασία εγγράφου"
 
 #: src/control/Control.Menubar.ts:137 src/control/Control.Menubar.ts:478
 #: src/control/Control.Menubar.ts:686 src/control/Control.Menubar.ts:856
@@ -4239,7 +4229,7 @@ msgstr "Περιέχει κείμενο..."
 #: src/control/jsdialog/Definitions.Menu.ts:1944
 #: src/control/jsdialog/Definitions.Menu.ts:1975
 msgid "More highlights..."
-msgstr "Περισσότερες επισημάνσεις"
+msgstr "Περισσότερες επισημάνσεις..."
 
 #: src/control/Control.Menubar.ts:1022
 msgid "Top/Bottom Rules..."
@@ -4416,7 +4406,7 @@ msgstr ""
 #: src/control/Notebookbar.CalcTableTab.ts:190
 #: src/control/Notebookbar.ImpressTableDesignTab.ts:121
 msgid "Table Options"
-msgstr ""
+msgstr "Επιλογές πίνακα"
 
 #: src/control/Notebookbar.CalcTableTab.ts:204
 #: src/control/Notebookbar.ImpressTableDesignTab.ts:136
@@ -4471,71 +4461,70 @@ msgstr ""
 
 #: src/control/Notebookbar.ImpressAnimationTab.ts:105
 msgid "Category"
-msgstr ""
+msgstr "Κατηγορία"
 
 #: src/control/Notebookbar.ImpressAnimationTab.ts:120
 msgid "Start"
-msgstr ""
+msgstr "Εκκίνηση"
 
 #: src/control/Notebookbar.ImpressAnimationTab.ts:140
 msgid "Effect"
-msgstr ""
+msgstr "Εφέ"
 
 #: src/control/Notebookbar.ImpressTableDesignTab.ts:59
 #: src/control/Notebookbar.WriterTableTab.ts:472
 #: src/control/Control.NotebookbarImpress.js:102
 msgid "Design"
-msgstr ""
+msgstr "Σχέδιο"
 
 #: src/control/Notebookbar.ImpressTableDesignTab.ts:99
 #: src/control/Notebookbar.WriterTableTab.ts:514
 msgid "Cell Background"
-msgstr ""
+msgstr "Φόντο κελιού"
 
 #: src/control/Notebookbar.ImpressTransitionTab.ts:24
 msgid "Transition"
-msgstr ""
+msgstr "Μετάβαση"
 
 #: src/control/Notebookbar.ImpressTransitionTab.ts:41
 #: src/control/Sidebar.FromNotebookbarPanel.ts:137
 msgid "Transitions"
-msgstr ""
+msgstr "Μεταβάσεις"
 
 #: src/control/Notebookbar.ImpressTransitionTab.ts:73
 msgid "Variant"
-msgstr ""
+msgstr "Παραλαγή"
 
 #: src/control/Notebookbar.ImpressTransitionTab.ts:89
 msgid "Duration"
-msgstr ""
+msgstr "Διάρκεια"
 
 #: src/control/Notebookbar.ImpressTransitionTab.ts:117
 msgid "On mouse click"
-msgstr ""
+msgstr "Με κλικ του ποντικιού"
 
 #: src/control/Notebookbar.ImpressTransitionTab.ts:125
 #: src/control/HRuler.ts:338
 msgid "After"
-msgstr ""
+msgstr "Μετά"
 
 #: src/control/Notebookbar.ImpressTransitionTab.ts:146
 msgid "Apply to All Slides"
-msgstr ""
+msgstr "Εφαρμογή σε όλες τις διαφάνειες"
 
 #: src/control/Notebookbar.WriterReferencesTab.ts:41
 msgid "Table of content"
-msgstr ""
+msgstr "Πίνακας περιεχομένων"
 
 #: src/control/Notebookbar.WriterReferencesTab.ts:95
 msgid "Footnote/Endnote"
-msgstr ""
+msgstr "Υποσημείωση/Σημείωση τέλους"
 
 #: src/control/Notebookbar.WriterReferencesTab.ts:313
 #: src/control/Control.NotebookbarDraw.js:1705
 #: src/control/Control.NotebookbarImpress.js:1783
-#, fuzzy
 msgid "Field"
-msgstr "Πεδία"
+msgstr "Πεδίο"
 
 #: src/control/Notebookbar.WriterTableTab.ts:24
 #: src/control/Control.NotebookbarCalc.js:1846
@@ -4550,7 +4539,7 @@ msgstr "Πίνακας"
 #: src/control/Notebookbar.WriterTableTab.ts:39
 #: src/control/Control.NotebookbarImpress.js:2204
 msgid "Select"
-msgstr ""
+msgstr "Επιλογή"
 
 #: src/control/Notebookbar.WriterTableTab.ts:113
 #: src/control/Control.NotebookbarCalc.js:42
@@ -4568,19 +4557,19 @@ msgstr "Εισαγωγή"
 #: src/control/Control.NotebookbarCalc.js:1196
 #: src/control/Control.NotebookbarWriter.js:1912
 msgid "Size"
-msgstr ""
+msgstr "Μέγεθος"
 
 #: src/control/Notebookbar.WriterTableTab.ts:307
 #: src/control/Control.NotebookbarImpress.js:2370
 msgid "Merge & Split"
-msgstr ""
+msgstr "Συγχώνευση & Διαχωρισμός"
 
 #: src/control/Notebookbar.WriterTableTab.ts:365
 #: src/control/Control.NotebookbarCalc.js:686
 #: src/control/Control.NotebookbarDraw.js:860
 #: src/control/Control.NotebookbarImpress.js:2409
 msgid "Alignment"
-msgstr ""
+msgstr "Στοίχιση"
 
 #: src/control/Notebookbar.WriterTableTab.ts:537
 #: src/control/Control.NotebookbarCalc.js:72
@@ -4593,54 +4582,54 @@ msgstr "Διαμόρφωση"
 #: src/control/Notebookbar.WriterTableTab.ts:595
 #: src/control/Control.NotebookbarCalc.js:2409
 msgid "Sort"
-msgstr ""
+msgstr "Ταξινόμηση"
 
 #: src/control/Notebookbar.WriterTableTab.ts:615
 msgid "Protect"
-msgstr ""
+msgstr "Προστασία"
 
 #: src/control/Notebookbar.WriterTableTab.ts:667
 #: src/control/Control.NotebookbarWriter.js:2891
 #: src/control/Control.NotebookbarWriter.js:3269
 msgid "Caption"
-msgstr ""
+msgstr "Λεζάντα"
 
 #: src/control/Sidebar.FromNotebookbarPanel.ts:154
 msgid "Animations"
-msgstr ""
+msgstr "Κινούμενα σχέδια"
 
 #: src/control/Control.Notebookbar.js:634
 msgid "Start:"
-msgstr ""
+msgstr "Έναρξη:"
 
 #: src/control/Control.Notebookbar.js:634
 msgid "End:"
-msgstr ""
+msgstr "Τέλος:"
 
 #: src/control/Control.Notebookbar.js:647
 msgid "Start arrowhead style"
-msgstr ""
+msgstr "Έναρξη στυλ αιχμής βέλους"
 
 #: src/control/Control.Notebookbar.js:647
 msgid "End arrowhead style"
-msgstr ""
+msgstr "Τέλος στυλ αιχμής βέλους"
 
 #: src/control/Control.Notebookbar.js:722
 msgid "Line Width"
-msgstr ""
+msgstr "Πλάτος γραμμής"
 
 #: src/control/Control.Notebookbar.js:755
 msgid "Line Transparency:"
-msgstr ""
+msgstr "Διαφάνεια γραμμής:"
 
 #: src/control/Control.NotebookbarBuilder.js:202
 #: src/control/Control.NotebookbarBuilder.js:604
 msgid "Unsaved changes. Save"
-msgstr ""
+msgstr "Μη αποθηκευμένες αλλαγές. Αποθηκεύστε"
 
 #: src/control/Control.NotebookbarBuilder.js:266
 msgid "Click to expand"
-msgstr ""
+msgstr "Κάντε κλικ για επέκταση"
 
 #: src/control/Control.NotebookbarBuilder.js:266
 msgid "Tap to expand"
@@ -4648,7 +4637,7 @@ msgstr "Πατήστε για επέκταση"
 
 #: src/control/Control.NotebookbarBuilder.js:267
 msgid "Click to collapse"
-msgstr ""
+msgstr "Κάντε κλικ για σύμπτυξη"
 
 #: src/control/Control.NotebookbarBuilder.js:267
 #: src/control/Control.NotebookbarBuilder.js:341
@@ -4657,11 +4646,11 @@ msgstr "Πατήστε για σύμπτυξη"
 
 #: src/control/Control.NotebookbarBuilder.js:395
 msgid "PDF Document (.pdf) with options"
-msgstr ""
+msgstr "Έγγραφο PDF (.pdf) με επιλογές"
 
 #: src/control/Control.NotebookbarBuilder.js:602
 msgid "Unsaved changes."
-msgstr ""
+msgstr "Μη αποθηκευμένες αλλαγές."
 
 #: src/control/Control.NotebookbarCalc.js:29
 #: src/control/Control.NotebookbarDraw.js:63
@@ -4672,14 +4661,12 @@ msgstr "Αρχείο"
 
 #: src/control/Control.NotebookbarCalc.js:48
 #: src/control/Control.NotebookbarDraw.js:1330
-#, fuzzy
 msgid "Page Layout"
-msgstr "Διάταξη σελίδας"
+msgstr "Διάταξη"
 
 #: src/control/Control.NotebookbarCalc.js:54
-#, fuzzy
 msgid "Formulas"
-msgstr "Τύπος"
+msgstr "Τύποι"
 
 #: src/control/Control.NotebookbarCalc.js:60
 msgid "Data"
@@ -4696,9 +4683,8 @@ msgstr "Επιθεώρηση"
 #: src/control/Control.NotebookbarDraw.js:108
 #: src/control/Control.NotebookbarImpress.js:136
 #: src/control/Control.NotebookbarWriter.js:82
-#, fuzzy
 msgid "Shape"
-msgstr "Σχήματα"
+msgstr "Σχήμα"
 
 #: src/control/Control.NotebookbarCalc.js:85
 #: src/control/Control.NotebookbarDraw.js:115
@@ -4713,7 +4699,7 @@ msgstr "Εικόνα"
 #: src/control/Control.NotebookbarImpress.js:150
 #: src/control/Control.NotebookbarWriter.js:96
 msgid "Chart"
-msgstr ""
+msgstr "Διάγραμμα"
 
 #: src/control/Control.NotebookbarCalc.js:99
 #: src/control/Control.NotebookbarDraw.js:129
@@ -4740,7 +4726,6 @@ msgstr "Βοήθεια"
 #: src/control/Control.NotebookbarDraw.js:223
 #: src/control/Control.NotebookbarImpress.js:271
 #: src/control/Control.NotebookbarWriter.js:217
-#, fuzzy
 msgid "Export As"
 msgstr "Εξαγωγή ως"
 
@@ -4759,7 +4744,7 @@ msgstr "Εμφάνιση ιστορικού"
 #: src/control/Control.NotebookbarImpress.js:444
 #: src/control/Control.NotebookbarWriter.js:390
 msgid "Security label"
-msgstr ""
+msgstr "Ετικέτα ασφαλείας"
 
 #: src/control/Control.NotebookbarCalc.js:406
 #: src/control/Control.NotebookbarDraw.js:403
@@ -4781,7 +4766,7 @@ msgstr "Μετονομασία"
 #: src/control/Control.NotebookbarImpress.js:861
 #: src/control/Control.NotebookbarWriter.js:667
 msgid "Clipboard"
-msgstr ""
+msgstr "Πρόχειρο"
 
 #: src/control/Control.NotebookbarCalc.js:504
 #: src/control/Control.NotebookbarDraw.js:682
@@ -4789,13 +4774,15 @@ msgstr ""
 #: src/control/Control.NotebookbarWriter.js:694
 #: src/control/Control.TopToolbar.js:155
 msgid "Clone Formatting (double click to keep active)"
-msgstr ""
+msgstr "Κλωνοποίηση μορφοποίησης (διπλό κλικ για να παραμείνει ενεργό)"
 
 #: src/control/Control.NotebookbarCalc.js:505
 msgid ""
 "Clone Formatting is active (press Enter on a cell to apply, click again or "
 "press Esc to exit)"
 msgstr ""
+"Η αντιγραφή μορφοποίησης είναι ενεργή (πατήστε Enter σε ένα κελί για να "
+"εφαρμόσετε, κάντε κλικ ξανά ή πατήστε Esc για έξοδο)"
 
 #: src/control/Control.NotebookbarCalc.js:541
 #: src/control/Control.NotebookbarDraw.js:719
@@ -4805,7 +4792,7 @@ msgstr "Γραμματοσειρά"
 
 #: src/control/Control.NotebookbarCalc.js:825
 msgid "Merge & Center"
-msgstr ""
+msgstr "Συγχώνευση & Κέντρο"
 
 #: src/control/Control.NotebookbarCalc.js:840
 #: src/control/Control.NotebookbarCalc.js:856
@@ -4847,11 +4834,11 @@ msgstr "Κείμενο"
 
 #: src/control/Control.NotebookbarCalc.js:870
 msgid "Number Format"
-msgstr ""
+msgstr "Μορφή αριθμού"
 
 #: src/control/Control.NotebookbarCalc.js:943
 msgid "Cells"
-msgstr ""
+msgstr "Κελιά"
 
 #: src/control/Control.NotebookbarCalc.js:1045
 #: src/control/jsdialog/Definitions.Menu.ts:2410
@@ -4877,7 +4864,7 @@ msgstr "Κακό"
 #: src/control/Control.NotebookbarCalc.js:1101
 #: src/control/PermissionMode.ts:219
 msgid "Editing"
-msgstr ""
+msgstr "Επεξεργασία"
 
 #: src/control/Control.NotebookbarCalc.js:1125
 #: src/control/Control.NotebookbarDraw.js:1243
@@ -4889,7 +4876,7 @@ msgstr "Αντικατάσταση"
 #: src/control/Control.NotebookbarCalc.js:1189
 #: src/control/Control.NotebookbarWriter.js:1905
 msgid "Margin"
-msgstr ""
+msgstr "Περιθώριο"
 
 #: src/control/Control.NotebookbarCalc.js:1257
 msgid "Row Height"
@@ -4934,7 +4921,7 @@ msgstr "Διαγραφή στηλών"
 #: src/control/Control.NotebookbarWriter.js:2708
 #: src/control/Control.NotebookbarWriter.js:3077
 msgid "Align"
-msgstr ""
+msgstr "Στοίχιση"
 
 #: src/control/Control.NotebookbarCalc.js:1418
 #: src/control/Control.NotebookbarCalc.js:3200
@@ -4947,35 +4934,35 @@ msgstr ""
 #: src/control/Control.NotebookbarWriter.js:2779
 #: src/control/Control.NotebookbarWriter.js:3148
 msgid "Arrange"
-msgstr ""
+msgstr "Τακτοποίηση"
 
 #: src/control/Control.NotebookbarCalc.js:1480
 msgid "Sheet View"
-msgstr ""
+msgstr "Προβολή φύλλου"
 
 #: src/control/Control.NotebookbarCalc.js:1494
 msgid "Default View"
-msgstr ""
+msgstr "Προεπιλεγμένη προβολή"
 
 #: src/control/Control.NotebookbarCalc.js:1511
 msgid "Open Views List"
-msgstr ""
+msgstr "Άνοιγμα λίστας προβολών"
 
 #: src/control/Control.NotebookbarCalc.js:1518
 msgid "New Sheet View"
-msgstr ""
+msgstr "Νέα προβολή φύλλου"
 
 #: src/control/Control.NotebookbarCalc.js:1525
 msgid "Remove Sheet View"
-msgstr ""
+msgstr "Κατάργηση προβολής φύλλου"
 
 #: src/control/Control.NotebookbarCalc.js:1532
 msgid "Exit Sheet View"
-msgstr ""
+msgstr "Έξοδος από την προβολή φύλλου"
 
 #: src/control/Control.NotebookbarCalc.js:1547
 msgid "Freeze"
-msgstr ""
+msgstr "Πάγωμα"
 
 #: src/control/Control.NotebookbarCalc.js:1601
 #: src/control/Control.NotebookbarDraw.js:453
@@ -4983,7 +4970,7 @@ msgstr ""
 #: src/control/Control.NotebookbarWriter.js:1709
 #: src/control/Control.StatusBar.js:150
 msgid "Zoom"
-msgstr ""
+msgstr "Ζουμ"
 
 #: src/control/Control.NotebookbarCalc.js:1608
 #: src/control/Control.NotebookbarDraw.js:460
@@ -5015,15 +5002,15 @@ msgstr "Γραμμή κατάστασης"
 #: src/control/Control.NotebookbarWriter.js:2836
 #: src/control/Control.NotebookbarWriter.js:3205
 msgid "Group"
-msgstr ""
+msgstr "Ομαδοποίηση"
 
 #: src/control/Control.NotebookbarCalc.js:1768
 msgid "Ungroup"
-msgstr ""
+msgstr "Κατάργηση ομαδοποίησης"
 
 #: src/control/Control.NotebookbarCalc.js:1790
 msgid "Pivot Table"
-msgstr ""
+msgstr "Συγκεντρωτικός πίνακας"
 
 #: src/control/Control.NotebookbarCalc.js:1855
 #: src/control/Control.NotebookbarCalc.js:1858
@@ -5068,9 +5055,8 @@ msgid "Insert Function"
 msgstr ""
 
 #: src/control/Control.NotebookbarCalc.js:2157
-#, fuzzy
 msgid "Function Library"
-msgstr "Οδηγός συναρτήσεων"
+msgstr "Βιβλιοθήκη λειτουργιών"
 
 #: src/control/Control.NotebookbarCalc.js:2171
 msgid "AutoSum"
@@ -5121,9 +5107,8 @@ msgstr ""
 #: src/control/Control.NotebookbarCalc.js:2757
 #: src/control/Control.NotebookbarImpress.js:2160
 #: src/control/jsdialog/Widget.HTMLContent.ts:52
-#, fuzzy
 msgid "Comments"
-msgstr "Σχόλιο"
+msgstr "Σχόλια"
 
 #: src/control/Control.NotebookbarCalc.js:2807
 #: src/control/Control.NotebookbarWriter.js:2430
@@ -5187,7 +5172,7 @@ msgstr ""
 #: src/control/Control.NotebookbarImpress.js:1120
 #: src/control/Control.NotebookbarWriter.js:877
 msgid "Paragraph"
-msgstr ""
+msgstr "Παράγραφος"
 
 #: src/control/Control.NotebookbarImpress.js:110
 msgid "Slide Show"
@@ -5274,9 +5259,8 @@ msgstr ""
 #: src/control/Control.NotebookbarImpress.js:948
 #: src/control/Control.NotebookbarImpress.js:2016
 #: src/control/Control.TopToolbar.js:264
-#, fuzzy
 msgid "Change Layout"
-msgstr "Διάταξη σελίδας"
+msgstr "Αλλαγή διάταξης"
 
 #: src/control/Control.NotebookbarImpress.js:956
 #: src/control/Control.NotebookbarImpress.js:2023
@@ -5304,9 +5288,8 @@ msgid "Master Slide Templates"
 msgstr ""
 
 #: src/control/Control.NotebookbarImpress.js:1955
-#, fuzzy
 msgid "This Presentation"
-msgstr "Κλείσιμο παρουσίασης"
+msgstr "Αυτή η Παρουσίαση"
 
 #: src/control/Control.NotebookbarImpress.js:1964
 msgid "Presentation Templates"
@@ -5350,9 +5333,8 @@ msgstr ""
 
 #: src/control/Control.NotebookbarWriter.js:1007
 #: src/control/Control.Zotero.js:828
-#, fuzzy
 msgid "Styles"
-msgstr "Τεχνοτροπία"
+msgstr "Στυλ"
 
 #: src/control/Control.NotebookbarWriter.js:1160
 msgid "Lists/Bullets"
@@ -5389,7 +5371,7 @@ msgstr ""
 
 #: src/control/Control.NotebookbarWriter.js:2319
 msgid "Spelling Options"
-msgstr ""
+msgstr "Επιλογές ορθογραφίας"
 
 #: src/control/Control.NotebookbarWriter.js:2444
 msgid "View Changes"
@@ -5449,9 +5431,8 @@ msgid "Slide %1, linked to %2"
 msgstr ""
 
 #: src/control/Control.PartsPreview.js:940
-#, fuzzy
 msgid "preview of page %1"
-msgstr "προεπισκόπηση της σελίδας %1"
+msgstr "προεπισκόπηση σελίδας %1"
 
 #: src/control/Control.PartsPreview.js:1286
 #: src/control/Control.PartsPreview.js:1420
@@ -5574,23 +5555,20 @@ msgid "Slide {0}"
 msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:827
-#, fuzzy
 msgid "Insert slides"
-msgstr "Εισαγωγή σχημάτων"
+msgstr "Εισαγωγή διαφάνειών"
 
 #: src/control/Control.SlideImportPane.tsx:835
 msgid "Insert {0} from {1}"
 msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:838
-#, fuzzy
 msgid "Insert 1 slide"
-msgstr "Εισαγωγή σχημάτων"
+msgstr "Εισαγωγή 1 διαφάνειας"
 
 #: src/control/Control.SlideImportPane.tsx:839
-#, fuzzy
 msgid "Insert {0} slides"
-msgstr "Εισαγωγή σχημάτων"
+msgstr "Εισαγωγή {0} διαφάνειών"
 
 #: src/control/Control.SlideImportPane.tsx:871
 msgid "{0} of {1}"
@@ -5618,9 +5596,8 @@ msgid "Inserting slides..."
 msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:961
-#, fuzzy
 msgid "Import slides"
-msgstr "Εισαγωγή σχημάτων"
+msgstr "Εισαγωγή διαφανειών"
 
 #: src/control/Control.SlideImportPane.tsx:965
 #: src/control/Control.SlideImportPane.tsx:966
@@ -5633,9 +5610,8 @@ msgid "Close slide import"
 msgstr ""
 
 #: src/control/Control.SlideImportPane.tsx:996
-#, fuzzy
 msgid "Add presentation…"
-msgstr "Τερματισμός παρουσίασης"
+msgstr "Τερματισμός παρουσίασης…"
 
 #: src/control/Control.SlideImportPane.tsx:1011
 msgid "No presentations yet"
@@ -5998,6 +5974,9 @@ msgid ""
 "Fit the page to the window width. Smart Zoom on open can be toggled in "
 "Options under File tab."
 msgstr ""
+"Προσαρμόστε τη σελίδα στο πλάτος του παραθύρου. Η έξυπνη μεγέθυνση κατά το "
+"άνοιγμα μπορεί να ενεργοποιηθεί ή να απενεργοποιηθεί στις Επιλογές στην "
+"καρτέλα Αρχείο."
 
 #: src/control/Control.StatusBar.js:295
 msgid "Fit the page to the window width."
@@ -6031,7 +6010,7 @@ msgstr "Ορισμός Γλώσσας για Όλο το κείμενο"
 
 #: src/control/Control.StatusBar.js:751
 msgid "Set Language for Paragraph"
-msgstr "Ορισμός Γλώσσας για την Παράγραφο"
+msgstr "Ορισμός γλώσσας για την παράγραφο"
 
 #: src/control/Control.StatusBar.js:752
 msgid "Set Language for Selection"
@@ -6110,7 +6089,6 @@ msgid "Document recalculated in %1 ms"
 msgstr ""
 
 #: src/control/Control.TopToolbar.js:145
-#, fuzzy
 msgid "Active Sheet"
 msgstr "Ενεργό φύλλο"
 
@@ -6132,9 +6110,8 @@ msgid "Insert connectors"
 msgstr "Εισαγωγή συνδέσμων"
 
 #: src/control/Control.UIManager.ts:116
-#, fuzzy
 msgid "Main"
-msgstr "Ελάχιστο"
+msgstr "Κύριο"
 
 #: src/control/Control.UIManager.ts:245
 msgid "You are currently in View mode, press {0} to edit"
@@ -6348,15 +6325,15 @@ msgstr ""
 
 #: src/control/Control.Zotero.js:1219 src/control/Control.Zotero.js:1543
 msgid "Confirm"
-msgstr ""
+msgstr "Επιβεβαίωση"
 
 #: src/control/Control.Zotero.js:1338
 msgid "Add Note"
-msgstr ""
+msgstr "Προσθήκη σημείωσης"
 
 #: src/control/Control.Zotero.js:1341
 msgid "An error occurred while fetching notes"
-msgstr ""
+msgstr "Παρουσιάστηκε σφάλμα κατά την ανάκτηση σημειώσεων"
 
 #: src/control/Control.Zotero.js:1481
 msgid "Updated citations"
@@ -6393,6 +6370,8 @@ msgstr ""
 #: src/control/HRuler.ts:404
 msgid "Double-click to insert a tab stop. Right-click for more options."
 msgstr ""
+"Κάντε διπλό κλικ για να εισάγετε ένα στηλοθέτη. Κάντε δεξί κλικ για "
+"περισσότερες επιλογές."
 
 #: src/control/HRuler.ts:788 src/control/HRuler.ts:953
 msgid "Left Margin"
@@ -6437,9 +6416,8 @@ msgid "Wrong password provided. Please try again."
 msgstr "Εσφαλμένος κωδικός πρόσβασης. Παρακαλούμε, ξαναπροσπαθήστε."
 
 #: src/control/Permission.js:193
-#, fuzzy
 msgid "Document requires a password to edit."
-msgstr "Για την προβολή του εγγράφου απαιτείται κωδικός πρόσβασης."
+msgstr "Το έγγραφο απαιτεί κωδικό για επεξεργασία."
 
 #: src/control/Permission.js:238
 msgid "Enter a file name"
@@ -6464,7 +6442,7 @@ msgstr ""
 
 #: src/control/Permission.js:448
 msgid "Collaborative editing"
-msgstr ""
+msgstr "Συνεργατική επεξεργασία"
 
 #: src/control/Permission.js:449 src/control/Permission.js:481
 msgid "Edit together in real-time"
@@ -6719,7 +6697,7 @@ msgstr ""
 
 #: src/control/jsdialog/Definitions.Menu.ts:185
 msgid "Min"
-msgstr "Ελάχιστο"
+msgstr "Ελάχ"
 
 #: src/control/jsdialog/Definitions.Menu.ts:186
 msgid "Max"
@@ -6910,14 +6888,12 @@ msgid "All users"
 msgstr ""
 
 #: src/control/jsdialog/Definitions.Menu.ts:1917
-#, fuzzy
 msgid "Highlight cells with"
-msgstr "Επισημάνετε τα κελιά με..."
+msgstr "Επισήμανση κελιών με"
 
 #: src/control/jsdialog/Definitions.Menu.ts:1948
-#, fuzzy
 msgid "Top/Bottom Rules"
-msgstr "Κανόνες μέγιστο/ελάχιστο..."
+msgstr "Κανόνες Κορυφή/Κάτω"
 
 #: src/control/jsdialog/Definitions.Menu.ts:1984
 msgid "Color Scale"
@@ -6925,7 +6901,7 @@ msgstr ""
 
 #: src/control/jsdialog/Definitions.Menu.ts:1989
 msgid "Data Bar"
-msgstr ""
+msgstr "Γραμμή δεδομένων"
 
 #: src/control/jsdialog/Definitions.Menu.ts:1994
 msgid "Icon Set"
@@ -6984,9 +6960,8 @@ msgid "Line color"
 msgstr ""
 
 #: src/control/jsdialog/Definitions.Menu.ts:2096
-#, fuzzy
 msgid "Line style"
-msgstr "Τεχνοτροπία γραμμής:"
+msgstr "Τεχνοτροπία γραμμής"
 
 #: src/control/jsdialog/Definitions.Menu.ts:2100
 msgid "Hairline (0.05 pt)"
@@ -7053,7 +7028,6 @@ msgid "Watermark"
 msgstr ""
 
 #: src/control/jsdialog/Definitions.Menu.ts:2433
-#, fuzzy
 msgid "Insert comment"
 msgstr "Εισαγωγή σχολίου"
 
@@ -7068,9 +7042,8 @@ msgid "Insert Comment"
 msgstr "Εισαγωγή σχολίου"
 
 #: src/control/jsdialog/Definitions.Menu.ts:2448
-#, fuzzy
 msgid "Insert Note"
-msgstr "Εισαγωγή ημερομηνίας"
+msgstr "Εισαγωγή σημείωσης"
 
 #: src/control/jsdialog/Widget.ColorPicker.ts:36
 msgid "Dark 1"
@@ -7150,9 +7123,8 @@ msgid "Color palette"
 msgstr ""
 
 #: src/control/jsdialog/Widget.Combobox.js:290
-#, fuzzy
 msgid "Open list"
-msgstr "Άνοιγμα συνδέσμου"
+msgstr "Άνοιγμα λίστας"
 
 #: src/control/jsdialog/Widget.Combobox.js:498
 msgid "Filter entries"
@@ -7182,59 +7154,61 @@ msgstr ""
 
 #: src/control/jsdialog/Widget.CsvGrid.ts:451
 msgid "Column {index}"
-msgstr ""
+msgstr "Στήλη {index}"
 
 #: src/control/jsdialog/Widget.EmojiPicker.ts:54
 msgid "Smileys"
-msgstr ""
+msgstr "Χαμόγελα"
 
 #: src/control/jsdialog/Widget.EmojiPicker.ts:100
 msgid "People & gestures"
-msgstr ""
+msgstr "Άνθρωποι & χειρονομίες"
 
 #: src/control/jsdialog/Widget.EmojiPicker.ts:136
 msgid "Objects"
-msgstr ""
+msgstr "Αντικείμενα"
 
 #: src/control/jsdialog/Widget.EmojiPicker.ts:218
 msgid "Nature & food"
-msgstr ""
+msgstr "Φύση & φαγητό"
 
 #: src/control/jsdialog/Widget.EmojiPicker.ts:364
 msgid "Recently used"
-msgstr ""
+msgstr "Χρησιμοποιήθηκε πρόσφατα"
 
 #: src/control/jsdialog/Widget.EmojiPicker.ts:384
 msgid "No emojis match \"{0}\""
-msgstr ""
+msgstr "Δεν υπάρχουν emoji που να αντιστοιχούν στο \"{0}\""
 
 #: src/control/jsdialog/Widget.PageMarginEntry.ts:139
 msgid "Top: {top}"
-msgstr ""
+msgstr "Κορυφή: {top}"
 
 #: src/control/jsdialog/Widget.PageMarginEntry.ts:144
 msgid "Left: {left}"
-msgstr ""
+msgstr "Αριστερά: {left}"
 
 #: src/control/jsdialog/Widget.PageMarginEntry.ts:154
 msgid "Bottom: {bottom}"
-msgstr ""
+msgstr "Κάτω: {bottom}"
 
 #: src/control/jsdialog/Widget.PageMarginEntry.ts:159
 msgid "Right: {right}"
-msgstr ""
+msgstr "Δεξιά: {right}"
 
 #: src/control/jsdialog/Widget.PageMarginEntry.ts:183
 msgid "Custom Margins…"
-msgstr ""
+msgstr "Προσαρμοσμένα περιθώρια…"
 
 #: src/control/jsdialog/Widget.PageSizeEntry.ts:91
 msgid "More Paper Sizes..."
-msgstr ""
+msgstr "Περισσότερα μεγέθη χαρτιού..."
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:31
 msgid "Number of Pages. Click to open the Go to Page dialog box."
 msgstr ""
+"Αριθμός Σελίδων. Κάντε κλικ για να ανοίξετε το παράθυρο διαλόγου Μετάβαση "
+"στη σελίδα."
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:32
 #: src/control/jsdialog/Widget.HTMLContent.ts:62
@@ -7257,16 +7231,15 @@ msgstr "Επιλεγμένη περιοχή κελιών"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:44
 msgid "Cell Selection"
-msgstr ""
+msgstr "Επιλογή κελιού"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:48
 msgid "Entering text mode"
 msgstr "Εκκινεί τη λειτουργία κειμένου"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:49
-#, fuzzy
 msgid "Insert Mode"
-msgstr "Εισαγωγή ημερομηνίας"
+msgstr "Λειτουργία εισαγωγής"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:54
 msgid "Selection Mode"
@@ -7283,27 +7256,27 @@ msgstr "Επιλογή λειτουργιών"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:68
 msgid "Table Cell Functions"
-msgstr ""
+msgstr "Λειτουργίες κελιών πίνακα"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:72
 msgid "Size of selected shape"
-msgstr ""
+msgstr "Μέγεθος επιλεγμένου σχήματος"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:73
 msgid "Shape Size"
-msgstr ""
+msgstr "Μέγεθος σχήματος"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:79
 msgid "Sheet Navigation"
-msgstr ""
+msgstr "Πλοήγηση φύλλων"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:81
 msgid "Slide Navigation"
-msgstr ""
+msgstr "Πλοήγηση διαφανειών"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:82
 msgid "Page Navigation"
-msgstr ""
+msgstr "Πλοήγηση σελίδας"
 
 #: src/control/jsdialog/Widget.HTMLContent.ts:88
 msgid "Your changes have been saved"
@@ -7315,11 +7288,11 @@ msgstr "Λειτουργία επεξεργασίας"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:70
 msgid "Last Custom Value"
-msgstr ""
+msgstr "Τελευταία προσαρμοσμένη τιμή"
 
 #: src/control/jsdialog/Widget.LineWidthCustom.ts:134
 msgid "Custom Line Thickness:"
-msgstr ""
+msgstr "Προσαρμοσμένο πάχος γραμμής:"
 
 #: src/control/jsdialog/Widget.MobileBorderSelector.js:111
 msgid "Cell borders"
@@ -7327,27 +7300,27 @@ msgstr "Περιγράμματα κελιού"
 
 #: src/control/jsdialog/Widget.NotebookbarIconView.ts:101
 msgid "New Table Style..."
-msgstr ""
+msgstr "Νέο στυλ πίνακα..."
 
 #: src/control/jsdialog/Widget.NotebookbarIconView.ts:112
 msgid "Clear Style"
-msgstr ""
+msgstr "Εκκαθάριση στυλ"
 
 #: src/control/jsdialog/Widget.NotebookbarIconView.ts:137
 msgid "Open Styles Sidebar"
-msgstr ""
+msgstr "Άνοιγμα πλευρικής μπάρας στυλ"
 
 #: src/control/jsdialog/Widget.NotebookbarIconView.ts:241
 msgid "Scroll up"
-msgstr "Κάντε κύλιση προς τα πάνω"
+msgstr "Κύλιση προς τα πάνω"
 
 #: src/control/jsdialog/Widget.NotebookbarIconView.ts:251
 msgid "Scroll down"
-msgstr "Κάντε κύλιση προς τα κάτω"
+msgstr "Κύλιση προς τα κάτω"
 
 #: src/control/jsdialog/Widget.NotebookbarIconView.ts:261
 msgid "More options"
-msgstr ""
+msgstr "Περισσότερες επιλογές"
 
 #: src/control/jsdialog/Widget.PushButton.ts:19
 msgid "Select range"
@@ -7363,37 +7336,38 @@ msgstr "απαντήσεις"
 
 #: src/control/jsdialog/Widget.SpinField.ts:275
 msgid "Increment value"
-msgstr ""
+msgstr "Αύξηση τιμής"
 
 #: src/control/jsdialog/Widget.SpinField.ts:284
 msgid "Decrement value"
-msgstr ""
+msgstr "Μείωση τιμής"
 
 #: src/control/jsdialog/Widget.SidebarContainers.tsx:145
 #: src/control/jsdialog/Widget.SidebarContainers.tsx:205
-#, fuzzy
 msgid "More options for {1}"
 msgstr "Περισσότερες επιλογές για {1}"
 
 #: src/control/jsdialog/Widget.TreeView.ts:1743
 msgid "Cell value"
-msgstr ""
+msgstr "Τιμή κελιού"
 
 #: src/control/jsdialog/Widget.TreeView.ts:1747
 msgid "row %1"
-msgstr ""
+msgstr "σειρά % 1"
 
 #: src/control/jsdialog/Widget.TreeView.ts:1756
 msgid "%1, %2"
-msgstr ""
+msgstr "%1, %2"
 
 #: src/control/jsdialog/Widget.TreeView.ts:2527
 msgid "Headings and objects that you add to the document will appear here"
 msgstr ""
+"Οι επικεφαλίδες και τα αντικείμενα που προσθέτετε στο έγγραφο θα "
+"εμφανίζονται εδώ"
 
 #: src/control/jsdialog/Widget.TreeView.ts:2578
 msgid "Search items"
-msgstr ""
+msgstr "Αναζήτηση στοιχείων"
 
 #: src/app/Socket.ts:323
 msgid "Oops, there is a problem connecting to {productname}: "
@@ -7409,7 +7383,7 @@ msgstr ""
 
 #: src/app/Socket.ts:668
 msgid "The connection to the document has been lost."
-msgstr ""
+msgstr "Η σύνδεση με το έγγραφο χάθηκε."
 
 #: src/app/Socket.ts:669
 msgid "The server has been disconnected."
@@ -7421,7 +7395,7 @@ msgstr "Επανασύνδεση..."
 
 #: src/app/Socket.ts:1056
 msgid "Exported to storage"
-msgstr ""
+msgstr "Εξήχθηκε στην αποθήκευση"
 
 #: src/app/Socket.ts:1057
 msgid "Successfully exported: "
@@ -7429,11 +7403,11 @@ msgstr "Έγινε επιτυχής εξαγωγή: "
 
 #: src/app/Socket.ts:1190
 msgid "This document has links to external content."
-msgstr ""
+msgstr "Αυτό το έγγραφο περιέχει συνδέσμους σε εξωτερικό περιεχόμενο."
 
 #: src/app/Socket.ts:1191
 msgid "Allow"
-msgstr ""
+msgstr "Επίτρεψε"
 
 #: src/app/Socket.ts:1869
 msgid "Discard"
@@ -7469,7 +7443,7 @@ msgstr "ΑΝΑΝΕΩΣΗ"
 
 #: src/app/Socket.ts:2094
 msgid "Cluster configuration warning"
-msgstr ""
+msgstr "Προειδοποίηση διαμόρφωσης συστάδας"
 
 #: src/app/Socket.ts:2103
 msgid "Wrong server, reconnecting..."
@@ -7477,7 +7451,7 @@ msgstr "Λάθος διακομιστής, επανασύνδεση..."
 
 #: src/app/Socket.ts:2125
 msgid "Unsupported version."
-msgstr ""
+msgstr "Μη υποστηριζόμενη έκδοση."
 
 #: src/app/Socket.ts:2126
 msgid "Unsupported server version."
@@ -7485,7 +7459,7 @@ msgstr "Μη υποστηριζόμενη έκδοση διακομιστή."
 
 #: src/app/Socket.ts:2311
 msgid "Document is getting migrated"
-msgstr ""
+msgstr "Το έγγραφο μεταφέρεται"
 
 #: src/app/Socket.ts:2578
 msgid "Document requires password to view."
@@ -7592,7 +7566,6 @@ msgstr ""
 "προφανώς ρυθμισμένος εσφαλμένα, παρακαλούμε επικοινωνήστε με τον διαχειριστή."
 
 #: src/errormessages.ts:22
-#, fuzzy
 msgid ""
 "This is an unsupported version of {productname}. To avoid the impression "
 "that it is suitable for deployment in enterprises, this message appears "
@@ -7602,7 +7575,7 @@ msgstr ""
 "Αυτή είναι μια μη υποστηριζόμενη έκδοση του {productname}. Για να αποφευχθεί "
 "η εντύπωση ότι είναι κατάλληλο για ανάπτυξη σε επιχειρήσεις, αυτό το μήνυμα "
 "εμφανίζεται όταν χρησιμοποιούνται ταυτόχρονα περισσότερα από {docs} έγγραφα "
-"ή {connections} συνδέσεις"
+"ή {connections} συνδέσεις."
 
 #: src/errormessages.ts:24
 msgid "More information and support"
@@ -7731,11 +7704,10 @@ msgid "Failed to load document."
 msgstr "Αδυναμία φόρτωσης του εγγράφου."
 
 #: src/errormessages.ts:75
-#, fuzzy
 msgid "Save failed due to no disk space left. Document will now be read-only."
 msgstr ""
-"Αποτυχία αποθήκευσης λόγω έλλειψης χώρου στον δίσκο. Το έγγραφο θα είναι "
-"τώρα μόνο για ανάγνωση."
+"Η αποθήκευση απέτυχε λόγω έλλειψης χώρου στο δίσκο. Το έγγραφο θα είναι "
+"πλέον μόνο για ανάγνωση."
 
 #: src/errormessages.ts:78
 msgid ""
@@ -8004,11 +7976,9 @@ msgid "Please send us your feedback"
 msgstr "Παρακαλώ στείλτε μας τα σχόλιά σας"
 
 #: src/map/handler/Map.FileInserter.js:192
-#, fuzzy
 msgid "The file of type: {0} cannot be inserted since the file has no name"
 msgstr ""
-"Το αρχείο τύπου: {0} δεν μπορεί να αποσταλεί στον διακομιστή επειδή το "
-"αρχείο δεν έχει όνομα"
+"Το αρχείο τύπου: {0} δεν μπορεί να εισαχθεί καθώς το αρχείο δεν έχει όνομα"
 
 #: src/map/handler/Map.FileInserter.js:193
 #, javascript-format
@@ -8020,11 +7990,8 @@ msgstr ""
 "αρχείο δεν έχει όνομα"
 
 #: src/map/handler/Map.FileInserter.js:196
-#, fuzzy
 msgid "The file of type: {0} cannot be inserted since the file is empty"
-msgstr ""
-"Το αρχείο τύπου: {0} δεν μπορεί να αποσταλεί στον διακομιστή, επειδή το "
-"αρχείο είναι κενό"
+msgstr "Το αρχείο τύπου: {0} δεν μπορεί να εισαχθεί καθώς το αρχείο είναι κενό"
 
 #: src/map/handler/Map.FileInserter.js:197
 #, javascript-format
@@ -8184,14 +8151,12 @@ msgid "Next Slide"
 msgstr "Επόμενη διαφάνεια"
 
 #: src/slideshow/engine/SlideShowHandler.ts:120
-#, fuzzy
 msgid "Previous Slide"
 msgstr "Προηγούμενη διαφάνεια"
 
 #: src/slideshow/engine/SlideShowHandler.ts:121
-#, fuzzy
 msgid "Last Slide"
-msgstr "Κύριες διαφάνειες"
+msgstr "Τελευταία διαφάνεια"
 
 #: src/slideshow/engine/SlideShowHandler.ts:122
 #: src/slideshow/SlideShowPresenter.ts:904
@@ -8199,14 +8164,12 @@ msgid "End Show"
 msgstr ""
 
 #: src/slideshow/engine/SlideShowHandler.ts:123
-#, fuzzy
 msgid "Paused"
-msgstr "Παύση"
+msgstr "Σε παύση"
 
 #: src/slideshow/engine/SlideShowHandler.ts:124
-#, fuzzy
 msgid "Resumed"
-msgstr "Συνέχεια"
+msgstr "Σε συνέχεια"
 
 #: src/slideshow/engine/SlideShowHandler.ts:394
 msgid "Animation: {0}, {1}"
@@ -8256,9 +8219,8 @@ msgid "Present to all"
 msgstr ""
 
 #: src/slideshow/PresenterConsole.js:43
-#, fuzzy
 msgid "Exit"
-msgstr "Επεξεργασία"
+msgstr "Έξοδος"
 
 #: src/slideshow/PresenterConsole.js:44
 msgid "Go Back"
@@ -8306,10 +8268,10 @@ msgid "No Notes"
 msgstr "Καμία σημείωση"
 
 #: src/slideshow/PresenterConsole.js:1709
-#, fuzzy
 msgid "Repeat in %n second"
 msgid_plural "Repeat in %n seconds"
-msgstr[0] "Επαναλάβετε σε {0} δευτερόλεπτα"
+msgstr[0] "Επαναλάβετε σε {0} δευτερόλεπτο"
+msgstr[1] "Επαναλάβετε σε {0} δευτερόλεπτα"
 
 #: src/slideshow/PresenterConsole.js:1716
 #: src/slideshow/SlideShowPresenter.ts:696
@@ -8405,9 +8367,8 @@ msgid "Inspiration"
 msgstr ""
 
 #: templates/templates.js:186 templates/templates.js:190
-#, fuzzy
 msgid "Lights"
-msgstr "Σφιχτό"
+msgstr "Φώτα"
 
 #: templates/templates.js:196 templates/templates.js:200
 msgid "Metropolis"
@@ -8475,7 +8436,6 @@ msgid "Collabora Online Development Edition"
 msgstr "Collabora Online Development Edition"
 
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.p:28-7
-#, fuzzy
 msgid ""
 "Enjoy the latest developments in online productivity, free for you to use, "
 "to explore and to use with others in the browser. Various <a "
@@ -8485,38 +8445,35 @@ msgid ""
 msgstr ""
 "Απολαύστε τις τελευταίες εξελίξεις στην παραγωγικότητα στο διαδίκτυο, δωρεάν "
 "για χρήση, εξερεύνηση και χρήση με άλλους στο πρόγραμμα περιήγησης. Διάφορες "
-"<a target=\"_blank\" href=\"https://www.collaboraonline.com/solutions/"
-"collabora-office-android-ios/\">εφαρμογές</a> είναι επίσης διαθέσιμες για "
-"κινητά."
+"<a target=\"_blank\" rel=\"noopener\" href=\"https://www.collaboraonline.com/"
+"solutions/collabora-office-android-ios/\">εφαρμογές</a> είναι επίσης "
+"διαθέσιμες για κινητά."
 
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.h1:37-7
 msgid "Discover All The Changes"
 msgstr "Ανακαλύψτε Όλες Τις Αλλαγές"
 
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.p:39-7
-#, fuzzy
 msgid ""
 "Check the <a target=\"_blank\" rel=\"noopener\" href=\"https://www."
 "collaboraonline.com/code-26-04-release-notes/\">release notes</a> and learn "
 "all about: The latest Collabora Online Development Edition, aimed at home "
 "users and small teams."
 msgstr ""
-"Ελέγξτε τις <a target=\"_blank\" href=\"https://www.collaboraonline.com/"
-"code-26-04-release-notes/\">σημειώσεις έκδοσης</a> και μάθετε τα πάντα για: "
-"Την τελευταία έκδοση Collabora Online Development Edition, που απευθύνεται "
-"σε οικιακούς χρήστες και μικρές ομάδες."
+"Ελέγξτε τις <a target=\"_blank\" rel=\"noopener\" href=\"https://"
+"www.collaboraonline.com/code-26-04-release-notes/\">release notes</a> και "
+"μάθετε τα πάντα για: Την τελευταία έκδοση Collabora Online Development "
+"Edition, που απευθύνεται σε οικιακούς χρήστες και μικρές ομάδες."
 
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.h1:48-7
 msgid "Get Involved"
 msgstr "Συμμετέχετε"
 
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.h2:49-7
-#, fuzzy
 msgid "https://www.collaboraoffice.org/"
 msgstr "https://www.collaboraonline.org/"
 
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.p:50-7
-#, fuzzy
 msgid ""
 "Are you interested in contributing but don’t know where to start? Head over "
 "to the <a target=\"_blank\" rel=\"noopener\" href=\"https://www."
@@ -8528,13 +8485,14 @@ msgid ""
 "report</a> with all the essential steps on how to reproduce it."
 msgstr ""
 "Ενδιαφέρεστε να συνεισφέρετε αλλά δεν ξέρετε από πού να ξεκινήσετε; "
-"Μεταβείτε στις <a target=\"_blank\" href=\"https://www.collaboraonline.org/"
-"post/build-code/\">βήμα προς βήμα οδηγίες</a> και δημιουργήστε το CODE από "
-"την αρχή. Μπορείτε επίσης να βοηθήσετε με <a target=\"_blank\" href=\"https"
-"://www.collaboraonline.org/post/translate/\">μεταφράσεις</a> ή <a target="
-"\"_blank\" href=\"https://www.collaboraonline.org/post/filebugs/\""
-">καταθέτοντας μια αναφορά σφάλματος</a> με όλα τα βασικά βήματα για τον "
-"τρόπο αναπαραγωγής του."
+"Μεταβείτε στις <a target=\"_blank\" rel=\"noopener\" href=\"https://"
+"www.collaboraoffice.org/post/build-code/\">step-by-step instructions</a> και "
+"δημιουργήστε το CODE από την αρχή. Μπορείτε επίσης να βοηθήσετε με <a "
+"target=\"_blank\" rel=\"noopener\" href=\"https://www.collaboraoffice.org/"
+"post/translate/\">translations</a> or by <a target=\"_blank\" "
+"rel=\"noopener\" href=\"https://www.collaboraoffice.org/post/filebugs/\">"
+"filing a bug report</a> με όλα τα βασικά βήματα για τον τρόπο αναπαραγωγής "
+"του."
 
 #: welcome/welcome.html%2Bhtml.body.div.div:55-5
 msgid ""
