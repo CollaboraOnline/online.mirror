@@ -1,5 +1,5 @@
 
-/* The ribbon scrolls sideways when it is wider than the window, and it scrolls
+/* The notebookbar scrolls sideways when it is wider than the window, and it scrolls
    without a visible scrollbar, so the whole row height stays with the icons. A
    narrow screen shows the bar again, through the media query below. */
 .notebookbar-scroll-wrapper {
