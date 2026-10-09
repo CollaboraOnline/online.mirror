@@ -847,7 +847,7 @@ class PresenterConsole {
 					if ('processCoolUrl' in window) {
 						target = window.processCoolUrl({ url: target, type: 'doc' });
 					}
-					window.open(target, '_blank');
+					window.open(target, '_blank', 'noopener');
 					this._hideExternalLinkDialog();
 				}.bind(this),
 			);
