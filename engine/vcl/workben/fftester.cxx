@@ -271,7 +271,7 @@ SAL_IMPLEMENT_MAIN_WITH_ARGS(argc, argv)
             static FFilterCall pfnImport(nullptr);
             if (!pfnImport)
             {
-                pfnImport = load(u"libmswordlo.so", "TestImportWW8");
+                pfnImport = load(u"libswlo.so", "TestImportWW8");
             }
             SvFileStream aFileStream(out, StreamMode::READ);
             ret = static_cast<int>((*pfnImport)(aFileStream));
@@ -281,7 +281,7 @@ SAL_IMPLEMENT_MAIN_WITH_ARGS(argc, argv)
             static FFilterCall pfnImport(nullptr);
             if (!pfnImport)
             {
-                pfnImport = load(u"libmswordlo.so", "TestImportWW6");
+                pfnImport = load(u"libswlo.so", "TestImportWW6");
             }
             SvFileStream aFileStream(out, StreamMode::READ);
             ret = static_cast<int>((*pfnImport)(aFileStream));
@@ -291,7 +291,7 @@ SAL_IMPLEMENT_MAIN_WITH_ARGS(argc, argv)
             static FFilterCall pfnImport(nullptr);
             if (!pfnImport)
             {
-                pfnImport = load(u"libmswordlo.so", "TestImportWW2");
+                pfnImport = load(u"libswlo.so", "TestImportWW2");
             }
             SvFileStream aFileStream(out, StreamMode::READ);
             ret = static_cast<int>((*pfnImport)(aFileStream));
@@ -301,7 +301,7 @@ SAL_IMPLEMENT_MAIN_WITH_ARGS(argc, argv)
             static FFilterCall pfnImport(nullptr);
             if (!pfnImport)
             {
-                pfnImport = load(u"libmswordlo.so", "TestImportRTF");
+                pfnImport = load(u"libswlo.so", "TestImportRTF");
             }
             SvFileStream aFileStream(out, StreamMode::READ);
             ret = static_cast<int>((*pfnImport)(aFileStream));
@@ -341,7 +341,7 @@ SAL_IMPLEMENT_MAIN_WITH_ARGS(argc, argv)
             static FFilterCall pfnImport(nullptr);
             if (!pfnImport)
             {
-                pfnImport = load(u"libmswordlo.so", "TestPDFExportRTF");
+                pfnImport = load(u"libswlo.so", "TestPDFExportRTF");
             }
             SvFileStream aFileStream(out, StreamMode::READ);
             ret = static_cast<int>((*pfnImport)(aFileStream));
