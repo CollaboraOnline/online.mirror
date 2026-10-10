@@ -1075,17 +1075,4 @@ FontWeight AnalyzeTTFWeight(const TrueTypeFont* ttf)
 
 } // namespace vcl
 
-int TestFontParsing(const void* data, sal_uInt32 size)
-{
-    if (data && size > 0)
-    {
-        FontSubsetInfo aInfo;
-        aInfo.m_nFontType = FontType::TYPE1_PFB;
-        std::vector<sal_uInt8> aOutBuffer;
-        vcl::ConvertCFFfontToType1(static_cast<const unsigned char*>(data),
-                                   size, aOutBuffer, aInfo);
-    }
-    return 0;
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
