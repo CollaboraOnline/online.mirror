@@ -1786,7 +1786,7 @@ void SwView::Execute(SfxRequest &rReq)
                 if (handle->GetKind() == SdrHdlKind::Anchor || handle->GetKind() == SdrHdlKind::Anchor_TR)
                     m_pWrtShell->FindAnchorPos(mPoint, /*bMoveIt=*/true);
                 else
-                    pSdrView->MoveShapeHandle(handleNum, mPoint, OrdNum ? OrdNum->GetValue() : -1);
+                    m_pWrtShell->MoveShapeHandle(handleNum, mPoint, OrdNum ? OrdNum->GetValue() : -1);
             }
             break;
         }
