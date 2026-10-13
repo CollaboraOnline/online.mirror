@@ -3630,15 +3630,16 @@ void jsuno::deliverProxyResult(OUString const& callId, OUString const& jsonValue
     it->second.json = jsonValue;
 }
 
-// Unblock every spinning ProxyInvocation::invoke by marking each pending entry as delivered
-// with an empty JSON body, so a torn-down iframe can't leave the kit waiting forever:
-void jsuno::cancelProxyCalls()
+// Unblock the ProxyInvocation::invoke spinning on callId by marking its pending entry as delivered
+// with an empty JSON body, so a closed iframe can't leave the kit waiting forever:
+void jsuno::cancelProxyCall(OUString const& callId)
 {
     std::lock_guard lock(g_pendingProxyResultsMutex);
-    for (auto & [ callId, entry ] : g_pendingProxyResults)
+    auto const it = g_pendingProxyResults.find(callId);
+    if (it != g_pendingProxyResults.end())
     {
-        entry.delivered = true;
-        entry.json.clear();
+        it->second.delivered = true;
+        it->second.json.clear();
     }
 }
 

@@ -507,7 +507,7 @@ namespace desktop {
                            void (*proxyCallback) (void * data, char const * payload),
                            void * proxyCallbackData) override;
         void deliverProxyResult(char const * callId, char const * jsonValue) override;
-        void cancelProxyCalls() override;
+        void cancelProxyCall(char const * callId) override;
         bool isExpectedReentry() override;
         bool takeLegacyUnoApiUseFlag() override;
         void

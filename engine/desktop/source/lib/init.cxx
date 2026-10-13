@@ -9940,12 +9940,14 @@ void COKitImpl::deliverProxyResult(char const * callId, char const * jsonValue)
 #endif
 }
 
-void COKitImpl::cancelProxyCalls()
+void COKitImpl::cancelProxyCall(char const * callId)
 {
-    comphelper::ProfileZone zone("lo_cancelProxyCalls");
+    comphelper::ProfileZone zone("lo_cancelProxyCall");
     // jsuno owns its own locks for the call hook and pending-results map, so no SolarMutex:
 #if HAVE_FEATURE_QUICKJS
-    jsuno::cancelProxyCalls();
+    jsuno::cancelProxyCall(OUString::fromUtf8(callId));
+#else
+    (void) callId;
 #endif
 }
 

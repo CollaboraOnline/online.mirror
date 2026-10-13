@@ -18,6 +18,7 @@
 #include <kit/Watermark.hpp>
 
 #include <chrono>
+#include <mutex>
 #include <optional>
 #include <queue>
 #include <set>
@@ -391,6 +392,7 @@ public:
             << "\n\tclientVisibleArea: " << _clientVisibleArea.toString()
             << "\n\thasURP: " << _hasURP
             << "\n\tURPContext?: " << (_urpContext == nullptr)
+            << "\n\tpendingProxyCallIds: " << pendingProxyCallCount()
             << "\n\tbackgroundDownloadAs: "
             << (_downloadAs ? _downloadAs->_path.tmpDir : std::string("none"))
             << '\n';
@@ -466,7 +468,17 @@ private:
     /// The export running in a forked process, empty when none is.
     std::optional<DownloadAsRequest> _downloadAs;
 
+    /// The IDs of the proxy calls that this session sent to its client, whose results have not
+    /// arrived yet:
+    std::mutex _pendingProxyCallIdsMutex;
+    std::set<std::string> _pendingProxyCallIds;
+
     // When state is added - please update dumpState above.
+
+    std::size_t pendingProxyCallCount() {
+        std::scoped_lock lock(_pendingProxyCallIdsMutex);
+        return _pendingProxyCallIds.size();
+    }
 
     friend class LogUiCommands;
     int _lastUiCmdLinesLoggedCount = 0;

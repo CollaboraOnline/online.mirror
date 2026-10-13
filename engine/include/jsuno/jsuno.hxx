@@ -73,9 +73,9 @@ LO_DLLPUBLIC_JSUNO OUString execute(OUString const& script, OUString const & sou
 // Yield on `callId`; spurious callIds are silently ignored:
 LO_DLLPUBLIC_JSUNO void deliverProxyResult(OUString const& callId, OUString const& jsonValue);
 
-// Unblock every spinning ProxyInvocation::invoke by marking each pending call as delivered
-// with an empty JSON value, so a torn-down iframe cannot leave the kit waiting forever:
-LO_DLLPUBLIC_JSUNO void cancelProxyCalls();
+// Unblock the ProxyInvocation::invoke spinning on `callId` by marking the call as delivered with an
+// empty JSON value; spurious callIds are silently ignored:
+LO_DLLPUBLIC_JSUNO void cancelProxyCall(OUString const& callId);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
