@@ -2268,6 +2268,13 @@ window.L.Control.JSDialogBuilder = window.L.Control.extend({
 		}
 		break;
 
+		case 'redraw':
+			// A widget that applies the new state to its existing elements keeps them, along
+			// with the focus.
+			if (typeof control.onRedraw !== 'function' || !control.onRedraw(data.control))
+				this._updateWidgetImpl(container, data.control, this.build);
+			break;
+
 		default:
 			app.console.error('unknown action: "' + data.action_type + '" for "' + control.id + '"');
 			break;

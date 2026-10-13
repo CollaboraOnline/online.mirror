@@ -139,6 +139,7 @@ interface ActionData {
 	control_id: string;
 	action_type: string;
 	data: any;
+	control?: WidgetJSON;
 }
 
 // JSDialog message (full, update or action)

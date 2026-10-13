@@ -144,6 +144,8 @@ class JSDialogModelState {
 
 			if (data.data.action_type === 'show') found.visible = true;
 			else if (data.data.action_type === 'hide') found.visible = false;
+			else if (data.data.action_type === 'redraw' && data.data.control)
+				this.widgetUpdate({ control: data.data.control } as JSDialogJSON);
 		}
 	}
 
