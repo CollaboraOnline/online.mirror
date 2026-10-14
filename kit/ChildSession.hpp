@@ -328,6 +328,7 @@ private:
     bool handleZoteroMessage(const StringVector& tokens);
     bool formFieldEvent(const char* buffer, int length, const StringVector& tokens);
     bool contentControlEvent(const StringVector& tokens);
+    bool filePickerResult(const StringVector& tokens);
     bool renderSearchResult(const char* buffer, int length, const StringVector& tokens);
     bool setAccessibilityState(bool enable);
     bool getA11yFocusedParagraph();

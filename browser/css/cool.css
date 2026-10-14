@@ -152,7 +152,7 @@ input, button {
 	pointer-events: none;
 }
 
-#insertgraphic, #insertmultimedia {
+#insertgraphic, #insertmultimedia, #filepicker {
 	position: fixed;
 	top: -100em;
 }
