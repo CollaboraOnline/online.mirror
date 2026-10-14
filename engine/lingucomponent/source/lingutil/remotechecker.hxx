@@ -152,6 +152,9 @@ protected:
     explicit CheckerBase(OUString aConfigNodePath);
     ~CheckerBase() override;
 
+    // Switched on and told where its server is. The checker lists its
+    // locales either way, so the service manager keeps it on its lists, but
+    // declines them while off, so the next checker in line gets the text.
     virtual bool isEnabled() = 0;
     // BCP 47 tags of the locales the checker is configured to serve.
     virtual std::vector<OUString> configuredLocales() = 0;

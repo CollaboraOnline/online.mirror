@@ -117,7 +117,7 @@ GrammalecteChecker::GrammalecteChecker()
 {
 }
 
-bool GrammalecteChecker::isEnabled() { return GrammalecteCfg::IsEnabled::get(); }
+bool GrammalecteChecker::isEnabled() { return GrammalecteCfg::IsEnabled::get() && !getBaseURL().isEmpty(); }
 
 std::vector<OUString> GrammalecteChecker::configuredLocales()
 {

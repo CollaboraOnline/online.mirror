@@ -59,7 +59,11 @@ LanguageToolGrammarChecker::LanguageToolGrammarChecker()
 {
 }
 
-bool LanguageToolGrammarChecker::isEnabled() { return LanguageToolCfg::IsEnabled::get(); }
+bool LanguageToolGrammarChecker::isEnabled()
+{
+    return LanguageToolCfg::IsEnabled::get()
+           && !LanguageToolCfg::BaseURL::get().value_or(OUString()).isEmpty();
+}
 
 std::vector<OUString> LanguageToolGrammarChecker::configuredLocales()
 {
