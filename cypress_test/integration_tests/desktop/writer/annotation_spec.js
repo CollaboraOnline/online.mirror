@@ -157,6 +157,8 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		desktopHelper.selectZoomLevel('120', false);
 		cy.cGet('#comment-container-1').should('be.visible');
 
+		// A cursor on the anchor selects the comment and scrolls it into view.
+		helper.typeIntoDocument('{enter}');
 		desktopHelper.selectZoomLevel('150', false);
 		cy.cGet('#comment-container-1').should('be.not.visible');
 	});
@@ -164,7 +166,8 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 	it('Visibility at Different Window Widths (increasing)', function() {
 		/*
 			1. start with collapsed comment and increase window width
-			2. cy.viewport(1400, 600); at 150% comment is collapsed
+			2. cy.viewport(1400, 600); at 150% the cursor is still on the
+			   anchor, so the comment is selected and scrolled into view
 			3. increase width by 20 and assert visibility
 		*/
 		desktopHelper.insertComment('test comment', true);
@@ -172,7 +175,7 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		cy.cGet('#comment-container-1').should('be.visible');
 
 		desktopHelper.selectZoomLevel('150', false);
-		cy.cGet('#comment-container-1').should('be.not.visible');
+		cy.cGet('#comment-container-1').should('be.visible');
 
 		for (let width = 1420; width < 1500; width += 20) {
 			cy.viewport(width, 600);
