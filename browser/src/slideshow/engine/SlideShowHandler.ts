@@ -311,6 +311,14 @@ class SlideShowHandler {
 				a11yContainer.tabIndex = -1;
 				canvas.innerHTML = '';
 				a11yContainer.innerHTML = app.LOUtil.sanitize(a11yString);
+				const aBlocks = Array.from(
+					a11yContainer.querySelectorAll('h1, h2, p, li'),
+				)
+					.map((el: Element) => el.textContent.trim())
+					.filter((s: string) => s.length > 0);
+				a11yContainer.textContent = aBlocks.length
+					? aBlocks.join('. ')
+					: a11yContainer.textContent;
 				canvas.appendChild(a11yContainer);
 			}
 		}
