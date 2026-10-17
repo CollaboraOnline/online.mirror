@@ -214,10 +214,7 @@ void Session::parseDocOptions(const StringVector& tokens, int& part, std::string
         }
         else if (name == "lang")
         {
-            if (value == "en")
-                _lang = "en-US";
-            else
-                _lang = std::move(value);
+            setLang(value);
             ++offset;
         }
         else if (name == "timezone")
