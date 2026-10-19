@@ -1168,6 +1168,7 @@ build-cool: \
 	$(DIST_FOLDER)/settings.css \
 	$(DIST_FOLDER)/color-palette.css \
 	$(DIST_FOLDER)/color-palette-dark.css \
+	$(DIST_FOLDER)/app-dark-theme.js \
 	$(DIST_FOLDER)/bundle.js \
 	$(DIST_FOLDER)/cool.html \
 	$(DIST_FOLDER)/cool-preview.html \
@@ -1250,7 +1251,7 @@ eslint.done: $(COOL_JS_SRC) $(COOL_TS_SRC) $(COOL_TSX_SRC)
 	@touch $@
 
 prettier.done: $(COOL_JS_SRC) $(COOL_TS_SRC) $(COOL_TSX_SRC)
-	$(call run_prettier_check,--debug-check $(srcdir)/src $(srcdir)/js/global.js $(srcdir)/js/plural.js)
+	$(call run_prettier_check,--debug-check $(srcdir)/src $(srcdir)/js/global.js $(srcdir)/js/plural.js $(srcdir)/js/app-dark-theme.js)
 	@touch $@
 
 # Generate the localization map files from Langs.conf (the single source of
@@ -1324,6 +1325,10 @@ $(DIST_FOLDER)/bundle.js: $(INTERMEDIATE_DIR)/cool-src.js $(L10N_ALL_JS) $(call 
 $(DIST_FOLDER)/global.js: $(srcdir)/js/global.js
 	@mkdir -p $(dir $@)
 	$(call global_file)
+
+$(DIST_FOLDER)/app-dark-theme.js: $(srcdir)/js/app-dark-theme.js
+	@mkdir -p $(dir $@)
+	@cp $< $@
 
 $(INTERMEDIATE_DIR)/COOL_JS.m4.jslist: $(COOL_JS_DST)
 	@mkdir -p $(INTERMEDIATE_DIR)
