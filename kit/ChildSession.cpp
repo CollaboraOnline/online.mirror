@@ -5140,7 +5140,10 @@ bool ChildSession::proxyReturn(char const * buffer, int length) {
     std::string const jsonValue(full.substr(idEnd + 1));
     {
         std::scoped_lock lock(_pendingProxyCallIdsMutex);
-        _pendingProxyCallIds.erase(callId);
+        if (_pendingProxyCallIds.erase(callId) == 0) {
+            LOG_WRN("Ignoring proxyreturn for call [" << callId << "] not pending in this session");
+            return true;
+        }
     }
     _docManager->getLOKit()->deliverProxyResult(callId.c_str(), jsonValue.c_str());
     return true;
