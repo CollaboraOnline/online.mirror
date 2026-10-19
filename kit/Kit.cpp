@@ -1873,6 +1873,28 @@ std::string Document::getDefaultBackgroundTheme(const std::shared_ptr<ChildSessi
     return darkTheme ? "Dark" : "Light";
 }
 
+namespace
+{
+/// Append ",name=value" to the comma-separated document load options string. A value is a single
+/// option, so one that is empty or holds a comma is left out.
+void appendLoadOption(std::string& options, std::string_view name, std::string_view value)
+{
+    if (value.empty())
+        return;
+
+    if (value.find(',') != std::string_view::npos)
+    {
+        LOG_WRN("Ignoring the [" << name << "] load option, its value holds a comma");
+        return;
+    }
+
+    options += ',';
+    options += name;
+    options += '=';
+    options += value;
+}
+}
+
 std::shared_ptr<lok::Document> Document::load(const std::shared_ptr<ChildSession>& session,
                                               const std::string& renderOpts)
 {
@@ -1899,26 +1921,13 @@ std::shared_ptr<lok::Document> Document::load(const std::shared_ptr<ChildSession
         consistencyCheckFileExists(uri);
 
     std::string options;
-    if (!lang.empty())
-        options = "Language=" + lang;
-
-    if (!deviceFormFactor.empty())
-        options += ",DeviceFormFactor=" + deviceFormFactor;
-
-    if (!batchMode.empty())
-        options += ",Batch=" + batchMode;
-
-    if (!enableMacrosExecution.empty())
-        options += ",EnableMacrosExecution=" + enableMacrosExecution;
-
-    if (!macroSecurityLevel.empty())
-        options += ",MacroSecurityLevel=" + macroSecurityLevel;
-
-    if (!clientVisibleArea.empty())
-        options += ",ClientVisibleArea=" + clientVisibleArea;
-
-    if (!userTimezone.empty())
-        options += ",Timezone=" + userTimezone;
+    appendLoadOption(options, "Language", lang);
+    appendLoadOption(options, "DeviceFormFactor", deviceFormFactor);
+    appendLoadOption(options, "Batch", batchMode);
+    appendLoadOption(options, "EnableMacrosExecution", enableMacrosExecution);
+    appendLoadOption(options, "MacroSecurityLevel", macroSecurityLevel);
+    appendLoadOption(options, "ClientVisibleArea", clientVisibleArea);
+    appendLoadOption(options, "Timezone", userTimezone);
 
     const std::string wopiCertDir = pathFromFileURL(session->getJailedFilePath() + ".certs");
     if (FileUtil::Stat(wopiCertDir).exists())
