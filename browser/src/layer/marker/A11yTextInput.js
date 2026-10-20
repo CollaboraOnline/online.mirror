@@ -481,6 +481,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 				this);
 		}
 		window.L.DomEvent.on(this._contextList, 'focusin', this._onContextFocus, this);
+		window.L.DomEvent.on(this._contextTable, 'focusin', this._onContextFocus, this);
 		this._container.insertBefore(this._headingsAbove, this._textArea);
 		this._container.insertBefore(this._contextBefore, this._textArea);
 		this._container.insertBefore(this._contextList, this._textArea);
@@ -541,7 +542,7 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 			return;
 
 		const rows = table && Array.isArray(table.rows) ? table.rows : [];
-		const key = JSON.stringify(table && rows.length ? table : null);
+		const key = JSON.stringify([window.L.Browser.win, table && rows.length ? table : null]);
 		if (key === this._contextTableKey)
 			return;
 		this._contextTableKey = key;
@@ -565,6 +566,8 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 				if (cell.colSpan !== undefined)
 					td.colSpan = parseInt(cell.colSpan);
 				td.textContent = cell.text;
+				if (window.L.Browser.win)
+					td.tabIndex = -1;
 				tr.appendChild(td);
 			});
 			element.appendChild(tr);
@@ -893,9 +896,9 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 		// NVDA focuses a link before activating it, and a jump now would replace the link
 		if (ev.target.closest && ev.target.closest('a'))
 			return;
-		const paragraph = ev.target.closest ? ev.target.closest('.a11y-context > span, .a11y-context li') : null;
-		if (paragraph && paragraph.dataset.twips)
-			this._jumpToContextParagraph(paragraph.dataset.twips);
+		const paragraph = ev.target.closest ? ev.target.closest('.a11y-context > span, .a11y-context li, .a11y-context td') : null;
+		if (paragraph)
+			this._jumpToContext(paragraph);
 	},
 
 	// Orca leaves the focus on the outline link, or on the page with the selection on the
@@ -913,21 +916,21 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 			this._jumpToHeading(parseInt(active.dataset.index), active.dataset.target);
 			return;
 		}
-		const inContext = active && (this._contextBefore.contains(active)
-			|| this._contextList.contains(active) || this._contextAfter.contains(active));
+		const inContext = active && (this._contextBefore.contains(active) || this._contextList.contains(active)
+			|| this._contextTable.contains(active) || this._contextAfter.contains(active));
 		if (active !== document.body && !inContext)
 			return;
 		const anchor = window.getSelection() ? window.getSelection().anchorNode : null;
 		const element = anchor && anchor.nodeType === Node.TEXT_NODE ? anchor.parentNode : anchor;
-		let paragraph = element && element.closest ? element.closest('.a11y-context > span, .a11y-context li') : null;
+		let paragraph = element && element.closest ? element.closest('.a11y-context > span, .a11y-context li, .a11y-context td') : null;
 		if (!paragraph && inContext) // the link NVDA left the focus on
-			paragraph = active.closest('.a11y-context > span, .a11y-context li');
-		if (!paragraph || !paragraph.dataset.twips)
+			paragraph = active.closest('.a11y-context > span, .a11y-context li, .a11y-context td');
+		if (!paragraph || (!paragraph.dataset.twips && paragraph.tagName !== 'TD'))
 			return;
 
 		window.L.DomEvent.stop(ev);
 		let target = paragraph;
-		if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+		if (paragraph.tagName !== 'TD' && (ev.key === 'ArrowDown' || ev.key === 'ArrowUp')) {
 			const down = ev.key === 'ArrowDown';
 			const paragraphs = Array.from(this._contextBefore.children).concat(
 				Array.from(this._contextList.querySelectorAll('li')), Array.from(this._contextAfter.children));
@@ -941,7 +944,22 @@ window.L.A11yTextInput = window.L.TextInput.extend({
 			if (next)
 				target = next;
 		}
-		this._jumpToContextParagraph(target.dataset.twips);
+		this._jumpToContext(target);
+	},
+
+	_jumpToContext: function(element) {
+		if (element.tagName === 'TD')
+			this._jumpToCell(element, false);
+		else if (element.dataset.twips)
+			this._jumpToContextParagraph(element.dataset.twips);
+	},
+
+	// A click near a cell's edge would select its row or column instead.
+	_jumpToCell: function(cell, end) {
+		this._contextJump = setTimeout(this._endContextJump.bind(this), 1000);
+		const row = parseInt(cell.parentNode.getAttribute('aria-rowindex')) - 1;
+		const col = parseInt(cell.getAttribute('aria-colindex')) - 1;
+		app.socket.sendMessage('seta11ycaretincell row=' + row + ' col=' + col + ' end=' + (end ? 1 : 0));
 	},
 
 	_jumpToContextParagraph: function(twips) {
