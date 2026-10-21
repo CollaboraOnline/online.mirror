@@ -1110,6 +1110,29 @@ CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest5, testTdf173710DocumentLanguage)
     assertXPath(pXmlDoc, "/p:presentation/p:defaultTextStyle/a:defPPr/a:defRPr", "lang", u"en-US");
 }
 
+CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest5, testTdf43547ShapeAltText)
+{
+    // A picture, a text box, a table, a line, a polyline, a rectangle and an ellipse, each with a
+    // title and a description
+    createSdImpressDoc("odp/shapes-with-title.fodp");
+
+    save(TestFilter::PPTX);
+    xmlDocUniquePtr pXmlDoc = parseExport(u"ppt/slides/slide1.xml"_ustr);
+    static constexpr OString sPath = "/p:sld/p:cSld/p:spTree/p:pic/p:nvPicPr/p:cNvPr"_ostr;
+    assertXPath(pXmlDoc, sPath, "descr", u"Paid stamp alt text");
+    // Without the fix in place, the title was not written
+    assertXPath(pXmlDoc, sPath, "title", u"Paid stamp title");
+
+    // Without the fix in place, neither the description nor the title of these was written
+    for (OUString const& sName : { u"Text box"_ustr, u"Table"_ustr, u"Line"_ustr, u"Polyline"_ustr,
+                                  u"Rectangle"_ustr, u"Ellipse"_ustr })
+    {
+        OString const sShape("//p:cNvPr[@name='" + sName.toUtf8() + "']");
+        assertXPath(pXmlDoc, sShape, "descr", Concat2View(sName + " alt text"));
+        assertXPath(pXmlDoc, sShape, "title", Concat2View(sName + " title"));
+    }
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

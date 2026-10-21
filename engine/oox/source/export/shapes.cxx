@@ -398,6 +398,16 @@ bool ShapeExport::NonEmptyText( const Reference< cpo::uno::XInterface >& xIface 
     return IsNonEmptySimpleText(xIface);
 }
 
+// a string property of a shape, as the description or the title of <cNvPr>: none when empty
+static std::optional<OUString> GetOptionalString(Reference<XPropertySet> const& xShape,
+                                                 OUString const& rName)
+{
+    OUString sValue;
+    if (xShape->getPropertySetInfo()->hasPropertyByName(rName))
+        xShape->getPropertyValue(rName) >>= sValue;
+    return sax_fastparser::UseIf(sValue, !sValue.isEmpty());
+}
+
 static void AddExtLst(FSHelperPtr const& pFS, Reference<XPropertySet> const& xShape)
 {
     if (xShape->getPropertySetInfo()->hasPropertyByName(u"Decorative"_ustr)
@@ -448,7 +458,9 @@ ShapeExport& ShapeExport::WritePolyPolygonShape( const Reference< XShape >& xSha
         pFS->startElementNS(mnXmlNamespace, XML_nvSpPr);
         pFS->startElementNS(mnXmlNamespace, XML_cNvPr,
                               XML_id, OString::number(GetNewShapeID(xShape)),
-                              XML_name, GetShapeName(xShape));
+                              XML_name, GetShapeName(xShape),
+                              XML_descr, GetOptionalString(xProps, u"Description"_ustr),
+                              XML_title, GetOptionalString(xProps, u"Title"_ustr));
         AddExtLst(pFS, xProps);
         pFS->endElementNS(mnXmlNamespace, XML_cNvPr);
     }
@@ -1340,7 +1352,9 @@ ShapeExport& ShapeExport::WriteEllipseShape( const Reference< XShape >& xShape )
         pFS->startElementNS(mnXmlNamespace, XML_nvSpPr);
         pFS->startElementNS(mnXmlNamespace, XML_cNvPr,
                 XML_id, OString::number(GetNewShapeID(xShape)),
-                XML_name, GetShapeName(xShape));
+                XML_name, GetShapeName(xShape),
+                XML_descr, GetOptionalString(xProps, u"Description"_ustr),
+                XML_title, GetOptionalString(xProps, u"Title"_ustr));
         AddExtLst(pFS, xProps);
         pFS->endElementNS(mnXmlNamespace, XML_cNvPr);
         pFS->singleElementNS( mnXmlNamespace, XML_cNvSpPr );
@@ -1497,7 +1511,8 @@ void ShapeExport::WriteGraphicObjectShapePart( const Reference< XShape >& xShape
 
     pFS->startElementNS(mnXmlNamespace, XML_cNvPr, XML_id, OString::number(nShapeId), XML_name,
                         GetShapeName(xShape), XML_descr,
-                        sax_fastparser::UseIf(sDescr, !sDescr.isEmpty()), XML_hidden,
+                        sax_fastparser::UseIf(sDescr, !sDescr.isEmpty()), XML_title,
+                        GetOptionalString(xShapeProps, u"Title"_ustr), XML_hidden,
                         sax_fastparser::UseIf("1", !bVisible));
 
     if (eClickAction != presentation::ClickAction_NONE)
@@ -2153,7 +2168,9 @@ ShapeExport& ShapeExport::WriteLineShape( const Reference< XShape >& xShape )
         pFS->startElementNS(mnXmlNamespace, XML_nvSpPr);
         pFS->startElementNS(mnXmlNamespace, XML_cNvPr,
                               XML_id, OString::number(GetNewShapeID(xShape)),
-                              XML_name, GetShapeName(xShape));
+                              XML_name, GetShapeName(xShape),
+                              XML_descr, GetOptionalString(xShapeProps, u"Description"_ustr),
+                              XML_title, GetOptionalString(xShapeProps, u"Title"_ustr));
         AddExtLst(pFS, xShapeProps);
         pFS->endElementNS(mnXmlNamespace, XML_cNvPr);
     }
@@ -2237,7 +2254,9 @@ ShapeExport& ShapeExport::WriteRectangleShape( const Reference< XShape >& xShape
     pFS->startElementNS(mnXmlNamespace, XML_nvSpPr);
     pFS->startElementNS(mnXmlNamespace, XML_cNvPr,
                           XML_id, OString::number(GetNewShapeID(xShape)),
-                          XML_name, GetShapeName(xShape));
+                          XML_name, GetShapeName(xShape),
+                          XML_descr, GetOptionalString(xShapeProps, u"Description"_ustr),
+                          XML_title, GetOptionalString(xShapeProps, u"Title"_ustr));
     AddExtLst(pFS, xShapeProps);
     pFS->endElementNS(mnXmlNamespace, XML_cNvPr);
     pFS->singleElementNS(mnXmlNamespace, XML_cNvSpPr);
@@ -2812,7 +2831,9 @@ ShapeExport& ShapeExport::WriteTableShape( const Reference< XShape >& xShape )
     Reference<XPropertySet> const xShapeProps(xShape, UNO_QUERY);
     pFS->startElementNS(mnXmlNamespace, XML_cNvPr,
                           XML_id, OString::number(GetNewShapeID(xShape)),
-                          XML_name,   GetShapeName(xShape));
+                          XML_name,   GetShapeName(xShape),
+                          XML_descr, GetOptionalString(xShapeProps, u"Description"_ustr),
+                          XML_title, GetOptionalString(xShapeProps, u"Title"_ustr));
     AddExtLst(pFS, xShapeProps);
     pFS->endElementNS(mnXmlNamespace, XML_cNvPr);
 
@@ -2843,7 +2864,9 @@ ShapeExport& ShapeExport::WriteTextShape( const Reference< XShape >& xShape )
         pFS->startElementNS(mnXmlNamespace, XML_nvSpPr);
         pFS->startElementNS(mnXmlNamespace, XML_cNvPr,
                               XML_id, OString::number(GetNewShapeID(xShape)),
-                              XML_name, GetShapeName(xShape));
+                              XML_name, GetShapeName(xShape),
+                              XML_descr, GetOptionalString(xShapeProps, u"Description"_ustr),
+                              XML_title, GetOptionalString(xShapeProps, u"Title"_ustr));
         OUString sURL;
         if (GetProperty(xShapeProps, u"URL"_ustr))
             mAny >>= sURL;

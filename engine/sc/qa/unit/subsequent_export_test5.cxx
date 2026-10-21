@@ -1820,6 +1820,19 @@ CPPUNIT_TEST_FIXTURE(ScExportTest5, testDecorativeODF14)
     assertXPath(pDoc, "//style:graphic-properties[@loext:decorative='true']", 1);
 }
 
+CPPUNIT_TEST_FIXTURE(ScExportTest5, testTdf43547PictureTitleXLSX)
+{
+    // A picture with a title and a description
+    createScDoc("ods/picture-with-title.ods");
+
+    save(TestFilter::XLSX);
+    xmlDocUniquePtr pDoc = parseExport(u"xl/drawings/drawing1.xml"_ustr);
+    CPPUNIT_ASSERT(pDoc);
+    assertXPath(pDoc, "//xdr:pic/xdr:nvPicPr/xdr:cNvPr", "descr", u"Paid stamp alt text");
+    // Without the fix in place, the title was not written
+    assertXPath(pDoc, "//xdr:pic/xdr:nvPicPr/xdr:cNvPr", "title", u"Paid stamp title");
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- A picture, a text box, a table, a line, a polyline, a rectangle and an ellipse, each with a
+     title and a description. -->
+<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0"
+                 xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0"
+                 xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0"
+                 xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0"
+                 xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0"
+                 xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0"
+                 xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0"
+                 office:version="1.3"
+                 office:mimetype="application/vnd.oasis.opendocument.presentation">
+ <office:automatic-styles>
+  <style:style style:name="dp1" style:family="drawing-page"/>
+  <style:style style:name="gr1" style:family="graphic"/>
+ </office:automatic-styles>
+ <office:body>
+  <office:presentation>
+   <draw:page draw:name="page1" draw:style-name="dp1" draw:master-page-name="Default">
+    <draw:frame draw:name="Stamp" draw:style-name="gr1" draw:layer="layout"
+                svg:width="5cm" svg:height="4cm" svg:x="1cm" svg:y="2cm">
+     <draw:image>
+      <office:binary-data>iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAEElEQVR42mM4YGAARAwQCgAhzgSBu+38ZAAAAABJRU5ErkJggg==</office:binary-data>
+     </draw:image>
+     <svg:title>Paid stamp title</svg:title>
+     <svg:desc>Paid stamp alt text</svg:desc>
+    </draw:frame>
+    <draw:frame draw:name="Text box" draw:style-name="gr1" draw:layer="layout"
+                svg:width="5cm" svg:height="2cm" svg:x="7cm" svg:y="2cm">
+     <draw:text-box><text:p>Text</text:p></draw:text-box>
+     <svg:title>Text box title</svg:title>
+     <svg:desc>Text box alt text</svg:desc>
+    </draw:frame>
+    <draw:frame draw:name="Table" draw:style-name="gr1" draw:layer="layout"
+                svg:width="5cm" svg:height="2cm" svg:x="13cm" svg:y="2cm">
+     <table:table>
+      <table:table-column/>
+      <table:table-row><table:table-cell><text:p>Cell</text:p></table:table-cell></table:table-row>
+     </table:table>
+     <svg:title>Table title</svg:title>
+     <svg:desc>Table alt text</svg:desc>
+    </draw:frame>
+    <draw:line draw:name="Line" draw:style-name="gr1" draw:layer="layout"
+               svg:x1="1cm" svg:y1="8cm" svg:x2="5cm" svg:y2="10cm">
+     <svg:title>Line title</svg:title>
+     <svg:desc>Line alt text</svg:desc>
+    </draw:line>
+    <draw:polyline draw:name="Polyline" draw:style-name="gr1" draw:layer="layout"
+                   svg:width="4cm" svg:height="2cm" svg:x="7cm" svg:y="8cm"
+                   svg:viewBox="0 0 4000 2000" draw:points="0,0 2000,2000 4000,0">
+     <svg:title>Polyline title</svg:title>
+     <svg:desc>Polyline alt text</svg:desc>
+    </draw:polyline>
+    <draw:rect draw:name="Rectangle" draw:style-name="gr1" draw:layer="layout"
+               svg:width="4cm" svg:height="2cm" svg:x="13cm" svg:y="8cm">
+     <svg:title>Rectangle title</svg:title>
+     <svg:desc>Rectangle alt text</svg:desc>
+    </draw:rect>
+    <draw:ellipse draw:name="Ellipse" draw:style-name="gr1" draw:layer="layout"
+                  svg:width="4cm" svg:height="2cm" svg:x="19cm" svg:y="8cm">
+     <svg:title>Ellipse title</svg:title>
+     <svg:desc>Ellipse alt text</svg:desc>
+    </draw:ellipse>
+   </draw:page>
+  </office:presentation>
+ </office:body>
+</office:document>
