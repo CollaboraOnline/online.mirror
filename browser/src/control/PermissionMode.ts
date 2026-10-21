@@ -37,7 +37,6 @@ class PermissionViewMode extends JSDialogComponent {
 	notebookbarBuilder!: JSBuilder;
 	awaitingRecording: boolean = false; // Set while review mode waits for core to confirm recording is on.
 	reviewTabRequested: boolean = false; // Set when the user selects Review Mode, to open the Review tab.
-	recordingStateKnown: boolean = false; // Set after core reports the recording state the document loaded with.
 
 	constructor(map: MapInterface) {
 		super(map, 'PermissionViewMode', 'permission');
@@ -290,16 +289,15 @@ class PermissionViewMode extends JSDialogComponent {
 	onCommandStateChanged(e: any): void {
 		if (e.commandName !== '.uno:TrackChanges') return;
 		const recording = e.state === 'true';
-		const isLoadState = !this.recordingStateKnown;
-		this.recordingStateKnown = true;
 		if (recording) this.awaitingRecording = false;
 		else if (this.awaitingRecording) return;
 
 		if (!this.map.isEditMode() || this.map.getDocType() !== 'text') return;
 		if (recording === app.file.reviewMode) return;
 
+		// A core report of recording on keeps the current tab. Recording is shared by the
+		// whole document, so the report can come from another user's action.
 		app.file.reviewMode = recording;
-		if (recording && !isLoadState) this.showReviewTab();
 		this.updateReadonlyIndicator();
 	}
 
