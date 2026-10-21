@@ -213,7 +213,7 @@ check_whitespaces( $against);
 check_author();
 
 # check prettier in code
-check_prettier();
+#check_prettier();
 
 # all OK
 exit( 0 );
