@@ -67,6 +67,15 @@ void logSyntaxErrorDetails(const StringVector& tokens, const std::string& firstL
 {
     LOG_WRN("Invalid syntax for '" << tokens[0] << "' message: [" << firstLine << ']');
 }
+
+/// Write " name=value" to a kit load line with the value URI-encoded, so it stays one token.
+void appendEncodedLoadToken(std::ostringstream& oss, std::string_view name,
+                            const std::string& value)
+{
+    std::string encoded;
+    Poco::URI::encode(value, "", encoded);
+    oss << ' ' << name << '=' << encoded;
+}
 }
 
 ClientSession::ClientSession(
@@ -1558,40 +1567,26 @@ bool ClientSession::loadDocument(const char* /*buffer*/, int /*length*/,
 
         if (!getUserId().empty() && !getUserName().empty())
         {
-            std::string encodedUserId;
-            Poco::URI::encode(getUserId(), "", encodedUserId);
-            oss << " authorid=" << encodedUserId;
-            encodedUserId.clear();
-            Poco::URI::encode(COOLWSD::anonymizeUsername(getUserId()), "", encodedUserId);
-            oss << " xauthorid=" << encodedUserId;
-
-            std::string encodedUserName;
-            Poco::URI::encode(getUserName(), "", encodedUserName);
-            oss << " author=" << encodedUserName;
-            encodedUserName.clear();
-            Poco::URI::encode(COOLWSD::anonymizeUsername(getUserName()), "", encodedUserName);
-            oss << " xauthor=" << encodedUserName;
+            appendEncodedLoadToken(oss, "authorid", getUserId());
+            appendEncodedLoadToken(oss, "xauthorid", COOLWSD::anonymizeUsername(getUserId()));
+            appendEncodedLoadToken(oss, "author", getUserName());
+            appendEncodedLoadToken(oss, "xauthor", COOLWSD::anonymizeUsername(getUserName()));
         }
 
         if (!getUserExtraInfo().empty())
         {
-            std::string encodedUserExtraInfo;
-            Poco::URI::encode(getUserExtraInfo(), "", encodedUserExtraInfo);
-            oss << " authorextrainfo=" << encodedUserExtraInfo; //TODO: could this include PII?
+            //TODO: could this include PII?
+            appendEncodedLoadToken(oss, "authorextrainfo", getUserExtraInfo());
         }
 
         if (!getUserPrivateInfo().empty())
         {
-            std::string encodedUserPrivateInfo;
-            Poco::URI::encode(getUserPrivateInfo(), "", encodedUserPrivateInfo);
-            oss << " authorprivateinfo=" << encodedUserPrivateInfo;
+            appendEncodedLoadToken(oss, "authorprivateinfo", getUserPrivateInfo());
         }
 
         if (!getServerPrivateInfo().empty())
         {
-            std::string encodedServerPrivateInfo;
-            Poco::URI::encode(getServerPrivateInfo(), "", encodedServerPrivateInfo);
-            oss << " serverprivateinfo=" << encodedServerPrivateInfo;
+            appendEncodedLoadToken(oss, "serverprivateinfo", getServerPrivateInfo());
         }
 
         oss << " readonly=" << isReadOnly();
@@ -1613,7 +1608,7 @@ bool ClientSession::loadDocument(const char* /*buffer*/, int /*length*/,
 
         if (!getLang().empty())
         {
-            oss << " lang=" << getLang();
+            appendEncodedLoadToken(oss, "lang", getLang());
         }
 
         if (!getDeviceFormFactor().empty())
@@ -1643,9 +1638,7 @@ bool ClientSession::loadDocument(const char* /*buffer*/, int /*length*/,
 
         if (!getWatermarkText().empty())
         {
-            std::string encodedWatermarkText;
-            Poco::URI::encode(getWatermarkText(), "", encodedWatermarkText);
-            oss << " watermarkText=" << encodedWatermarkText;
+            appendEncodedLoadToken(oss, "watermarkText", getWatermarkText());
             oss << " watermarkOpacity="
                 << ConfigUtil::getConfigValue<double>("watermark.opacity", 0.2);
         }

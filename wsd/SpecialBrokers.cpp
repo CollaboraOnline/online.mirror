@@ -128,10 +128,10 @@ bool ConvertToBroker::startConversion(SocketDisposition& disposition, const std:
 void ConvertToBroker::sendStartMessage(const std::shared_ptr<ClientSession>& clientSession,
                                        const std::string& encodedFrom)
 {
+    clientSession->setLang(getLang());
+
     // add batch mode, no interactive dialogs
-    std::string load = "load url=" + encodedFrom + " batch=true";
-    if (!getLang().empty())
-        load += " lang=" + getLang();
+    const std::string load = "load url=" + encodedFrom + " batch=true";
     std::vector<char> loadRequest(load.begin(), load.end());
     clientSession->handleMessage(loadRequest);
 }

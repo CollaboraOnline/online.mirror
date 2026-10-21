@@ -926,6 +926,10 @@ bool ChildSession::loadDocument(const StringVector& tokens)
 
     std::string timestamp;
     parseDocOptions(tokens, part, timestamp);
+    // coolwsd sends lang URI-encoded on the load line.
+    std::string decodedLang;
+    URI::decode(getLang(), decodedLang);
+    setLang(decodedLang);
 
     std::string renderOpts;
     if (!getDocOptions().empty())
