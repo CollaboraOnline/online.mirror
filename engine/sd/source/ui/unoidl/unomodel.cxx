@@ -7116,6 +7116,7 @@ void SdXImpressDocument::moveSelectedParts(int nPosition, bool bDuplicate, int n
         SdPage* pPage;
         OUString aName;
         OUString aId;
+        sd::SlideSectionLink aLink;
     };
     std::vector<SectionAnchor> aAnchors;
 
@@ -7141,7 +7142,7 @@ void SdXImpressDocument::moveSelectedParts(int nPosition, bool bDuplicate, int n
                 }
             }
 
-            aAnchors.push_back({ pAnchor, rSec.maName, rSec.maId });
+            aAnchors.push_back({ pAnchor, rSec.maName, rSec.maId, rSec.maLink });
         }
 
         // Override one section's anchor with the first moved slide so it
@@ -7186,6 +7187,9 @@ void SdXImpressDocument::moveSelectedParts(int nPosition, bool bDuplicate, int n
                     aSec.maName = rAnchor.aName;
                     aSec.maId = rAnchor.aId;
                     aSec.mnStartIndex = static_cast<sal_Int32>(p);
+                    // The section keeps the slides it was linked with, so it stays linked while
+                    // it spans them in the same order.
+                    aSec.maLink = rAnchor.aLink;
                     aNewSections.push_back(aSec);
                     break;
                 }
