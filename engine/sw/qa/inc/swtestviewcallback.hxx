@@ -61,6 +61,8 @@ public:
     /// Accessibility selected object payload.
     boost::property_tree::ptree m_aA11ySelection;
     std::vector<OString> m_aStateChanges;
+    /// The view ids named by each notice that recording was turned on for all views, in order.
+    std::vector<int> m_aRecordingForAllViewsBy;
     TestKitCallbackWrapper m_callbackWrapper;
     OString m_aExportFile;
     bool m_bCursorVisible = false;

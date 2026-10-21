@@ -223,6 +223,14 @@ void SwTestViewCallback::callbackImpl(COKitCallbackType eType, const char* pPayl
             boost::property_tree::read_json(aStream, m_aA11ySelection);
             break;
         }
+        case COKitCallbackType::REDLINE_RECORDING_FOR_ALL_VIEWS:
+        {
+            boost::property_tree::ptree aTree;
+            std::stringstream aStream(pPayload);
+            boost::property_tree::read_json(aStream, aTree);
+            m_aRecordingForAllViewsBy.push_back(aTree.get<int>("viewId"));
+            break;
+        }
         default:
             break;
     }
