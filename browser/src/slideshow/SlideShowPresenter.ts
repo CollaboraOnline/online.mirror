@@ -1201,9 +1201,11 @@ class SlideShowPresenter {
 		const htmlContent = this._generateSlideWindowHtml();
 
 		// On the Qt and macOS shells a full screen show or a presenter-console
-		// show opens its own window with window.origOpen. A plain "Present in
-		// Window", and the web build, keep the in-page iframe.
-		const consoleDriven = !!this._map.presenterConsole?._active;
+		// show opens its own window with window.origOpen. "Present in Window",
+		// with or without the console, and the web build keep the in-page iframe.
+		const consoleDriven =
+			!!this._map.presenterConsole?._active &&
+			!this._map.presenterConsole._inDocumentWindow;
 		const separateWindowOpen =
 			(showSwitchMonitors || consoleDriven) &&
 			this._shellOpensSlideshowWindow() &&

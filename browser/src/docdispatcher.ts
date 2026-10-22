@@ -957,11 +957,18 @@ class Dispatcher {
 			() => {
 				const welcomePresentation =
 					window.coolParams.get('welcome') === 'true' ? true : false;
-				if (window.canvasSlideshowEnabled)
-					app.map.fire('newpresentinwindow', {
-						isWelcomePresentation: welcomePresentation,
-					});
-				else
+				if (window.canvasSlideshowEnabled) {
+					// The Presenter View toggle decides whether the console opens too.
+					if (
+						!welcomePresentation &&
+						app.map.uiManager.shouldShowPresenterConsole()
+					)
+						app.map.fire('newpresentinconsole', { inDocumentWindow: true });
+					else
+						app.map.fire('newpresentinwindow', {
+							isWelcomePresentation: welcomePresentation,
+						});
+				} else
 					app.map.fire('presentinwindow', {
 						isWelcomePresentation: welcomePresentation,
 					});
