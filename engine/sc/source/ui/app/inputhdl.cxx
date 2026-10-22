@@ -955,6 +955,7 @@ ScInputHandler::ScInputHandler()
         mbDocumentDisposing(false),
         mbPartialPrefix(false),
         mbEditingExistingContent(false),
+        mbKeepURLFields(false),
         nValidation( 0 ),
         eAttrAdjust( SvxCellHorJustify::Standard ),
         fScaleX( 1.0 ),
@@ -4887,7 +4888,7 @@ Size ScInputHandler::GetTextSize()
 void ScInputHandler::RemoveURLFieldsFromEditEngine()
 {
     maUnlinkedURLFields.clear();
-    if (!mpEditEngine)
+    if (!mpEditEngine || mbKeepURLFields)
         return;
 
     SfxItemSet aSet = mpEditEngine->GetAttribs(ESelection::All());
