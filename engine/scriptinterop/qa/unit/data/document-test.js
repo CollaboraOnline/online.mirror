@@ -175,6 +175,17 @@ function test() {
     console.assert(noteContents.getNumChildren() >= 1);
     console.assert(noteContents.getChild(0).getText() === 'Note');
     console.assert(noteContents.getChildIndex(noteContents.getChild(0)) === 0);
+    // Only COOL has the legacy UNO API, through which a footnote section that has already been read
+    // sees the changes made since, as well as those of undo:
+    if (globalThis.cool) {
+        const noteCount = noteContents.getNumChildren();
+        const noteText = cool.getActiveUnoModel().getFootnotes().getByIndex(1);
+        // 0 is com.sun.star.text.ControlCharacter.PARAGRAPH_BREAK:
+        noteText.insertControlCharacter(noteText.getEnd(), 0, false);
+        console.assert(noteContents.getNumChildren() === noteCount + 1);
+        cool.getActiveUnoModel().getUndoManager().undo();
+        console.assert(noteContents.getNumChildren() === noteCount);
+    }
 
     // As in GAS, an element casts to its own type, a paragraph also to a text that reports the
     // paragraph's type, and any other cast throws:
@@ -675,6 +686,33 @@ function test() {
         .insertInlineImage(Utilities.newBlob(png, 'image/png'));
     console.assert(insertedImage.getWidth() === 300);
     console.assert(insertedImage.getHeight() === 200);
+
+    // A body and a paragraph that have already been read see the changes made since, also those
+    // made through other objects for the same body or paragraph:
+    const count = body.getNumChildren();
+    const imageParagraph = body.getChild(0).asParagraph();
+    const imageParagraphCount = imageParagraph.getNumChildren();
+    body.appendParagraph('Appended');
+    console.assert(body.getNumChildren() === count + 1);
+    console.assert(body.getChild(count).asParagraph().getText() === 'Appended');
+    doc.getBody().getChild(count - 1).removeFromParent();
+    console.assert(body.getNumChildren() === count);
+    console.assert(body.getChild(count - 1).asParagraph().getText() === 'Appended');
+    const secondImage = doc.newPosition(doc.getBody().getChild(0), 0)
+        .insertInlineImage(Utilities.newBlob(png, 'image/png'));
+    console.assert(imageParagraph.getNumChildren() === imageParagraphCount + 1);
+    secondImage.removeFromParent();
+    console.assert(imageParagraph.getNumChildren() === imageParagraphCount);
+    // Only COOL has the legacy UNO API, whose changes are seen too, as are those of undo:
+    if (globalThis.cool) {
+        const unoText = cool.getActiveUnoModel().getText();
+        // 0 is com.sun.star.text.ControlCharacter.PARAGRAPH_BREAK:
+        unoText.insertControlCharacter(unoText.getEnd(), 0, false);
+        console.assert(body.getNumChildren() === count + 1);
+        console.assert(body.getChild(count).asParagraph().getText() === '');
+        cool.getActiveUnoModel().getUndoManager().undo();
+        console.assert(body.getNumChildren() === count);
+    }
 
     // A positioned image starts at the top left of its paragraph, with the text wrapped around it,
     // and is no child of the paragraph:

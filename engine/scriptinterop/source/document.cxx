@@ -12,7 +12,9 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <iterator>
+#include <map>
 #include <memory>
 #include <optional>
 #include <string_view>
@@ -42,6 +44,7 @@
 #include <com/sun/star/graphic/XGraphic.hpp>
 #include <com/sun/star/graphic/XGraphicProvider.hpp>
 #include <com/sun/star/io/XTempFile.hpp>
+#include <com/sun/star/lang/DisposedException.hpp>
 #include <com/sun/star/lang/IndexOutOfBoundsException.hpp>
 #include <com/sun/star/lang/Locale.hpp>
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
@@ -71,12 +74,15 @@
 #include <com/sun/star/text/XTextTable.hpp>
 #include <com/sun/star/text/XTextViewCursor.hpp>
 #include <com/sun/star/text/XTextViewCursorSupplier.hpp>
+#include <com/sun/star/util/XModifyBroadcaster.hpp>
+#include <com/sun/star/util/XModifyListener.hpp>
 #include <com/sun/star/lang/IllegalArgumentException.hpp>
 #include <cpo/uno/Reference.hxx>
 #include <cpo/uno/RuntimeException.hpp>
 #include <cpo/uno/XComponentContext.hpp>
 #include <cpo/uno/XInterface.hpp>
 #include <com/sun/star/view/XSelectionSupplier.hpp>
+#include <comphelper/diagnose_ex.hxx>
 #include <comphelper/processfactory.hxx>
 #include <cpo/uno/Any.hxx>
 #include <cpo/uno/Exception.hdl>
@@ -84,9 +90,11 @@
 #include <cppu/unotype.hxx>
 #include <cppuhelper/implbase.hxx>
 #include <i18nlangtag/languagetag.hxx>
+#include <o3tl/safeint.hxx>
 #include <o3tl/string_view.hxx>
 #include <o3tl/unit_conversion.hxx>
 #include <rtl/character.hxx>
+#include <rtl/ref.hxx>
 #include <rtl/ustrbuf.hxx>
 #include <rtl/ustring.hxx>
 #include <sal/config.h>
@@ -116,6 +124,7 @@
 #include <scriptinterop/XTableRow.hpp>
 #include <scriptinterop/XText.hpp>
 #include <tools/color.hxx>
+#include <tools/debug.hxx>
 
 #include "document.hxx"
 
@@ -125,18 +134,94 @@ template<typename T>
 css::beans::Optional<cpo::uno::Reference<T>> maybe(cpo::uno::Reference<T> const & ref)
 { return {ref.is(), ref}; }
 
+class ModificationsListener: public cppu::WeakImplHelper<css::util::XModifyListener> {
+public:
+    std::uintmax_t generation() const { return generation_; }
+
+    void modified(css::lang::EventObject const &) override { incrementGeneration(); }
+
+    void disposing(css::lang::EventObject const &) override { incrementGeneration(); }
+
+private:
+    void incrementGeneration() {
+        DBG_TESTSOLARMUTEX();
+        // Overflow is arguably harmless for practical purposes:
+        ++generation_;
+    }
+
+    std::uintmax_t generation_ = 0;
+};
+
+template<typename T> class Cached {
+public:
+    template<typename F> T const & get(std::uintmax_t generation, F compute) {
+        DBG_TESTSOLARMUTEX();
+        if (!value_ || generation_ != generation) {
+            value_ = compute();
+            generation_ = generation;
+        }
+        return *value_;
+    }
+
+private:
+    std::optional<T> value_;
+    std::uintmax_t generation_;
+};
+
 class Model {
 public:
-    explicit Model(cpo::uno::Reference<css::frame::XModel> const & model): model_(model) {}
+    explicit Model(cpo::uno::Reference<css::frame::XModel> const & model):
+        model_(model), listener_(new ModificationsListener)
+    {
+        cpo::uno::Reference<css::util::XModifyBroadcaster>(model_, cpo::uno::UNO_QUERY_THROW)
+            ->addModifyListener(listener_);
+    }
+
+    ~Model() {
+        try {
+            cpo::uno::Reference<css::util::XModifyBroadcaster>(model_, cpo::uno::UNO_QUERY_THROW)
+                ->removeModifyListener(listener_);
+        } catch (css::lang::DisposedException const &) {
+        } catch (cpo::uno::Exception const &) {
+            TOOLS_WARN_EXCEPTION("scriptinterop", "removing the modify listener");
+        }
+    }
 
     Model(Model const &) = delete;
     Model & operator =(Model const &) = delete;
 
     cpo::uno::Reference<css::frame::XModel> const & uno() const { return model_; }
 
+    std::uintmax_t generation() const { return listener_->generation(); }
+
+    // The paragraphs and tables of the document's body:
+    Cached<std::vector<cpo::uno::Reference<css::text::XTextContent>>> & bodyContents() {
+        return bodyContents_;
+    }
+
 private:
     cpo::uno::Reference<css::frame::XModel> model_;
+    rtl::Reference<ModificationsListener> listener_;
+    Cached<std::vector<cpo::uno::Reference<css::text::XTextContent>>> bodyContents_;
 };
+
+// The Model of a document model, which all users of that document model share for as long as any of
+// them exists:
+std::shared_ptr<Model> sharedModel(cpo::uno::Reference<css::frame::XModel> const & model) {
+    DBG_TESTSOLARMUTEX();
+    // Keys are XInterface rather than XModel pointers for guaranteed equality comparison, and the
+    // Model entries' model_ members keep them alive:
+    static std::map<cpo::uno::XInterface *, std::weak_ptr<Model>> models;
+    std::erase_if(models, [](auto const & entry) { return entry.second.expired(); });
+    auto & entry = models[
+        cpo::uno::Reference<cpo::uno::XInterface>(model, cpo::uno::UNO_QUERY).get()];
+    auto shared = entry.lock();
+    if (!shared) {
+        shared = std::make_shared<Model>(model);
+        entry = shared;
+    }
+    return shared;
+}
 
 // The length of the line end at offset in string, which is zero at the end of string:
 sal_Int32 lineEndAt(OUString const & string, sal_Int32 offset) {
@@ -345,6 +430,21 @@ cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XElement>> enumerateElemen
     std::shared_ptr<Model> const & model,
     cpo::uno::Reference<css::text::XText> const & text,
     cpo::uno::Reference<scriptinterop::XElement> const & parent);
+
+// The paragraphs and tables of a text, in document order:
+std::vector<cpo::uno::Reference<css::text::XTextContent>> enumerateContents(
+    cpo::uno::Reference<css::text::XText> const & text);
+
+// A paragraph or table of a text, as an element:
+cpo::uno::Reference<scriptinterop::XElement> elementOf(
+    std::shared_ptr<Model> const & model,
+    cpo::uno::Reference<scriptinterop::XElement> const & parent,
+    cpo::uno::Reference<css::text::XTextContent> const & content);
+
+cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XElement>> elementsOf(
+    std::shared_ptr<Model> const & model,
+    cpo::uno::Reference<scriptinterop::XElement> const & parent,
+    std::vector<cpo::uno::Reference<css::text::XTextContent>> const & contents);
 
 cpo::uno::Reference<scriptinterop::XElement> siblingContent(
     std::shared_ptr<Model> const & model,
@@ -2198,7 +2298,7 @@ public:
         if (index == 0) {
             return new TextImpl(model_, this, content_, scriptinterop::ElementType_TEXT);
         }
-        auto const images = enumerateFramedImages(css::text::TextContentAnchorType_AS_CHARACTER);
+        auto const & images = inlineImages();
         auto const imgIndex = index - 1;
         if (imgIndex < 0 || imgIndex >= static_cast<sal_Int32>(images.size())) {
             return {};
@@ -2402,8 +2502,7 @@ public:
     }
 
     sal_Int32 getNumChildren() override {
-        return 1 + static_cast<sal_Int32>(
-            enumerateFramedImages(css::text::TextContentAnchorType_AS_CHARACTER).size());
+        return 1 + inlineImages().size();
     }
 
     css::beans::Optional<cpo::uno::Reference<scriptinterop::XElement>> getParent() override {
@@ -2456,6 +2555,12 @@ public:
     }
 
 private:
+    std::vector<cpo::uno::Reference<css::text::XTextContent>> const & inlineImages() {
+        return inlineImages_.get(model_->generation(), [this] {
+            return enumerateFramedImages(css::text::TextContentAnchorType_AS_CHARACTER);
+        });
+    }
+
     // The images anchored to the paragraph, which its content enumeration has, and those anchored
     // to one of its characters, which its text portions have:
     std::vector<cpo::uno::Reference<scriptinterop::XPositionedImage>> enumeratePositionedImages()
@@ -2554,6 +2659,7 @@ private:
     std::shared_ptr<Model> model_;
     cpo::uno::Reference<scriptinterop::XElement> parent_;
     cpo::uno::Reference<css::text::XTextContent> content_;
+    Cached<std::vector<cpo::uno::Reference<css::text::XTextContent>>> inlineImages_;
 };
 
 // A paragraph's text view casts back to the paragraph, as it reports the paragraph's type:
@@ -2603,15 +2709,16 @@ public:
     cpo::uno::Reference<scriptinterop::XElement> copy() override { return this; }
 
     cpo::uno::Reference<scriptinterop::XElement> getChild(sal_Int32 index) override {
-        auto const list = getChildren();
-        return index >= 0 && index < list.getLength() ? list[index] : nullptr;
+        auto const & list = contents();
+        return index >= 0 && o3tl::make_unsigned(index) < list.size()
+            ? elementOf(model_, this, list[index]) : nullptr;
     }
 
     sal_Int32 getChildIndex(cpo::uno::Reference<scriptinterop::XElement> const & child) override
     { return childIndexOf(*this, child); }
 
     cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XElement>> getChildren() override {
-        return enumerateElements(model_, text_, this);
+        return elementsOf(model_, this, contents());
     }
 
     // TODO: Writer text tables encode a horizontal merge in the anchor cell's name (a merged cell
@@ -2624,7 +2731,7 @@ public:
         return {false, {}};
     }
 
-    sal_Int32 getNumChildren() override { return getChildren().getLength(); }
+    sal_Int32 getNumChildren() override { return contents().size(); }
 
     css::beans::Optional<cpo::uno::Reference<scriptinterop::XElement>> getParent() override {
         return maybe(parent_);
@@ -2662,9 +2769,14 @@ public:
     }
 
 private:
+    std::vector<cpo::uno::Reference<css::text::XTextContent>> const & contents() {
+        return contents_.get(model_->generation(), [this] { return enumerateContents(text_); });
+    }
+
     std::shared_ptr<Model> model_;
     cpo::uno::Reference<scriptinterop::XElement> parent_;
     cpo::uno::Reference<css::text::XText> text_;
+    Cached<std::vector<cpo::uno::Reference<css::text::XTextContent>>> contents_;
 };
 
 class TableRowImpl: public ElementImpl<scriptinterop::XTableRow> {
@@ -2895,12 +3007,10 @@ private:
     cpo::uno::Reference<css::text::XTextTable> table_;
 };
 
-cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XElement>> enumerateElements(
-    std::shared_ptr<Model> const & model,
-    cpo::uno::Reference<css::text::XText> const & text,
-    cpo::uno::Reference<scriptinterop::XElement> const & parent)
+std::vector<cpo::uno::Reference<css::text::XTextContent>> enumerateContents(
+    cpo::uno::Reference<css::text::XText> const & text)
 {
-    std::vector<cpo::uno::Reference<scriptinterop::XElement>> v;
+    std::vector<cpo::uno::Reference<css::text::XTextContent>> v;
     if (cpo::uno::Reference<css::container::XEnumerationAccess> const ea{text, cpo::uno::UNO_QUERY})
     {
         auto const en = ea->createEnumeration();
@@ -2915,16 +3025,47 @@ cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XElement>> enumerateElemen
                 continue;
             }
             if (info->supportsService(u"com.sun.star.text.Paragraph"_ustr)) {
-                v.emplace_back(new ParagraphImpl(model, parent, xtc));
+                v.push_back(xtc);
             } else if (info->supportsService(u"com.sun.star.text.TextTable"_ustr)) {
                 cpo::uno::Reference<css::text::XTextTable> const table(xtc, cpo::uno::UNO_QUERY);
                 if (table.is()) {
-                    v.emplace_back(new TableImpl(model, parent, table));
+                    v.push_back(xtc);
                 }
             }
         }
     }
+    return v;
+}
+
+cpo::uno::Reference<scriptinterop::XElement> elementOf(
+    std::shared_ptr<Model> const & model,
+    cpo::uno::Reference<scriptinterop::XElement> const & parent,
+    cpo::uno::Reference<css::text::XTextContent> const & content)
+{
+    if (cpo::uno::Reference<css::text::XTextTable> const table{content, cpo::uno::UNO_QUERY}) {
+        return new TableImpl(model, parent, table);
+    }
+    return new ParagraphImpl(model, parent, content);
+}
+
+cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XElement>> elementsOf(
+    std::shared_ptr<Model> const & model,
+    cpo::uno::Reference<scriptinterop::XElement> const & parent,
+    std::vector<cpo::uno::Reference<css::text::XTextContent>> const & contents)
+{
+    std::vector<cpo::uno::Reference<scriptinterop::XElement>> v;
+    for (auto const & content: contents) {
+        v.push_back(elementOf(model, parent, content));
+    }
     return cpo::uno::Sequence(v.data(), v.size());
+}
+
+cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XElement>> enumerateElements(
+    std::shared_ptr<Model> const & model,
+    cpo::uno::Reference<css::text::XText> const & text,
+    cpo::uno::Reference<scriptinterop::XElement> const & parent)
+{
+    return elementsOf(model, parent, enumerateContents(text));
 }
 
 cpo::uno::Reference<scriptinterop::XElement> siblingContent(
@@ -3433,8 +3574,9 @@ public:
     cpo::uno::Reference<scriptinterop::XElement> copy() override { return this; }
 
     cpo::uno::Reference<scriptinterop::XElement> getChild(sal_Int32 index) override {
-        auto const list = enumerateElements(model_, text_, this);
-        return index >= 0 && index < list.getLength() ? list[index] : nullptr;
+        auto const & list = contents();
+        return index >= 0 && o3tl::make_unsigned(index) < list.size()
+            ? elementOf(model_, this, list[index]) : nullptr;
     }
 
     sal_Int32 getChildIndex(cpo::uno::Reference<scriptinterop::XElement> const & child) override
@@ -3445,9 +3587,7 @@ public:
         return {false, {}};
     }
 
-    sal_Int32 getNumChildren() override {
-        return enumerateElements(model_, text_, this).getLength();
-    }
+    sal_Int32 getNumChildren() override { return contents().size(); }
 
     // TODO: no natural container for a footnote section in scriptinterop (GAS's Document analogue
     // would be that parent, but we do not model it):
@@ -3475,8 +3615,13 @@ public:
     }
 
 private:
+    std::vector<cpo::uno::Reference<css::text::XTextContent>> const & contents() {
+        return contents_.get(model_->generation(), [this] { return enumerateContents(text_); });
+    }
+
     std::shared_ptr<Model> model_;
     cpo::uno::Reference<css::text::XText> text_;
+    Cached<std::vector<cpo::uno::Reference<css::text::XTextContent>>> contents_;
 };
 
 class FootnoteImpl: public ElementImpl<scriptinterop::XFootnote> {
@@ -3581,22 +3726,23 @@ public:
     cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return text_; }
 
     cpo::uno::Reference<scriptinterop::XElement> getChild(sal_Int32 index) override {
-        auto const list = getChildren();
-        return index >= 0 && index < list.getLength() ? list[index] : nullptr;
+        auto const & list = contents();
+        return index >= 0 && o3tl::make_unsigned(index) < list.size()
+            ? elementOf(model_, this, list[index]) : nullptr;
     }
 
     sal_Int32 getChildIndex(cpo::uno::Reference<scriptinterop::XElement> const & child) override
     { return childIndexOf(*this, child); }
 
     cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XElement>> getChildren() override {
-        return enumerateElements(model_, text_, this);
+        return elementsOf(model_, this, contents());
     }
 
     css::beans::Optional<cpo::uno::Reference<scriptinterop::XElement>> getNextSibling() override {
         return {false, {}};
     }
 
-    sal_Int32 getNumChildren() override { return getChildren().getLength(); }
+    sal_Int32 getNumChildren() override { return contents().size(); }
 
     double getMarginLeft() override { return pageStyleLength(u"LeftMargin"_ustr); }
 
@@ -3649,6 +3795,11 @@ public:
     }
 
 private:
+    std::vector<cpo::uno::Reference<css::text::XTextContent>> const & contents() {
+        return model_->bodyContents().get(
+            model_->generation(), [this] { return enumerateContents(text_); });
+    }
+
     std::vector<cpo::uno::Reference<scriptinterop::XPositionedImage>> pageAnchoredImages() {
         std::vector<cpo::uno::Reference<scriptinterop::XPositionedImage>> images;
         auto const objects = cpo::uno::Reference<css::text::XTextGraphicObjectsSupplier>(
@@ -3786,7 +3937,7 @@ class DocumentImpl : public cppu::WeakImplHelper<scriptinterop::XDocument>
 {
 public:
     explicit DocumentImpl(cpo::uno::Reference<css::frame::XModel> const& model)
-        : model_(std::make_shared<Model>(model))
+        : model_(sharedModel(model))
     {
     }
 

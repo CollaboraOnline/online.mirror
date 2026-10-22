@@ -46,4 +46,10 @@ function test() {
     console.assert(
         body.getText() === 'Before\n\nB1\n\n\nBetween\nMerged\nB1\n\nB2\nBetween\n' + lead
             + 'N1\nN2\n\nB1\nAfter');
+
+    // A table cell that has already been read sees the changes made since through another object
+    // for the same cell, here clearing it, which leaves one empty paragraph:
+    console.assert(cell.getNumChildren() > 1);
+    nested.getRow(0).getCell(0).clear();
+    console.assert(cell.getNumChildren() === 1);
 }
