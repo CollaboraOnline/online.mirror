@@ -101,6 +101,8 @@ using Poco::Path;
 const int ClipboardTokenLengthBytes = 16;
 // One-time token authorizing a POST to /cool/links, rotated per use.
 const int LinkTokenLengthBytes = 32;
+// The key a view's media URLs carry, kept for the life of the view.
+const int MediaKeyLengthBytes = 32;
 // home-use, disabled by default.
 const int ProxyAccessTokenLengthBytes = 32;
 
@@ -140,6 +142,7 @@ ClientSession::ClientSession(const std::shared_ptr<ProtocolHandlerInterface>& ws
     , _serverURL(requestDetails)
     , _auth(Authorization::create(uriPublic))
     , _tokenRefreshAttempts(0)
+    , _mediaKey(Util::rng::getHexString(MediaKeyLengthBytes))
     , _docBroker(docBroker)
     , _lastStateTime(std::chrono::steady_clock::now())
     , _clientVisibleArea(0, 0, 0, 0)
@@ -300,7 +303,13 @@ std::string ClientSession::getClipboardURI(bool encode)
     return createPublicURI("clipboard", _clipboardKeys[0], encode);
 }
 
-std::string ClientSession::createPublicURI(const std::string& subPath, const std::string& tag, bool encode)
+std::string ClientSession::createMediaURI(const std::string& subPath, const std::string& id)
+{
+    return createPublicURI(subPath, id, /*encode=*/false, "&MediaKey=" + _mediaKey);
+}
+
+std::string ClientSession::createPublicURI(const std::string& subPath, const std::string& tag, bool encode,
+                                           const std::string& query)
 {
     Poco::URI wopiSrc = getDocumentBroker()->getPublicUri();
     wopiSrc.setQueryParameters(Poco::URI::QueryParameters());
@@ -311,7 +320,7 @@ std::string ClientSession::createPublicURI(const std::string& subPath, const std
         "/cool/" + subPath + "?WOPISrc=" + encodedFrom +
         "&ServerId=" + Util::getProcessIdentifier() +
         "&ViewId=" + std::to_string(getKitViewId()) +
-        "&Tag=" + tag);
+        "&Tag=" + tag + query);
 
 #if !MOBILEAPP
     if (!COOLWSD::RouteToken.empty())
@@ -3455,7 +3464,7 @@ bool ClientSession::handlePresentationInfo(const std::shared_ptr<Message>& paylo
                                 docBroker->addEmbeddedMedia(id, original); // Capture the original message with internal URL.
 
                                 const std::string mediaUrl =
-                                    Uri::encode(createPublicURI("media", id, false), "&");
+                                    Uri::encode(createMediaURI("media", id), "&");
                                 video->set("url", mediaUrl); // Replace the url with the public one.
                                 modified = true;
                             }
@@ -3485,7 +3494,7 @@ bool ClientSession::handlePresentationInfo(const std::shared_ptr<Message>& paylo
                                 docBroker->addEmbeddedMedia(id, original); // Capture the original message with internal URL.
 
                                 std::string mediaUrl =
-                                    Uri::encode(createPublicURI("media", id, false), "&");
+                                    Uri::encode(createMediaURI("media", id), "&");
                                 if (!checksum.empty())
                                     mediaUrl += "&Ver=" + checksum;
                                 gif->set("url", mediaUrl); // Replace the url with the public one.
@@ -3950,9 +3959,9 @@ bool ClientSession::handleKitToClientMessage(const std::shared_ptr<Message>& pay
                             id, json); // Capture the original message with internal URL.
 
                         const std::string mediaUrl =
-                            Uri::encode(createPublicURI("media", id, /*encode=*/false), "&");
+                            Uri::encode(createMediaURI("media", id), "&");
                         const std::string mediaVTT =
-                            Uri::encode(createPublicURI("mediavtt", id, /*encode=*/false), "&");
+                            Uri::encode(createMediaURI("mediavtt", id), "&");
                         object->set("url", mediaUrl); // Replace the url with the public one.
                         object->set("mimeType", "video/mp4"); //FIXME: get this from the source json
                         if (!mediaVTT.empty())
@@ -4889,6 +4898,7 @@ void ClientSession::dumpState(std::ostream& os)
        << "\n\t\tclip sockets: " << _clipSockets.size()
        << "\n\t\tproxy access:: " << _proxyAccess
        << "\n\t\tlinkToken set: " << !_linkToken.empty()
+       << "\n\t\tmediaKey set: " << !_mediaKey.empty()
        << "\n\t\tisRemoteDocumentConnection: " << _isRemoteDocumentConnection
        << "\n\t\tclientSelectedMode: " << _clientSelectedMode
        << "\n\t\tvisibleAreaMode: " << _visibleAreaMode
@@ -5247,7 +5257,7 @@ std::string ClientSession::processSVGContent(const std::string& svg)
                                             fileUrl + "\"}");
 
         const std::string mediaUrl =
-            Uri::encode(createPublicURI("media", id, /*encode=*/false), "&");
+            Uri::encode(createMediaURI("media", id), "&");
         oss << "src=\"" << mediaUrl << '"';
         pos = end + 1;
     }
