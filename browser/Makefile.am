@@ -893,6 +893,7 @@ COOL_JS_LST =\
 	src/control/backstage/Sidebar.tsx \
 	src/control/backstage/TemplatesView.tsx \
 	src/control/backstage/HomeView.tsx \
+	src/control/backstage/MyTemplatesView.tsx \
 	src/control/backstage/InfoView.tsx \
 	src/control/backstage/ExportView.tsx \
 	src/control/backstage/OpenView.tsx \
@@ -1816,6 +1817,7 @@ pot:
 		src/control/backstage/Sidebar.tsx \
 		src/control/backstage/HomeView.tsx \
 		src/control/backstage/TemplatesView.tsx \
+		src/control/backstage/MyTemplatesView.tsx \
 		src/control/backstage/InfoView.tsx \
 		src/control/backstage/OpenView.tsx \
 		src/control/backstage/CloudDialogs.tsx \
