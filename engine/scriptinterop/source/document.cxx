@@ -13,6 +13,7 @@
 #include <cassert>
 #include <cmath>
 #include <iterator>
+#include <memory>
 #include <optional>
 #include <string_view>
 #include <utility>
@@ -123,6 +124,19 @@ namespace
 template<typename T>
 css::beans::Optional<cpo::uno::Reference<T>> maybe(cpo::uno::Reference<T> const & ref)
 { return {ref.is(), ref}; }
+
+class Model {
+public:
+    explicit Model(cpo::uno::Reference<css::frame::XModel> const & model): model_(model) {}
+
+    Model(Model const &) = delete;
+    Model & operator =(Model const &) = delete;
+
+    cpo::uno::Reference<css::frame::XModel> const & uno() const { return model_; }
+
+private:
+    cpo::uno::Reference<css::frame::XModel> model_;
+};
 
 // The length of the line end at offset in string, which is zero at the end of string:
 sal_Int32 lineEndAt(OUString const & string, sal_Int32 offset) {
@@ -328,12 +342,12 @@ sal_Int32 childIndexOf(
 }
 
 cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XElement>> enumerateElements(
-    cpo::uno::Reference<css::frame::XModel> const & model,
+    std::shared_ptr<Model> const & model,
     cpo::uno::Reference<css::text::XText> const & text,
     cpo::uno::Reference<scriptinterop::XElement> const & parent);
 
 cpo::uno::Reference<scriptinterop::XElement> siblingContent(
-    cpo::uno::Reference<css::frame::XModel> const & model,
+    std::shared_ptr<Model> const & model,
     cpo::uno::Reference<css::text::XTextContent> const & content,
     cpo::uno::Reference<scriptinterop::XElement> const & parent, bool forward);
 
@@ -450,7 +464,7 @@ OUString formatColor(sal_Int32 color) {
 }
 
 cpo::uno::Reference<css::text::XTextContent> createGraphicFromBlob(
-    cpo::uno::Reference<css::frame::XModel> const & model,
+    std::shared_ptr<Model> const & model,
     cpo::uno::Reference<scriptinterop::XBlob> const & blob)
 {
     if (!blob.is()) {
@@ -475,7 +489,7 @@ cpo::uno::Reference<css::text::XTextContent> createGraphicFromBlob(
             u"createGraphicFromBlob: failed to load graphic"_ustr);
     }
     cpo::uno::Reference<css::lang::XMultiServiceFactory> const docFactory(
-        model, cpo::uno::UNO_QUERY_THROW);
+        model->uno(), cpo::uno::UNO_QUERY_THROW);
     cpo::uno::Reference<css::text::XTextContent> const graphic(
         docFactory->createInstance(u"com.sun.star.text.TextGraphicObject"_ustr),
         cpo::uno::UNO_QUERY_THROW);
@@ -505,7 +519,7 @@ class SelectionImpl : public cppu::WeakImplHelper<scriptinterop::XSelection>
 {
 public:
     SelectionImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<css::container::XIndexAccess> const& ranges)
         : model_(model), ranges_(ranges)
     {
@@ -557,7 +571,7 @@ public:
     }
 
 private:
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<css::container::XIndexAccess> ranges_;
 };
 
@@ -589,7 +603,7 @@ private:
 
 class RangeBuilderImpl: public cppu::WeakImplHelper<scriptinterop::XRangeBuilder> {
 public:
-    explicit RangeBuilderImpl(cpo::uno::Reference<css::frame::XModel> const & model):
+    explicit RangeBuilderImpl(std::shared_ptr<Model> const & model):
         model_(model) {}
 
     cpo::uno::Reference<scriptinterop::XRangeBuilder> addElement(
@@ -677,7 +691,7 @@ private:
         cursor_->gotoRange(end, true);
     }
 
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<css::text::XTextCursor> cursor_;
     cpo::uno::Reference<css::text::XTextContent> image_;
 };
@@ -770,7 +784,7 @@ private:
 class TextImpl: public ElementImpl<scriptinterop::XText> {
 public:
     TextImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<scriptinterop::XElement> const & parent,
         cpo::uno::Reference<css::text::XTextContent> const & content,
         scriptinterop::ElementType reportedType):
@@ -1347,7 +1361,7 @@ private:
             value.Value ? css::awt::FontUnderline::SINGLE : css::awt::FontUnderline::NONE)));
     }
 
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<scriptinterop::XElement> parent_;
     cpo::uno::Reference<css::text::XTextContent> content_;
     scriptinterop::ElementType reportedType_;
@@ -1952,7 +1966,7 @@ private:
 class PositionedImageImpl: public cppu::WeakImplHelper<scriptinterop::XPositionedImage> {
 public:
     PositionedImageImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<css::text::XTextContent> const & paragraph,
         cpo::uno::Reference<css::text::XTextContent> const & image):
         model_(model), paragraph_(paragraph), image_(image) {}
@@ -2096,7 +2110,7 @@ private:
             o3tl::convert(value, o3tl::Length::pt, o3tl::Length::mm100)))));
     }
 
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<css::text::XTextContent> paragraph_;
     cpo::uno::Reference<css::text::XTextContent> image_;
 };
@@ -2105,7 +2119,7 @@ class ParagraphImpl : public ElementImpl<scriptinterop::XParagraph>
 {
 public:
     ParagraphImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<scriptinterop::XElement> const & parent,
         cpo::uno::Reference<css::text::XTextContent> const& content)
         : model_(model), parent_(parent), content_(content)
@@ -2537,7 +2551,7 @@ private:
         return images;
     }
 
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<scriptinterop::XElement> parent_;
     cpo::uno::Reference<css::text::XTextContent> content_;
 };
@@ -2567,7 +2581,7 @@ cpo::uno::Reference<scriptinterop::XParagraph> PositionedImageImpl::getParagraph
 class TableCellImpl: public ElementImpl<scriptinterop::XTableCell> {
 public:
     TableCellImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<scriptinterop::XElement> const & parent,
         cpo::uno::Reference<css::text::XText> const & text):
         model_(model), parent_(parent), text_(text) {}
@@ -2648,7 +2662,7 @@ public:
     }
 
 private:
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<scriptinterop::XElement> parent_;
     cpo::uno::Reference<css::text::XText> text_;
 };
@@ -2656,7 +2670,7 @@ private:
 class TableRowImpl: public ElementImpl<scriptinterop::XTableRow> {
 public:
     TableRowImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<scriptinterop::XElement> const & parent,
         cpo::uno::Reference<css::text::XTextTable> const & table, sal_Int32 rowIndex):
         model_(model), parent_(parent), table_(table), rowIndex_(rowIndex) {}
@@ -2782,7 +2796,7 @@ public:
     }
 
 private:
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<scriptinterop::XElement> parent_;
     cpo::uno::Reference<css::text::XTextTable> table_;
     sal_Int32 rowIndex_;
@@ -2791,7 +2805,7 @@ private:
 class TableImpl: public ElementImpl<scriptinterop::XTable> {
 public:
     TableImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<scriptinterop::XElement> const & parent,
         cpo::uno::Reference<css::text::XTextTable> const & table):
         model_(model), parent_(parent), table_(table) {}
@@ -2876,13 +2890,13 @@ public:
     }
 
 private:
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<scriptinterop::XElement> parent_;
     cpo::uno::Reference<css::text::XTextTable> table_;
 };
 
 cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XElement>> enumerateElements(
-    cpo::uno::Reference<css::frame::XModel> const & model,
+    std::shared_ptr<Model> const & model,
     cpo::uno::Reference<css::text::XText> const & text,
     cpo::uno::Reference<scriptinterop::XElement> const & parent)
 {
@@ -2914,7 +2928,7 @@ cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XElement>> enumerateElemen
 }
 
 cpo::uno::Reference<scriptinterop::XElement> siblingContent(
-    cpo::uno::Reference<css::frame::XModel> const & model,
+    std::shared_ptr<Model> const & model,
     cpo::uno::Reference<css::text::XTextContent> const & content,
     cpo::uno::Reference<scriptinterop::XElement> const & parent, bool forward)
 {
@@ -2993,7 +3007,7 @@ cpo::uno::Reference<css::text::XTextContent> findContainingParagraph(
 class RangeElementImpl: public cppu::WeakImplHelper<scriptinterop::XRangeElement> {
 public:
     RangeElementImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<css::text::XTextRange> const & range):
         model_(model), range_(range), paragraph_(findContainingParagraph(range))
     {
@@ -3052,7 +3066,7 @@ public:
     }
 
 private:
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<css::text::XTextRange> range_;
     cpo::uno::Reference<css::text::XTextContent> paragraph_;
     sal_Int32 startOffset_ = 0;
@@ -3065,7 +3079,7 @@ private:
 // extent, so a paragraph that lies fully inside the raw range becomes a non-partial element and
 // the first and last paragraphs become partial ones:
 void splitAtParagraphBoundaries(
-    cpo::uno::Reference<css::frame::XModel> const & model,
+    std::shared_ptr<Model> const & model,
     cpo::uno::Reference<css::text::XTextRange> const & range,
     std::vector<cpo::uno::Reference<scriptinterop::XRangeElement>> & out)
 {
@@ -3137,7 +3151,7 @@ SelectionImpl::getRangeElements() {
 class ImageRangeElementImpl: public cppu::WeakImplHelper<scriptinterop::XRangeElement> {
 public:
     ImageRangeElementImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<css::text::XTextContent> const & image):
         model_(model), image_(image) {}
 
@@ -3163,7 +3177,7 @@ public:
     bool isPartial() override { return false; }
 
 private:
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<css::text::XTextContent> image_;
 };
 
@@ -3171,7 +3185,7 @@ private:
 class ImageSelectionImpl: public cppu::WeakImplHelper<scriptinterop::XSelection> {
 public:
     ImageSelectionImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<css::text::XTextContent> const & image):
         model_(model), image_(image) {}
 
@@ -3193,7 +3207,7 @@ public:
     }
 
 private:
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<css::text::XTextContent> image_;
 };
 
@@ -3209,10 +3223,10 @@ cpo::uno::Reference<scriptinterop::XSelection> RangeBuilderImpl::build() {
 }
 
 cpo::uno::Reference<css::text::XTextViewCursor> viewCursorOf(
-    cpo::uno::Reference<css::frame::XModel> const & model)
+    std::shared_ptr<Model> const & model)
 {
     cpo::uno::Reference<css::text::XTextViewCursorSupplier> const sup(
-        model->getCurrentController(), cpo::uno::UNO_QUERY_THROW);
+        model->uno()->getCurrentController(), cpo::uno::UNO_QUERY_THROW);
     auto const c = sup->getViewCursor();
     if (!c.is()) {
         throw cpo::uno::RuntimeException(u"the document view has no cursor"_ustr);
@@ -3222,12 +3236,12 @@ cpo::uno::Reference<css::text::XTextViewCursor> viewCursorOf(
 
 class CursorImpl: public cppu::WeakImplHelper<scriptinterop::XCursor> {
 public:
-    explicit CursorImpl(cpo::uno::Reference<css::frame::XModel> const & model): model_(model) {}
+    explicit CursorImpl(std::shared_ptr<Model> const & model): model_(model) {}
 
     // A position at one place in the document, rather than wherever the view cursor is, which is
     // at offset into element:
     CursorImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<css::text::XTextRange> const & position,
         cpo::uno::Reference<scriptinterop::XElement> const & element, sal_Int32 offset):
         model_(model), position_(position), element_(element), offset_(offset) {}
@@ -3389,7 +3403,7 @@ private:
         return textOf(probe).getLength();
     }
 
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<css::text::XTextRange> position_;
     cpo::uno::Reference<scriptinterop::XElement> element_;
     sal_Int32 offset_ = 0;
@@ -3398,7 +3412,7 @@ private:
 class FootnoteSectionImpl: public ElementImpl<scriptinterop::XContainerElement> {
 public:
     FootnoteSectionImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<css::text::XText> const & text):
         model_(model), text_(text) {}
 
@@ -3461,14 +3475,14 @@ public:
     }
 
 private:
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<css::text::XText> text_;
 };
 
 class FootnoteImpl: public ElementImpl<scriptinterop::XFootnote> {
 public:
     FootnoteImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<css::text::XFootnote> const & footnote):
         model_(model), footnote_(footnote) {}
 
@@ -3514,14 +3528,14 @@ public:
     }
 
 private:
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<css::text::XFootnote> footnote_;
 };
 
 class BodyImpl: public ElementImpl<scriptinterop::XBody> {
 public:
     explicit BodyImpl(
-        cpo::uno::Reference<css::frame::XModel> const & model,
+        std::shared_ptr<Model> const & model,
         cpo::uno::Reference<css::text::XText> const & text):
         model_(model), text_(text) {}
 
@@ -3638,7 +3652,7 @@ private:
     std::vector<cpo::uno::Reference<scriptinterop::XPositionedImage>> pageAnchoredImages() {
         std::vector<cpo::uno::Reference<scriptinterop::XPositionedImage>> images;
         auto const objects = cpo::uno::Reference<css::text::XTextGraphicObjectsSupplier>(
-            model_, cpo::uno::UNO_QUERY_THROW)->getGraphicObjects();
+            model_->uno(), cpo::uno::UNO_QUERY_THROW)->getGraphicObjects();
         for (auto const & name: objects->getElementNames()) {
             cpo::uno::Reference<css::text::XTextContent> const frame(
                 objects->getByName(name), cpo::uno::UNO_QUERY_THROW);
@@ -3666,7 +3680,7 @@ private:
         }
         cpo::uno::Reference<css::container::XNameAccess> const styles(
             cpo::uno::Reference<css::style::XStyleFamiliesSupplier>(
-                model_, cpo::uno::UNO_QUERY_THROW)->getStyleFamilies()->getByName(
+                model_->uno(), cpo::uno::UNO_QUERY_THROW)->getStyleFamilies()->getByName(
                     u"PageStyles"_ustr),
             cpo::uno::UNO_QUERY_THROW);
         sal_Int32 size = 0;
@@ -3745,7 +3759,7 @@ private:
 
     void applyBulletNumbering(cpo::uno::Reference<css::beans::XPropertySet> const & props) {
         cpo::uno::Reference<css::lang::XMultiServiceFactory> const factory(
-            model_, cpo::uno::UNO_QUERY_THROW);
+            model_->uno(), cpo::uno::UNO_QUERY_THROW);
         cpo::uno::Reference<css::container::XIndexReplace> const rules(
             factory->createInstance(u"com.sun.star.text.NumberingRules"_ustr),
             cpo::uno::UNO_QUERY_THROW);
@@ -3764,7 +3778,7 @@ private:
         props->setPropertyValue(u"NumberingIsNumber"_ustr, cpo::uno::Any(true));
     }
 
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<css::text::XText> text_;
 };
 
@@ -3772,16 +3786,17 @@ class DocumentImpl : public cppu::WeakImplHelper<scriptinterop::XDocument>
 {
 public:
     explicit DocumentImpl(cpo::uno::Reference<css::frame::XModel> const& model)
-        : model_(model)
+        : model_(std::make_shared<Model>(model))
     {
     }
 
-    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return model_; }
+    cpo::uno::Reference<cpo::uno::XInterface> getuno() override { return model_->uno(); }
 
     css::beans::Optional<cpo::uno::Reference<scriptinterop::XSelection>> getSelection()
         override
     {
-        cpo::uno::Reference<css::text::XTextDocument> const doc(model_, cpo::uno::UNO_QUERY_THROW);
+        cpo::uno::Reference<css::text::XTextDocument> const doc(
+            model_->uno(), cpo::uno::UNO_QUERY_THROW);
         cpo::uno::Reference<css::view::XSelectionSupplier> const sup(
             doc->getCurrentController(), cpo::uno::UNO_QUERY_THROW);
         cpo::uno::Reference<css::lang::XServiceInfo> const info{
@@ -3829,7 +3844,8 @@ public:
 
     cpo::uno::Reference<scriptinterop::XBody> getBody() override
     {
-        cpo::uno::Reference<css::text::XTextDocument> const doc(model_, cpo::uno::UNO_QUERY_THROW);
+        cpo::uno::Reference<css::text::XTextDocument> const doc(
+            model_->uno(), cpo::uno::UNO_QUERY_THROW);
         return new BodyImpl(model_, doc->getText());
     }
 
@@ -3923,7 +3939,7 @@ public:
         // Selecting the collapsed range also ends a selection of a graphic or other object, which
         // the view cursor cannot move out of on its own:
         cpo::uno::Reference<css::view::XSelectionSupplier> const sup(
-            model_->getCurrentController(), cpo::uno::UNO_QUERY_THROW);
+            model_->uno()->getCurrentController(), cpo::uno::UNO_QUERY_THROW);
         if (!sup->select(cpo::uno::Any(range->getStart()))) {
             throw cpo::uno::RuntimeException(
                 u"setCursor: the position is not somewhere the cursor can be"_ustr);
@@ -3939,7 +3955,7 @@ public:
             throw cpo::uno::RuntimeException(u"setSelection: the selection must not be null"_ustr);
         }
         cpo::uno::Reference<css::view::XSelectionSupplier> const sup(
-            model_->getCurrentController(), cpo::uno::UNO_QUERY_THROW);
+            model_->uno()->getCurrentController(), cpo::uno::UNO_QUERY_THROW);
         // Writer's select typically only recognises its own SwXTextRanges; when our XSelection
         // wraps a single XTextRange, unwrap and pass that directly so Writer accepts it:
         cpo::uno::Reference<css::container::XIndexAccess> const idx(
@@ -3959,7 +3975,7 @@ public:
     cpo::uno::Sequence<cpo::uno::Reference<scriptinterop::XFootnote>> getFootnotes() override {
         std::vector<cpo::uno::Reference<scriptinterop::XFootnote>> v;
         cpo::uno::Reference<css::text::XFootnotesSupplier> const sup(
-            model_, cpo::uno::UNO_QUERY_THROW);
+            model_->uno(), cpo::uno::UNO_QUERY_THROW);
         auto const idx = sup->getFootnotes();
         if (!idx.is()) {
             throw cpo::uno::RuntimeException(
@@ -3981,7 +3997,8 @@ public:
     css::beans::Optional<OUString> getLanguage() override {
         css::lang::Locale locale;
         cpo::uno::Reference<css::beans::XPropertySet>(
-            cpo::uno::Reference<css::lang::XMultiServiceFactory>(model_, cpo::uno::UNO_QUERY_THROW)
+            cpo::uno::Reference<css::lang::XMultiServiceFactory>(
+                model_->uno(), cpo::uno::UNO_QUERY_THROW)
                 ->createInstance(u"com.sun.star.text.Defaults"_ustr),
             cpo::uno::UNO_QUERY_THROW)->getPropertyValue(u"CharLocale"_ustr) >>= locale;
         auto const code = gasLanguageCode(locale);
@@ -3994,7 +4011,8 @@ public:
     void insertImage(cpo::uno::Sequence<sal_Int8> const& data,
                               scriptinterop::ImageOptions const& opts) override
     {
-        cpo::uno::Reference<css::text::XTextDocument> const doc(model_, cpo::uno::UNO_QUERY_THROW);
+        cpo::uno::Reference<css::text::XTextDocument> const doc(
+            model_->uno(), cpo::uno::UNO_QUERY_THROW);
         auto const componentCtx = comphelper::getProcessComponentContext();
         auto const smgr = componentCtx->getServiceManager();
         // Stage the bytes in a TempFile to give GraphicProvider a file URL:
@@ -4045,13 +4063,13 @@ private:
     // frame or some other object are selected:
     bool hasTextCursor() {
         cpo::uno::Reference<css::view::XSelectionSupplier> const sup(
-            model_->getCurrentController(), cpo::uno::UNO_QUERY_THROW);
+            model_->uno()->getCurrentController(), cpo::uno::UNO_QUERY_THROW);
         cpo::uno::Reference<css::lang::XServiceInfo> const info{
             sup->getSelection(), cpo::uno::UNO_QUERY};
         return info.is() && info->supportsService(u"com.sun.star.text.TextRanges"_ustr);
     }
 
-    cpo::uno::Reference<css::frame::XModel> model_;
+    std::shared_ptr<Model> model_;
     cpo::uno::Reference<scriptinterop::XCursor> cursorPosition_;
 };
 }
