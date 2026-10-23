@@ -90,6 +90,27 @@ public:
         }
     }
 
+    /// A conversion is refused when its format is not a single file extension.
+    void testFormatIsOneExtension()
+    {
+        TST_LOG("testFormatIsOneExtension");
+        std::unique_ptr<Poco::Net::HTTPClientSession> session(
+            helpers::createSession(Poco::URI(helpers::getTestServerURI())));
+
+        Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_POST, "/cool/convert-to");
+        Poco::Net::HTMLForm form;
+        form.setEncoding(Poco::Net::HTMLForm::ENCODING_MULTIPART);
+        form.set("format", "txt/txt");
+        form.addPart("data", new Poco::Net::StringPartSource("Hello world test\n", "text/plain",
+                                                             "foobaa.txt"));
+        form.prepareSubmit(request);
+        form.write(session->sendRequest(request));
+
+        Poco::Net::HTTPResponse response;
+        session->receiveResponse(response);
+        LOK_ASSERT_EQUAL(Poco::Net::HTTPResponse::HTTP_BAD_REQUEST, response.getStatus());
+    }
+
     void writeString(const std::shared_ptr<Poco::Net::StreamSocket> &socket, const std::string& str)
     {
         TST_LOG("Sending " << str.size() << " bytes:\n" << str);
@@ -252,6 +273,7 @@ public:
     {
         testChunks();
         testContinue();
+        testFormatIsOneExtension();
         TST_LOG("All tests passed.");
         exitTest(TestResult::Ok);
     }
