@@ -384,7 +384,13 @@ JSDialog.spinfieldControl = function (
 		if (customCallback)
 			customCallback('spinfield', 'change', controls.container, value, builder);
 		else
-			builder.callback('spinfield', 'set', controls.container, value, builder);
+			builder.callback(
+				'spinfield',
+				'change',
+				controls.container,
+				value,
+				builder,
+			);
 	});
 
 	updateFunction();
