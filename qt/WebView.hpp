@@ -170,9 +170,10 @@ public:
 
     // When asDraft is true the fileURL names a draft working copy: the
     // document opens editable and its first user save is turned into a
-    // Save As (see isDraft()).
+    // Save As (see isDraft()). A recovered draft holds work from an earlier
+    // run, so closing it asks first even when it is untouched.
     void load(const Poco::URI& fileURL = Poco::URI(), bool isStarterMode = false,
-              bool asDraft = false);
+              bool asDraft = false, bool recoveredDraft = false);
     void loadRemote(std::shared_ptr<coda::RemoteDocInfo> remoteInfo);
 
     // The owner installs these; Bridge calls requestClose()/closeCancelled()/updateTitle().
