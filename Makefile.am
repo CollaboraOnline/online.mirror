@@ -234,6 +234,7 @@ shared_sources = \
                  common/Util-server.cpp \
                  common/Util-unix.cpp \
                  common/Util.cpp \
+                 common/VersionStore.cpp \
                  common/Watchdog-unix.cpp \
                  kit/KitQueue.cpp \
                  kit/LogUI.cpp \
@@ -469,6 +470,7 @@ shared_headers = \
                  common/Uri.hpp \
                  common/UserTemplates.hpp \
                  common/Util.hpp \
+                 common/VersionStore.hpp \
                  common/ViewSettings.hpp \
                  common/Watchdog.hpp \
                  common/base64.hpp \
