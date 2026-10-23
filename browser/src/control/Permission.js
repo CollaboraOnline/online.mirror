@@ -571,18 +571,25 @@ window.L.Map.include({
 	// close waits on the user's choice.
 	_saveFailedPrompt: null,
 
-	// Save any local-edit changes and then close the window.  Mirrors
-	// _saveAndSwitchToServerMode but the post-save action is window
-	// close, signalled to the native host via a CLOSE_WINDOW message
-	// once the save (and, for remote docs, the subsequent integrator
-	// upload) completes.
+	// Save any local-edit changes and then close the window, or settle a
+	// draft first (see _closeDraft).  Mirrors _saveAndSwitchToServerMode
+	// but the post-save action is window close, signalled to the native
+	// host via a CLOSE_WINDOW message once the save (and, for remote docs,
+	// the subsequent integrator upload) completes.
 	// A close joins the save that the page already runs, or the open prompt
 	// of the save that failed.
 	_saveAndClose: function () {
 		var prompt = this._saveFailedPrompt;
 		if (prompt) {
+			if (window.ThisIsTheQtApp)
+				window.postMobileMessage('BRING_TO_FRONT');
 			if (!prompt.closing)
 				this._showSaveFailedPrompt(prompt.errorDetail, prompt.fileName, true);
+			return;
+		}
+
+		if (this._isDraft) {
+			this._closeDraft();
 			return;
 		}
 		if (this._pendingNativeSave) {
@@ -665,7 +672,11 @@ window.L.Map.include({
 				window.postMobileMessage(closeMessage);
 		};
 		var cancel = function () { decided('CLOSE_CANCELLED'); };
-		var closeWithoutSaving = function () { decided('CLOSE_WINDOW'); };
+		var closeWithoutSaving = function () {
+			if (that._isDraft)
+				window.postMobileMessage('DISCARD_DRAFT');
+			decided('CLOSE_WINDOW');
+		};
 		var saveAs = function () {
 			decided('CLOSE_CANCELLED');
 			window.postMobileMessage('uno .uno:SaveAs');
@@ -694,6 +705,55 @@ window.L.Map.include({
 		this.uiManager.showModalWithCustomButtons('savefailed',
 			_('Cannot Save Document'), message, false, buttons, callbacks, errorDetail,
 			'savefailed-saveas');
+	},
+
+	// A draft lives only in the drafts folder, so closing one that holds
+	// anything asks where to keep it. The native host gets one answer:
+	// SAVEAS_AND_CLOSE (close once the Save As saved the document),
+	// DISCARD_DRAFT then CLOSE_WINDOW, or CLOSE_CANCELLED. BRING_TO_FRONT
+	// comes before a prompt, because a page at the back does not draw one.
+	// Only CODA-Q handles it.
+	_closeDraft: function () {
+		var discard = function () {
+			window.postMobileMessage('DISCARD_DRAFT');
+			window.postMobileMessage('CLOSE_WINDOW');
+		};
+		if (!this._everModified && !this._isRecoveredDraft) {
+			discard();
+			return;
+		}
+
+		if (window.ThisIsTheQtApp)
+			window.postMobileMessage('BRING_TO_FRONT');
+		var promptId = 'draft-close-prompt';
+		// A second close while the prompt is up waits for its answer.
+		if (document.getElementById(this.uiManager.generateModalId(promptId)))
+			return;
+
+		var cancel = function () {
+			window.postMobileMessage('CLOSE_CANCELLED');
+		};
+		var fileName = (this['wopi'] && this['wopi'].BaseFileName) || '';
+		this.uiManager.showModalWithCustomButtons(
+			promptId,
+			_('Save Changes?'),
+			_('Save changes to "%1" before closing? If you don\'t save, your changes will be permanently lost.')
+				.replace('%1', fileName),
+			false,
+			[
+				{ id: 'draft-close-cancel', text: _('Cancel') },
+				{ id: 'draft-close-discard', text: _('Discard') },
+				{ id: 'draft-close-save', text: _('Save'), 'has_default': true },
+			],
+			[
+				{ id: 'draft-close-save', func_: function () {
+					window.postMobileMessage('SAVEAS_AND_CLOSE');
+				} },
+				{ id: 'draft-close-discard', func_: discard },
+				{ id: 'draft-close-cancel', func_: cancel },
+				// The title bar's close button and Escape.
+				{ id: '__POPOVER__', func: cancel },
+			]);
 	},
 
 	// Another user wants to start collaborative editing.  Save

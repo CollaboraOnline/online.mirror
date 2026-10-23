@@ -234,6 +234,10 @@ void Bridge::createAndStartMessagePumpThread()
                             break;
                         }
 
+                        if (message.starts_with("error: cmd=saveas "))
+                            QMetaObject::invokeMethod(
+                                this, [this] { finishSaveAs(false); }, Qt::QueuedConnection);
+
                         send2JS(buf);
                     }
                     if (pfd[0].revents & POLLERR)
@@ -532,7 +536,7 @@ void Bridge::promptSaveLocation(std::function<void(const std::string&, const std
     if (!loKitDoc)
     {
         LOG_ERR("promptSaveLocation: no loKitDocument");
-        finishSave(false);
+        finishSaveAs(false);
         return;
     }
 
@@ -542,7 +546,7 @@ void Bridge::promptSaveLocation(std::function<void(const std::string&, const std
     if (formats.empty())
     {
         LOG_ERR("promptSaveLocation: no formats available for document type");
-        finishSave(false);
+        finishSaveAs(false);
         return;
     }
 
@@ -671,7 +675,7 @@ void Bridge::promptSaveLocation(std::function<void(const std::string&, const std
                      });
 
     // save never happened, so clear the save-in-flight flag
-    QObject::connect(dialog, &QFileDialog::rejected, this, [this] { finishSave(false); });
+    QObject::connect(dialog, &QFileDialog::rejected, this, [this] { finishSaveAs(false); });
 
     dialog->open();
 }
@@ -680,7 +684,19 @@ void Bridge::finishSave(bool saved)
 {
     _saveInFlight = false;
     LOG_TRC_NOFILE("Bridge::finishSave: _saveInFlight=false, saved=" << saved);
-    if (_onSaveComplete)
+    runSaveCompleteCallback(saved);
+}
+
+void Bridge::finishSaveAs(bool saved)
+{
+    _saveAsInFlight = false;
+    LOG_TRC_NOFILE("Bridge::finishSaveAs: _saveAsInFlight=false, saved=" << saved);
+    runSaveCompleteCallback(saved);
+}
+
+void Bridge::runSaveCompleteCallback(bool saved)
+{
+    if (!isSaveInFlight() && _onSaveComplete)
     {
         // Move out before invoking so a handler that schedules a new
         // close (which re-checks isSaveInFlight) sees a clean slate.
@@ -692,7 +708,7 @@ void Bridge::finishSave(bool saved)
 
 void Bridge::onSaveComplete(std::function<void(bool)> callback)
 {
-    if (!_saveInFlight)
+    if (!isSaveInFlight())
     {
         if (callback)
             callback(true);
@@ -703,7 +719,7 @@ void Bridge::onSaveComplete(std::function<void(bool)> callback)
 
 bool Bridge::requestSave(std::function<void(bool)> onComplete)
 {
-    if (_saveInFlight || _onSaveComplete)
+    if (isSaveInFlight() || _onSaveComplete)
         return false;
 
     _onSaveComplete = std::move(onComplete);
@@ -739,11 +755,21 @@ void Bridge::closeWaitsForSave(std::function<void(bool)> then)
         self->_closeWaitsForSave = false;
         // The busy modal must not hang behind the page's prompt for a failed save.
         self->evalJS("if (window.app && window.app.map) window.app.map.fire('hidebusy');");
-        if (saved)
+        // Not for a draft: its Save As may have been cancelled, and the re-entry must
+        // prompt instead of closing unsaved.
+        if (saved && !(self->_owner && self->_owner->isDraft()))
             self->markReadyToClose();
         // Deferred: a close in then destroys this bridge, which the save result runs in.
         QTimer::singleShot(0, self.data(), [then = std::move(then), saved]() { then(saved); });
     });
+}
+
+void Bridge::closeWhenReady()
+{
+    _readyToClose = true;
+    if (WebView* owner = _owner.data())
+        QMetaObject::invokeMethod(
+            owner, [owner]() { owner->requestClose(); }, Qt::QueuedConnection);
 }
 
 void Bridge::saveAndClose()
@@ -755,8 +781,29 @@ void Bridge::saveAndClose()
         "else window.postMobileMessage('CLOSE_WINDOW');");
 }
 
+void Bridge::saveAsAndClose()
+{
+    saveDocumentAs();
+    QPointer<Bridge> self = this;
+    onSaveComplete(
+        [self](bool)
+        {
+            if (!self || !self->_owner)
+                return;
+            if (self->_owner->isDraft())
+            {
+                self->_owner->closeCancelled();
+                return;
+            }
+            // The Save As has just written the document, so the close needs no second save.
+            self->closeWhenReady();
+        });
+}
+
 void Bridge::saveDocumentAs()
 {
+    _saveAsInFlight = true;
+    LOG_TRC_NOFILE("Bridge::saveDocumentAs: _saveAsInFlight=true");
     QPointer<Bridge> self = this;
     promptSaveLocation(
         [self, fakeClientFd = _document._fakeClientFd,
@@ -791,6 +838,12 @@ void Bridge::saveDocumentAs()
             if (FileUtil::hostPathOfTarget(destUri.getPath())
                 == FileUtil::hostPath(currentUri.getPath()))
             {
+                // No loaddocument follows a plain save; its SAVECOMPLETED ends it instead.
+                if (self)
+                {
+                    self->_saveInFlight = true;
+                    self->_saveAsInFlight = false;
+                }
                 // Send save command if the saveas destination is the same as the current document.
                 const std::string saveCmd = "save dontTerminateEdit=0 dontSaveIfUnmodified=0";
                 fakeSocketWriteQueue(fakeClientFd, saveCmd.data(), saveCmd.size());
@@ -860,6 +913,7 @@ QVariant Bridge::cool(const QString& messageStr)
         if (!COOLProtocol::getTokenString(tokens, "url", newFileUrl))
         {
             LOG_ERR("loaddocument: no url= specified");
+            finishSaveAs(false);
             return {};
         }
 
@@ -898,6 +952,7 @@ QVariant Bridge::cool(const QString& messageStr)
         int rc = fakeSocketConnect(_document._fakeClientFd, coolwsd_server_socket_fd);
         if (rc == -1) {
             LOG_ERR("loaddocument: failed to connect fakesocket");
+            finishSaveAs(false);
             return {};
         }
 
@@ -920,9 +975,7 @@ QVariant Bridge::cool(const QString& messageStr)
             QString::fromStdString(_document._fileURL.getPath()));
         Application::getRecentFiles().add(_document._fileURL.toString(), hostDisplayUri);
 
-        // a Save As ends here, unlike a regular save; it never gets a
-        // SAVECOMPLETED, so clear the save-in-flight flag
-        finishSave(false);
+        finishSaveAs(true);
 
         LOG_TRC_NOFILE("loaddocument: sent initial message with new appDocId");
         return {};
@@ -1519,6 +1572,21 @@ QVariant Bridge::cool(const QString& messageStr)
             if (WebView* owner = _owner.data())
                 owner->activateWindow();
     }
+    else if (tokens.equals(0, "SAVEAS_AND_CLOSE"))
+    {
+        saveAsAndClose();
+    }
+    else if (tokens.equals(0, "DISCARD_DRAFT"))
+    {
+        if (_owner)
+            _owner->discardDraft();
+    }
+    else if (tokens.equals(0, "BRING_TO_FRONT"))
+    {
+        // The page is about to prompt, in a tab that may be hidden.
+        if (WebView* owner = _owner.data())
+            owner->activateWindow();
+    }
     else if (tokens.equals(0, "CLOSE_CANCELLED"))
     {
         if (WebView* owner = _owner.data())
@@ -1527,15 +1595,12 @@ QVariant Bridge::cool(const QString& messageStr)
     else if (tokens.equals(0, "CLOSE_WINDOW"))
     {
         // Page-JS is done with the save-if-dirty step initiated by
-        // saveAndClose() (either because the save finished, or
-        // because the doc was clean).  Trip _readyToClose so the
+        // saveAndClose() (the save finished, the doc was clean, or
+        // the draft was discarded).  Trip _readyToClose so the
         // re-entry into TabManager::closeTab (or the standalone
         // window's closeEvent) proceeds with teardown instead of
         // looping back here.
-        _readyToClose = true;
-        if (WebView* owner = _owner.data())
-            QMetaObject::invokeMethod(
-                owner, [owner]() { owner->requestClose(); }, Qt::QueuedConnection);
+        closeWhenReady();
     }
     else
     {

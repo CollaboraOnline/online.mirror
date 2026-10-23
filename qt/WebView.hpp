@@ -175,9 +175,9 @@ public:
               bool asDraft = false);
     void loadRemote(std::shared_ptr<coda::RemoteDocInfo> remoteInfo);
 
-    // The owner installs these; Bridge calls requestClose()/updateTitle().
+    // The owner installs these; Bridge calls requestClose()/closeCancelled()/updateTitle().
     void setOnCloseRequest(CloseRequestFn cb) { _onCloseRequest = std::move(cb); }
-    // Runs when the user kept the document open from the page's close prompt.
+    // Runs when the page stops a close it was handed, or its Save As for the close is cancelled.
     void setOnCloseCancelled(CloseCancelledFn cb) { _onCloseCancelled = std::move(cb); }
     void setOnTitleChange(TitleChangeFn cb) { _onTitleChange = std::move(cb); }
     // Runs each time the document stops holding a change that is not on disk.
@@ -332,6 +332,7 @@ private:
     QImage _thumbnail;
     Bridge* _bridge;
     QString _draftPath;
+    bool _draftRecovered = false;
 
     CloseRequestFn _onCloseRequest;
     CloseCancelledFn _onCloseCancelled;
