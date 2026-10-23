@@ -1242,6 +1242,8 @@ void WebView::load(const Poco::URI& fileURL, bool isStarterMode, bool asDraft,
         if (CODAConfig::instance().messageDelay() > 0)
             urlAndQuery.addQueryParameter(
                 "messagedelay", std::to_string(CODAConfig::instance().messageDelay()));
+        // Enables the "See revision history" menu and backstage entries.
+        urlAndQuery.addQueryParameter("revisionhistory", "1");
     }
 
     // Dark mode: the user's saved choice wins, otherwise follow the system theme.
