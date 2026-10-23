@@ -217,6 +217,7 @@ shared_sources = \
                  common/Log-common.cpp \
                  common/Log-poco.cpp \
                  common/MobileApp.cpp \
+                 common/Prefs.cpp \
                  common/ProcUtil.cpp \
                  common/Protocol.cpp \
                  common/RegexUtil.cpp \
@@ -234,6 +235,7 @@ shared_sources = \
                  common/Util-server.cpp \
                  common/Util-unix.cpp \
                  common/Util.cpp \
+                 common/VersionSettings.cpp \
                  common/VersionStore.cpp \
                  common/Watchdog-unix.cpp \
                  kit/KitQueue.cpp \
@@ -470,6 +472,7 @@ shared_headers = \
                  common/Uri.hpp \
                  common/UserTemplates.hpp \
                  common/Util.hpp \
+                 common/VersionSettings.hpp \
                  common/VersionStore.hpp \
                  common/ViewSettings.hpp \
                  common/Watchdog.hpp \

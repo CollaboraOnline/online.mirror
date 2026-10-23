@@ -40,6 +40,7 @@
 #include <common/Unit.hpp>
 #include <common/Uri.hpp>
 #include <common/Util.hpp>
+#include <common/VersionStore.hpp>
 #include <net/HttpServer.hpp>
 #include <net/HttpHelper.hpp>
 #include <net/Socket.hpp>
@@ -1695,6 +1696,12 @@ bool DocumentBroker::doDownloadDocument(const Authorization& auth,
     if constexpr (!Util::isMobileAppBuild())
     {
         _quarantine = std::make_unique<Quarantine>(*this, _filename);
+    }
+    else if (templateSource.empty())
+    {
+        // Autosave overwrites localPath in place; the first save keeps a
+        // copy of the file as opened, so the open itself does not wait.
+        _snapshotBeforeFirstWrite = true;
     }
 
     if (!templateSource.empty())
@@ -3566,7 +3573,18 @@ void DocumentBroker::handleSaveResponse(const std::shared_ptr<ClientSession>& se
                                                     << DocumentState::name(_docState.activity())
                                                     << ") in " << _saveManager.lastSaveDuration());
 
-    if constexpr (!Util::isMobileAppBuild())
+    if constexpr (Util::isMobileAppBuild())
+    {
+        // The apps have no jail: the kit saved directly to the user's file.
+        if (wroteNewVersion && _storage)
+        {
+            const bool isAutosave =
+                json->has("isAutosave") && json->get("isAutosave").toString() == "true";
+            versioning::snapshot(_storage->getRootFilePath(),
+                                 /*bypassMergeWindow=*/!isAutosave);
+        }
+    }
+    else
     {
         // Create the 'upload' file regardless of success or failure,
         // because we don't know if the last upload worked or not.
@@ -5124,6 +5142,25 @@ bool DocumentBroker::sendUnoSave(const std::shared_ptr<ClientSession>& session,
     _nextStorageAttrs.setExtendedData(extendedData);
 
     const std::string saveArgs = oss.str();
+
+    if constexpr (Util::isMobileAppBuild())
+    {
+        // The kit writes straight to the user's file, so this is the last
+        // moment the file as opened is still on disk. Synchronous: the write
+        // must not land first. The kit writes an unmodified document too,
+        // unless the save asks it not to.
+        if (_snapshotBeforeFirstWrite && _storage &&
+            (!dontSaveIfUnmodified || isModified() || haveModifyActivityAfterSaveRequest()))
+        {
+            _snapshotBeforeFirstWrite = false;
+            const versioning::SnapshotResult result = versioning::snapshotSync(
+                _storage->getRootFilePath(), /*bypassMergeWindow=*/true);
+            if (result == versioning::SnapshotResult::Failed ||
+                result == versioning::SnapshotResult::TooLarge)
+                LOG_WRN("No version of [" << _docKey
+                                          << "] as opened; the save goes on without one");
+        }
+    }
 
     // re-written to .uno:Save in the Kit.
     const auto command = std::string("save background=") + (background ? "true " : " ") + saveArgs;
