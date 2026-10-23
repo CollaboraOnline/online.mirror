@@ -69,6 +69,8 @@ public:
     bool m_bViewLock;
     bool m_bTilesInvalidated;
     std::vector<tools::Rectangle> m_aInvalidations;
+    /// The part and the edit mode of each invalidation that covers a whole part.
+    std::vector<std::pair<int, int>> m_aWholePartInvalidations;
     std::map<int, bool> m_aViewCursorInvalidations;
     std::map<int, bool> m_aViewCursorVisibilities;
     bool m_bViewSelectionSet;
