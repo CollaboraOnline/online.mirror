@@ -1853,6 +1853,10 @@ bool ClientRequestDispatcher::handlePostRequest(const RequestDetails& requestDet
         if (requestDetails.equals(1, "convert-to") && format.empty())
             hasRequiredParameters = false;
 
+        // The format becomes the extension of the output file name.
+        if (!format.empty() && !FileUtil::isPlainFileName(format))
+            hasRequiredParameters = false;
+
         const std::string fromPath = handler.getFilename();
         LOG_INF("Conversion request for URI [" << fromPath << "] format [" << format << "].");
         if (!fromPath.empty() && hasRequiredParameters)
