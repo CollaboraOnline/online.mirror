@@ -465,6 +465,15 @@ namespace FileUtil
         return Util::splitLast(path, '.', true).second;
     }
 
+    bool isPlainFileName(std::string_view name)
+    {
+        if (name.empty() || name == "." || name == "..")
+            return false;
+        return std::none_of(name.begin(), name.end(),
+                            [](unsigned char c)
+                            { return c == '/' || c == '\\' || c < 0x20 || c == 0x7f; });
+    }
+
 } // namespace FileUtil
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
