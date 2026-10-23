@@ -56,6 +56,7 @@ class WhiteBoxTests : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(testIso8601Time);
     CPPUNIT_TEST(testClockAsString);
     CPPUNIT_TEST(testStat);
+    CPPUNIT_TEST(testIsPlainFileName);
     CPPUNIT_TEST(testStringCompare);
     CPPUNIT_TEST(testSafeAtoi);
     CPPUNIT_TEST(testJsonUtilEscapeJSONValue);
@@ -83,6 +84,7 @@ class WhiteBoxTests : public CPPUNIT_NS::TestFixture
     void testIso8601Time();
     void testClockAsString();
     void testStat();
+    void testIsPlainFileName();
     void testStringCompare();
     void testSafeAtoi();
     void testJsonUtilEscapeJSONValue();
@@ -939,6 +941,25 @@ void WhiteBoxTests::testStat()
 
     ofs.close();
     FileUtil::removeFile(tmpFile);
+}
+
+void WhiteBoxTests::testIsPlainFileName()
+{
+    constexpr auto testname = __func__;
+
+    LOK_ASSERT(FileUtil::isPlainFileName("hello.odt"));
+    LOK_ASSERT(FileUtil::isPlainFileName("..hidden"));
+    LOK_ASSERT(FileUtil::isPlainFileName("a..b"));
+
+    LOK_ASSERT(!FileUtil::isPlainFileName(""));
+    LOK_ASSERT(!FileUtil::isPlainFileName("."));
+    LOK_ASSERT(!FileUtil::isPlainFileName(".."));
+    LOK_ASSERT(!FileUtil::isPlainFileName("dir/file.odt"));
+    LOK_ASSERT(!FileUtil::isPlainFileName("dir\\file.odt"));
+    LOK_ASSERT(!FileUtil::isPlainFileName("/file.odt"));
+    LOK_ASSERT(!FileUtil::isPlainFileName("file.odt/"));
+    LOK_ASSERT(!FileUtil::isPlainFileName("file\nname.odt"));
+    LOK_ASSERT(!FileUtil::isPlainFileName("file\x7fname.odt"));
 }
 
 void WhiteBoxTests::testStringCompare()
