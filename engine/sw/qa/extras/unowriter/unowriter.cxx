@@ -39,6 +39,7 @@
 #include <com/sun/star/text/XBookmarksSupplier.hpp>
 #include <com/sun/star/text/XTextViewCursorSupplier.hpp>
 #include <com/sun/star/text/XTextTable.hpp>
+#include <com/sun/star/text/XTextTableCursor.hpp>
 #include <com/sun/star/text/XPageCursor.hpp>
 
 #include <officecfg/Office/Writer.hxx>
@@ -1700,6 +1701,27 @@ CPPUNIT_TEST_FIXTURE(SwUnoWriter, testRemovedParagraph)
     CPPUNIT_ASSERT_THROW(first.queryThrow<text::XTextRange>()->setString(u"x"_ustr),
                          uno::RuntimeException);
     CPPUNIT_ASSERT_EQUAL(u"second"_ustr, bodyText->getString());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUnoWriter, testSelectSingleTableCell) {
+    createSwDoc();
+    cpo::uno::Reference<css::text::XTextDocument> const doc(mxComponent, cpo::uno::UNO_QUERY_THROW);
+    cpo::uno::Reference<css::text::XTextTable> const table(
+        cpo::uno::Reference<css::lang::XMultiServiceFactory>(doc, cpo::uno::UNO_QUERY_THROW)
+            ->createInstance(u"com.sun.star.text.TextTable"_ustr),
+        cpo::uno::UNO_QUERY_THROW);
+    table->initialize(2, 2);
+    doc->getText()->insertTextContent(doc->getText()->createTextCursor(), table, false);
+    cpo::uno::Reference<css::view::XSelectionSupplier> const controller(
+        doc->getCurrentController(), cpo::uno::UNO_QUERY_THROW);
+    controller->select(cpo::uno::Any(
+        cpo::uno::Reference<css::table::XCellRange>(table, cpo::uno::UNO_QUERY_THROW)
+            ->getCellRangeByName(u"B1:B1"_ustr)));
+    // Selecting the cell range of a single cell gives a table selection of that cell:
+    cpo::uno::Reference<css::text::XTextTableCursor> const cursor(
+        controller->getSelection(), cpo::uno::UNO_QUERY);
+    CPPUNIT_ASSERT(cursor.is());
+    CPPUNIT_ASSERT_EQUAL(u"B1"_ustr, cursor->getRangeName());
 }
 
 } // end of anonymous namespace

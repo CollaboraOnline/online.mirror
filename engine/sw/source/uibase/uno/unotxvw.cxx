@@ -195,6 +195,13 @@ bool SwXTextView::select(const cpo::uno::Any& aInterface)
             UnoActionRemoveContext const aContext(*pTableCursor);
             rSh.EnterStdMode();
             rSh.SetSelection(*pTableCursor);
+            // The selection of a single cell is a table selection of that cell:
+            if (!pTableCursor->HasMark()
+                || pTableCursor->GetPoint()->GetNode().FindTableBoxStartNode()
+                    == pTableCursor->GetMark()->GetNode().FindTableBoxStartNode())
+            {
+                rSh.SelTableBox();
+            }
             return true;
         }
         else if (pMark)
