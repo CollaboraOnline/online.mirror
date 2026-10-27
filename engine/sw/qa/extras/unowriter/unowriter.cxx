@@ -10,12 +10,17 @@
 #include <swmodeltestbase.hxx>
 
 #include <com/sun/star/awt/FontSlant.hpp>
+#include <com/sun/star/chart2/data/XDataProvider.hpp>
 #include <com/sun/star/datatransfer/XTransferableSupplier.hpp>
 #include <com/sun/star/datatransfer/XTransferableTextSupplier.hpp>
 #include <com/sun/star/frame/XDispatch.hpp>
 #include <com/sun/star/frame/XDispatchProviderInterception.hpp>
 #include <com/sun/star/frame/XDispatchProviderInterceptor.hpp>
+#include <com/sun/star/frame/XModel.hpp>
+#include <com/sun/star/table/TableBorder2.hpp>
 #include <com/sun/star/table/XCellRange.hpp>
+#include <com/sun/star/table/XTableColumns.hpp>
+#include <com/sun/star/table/XTableRows.hpp>
 #include <com/sun/star/text/ControlCharacter.hpp>
 #include <com/sun/star/text/TextContentAnchorType.hpp>
 #include <com/sun/star/text/AutoTextContainer.hpp>
@@ -35,11 +40,13 @@
 #include <com/sun/star/text/XTextDocument.hpp>
 #include <com/sun/star/container/XEnumerationAccess.hpp>
 #include <com/sun/star/container/XNameContainer.hpp>
+#include <com/sun/star/container/XNamed.hpp>
 #include <com/sun/star/view/XRenderable.hpp>
 #include <com/sun/star/text/XBookmarksSupplier.hpp>
 #include <com/sun/star/text/XTextViewCursorSupplier.hpp>
 #include <com/sun/star/text/XTextTable.hpp>
 #include <com/sun/star/text/XTextTableCursor.hpp>
+#include <com/sun/star/text/XTextTablesSupplier.hpp>
 #include <com/sun/star/text/XPageCursor.hpp>
 
 #include <officecfg/Office/Writer.hxx>
@@ -1740,6 +1747,191 @@ CPPUNIT_TEST_FIXTURE(SwUnoWriter, testTableCursorTextTable) {
         cpo::uno::Reference<css::container::XNamed>(table, cpo::uno::UNO_QUERY_THROW)->getName(),
         cpo::uno::Reference<css::container::XNamed>(
             cursor->getPropertyValue(u"TextTable"_ustr), cpo::uno::UNO_QUERY_THROW)->getName());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUnoWriter, testTableCursorRangeNameOrder) {
+    createSwDoc();
+    cpo::uno::Reference<css::text::XTextDocument> const doc(mxComponent, cpo::uno::UNO_QUERY_THROW);
+    cpo::uno::Reference<css::text::XTextTable> const table(
+        cpo::uno::Reference<css::lang::XMultiServiceFactory>(doc, cpo::uno::UNO_QUERY_THROW)
+            ->createInstance(u"com.sun.star.text.TextTable"_ustr),
+        cpo::uno::UNO_QUERY_THROW);
+    table->initialize(2, 2);
+    doc->getText()->insertTextContent(doc->getText()->createTextCursor(), table, false);
+    auto const cursor = table->createCursorByCellName(u"B1"_ustr);
+    cursor->gotoCellByName(u"A2"_ustr, true);
+    // The range name of a table cursor goes from the cell of its mark to the cell of its point:
+    CPPUNIT_ASSERT_EQUAL(u"B1:A2"_ustr, cursor->getRangeName());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUnoWriter, testSelectCellsWithNestedTables) {
+    // Cell A1 of table Outer has a nested table at its start, a paragraph, and a nested table at
+    // its end, and both nested tables have cells A1 and B1 too:
+    createSwDoc("nested-tables-in-cell.fodt");
+    cpo::uno::Reference<css::table::XCellRange> const outer(
+        cpo::uno::Reference<css::text::XTextTablesSupplier>(mxComponent, cpo::uno::UNO_QUERY_THROW)
+            ->getTextTables()->getByName(u"Outer"_ustr),
+        cpo::uno::UNO_QUERY_THROW);
+    cpo::uno::Reference<css::view::XSelectionSupplier> const controller(
+        cpo::uno::Reference<css::frame::XModel>(mxComponent, cpo::uno::UNO_QUERY_THROW)
+            ->getCurrentController(),
+        cpo::uno::UNO_QUERY_THROW);
+
+    // Selecting cells A1 and B1 of Outer selects those cells:
+    controller->select(cpo::uno::Any(outer->getCellRangeByName(u"A1:B1"_ustr)));
+    cpo::uno::Reference<css::text::XTextTableCursor> cursor(
+        controller->getSelection(), cpo::uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT_EQUAL(
+        u"Outer"_ustr,
+        cpo::uno::Reference<css::container::XNamed>(
+            cpo::uno::Reference<css::beans::XPropertySet>(cursor, cpo::uno::UNO_QUERY_THROW)
+                ->getPropertyValue(u"TextTable"_ustr),
+            cpo::uno::UNO_QUERY_THROW)->getName());
+    CPPUNIT_ASSERT_EQUAL(u"A1:B1"_ustr, cursor->getRangeName());
+
+    // Selecting cell A1 of Outer alone selects that cell:
+    controller->select(cpo::uno::Any(outer->getCellRangeByName(u"A1:A1"_ustr)));
+    cursor.set(controller->getSelection(), cpo::uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT_EQUAL(
+        u"Outer"_ustr,
+        cpo::uno::Reference<css::container::XNamed>(
+            cpo::uno::Reference<css::beans::XPropertySet>(cursor, cpo::uno::UNO_QUERY_THROW)
+                ->getPropertyValue(u"TextTable"_ustr),
+            cpo::uno::UNO_QUERY_THROW)->getName());
+    CPPUNIT_ASSERT_EQUAL(u"A1"_ustr, cursor->getRangeName());
+
+    // Selecting a range made from a range of Outer selects cells of Outer too:
+    controller->select(cpo::uno::Any(
+        outer->getCellRangeByName(u"A1:B1"_ustr)->getCellRangeByPosition(0, 0, 1, 0)));
+    cursor.set(controller->getSelection(), cpo::uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT_EQUAL(
+        u"Outer"_ustr,
+        cpo::uno::Reference<css::container::XNamed>(
+            cpo::uno::Reference<css::beans::XPropertySet>(cursor, cpo::uno::UNO_QUERY_THROW)
+                ->getPropertyValue(u"TextTable"_ustr),
+            cpo::uno::UNO_QUERY_THROW)->getName());
+    CPPUNIT_ASSERT_EQUAL(u"A1:B1"_ustr, cursor->getRangeName());
+
+}
+
+CPPUNIT_TEST_FIXTURE(SwUnoWriter, testTableCursorInCellWithOnlyNestedTable) {
+    // Cell B1 of table Outer holds nothing but a nested table:
+    createSwDoc("nested-table-only-in-cell.fodt");
+    cpo::uno::Reference<css::text::XTextTable> const outer(
+        cpo::uno::Reference<css::text::XTextTablesSupplier>(mxComponent, cpo::uno::UNO_QUERY_THROW)
+            ->getTextTables()->getByName(u"Outer"_ustr),
+        cpo::uno::UNO_QUERY_THROW);
+    // A table cursor of the cell is named after the cell, even though it is in the nested table:
+    CPPUNIT_ASSERT_EQUAL(u"B1"_ustr, outer->createCursorByCellName(u"B1"_ustr)->getRangeName());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUnoWriter, testCellTextCursorWithNestedTables) {
+    // Cell A1 of table Outer has a nested table at its start, a paragraph, and a nested table at
+    // its end:
+    createSwDoc("nested-tables-in-cell.fodt");
+    cpo::uno::Reference<css::table::XCellRange> const outer(
+        cpo::uno::Reference<css::text::XTextTablesSupplier>(mxComponent, cpo::uno::UNO_QUERY_THROW)
+            ->getTextTables()->getByName(u"Outer"_ustr),
+        cpo::uno::UNO_QUERY_THROW);
+    // A text cursor of the cell is in the cell itself:
+    cpo::uno::Reference<css::text::XText> const cell(
+        outer->getCellByPosition(0, 0), cpo::uno::UNO_QUERY_THROW);
+    auto const cursor = cell->createTextCursor();
+    CPPUNIT_ASSERT_EQUAL(
+        u"Outer"_ustr,
+        cpo::uno::Reference<css::container::XNamed>(
+            cpo::uno::Reference<css::beans::XPropertySet>(cursor, cpo::uno::UNO_QUERY_THROW)
+                ->getPropertyValue(u"TextTable"_ustr),
+            cpo::uno::UNO_QUERY_THROW)->getName());
+    // The text of the cell goes from its own first paragraph to its own last paragraph, which
+    // leaves out the nested tables at its start and end:
+    CPPUNIT_ASSERT_EQUAL(u"middle"_ustr, cell->getString());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUnoWriter, testTableOperationsWithNestedTables) {
+    // Cell A1 of table Outer has a nested table Start at its start, a paragraph, and a nested table
+    // at its end:
+    auto const tables = [this] {
+        return cpo::uno::Reference<css::text::XTextTablesSupplier>(
+            mxComponent, cpo::uno::UNO_QUERY_THROW)->getTextTables();
+    };
+    auto const table = [&tables](OUString const & name) {
+        return cpo::uno::Reference<css::text::XTextTable>(
+            tables()->getByName(name), cpo::uno::UNO_QUERY_THROW);
+    };
+
+    // A table cursor for cell A1 of Outer formats that cell:
+    createSwDoc("nested-tables-in-cell.fodt");
+    cpo::uno::Reference<css::beans::XPropertySet>(
+        table(u"Outer"_ustr)->createCursorByCellName(u"A1"_ustr), cpo::uno::UNO_QUERY_THROW)
+        ->setPropertyValue(u"BackColor"_ustr, cpo::uno::Any(sal_Int32(0xFF0000)));
+    CPPUNIT_ASSERT_EQUAL(
+        cpo::uno::Any(sal_Int32(0xFF0000)),
+        cpo::uno::Reference<css::beans::XPropertySet>(
+            table(u"Outer"_ustr)->getCellByName(u"A1"_ustr), cpo::uno::UNO_QUERY_THROW)
+            ->getPropertyValue(u"BackColor"_ustr));
+
+    // The border of Outer is the border of Outer's cells:
+    css::table::TableBorder2 border;
+    border.TopLine.LineWidth = 100;
+    border.IsTopLineValid = true;
+    cpo::uno::Reference<css::beans::XPropertySet>(table(u"Outer"_ustr), cpo::uno::UNO_QUERY_THROW)
+        ->setPropertyValue(u"TableBorder2"_ustr, cpo::uno::Any(border));
+    CPPUNIT_ASSERT(
+        cpo::uno::Reference<css::beans::XPropertySet>(
+            table(u"Outer"_ustr), cpo::uno::UNO_QUERY_THROW)
+            ->getPropertyValue(u"TableBorder2"_ustr).get<css::table::TableBorder2>().TopLine
+            .LineWidth
+        != 0);
+    CPPUNIT_ASSERT_EQUAL(
+        sal_uInt32(0),
+        cpo::uno::Reference<css::beans::XPropertySet>(
+            table(u"Start"_ustr), cpo::uno::UNO_QUERY_THROW)
+            ->getPropertyValue(u"TableBorder2"_ustr).get<css::table::TableBorder2>().TopLine
+            .LineWidth);
+
+    // A row inserted at, and the row removed at, cell A1 of Outer are rows of Outer:
+    createSwDoc("nested-tables-in-cell.fodt");
+    table(u"Outer"_ustr)->getRows()->insertByIndex(1, 1);
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(2), table(u"Outer"_ustr)->getRows()->getCount());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(1), table(u"Start"_ustr)->getRows()->getCount());
+    table(u"Outer"_ustr)->getRows()->removeByIndex(0, 1);
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(1), table(u"Outer"_ustr)->getRows()->getCount());
+    CPPUNIT_ASSERT(!tables()->hasByName(u"Start"_ustr));
+
+    // A column inserted at, and the column removed at, the cell of Outer with the nested tables are
+    // columns of Outer:
+    createSwDoc("nested-tables-in-cell.fodt");
+    table(u"Outer"_ustr)->getColumns()->insertByIndex(0, 1);
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(3), table(u"Outer"_ustr)->getColumns()->getCount());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(2), table(u"Start"_ustr)->getColumns()->getCount());
+    table(u"Outer"_ustr)->getColumns()->removeByIndex(1, 1);
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(2), table(u"Outer"_ustr)->getColumns()->getCount());
+    CPPUNIT_ASSERT(!tables()->hasByName(u"Start"_ustr));
+}
+
+CPPUNIT_TEST_FIXTURE(SwUnoWriter, testChartDataWithNestedTable) {
+    // Cell B2 of the 3x2 table Outer has a nested 1x1 table at its start:
+    createSwDoc("nested-table-in-cell-b2.fodt");
+    cpo::uno::Reference<css::chart2::data::XDataProvider> const provider(
+        cpo::uno::Reference<css::lang::XMultiServiceFactory>(mxComponent, cpo::uno::UNO_QUERY_THROW)
+            ->createInstance(u"com.sun.star.chart2.data.DataProvider"_ustr),
+        cpo::uno::UNO_QUERY_THROW);
+
+    // The data sequence for cells A2 and B2 of Outer covers those two cells:
+    CPPUNIT_ASSERT_EQUAL(
+        u"Outer.A2:B2"_ustr,
+        provider->createDataSequenceByRangeRepresentation(u"Outer.A2:B2"_ustr)
+            ->getSourceRangeRepresentation());
+
+    // After column A of Outer is deleted, the data sequence for cells A2 to C2 covers the remaining
+    // two cells, now named A2 and B2:
+    auto const sequence = provider->createDataSequenceByRangeRepresentation(u"Outer.A2:C2"_ustr);
+    cpo::uno::Reference<css::text::XTextTable>(
+        cpo::uno::Reference<css::text::XTextTablesSupplier>(mxComponent, cpo::uno::UNO_QUERY_THROW)
+            ->getTextTables()->getByName(u"Outer"_ustr),
+        cpo::uno::UNO_QUERY_THROW)->getColumns()->removeByIndex(0, 1);
+    CPPUNIT_ASSERT_EQUAL(u"Outer.A2:B2"_ustr, sequence->getSourceRangeRepresentation());
 }
 
 } // end of anonymous namespace

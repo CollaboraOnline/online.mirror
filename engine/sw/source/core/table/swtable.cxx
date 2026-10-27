@@ -2406,6 +2406,41 @@ SwNodeOffset SwTableBox::GetSttIdx() const
     return m_pStartNode ? m_pStartNode->GetIndex() : SwNodeOffset(0);
 }
 
+SwContentNode * GetBoxContentNode(SwStartNode const & rBoxStart, bool bLast) {
+    SwNodes const & rNodes = rBoxStart.GetNodes();
+    auto const nStart = rBoxStart.GetIndex();
+    auto const nEnd = rBoxStart.EndOfSectionIndex();
+    // A content node of the box itself, skipping over nested tables:
+    if (bLast) {
+        for (auto i = nEnd - 1; i != nStart; --i) {
+            SwNode * pNode = rNodes[i];
+            if (pNode->IsEndNode() && pNode->StartOfSectionNode()->IsTableNode()) {
+                i = pNode->StartOfSectionIndex();
+            } else if (pNode->IsContentNode()) {
+                return pNode->GetContentNode();
+            }
+        }
+    } else {
+        for (auto i = nStart + 1; i != nEnd; ++i) {
+            SwNode * pNode = rNodes[i];
+            if (pNode->IsTableNode()) {
+                i = pNode->EndOfSectionIndex();
+            } else if (pNode->IsContentNode()) {
+                return pNode->GetContentNode();
+            }
+        }
+    }
+    // Else the box only holds nested tables, so a content node of those (which makes a cursor there
+    // be in a cell of a nested table, as there is no content node that stands for the box itself):
+    if (bLast) {
+        SwNodeIndex aIndex(*rBoxStart.EndOfSectionNode());
+        return SwNodes::GoPrevious(&aIndex);
+    } else {
+        SwNodeIndex aIndex(rBoxStart);
+        return SwNodes::GoNext(&aIndex);
+    }
+}
+
 bool SwTableBox::IsEmpty( bool bWithRemainingNestedTable ) const
 {
     const SwStartNode *pSttNd = GetSttNd();

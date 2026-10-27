@@ -385,11 +385,10 @@ static void GetFormatAndCreateCursorFromRangeRep(
         if(pTLBox)
         {
             const SwStartNode* pSttNd = pTLBox->GetSttNd();
-            SwPosition aPos(*pSttNd);
+            SwPosition aPos(*GetBoxContentNode(*pSttNd, false));
 
             // set cursor to top left box of range
             auto pUnoCursor = pTableFormat->GetDoc().CreateUnoCursor(aPos, true);
-            pUnoCursor->Move( fnMoveForward, GoInNode );
             pUnoCursor->SetRemainInSection( false );
 
             // #i80314#
@@ -398,8 +397,7 @@ static void GetFormatAndCreateCursorFromRangeRep(
             if(pBRBox)
             {
                 pUnoCursor->SetMark();
-                pUnoCursor->GetPoint()->Assign( *pBRBox->GetSttNd() );
-                pUnoCursor->Move( fnMoveForward, GoInNode );
+                pUnoCursor->GetPoint()->Assign( *GetBoxContentNode(*pBRBox->GetSttNd(), false) );
                 SwUnoTableCursor& rCursor =
                     dynamic_cast<SwUnoTableCursor&>(*pUnoCursor);
                 // HACK: remove pending actions for old style tables
@@ -2343,16 +2341,7 @@ bool SwChartDataSequence::DeleteBox( const SwTableBox &rBox )
 
         if (pNewBox)    // set new position (cell range) to use
         {
-            // This is how you get the first content node of a row:
-            // First get a SwNodeIndex pointing to the node after SwStartNode of the box...
-            SwNodeIndex aIdx( *pNewBox->GetSttNd(), +1 );
-            // This can be a SwContentNode, but might also be a table or section node,
-            // therefore call GoNext
-            SwContentNode *pCNd = aIdx.GetNode().GetContentNode();
-            if (!pCNd)
-                pCNd = SwNodes::GoNext(&aIdx);
-            // and then one can e.g. create a SwPosition:
-            SwPosition aNewPos( *pCNd );   // new position to be used with cursor
+            SwPosition aNewPos( *GetBoxContentNode(*pNewBox->GetSttNd(), false) );
 
             // if the mark is to be changed, make sure there is one
             if (pMarkStartNode == rBox.GetSttNd() && !m_pTableCursor->HasMark())
@@ -2481,9 +2470,8 @@ void SwChartDataSequence::ExtendTo( bool bExtendCol,
         const SwTableBox *pNewStartBox = pTable->GetTableBox( aNewStartCell );
         const SwTableBox *pNewEndBox   = pTable->GetTableBox( aNewEndCell );
         pUnoTableCursor->SetMark();
-        pUnoTableCursor->GetPoint()->Assign( *pNewEndBox->GetSttNd() );
-        pUnoTableCursor->GetMark()->Assign( *pNewStartBox->GetSttNd() );
-        pUnoTableCursor->Move( fnMoveForward, GoInNode );
+        pUnoTableCursor->GetPoint()->Assign( *GetBoxContentNode(*pNewEndBox->GetSttNd(), false) );
+        pUnoTableCursor->GetMark()->Assign( *GetBoxContentNode(*pNewStartBox->GetSttNd(), false) );
         pUnoTableCursor->MakeBoxSels();
     }
 }

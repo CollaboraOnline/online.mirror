@@ -44,6 +44,7 @@
 #include <paratr.hxx>
 #include <pam.hxx>
 #include <shellio.hxx>
+#include <swtable.hxx>
 #include <unotbl.hxx>
 #include <fmtruby.hxx>
 #include <docsh.hxx>
@@ -1119,9 +1120,18 @@ SwXTextCursor::gotoEnd(bool Expand)
     SwUnoCursor & rUnoCursor( GetCursorOrThrow() );
 
     SwUnoCursorHelper::SelectPam(rUnoCursor, Expand);
+    SwXText const * const pParentCell = CursorType::TableText == m_eType
+        ? dynamic_cast<SwXCell const *>(m_xParentText.get()) : nullptr;
+    SwStartNode const * const pCellStart
+        = pParentCell == nullptr ? nullptr : pParentCell->GetStartNode();
     if (CursorType::Body == m_eType)
     {
         rUnoCursor.Move( fnMoveForward, GoInDoc );
+    }
+    else if (pCellStart != nullptr) {
+        // The end of a cell's text is in the cell itself, after any tables nested at its end:
+        SwContentNode & rLast = *GetBoxContentNode(*pCellStart, true);
+        rUnoCursor.GetPoint()->Assign(rLast, rLast.Len());
     }
     else if (   (CursorType::Frame   == m_eType)
             ||  (CursorType::TableText == m_eType)

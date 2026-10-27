@@ -1982,6 +1982,26 @@ CPPUNIT_TEST_FIXTURE(Test, testSpansDifferingOnlyInRsidContinueEachOther)
     CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(3), nAutoFormats);
 }
 
+CPPUNIT_TEST_FIXTURE(Test, testRepeatedCellWithNestedTable)
+{
+    // Given a table with two rows that each have a cell repeated over both columns, the first with
+    // a paragraph and then a nested table, the second with a nested table and then a paragraph:
+    createSwDoc("repeated-cell-nested-table.fodt");
+
+    // Then each copy of a repeated cell has the cell's own paragraph:
+    uno::Reference<text::XTextTablesSupplier> xTablesSupplier(mxComponent, uno::UNO_QUERY);
+    uno::Reference<text::XTextTable> xOuter(
+        xTablesSupplier->getTextTables()->getByName(u"Outer"_ustr), uno::UNO_QUERY);
+    CPPUNIT_ASSERT_EQUAL(
+        u"end"_ustr,
+        uno::Reference<text::XText>(xOuter->getCellByName(u"B1"_ustr), uno::UNO_QUERY_THROW)
+            ->getString());
+    CPPUNIT_ASSERT_EQUAL(
+        u"start"_ustr,
+        uno::Reference<text::XText>(xOuter->getCellByName(u"B2"_ustr), uno::UNO_QUERY_THROW)
+            ->getString());
+}
+
 } // end of anonymous namespace
 CPPUNIT_PLUGIN_IMPLEMENT();
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

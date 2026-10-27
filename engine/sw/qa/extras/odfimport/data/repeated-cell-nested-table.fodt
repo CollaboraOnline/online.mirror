@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" office:version="1.3" office:mimetype="application/vnd.oasis.opendocument.text">
+ <office:body>
+  <office:text>
+   <table:table table:name="Outer">
+    <table:table-column table:number-columns-repeated="2"/>
+    <table:table-row>
+     <table:table-cell table:number-columns-repeated="2">
+      <text:p>end</text:p>
+      <table:table table:name="AtEnd">
+       <table:table-column/>
+       <table:table-row>
+        <table:table-cell><text:p>e</text:p></table:table-cell>
+       </table:table-row>
+      </table:table>
+     </table:table-cell>
+    </table:table-row>
+    <table:table-row>
+     <table:table-cell table:number-columns-repeated="2">
+      <table:table table:name="AtStart">
+       <table:table-column/>
+       <table:table-row>
+        <table:table-cell><text:p>s</text:p></table:table-cell>
+       </table:table-row>
+      </table:table>
+      <text:p>start</text:p>
+     </table:table-cell>
+    </table:table-row>
+   </table:table>
+   <text:p/>
+  </office:text>
+ </office:body>
+</office:document>

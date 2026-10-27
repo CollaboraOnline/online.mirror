@@ -648,6 +648,10 @@ public:
     void dumpAsXml(xmlTextWriterPtr pWriter) const;
 };
 
+// The first or the last content node of the table box that starts with rBoxStart, preferring one
+// that is not in a table nested in the box:
+SwContentNode * GetBoxContentNode(SwStartNode const & rBoxStart, bool bLast);
+
 class SwCellFrame;
 class SW_DLLPUBLIC SwTableCellInfo
 {

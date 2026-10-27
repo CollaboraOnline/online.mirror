@@ -316,13 +316,12 @@ bool SwCursorShell::SelTableBox()
     // select the complete box with our shiny new m_pTableCursor
     // 1. delete mark, and move point to first content node in box
     m_pTableCursor->DeleteMark();
-    m_pTableCursor->GetPoint()->Assign( *pStartNode );
-    m_pTableCursor->Move( fnMoveForward, GoInNode );
+    m_pTableCursor->GetPoint()->Assign( *GetBoxContentNode(*pStartNode, false) );
 
     // 2. set mark, and move point to last content node in box
     m_pTableCursor->SetMark();
-    m_pTableCursor->GetPoint()->Assign( *(pStartNode->EndOfSectionNode()) );
-    m_pTableCursor->Move( fnMoveBackward, GoInNode );
+    SwContentNode * pLast = GetBoxContentNode(*pStartNode, true);
+    m_pTableCursor->GetPoint()->Assign( *pLast, pLast->Len() );
 
     // 3. exchange
     m_pTableCursor->Exchange();
