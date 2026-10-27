@@ -402,6 +402,33 @@ function editEngineUpdateClipboardState(container: EditEngineContainer): void {
 	});
 }
 
+function editEngineSendBlur(container: EditEngineContainer): void {
+	editEngineSendAction(container, 'blur', {});
+	editEngineRestoreClipboardState(container);
+}
+
+/// True for an element in the context menu or in one of its submenus. Their ids all start with the
+/// id of the context menu.
+function editEngineIsInContextMenu(target: EventTarget | null): boolean {
+	return (
+		target instanceof Element &&
+		!!target.closest('[id^="' + ContextMenuControl.menuID + '"]')
+	);
+}
+
+/// Waits for the focus to leave the context menu. Focus that comes back to the widget keeps the
+/// text in editing, and focus that goes anywhere else ends it. The widget is matched by its id,
+/// because an update from the engine can rebuild it while the menu is open.
+function editEngineBlurAfterContextMenu(container: EditEngineContainer): void {
+	const onFocusIn = (e: FocusEvent) => {
+		if (editEngineIsInContextMenu(e.target)) return;
+		container.ownerDocument.removeEventListener('focusin', onFocusIn);
+		const target = e.target instanceof Element ? e.target : null;
+		if (!target || target.id !== container.id) editEngineSendBlur(container);
+	};
+	container.ownerDocument.addEventListener('focusin', onFocusIn);
+}
+
 function editEngineAttachHandlers(container: EditEngineContainer): void {
 	container.addEventListener('keydown', (e: KeyboardEvent) => {
 		container.editEngineMousePoint = undefined;
@@ -424,9 +451,13 @@ function editEngineAttachHandlers(container: EditEngineContainer): void {
 		editEngineSendAction(container, 'focus', {});
 	});
 
-	container.addEventListener('blur', () => {
-		editEngineSendAction(container, 'blur', {});
-		editEngineRestoreClipboardState(container);
+	// The text stays in editing while the context menu opened on it holds the focus, as it does on
+	// desktop, so empty text under the menu shows no placeholder. The blur goes out when the focus
+	// leaves the menu for anywhere other than this widget.
+	container.addEventListener('blur', (e: FocusEvent) => {
+		if (editEngineIsInContextMenu(e.relatedTarget))
+			editEngineBlurAfterContextMenu(container);
+		else editEngineSendBlur(container);
 	});
 
 	container.addEventListener('compositionend', (e: CompositionEvent) => {
