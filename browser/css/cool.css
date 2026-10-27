@@ -620,8 +620,14 @@ body {
 	-webkit-user-select: text;
 	-ms-user-select: text;
 	z-index: 12;
-	width: 250px;
+	width: min-content;
+	min-width: 250px;
 	transition: left .25s;
+}
+
+.cool-annotation-child-lines {
+	position: absolute;
+	top: 100%;
 }
 
 .comment-placement-overlay {
@@ -715,6 +721,7 @@ body {
 	overflow: auto;
 	scrollbar-color: var(--scrollbar-color);
 	scrollbar-width: var(--scrollbar-width);
+	min-width: 200px;
 }
 
 .cool-annotation-info-collapsed {
@@ -916,10 +923,6 @@ body {
 	width: 100%;
 	overflow: hidden;
 	flex: 1;
-}
-
-.cool-annotation:not(.annotation-pop-up) .cool-annotation-author {
-	max-width: 150px;
 }
 
 .cool-annotation-content-author {

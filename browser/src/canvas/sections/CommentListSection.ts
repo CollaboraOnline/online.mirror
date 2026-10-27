@@ -206,6 +206,7 @@ export class CommentSection extends CanvasSectionObject {
 		width: number;
 		commentWidth: number;
 		collapsedMarginToTheEdge: number;
+		columnEndMargin: number;
 		deflectionOfSelectedComment: number;
 		collapsedCommentWidth: number;
 		showSelectedBigger: boolean;
@@ -279,6 +280,7 @@ export class CommentSection extends CanvasSectionObject {
 		this.sectionProperties.commentWidthBigger =  588 * app.dpiScale;
 		this.sectionProperties.collapsedCommentWidth = 32 * 1.5 * app.dpiScale;
 		this.sectionProperties.collapsedMarginToTheEdge = 120; // CSS pixels.
+		this.sectionProperties.columnEndMargin = 8;
 		this.sectionProperties.deflectionOfSelectedComment = 160; // CSS pixels.
 		this.sectionProperties.showSelectedBigger = false;
 		this.sectionProperties.calcCurrentComment = null; // We don't automatically show a Calc comment when cursor is on its cell. But we remember it to show if user presses Alt+C keys.
@@ -1449,6 +1451,15 @@ export class CommentSection extends CanvasSectionObject {
 		});
 	}
 
+	private isCommentVerticallyInView (comment: Comment): boolean {
+		const container = comment.sectionProperties.container;
+		if (!container || !comment.isContainerVisible())
+			return false;
+		const rect = container.getBoundingClientRect();
+		const documentRect = document.getElementById('document-container').getBoundingClientRect();
+		return rect.top >= documentRect.top && rect.bottom <= documentRect.bottom;
+	}
+
 	private scrollCommentIntoView (comment: Comment) {
 		if (CommentSection.importingComments || CommentSection.showingEveryComment
 			|| !comment)
@@ -1505,8 +1516,9 @@ export class CommentSection extends CanvasSectionObject {
 		// An anchor inside the frozen rows keeps its place on screen, so the
 		// vertical position stays as it is.
 		const pinnedByFrozenRows = topTwips < split.y;
+		const alreadyShown = app.map._docLayer._docType === 'text' && this.isCommentVerticallyInView(comment);
 
-		if (!pinnedByFrozenRows && (!topVisible || !bottomVisible)) {
+		if (!pinnedByFrozenRows && !alreadyShown && (!topVisible || !bottomVisible)) {
 			const topPixels = topTwips * app.twipsToPixels;
 			const topBottom = this.getScreenTopBottom();
 			const viewHeight = topBottom[1] - topBottom[0];
@@ -2289,6 +2301,11 @@ export class CommentSection extends CanvasSectionObject {
 				if (app.map._docLayer._docType === 'spreadsheet')
 					annotation.hide();
 
+				if (this.actionPerformedByCurrentUser(obj) && !annotation.isRootComment())
+					app.layoutingService.appendLayoutingTask(() => {
+						annotation.scrollDocumentToShowCard();
+					});
+
 				var autoSavedComment = CommentSection.autoSavedComment;
 				if (autoSavedComment) {
 					var isOurComment = annotation.isAutoSaved();
@@ -2770,6 +2787,18 @@ export class CommentSection extends CanvasSectionObject {
 		}
 	}
 
+	private getColumnWidth (): number {
+		if (app.map._docLayer._docType !== 'text')
+			return this.sectionProperties.commentWidth;
+		let widest = 0;
+		for (const comment of this.sectionProperties.commentList)
+			widest = Math.max(widest, comment.sectionProperties.container.offsetWidth);
+		const width = widest * app.dpiScale;
+		if (width <= this.sectionProperties.commentWidth)
+			return this.sectionProperties.commentWidth;
+		return width + this.sectionProperties.columnEndMargin * app.dpiScale;
+	}
+
 	private layout (relayout: boolean = true): void {
 		if ((<any>window).mode.isMobile() || app.map._docLayer._docType === 'spreadsheet') {
 			if (this.sectionProperties.commentList.length > 0)
@@ -2824,9 +2853,10 @@ export class CommentSection extends CanvasSectionObject {
 		if (relayout)
 			this.resizeComments();
 
+		const columnWidth = this.getColumnWidth();
 		let horizontalScroll = app.activeDocument.fileSize.x;
-		if (availableSpace < this.sectionProperties.commentWidth && !this.isCollapsed)
-			horizontalScroll = (app.activeDocument.fileSize.cX + this.sectionProperties.commentWidth) * app.pixelsToTwips * app.dpiScale;
+		if (availableSpace < columnWidth && !this.isCollapsed)
+			horizontalScroll = (app.activeDocument.fileSize.cX + columnWidth) * app.pixelsToTwips * app.dpiScale;
 
 		const checkY = lastY + app.activeDocument.activeLayout.viewedRectangle.pY1;
 

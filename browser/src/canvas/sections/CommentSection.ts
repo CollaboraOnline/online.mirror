@@ -155,7 +155,7 @@ export class Comment extends CanvasSectionObject {
 		this.sectionProperties.children = []; // This is used for Writer comments. There is parent / child relationship between comments in Writer files.
 		this.sectionProperties.childLinesNode = null;
 		this.sectionProperties.childLines = [];
-		this.sectionProperties.childCommentOffset = 8;
+		this.sectionProperties.childCommentOffset = 24;
 		this.sectionProperties.commentMarkerSubSection = null; // For Impress and Draw documents.
 		this.sectionProperties.commentAnchorAreaSubSection = null; // For comments with an explicit anchor area (PDF /Rect, drag-to-area).
 		this.sectionProperties.calcCommentAreaWidth = 40; // Calc comment area doesn't cover the whole cell, in order to allow multi-cell selections.
@@ -470,7 +470,7 @@ export class Comment extends CanvasSectionObject {
 	}
 
 	private createChildLinesNode (): void {
-		this.sectionProperties.childLinesNode = window.L.DomUtil.create('div', '', this.sectionProperties.container);
+		this.sectionProperties.childLinesNode = window.L.DomUtil.create('div', 'cool-annotation-child-lines', this.sectionProperties.container);
 		this.sectionProperties.childLinesNode.id = 'annotation-child-lines-' + this.sectionProperties.data.id;
 		this.sectionProperties.childLinesNode.style.width = this.sectionProperties.childCommentOffset*(this.getChildLevel() + 1) + 'px';
 	}
@@ -507,7 +507,8 @@ export class Comment extends CanvasSectionObject {
 		for (let i = 0; i < this.sectionProperties.children.length; i++) {
 			if (this.sectionProperties.children[i].isContainerVisible())
 				childPositions.push({ id: this.sectionProperties.children[i].sectionProperties.data.id,
-									posY: this.getContainerPosY()});
+					posY: this.sectionProperties.children[i].getContainerPosY()
+				});
 		}
 		childPositions.sort((a, b) => { return a.posY - b.posY; });
 		let lastPosY = this.getContainerPosY() + this.getCommentHeight(false);
@@ -516,7 +517,7 @@ export class Comment extends CanvasSectionObject {
 			if (this.sectionProperties.childLines[i] === undefined) {
 				this.sectionProperties.childLines[i] = window.L.DomUtil.create('div', 'cool-annotation-child-line', this.sectionProperties.childLinesNode);
 				this.sectionProperties.childLines[i].id = 'annotation-child-line-' + this.sectionProperties.data.id + '-' + i;
-				this.sectionProperties.childLines[i].style.width = this.sectionProperties.childCommentOffset/2 + 'px';
+				this.sectionProperties.childLines[i].style.width = (this.sectionProperties.childCommentOffset - 4) + 'px';
 			}
 			this.sectionProperties.childLines[i].style.marginLeft =  (this.sectionProperties.childCommentOffset*this.getChildLevel() + 4) + 'px';
 			this.sectionProperties.childLines[i].style.height = (childPositions[i].posY + 24 - lastPosY) + 'px';
@@ -1300,6 +1301,16 @@ export class Comment extends CanvasSectionObject {
 		return true;
 	}
 
+	public scrollDocumentToShowCard(): void {
+		const rect = this.sectionProperties.wrapper.getBoundingClientRect();
+		const documentRect = document.getElementById('document-container').getBoundingClientRect();
+		const margin = this.sectionProperties.commentListSection.sectionProperties.columnEndMargin;
+		const offset = rect.right + margin - documentRect.right;
+		if (offset > 0)
+			app.activeDocument.activeLayout.scroll(Math.ceil(offset * app.dpiScale), 0);
+		this.scrollDocumentToShow(rect);
+	}
+
 	private scrollDocumentToShow(rect: DOMRect): void {
 		const documentRect = document.getElementById('document-container').getBoundingClientRect();
 		const margin = this.sectionProperties.commentListSection.sectionProperties.marginY / app.dpiScale;
@@ -2023,8 +2034,7 @@ export class Comment extends CanvasSectionObject {
 		if (invalidateCache)
 			this.cachedCommentHeight = null;
 		if (this.cachedCommentHeight === null)
-			this.cachedCommentHeight = this.sectionProperties.container.getBoundingClientRect().height
-			- this.sectionProperties.childLinesNode.getBoundingClientRect().height;
+			this.cachedCommentHeight = this.sectionProperties.container.getBoundingClientRect().height;
 		return this.cachedCommentHeight;
 	}
 
