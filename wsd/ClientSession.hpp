@@ -792,7 +792,7 @@ private:
     /// If Session is for convert-to
     bool _isConvertTo;
 
-    /// Whether this session is the headless connection
+    /// True for a headless connection, one whose load named a connection chain.
     bool _isRemoteDocumentConnection;
 
     Poco::SharedPtr<Poco::JSON::Object> _viewSettingsJSON;

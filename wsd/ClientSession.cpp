@@ -167,7 +167,7 @@ ClientSession::ClientSession(const std::shared_ptr<ProtocolHandlerInterface>& ws
     , _sentAudit(false)
     , _sentBrowserSetting(false)
     , _isConvertTo(false)
-    , _isRemoteDocumentConnection(requestDetails.isRemoteDocument())
+    , _isRemoteDocumentConnection(false)
 {
     const std::size_t curConnections = ++COOLWSD::NumConnections;
     LOG_INF("ClientSession ctor [" << getName() << "] for URI: [" << _uriPublic.toString()
@@ -2733,9 +2733,6 @@ bool ClientSession::loadDocument(const char* /*buffer*/, int /*length*/,
     try
     {
         std::string loadPart;
-#if !MOBILEAPP
-        bool namedDocKeyChain = false;
-#endif
         for (std::size_t i = 1; i < tokens.size(); ++i)
         {
             std::string name;
@@ -2755,20 +2752,13 @@ bool ClientSession::loadDocument(const char* /*buffer*/, int /*length*/,
 #if !MOBILEAPP
             if (name == "remotechain")
             {
-                // A headless session names the docKeys already on its connection
-                // chain, so a subscription that would close a cycle can be refused.
+                // A headless session names the docKeys already on its connection chain, so a
+                // subscription that would close a cycle can be refused. Naming a chain is what
+                // makes the connection a headless one.
                 if (value.empty())
                     continue;
 
-                if (!_isRemoteDocumentConnection)
-                {
-                    LOG_WRN("Ignoring the connection chain named by session ["
-                            << getId()
-                            << "]: the connection is not one a RemoteDocumentBroker made");
-                    continue;
-                }
-
-                namedDocKeyChain = true;
+                _isRemoteDocumentConnection = true;
                 docBroker->addToIncomingDocKeyChain(value);
                 continue;
             }
@@ -2781,16 +2771,6 @@ bool ClientSession::loadDocument(const char* /*buffer*/, int /*length*/,
 
         disableSpellCheckIfReadOnly();
         overrideDocOption();
-
-#if !MOBILEAPP
-        // A headless connection carries the chain of the document, one naming no chain
-        // is refused instead, so that cycle protection is not skipped.
-        if (_isRemoteDocumentConnection && !namedDocKeyChain)
-        {
-            sendTextFrameAndLogError("error: cmd=load kind=syntax");
-            return false;
-        }
-#endif
 
         // If an earlier view of this document recorded a part, this view opens on that part.
         const DocumentBroker::ViewPosition& lastPosition = docBroker->getLastViewPosition();
