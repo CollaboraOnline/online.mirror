@@ -904,6 +904,32 @@ describe(['tagdesktop'], 'Impress speaker notes pane', function () {
 		helper.getContextMenuItem('Cut').should('be.visible');
 		helper.getContextMenuItem('Copy').should('be.visible');
 	});
+
+	// A right click on empty notes enters them, as a left click does, and they stay entered while
+	// the context menu is open.
+	it('right clicking empty notes replaces the placeholder', function () {
+		var editEngine = '#notespanel-container .ui-editengine';
+		var paragraph = editEngine + ' .ui-editengine-paragraph';
+
+		openNotesPane();
+		cy.cGet(paragraph).should('contain.text', 'Click to add Notes');
+
+		cy.cGet(paragraph).realClick({ button: 'right', x: 30, y: 10 });
+		helper.getContextMenuItem('Paste').should('be.visible');
+		cy.getFrameWindow().then((win) => { helper.processToIdle(win); });
+		cy.cGet(paragraph).should('not.contain.text', 'Click to add Notes');
+
+		cy.realPress('Escape');
+		cy.cGet('#jsd-context-menu-dropdown-overlay').should('not.exist');
+		cy.cGet(editEngine).should('have.focus');
+		cy.cGet(paragraph).should('not.contain.text', 'Click to add Notes');
+
+		// Leaving the notes empty brings the placeholder back.
+		cy.cGet(editEngine).then(function (element) {
+			element[0].blur();
+		});
+		cy.cGet(paragraph).should('contain.text', 'Click to add Notes');
+	});
 });
 
 describe(['tagdesktop'], 'Impress speaker notes pane on load', function () {
