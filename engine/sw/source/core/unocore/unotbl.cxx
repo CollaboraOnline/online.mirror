@@ -1717,6 +1717,12 @@ cpo::uno::Any SwXTextTableCursor::getPropertyValue(const OUString& rPropertyName
             // TODO: GetAttr for table selections in a Doc is missing
             throw cpo::uno::RuntimeException("Unknown property: " + rPropertyName, getXWeak());
         break;
+        case FN_UNO_TEXT_TABLE:
+            if (GetFrameFormat() != nullptr) {
+                aResult <<= uno::Reference<text::XTextTable>(
+                    SwXTextTable::CreateXTextTable(GetFrameFormat()));
+            }
+        break;
         case FN_UNO_PARA_STYLE:
         {
             auto pFormat(SwUnoCursorHelper::GetCurTextFormatColl(rUnoCursor, false));

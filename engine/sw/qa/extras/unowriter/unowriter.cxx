@@ -1724,6 +1724,24 @@ CPPUNIT_TEST_FIXTURE(SwUnoWriter, testSelectSingleTableCell) {
     CPPUNIT_ASSERT_EQUAL(u"B1"_ustr, cursor->getRangeName());
 }
 
+CPPUNIT_TEST_FIXTURE(SwUnoWriter, testTableCursorTextTable) {
+    createSwDoc();
+    cpo::uno::Reference<css::text::XTextDocument> const doc(mxComponent, cpo::uno::UNO_QUERY_THROW);
+    cpo::uno::Reference<css::text::XTextTable> const table(
+        cpo::uno::Reference<css::lang::XMultiServiceFactory>(doc, cpo::uno::UNO_QUERY_THROW)
+            ->createInstance(u"com.sun.star.text.TextTable"_ustr),
+        cpo::uno::UNO_QUERY_THROW);
+    table->initialize(2, 2);
+    doc->getText()->insertTextContent(doc->getText()->createTextCursor(), table, false);
+    cpo::uno::Reference<css::beans::XPropertySet> const cursor(
+        table->createCursorByCellName(u"B1"_ustr), cpo::uno::UNO_QUERY_THROW);
+    // A table cursor has the table that it is in as its TextTable property:
+    CPPUNIT_ASSERT_EQUAL(
+        cpo::uno::Reference<css::container::XNamed>(table, cpo::uno::UNO_QUERY_THROW)->getName(),
+        cpo::uno::Reference<css::container::XNamed>(
+            cursor->getPropertyValue(u"TextTable"_ustr), cpo::uno::UNO_QUERY_THROW)->getName());
+}
+
 } // end of anonymous namespace
 CPPUNIT_PLUGIN_IMPLEMENT();
 

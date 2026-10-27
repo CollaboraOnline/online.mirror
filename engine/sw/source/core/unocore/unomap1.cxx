@@ -970,6 +970,7 @@ std::span<const SfxItemPropertyMapEntry> SwUnoPropertyMapProvider::GetTextTableC
         { UNO_NAME_BACK_TRANSPARENT, FN_UNO_TABLE_CELL_BACKGROUND,  cppu::UnoType<bool>::get(),         PROPERTY_NONE , MID_GRAPHIC_TRANSPARENT      },
         { UNO_NAME_USER_DEFINED_ATTRIBUTES, RES_UNKNOWNATR_CONTAINER, cppu::UnoType<css::container::XNameContainer>::get(), PropertyAttribute::MAYBEVOID, 0 },
         { UNO_NAME_TEXT_SECTION, FN_UNO_TEXT_SECTION, cppu::UnoType<css::text::XTextSection>::get(),  PropertyAttribute::MAYBEVOID|PropertyAttribute::READONLY ,0 },
+        { UNO_NAME_TEXT_TABLE, FN_UNO_TEXT_TABLE, cppu::UnoType<css::text::XTextTable>::get(), PropertyAttribute::MAYBEVOID|PropertyAttribute::READONLY, 0 },
         { UNO_NAME_IS_PROTECTED, RES_PROTECT,            cppu::UnoType<bool>::get(), 0, MID_PROTECT_CONTENT},
         { UNO_NAME_VERT_ORIENT, RES_VERT_ORIENT,      cppu::UnoType<sal_Int16>::get(),           PROPERTY_NONE ,MID_VERTORIENT_ORIENT    },
     };
