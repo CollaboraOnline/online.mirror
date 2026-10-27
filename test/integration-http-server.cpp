@@ -39,6 +39,7 @@ class HTTPServerTest : public CPPUNIT_NS::TestFixture
 
     CPPUNIT_TEST(testCoolGet);
     CPPUNIT_TEST(testCoolPagesNoStore);
+    CPPUNIT_TEST(testStaticFileVary);
     CPPUNIT_TEST(testCoolPostPoco);
     CPPUNIT_TEST(testCoolPost);
     CPPUNIT_TEST(testIntegratorSettingsUnrestrictedFraming);
@@ -57,6 +58,7 @@ class HTTPServerTest : public CPPUNIT_NS::TestFixture
 
     void testCoolGet();
     void testCoolPagesNoStore();
+    void testStaticFileVary();
     void testCoolPostPoco();
     void testCoolPost();
     void testIntegratorSettingsUnrestrictedFraming();
@@ -145,6 +147,26 @@ void HTTPServerTest::testCoolPagesNoStore()
         LOK_ASSERT_EQUAL(http::StatusCode::OK, httpResponse->statusLine().statusCode());
         LOK_ASSERT_EQUAL_STR("no-store", httpResponse->get("Cache-Control"));
         LOK_ASSERT_EQUAL_STR("", httpResponse->get("ETag"));
+    }
+}
+
+void HTTPServerTest::testStaticFileVary()
+{
+    constexpr std::string_view testname = __func__;
+
+    for (const std::string encoding : { "gzip", "" })
+    {
+        TST_LOG("Accept-Encoding: [" << encoding << ']');
+        auto httpSession = http::Session::create(_uri.toString());
+        http::Request request("/browser/dist/global.js");
+        if (!encoding.empty())
+            request.set("Accept-Encoding", encoding);
+        const std::shared_ptr<const http::Response> httpResponse =
+            httpSession->syncRequest(request);
+
+        LOK_ASSERT_EQUAL(http::StatusCode::OK, httpResponse->statusCode());
+        LOK_ASSERT_EQUAL_STR(encoding, httpResponse->get("Content-Encoding"));
+        LOK_ASSERT_EQUAL_STR("Accept-Encoding", httpResponse->get("Vary"));
     }
 }
 

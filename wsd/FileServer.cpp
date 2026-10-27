@@ -721,6 +721,10 @@ bool FileServerRequestHandler::handleRequest(const HTTPRequest& request,
 
             response.setContentType(std::move(mimeType));
 
+            // The body is br, gzip or plain depending on Accept-Encoding, so a
+            // shared cache has to keep one copy per encoding.
+            response.add("Vary", "Accept-Encoding");
+
             auto it = request.find("If-None-Match");
             if (it != request.end())
             {
@@ -734,7 +738,9 @@ bool FileServerRequestHandler::handleRequest(const HTTPRequest& request,
                     std::string extraHeaders =
                         "Expires: " + Poco::DateTimeFormatter::format(
                             later, Poco::DateTimeFormat::HTTP_FORMAT) + "\r\n" +
-                        "Cache-Control: max-age=11059200\r\n";
+                        "Cache-Control: max-age=11059200\r\n"
+                        "ETag: " + etagString + "\r\n"
+                        "Vary: Accept-Encoding\r\n";
                     HttpHelper::sendErrorAndShutdown(http::StatusCode::NotModified, socket,
                                                      std::string(), extraHeaders);
                     return true;
