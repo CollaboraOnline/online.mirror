@@ -39,6 +39,7 @@
 #include <com/sun/star/view/XSelectionSupplier.hpp>
 #include <com/sun/star/text/XTextDocument.hpp>
 #include <com/sun/star/container/XEnumerationAccess.hpp>
+#include <com/sun/star/container/XIndexAccess.hpp>
 #include <com/sun/star/container/XNameContainer.hpp>
 #include <com/sun/star/container/XNamed.hpp>
 #include <com/sun/star/view/XRenderable.hpp>
@@ -1932,6 +1933,37 @@ CPPUNIT_TEST_FIXTURE(SwUnoWriter, testChartDataWithNestedTable) {
             ->getTextTables()->getByName(u"Outer"_ustr),
         cpo::uno::UNO_QUERY_THROW)->getColumns()->removeByIndex(0, 1);
     CPPUNIT_ASSERT_EQUAL(u"Outer.A2:B2"_ustr, sequence->getSourceRangeRepresentation());
+}
+
+CPPUNIT_TEST_FIXTURE(SwUnoWriter, testSelectSeveralTextRanges) {
+    createSwDoc();
+    cpo::uno::Reference<css::text::XTextDocument> const doc(mxComponent, cpo::uno::UNO_QUERY_THROW);
+    auto const text = doc->getText();
+    text->insertString(text->getEnd(), u"one"_ustr, false);
+    text->insertControlCharacter(
+        text->getEnd(), css::text::ControlCharacter::PARAGRAPH_BREAK, false);
+    text->insertString(text->getEnd(), u"two"_ustr, false);
+    text->insertControlCharacter(
+        text->getEnd(), css::text::ControlCharacter::PARAGRAPH_BREAK, false);
+    text->insertString(text->getEnd(), u"three"_ustr, false);
+    auto const first = text->createTextCursorByRange(text->getStart());
+    first->goRight(3, true);
+    auto const last = text->createTextCursorByRange(text->getEnd());
+    last->goLeft(5, true);
+    cpo::uno::Reference<css::view::XSelectionSupplier> const controller(
+        doc->getCurrentController(), cpo::uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT(controller->select(cpo::uno::Any(
+        cpo::uno::Sequence<cpo::uno::Reference<css::text::XTextRange>>{first, last})));
+    // Selecting a sequence of text ranges gives a selection of those ranges:
+    cpo::uno::Reference<css::container::XIndexAccess> const selection(
+        controller->getSelection(), cpo::uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(2), selection->getCount());
+    CPPUNIT_ASSERT_EQUAL(
+        u"one"_ustr,
+        selection->getByIndex(0).queryThrow<css::text::XTextRange>()->getString());
+    CPPUNIT_ASSERT_EQUAL(
+        u"three"_ustr,
+        selection->getByIndex(1).queryThrow<css::text::XTextRange>()->getString());
 }
 
 } // end of anonymous namespace

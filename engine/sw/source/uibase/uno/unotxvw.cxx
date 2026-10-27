@@ -132,6 +132,31 @@ bool SwXTextView::select(const cpo::uno::Any& aInterface)
 {
     SolarMutexGuard aGuard;
 
+    // A sequence of text ranges is selected as a selection made of several ranges:
+    if (uno::Sequence<uno::Reference<text::XTextRange>> ranges; aInterface >>= ranges) {
+        if (!GetView() || !ranges.hasElements()) {
+            return false;
+        }
+        SwDoc & doc = *GetView()->GetDocShell()->GetDoc();
+        std::optional<SwPaM> ring;
+        std::vector<std::unique_ptr<SwPaM>> others;
+        for (auto const & range: ranges) {
+            SwUnoInternalPaM pam(doc);
+            if (!sw::XTextRangeToSwPaM(pam, range)) {
+                return false;
+            }
+            if (!ring) {
+                ring.emplace(*pam.GetMark(), *pam.GetPoint());
+            } else {
+                others.push_back(std::make_unique<SwPaM>(*pam.GetMark(), *pam.GetPoint(), &*ring));
+            }
+        }
+        SwWrtShell & shell = GetView()->GetWrtShell();
+        shell.EnterStdMode();
+        shell.SetSelection(*ring);
+        return true;
+    }
+
     uno::Reference< cpo::uno::XInterface >  xInterface;
     if (!GetView() || !(aInterface >>= xInterface))
     {
