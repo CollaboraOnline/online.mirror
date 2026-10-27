@@ -792,6 +792,11 @@ describe(['tagdesktop'], 'Annotation Tests', function() {
 		// Add several nested replies to create a deep thread
 		const replyCount = 5;
 		for (let i = 1; i <= replyCount; i++) {
+			// Deep replies reach past the comment column, scroll right to reach them.
+			cy.then(() => {
+				const layout = this.win.app.activeDocument.activeLayout;
+				layout.scroll(layout.viewSize.pX, 0);
+			});
 			cy.cGet('#comment-annotation-menu-' + i).click();
 			cy.cGet('body').contains('.ui-combobox-entry', 'Reply').click();
 			cy.cGet('#annotation-reply-textarea-' + i).type('reply ' + i);

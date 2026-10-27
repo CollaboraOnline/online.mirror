@@ -170,7 +170,7 @@ export class Comment extends CanvasSectionObject {
 		this.sectionProperties.children = []; // This is used for Writer comments. There is parent / child relationship between comments in Writer files.
 		this.sectionProperties.childLinesNode = null;
 		this.sectionProperties.childLines = [];
-		this.sectionProperties.childCommentOffset = 8;
+		this.sectionProperties.childCommentOffset = 24;
 		this.sectionProperties.commentMarkerSubSection = null; // For Impress and Draw documents.
 		this.sectionProperties.commentAnchorAreaSubSection = null; // For comments with an explicit anchor area (PDF /Rect, drag-to-area).
 		this.sectionProperties.calcCommentAreaWidth = 40; // Calc comment area doesn't cover the whole cell, in order to allow multi-cell selections.
@@ -617,7 +617,7 @@ export class Comment extends CanvasSectionObject {
 			if (this.sectionProperties.childLines[i] === undefined) {
 				this.sectionProperties.childLines[i] = window.L.DomUtil.create('div', 'cool-annotation-child-line', this.sectionProperties.childLinesNode);
 				this.sectionProperties.childLines[i].id = 'annotation-child-line-' + this.sectionProperties.data.id + '-' + i;
-				this.sectionProperties.childLines[i].style.width = this.sectionProperties.childCommentOffset/2 + 'px';
+				this.sectionProperties.childLines[i].style.width = (this.sectionProperties.childCommentOffset - 4) + 'px';
 			}
 			this.sectionProperties.childLines[i].style.marginLeft =  (this.sectionProperties.childCommentOffset*this.getChildLevel() + 4) + 'px';
 			this.sectionProperties.childLines[i].style.height = (childPositions[i].posY + 24 - lastPosY) + 'px';
@@ -1597,6 +1597,15 @@ export class Comment extends CanvasSectionObject {
 		else if (isTab)
 			app.map.focus();
 		return true;
+	}
+
+	public scrollDocumentToShowRight(): void {
+		const rect = this.sectionProperties.wrapper.getBoundingClientRect();
+		const documentRect = document.getElementById('document-container').getBoundingClientRect();
+		const margin = this.sectionProperties.commentListSection.sectionProperties.columnEndMargin;
+		const offset = rect.right + margin - documentRect.right;
+		if (offset > 0)
+			app.activeDocument.activeLayout.scroll(Math.ceil(offset * app.dpiScale), 0);
 	}
 
 	private scrollDocumentToShow(rect: DOMRect): void {
