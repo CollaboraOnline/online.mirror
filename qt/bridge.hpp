@@ -11,12 +11,14 @@
 
 #pragma once
 
+#include <QWebEngineFrame>
 #include <QWebEngineView>
 #include <QObject>
 #include <QStringList>
 #include <QPointer>
 #include <QVariant>
 #include <functional>
+#include <optional>
 #include <string>
 #include <thread>
 #include "Document.hpp"
@@ -34,6 +36,8 @@ class Bridge : public QObject
     coda::DocumentData& _document;
     QPointer<WebView> _owner;
     QWebEngineView* _webView;
+    // The frame of _webView's page that shows this document, when it is not the page itself.
+    std::optional<QWebEngineFrame> _frame;
     int _closeNotificationPipeForForwardingThread[2];
     std::thread _app2js;
     bool _modified = false;
@@ -94,6 +98,9 @@ public:
                     QWebEngineView* webView);
 
     ~Bridge() override;
+
+    // Run the page's JavaScript in frame instead of the page's main frame.
+    void setFrame(const QWebEngineFrame& frame) { _frame = frame; }
 
     // TODO: move these to webview...
     // Helper: post JavaScript code safely on GUI thread
