@@ -50,10 +50,6 @@ import java.util.Random;
     The service manager can create a few basic services, whose implementations  are:
     <ul>
     <li>com.sun.star.comp.loader.JavaLoader</li>
-    <li>com.sun.star.comp.urlresolver.UrlResolver</li>
-    <li>com.sun.star.comp.bridgefactory.BridgeFactory</li>
-    <li>com.sun.star.comp.connections.Connector</li>
-    <li>com.sun.star.comp.connections.Acceptor</li>
     <li>com.sun.star.comp.servicemanager.ServiceManager</li>
     </ul>
 
@@ -74,22 +70,6 @@ public class Bootstrap {
         // insert the factory of the loader
         xSet.insert( xImpLoader.activate(
             "com.sun.star.comp.loader.JavaLoader", null, null, null ) );
-
-        // insert the factory of the URLResolver
-        xSet.insert( xImpLoader.activate(
-            "com.sun.star.comp.urlresolver.UrlResolver", null, null, null ) );
-
-        // insert the bridgefactory
-        xSet.insert( xImpLoader.activate(
-            "com.sun.star.comp.bridgefactory.BridgeFactory", null, null, null ) );
-
-        // insert the connector
-        xSet.insert( xImpLoader.activate(
-            "com.sun.star.comp.connections.Connector", null, null, null ) );
-
-        // insert the acceptor
-        xSet.insert( xImpLoader.activate(
-            "com.sun.star.comp.connections.Acceptor", null, null, null ) );
     }
 
     /**
@@ -392,66 +372,6 @@ public class Bootstrap {
 
         return xContext;
     }
-
-    /**
-     * Bootstraps the component context from a websocket location.
-     *
-     * @param url
-     *        the ws:// or wss:// url of the websocket server
-     *
-     * @throws BootstrapException if things go awry.
-     *
-     * @return a bootstrapped component context.
-     */
-    public static final XComponentContext bootstrapWebsocketConnection( String url )
-        throws BootstrapException {
-
-        XComponentContext xContext = null;
-
-        try {
-            // create default local component context
-            XComponentContext xLocalContext =
-                createInitialComponentContext( (Map<String, Object>) null );
-            if ( xLocalContext == null )
-                throw new BootstrapException( "no local component context!" );
-
-            // initial service manager
-            XMultiComponentFactory xLocalServiceManager =
-                xLocalContext.getServiceManager();
-            if ( xLocalServiceManager == null )
-                throw new BootstrapException( "no initial service manager!" );
-
-            // create a URL resolver
-            XUnoUrlResolver xUrlResolver =
-                UnoUrlResolver.create( xLocalContext );
-
-            // connection string
-            String sConnect = "uno:websocket"
-                              + ",url=" + url
-                              + ";urp;StarOffice.ComponentContext";
-
-            try {
-                // try to connect to office
-                Object xOfficeServiceManager = xUrlResolver.resolve(sConnect);
-
-                xContext = UnoRuntime.queryInterface(XComponentContext.class, xOfficeServiceManager);
-
-                if ( xContext == null )
-                    throw new BootstrapException( "no component context!" );
-            } catch ( com.sun.star.connection.NoConnectException ex ) {
-                throw new BootstrapException(ex);
-            }
-        } catch ( BootstrapException e ) {
-            throw e;
-        } catch ( java.lang.RuntimeException e ) {
-            throw e;
-        } catch ( java.lang.Exception e ) {
-            throw new BootstrapException( e );
-        }
-
-        return xContext;
-    }
-
 
     private static final Random randomPipeName = new Random();
 

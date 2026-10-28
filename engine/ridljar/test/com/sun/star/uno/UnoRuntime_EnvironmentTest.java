@@ -19,7 +19,6 @@
 
 package com.sun.star.uno;
 
-import com.sun.star.comp.connections.PipedConnection;
 import org.junit.Test;
 import util.WaitUnreachable;
 import static org.junit.Assert.*;
@@ -51,34 +50,6 @@ public final class UnoRuntime_EnvironmentTest {
         // drop the environments and wait until they are gc
         java_environment1.waitUnreachable();
         java_environment2.waitUnreachable();
-    }
-
-    @Test public void test_getBridge() throws java.lang.Exception {
-        PipedConnection conn = new PipedConnection(new Object[0]);
-        new PipedConnection(new Object[] { conn });
-
-        // get a bridge
-        IBridge iBridge = UnoRuntime.getBridgeByName(
-            "java", null, "remote", "testname",
-            new Object[] { "urp", conn, null });
-
-        // reget the bridge, it must be the same as above
-        IBridge iBridge_tmp = UnoRuntime.getBridgeByName(
-            "java", null, "remote", "testname",
-            new Object[] { "urp", conn, null });
-        assertTrue(UnoRuntime.areSame(iBridge_tmp, iBridge));
-
-        // dispose the bridge, this removes the entry from the runtime
-        iBridge.dispose();
-
-        conn = new PipedConnection(new Object[0]);
-        new PipedConnection(new Object[] { conn });
-
-        // reget the bridge, it must be a different one
-        iBridge_tmp = UnoRuntime.getBridgeByName(
-            "java", null, "remote", "testname",
-            new Object[]{ "urp", conn, null });
-        assertFalse(UnoRuntime.areSame(iBridge_tmp, iBridge));
     }
 }
 

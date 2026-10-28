@@ -13,14 +13,7 @@ ifneq ($(ENABLE_JAVA),)
 
 $(eval $(call gb_Module_add_targets,jurt,\
     Jar_jurt \
-    Library_jpipe \
 ))
-
-ifeq ($(OS),WNT)
-$(eval $(call gb_Module_add_targets,jurt,\
-    Library_jpipx \
-))
-endif
 
 endif
 

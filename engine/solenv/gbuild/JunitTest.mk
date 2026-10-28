@@ -162,25 +162,6 @@ $(foreach dependency,$(2),$(call gb_JunitTest_use_customtarget,$(1),$(dependency
 
 endef
 
-define gb_JunitTest_use_unoapi_jars
-$(eval $(call gb_JunitTest_use_jars,$(1),\
-    OOoRunner \
-    libreoffice \
-    test \
-))
-
-endef
-
-define gb_JunitTest_use_unoapi_test_class
-$(eval $(call gb_JunitTest_add_classes,$(1),\
-    org.openoffice.test.UnoApiTest \
-))
-
-endef
-
-$(eval $(call gb_JunitTest_use_unoapi_jars,$(1)))
-$(eval $(call gb_JunitTest_use_unoapi_test_class,$(1)))
-
 else # OOO_JUNIT_JAR
 
 .PHONY : $(call gb_JunitTest_get_target,$(1))

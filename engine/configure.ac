@@ -8778,9 +8778,7 @@ if test "$ENABLE_JAVA" != ""; then
         fi
     fi
 
-    dnl Check that the JDK found is correct architecture (at least 2 reasons to
-    dnl check: officebean needs to link -ljawt, and libjpipe.so needs to be
-    dnl loaded by java to run JunitTests:
+    dnl Check that the JDK found is correct architecture, officebean needs to link -ljawt
     if test "$build_os" = "cygwin" -a "$cross_compiling" != "yes"; then
         if test $WIN_HOST_BITS -eq 64 -a -f "$with_jdk_home/bin/java.exe" -a "`"$with_jdk_home/bin/java.exe" -version 2>&1 | $GREP -i 64-bit`" = "" >/dev/null; then
             AC_MSG_WARN([You are building 64-bit binaries but the JDK $howfound is 32-bit])
@@ -14206,7 +14204,7 @@ rm -f a.out a.wasm a.out.js a.out.wasm
 
 dnl cspell:ignore Randr Xext alignof altlinuxhyph appex bzlib ccached coreutils createmsi cxxabi
 dnl cspell:ignore cygdrive devel devenv dlsym dtrace emconfigure fpch frobozz gnucp
-dnl cspell:ignore ifdef ifndef libc libdl libjpipe libstdc longjmp memcpy msicreator
+dnl cspell:ignore ifdef ifndef libc libdl libstdc longjmp memcpy msicreator
 dnl cspell:ignore msiglobal mspdb msys nmake omindex optimised qconfig qtbase
 dnl cspell:ignore quadrigraph rbbi rpms sccache strbuf stringop tosvg ucrt ustring uuidgen vclplugs
 dnl cspell:ignore vswhere werror wilangid xcent xcrun

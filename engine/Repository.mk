@@ -465,8 +465,6 @@ $(eval $(call gb_Helper_register_libraries_for_install,PLAINLIBS_URE,ure, \
 	) \
 	$(if $(ENABLE_JAVA), \
 		java_uno \
-		jpipe \
-		$(if $(filter $(OS),WNT),jpipx) \
 	    juh \
 		juhx \
 	) \

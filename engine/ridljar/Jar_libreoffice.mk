@@ -18,16 +18,11 @@ $(eval $(call gb_Jar_use_jars,libreoffice, \
     unoloader \
 ))
 
-$(eval $(call gb_Jar_use_externals,libreoffice,\
-    java_websocket \
-))
-
 $(eval $(call gb_Jar_set_packageroot,libreoffice,com cpo))
 
 $(eval $(call gb_Jar_set_manifest,libreoffice,$(SRCDIR)/ridljar/util/manifest))
 
 $(eval $(call gb_Jar_add_manifest_classpath,libreoffice, \
-    java_websocket.jar \
     unoloader.jar \
     $(if $(filter MACOSX,$(OS)),../../Frameworks/,../) \
 ))
@@ -45,12 +40,6 @@ $(if $(MODULAR_JAVA),$(eval $(call gb_Jar_add_sourcefiles_java9,libreoffice,\
 )))
 
 $(eval $(call gb_Jar_add_sourcefiles,libreoffice,\
-    ridljar/com/sun/star/comp/bridgefactory/BridgeFactory \
-    ridljar/com/sun/star/comp/connections/Acceptor \
-    ridljar/com/sun/star/comp/connections/Connector \
-    ridljar/com/sun/star/comp/connections/ConstantInstanceProvider \
-    ridljar/com/sun/star/comp/connections/Implementation \
-    ridljar/com/sun/star/comp/connections/PipedConnection \
     ridljar/com/sun/star/comp/helper/Bootstrap \
     ridljar/com/sun/star/comp/helper/BootstrapException \
     ridljar/com/sun/star/comp/helper/ComponentContext \
@@ -61,17 +50,6 @@ $(eval $(call gb_Jar_add_sourcefiles,libreoffice,\
     ridljar/com/sun/star/comp/loader/JavaLoaderFactory \
     ridljar/com/sun/star/comp/loader/RegistrationClassFinder \
     ridljar/com/sun/star/comp/servicemanager/ServiceManager \
-    ridljar/com/sun/star/comp/urlresolver/UrlResolver \
-    ridljar/com/sun/star/lib/connections/pipe/PipeConnection \
-    ridljar/com/sun/star/lib/connections/pipe/pipeAcceptor \
-    ridljar/com/sun/star/lib/connections/pipe/pipeConnector \
-    ridljar/com/sun/star/lib/connections/socket/ConnectionDescriptor \
-    ridljar/com/sun/star/lib/connections/socket/SocketConnection \
-    ridljar/com/sun/star/lib/connections/socket/socketAcceptor \
-    ridljar/com/sun/star/lib/connections/socket/socketConnector \
-    ridljar/com/sun/star/lib/connections/websocket/ConnectionDescriptor \
-    ridljar/com/sun/star/lib/connections/websocket/WebsocketConnection \
-    ridljar/com/sun/star/lib/connections/websocket/websocketConnector \
     ridljar/com/sun/star/lib/uno/Proxy \
     ridljar/com/sun/star/lib/uno/adapter/ByteArrayToXInputStreamAdapter \
     ridljar/com/sun/star/lib/uno/adapter/InputStreamToXInputStreamAdapter \
@@ -79,25 +57,7 @@ $(eval $(call gb_Jar_add_sourcefiles,libreoffice,\
     ridljar/com/sun/star/lib/uno/adapter/XInputStreamToInputStreamAdapter \
     ridljar/com/sun/star/lib/uno/adapter/XOutputStreamToByteArrayAdapter \
     ridljar/com/sun/star/lib/uno/adapter/XOutputStreamToOutputStreamAdapter \
-    ridljar/com/sun/star/lib/uno/bridges/java_remote/BridgedObject \
-    ridljar/com/sun/star/lib/uno/bridges/java_remote/ProxyFactory \
-    ridljar/com/sun/star/lib/uno/bridges/java_remote/RequestHandler \
-    ridljar/com/sun/star/lib/uno/bridges/java_remote/XConnectionInputStream_Adapter \
-    ridljar/com/sun/star/lib/uno/bridges/java_remote/XConnectionOutputStream_Adapter \
-    ridljar/com/sun/star/lib/uno/bridges/java_remote/java_remote_bridge \
     ridljar/com/sun/star/lib/uno/environments/java/java_environment \
-    ridljar/com/sun/star/lib/uno/environments/remote/IProtocol \
-    ridljar/com/sun/star/lib/uno/environments/remote/IReceiver \
-    ridljar/com/sun/star/lib/uno/environments/remote/IThreadPool \
-    ridljar/com/sun/star/lib/uno/environments/remote/JavaThreadPool \
-    ridljar/com/sun/star/lib/uno/environments/remote/JavaThreadPoolFactory \
-    ridljar/com/sun/star/lib/uno/environments/remote/Job \
-    ridljar/com/sun/star/lib/uno/environments/remote/JobQueue \
-    ridljar/com/sun/star/lib/uno/environments/remote/Message \
-    ridljar/com/sun/star/lib/uno/environments/remote/NativeThreadPool \
-    ridljar/com/sun/star/lib/uno/environments/remote/ThreadId \
-    ridljar/com/sun/star/lib/uno/environments/remote/ThreadPoolManager \
-    ridljar/com/sun/star/lib/uno/environments/remote/remote_environment \
     ridljar/com/sun/star/lib/uno/helper/ComponentBase \
     ridljar/com/sun/star/lib/uno/helper/ExceptionOrigin \
     ridljar/com/sun/star/lib/uno/helper/Factory \
@@ -105,15 +65,8 @@ $(eval $(call gb_Jar_add_sourcefiles,libreoffice,\
     ridljar/com/sun/star/lib/uno/helper/MultiTypeInterfaceContainer \
     ridljar/com/sun/star/lib/uno/helper/PropertySet \
     ridljar/com/sun/star/lib/uno/helper/PropertySetMixin \
-    ridljar/com/sun/star/lib/uno/helper/UnoUrl \
     ridljar/com/sun/star/lib/uno/helper/WeakAdapter \
     ridljar/com/sun/star/lib/uno/helper/WeakBase \
-    ridljar/com/sun/star/lib/uno/protocols/urp/Cache \
-    ridljar/com/sun/star/lib/uno/protocols/urp/Marshal \
-    ridljar/com/sun/star/lib/uno/protocols/urp/PendingRequests \
-    ridljar/com/sun/star/lib/uno/protocols/urp/Unmarshal \
-    ridljar/com/sun/star/lib/uno/protocols/urp/UrpMessage \
-    ridljar/com/sun/star/lib/uno/protocols/urp/urp \
     ridljar/com/sun/star/lib/uno/typedesc/FieldDescription \
     ridljar/com/sun/star/lib/uno/typedesc/MemberDescriptionHelper \
     ridljar/com/sun/star/lib/uno/typedesc/MethodDescription \

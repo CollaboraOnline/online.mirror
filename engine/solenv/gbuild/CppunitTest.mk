@@ -426,7 +426,6 @@ $(call gb_CppunitTest_get_target,$(1)) : \
     $(foreach jar,java_uno libreoffice unoloader,$(call gb_Jar_get_target,$(jar))) \
     $(call gb_Library_get_target,affine_uno_uno) \
     $(call gb_Library_get_target,java_uno) \
-    $(call gb_Library_get_target,jpipe) \
     $(call gb_Library_get_target,juhx) \
     $(call gb_Library_get_target,juhx) \
     $(call gb_Library_get_target,jvmaccess) \

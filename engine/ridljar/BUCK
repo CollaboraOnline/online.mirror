@@ -41,7 +41,6 @@ java_doc(
   deps = [
     '//:unoloader',
     '//:libreoffice',
-    '//:java-websocket',
   ],
   visibility = ['PUBLIC'],
 )

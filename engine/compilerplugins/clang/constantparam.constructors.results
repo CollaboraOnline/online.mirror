@@ -14,10 +14,6 @@ binaryurp/source/bridge.hxx:101
     class com::sun::star::uno::UnoInterfaceReference binaryurp::Bridge::registerIncomingInterface(const class rtl::OUString &,const class com::sun::star::uno::TypeDescription &)
     const class rtl::OUString & oid
     readOid()
-bridges/source/jni_uno/nativethreadpool.cxx:41
-    void (anonymous namespace)::Pool::Pool(class rtl::Reference<class jvmaccess::VirtualMachine>,struct _jmethodID *,struct _uno_ThreadPool *)
-    struct _uno_ThreadPool * thePool
-    uno_threadpool_create()
 chart2/source/controller/inc/CommandDispatchContainer.hxx:80
     void chart::CommandDispatchContainer::setChartDispatch(const class cpo::uno::Reference<class com::sun::star::frame::XDispatch> &,const class o3tl::sorted_vector<class std::basic_string_view<char16_t> > &)
     const class o3tl::sorted_vector<class std::basic_string_view<char16_t> > & rChartCommands

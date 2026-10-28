@@ -28,9 +28,7 @@ $(eval $(call gb_Jar_set_packageroot,test,org))
 $(eval $(call gb_Jar_add_sourcefiles,test,\
 	unotest/source/java/org/openoffice/test/Argument \
 	unotest/source/java/org/openoffice/test/FileHelper \
-	unotest/source/java/org/openoffice/test/OfficeConnection \
 	unotest/source/java/org/openoffice/test/OfficeFileUrl \
-	unotest/source/java/org/openoffice/test/UnoApiTest \
 ))
 
 # vim: set noet sw=4 ts=4:

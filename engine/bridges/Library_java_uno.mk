@@ -31,7 +31,6 @@ $(eval $(call gb_Library_add_exception_objects,java_uno,\
 	bridges/source/jni_uno/jni_info \
 	bridges/source/jni_uno/jni_java2uno \
 	bridges/source/jni_uno/jni_uno2java \
-	bridges/source/jni_uno/nativethreadpool \
 ))
 
 # vim: set noet sw=4 ts=4:

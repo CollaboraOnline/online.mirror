@@ -48,10 +48,6 @@ public class ComponentContext_Test {
         XMultiComponentFactory xSMgr = xContext.getServiceManager();
 
         assertNotNull(xSMgr.createInstanceWithContext("com.sun.star.loader.Java", xContext));
-        assertNotNull(xSMgr.createInstanceWithContext("com.sun.star.bridge.BridgeFactory", xContext));
-        assertNotNull(xSMgr.createInstanceWithContext("com.sun.star.bridge.UnoUrlResolver", xContext));
-        assertNotNull(xSMgr.createInstanceWithContext("com.sun.star.connection.Connector", xContext));
-        assertNotNull(xSMgr.createInstanceWithContext("com.sun.star.connection.Acceptor", xContext));
 //        assertNotNull(xSMgr.createInstanceWithContext("com.sun.star.lang.ServiceManager", xContext));
 
         assertNotNull(xContext.getValueByName("bla1"));

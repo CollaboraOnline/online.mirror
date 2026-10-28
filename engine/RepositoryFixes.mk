@@ -45,8 +45,6 @@ gb_Executable_FILENAMES := $(patsubst soffice_com:soffice_com%,soffice_com:soffi
 # fixes for .jnilibs on macOS that are not also needed as .dylibs:
 ifeq ($(OS),MACOSX)
 gb_Library_FILENAMES := \
-    $(subst jpipe:libjpipe.dylib,jpipe:libjpipe.jnilib,$(gb_Library_FILENAMES))
-gb_Library_FILENAMES := \
     $(subst juh:libjuh.dylib,juh:libjuh.jnilib,$(gb_Library_FILENAMES))
 endif
 
