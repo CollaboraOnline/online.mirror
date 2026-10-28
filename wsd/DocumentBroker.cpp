@@ -5590,11 +5590,9 @@ bool DocumentBroker::sendTextFrameToKit(const std::string& message)
 }
 
 #if !MOBILEAPP
-void DocumentBroker::setRemoteDocumentSource(const std::string& wopiSrc, const std::string& name,
-                                             const std::string& lastModifiedTime,
-                                             const std::string& persistentLink)
+void DocumentBroker::setRemoteDocumentSource(const RemoteLink& link)
 {
-    _remoteLinks.setSource(*this, wopiSrc, name, lastModifiedTime, persistentLink);
+    _remoteLinks.setSource(*this, link);
 }
 
 void DocumentBroker::setRemoteDocumentNamedSources(std::vector<std::string> names)
@@ -5630,11 +5628,7 @@ void DocumentBroker::resolveRemoteDocumentSource(const std::string& tag,
 
 bool DocumentBroker::registerRemoteDocumentToken(const std::string& oneTimeToken,
                                                  const std::string& documentAccessToken,
-                                                 const std::string& wopiSrc,
-                                                 const std::string& accessToken,
-                                                 const std::string& name,
-                                                 const std::string& lastModifiedTime,
-                                                 const std::string& persistentLink)
+                                                 const RemoteLinkRegistration& link)
 {
     ASSERT_CORRECT_THREAD();
 
@@ -5645,8 +5639,8 @@ bool DocumentBroker::registerRemoteDocumentToken(const std::string& oneTimeToken
     {
         if (!oneTimeToken.empty() && it.second->matchesLinkToken(oneTimeToken))
         {
-            setRemoteDocumentSource(wopiSrc, name, lastModifiedTime, persistentLink);
-            setRemoteDocumentViewToken(it.first, wopiSrc, accessToken);
+            setRemoteDocumentSource(link);
+            setRemoteDocumentViewToken(it.first, link.wopiSrc, link.accessToken);
             // Consume the one-time token and hand the view its next one.
             it.second->rotateLinkToken(/*notifyClient=*/true);
             registered = true;
@@ -5655,8 +5649,8 @@ bool DocumentBroker::registerRemoteDocumentToken(const std::string& oneTimeToken
                  it.second->getAuthorization().matchesToken(documentAccessToken))
         {
             // The same user may hold several views, each of them gets the token.
-            setRemoteDocumentSource(wopiSrc, name, lastModifiedTime, persistentLink);
-            setRemoteDocumentViewToken(it.first, wopiSrc, accessToken);
+            setRemoteDocumentSource(link);
+            setRemoteDocumentViewToken(it.first, link.wopiSrc, link.accessToken);
             registered = true;
         }
     }
