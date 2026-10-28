@@ -145,6 +145,7 @@ describe(['tagdesktop'], 'Accessibility Impress Sidebar Tests', { testIsolation:
 			win.app.map.sendUnoCommand('.uno:SidebarDeck.SdCustomAnimationDeck');
 			helper.processToIdle(win);
 		});
+		cy.cGet('#SdCustomAnimationDeck').should('be.visible');
 
 		runA11yValidation(win);
 
@@ -159,6 +160,7 @@ describe(['tagdesktop'], 'Accessibility Impress Sidebar Tests', { testIsolation:
 			win.app.map.sendUnoCommand('.uno:SidebarDeck.SdMasterPagesDeck');
 			helper.processToIdle(win);
 		});
+		cy.cGet('#SdMasterPagesDeck').should('be.visible');
 
 		runA11yValidation(win);
 

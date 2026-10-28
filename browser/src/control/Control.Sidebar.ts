@@ -129,7 +129,8 @@ class Sidebar extends SidebarBase {
 						// just to be sure check with other method
 						if (isCurrent === 'false' || !isCurrent)
 							isCurrent =
-								this.targetDeckCommand === this.commandForDeck(currentDeck);
+								this.targetDeckCommand === this.commandForDeck(currentDeck) ||
+								this.targetDeckCommand === '.uno:SidebarDeck.' + currentDeck;
 						if (this.targetDeckCommand && (isCurrent === 'false' || !isCurrent))
 							this.changeDeck(this.targetDeckCommand);
 					} else {
