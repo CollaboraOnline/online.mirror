@@ -20,6 +20,10 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
+        <source>This folder holds the drafts and is cleaned up automatically. Choose another location.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Cannot open remote document</source>
         <translation type="unfinished"></translation>
     </message>
@@ -175,9 +179,41 @@
         <source>Drawing</source>
         <translation type="unfinished"></translation>
     </message>
+    <message>
+        <source>%1 (Draft)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Account not opened</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>%1 redirected to %2, so the account was not opened. Only a redirect within the same site is followed.</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>TabManager</name>
+    <message>
+        <source>Close tab</source>
+        <extracomment>Tooltip of the button that closes a tab</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
+        <extracomment>Tooltip of the + button at the end of the tab strip</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>(untitled)</source>
+        <extracomment>The name in a tab whose document has no name</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Draft</source>
+        <extracomment>Badge in a tab whose document is a draft, not yet saved to a file of its own</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Close</source>
         <translation type="unfinished"></translation>

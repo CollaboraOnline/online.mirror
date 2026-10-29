@@ -128,6 +128,10 @@
         <translation>Theip ar onnmhairiú na ndoiciméad.</translation>
     </message>
     <message>
+        <source>This folder holds the drafts and is cleaned up automatically. Choose another location.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Cannot open remote document</source>
         <translation>Ní féidir an doiciméad cianda a oscailt</translation>
     </message>
@@ -156,6 +160,10 @@
         <translation>Líníocht</translation>
     </message>
     <message>
+        <source>%1 (Draft)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Template Error</source>
         <translation>Earráid Teimpléid</translation>
     </message>
@@ -178,6 +186,26 @@
 </context>
 <context>
     <name>TabManager</name>
+    <message>
+        <source>Close tab</source>
+        <extracomment>Tooltip of the button that closes a tab</extracomment>
+        <translation>Dún an cluaisín</translation>
+    </message>
+    <message>
+        <source>New</source>
+        <extracomment>Tooltip of the + button at the end of the tab strip</extracomment>
+        <translation>Nua</translation>
+    </message>
+    <message>
+        <source>(untitled)</source>
+        <extracomment>The name in a tab whose document has no name</extracomment>
+        <translation>(gan teideal)</translation>
+    </message>
+    <message>
+        <source>Draft</source>
+        <extracomment>Badge in a tab whose document is a draft, not yet saved to a file of its own</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Close</source>
         <translation>Dún</translation>

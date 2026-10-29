@@ -128,6 +128,10 @@
         <translation>Der Export des Dokuments ist fehlgeschlagen.</translation>
     </message>
     <message>
+        <source>This folder holds the drafts and is cleaned up automatically. Choose another location.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Cannot open remote document</source>
         <translation>Das entfernte Dokument kann nicht geöffnet werden</translation>
     </message>
@@ -156,6 +160,10 @@
         <translation>Zeichnung</translation>
     </message>
     <message>
+        <source>%1 (Draft)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>Template Error</source>
         <translation>Vorlagenfehler</translation>
     </message>
@@ -178,6 +186,26 @@
 </context>
 <context>
     <name>TabManager</name>
+    <message>
+        <source>Close tab</source>
+        <extracomment>Tooltip of the button that closes a tab</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>New</source>
+        <extracomment>Tooltip of the + button at the end of the tab strip</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>(untitled)</source>
+        <extracomment>The name in a tab whose document has no name</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Draft</source>
+        <extracomment>Badge in a tab whose document is a draft, not yet saved to a file of its own</extracomment>
+        <translation type="unfinished"></translation>
+    </message>
     <message>
         <source>Close</source>
         <translation>Schließen</translation>
