@@ -7483,6 +7483,7 @@ std::string SdXImpressDocument::getPresentationInfo(bool bAllyState) const
                 aJsonWriter.put("hidden", true);
                 aJsonWriter.put("part", pPage->GetGuid().getString());
                 aJsonWriter.put("guid", pPage->GetGuid().getOUString());
+                aJsonWriter.put("name", pPage->GetRealName());
             }
             else
             {

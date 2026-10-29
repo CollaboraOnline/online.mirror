@@ -139,6 +139,7 @@ class SlideLinks {
 		{
 			time: string;
 			guids: Set<string> | null;
+			names: Map<string, string>;
 			sections: Set<string> | null;
 		}
 	> = new Map();
@@ -184,6 +185,13 @@ class SlideLinks {
 	public getPageLink(part: string): { source: string; name: string } | null {
 		const link = this.pages.get(part);
 		return link ? { source: link.source, name: link.name } : null;
+	}
+
+	public getSourceSlideName(part: string): string {
+		const link = this.pages.get(part);
+		if (!link || !link.sourceGuid) return '';
+		const slides = this.sourceSlides.get(link.source);
+		return (slides && slides.names.get(link.sourceGuid)) || '';
 	}
 
 	public isPageOutdated(part: string): boolean {
@@ -952,6 +960,7 @@ class SlideLinks {
 			this.sourceSlides.set(source, {
 				time: time,
 				guids: null,
+				names: new Map(),
 				sections: null,
 			});
 			SlideImportSession.sendRemoteCommand(source, 'getpresentationinfo');
@@ -975,13 +984,20 @@ class SlideLinks {
 		if (!refresh && !asked) return;
 
 		const guids = new Set<string>();
+		const names = new Map<string, string>();
 		const parts: string[] = [];
 		let sections: SlideImportSection[];
 		try {
 			const info = JSON.parse(json);
 			const slides = Array.isArray(info.slides) ? info.slides : [];
 			for (const slide of slides) {
-				if (slide && slide.guid) guids.add(slide.guid);
+				if (slide && slide.guid) {
+					guids.add(slide.guid);
+					names.set(
+						slide.guid,
+						slide.name || _('Slide %1').replace('%1', String(slide.index + 1)),
+					);
+				}
 				parts.push(slide && slide.part ? String(slide.part) : '');
 			}
 			// A source with no sections reports none.
@@ -1006,6 +1022,7 @@ class SlideLinks {
 		this.sourceSlides.set(source, {
 			time: asked.time,
 			guids: guids,
+			names: names,
 			sections: new Set(sections.map((section) => section.id)),
 		});
 		app.events.fire('slidelink:changed', {});

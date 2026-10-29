@@ -26,6 +26,7 @@
 #include <comphelper/scopeguard.hxx>
 #include <COKit/COKit.hxx>
 
+#include <sfx2/kit/helper.hxx>
 #include <sfx2/viewsh.hxx>
 #include <vcl/svapp.hxx>
 #include <editeng/outliner.hxx>
@@ -77,6 +78,7 @@
 #include <app.hrc>
 #include <createunopageimpl.hxx>
 #include <drawdoc.hxx>
+#include <unomodel.hxx>
 #include <sdmod.hxx>
 #include <sdpage.hxx>
 #include <sdresid.hxx>
@@ -1939,6 +1941,8 @@ void SdPage::GetPageInfo(::tools::JsonWriter& jsonWriter)
     jsonWriter.put("upperBorder", GetUpperBorder());
     jsonWriter.put("lowerBorder", GetLowerBorder());
     jsonWriter.put("name", GetName());
+    // The name the page was given, empty for a page that goes by its default name.
+    jsonWriter.put("realName", GetRealName());
     // The page's part identifier: its GUID, the value every part-carrying
     // message names this page by.
     jsonWriter.put("part", GetGuid().getString());
@@ -3118,10 +3122,19 @@ SdPage* SdPage::getImplementation( const cpo::uno::Reference< css::drawing::XDra
 void SdPage::SetName (const OUString& rName, bool bUpdatePageRelativeURLs)
 {
     OUString aOldName( GetName() );
+    const bool bRenamed = GetRealName() != rName;
     FmFormPage::SetName (rName);
+    SdDrawDocument& rDoc = static_cast< SdDrawDocument& >(getSdrModelFromSdrPage());
     if (bUpdatePageRelativeURLs)
-        static_cast< SdDrawDocument& >(getSdrModelFromSdrPage()).UpdatePageRelativeURLs(aOldName, rName);
+        rDoc.UpdatePageRelativeURLs(aOldName, rName);
     ActionChanged();
+
+    if (bRenamed && comphelper::COKit::isActive() && IsInserted()
+        && mePageKind == PageKind::Standard)
+    {
+        if (SdXImpressDocument* pDoc = rDoc.getUnoModel())
+            KitHelper::notifyDocumentSizeChangedAllViews(pDoc, /*bInvalidateAllParts=*/false);
+    }
 }
 
 const HeaderFooterSettings& SdPage::getHeaderFooterSettings() const

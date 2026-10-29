@@ -927,14 +927,15 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 		return put(_n('with %1 and 1 other', 'with %1 and %n others', rest));
 	},
 
-	// The visible digit, the alt text and the tooltip are plain position
-	// strings, so they only ever hold the position they were given here.
+	// The visible digit is the position. The alt text and the tooltip name a
+	// slide by the name it was given, and by its position when it has none.
 	// Callers that move a preview to a different position must call this
 	// again with the new position. A slide linked to another file names
 	// that file and the slide of it in the alt text and the tooltip.
 	_setPreviewPositionLabels: function (img, i) {
 		const link = this._pageLink(img);
 		const position = String(i + 1);
+		const name = this._slideName(img);
 		const people = this._peopleHere(img);
 		const withPeople = function (text) {
 			return people ? text + ', ' + people : text;
@@ -950,77 +951,83 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 				return values[token];
 			});
 		};
+		const altSlide = name ? position + ', ' + name : position;
+		const tooltipSlide = name || fill(_('Slide %1'), { '%1': position });
 		if (link) {
 			// A slide tracked by the identifier of the slide it came from
 			// names no slide of the source, so %2 is the source then.
-			const values = {
-				'%1': position,
-				'%2': link.name || link.source,
-				'%3': link.source,
-			};
-			const labels = this._linkLabels(img, link);
+			const sourceSlide =
+				this._map.slideLinks.getSourceSlideName(img._part) || link.name;
+			const values = { '%2': sourceSlide || link.source, '%3': link.source };
+			const labels = this._linkLabels(img, sourceSlide);
+			values['%1'] = altSlide;
 			img.setAttribute('alt', withPeople(fill(labels[0], values)));
+			values['%1'] = tooltipSlide;
 			img.setAttribute('data-cooltip', withPeople(fill(labels[1], values)));
 			return;
 		}
 		img.setAttribute(
 			'alt',
-			withPeople(_('preview of page %1').replace('%1', position)),
+			withPeople(fill(_('preview of page %1'), { '%1': altSlide })),
 		);
-		img.setAttribute(
-			'data-cooltip',
-			withPeople(_('Slide %1').replace('%1', position)),
-		);
+		img.setAttribute('data-cooltip', withPeople(tooltipSlide));
+	},
+
+	_slideName: function (img) {
+		const layer = this._map._docLayer;
+		const index = layer && img._part ? layer.getIndexFromPart(img._part) : -1;
+		const entry = index >= 0 ? app.impress.partList[index] : null;
+		return (entry && entry.realName) || '';
 	},
 
 	// The alt text and the tooltip of a linked slide, naming what the badge
 	// shows, or what is wrong with the source when it cannot be read.
-	_linkLabels: function (img, link) {
+	_linkLabels: function (img, sourceSlide) {
 		const links = this._map.slideLinks;
 		const state = links.getPageSourceState(img._part);
 		if (state === 'missing')
 			return [
 				_('preview of page %1, %3 is missing'),
-				_('Slide %1, %3 is missing'),
+				_('%1, %3 is missing'),
 			];
 		if (links.isPageMissing(img._part))
 			return [
 				_('preview of page %1, not found in %3'),
-				_('Slide %1, not found in %3'),
+				_('%1, not found in %3'),
 			];
 		if (state === 'noaccess')
 			return [
 				_('preview of page %1, no access to %3'),
-				_('Slide %1, no access to %3'),
+				_('%1, no access to %3'),
 			];
 		if (state === 'failed')
 			return [
 				_('preview of page %1, could not open %3'),
-				_('Slide %1, could not open %3'),
+				_('%1, could not open %3'),
 			];
 		if (links.isPageOutdated(img._part))
-			return link.name
+			return sourceSlide
 				? [
 						_('preview of page %1, %2 changed in %3'),
-						_('Slide %1, %2 changed in %3'),
+						_('%1, %2 changed in %3'),
 					]
 				: [
 						_('preview of page %1, changed in %3'),
-						_('Slide %1, changed in %3'),
+						_('%1, changed in %3'),
 					];
 		if (state === 'disconnected')
 			return [
 				_('preview of page %1, %3 is disconnected'),
-				_('Slide %1, %3 is disconnected'),
+				_('%1, %3 is disconnected'),
 			];
-		return link.name
+		return sourceSlide
 			? [
 					_('preview of page %1, linked to %2 in %3'),
-					_('Slide %1, linked to %2 in %3'),
+					_('%1, linked to %2 in %3'),
 				]
 			: [
 					_('preview of page %1, linked to %2'),
-					_('Slide %1, linked to %2'),
+					_('%1, linked to %2'),
 				];
 	},
 

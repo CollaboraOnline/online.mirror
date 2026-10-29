@@ -113,10 +113,13 @@ class SlideLinkToolbar {
     );
 
     // The label describes the link the way the slide's thumbnail does.
+    const sourceSlide = link ? links.getSourceSlideName(part) || link.name : '';
     const description = link
-      ? _('Linked to {0} in {1}')
-          .replace('{0}', () => link.name)
-          .replace('{1}', () => link.source)
+      ? sourceSlide
+        ? _('Linked to {0} in {1}')
+            .replace('{0}', () => sourceSlide)
+            .replace('{1}', () => link.source)
+        : _('Linked to {0}').replace('{0}', () => link.source)
       : _('In a section linked to {0}').replace(
           '{0}',
           () => sectionLink.source,
