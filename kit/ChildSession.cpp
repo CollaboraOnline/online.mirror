@@ -732,6 +732,7 @@ bool ChildSession::_handleInput(const char *buffer, int length)
                tokens.equals(0, "firsttilesent") ||
                tokens.equals(0, "geta11yfocusedparagraph") ||
                tokens.equals(0, "geta11ycaretposition") ||
+               tokens.equals(0, "seta11ycaretincell") ||
                tokens.equals(0, "toggletiledumping") ||
                tokens.equals(0, "getpresentationinfo") ||
                tokens.equals(0, "exportslides") ||
@@ -1149,6 +1150,10 @@ bool ChildSession::_handleInput(const char *buffer, int length)
         else if (tokens.equals(0, "geta11ycaretposition"))
         {
             return getA11yCaretPosition();
+        }
+        else if (tokens.equals(0, "seta11ycaretincell"))
+        {
+            return setA11yCaretInCell(tokens);
         }
         else if (tokens.equals(0, "toggletiledumping"))
         {
@@ -5601,6 +5606,23 @@ bool ChildSession::getA11yCaretPosition()
     getLOKitDocument()->setView(_viewId);
     int pos = getLOKitDocument()->getA11yCaretPosition();
     sendTextFrame("a11ycaretposition: " + std::to_string(pos));
+    return true;
+}
+
+bool ChildSession::setA11yCaretInCell(const StringVector& tokens)
+{
+    int row = -1;
+    int col = -1;
+    int end = 0;
+    if (tokens.size() != 4 || !getTokenInteger(tokens[1], "row", row) ||
+        !getTokenInteger(tokens[2], "col", col) || !getTokenInteger(tokens[3], "end", end))
+    {
+        sendTextFrameAndLogError("error: cmd=seta11ycaretincell kind=syntax");
+        return false;
+    }
+
+    getLOKitDocument()->setView(_viewId);
+    getLOKitDocument()->setA11yCaretInTableCell(row, col, end != 0);
     return true;
 }
 

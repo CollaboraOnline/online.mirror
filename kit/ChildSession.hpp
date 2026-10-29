@@ -345,6 +345,7 @@ private:
     bool firstTileSent();
     bool getA11yFocusedParagraph();
     bool getA11yCaretPosition();
+    bool setA11yCaretInCell(const StringVector& tokens);
     bool getPresentationInfo();
     bool executeScript(char const * buffer, int length, StringVector const & tokens);
     bool proxyReturn(char const * buffer, int length);
