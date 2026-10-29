@@ -157,6 +157,9 @@ sal_Int32 SwAccessibleParagraph::GetCaretPos()
             UpdatePortionData();
         }
     }
+    // of a paragraph split over pages or columns, only the part that shows the caret has it
+    if (sw::FrameAtCaret(*pTextFrame, *pPoint) != pTextFrame)
+        return -1;
     if( GetPortionData().IsValidCorePosition( nIndex ) )
     {
         // Yes, it's us!

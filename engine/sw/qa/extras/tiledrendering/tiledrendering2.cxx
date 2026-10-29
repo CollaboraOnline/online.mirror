@@ -2950,6 +2950,59 @@ CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yContextWithoutElements)
     CPPUNIT_ASSERT(rParagraph.get_child_optional("afterFormats"));
 }
 
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yParagraphSplitOverPages)
+{
+    // Given a paragraph that continues on the second page, with screen reader support on:
+    createDoc("a11y-split-paragraph.fodt");
+    SwTestViewCallback aView;
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    CPPUNIT_ASSERT_EQUAL(sal_uInt16(2), pWrtShell->GetPageCnt());
+    pWrtShell->GetSfxViewShell()->SetKitAccessibilityState(true);
+    Scheduler::ProcessEventsToIdle();
+
+    // the text around the caret of the client is the text around the caret of the document
+    auto checkCaret = [&aView, pWrtShell](const char* pStep) {
+        Scheduler::ProcessEventsToIdle();
+        const OUString& rText = pWrtShell->GetCursor()->GetPointNode().GetTextNode()->GetText();
+        const sal_Int32 nCaret = pWrtShell->GetCursor()->GetPoint()->GetContentIndex();
+        const OUString aContent
+            = OUString::fromUtf8(aView.m_aA11yFocusedParagraph.get<std::string>("content"));
+        const sal_Int32 nPosition = aView.m_nA11yCaretPosition;
+        CPPUNIT_ASSERT_MESSAGE(pStep, nPosition >= 0);
+        CPPUNIT_ASSERT_MESSAGE(pStep, nPosition <= aContent.getLength());
+        const sal_Int32 nBefore = std::min<sal_Int32>(nPosition, 10);
+        CPPUNIT_ASSERT_MESSAGE(pStep, nCaret >= nBefore);
+        const sal_Int32 nAfter = std::min<sal_Int32>(
+            { aContent.getLength() - nPosition, rText.getLength() - nCaret, 10 });
+        CPPUNIT_ASSERT_EQUAL_MESSAGE(pStep, rText.copy(nCaret - nBefore, nBefore + nAfter),
+                                     aContent.copy(nPosition - nBefore, nBefore + nAfter));
+    };
+
+    // When the caret moves over the page break, by lines and by characters:
+    auto onFirstPage = [&aView]() {
+        const std::string aContent = aView.m_aA11yFocusedParagraph.get<std::string>("content", "");
+        return aContent.empty() || aContent.starts_with("word001");
+    };
+    for (int i = 0; i < 20 && onFirstPage(); ++i)
+    {
+        pWrtShell->Down(/*bSelect=*/false);
+        Scheduler::ProcessEventsToIdle();
+    }
+    CPPUNIT_ASSERT(!onFirstPage());
+    checkCaret("Down to the second page");
+    pWrtShell->Up(/*bSelect=*/false);
+    // Without the fix, the client kept the text of the second page, and its caret was at the
+    // position in the text of the first page
+    checkCaret("Up to the first page");
+    pWrtShell->Down(/*bSelect=*/false);
+    checkCaret("Down to the second page again");
+    pWrtShell->Left(SwCursorSkipMode::Chars, /*bSelect=*/false, 1, /*bBasicCall=*/false);
+    // Without the fix, the client was not told that the caret moved
+    checkCaret("Left to the first page");
+    pWrtShell->Right(SwCursorSkipMode::Chars, /*bSelect=*/false, 1, /*bBasicCall=*/false);
+    checkCaret("Right to the second page");
+}
+
 CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yImageSelection)
 {
     for (const char* pFile : { "a11y-image.fodt", "a11y-image-at-paragraph.fodt" })

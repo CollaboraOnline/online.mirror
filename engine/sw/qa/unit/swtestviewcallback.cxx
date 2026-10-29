@@ -207,6 +207,15 @@ void SwTestViewCallback::callbackImpl(COKitCallbackType eType, const char* pPayl
             m_aA11yFocusedParagraph.clear();
             std::stringstream aStream(pPayload);
             boost::property_tree::read_json(aStream, m_aA11yFocusedParagraph);
+            m_nA11yCaretPosition = m_aA11yFocusedParagraph.get<int>("position");
+            break;
+        }
+        case COKitCallbackType::A11Y_CARET_CHANGED:
+        {
+            boost::property_tree::ptree aTree;
+            std::stringstream aStream(pPayload);
+            boost::property_tree::read_json(aStream, aTree);
+            m_nA11yCaretPosition = aTree.get<int>("position");
             break;
         }
         case COKitCallbackType::A11Y_FOCUSED_CELL_CHANGED:

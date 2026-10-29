@@ -56,6 +56,8 @@ public:
     int m_nCommentCallbackCount = 0;
     /// Accessibility focused paragraph payload.
     boost::property_tree::ptree m_aA11yFocusedParagraph;
+    /// Accessibility caret position in the focused paragraph, from the last focus or caret payload.
+    int m_nA11yCaretPosition = -1;
     /// Accessibility focused table cell payload.
     boost::property_tree::ptree m_aA11yFocusedCell;
     /// Accessibility selected object payload.

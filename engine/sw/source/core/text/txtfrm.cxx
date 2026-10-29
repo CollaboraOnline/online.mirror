@@ -310,6 +310,14 @@ namespace sw {
         }
     }
 
+const SwTextFrame* FrameAtCaret(const SwTextFrame& rFrame, const SwPosition& rPos)
+{
+    const SwTextFrame* pMaster = &rFrame;
+    while (pMaster->IsFollow())
+        pMaster = pMaster->FindMaster();
+    return pMaster->GetFrameAtPos(rPos);
+}
+
     bool IsParaPropsNode(SwRootFrame const& rLayout, SwTextNode const& rNode)
     {
         if (rLayout.HasMergedParas())

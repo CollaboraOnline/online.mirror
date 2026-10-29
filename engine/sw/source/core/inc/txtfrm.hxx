@@ -118,6 +118,8 @@ std::unique_ptr<sw::MergedPara> CheckParaRedlineMerge(SwTextFrame & rFrame, SwTe
 SwTextFrame * MakeTextFrame(SwTextNode & rNode, SwFrame *, sw::FrameMode eMode);
 
 bool FrameContainsNode(SwContentFrame const& rFrame, SwNodeOffset nNodeIndex);
+/// The part of rFrame's paragraph that shows the caret at rPos.
+const SwTextFrame* FrameAtCaret(const SwTextFrame& rFrame, const SwPosition& rPos);
 bool IsParaPropsNode(SwRootFrame const& rLayout, SwTextNode const& rNode);
 SwTextNode * GetParaPropsNode(SwRootFrame const& rLayout, SwNode const& rNode);
 SwPosition GetParaPropsPos(SwRootFrame const& rLayout, SwPosition const& rPos);

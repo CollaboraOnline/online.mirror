@@ -2531,7 +2531,14 @@ void SwCursorShell::UpdateCursor( sal_uInt16 eFlags, bool bIdleEnd, ScrollSizeMo
 
 #if !ENABLE_WASM_STRIP_ACCESSIBILITY
     if (Imp()->IsAccessible() && m_bSendAccessibleCursorEvents)
-        Imp()->InvalidateAccessibleCursorPosition(pPointFrame);
+    {
+        const SwFrame* pCaretFrame = pPointFrame;
+        const SwPosition* pPoint = getShellCursor(true)->GetPoint();
+        if (pPointFrame->IsTextFrame()
+            && sw::FrameContainsNode(*pPointFrame, pPoint->GetNodeIndex()))
+            pCaretFrame = sw::FrameAtCaret(*static_cast<SwTextFrame*>(pPointFrame), *pPoint);
+        Imp()->InvalidateAccessibleCursorPosition(pCaretFrame);
+    }
 #endif
 
     // switch from blinking cursor to read-only-text-selection cursor
