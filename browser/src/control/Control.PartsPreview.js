@@ -188,11 +188,16 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 					// does for the slide an insert creates. The focus follows
 					// it while the sorter owns the keyboard, so a screen
 					// reader announces the slide the sorter marks as the
-					// current one.
+					// current one. Without the keyboard, the sorter scrolls to show
+					// the current slide.
 					const currentPartMoved = this._focusedCurrentPart !== selectedPart;
 					this._focusedCurrentPart = selectedPart;
-					if (currentPartMoved && (this.hasSlideFocus() || this.partsFocused))
-						this.focusCurrentSlide();
+					if (currentPartMoved) {
+						if (this.hasSlideFocus() || this.partsFocused)
+							this.focusCurrentSlide();
+						else
+							this._scrollToPart(selectedPart);
+					}
 					this._sendTabThumbnail();
 				}
 				this._updateSelectedSection();
@@ -1581,11 +1586,13 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 		// Use the preview tile's parent frame directly instead of child index
 		var node = this._previewTiles[partNo] ? this._previewTiles[partNo].parentNode : null;
 
-		if (node && (!this._previewTiles[partNo] || !this._isPreviewVisible(partNo))) {
+		if (node) {
 			if (this.scrollTimer) clearTimeout(this.scrollTimer);
 
-			 this.scrollTimer = setTimeout(() => {
-				node.scrollIntoView();
+			// 'nearest' leaves a fully visible slide in place and scrolls a partly visible
+			// or hidden one by the least amount that shows it whole.
+			this.scrollTimer = setTimeout(() => {
+				node.scrollIntoView({block: 'nearest', inline: 'nearest'});
 				this.scrollTimer = null;
 			}, 50);
 		}
