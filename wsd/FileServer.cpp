@@ -495,6 +495,20 @@ bool FileServerRequestHandler::isAdminLoggedIn(const HTTPRequest& request, http:
            authenticateAdmin(Poco::Net::HTTPBasicCredentials(request), response, jwtToken);
 }
 
+/// If-None-Match holds "*" or a list of entity tags, which match by weak comparison (RFC 9110).
+static bool ifNoneMatch(const std::string& header, const std::string& etag)
+{
+    for (std::string& tag : Util::splitStringToVector(header, ','))
+    {
+        Util::trim(tag);
+        if (tag.starts_with("W/"))
+            tag.erase(0, 2);
+        if (tag == "*" || tag == etag)
+            return true;
+    }
+    return false;
+}
+
 static std::string getRequestPath(const HTTPRequest& request)
 {
     const Poco::URI requestUri(request.getURI());
@@ -726,25 +740,17 @@ bool FileServerRequestHandler::handleRequest(const HTTPRequest& request,
             response.add("Vary", "Accept-Encoding");
 
             auto it = request.find("If-None-Match");
-            if (it != request.end())
+            if (!noCache && it != request.end() && ifNoneMatch(it->second, etagString))
             {
-                // if ETags match avoid re-sending the file.
-                if (!noCache && it->second == etagString)
-                {
-                    // TESTME: harder ... - do we even want ETag support ?
-                    std::ostringstream oss;
-                    Poco::DateTime now;
-                    Poco::DateTime later(now.utcTime(), int64_t(1000)*1000 * 60 * 60 * 24 * 128);
-                    std::string extraHeaders =
-                        "Expires: " + Poco::DateTimeFormatter::format(
-                            later, Poco::DateTimeFormat::HTTP_FORMAT) + "\r\n" +
-                        "Cache-Control: max-age=11059200\r\n"
-                        "ETag: " + etagString + "\r\n"
-                        "Vary: Accept-Encoding\r\n";
-                    HttpHelper::sendErrorAndShutdown(http::StatusCode::NotModified, socket,
-                                                     std::string(), extraHeaders);
-                    return true;
-                }
+                http::Response notModified(http::StatusCode::NotModified);
+                if (requestDetails.closeConnection())
+                    notModified.setConnectionToken(http::Header::ConnectionToken::Close);
+                hstsHeaders(notModified);
+                notModified.set("Cache-Control", "max-age=11059200");
+                notModified.set("ETag", etagString);
+                notModified.add("Vary", "Accept-Encoding");
+                socket->send(notModified);
+                return true;
             }
 
 #if !MOBILEAPP

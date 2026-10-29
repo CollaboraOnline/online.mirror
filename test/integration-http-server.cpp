@@ -22,6 +22,7 @@
 #include <Common.hpp>
 #include <common/FileUtil.hpp>
 #include <KitPidHelpers.hpp>
+#include <wsd/COOLWSD.hpp>
 
 #include <regex>
 #include <Poco/URI.h>
@@ -40,6 +41,7 @@ class HTTPServerTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(testCoolGet);
     CPPUNIT_TEST(testCoolPagesNoStore);
     CPPUNIT_TEST(testStaticFileVary);
+    CPPUNIT_TEST(testStaticFileNotModified);
     CPPUNIT_TEST(testCoolPostPoco);
     CPPUNIT_TEST(testCoolPost);
     CPPUNIT_TEST(testIntegratorSettingsUnrestrictedFraming);
@@ -59,6 +61,7 @@ class HTTPServerTest : public CPPUNIT_NS::TestFixture
     void testCoolGet();
     void testCoolPagesNoStore();
     void testStaticFileVary();
+    void testStaticFileNotModified();
     void testCoolPostPoco();
     void testCoolPost();
     void testIntegratorSettingsUnrestrictedFraming();
@@ -168,6 +171,46 @@ void HTTPServerTest::testStaticFileVary()
         LOK_ASSERT_EQUAL_STR(encoding, httpResponse->get("Content-Encoding"));
         LOK_ASSERT_EQUAL_STR("Accept-Encoding", httpResponse->get("Vary"));
     }
+}
+
+void HTTPServerTest::testStaticFileNotModified()
+{
+    constexpr std::string_view testname = __func__;
+
+    // Debug builds don't cache static files unless --forcecaching is given.
+    struct RestoreForceCaching
+    {
+        const bool old = COOLWSD::ForceCaching;
+        ~RestoreForceCaching() { COOLWSD::ForceCaching = old; }
+    } restoreForceCaching;
+    COOLWSD::ForceCaching = true;
+
+    const std::string path = "/browser/" + Util::getCoolVersionHash() + "/global.js";
+    auto httpSession = http::Session::create(_uri.toString());
+    const std::shared_ptr<const http::Response> okResponse =
+        httpSession->syncRequest(http::Request(path));
+    LOK_ASSERT_EQUAL(http::StatusCode::OK, okResponse->statusCode());
+    const std::string etag = okResponse->get("ETag");
+    LOK_ASSERT(!etag.empty());
+
+    for (const std::string& ifNoneMatch :
+         std::vector<std::string>{ etag, "W/" + etag, "\"other\", " + etag, "*" })
+    {
+        TST_LOG("If-None-Match: [" << ifNoneMatch << ']');
+        http::Request request(path);
+        request.set("If-None-Match", ifNoneMatch);
+        const std::shared_ptr<const http::Response> httpResponse =
+            httpSession->syncRequest(request);
+
+        LOK_ASSERT_EQUAL(http::StatusCode::NotModified, httpResponse->statusCode());
+        LOK_ASSERT_EQUAL_STR(etag, httpResponse->get("ETag"));
+        LOK_ASSERT_EQUAL_STR("Accept-Encoding", httpResponse->get("Vary"));
+        LOK_ASSERT_EQUAL_STR("", httpResponse->get("Connection"));
+    }
+
+    http::Request request(path);
+    request.set("If-None-Match", "\"other\"");
+    LOK_ASSERT_EQUAL(http::StatusCode::OK, httpSession->syncRequest(request)->statusCode());
 }
 
 void HTTPServerTest::testCoolPostPoco()
