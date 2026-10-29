@@ -27,6 +27,11 @@ inline void setupKitEnvironment(const std::string& userInterface)
         "xcsxcu:${BRAND_BASE_DIR}/share/registry "
         "res:${BRAND_BASE_DIR}/share/registry "
 #endif
+#if defined(_WIN32)
+        // Group Policy settings of the machine, read from the registry; see
+        // winreg.cxx in the engine.
+        "winreg:LOCAL_MACHINE "
+#endif
         // The layer addOrganizationPath() files the shared AutoText, Dictionary
         // and Template paths into, ranking them above the shipped defaults. The
         // ini does not exist: the layer starts out empty and is filled at run
@@ -39,6 +44,10 @@ inline void setupKitEnvironment(const std::string& userInterface)
         "macosprefs: "
 #else
         "sharedext:${BRAND_BASE_DIR}/share/registry/sharedext.ini "
+#endif
+#if defined(_WIN32)
+        // Group Policy settings of the user, ranking above the machine's.
+        "winreg:CURRENT_USER "
 #endif
         );
     ::setenv("CONFIGURATION_LAYERS", layers.c_str(),
