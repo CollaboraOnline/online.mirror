@@ -119,7 +119,10 @@ class StatusBar extends JSDialog.Toolbar {
 			return;
 		} else if (data === 'menuoverflow' || object.id === 'menuoverflow') {
 			const targetBtn = document.getElementById('menuoverflow-button') || document.getElementById('menuoverflow');
-			this._openConfigMenu(targetBtn);
+			// :focus-visible tells a keyboard press of the button from a mouse click.
+			const keyboardInitiated = !!targetBtn
+				&& targetBtn.matches(':focus-visible, :has(:focus-visible)');
+			this._openConfigMenu(targetBtn, !keyboardInitiated);
 			return;
 		}
 	}
@@ -357,7 +360,7 @@ class StatusBar extends JSDialog.Toolbar {
 
 	onContextMenu(e) {
 		window.L.DomEvent.preventDefault(e);
-		this._openConfigMenu(this._getAnchorAtCursor(e));
+		this._openConfigMenu(this._getAnchorAtCursor(e), true /* noDefaultSelection */);
 	}
 
 	// The status bar entries the user can hide, one per configuration menu entry.
@@ -377,7 +380,7 @@ class StatusBar extends JSDialog.Toolbar {
 		return result;
 	}
 
-	_openConfigMenu(anchor) {
+	_openConfigMenu(anchor, noDefaultSelection) {
 		const menuEntries = [];
 
 		for (const item of this._configurableItems()) {
@@ -402,8 +405,9 @@ class StatusBar extends JSDialog.Toolbar {
 				peers: item.configPeers || [],
 				type: 'comboboxentry',
 				text: item.configLabel,
-				checked: !isUserHidden,
-				checktype: 'checkmark'
+				// A shown item has its check mark at the end of the row, like
+				// in the context menu, rather than in a column before the texts.
+				class: isUserHidden ? undefined : 'context-menu-checked',
 			});
 		}
 
@@ -420,7 +424,8 @@ class StatusBar extends JSDialog.Toolbar {
 			this._storeHiddenItems();
 		};
 
-		JSDialog.OpenDropdown('statusbar-context-menu', anchor, menuEntries, callback, 'top', false);
+		JSDialog.OpenDropdown('statusbar-context-menu', anchor, menuEntries, callback, 'top', false,
+			false, noDefaultSelection);
 	}
 
 	_applyUserHidden(itemId, targetId, peers, hide) {
