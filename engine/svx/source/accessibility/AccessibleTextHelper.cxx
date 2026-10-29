@@ -507,6 +507,13 @@ void AccessibleTextHelper_Impl::UpdateSelection()
         }
 
         sal_Int32 nMaxValidParaIndex( GetTextForwarder().GetParagraphCount() - 1 );
+        // the edit view counts the bullet text, the paragraphs do not
+        auto paragraphPosition = [this](sal_Int32 nPara, sal_Int32 nIndex) {
+            const EBulletInfo aBulletInfo = GetTextForwarder().GetBulletInfo(nPara);
+            if (aBulletInfo.nParagraph != EE_PARA_MAX && aBulletInfo.bVisible)
+                return std::max<sal_Int32>(nIndex - aBulletInfo.aText.getLength(), 0);
+            return nIndex;
+        };
 
         // notify all affected paragraphs (TODO: may be suboptimal,
         // since some paragraphs might stay selected)
@@ -519,11 +526,13 @@ void AccessibleTextHelper_Impl::UpdateSelection()
             {
                 if (maLastSelection.end.nPara < maParaManager.GetNum())
                 {
-                    maParaManager.FireEvent( ::std::min( maLastSelection.end.nPara, nMaxValidParaIndex ),
-                                             ::std::min( maLastSelection.end.nPara, nMaxValidParaIndex )+1,
-                                             AccessibleEventId::CARET_CHANGED,
-                                             cpo::uno::Any(static_cast<sal_Int32>(-1)),
-                                             cpo::uno::Any(maLastSelection.end.nIndex) );
+                    maParaManager.FireEvent(
+                        ::std::min(maLastSelection.end.nPara, nMaxValidParaIndex),
+                        ::std::min(maLastSelection.end.nPara, nMaxValidParaIndex) + 1,
+                        AccessibleEventId::CARET_CHANGED, cpo::uno::Any(static_cast<sal_Int32>(-1)),
+                        cpo::uno::Any(paragraphPosition(
+                            std::min(maLastSelection.end.nPara, nMaxValidParaIndex),
+                            maLastSelection.end.nIndex)));
                 }
 
                 ChangeChildFocus(aSelection.end.nPara);
@@ -547,18 +556,18 @@ void AccessibleTextHelper_Impl::UpdateSelection()
             if( maLastSelection.start.nPara != EE_PARA_MAX &&
                 maLastSelection.end.nPara == aSelection.end.nPara )
             {
-                aOldCursor <<= maLastSelection.end.nIndex;
+                aOldCursor
+                    <<= paragraphPosition(maLastSelection.end.nPara, maLastSelection.end.nIndex);
             }
             else
             {
                 aOldCursor <<= static_cast<sal_Int32>(-1);
             }
 
-            maParaManager.FireEvent( aSelection.end.nPara,
-                                     aSelection.end.nPara+1,
-                                     AccessibleEventId::CARET_CHANGED,
-                                     cpo::uno::Any(aSelection.end.nIndex),
-                                     aOldCursor );
+            maParaManager.FireEvent(
+                aSelection.end.nPara, aSelection.end.nPara + 1, AccessibleEventId::CARET_CHANGED,
+                cpo::uno::Any(paragraphPosition(aSelection.end.nPara, aSelection.end.nIndex)),
+                aOldCursor);
         }
 
         SAL_INFO(

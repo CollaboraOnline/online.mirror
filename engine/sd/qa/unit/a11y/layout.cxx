@@ -7,14 +7,22 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <com/sun/star/accessibility/AccessibleEventId.hpp>
+#include <com/sun/star/accessibility/AccessibleEventObject.hpp>
 #include <com/sun/star/accessibility/AccessibleTextType.hpp>
+#include <com/sun/star/accessibility/XAccessibleEventBroadcaster.hpp>
+#include <com/sun/star/accessibility/XAccessibleEventListener.hpp>
 #include <com/sun/star/accessibility/XAccessibleText.hpp>
 #include <com/sun/star/accessibility/XAccessibleTextAttributes.hpp>
 #include <com/sun/star/awt/FontWeight.hpp>
 #include <com/sun/star/drawing/XDrawView.hpp>
 #include <com/sun/star/drawing/XDrawPagesSupplier.hpp>
 #include <com/sun/star/frame/XModel.hpp>
+#include <com/sun/star/view/XSelectionSupplier.hpp>
 
+#include <cppuhelper/implbase.hxx>
+#include <rtl/ref.hxx>
+#include <vcl/keycodes.hxx>
 #include <vcl/scheduler.hxx>
 
 #include <test/a11y/accessibletestbase.hxx>
@@ -221,6 +229,84 @@ CPPUNIT_TEST_FIXTURE(test::AccessibleTestBase, testBulletedParagraphRuns)
     aRun = xText->getTextAtIndex(14, accessibility::AccessibleTextType::ATTRIBUTE_RUN);
     CPPUNIT_ASSERT_EQUAL(sal_Int32(14), aRun.SegmentStart);
     CPPUNIT_ASSERT_EQUAL(sal_Int32(14), aRun.SegmentEnd);
+}
+
+namespace
+{
+// the new caret positions in the paragraph it listens to
+class CaretListener : public cppu::WeakImplHelper<accessibility::XAccessibleEventListener>
+{
+public:
+    std::vector<sal_Int32> maPositions;
+
+    void notifyEvent(const accessibility::AccessibleEventObject& rEvent) override
+    {
+        sal_Int32 nPosition = -1;
+        if (rEvent.EventId == accessibility::AccessibleEventId::CARET_CHANGED
+            && (rEvent.NewValue >>= nPosition) && nPosition >= 0)
+            maPositions.push_back(nPosition);
+    }
+    void disposing(const lang::EventObject&) override {}
+};
+}
+
+CPPUNIT_TEST_FIXTURE(test::AccessibleTestBase, testBulletedParagraphEditing)
+{
+    // Given the numbered "plain BOLD end" of a text box, in edit mode:
+    loadFromSrc(u"/sd/qa/unit/a11y/data/bulleted-runs.fodp"_ustr);
+    Scheduler::ProcessEventsToIdle();
+    const auto xPage = mxDocument.queryThrow<drawing::XDrawPagesSupplier>()
+                           ->getDrawPages()
+                           ->getByIndex(0)
+                           .query<drawing::XDrawPage>();
+    const auto xController = mxDocument.queryThrow<frame::XModel>()->getCurrentController();
+    xController.queryThrow<view::XSelectionSupplier>()->select(xPage->getByIndex(0));
+    documentPostKeyEvent(COKitKeyEventType::DOWN, 0, KEY_RETURN);
+    documentPostKeyEvent(COKitKeyEventType::UP, 0, KEY_RETURN);
+    Scheduler::ProcessEventsToIdle();
+    uno::Reference<accessibility::XAccessibleContext> xBox;
+    for (const auto& xShape : getAllChildren(getDocumentAccessibleContext()))
+    {
+        if (xShape->getAccessibleChildCount() == 2)
+            xBox = xShape;
+    }
+    CPPUNIT_ASSERT(xBox.is());
+    const auto xParagraph = xBox->getAccessibleChild(0)->getAccessibleContext();
+    const auto xText = xParagraph.queryThrow<accessibility::XAccessibleText>();
+    rtl::Reference<CaretListener> pListener(new CaretListener);
+    xParagraph.queryThrow<accessibility::XAccessibleEventBroadcaster>()->addAccessibleEventListener(
+        pListener);
+
+    // When the caret goes to its start, and then selects "plain":
+    documentPostKeyEvent(COKitKeyEventType::DOWN, 0, KEY_HOME | KEY_MOD1);
+    documentPostKeyEvent(COKitKeyEventType::UP, 0, KEY_HOME | KEY_MOD1);
+    Scheduler::ProcessEventsToIdle();
+    for (int i = 0; i < 5; ++i)
+    {
+        documentPostKeyEvent(COKitKeyEventType::DOWN, 0, KEY_RIGHT | KEY_SHIFT);
+        documentPostKeyEvent(COKitKeyEventType::UP, 0, KEY_RIGHT | KEY_SHIFT);
+    }
+    Scheduler::ProcessEventsToIdle();
+
+    // Then the positions are those in its text, not after the bullet text "1.":
+    CPPUNIT_ASSERT(!pListener->maPositions.empty());
+    // Without the fix, it was 2
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(0), pListener->maPositions.front());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(5), pListener->maPositions.back());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(5), xText->getCaretPosition());
+    // Without the fix, it was 2 to 7, "ain B"
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(0), xText->getSelectionStart());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(5), xText->getSelectionEnd());
+    CPPUNIT_ASSERT_EQUAL(u"plain"_ustr, xText->getSelectedText());
+
+    // And when "BOLD" is selected through the paragraph, then the selection ends after it:
+    CPPUNIT_ASSERT(xText->setSelection(6, 10));
+    Scheduler::ProcessEventsToIdle();
+    // Without the fix, it was 8
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(10), xText->getCaretPosition());
+    CPPUNIT_ASSERT_EQUAL(u"BOLD"_ustr, xText->getSelectedText());
+    xParagraph.queryThrow<accessibility::XAccessibleEventBroadcaster>()
+        ->removeAccessibleEventListener(pListener);
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();

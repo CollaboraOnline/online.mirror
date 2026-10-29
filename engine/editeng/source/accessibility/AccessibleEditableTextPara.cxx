@@ -341,15 +341,17 @@ bool AccessibleEditableTextPara::GetSelection(sal_Int32 &nStartPos, sal_Int32 &n
     if (aSelection.start.nPara > nPara || aSelection.end.nPara < nPara)
         return false;
 
+    // the edit view counts the bullet text
+    const sal_Int32 nBulletLen = GetBulletTextLength();
     if (nPara == aSelection.start.nPara)
-        nStartPos = aSelection.start.nIndex;
+        nStartPos = std::max<sal_Int32>(aSelection.start.nIndex - nBulletLen, 0);
     else
         nStartPos = 0;
 
     if (nPara == aSelection.end.nPara)
-        nEndPos = aSelection.end.nIndex;
+        nEndPos = std::max<sal_Int32>(aSelection.end.nIndex - nBulletLen, 0);
     else
-        nEndPos = GetTextLen();
+        nEndPos = GetTextLen() - nBulletLen;
 
     return true;
 }
@@ -1155,7 +1157,10 @@ bool AccessibleEditableTextPara::setSelection( sal_Int32 nStartIndex, sal_Int32 
     try
     {
         SvxEditViewForwarder& rCacheVF = GetEditViewForwarder( true );
-        return rCacheVF.SetSelection( MakeSelection(nStartIndex, nEndIndex) );
+        // the edit view counts the bullet text
+        const sal_Int32 nBulletLen = GetBulletTextLength();
+        return rCacheVF.SetSelection(
+            MakeSelection(nStartIndex + nBulletLen, nEndIndex + nBulletLen));
     }
     catch (const cpo::uno::RuntimeException&)
     {
