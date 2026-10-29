@@ -129,12 +129,13 @@ marked `Final` is locked for the user. The key format, a sample profile and a
 `defaults write` recipe for trying it without an MDM are documented in
 `engine/configmgr/README.md`, section "macOS Managed Preferences Layer".
 
-The kit lists the layer in `CONFIGURATION_LAYERS` in `kit/SetupKitEnvironment.hpp`.
-That list has no writable user layer (the engine persists only an allow-listed
-subset of settings in the app, through its own mechanism), so the managed values
-always apply; `Final` additionally makes the affected options read-only in
-dialogs. Preferences are read once at startup: restart the app after installing
-or changing a profile.
+The kit lists the layer in `CONFIGURATION_LAYERS` in `kit/SetupKitEnvironment.hpp`,
+after the shipped defaults and before the user's own settings, which the engine
+keeps in `user/registrymodifications.xcu` under the app's Application Support
+directory. A managed value therefore overrides the shipped default and, when
+marked `Final`, the user's own value too, and the affected options are read-only
+in dialogs. Preferences are read once at startup: restart the app after
+installing or changing a profile.
 
 ## Pre-built download
 

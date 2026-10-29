@@ -146,8 +146,9 @@ the `macosprefs` layer (`macosprefs.mm`), which reads the application's
 application's bundle identifier, and the plain defaults of the same domain.
 The application lists it in `CONFIGURATION_LAYERS` as `macosprefs:` (nothing
 after the colon); the kit does so in `kit/SetupKitEnvironment.hpp`, after the
-`sharedext` layer, so a managed setting overrides the shipped defaults, and a
-setting marked `Final` is read-only for the user as well.
+`sharedext` layer and before the user's `registrymodifications.xcu`, so a
+managed setting overrides the shipped defaults, and a setting marked `Final`
+overrides the user's own value and is read-only for the user as well.
 
 The preference domain is the bundle identifier of the application that hosts
 the engine, for the CODA-M macOS app the `--with-app-package-name` value. The

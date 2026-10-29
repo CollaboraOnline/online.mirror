@@ -43,6 +43,12 @@ void runKitLoopInAThread();
 
 struct COKit;
 
+#if MOBILEAPP
+/// Writes the engine's pending configuration changes to the user profile. The
+/// apps exit without destroying the engine, so they call this first.
+void flushKitConfiguration();
+#endif
+
 void lokit_main(
 #if !MOBILEAPP
     const std::string& childRoot, const std::string& jailId, const std::string& configId,

@@ -124,6 +124,8 @@ COMPHELPER_DLLPUBLIC OUString getUserConfigDir();
 /// so that they outlive the kit. A no-op, returning false, when the kit is not
 /// active, the settings do not outlive it (see
 /// isUserSettingsPersistenceAvailable), or the host gave us nowhere to write.
+/// Returns true without writing when CONFIGURATION_LAYERS has a writable user
+/// layer, as in the apps: configmgr then persists every change itself.
 /// Call it once a dialog that changes persistent settings is accepted; files
 /// the engine wrote into the user profile itself (the AutoCorrect lists, the
 /// user's dictionaries) are announced to the host along with the configuration.

@@ -5871,6 +5871,16 @@ void COKitImpl::setOption(const char *pOption, const char* pValue)
         const OUString aPresetsUrl(pValue, strlen(pValue), RTL_TEXTENCODING_UTF8);
         addSharedPresetPaths(aPresetsUrl);
     }
+    else if (strcmp(pOption, "flushconfig") == 0)
+    {
+        // Write the pending configuration changes out now. With a writable user
+        // layer configmgr writes them itself, a second after the change and from
+        // its own thread; an app that is about to exit without destroying
+        // anything asks for the write first.
+        cpo::uno::Reference<css::util::XFlushable>(
+            css::configuration::theDefaultProvider::get(comphelper::getProcessComponentContext()),
+            cpo::uno::UNO_QUERY_THROW)->flush();
+    }
 #ifdef LINUX
     else if (strcmp(pOption, "addfont") == 0)
     {

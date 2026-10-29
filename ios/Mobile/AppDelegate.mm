@@ -178,6 +178,10 @@ NSString *app_text_direction;
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application {
+    // The engine writes the user's settings a second after a change, from its own
+    // thread; nothing below destroys it, so ask for the write now.
+    if (lo_kit)
+        lo_kit->setOption("flushconfig", "");
     // tdf#126974 We don't want any global object destructors to be called, the code
     // is not prepared for that.
     std::_Exit(1);

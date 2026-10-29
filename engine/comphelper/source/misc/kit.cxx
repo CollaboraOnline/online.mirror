@@ -18,6 +18,8 @@
 
 #include <comphelper/processfactory.hxx>
 #include <comphelper/diagnose_ex.hxx>
+#include <o3tl/string_view.hxx>
+#include <rtl/bootstrap.hxx>
 
 #include <osl/process.h>
 #include <osl/time.h>
@@ -252,10 +254,40 @@ void setUserSettingsPersistedCallback(void (*callback)(void* data), void* data)
     pUserSettingsPersistedCallbackData = data;
 }
 
+/// Whether CONFIGURATION_LAYERS ends in a writable user layer, so that configmgr
+/// persists every committed change itself. The apps run with one; the server
+/// keeps the kit's configuration in memory.
+static bool configurationHasWritableUserLayer()
+{
+    static const bool bWritable = []
+    {
+        OUString aLayers(u"${CONFIGURATION_LAYERS}"_ustr);
+        rtl::Bootstrap::expandMacros(aLayers);
+        for (sal_Int32 nIndex = 0; nIndex >= 0;)
+        {
+            std::u16string_view aUrl;
+            if (o3tl::starts_with(o3tl::getToken(aLayers, 0, u' ', nIndex), u"user:", &aUrl))
+            {
+                // "!" is writable, "*" read-only, and no prefix means writable for
+                // backwards compatibility (configmgr/source/components.cxx).
+                return !o3tl::starts_with(aUrl, u"*");
+            }
+        }
+        return false;
+    }();
+    return bWritable;
+}
+
 bool persistUserSettings()
 {
     if (!isActive() || !isUserSettingsPersistenceAvailable())
         return false;
+
+    // configmgr writes the user layer itself; a second copy under the user config
+    // tree would be re-applied at the next start over whatever the user layer has
+    // by then.
+    if (configurationHasWritableUserLayer())
+        return true;
 
     OUString aConfigDir = getUserConfigDir();
     if (aConfigDir.isEmpty())

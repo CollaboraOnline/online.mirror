@@ -1500,6 +1500,12 @@ void Document::onUnload(const ChildSession& session)
         return;
     }
 
+    // The apps run with a writable configuration layer, which configmgr writes a
+    // second after a change, and they exit without destroying the engine. Closing
+    // a view is a natural moment to get the pending changes to disk.
+    if (Util::isMobileApp())
+        _loKit->setOption("flushconfig", "");
+
     // If we have no more sessions, we have nothing more to do.
     if (!Util::isMobileApp() && !haveLoadedSessions())
     {
@@ -3574,6 +3580,18 @@ std::shared_ptr<DocumentBroker> getDocumentBrokerForAndroidOnly()
 
 #endif
 
+#if MOBILEAPP
+/// The engine the app runs, which lives as long as the process; set once
+/// lokit_main() has created it, and read from the wsd thread at exit.
+static std::atomic<COKit*> MobileKit(nullptr);
+
+void flushKitConfiguration()
+{
+    if (COKit* kit = MobileKit.load())
+        kit->setOption("flushconfig", "");
+}
+#endif
+
 KitSocketPoll::KitSocketPoll() : SocketPoll("kit")
 {
 #if DOCS_SHARE_PROCESS
@@ -4957,6 +4975,7 @@ void lokit_main(
 
         static std::shared_ptr<COKit> coKit(kit);
         assert(coKit);
+        MobileKit = coKit.get();
 
         COOLWSD::LOKitVersion = coKit->getVersionInfo();
 

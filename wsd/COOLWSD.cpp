@@ -4630,6 +4630,11 @@ void COOLWSD::innerMain()
 
     if (Util::isMobileApp())
     {
+#if MOBILEAPP
+        // Nothing is destroyed on the way out, so get the engine's pending
+        // configuration changes to disk first.
+        flushKitConfiguration();
+#endif
         LOG_INF("Process [coolwsd] finished with exit status: " << EXIT_OK);
         Util::forcedExit(EXIT_OK);
     }

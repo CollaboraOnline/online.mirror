@@ -49,6 +49,26 @@ inline void setupKitEnvironment(const std::string& userInterface)
         // Group Policy settings of the user, ranking above the machine's.
         "winreg:CURRENT_USER "
 #endif
+#if MOBILEAPP && !WASMAPP
+        // The user's own settings, which the engine writes as it does on the
+        // desktop: the apps have a profile of their own, the one passed to
+        // cok_init_2() or named in bootstraprc. The writable layer has to be
+        // the last one. The server has no profile that outlives the kit and
+        // keeps its configuration in memory instead; it persists an
+        // allow-listed part through comphelper::COKit::persistUserSettings().
+        // The WASM app's filesystem is in memory and goes with the page, so it
+        // keeps the server's list too.
+#if defined(MACOS)
+        "user:!${$BRAND_BASE_DIR/Resources/bootstraprc:UserInstallation}"
+        "/user/registrymodifications.xcu"
+#elif defined(_WIN32)
+        "user:!${$BRAND_BASE_DIR/program/bootstrap.ini:UserInstallation}"
+        "/user/registrymodifications.xcu"
+#else
+        "user:!${$BRAND_BASE_DIR/program/bootstraprc:UserInstallation}"
+        "/user/registrymodifications.xcu"
+#endif
+#endif
         );
     ::setenv("CONFIGURATION_LAYERS", layers.c_str(),
              1 /* override */);
