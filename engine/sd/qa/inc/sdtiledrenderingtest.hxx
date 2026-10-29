@@ -89,6 +89,8 @@ public:
     /** The results the uno commands reported, in the order they arrived. Each entry is the whole
         payload: the name of the command, whether it worked and the result it carries. */
     std::vector<boost::property_tree::ptree> m_aCommandResults;
+    /// The focused paragraph as last sent to the screen reader.
+    boost::property_tree::ptree m_aA11yFocusedParagraph;
     /// How many times this view was told that the linked pages or sections changed.
     int m_nSlideLinksChanged = 0;
     TestKitCallbackWrapper m_callbackWrapper;

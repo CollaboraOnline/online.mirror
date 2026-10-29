@@ -39,6 +39,7 @@
 #include <com/sun/star/accessibility/AccessibleTextType.hpp>
 #include <com/sun/star/accessibility/AccessibleStateType.hpp>
 #include <com/sun/star/accessibility/AccessibleEventId.hpp>
+#include <comphelper/sequence.hxx>
 #include <comphelper/sequenceashashmap.hxx>
 #include <unotools/accessiblerelationsethelper.hxx>
 #include <com/sun/star/accessibility/AccessibleRelationType.hpp>
@@ -975,10 +976,8 @@ cpo::uno::Sequence< beans::PropertyValue > AccessibleEditableTextPara::getCharac
         rRes.Handle = -1;
         rRes.State  = bIsDirectVal ? PropertyState_DIRECT_VALUE : PropertyState_DEFAULT_VALUE;
     }
-    if( bSupplementalMode )
+    if (bSupplementalMode || comphelper::findValue(aPropertyNames, u"NumberingPrefix") != -1)
     {
-        _correctValues( aRes );
-        // NumberingPrefix
         sal_Int32 nRes = aRes.getLength();
         aRes.realloc( nRes + 1 );
         beans::PropertyValue &rRes = aRes.getArray()[nRes];
@@ -989,11 +988,15 @@ cpo::uno::Sequence< beans::PropertyValue > AccessibleEditableTextPara::getCharac
         rRes.Value <<= numStr;
         rRes.Handle = -1;
         rRes.State = PropertyState_DIRECT_VALUE;
+    }
+    if( bSupplementalMode )
+    {
+        _correctValues( aRes );
         //For field object.
         OUString strFieldType = GetFieldTypeNameAtIndex(nIndex);
         if (!strFieldType.isEmpty())
         {
-            nRes = aRes.getLength();
+            sal_Int32 nRes = aRes.getLength();
             aRes.realloc( nRes + 1 );
             beans::PropertyValue &rResField = aRes.getArray()[nRes];
             rResField.Name = u"FieldType"_ustr;

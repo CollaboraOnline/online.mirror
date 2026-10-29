@@ -1615,7 +1615,8 @@ sal_Int32 getListPrefixSize(const uno::Reference<css::accessibility::XAccessible
         return 0;
 
     cpo::uno::Sequence< css::beans::PropertyValue > aRunAttributeList;
-    cpo::uno::Sequence< OUString > aRequestedAttributes = {UNO_NAME_NUMBERING_LEVEL, UNO_NAME_NUMBERING};
+    cpo::uno::Sequence<OUString> aRequestedAttributes
+        = { UNO_NAME_NUMBERING_LEVEL, UNO_NAME_NUMBERING, u"NumberingPrefix"_ustr };
     aRunAttributeList = xAccText->getCharacterAttributes(0, aRequestedAttributes);
 
     sal_Int16 nLevel = -1;
@@ -1628,6 +1629,8 @@ sal_Int32 getListPrefixSize(const uno::Reference<css::accessibility::XAccessible
            attribute.Value >>= nLevel;
         else if (attribute.Name == UNO_NAME_NUMBERING)
            attribute.Value >>= bIsCounted;
+        else if (attribute.Name == "NumberingPrefix")
+            return 0; // the label is not in the text
     }
     if (nLevel < 0 || !bIsCounted)
         return 0;

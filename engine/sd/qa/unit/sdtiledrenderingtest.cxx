@@ -387,6 +387,13 @@ void SdTestViewCallback::callbackImpl(COKitCallbackType eType, const char* pPayl
             m_aCommandResults.push_back(aTree);
         }
         break;
+        case COKitCallbackType::A11Y_FOCUS_CHANGED:
+        {
+            m_aA11yFocusedParagraph.clear();
+            std::stringstream aStream(pPayload);
+            boost::property_tree::read_json(aStream, m_aA11yFocusedParagraph);
+        }
+        break;
         default:
         break;
     }

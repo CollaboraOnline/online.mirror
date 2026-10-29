@@ -46,6 +46,7 @@
 #include <sfx2/linkmgr.hxx>
 #include <tools/json_writer.hxx>
 
+#include <vcl/keycodes.hxx>
 #include <vcl/virdev.hxx>
 
 #include <tools/UnitConversion.hxx>
@@ -2224,6 +2225,34 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSlideLayoutKeepsOtherSlidesOfItsM
     // background, and every slide of the master was invalidated.
     CPPUNIT_ASSERT_EQUAL(""_ostr, wholePartInvalidationsInMode(aView, 0, 1));
     CPPUNIT_ASSERT_EQUAL(""_ostr, wholePartInvalidationsInMode(aView, 2));
+}
+
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testA11yNumberedParagraphPrefix)
+{
+    // Given a text box whose first paragraph is "1. plain BOLD end", with screen reader support on:
+    loadFromURL(m_directories.getURLFromSrc(u"/sd/qa/unit/a11y/data/bulleted-runs.fodp"));
+    auto pXImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+    CPPUNIT_ASSERT(pXImpressDocument);
+    pXImpressDocument->initializeForTiledRendering({});
+    SdTestViewCallback aView;
+    sd::ViewShell* pViewShell = pXImpressDocument->GetDocShell()->GetViewShell();
+    pViewShell->GetViewShell()->SetKitAccessibilityState(true);
+
+    // When editing starts at the beginning of that paragraph:
+    SdrView* pView = pViewShell->GetView();
+    pView->MarkObj(pViewShell->GetActualPage()->GetObj(0), pView->GetSdrPageView());
+    pXImpressDocument->postKeyEvent(COKitKeyEventType::DOWN, 0, KEY_RETURN);
+    pXImpressDocument->postKeyEvent(COKitKeyEventType::UP, 0, KEY_RETURN);
+    Scheduler::ProcessEventsToIdle();
+    pXImpressDocument->postKeyEvent(COKitKeyEventType::DOWN, 0, KEY_MOD1 | KEY_HOME);
+    pXImpressDocument->postKeyEvent(COKitKeyEventType::UP, 0, KEY_MOD1 | KEY_HOME);
+    Scheduler::ProcessEventsToIdle();
+
+    // Then the paragraph text has no list prefix, as the label is not part of it:
+    CPPUNIT_ASSERT_EQUAL(std::string("plain BOLD end"),
+                         aView.m_aA11yFocusedParagraph.get<std::string>("content"));
+    // Without the fix, it was 6, the length of the first formatting run.
+    CPPUNIT_ASSERT_EQUAL(0, aView.m_aA11yFocusedParagraph.get<int>("listPrefixLength", 0));
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
