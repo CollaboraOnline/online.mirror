@@ -1746,6 +1746,27 @@ bool ChildSession::paste(const char* buffer, int length, const StringVector& tok
     return true;
 }
 
+namespace
+{
+/// Whether url is a file: URL, with no host, query or fragment, naming one plain file directly
+/// in folder, which ends with '/'.
+bool isFileUrlDirectlyIn(const std::string& url, const std::string& folder)
+{
+    try
+    {
+        const Poco::URI uri(url);
+        const std::string& path = uri.getPath();
+        return uri.getScheme() == "file" && uri.getHost().empty() && uri.getRawQuery().empty() &&
+               uri.getRawFragment().empty() && path.starts_with(folder) &&
+               FileUtil::isPlainFileName(path.substr(folder.size()));
+    }
+    catch (const std::exception&)
+    {
+        return false;
+    }
+}
+}
+
 bool ChildSession::insertFile(const StringVector& tokens)
 {
     std::string name, type, data;
@@ -2985,6 +3006,12 @@ bool ChildSession::saveAs(const StringVector& tokens)
         // on saveAs we should send encoded!
         encodeURL = true;
         wopiFilename = wopiURL.getPath();
+    }
+    else if (!Util::isMobileApp() && !isFileUrlDirectlyIn(url, getJailDocRoot()))
+    {
+        // On a server any other target is a file directly in the document folder of the jail.
+        sendTextFrameAndLogError("error: cmd=saveas kind=syntax");
+        return false;
     }
 
     if (tokens.size() > 2)
