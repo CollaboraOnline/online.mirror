@@ -2925,6 +2925,31 @@ CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yFocusedParagraphFormatsTracke
     CPPUNIT_ASSERT(!rBold.get_optional<std::string>("underline"));
 }
 
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yContextWithoutElements)
+{
+    // Given formatted paragraphs without links, images, comments or content controls:
+    createDoc("a11y-formatting.fodt");
+    SwTestViewCallback aView;
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->GetSfxViewShell()->SetKitAccessibilityState(true);
+
+    // When the caret moves into the heading between them:
+    pWrtShell->Down(/*bSelect=*/false, 2);
+    Scheduler::ProcessEventsToIdle();
+
+    // Then the lists of elements that no paragraph around it has are left out, and the formats
+    // kept:
+    const boost::property_tree::ptree& rParagraph = aView.m_aA11yFocusedParagraph;
+    CPPUNIT_ASSERT_EQUAL(std::string("A heading"), rParagraph.get<std::string>("content", ""));
+    // Without the fix, each list was there, with an empty entry for each paragraph
+    for (const char* pName :
+         { "beforeLinks", "afterLinks", "beforeImages", "afterImages", "beforeComments",
+           "afterComments", "beforeContentControls", "afterContentControls" })
+        CPPUNIT_ASSERT_MESSAGE(pName, !rParagraph.get_child_optional(pName));
+    CPPUNIT_ASSERT(rParagraph.get_child_optional("beforeFormats"));
+    CPPUNIT_ASSERT(rParagraph.get_child_optional("afterFormats"));
+}
+
 CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yImageSelection)
 {
     for (const char* pFile : { "a11y-image.fodt", "a11y-image-at-paragraph.fodt" })

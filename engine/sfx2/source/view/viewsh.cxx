@@ -1994,47 +1994,35 @@ void KitDocumentFocusListener::paragraphPropertiesToTree(boost::property_tree::p
             aPayloadTree.add_child("beforeLevels", toArray(m_aParagraphsBefore, aLevel));
             aPayloadTree.add_child("afterLevels", toArray(m_aParagraphsAfter, aLevel));
         }
-        auto toLinks = [](const std::vector<ContextParagraph>& rParagraphs) {
+        // left out where no paragraph has such elements
+        auto addElements = [&](const char* pName, const std::vector<ContextParagraph>& rParagraphs,
+                               auto pElements, auto makeTree) {
+            auto hasNone
+                = [pElements](const ContextParagraph& r) { return (r.*pElements).empty(); };
+            if (std::all_of(rParagraphs.begin(), rParagraphs.end(), hasNone))
+                return;
             boost::property_tree::ptree aArray;
             for (const ContextParagraph& rParagraph : rParagraphs)
-                aArray.push_back(std::make_pair("", makeLinksTree(rParagraph.aLinks)));
-            return aArray;
+                aArray.push_back(std::make_pair("", makeTree(rParagraph.*pElements)));
+            aPayloadTree.add_child(pName, aArray);
         };
-        aPayloadTree.add_child("beforeLinks", toLinks(m_aParagraphsBefore));
-        aPayloadTree.add_child("afterLinks", toLinks(m_aParagraphsAfter));
-        auto toFormats = [](const std::vector<ContextParagraph>& rParagraphs) {
-            boost::property_tree::ptree aArray;
-            for (const ContextParagraph& rParagraph : rParagraphs)
-                aArray.push_back(std::make_pair("", makeFormatsTree(rParagraph.aFormats)));
-            return aArray;
-        };
-        aPayloadTree.add_child("beforeFormats", toFormats(m_aParagraphsBefore));
-        aPayloadTree.add_child("afterFormats", toFormats(m_aParagraphsAfter));
-        auto toImages = [](const std::vector<ContextParagraph>& rParagraphs) {
-            boost::property_tree::ptree aArray;
-            for (const ContextParagraph& rParagraph : rParagraphs)
-                aArray.push_back(std::make_pair("", makeImagesTree(rParagraph.aImages)));
-            return aArray;
-        };
-        aPayloadTree.add_child("beforeImages", toImages(m_aParagraphsBefore));
-        aPayloadTree.add_child("afterImages", toImages(m_aParagraphsAfter));
-        auto toComments = [](const std::vector<ContextParagraph>& rParagraphs) {
-            boost::property_tree::ptree aArray;
-            for (const ContextParagraph& rParagraph : rParagraphs)
-                aArray.push_back(std::make_pair("", makeCommentsTree(rParagraph.aComments)));
-            return aArray;
-        };
-        aPayloadTree.add_child("beforeComments", toComments(m_aParagraphsBefore));
-        aPayloadTree.add_child("afterComments", toComments(m_aParagraphsAfter));
-        auto toContentControls = [](const std::vector<ContextParagraph>& rParagraphs) {
-            boost::property_tree::ptree aArray;
-            for (const ContextParagraph& rParagraph : rParagraphs)
-                aArray.push_back(
-                    std::make_pair("", makeContentControlsTree(rParagraph.aContentControls)));
-            return aArray;
-        };
-        aPayloadTree.add_child("beforeContentControls", toContentControls(m_aParagraphsBefore));
-        aPayloadTree.add_child("afterContentControls", toContentControls(m_aParagraphsAfter));
+        addElements("beforeLinks", m_aParagraphsBefore, &ContextParagraph::aLinks, makeLinksTree);
+        addElements("afterLinks", m_aParagraphsAfter, &ContextParagraph::aLinks, makeLinksTree);
+        addElements("beforeFormats", m_aParagraphsBefore, &ContextParagraph::aFormats,
+                    makeFormatsTree);
+        addElements("afterFormats", m_aParagraphsAfter, &ContextParagraph::aFormats,
+                    makeFormatsTree);
+        addElements("beforeImages", m_aParagraphsBefore, &ContextParagraph::aImages,
+                    makeImagesTree);
+        addElements("afterImages", m_aParagraphsAfter, &ContextParagraph::aImages, makeImagesTree);
+        addElements("beforeComments", m_aParagraphsBefore, &ContextParagraph::aComments,
+                    makeCommentsTree);
+        addElements("afterComments", m_aParagraphsAfter, &ContextParagraph::aComments,
+                    makeCommentsTree);
+        addElements("beforeContentControls", m_aParagraphsBefore,
+                    &ContextParagraph::aContentControls, makeContentControlsTree);
+        addElements("afterContentControls", m_aParagraphsAfter, &ContextParagraph::aContentControls,
+                    makeContentControlsTree);
     }
     if (!m_aList.aItems.empty())
     {
@@ -2088,7 +2076,7 @@ void KitDocumentFocusListener::paragraphPropertiesToJson(std::string& aPayload, 
     boost::property_tree::ptree aPayloadTree;
     paragraphPropertiesToTree(aPayloadTree, force);
     std::stringstream aStream;
-    boost::property_tree::write_json(aStream, aPayloadTree);
+    boost::property_tree::write_json(aStream, aPayloadTree, false);
     aPayload = aStream.str();
 }
 
@@ -2219,7 +2207,7 @@ void KitDocumentFocusListener::notifyEditingInSelectionState(bool bParagraph)
     }
 
     std::stringstream aStream;
-    boost::property_tree::write_json(aStream, aPayloadTree);
+    boost::property_tree::write_json(aStream, aPayloadTree, false);
     std::string aPayload = aStream.str();
     if (m_pViewShell)
     {
@@ -2268,7 +2256,7 @@ void KitDocumentFocusListener::notifyCaretChanged()
     boost::property_tree::ptree aPayloadTree;
     aPayloadTree.put("position", m_nCaretPosition);
     std::stringstream aStream;
-    boost::property_tree::write_json(aStream, aPayloadTree);
+    boost::property_tree::write_json(aStream, aPayloadTree, false);
     std::string aPayload = aStream.str();
     if (m_pViewShell)
     {
@@ -2285,7 +2273,7 @@ void KitDocumentFocusListener::notifyTextSelectionChanged()
     aPayloadTree.put("start", bLeftToRight ? m_nSelectionStart : m_nSelectionEnd);
     aPayloadTree.put("end", bLeftToRight ? m_nSelectionEnd : m_nSelectionStart);
     std::stringstream aStream;
-    boost::property_tree::write_json(aStream, aPayloadTree);
+    boost::property_tree::write_json(aStream, aPayloadTree, false);
     std::string aPayload = aStream.str();
     if (m_pViewShell)
     {
@@ -2336,7 +2324,7 @@ void KitDocumentFocusListener::notifyFocusedCellChanged(
     aPayloadTree.add_child("paragraph", aContentNode);
 
     std::stringstream aStream;
-    boost::property_tree::write_json(aStream, aPayloadTree);
+    boost::property_tree::write_json(aStream, aPayloadTree, false);
     std::string aPayload = aStream.str();
     if (m_pViewShell)
     {
@@ -2461,7 +2449,7 @@ void KitDocumentFocusListener::notifySelectionChanged(
     if (oContentControl)
         aPayloadTree.add_child("contentControl", makeContentControlTree(*oContentControl));
     std::stringstream aStream;
-    boost::property_tree::write_json(aStream, aPayloadTree);
+    boost::property_tree::write_json(aStream, aPayloadTree, false);
     std::string aPayload = aStream.str();
     if (m_pViewShell)
     {
