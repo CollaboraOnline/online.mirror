@@ -1909,7 +1909,8 @@ std::shared_ptr<lok::Document> Document::load(const std::shared_ptr<ChildSession
     const std::string& lang = session->getLang();
     const std::string& deviceFormFactor = session->getDeviceFormFactor();
     const std::string& batchMode = session->getBatchMode();
-    const std::string& enableMacrosExecution = session->getEnableMacrosExecution();
+    const std::string enableMacrosExecution =
+        session->isReadOnly() ? "false" : session->getEnableMacrosExecution();
     const std::string& macroSecurityLevel = session->getMacroSecurityLevel();
     const std::string& clientVisibleArea = session->getInitialClientVisibleArea();
     const bool accessibilityState = session->getAccessibilityState();
