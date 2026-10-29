@@ -3081,19 +3081,24 @@ void MSWordExportBase::OutputTextNode( SwTextNode& rNode )
                         // the paragraph.
                         oTmpSet->Put( SwNumRuleItem( pRule->GetName() ));
 
-                        // Put indent values into the itemset in case that the list
-                        // style is applied via paragraph style and the list level
-                        // indent values are not applicable.
+                        // Where the paragraph and the styles behind it state no indent
+                        // of their own, the indent a reader sees is the one the level of
+                        // the list states, so that is the one written out.
                         if ( pFormat->GetPositionAndSpaceMode() ==
                                     SvxNumberFormat::LABEL_ALIGNMENT)
                         {
                             ::sw::ListLevelIndents const indents(rNode.AreListLevelIndentsApplicable());
                             if (indents & ::sw::ListLevelIndents::FirstLine)
                             {
+                                firstLine.SetTextFirstLineOffset(SvxIndentValue{
+                                    static_cast<double>(pFormat->GetFirstLineIndent()),
+                                    pFormat->GetFirstLineIndentUnit() });
                                 oTmpSet->Put(firstLine);
                             }
                             if (indents & ::sw::ListLevelIndents::LeftMargin)
                             {
+                                leftMargin.SetTextLeft(
+                                    SvxIndentValue::twips(pFormat->GetIndentAt()));
                                 oTmpSet->Put(leftMargin);
                             }
                         }

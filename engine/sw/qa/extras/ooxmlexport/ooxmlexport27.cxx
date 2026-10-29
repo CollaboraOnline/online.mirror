@@ -866,6 +866,23 @@ CPPUNIT_TEST_FIXTURE(Test, testDocGridCharSpaceStaysANumber)
     CPPUNIT_ASSERT_EQUAL(u"-4097"_ustr, getXPath(pXmlDoc, "//w:docGrid", "charSpace"));
 }
 
+CPPUNIT_TEST_FIXTURE(Test, testListIndentComesFromTheListLevel)
+{
+    // The paragraph is numbered through its style, and neither the paragraph nor any style
+    // behind it states an indent of its own, so the indent it is shown with is the one the
+    // level of the list states.
+    createSwDoc("list-indent-from-the-paragraph-style.fodt");
+    save(TestFilter::DOCX);
+
+    xmlDocUniquePtr pXmlDoc = parseExport(u"word/document.xml"_ustr);
+    // The indent used to be taken from the styles behind the paragraph, which state none, so
+    // the item was written out standing at the edge of the text.
+    assertXPath(pXmlDoc, "//w:p[w:pPr/w:pStyle[@w:val='ListAndIndents']][1]/w:pPr/w:ind",
+                "start", u"754");
+    assertXPath(pXmlDoc, "//w:p[w:pPr/w:pStyle[@w:val='ListAndIndents']][1]/w:pPr/w:ind",
+                "hanging", u"397");
+}
+
 } // end of anonymous namespace
 CPPUNIT_PLUGIN_IMPLEMENT();
 
