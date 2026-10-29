@@ -100,6 +100,7 @@ describe('SlideLinkToolbar', function () {
 			slideLinks: {
 				currentPart: () => current,
 				getPageLink: (part: string) => linked.get(part) || null,
+				getSourceSlideName: () => '',
 				isPageOutdated: (part: string) => outdated.has(part),
 				getPageSourceState: (part: string) =>
 					linked.has(part) ? sourceState : '',

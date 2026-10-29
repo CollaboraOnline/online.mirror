@@ -1073,7 +1073,7 @@ class SlideImportPane {
 
     this.panel
       .querySelectorAll(
-        '.navigation-expand-button, .close-navigation-button, .slide-import-insert',
+        '.navigation-expand-button, .close-navigation-button, .slide-import-insert, .slide-import-slide',
       )
       .forEach((el: Element) =>
         window.L.control.attachTooltipEventListener(el, this.map),
@@ -1949,6 +1949,7 @@ class SlideImportPane {
         role="option"
         aria-selected={selected ? 'true' : 'false'}
         aria-label={this.slideLabel(source, index)}
+        data-cooltip={this.slideLabel(source, index)}
         tabindex={focused ? 0 : -1}
         data-index={index}
         draggable="true"
