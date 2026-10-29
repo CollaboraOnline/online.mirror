@@ -42,7 +42,7 @@ struct TempFile {
     ~TempFile();
     void closeAndRename(const OUString &url);
     oslFileError flush();
-#ifdef _WIN32
+#if defined _WIN32 || defined MACOSX
     oslFileError closeWithoutUnlink();
 #endif
     void writeString(std::string_view text);

@@ -71,6 +71,8 @@
 
 #if defined(_WIN32)
 #include "winreg.hxx"
+#elif defined MACOSX
+#include "macosprefs.hxx"
 #endif
 
 namespace configmgr {
@@ -479,6 +481,24 @@ Components::Components(
             if (dumpWindowsRegistry(&aTempFileURL, eType)) {
                 parseFileLeniently(&parseXcuFile, aTempFileURL, layer, nullptr, nullptr, nullptr);
                 if (!getenv("SAL_CONFIG_WINREG_RETAIN_TMP"))
+                    osl::File::remove(aTempFileURL);
+            }
+            ++layer;
+#endif
+#if defined MACOSX
+        } else if (type == "macosprefs") {
+            // Managed preferences (MDM configuration profiles) of the application; nothing
+            // follows the colon, the preference domain is the application's bundle identifier.
+            if (!url.isEmpty()) {
+                throw cpo::uno::RuntimeException(
+                    "CONFIGURATION_LAYERS: unexpected \"macosprefs\" URL \"" + url + "\"");
+            }
+            OUString aTempFileURL;
+            if (dumpMacOSPreferences(&aTempFileURL)) {
+                parseFileLeniently(&parseXcuFile, aTempFileURL, layer, nullptr, nullptr, nullptr);
+                if (getenv("SAL_CONFIG_MACOSPREFS_RETAIN_TMP"))
+                    SAL_INFO("configmgr", "macosprefs dump retained at " << aTempFileURL);
+                else
                     osl::File::remove(aTempFileURL);
             }
             ++layer;

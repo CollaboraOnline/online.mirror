@@ -25,6 +25,11 @@ $(eval $(call gb_CppunitTest_use_custom_headers,configmgr_unit,\
         officecfg/registry \
 ))
 
+$(eval $(call gb_CppunitTest_set_include,configmgr_unit,\
+    $$(INCLUDE) \
+    -I$(SRCDIR)/configmgr/source \
+))
+
 $(eval $(call gb_CppunitTest_use_libraries,configmgr_unit, \
 	    comphelper \
 	    cppu \
@@ -46,6 +51,20 @@ $(eval $(call gb_CppunitTest_use_configuration,configmgr_unit))
 # layer at run time. Declare it here, with an ini file that does not exist, the way the
 # product does, so testSharedOrganizationLayer can check the mechanism still works.
 $(eval $(call gb_CppunitTest__use_configuration,configmgr_unit,sharedext,$(WORKDIR)/configmgr-no-such-layer.ini))
+
+ifeq ($(OS),MACOSX)
+# The managed preferences layer, read from the preferences of the test process (normally empty).
+$(call gb_CppunitTest_get_target,configmgr_unit) : CONFIGURATION_LAYERS += macosprefs:
+
+$(eval $(call gb_CppunitTest_use_system_darwin_frameworks,configmgr_unit,\
+    CoreFoundation \
+    Foundation \
+))
+endif
+
+# A read-only user layer that finalizes a property, which is what "Final" in the winreg and
+# macosprefs layers relies on.
+$(call gb_CppunitTest_get_target,configmgr_unit) : CONFIGURATION_LAYERS += user:*$(call gb_Helper_make_url,$(SRCDIR)/configmgr/qa/unit/data/finalized.xcu)
 
 $(eval $(call gb_CppunitTest_use_components,configmgr_unit,\
     i18npool/util/i18npool \

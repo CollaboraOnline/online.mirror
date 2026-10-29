@@ -92,7 +92,7 @@ TempFile::~TempFile() {
     }
 }
 
-#ifdef _WIN32
+#if defined _WIN32 || defined MACOSX
 oslFileError TempFile::closeWithoutUnlink() {
     flush();
     oslFileError e = osl_closeFile(handle);

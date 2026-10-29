@@ -135,3 +135,144 @@ recorded:
             "modify,fuse" etc.: any of those operations
             "modify/fuse": a modify or a fuse on an existing member
             "replace/fuse": a replace or a fuse on a non-existing member
+
+
+## macOS Managed Preferences Layer
+
+On Windows, administrators deploy settings through Group Policy, which the
+`winreg` layers read from the registry (`winreg.cxx`). The macOS counterpart is
+the `macosprefs` layer (`macosprefs.mm`), which reads the application's
+**preferences**: the settings an MDM configuration profile delivers for the
+application's bundle identifier, and the plain defaults of the same domain.
+The application lists it in `CONFIGURATION_LAYERS` as `macosprefs:` (nothing
+after the colon); the kit does so in `kit/SetupKitEnvironment.hpp`, after the
+`sharedext` layer, so a managed setting overrides the shipped defaults, and a
+setting marked `Final` is read-only for the user as well.
+
+The preference domain is the bundle identifier of the application that hosts
+the engine, for the CODA-M macOS app the `--with-app-package-name` value. The
+preferences are read once, when the configuration is first used, so a changed
+profile needs an application restart.
+
+### Keys
+
+Every preference key that starts with `/` is a configuration path whose last
+segment is the property name; keys that do not start with `/` are left alone,
+so the application's other defaults are not disturbed. The path uses the same
+syntax as `oor:path` in an `.xcu` file:
+
+    /org.openoffice.Office.Common/Save/Document/AutoSave
+    /org.openoffice.Office.Paths/Paths/org.openoffice.Office.Paths:NamedPath['Work']/WritePath
+
+A segment written as `Name#op` (with `op` one of `modify`, `replace`, `fuse` or
+`remove`) becomes a `<node oor:name="Name" oor:op="op">` element, and so does
+every segment after it. That is how a set member is created; it corresponds to
+`Name/#op` in a registry key on Windows:
+
+    /org.openoffice.Office.OptionsDialog/OptionsDialogGroups/ProductName#fuse/Pages/Java#fuse/Hide
+
+### Values
+
+The value of a key can be
+
+- a plain value: string, boolean, integer, real, or data (written as
+  `hexBinary`). It is parsed with the type the property has in the schema, so no
+  type needs to be given.
+- an array of plain values: the items of a list property such as
+  `oor:string-list`.
+- a dictionary with the same entries the Windows registry layer uses:
+
+  | Entry             | Meaning                                                               |
+  |-------------------|-----------------------------------------------------------------------|
+  | `Value`           | the plain value or array                                              |
+  | `Type`            | the `oor:type`, e.g. `xs:boolean` or `oor:string-list`; needed only for properties of type `any` and for new properties of extensible groups |
+  | `Final`           | `true` locks the setting: the user cannot change it, and a value in `registrymodifications.xcu` is ignored |
+  | `Nil`             | `true` sets the property to nil (`<value xsi:nil="true"/>`)           |
+  | `External`        | `true` if `Value` names an external backend, as in `com.sun.star.configuration.backend.LdapUserProfileBe company` |
+  | `ExternalBackend` | the backend, prepended to `Value` when `External` is set              |
+
+  A flag is set by a boolean `true`, the integer `1`, or the strings `"1"` and
+  `"true"`.
+
+`Final` is honoured only for values that were delivered by a configuration
+profile (what `NSUserDefaults` calls a forced value). A `Final` on a value that
+was written with `defaults write` is ignored, with a `SAL_INFO` message: only an
+administrator can lock a setting. Values that cannot be mapped (a date, a nested
+array, a key without a property name, an unknown node operation) are skipped
+with a `SAL_WARN`, and the rest of the layer is still loaded.
+
+### A configuration profile
+
+A custom settings payload whose `PayloadType` is the bundle identifier carries
+the keys next to the usual `Payload*` entries. MDM products (Jamf Pro
+"Application & Custom Settings", Intune "Preference file", and so on) generate
+such a payload from a property list; a hand-written profile looks like this:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>PayloadType</key>
+            <string>com.example.coda</string>
+            <key>PayloadIdentifier</key>
+            <string>com.example.coda.settings</string>
+            <key>PayloadUUID</key>
+            <string>6E4C7B1E-2F0A-4B6B-9C3D-1A2B3C4D5E6F</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadDisplayName</key>
+            <string>Collabora Office settings</string>
+            <key>/org.openoffice.Office.Common/Security/Scripting/MacroSecurityLevel</key>
+            <dict>
+                <key>Value</key>
+                <integer>3</integer>
+                <key>Final</key>
+                <true/>
+            </dict>
+            <key>/org.openoffice.Office.Common/Security/Scripting/SecureURL</key>
+            <array>
+                <string>file:///opt/corp/macros</string>
+            </array>
+            <key>/org.openoffice.Office.Common/Save/Document/AutoSave</key>
+            <false/>
+            <key>/org.openoffice.UserProfile/Data/o</key>
+            <string>Example Corp.</string>
+        </dict>
+    </array>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadIdentifier</key>
+    <string>com.example.coda.settings.profile</string>
+    <key>PayloadUUID</key>
+    <string>0F1E2D3C-4B5A-4968-8776-655443322110</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadDisplayName</key>
+    <string>Collabora Office</string>
+    <key>PayloadScope</key>
+    <string>System</string>
+</dict>
+</plist>
+```
+
+Replace `com.example.coda` with the bundle identifier of the deployed
+application, and the UUIDs with fresh ones.
+
+### Trying it without an MDM
+
+The same keys can be written into the application's defaults; they are read
+like managed ones, except that `Final` is ignored:
+
+    defaults write com.example.coda '/org.openoffice.Office.Common/Save/Document/AutoSave' -bool false
+    defaults write com.example.coda '/org.openoffice.UserProfile/Data/o' -dict Value 'Example Corp.' Final 1
+    defaults delete com.example.coda '/org.openoffice.Office.Common/Save/Document/AutoSave'
+
+`SAL_LOG=+INFO.configmgr` logs every key the layer reads, and with
+`SAL_CONFIG_MACOSPREFS_RETAIN_TMP=1` the generated `.xcu` is kept in the
+temporary directory and its location logged, which is the quickest way to see
+what a profile produced. A profile can also be installed by hand on an
+unmanaged Mac, from System Settings, to check that a value is forced.

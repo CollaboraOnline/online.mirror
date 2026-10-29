@@ -45,6 +45,16 @@ $(eval $(call gb_Library_add_exception_objects,configmgr, \
     $(if $(filter $(OS),WNT),configmgr/source/winreg) \
 ))
 
+ifeq ($(OS),MACOSX)
+$(eval $(call gb_Library_add_objcxxobjects,configmgr,\
+    configmgr/source/macosprefs \
+))
+
+$(eval $(call gb_Library_use_system_darwin_frameworks,configmgr,\
+    Foundation \
+))
+endif
+
 $(eval $(call gb_Library_use_externals,configmgr, \
     boost_headers \
 ))

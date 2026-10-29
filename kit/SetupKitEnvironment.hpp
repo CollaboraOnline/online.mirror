@@ -33,6 +33,10 @@ inline void setupKitEnvironment(const std::string& userInterface)
         // time. See addOrganizationPath() in desktop/source/lib/init.cxx.
 #if defined(MACOS)
         "sharedext:${BRAND_BASE_DIR}/Resources/registry/sharedext.ini "
+        // Managed preferences of the app's bundle identifier, deployed by an MDM
+        // configuration profile; see "macOS Managed Preferences Layer" in
+        // engine/configmgr/README.md.
+        "macosprefs: "
 #else
         "sharedext:${BRAND_BASE_DIR}/share/registry/sharedext.ini "
 #endif

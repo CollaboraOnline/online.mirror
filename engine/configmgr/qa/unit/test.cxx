@@ -20,9 +20,11 @@
 #include <sal/config.h>
 
 #include <com/sun/star/beans/NamedValue.hpp>
+#include <com/sun/star/beans/PropertyAttribute.hpp>
 #include <com/sun/star/beans/PropertyChangeEvent.hpp>
 #include <com/sun/star/beans/XPropertyChangeListener.hpp>
 #include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/beans/XPropertySetInfo.hpp>
 #include <com/sun/star/beans/XPropertyState.hpp>
 #include <com/sun/star/configuration/ReadOnlyAccess.hpp>
 #include <com/sun/star/configuration/Update.hpp>
@@ -32,6 +34,7 @@
 #include <com/sun/star/container/XNameReplace.hpp>
 #include <com/sun/star/container/XNamed.hpp>
 #include <com/sun/star/lang/EventObject.hpp>
+#include <com/sun/star/lang/IllegalArgumentException.hpp>
 #include <com/sun/star/lang/XComponent.hpp>
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>
 #include <com/sun/star/lang/XSingleServiceFactory.hpp>
@@ -50,6 +53,7 @@
 #include <osl/file.hxx>
 
 #include <algorithm>
+#include <vector>
 #include <comphelper/configuration.hxx>
 #include <comphelper/configurationlistener.hxx>
 #include <cppunit/TestAssert.h>
@@ -57,6 +61,11 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include <cppunit/plugin/TestPlugIn.h>
 #include <officecfg/Office/Math.hxx>
+
+#ifdef MACOSX
+#include <macosprefs.hxx>
+#include <writemodfile.hxx>
+#endif
 
 namespace {
 
@@ -75,6 +84,10 @@ public:
     void testRecursive();
     void testCrossThreads();
     void testSharedOrganizationLayer();
+    void testFinalized();
+#ifdef MACOSX
+    void testMacOSPrefsDump();
+#endif
 
     cpo::uno::Any getKey(
         OUString const & path, OUString const & relative) const;
@@ -107,6 +120,10 @@ public:
     CPPUNIT_TEST(testRecursive);
     CPPUNIT_TEST(testCrossThreads);
     CPPUNIT_TEST(testSharedOrganizationLayer);
+    CPPUNIT_TEST(testFinalized);
+#ifdef MACOSX
+    CPPUNIT_TEST(testMacOSPrefsDump);
+#endif
     CPPUNIT_TEST_SUITE_END();
 
 private:
@@ -568,6 +585,238 @@ void Test::testSharedOrganizationLayer()
 
     osl::File::remove(aUrl);
 }
+
+/// finalized.xcu, a read-only user layer in this test's CONFIGURATION_LAYERS, finalizes
+/// MacroSecurityLevel the way an administrator's policy (the winreg or macosprefs layer) does.
+/// The value has to arrive, the property has to be read-only and refuse writes, and its siblings
+/// have to stay writable.
+void Test::testFinalized()
+{
+    static constexpr OUString aPath = u"/org.openoffice.Office.Common/Security/Scripting"_ustr;
+    sal_Int32 nLevel = 0;
+    CPPUNIT_ASSERT(getKey(aPath, u"MacroSecurityLevel"_ustr) >>= nLevel);
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(3), nLevel);
+
+    cpo::uno::Reference<css::beans::XPropertySet> xAccess(
+        createUpdateAccess(aPath), cpo::uno::UNO_QUERY_THROW);
+    cpo::uno::Reference<css::beans::XPropertySetInfo> xInfo(xAccess->getPropertySetInfo());
+    CPPUNIT_ASSERT(xInfo->getPropertyByName(u"MacroSecurityLevel"_ustr).Attributes
+                   & css::beans::PropertyAttribute::READONLY);
+    CPPUNIT_ASSERT(!(xInfo->getPropertyByName(u"SecureURL"_ustr).Attributes
+                     & css::beans::PropertyAttribute::READONLY));
+    CPPUNIT_ASSERT_THROW(
+        xAccess->setPropertyValue(u"MacroSecurityLevel"_ustr, cpo::uno::Any(sal_Int32(0))),
+        css::lang::IllegalArgumentException);
+    cpo::uno::Reference<css::lang::XComponent>(xAccess, cpo::uno::UNO_QUERY_THROW)->dispose();
+}
+
+#ifdef MACOSX
+
+CFStringRef createCFString(char const* pText)
+{
+    return CFStringCreateWithCString(kCFAllocatorDefault, pText, kCFStringEncodingUTF8);
+}
+
+CFNumberRef createCFNumber(sal_Int64 nValue)
+{
+    return CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt64Type, &nValue);
+}
+
+CFNumberRef createCFNumber(double fValue)
+{
+    return CFNumberCreate(kCFAllocatorDefault, kCFNumberDoubleType, &fValue);
+}
+
+CFMutableDictionaryRef createDictionary()
+{
+    return CFDictionaryCreateMutable(kCFAllocatorDefault, 0, &kCFTypeDictionaryKeyCallBacks,
+                                     &kCFTypeDictionaryValueCallBacks);
+}
+
+/// Stores pValue under pKey and gives up the caller's reference to it.
+void setValue(CFMutableDictionaryRef pDict, char const* pKey, CFTypeRef pValue)
+{
+    CFStringRef pKeyString = createCFString(pKey);
+    CFDictionarySetValue(pDict, pKeyString, pValue);
+    CFRelease(pKeyString);
+    CFRelease(pValue);
+}
+
+/// The macosprefs layer turns the configuration keys among the application's preferences into
+/// an .xcu file. This drives its writer with a dictionary built here (a test must not write real
+/// preferences: they would leak into the developer's account and into other test processes), and
+/// then loads the result through the extension layer, to see that the configuration takes it.
+void Test::testMacOSPrefsDump()
+{
+    CFMutableDictionaryRef pPrefs = createDictionary();
+    // plain values
+    setValue(pPrefs, "/org.openoffice.Office.Common/Save/Document/AutoSave",
+             CFRetain(kCFBooleanFalse));
+    setValue(pPrefs, "/org.openoffice.Office.Common/Save/Document/AutoSaveTimeIntervall",
+             createCFNumber(sal_Int64(7)));
+    setValue(pPrefs, "/org.openoffice.Office.Common/Nonexistent/Ratio", createCFNumber(1.5));
+    UInt8 const aBytes[] = { 0x01, 0xAB };
+    setValue(pPrefs, "/org.openoffice.Office.Common/Nonexistent/Blob",
+             CFDataCreate(kCFAllocatorDefault, aBytes, 2));
+    // a list
+    CFTypeRef aUrls[] = { createCFString("file:///opt/corp/macros"),
+                          createCFString("file:///Volumes/share") };
+    setValue(pPrefs, "/org.openoffice.Office.Common/Security/Scripting/SecureURL",
+             CFArrayCreate(kCFAllocatorDefault, aUrls, 2, &kCFTypeArrayCallBacks));
+    CFRelease(aUrls[0]);
+    CFRelease(aUrls[1]);
+    // a set member created with #fuse, with the value given as a string
+    setValue(pPrefs,
+             "/org.openoffice.Office.OptionsDialog/OptionsDialogGroups/ProductName#fuse/Pages/"
+             "Java#fuse/Hide",
+             createCFString("true"));
+    // dictionaries: Final on a managed key, Final on a key that is not managed, Nil, Type
+    CFMutableDictionaryRef pDict = createDictionary();
+    setValue(pDict, "Value", createCFString("Example Corp."));
+    setValue(pDict, "Final", CFRetain(kCFBooleanTrue));
+    setValue(pPrefs, "/org.openoffice.UserProfile/Data/o", pDict);
+    pDict = createDictionary();
+    setValue(pDict, "Value", createCFString("Berlin"));
+    setValue(pDict, "Final", createCFString("1"));
+    setValue(pPrefs, "/org.openoffice.UserProfile/Data/l", pDict);
+    pDict = createDictionary();
+    setValue(pDict, "Nil", createCFNumber(sal_Int64(1)));
+    setValue(pDict, "Final", CFRetain(kCFBooleanTrue));
+    setValue(pPrefs, "/org.openoffice.Office.Common/Path/Current/Work", pDict);
+    pDict = createDictionary();
+    setValue(pDict, "Value", CFRetain(kCFBooleanFalse));
+    setValue(pDict, "Type", createCFString("xs:boolean"));
+    setValue(pDict, "Final", CFRetain(kCFBooleanTrue));
+    setValue(pPrefs,
+             "/org.openoffice.Office.Jobs/Jobs/org.openoffice.Office.Jobs:Job['UpdateCheck']/"
+             "Arguments/AutoCheckEnabled",
+             pDict);
+    // ignored: not a configuration path, no property name, unsupported value, bad operation
+    setValue(pPrefs, "userName", createCFString("someone"));
+    setValue(pPrefs, "/org.openoffice.Office.Common", createCFString("x"));
+    setValue(pPrefs, "/org.openoffice.Office.Common/Misc/Bad", CFDateCreate(kCFAllocatorDefault, 0));
+    setValue(pPrefs, "/org.openoffice.Office.Common/Misc/Group#delete/Bad", createCFString("x"));
+
+    CFTypeRef aForced[]
+        = { createCFString("/org.openoffice.UserProfile/Data/o"),
+            createCFString("/org.openoffice.Office.Common/Path/Current/Work"),
+            createCFString("/org.openoffice.Office.Jobs/Jobs/org.openoffice.Office.Jobs:Job['"
+                           "UpdateCheck']/Arguments/AutoCheckEnabled") };
+    CFSetRef pForced = CFSetCreate(kCFAllocatorDefault, aForced, 3, &kCFTypeSetCallBacks);
+    for (CFTypeRef pKey : aForced)
+        CFRelease(pKey);
+
+    static constexpr OString aHeader
+        = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<oor:items"
+          " xmlns:oor=\"http://openoffice.org/2001/registry\""
+          " xmlns:xs=\"http://www.w3.org/2001/XMLSchema\""
+          " xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n"_ostr;
+
+    configmgr::TempFile aFile;
+    CPPUNIT_ASSERT_EQUAL(osl::FileBase::E_None,
+                         osl::FileBase::createTempFile(nullptr, &aFile.handle, &aFile.url));
+    aFile.writeString(aHeader);
+    configmgr::writeMacOSPreferencesXcu(pPrefs, pForced, aFile);
+    aFile.writeString("</oor:items>");
+    CPPUNIT_ASSERT_EQUAL(osl_File_E_None, aFile.closeWithoutUnlink());
+    CFRelease(pForced);
+    CFRelease(pPrefs);
+
+    OString aContent;
+    {
+        osl::File aIn(aFile.url);
+        CPPUNIT_ASSERT_EQUAL(osl::FileBase::E_None, aIn.open(osl_File_OpenFlag_Read));
+        sal_uInt64 nSize = 0;
+        CPPUNIT_ASSERT_EQUAL(osl::FileBase::E_None, aIn.getSize(nSize));
+        std::vector<char> aBuffer(nSize);
+        sal_uInt64 nRead = 0;
+        CPPUNIT_ASSERT_EQUAL(osl::FileBase::E_None, aIn.read(aBuffer.data(), nSize, nRead));
+        aContent = OString(aBuffer.data(), static_cast<sal_Int32>(nRead));
+    }
+    // Keys are written in sorted order; the ignored ones do not appear.
+    OString aExpected
+        = aHeader
+          + "<item oor:path=\"/org.openoffice.Office.Common/Nonexistent\">"
+            "<prop oor:name=\"Blob\"><value>01AB</value></prop></item>\n"
+            "<item oor:path=\"/org.openoffice.Office.Common/Nonexistent\">"
+            "<prop oor:name=\"Ratio\"><value>1.5</value></prop></item>\n"
+            "<item oor:path=\"/org.openoffice.Office.Common/Path/Current\">"
+            "<prop oor:name=\"Work\" oor:finalized=\"true\"><value xsi:nil=\"true\"/></prop>"
+            "</item>\n"
+            "<item oor:path=\"/org.openoffice.Office.Common/Save/Document\">"
+            "<prop oor:name=\"AutoSave\"><value>false</value></prop></item>\n"
+            "<item oor:path=\"/org.openoffice.Office.Common/Save/Document\">"
+            "<prop oor:name=\"AutoSaveTimeIntervall\"><value>7</value></prop></item>\n"
+            "<item oor:path=\"/org.openoffice.Office.Common/Security/Scripting\">"
+            "<prop oor:name=\"SecureURL\"><value><it>file:///opt/corp/macros</it>"
+            "<it>file:///Volumes/share</it></value></prop></item>\n"
+            "<item oor:path=\"/org.openoffice.Office.Jobs/Jobs/"
+            "org.openoffice.Office.Jobs:Job['UpdateCheck']/Arguments\">"
+            "<prop oor:name=\"AutoCheckEnabled\" oor:type=\"xs:boolean\" oor:finalized=\"true\">"
+            "<value>false</value></prop></item>\n"
+            "<item oor:path=\"/org.openoffice.Office.OptionsDialog/OptionsDialogGroups\">"
+            "<node oor:name=\"ProductName\" oor:op=\"fuse\"><node oor:name=\"Pages\">"
+            "<node oor:name=\"Java\" oor:op=\"fuse\"><prop oor:name=\"Hide\">"
+            "<value>true</value></prop></node></node></node></item>\n"
+            "<item oor:path=\"/org.openoffice.UserProfile/Data\">"
+            "<prop oor:name=\"l\"><value>Berlin</value></prop></item>\n"
+            "<item oor:path=\"/org.openoffice.UserProfile/Data\">"
+            "<prop oor:name=\"o\" oor:finalized=\"true\"><value>Example Corp.</value></prop>"
+            "</item>\n"
+            "</oor:items>";
+    CPPUNIT_ASSERT_EQUAL(aExpected, aContent);
+
+    // The generated file is what the configuration gets at start-up; here it goes in through
+    // the extension layer, which parses it the same way.
+    css::configuration::Update::get(comphelper::getProcessComponentContext())
+        ->insertExtensionXcuFile(aFile.url);
+    osl::File::remove(aFile.url);
+
+    bool bAutoSave = true;
+    CPPUNIT_ASSERT(
+        getKey(u"/org.openoffice.Office.Common/Save/Document"_ustr, u"AutoSave"_ustr)
+        >>= bAutoSave);
+    CPPUNIT_ASSERT(!bAutoSave);
+    sal_Int32 nInterval = 0;
+    CPPUNIT_ASSERT(
+        getKey(u"/org.openoffice.Office.Common/Save/Document"_ustr,
+               u"AutoSaveTimeIntervall"_ustr)
+        >>= nInterval);
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(7), nInterval);
+    cpo::uno::Sequence<OUString> aSecureUrls;
+    CPPUNIT_ASSERT(
+        getKey(u"/org.openoffice.Office.Common/Security/Scripting"_ustr, u"SecureURL"_ustr)
+        >>= aSecureUrls);
+    CPPUNIT_ASSERT(std::find(aSecureUrls.begin(), aSecureUrls.end(),
+                             u"file:///Volumes/share"_ustr)
+                   != aSecureUrls.end());
+    bool bHide = false;
+    CPPUNIT_ASSERT(
+        getKey(u"/org.openoffice.Office.OptionsDialog/OptionsDialogGroups/ProductName/Pages/"
+               "Java"_ustr,
+               u"Hide"_ustr)
+        >>= bHide);
+    CPPUNIT_ASSERT(bHide);
+    OUString aText;
+    CPPUNIT_ASSERT(getKey(u"/org.openoffice.UserProfile/Data"_ustr, u"o"_ustr) >>= aText);
+    CPPUNIT_ASSERT_EQUAL(u"Example Corp."_ustr, aText);
+    CPPUNIT_ASSERT(getKey(u"/org.openoffice.UserProfile/Data"_ustr, u"l"_ustr) >>= aText);
+    CPPUNIT_ASSERT_EQUAL(u"Berlin"_ustr, aText);
+
+    // Only the managed key is locked.
+    cpo::uno::Reference<css::beans::XPropertySet> xData(
+        createUpdateAccess(u"/org.openoffice.UserProfile/Data"_ustr), cpo::uno::UNO_QUERY_THROW);
+    cpo::uno::Reference<css::beans::XPropertySetInfo> xInfo(xData->getPropertySetInfo());
+    CPPUNIT_ASSERT(xInfo->getPropertyByName(u"o"_ustr).Attributes
+                   & css::beans::PropertyAttribute::READONLY);
+    CPPUNIT_ASSERT(!(xInfo->getPropertyByName(u"l"_ustr).Attributes
+                     & css::beans::PropertyAttribute::READONLY));
+    CPPUNIT_ASSERT_THROW(xData->setPropertyValue(u"o"_ustr, cpo::uno::Any(u"Other"_ustr)),
+                         css::lang::IllegalArgumentException);
+    cpo::uno::Reference<css::lang::XComponent>(xData, cpo::uno::UNO_QUERY_THROW)->dispose();
+}
+
+#endif
 
 CPPUNIT_TEST_SUITE_REGISTRATION(Test);
 

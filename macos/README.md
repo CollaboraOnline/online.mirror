@@ -119,6 +119,23 @@ Open the `macos/coda/coda.xcodeproj` project in Xcode and choose `Build and Run 
 
 That's it!
 
+## Managed configuration (MDM)
+
+On a managed Mac, engine settings (macro security, trusted locations, autosave,
+and so on) are deployed with a configuration profile whose `PayloadType` is the
+app's bundle identifier, i.e. the `--with-app-package-name` value. The engine
+reads those preferences through its `macosprefs` configuration layer; a setting
+marked `Final` is locked for the user. The key format, a sample profile and a
+`defaults write` recipe for trying it without an MDM are documented in
+`engine/configmgr/README.md`, section "macOS Managed Preferences Layer".
+
+The kit lists the layer in `CONFIGURATION_LAYERS` in `kit/SetupKitEnvironment.hpp`.
+That list has no writable user layer (the engine persists only an allow-listed
+subset of settings in the app, through its own mechanism), so the managed values
+always apply; `Final` additionally makes the affected options read-only in
+dialogs. Preferences are read once at startup: restart the app after installing
+or changing a profile.
+
 ## Pre-built download
 
 If you just want a pre-built macOS version instead of building locally, please use
