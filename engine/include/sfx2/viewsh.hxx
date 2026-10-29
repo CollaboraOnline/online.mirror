@@ -602,6 +602,7 @@ public:
 
     std::string getA11yFocusedParagraph();
     int getA11yCaretPosition() const;
+    bool setA11yCaretInTableCell(sal_Int32 nRow, sal_Int32 nCol, bool bEnd);
     void SetSigningCertificate(const svl::crypto::CertificateOrName& rCertificateOrName);
     const svl::crypto::CertificateOrName & GetSigningCertificate() const;
 

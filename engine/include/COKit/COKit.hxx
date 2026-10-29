@@ -2682,6 +2682,16 @@ struct COKitDocument
     /// Get the current text cursor position.
     virtual int getA11yCaretPosition() = 0;
 
+    /**
+     * Puts the caret in a cell of the table last given with the focused paragraph.
+     *
+     * @param nRow the row of the cell, as given in that table
+     * @param nCol the column of the cell, as given in that table
+     * @param bEnd true for the end of the cell's text, false for its start
+     * @returns false if that table has no such cell
+     */
+    virtual bool setA11yCaretInTableCell(int nRow, int nCol, bool bEnd) = 0;
+
     /** Set if the view should be treated as readonly or not.
      *
      * @param nId view ID

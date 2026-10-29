@@ -4294,6 +4294,16 @@ int COKitDocumentImpl::getA11yCaretPosition()
 
 }
 
+bool COKitDocumentImpl::setA11yCaretInTableCell(int nRow, int nCol, bool bEnd)
+{
+    SolarMutexGuard aGuard;
+    SetLastExceptionMsg();
+
+    if (SfxViewShell* pViewShell = SfxViewShell::Current())
+        return pViewShell->setA11yCaretInTableCell(nRow, nCol, bEnd);
+    return false;
+}
+
 std::string COKitDocumentImpl::getPartName(int nPart)
 {
     comphelper::ProfileZone aZone("COKitDocumentImpl::getPartName");

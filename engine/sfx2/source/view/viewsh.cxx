@@ -1914,6 +1914,7 @@ public:
     void
     collectContextWindow(const uno::Reference<css::accessibility::XAccessibleText>& xAccText) const;
     int getCaretPosition() const;
+    bool setCaretInTableCell(sal_Int32 nRow, sal_Int32 nCol, bool bEnd);
 
 private:
     void paragraphPropertiesToTree(boost::property_tree::ptree& aPayloadTree, bool force = false) const;
@@ -2147,6 +2148,34 @@ int KitDocumentFocusListener::getCaretPosition() const
     aboutView("KitDocumentFocusListener::getCaretPosition", this, m_pViewShell);
     SAL_INFO("kit.a11y", "KitDocumentFocusListener::getCaretPosition: " << m_nCaretPosition);
     return m_nCaretPosition;
+}
+
+bool KitDocumentFocusListener::setCaretInTableCell(sal_Int32 nRow, sal_Int32 nCol, bool bEnd)
+{
+    aboutView("KitDocumentFocusListener::setCaretInTableCell", this, m_pViewShell);
+    for (const TableRowText& rRow : m_aTable.aRows)
+    {
+        if (rRow.nRow != nRow)
+            continue;
+        for (const TableCellText& rCell : rRow.aCells)
+        {
+            if (rCell.nCol != nCol || rCell.aParagraphs.empty())
+                continue;
+            uno::Reference<accessibility::XAccessibleText> xText(
+                bEnd ? rCell.aParagraphs.back() : rCell.aParagraphs.front(), uno::UNO_QUERY);
+            if (isDefunct(xText))
+                return false;
+            try
+            {
+                return xText->setCaretPosition(bEnd ? xText->getCharacterCount() : 0);
+            }
+            catch (const lang::IndexOutOfBoundsException&)
+            {
+                return false;
+            }
+        }
+    }
+    return false;
 }
 
 // notifyEditingInSelectionState
@@ -4270,6 +4299,11 @@ int SfxViewShell::getA11yCaretPosition() const
 {
     const KitDocumentFocusListener& rDocFocusListener = GetKitDocumentFocusListener();
     return rDocFocusListener.getCaretPosition();
+}
+
+bool SfxViewShell::setA11yCaretInTableCell(sal_Int32 nRow, sal_Int32 nCol, bool bEnd)
+{
+    return GetKitDocumentFocusListener().setCaretInTableCell(nRow, nCol, bEnd);
 }
 
 void SfxViewShell::SetSigningCertificate(const svl::crypto::CertificateOrName& rCertificate)

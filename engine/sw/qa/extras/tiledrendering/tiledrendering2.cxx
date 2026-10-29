@@ -2054,6 +2054,43 @@ CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yContextTableTyping)
     CPPUNIT_ASSERT_EQUAL(std::string("X\nYOne|Two|||Three|Four|"), aCellTexts());
 }
 
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yCaretInTableCell)
+{
+    // Given the cursor in the first cell of a table, the table given to the client:
+    SwXTextDocument* pXTextDocument = createDoc("a11y-table-typing.fodt");
+    pXTextDocument->setClientVisibleArea(tools::Rectangle(0, 0, 12240, 15840));
+    SwTestViewCallback aView;
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    SfxViewShell* pViewShell = pWrtShell->GetSfxViewShell();
+    pViewShell->SetKitAccessibilityState(true);
+    pWrtShell->Down(/*bSelect=*/false);
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT_EQUAL(2, aView.m_aA11yFocusedCell.get<int>("paragraph.table.rowCount"));
+
+    // When the client puts the caret at the start of the last cell:
+    CPPUNIT_ASSERT(pViewShell->setA11yCaretInTableCell(1, 1, /*bEnd=*/false));
+    Scheduler::ProcessEventsToIdle();
+
+    // Then the caret is there, with nothing selected:
+    SwShellCursor* pCursor = pWrtShell->getShellCursor(false);
+    CPPUNIT_ASSERT(!pCursor->HasMark());
+    CPPUNIT_ASSERT_EQUAL(u"Four"_ustr, pCursor->GetPoint()->GetNode().GetTextNode()->GetText());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(0), pCursor->GetPoint()->GetContentIndex());
+
+    // And at the end of the second cell:
+    CPPUNIT_ASSERT(pViewShell->setA11yCaretInTableCell(0, 1, /*bEnd=*/true));
+    Scheduler::ProcessEventsToIdle();
+    pCursor = pWrtShell->getShellCursor(false);
+    CPPUNIT_ASSERT_EQUAL(u"Two"_ustr, pCursor->GetPoint()->GetNode().GetTextNode()->GetText());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(3), pCursor->GetPoint()->GetContentIndex());
+
+    // And a cell the table does not have moves nothing:
+    CPPUNIT_ASSERT(!pViewShell->setA11yCaretInTableCell(2, 0, /*bEnd=*/false));
+    CPPUNIT_ASSERT_EQUAL(
+        u"Two"_ustr,
+        pWrtShell->getShellCursor(false)->GetPoint()->GetNode().GetTextNode()->GetText());
+}
+
 CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yFocusedParagraphLinks)
 {
     // Given a short hyperlink, then one wrapping over two lines:

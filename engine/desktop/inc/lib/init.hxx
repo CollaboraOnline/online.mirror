@@ -423,6 +423,7 @@ namespace desktop {
         void viewGotFirstTile(int nId) override;
         std::string getA11yFocusedParagraph() override;
         int getA11yCaretPosition() override;
+        bool setA11yCaretInTableCell(int nRow, int nCol, bool bEnd) override;
         void setViewReadOnly(int nId, const bool readOnly) override;
         void setAllowChangeComments(int nId, const bool allow) override;
         std::string getPresentationInfo() override;
