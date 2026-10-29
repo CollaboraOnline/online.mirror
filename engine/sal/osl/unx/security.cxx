@@ -29,6 +29,7 @@
 #ifdef IOS
 #include <premac.h>
 #import <Foundation/Foundation.h>
+#include <TargetConditionals.h>
 #include <postmac.h>
 #endif
 
@@ -127,7 +128,7 @@ oslSecurity osl_getCurrentSecurity()
         if (p == nullptr) {
             return nullptr;
         }
-#if (defined(IOS) && defined(X86_64)) || defined(__EMSCRIPTEN__)
+#if (defined(IOS) && TARGET_OS_SIMULATOR) || defined(__EMSCRIPTEN__)
         // getpwuid_r() does not work in the iOS simulator
         (void) found;
         char * buffer = p->m_buffer;
