@@ -2802,6 +2802,27 @@ bool ChildSession::resetSelection(const StringVector& tokens)
     return true;
 }
 
+namespace
+{
+/// Whether url is a file: URL, with no host, query or fragment, naming one plain file directly
+/// in folder, which ends with '/'.
+bool isFileUrlDirectlyIn(const std::string& url, const std::string& folder)
+{
+    try
+    {
+        const Poco::URI uri(url);
+        const std::string& path = uri.getPath();
+        return uri.getScheme() == "file" && uri.getHost().empty() && uri.getRawQuery().empty() &&
+               uri.getRawFragment().empty() && path.starts_with(folder) &&
+               FileUtil::isPlainFileName(path.substr(folder.size()));
+    }
+    catch (const std::exception&)
+    {
+        return false;
+    }
+}
+}
+
 bool ChildSession::saveAs(const StringVector& tokens)
 {
     std::string wopiFilename, url, format, filterOptions;
@@ -2811,6 +2832,13 @@ bool ChildSession::saveAs(const StringVector& tokens)
     {
         sendTextFrameAndLogError("error: cmd=saveas kind=syntax");
         return false;
+    }
+
+    std::string jailDoc = JAILED_DOCUMENT_ROOT;
+    if (NoCapsForKit)
+    {
+        jailDoc = Poco::URI(getJailedFilePath()).getPath();
+        jailDoc = jailDoc.substr(0, jailDoc.find(JAILED_DOCUMENT_ROOT)) + JAILED_DOCUMENT_ROOT;
     }
 
     // if the url is a 'wopi:///something/blah.odt', then save to a temporary
@@ -2827,13 +2855,6 @@ bool ChildSession::saveAs(const StringVector& tokens)
             return false;
         }
 
-        std::string jailDoc = JAILED_DOCUMENT_ROOT;
-        if (NoCapsForKit)
-        {
-            jailDoc = Poco::URI(getJailedFilePath()).getPath();
-            jailDoc = jailDoc.substr(0, jailDoc.find(JAILED_DOCUMENT_ROOT)) + JAILED_DOCUMENT_ROOT;
-        }
-
         const std::string tmpDir = FileUtil::createRandomDir(jailDoc);
         const Poco::Path filenameParam(pathSegments[pathSegments.size() - 1]);
         url = std::string("file://") + jailDoc + tmpDir + '/' + filenameParam.getFileName();
@@ -2841,6 +2862,12 @@ bool ChildSession::saveAs(const StringVector& tokens)
         // on saveAs we should send encoded!
         encodeURL = true;
         wopiFilename = wopiURL.getPath();
+    }
+    else if (!Util::isMobileApp() && !isFileUrlDirectlyIn(url, jailDoc))
+    {
+        // On a server any other target is a file directly in the document folder of the jail.
+        sendTextFrameAndLogError("error: cmd=saveas kind=syntax");
+        return false;
     }
 
     if (tokens.size() > 2)
