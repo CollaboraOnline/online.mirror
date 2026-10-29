@@ -607,7 +607,7 @@ void EditView::ShowCursor( bool bGotoCursor, bool bForceVisCursor, bool bActivat
         bGotoCursor = false;
     getImpl().ShowCursor( bGotoCursor, bForceVisCursor );
 
-    if (getImpl().mpViewShell && !bActivate)
+    if (getImpl().mpViewShell && !bActivate && !getImpl().IsSuppressKitMessages())
     {
         if (!getImpl().mpOutputWindow || getImpl().mpOutputWindow->isDisposed())
             return;
@@ -625,7 +625,7 @@ void EditView::HideCursor(bool bDeactivate)
 {
     getImpl().GetCursor()->Hide();
 
-    if (getImpl().mpViewShell && !bDeactivate)
+    if (getImpl().mpViewShell && !bDeactivate && !getImpl().IsSuppressKitMessages())
     {
         if (!getImpl().mpOutputWindow || getImpl().mpOutputWindow->isDisposed())
             return;
