@@ -2869,6 +2869,7 @@ class UIManager extends window.L.Control {
 
 	/// buttonObjectList: [{id: button's id, text: button's text, ..other properties if needed}, ...]
 	/// callbackList: [{id: button's id, func_: function}, ...]
+	/// focusId: id of the button that gets the first focus
 	showModalWithCustomButtons(
 		id: string,
 		title: string,
@@ -2877,6 +2878,7 @@ class UIManager extends window.L.Control {
 		buttonObjectList: any[],
 		callbackList: any[],
 		errorDetail?: string,
+		focusId?: string,
 	): void {
 		var dialogId = this.generateModalId(id);
 
@@ -2910,7 +2912,7 @@ class UIManager extends window.L.Control {
 			layoutstyle: 'end'
 		});
 
-		var json = this._modalDialogJSON(id, title, !!cancellable, children);
+		var json = this._modalDialogJSON(id, title, !!cancellable, children, focusId);
 
 		buttonObjectList.forEach((button) => {
 			callbackList.forEach((callback) => {

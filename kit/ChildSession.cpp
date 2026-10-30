@@ -5185,6 +5185,10 @@ bool ChildSession::saveAs(const StringVector& tokens)
     std::string encodedWopiFilename;
     Poco::URI::encode(wopiFilename, "", encodedWopiFilename);
 
+    // The desktop apps give no filename token, so a failure names the file from the URL.
+    std::string encodedTargetName;
+    Poco::URI::encode(Poco::Path(wopiURL.getPath()).getFileName(), "", encodedTargetName);
+
     success = getLOKitDocument()->saveAs(encodedURL.c_str(),
                                          format.empty() ? nullptr : format.c_str(),
                                          filterOptions.empty() ? nullptr : filterOptions.c_str());
@@ -5218,7 +5222,8 @@ bool ChildSession::saveAs(const StringVector& tokens)
     if (success)
         sendTextFrame("saveas: url=" + encodedURL + " filename=" + encodedWopiFilename);
     else
-        sendTextFrameAndLogError("error: cmd=saveas kind=savefailed");
+        sendTextFrameAndLogError("error: cmd=saveas kind=savefailed filename=" +
+                                 encodedTargetName);
 
     return true;
 }
