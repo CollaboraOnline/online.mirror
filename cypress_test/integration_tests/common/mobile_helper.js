@@ -126,6 +126,12 @@ function openMobileWizard() {
 	cy.cGet('#toolbar-up #mobile_wizard')
 		.should('have.class', 'selected');
 
+	// The core sends more updates of the wizard's fields after it opens, and an update
+	// rebuilds its field, so wait for them before the caller focuses or types into one.
+	cy.getFrameWindow().then(function(win) {
+		helper.processToIdle(win);
+	});
+
 	cy.log('<< openMobileWizard - end');
 }
 
