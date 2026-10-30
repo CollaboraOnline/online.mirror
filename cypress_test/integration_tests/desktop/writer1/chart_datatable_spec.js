@@ -10,19 +10,18 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Chart Data Table dialog', 
 		desktopHelper.switchUIToNotebookbar();
 		desktopHelper.selectZoomLevel('70', false);
 
-		insertChart();
-		openDataTableDialog();
 		cy.getFrameWindow().then((win) => {
 			this.win = win;
+			insertChart(win);
+			openDataTableDialog();
 		});
 	});
 
-	function insertChart() {
+	function insertChart(win) {
 		// Insert a default chart via the notebookbar Insert tab.
-		// Use getNbIconArrow to expand the overflow dropdown first.
 		cy.cGet('.notebookbar #Insert-tab-label').click();
-		desktopHelper.getNbIconArrow('InsertGraphic', 'Insert').click();
-		cy.cGet('#Insert-container .unoInsertObjectChart button').click();
+		desktopHelper.clickWidgetButtonInOverflowGroup(win, 'insert-insert-object-chart',
+			'overflow-button-insert-illustrations');
 
 		// Chart must be in edit mode (shape handles visible).
 		cy.cGet('#test-div-shapeHandlesSection').should('exist');

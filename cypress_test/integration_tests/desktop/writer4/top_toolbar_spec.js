@@ -210,7 +210,8 @@ describe(['tagdesktop'], 'Top toolbar tests.', { testIsolation: false }, functio
 
 	it('Insert/delete chart.', function() {
 		cy.cGet('#Insert-tab-label').click();
-		cy.cGet('#Insert-container .unoInsertObjectChart button').click();
+		desktopHelper.clickWidgetButtonInOverflowGroup(this.win, 'insert-insert-object-chart',
+			'overflow-button-insert-illustrations');
 
 		cy.cGet('#test-div-shapeHandlesSection').should('exist');
 

@@ -9,6 +9,9 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Chart wizard', function() 
 		helper.setupAndLoadDocument('writer/chart_wizard.odt');
 		desktopHelper.switchUIToNotebookbar();
 		desktopHelper.selectZoomLevel('70', false);
+		cy.getFrameWindow().then((win) => {
+			this.win = win;
+		});
 	});
 
 	function insertTableAndSelect() {
@@ -20,11 +23,11 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Chart wizard', function() 
 		helper.typeIntoDocument('{shift}{upArrow}{shift}{leftArrow}');
 	}
 
-	function insertChartFromSelection() {
+	function insertChartFromSelection(win) {
 		// Insert a chart using the selection.
 		cy.cGet('.notebookbar #Insert-tab-label').click();
-		desktopHelper.getNbIconArrow('InsertGraphic', 'Insert').click();
-		cy.cGet('#Insert-container .unoInsertObjectChart button').click();
+		desktopHelper.clickWidgetButtonInOverflowGroup(win, 'insert-insert-object-chart',
+			'overflow-button-insert-illustrations');
 		// Chart insert wizard must popup.
 		cy.cGet('.jsdialog-container.lokdialog_container').should('exist');
 		// The chart itself must be present in active mode and has selection.
@@ -34,7 +37,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Chart wizard', function() 
 	it('Open the chart wizard and press cancel', function() {
 
 		insertTableAndSelect();
-		insertChartFromSelection();
+		insertChartFromSelection(this.win);
 
 		// Click cancel on the wizard.
 		cy.cGet('.jsdialog-container').contains('button.jsdialog.ui-pushbutton', 'Cancel').click();
@@ -47,7 +50,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Chart wizard', function() 
 	it('Open the chart wizard and press finish', function() {
 
 		insertTableAndSelect();
-		insertChartFromSelection();
+		insertChartFromSelection(this.win);
 
 		// Click cancel on the wizard.
 		cy.cGet('.jsdialog-container').contains('button.jsdialog.ui-pushbutton', 'Finish').click();
@@ -61,7 +64,7 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Chart wizard', function() 
 	it('Chart shows drag preview SVG after closing wizard', function() {
 
 		insertTableAndSelect();
-		insertChartFromSelection();
+		insertChartFromSelection(this.win);
 
 		// Close the wizard; the chart stays selected as a graphic object.
 		cy.cGet('.jsdialog-container').contains('button.jsdialog.ui-pushbutton', 'Finish').click();

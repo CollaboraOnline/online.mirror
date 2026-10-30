@@ -755,6 +755,18 @@ function isWidgetButtonShown(win, modelId) {
 	return !!button && button.checkVisibility();
 }
 
+/// click the button of a widget declared in an overflow group - a folded group shows its
+/// buttons only in the popup that its own overflow button opens
+function clickWidgetButtonInOverflowGroup(win, modelId, overflowId) {
+	// The fold decision runs again after layout and resize changes, so wait until it settles.
+	helper.processToIdle(win);
+	cy.then(function() {
+		if (isWidgetButtonShown(win, modelId)) return;
+		getWidgetButton(overflowId).click();
+	});
+	getWidgetButton(modelId).filter(':visible').click();
+}
+
 // A menu button of a notebookbar tab whose menu has several entries and no
 // state on any of them, so its popup opens with nothing to focus by id.
 // Returns { id, overflow } or null, read from the model the client built.
@@ -1040,6 +1052,7 @@ module.exports.getDropdown = getDropdown;
 module.exports.getOpenMenuEntries = getOpenMenuEntries;
 module.exports.getWidgetButton = getWidgetButton;
 module.exports.isWidgetButtonShown = isWidgetButtonShown;
+module.exports.clickWidgetButtonInOverflowGroup = clickWidgetButtonInOverflowGroup;
 module.exports.findStatelessMenuButton = findStatelessMenuButton;
 module.exports.getUndoCount = getUndoCount;
 module.exports.undoAll = undoAll;
