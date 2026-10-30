@@ -243,8 +243,6 @@ gb_LinkTarget_get_manifestfile = \
 gb_LinkTarget_get_linksearchpath_for_layer = \
 	-LIBPATH:$(gb_StaticLibrary_WORKDIR) \
 	-LIBPATH:$(gb_Library_DLLDIR) \
-	$(if $(filter OXT,$(1)),\
-		-LIBPATH:$(WORKDIR)/LinkTarget/ExtensionLibrary)
 
 # avoid fatal error LNK1170 for Library_merged
 define gb_LinkTarget_MergedResponseFile
@@ -372,9 +370,7 @@ gb_Library_LAYER := \
 	$(foreach lib,$(gb_Library_PLAINLIBS_NONE),$(lib):NONE) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_URE),$(lib):OOO) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_OOO),$(lib):OOO) \
-	$(foreach lib,$(gb_Library_PLAINLIBS_OXT),$(lib):OXT) \
 	$(foreach lib,$(gb_Library_PRIVATELIBS_URE),$(lib):OOO) \
-	$(foreach lib,$(gb_Library_EXTENSIONLIBS),$(lib):OXT) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_SHLXTHDL),$(lib):SHLXTHDL) \
 
 gb_Library_ILIBFILENAMES :=\
@@ -382,17 +378,14 @@ gb_Library_ILIBFILENAMES :=\
 
 gb_Library_DLLEXT := .dll
 gb_Library_OOOEXT := $(gb_Library_DLLPOSTFIX)$(gb_Library_DLLEXT)
-gb_Library_UNOEXT := .uno$(gb_Library_DLLEXT)
 
 gb_Library_FILENAMES :=\
 	$(foreach lib,$(gb_Library_OOOLIBS),$(lib):$(lib)$(gb_Library_OOOEXT)) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_NONE),$(lib):$(lib)$(gb_Library_DLLEXT)) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_URE),$(lib):$(lib)$(gb_Library_DLLEXT)) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_OOO),$(lib):$(lib)$(gb_Library_DLLEXT)) \
-	$(foreach lib,$(gb_Library_PLAINLIBS_OXT),$(lib):$(lib)$(gb_Library_DLLEXT)) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_SHLXTHDL),$(lib):$(lib)$(gb_Library_DLLEXT)) \
 	$(foreach lib,$(gb_Library_PRIVATELIBS_URE),$(lib):$(lib)$(gb_Library_OOOEXT)) \
-	$(foreach lib,$(gb_Library_EXTENSIONLIBS),$(lib):$(lib)$(gb_Library_UNOEXT)) \
 
 # An assembly is a special kind of library for CLI
 define gb_Library_Assembly

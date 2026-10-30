@@ -98,7 +98,6 @@ endef
 gb_LinkTarget__RPATHS := \
 	UREBIN:\dORIGIN \
 	OOO:\dORIGIN \
-	OXT: \
 	NONE:\dORIGIN/../Library \
 
 gb_LinkTarget_CFLAGS := $(gb_CFLAGS)
@@ -247,25 +246,20 @@ gb_Library_DLLEXT := .so
 endif
 
 gb_Library_OOOEXT := $(gb_Library_DLLPOSTFIX)$(gb_Library_PLAINEXT)
-gb_Library_UNOEXT := .uno$(gb_Library_PLAINEXT)
 
 gb_Library_FILENAMES := \
 	$(foreach lib,$(gb_Library_OOOLIBS),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_OOOEXT)) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_NONE),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_PLAINEXT)) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_URE),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_PLAINEXT)) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_OOO),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_PLAINEXT)) \
-	$(foreach lib,$(gb_Library_PLAINLIBS_OXT),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_PLAINEXT)) \
 	$(foreach lib,$(gb_Library_PRIVATELIBS_URE),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_OOOEXT)) \
-	$(foreach lib,$(gb_Library_EXTENSIONLIBS),$(lib):$(lib)$(gb_Library_UNOEXT)) \
 
 gb_Library_LAYER := \
 	$(foreach lib,$(gb_Library_OOOLIBS),$(lib):OOO) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_URE),$(lib):OOO) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_OOO),$(lib):OOO) \
-	$(foreach lib,$(gb_Library_PLAINLIBS_OXT),$(lib):OXT) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_NONE),$(lib):NONE) \
 	$(foreach lib,$(gb_Library_PRIVATELIBS_URE),$(lib):OOO) \
-	$(foreach lib,$(gb_Library_EXTENSIONLIBS),$(lib):OXT) \
 
 define gb_Library__get_rpath
 $(if $(1),$(strip -Wl,-z,origin '-Wl,-rpath,$(1)' -Wl,-rpath-link,$(INSTDIR)/program))

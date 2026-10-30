@@ -19,7 +19,7 @@
 # The install names of our dynamic libraries contain a special segment token
 # that denotes where the dynamic library is located in the installation set.
 # The segment token consists of "@", optionally followed by ".", followed by 50
-# "_", followed by a location token (one of "OOO", "OXT", or "NONE").
+# "_", followed by a location token (one of "OOO" or "NONE").
 #
 # Typically, the segment token is the first segment of a relative install name.
 # But the segment token may also appear within an absolute install name.  That
@@ -51,7 +51,6 @@ sub action($$$)
          'app/NONE/OOO' => '@__VIA_LIBRARY_PATH__',
          'app/NONE/NONE' => '@__VIA_LIBRARY_PATH__',
          'shl/OOO/OOO' => '@loader_path',
-         'shl/OXT/OOO' => '@executable_path/urelibs',
          'shl/NONE/OOO' => '@__VIA_LIBRARY_PATH__',
          'shl/NONE/NONE' => '@loader_path');
     my ($type, $loc1, $loc2) = @_;
@@ -60,7 +59,7 @@ sub action($$$)
     return $act;
 }
 
-@ARGV >= 2 or die 'Usage: app|shl UREBIN|OOO|OXT|NONE <filepath>*';
+@ARGV >= 2 or die 'Usage: app|shl UREBIN|OOO|NONE <filepath>*';
 $type = shift @ARGV;
 $loc = shift @ARGV;
 foreach $file (@ARGV)

@@ -149,26 +149,21 @@ gb_Library_PLAINEXT_FOR_BUILD := .dylib
 gb_Library_DLLEXT := .a
 
 gb_Library_OOOEXT := $(gb_Library_DLLPOSTFIX)$(gb_Library_PLAINEXT)
-gb_Library_UNOEXT := .uno$(gb_Library_PLAINEXT)
 
 gb_Library_FILENAMES := \
 	$(foreach lib,$(gb_Library_OOOLIBS),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_OOOEXT)) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_NONE),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_PLAINEXT)) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_URE),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_PLAINEXT)) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_OOO),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_PLAINEXT)) \
-	$(foreach lib,$(gb_Library_PLAINLIBS_OXT),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_PLAINEXT)) \
 	$(foreach lib,$(gb_Library_PRIVATELIBS_URE),$(lib):$(gb_Library_SYSPRE)$(lib)$(gb_Library_OOOEXT)) \
-	$(foreach lib,$(gb_Library_EXTENSIONLIBS),$(lib):$(lib)$(gb_Library_UNOEXT)) \
 
 
 gb_Library_LAYER := \
 	$(foreach lib,$(gb_Library_OOOLIBS),$(lib):OOO) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_URE),$(lib):OOO) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_OOO),$(lib):OOO) \
-	$(foreach lib,$(gb_Library_PLAINLIBS_OXT),$(lib):OXT) \
 	$(foreach lib,$(gb_Library_PLAINLIBS_NONE),$(lib):NONE) \
 	$(foreach lib,$(gb_Library_PRIVATELIBS_URE),$(lib):OOO) \
-	$(foreach lib,$(gb_Library_EXTENSIONLIBS),$(lib):OXT) \
 
 define gb_Library_Library_platform
 $(call gb_LinkTarget_get_target,$(2)) : LAYER := $(call gb_Library_get_layer,$(1))

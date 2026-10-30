@@ -31,13 +31,11 @@
 gb_Library_LAYER_DIRS := \
 	OOO:$(INSTROOT)/$(LIBO_LIB_FOLDER) \
 	SHLXTHDL:$(INSTROOT)/$(LIBO_LIB_FOLDER)/shlxthdl \
-	OXT:$(WORKDIR)/LinkTarget/ExtensionLibrary \
 	NONE:$(gb_Library_DLLDIR) \
 
 gb_Library_LAYER_DIRS_FOR_BUILD := \
 	OOO:$(INSTROOT_FOR_BUILD)/$(LIBO_LIB_FOLDER_FOR_BUILD) \
 	SHLXTHDL:$(INSTROOT_FOR_BUILD)/$(LIBO_LIB_FOLDER_FOR_BUILD)/shlxthdl \
-	OXT:$(WORKDIR_FOR_BUILD)/LinkTarget/ExtensionLibrary \
 	NONE:$(gb_Library_DLLDIR_FOR_BUILD) \
 
 # EVIL: gb_StaticLibrary and gb_Library need the same deliver rule because they are indistinguishable on windows
@@ -164,7 +162,6 @@ gb_Library__get_layer_componentprefix = \
 gb_Library__COMPONENTPREFIXES := \
     NONE:vnd.sun.star.expand:\dLO_BUILD_LIB_DIR/ \
     OOO:vnd.sun.star.expand:\dURE_INTERNAL_LIB_DIR/ \
-    OXT:./ \
 	SHLXTHDL:ERROR_NOT_ALLOWED \
 
 

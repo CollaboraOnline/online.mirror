@@ -24,7 +24,6 @@ gb_Jar_JARCOMMAND := jar
 gb_Jar_LAYER_DIRS := \
 	URE:$(INSTROOT)/$(LIBO_URE_SHARE_JAVA_FOLDER) \
 	OOO:$(INSTROOT)/$(LIBO_SHARE_JAVA_FOLDER) \
-	OXT:$(WORKDIR)/Jar \
 	NONE:$(WORKDIR)/Jar \
 
 
@@ -267,10 +266,9 @@ endef
 gb_Jar_COMPONENTPREFIXES := \
     OOO:vnd.sun.star.expand:\dLO_JAVA_DIR/ \
     URE:vnd.sun.star.expand:\dURE_INTERNAL_JAVA_DIR/ \
-    OXT:./ \
     NONE:$(call gb_Helper_make_url,$(WORKDIR)/Jar/) \
 
-# get component prefix from layer name ("OOO", "URE", "OXT", "NONE")
+# get component prefix from layer name ("OOO", "URE", "NONE")
 gb_Jar__get_componentprefix = \
     $(patsubst $(1):%,%,$(or \
         $(filter $(1):%,$(gb_Jar_COMPONENTPREFIXES)), \
