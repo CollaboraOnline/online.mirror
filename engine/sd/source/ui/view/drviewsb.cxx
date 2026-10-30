@@ -54,6 +54,8 @@ bool DrawViewShell::RenameSlide( sal_uInt16 nPageId, const OUString & rName  )
     if( GetEditMode() == EditMode::Page )
     {
         pPageToRename = GetDoc()->GetSdPage( maTabControl->GetPagePos(nPageId), ePageKind );
+        if (!pPageToRename)
+            return false;
 
         // Undo
         SdPage* pUndoPage = pPageToRename;
@@ -83,6 +85,8 @@ bool DrawViewShell::RenameSlide( sal_uInt16 nPageId, const OUString & rName  )
     {
         // rename MasterPage -> rename LayoutTemplate
         pPageToRename = GetDoc()->GetMasterSdPage( maTabControl->GetPagePos(nPageId), ePageKind );
+        if (!pPageToRename)
+            return false;
         OUString aOldPageLayoutName = pPageToRename->GetLayoutName();
         GetDoc()->RenameLayoutTemplate(aOldPageLayoutName, rName);
     }
