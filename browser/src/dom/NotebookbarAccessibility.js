@@ -135,9 +135,12 @@ var NotebookbarAccessibility = function() {
 	*/
 	this.mayShowAcceleratorInfoBoxes = false;
 	this.onDocumentKeyDown = function(event) {
-			 if (this.initialized && (event.keyCode === 18 || (event.keyCode === 18 && event.shiftKey))) {
-				this.mayShowAcceleratorInfoBoxes = true;
-			}
+		if (app.map && app.map.backstageView && app.map.backstageView.isOpen && app.map.backstageView.isOpen())
+			return;
+
+		if (this.initialized && (event.keyCode === 18 || (event.keyCode === 18 && event.shiftKey))) {
+			this.mayShowAcceleratorInfoBoxes = true;
+		}
 	};
 
 	// A mouse press while Alt is held makes it an Alt+mouse action, like Alt-drag, so releasing
@@ -148,6 +151,9 @@ var NotebookbarAccessibility = function() {
 
 	this.onDocumentKeyUp = function(event) {
 		if (document.body.dataset.userinterfacemode !== 'notebookbar')
+			return;
+
+		if (app.map && app.map.backstageView && app.map.backstageView.isOpen && app.map.backstageView.isOpen())
 			return;
 
 		if (this.initialized) {
@@ -270,6 +276,13 @@ var NotebookbarAccessibility = function() {
 
 					this.removeFocusFromTab();
 					element.click();
+					var isFileTabForCoda = (element.id === 'File-tab-label' || element.id === 'File') && window.mode.isCODesktop();
+					if (isFileTabForCoda || (app.map && app.map.backstageView && app.map.backstageView.isOpen && app.map.backstageView.isOpen())) {
+						this.accessibilityInputElement.blur();
+						this.resetState();
+						this.filteredItem = null;
+						return true;
+					}
 					this.addTabFocus();
 					this.setupAcceleratorsForCurrentTab(element.id);
 					this.combination = null;
