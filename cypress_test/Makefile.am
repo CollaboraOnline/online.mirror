@@ -136,7 +136,7 @@ PHP_CLI_SERVER_WORKERS = 16
 PROXY_PHP_BASE_URL = https://raw.githubusercontent.com/CollaboraOnline/richdocumentscode/master
 # proxy.php and the files it includes, as paths in richdocumentscode. Only
 # proxy.php has to exist, so an older proxy.php without includes still works.
-PROXY_PHP_FILES = proxy.php lib/HostFile.php
+PROXY_PHP_FILES = proxy.php lib/HostFile.php lib/HostConfig.php lib/Coolwsd.php
 # A local proxy.php to serve instead of downloading from PROXY_PHP_BASE_URL. The
 # other PROXY_PHP_FILES are copied from beside it.
 PROXY_PHP =
