@@ -2571,7 +2571,7 @@ bool ChildSession::paste(const char* buffer, int length, const StringVector& tok
     // paste paths that do take an image flatten it to a Bitmap, dropping the
     // animation. .uno:InsertGraphic reads the file through GraphicFilter,
     // which keeps it.
-    if (size > 0 && mimeType == "image/gif")
+    if (size > 0 && mimeType == "image/gif" && !isReadOnly())
         return insertPastedGif(data, size);
 
     bool success = false;
