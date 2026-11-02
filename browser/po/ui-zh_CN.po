@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-13 14:06+0200\n"
+"POT-Creation-Date: 2026-11-02 12:25+0100\n"
 "PO-Revision-Date: 2026-09-25 21:45+0000\n"
 "Last-Translator: QuietCedar47 <quietcedar47@users.noreply.hosted.weblate.org>"
 "\n"
@@ -28,8 +28,8 @@ msgstr "管理控制台"
 msgid "Settings"
 msgstr "设置"
 
-#: admin/admin.strings.js:17 src/control/Control.StatusBar.js:287
-#: src/control/Control.StatusBar.js:288
+#: admin/admin.strings.js:17 src/control/Control.StatusBar.js:304
+#: src/control/Control.StatusBar.js:305
 #: src/control/jsdialog/Widget.NewSlideLayoutEntry.ts:39
 msgid "Overview"
 msgstr "预览"
@@ -51,15 +51,15 @@ msgid "Log"
 msgstr "日志"
 
 #: admin/admin.strings.js:22 src/control/Control.Menubar.ts:462
-#: src/control/Control.Menubar.ts:675 src/control/Control.Menubar.ts:843
-#: src/control/Control.Menubar.ts:1161
+#: src/control/Control.Menubar.ts:676 src/control/Control.Menubar.ts:844
+#: src/control/Control.Menubar.ts:1162
 #: src/control/Control.NotebookbarWriter.js:623
-#: src/control/Control.ServerAuditDialog.ts:327
-#: src/control/Control.ServerAuditDialog.ts:328
+#: src/control/Control.ServerAuditDialog.ts:340
+#: src/control/Control.ServerAuditDialog.ts:341
 msgid "Server audit"
 msgstr "服务器审计"
 
-#: admin/admin.strings.js:23 src/control/Control.ServerAuditDialog.ts:346
+#: admin/admin.strings.js:23 src/control/Control.ServerAuditDialog.ts:359
 msgid "Status"
 msgstr "状态"
 
@@ -67,7 +67,7 @@ msgstr "状态"
 msgid "Details"
 msgstr "详细信息"
 
-#: admin/admin.strings.js:25 src/control/Control.ServerAuditDialog.ts:356
+#: admin/admin.strings.js:25 src/control/Control.ServerAuditDialog.ts:369
 msgid "No issues found"
 msgstr "未发现问题"
 
@@ -170,12 +170,12 @@ msgstr "网络图"
 #: admin/src/integrator/AdminIntegratorSettings.ts:2107
 #: admin/src/integrator/AdminIntegratorSettings.ts:5077
 #: admin/src/integrator/WordBook.ts:394 admin/src/integrator/Xcu.ts:543
-#: src/canvas/sections/CommentListSection.ts:805
+#: src/canvas/sections/CommentListSection.ts:844
 #: src/canvas/sections/CommentSection.ts:205
-#: src/canvas/sections/CommentSection.ts:714
-#: src/canvas/sections/CommentSection.ts:1730
+#: src/canvas/sections/CommentSection.ts:722
+#: src/canvas/sections/CommentSection.ts:1742
 #: src/control/Control.BackstageView.ts:161
-#: src/control/Control.Notebookbar.js:830
+#: src/control/Control.Notebookbar.js:836
 #: src/control/Control.NotebookbarBuilder.js:214
 #: src/control/Control.NotebookbarBuilder.js:610
 #: src/control/Control.NotebookbarDraw.js:29
@@ -250,7 +250,7 @@ msgstr "信道筛选器："
 #: src/app/TableStylesService.ts:517
 #: src/control/Control.CleanupSidebar.ts:1169
 #: src/control/Control.JSDialogBuilder.js:423
-#: src/control/Control.StatusBar.js:227 src/control/Control.StatusBar.js:232
+#: src/control/Control.StatusBar.js:244 src/control/Control.StatusBar.js:249
 msgid "None"
 msgstr "无"
 
@@ -268,8 +268,8 @@ msgstr "日志级别"
 #: src/control/backstage/CloudDialogs.tsx:231
 #: src/control/Control.UIManager.ts:3284 src/control/Control.Zotero.js:191
 #: src/control/jsdialog/Widget.SidebarContainers.tsx:71 src/app/Socket.ts:1001
-#: src/app/Socket.ts:2755 src/app/Socket.ts:2766
-#: welcome/welcome.html%2Bhtml.body.div.div.div.div.div:51-7
+#: src/app/Socket.ts:2758 src/app/Socket.ts:2769
+#: welcome/welcome.html%2Bhtml.body.div.div.div.div.div.button:52-8
 msgid "Close"
 msgstr "关闭"
 
@@ -286,10 +286,10 @@ msgid "License"
 msgstr "授权"
 
 #: admin/admin.strings.js:72 src/control/Control.BackstageView.ts:227
-#: src/control/Control.Menubar.ts:464 src/control/Control.Menubar.ts:677
-#: src/control/Control.Menubar.ts:845 src/control/Control.Menubar.ts:1163
-#: src/control/Control.Menubar.ts:1220 src/control/Control.Menubar.ts:1276
-#: src/control/Control.Menubar.ts:1325 src/control/Control.Menubar.ts:1392
+#: src/control/Control.Menubar.ts:464 src/control/Control.Menubar.ts:678
+#: src/control/Control.Menubar.ts:846 src/control/Control.Menubar.ts:1164
+#: src/control/Control.Menubar.ts:1221 src/control/Control.Menubar.ts:1277
+#: src/control/Control.Menubar.ts:1326 src/control/Control.Menubar.ts:1393
 #: src/control/Control.NotebookbarWriter.js:678
 msgid "About"
 msgstr "关于"
@@ -319,7 +319,7 @@ msgid "Failed to authenticate this session over protocol {0}"
 msgstr "无法通过 {0} 协议验证此会话"
 
 #: admin/src/AdminClusterOverview.js:558 admin/src/AdminSocketOverview.js:432
-#: admin/src/AdminSocketServerAudit.js:92
+#: admin/src/AdminSocketServerAudit.js:99
 msgid "Warning"
 msgstr "注意"
 
@@ -327,28 +327,28 @@ msgstr "注意"
 #: admin/src/AdminSocketBase.js:74 admin/src/AdminSocketOverview.js:108
 #: admin/src/AdminSocketOverview.js:434 admin/src/AdminSocketSettings.js:47
 #: admin/src/integrator/AdminIntegratorSettings.ts:5220 src/app/Debug.ts:1828
-#: src/canvas/sections/CommentListSection.ts:2088
+#: src/canvas/sections/CommentListSection.ts:2149
 #: src/control/Control.AboutDialog.ts:245
 #: src/control/Control.AlertDialog.js:56
 #: src/control/Control.DocumentNameInput.js:58
 #: src/control/Control.DocumentRepair.js:77
 #: src/control/Control.ESignatureDialog.ts:132
 #: src/control/Control.LanguageDialog.js:120
-#: src/control/Control.PartsPreview.js:1400
-#: src/control/Control.PartsPreview.js:1442
-#: src/control/Control.ServerAuditDialog.ts:370
+#: src/control/Control.PartsPreview.js:1501
+#: src/control/Control.PartsPreview.js:1552
+#: src/control/Control.ServerAuditDialog.ts:383
 #: src/control/Control.Tabs.js:712 src/control/Control.Tabs.js:721
 #: src/control/Control.Tabs.js:760 src/control/Control.Tabs.js:764
 #: src/control/Control.Zotero.js:365 src/control/Control.Zotero.js:411
-#: src/control/Parts.js:610 src/control/Permission.js:113
+#: src/control/Parts.js:645 src/control/Permission.js:113
 #: src/control/Permission.js:123 src/control/Permission.js:214
-#: src/control/Permission.js:238 src/control/Toolbar.js:819
-#: src/app/Socket.ts:1067 src/app/Socket.ts:1946 src/app/Socket.ts:2114
-#: src/app/Socket.ts:2668 src/app/Socket.ts:2683 src/app/Socket.ts:2812
-#: src/main.js:133 src/main.js:136 src/main.js:405 src/map/Clipboard.js:1519
-#: src/map/handler/Map.Feedback.js:96 src/map/handler/Map.SlideShow.js:60
-#: src/map/handler/Map.SlideShow.js:177 src/map/handler/Map.SlideShow.js:305
-#: src/map/handler/Map.SlideShow.js:316 src/map/handler/Map.WOPI.js:923
+#: src/control/Toolbar.js:819 src/app/Socket.ts:1067 src/app/Socket.ts:1946
+#: src/app/Socket.ts:2114 src/app/Socket.ts:2668 src/app/Socket.ts:2683
+#: src/app/Socket.ts:2815 src/main.js:133 src/main.js:136 src/main.js:405
+#: src/map/Clipboard.js:1519 src/map/handler/Map.Feedback.js:96
+#: src/map/handler/Map.SlideShow.js:60 src/map/handler/Map.SlideShow.js:177
+#: src/map/handler/Map.SlideShow.js:305 src/map/handler/Map.SlideShow.js:316
+#: src/map/handler/Map.WOPI.js:933 src/map/handler/Map.WOPI.js:1041
 #: src/slideshow/SlideShowPresenter.ts:1444
 #: src/slideshow/SlideShowPresenter.ts:1459
 #: src/slideshow/SlideShowPresenter.ts:1474
@@ -359,11 +359,11 @@ msgstr "确定"
 #: admin/src/AdminClusterOverview.js:561 admin/src/AdminSocketOverview.js:109
 #: admin/src/AdminSocketOverview.js:435 admin/src/AdminSocketSettings.js:48
 #: admin/src/integrator/WordBook.ts:386
-#: src/canvas/sections/CommentListSection.ts:800
+#: src/canvas/sections/CommentListSection.ts:839
 #: src/canvas/sections/CommentSection.ts:204
 #: src/canvas/sections/CommentSection.ts:207
-#: src/canvas/sections/CommentSection.ts:1731
-#: src/canvas/sections/CommentSection.ts:1736
+#: src/canvas/sections/CommentSection.ts:1743
+#: src/canvas/sections/CommentSection.ts:1748
 #: src/control/Control.AIChatSidebar.ts:1470
 #: src/control/Control.AIChatSidebar.ts:1472
 #: src/control/Control.AIChatSidebar.ts:1557
@@ -376,7 +376,7 @@ msgstr "确定"
 #: src/control/Control.UIManager.ts:2717 src/control/Control.UIManager.ts:2812
 #: src/control/Control.UIManager.ts:2976 src/control/Control.UIManager.ts:3068
 #: src/control/Control.UIManager.ts:3251 src/control/Control.Zotero.js:360
-#: src/control/Parts.js:605 src/app/Socket.ts:1877
+#: src/control/Parts.js:640 src/app/Socket.ts:1877
 #: src/map/handler/Map.Settings.ts:148
 msgid "Cancel"
 msgstr "取消"
@@ -429,36 +429,42 @@ msgid ""
 msgstr "未启用潜在风险系统调用的 BPF 过滤 (seccomp)；存在安全隐患。"
 
 #: admin/src/AdminSocketServerAudit.js:50
-#: src/control/Control.ServerAuditDialog.ts:109
+#: src/control/Control.ServerAuditDialog.ts:107
+msgid "No WOPI host configured: trusting the first host that connected"
+msgstr ""
+
+#: admin/src/AdminSocketServerAudit.js:55
+#: src/control/Control.ServerAuditDialog.ts:122
 msgid ""
 "Your server is configured with insufficient hardware resources, which may "
 "lead to poor performance."
 msgstr "您的服务器硬件配置过低，可能影响性能。"
 
-#: admin/src/AdminSocketServerAudit.js:54
-#: src/control/Control.ServerAuditDialog.ts:123
+#: admin/src/AdminSocketServerAudit.js:59
+#: src/control/Control.ServerAuditDialog.ts:136
 msgid "Slow Kit jail setup with copying, cannot bind-mount."
 msgstr "Kit jail 设置缓慢（需复制），无法绑定挂载。"
 
-#: admin/src/AdminSocketServerAudit.js:55
-#: src/control/Control.ServerAuditDialog.ts:138
+#: admin/src/AdminSocketServerAudit.js:60
+#: src/control/Control.ServerAuditDialog.ts:151
 msgid "Fast kit jail bind mounting not configured"
 msgstr "Fast kit jail bind mounting 未配置"
 
-#: admin/src/AdminSocketServerAudit.js:59
+#: admin/src/AdminSocketServerAudit.js:64
 msgid ""
 "Some clients connected with the old WebSocket URL form, which is planned "
 "for removal. Check that your proxy passes the compact form through."
-msgstr "部分客户端使用了旧版 WebSocket URL "
-"形式连接，该形式计划移除。请检查您的代理是否透传紧凑形式。"
+msgstr ""
+"部分客户端使用了旧版 WebSocket URL 形式连接，该形式计划移除。请检查您的代理是"
+"否透传紧凑形式。"
 
-#: admin/src/AdminSocketServerAudit.js:92
+#: admin/src/AdminSocketServerAudit.js:99
 #: admin/src/integrator/AdminIntegratorSettings.ts:5208
-#: src/control/Control.AIChatSidebar.ts:3714 src/map/handler/Map.WOPI.js:923
+#: src/control/Control.AIChatSidebar.ts:3714 src/map/handler/Map.WOPI.js:933
 msgid "Error"
 msgstr "错误"
 
-#: admin/src/AdminSocketServerAudit.js:108
+#: admin/src/AdminSocketServerAudit.js:115
 msgid "Learn more"
 msgstr "了解更多"
 
@@ -495,11 +501,13 @@ msgid "API key lacks permissions"
 msgstr "API key 缺少许可"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:644
+#, fuzzy
 msgid ""
-"This AI host is not in the server's allowed host list (lok_allow.host). Ask "
-"your administrator to permit it."
-msgstr "此 AI 主机不在服务器的允许主机列表 (lok_allow.host) "
-"中。请联系管理员予以授权。"
+"This AI host is not in the server's allowed AI host list "
+"(ai.allowed_hosts). Ask your administrator to permit it."
+msgstr ""
+"此 AI 主机不在服务器的允许主机列表 (lok_allow.host) 中。请联系管理员予以授权"
+"。"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:646
 #: src/control/Control.AIChatSidebar.ts:2192
@@ -572,9 +580,9 @@ msgstr "文档内屏幕阅读器"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:739
 #: src/control/Control.Menubar.ts:197 src/control/Control.Menubar.ts:530
-#: src/control/Control.Menubar.ts:727 src/control/Control.Menubar.ts:911
-#: src/control/Control.Menubar.ts:1204 src/control/Control.Menubar.ts:1248
-#: src/control/Control.Menubar.ts:1303 src/control/Control.Menubar.ts:1355
+#: src/control/Control.Menubar.ts:728 src/control/Control.Menubar.ts:912
+#: src/control/Control.Menubar.ts:1205 src/control/Control.Menubar.ts:1249
+#: src/control/Control.Menubar.ts:1304 src/control/Control.Menubar.ts:1356
 #: src/control/Control.NotebookbarCalc.js:1706
 #: src/control/Control.NotebookbarDraw.js:591
 #: src/control/Control.NotebookbarImpress.js:798
@@ -688,7 +696,7 @@ msgid "Force Breaks"
 msgstr "强制换行"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:767
-#: src/control/Control.Menubar.ts:869 src/control/Control.TopToolbar.js:146
+#: src/control/Control.Menubar.ts:870 src/control/Control.TopToolbar.js:146
 #: src/control/jsdialog/Definitions.Menu.ts:1605
 msgid "All Sheets"
 msgstr "讲义"
@@ -767,7 +775,7 @@ msgid "Presentation"
 msgstr "读取文件错误"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:784
-#: src/control/Control.StatusBar.js:290 src/control/Control.StatusBar.js:291
+#: src/control/Control.StatusBar.js:307 src/control/Control.StatusBar.js:308
 #: src/control/Control.Zotero.js:1342 src/slideshow/PresenterConsole.js:36
 msgid "Notes"
 msgstr "注释"
@@ -859,8 +867,9 @@ msgstr "自动文本"
 msgid ""
 "Upload reusable text snippets (.bau). To insert the text in your document, "
 "type the shortcut for an AutoText entry and press F3."
-msgstr "上传可复用的文本片段 (.bau) 文件。要在文档中插入文本，"
-"请键入自动文本条目的快捷键并按 F3。"
+msgstr ""
+"上传可复用的文本片段 (.bau) 文件。要在文档中插入文本，请键入自动文本条目的快"
+"捷键并按 F3。"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1418
 msgid "Upload Autotext"
@@ -872,10 +881,11 @@ msgstr "自定义字典"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1426
 msgid ""
-"Add or edit words in a spell check dictionary. Words in your wordbook (."
-"dic) will be available for spelling checks."
-msgstr "在拼写检查词典中添加或编辑单词。您的词典文件 (.dic) "
-"中的单词将可用于拼写检查。"
+"Add or edit words in a spell check dictionary. Words in your wordbook "
+"(.dic) will be available for spelling checks."
+msgstr ""
+"在拼写检查词典中添加或编辑单词。您的词典文件 (.dic) 中的单词将可用于拼写检查"
+"。"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1432
 msgid "Upload Wordbook"
@@ -896,8 +906,8 @@ msgid "Upload Theme"
 msgstr "上传主题"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1452
-#: src/control/Control.Menubar.ts:450 src/control/Control.Menubar.ts:663
-#: src/control/Control.Menubar.ts:831 src/control/Control.Menubar.ts:1149
+#: src/control/Control.Menubar.ts:450 src/control/Control.Menubar.ts:664
+#: src/control/Control.Menubar.ts:832 src/control/Control.Menubar.ts:1150
 #: src/control/Control.NotebookbarCalc.js:115
 #: src/control/Control.NotebookbarDraw.js:135
 #: src/control/Control.NotebookbarImpress.js:172
@@ -923,8 +933,9 @@ msgstr "安全策略"
 msgid ""
 "Upload SPIF security policies (.xml). These define the classifications and "
 "categories available when applying a security label to a document."
-msgstr "上传 SPIF 安全策略 (."
-"xml)。这些策略定义了在为文档应用安全标签时可用的分类和类别。"
+msgstr ""
+"上传 SPIF 安全策略 (.xml)。这些策略定义了在为文档应用安全标签时可用的分类和类"
+"别。"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:1475
 msgid "Upload Security Policy"
@@ -968,7 +979,8 @@ msgstr "启用后，文本文档以该服务器选择的缩放大小打开。将
 msgid ""
 "When on, Writer fits the document to the viewport width on open. When off, "
 "the document opens at the Default Zoom level set below."
-msgstr "启用后，Writer 在打开文档时会将其适配到视口宽度。关闭时，文档将以下方设置的默"
+msgstr ""
+"启用后，Writer 在打开文档时会将其适配到视口宽度。关闭时，文档将以下方设置的默"
 "认缩放级别打开。"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:2058
@@ -1016,14 +1028,14 @@ msgid "Something went wrong while uploading the file. Please try again."
 msgstr "上传文件时出现一些错误，请重试。"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:2790
-#: src/canvas/sections/CommentSection.ts:1644
-#: src/canvas/sections/CommentSection.ts:1649
+#: src/canvas/sections/CommentSection.ts:1652
+#: src/canvas/sections/CommentSection.ts:1657
 #: src/control/Control.AIChatSidebar.ts:1564
 #: src/control/backstage/CloudDialogs.tsx:193
-#: src/control/Control.PartsPreview.js:1397
-#: src/control/jsdialog/Control.ContextMenu.ts:314
+#: src/control/Control.PartsPreview.js:1498
+#: src/control/jsdialog/Control.ContextMenu.ts:367
 #: src/control/jsdialog/Definitions.DialogModification.ts:185
-#: src/docdispatcher.ts:1000
+#: src/docdispatcher.ts:1020
 msgid "Delete"
 msgstr "删除"
 
@@ -1099,8 +1111,8 @@ msgstr "文档签名设置"
 #: admin/src/integrator/AdminIntegratorSettings.ts:3159
 #: admin/src/integrator/AdminIntegratorSettings.ts:4616
 #: src/control/Control.AIChatSidebar.ts:711 src/control/Control.Menubar.ts:247
-#: src/control/Control.Menubar.ts:556 src/control/Control.Menubar.ts:744
-#: src/control/Control.Menubar.ts:942
+#: src/control/Control.Menubar.ts:556 src/control/Control.Menubar.ts:745
+#: src/control/Control.Menubar.ts:943
 #: src/control/Notebookbar.AIAssistantTab.ts:40
 #: src/control/Notebookbar.AIAssistantTab.ts:256
 #: src/control/Notebookbar.AIAssistantTab.ts:257
@@ -1254,14 +1266,16 @@ msgstr "选择句子检查器在您输入时检查的内容。"
 msgid ""
 "This document is using the document settings it was opened with. What you "
 "change here applies to the next document you open."
-msgstr "此文档使用的是打开时采用的文档设置。您在此处所做的更改将应用于下次打开的文档"
+msgstr ""
+"此文档使用的是打开时采用的文档设置。您在此处所做的更改将应用于下次打开的文档"
 "。"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:4429
 msgid ""
 "This document is open in more than one window, so what you change here "
 "applies to the next document you open rather than this one."
-msgstr "此文档已在多个窗口中打开，因此你在这里所做的更改将应用于下次打开的文档，而不"
+msgstr ""
+"此文档已在多个窗口中打开，因此你在这里所做的更改将应用于下次打开的文档，而不"
 "会应用于当前文档。"
 
 #: admin/src/integrator/AdminIntegratorSettings.ts:4539
@@ -1390,17 +1404,17 @@ msgstr " 分钟"
 msgid " s"
 msgstr " 秒"
 
-#: js/global.js:2112
+#: js/global.js:2122
 msgid ""
 "The system is currently adjusting resources. Please wait a moment while we "
 "retry your request..."
 msgstr "系统正在调整资源。请稍候片刻，我们正在重试您的请求..."
 
-#: js/global.js:2114
+#: js/global.js:2124
 msgid "The document is being migrated to a new server. Retrying shortly..."
 msgstr "文档正在迁移到新服务器。正在短期内重试..."
 
-#: js/global.js:2116
+#: js/global.js:2126
 msgid "Failed to get RouteToken from controller"
 msgstr "无法从控制器获取 RouteToken"
 
@@ -1452,17 +1466,17 @@ msgstr "HTML 文件（.html）"
 msgid "Markdown (.md)"
 msgstr "Markdown 文件 (.md)"
 
-#: src/app/ExportFormats.ts:76 src/control/Control.Menubar.ts:854
+#: src/app/ExportFormats.ts:76 src/control/Control.Menubar.ts:855
 #: src/control/Control.NotebookbarBuilder.js:436
 msgid "ODF spreadsheet (.ods)"
 msgstr "ODF 电子表格（.ods）"
 
-#: src/app/ExportFormats.ts:77 src/control/Control.Menubar.ts:855
+#: src/app/ExportFormats.ts:77 src/control/Control.Menubar.ts:856
 #: src/control/Control.NotebookbarBuilder.js:444
 msgid "Excel 2003 Spreadsheet (.xls)"
 msgstr "Excel 2003 电子表格（.xls）"
 
-#: src/app/ExportFormats.ts:78 src/control/Control.Menubar.ts:856
+#: src/app/ExportFormats.ts:78 src/control/Control.Menubar.ts:857
 #: src/control/Control.NotebookbarBuilder.js:440
 msgid "Excel Spreadsheet (.xlsx)"
 msgstr "Excel 电子表格（.xlsx）"
@@ -1518,11 +1532,11 @@ msgstr "当前幻灯片为 TIFF 图片（.tiff）"
 msgid "Image (.png)"
 msgstr "图片（.png）"
 
-#: src/app/LOUtil.ts:1162
+#: src/app/LOUtil.ts:1163
 msgid "{0} website, opens in new tab"
 msgstr "{0} 网站，在新标签页中打开"
 
-#: src/app/LOUtil.ts:1165
+#: src/app/LOUtil.ts:1166
 msgid "file type icon"
 msgstr "文件类型图标"
 
@@ -1560,28 +1574,29 @@ msgstr "设为默认"
 msgid "Duplicate Style"
 msgstr "复制样式"
 
-#: src/canvas/sections/CommentListSection.ts:2086
-#: src/canvas/sections/CommentListSection.ts:2099
+#: src/canvas/sections/CommentListSection.ts:2147
+#: src/canvas/sections/CommentListSection.ts:2160
 msgid "Comments Updated"
 msgstr "批注已更新"
 
-#: src/canvas/sections/CommentListSection.ts:2087
+#: src/canvas/sections/CommentListSection.ts:2148
 msgid "Another user has removed this comment."
 msgstr "其他用户已经移除该批注。"
 
-#: src/canvas/sections/CommentListSection.ts:2100
+#: src/canvas/sections/CommentListSection.ts:2161
 msgid ""
 "Another user has updated the comment. Would you like to overwrite those "
 "changes?"
 msgstr "其他用户已经更新该批注。您想要覆盖这些修改吗？"
 
-#: src/canvas/sections/CommentListSection.ts:2101 src/control/Styles.js:39
+#: src/canvas/sections/CommentListSection.ts:2162 src/control/Styles.js:39
 #: src/app/Socket.ts:1881
 msgid "Overwrite"
 msgstr "覆盖"
 
-#: src/canvas/sections/CommentListSection.ts:2102
-#: src/control/Control.SlideLinkToolbar.tsx:147
+#: src/canvas/sections/CommentListSection.ts:2163
+#: src/control/Control.SlideLinkToolbar.tsx:166
+#: src/slideimport/SlideLinks.ts:469
 msgid "Update"
 msgstr "更新"
 
@@ -1598,90 +1613,90 @@ msgid "Open menu"
 msgstr "打开菜单"
 
 #: src/canvas/sections/CommentSection.ts:208
-#: src/canvas/sections/CommentSection.ts:718
-#: src/canvas/sections/CommentSection.ts:1306
-#: src/canvas/sections/CommentSection.ts:1735
+#: src/canvas/sections/CommentSection.ts:726
+#: src/canvas/sections/CommentSection.ts:1314
+#: src/canvas/sections/CommentSection.ts:1747
 msgid "Reply"
 msgstr "回复"
 
-#: src/canvas/sections/CommentSection.ts:533
+#: src/canvas/sections/CommentSection.ts:541
 msgid "Press Ctrl + Enter to post"
 msgstr "按 Ctrl + Enter 发布"
 
-#: src/canvas/sections/CommentSection.ts:607
-#: src/canvas/sections/CommentSection.ts:608
+#: src/canvas/sections/CommentSection.ts:615
+#: src/canvas/sections/CommentSection.ts:616
 msgid "Accept change"
 msgstr "接受更改"
 
-#: src/canvas/sections/CommentSection.ts:614
-#: src/canvas/sections/CommentSection.ts:615
+#: src/canvas/sections/CommentSection.ts:622
+#: src/canvas/sections/CommentSection.ts:623
 msgid "Reject change"
 msgstr "拒绝更改"
 
-#: src/canvas/sections/CommentSection.ts:639
+#: src/canvas/sections/CommentSection.ts:647
 msgid "Resolved"
 msgstr "已解决"
 
-#: src/canvas/sections/CommentSection.ts:649
+#: src/canvas/sections/CommentSection.ts:657
 msgid "Removed"
 msgstr "已删除"
 
-#: src/canvas/sections/CommentSection.ts:1293
+#: src/canvas/sections/CommentSection.ts:1301
 #: src/control/jsdialog/Widget.Comment.ts:177
-#: src/layer/tile/CanvasTileLayer.js:3645
-#: src/layer/tile/CanvasTileLayer.js:3656
+#: src/layer/tile/CanvasTileLayer.js:3676
+#: src/layer/tile/CanvasTileLayer.js:3687
 msgid "Comment"
 msgstr "批注"
 
-#: src/canvas/sections/CommentSection.ts:1303
+#: src/canvas/sections/CommentSection.ts:1311
 msgid "Modify"
 msgstr "修改"
 
-#: src/canvas/sections/CommentSection.ts:1309
+#: src/canvas/sections/CommentSection.ts:1317
 #: src/control/Control.CleanupSidebar.ts:384
 #: src/control/backstage/CloudDialogs.tsx:295
 #: src/control/Notebookbar.ImpressAnimationTab.ts:83
 msgid "Remove"
 msgstr "删除"
 
-#: src/canvas/sections/CommentSection.ts:1313
+#: src/canvas/sections/CommentSection.ts:1321
 msgid "Remove Thread"
 msgstr "移除主题"
 
-#: src/canvas/sections/CommentSection.ts:1320
+#: src/canvas/sections/CommentSection.ts:1328
 msgid "Resolve"
 msgstr "解决"
 
-#: src/canvas/sections/CommentSection.ts:1320
+#: src/canvas/sections/CommentSection.ts:1328
 msgid "Unresolve"
 msgstr "未解决"
 
-#: src/canvas/sections/CommentSection.ts:1327
+#: src/canvas/sections/CommentSection.ts:1335
 msgid "Unresolve Thread"
 msgstr "未解决主题"
 
-#: src/canvas/sections/CommentSection.ts:1327
+#: src/canvas/sections/CommentSection.ts:1335
 msgid "Resolve Thread"
 msgstr "解决主题"
 
-#: src/canvas/sections/CommentSection.ts:1333
+#: src/canvas/sections/CommentSection.ts:1341
 msgid "Promote to top comment"
 msgstr "置顶批注"
 
-#: src/canvas/sections/CommentSection.ts:1338
+#: src/canvas/sections/CommentSection.ts:1346
 msgid "Show on the side"
 msgstr "在侧边显示"
 
-#: src/canvas/sections/CommentSection.ts:1338
+#: src/canvas/sections/CommentSection.ts:1346
 msgid "Open in full view"
 msgstr "全屏查看"
 
-#: src/canvas/sections/CommentSection.ts:1345
+#: src/canvas/sections/CommentSection.ts:1353
 msgid "Show in navigator"
 msgstr "在导航器中显示"
 
-#: src/canvas/sections/CommentSection.ts:1643
-#: src/canvas/sections/CommentSection.ts:1648
+#: src/canvas/sections/CommentSection.ts:1651
+#: src/canvas/sections/CommentSection.ts:1656
 #: src/control/Control.SaveState.tsx:196
 msgid "Saved"
 msgstr "已保存"
@@ -1734,15 +1749,15 @@ msgstr "展开"
 msgid "Help on this error"
 msgstr "此错误的帮助"
 
-#: src/canvas/sections/FormulaErrorHelpSection.ts:85
+#: src/canvas/sections/FormulaErrorHelpSection.ts:103
 msgid "Inspect with Function Wizard"
 msgstr "使用函数向导检查"
 
-#: src/canvas/sections/FormulaErrorHelpSection.ts:90
+#: src/canvas/sections/FormulaErrorHelpSection.ts:108
 msgid "Edit in Formula Bar"
 msgstr "在公式栏中编辑"
 
-#: src/canvas/sections/FormulaErrorHelpSection.ts:98
+#: src/canvas/sections/FormulaErrorHelpSection.ts:116
 msgid "Help fix this error with AI"
 msgstr "使用 AI 帮助修复此错误"
 
@@ -1941,7 +1956,7 @@ msgid "AI generated image"
 msgstr "AI 生成的图像"
 
 #: src/control/Control.AIChatSidebar.ts:890
-#: src/control/Control.SlideImportPane.tsx:1177
+#: src/control/Control.SlideImportPane.tsx:1301
 msgid "Retry"
 msgstr "重试"
 
@@ -2032,12 +2047,12 @@ msgid "Emojify"
 msgstr "表情化"
 
 #: src/control/Control.AIChatSidebar.ts:1177
-#: src/control/Control.StatusBar.js:178
+#: src/control/Control.StatusBar.js:183
 msgid "On"
 msgstr "开启"
 
 #: src/control/Control.AIChatSidebar.ts:1177
-#: src/control/Control.StatusBar.js:180
+#: src/control/Control.StatusBar.js:185
 #: src/control/jsdialog/Definitions.Menu.ts:1856
 msgid "Off"
 msgstr "关闭"
@@ -2249,8 +2264,9 @@ msgstr "模型在生成输出前耗尽了 Token。请尝试缩短输入内容，
 msgid ""
 "The model returned an empty response (no tokens generated). This is usually "
 "a temporary provider issue - please retry, or try a different model."
-msgstr "模型返回了空响应（未生成任何 Token）。这通常是提供商的临时问题 - "
-"请重试，或尝试使用其他模型。"
+msgstr ""
+"模型返回了空响应（未生成任何 Token）。这通常是提供商的临时问题 - 请重试，或尝"
+"试使用其他模型。"
 
 #: src/control/Control.AIChatSidebar.ts:2175
 msgid "Image generation failed: no prompt from model"
@@ -2538,7 +2554,8 @@ msgstr "继续不使用设计模板"
 msgid ""
 "Here is a proposed outline. Edit the titles or descriptions, remove slides "
 "you do not want, then approve to build the deck:"
-msgstr "这是为您生成的建议大纲。您可以编辑标题或描述、移除不需要的幻灯片，确认无误后"
+msgstr ""
+"这是为您生成的建议大纲。您可以编辑标题或描述、移除不需要的幻灯片，确认无误后"
 "点击批准即可生成演示文稿："
 
 #: src/control/Control.AIChatSidebar.ts:3365
@@ -2714,8 +2731,9 @@ msgstr "选区中未找到数据。"
 msgid ""
 "Describe the slides you want to create. For example: \"A 5-slide overview "
 "of renewable energy\" or \"An introduction to our team\"."
-msgstr "描述您想要创建的幻灯片。例如：「可再生能源概述，5 "
-"张幻灯片」或「我们的团队介绍」。"
+msgstr ""
+"描述您想要创建的幻灯片。例如：「可再生能源概述，5 张幻灯片」或「我们的团队介"
+"绍」。"
 
 #: src/control/Control.AIChatSidebar.ts:3909
 msgid ""
@@ -2731,8 +2749,9 @@ msgstr ""
 msgid ""
 "Describe what formula you need. For example: \"Calculate the average of "
 "column B\" or \"Sum all values where column A is greater than 100\"."
-msgstr "描述您需要的公式。例如：「计算 B 列的平均值」或「对 A 列大于 100 "
-"的所有值求和」。"
+msgstr ""
+"描述您需要的公式。例如：「计算 B 列的平均值」或「对 A 列大于 100 的所有值求和"
+"」。"
 
 #: src/control/Control.AIChatSidebar.ts:3959
 msgid ""
@@ -2771,7 +2790,8 @@ msgid ""
 "Benford's Law violations — check if leading digit distribution of numeric "
 "values deviates significantly from the expected distribution, which may "
 "suggest data manipulation."
-msgstr "本福特定律违例——检查数值的首位数字分布是否显著偏离预期分布，这可能表明数据被"
+msgstr ""
+"本福特定律违例——检查数值的首位数字分布是否显著偏离预期分布，这可能表明数据被"
 "操纵。"
 
 #: src/control/Control.AIChatSidebar.ts:3987
@@ -2806,7 +2826,7 @@ msgstr ""
 #: src/control/Control.BackstageView.ts:891
 #: src/control/Control.NavigatorPanel.ts:206
 #: src/control/Control.NotebookbarImpress.js:1537
-#: src/control/Control.PartsPreview.js:136
+#: src/control/Control.PartsPreview.js:137
 #: src/slideshow/PresenterConsole.js:37
 msgid "Slides"
 msgstr "幻灯片"
@@ -2884,7 +2904,7 @@ msgid "Master slide, image %1"
 msgstr "母版幻灯片，图像 %1"
 
 #: src/control/Control.CleanupSidebar.ts:549
-#: src/control/Control.PartsPreview.js:965
+#: src/control/Control.PartsPreview.js:959
 msgid "Slide %1"
 msgstr "幻灯片 %1"
 
@@ -2976,13 +2996,13 @@ msgstr[0] "%1 项可清理"
 
 #: src/control/Control.CleanupSidebar.ts:759
 #: src/control/Control.BackstageView.ts:220 src/control/Control.Menubar.ts:143
-#: src/control/Control.Menubar.ts:485 src/control/Control.Menubar.ts:694
-#: src/control/Control.Menubar.ts:865
+#: src/control/Control.Menubar.ts:485 src/control/Control.Menubar.ts:695
+#: src/control/Control.Menubar.ts:866
 #: src/control/Control.NotebookbarCalc.js:443
 #: src/control/Control.NotebookbarDraw.js:439
 #: src/control/Control.NotebookbarImpress.js:508
 #: src/control/Control.NotebookbarWriter.js:502
-#: src/control/Control.SlideImportPane.tsx:1512 src/control/IFrameDialog.js:39
+#: src/control/Control.SlideImportPane.tsx:1638 src/control/IFrameDialog.js:39
 #: src/map/handler/Map.Settings.ts:144
 msgid "Options"
 msgstr "选项"
@@ -3034,12 +3054,12 @@ msgid "saves %1"
 msgstr "可节省 %1"
 
 #: src/control/Control.CleanupSidebar.ts:1169
-#: src/control/Control.SlideImportPane.tsx:696
+#: src/control/Control.SlideImportPane.tsx:727
 msgid "Not checked"
 msgstr "未检查"
 
 #: src/control/Control.CleanupSidebar.ts:1272
-#: src/control/Control.Menubar.ts:658
+#: src/control/Control.Menubar.ts:659
 #: src/control/Control.NotebookbarImpress.js:2183
 #: src/control/Control.NotebookbarImpress.js:2184
 msgid "Clean Up"
@@ -3070,7 +3090,8 @@ msgid ""
 "Downloading external resources is forbidden but pasting images is still "
 "possible. Please right click in the image, choose \"Copy Image\" and paste "
 "it into the document instead."
-msgstr "禁止下载外部源文件，但您仍可粘贴图像。请右键点击图像，选择“复制图像”，然后将"
+msgstr ""
+"禁止下载外部源文件，但您仍可粘贴图像。请右键点击图像，选择“复制图像”，然后将"
 "其粘贴到文档中。"
 
 #: src/control/Control.AlertDialog.js:74
@@ -3121,7 +3142,7 @@ msgid "Open"
 msgstr "打开"
 
 #: src/control/Control.BackstageView.ts:145
-#: src/control/Control.Notebookbar.js:1246
+#: src/control/Control.Notebookbar.js:1252
 #: src/control/Control.NotebookbarCalc.js:230
 #: src/control/Control.NotebookbarCalc.js:264
 #: src/control/Control.NotebookbarDraw.js:242
@@ -3131,7 +3152,7 @@ msgstr "打开"
 #: src/control/Control.NotebookbarImpress.js:327
 #: src/control/Control.NotebookbarWriter.js:272
 #: src/control/Control.NotebookbarWriter.js:305
-#: src/control/PermissionMode.ts:160
+#: src/control/PermissionMode.ts:170
 msgid "Share"
 msgstr "共享"
 
@@ -3192,7 +3213,7 @@ msgstr "文本文档（txt）"
 
 #: src/control/Control.BackstageView.ts:889
 #: src/control/Control.BackstageView.ts:892
-#: src/control/Control.PartsPreview.js:136
+#: src/control/Control.PartsPreview.js:137
 msgid "Pages"
 msgstr "Pages文稿"
 
@@ -3284,7 +3305,7 @@ msgid "Search templates"
 msgstr "搜索模板"
 
 #: src/control/backstage/InfoView.tsx:31 src/control/Control.Menubar.ts:418
-#: src/control/Control.Menubar.ts:1442
+#: src/control/Control.Menubar.ts:1443
 #: src/control/Notebookbar.CalcTableTab.ts:62
 #: src/control/Control.NotebookbarCalc.js:370
 #: src/control/Control.NotebookbarCalc.js:396
@@ -3313,6 +3334,8 @@ msgstr "从计算机打开文件"
 msgid "Add Cloud +"
 msgstr "添加云 +"
 
+#: src/control/backstage/OpenView.tsx:139
+#: src/control/backstage/OpenView.tsx:140
 #: src/control/backstage/CloudDialogs.tsx:90
 msgid "Edit account"
 msgstr "编辑账号"
@@ -3413,94 +3436,94 @@ msgid ""
 "Select the name to rename the document. Every change is saved as you work."
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:40
+#: src/control/onboarding/OnboardingSteps.ts:41
 msgid "The tabs"
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:42
+#: src/control/onboarding/OnboardingSteps.ts:43
 msgid ""
 "Each tab gathers the tools for one kind of work, such as inserting or "
 "reviewing."
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:49
+#: src/control/onboarding/OnboardingSteps.ts:50
 msgid "The menus"
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:50
+#: src/control/onboarding/OnboardingSteps.ts:51
 msgid "Every command of the editor is in one of these menus."
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:56
+#: src/control/onboarding/OnboardingSteps.ts:57
 msgid "The tools"
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:57
+#: src/control/onboarding/OnboardingSteps.ts:58
 msgid "The buttons of the tab you selected appear along this row."
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:63
+#: src/control/onboarding/OnboardingSteps.ts:64
 msgid "The toolbar"
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:64
+#: src/control/onboarding/OnboardingSteps.ts:65
 msgid "The buttons you need most often sit here, under the menus."
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:70
+#: src/control/onboarding/OnboardingSteps.ts:71
 msgid "The formula bar"
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:72
+#: src/control/onboarding/OnboardingSteps.ts:73
 msgid ""
 "The contents of the selected cell appear here. Type an equals sign to start "
 "a formula."
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:79
+#: src/control/onboarding/OnboardingSteps.ts:80
 msgid "The slide panel"
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:81
+#: src/control/onboarding/OnboardingSteps.ts:82
 msgid ""
 "Every slide or page of the document is listed here. Select one to work on "
 "it."
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:89
+#: src/control/onboarding/OnboardingSteps.ts:90
 msgid "The sidebar"
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:91
+#: src/control/onboarding/OnboardingSteps.ts:92
 msgid ""
 "The sidebar holds the settings for whatever you have selected, such as "
 "text, a shape or a cell."
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:98
+#: src/control/onboarding/OnboardingSteps.ts:99
 msgid "The people in the document"
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:99
+#: src/control/onboarding/OnboardingSteps.ts:100
 msgid "See who else is editing and share the document."
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:109
+#: src/control/onboarding/OnboardingSteps.ts:110
 #, fuzzy
 msgid "The status bar"
 msgstr "显示状态栏"
 
-#: src/control/onboarding/OnboardingSteps.ts:111
+#: src/control/onboarding/OnboardingSteps.ts:112
 msgid ""
 "The state of the document, the language of the text and the zoom level are "
 "along the bottom."
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:118
+#: src/control/onboarding/OnboardingSteps.ts:119
 msgid "You are ready to work"
 msgstr ""
 
-#: src/control/onboarding/OnboardingSteps.ts:119
+#: src/control/onboarding/OnboardingSteps.ts:120
 msgid "You can walk through this tour again from the Help menu."
 msgstr ""
 
@@ -3605,7 +3628,7 @@ msgstr "下载剪切板内容"
 
 #: src/control/Control.DownloadProgress.js:87
 #: src/control/Control.DownloadProgress.js:112
-#: src/control/Control.PartsPreview.js:684 src/map/Clipboard.js:1581
+#: src/control/Control.PartsPreview.js:691 src/map/Clipboard.js:1581
 msgid "Copy"
 msgstr "复制"
 
@@ -3972,7 +3995,7 @@ msgstr "文档已暂停，请单击以重新加载并继续编辑"
 msgid "Idle document - please tap to reload and resume editing"
 msgstr "文档已暂停，请点击屏幕以重新加载并继续编辑"
 
-#: src/control/Control.JSDialog.js:503
+#: src/control/Control.JSDialog.js:518
 msgid "Close dialog"
 msgstr "关闭对话框"
 
@@ -4062,12 +4085,12 @@ msgid "Open {name}"
 msgstr "打开 {name}"
 
 #: src/control/Control.JSDialogBuilder.js:2034
-#: src/control/Control.Menubar.ts:1043
+#: src/control/Control.Menubar.ts:1044
 msgid "Rows"
 msgstr "行"
 
 #: src/control/Control.JSDialogBuilder.js:2035
-#: src/control/Control.Menubar.ts:1046
+#: src/control/Control.Menubar.ts:1047
 msgid "Columns"
 msgstr "列"
 
@@ -4077,8 +4100,8 @@ msgstr "插入表格"
 
 #: src/control/Control.LanguageDialog.js:64 src/control/Control.Menubar.ts:430
 #: src/control/Control.Menubar.ts:432 src/control/Control.Menubar.ts:434
-#: src/control/Control.Menubar.ts:657 src/control/Control.Menubar.ts:829
-#: src/control/Control.Menubar.ts:1143 src/control/Control.StatusBar.js:728
+#: src/control/Control.Menubar.ts:658 src/control/Control.Menubar.ts:830
+#: src/control/Control.Menubar.ts:1144 src/control/Control.StatusBar.js:766
 msgid "None (Do not check spelling)"
 msgstr "无（不检查拼写）"
 
@@ -4087,7 +4110,7 @@ msgid "Select language"
 msgstr "选择语言"
 
 #: src/control/Control.LanguageDialog.js:103
-#: src/control/Control.StatusBar.js:272
+#: src/control/Control.StatusBar.js:289
 msgid "Language"
 msgstr "语言"
 
@@ -4101,12 +4124,12 @@ msgstr "PDF 文档（.pdf）为…"
 
 #: src/control/Control.Menubar.ts:135 src/control/Control.Menubar.ts:139
 #: src/control/Control.Menubar.ts:477 src/control/Control.Menubar.ts:481
-#: src/control/Control.Menubar.ts:686 src/control/Control.Menubar.ts:691
-#: src/control/Control.Menubar.ts:858 src/control/Control.Menubar.ts:861
-#: src/control/Control.Menubar.ts:1173 src/control/Control.Menubar.ts:1179
-#: src/control/Control.Menubar.ts:1228 src/control/Control.Menubar.ts:1234
-#: src/control/Control.Menubar.ts:1284 src/control/Control.Menubar.ts:1289
-#: src/control/Control.Menubar.ts:1333 src/control/Control.Menubar.ts:1341
+#: src/control/Control.Menubar.ts:687 src/control/Control.Menubar.ts:692
+#: src/control/Control.Menubar.ts:859 src/control/Control.Menubar.ts:862
+#: src/control/Control.Menubar.ts:1174 src/control/Control.Menubar.ts:1180
+#: src/control/Control.Menubar.ts:1229 src/control/Control.Menubar.ts:1235
+#: src/control/Control.Menubar.ts:1285 src/control/Control.Menubar.ts:1290
+#: src/control/Control.Menubar.ts:1334 src/control/Control.Menubar.ts:1342
 #: src/control/Control.NotebookbarCalc.js:333
 #: src/control/Control.NotebookbarImpress.js:398
 #: src/control/Control.NotebookbarWriter.js:377
@@ -4118,36 +4141,36 @@ msgid "Rename Document"
 msgstr "重新命名文档"
 
 #: src/control/Control.Menubar.ts:137 src/control/Control.Menubar.ts:479
-#: src/control/Control.Menubar.ts:688 src/control/Control.Menubar.ts:859
-#: src/control/Control.Menubar.ts:1174 src/control/Control.Menubar.ts:1229
-#: src/control/Control.Menubar.ts:1285 src/control/Control.Menubar.ts:1334
+#: src/control/Control.Menubar.ts:689 src/control/Control.Menubar.ts:860
+#: src/control/Control.Menubar.ts:1175 src/control/Control.Menubar.ts:1230
+#: src/control/Control.Menubar.ts:1286 src/control/Control.Menubar.ts:1335
 msgid "Share..."
 msgstr "分享..."
 
 #: src/control/Control.Menubar.ts:138 src/control/Control.Menubar.ts:480
-#: src/control/Control.Menubar.ts:690 src/control/Control.Menubar.ts:860
-#: src/control/Control.Menubar.ts:1175 src/control/Control.Menubar.ts:1230
-#: src/control/Control.Menubar.ts:1287 src/control/Control.Menubar.ts:1335
+#: src/control/Control.Menubar.ts:691 src/control/Control.Menubar.ts:861
+#: src/control/Control.Menubar.ts:1176 src/control/Control.Menubar.ts:1231
+#: src/control/Control.Menubar.ts:1288 src/control/Control.Menubar.ts:1336
 msgid "See revision history"
 msgstr "查看修订历史"
 
 #: src/control/Control.Menubar.ts:139 src/control/Control.Menubar.ts:481
-#: src/control/Control.Menubar.ts:691 src/control/Control.Menubar.ts:861
-#: src/control/Control.Menubar.ts:1179 src/control/Control.Menubar.ts:1234
-#: src/control/Control.Menubar.ts:1289 src/control/Control.Menubar.ts:1341
+#: src/control/Control.Menubar.ts:692 src/control/Control.Menubar.ts:862
+#: src/control/Control.Menubar.ts:1180 src/control/Control.Menubar.ts:1235
+#: src/control/Control.Menubar.ts:1290 src/control/Control.Menubar.ts:1342
 msgid "Download as"
 msgstr "下载为"
 
 #: src/control/Control.Menubar.ts:146 src/control/Control.Menubar.ts:491
-#: src/control/Control.Menubar.ts:696 src/control/Control.Menubar.ts:871
-#: src/control/Control.Toolbar.js:1242
+#: src/control/Control.Menubar.ts:697 src/control/Control.Menubar.ts:872
+#: src/control/Control.Toolbar.js:1266
 msgid "Close document"
 msgstr "关闭文档"
 
 #: src/control/Control.Menubar.ts:151 src/control/Control.Menubar.ts:496
-#: src/control/Control.Menubar.ts:701 src/control/Control.Menubar.ts:876
-#: src/control/Control.Menubar.ts:1183 src/control/Control.Menubar.ts:1238
-#: src/control/Control.Menubar.ts:1293 src/control/Control.Menubar.ts:1345
+#: src/control/Control.Menubar.ts:702 src/control/Control.Menubar.ts:877
+#: src/control/Control.Menubar.ts:1184 src/control/Control.Menubar.ts:1239
+#: src/control/Control.Menubar.ts:1294 src/control/Control.Menubar.ts:1346
 #: src/control/Control.NotebookbarCalc.js:349
 #: src/control/Control.NotebookbarDraw.js:375
 #: src/control/Control.NotebookbarImpress.js:414
@@ -4156,7 +4179,7 @@ msgid "Repair"
 msgstr "修复"
 
 #: src/control/Control.Menubar.ts:160 src/control/Control.Menubar.ts:505
-#: src/control/Control.Menubar.ts:710 src/control/Control.Menubar.ts:885
+#: src/control/Control.Menubar.ts:711 src/control/Control.Menubar.ts:886
 msgid "Find"
 msgstr "查找"
 
@@ -4165,13 +4188,13 @@ msgid "Compare Changes"
 msgstr "比较更改"
 
 #: src/control/Control.Menubar.ts:183 src/control/Control.Menubar.ts:509
-#: src/control/Control.Menubar.ts:515 src/control/Control.Menubar.ts:714
-#: src/control/Control.Menubar.ts:720 src/control/Control.Menubar.ts:899
-#: src/control/Control.Menubar.ts:905
+#: src/control/Control.Menubar.ts:515 src/control/Control.Menubar.ts:715
+#: src/control/Control.Menubar.ts:721 src/control/Control.Menubar.ts:900
+#: src/control/Control.Menubar.ts:906
 #: src/control/Control.NotebookbarCalc.js:1625
 #: src/control/Control.NotebookbarDraw.js:474
 #: src/control/Control.NotebookbarImpress.js:653
-#: src/control/Control.StatusBar.js:296
+#: src/control/Control.StatusBar.js:313
 msgid "Reset zoom"
 msgstr "重置缩放"
 
@@ -4180,30 +4203,30 @@ msgid "Fit to Screen"
 msgstr "适应屏幕"
 
 #: src/control/Control.Menubar.ts:192 src/control/Control.Menubar.ts:521
-#: src/control/Control.Menubar.ts:726 src/control/Control.Menubar.ts:908
+#: src/control/Control.Menubar.ts:727 src/control/Control.Menubar.ts:909
 msgid "Toggle UI Mode"
 msgstr "切换界面模式"
 
 #: src/control/Control.Menubar.ts:193
 #: src/control/Control.NotebookbarWriter.js:1851
-#: src/control/Control.StatusBar.js:281 src/control/Control.StatusBar.js:282
+#: src/control/Control.StatusBar.js:298 src/control/Control.StatusBar.js:299
 msgid "Multi Page View"
 msgstr "多页面视图"
 
 #: src/control/Control.Menubar.ts:195 src/control/Control.Menubar.ts:523
-#: src/control/Control.Menubar.ts:731 src/control/Control.Menubar.ts:909
+#: src/control/Control.Menubar.ts:732 src/control/Control.Menubar.ts:910
 msgid "Show Status Bar"
 msgstr "显示状态栏"
 
 #: src/control/Control.Menubar.ts:196 src/control/Control.Menubar.ts:529
-#: src/control/Control.Menubar.ts:732 src/control/Control.Menubar.ts:910
+#: src/control/Control.Menubar.ts:733 src/control/Control.Menubar.ts:911
 msgid "Hide Menu Bar"
 msgstr "隐藏菜单栏"
 
 #: src/control/Control.Menubar.ts:198 src/control/Control.Menubar.ts:531
-#: src/control/Control.Menubar.ts:728 src/control/Control.Menubar.ts:912
-#: src/control/Control.Menubar.ts:1205 src/control/Control.Menubar.ts:1249
-#: src/control/Control.Menubar.ts:1304 src/control/Control.Menubar.ts:1356
+#: src/control/Control.Menubar.ts:729 src/control/Control.Menubar.ts:913
+#: src/control/Control.Menubar.ts:1206 src/control/Control.Menubar.ts:1250
+#: src/control/Control.Menubar.ts:1305 src/control/Control.Menubar.ts:1357
 #: src/control/Control.NotebookbarCalc.js:1714
 #: src/control/Control.NotebookbarDraw.js:599
 #: src/control/Control.NotebookbarImpress.js:806
@@ -4211,31 +4234,31 @@ msgstr "隐藏菜单栏"
 msgid "Invert Background"
 msgstr "反转背景"
 
-#: src/control/Control.Menubar.ts:200 src/control/Control.Menubar.ts:915
+#: src/control/Control.Menubar.ts:200 src/control/Control.Menubar.ts:916
 #: src/control/Control.NotebookbarCalc.js:2915
 #: src/control/Control.NotebookbarWriter.js:1199
 msgid "Style list"
 msgstr "样式列表"
 
 #: src/control/Control.Menubar.ts:209 src/control/Control.Menubar.ts:543
-#: src/control/Control.Menubar.ts:735 src/control/Control.Menubar.ts:926
-#: src/control/Control.Menubar.ts:1398 src/control/Control.Menubar.ts:1448
-#: src/control/Control.Menubar.ts:1462 src/control/Control.Menubar.ts:1485
+#: src/control/Control.Menubar.ts:736 src/control/Control.Menubar.ts:927
+#: src/control/Control.Menubar.ts:1399 src/control/Control.Menubar.ts:1449
+#: src/control/Control.Menubar.ts:1463 src/control/Control.Menubar.ts:1486
 msgid "Local Image..."
 msgstr "本地图像…"
 
 #: src/control/Control.Menubar.ts:213 src/control/Control.Menubar.ts:549
-#: src/control/Control.Menubar.ts:740 src/control/Control.Menubar.ts:934
+#: src/control/Control.Menubar.ts:741 src/control/Control.Menubar.ts:935
 msgid "Shapes ..."
 msgstr "图形 ..."
 
 #: src/control/Control.Menubar.ts:234 src/control/Control.Menubar.ts:236
-#: src/control/Control.Menubar.ts:1415 src/control/Control.Menubar.ts:1417
+#: src/control/Control.Menubar.ts:1416 src/control/Control.Menubar.ts:1418
 msgid "All"
 msgstr "所有"
 
 #: src/control/Control.Menubar.ts:246 src/control/Control.Menubar.ts:555
-#: src/control/Control.Menubar.ts:743 src/control/Control.Menubar.ts:941
+#: src/control/Control.Menubar.ts:744 src/control/Control.Menubar.ts:942
 #: src/control/Control.NotebookbarCalc.js:1962
 #: src/control/Control.NotebookbarDraw.js:1714
 #: src/control/Control.NotebookbarImpress.js:1746
@@ -4288,83 +4311,83 @@ msgstr "取消引用链接"
 msgid "Citation Preferences"
 msgstr "引用链接偏好"
 
-#: src/control/Control.Menubar.ts:413 src/control/Control.Menubar.ts:1437
+#: src/control/Control.Menubar.ts:413 src/control/Control.Menubar.ts:1438
 msgid "Insert Rich Text"
 msgstr "插入富文本"
 
-#: src/control/Control.Menubar.ts:414 src/control/Control.Menubar.ts:1438
+#: src/control/Control.Menubar.ts:414 src/control/Control.Menubar.ts:1439
 msgid "Insert Checkbox"
 msgstr "插入复选框"
 
-#: src/control/Control.Menubar.ts:415 src/control/Control.Menubar.ts:1439
+#: src/control/Control.Menubar.ts:415 src/control/Control.Menubar.ts:1440
 msgid "Insert Dropdown"
 msgstr "插入下拉列表"
 
-#: src/control/Control.Menubar.ts:416 src/control/Control.Menubar.ts:1440
+#: src/control/Control.Menubar.ts:416 src/control/Control.Menubar.ts:1441
 msgid "Insert Picture"
 msgstr "插入图片"
 
-#: src/control/Control.Menubar.ts:417 src/control/Control.Menubar.ts:1441
+#: src/control/Control.Menubar.ts:417 src/control/Control.Menubar.ts:1442
 msgid "Insert Date"
 msgstr "插入日期"
 
-#: src/control/Control.Menubar.ts:438 src/control/Control.Menubar.ts:1209
+#: src/control/Control.Menubar.ts:438 src/control/Control.Menubar.ts:1210
 #: src/control/Control.NotebookbarWriter.js:637
 msgid "Screen Reading"
 msgstr "屏幕阅读"
 
-#: src/control/Control.Menubar.ts:452 src/control/Control.Menubar.ts:665
-#: src/control/Control.Menubar.ts:833 src/control/Control.Menubar.ts:1151
+#: src/control/Control.Menubar.ts:452 src/control/Control.Menubar.ts:666
+#: src/control/Control.Menubar.ts:834 src/control/Control.Menubar.ts:1152
 #: src/control/Control.NotebookbarWriter.js:529
 msgid "Online Help"
 msgstr "在线帮助"
 
-#: src/control/Control.Menubar.ts:453 src/control/Control.Menubar.ts:666
-#: src/control/Control.Menubar.ts:834 src/control/Control.Menubar.ts:1152
+#: src/control/Control.Menubar.ts:453 src/control/Control.Menubar.ts:667
+#: src/control/Control.Menubar.ts:835 src/control/Control.Menubar.ts:1153
 #: src/control/Control.NotebookbarWriter.js:541
 msgid "Show tour"
 msgstr ""
 
-#: src/control/Control.Menubar.ts:455 src/control/Control.Menubar.ts:668
-#: src/control/Control.Menubar.ts:836 src/control/Control.Menubar.ts:1154
+#: src/control/Control.Menubar.ts:455 src/control/Control.Menubar.ts:669
+#: src/control/Control.Menubar.ts:837 src/control/Control.Menubar.ts:1155
 #: src/control/Control.NotebookbarWriter.js:555
 msgid "Keyboard shortcuts"
 msgstr "快捷键"
 
-#: src/control/Control.Menubar.ts:457 src/control/Control.Menubar.ts:670
-#: src/control/Control.Menubar.ts:838 src/control/Control.Menubar.ts:1156
+#: src/control/Control.Menubar.ts:457 src/control/Control.Menubar.ts:671
+#: src/control/Control.Menubar.ts:839 src/control/Control.Menubar.ts:1157
 #: src/control/Control.NotebookbarWriter.js:568
 msgid "Forum"
 msgstr "论坛"
 
-#: src/control/Control.Menubar.ts:458 src/control/Control.Menubar.ts:671
-#: src/control/Control.Menubar.ts:839 src/control/Control.Menubar.ts:1157
+#: src/control/Control.Menubar.ts:458 src/control/Control.Menubar.ts:672
+#: src/control/Control.Menubar.ts:840 src/control/Control.Menubar.ts:1158
 #: src/control/Control.NotebookbarWriter.js:580
 msgid "Report an issue"
 msgstr "报告问题"
 
-#: src/control/Control.Menubar.ts:459 src/control/Control.Menubar.ts:672
-#: src/control/Control.Menubar.ts:840 src/control/Control.Menubar.ts:1158
-#: src/control/Control.Menubar.ts:1218 src/control/Control.Menubar.ts:1274
-#: src/control/Control.Menubar.ts:1323 src/control/Control.Menubar.ts:1390
+#: src/control/Control.Menubar.ts:459 src/control/Control.Menubar.ts:673
+#: src/control/Control.Menubar.ts:841 src/control/Control.Menubar.ts:1159
+#: src/control/Control.Menubar.ts:1219 src/control/Control.Menubar.ts:1275
+#: src/control/Control.Menubar.ts:1324 src/control/Control.Menubar.ts:1391
 #: src/control/Control.NotebookbarWriter.js:593
 msgid "Latest Updates"
 msgstr "最新更新"
 
-#: src/control/Control.Menubar.ts:460 src/control/Control.Menubar.ts:673
-#: src/control/Control.Menubar.ts:841 src/control/Control.Menubar.ts:1159
-#: src/control/Control.Menubar.ts:1219 src/control/Control.Menubar.ts:1275
-#: src/control/Control.Menubar.ts:1324 src/control/Control.Menubar.ts:1391
+#: src/control/Control.Menubar.ts:460 src/control/Control.Menubar.ts:674
+#: src/control/Control.Menubar.ts:842 src/control/Control.Menubar.ts:1160
+#: src/control/Control.Menubar.ts:1220 src/control/Control.Menubar.ts:1276
+#: src/control/Control.Menubar.ts:1325 src/control/Control.Menubar.ts:1392
 #: src/control/Control.NotebookbarWriter.js:607
 msgid "Send Feedback"
 msgstr "发送反馈"
 
-#: src/control/Control.Menubar.ts:466 src/control/Control.Menubar.ts:679
-#: src/control/Control.Menubar.ts:847 src/control/Control.Menubar.ts:1165
+#: src/control/Control.Menubar.ts:466 src/control/Control.Menubar.ts:680
+#: src/control/Control.Menubar.ts:848 src/control/Control.Menubar.ts:1166
 msgid "Last modification"
 msgstr "最后修改"
 
-#: src/control/Control.Menubar.ts:478 src/control/Control.Menubar.ts:687
+#: src/control/Control.Menubar.ts:478 src/control/Control.Menubar.ts:688
 msgid "Save Comments"
 msgstr "保存批注"
 
@@ -4408,7 +4431,7 @@ msgstr "主视图"
 msgid "Local Multimedia..."
 msgstr "本地多媒体…"
 
-#: src/control/Control.Menubar.ts:587 src/control/Control.Menubar.ts:774
+#: src/control/Control.Menubar.ts:587 src/control/Control.Menubar.ts:775
 #: src/control/Control.NotebookbarDraw.js:1415
 #: src/control/Control.NotebookbarImpress.js:2330
 #: src/control/Control.NotebookbarImpress.js:2740
@@ -4424,7 +4447,7 @@ msgstr "从文件插入幻灯片..."
 msgid "Update Linked Slides..."
 msgstr "更新链接的幻灯片..."
 
-#: src/control/Control.Menubar.ts:645 src/control/Control.Menubar.ts:1273
+#: src/control/Control.Menubar.ts:645 src/control/Control.Menubar.ts:1274
 #: src/control/Control.PresentationBar.js:143
 msgid "Fullscreen presentation"
 msgstr "全屏演示"
@@ -4433,100 +4456,101 @@ msgstr "全屏演示"
 msgid "Present current slide"
 msgstr "从当前幻灯片开始演示"
 
-#: src/control/Control.Menubar.ts:647
-msgid "Present in new window"
-msgstr "在新窗口中显示"
-
-#: src/control/Control.Menubar.ts:649 src/slideshow/PresenterConsole.js:298
+#: src/control/Control.Menubar.ts:648 src/slideshow/PresenterConsole.js:298
 msgid "Presenter Console"
 msgstr "演示者控制台"
 
-#: src/control/Control.Menubar.ts:868
+#: src/control/Control.Menubar.ts:651
+#: src/control/Control.NotebookbarImpress.js:583
+msgid "Present in Window"
+msgstr "显示在窗口中"
+
+#: src/control/Control.Menubar.ts:869
 #: src/control/jsdialog/Definitions.Menu.ts:1604
 msgid "Active sheet"
 msgstr "活动工作表"
 
-#: src/control/Control.Menubar.ts:918
+#: src/control/Control.Menubar.ts:919
 #: src/control/Control.NotebookbarCalc.js:1596
 msgid "Focus Cell"
 msgstr "焦点单元格"
 
-#: src/control/Control.Menubar.ts:1015
+#: src/control/Control.Menubar.ts:1016
 msgid "Highlight cells with..."
 msgstr "高亮单元格条件…"
 
-#: src/control/Control.Menubar.ts:1016
+#: src/control/Control.Menubar.ts:1017
 #: src/control/jsdialog/Definitions.Menu.ts:1920
 msgid "Values greater than..."
 msgstr "值大于…"
 
-#: src/control/Control.Menubar.ts:1017
+#: src/control/Control.Menubar.ts:1018
 #: src/control/jsdialog/Definitions.Menu.ts:1924
 msgid "Values less than..."
 msgstr "值小于…"
 
-#: src/control/Control.Menubar.ts:1018
+#: src/control/Control.Menubar.ts:1019
 #: src/control/jsdialog/Definitions.Menu.ts:1928
 msgid "Values equal to..."
 msgstr "值等于…"
 
-#: src/control/Control.Menubar.ts:1019
+#: src/control/Control.Menubar.ts:1020
 #: src/control/jsdialog/Definitions.Menu.ts:1932
 msgid "Values between..."
 msgstr "值介于…"
 
-#: src/control/Control.Menubar.ts:1020
+#: src/control/Control.Menubar.ts:1021
 #: src/control/jsdialog/Definitions.Menu.ts:1936
 msgid "Values duplicate..."
 msgstr "值重复…"
 
-#: src/control/Control.Menubar.ts:1021
+#: src/control/Control.Menubar.ts:1022
 #: src/control/jsdialog/Definitions.Menu.ts:1940
 msgid "Containing text..."
 msgstr "包含文本…"
 
-#: src/control/Control.Menubar.ts:1023 src/control/Control.Menubar.ts:1033
+#: src/control/Control.Menubar.ts:1024 src/control/Control.Menubar.ts:1034
 #: src/control/jsdialog/Definitions.Menu.ts:1944
 #: src/control/jsdialog/Definitions.Menu.ts:1975
 msgid "More highlights..."
 msgstr "更多高亮条件…"
 
-#: src/control/Control.Menubar.ts:1025
+#: src/control/Control.Menubar.ts:1026
 msgid "Top/Bottom Rules..."
 msgstr "顶部/底部规则…"
 
-#: src/control/Control.Menubar.ts:1026
+#: src/control/Control.Menubar.ts:1027
 #: src/control/jsdialog/Definitions.Menu.ts:1951
 msgid "Top N elements..."
 msgstr "顶部 N 个元素…"
 
-#: src/control/Control.Menubar.ts:1027
+#: src/control/Control.Menubar.ts:1028
 #: src/control/jsdialog/Definitions.Menu.ts:1955
 msgid "Top N percent..."
 msgstr "顶部 N 百分比…"
 
-#: src/control/Control.Menubar.ts:1028
+#: src/control/Control.Menubar.ts:1029
 #: src/control/jsdialog/Definitions.Menu.ts:1959
 msgid "Bottom N elements..."
 msgstr "底部 N 个元素…"
 
-#: src/control/Control.Menubar.ts:1029
+#: src/control/Control.Menubar.ts:1030
 #: src/control/jsdialog/Definitions.Menu.ts:1963
 msgid "Bottom N percent..."
 msgstr "底部 N 百分比…"
 
-#: src/control/Control.Menubar.ts:1030
+#: src/control/Control.Menubar.ts:1031
 #: src/control/jsdialog/Definitions.Menu.ts:1967
 msgid "Above Average..."
 msgstr "超出平均…"
 
-#: src/control/Control.Menubar.ts:1031
+#: src/control/Control.Menubar.ts:1032
 #: src/control/jsdialog/Definitions.Menu.ts:1971
 msgid "Below Average..."
 msgstr "低于平均…"
 
-#: src/control/Control.Menubar.ts:1169 src/control/Control.Menubar.ts:1224
-#: src/control/Control.Menubar.ts:1280 src/control/Control.Menubar.ts:1329
+#: src/control/Control.Menubar.ts:1170 src/control/Control.Menubar.ts:1225
+#: src/control/Control.Menubar.ts:1281 src/control/Control.Menubar.ts:1330
 #: src/control/Control.MobileSearchBar.ts:30
 #: src/control/Control.NavigatorPanel.ts:651
 #: src/control/Control.NotebookbarCalc.js:1117
@@ -4541,51 +4565,51 @@ msgstr "低于平均…"
 msgid "Search"
 msgstr "搜索"
 
-#: src/control/Control.Menubar.ts:1211
+#: src/control/Control.Menubar.ts:1212
 #: src/control/Control.NotebookbarCalc.js:1182
 #: src/control/Control.NotebookbarWriter.js:1936
 msgid "Page Setup"
 msgstr "页面设置"
 
-#: src/control/Control.Menubar.ts:1338
+#: src/control/Control.Menubar.ts:1339
 msgid "Define print area"
 msgstr "自定义打印区域"
 
-#: src/control/Control.Menubar.ts:1339
+#: src/control/Control.Menubar.ts:1340
 msgid "Remove print area"
 msgstr "删除打印区域"
 
-#: src/control/Control.Menubar.ts:1704 src/control/Control.StatusBar.js:727
+#: src/control/Control.Menubar.ts:1705 src/control/Control.StatusBar.js:765
 msgid "Reset to Default Language"
 msgstr "重置为默认语言"
 
-#: src/control/Control.Menubar.ts:1735 src/control/Control.Menubar.ts:1736
-#: src/control/Control.Menubar.ts:1737 src/control/Control.Toolbar.js:257
+#: src/control/Control.Menubar.ts:1736 src/control/Control.Menubar.ts:1737
+#: src/control/Control.Menubar.ts:1738 src/control/Control.Toolbar.js:257
 #: src/control/jsdialog/Definitions.Menu.ts:2204
 msgid "More..."
 msgstr "更多…"
 
-#: src/control/Control.Menubar.ts:2070
+#: src/control/Control.Menubar.ts:2078
 msgid "Menu"
 msgstr "菜单"
 
-#: src/control/Control.Menubar.ts:2291
+#: src/control/Control.Menubar.ts:2299
 msgid "Use Compact view"
 msgstr "使用紧凑视图"
 
-#: src/control/Control.Menubar.ts:2293
+#: src/control/Control.Menubar.ts:2301
 msgid "Use Tabbed view"
 msgstr "使用标签栏视图"
 
-#: src/control/Control.Menubar.ts:2579
+#: src/control/Control.Menubar.ts:2587
 msgid "Insert Shape"
 msgstr "插入形状"
 
-#: src/control/Control.Menubar.ts:2669
+#: src/control/Control.Menubar.ts:2677
 msgid "The signature line can now be moved or resized as needed."
 msgstr "签名行现在可以根据需要移动或调整大小。"
 
-#: src/control/Control.Menubar.ts:2674
+#: src/control/Control.Menubar.ts:2682
 msgid "Finish electronic signing"
 msgstr "完成电子签名"
 
@@ -4640,7 +4664,7 @@ msgstr "查找和替换"
 
 #: src/control/Control.NavigatorPanel.ts:637
 #: src/control/jsdialog/Widget.Combobox.js:497
-#: src/control/jsdialog/Widget.TreeView.ts:2612
+#: src/control/jsdialog/Widget.TreeView.ts:2621
 msgid "Search..."
 msgstr "搜索..."
 
@@ -4969,25 +4993,25 @@ msgstr "题注"
 msgid "Animations"
 msgstr "动画"
 
-#: src/control/Control.Notebookbar.js:650
+#: src/control/Control.Notebookbar.js:656
 #: src/control/Control.NotebookbarWriter.js:3077
 msgid "Fill Color (Transparent Pictures Only)"
 msgstr ""
 
-#: src/control/Control.Notebookbar.js:661
+#: src/control/Control.Notebookbar.js:667
 #, fuzzy
 msgid "Line"
 msgstr "链接"
 
-#: src/control/Control.Notebookbar.js:704
+#: src/control/Control.Notebookbar.js:710
 msgid "Line Width"
 msgstr "线宽"
 
-#: src/control/Control.Notebookbar.js:737
+#: src/control/Control.Notebookbar.js:743
 msgid "Transparency:"
 msgstr ""
 
-#: src/control/Control.Notebookbar.js:756
+#: src/control/Control.Notebookbar.js:762
 msgid "Thickness:"
 msgstr ""
 
@@ -5087,7 +5111,7 @@ msgstr "迷你图"
 #: src/control/Control.NotebookbarDraw.js:141
 #: src/control/Control.NotebookbarImpress.js:178
 #: src/control/Control.NotebookbarWriter.js:149
-#: src/control/Control.ServerAuditDialog.ts:347
+#: src/control/Control.ServerAuditDialog.ts:360
 msgid "Help"
 msgstr "帮助"
 
@@ -5224,7 +5248,7 @@ msgid "Bad"
 msgstr "坏"
 
 #: src/control/Control.NotebookbarCalc.js:1104
-#: src/control/PermissionMode.ts:229
+#: src/control/PermissionMode.ts:319
 msgid "Editing"
 msgstr "编辑"
 
@@ -5330,7 +5354,7 @@ msgstr "冻结"
 #: src/control/Control.NotebookbarDraw.js:453
 #: src/control/Control.NotebookbarImpress.js:639
 #: src/control/Control.NotebookbarWriter.js:1758
-#: src/control/Control.StatusBar.js:150
+#: src/control/Control.StatusBar.js:155
 msgid "Zoom"
 msgstr "缩放"
 
@@ -5576,10 +5600,6 @@ msgstr "显示您的备注、下一张幻灯片和计时器"
 msgid "Present"
 msgstr "演示"
 
-#: src/control/Control.NotebookbarImpress.js:583
-msgid "Present in Window"
-msgstr "显示在窗口中"
-
 #: src/control/Control.NotebookbarImpress.js:584
 msgid "Plays inside the document window. Starts at slide 1"
 msgstr "在文档窗口内播放。从第 1 张幻灯片开始"
@@ -5747,96 +5767,182 @@ msgstr "查看更改"
 msgid "Element categories"
 msgstr ""
 
-#: src/control/Control.ContextToolbar.ts:154
+#: src/control/Control.ContextToolbar.ts:168
 msgid "Switch to Editing"
 msgstr "切换到编辑模式"
 
-#: src/control/Control.PartsPreview.js:452
+#: src/control/Control.PartsPreview.js:459
 msgid "Show everyone on this slide"
 msgstr "显示此幻灯片上的所有人"
 
-#: src/control/Control.PartsPreview.js:618
-#: src/control/Control.PartsPreview.js:693 src/map/Clipboard.js:1581
+#: src/control/Control.PartsPreview.js:625
+#: src/control/Control.PartsPreview.js:700 src/map/Clipboard.js:1581
 msgid "Paste"
 msgstr "粘贴"
 
-#: src/control/Control.PartsPreview.js:757
+#: src/control/Control.PartsPreview.js:764
 msgid "Unlink Slide"
 msgstr "取消链接幻灯片"
 
-#: src/control/Control.PartsPreview.js:779
+#: src/control/Control.PartsPreview.js:786
 msgid "Add Section"
 msgstr "添加节"
 
-#: src/control/Control.PartsPreview.js:896
+#: src/control/Control.PartsPreview.js:903
 msgid "with 1 other"
 msgid_plural "with %n others"
 msgstr[0] "与另外 %n 人一起"
 
-#: src/control/Control.PartsPreview.js:906
+#: src/control/Control.PartsPreview.js:913
 msgid "with %1"
 msgstr "与 %1 一起"
 
-#: src/control/Control.PartsPreview.js:907
+#: src/control/Control.PartsPreview.js:914
 msgid "with %1 and 1 other"
 msgid_plural "with %1 and %n others"
 msgstr[0] "与 %1 和另外 %n 人一起"
 
-#: src/control/Control.PartsPreview.js:937
-msgid "preview of page %1, linked to %2 in %3"
-msgstr "页面 %1 的预览，已链接到 %3 中的 %2"
-
-#: src/control/Control.PartsPreview.js:941
-msgid "Slide %1, linked to %2 in %3"
-msgstr "幻灯片 %1，已链接到 %3 中的 %2"
-
-#: src/control/Control.PartsPreview.js:951
-msgid "preview of page %1, linked to %2"
-msgstr "页面 %1 的预览，已链接到 %2"
-
 #: src/control/Control.PartsPreview.js:955
-msgid "Slide %1, linked to %2"
-msgstr "幻灯片 %1，已链接到 %2"
-
-#: src/control/Control.PartsPreview.js:961
 msgid "preview of page %1"
 msgstr "页面预览 %1"
 
-#: src/control/Control.PartsPreview.js:1307
-#: src/control/Control.PartsPreview.js:1439
+#: src/control/Control.PartsPreview.js:970
+msgid "preview of page %1, %3 is missing"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:971
+msgid "Slide %1, %3 is missing"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:975
+#, fuzzy
+msgid "preview of page %1, not found in %3"
+msgstr "页面 %1 的预览，已链接到 %3 中的 %2"
+
+#: src/control/Control.PartsPreview.js:976
+msgid "Slide %1, not found in %3"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:980
+msgid "preview of page %1, no access to %3"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:981
+msgid "Slide %1, no access to %3"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:985
+msgid "preview of page %1, could not open %3"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:986
+msgid "Slide %1, could not open %3"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:991
+msgid "preview of page %1, %2 changed in %3"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:992
+msgid "Slide %1, %2 changed in %3"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:995
+#, fuzzy
+msgid "preview of page %1, changed in %3"
+msgstr "页面 %1 的预览，已链接到 %2"
+
+#: src/control/Control.PartsPreview.js:996
+msgid "Slide %1, changed in %3"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:1000
+msgid "preview of page %1, %3 is disconnected"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:1001
+msgid "Slide %1, %3 is disconnected"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:1005
+msgid "preview of page %1, linked to %2 in %3"
+msgstr "页面 %1 的预览，已链接到 %3 中的 %2"
+
+#: src/control/Control.PartsPreview.js:1006
+msgid "Slide %1, linked to %2 in %3"
+msgstr "幻灯片 %1，已链接到 %3 中的 %2"
+
+#: src/control/Control.PartsPreview.js:1009
+msgid "preview of page %1, linked to %2"
+msgstr "页面 %1 的预览，已链接到 %2"
+
+#: src/control/Control.PartsPreview.js:1010
+msgid "Slide %1, linked to %2"
+msgstr "幻灯片 %1，已链接到 %2"
+
+#: src/control/Control.PartsPreview.js:1233
+msgid "Linked to a section of %1 that is missing"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:1235
+msgid "Linked to a section of %1 that has changed"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:1237
+msgid "Linked to a section of %1, disconnected"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:1238
+msgid "Linked to a section of %1"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:1382
+#: src/control/Control.PartsPreview.js:1549
 msgid "Rename Section"
 msgstr "重命名节"
 
-#: src/control/Control.PartsPreview.js:1314
+#: src/control/Control.PartsPreview.js:1389
 msgid "Remove Section"
 msgstr "删除节"
 
-#: src/control/Control.PartsPreview.js:1322
+#: src/control/Control.PartsPreview.js:1397
 msgid "Remove Section & Slides"
 msgstr "删除分区和幻灯片"
 
-#: src/control/Control.PartsPreview.js:1331
+#: src/control/Control.PartsPreview.js:1406
 msgid "Move Section Up"
 msgstr "上移节"
 
-#: src/control/Control.PartsPreview.js:1340
+#: src/control/Control.PartsPreview.js:1415
 msgid "Move Section Down"
 msgstr "下移节"
 
-#: src/control/Control.PartsPreview.js:1349
+#: src/control/Control.PartsPreview.js:1426
+msgid "Update Section"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:1434
+msgid "Unlink Section"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:1441
+msgid "Unlink Section & Slides"
+msgstr ""
+
+#: src/control/Control.PartsPreview.js:1450
 msgid "Collapse All Sections"
 msgstr "折叠所有节"
 
-#: src/control/Control.PartsPreview.js:1357
+#: src/control/Control.PartsPreview.js:1458
 msgid "Expand All Sections"
 msgstr "展开所有节"
 
-#: src/control/Control.PartsPreview.js:1391 src/docdispatcher.ts:981
+#: src/control/Control.PartsPreview.js:1492 src/docdispatcher.ts:1001
 msgid "Delete section \"%1\" and its %n slide?"
 msgid_plural "Delete section \"%1\" and its %n slides?"
 msgstr[0] "删除分区“%1”及其 %n 张幻灯片？"
 
-#: src/control/Control.PartsPreview.js:1440
+#: src/control/Control.PartsPreview.js:1550
 msgid "Enter new section name:"
 msgstr "输入新节名称："
 
@@ -5844,265 +5950,294 @@ msgstr "输入新节名称："
 msgid "Import your slides"
 msgstr "导入您的幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:680
+#: src/control/Control.SlideImportPane.tsx:711
 msgid "Checking..."
 msgstr "正在检查……"
 
-#: src/control/Control.SlideImportPane.tsx:682
-#: src/control/Control.SlideLinkToolbar.tsx:165
+#: src/control/Control.SlideImportPane.tsx:713
+#: src/control/Control.SlideLinkToolbar.tsx:194
 msgid "Missing"
 msgstr "缺失"
 
-#: src/control/Control.SlideImportPane.tsx:684
-#: src/control/Control.SlideLinkToolbar.tsx:163
+#: src/control/Control.SlideImportPane.tsx:715
+#: src/control/Control.SlideLinkToolbar.tsx:192
 msgid "No access"
 msgstr "无访问权限"
 
-#: src/control/Control.SlideImportPane.tsx:686
+#: src/control/Control.SlideImportPane.tsx:717
 msgid "Could not open"
 msgstr "无法打开"
 
-#: src/control/Control.SlideImportPane.tsx:692
+#: src/control/Control.SlideImportPane.tsx:723
 msgid "{0} changed"
 msgstr "{0} 已更改"
 
-#: src/control/Control.SlideImportPane.tsx:694
-#: src/control/Control.SlideLinkToolbar.tsx:115
+#: src/control/Control.SlideImportPane.tsx:725
+#: src/control/Control.SlideLinkToolbar.tsx:134
 msgid "Linked"
 msgstr "已链接"
 
-#: src/control/Control.SlideImportPane.tsx:697
-#: src/control/Control.SlideImportPane.tsx:1442
+#: src/control/Control.SlideImportPane.tsx:728
+#: src/control/Control.SlideImportPane.tsx:1567
 msgid "Not linked"
 msgstr "未链接"
 
-#: src/control/Control.SlideImportPane.tsx:740
-#: src/control/Control.SlideImportPane.tsx:759
+#: src/control/Control.SlideImportPane.tsx:771
+#: src/control/Control.SlideImportPane.tsx:790
 msgid "Reading the slides..."
 msgstr "正在读取幻灯片..."
 
-#: src/control/Control.SlideImportPane.tsx:742
+#: src/control/Control.SlideImportPane.tsx:773
 msgid "Looking for the file..."
 msgstr ""
 
-#: src/control/Control.SlideImportPane.tsx:745
+#: src/control/Control.SlideImportPane.tsx:776
 msgid ""
 "The slides are in this presentation. You do not have permission to open the "
 "file they came from."
 msgstr ""
 
-#: src/control/Control.SlideImportPane.tsx:749
+#: src/control/Control.SlideImportPane.tsx:780
 msgid ""
 "The slides are in this presentation. Looking for the file they came from "
 "did not work this time."
 msgstr ""
 
-#: src/control/Control.SlideImportPane.tsx:752
+#: src/control/Control.SlideImportPane.tsx:783
 msgid ""
 "The slides are in this presentation. The file they came from is no longer "
 "here."
 msgstr "这些幻灯片已存在于此演示文稿中。但它们原本来自的文件已无法找到。"
 
-#: src/control/Control.SlideImportPane.tsx:756
+#: src/control/Control.SlideImportPane.tsx:787
 msgid "This file is here. You do not have permission to open it."
 msgstr "此文件仍然存在，但您没有权限打开它。"
 
-#: src/control/Control.SlideImportPane.tsx:758
+#: src/control/Control.SlideImportPane.tsx:789
 msgid "This file could not be read this time."
 msgstr "无法读取此文件。"
 
-#: src/control/Control.SlideImportPane.tsx:769
-#: src/control/Control.SlideImportPane.tsx:1292
+#: src/control/Control.SlideImportPane.tsx:800
+#: src/control/Control.SlideImportPane.tsx:1417
 msgid "Look again"
 msgstr ""
 
-#: src/control/Control.SlideImportPane.tsx:774
-#: src/control/Control.SlideImportPane.tsx:1297
+#: src/control/Control.SlideImportPane.tsx:805
+#: src/control/Control.SlideImportPane.tsx:1422
 msgid "Locate file"
 msgstr "定位文件"
 
-#: src/control/Control.SlideImportPane.tsx:783
-#: src/control/Control.SlideImportPane.tsx:1316
+#: src/control/Control.SlideImportPane.tsx:814
+#: src/control/Control.SlideImportPane.tsx:1441
 msgid "Reload slides"
 msgstr "重新加载幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:857
+#: src/control/Control.SlideImportPane.tsx:888
 msgid "1 slide inserted"
 msgstr "已插入 1 张幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:858
+#: src/control/Control.SlideImportPane.tsx:889
 msgid "{0} slides inserted"
 msgstr "已插入 {0} 张幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:865
+#: src/control/Control.SlideImportPane.tsx:896
 msgid "Slide {0}"
 msgstr "幻灯片 {0}"
 
-#: src/control/Control.SlideImportPane.tsx:870
+#: src/control/Control.SlideImportPane.tsx:901
 msgid "Insert slides"
 msgstr "插入幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:878
+#: src/control/Control.SlideImportPane.tsx:904
+msgid "Insert section \"{0}\""
+msgstr ""
+
+#: src/control/Control.SlideImportPane.tsx:912
 msgid "Insert {0} from {1}"
 msgstr "从 {1} 插入 {0}"
 
-#: src/control/Control.SlideImportPane.tsx:881
+#: src/control/Control.SlideImportPane.tsx:915
 msgid "Insert 1 slide"
 msgstr "插入%n张幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:882
+#: src/control/Control.SlideImportPane.tsx:916
 msgid "Insert {0} slides"
 msgstr "插入 {0} 张幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:914
+#: src/control/Control.SlideImportPane.tsx:972
+msgid "How the section goes in"
+msgstr ""
+
+#: src/control/Control.SlideImportPane.tsx:977
+msgid "Insert as section \"{0}\""
+msgstr ""
+
+#: src/control/Control.SlideImportPane.tsx:983
+msgid "Insert as separate slides"
+msgstr ""
+
+#: src/control/Control.SlideImportPane.tsx:989
+msgid "Linked to its section in {0}. Update Links brings in later changes."
+msgstr ""
+
+#: src/control/Control.SlideImportPane.tsx:1038
 msgid "{0} of {1}"
 msgstr "{0}，共 {1}"
 
-#: src/control/Control.SlideImportPane.tsx:917
-#: src/control/Control.SlideImportPane.tsx:1688
+#: src/control/Control.SlideImportPane.tsx:1041
+#: src/control/Control.SlideImportPane.tsx:1815
 msgid "{0} slides"
 msgstr "{0} 张幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:924
+#: src/control/Control.SlideImportPane.tsx:1048
 msgid "Inserts at the end"
 msgstr "插入到末尾"
 
-#: src/control/Control.SlideImportPane.tsx:925
+#: src/control/Control.SlideImportPane.tsx:1049
 msgid "Inserts after slide {0}"
 msgstr "插入到幻灯片 {0} 之后"
 
-#: src/control/Control.SlideImportPane.tsx:929
+#: src/control/Control.SlideImportPane.tsx:1053
 msgid "Opening file..."
 msgstr "正在打开文件..."
 
-#: src/control/Control.SlideImportPane.tsx:930
+#: src/control/Control.SlideImportPane.tsx:1054
 msgid "Inserting slides..."
 msgstr "正在插入幻灯片..."
 
-#: src/control/Control.SlideImportPane.tsx:1013
+#: src/control/Control.SlideImportPane.tsx:1137
 msgid "Import slides"
 msgstr "导入幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:1019
-#: src/control/Control.SlideImportPane.tsx:1020
+#: src/control/Control.SlideImportPane.tsx:1143
+#: src/control/Control.SlideImportPane.tsx:1144
 msgid "Close slide import"
 msgstr "关闭幻灯片导入面板"
 
-#: src/control/Control.SlideImportPane.tsx:1035
+#: src/control/Control.SlideImportPane.tsx:1159
 msgid "Add presentation…"
 msgstr "添加演示文稿…"
 
-#: src/control/Control.SlideImportPane.tsx:1050
+#: src/control/Control.SlideImportPane.tsx:1174
 msgid "No presentations yet"
 msgstr "暂无演示文稿"
 
-#: src/control/Control.SlideImportPane.tsx:1054
+#: src/control/Control.SlideImportPane.tsx:1178
 msgid ""
 "Add a presentation to browse its slides and insert them into this deck."
 msgstr "添加演示文稿以浏览其幻灯片并将它们插入到当前演示文稿中。"
 
-#: src/control/Control.SlideImportPane.tsx:1087
+#: src/control/Control.SlideImportPane.tsx:1211
 msgid "Hide all slides"
 msgstr "隐藏所有幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:1087
+#: src/control/Control.SlideImportPane.tsx:1211
 msgid "Show all slides"
 msgstr "显示所有幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:1119
-#: src/control/Control.SlideImportPane.tsx:1120
+#: src/control/Control.SlideImportPane.tsx:1243
+#: src/control/Control.SlideImportPane.tsx:1244
 msgid "Filter presentations"
 msgstr "筛选演示文稿"
 
-#: src/control/Control.SlideImportPane.tsx:1148
+#: src/control/Control.SlideImportPane.tsx:1272
 msgid "Slide sources"
 msgstr "幻灯片来源"
 
-#: src/control/Control.SlideImportPane.tsx:1156
+#: src/control/Control.SlideImportPane.tsx:1280
 msgid "Presentations to import from"
 msgstr "可从中导入的演示文稿"
 
-#: src/control/Control.SlideImportPane.tsx:1225
+#: src/control/Control.SlideImportPane.tsx:1350
 msgid "{0} picked"
 msgstr "已选择 {0}"
 
-#: src/control/Control.SlideImportPane.tsx:1263
+#: src/control/Control.SlideImportPane.tsx:1388
 msgid "Actions for {0}"
 msgstr "{0} 的操作"
 
-#: src/control/Control.SlideImportPane.tsx:1307
+#: src/control/Control.SlideImportPane.tsx:1432
 msgid "Hide slides"
 msgstr "隐藏幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:1307
+#: src/control/Control.SlideImportPane.tsx:1432
 msgid "Show slides"
 msgstr "显示幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:1323
+#: src/control/Control.SlideImportPane.tsx:1448
 msgid "Select all slides"
 msgstr "选择所有幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:1331
+#: src/control/Control.SlideImportPane.tsx:1456
 msgid "Update the slides linked to this file"
 msgstr "更新链接到此文件的幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:1338
+#: src/control/Control.SlideImportPane.tsx:1463
 msgid "Remove from list"
 msgstr "从列表中移除"
 
-#: src/control/Control.SlideImportPane.tsx:1427
+#: src/control/Control.SlideImportPane.tsx:1552
 msgid "Slides in {0}"
 msgstr "{0} 中的幻灯片"
 
-#: src/control/Control.SlideImportPane.tsx:1441
+#: src/control/Control.SlideImportPane.tsx:1566
 msgid "Original design"
 msgstr "原始设计"
 
-#: src/control/Control.SlideImportPane.tsx:1444
+#: src/control/Control.SlideImportPane.tsx:1569
 msgid "Linked, follows the slide number"
 msgstr "已链接，按幻灯片编号定位"
 
-#: src/control/Control.SlideImportPane.tsx:1445
+#: src/control/Control.SlideImportPane.tsx:1570
 msgid "Linked, follows the slide"
 msgstr "已链接，跟随幻灯片本身"
 
-#: src/control/Control.SlideImportPane.tsx:1482
+#: src/control/Control.SlideImportPane.tsx:1607
 msgid "Keep original design"
 msgstr "保留原始设计"
 
-#: src/control/Control.SlideImportPane.tsx:1496
+#: src/control/Control.SlideImportPane.tsx:1622
 msgid "Stay linked to the source file"
 msgstr "保持与源文件的链接"
 
-#: src/control/Control.SlideImportPane.tsx:1534
+#: src/control/Control.SlideImportPane.tsx:1660
 msgid "Follow the slide, wherever it moves"
 msgstr "跟随幻灯片本身，无论其位置如何变化"
 
-#: src/control/Control.SlideImportPane.tsx:1536
+#: src/control/Control.SlideImportPane.tsx:1662
 msgid "Follow the slide number"
 msgstr "按幻灯片编号定位"
 
-#: src/control/Control.SlideImportPane.tsx:1694
+#: src/control/Control.SlideImportPane.tsx:1821
 msgid "Select the slides of {0}"
 msgstr "选择 {0} 中的幻灯片"
 
-#: src/control/Control.SlideLinkToolbar.tsx:102
+#: src/control/Control.SlideLinkToolbar.tsx:117
 msgid "Linked to {0} in {1}"
 msgstr "已链接到 {1} 中的 {0}"
 
-#: src/control/Control.SlideLinkToolbar.tsx:126
+#: src/control/Control.SlideLinkToolbar.tsx:120
+msgid "In a section linked to {0}"
+msgstr ""
+
+#: src/control/Control.SlideLinkToolbar.tsx:145
 msgid "Hide the actions for this linked slide"
 msgstr "隐藏此链接幻灯片的操作"
 
-#: src/control/Control.SlideLinkToolbar.tsx:127
+#: src/control/Control.SlideLinkToolbar.tsx:146
 msgid "Show the actions for this linked slide"
 msgstr "显示此链接幻灯片的操作"
 
-#: src/control/Control.SlideLinkToolbar.tsx:137
+#: src/control/Control.SlideLinkToolbar.tsx:156
 msgid "Unlink"
 msgstr "取消链接"
 
-#: src/control/Control.SlideLinkToolbar.tsx:161
+#: src/control/Control.SlideLinkToolbar.tsx:176
+#: src/slideimport/SlideLinks.ts:467
+msgid "Update section"
+msgstr ""
+
+#: src/control/Control.SlideLinkToolbar.tsx:190
 msgid "Not available"
 msgstr "不可用"
 
@@ -6110,78 +6245,133 @@ msgstr "不可用"
 msgid "Toggle section %1"
 msgstr "切换节 %1"
 
-#: src/slideimport/SlideImportSession.ts:255
+#: src/slideimport/SlideImportSession.ts:278
 msgid "The slides of the source could not be read."
 msgstr "无法读取源文件的幻灯片。"
 
-#: src/slideimport/SlideImportSession.ts:306
-#: src/slideimport/SlideImportSession.ts:315
+#: src/slideimport/SlideImportSession.ts:329
+#: src/slideimport/SlideImportSession.ts:338
 msgid "Inserting the slides failed."
 msgstr "插入幻灯片失败。"
 
-#: src/slideimport/SlideImportSession.ts:324
+#: src/slideimport/SlideImportSession.ts:347
 msgid "Importing slides failed."
 msgstr "导入幻灯片失败。"
 
-#: src/slideimport/SlideLinks.ts:235
+#: src/slideimport/SlideLinks.ts:370
 msgid "No slide of this presentation is linked to another file."
 msgstr "此演示文稿中没有幻灯片链接到其他文件。"
 
-#: src/slideimport/SlideLinks.ts:273
+#: src/slideimport/SlideLinks.ts:425
+msgid "The section cannot be updated, because its source is not available."
+msgstr ""
+
+#: src/slideimport/SlideLinks.ts:447
+msgid ""
+"One linked section cannot be updated, because its source is not available."
+msgstr ""
+
+#: src/slideimport/SlideLinks.ts:450
+msgid ""
+"{0} linked sections cannot be updated, because their sources are not "
+"available."
+msgstr ""
+
+#: src/slideimport/SlideLinks.ts:459
+msgid ""
+"The section will hold the slides that its section in {0} holds now. Changes "
+"made to these slides in this presentation will be lost."
+msgstr ""
+
+#: src/slideimport/SlideLinks.ts:462
+msgid ""
+"{0} linked sections will hold the slides that their sections in the source "
+"files hold now. Changes made to these slides in this presentation will be "
+"lost."
+msgstr ""
+
+#: src/slideimport/SlideLinks.ts:467
+msgid "Update sections"
+msgstr ""
+
+#: src/slideimport/SlideLinks.ts:534
 msgid "This slide is not linked to another file."
 msgstr "此幻灯片未链接到其他文件。"
 
-#: src/slideimport/SlideLinks.ts:430 src/slideimport/SlideLinks.ts:720
+#: src/slideimport/SlideLinks.ts:712 src/slideimport/SlideLinks.ts:1164
 msgid ""
 "{0} is not one of the documents this one is related to, so the server "
 "cannot read it."
 msgstr "{0} 不是此文档关联的文档之一，因此服务器无法读取它。"
 
-#: src/slideimport/SlideLinks.ts:454
-msgid "You do not have access to {0}, so its pages cannot be refreshed."
-msgstr "您没有 {0} 的访问权限，因此无法刷新其页面。"
-
-#: src/slideimport/SlideLinks.ts:455 src/slideimport/SlideLinks.ts:723
+#: src/slideimport/SlideLinks.ts:737 src/slideimport/SlideLinks.ts:999
+#: src/slideimport/SlideLinks.ts:1167
 msgid "{0} could not be read."
 msgstr "无法读取 {0}。"
 
-#: src/slideimport/SlideLinks.ts:557
+#: src/slideimport/SlideLinks.ts:742
+msgid "You do not have access to {0}, so the section cannot be updated."
+msgstr ""
+
+#: src/slideimport/SlideLinks.ts:745
+msgid "You do not have access to {0}, so its pages cannot be refreshed."
+msgstr "您没有 {0} 的访问权限，因此无法刷新其页面。"
+
+#: src/slideimport/SlideLinks.ts:860
 msgid "Cannot update the slides of {0}: source lacks the matching slides"
 msgstr "无法更新 {0} 的幻灯片：源文件缺少匹配的幻灯片"
 
-#: src/slideimport/SlideLinks.ts:560 src/slideimport/SlideLinks.ts:726
+#: src/slideimport/SlideLinks.ts:863 src/slideimport/SlideLinks.ts:1170
 msgid "The slides of {0} could not be read into this presentation."
 msgstr "无法将 {0} 的幻灯片读取到此演示文稿中。"
 
-#: src/slideimport/SlideLinks.ts:651
+#: src/slideimport/SlideLinks.ts:919
+msgid "The section was updated from {0}."
+msgstr ""
+
+#: src/slideimport/SlideLinks.ts:1059
+msgid "Cannot update the section: {0} no longer holds its source section."
+msgstr ""
+
+#: src/slideimport/SlideLinks.ts:1085
 msgid "Cannot update slide {0}: the source lacks matching slide"
 msgstr "无法更新幻灯片 {0}：源文件缺少匹配的幻灯片"
 
-#: src/slideimport/SlideLinks.ts:666
+#: src/slideimport/SlideLinks.ts:1100
 msgid "Unlinking the slide failed."
 msgstr "取消幻灯片链接失败。"
 
-#: src/slideimport/SlideLinks.ts:677 src/slideimport/SlideLinks.ts:738
+#: src/slideimport/SlideLinks.ts:1105
+#, fuzzy
+msgid "Unlinking the section failed."
+msgstr "取消幻灯片链接失败。"
+
+#: src/slideimport/SlideLinks.ts:1122
+#, fuzzy
+msgid "Updating the section from {0} failed."
+msgstr "更新 {0} 的幻灯片失败。"
+
+#: src/slideimport/SlideLinks.ts:1123 src/slideimport/SlideLinks.ts:1182
 msgid "Updating the slides of {0} failed."
 msgstr "更新 {0} 的幻灯片失败。"
 
-#: src/slideimport/SlideLinks.ts:692
+#: src/slideimport/SlideLinks.ts:1136
 msgid "No slide of {0} was updated."
 msgstr "{0} 中的幻灯片无需更新。"
 
-#: src/slideimport/SlideLinks.ts:696
+#: src/slideimport/SlideLinks.ts:1140
 msgid "1 slide updated from {0}."
 msgstr "已从 {0} 更新 1 张幻灯片。"
 
-#: src/slideimport/SlideLinks.ts:700
+#: src/slideimport/SlideLinks.ts:1144
 msgid "{0} slides updated from {1}."
 msgstr "已从 {1} 更新 {0} 张幻灯片。"
 
-#: src/slideimport/SlideLinks.ts:729
+#: src/slideimport/SlideLinks.ts:1173
 msgid "No slide of this presentation is linked to {0}."
 msgstr "此演示文稿中没有幻灯片链接到 {0}。"
 
-#: src/slideimport/SlideLinks.ts:735
+#: src/slideimport/SlideLinks.ts:1179
 msgid "Another update is still running. Ask for {0} again in a moment."
 msgstr "另一项更新仍在进行中。请稍后再尝试更新 {0}。"
 
@@ -6226,72 +6416,77 @@ msgstr "每个文档都已安全隔离（Linux capabilities 和 chroot）"
 msgid "System call security filtering enabled"
 msgstr "已启用系统调用安全过滤"
 
-#: src/control/Control.ServerAuditDialog.ts:115
+#: src/control/Control.ServerAuditDialog.ts:112
+msgid "The trusted WOPI hosts are configured"
+msgstr ""
+
+#: src/control/Control.ServerAuditDialog.ts:128
 msgid "Hardware resources are sufficient for optimal performance"
 msgstr "硬件配置足以提供最佳性能"
 
-#: src/control/Control.ServerAuditDialog.ts:128
+#: src/control/Control.ServerAuditDialog.ts:141
 msgid "Fast kit jail bind mounting enabled"
 msgstr "已启用快速 Kit jail 绑定挂载"
 
-#: src/control/Control.ServerAuditDialog.ts:133
+#: src/control/Control.ServerAuditDialog.ts:146
 msgid "Fast kit jail setup with landlock, nothing to copy or mount"
 msgstr "使用 Landlock 快速建立 kit jail，无需复制或挂载任何内容"
 
-#: src/control/Control.ServerAuditDialog.ts:146
+#: src/control/Control.ServerAuditDialog.ts:159
 msgid "Poorly performing proxying of all network requests."
 msgstr "所有网络请求的代理性能较差。"
 
-#: src/control/Control.ServerAuditDialog.ts:150
+#: src/control/Control.ServerAuditDialog.ts:163
 msgid "Direct network connection"
 msgstr "直接网络连接"
 
-#: src/control/Control.ServerAuditDialog.ts:156
+#: src/control/Control.ServerAuditDialog.ts:169
 msgid ""
 "Connected with the old WebSocket URL form, which is planned for removal. "
 "Check that your proxy passes the compact form through."
-msgstr "使用旧版 WebSocket URL "
-"形式连接，该形式计划移除。请检查您的代理是否透传紧凑形式。"
+msgstr ""
+"使用旧版 WebSocket URL 形式连接，该形式计划移除。请检查您的代理是否透传紧凑形"
+"式。"
 
-#: src/control/Control.ServerAuditDialog.ts:162
+#: src/control/Control.ServerAuditDialog.ts:175
 msgid "Connected with the compact WebSocket URL form"
 msgstr "使用紧凑 WebSocket URL 形式连接"
 
-#: src/control/Control.ServerAuditDialog.ts:171
+#: src/control/Control.ServerAuditDialog.ts:184
 msgid "The IsAdminUser property is not set by integration"
 msgstr "IsAdminUser 属性未被集成设置"
 
-#: src/control/Control.ServerAuditDialog.ts:177
+#: src/control/Control.ServerAuditDialog.ts:190
 msgid ""
 "Used deprecated is_admin field, integration should use IsAdminUser property "
 "instead"
 msgstr "使用了过时的 is_admin 字段，集成应该使用 IsAdminUser 属性"
 
-#: src/control/Control.ServerAuditDialog.ts:183
+#: src/control/Control.ServerAuditDialog.ts:196
 msgid "The IsAdminUser user property is set by integration"
 msgstr "IsAdminUser 属性已被集成设置"
 
-#: src/control/Control.ServerAuditDialog.ts:191
+#: src/control/Control.ServerAuditDialog.ts:204
 msgid "PostMessage API is initialized"
 msgstr "PostMessage API 已初始化"
 
-#: src/control/Control.ServerAuditDialog.ts:196
+#: src/control/Control.ServerAuditDialog.ts:209
 msgid "Integrator is not ready for PostMessage calls"
 msgstr "Integrator 尚未准备好为 PostMessage 调用"
 
-#: src/control/Control.ServerAuditDialog.ts:276
+#: src/control/Control.ServerAuditDialog.ts:289
 msgid "Document container started in {1} ms"
 msgstr "文档容器在 {1} 毫秒内启动"
 
-#: src/control/Control.ServerAuditDialog.ts:361
+#: src/control/Control.ServerAuditDialog.ts:374
 msgid "Alerts:"
 msgstr "警告："
 
-#: src/control/Control.ServerAuditDialog.ts:429
+#: src/control/Control.ServerAuditDialog.ts:442
 msgid "Check warnings of your server"
 msgstr "检查您服务器的安全警告"
 
-#: src/control/Control.ServerAuditDialog.ts:430
+#: src/control/Control.ServerAuditDialog.ts:443
 msgid "OPEN"
 msgstr "打开"
 
@@ -6321,82 +6516,82 @@ msgstr "插入工作表"
 msgid "Show sheet list"
 msgstr "显示工作表列表"
 
-#: src/control/Control.StatusBar.js:220
+#: src/control/Control.StatusBar.js:237
 #: src/control/jsdialog/Definitions.Menu.ts:184
 msgid "Average"
 msgstr "平均值"
 
-#: src/control/Control.StatusBar.js:221
+#: src/control/Control.StatusBar.js:238
 msgid "CountA"
 msgstr "计数 A"
 
-#: src/control/Control.StatusBar.js:222
+#: src/control/Control.StatusBar.js:239
 #: src/control/jsdialog/Definitions.Menu.ts:187
 msgid "Count"
 msgstr "计数"
 
-#: src/control/Control.StatusBar.js:223
+#: src/control/Control.StatusBar.js:240
 msgid "Maximum"
 msgstr "最大值"
 
-#: src/control/Control.StatusBar.js:224
+#: src/control/Control.StatusBar.js:241
 msgid "Minimum"
 msgstr "最小值"
 
-#: src/control/Control.StatusBar.js:225
+#: src/control/Control.StatusBar.js:242
 #: src/control/jsdialog/Definitions.Menu.ts:183
 msgid "Sum"
 msgstr "求和"
 
-#: src/control/Control.StatusBar.js:226
+#: src/control/Control.StatusBar.js:243
 msgid "Selection count"
 msgstr "选中范围计数"
 
-#: src/control/Control.StatusBar.js:294
+#: src/control/Control.StatusBar.js:311
 msgid "Zoom to Fit Slide"
 msgstr "缩放以适合幻灯片"
 
-#: src/control/Control.StatusBar.js:295
+#: src/control/Control.StatusBar.js:312
 msgid ""
 "Fit the page to the window width. Smart Zoom on open can be toggled in "
 "Options under File tab."
 msgstr "将页面适配到窗口宽度。打开时的智能缩放可在“文件”选项卡下的“选项”中切换。"
 
-#: src/control/Control.StatusBar.js:295
+#: src/control/Control.StatusBar.js:312
 msgid "Fit the page to the window width."
 msgstr "使页面适合窗口宽度。"
 
-#: src/control/Control.StatusBar.js:300
+#: src/control/Control.StatusBar.js:317
 msgid "Status Bar Menu"
 msgstr "状态栏菜单"
 
-#: src/control/Control.StatusBar.js:575
+#: src/control/Control.StatusBar.js:613
 msgid "The document is probably locked and has been opened as view-only"
 msgstr "文档可能已被锁定，已以只读方式打开"
 
-#: src/control/Control.StatusBar.js:584
+#: src/control/Control.StatusBar.js:622
 msgid ""
 "To prevent accidental changes, the author has set this file to open as view-"
 "only"
 msgstr "为防止意外的修改，作者已将文件设置为只读"
 
-#: src/control/Control.StatusBar.js:649
+#: src/control/Control.StatusBar.js:687
 msgid "Select multiple cells"
 msgstr "选择多个单元格"
 
-#: src/control/Control.StatusBar.js:666
+#: src/control/Control.StatusBar.js:704
 msgid "Selection mode: inactive"
 msgstr "选择模式：未激活"
 
-#: src/control/Control.StatusBar.js:744
+#: src/control/Control.StatusBar.js:782
 msgid "Set Language for All text"
 msgstr "为所有文本设置语言"
 
-#: src/control/Control.StatusBar.js:747
+#: src/control/Control.StatusBar.js:785
 msgid "Set Language for Paragraph"
 msgstr "为段落设置语言"
 
-#: src/control/Control.StatusBar.js:748
+#: src/control/Control.StatusBar.js:786
 msgid "Set Language for Selection"
 msgstr "为选中部分设置语言"
 
@@ -6456,17 +6651,17 @@ msgstr "取消保护工作表"
 msgid "Enter the password to unprotect the sheet"
 msgstr "输入密码以取消保护工作表"
 
-#: src/control/Control.Toolbar.js:1036
+#: src/control/Control.Toolbar.js:1060
 msgid ""
 "Conflict Undo/Redo with multiple users. Please use document repair to "
 "resolve"
 msgstr "多个用户之间的“撤销”/“恢复”操作发生冲突。请使用文档修复功能解决问题"
 
-#: src/control/Control.Toolbar.js:1071
+#: src/control/Control.Toolbar.js:1095
 msgid "Sheet recalculated in %1 ms"
 msgstr "工作表重算完成，耗时 %1 毫秒"
 
-#: src/control/Control.Toolbar.js:1072
+#: src/control/Control.Toolbar.js:1096
 msgid "Document recalculated in %1 ms"
 msgstr "文档重算完成，耗时 %1 毫秒"
 
@@ -6598,10 +6793,11 @@ msgstr "Zotero 警告"
 msgid ""
 "The document contains some citations which may be unreachable through web "
 "API. It may cause some problems while editing citations or bibliography."
-msgstr "该文档包含一些可能无法通过 Web API 访问的引用。 "
-"编辑引文或参考书目时可能会导致一些问题。"
+msgstr ""
+"该文档包含一些可能无法通过 Web API 访问的引用。 编辑引文或参考书目时可能会导"
+"致一些问题。"
 
-#: src/control/Control.Zotero.js:246 src/app/Socket.ts:2959
+#: src/control/Control.Zotero.js:246 src/app/Socket.ts:2962
 msgid "Loading..."
 msgstr "正在载入…"
 
@@ -6761,7 +6957,7 @@ msgstr "插入制表位"
 msgid "Delete tabstop"
 msgstr "删除制表位"
 
-#: src/control/Parts.js:583 src/control/Parts.js:587
+#: src/control/Parts.js:618 src/control/Parts.js:622
 msgid "Show sheets"
 msgstr "显示工作表"
 
@@ -6789,95 +6985,91 @@ msgstr "密码错误。请重试。"
 msgid "Document requires a password to edit."
 msgstr "文档需要密码才能编辑。"
 
-#: src/control/Permission.js:238
-msgid "Enter a file name"
-msgstr "输入文件名"
-
-#: src/control/Permission.js:439
+#: src/control/Permission.js:430
 msgid "Edit locally"
 msgstr "在本地编辑"
 
-#: src/control/Permission.js:440
+#: src/control/Permission.js:431
 msgid "Changes sync when you save"
 msgstr "保存时同步更改"
 
-#: src/control/Permission.js:446
+#: src/control/Permission.js:437
 msgid "Collaborative editing"
 msgstr "协作编辑"
 
-#: src/control/Permission.js:447 src/control/Permission.js:480
+#: src/control/Permission.js:438 src/control/Permission.js:471
 msgid "Edit together in real-time"
 msgstr "实时协同编辑"
 
-#: src/control/Permission.js:470
+#: src/control/Permission.js:461
 msgid "Keep viewing local copy"
 msgstr "继续查看本地副本"
 
-#: src/control/Permission.js:471
+#: src/control/Permission.js:462
 msgid "Continue with your version"
 msgstr "继续使用您的版本"
 
-#: src/control/Permission.js:479
+#: src/control/Permission.js:470
 msgid "Join collaborative editing"
 msgstr "加入协作编辑"
 
-#: src/control/Permission.js:505
+#: src/control/Permission.js:496
 msgid "Waiting for changes to be saved..."
 msgstr "正在等待保存更改…"
 
-#: src/control/Permission.js:597 src/control/Permission.js:647
+#: src/control/Permission.js:588 src/control/Permission.js:638
 msgid "How would you like to edit?"
 msgstr "您希望如何编辑？"
 
-#: src/control/Permission.js:598
+#: src/control/Permission.js:589
 msgid ""
 "Other users are editing this document. Choose how you'd like to continue:"
 msgstr "其他用户正在编辑此文档。请选择您希望如何继续："
 
-#: src/control/Permission.js:607
+#: src/control/Permission.js:598
 msgid "opened this document"
 msgstr ""
 
-#: src/control/Permission.js:608
+#: src/control/Permission.js:599
 msgid "{0} opened this document"
 msgstr ""
 
-#: src/control/Permission.js:609 src/control/Permission.js:625
+#: src/control/Permission.js:600 src/control/Permission.js:616
 msgid "Choose how you'd like to continue:"
 msgstr ""
 
-#: src/control/Permission.js:619
+#: src/control/Permission.js:610
 msgid "started editing"
 msgstr "开始编辑"
 
-#: src/control/Permission.js:620
+#: src/control/Permission.js:611
 msgid "{0} started editing"
 msgstr "{0} 开始编辑"
 
-#: src/control/Permission.js:630
+#: src/control/Permission.js:621
 msgid ""
 "Someone else is now editing this document. Choose how you'd like to "
 "continue:"
 msgstr "其他人现在正在编辑此文档。请选择您希望如何继续："
 
-#: src/control/Permission.js:648
+#: src/control/Permission.js:639
 msgid ""
 "Other users are viewing this document. Choose how you'd like to continue:"
 msgstr "其他用户正在查看此文档。请选择您希望如何继续："
 
-#: src/control/Permission.js:666
+#: src/control/Permission.js:657
 msgid "Save as ODF format"
 msgstr "保存为 ODF 格式"
 
-#: src/control/Permission.js:667
+#: src/control/Permission.js:658
 msgid "Continue editing"
 msgstr "继续编辑"
 
-#: src/control/Permission.js:667
+#: src/control/Permission.js:658
 msgid "Continue read only"
 msgstr "继续只读"
 
-#: src/control/Permission.js:680
+#: src/control/Permission.js:671
 msgid ""
 "This document may contain formatting or content that cannot be saved in the "
 "current file format."
@@ -7032,32 +7224,44 @@ msgstr "权限模式"
 msgid "Read-only"
 msgstr "只读"
 
-#: src/control/PermissionMode.ts:130
+#: src/control/PermissionMode.ts:124
 msgid "Viewing Mode"
 msgstr "查看模式"
 
-#: src/control/PermissionMode.ts:136
+#: src/control/PermissionMode.ts:130
 msgid "Editing Mode"
 msgstr "编辑模式"
 
-#: src/control/PermissionMode.ts:146 src/control/PermissionMode.ts:232
-#: src/control/PermissionMode.ts:238 src/control/PermissionMode.ts:244
+#: src/control/PermissionMode.ts:138
+msgid "Review Mode"
+msgstr ""
+
+#: src/control/PermissionMode.ts:156 src/control/PermissionMode.ts:322
+#: src/control/PermissionMode.ts:328 src/control/PermissionMode.ts:334
 msgid "Viewing"
 msgstr "查看中"
 
-#: src/control/jsdialog/Control.ContextMenu.ts:333
+#: src/control/PermissionMode.ts:319
+msgid "Reviewing"
+msgstr ""
+
+#: src/control/jsdialog/Control.ContextMenu.ts:386
 msgid "Save Image to Server"
 msgstr "保存图像到服务器"
 
-#: src/control/jsdialog/Control.ContextMenu.ts:435
+#: src/control/jsdialog/Control.ContextMenu.ts:405
+msgid "Fit slide to view"
+msgstr ""
+
+#: src/control/jsdialog/Control.ContextMenu.ts:505
 msgid "Paste Special"
 msgstr "选择性粘贴"
 
-#: src/control/jsdialog/Control.ContextMenu.ts:446
+#: src/control/jsdialog/Control.ContextMenu.ts:516
 msgid "Copy Cells"
 msgstr "复制单元格"
 
-#: src/control/jsdialog/Control.ContextMenu.ts:455
+#: src/control/jsdialog/Control.ContextMenu.ts:525
 msgid "Fill Series"
 msgstr "填充序列"
 
@@ -7736,11 +7940,11 @@ msgstr "行 %1"
 msgid "%1, %2"
 msgstr "%1，%2"
 
-#: src/control/jsdialog/Widget.TreeView.ts:2558
+#: src/control/jsdialog/Widget.TreeView.ts:2562
 msgid "Headings and objects that you add to the document will appear here"
 msgstr "您添加到文档中的标题和对象将显示在此处"
 
-#: src/control/jsdialog/Widget.TreeView.ts:2610
+#: src/control/jsdialog/Widget.TreeView.ts:2619
 msgid "Search items"
 msgstr "搜索项目"
 
@@ -7856,70 +8060,72 @@ msgstr "您没有编辑此文档的权限。"
 msgid "The document could not be made editable."
 msgstr "无法将此文档设为可编辑。"
 
-#: src/app/Socket.ts:2752 src/app/Socket.ts:2763
+#: src/app/Socket.ts:2755 src/app/Socket.ts:2766
 msgid "Missing Fonts"
 msgstr "缺失字体"
 
-#: src/app/Socket.ts:2801
+#: src/app/Socket.ts:2804
 msgid "Someone"
 msgstr "某人"
 
-#: src/app/Socket.ts:2803
+#: src/app/Socket.ts:2806
 msgid "{username} saved this document as {filename}. Do you want to join?"
 msgstr "{username} 将此文档保存为 {filename}。你想要加入吗？"
 
-#: src/app/Socket.ts:2826
+#: src/app/Socket.ts:2829
 msgid "The document is being renamed and will reload shortly"
 msgstr "文档正被重命名，即将重新加载"
 
-#: src/app/Socket.ts:2829
+#: src/app/Socket.ts:2832
 msgid "The document is switching to Offline mode and will reload shortly"
 msgstr "文档正切换到脱机模式，即将重新加载"
 
-#: src/app/Socket.ts:2959
+#: src/app/Socket.ts:2962
 msgid "Connecting..."
 msgstr "正在连接…"
 
-#: src/app/Socket.ts:2975
+#: src/app/Socket.ts:2978
 msgid "Server is shutting down"
 msgstr "服务器正在关闭"
 
-#: src/docdispatcher.ts:674
+#: src/docdispatcher.ts:680
 msgid "AI is not configured, contact your administrator"
 msgstr "未配置 AI，请联系管理员"
 
-#: src/docdispatcher.ts:979
+#: src/docdispatcher.ts:999
 msgid "Delete section"
 msgstr ""
 
-#: src/docdispatcher.ts:986
+#: src/docdispatcher.ts:1006
+#, fuzzy
 msgid "Delete slides"
-msgstr ""
+msgstr "删除%n个幻灯片"
 
-#: src/docdispatcher.ts:987
+#: src/docdispatcher.ts:1007
 #, fuzzy
 msgid "Delete %n slide?"
 msgid_plural "Delete %n slides?"
 msgstr[0] "删除%n个幻灯片"
 
-#: src/docdispatcher.ts:991
+#: src/docdispatcher.ts:1011
 msgid "Delete pages"
 msgstr ""
 
-#: src/docdispatcher.ts:992
+#: src/docdispatcher.ts:1012
+#, fuzzy
 msgid "Delete %n page?"
 msgid_plural "Delete %n pages?"
-msgstr[0] ""
+msgstr[0] "删除%n个幻灯片"
 
-#: src/docstate.ts:154
+#: src/docstate.ts:165
 msgid "Standard"
 msgstr "标准"
 
-#: src/docstate.ts:299
+#: src/docstate.ts:310
 msgid "Theme colors"
 msgstr "主题颜色"
 
-#: src/docstate.ts:300
+#: src/docstate.ts:311
 msgid "Document colors"
 msgstr "文档颜色"
 
@@ -7952,8 +8158,8 @@ msgid ""
 "when more than {docs} documents or {connections} connections are in use "
 "concurrently."
 msgstr ""
-"这是不受支持的 {productname} 版本。为了避免让人觉得它适合在企业中部署，"
-"当同时使用超过 {docs} 个文档或超过 {connections} 个连接时，就会出现这则消息。"
+"这是不受支持的 {productname} 版本。为了避免让人觉得它适合在企业中部署，当同时"
+"使用超过 {docs} 个文档或超过 {connections} 个连接时，就会出现这则消息。"
 
 #: src/errormessages.ts:24
 msgid "More information and support"
@@ -8015,7 +8221,8 @@ msgstr "您正要离开该文档。接下来的页面将在新的标签页打开
 msgid ""
 "Failed to load the document. This document is either malformed or is taking "
 "more resources than allowed. Please contact the administrator."
-msgstr "载入文档失败。可能是文档格式损坏，也可能是文档需要的资源超过限制。请联系系统"
+msgstr ""
+"载入文档失败。可能是文档格式损坏，也可能是文档需要的资源超过限制。请联系系统"
 "管理员。"
 
 #: src/errormessages.ts:54
@@ -8036,9 +8243,9 @@ msgid ""
 "storage and/or copy/paste problems. Expected serverId {0} for routeToken "
 "{1} but connected to serverId {2}"
 msgstr ""
-"您的 {productname} 集群似乎配置错误或扩展迅速 - 请联系您的系统管理员。 "
-"继续编辑可能会导致多个用户看不到对方、文档存储冲突和/或复制/粘贴问题。 "
-"RouteToken {1} 预期为 serverId {0}，但已连接到 serverId {2}"
+"您的 {productname} 集群似乎配置错误或扩展迅速 - 请联系您的系统管理员。 继续编"
+"辑可能会导致多个用户看不到对方、文档存储冲突和/或复制/粘贴问题。 RouteToken "
+"{1} 预期为 serverId {0}，但已连接到 serverId {2}"
 
 #: src/errormessages.ts:62
 msgid ""
@@ -8102,7 +8309,8 @@ msgstr "无法从存储中读取该文档，请尝试重新加载该文档。"
 msgid ""
 "Save failed due to no storage space left. The document will now be read-"
 "only. Please make sure enough disk space is available and try to save again."
-msgstr "无法保存该文档，存储空间不足。文档将只读。请确保有足够的磁盘空间并重新尝试保"
+msgstr ""
+"无法保存该文档，存储空间不足。文档将只读。请确保有足够的磁盘空间并重新尝试保"
 "存。"
 
 #: src/errormessages.ts:94
@@ -8110,7 +8318,8 @@ msgid ""
 "Save failed because the document is too large or exceeds the remaining "
 "storage space. The document will now be read-only but you may still "
 "download it now to preserve a copy locally."
-msgstr "无法保存该文档，文档太大或超出剩余存储空间。文档将只读，但是您仍可以下载它以"
+msgstr ""
+"无法保存该文档，文档太大或超出剩余存储空间。文档将只读，但是您仍可以下载它以"
 "保留一份本地拷贝。"
 
 #: src/errormessages.ts:97
@@ -8223,15 +8432,27 @@ msgstr "视图菜单"
 msgid "Online Editor"
 msgstr "在线编辑器"
 
-#: src/layer/tile/CanvasTileLayer.js:1445
+#: src/layer/tile/CanvasTileLayer.js:1385
+msgid "%1 started recording changes for all users."
+msgstr ""
+
+#: src/layer/tile/CanvasTileLayer.js:1386
+msgid "Recording changes was started for all users."
+msgstr ""
+
+#: src/layer/tile/CanvasTileLayer.js:1388
+msgid "Your changes are tracked now."
+msgstr ""
+
+#: src/layer/tile/CanvasTileLayer.js:1472
 msgid "Functions"
 msgstr "函数"
 
-#: src/layer/tile/CanvasTileLayer.js:1748
+#: src/layer/tile/CanvasTileLayer.js:1775
 msgid "Named Range"
 msgstr "命名范围"
 
-#: src/layer/tile/CanvasTileLayer.js:3673
+#: src/layer/tile/CanvasTileLayer.js:3704
 msgid "No Comments"
 msgstr "暂无批注"
 
@@ -8280,7 +8501,8 @@ msgstr "剪切"
 msgid ""
 "A download due to a large copy/paste operation has already started. Please, "
 "wait for the current download or cancel it before starting a new one"
-msgstr "由于大规模复制/粘贴操作而导致的下载已经开始。请等待当前下载，或在开始新下载之"
+msgstr ""
+"由于大规模复制/粘贴操作而导致的下载已经开始。请等待当前下载，或在开始新下载之"
 "前取消它"
 
 #: src/map/Clipboard.js:1625
@@ -8319,37 +8541,37 @@ msgstr "请稍后！"
 msgid "Please send us your feedback"
 msgstr "请向我们提供您的反馈意见"
 
-#: src/map/handler/Map.FileInserter.js:200
+#: src/map/handler/Map.FileInserter.js:298
 msgid "The file of type: {0} cannot be inserted since the file has no name"
 msgstr "无法插入类型为 {0} 的文件，因为该文件没有文件名"
 
-#: src/map/handler/Map.FileInserter.js:201
+#: src/map/handler/Map.FileInserter.js:299
 #, javascript-format
 msgid ""
 "The file of type: {0} cannot be uploaded to server since the file has no "
 "name"
 msgstr "无法将类型为 {0} 的文件上传到服务器，因为该文件没有文件名"
 
-#: src/map/handler/Map.FileInserter.js:204
+#: src/map/handler/Map.FileInserter.js:302
 msgid "The file of type: {0} cannot be inserted since the file is empty"
 msgstr "无法插入类型为 {0} 的文件，因为该文件是空的"
 
-#: src/map/handler/Map.FileInserter.js:205
+#: src/map/handler/Map.FileInserter.js:303
 #, javascript-format
 msgid ""
 "The file of type: {0} cannot be uploaded to server since the file is empty"
 msgstr "无法将类型为 {0} 的文件上传到服务器，因为该文件是空的"
 
-#: src/map/handler/Map.FileInserter.js:241
-#: src/map/handler/Map.FileInserter.js:321
+#: src/map/handler/Map.FileInserter.js:350
+#: src/map/handler/Map.FileInserter.js:435
 msgid "Uploading..."
 msgstr "正在上传…"
 
-#: src/map/handler/Map.FileInserter.js:266
+#: src/map/handler/Map.FileInserter.js:377
 msgid "Uploading file to server failed with status: {0}"
 msgstr "文件上传失败，状态为 {0}"
 
-#: src/map/handler/Map.FileInserter.js:293
+#: src/map/handler/Map.FileInserter.js:406
 msgid "Failed to read the selected file."
 msgstr "读取所选文件失败。"
 
@@ -8378,7 +8600,8 @@ msgid ""
 "Presentation was blocked. Please allow pop-ups in your browser. This lets "
 "slide shows to be displayed in separated windows, allowing for easy screen "
 "sharing."
-msgstr "演示被阻止。请在浏览器中允许弹出窗口。这让幻灯片演示显示在单独窗口中，便于屏"
+msgstr ""
+"演示被阻止。请在浏览器中允许弹出窗口。这让幻灯片演示显示在单独窗口中，便于屏"
 "幕分享。"
 
 #: src/map/handler/Map.SlideShow.js:180
@@ -8424,31 +8647,31 @@ msgstr "演示已禁用"
 msgid "Presentation mode has been disabled for this document"
 msgstr "该文档演示模式已被禁用"
 
-#: src/map/handler/Map.StateChanges.js:149
-msgid "Apply this order to your presentation?"
-msgstr "将此顺序应用于您的演示文稿？"
-
-#: src/map/handler/Map.StateChanges.js:149
-msgid "Update Slides"
-msgstr "更新幻灯片"
+#: src/map/handler/Map.StateChanges.js:204
+msgid "Editing slide %1 - click outside or press Esc to finish"
+msgstr ""
 
 #: src/map/handler/Map.VersionBar.js:50
 msgid "Your Collabora Online server needs updating. Version {0} is available."
 msgstr "您的Collabora Online版本需要更新。{0}版本可用。"
 
-#: src/map/handler/Map.WOPI.js:223
+#: src/map/handler/Map.WOPI.js:234
 msgid "Creating new file from template..."
 msgstr "使用模版创建新文件…"
 
-#: src/map/handler/Map.WOPI.js:325
+#: src/map/handler/Map.WOPI.js:336
 msgid "Compare Document..."
 msgstr "比较文档..."
 
-#: src/map/handler/Map.WOPI.js:923
+#: src/map/handler/Map.WOPI.js:933
 msgid "File name should contain an extension."
 msgstr "文件名应当包含扩展名。"
 
-#: src/map/handler/Map.WOPI.js:932
+#: src/map/handler/Map.WOPI.js:1041
+msgid "Enter a file name"
+msgstr "输入文件名"
+
+#: src/map/handler/Map.WOPI.js:1058
 msgid "Creating copy..."
 msgstr "正在创建副本…"
 
@@ -8757,7 +8980,8 @@ msgid "Explore The New {coolversion}"
 msgstr "体验新版本 {coolversion}"
 
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.h2:27-7
-#: welcome/welcome.html%2Bhtml.body.div.div.div.div.h2:38-7
+#, fuzzy
+msgctxt "welcome/welcome.html:welcome-slide1-heading-2"
 msgid "Collabora Online Development Edition"
 msgstr "Collabora Online 开发版本"
 
@@ -8770,23 +8994,30 @@ msgid ""
 "mobile."
 msgstr ""
 "享受在线生产力的最新发展，您可以在浏览器中免费使用、探索并与其他人一同使用。"
-"各种 <a target=\"_blank\" rel=\"noopener\" href=\"https://www.collaboraonline"
-".com/solutions/collabora-office-android-ios/\">应用</a> 也适用于移动设备。"
+"各种 <a target=\"_blank\" rel=\"noopener\" href=\"https://"
+"www.collaboraonline.com/solutions/collabora-office-android-ios/\">应用</a> 也"
+"适用于移动设备。"
 
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.h1:37-7
 msgid "Discover All The Changes"
 msgstr "检查所有更新"
 
+#: welcome/welcome.html%2Bhtml.body.div.div.div.div.h2:38-7
+#, fuzzy
+msgctxt "welcome/welcome.html:welcome-slide2-heading-2"
+msgid "Collabora Online Development Edition"
+msgstr "Collabora Online 开发版本"
+
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.p:39-7
 msgid ""
-"Check the <a target=\"_blank\" rel=\"noopener\" href=\"https://www."
-"collaboraonline.com/code-26-04-release-notes/\">release notes</a> and learn "
-"all about: The latest Collabora Online Development Edition, aimed at home "
-"users and small teams."
+"Check the <a target=\"_blank\" rel=\"noopener\" href=\"https://"
+"www.collaboraonline.com/code-26-04-release-notes/\">release notes</a> and "
+"learn all about: The latest Collabora Online Development Edition, aimed at "
+"home users and small teams."
 msgstr ""
-"请查阅 <a target=\"_blank\" rel=\"noopener\" href=\"https://www."
-"collaboraonline.com/code-26-04-release-notes/\">发布说明</a> "
-"并了解针对家庭用户和小团队的最新 Collabora Online 开发版的所有信息。"
+"请查阅 <a target=\"_blank\" rel=\"noopener\" href=\"https://"
+"www.collaboraonline.com/code-26-04-release-notes/\">发布说明</a> 并了解针对家"
+"庭用户和小团队的最新 Collabora Online 开发版的所有信息。"
 
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.h1:48-7
 msgid "Get Involved"
@@ -8799,17 +9030,18 @@ msgstr "https://www.collaboraoffice.org/"
 #: welcome/welcome.html%2Bhtml.body.div.div.div.div.p:50-7
 msgid ""
 "Are you interested in contributing but don’t know where to start? Head over "
-"to the <a target=\"_blank\" rel=\"noopener\" href=\"https://www."
-"collaboraoffice.org/post/build-code/\">step-by-step instructions</a> and "
-"build CODE from scratch. You can also help out with <a target=\"_blank\" "
-"rel=\"noopener\" href=\"https://www.collaboraoffice.org/post/translate/"
-"\">translations</a> or by <a target=\"_blank\" rel=\"noopener\" "
-"href=\"https://www.collaboraoffice.org/post/filebugs/\">filing a bug "
-"report</a> with all the essential steps on how to reproduce it."
+"to the <a target=\"_blank\" rel=\"noopener\" href=\"https://"
+"www.collaboraoffice.org/post/build-code/\">step-by-step instructions</a> "
+"and build CODE from scratch. You can also help out with <a "
+"target=\"_blank\" rel=\"noopener\" href=\"https://www.collaboraoffice.org/"
+"post/translate/\">translations</a> or by <a target=\"_blank\" "
+"rel=\"noopener\" href=\"https://www.collaboraoffice.org/post/filebugs/"
+"\">filing a bug report</a> with all the essential steps on how to reproduce "
+"it."
 msgstr ""
 "有兴趣参与贡献但不知道从何入手？请前往 <a target=\"_blank\" rel=\"noopener\" "
-"href=\"https://www.collaboraoffice.org/post/build-code/\">分步指南</a> "
-"从零开始构建 CODE。你还可以通过协助 <a target=\"_blank\" rel=\"noopener\" "
+"href=\"https://www.collaboraoffice.org/post/build-code/\">分步指南</a> 从零开"
+"始构建 CODE。你还可以通过协助 <a target=\"_blank\" rel=\"noopener\" "
 "href=\"https://www.collaboraoffice.org/post/translate/\">翻译</a>，或者 <a "
 "target=\"_blank\" rel=\"noopener\" href=\"https://www.collaboraoffice.org/"
 "post/filebugs/\">提交包含完整复现步骤的缺陷报告</a> 来提供帮助。"
@@ -8825,6 +9057,15 @@ msgstr ""
 "translate=\"true\">1</a> <a id=\"slide-2-indicator\" href=\"#slide-2\" data-"
 "translate=\"true\">2</a> <a id=\"slide-3-indicator\" href=\"#slide-3\" data-"
 "translate=\"true\">3</a>"
+
+#~ msgid "Present in new window"
+#~ msgstr "在新窗口中显示"
+
+#~ msgid "Apply this order to your presentation?"
+#~ msgstr "将此顺序应用于您的演示文稿？"
+
+#~ msgid "Update Slides"
+#~ msgstr "更新幻灯片"
 
 #~ msgid "Request Timeout (seconds)"
 #~ msgstr "请求超时时间（以秒为单位）"
