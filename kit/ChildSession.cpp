@@ -1711,6 +1711,27 @@ bool ChildSession::paste(const char* buffer, int length, const StringVector& tok
     return true;
 }
 
+namespace
+{
+/// Whether url is a file: URL, with no host, query or fragment, naming one plain file directly
+/// in folder, which ends with '/'.
+bool isFileUrlDirectlyIn(const std::string& url, const std::string& folder)
+{
+    try
+    {
+        const Poco::URI uri(url);
+        const std::string& path = uri.getPath();
+        return uri.getScheme() == "file" && uri.getHost().empty() && uri.getRawQuery().empty() &&
+               uri.getRawFragment().empty() && path.starts_with(folder) &&
+               FileUtil::isPlainFileName(path.substr(folder.size()));
+    }
+    catch (const std::exception&)
+    {
+        return false;
+    }
+}
+}
+
 bool ChildSession::insertFile(const StringVector& tokens)
 {
     std::string name, type, data;
@@ -1758,6 +1779,11 @@ bool ChildSession::insertFile(const StringVector& tokens)
                               JAILED_DOCUMENT_ROOT;
                 }
                 url = "file://" + jailDoc + "insertfile/" + name;
+                if (!isFileUrlDirectlyIn(url, jailDoc + "insertfile/"))
+                {
+                    sendTextFrameAndLogError("error: cmd=insertfile kind=syntax");
+                    return false;
+                }
             }
             else if (type == "graphicurl" || type == "multimediaurl")
             {
@@ -2113,6 +2139,11 @@ bool ChildSession::contentControlEvent(const StringVector& tokens)
                     jailDoc.substr(0, jailDoc.find(JAILED_DOCUMENT_ROOT)) + JAILED_DOCUMENT_ROOT;
             }
             std::string url = "file://" + jailDoc + "insertfile/" + name;
+            if (!isFileUrlDirectlyIn(url, jailDoc + "insertfile/"))
+            {
+                sendTextFrameAndLogError("error: cmd=contentcontrolevent kind=syntax");
+                return false;
+            }
             arguments += "\"changed\":\"" + url + "\"}";
         }
     }
@@ -2802,27 +2833,6 @@ bool ChildSession::resetSelection(const StringVector& tokens)
     getLOKitDocument()->resetSelection();
 
     return true;
-}
-
-namespace
-{
-/// Whether url is a file: URL, with no host, query or fragment, naming one plain file directly
-/// in folder, which ends with '/'.
-bool isFileUrlDirectlyIn(const std::string& url, const std::string& folder)
-{
-    try
-    {
-        const Poco::URI uri(url);
-        const std::string& path = uri.getPath();
-        return uri.getScheme() == "file" && uri.getHost().empty() && uri.getRawQuery().empty() &&
-               uri.getRawFragment().empty() && path.starts_with(folder) &&
-               FileUtil::isPlainFileName(path.substr(folder.size()));
-    }
-    catch (const std::exception&)
-    {
-        return false;
-    }
-}
 }
 
 bool ChildSession::saveAs(const StringVector& tokens)
