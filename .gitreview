@@ -3,4 +3,4 @@ host=gerrit.collaboraoffice.com
 port=29418
 project=online
 defaultremote=cogerrit
-defaultbranch=main
+defaultbranch=distro/collabora/co-26.04
