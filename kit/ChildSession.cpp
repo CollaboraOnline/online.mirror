@@ -1835,6 +1835,11 @@ bool ChildSession::insertFile(const StringVector& tokens)
             {
                 std::string jailDoc = getJailDocRoot();
                 url = "file://" + jailDoc + "insertfile/" + name;
+                if (!isFileUrlDirectlyIn(url, jailDoc + "insertfile/"))
+                {
+                    sendTextFrameAndLogError("error: cmd=insertfile kind=syntax");
+                    return false;
+                }
             }
             else if (type == "graphicurl" || type == "multimediaurl" || type == "comparedocumentsurl")
             {
@@ -2196,6 +2201,11 @@ bool ChildSession::contentControlEvent(const StringVector& tokens)
         {
             std::string jailDoc = getJailDocRoot();
             std::string url = "file://" + jailDoc + "insertfile/" + name;
+            if (!isFileUrlDirectlyIn(url, jailDoc + "insertfile/"))
+            {
+                sendTextFrameAndLogError("error: cmd=contentcontrolevent kind=syntax");
+                return false;
+            }
             arguments += R"("changed":")" + url + "\"}";
         }
     }
