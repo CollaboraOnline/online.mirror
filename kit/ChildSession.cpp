@@ -2389,11 +2389,13 @@ bool ChildSession::unoCommand(const StringVector& tokens)
     if (tokens.equals(1, ".uno:Copy") || tokens.equals(1, ".uno:CopyHyperlinkLocation"))
         _copyToClipboard = true;
 
+#if ENABLE_DEBUG
     if (tokens.size() == 2 && tokens.equals(1, ".uno:fakeDiskFull"))
     {
         _docManager->alertAllUsers("internal", "diskfull");
         return true;
     }
+#endif
 
     getLOKitDocument()->postUnoCommand(tokens[1].c_str(), saveArgs.c_str(), notify);
     return true;
