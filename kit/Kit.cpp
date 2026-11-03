@@ -2576,7 +2576,6 @@ std::shared_ptr<COKitDocument> Document::load(const std::shared_ptr<ChildSession
         {
             _loKitDocument->setAllowChangeComments(viewId, true);
         }
-
         if (session->isAllowManageRedlines())
         {
             _loKitDocument->setAllowManageRedlines(viewId, true);
@@ -4418,32 +4417,36 @@ void lokit_main(
                 LOG_SFL("chroot(\"" << jailPathStr << "\") failed");
                 Util::forcedExit(EX_SOFTWARE);
             }
+
             if (chdir("/") == -1)
             {
                 LOG_SFL("chdir(\"/\") in jail failed");
                 Util::forcedExit(EX_SOFTWARE);
             }
+
 #ifdef __FreeBSD__
-    struct passwd *pw = getpwnam(COOL_USER_ID);
-    int ret=0;
-    if(pw != nullptr)
-    {
-        ret = setgid(pw->pw_gid);
-        if(ret != 0)
-        {
-            LOG_FTL("Cannot setgid to " << COOL_USER_ID);
-            Util::forcedExit(EX_SOFTWARE);
-        }
-        ret = setuid(pw->pw_uid);
-        if(ret != 0)
-        {
-            LOG_FTL("Cannot setuid to " << COOL_USER_ID << " error: " << errno);
-            Util::forcedExit(EX_SOFTWARE);
-        }
-    } else {
-            LOG_FTL("Cannot find user " << COOL_USER_ID << " error: " << errno);
-            Util::forcedExit(EX_SOFTWARE);
-        }
+            struct passwd *pw = getpwnam(COOL_USER_ID);
+            int ret = 0;
+            if (pw != nullptr)
+            {
+                ret = setgid(pw->pw_gid);
+                if (ret != 0)
+                {
+                    LOG_FTL("Cannot setgid to " << COOL_USER_ID);
+                    Util::forcedExit(EX_SOFTWARE);
+                }
+                ret = setuid(pw->pw_uid);
+                if (ret != 0)
+                {
+                    LOG_FTL("Cannot setuid to " << COOL_USER_ID << " error: " << errno);
+                    Util::forcedExit(EX_SOFTWARE);
+                }
+            }
+            else
+            {
+                LOG_FTL("Cannot find user " << COOL_USER_ID << " error: " << errno);
+                Util::forcedExit(EX_SOFTWARE);
+            }
 #endif
 #if HAVE_LIBCAP
             if (usingMountNamespace)
@@ -5045,7 +5048,6 @@ bool startURP(const std::shared_ptr<COKit>& LOKit, void** ppURPContext)
 /// Initializes COKit for cross-fork re-use.
 bool globalPreinit(const std::string &loTemplate)
 {
-
     std::string loadedLibrary;
     // we deliberately don't dlclose handle on success, make it
     // static so static analysis doesn't see this as a leak

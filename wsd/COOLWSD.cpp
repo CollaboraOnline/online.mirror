@@ -1402,6 +1402,7 @@ bool startWithLandlockJail()
 }
 
 } // namespace
+
 #ifndef __FreeBSD__
 // Due to the possibility of enterMountingNS failing at an intermediate stage
 // after entering a usernamespace, but unable to enter a useful mounting namespace
@@ -1420,6 +1421,7 @@ bool COOLWSD::testMountingNSInFork()
                               }) == 1;
 }
 #endif
+
 void COOLWSD::setupChildRoot(const bool UseMountNamespaces)
 {
     JailUtil::disableBindMounting(); // Default to assume failure
@@ -1457,6 +1459,7 @@ void COOLWSD::setupChildRoot(const bool UseMountNamespaces)
                 }
 #endif
             }
+
             // Setup the jails.
             JailUtil::cleanupJails(CleanupChildRoot);
             JailUtil::setupChildRoot(IsBindMountingEnabled, ChildRoot, SysTemplate);

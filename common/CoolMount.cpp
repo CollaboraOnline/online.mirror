@@ -87,6 +87,7 @@ extern "C"  {
 #include <mntopts.h>
 }
 #endif
+
 int mount_wrapper(const char *source, const char *target,
           const char *filesystemtype, unsigned long mountflags,
           const void *data)
@@ -310,6 +311,7 @@ int domount(int argc, const char* const* argv)
                 return EX_USAGE;
             }
         }
+
         if (!isDir && !isCharDev)
         {
             fprintf(stderr,
@@ -380,8 +382,6 @@ int domount(int argc, const char* const* argv)
                 free(iov);
             }
 
-
-
 #else
         // Mount the source path as the target path.
         // First bind to mount an existing directory node into the chroot.
@@ -437,6 +437,7 @@ int domount(int argc, const char* const* argv)
         usage(program);
         return EX_USAGE;
     }
+
     fflush(stderr);
     return EX_OK;
 }

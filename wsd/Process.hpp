@@ -188,7 +188,6 @@ public:
                 return false;
             }
 
-
 #else
             return _pid > 1 && _ws && ::kill(_pid, 0) == 0;
 #endif

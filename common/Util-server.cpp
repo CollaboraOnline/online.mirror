@@ -64,6 +64,7 @@ const char* startsWith(const char* line, std::string_view tag)
 
     return nullptr;
 }
+
 #ifdef __linux__
 std::size_t getFromCGroup(const std::string& group, const std::string& key)
 {
