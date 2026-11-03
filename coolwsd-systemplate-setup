@@ -33,10 +33,10 @@ else
     REALPATH=grealpath
     LOCALBASE=usr/local/
     mkdir -p "${CHROOT}/etc"
-    cat /etc/master.passwd |egrep '^(root|toor|coolwsd)' | awk 'BEGIN {FS=":"} { sub(".*","*",$2); print $1":"$2":"$3":"$4":"$5":"$6":"$7":"$8":"$9":"$10}' > "${CHROOT}/etc/master.passwd"
-    cat /etc/passwd |egrep "^(root|toor|coolwsd)" > "${CHROOT}/etc/passwd"
+    cat /etc/master.passwd |egrep '^(root|toor|cool)' | awk 'BEGIN {FS=":"} { sub(".*","*",$2); print $1":"$2":"$3":"$4":"$5":"$6":"$7":"$8":"$9":"$10}' > "${CHROOT}/etc/master.passwd"
+    cat /etc/passwd |egrep "^(root|toor|cool)" > "${CHROOT}/etc/passwd"
     echo 'wheel:*:0:root' > "${CHROOT}/etc/group"
-    cat /etc/group |egrep "^(coolwsd)" >> "${CHROOT}/etc/group"
+    cat /etc/group |egrep "^(cool)" >> "${CHROOT}/etc/group"
     pwd_mkdb -d "${CHROOT}/etc" "${CHROOT}/etc/master.passwd"
 fi
 
