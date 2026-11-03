@@ -1038,7 +1038,9 @@ std::shared_ptr<ChildProcess> getNewChild_Blocks(const std::shared_ptr<SocketPol
                                    auto found = std::find_if(
                                        NewChildren.begin(), NewChildren.end(),
                                        [configId](const auto& candidate) -> bool
-                                       { return candidate->getConfigId() == configId; });
+                                       { return candidate->getConfigId() == configId
+                                                || (Util::isKitInProcess()
+                                                    && candidate->getConfigId().empty()); });
 
                                    const bool candidateMatch = found != NewChildren.end();
                                    // move this candidate into the last position
