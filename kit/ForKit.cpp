@@ -318,9 +318,6 @@ bool haveCorrectCapabilities()
 bool haveCorrectCapabilities()
 {
     // chroot() can only be called by root
-#ifdef __FreeBSD__
-    return true;
-#endif
     return getuid() == 0;
 }
 #endif // HAVE_LIBCAP
