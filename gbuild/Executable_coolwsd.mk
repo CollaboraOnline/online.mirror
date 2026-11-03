@@ -39,7 +39,6 @@ $(eval $(call gb_Executable_use_static_libraries,coolwsd, \
 $(eval $(call gb_Executable_use_externals,coolwsd, \
     expat \
     libpng \
-    $(if $(filter FREEBSD,$(OS)),iconv) \
     openssl \
     openssl_headers \
     zlib \
@@ -54,6 +53,7 @@ $(eval $(call gb_Executable_add_libs,coolwsd, \
     -Wl$(COMMA)--no-whole-archive \
     $(UNIX_DLAPI_LIBS) \
     $(if $(filter LINUX,$(OS)),-lrt) \
+    $(if $(filter FREEBSD,$(OS)),-liconv) \
 ))
 $(call gb_Executable_get_target,coolwsd) : \
     $(call gb_StaticLibrary_get_target,wsd) \
