@@ -394,6 +394,7 @@ class ViewController: NSViewController, WKScriptMessageHandlerWithReply, WKNavig
             // so the page's echo of them carries nothing new. Swallowing it here
             // keeps it from being forwarded back to the engine as a client
             // message.
+            return (nil, nil)
         }
         else if body.hasPrefix("COMMANDRESULT ") {
             // Command results are already handled in the Document's
@@ -401,6 +402,7 @@ class ViewController: NSViewController, WKScriptMessageHandlerWithReply, WKNavig
             // stream, so the page's echo of them carries nothing new.
             // Swallowing it here keeps it from being forwarded back to the
             // engine as a client message.
+            return (nil, nil)
         }
         else if body == "PRINT" {
             document.printDocument(self)
