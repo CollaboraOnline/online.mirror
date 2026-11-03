@@ -74,8 +74,12 @@ closedir(_dir);
         return tasks;
 #endif
 #ifdef __FreeBSD__
-struct kinfo_proc* ki = kinfo_getproc(getpid());
-return ki->ki_numthreads;
+        struct kinfo_proc* ki = kinfo_getproc(getpid());
+        if (!ki)
+            return -1;
+        int threads = ki->ki_numthreads;
+        free(ki);
+        return threads;
 #endif
     }
 };
