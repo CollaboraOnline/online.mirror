@@ -2561,7 +2561,7 @@ AS_IF([test `uname -s` = "Darwin" -a "$ENABLE_IOSAPP" != "true"],
       [AC_CHECK_LIB(iconv, iconv_open, [], [AC_MSG_ERROR([No, please install libiconv.])])])
 
 AS_IF([test `uname -s` = "FreeBSD"],
-      [LIBS="$LIBS -lexecinfo -lz"])
+      [LIBS="$LIBS -lexecinfo -lz -lutil -lpthread"])
 
 if test "x${prefix}" = "xNONE"; then
     prefix=/usr/local

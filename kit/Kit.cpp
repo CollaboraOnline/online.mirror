@@ -3966,7 +3966,7 @@ void lokit_main(
                 bool noCapabilities,
                 bool requireLandlock,
                 bool noSeccomp,
-                bool useMountNamespaces,
+                [[maybe_unused]] bool useMountNamespaces,
                 bool queryVersion,
                 bool displayVersion,
                 bool sysTemplateIncomplete,

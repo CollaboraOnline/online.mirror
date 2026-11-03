@@ -35,7 +35,9 @@ namespace Util
 
 class CounterImpl {
 private:
+#ifdef __linux__
     DIR* _dir = nullptr;
+#endif
 
 public:
 #ifdef __linux__
