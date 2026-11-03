@@ -4409,15 +4409,6 @@ void lokit_main(
                     LOG_SYS("Failed to open /proc/self/smaps. Memory stats will be missing.");
             }
             LOG_INF("chroot(\"" << jailPathStr << "\")");
-
-#ifdef __FreeBSD__
-            if (setegid(0) != 0 || seteuid(0) != 0)
-            {
-                LOG_FTL("re-elevation to root failed: " << strerror(errno));
-                Util::forcedExit(EX_SOFTWARE);
-            }
-#endif
-            LOG_INF("chroot(\"" << jailPathStr << "\")" << "as effective uid :"<< geteuid() << "uid" << getuid());
 #ifdef __FreeBSD__
             if (gotojail(jailPathStr.c_str(),jailId.c_str()) == -1)
 #else
