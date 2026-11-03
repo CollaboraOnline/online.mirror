@@ -83,7 +83,6 @@ Util::LoadTimings KitLoadTimings;
 #ifdef __FreeBSD__
 #include <sys/param.h>
 #include <sys/mount.h>
-#include <sys/param.h>
 #include <sys/jail.h>
 #include <sys/procctl.h>
 #endif
