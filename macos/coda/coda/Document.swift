@@ -620,10 +620,7 @@ class Document: NSDocument {
         COWrapper.detach(self)
     }
 
-    /**
-     * Initiate loading of cool.html, which also triggers loading of the document via lokit.
-     */
-    func loadDocumentInWebView(webView: WKWebView, permission: String, isWelcome: Bool) {
+    func connect(webView: WKWebView) {
         self.webView = webView
 
         // The appDocId names the document to the in-process server for as long as the
@@ -636,6 +633,13 @@ class Document: NSDocument {
         self.isDetached = false
 
         NSLog("CollaboraOffice: load into webview with appDocId \(self.appDocId), client fd \(self.fakeClientFd), temp file \(self.tempFileURL?.absoluteString ?? "<none>")")
+    }
+
+    /**
+     * Initiate loading of cool.html, which also triggers loading of the document via lokit.
+     */
+    func loadDocumentInWebView(webView: WKWebView, permission: String, isWelcome: Bool) {
+        connect(webView: webView)
 
         guard let url = Bundle.main.url(forResource: "cool", withExtension: "html") else {
             fatalError("Resource 'cool.html' not found in the main bundle.")
