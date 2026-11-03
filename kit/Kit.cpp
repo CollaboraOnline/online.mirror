@@ -164,10 +164,6 @@ extern "C" { void dump_kit_state(void); /* easy for gdb */ }
 #ifdef __FreeBSD__
 static int gotojail(const char* jailPath,const char* name);
 #endif
-#if MOBILEAPP
-extern std::map<std::string, std::shared_ptr<DocumentBroker>> DocBrokers;
-extern std::mutex DocBrokersMutex;
-#endif
 
 #if !MOBILEAPP
 
