@@ -1050,12 +1050,20 @@ int forkit_main(int argc, char** argv)
     LOG_DBG("About to init Kit UnitBase with test [" << UnitTestLibrary << ']');
 #ifdef __FreeBSD__
     struct passwd *pw = getpwnam(COOL_USER_ID);
-    if(pw != nullptr)
+    if (!pw)
     {
-        setegid(pw->pw_gid);
-        seteuid(pw->pw_uid);
-    } else  {
-        LOG_FTL("Cannot find user" << COOL_USER_ID);
+        LOG_FTL("Cannot find user " << COOL_USER_ID);
+        Util::forcedExit(EX_SOFTWARE);
+    }
+    if (setegid(pw->pw_gid) != 0)
+    {
+        LOG_FTL("setegid(" << pw->pw_gid << ") failed: " << strerror(errno));
+        Util::forcedExit(EX_SOFTWARE);
+    }
+    if (seteuid(pw->pw_uid) != 0)
+    {
+        LOG_FTL("seteuid(" << pw->pw_uid << ") failed: " << strerror(errno));
+        Util::forcedExit(EX_SOFTWARE);
     }
 #endif
     if (!Util::isKitInProcess() && !UnitBase::init(UnitBase::UnitType::Kit, UnitTestLibrary))
