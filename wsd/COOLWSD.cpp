@@ -1457,6 +1457,7 @@ void COOLWSD::setupChildRoot(const bool UseMountNamespaces)
                 }
 #endif
             }
+
             // Setup the jails.
             JailUtil::cleanupJails(CleanupChildRoot);
             JailUtil::setupChildRoot(IsBindMountingEnabled, ChildRoot, SysTemplate);

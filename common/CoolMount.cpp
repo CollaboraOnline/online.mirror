@@ -380,8 +380,6 @@ int domount(int argc, const char* const* argv)
                 free(iov);
             }
 
-
-
 #else
         // Mount the source path as the target path.
         // First bind to mount an existing directory node into the chroot.
