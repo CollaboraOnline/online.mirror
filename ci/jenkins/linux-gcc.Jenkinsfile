@@ -19,6 +19,7 @@ pipeline {
 
     options {
         timestamps()
+        skipDefaultCheckout()
     }
 
     stages {
@@ -26,6 +27,24 @@ pipeline {
             steps {
                 // Print every GERRIT_ variable the Gerrit Trigger plugin passes in.
                 sh 'env | grep "^GERRIT_" | sort || true'
+            }
+        }
+        stage('Checkout') {
+            steps {
+                // Fetch the Gerrit change under test and check out its exact commit. The second
+                // refspec keeps main current in the persistent workspace, so each fetch only needs
+                // the objects that are new since the last build.
+                checkout([$class: 'GitSCM',
+                    branches: [[name: env.GERRIT_PATCHSET_REVISION]],
+                    userRemoteConfigs: [[
+                        name: 'origin',
+                        url: 'https://gerrit.collaboraoffice.com/online',
+                        refspec: "${env.GERRIT_REFSPEC} +refs/heads/main:refs/remotes/origin/main"
+                    ]],
+                    extensions: [
+                        [$class: 'CloneOption', shallow: false, noTags: true, timeout: 60],
+                    ]
+                ])
             }
         }
         stage('Build') {
