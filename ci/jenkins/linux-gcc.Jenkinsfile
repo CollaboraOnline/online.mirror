@@ -29,7 +29,6 @@ pipeline {
                 sh 'env | grep "^GERRIT_" | sort || true'
             }
         }
-
         stage('Build') {
             steps {
                 echo "Hello, here building Collabora Online ${env.GERRIT_BRANCH} branch (linux, gcc)"
