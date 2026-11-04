@@ -23,9 +23,16 @@ pipeline {
     }
 
     stages {
+        stage('Gerrit parameters') {
+            steps {
+                // Print every GERRIT_ variable the Gerrit Trigger plugin passes in.
+                sh 'env | grep "^GERRIT_" | sort || true'
+            }
+        }
+
         stage('Build') {
             steps {
-                echo 'Hello, here building Collabora Online (linux, gcc)'
+                echo "Hello, here building Collabora Online ${env.GERRIT_BRANCH} branch (linux, gcc)"
                 sh 'hostname; uname -a'
             }
         }
