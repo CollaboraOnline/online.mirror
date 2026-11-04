@@ -24,7 +24,10 @@ body {
 	app-region: drag;
 }
 [data-title-bar] .tab,
-[data-title-bar] #new-tab {
+[data-title-bar] #new-tab,
+[data-title-bar] #strip::-webkit-scrollbar,
+[data-title-bar] #strip::-webkit-scrollbar-thumb,
+[data-title-bar] #strip::-webkit-scrollbar-track {
 	app-region: no-drag;
 }
 #strip {
@@ -41,6 +44,22 @@ body {
 	padding-top: 4px;
 	overflow-x: auto;
 	overflow-y: hidden;
+}
+#strip::-webkit-scrollbar {
+	height: 6px;
+}
+#strip::-webkit-scrollbar-track {
+	background: transparent;
+}
+#strip::-webkit-scrollbar-thumb {
+	background: var(--color-border);
+	border-radius: 3px;
+}
+#strip::-webkit-scrollbar-thumb:hover {
+	background: var(--color-text-lighter);
+}
+#strip::-webkit-scrollbar-button {
+	display: none;
 }
 .tab {
 	box-sizing: border-box;
