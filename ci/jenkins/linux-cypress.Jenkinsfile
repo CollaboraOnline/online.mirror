@@ -23,13 +23,13 @@ pipeline {
     }
 
     stages {
-        stage('Gerrit parameters') {
+        stage('Show Gerrit parameters') {
             steps {
                 // Print every GERRIT_ variable the Gerrit Trigger plugin passes in.
                 sh 'env | grep "^GERRIT_" | sort || true'
             }
         }
-        stage('Checkout') {
+        stage('Checkout gerrit change') {
             steps {
                 // Fetch the Gerrit change under test and check out its exact commit. The second
                 // refspec keeps main current in the persistent workspace, so each fetch only needs
@@ -47,7 +47,7 @@ pipeline {
                 ])
             }
         }
-        stage('Build') {
+        stage('Build Online') {
             steps {
                 echo "Hello, here running Cypress tests on the ${env.GERRIT_BRANCH} branch (linux)"
                 sh 'hostname; uname -a'
