@@ -50,6 +50,7 @@ class NotesPanel extends JSDialogComponent {
 	protected setupContainer() {
 		this.container =
 			document.getElementById('notespanel-container') ?? undefined;
+		this.container?.addEventListener('keydown', this.onKeyDown);
 		this.wrapper = document.getElementById('notespanel-dock-wrapper');
 		this.column = document.getElementById('document-and-notes');
 		this.splitter = document.getElementById('notespanel-splitter');
@@ -77,6 +78,7 @@ class NotesPanel extends JSDialogComponent {
 	onRemove() {
 		this.map.off('notespanel', this.onNotesPanel, this);
 		app.events.off('updatepermission', this.onUpdatePermission);
+		this.container?.removeEventListener('keydown', this.onKeyDown);
 		this.unregisterMessageHandlers();
 	}
 
@@ -88,6 +90,13 @@ class NotesPanel extends JSDialogComponent {
 			return;
 		focused.blur();
 		this.map.focus();
+	};
+
+	/// Typing in the notes in viewing mode tells the user how to switch to editing, as on the slide.
+	private onKeyDown = (e: KeyboardEvent): void => {
+		if (e.key.length !== 1 || e.ctrlKey || e.altKey || e.metaKey) return;
+		if (this.map.isEditMode()) return;
+		this.map.uiManager.showViewModeAttention();
 	};
 
 	/// The engine sends the whole tree when the notes view shell appears, and single widget

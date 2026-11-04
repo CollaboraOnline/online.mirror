@@ -1119,3 +1119,32 @@ describe(['tagdesktop'], 'Impress speaker notes pane on load', function () {
 		});
 	});
 });
+
+describe(['tagdesktop'], 'Impress speaker notes pane in viewing mode', function () {
+	beforeEach(function () {
+		helper.setupAndLoadDocument('impress/empty-placeholder.fodp', false, false, undefined,
+			'tooltips=true');
+	});
+
+	it('typing in the notes shows how to switch to editing', function () {
+		var editEngine = '#notespanel-container .ui-editengine';
+		var paragraph = editEngine + ' .ui-editengine-paragraph';
+
+		cy.getFrameWindow().then(function (win) {
+			win.app.dispatcher.dispatch('notespanelbottom');
+		});
+		cy.cGet(editEngine).should('exist');
+		cy.getFrameWindow().then(function (win) {
+			win.app.map.setPermission('readonly');
+			helper.processToIdle(win);
+		});
+		cy.cGet(editEngine).should('have.attr', 'contenteditable', 'false');
+		cy.cGet(paragraph).invoke('text').then(function (before) {
+			cy.cGet(editEngine).click();
+			cy.cGet(editEngine).type('x');
+			cy.cGet('#cooltip').should('be.visible')
+				.and('contain.text', 'You are currently in View mode');
+			cy.cGet(paragraph).should('have.text', before);
+		});
+	});
+});
