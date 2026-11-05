@@ -26,6 +26,8 @@
 
 #include <atomic>
 #include <string>
+#include <string_view>
+#include <vector>
 #include <map>
 #include <type_traits>
 #include <unordered_map>
@@ -117,6 +119,9 @@ const std::unordered_map<std::string, std::string>& getDefaultAppConfig();
 
 /// Extract all entries as key-value pairs. We use map to have the entries sorted.
 std::map<std::string, std::string> extractAll(const Poco::Util::AbstractConfiguration& config);
+
+/// A value that is only used by internal coolwsd runtime, not given to forkit or written to the log.
+bool isWsdOnlyKey(std::string_view key);
 
 /// Returns the config in a loggable string form.
 std::string getLoggableConfig(const Poco::Util::AbstractConfiguration& config);
