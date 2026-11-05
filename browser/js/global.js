@@ -2865,6 +2865,8 @@ function showWelcomeSVG() {
 							if (url.startsWith('/') && global._collabCoolServer)
 								url = global._collabCoolServer + url;
 							global.app.console.log('Collab fetch URL: ' + url);
+							// The version in storage that the uploads of this page replace:
+							global._collabLastModifiedTime = msg.lastModifiedTime;
 							resolve({url: url, filename: msg.filename});
 						} else {
 							global.collabWs.close();
@@ -3041,6 +3043,9 @@ function showWelcomeSVG() {
 						if (response.ok) return response.json();
 						throw new Error('Upload failed with status '
 							+ response.status);
+					}).then((result) => {
+						global._collabLastModifiedTime = result && result.LastModifiedTime;
+						return result;
 					}).then(resolve).catch(reject);
 				} else if (msg.type === 'upload_error') {
 					clearTimeout(timeoutId);
@@ -3054,7 +3059,8 @@ function showWelcomeSVG() {
 			ws.send(JSON.stringify({
 				type: 'upload',
 				stream: 'contents',
-				requestId: 'wasm-save'
+				requestId: 'wasm-save',
+				lastModifiedTime: global._collabLastModifiedTime
 			}));
 		});
 	};
