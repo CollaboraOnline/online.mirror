@@ -510,6 +510,7 @@ noinst_HEADERS = \
                  test/HttpTestServer.hpp \
                  test/KitPidHelpers.hpp \
                  test/MockStreamSocket.hpp \
+                 test/SavedEnvironmentVariable.hpp \
                  test/SecurityLabelTest.hpp \
                  test/TestWopiFileServer.hpp \
                  test/UnitHTTP.hpp \
