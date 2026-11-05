@@ -429,6 +429,7 @@ shared_headers = \
                  common/CoolMount.hpp \
                  common/Crypto.hpp \
                  common/DraftStore.hpp \
+                 common/EditorFrameMessages.hpp \
                  common/FileUtil.hpp \
                  common/Globals.hpp \
                  common/HexUtil.hpp \
