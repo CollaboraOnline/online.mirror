@@ -441,6 +441,7 @@ noinst_HEADERS = $(wsd_headers) $(shared_headers) $(kit_headers) \
                  tools/COOLWebSocket.hpp \
                  test/HttpTestServer.hpp \
                  test/KitPidHelpers.hpp \
+                 test/SavedEnvironmentVariable.hpp \
                  test/UnitHTTP.hpp \
                  test/UnitTimeoutBase.hpp \
                  test/UnitWSDClient.hpp \

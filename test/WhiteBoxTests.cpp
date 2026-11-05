@@ -23,6 +23,7 @@
 #include <common/StateEnum.hpp>
 #include <common/ThreadPool.hpp>
 
+#include <test/SavedEnvironmentVariable.hpp>
 #include <test/lokassert.hpp>
 
 #include <cppunit/TestAssert.h>
@@ -1127,6 +1128,7 @@ void WhiteBoxTests::testThreadPool()
 {
     constexpr auto testname = __func__;
 //    const size_t existingUnrelatedThreads = Util::getCurrentThreadCount();
+    const SavedEnvironmentVariable maxConcurrency("MAX_CONCURRENCY");
     // coverity[tainted_data_argument : FALSE] - we trust this variable in tests
     setenv("MAX_CONCURRENCY","8",1);
     ThreadPool pool;
