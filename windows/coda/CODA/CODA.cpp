@@ -6877,14 +6877,19 @@ static void processMessage(DocumentTab& data, wil::unique_cotaskmem_string& mess
             if (WindowState* window = findWindow(data.hWnd))
                 window->closingAll = false;
         }
-        else if (s == L"SAVECOMPLETED" || s == L"SAVEFAILED")
+        else if (s == L"SAVESTARTED" || s == L"SAVECOMPLETED" || s == L"SAVEFAILED")
         {
             // The message does not go on to wsd. The live-view limit can wait for it, and by the
             // time it comes the user can be back on this tab, so the limit is asked again rather
             // than the WebView2 going now.
-            data.dropWaitsForSave = false;
-            if (WindowState* window = findWindow(data.hWnd))
-                scheduleLiveViewLimit(*window, LIVE_VIEW_LIMIT_DELAY);
+            // TODO: An account window closes without asking its page, so a close during a save
+            // can cut off the upload. Defer it from SAVESTARTED to SAVECOMPLETED, as Qt does.
+            if ((s == L"SAVECOMPLETED" || s == L"SAVEFAILED") && data.dropWaitsForSave)
+            {
+                data.dropWaitsForSave = false;
+                if (WindowState* window = findWindow(data.hWnd))
+                    scheduleLiveViewLimit(*window, LIVE_VIEW_LIMIT_DELAY);
+            }
         }
         else if (s == L"SAVEFAILED prompt")
         {
