@@ -24,6 +24,7 @@
 #include <wsd/TileCache.hpp>
 #include <wsd/TileDesc.hpp>
 
+#include <test/SavedEnvironmentVariable.hpp>
 #include <test/lokassert.hpp>
 
 #include <cppunit/TestAssert.h>
@@ -1054,6 +1055,7 @@ void WhiteBoxTests::testThreadPool()
 {
     constexpr std::string_view testname = __func__;
     //    const size_t existingUnrelatedThreads = Util::getCurrentThreadCount();
+    const SavedEnvironmentVariable maxConcurrency("MAX_CONCURRENCY");
     // coverity[tainted_data_argument : FALSE] - we trust this variable in tests
     setenv("MAX_CONCURRENCY","8",1);
     // coverity[tainted_argument] : don't warn that getenv("MAX_CONCURRENCY") is tainted

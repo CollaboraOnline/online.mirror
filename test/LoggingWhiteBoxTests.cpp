@@ -16,6 +16,7 @@
 #include <common/Log.hpp>
 #include <common/Util.hpp>
 
+#include <test/SavedEnvironmentVariable.hpp>
 #include <test/lokassert.hpp>
 
 #include <cppunit/TestAssert.h>
@@ -43,8 +44,7 @@ void LoggingTests::testGetTimeForLog()
 
     // getTimeForLog returns the time in local timezone.
     // To get reliable tests across different timezones, we use GMT.
-    const char* tz = ::getenv("TZ");
-    const std::string timezoneName = (tz ? tz : "");
+    const SavedEnvironmentVariable savedTimezone("TZ");
     ::setenv("TZ", "GMT", 1);
     tzset();
 
@@ -79,8 +79,6 @@ void LoggingTests::testGetTimeForLog()
 
     LOK_ASSERT_EQUAL_STR("Thu Oct 09 21:00:25.369 2025 (12h 7m 5s 369ms later)",
                          Util::getTimeForLog(now, now + 12h + 7min + 5s + 369ms));
-
-    ::setenv("TZ", timezoneName.data(), 1); // Restore the timeezone.
 }
 
 void LoggingTests::testIso8601Time()
