@@ -535,6 +535,9 @@ private:
     MapUnit             m_ePoolUnit;
     OUString            sLastItemIdent;
     Size                aIconSize;
+    // Position in the preset list of the preset that was selected last, or -1 if none was.
+    // Editing a hatch value clears the visible selection but keeps this position.
+    sal_Int32           m_nLastSelectedPos;
 
     SvxXRectPreview m_aCtlPreview;
     std::unique_ptr<weld::MetricSpinButton> m_xMtrDistance;
@@ -563,6 +566,7 @@ private:
     DECL_LINK( ModifiedBackgroundHdl_Impl, ColorListBox&, void );
     DECL_LINK( ModifiedSliderHdl_Impl, weld::Scale&, void );
     void ModifiedHdl_Impl(void const *);
+    void UnselectPreset();
     DECL_LINK( ClickAddHdl_Impl, weld::Button&, void );
     DECL_LINK( ClickModifyHdl_Impl, weld::Button&, void );
 

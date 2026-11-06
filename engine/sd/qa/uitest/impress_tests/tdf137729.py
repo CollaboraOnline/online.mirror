@@ -37,13 +37,14 @@ class tdf137729(UITestCase):
             self.assertEqual(
               document.DrawPages[0].Background.FillHatch.Color, 0)
             self.assertEqual(
-              document.DrawPages[0].Background.FillHatch.Distance, 102)
+              document.DrawPages[0].Background.FillHatch.Distance, 152)
             self.assertEqual(
               document.DrawPages[0].Background.FillHatch.Angle, 0)
 
-            # FillHatchName to match the first(default) preset's name
+            # Without the patch in place, this test would have failed with
+            # AssertionError: '' != 'hatch'
             self.assertEqual(
-              document.DrawPages[0].Background.FillHatchName, 'Black 0 Degrees')
+              document.DrawPages[0].Background.FillHatchName, 'hatch')
 
 
 # vim: set shiftwidth=4 softtabstop=4 expandtab:

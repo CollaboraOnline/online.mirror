@@ -53,6 +53,7 @@ SvxHatchTabPage::SvxHatchTabPage(weld::Container* pPage, weld::DialogController*
     , m_pnColorListState(nullptr)
     , m_aFillAttributeSet(rInAttrs.getPool(), WhichRangesContainer(XATTR_FILL_FIRST, XATTR_FILL_LAST)) //m_aXFillAttr.GetItemSet())
     , aIconSize(60, 64)
+    , m_nLastSelectedPos(-1)
     , m_xMtrDistance(m_xBuilder->weld_metric_spin_button(u"distancemtr"_ustr, FieldUnit::MM))
     , m_xMtrAngle(m_xBuilder->weld_metric_spin_button(u"hatchanglemtr"_ustr, FieldUnit::DEGREE))
     , m_xSliderAngle(m_xBuilder->weld_scale(u"hatchangleslider"_ustr))
@@ -318,12 +319,13 @@ std::unique_ptr<SfxTabPage> SvxHatchTabPage::Create( weld::Container* pPage, wel
 IMPL_LINK( SvxHatchTabPage, ModifiedListBoxHdl_Impl, weld::ComboBox&, rListBox, void )
 {
     ModifiedHdl_Impl(&rListBox);
-    // hatch params have changed, it is no longer one of the presets
+    UnselectPreset();
 }
 
 IMPL_LINK( SvxHatchTabPage, ModifiedColorListBoxHdl_Impl, ColorListBox&, rListBox, void )
 {
     ModifiedHdl_Impl(&rListBox);
+    UnselectPreset();
 }
 
 IMPL_LINK_NOARG( SvxHatchTabPage, ToggleHatchBackgroundColor_Impl, weld::Toggleable&, void )
@@ -354,11 +356,25 @@ IMPL_LINK_NOARG( SvxHatchTabPage, ModifiedBackgroundHdl_Impl, ColorListBox&, voi
 IMPL_LINK( SvxHatchTabPage, ModifiedEditHdl_Impl, weld::MetricSpinButton&, rEdit, void )
 {
     ModifiedHdl_Impl(&rEdit);
+    UnselectPreset();
 }
 
 IMPL_LINK( SvxHatchTabPage, ModifiedSliderHdl_Impl, weld::Scale&, rSlider, void )
 {
     ModifiedHdl_Impl(&rSlider);
+    UnselectPreset();
+}
+
+// The edited hatch is no longer one of the presets, so no preset stays selected and the dialog
+// applies the values in the controls.
+void SvxHatchTabPage::UnselectPreset()
+{
+    const OUString sId = m_xHatchLB->get_selected_id();
+    if (sId.isEmpty())
+        return;
+
+    m_nLastSelectedPos = sId.toInt32();
+    m_xHatchLB->unselect_all();
 }
 
 void SvxHatchTabPage::ModifiedHdl_Impl( void const * p )
@@ -516,10 +532,11 @@ IMPL_LINK_NOARG(SvxHatchTabPage, ClickAddHdl_Impl, weld::Button&, void)
 IMPL_LINK_NOARG(SvxHatchTabPage, ClickModifyHdl_Impl, weld::Button&, void)
 {
     OUString sId = m_xHatchLB->get_selected_id();
-    sal_Int32 nPos = !sId.isEmpty() ? sId.toInt32() : -1;
+    sal_Int32 nPos = !sId.isEmpty() ? sId.toInt32() : m_nLastSelectedPos;
 
-    if ( nPos == -1 )
+    if ( nPos < 0 || nPos >= m_pHatchingList->Count() )
         return;
+    sId = OUString::number(nPos);
 
     OUString aName( m_pHatchingList->GetHatch( static_cast<sal_uInt16>(nPos) )->GetName() );
 
