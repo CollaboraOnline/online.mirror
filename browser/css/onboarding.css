@@ -11,7 +11,8 @@
 
 
 /* The onboarding tour. Its card is a JSDialog modal popup with the id
-   modal-dialog-onboarding-tour, and the element of the current step carries
+   modal-dialog-onboarding-tour, or modal-dialog-onboarding-tour-next for
+   every other step, and the element of the current step carries
    the onboarding-highlight class. */
 
 /* The card. The window, the form, the title bar, the content and the
@@ -23,7 +24,8 @@
    the form inside it is the card. A centred card stays centred, because the
    padding is the same on every side. The tour points at elements as wide as
    the window, so the card has a width of its own. */
-#modal-dialog-onboarding-tour {
+#modal-dialog-onboarding-tour,
+#modal-dialog-onboarding-tour-next {
 	--onboarding-card-gap: 20px;
 	--onboarding-card-width: 320px;
 	box-sizing: border-box;
@@ -45,7 +47,8 @@
    .lokdialog_container.ui-dialog.ui-widget-content.jsdialog-container rule
    paints every dialog form with !important. */
 /* Each step opens a new popup, so the card fades in and rises on every step. */
-#modal-dialog-onboarding-tour .jsdialog-container {
+#modal-dialog-onboarding-tour .jsdialog-container,
+#modal-dialog-onboarding-tour-next .jsdialog-container {
 	animation: onboarding-appear 0.2s ease-out;
 	box-sizing: border-box;
 	width: 100%;
@@ -59,7 +62,8 @@
 /* The background is !important because the
    .lokdialog_container .ui-dialog-titlebar.ui-widget-header rule paints every
    dialog title bar with !important. */
-#modal-dialog-onboarding-tour .ui-dialog-titlebar {
+#modal-dialog-onboarding-tour .ui-dialog-titlebar,
+#modal-dialog-onboarding-tour-next .ui-dialog-titlebar {
 	display: flex;
 	align-items: center;
 	gap: var(--spacing-m);
@@ -73,11 +77,14 @@
    flex row they would be items of their own and push the title away from the
    start edge by one gap, so they are not drawn. */
 #modal-dialog-onboarding-tour .ui-dialog-titlebar::before,
-#modal-dialog-onboarding-tour .ui-dialog-titlebar::after {
+#modal-dialog-onboarding-tour-next .ui-dialog-titlebar::before,
+#modal-dialog-onboarding-tour .ui-dialog-titlebar::after,
+#modal-dialog-onboarding-tour-next .ui-dialog-titlebar::after {
 	display: none;
 }
 
-#modal-dialog-onboarding-tour .ui-dialog-title {
+#modal-dialog-onboarding-tour .ui-dialog-title,
+#modal-dialog-onboarding-tour-next .ui-dialog-title {
 	flex: 1;
 	float: none;
 	width: auto;
@@ -90,7 +97,8 @@
 
 /* A small close button: the hit area of a toolbar button around a 16 px
    cross, with no frame of its own. */
-#modal-dialog-onboarding-tour .ui-dialog-titlebar-close {
+#modal-dialog-onboarding-tour .ui-dialog-titlebar-close,
+#modal-dialog-onboarding-tour-next .ui-dialog-titlebar-close {
 	position: relative;
 	top: auto;
 	right: auto;
@@ -104,7 +112,8 @@
 	background: transparent;
 }
 
-#modal-dialog-onboarding-tour .ui-dialog-titlebar-close:hover {
+#modal-dialog-onboarding-tour .ui-dialog-titlebar-close:hover,
+#modal-dialog-onboarding-tour-next .ui-dialog-titlebar-close:hover {
 	background-color: var(--color-background-hover);
 }
 
@@ -112,17 +121,20 @@
    ring of a button show past their edges. The overflow of the content is
    !important because .jsdialog-container .ui-dialog-content sets overflow-y
    with !important. */
-#modal-dialog-onboarding-tour .ui-dialog-content {
+#modal-dialog-onboarding-tour .ui-dialog-content,
+#modal-dialog-onboarding-tour-next .ui-dialog-content {
 	padding: 0;
 	overflow: visible !important;
 	line-height: 1.45;
 }
 
-#modal-dialog-onboarding-tour .root-container {
+#modal-dialog-onboarding-tour .root-container,
+#modal-dialog-onboarding-tour-next .root-container {
 	overflow: visible;
 }
 
-#modal-dialog-onboarding-tour #info-modal-container {
+#modal-dialog-onboarding-tour #info-modal-container,
+#modal-dialog-onboarding-tour-next #info-modal-container {
 	display: flex;
 	flex-direction: column;
 	gap: var(--spacing-xl);
@@ -130,7 +142,8 @@
 
 /* The text is a static label, which dialogs give the height of one form row.
    Here it is a paragraph that wraps. */
-#modal-dialog-onboarding-tour #onboarding-text {
+#modal-dialog-onboarding-tour #onboarding-text,
+#modal-dialog-onboarding-tour-next #onboarding-text {
 	display: block;
 	margin: 0;
 	padding: 0;
@@ -142,28 +155,33 @@
 /* One row: the dots at the start, the buttons at the end. The buttons keep
    their width, and when a long tour leaves too little room the dots wrap onto
    a second line in their own column. */
-#modal-dialog-onboarding-tour #onboarding-footer {
+#modal-dialog-onboarding-tour #onboarding-footer,
+#modal-dialog-onboarding-tour-next #onboarding-footer {
 	grid-template-columns: minmax(0, 1fr) auto;
 	align-items: center;
 	column-gap: var(--spacing-m);
 }
 
-#modal-dialog-onboarding-tour #onboarding-progress {
+#modal-dialog-onboarding-tour #onboarding-progress,
+#modal-dialog-onboarding-tour-next #onboarding-progress {
 	justify-self: start;
 	flex-wrap: wrap;
 	row-gap: var(--spacing-s);
 }
 
-#modal-dialog-onboarding-tour #onboarding-buttons {
+#modal-dialog-onboarding-tour #onboarding-buttons,
+#modal-dialog-onboarding-tour-next #onboarding-buttons {
 	margin: 0;
 }
 
-#modal-dialog-onboarding-tour #onboarding-buttons .ui-button-box-right {
+#modal-dialog-onboarding-tour #onboarding-buttons .ui-button-box-right,
+#modal-dialog-onboarding-tour-next #onboarding-buttons .ui-button-box-right {
 	gap: var(--spacing-m);
 	margin: 0;
 }
 
-#modal-dialog-onboarding-tour .ui-pushbutton {
+#modal-dialog-onboarding-tour .ui-pushbutton,
+#modal-dialog-onboarding-tour-next .ui-pushbutton {
 	min-height: 32px;
 	margin: 0;
 	padding-inline: var(--spacing-l);
@@ -174,7 +192,8 @@
 /* Skip is a text button, as wide as its label. The minimum width is
    !important because .ui-button-box .ui-pushbutton in btns.css gives every
    dialog button a minimum width with !important. */
-#modal-dialog-onboarding-tour #onboarding-skip-button {
+#modal-dialog-onboarding-tour #onboarding-skip-button,
+#modal-dialog-onboarding-tour-next #onboarding-skip-button {
 	min-width: 0 !important;
 	padding-inline: var(--spacing-m);
 	border: none;
@@ -184,7 +203,8 @@
 
 /* !important because the shared hover rules for dialog buttons in
    device-desktop.css and jsdialogs.css set the hover colours with !important. */
-#modal-dialog-onboarding-tour #onboarding-skip-button:hover {
+#modal-dialog-onboarding-tour #onboarding-skip-button:hover,
+#modal-dialog-onboarding-tour-next #onboarding-skip-button:hover {
 	background-color: transparent !important;
 	color: var(--color-main-text) !important;
 	text-decoration: underline;
@@ -193,7 +213,8 @@
 /* The label of the primary button takes the page background colour, which
    reads on the accent fill in both themes. Its hover state keeps the shared
    inverted look. */
-#modal-dialog-onboarding-tour #onboarding-next-button.button-primary:not(:hover):not(:focus-visible) {
+#modal-dialog-onboarding-tour #onboarding-next-button.button-primary:not(:hover):not(:focus-visible),
+#modal-dialog-onboarding-tour-next #onboarding-next-button.button-primary:not(:hover):not(:focus-visible) {
 	font-weight: 500;
 	color: var(--color-main-background);
 }
@@ -207,12 +228,14 @@
    the accent of the tour, the same as the highlight ring and the
    current dot. The pointer over the button still gives the shared hover
    look. */
-#modal-dialog-onboarding-tour #onboarding-next-button.button-primary:focus-visible {
+#modal-dialog-onboarding-tour #onboarding-next-button.button-primary:focus-visible,
+#modal-dialog-onboarding-tour-next #onboarding-next-button.button-primary:focus-visible {
 	outline: 2px solid var(--color-main-text);
 	outline-offset: 2px;
 }
 
-#modal-dialog-onboarding-tour #onboarding-next-button.button-primary:focus-visible:not(:hover) {
+#modal-dialog-onboarding-tour #onboarding-next-button.button-primary:focus-visible:not(:hover),
+#modal-dialog-onboarding-tour-next #onboarding-next-button.button-primary:focus-visible:not(:hover) {
 	background-color: rgb(var(--doc-type, 3, 105, 163));
 	border-color: rgb(var(--doc-type, 3, 105, 163));
 	color: var(--color-main-background);
@@ -321,6 +344,7 @@
    pulse. */
 @media (prefers-reduced-motion: reduce) {
 	#modal-dialog-onboarding-tour .jsdialog-container,
+	#modal-dialog-onboarding-tour-next .jsdialog-container,
 	.onboarding-highlight::after {
 		animation: none;
 	}

@@ -19,8 +19,15 @@
  */
 
 class OnboardingTourController {
-	// The id the tour passes to the modal helpers. The popup window id is built from it.
-	private static readonly modalId = 'onboarding-tour';
+	// The modal ids of the cards of even and odd steps: the focus moves from card to card.
+	private static readonly modalIds = [
+		'onboarding-tour',
+		'onboarding-tour-next',
+	];
+
+	// The popup of the previous card, until the card that replaces it has the focus.
+	private previousPopupId: string | null = null;
+	private closePreviousTask: TaskId | null = null;
 
 	// The steps of the running tour, chosen when it starts. Empty when no tour is running.
 	private steps: OnboardingStep[] = [];
@@ -79,8 +86,8 @@ class OnboardingTourController {
 		this.showStep(0);
 	}
 
-	// Closes the tour from any step and takes the highlight away. The focus goes back to the
-	// document.
+	// Closes the tour from any step and takes the highlight away. The focus goes to the
+	// document, as after most commands, whatever had it when the tour started.
 	end(): void {
 		if (this.startTask !== null) {
 			app.layoutingService.cancelLayoutingTask(this.startTask);
@@ -88,31 +95,58 @@ class OnboardingTourController {
 		}
 
 		this.cancelArrowKeysTask();
+		this.closePreviousPopup();
 
 		if (!this.isRunning()) return;
 
+		const popupId = OnboardingTourController.popupId(this.stepIndex);
 		this.reset();
-		app.map.uiManager.closeModal(OnboardingTourController.popupId());
+		app.map.focus();
+		app.map.uiManager.closeModal(popupId, true);
 	}
 
+	// A key repeated while the previous card closes does nothing.
 	next(): void {
-		if (!this.isRunning()) return;
+		if (!this.isRunning() || this.previousPopupId !== null) return;
 		if (this.stepIndex + 1 >= this.steps.length) this.end();
 		else this.showStep(this.stepIndex + 1);
 	}
 
 	back(): void {
-		if (!this.isRunning() || this.stepIndex === 0) return;
+		if (
+			!this.isRunning() ||
+			this.previousPopupId !== null ||
+			this.stepIndex === 0
+		)
+			return;
 		this.showStep(this.stepIndex - 1);
 	}
 
-	private static popupId(): string {
-		return JSDialog.generateModalId(OnboardingTourController.modalId);
+	private static modalId(index: number): string {
+		return OnboardingTourController.modalIds[index % 2];
+	}
+
+	private static popupId(index: number): string {
+		return JSDialog.generateModalId(OnboardingTourController.modalId(index));
 	}
 
 	private isPopupOpen(): boolean {
 		const jsdialog = app.map.jsdialog;
-		return !!jsdialog && !!jsdialog.dialogs[OnboardingTourController.popupId()];
+		return (
+			!!jsdialog &&
+			!!jsdialog.dialogs[OnboardingTourController.popupId(this.stepIndex)]
+		);
+	}
+
+	private closePreviousPopup(): void {
+		if (this.closePreviousTask !== null) {
+			app.layoutingService.cancelLayoutingTask(this.closePreviousTask);
+			this.closePreviousTask = null;
+		}
+		if (this.previousPopupId === null) return;
+
+		app.map.uiManager.closeModal(this.previousPopupId, true);
+		this.previousPopupId = null;
 	}
 
 	private reset(): void {
@@ -155,6 +189,12 @@ class OnboardingTourController {
 	}
 
 	private showStep(index: number): void {
+		// a card whose close task has not run yet, which may have the id of this card
+		this.closePreviousPopup();
+		const previous = this.isPopupOpen()
+			? OnboardingTourController.popupId(this.stepIndex)
+			: null;
+
 		this.stepIndex = index;
 		const step = this.steps[index];
 
@@ -163,17 +203,23 @@ class OnboardingTourController {
 		const target = OnboardingTourController.resolveTarget(step);
 		this.setHighlight(target);
 
-		// The popup of the previous step closes and the popup of this step opens in its
-		// place. The new popup takes the focus, so the focus stays in the tour.
+		// The button with the focus on the previous card has it on this card too, unless it is
+		// disabled here.
+		const focused = previous ? document.activeElement : null;
+		const focusId =
+			focused instanceof HTMLElement &&
+			focused.id &&
+			focused.closest('#' + previous) &&
+			!(focused.id === 'onboarding-back-button' && index === 0)
+				? focused.id
+				: 'onboarding-next-button';
 		const uiManager = app.map.uiManager;
-		uiManager.closeModal(OnboardingTourController.popupId(), true);
-
 		const json = uiManager._modalDialogJSON(
-			OnboardingTourController.modalId,
+			OnboardingTourController.modalId(index),
 			step.title,
 			false,
 			this.buildWidgets(index),
-			'onboarding-next-button',
+			focusId,
 		);
 		if (target) {
 			json.popupParent = target;
@@ -191,10 +237,17 @@ class OnboardingTourController {
 
 		// The popup is attached to the page in a layouting task of the platform. This task
 		// runs after it.
+		this.previousPopupId = previous;
 		this.cancelArrowKeysTask();
 		this.arrowKeysTask = app.layoutingService.appendLayoutingTask(() => {
 			this.arrowKeysTask = null;
 			this.addArrowKeys();
+			// after the task that focuses the new popup, appended when it was attached
+			if (this.previousPopupId === null) return;
+			this.closePreviousTask = app.layoutingService.appendLayoutingTask(() => {
+				this.closePreviousTask = null;
+				this.closePreviousPopup();
+			});
 		});
 	}
 
@@ -207,7 +260,9 @@ class OnboardingTourController {
 	// The arrow keys move between the steps while the card has the focus. The listener is on the
 	// popup window, so it goes away with the popup.
 	private addArrowKeys(): void {
-		const popup = document.getElementById(OnboardingTourController.popupId());
+		const popup = document.getElementById(
+			OnboardingTourController.popupId(this.stepIndex),
+		);
 		if (!popup) return;
 
 		popup.addEventListener('keydown', (event: KeyboardEvent) => {

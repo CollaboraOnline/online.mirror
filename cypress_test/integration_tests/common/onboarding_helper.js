@@ -1,5 +1,7 @@
 /* -*- js-indent-level: 8 -*- */
-/* global cy expect */
+/* global cy expect require */
+
+const helper = require('./helper');
 
 // Helpers for the tests of the tour that introduces the user interface.
 
@@ -10,6 +12,16 @@ function tourSeenKey(docType) {
 	return docType + '.onboardingTourSeen';
 }
 
+// The card on screen: the cards of steps next to each other are two popups.
+const cardSelector = ':is(#modal-dialog-onboarding-tour, #modal-dialog-onboarding-tour-next)';
+
+// Wait until the card of the step the tour is on is the only one on screen. The next card
+// opens in a layouting task, and the previous one closes once the next one has the focus.
+function waitForCard(win) {
+	helper.waitUntilLayoutingIsIdle(win);
+	cy.cGet(cardSelector).should('have.length', 1).and('be.visible');
+}
+
 // Open the tour from its first card and wait until that card is on screen.
 function startTour(win) {
 	cy.log('>> startTour - start');
@@ -17,14 +29,14 @@ function startTour(win) {
 	cy.then(function() {
 		win.app.onboardingTour.start();
 	});
-	cy.cGet('#modal-dialog-onboarding-tour').should('be.visible');
+	cy.cGet(cardSelector).should('be.visible');
 
 	cy.log('<< startTour - end');
 }
 
 // The card on screen is the one named by stepId.
 function assertStep(win, stepId) {
-	cy.cGet('#modal-dialog-onboarding-tour').should('be.visible');
+	waitForCard(win);
 	cy.wrap(null).should(function() {
 		expect(win.app.onboardingTour.currentStepId()).to.equal(stepId);
 	});
@@ -34,7 +46,8 @@ function assertStep(win, stepId) {
 // that never reaches that card fails here, after maxSteps cards, rather than
 // walking off the end of the tour.
 function stepForwardTo(win, stepId, maxSteps) {
-	cy.cGet('#modal-dialog-onboarding-tour').should('be.visible').then(function() {
+	waitForCard(win);
+	cy.then(function() {
 		if (win.app.onboardingTour.currentStepId() === stepId)
 			return;
 
@@ -48,8 +61,9 @@ function stepForwardTo(win, stepId, maxSteps) {
 // Once the tour has been left, none of it is on screen any more and the
 // document is the user's again.
 function assertTourEnded(win) {
-	cy.cGet('#modal-dialog-onboarding-tour').should('not.exist');
+	cy.cGet(cardSelector).should('not.exist');
 	cy.cGet('#modal-dialog-onboarding-tour-overlay').should('not.exist');
+	cy.cGet('#modal-dialog-onboarding-tour-next-overlay').should('not.exist');
 	cy.cGet('.onboarding-highlight').should('not.exist');
 	cy.then(function() {
 		expect(win.app.onboardingTour.isRunning()).to.be.false;
@@ -67,6 +81,8 @@ function assertHighlighted(selector) {
 	cy.log('<< assertHighlighted - end');
 }
 
+module.exports.cardSelector = cardSelector;
+module.exports.waitForCard = waitForCard;
 module.exports.tourSeenKey = tourSeenKey;
 module.exports.startTour = startTour;
 module.exports.assertStep = assertStep;

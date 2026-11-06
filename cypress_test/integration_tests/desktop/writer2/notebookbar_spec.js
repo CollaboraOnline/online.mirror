@@ -459,6 +459,7 @@ describe(['tagdesktop'], 'Onboarding tour on a later visit.', function() {
 		// says so.
 		let secondStepId;
 		cy.cGet('#onboarding-next-button').click();
+		onboardingHelper.waitForCard(this.win);
 		cy.cGet('#onboarding-progress').should(($progress) => {
 			expect($progress.text().trim()).to.not.equal(welcomeProgress);
 		});
@@ -514,13 +515,100 @@ describe(['tagdesktop'], 'Onboarding tour on a later visit.', function() {
 		// Closing the tour from its second card leaves nothing of it behind.
 		onboardingHelper.startTour(this.win);
 		cy.cGet('#onboarding-next-button').click();
-		cy.cGet('#modal-dialog-onboarding-tour .ui-dialog-titlebar-close').click();
+		onboardingHelper.waitForCard(this.win);
+		cy.cGet(onboardingHelper.cardSelector + ' .ui-dialog-titlebar-close').click();
 		onboardingHelper.assertTourEnded(this.win);
 
 		// Skipping the tour from the same place does the same.
 		onboardingHelper.startTour(this.win);
 		cy.cGet('#onboarding-next-button').click();
+		onboardingHelper.waitForCard(this.win);
 		cy.cGet('#onboarding-skip-button').click();
 		onboardingHelper.assertTourEnded(this.win);
+	});
+
+	it('The focus stays in the tour while one card replaces another', function() {
+		onboardingHelper.startTour(this.win);
+		onboardingHelper.assertStep(this.win, 'intro');
+		cy.cGet('#onboarding-next-button').focus();
+
+		// A screen reader follows the focus, which moves into the new card before the old one
+		// goes, so the reader is told of the new card and has no other place in between.
+		const outside = [];
+		let replaced = 0;
+		let observer;
+		cy.then(() => {
+			const doc = this.win.document;
+			observer = new this.win.MutationObserver((mutations) => {
+				const gone = mutations.some((mutation) => Array.from(mutation.removedNodes)
+					.some((node) => node.id === 'modal-dialog-onboarding-tour'));
+				if (!gone)
+					return;
+				++replaced;
+				const card = doc.getElementById('modal-dialog-onboarding-tour-next');
+				if (!card || !card.contains(doc.activeElement))
+					outside.push(this.win.app.onboardingTour.currentStepId());
+			});
+			observer.observe(doc.body, { childList: true, subtree: true });
+		});
+
+		cy.realPress('Enter');
+		cy.wrap(null).should(() => {
+			expect(replaced, 'cards replaced').to.be.greaterThan(0);
+		});
+		// the button of the new card
+		cy.then(() => {
+			helper.processToIdle(this.win);
+		});
+		cy.cGet('#onboarding-next-button').should(($button) => {
+			expect(this.win.document.activeElement).to.equal($button[0]);
+		});
+
+		cy.then(() => {
+			observer.disconnect();
+			expect(outside, 'cards removed with the focus outside the new card').to.be.empty;
+		});
+
+		// Only a card that points at nothing dims the page.
+		cy.cGet('#modal-dialog-onboarding-tour-next-overlay').should('not.have.class', 'dimmed');
+		cy.cGet('#onboarding-back-button').click();
+		onboardingHelper.assertStep(this.win, 'intro');
+		cy.cGet('#modal-dialog-onboarding-tour-overlay').should('have.class', 'dimmed');
+	});
+
+	it('Leaving the tour gives the focus to the document, wherever it started from', function() {
+		desktopHelper.switchUIToNotebookbar();
+		cy.then(() => {
+			helper.processToIdle(this.win);
+		});
+		// once: a click on the selected tab collapses the notebookbar
+		cy.cGet('#Help-tab-label').click();
+
+		const ways = [
+			() => cy.cGet('#onboarding-skip-button').click(),
+			() => {
+				cy.cGet('#onboarding-next-button').focus();
+				cy.realPress('Escape');
+			},
+			() => cy.cGet(onboardingHelper.cardSelector + ' .ui-dialog-titlebar-close').click(),
+		];
+		for (const leave of ways) {
+			// Started from the keyboard, the tour opens with the focus on its button.
+			cy.cGet('#onboardingtour-button').focus();
+			cy.realPress('Enter');
+			onboardingHelper.assertStep(this.win, 'intro');
+			cy.cGet('#onboarding-next-button').click();
+			onboardingHelper.waitForCard(this.win);
+
+			leave();
+			onboardingHelper.assertTourEnded(this.win);
+			cy.then(() => {
+				helper.processToIdle(this.win);
+			});
+			cy.wrap(null).should(() => {
+				expect(this.win.app.map._textInput.hasFocus(), 'the document has the focus')
+					.to.equal(true);
+			});
+		}
 	});
 });
