@@ -21,6 +21,7 @@
 
 #include <boost/property_tree/json_parser.hpp>
 
+#include <rtl/character.hxx>
 #include <sal/log.hxx>
 #include <svl/stritem.hxx>
 #include <svl/eitem.hxx>
@@ -1069,6 +1070,36 @@ collectImages(const uno::Reference<css::accessibility::XAccessibleText>& xAccTex
     }
     std::ranges::stable_sort(aResult, {}, &ParagraphImage::nPosition);
     return aResult;
+}
+
+// U+FFFC replaced by its object's name, dropped where no object matches
+OUString getTextWithObjectNames(const uno::Reference<css::accessibility::XAccessibleText>& xAccText)
+{
+    const OUString aText = xAccText->getText();
+    if (aText.indexOf(u'\xfffc') < 0)
+        return aText;
+
+    const std::vector<ParagraphImage> aImages = collectImages(xAccText);
+    OUStringBuffer aResult(aText.getLength());
+    bool bAfterName = false; // space deferred past a dropped U+FFFC
+    for (sal_Int32 nPos = 0; nPos < aText.getLength(); ++nPos)
+    {
+        if (aText[nPos] != u'\xfffc')
+        {
+            if (std::exchange(bAfterName, false) && !rtl::isAsciiWhiteSpace(aText[nPos]))
+                aResult.append(' ');
+            aResult.append(aText[nPos]);
+            continue;
+        }
+        const auto it = std::ranges::find(aImages, nPos, &ParagraphImage::nPosition);
+        if (it == aImages.end())
+            continue;
+        if (!aResult.isEmpty() && !rtl::isAsciiWhiteSpace(aResult[aResult.getLength() - 1]))
+            aResult.append(' ');
+        aResult.append(it->aName);
+        bAfterName = true;
+    }
+    return aResult.makeStringAndClear();
 }
 
 boost::property_tree::ptree makeCommentsTree(const std::vector<SfxParagraphComment>& rComments)
@@ -2786,7 +2817,7 @@ void KitDocumentFocusListener::notifySelectionChanged(const uno::Reference<acces
                 uno::Reference<XAccessibleText> xAccText(xAccObj, uno::UNO_QUERY);
                 if (xAccText.is())
                 {
-                    sTextContent = xAccText->getText();
+                    sTextContent = getTextWithObjectNames(xAccText);
                     sal_Int32 nTextLength = sTextContent.getLength();
                     if (nTextLength > nMaxTextContentLength)
                     {
@@ -2827,7 +2858,7 @@ void KitDocumentFocusListener::notifySelectionChanged(const uno::Reference<acces
                         uno::Reference<XAccessibleText> xAccText(xChild, uno::UNO_QUERY);
                         if (!xAccText.is())
                             continue;
-                        OUString sText = xAccText->getText();
+                        OUString sText = getTextWithObjectNames(xAccText);
                         sal_Int32 nTextLength = sText.getLength();
                         if (nTextLength < 1)
                             continue;

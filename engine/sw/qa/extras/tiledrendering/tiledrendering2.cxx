@@ -2976,6 +2976,27 @@ CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yTextFrameSelection)
                          aView.m_aA11ySelection.get<std::string>("action", ""));
 }
 
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yTextFrameSelectionObjectNames)
+{
+    // Given a text frame holding a frame right after a word, and a comment right after the frame:
+    createDoc("a11y-frame-in-frame.fodt");
+    SwTestViewCallback aView;
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->GetSfxViewShell()->SetKitAccessibilityState(true);
+    Scheduler::ProcessEventsToIdle();
+
+    // When the outer frame is selected from the keyboard (Shift+F4):
+    dispatchCommand(mxComponent, u".uno:JumpToNextFrame"_ustr, {});
+    Scheduler::ProcessEventsToIdle();
+
+    // Then its text has the inner frame's title set off by spaces, and no comment anchor:
+    CPPUNIT_ASSERT(pWrtShell->IsFrameSelected());
+    CPPUNIT_ASSERT_EQUAL(std::string("Outer"), aView.m_aA11ySelection.get<std::string>("name", ""));
+    // Without the fix, the frame and the comment were U+FFFC:
+    CPPUNIT_ASSERT_EQUAL(std::string("Outer text Inner box with a remark here. \n"),
+                         aView.m_aA11ySelection.get<std::string>("text", ""));
+}
+
 CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testA11yFloatingTableSelection)
 {
     // Given a floating table split over two pages, A1 on the first and A2 on the second, and the
