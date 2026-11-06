@@ -80,6 +80,7 @@ SvxPatternTabPage::SvxPatternTabPage(weld::Container* pPage, weld::DialogControl
     , m_pnColorListState(nullptr)
     , m_aFillAttributeSet(rInAttrs.getPool(), WhichRangesContainer(XATTR_FILL_FIRST, XATTR_FILL_LAST))
     , aIconSize(60, 64)
+    , m_nLastSelectedPos(-1)
     , m_xCtlPixel(new SvxPixelCtl(this))
     , m_xLbColor(new ColorListBox(m_xBuilder->weld_menu_button(u"LB_COLOR"_ustr),
                 [this]{ return GetDialogController()->getDialog(); }))
@@ -465,10 +466,11 @@ void SvxPatternTabPage::AddPattern(const OUString& aName, tools::Long nCount)
 IMPL_LINK_NOARG(SvxPatternTabPage, ClickModifyHdl_Impl, weld::Button&, void)
 {
     OUString sId = m_xPatternLB->get_selected_id();
-    sal_Int32 nPos = !sId.isEmpty() ? sId.toInt32() : -1;
+    sal_Int32 nPos = !sId.isEmpty() ? sId.toInt32() : m_nLastSelectedPos;
 
-    if ( nPos == -1 )
+    if ( nPos < 0 || nPos >= m_pPatternList->Count() )
         return;
+    sId = OUString::number(nPos);
 
     OUString aName( m_pPatternList->GetBitmap( static_cast<sal_uInt16>(nPos) )->GetName() );
 
@@ -654,6 +656,7 @@ void SvxPatternTabPage::ClickDeleteHdl()
 IMPL_LINK_NOARG(SvxPatternTabPage, ChangeColorHdl_Impl, ColorListBox&, void)
 {
     ChangeColor_Impl();
+    UnselectPreset();
 }
 
 void SvxPatternTabPage::ChangeColor_Impl()
@@ -682,6 +685,20 @@ void SvxPatternTabPage::PointChanged(weld::DrawingArea* pDrawingArea, RectPoint)
         m_aCtlPreview.SetAttributes(m_aFillAttributeSet);
         m_aCtlPreview.Invalidate();
     }
+
+    UnselectPreset();
+}
+
+// The edited pattern is no longer one of the presets, so no preset stays selected and the dialog
+// applies the pattern being edited.
+void SvxPatternTabPage::UnselectPreset()
+{
+    const OUString sId = m_xPatternLB->get_selected_id();
+    if (sId.isEmpty())
+        return;
+
+    m_nLastSelectedPos = sId.toInt32();
+    m_xPatternLB->unselect_all();
 }
 
 sal_Int32 SvxPatternTabPage::SearchPatternList(std::u16string_view rPatternName)
