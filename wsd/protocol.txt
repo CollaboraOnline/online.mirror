@@ -1176,11 +1176,20 @@ a11ystate <enableA11y>
 
 geta11yfocusedparagraph
 
-    The geta11yfocusedparagraph protocol is used to retrieve information about the currently focused paragraph in an editable area, supporting accessibility (A11y) features.
+    Requests the paragraph that has the accessibility focus. The answer is
+    an a11yfocusedparagraph message.
 
-a11ycaretposition
+geta11ycaretposition
 
-    The a11ycaretposition protocol is used to notify or request the current caret position within an editable area, supporting accessibility (A11y) features.
+    Requests the caret position in the paragraph that has the
+    accessibility focus. The answer is an a11ycaretposition message.
+
+seta11ycaretincell row=<row> col=<column> end=<0|1>
+
+    Puts the caret at the start of the cell at row and col, as in the
+    table member of the paragraph object last sent, or at its end when end
+    is 1. A cell not listed in that member is ignored. A request without
+    row, col and end is answered error: cmd=seta11ycaretincell kind=syntax.
 
 notasync:
 
@@ -1783,6 +1792,152 @@ comment:
 
     Signals that comment has either been added, removed or modified. See
     LOK_CALLBACK_COMMENT for JSON structure.
+
+a11yfocuschanged: <payload>
+
+    Sent while screen reader support is on:
+    - when the view starts with screen reader support on;
+    - when the accessibility focus goes to another paragraph, or the
+      paragraph that has it changes, and its text, headingLevel, area,
+      links, formats, images, comments or contentControls differ from
+      what was last sent;
+    - when editing the text of a selected shape or a spreadsheet cell
+      starts, and when editing a cell ends;
+    - when text is selected in a formula being edited, such as a cell
+      reference picked with the mouse.
+    When the caret goes to a paragraph in a Writer table, or out of all
+    tables, a11yfocusedcellchanged is sent instead.
+
+    In the payloads of the a11y messages every value is a JSON string, as
+    the engine writes them, except inputSequence, which is a number, an
+    empty array is written as "", and an offset counts UTF-16 code units
+    of the accessible text of a paragraph. The payload is a paragraph
+    object:
+
+        {"content": "<text>", "position": "<offset>", "start": "<offset>",
+         "end": "<offset>", ...}
+
+    content is the accessible text of the paragraph, position the caret,
+    start and end the selection as for a11ytextselectionchanged. These
+    members follow only where they have a value:
+
+    listPrefixLength: the length of the bullet or number at the start of
+        content.
+    headingLevel: the outline level of a heading, from 1.
+    area: "header", "footer", "footnote" or "endnote", for a paragraph
+        outside the body text.
+    links: [{"start", "end", "url"}], the hyperlinks.
+    formats: [{"start", "end", ...}], the runs of character formatting,
+        with "bold", "italic", "underline" and "strikethrough" as "true"
+        where set, and "escapement" as "super" or "sub".
+    images: [{"position", "name", "description", "kind", "shapeType"}],
+        the objects anchored as characters; position is the offset of the
+        object character, kind is "shape", "frame", "formula", "chart" or
+        "object" and absent for an image, and shapeType, such as
+        "Rectangle", is there for a shape only.
+    comments: [{"start", "end", "id", "author", "text"}], the range of
+        each comment and its id as in the comment message.
+    contentControls: [{"start", "end", "type", "alias", "checked",
+        "placeholder"}]; type is "richText", "plainText", "checkbox",
+        "dropDown", "comboBox", "picture" or "date", alias is there where
+        set, checked is "true" or "false" for a checkbox, and placeholder is
+        "true" while the placeholder text shows.
+    before, after: the text of the paragraphs around this one in the same
+        text, in document order: those within the visible area extended by
+        its height above and below, or 10 on each side when the visible area
+        is not known. The paragraphs given in list and table are left out.
+        The two come together, with their rectangles: where only one side
+        has paragraphs, the other is "".
+    beforeRects, afterRects: their rectangles in twips, as "<x>, <y>,
+        <width>, <height>": in document coordinates in Writer, and from the
+        top left of the shape or cell being edited elsewhere.
+    beforeLevels, afterLevels: their heading levels, 0 for a paragraph
+        that is no heading, both present where a paragraph of either side
+        is a heading.
+    beforeLinks, afterLinks, beforeFormats, afterFormats, beforeImages,
+        afterImages, beforeComments, afterComments, beforeContentControls,
+        afterContentControls: one array per paragraph of that side, as for
+        this one, present where a paragraph of that side has such elements.
+    list: {"items": [{"level", "text", "rect"}]}, for a Writer paragraph
+        with a bullet or a number outside tables: the run of list
+        paragraphs including this one, up to 25 on each side, with the list
+        level from 0 and the rectangle as for beforeRects.
+    table: {"rowCount", "colCount", "rows": [{"row", "cells": [{"col",
+        "text", "rowSpan", "colSpan"}]}]}, for a Writer paragraph in a
+        table: the rows of the innermost table holding it, from 25 above
+        the caret's row to 25 below it. text holds the paragraphs of a cell
+        joined by "\n", a nested table as its cells' text, one per line; a
+        span is there only when above 1.
+    force: "1" when the paragraph was changed by another view, or when
+        editing the text of a selected shape or a spreadsheet cell starts,
+        so the client updates its copy even while it is composing.
+
+a11yfocusedparagraph: <payload>
+
+    The answer to geta11yfocusedparagraph, a paragraph object as for
+    a11yfocuschanged.
+
+a11ycaretposition: <offset>
+
+    The answer to geta11ycaretposition: the caret in the accessible text
+    of the paragraph that has the accessibility focus, as a plain number.
+
+a11yfocusedcellchanged: <payload>
+
+    Sent while screen reader support is on, in place of a11yfocuschanged,
+    when the caret goes to a paragraph in a Writer table, another paragraph
+    of the same cell included, or out of all tables. JSON payload:
+
+        {"outCount": "<count>", "inList": [{"rowCount", "colCount"}],
+         "row": "<row>", "col": "<column>", "rowSpan": "<rows>",
+         "colSpan": "<columns>", "paragraph": {...}}
+
+    outCount is the number of tables the caret left, inList the size of
+    each table it entered, the outermost first, both absent when there is
+    none. row and col count from 0, and are -1 when the caret left all
+    tables; a span is there only when above 1, and paragraph is the
+    paragraph object of the caret, as for a11yfocuschanged.
+
+a11yeditinginselectionstate: <payload>
+
+    Sent while screen reader support is on, when editing the text of a
+    selected shape starts or ends, or when editing a spreadsheet cell
+    starts; the end of editing a cell is an a11yfocuschanged with empty
+    content and position 0, whose other members still hold the cell's
+    values. JSON payload:
+
+        {"cell": "<0|1>", "enabled": "<0|1>", "selection": "<name>",
+         "paragraph": "<text>"}
+
+    cell is 1 for a spreadsheet cell, enabled is 1 when editing starts,
+    selection is the address of the cell or the name of the shape, and
+    paragraph the text of the paragraph that has the accessibility focus;
+    selection and paragraph are there only when editing starts, and
+    paragraph only when the text being edited has a single paragraph.
+
+a11yselectionchanged: <payload>
+
+    Sent while screen reader support is on, when an object or a table cell
+    is selected, leaves the selection, or is deleted while selected. JSON
+    payload:
+
+        {"cell": "<0|1>", "action": "<action>", "name": "<name>",
+         "text": "<text>", "contentControl": {...}}
+
+    cell is 1 for a table cell. action is "create" when the selection is
+    this object alone, "add" when a Writer shape joins the selection,
+    "remove" when it leaves it and "delete" when the selected object is
+    deleted. name is the name of the object, or of the table of a floating
+    table. On "create" and "add", text holds the start of the text. For a
+    cell it is at most 1000 characters. For an object it is its first 10
+    paragraphs, or for a floating table the first 10 paragraphs of each of
+    its first 10 cells; each one that is not empty is followed by " \n"
+    unless cut short, and all of them hold at most 1000 characters,
+    separators not counted, or 100 for a text frame, a floating table
+    included. Text cut short ends before its last space, where it has one,
+    and text is absent when empty.
+    contentControl, as an element of contentControls in a11yfocuschanged
+    without the range, is there for an object in a content control.
 
 a11ycaretchanged: <payload>
 
