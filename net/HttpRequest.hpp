@@ -1197,6 +1197,7 @@ public:
         , _parserStage(ParserStage::StatusLine)
         , _recvBodySize(0)
         , _bodySizeLimit(0)
+        , _bodySizeLimitExceeded(false)
         , _finishedCallback(std::move(finishedCallback))
         , _fd(fd)
     {
@@ -1219,6 +1220,7 @@ public:
         , _parserStage(ParserStage::StatusLine)
         , _recvBodySize(0)
         , _bodySizeLimit(0)
+        , _bodySizeLimitExceeded(false)
         , _fd(fd)
     {
         _header.add("Date", Util::getHttpTimeNow());
@@ -1312,6 +1314,9 @@ public:
     /// transfer as an error and the state becomes State::Error. 0, the default, accepts any size.
     void setBodySizeLimit(int64_t limit) { _bodySizeLimit = limit; }
 
+    /// True when the response ended because its body was larger than the body size limit.
+    bool bodySizeLimitExceeded() const { return _bodySizeLimitExceeded; }
+
     /// Returns the body, assuming it wasn't redirected to file or callback.
     const std::string& getBody() const { return _body; }
 
@@ -1380,6 +1385,7 @@ private:
     ParserStage _parserStage; ///< The parser's state.
     int64_t _recvBodySize; ///< The amount of data we received (compared to the Content-Length).
     int64_t _bodySizeLimit; ///< The largest accepted body size, in bytes. 0 accepts any size.
+    bool _bodySizeLimitExceeded; ///< The body was larger than _bodySizeLimit.
     std::string _body; ///< Used when _bodyHandling is InMemory.
     std::ofstream _bodyFile; ///< Used when _bodyHandling is OnDisk.
     IoWriteFunc _onBodyWriteCb; ///< Used to handling body receipt in all cases.
