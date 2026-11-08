@@ -120,6 +120,11 @@ namespace FileUtil
         return std::nullopt;
     }
 
+    std::optional<std::string> resolveRealpath(const char* path)
+    {
+        return std::string(path);
+    }
+
     bool platformDependentCheckDiskSpace(const std::string& path, int64_t enoughSpace)
     {
         // FIXME
