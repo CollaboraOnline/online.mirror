@@ -3042,6 +3042,13 @@ bool isFileUrlDirectlyIn(const std::string& url, const std::string& folder)
     const Poco::URI uri(url);
     return uri.getRawQuery().empty() && uri.getRawFragment().empty();
 }
+
+/// Whether url is an http or https URL.
+bool isHttpUrl(const std::string& url)
+{
+    const std::string lower = Util::toLower(url);
+    return lower.starts_with("http://") || lower.starts_with("https://");
+}
 }
 
 std::size_t ChildSession::insertReadableFiles(std::string_view uriList)
@@ -3229,9 +3236,8 @@ bool ChildSession::insertFile(const StringVector& tokens)
             else if (type == "graphicurl" || type == "multimediaurl" || type == "comparedocumentsurl")
             {
                 URI::decode(name, url);
-                if (!Util::toLower(url).starts_with("http"))
+                if (!isHttpUrl(url))
                 {
-                    // Do not allow arbitrary schemes, especially "file://".
                     sendTextFrameAndLogError("error: cmd=insertfile kind=syntax");
                     return false;
                 }
@@ -4454,8 +4460,9 @@ bool ChildSession::contentControlEvent(const StringVector& tokens)
             try
             {
                 URI::decode(name, url);
-                arguments =
-                    R"({"type":"picture","changed":")" + JsonUtil::escapeJSONValue(url) + "\"}";
+                if (isHttpUrl(url))
+                    arguments = R"({"type":"picture","changed":")" +
+                                JsonUtil::escapeJSONValue(url) + "\"}";
             }
             catch (const Poco::SyntaxException&)
             {
