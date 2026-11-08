@@ -65,6 +65,7 @@
 
 #include <common/AIHttpTransport.hpp>
 #include <common/Clipboard.hpp>
+#include <common/CODAConfig.hpp>
 #include <common/Common.hpp>
 #include <common/JsonUtil.hpp>
 #include <common/LangUtil.hpp>
@@ -76,7 +77,6 @@
 #include <common/StringVector.hpp>
 #include <common/Uri.hpp>
 #include <net/FakeSocket.hpp>
-#include <qt/CodaConfig.hpp>
 #include <wsd/Extensions.hpp>
 #include <wsd/COOLWSD.hpp>
 #include <wsd/DocumentBroker.hpp>
@@ -4000,7 +4000,7 @@ static void requestSaveThenDiscard(DocumentTab& tab)
 // first.
 static void scheduleLiveViewLimit(WindowState& window, UINT delayMilliseconds)
 {
-    if (!window.isTabbed || CodaConfig::instance().liveViewLimit() <= 0)
+    if (!window.isTabbed || CODAConfig::instance().liveViewLimit() <= 0)
         return;
 
     // A run that is already due sooner covers this one too.
@@ -4019,7 +4019,7 @@ static void enforceLiveViewLimit(WindowState& window)
 {
     window.liveViewLimitDue = 0;
 
-    const int limit = CodaConfig::instance().liveViewLimit();
+    const int limit = CODAConfig::instance().liveViewLimit();
     if (limit <= 0)
         return;
 
