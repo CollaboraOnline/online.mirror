@@ -2318,7 +2318,10 @@ void COOLWSD::setLokitEnvironmentVariables(const Poco::Util::LayeredConfiguratio
         appendAllowedAliasGroups(conf, lokAllowedHosts);
     }
 
-    if (lokAllowedHosts.size())
+    // Export the allowlist whenever the net.lok_allow section is present, even
+    // when it resolves to no hosts, so that an explicitly empty section allows
+    // no hosts. Without the section every host is allowed.
+    if (lokAllowedHosts.size() || conf.has("net.lok_allow"))
     {
         std::string allowedRegex;
         for (size_t i = 0; i < lokAllowedHosts.size(); i++)
