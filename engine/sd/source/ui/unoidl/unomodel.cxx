@@ -2787,14 +2787,15 @@ SdXImpressDocument::VectorPartState* servedPartOf(
 }
 
 // A slide's presentation info changed, so tell every view of the document.
-// The payload names the reason and the changed part.
-void notifyViewsPresentationInfoChanged(const SfxObjectShell* pDocShell, sal_Int32 nPart)
+// The payload names the reason, "gifupdate" or "videoupdate", and the changed part.
+void notifyViewsPresentationInfoChanged(const SfxObjectShell* pDocShell, sal_Int32 nPart,
+                                        std::string_view aReason)
 {
     if (!comphelper::COKit::isActive() || !pDocShell)
         return;
 
     ::tools::JsonWriter aWriter;
-    aWriter.put("reason", "gifupdate");
+    aWriter.put("reason", aReason);
     aWriter.put("part", nPart);
     const OString aPayload = aWriter.finishAndGetAsOString();
 
@@ -3125,6 +3126,10 @@ void SdXImpressDocument::Notify( SfxBroadcaster& rBC, const SfxHint& rHint )
                                 notifyViewsVectorPartChanged(mpDocShell, *pPage,
                                                              constVectorModeMasterPages);
                             }
+
+                            // The master videos of every slide using this master changed.
+                            if (dynamic_cast<const SdrMediaObj*>(pObject))
+                                notifyViewsPresentationInfoChanged(mpDocShell, 0, "videoupdate");
                         }
                     }
                     else if (const auto oPart = partAndModeOfPage(pPage))
@@ -3140,8 +3145,8 @@ void SdXImpressDocument::Notify( SfxBroadcaster& rBC, const SfxHint& rHint )
                             notifyViewsVectorPartChanged(mpDocShell, *pPage, oPart->mnMode);
                         }
 
-                        // An animated image came, went or moved, so
-                        // re-send the presentation info. A move arrives
+                        // An animated image or a video came, went or moved,
+                        // so re-send the presentation info. A move arrives
                         // coalesced, and only the slides have such info.
                         if (oPart->mnMode == constVectorModeSlides)
                         {
@@ -3151,7 +3156,13 @@ void SdXImpressDocument::Notify( SfxBroadcaster& rBC, const SfxHint& rHint )
                                     = dynamic_cast<const SdrGrafObj*>(pObject))
                             {
                                 if (pGraphicObject->GetGraphic().IsAnimated())
-                                    notifyViewsPresentationInfoChanged(mpDocShell, oPart->mnPart);
+                                    notifyViewsPresentationInfoChanged(mpDocShell, oPart->mnPart,
+                                                                       "gifupdate");
+                            }
+                            else if (dynamic_cast<const SdrMediaObj*>(pObject))
+                            {
+                                notifyViewsPresentationInfoChanged(mpDocShell, oPart->mnPart,
+                                                                   "videoupdate");
                             }
                         }
                     }
@@ -8042,6 +8053,7 @@ void writeVideos(::tools::JsonWriter& rJsonWriter, SdPage& rPage, std::string_vi
             const avmedia::MediaItem& rMediaItem = pMediaObject->getMediaProperties();
             rJsonWriter.put("loop", rMediaItem.isLoop());
             rJsonWriter.put("mute", rMediaItem.isMute());
+            rJsonWriter.put("hasPoster", !rMediaItem.getGraphic().IsNone());
             rJsonWriter.put("x", aRectangle.Left());
             rJsonWriter.put("y", aRectangle.Top());
             rJsonWriter.put("width", aRectangle.GetWidth());

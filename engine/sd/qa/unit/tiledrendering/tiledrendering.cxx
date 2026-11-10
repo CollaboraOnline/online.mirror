@@ -118,6 +118,8 @@
 #include <sfx2/sidebar/Sidebar.hxx>
 #include <vcl/BitmapTools.hxx>
 #include <vcl/filter/PngImageWriter.hxx>
+#include <unotools/tempfile.hxx>
+#include <osl/file.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/svapp.hxx>
@@ -6023,6 +6025,121 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSlideshowMasterPageVideo)
         }
     }
     CPPUNIT_ASSERT_EQUAL(1, nVideoLayers);
+}
+
+namespace
+{
+/// A small image written to a temporary file, the way a poster uploaded by a client arrives.
+/// The caller removes the file.
+OUString writePosterFile(Color aColor)
+{
+    Bitmap aBitmap(Size(4, 4), vcl::PixelFormat::N24_BPP);
+    aBitmap.Erase(aColor);
+    utl::TempFileNamed aFile(u"", true, u".png");
+    SvFileStream aStream(aFile.GetURL(), StreamMode::WRITE | StreamMode::TRUNC);
+    vcl::PngImageWriter aWriter(aStream);
+    CPPUNIT_ASSERT(aWriter.write(aBitmap));
+    return aFile.GetURL();
+}
+
+/// The arguments of the command that gives a video shape its preview image.
+uno::Sequence<beans::PropertyValue> videoPosterArguments(const OUString& rFileURL,
+                                                         sal_uInt64 nObjectId)
+{
+    return comphelper::InitPropertySequence(
+        { { u"FileName"_ustr, uno::Any(rFileURL) },
+          { u"ObjectId"_ustr, uno::Any(OUString::number(nObjectId)) } });
+}
+}
+
+// A client sends the preview image of a video, and the video keeps the first one it is given.
+// The preview is derived data, so it leaves the undo list and the modified state alone, and
+// every view hears that the presentation info changed.
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSetVideoPoster)
+{
+    SdXImpressDocument* pXImpressDocument = createDoc("SlideRenderingTest.odp");
+    SdTestViewCallback aView;
+    sd::ViewShell* pViewShell = pXImpressDocument->GetDocShell()->GetViewShell();
+    SdPage* pPage = pViewShell->GetActualPage();
+    rtl::Reference<SdrMediaObj> xVideo(
+        new SdrMediaObj(pPage->getSdrModelFromSdrPage(), tools::Rectangle(0, 0, 2000, 2000)));
+    pPage->InsertObject(xVideo.get(), 0);
+    Scheduler::ProcessEventsToIdle();
+    pXImpressDocument->GetDocShell()->SetModified(false);
+    const size_t nUndoActions = pXImpressDocument->GetDoc()->GetUndoManager()->GetUndoActionCount();
+
+    boost::property_tree::ptree aInfo;
+    readJSON(aInfo, pXImpressDocument->getPresentationInfo());
+    const boost::property_tree::ptree& rVideo = child_at(child_at(aInfo, "slides", 0), "videos", 0);
+    CPPUNIT_ASSERT_EQUAL(std::to_string(xVideo->GetUniqueID()), rVideo.get<std::string>("id"));
+    CPPUNIT_ASSERT(!rVideo.get<bool>("hasPoster"));
+
+    const int nInfoChanges = aView.m_nPresentationInfoChanged;
+    aView.m_bTilesInvalidated = false;
+    const OUString aFirstFile = writePosterFile(COL_RED);
+    dispatchCommand(mxComponent, u".uno:SetVideoPoster"_ustr,
+                    videoPosterArguments(aFirstFile, xVideo->GetUniqueID()));
+    Scheduler::ProcessEventsToIdle();
+
+    const Graphic& rPoster = xVideo->getMediaProperties().getGraphic();
+    CPPUNIT_ASSERT(!rPoster.IsNone());
+    CPPUNIT_ASSERT_EQUAL(COL_RED, rPoster.GetBitmap().GetPixelColor(0, 0));
+    // The file belongs to whoever staged it, so it stays where it is.
+    osl::File aPosterFile(aFirstFile);
+    CPPUNIT_ASSERT_EQUAL(osl::FileBase::E_None, aPosterFile.open(osl_File_OpenFlag_Read));
+    aPosterFile.close();
+    osl::File::remove(aFirstFile);
+    CPPUNIT_ASSERT(!pXImpressDocument->GetDocShell()->IsModified());
+    CPPUNIT_ASSERT_EQUAL(nUndoActions,
+                         pXImpressDocument->GetDoc()->GetUndoManager()->GetUndoActionCount());
+    CPPUNIT_ASSERT(aView.m_nPresentationInfoChanged > nInfoChanges);
+    CPPUNIT_ASSERT(aView.m_bTilesInvalidated);
+
+    readJSON(aInfo, pXImpressDocument->getPresentationInfo());
+    CPPUNIT_ASSERT(child_at(child_at(aInfo, "slides", 0), "videos", 0).get<bool>("hasPoster"));
+
+    // A second image, from another view that was slower, is dropped.
+    const OUString aSecondFile = writePosterFile(COL_BLUE);
+    dispatchCommand(mxComponent, u".uno:SetVideoPoster"_ustr,
+                    videoPosterArguments(aSecondFile, xVideo->GetUniqueID()));
+    Scheduler::ProcessEventsToIdle();
+    osl::File::remove(aSecondFile);
+    CPPUNIT_ASSERT_EQUAL(COL_RED,
+                         xVideo->getMediaProperties().getGraphic().GetBitmap().GetPixelColor(0, 0));
+}
+
+// A video on the slide master takes a preview the same way, and the slides using the master
+// list it among their master videos.
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSetVideoPosterOnMaster)
+{
+    SdXImpressDocument* pXImpressDocument = createDoc("SlideRenderingTest.odp");
+    SdTestViewCallback aView;
+    sd::ViewShell* pViewShell = pXImpressDocument->GetDocShell()->GetViewShell();
+    SdrPage& rMasterPage = pViewShell->GetActualPage()->TRG_GetMasterPage();
+    rtl::Reference<SdrMediaObj> xVideo(
+        new SdrMediaObj(rMasterPage.getSdrModelFromSdrPage(), tools::Rectangle(0, 0, 2000, 2000)));
+    rMasterPage.InsertObject(xVideo.get(), 0);
+    Scheduler::ProcessEventsToIdle();
+    pXImpressDocument->GetDocShell()->SetModified(false);
+
+    boost::property_tree::ptree aInfo;
+    readJSON(aInfo, pXImpressDocument->getPresentationInfo());
+    CPPUNIT_ASSERT(
+        !child_at(child_at(aInfo, "slides", 0), "masterVideos", 0).get<bool>("hasPoster"));
+
+    aView.m_bTilesInvalidated = false;
+    const OUString aPosterFile = writePosterFile(COL_GREEN);
+    dispatchCommand(mxComponent, u".uno:SetVideoPoster"_ustr,
+                    videoPosterArguments(aPosterFile, xVideo->GetUniqueID()));
+    Scheduler::ProcessEventsToIdle();
+    osl::File::remove(aPosterFile);
+
+    CPPUNIT_ASSERT(!xVideo->getMediaProperties().getGraphic().IsNone());
+    CPPUNIT_ASSERT(!pXImpressDocument->GetDocShell()->IsModified());
+    CPPUNIT_ASSERT(aView.m_bTilesInvalidated);
+    readJSON(aInfo, pXImpressDocument->getPresentationInfo());
+    CPPUNIT_ASSERT(
+        child_at(child_at(aInfo, "slides", 0), "masterVideos", 0).get<bool>("hasPoster"));
 }
 
 // An animated GIF is drawn at its place in the stacking order of the slide, so its shape has a

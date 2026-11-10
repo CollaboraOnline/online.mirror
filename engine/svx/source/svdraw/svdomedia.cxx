@@ -471,6 +471,7 @@ static bool lcl_HandlePackageURL(
 void SdrMediaObj::mediaPropertiesChanged( const ::avmedia::MediaItem& rNewProperties )
 {
     bool bBroadcastChanged = false;
+    bool bGraphicChanged = false;
 #if HAVE_FEATURE_AVMEDIA
     const AVMediaSetMask nMaskSet = rNewProperties.getMaskSet();
 
@@ -478,9 +479,12 @@ void SdrMediaObj::mediaPropertiesChanged( const ::avmedia::MediaItem& rNewProper
     if( AVMediaSetMask::MIME_TYPE & nMaskSet )
         m_xImpl->m_MediaProperties.setMimeType( rNewProperties.getMimeType() );
 
-    if (nMaskSet & AVMediaSetMask::GRAPHIC)
+    if ((nMaskSet & AVMediaSetMask::GRAPHIC)
+        && m_xImpl->m_MediaProperties.setGraphic(rNewProperties.getGraphic()))
     {
-        m_xImpl->m_MediaProperties.setGraphic(rNewProperties.getGraphic());
+        // The snapshot is drawn from the graphic, so a new graphic needs a new snapshot.
+        m_xImpl->m_xCachedSnapshot.clear();
+        bGraphicChanged = true;
     }
 
     if (nMaskSet & AVMediaSetMask::CROP)
@@ -558,6 +562,11 @@ void SdrMediaObj::mediaPropertiesChanged( const ::avmedia::MediaItem& rNewProper
     if( bBroadcastChanged )
     {
         SetChanged();
+        BroadcastObjectChange();
+    }
+    else if (bGraphicChanged)
+    {
+        ActionChanged();
         BroadcastObjectChange();
     }
 }

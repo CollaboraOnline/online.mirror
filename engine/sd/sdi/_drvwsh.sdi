@@ -2818,6 +2818,10 @@ interface DrawView
         ExecMethod = FuTemporary ;
         StateMethod = GetMenuState ;
     ]
+    SID_SET_VIDEO_POSTER
+    [
+        ExecMethod = FuTemporary ;
+    ]
     SID_REMOVE_VIDEO_BACKGROUND
     [
         ExecMethod = FuTemporary ;

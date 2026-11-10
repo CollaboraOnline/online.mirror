@@ -3307,6 +3307,21 @@ SfxVoidItem InsertVideoBackground SID_INSERT_VIDEO_BACKGROUND
     GroupId = SfxGroupId::Options;
 ]
 
+SfxVoidItem SetVideoPoster SID_SET_VIDEO_POSTER
+(SfxStringItem FileName SID_SET_VIDEO_POSTER,SfxStringItem ObjectId FN_PARAM_1)
+[
+    AutoUpdate = FALSE,
+    FastCall = FALSE,
+    ReadOnlyDoc = FALSE,
+    Toggle = FALSE,
+    Container = FALSE,
+
+    AccelConfig = FALSE,
+    MenuConfig = FALSE,
+    ToolBoxConfig = FALSE,
+    GroupId = SfxGroupId::Options;
+]
+
 SfxStringItem RemoveVideoBackground SID_REMOVE_VIDEO_BACKGROUND
 ()
 [

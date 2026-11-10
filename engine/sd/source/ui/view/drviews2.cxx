@@ -81,6 +81,7 @@
 #include <sfx2/viewfrm.hxx>
 #include <sfx2/zoomitem.hxx>
 #include <sfx2/kit/helper.hxx>
+#include <sfx2/viewsh.hxx>
 #include <sfx2/kit/unocommandlist.hxx>
 
 #include <svx/compressgraphicdialog.hxx>
@@ -99,6 +100,7 @@
 #include <svx/svdetc.hxx>
 #include <svx/svdograf.hxx>
 #include <svx/svdomedia.hxx>
+#include <svx/svdpage.hxx>
 #include <svx/svdoole2.hxx>
 #include <svx/svdopage.hxx>
 #include <svx/svdpagv.hxx>
@@ -675,6 +677,66 @@ void insertVideoBackground(SdDrawDocument& rDoc, SdPage& rMasterPage, const OUSt
     Reference<beans::XPropertySet> xProperties(xVideo->getUnoShape(), UNO_QUERY_THROW);
     xProperties->setPropertyValue(u"Loop"_ustr, Any(true));
     xProperties->setPropertyValue(u"Mute"_ustr, Any(true));
+}
+
+// The video shape with this unique id on any slide or slide master of the document, or nullptr.
+SdrMediaObj* findMediaObject(SdDrawDocument& rDoc, sal_uInt64 nUniqueId)
+{
+    const sal_uInt16 nPageCount = rDoc.GetSdPageCount(PageKind::Standard);
+    for (sal_uInt16 nPage = 0; nPage < nPageCount; ++nPage)
+    {
+        SdPage* pPage = rDoc.GetSdPage(nPage, PageKind::Standard);
+        if (SdrObject* pObject = pPage->FindObjectByUniqueID(nUniqueId))
+            return dynamic_cast<SdrMediaObj*>(pObject);
+    }
+    const sal_uInt16 nMasterCount = rDoc.GetMasterSdPageCount(PageKind::Standard);
+    for (sal_uInt16 nPage = 0; nPage < nMasterCount; ++nPage)
+    {
+        SdPage* pPage = rDoc.GetMasterSdPage(nPage, PageKind::Standard);
+        if (SdrObject* pObject = pPage->FindObjectByUniqueID(nUniqueId))
+            return dynamic_cast<SdrMediaObj*>(pObject);
+    }
+    return nullptr;
+}
+
+// The tiles of every view showing the page of the video are drawn again. A video on a slide
+// master shows on every slide using it, and the master is a part of its own in master view.
+void invalidateVideoTiles(SdDrawDocument& rDoc, const SfxObjectShell* pDocShell,
+                          const SdPage& rPage)
+{
+    std::vector<std::pair<int, int>> aPartsAndModes;
+    if (rPage.IsMasterPage())
+    {
+        const sal_uInt16 nMasterCount = rDoc.GetMasterSdPageCount(PageKind::Standard);
+        for (sal_uInt16 nPage = 0; nPage < nMasterCount; ++nPage)
+            if (rDoc.GetMasterSdPage(nPage, PageKind::Standard) == &rPage)
+                aPartsAndModes.emplace_back(nPage, 1);
+        const sal_uInt16 nPageCount = rDoc.GetSdPageCount(PageKind::Standard);
+        for (sal_uInt16 nPage = 0; nPage < nPageCount; ++nPage)
+        {
+            const SdPage* pUserPage = rDoc.GetSdPage(nPage, PageKind::Standard);
+            if (pUserPage->TRG_HasMasterPage() && &pUserPage->TRG_GetMasterPage() == &rPage)
+                aPartsAndModes.emplace_back(nPage, 0);
+        }
+    }
+    else
+        aPartsAndModes.emplace_back((rPage.GetPageNum() - 1) / 2, 0);
+
+    SfxViewShell* pShell = SfxViewShell::GetFirst(false);
+    while (pShell)
+    {
+        if (pShell->GetObjectShell() == pDocShell)
+            for (const auto& [nPart, nMode] : aPartsAndModes)
+                pShell->viewInvalidateTilesCallback(nullptr, nPart, nMode);
+        pShell = SfxViewShell::GetNext(*pShell, false);
+    }
+}
+
+void setVideoPoster(SdrMediaObj& rVideo, const Graphic& rGraphic)
+{
+    avmedia::MediaItem aItem;
+    aItem.setGraphic(rGraphic);
+    rVideo.setMediaProperties(aItem);
 }
 #endif
 
@@ -4111,6 +4173,35 @@ void DrawViewShell::FuTemporary(SfxRequest& rReq)
                 rDoc.EndUndo();
                 rDoc.SetChanged();
                 GetViewFrame()->GetBindings().Invalidate(SID_REMOVE_VIDEO_BACKGROUND);
+            }
+#endif
+            Cancel();
+            rReq.Done();
+        }
+        break;
+
+        case SID_SET_VIDEO_POSTER:
+        {
+#if HAVE_FEATURE_AVMEDIA
+            const SfxStringItem* pFileName = rReq.GetArg<SfxStringItem>(SID_SET_VIDEO_POSTER);
+            const SfxStringItem* pObjectId = rReq.GetArg<SfxStringItem>(FN_PARAM_1);
+            if (pFileName && pObjectId && !pFileName->GetValue().isEmpty())
+            {
+                Graphic aGraphic;
+                GraphicFilter::LoadGraphic(pFileName->GetValue(), OUString(), aGraphic,
+                                           &GraphicFilter::GetGraphicFilter());
+
+                SdDrawDocument& rDoc = *GetDoc();
+                SdrMediaObj* pVideo = findMediaObject(rDoc, pObjectId->GetValue().toUInt64());
+
+                if (pVideo && !aGraphic.IsNone()
+                    && pVideo->getMediaProperties().getGraphic().IsNone())
+                {
+                    setVideoPoster(*pVideo, aGraphic);
+                    if (const SdPage* pPage
+                        = dynamic_cast<const SdPage*>(pVideo->getSdrPageFromSdrObject()))
+                        invalidateVideoTiles(rDoc, GetDocSh(), *pPage);
+                }
             }
 #endif
             Cancel();

@@ -69,7 +69,7 @@ public:
         /// Returns the URL to the temporary extracted media file.
         const OUString&      getTempURL() const;
 
-        SAL_DLLPRIVATE void                        setMediaProperties( const ::avmedia::MediaItem& rState );
+        void                        setMediaProperties( const ::avmedia::MediaItem& rState );
         const ::avmedia::MediaItem& getMediaProperties() const;
 
         cpo::uno::Reference< css::graphic::XGraphic > const &
