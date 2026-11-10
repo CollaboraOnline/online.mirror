@@ -194,7 +194,7 @@ namespace drawinglayer::primitive2d
                     && maURL == rCompare.maURL
                     && getBackgroundColor() == rCompare.getBackgroundColor()
                     && getDiscreteBorder() == rCompare.getDiscreteBorder()
-                    && maSnapshot.IsNone() == rCompare.maSnapshot.IsNone());
+                    && maSnapshot == rCompare.maSnapshot);
             }
 
             return false;
