@@ -2715,7 +2715,7 @@ $(call gb_LinkTarget_use_libraries,$(1),\
 
 endef
 
-ifneq ($(filter HELPTOOLS XMLHELP,$(BUILD_TYPE)),)
+ifneq ($(filter HELPTOOLS,$(BUILD_TYPE)),)
 $(eval $(call gb_Helper_register_external_libraries_for_install,clucene,PLAINLIBS_OOO,ooo,\
     clucene \
 ))

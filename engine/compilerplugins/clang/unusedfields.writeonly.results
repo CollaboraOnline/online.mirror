@@ -1810,14 +1810,6 @@ vcl/unx/gtk3/hudawareness.cxx:21
     (anonymous namespace)::HudAwarenessHandle notify GDestroyNotify
 vcl/workben/vcldemo.cxx:1705
     (anonymous namespace)::DemoWin mxThread rtl::Reference<RenderThread>
-xmlhelp/source/cxxhelp/provider/databases.hxx:256
-    chelp::Databases m_aDatabases DatabasesTable
-xmlhelp/source/cxxhelp/provider/databases.hxx:262
-    chelp::Databases m_aModInfo ModInfoTable
-xmlhelp/source/cxxhelp/provider/databases.hxx:265
-    chelp::Databases m_aKeywordInfo KeywordInfoTable
-xmlhelp/source/cxxhelp/provider/databases.hxx:271
-    chelp::Databases m_aCollatorTable CollatorTable
 xmloff/qa/unit/uxmloff.cxx:107
     (unnamed struct at /home/noel/online-plugin/engine/xmloff/qa/unit/uxmloff.cxx:106:12) generator const char *const
 xmloff/qa/unit/uxmloff.cxx:108

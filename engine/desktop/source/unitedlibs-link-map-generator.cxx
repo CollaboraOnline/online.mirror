@@ -1220,11 +1220,6 @@ int main()
     line("org_libreoffice_comp_Writer_StarOfficeWriterImportFilter_get_implementation");
     line("com_sun_star_comp_Writer_EPUBExportFilter_get_implementation");
     line("com_sun_star_comp_Writer_EPUBExportUIComponent_get_implementation");
-#if HAVE_FEATURE_XMLHELP
-    // xmlhelp/util/ucpchelp1.component
-    line("CHelpContentProvider_get_implementation");
-    line("com_sun_star_help_TreeViewImpl_get_implementation");
-#endif
     // xmloff/source/transform/xof.component
     line("xmloff_XMLCalcContentImportOOO_get_implementation");
     line("xmloff_XMLCalcImportOOO_get_implementation");

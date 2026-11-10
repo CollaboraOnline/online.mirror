@@ -17,7 +17,6 @@ The XML help is the only one supported in extensions.
 
 --with-help: selects the help type to build
 --with-omindex: prepares the online help for a Xapian Omega based search index
---disable-xmlhelp: removes support for the XML help
 --with-helppack-integration: includes the help-packs in the installer
 
 Also see `configure --help`.
@@ -33,11 +32,7 @@ ship their help. This output is originally based on JavaDoc.
 The main support for this help type is in the following directories:
 
 * helpcompiler: tooling and support library
-* xmlhelp: the viewer component
 * desktop/source/deployment/registry/help: extensions / help-pack support
-
-Most code is "marked" by HAVE_FEATURE_XMLHELP precompiler blocks or conditioned
-by the XMLHELP flag in the $BUILD_TYPE variable.
 
 Interestingly the HelpIndexer and HelpLinker are used by gbuild to build the
 help inside bundled extensions, but both are not part of the Collabora Office SDK.

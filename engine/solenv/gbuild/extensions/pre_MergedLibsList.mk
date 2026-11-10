@@ -68,7 +68,6 @@ gb_MERGE_LIBRARY_LIST := \
 	fwk \
 	guesslang \
 	graphicfilter \
-	$(call gb_Helper_optionals_and,DESKTOP XMLHELP,helplinker) \
 	hwp \
 	hyphen \
 	i18nlangtag \
@@ -137,7 +136,6 @@ gb_MERGE_LIBRARY_LIST := \
 	tl \
 	ucb1 \
 	ucbhelper \
-	$(call gb_Helper_optional,XMLHELP,ucpchelp1) \
 	$(if $(WITH_WEBDAV),ucpdav1) \
 	ucppkg1 \
 	ucpexpand1 \

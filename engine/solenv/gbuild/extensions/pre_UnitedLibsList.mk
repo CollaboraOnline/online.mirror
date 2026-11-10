@@ -74,7 +74,6 @@ gb_UNITED_LIBRARY_LIST := \
 	guesslang \
 	graphicfilter \
 	$(if $(ENABLE_CURL),Grammalecte) \
-	$(call gb_Helper_optionals_and,DESKTOP XMLHELP,helplinker) \
 	hwp \
 	hyphen \
 	i18nlangtag \
@@ -187,7 +186,6 @@ gb_UNITED_LIBRARY_LIST := \
 	tl \
     ucbhelper \
 	ucb1 \
-	$(call gb_Helper_optional,XMLHELP,ucpchelp1) \
 	$(if $(WITH_WEBDAV),ucpdav1) \
 	ucppkg1 \
 	ucpexpand1 \

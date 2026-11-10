@@ -18,7 +18,6 @@
 -o ucb.UcbContentProviderProxyFactory
 -o ucb.UcbPropertiesManager
 -o ucb.UcbStore
--o ucpchelp.CHelpContentProvider
 -o ucpfile.FileProvider
 -o ucphier.HierarchyContentProvider
 -o ucphier.HierarchyDataSource

@@ -86,7 +86,7 @@ $(eval $(call gb_Module_add_moduledirs,libreoffice,\
 	formula \
 	$(call gb_Helper_optional,DESKTOP,fpicker) \
 	framework \
-    $(call gb_Helper_optionals_or,HELPTOOLS XMLHELP,helpcompiler) \
+    $(call gb_Helper_optional,HELPTOOLS,helpcompiler) \
 	$(call gb_Helper_optional,HELP,helpcontent2) \
 	hwpfilter \
 	i18nlangtag \
@@ -175,7 +175,6 @@ $(eval $(call gb_Module_add_moduledirs,libreoffice,\
 	vbahelper \
 	vcl \
 	writerperfect \
-    $(call gb_Helper_optional,XMLHELP,xmlhelp) \
 	xmloff \
 	xmlreader \
 	xmlscript \

@@ -659,7 +659,6 @@ certain functionality.
 @li @c uui
 @li @c vbahelper
 @li @c wasm
-@li @c xmlhelp
 @li @c xmlreader
 
 */

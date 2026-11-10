@@ -98,12 +98,6 @@
  */
 #define KIT_ALWAYS_ACTIVE 0
 
-/* XMLHELP - whether we include the XML help mechanisms
- *
- * Can be turned off with --without-xmlhelp
- */
-#define HAVE_FEATURE_XMLHELP 0
-
 /*
  * Whether Calc supports jumbo sheets (more than 1m rows), which can overflow
  * 32bit drawing coordinates (see tools::Long definition).

@@ -78,17 +78,6 @@
                 <value/>
               </prop>
             </node>
-            <node oor:name="Provider5" oor:op="replace">
-              <prop oor:name="ServiceName">
-                <value>com.sun.star.help.XMLHelp</value>
-              </prop>
-              <prop oor:name="URLTemplate">
-                <value>vnd.sun.star.help</value>
-              </prop>
-              <prop oor:name="Arguments">
-                <value/>
-              </prop>
-            </node>
             <node oor:name="Provider8" oor:op="replace">
               <prop oor:name="ServiceName">
                 <value>com.sun.star.ucb.PackageContentProvider</value>

@@ -206,8 +206,6 @@ public:
             return;
         if (fn == SRCDIR "/starmath/source/view.cxx")
             return;
-        if (fn == SRCDIR "/xmlhelp/source/treeview/tvread.cxx")
-            return;
         TraverseDecl(compiler.getASTContext().getTranslationUnitDecl());
     }
 

@@ -2120,11 +2120,6 @@ else
     enable_emscripten_proxy_posix_sockets=
 fi
 
-AC_ARG_ENABLE(xmlhelp,
-    AS_HELP_STRING([--enable-xmlhelp],
-        [Enable XML help support. Disabled by default.]),
-,enable_xmlhelp=no)
-
 AC_ARG_ENABLE(customtarget-components,
     AS_HELP_STRING([--enable-customtarget-components],
         [Generates the static UNO object constructor mapping from the build.]))
@@ -5851,19 +5846,6 @@ if test -n "$with_omindex" -a "$with_omindex" != "no"; then
         ;;
     esac
 else
-    AC_MSG_RESULT([no])
-fi
-
-AC_MSG_CHECKING([whether to include the XML-help support])
-if test "$enable_xmlhelp" = yes; then
-    BUILD_TYPE="$BUILD_TYPE XMLHELP"
-    test_clucene=yes
-    AC_DEFINE(HAVE_FEATURE_XMLHELP)
-    AC_MSG_RESULT([yes])
-else
-    if test "$with_help" = yes; then
-        add_warning "Building the XML help, but Collabora Office with disabled xmlhelp support. Generated help can't be accessed from this Collabora Office build!"
-    fi
     AC_MSG_RESULT([no])
 fi
 

@@ -43,7 +43,6 @@ $(eval $(call gb_Library_use_externals,united,\
     $(if $(USE_HEADLESS_CODE), cairo) \
 	cdr \
 	$(if $(filter OPENCL,$(BUILD_TYPE)),clew) \
-	$(call gb_Helper_optionals_and,DESKTOP XMLHELP,clucene) \
 	$(if $(ENABLE_COINMP),coinmp) \
 	$(if $(filter TRUE-TRUE,$(USE_HEADLESS_CODE)-$(ENABLE_CPDB)), cpdb) \
 	$(if $(filter TRUE-TRUE,$(USE_HEADLESS_CODE)-$(ENABLE_CUPS)), cups) \

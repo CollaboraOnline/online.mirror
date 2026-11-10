@@ -107,8 +107,6 @@ void StringLoop::run()
         return;
     if (loplugin::hasPathnamePrefix(fn, SRCDIR "/xmloff/"))
         return;
-    if (loplugin::hasPathnamePrefix(fn, SRCDIR "/xmlhelp/"))
-        return;
     if (loplugin::hasPathnamePrefix(fn, SRCDIR "/forms/"))
         return;
     if (loplugin::hasPathnamePrefix(fn, SRCDIR "/sc/source/core/tool/address.cxx"))

@@ -970,14 +970,6 @@ writerperfect/qa/unit/WpftLoader.hxx:70
     void writerperfect::test::WpftLoader::WpftLoader(const class cpo::uno::Reference<class com::sun::star::io::XInputStream> &,const class cpo::uno::Reference<class com::sun::star::document::XFilter> &,const class rtl::OUString &,const class cpo::uno::Reference<class com::sun::star::frame::XDesktop2> &,const class cpo::uno::Reference<class cpo::uno::XComponentContext> &)
     const class cpo::uno::Reference<class com::sun::star::io::XInputStream> & rxInputStream
     createDummyInput()
-xmlhelp/source/cxxhelp/provider/urlparameter.cxx:295
-    void (anonymous namespace)::InputStreamTransformer::InputStreamTransformer(class chelp::URLParameter *,class chelp::Databases *,_Bool)
-    _Bool isRoot
-    isRoot()
-xmlhelp/source/cxxhelp/provider/urlparameter.hxx:214
-    _Bool chelp::URLParameter::name(_Bool)
-    _Bool modulePresent
-    module()
 xmloff/source/style/xmlexppr.cxx:95
     _Bool (anonymous namespace)::ComparePropertyState::operator()(const struct XMLPropertyState &,const struct XMLPropertyState &)
     const struct XMLPropertyState & lhs

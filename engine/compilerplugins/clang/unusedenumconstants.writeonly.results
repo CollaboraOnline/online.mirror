@@ -7858,34 +7858,6 @@ vcl/unx/kf5/KFSalInstance.cxx:57
     enum (unnamed at /home/noel/libo-plugin/vcl/unx/kf5/KFSalInstance.cxx:57:60) Size
 writerperfect/source/writer/exp/xmlimp.hxx:60
     enum writerperfect::exp::PopupState Consumed
-xmlhelp/source/cxxhelp/inc/tvread.hxx:44
-    enum treeview::ConfigData::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/inc/tvread.hxx:43:9) PRODUCTNAME
-xmlhelp/source/cxxhelp/inc/tvread.hxx:44
-    enum treeview::ConfigData::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/inc/tvread.hxx:43:9) PRODUCTVERSION
-xmlhelp/source/cxxhelp/inc/tvread.hxx:44
-    enum treeview::ConfigData::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/inc/tvread.hxx:43:9) VENDORNAME
-xmlhelp/source/cxxhelp/inc/tvread.hxx:44
-    enum treeview::ConfigData::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/inc/tvread.hxx:43:9) VENDORVERSION
-xmlhelp/source/cxxhelp/inc/tvread.hxx:45
-    enum treeview::ConfigData::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/inc/tvread.hxx:43:9) VENDORSHORT
-xmlhelp/source/cxxhelp/provider/databases.hxx:241
-    enum chelp::Databases::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/provider/databases.hxx:240:9) PRODUCTNAME
-xmlhelp/source/cxxhelp/provider/databases.hxx:242
-    enum chelp::Databases::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/provider/databases.hxx:240:9) PRODUCTVERSION
-xmlhelp/source/cxxhelp/provider/databases.hxx:243
-    enum chelp::Databases::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/provider/databases.hxx:240:9) VENDORNAME
-xmlhelp/source/cxxhelp/provider/databases.hxx:244
-    enum chelp::Databases::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/provider/databases.hxx:240:9) VENDORVERSION
-xmlhelp/source/cxxhelp/provider/databases.hxx:245
-    enum chelp::Databases::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/provider/databases.hxx:240:9) VENDORSHORT
-xmlhelp/source/cxxhelp/provider/databases.hxx:246
-    enum chelp::Databases::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/provider/databases.hxx:240:9) NEWPRODUCTNAME
-xmlhelp/source/cxxhelp/provider/databases.hxx:247
-    enum chelp::Databases::(unnamed at /home/noel/libo-plugin/xmlhelp/source/cxxhelp/provider/databases.hxx:240:9) NEWPRODUCTVERSION
-xmlhelp/source/treeview/tvread.cxx:84
-    enum treeview::TVDom::Kind tree_node
-xmlhelp/source/treeview/tvread.cxx:86
-    enum treeview::TVDom::Kind other
 xmloff/inc/EnhancedCustomShapeToken.hxx:96
     enum xmloff::EnhancedCustomShapeToken::EnhancedCustomShapeTokenEnum EAS_CustomShapeEngine
 xmloff/inc/EnhancedCustomShapeToken.hxx:97
