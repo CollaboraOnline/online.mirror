@@ -465,6 +465,23 @@ void PPTShape::addShape(
                                 }
                             }
                         }
+                        else
+                        {
+                            // Plain text in the date placeholder is a fixed date.
+                            const OUString aDateTimeText = getTextBody()->firstParatoString();
+                            if (!aDateTimeText.isEmpty())
+                            {
+                                Reference<XPropertySet> xPropertySet(rSlidePersist.getPage(),
+                                                                     UNO_QUERY);
+                                xPropertySet->setPropertyValue(u"IsDateTimeVisible"_ustr,
+                                                               Any(true));
+                                xPropertySet->setPropertyValue(u"IsDateTimeFixed"_ustr,
+                                                               Any(true));
+                                xPropertySet->setPropertyValue(u"DateTimeText"_ustr,
+                                                               Any(aDateTimeText));
+                                return;
+                            }
+                        }
                     }
                     sServiceName = u"com.sun.star.presentation.DateTimeShape"_ustr;
                     bClearText = true;
