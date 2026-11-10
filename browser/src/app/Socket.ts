@@ -2542,6 +2542,41 @@ class Socket {
 		}
 	}
 
+	private _showCollabConflictWait(userNames: string | undefined): void {
+		const waitDialogId = this._map.uiManager.generateModalId(
+			'collab-conflict-wait',
+		);
+		if (document.getElementById(waitDialogId)) {
+			return;
+		}
+
+		this._map.uiManager.showInfoModal(
+			'collab-conflict-wait',
+			'',
+			_(
+				'Waiting for %USERS to decide which version of this document to keep. The document opens here once they decide.',
+			).replace('%USERS', decodeURIComponent(userNames || '')),
+			null,
+			_('Close'),
+			() => {
+				// No action runs while a dialog is open, so the message goes first:
+				clearTimeout(this.timer);
+				this._map.uiManager.closeModal(waitDialogId);
+				app.dispatcher.dispatch('closeapp');
+				return true;
+			},
+		);
+	}
+
+	private _closeCollabConflictWait(): void {
+		const waitDialogId = this._map.uiManager.generateModalId(
+			'collab-conflict-wait',
+		);
+		if (document.getElementById(waitDialogId)) {
+			this._map.uiManager.closeModal(waitDialogId);
+		}
+	}
+
 	// 'error: ' message.
 	// returns true if the caller need to exit immediately.
 	private _onErrorMsg(textMsg: string, command: ServerCommand): boolean {
@@ -2777,9 +2812,6 @@ class Socket {
 				// A conflict with what this page uploaded waits for as long as the other users take
 				// to decide (as the upload already holds the changes of this page):
 				const waitsForConflict = errorKind === 'docunloading:collabconflict';
-				const waitDialogId = this._map.uiManager.generateModalId(
-					'collab-conflict-wait',
-				);
 
 				clearTimeout(this.timer);
 				if (waitsForConflict) {
@@ -2798,9 +2830,7 @@ class Socket {
 						// dialog.
 						if (this.connected() || this._map._fatal) {
 							clearTimeout(this.timer);
-							if (document.getElementById(waitDialogId)) {
-								this._map.uiManager.closeModal(waitDialogId);
-							}
+							this._closeCollabConflictWait();
 							return;
 						}
 
@@ -2817,24 +2847,7 @@ class Socket {
 				); // Quadratic back-off.
 
 				if (waitsForConflict) {
-					if (!document.getElementById(waitDialogId)) {
-						this._map.uiManager.showInfoModal(
-							'collab-conflict-wait',
-							'',
-							_(
-								'Waiting for %USERS to decide which version of this document to keep. The document opens here once they decide.',
-							).replace('%USERS', decodeURIComponent(command.username || '')),
-							null,
-							_('Close'),
-							() => {
-								// No action runs while a dialog is open, so the message goes first:
-								clearTimeout(this.timer);
-								this._map.uiManager.closeModal(waitDialogId);
-								app.dispatcher.dispatch('closeapp');
-								return true;
-							},
-						);
-					}
+					this._showCollabConflictWait(command.username);
 				} else if (this.ReconnectCount > 1) {
 					this._map.showBusy(errorMessages.docunloadingretry, false);
 				}
