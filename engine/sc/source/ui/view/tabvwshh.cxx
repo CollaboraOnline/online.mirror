@@ -29,7 +29,9 @@
 #include <basic/sbxcore.hxx>
 #include <svl/stritem.hxx>
 #include <svl/whiter.hxx>
+#include <vcl/kit.hxx>
 #include <vcl/svapp.hxx>
+#include <comphelper/scopeguard.hxx>
 #include <osl/diagnose.h>
 
 #include <tabvwsh.hxx>
@@ -256,6 +258,11 @@ bool ScTabViewShell::ExecuteRetypePassDlg(ScPasswordHash eDesiredHash)
     ScRetypePassDlg aDlg(GetFrameWeld());
     aDlg.SetDataFromDocument(rDoc);
     aDlg.SetDesiredHash(eDesiredHash);
+
+    // The dialog runs a nested main loop inside the save, which waits for the answer, so that
+    // re-entry is expected.
+    vcl::kit::pushExpectedReentry();
+    comphelper::ScopeGuard aPopReentry([] { vcl::kit::popExpectedReentry(); });
     if (aDlg.run() != RET_OK)
         return false;
 

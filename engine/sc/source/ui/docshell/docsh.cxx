@@ -2023,16 +2023,7 @@ bool ScDocShell::SaveAs( SfxMedium& rMedium )
     }
 
     ScTabViewShell* pViewShell = GetBestViewShell();
-    bool bNeedsRehash = ScPassHashHelper::needsPassHashRegen(*m_pDocument, PASSHASH_SHA1);
-    if (bNeedsRehash)
-        // legacy xls hash double-hashed by SHA1 is also supported.
-        bNeedsRehash = ScPassHashHelper::needsPassHashRegen(*m_pDocument, PASSHASH_XL, PASSHASH_SHA1);
-    if (bNeedsRehash)
-    {   // SHA256 explicitly supported in ODF 1.2, implicitly in ODF 1.1
-        bNeedsRehash = ScPassHashHelper::needsPassHashRegen(*m_pDocument, PASSHASH_SHA256);
-    }
-
-    if (pViewShell && bNeedsRehash)
+    if (pViewShell && NeedsPasswordRetypeForODF())
     {
         if (rMedium.GetArgs().getValue(utl::MediaDescriptor::PROP_AUTOSAVEEVENT) == true)
         {
@@ -3116,6 +3107,38 @@ bool ScDocShell::WillWarnOnlyActiveSheetSaved( std::u16string_view rFilter ) con
     return rFilter == SC_TEXT_CSV_FILTER_NAME
         && m_pDocument->GetTableCount() > 1
         && ScModule::get()->GetInputOptions().GetWarnActiveSheet();
+}
+
+bool ScDocShell::NeedsPasswordRetypeForODF() const
+{
+    bool bNeedsRehash = ScPassHashHelper::needsPassHashRegen(*m_pDocument, PASSHASH_SHA1);
+    if (bNeedsRehash)
+        // legacy xls hash double-hashed by SHA1 is also supported.
+        bNeedsRehash = ScPassHashHelper::needsPassHashRegen(*m_pDocument, PASSHASH_XL, PASSHASH_SHA1);
+    if (bNeedsRehash)
+    {   // SHA256 explicitly supported in ODF 1.2, implicitly in ODF 1.1
+        bNeedsRehash = ScPassHashHelper::needsPassHashRegen(*m_pDocument, PASSHASH_SHA256);
+    }
+    return bNeedsRehash;
+}
+
+bool ScDocShell::WillAskToRetypePasswords( const OUString& rFilter )
+{
+    // The dialog has a view to come up in, and without one the save goes ahead unasked.
+    if (!GetBestViewShell())
+        return false;
+
+    if (rFilter == SC_XL5_FILTER_NAME || rFilter == SC_XL95_FILTER_NAME
+        || rFilter == SC_XL97_FILTER_NAME || rFilter == SC_XL5TMPL_FILTER_NAME
+        || rFilter == SC_XL95TMPL_FILTER_NAME || rFilter == SC_XL97TMPL_FILTER_NAME)
+        return ScPassHashHelper::needsPassHashRegen(*m_pDocument, PASSHASH_XL);
+
+    // Own filters with the STARONEFILTER flag, such as flat ODS, are written by an export filter
+    // and leave the protection hashes as they are.
+    std::shared_ptr<const SfxFilter> pFilter = SfxFilter::GetFilterByName(rFilter);
+    return pFilter && pFilter->IsOwnFormat()
+           && !(pFilter->GetFilterFlags() & SfxFilterFlags::STARONEFILTER)
+           && NeedsPasswordRetypeForODF();
 }
 
 bool ScDocShell::HasAutomaticTableName( std::u16string_view rFilter )

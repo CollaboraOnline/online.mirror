@@ -1375,6 +1375,12 @@ window.L.Control.JSDialog = window.L.Control.extend({
 			if (this.map && !instance.isDropdown)
 				this.map._progressBar.end();
 
+			// A newly opened dialog takes the input, so a busy popup that is up or about to
+			// come up goes away and does not cover it.
+			if (this.map && !existingNode && instance.nonModal
+				&& this.map.uiManager && this.map.uiManager.isBusyPopupShownOrPending())
+				this.map.fire('hidebusy');
+
 			instance.popoutWindow = this.openPopoutIfWanted(instance);
 
 			let dialogDomParent = instance.overlay ? instance.overlay : instance.containerParent;

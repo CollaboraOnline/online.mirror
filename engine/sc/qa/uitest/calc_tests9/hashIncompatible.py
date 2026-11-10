@@ -57,7 +57,7 @@ class hashIncompatible(UITestCase):
                     xOpen = xSaveDialog.getChild("open")
 
                     with self.ui_test.execute_dialog_through_action(xOpen, "CLICK") as xRetypePasswordDialog:
-                        xRetypeBtn = xRetypePasswordDialog.getChild("button")
+                        xRetypeBtn = xRetypePasswordDialog.getChild("button0")
 
                         with self.ui_test.execute_blocking_action(
                                 xRetypeBtn.executeAction, args=('CLICK', ())) as xPasswordDialog:
