@@ -86,6 +86,14 @@ TextCharacterPropertiesContext::TextCharacterPropertiesContext(
     {
         --nVisualTokenAmount; // Not a visual attribute
     }
+    if ( rAttribs.hasAttribute( XML_err ) )
+    {
+        --nVisualTokenAmount; // Not a visual attribute
+    }
+    if ( rAttribs.hasAttribute( XML_noProof ) )
+    {
+        --nVisualTokenAmount; // Not a visual attribute
+    }
 
     if ( nVisualTokenAmount > 0 )
         mrTextCharacterProperties.mbHasVisualRunProperties = true;

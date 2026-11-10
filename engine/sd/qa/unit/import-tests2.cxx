@@ -3360,6 +3360,22 @@ CPPUNIT_TEST_FIXTURE(SdImportTest2, testSlideDatePlainTextIsFixedDate)
     CPPUNIT_ASSERT_EQUAL(sal_Int32(0), xPage->getCount());
 }
 
+CPPUNIT_TEST_FIXTURE(SdImportTest2, testSlideFooterInSeveralRunsIsFooterText)
+{
+    createSdImpressDoc("pptx/slide-footer-split-runs.pptx");
+
+    // The footer placeholder of the slide holds its text in two runs that look the same, one of
+    // them marked as misspelled, so the text is the footer text of the slide and the slide keeps no
+    // shape of its own.
+    uno::Reference<drawing::XDrawPage> xPage(getPage(0));
+    uno::Reference<beans::XPropertySet> xPageProperties(xPage, uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT_EQUAL(true,
+                         xPageProperties->getPropertyValue(u"IsFooterVisible"_ustr).get<bool>());
+    CPPUNIT_ASSERT_EQUAL(u"First name Last name"_ustr,
+                         xPageProperties->getPropertyValue(u"FooterText"_ustr).get<OUString>());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(0), xPage->getCount());
+}
+
 CPPUNIT_TEST_FIXTURE(SdImportTest2, testSlideFooterAtInheritedPositionIsFooterText)
 {
     createSdImpressDoc("pptx/slide-footer-own-position.pptx");
