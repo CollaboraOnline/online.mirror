@@ -3369,6 +3369,23 @@ CPPUNIT_TEST_FIXTURE(SdImportTest2, testOwnLuminanceReplacesTheInheritedOne)
     CPPUNIT_ASSERT_EQUAL(Color(0x808080), nCharColor);
 }
 
+CPPUNIT_TEST_FIXTURE(SdImportTest2, testSlideDatePlainTextIsFixedDate)
+{
+    createSdImpressDoc("pptx/slide-date-plain-text.pptx");
+
+    // The date placeholder of the slide holds plain text, which is the fixed date of the slide,
+    // so the Header and Footer dialog edits it and the slide keeps no shape of its own.
+    uno::Reference<drawing::XDrawPage> xPage(getPage(0));
+    uno::Reference<beans::XPropertySet> xPageProperties(xPage, uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT_EQUAL(
+        true, xPageProperties->getPropertyValue(u"IsDateTimeVisible"_ustr).get<bool>());
+    CPPUNIT_ASSERT_EQUAL(true,
+                         xPageProperties->getPropertyValue(u"IsDateTimeFixed"_ustr).get<bool>());
+    CPPUNIT_ASSERT_EQUAL(u"Project title | 20.08.2019"_ustr,
+                         xPageProperties->getPropertyValue(u"DateTimeText"_ustr).get<OUString>());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(0), xPage->getCount());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
