@@ -728,6 +728,7 @@ bool ChildSession::_handleInput(const char *buffer, int length)
                tokens.equals(0, "paste") ||
                tokens.equals(0, "insertfile") ||
                tokens.equals(0, "insertfilelist") ||
+               tokens.equals(0, "videoposter") ||
                tokens.equals(0, "slideimport") ||
                tokens.equals(0, "slidelink") ||
                tokens.equals(0, "linkedfile") ||
@@ -921,6 +922,10 @@ bool ChildSession::_handleInput(const char *buffer, int length)
         else if (tokens.equals(0, "insertfile"))
         {
             return insertFile(tokens);
+        }
+        else if (tokens.equals(0, "videoposter"))
+        {
+            return setVideoPoster(tokens);
         }
         else if (tokens.equals(0, "insertfilelist"))
         {
@@ -3538,6 +3543,49 @@ bool ChildSession::pasteFileList()
     return insertReadableFiles(std::string_view(list.data(), list.size())) > 0;
 }
 
+// videoposter name=<staged file> id=<unique id of the video shape>
+// The client produced a preview image out of the video and uploaded it
+bool ChildSession::setVideoPoster(const StringVector& tokens)
+{
+    std::string name;
+    std::string id;
+    if (tokens.size() != 3 || !getTokenString(tokens[1], "name", name) ||
+        !getTokenString(tokens[2], "id", id) || id.empty() ||
+        !std::all_of(id.begin(), id.end(), [](char c) { return std::isdigit(static_cast<unsigned char>(c)); }))
+    {
+        sendTextFrameAndLogError("error: cmd=videoposter kind=syntax");
+        return false;
+    }
+
+    if (isReadOnly())
+    {
+        sendTextFrameAndLogError("error: cmd=videoposter kind=failure");
+        return false;
+    }
+
+    const std::string jailDoc = getJailDocRoot();
+    const std::string url = "file://" + jailDoc + "insertfile/" + name;
+    if (!isFileUrlDirectlyIn(url, jailDoc + "insertfile/"))
+    {
+        sendTextFrameAndLogError("error: cmd=videoposter kind=syntax");
+        return false;
+    }
+
+    const std::string arguments = "{"
+        "\"FileName\":{"
+            "\"type\":\"string\","
+            "\"value\":\"" + JsonUtil::escapeJSONValue(url) + "\""
+        "},"
+        "\"ObjectId\":{"
+            "\"type\":\"string\","
+            "\"value\":\"" + id + "\""
+        "}}";
+
+    getLOKitDocument()->setView(_viewId);
+    getLOKitDocument()->postUnoCommand(".uno:SetVideoPoster", arguments.c_str(), false);
+    return true;
+}
+
 bool ChildSession::insertFile(const StringVector& tokens)
 {
     std::string name, type, data;
@@ -5470,6 +5518,14 @@ bool ChildSession::unoCommand(const StringVector& tokens)
 
     // The caret is placed through the 'textcursor' message only.
     if (COOLProtocol::splitCommand(tokens[1]).name == ".uno:SetTextCursor")
+    {
+        sendTextFrameAndLogError("error: cmd=uno kind=syntax");
+        return false;
+    }
+
+    // A video gets its preview image through the 'videoposter' message only. The engine finds
+    // the command by its name in any letter case.
+    if (Util::iequal(COOLProtocol::getUnoCommandName(tokens[1]), "SetVideoPoster"))
     {
         sendTextFrameAndLogError("error: cmd=uno kind=syntax");
         return false;

@@ -19,6 +19,7 @@ window.L.Map.FileInserter = window.L.Handler.extend({
 		this._toInsertURL = {};
 		this._toInsertBackground = {};
 		this._toVideoBackground = {};
+		this._toVideoPoster = {};
 		this._toCompareDocuments = {};
 		this._toFilePicker = {};
 		// The id of the engine's file request the next picked file answers, or null.
@@ -40,6 +41,7 @@ window.L.Map.FileInserter = window.L.Handler.extend({
 		this._map.on('childid', this._onChildIdMsg, this);
 		this._map.on('selectbackground', this._onSelectBackground, this);
 		this._map.on('videobackground', this._onVideoBackground, this);
+		this._map.on('videoposter', this._onVideoPoster, this);
 		this._map.on('comparedocuments', this._onCompareDocuments, this);
 		this._map.on('filepicker', this._onFilePickerRequest, this);
 		const input = document.getElementById('filepicker');
@@ -56,6 +58,7 @@ window.L.Map.FileInserter = window.L.Handler.extend({
 		this._map.off('childid', this._onChildIdMsg, this);
 		this._map.off('selectbackground', this._onSelectBackground, this);
 		this._map.off('videobackground', this._onVideoBackground, this);
+		this._map.off('videoposter', this._onVideoPoster, this);
 		this._map.off('comparedocuments', this._onCompareDocuments, this);
 		this._map.off('filepicker', this._onFilePickerRequest, this);
 		const input = document.getElementById('filepicker');
@@ -195,6 +198,18 @@ window.L.Map.FileInserter = window.L.Handler.extend({
 		}
 	},
 
+	// The preview image of a video, made here, is uploaded like an inserted file. It is
+	// background work, so nothing is shown while it uploads and nothing is said when it fails.
+	_onVideoPoster: function (e) {
+		if (!this._childId) {
+			app.socket.sendMessage('getchildid');
+			this._toVideoPoster[Date.now()] = e;
+		}
+		else {
+			this._sendFile(Date.now(), e.file, 'videoposter', { id: e.id });
+		}
+	},
+
 	_onCompareDocuments: function (e) {
 		if (!this._childId) {
 			app.socket.sendMessage('getchildid');
@@ -235,6 +250,12 @@ window.L.Map.FileInserter = window.L.Handler.extend({
 		}
 		this._toVideoBackground = {};
 
+		for (name in this._toVideoPoster) {
+			const poster = this._toVideoPoster[name];
+			this._sendFile(name, poster.file, 'videoposter', { id: poster.id });
+		}
+		this._toVideoPoster = {};
+
 		for (name in this._toCompareDocuments) {
 			this._sendFile(name, this._toCompareDocuments[name], 'comparedocuments');
 		}
@@ -246,12 +267,15 @@ window.L.Map.FileInserter = window.L.Handler.extend({
 		this._toFilePicker = {};
 	},
 
-	_sendFile: async function (name, file, type) {
+	// extra carries what the message after the upload needs besides the staged name: the id
+	// of the video shape for a videoposter.
+	_sendFile: async function (name, file, type, extra) {
 		var socket = app.socket;
 		var map = this._map;
 		var sectionContainer = app.sectionContainer;
 		var url = this.getWopiUrl(map);
 		const fileInserter = this;
+		const quiet = type === 'videoposter';
 		// The request this upload answers; the engine hears about a failed
 		// upload too, so its request does not stay open.
 		const filePickerRequestId = type === 'filepicker' ? this._filePickerRequestId : null;
@@ -365,10 +389,10 @@ window.L.Map.FileInserter = window.L.Handler.extend({
 			reader.readAsArrayBuffer(file);
 		} else {
 			var xmlHttp = new XMLHttpRequest();
-			this._map.showBusy(_('Uploading...'), false);
+			if (!quiet) this._map.showBusy(_('Uploading...'), false);
 			xmlHttp.onreadystatechange = function () {
 				if (xmlHttp.readyState === 4) {
-					map.hideBusy();
+					if (!quiet) map.hideBusy();
 					if (xmlHttp.status === 200) {
 						// The server names the file it staged. The name keeps the user's file
 						// name, which can hold spaces, so it goes URL-encoded into a message.
@@ -385,9 +409,14 @@ window.L.Map.FileInserter = window.L.Handler.extend({
 							fileInserter._answerFilePicker(filePickerRequestId, stagedName);
 						} else if (type === 'multimedia') {
 							socket.sendMessage('insertfile name=' + encodedName + ' type=' + type + ' width=' + size.width + ' height=' + size.height);
+						} else if (type === 'videoposter') {
+							socket.sendMessage('videoposter name=' + encodedName + ' id=' + extra.id);
 						} else {
 							socket.sendMessage('insertfile name=' + encodedName + ' type=' + type);
 						}
+					}
+					else if (quiet) {
+						// A failed upload of a preview image is not reported.
 					}
 					else if (xmlHttp.status === 404) {
 						map.fire('error', {msg: errorMessages.uploadfile.notfound, critical: false});

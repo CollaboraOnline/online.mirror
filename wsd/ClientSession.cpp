@@ -654,6 +654,24 @@ void ClientSession::onTileProcessed(TileWireId wireId)
         LOG_INF("Tileprocessed message with an unknown wire-id '" << wireId << "' from session " << getId());
 }
 
+namespace
+{
+/// The type a video is served with, by the extension of its file: WebM and Ogg have their own
+/// types and every other video is video/mp4. A browser told video/mp4 reads the container from
+/// the file itself, so a QuickTime or Matroska file holding H.264 plays under that type too.
+std::string videoMimeTypeOf(const std::string& url)
+{
+    std::string extension = Poco::Path(url).getExtension();
+    std::transform(extension.begin(), extension.end(), extension.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    if (extension == "webm")
+        return "video/webm";
+    if (extension == "ogv")
+        return "video/ogg";
+    return "video/mp4";
+}
+} // namespace
+
 #if !MOBILEAPP
 namespace
 {
@@ -2491,6 +2509,7 @@ bool ClientSession::_handleInput(const char *buffer, int length)
              tokens.equals(0, "paste") ||
              tokens.equals(0, "insertfile") ||
              tokens.equals(0, "insertfilelist") ||
+             tokens.equals(0, "videoposter") ||
              tokens.equals(0, "filepickerresult") ||
              tokens.equals(0, "slideimport") ||
              tokens.equals(0, "key") ||
@@ -4538,8 +4557,12 @@ bool ClientSession::handlePresentationInfo(const std::shared_ptr<Message>& paylo
 
                             if (!id.empty() && !url.empty())
                             {
-                                video->set("url", registerEmbeddedMedia(docBroker, id, url,
-                                                                        std::string()));
+                                // The engine does not know the type of the file reliably, so
+                                // the file name says what the video is.
+                                const std::string mimeType = videoMimeTypeOf(url);
+                                video->set("url",
+                                           registerEmbeddedMedia(docBroker, id, url, mimeType));
+                                video->set("mimeType", mimeType);
                                 modified = true;
                             }
                         }
@@ -5179,7 +5202,7 @@ bool ClientSession::handleKitToClientMessage(const std::shared_ptr<Message>& pay
                         const std::string mediaUrl = createMediaURI("media", id);
                         const std::string mediaVTT = createMediaURI("mediavtt", id);
                         object->set("url", mediaUrl); // Replace the url with the public one.
-                        object->set("mimeType", "video/mp4"); //FIXME: get this from the source json
+                        object->set("mimeType", videoMimeTypeOf(url));
                         if (!mediaVTT.empty())
                         {
                             object->set("srt", mediaVTT);

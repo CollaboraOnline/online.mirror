@@ -499,6 +499,7 @@ COOL_JS_LST =\
 	src/app/CalcVectorManager.ts \
 	src/app/GifFrameSource.ts \
 	src/app/AnimatedGifManager.ts \
+	src/app/VideoPosterManager.ts \
 	src/app/TilesMiddleware.ts \
 	src/app/PreloadMapOverlay.ts \
 	src/app/SearchService.ts \

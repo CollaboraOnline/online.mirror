@@ -4,6 +4,7 @@
  */
 
 /* global app cool $ _ JSDialog UNOKey DocumentBase ViewState RenderManager AnimatedGifManager */
+/* global VideoPosterManager */
 /* global CanvasSectionContainer CanvasOverlay SplitSection RenderGeometrySection URLPopUpSection */
 /* global CursorHeaderSection CellCursorSection TextCursorSection CompareChangesLabelSection */
 /* global OtherViewCellCursorSection OtherViewGraphicSelectionSection */
@@ -4605,6 +4606,10 @@ window.L.CanvasTileLayer = window.L.Layer.extend({
 		// Plays animated GIFs over the document.
 		if (!this._animatedGifManager)
 			this._animatedGifManager = new AnimatedGifManager(map);
+
+		// Gives the videos a preview image, which the engine cannot make itself.
+		if (!this._videoPosterManager)
+			this._videoPosterManager = new VideoPosterManager(map);
 
 		if (!this._viewState)
 			this._viewState = new ViewState(map);

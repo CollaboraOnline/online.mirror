@@ -156,6 +156,44 @@ describe(['tagdesktop'], 'Image Operation Tests', function() {
 		cy.cGet('[id^="test-div-AnimatedGif-"]').should('exist');
 	});
 
+	it('Inserted video gets a poster image from the browser', function () {
+		// The engine cannot play a video, so the browser takes a frame of the
+		// inserted video and uploads it, and the engine keeps it as the preview
+		// and tells every view that the video has one.
+		helper.processToIdle(this.win);
+
+		cy.getFrameWindow().then(function (win) {
+			cy.spy(win.app.socket, 'sendMessage').as('sendMessage');
+			const manager = win.app.map._docLayer._videoPosterManager;
+			// The first capture waits a few seconds after load; the test does not.
+			manager._started = true;
+			// The fixture video holds no frame a browser can decode, so a drawn
+			// image stands in for the captured frame.
+			manager.captureFrame = function () {
+				const canvas = win.document.createElement('canvas');
+				canvas.width = 32;
+				canvas.height = 32;
+				const context = canvas.getContext('2d');
+				context.fillStyle = '#3366cc';
+				context.fillRect(0, 0, 32, 32);
+				return new Promise(function (resolve) {
+					canvas.toBlob(resolve, 'image/jpeg', 0.85);
+				});
+			};
+		});
+
+		desktopHelper.insertVideo();
+
+		cy.get('@sendMessage', { timeout: 30000 }).should('have.been.calledWithMatch',
+			/^videoposter name=\S+ id=\d+$/);
+
+		cy.getFrameWindow().then(function (win) {
+			cy.wrap(win.app.map._docLayer._videoPosterManager)
+				.its('_presentationInfo.slides.0.videos.0.hasPoster', { timeout: 30000 })
+				.should('eq', true);
+		});
+	});
+
 	it('Insert multimedia from WOPI URL shows progress feedback', function () {
 		// Inserting a remote video shows a busy popup while the kit
 		// downloads it, and the popup is cleared once the insert finishes.

@@ -482,6 +482,7 @@
 /// <reference path="../src/slideshow/RenderContext.ts" />
 /// <reference path="../src/slideshow/VectorCompositor.ts" />
 /// <reference path="../src/app/GifFrameSource.ts" />
+/// <reference path="../src/app/VideoPosterManager.ts" />
 /// <reference path="../src/slideshow/AnimatedContentRenderer.ts" />
 /// <reference path="../src/slideshow/VideoRenderer.ts" />
 /// <reference path="../src/slideshow/SlideVideos.ts" />

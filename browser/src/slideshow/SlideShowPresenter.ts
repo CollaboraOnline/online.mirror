@@ -21,6 +21,8 @@ interface VideoInfo {
 	// The id of the video's shape, which an effect on the video names as its target.
 	id: number;
 	url: string;
+	mimeType?: string;
+	hasPoster?: boolean;
 	loop: boolean;
 	mute: boolean;
 	x: number;
