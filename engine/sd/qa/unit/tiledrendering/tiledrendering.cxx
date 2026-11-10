@@ -22,6 +22,7 @@
 #include <com/sun/star/beans/XPropertySet.hpp>
 #include <com/sun/star/form/FormComponentType.hpp>
 #include <svx/svdlayer.hxx>
+#include <algorithm>
 #include <cmath>
 #include <functional>
 #include <map>
@@ -6050,6 +6051,16 @@ uno::Sequence<beans::PropertyValue> videoPosterArguments(const OUString& rFileUR
         { { u"FileName"_ustr, uno::Any(rFileURL) },
           { u"ObjectId"_ustr, uno::Any(OUString::number(nObjectId)) } });
 }
+
+/// Whether one of the invalidations the view got covers the shape, in the twips of the tiles.
+bool isAreaInvalidated(const SdTestViewCallback& rView, const SdrObject& rObject)
+{
+    const tools::Rectangle aArea
+        = o3tl::convert(rObject.GetCurrentBoundRect(), o3tl::Length::mm100, o3tl::Length::twip);
+    return std::any_of(rView.m_aInvalidations.begin(), rView.m_aInvalidations.end(),
+                       [&aArea](const tools::Rectangle& rInvalidation)
+                       { return rInvalidation.Contains(aArea); });
+}
 }
 
 // A client sends the preview image of a video, and the video keeps the first one it is given.
@@ -6075,7 +6086,8 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSetVideoPoster)
     CPPUNIT_ASSERT(!rVideo.get<bool>("hasPoster"));
 
     const int nInfoChanges = aView.m_nPresentationInfoChanged;
-    aView.m_bTilesInvalidated = false;
+    aView.m_aInvalidations.clear();
+    aView.m_aWholePartInvalidations.clear();
     const OUString aFirstFile = writePosterFile(COL_RED);
     dispatchCommand(mxComponent, u".uno:SetVideoPoster"_ustr,
                     videoPosterArguments(aFirstFile, xVideo->GetUniqueID()));
@@ -6093,7 +6105,9 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSetVideoPoster)
     CPPUNIT_ASSERT_EQUAL(nUndoActions,
                          pXImpressDocument->GetDoc()->GetUndoManager()->GetUndoActionCount());
     CPPUNIT_ASSERT(aView.m_nPresentationInfoChanged > nInfoChanges);
-    CPPUNIT_ASSERT(aView.m_bTilesInvalidated);
+    // The tiles under the video are drawn again, and the rest of the slide is kept.
+    CPPUNIT_ASSERT(isAreaInvalidated(aView, *xVideo));
+    CPPUNIT_ASSERT(aView.m_aWholePartInvalidations.empty());
 
     readJSON(aInfo, pXImpressDocument->getPresentationInfo());
     CPPUNIT_ASSERT(child_at(child_at(aInfo, "slides", 0), "videos", 0).get<bool>("hasPoster"));
@@ -6127,7 +6141,8 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSetVideoPosterOnMaster)
     CPPUNIT_ASSERT(
         !child_at(child_at(aInfo, "slides", 0), "masterVideos", 0).get<bool>("hasPoster"));
 
-    aView.m_bTilesInvalidated = false;
+    aView.m_aInvalidations.clear();
+    aView.m_aWholePartInvalidations.clear();
     const OUString aPosterFile = writePosterFile(COL_GREEN);
     dispatchCommand(mxComponent, u".uno:SetVideoPoster"_ustr,
                     videoPosterArguments(aPosterFile, xVideo->GetUniqueID()));
@@ -6136,7 +6151,8 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSetVideoPosterOnMaster)
 
     CPPUNIT_ASSERT(!xVideo->getMediaProperties().getGraphic().IsNone());
     CPPUNIT_ASSERT(!pXImpressDocument->GetDocShell()->IsModified());
-    CPPUNIT_ASSERT(aView.m_bTilesInvalidated);
+    CPPUNIT_ASSERT(isAreaInvalidated(aView, *xVideo));
+    CPPUNIT_ASSERT(aView.m_aWholePartInvalidations.empty());
     readJSON(aInfo, pXImpressDocument->getPresentationInfo());
     CPPUNIT_ASSERT(
         child_at(child_at(aInfo, "slides", 0), "masterVideos", 0).get<bool>("hasPoster"));

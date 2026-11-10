@@ -699,11 +699,16 @@ SdrMediaObj* findMediaObject(SdDrawDocument& rDoc, sal_uInt64 nUniqueId)
     return nullptr;
 }
 
-// The tiles of every view showing the page of the video are drawn again. A video on a slide
-// master shows on every slide using it, and the master is a part of its own in master view.
+// The tiles under the video are drawn again in every view, on every page that shows the video. A
+// video on a slide master shows on every slide using it, and the master is a part of its own in
+// master view. The master objects sit at the same place on each of these pages.
 void invalidateVideoTiles(SdDrawDocument& rDoc, const SfxObjectShell* pDocShell,
-                          const SdPage& rPage)
+                          const SdPage& rPage, const SdrMediaObj& rVideo)
 {
+    // The tiles are addressed in twips.
+    const ::tools::Rectangle aArea
+        = o3tl::convert(rVideo.GetCurrentBoundRect(), o3tl::Length::mm100, o3tl::Length::twip);
+
     std::vector<std::pair<int, int>> aPartsAndModes;
     if (rPage.IsMasterPage())
     {
@@ -727,7 +732,7 @@ void invalidateVideoTiles(SdDrawDocument& rDoc, const SfxObjectShell* pDocShell,
     {
         if (pShell->GetObjectShell() == pDocShell)
             for (const auto& [nPart, nMode] : aPartsAndModes)
-                pShell->viewInvalidateTilesCallback(nullptr, nPart, nMode);
+                pShell->viewInvalidateTilesCallback(&aArea, nPart, nMode);
         pShell = SfxViewShell::GetNext(*pShell, false);
     }
 }
@@ -4200,7 +4205,7 @@ void DrawViewShell::FuTemporary(SfxRequest& rReq)
                     setVideoPoster(*pVideo, aGraphic);
                     if (const SdPage* pPage
                         = dynamic_cast<const SdPage*>(pVideo->getSdrPageFromSdrObject()))
-                        invalidateVideoTiles(rDoc, GetDocSh(), *pPage);
+                        invalidateVideoTiles(rDoc, GetDocSh(), *pPage, *pVideo);
                 }
             }
 #endif
