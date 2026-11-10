@@ -368,9 +368,6 @@ static bool InnerYield(bool i_bWait, bool i_bAllEvents)
 {
     ImplSVData* pSVData = ImplGetSVData();
 
-    SAL_INFO("vcl.schedule", "Enter InnerYield: " << (i_bWait ? "wait" : "no wait") <<
-             ": " << (i_bAllEvents ? "all events" : "one event"));
-
     // there's a data race here on WNT only because InnerYield may be
     // called without SolarMutex; but the only remaining use of mnDispatchLevel
     // is in OSX specific code
@@ -396,7 +393,6 @@ static bool InnerYield(bool i_bWait, bool i_bAllEvents)
 
     DBG_TESTSOLARMUTEX(); // must be locked on return from Yield
 
-    SAL_INFO("vcl.schedule", "Leave InnerYield with return " << bProcessedEvent );
     return bProcessedEvent;
 }
 
