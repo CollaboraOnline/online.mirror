@@ -7322,6 +7322,12 @@ void ChildSession::rememberEventsForInactiveUser(const COKitCallbackType type,
         // the page list is remembered as a document size change, which sends the status.
         _stateRecorder.recordEvent(COKitCallbackType::DOCUMENT_SIZE_CHANGED, std::string());
     }
+    else if (type == COKitCallbackType::PRESENTATION_INFO)
+    {
+        // The presentation info is read from the document when it is sent, so the last change
+        // stands for all of them, and the user gets the info as it is when they are active again.
+        _stateRecorder.recordEvent(type, payload);
+    }
     else if (type == COKitCallbackType::INVALIDATE_VISIBLE_CURSOR ||
              type == COKitCallbackType::CURSOR_VISIBLE ||
              type == COKitCallbackType::TEXT_SELECTION ||
