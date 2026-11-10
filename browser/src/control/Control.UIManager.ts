@@ -873,6 +873,11 @@ class UIManager extends window.L.Control {
 	}
 
 
+	/// True while the busy popup is on screen or waiting for its delay to pass.
+	isBusyPopupShownOrPending(): boolean {
+		return this.busyPopupShownAt !== null || this.busyPopupTimer !== null;
+	}
+
 	initializeNonInteractiveUI() {
 		app.console.debug('UIManager: initialize non-interactive basic UI');
 

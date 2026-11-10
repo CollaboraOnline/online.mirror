@@ -43,7 +43,13 @@ ScRetypePassDlg::ScRetypePassDlg(weld::Window* pParent)
     Init();
 }
 
-ScRetypePassDlg::~ScRetypePassDlg() {}
+ScRetypePassDlg::~ScRetypePassDlg()
+{
+    // A password dialog still open is cancelled, so its result handler runs while this dialog
+    // and the protection it edits still exist, and leaves them unchanged.
+    if (std::shared_ptr<ScRetypePassInputDlg> xInputDlg = mxInputDlg.lock())
+        xInputDlg->response(RET_CANCEL);
+}
 
 void ScRetypePassDlg::DeleteSheets() { maSheets.clear(); }
 
@@ -86,6 +92,14 @@ void ScRetypePassDlg::SetDataFromDocument(const ScDocument& rDoc)
         maTableItems.push_back(std::move(aTabItem));
         maSheets.emplace_back(new PassFragment(mxSheetsBox.get()));
         maSheets.back()->m_xButton->connect_clicked(LINK(this, ScRetypePassDlg, RetypeBtnHdl));
+
+        // Every sheet row comes from the same .ui file. A number makes its ids unique in the
+        // JSON of the dialog.
+        const OUString aIndex = OUString::number(i);
+        maSheets.back()->m_xSheetsBox->set_buildable_name(u"PassEntry"_ustr + aIndex);
+        maSheets.back()->m_xName->set_buildable_name(u"name"_ustr + aIndex);
+        maSheets.back()->m_xStatus->set_buildable_name(u"status"_ustr + aIndex);
+        maSheets.back()->m_xButton->set_buildable_name(u"button"_ustr + aIndex);
     }
 }
 
@@ -224,6 +238,10 @@ IMPL_LINK_NOARG(ScRetypePassDlg, OKHdl, weld::Button&, void) { m_xDialog->respon
 
 IMPL_LINK(ScRetypePassDlg, RetypeBtnHdl, weld::Button&, rBtn, void)
 {
+    // One password dialog at a time, because the destructor cancels only that one.
+    if (!mxInputDlg.expired())
+        return;
+
     ScPassHashProtectable* pProtected = nullptr;
     if (&rBtn == mxBtnRetypeDoc.get())
     {
@@ -244,25 +262,31 @@ IMPL_LINK(ScRetypePassDlg, RetypeBtnHdl, weld::Button&, rBtn, void)
         // What the ... !?
         return;
 
-    ScRetypePassInputDlg aDlg(m_xDialog.get(), pProtected);
-    if (aDlg.run() != RET_OK)
-        return;
+    // This dialog already runs modally, and the one for the password opens on top of it
+    // without blocking.
+    std::shared_ptr<ScRetypePassInputDlg> xDlg(
+        new ScRetypePassInputDlg(m_xDialog.get(), pProtected));
+    mxInputDlg = xDlg;
+    weld::DialogController::runAsync(xDlg, [this, xDlg, pProtected](sal_Int32 nResult) {
+        if (nResult != RET_OK)
+            return;
 
-    // OK is pressed.  Update the protected item.
-    if (aDlg.IsRemovePassword())
-    {
-        // Remove password from this item.
-        pProtected->setPassword(OUString());
-    }
-    else
-    {
-        // Set a new password.
-        OUString aNewPass = aDlg.GetNewPassword();
-        pProtected->setPassword(aNewPass);
-    }
+        // OK is pressed.  Update the protected item.
+        if (xDlg->IsRemovePassword())
+        {
+            // Remove password from this item.
+            pProtected->setPassword(OUString());
+        }
+        else
+        {
+            // Set a new password.
+            OUString aNewPass = xDlg->GetNewPassword();
+            pProtected->setPassword(aNewPass);
+        }
 
-    SetDocData();
-    CheckHashStatus();
+        PopulateDialog();
+        CheckHashStatus();
+    });
 }
 
 ScRetypePassInputDlg::ScRetypePassInputDlg(weld::Window* pParent, ScPassHashProtectable* pProtected)

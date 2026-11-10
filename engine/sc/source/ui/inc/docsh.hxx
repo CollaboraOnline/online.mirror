@@ -449,6 +449,14 @@ public:
                             only the active sheet reaches the file. True while the document
                             has more than one sheet to lose and the warning is turned on. */
     bool              WillWarnOnlyActiveSheetSaved( std::u16string_view rFilter ) const;
+                        /** Whether some protection password of the document is stored only as a
+                            hash that ODF cannot hold, so it has to be typed again before an ODF
+                            save. */
+    bool              NeedsPasswordRetypeForODF() const;
+                        /** Whether writing the document out through this filter asks the user
+                            to type protection passwords again. True for the packaged ODF filters
+                            and the binary Excel filters while a password hash does not fit them. */
+    bool              WillAskToRetypePasswords( const OUString& rFilter );
     static void       KitCommentNotify(KitCommentNotificationType nType, const ScDocument& rDocument, const ScAddress& rPos, const ScPostIt* pNote);
 
     DECL_LINK( RefreshDBDataHdl, Timer*, void );

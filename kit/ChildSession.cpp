@@ -2687,7 +2687,12 @@ bool ChildSession::downloadAsHere([[maybe_unused]] const DownloadAsRequest& requ
 #else
     // Nothing else on this document is served while the export runs here, so hold off
     // the other messages and let the responsiveness watchdog know this wait is expected.
-    InputProcessingManager processInput(getProtocol(), false);
+    // An export that asks the user something keeps taking messages, because the answer to
+    // its dialog arrives as one.
+    const std::shared_ptr<ProtocolHandlerInterface> heldProtocol =
+        exportRaisesDialog(request._format) ? std::shared_ptr<ProtocolHandlerInterface>()
+                                            : getProtocol();
+    InputProcessingManager processInput(heldProtocol, false);
     WatchdogGuard watchdogGuard;
 
     const std::chrono::steady_clock::time_point timeStart = std::chrono::steady_clock::now();
@@ -6161,9 +6166,11 @@ bool ChildSession::saveAs(const StringVector& tokens)
                                          format.empty() ? nullptr : format.c_str(),
                                          filterOptions.empty() ? nullptr : filterOptions.c_str());
 
-    if (!success)
+    // A target without an extension gets the one of the document type and a second try. A
+    // target that has one failed for another reason, such as the user cancelling a question
+    // the save asked, and is not tried again.
+    if (!success && Poco::Path(url).getExtension().empty())
     {
-        // a desperate try - add an extension hoping that it'll help
         bool retry = true;
         switch (getLOKitDocument()->getDocumentType())
         {

@@ -1336,7 +1336,9 @@ void ScModelObj::getRowColumnHeaders(const tools::Rectangle& rRectangle, tools::
 
 bool ScModelObj::exportRaisesDialog(const OUString& rFilterName)
 {
-    return pDocShell && pDocShell->WillWarnOnlyActiveSheetSaved(rFilterName);
+    return pDocShell
+           && (pDocShell->WillWarnOnlyActiveSheetSaved(rFilterName)
+               || pDocShell->WillAskToRetypePasswords(rFilterName));
 }
 
 std::string ScModelObj::getSheetGeometryData(bool bColumns, bool bRows, bool bSizes, bool bHidden,

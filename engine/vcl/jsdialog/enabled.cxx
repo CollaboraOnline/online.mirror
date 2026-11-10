@@ -225,6 +225,7 @@ constexpr auto ScalcDialogList
         { u"modules/scalc/ui/paradialog.ui" },
         { u"modules/scalc/ui/pagetemplatedialog.ui" },
         { u"modules/scalc/ui/paratemplatedialog.ui" },
+        { u"modules/scalc/ui/passfragment.ui" },
         { u"modules/scalc/ui/pastespecial.ui" },
         { u"modules/scalc/ui/pivotcalcfielddialog.ui" },
         { u"modules/scalc/ui/pivotfielddialog.ui" },
@@ -232,6 +233,8 @@ constexpr auto ScalcDialogList
         { u"modules/scalc/ui/principalcomponentanalysisdialog.ui" },
         { u"modules/scalc/ui/protectsheetdlg.ui" },
         { u"modules/scalc/ui/regressiondialog.ui" },
+        { u"modules/scalc/ui/retypepassdialog.ui" },
+        { u"modules/scalc/ui/retypepassworddialog.ui" },
         { u"modules/scalc/ui/rowheightdialog.ui" },
         { u"modules/scalc/ui/samplingdialog.ui" },
         { u"modules/scalc/ui/selectsource.ui" },
@@ -833,6 +836,13 @@ std::vector<OUString> completeCalcDialogList(const o3tl::sorted_vector<OUString>
         // row inside the Solver options dialog, not from a UNO command.
         else if (entry == u"modules/scalc/ui/doubledialog.ui" ||
                  entry == u"modules/scalc/ui/integerdialog.ui")
+            continue;
+        // Skip these Re-type Password dialogs. They only appear while a document is saved to a
+        // format that cannot hold one of its protection password hashes, so no single UNO
+        // command opens them.
+        else if (entry == u"modules/scalc/ui/retypepassdialog.ui" ||
+                 entry == u"modules/scalc/ui/passfragment.ui" ||
+                 entry == u"modules/scalc/ui/retypepassworddialog.ui")
             continue;
 
         OUString sEntry(entry);

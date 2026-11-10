@@ -4829,6 +4829,32 @@ CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testSaveWritesParagraphFormatOfOpenCe
                 "font-weight", u"bold");
 }
 
+CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testExportAsksToRetypeSheetPassword)
+{
+    // Sheet1 is protected with the password "Hello", stored only as a salted SHA-512 hash.
+    ScModelObj* pModelObj = createDoc("sheet-protection-sha512.xlsx");
+    ScDocument* pDoc = pModelObj->GetDocument();
+    CPPUNIT_ASSERT(pDoc);
+
+    // Neither ODS nor XLS can hold that hash, so saving to them asks for the password again.
+    CPPUNIT_ASSERT(pModelObj->exportRaisesDialog(u"calc8"_ustr));
+    CPPUNIT_ASSERT(pModelObj->exportRaisesDialog(u"MS Excel 97"_ustr));
+    // Saving back to XLSX keeps the hash and asks nothing. Flat ODS and a CSV of the single
+    // sheet ask nothing either.
+    CPPUNIT_ASSERT(!pModelObj->exportRaisesDialog(u"Calc Office Open XML"_ustr));
+    CPPUNIT_ASSERT(!pModelObj->exportRaisesDialog(u"OpenDocument Spreadsheet Flat XML"_ustr));
+    CPPUNIT_ASSERT(!pModelObj->exportRaisesDialog(u"Text - txt - csv (StarCalc)"_ustr));
+
+    // Once the password is typed again, the ODS save has nothing left to ask.
+    const ScTableProtection* pProtection = pDoc->GetTabProtection(0);
+    CPPUNIT_ASSERT(pProtection);
+    CPPUNIT_ASSERT(pProtection->verifyPassword(u"Hello"_ustr));
+    ScTableProtection aRetyped(*pProtection);
+    aRetyped.setPassword(u"Hello"_ustr);
+    pDoc->SetTabProtection(0, &aRetyped);
+    CPPUNIT_ASSERT(!pModelObj->exportRaisesDialog(u"calc8"_ustr));
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

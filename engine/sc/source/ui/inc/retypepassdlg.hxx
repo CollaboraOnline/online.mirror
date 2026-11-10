@@ -24,6 +24,7 @@
 #include <memory>
 
 class ScDocument;
+class ScRetypePassInputDlg;
 
 struct PassFragment
 {
@@ -88,6 +89,8 @@ private:
     std::unique_ptr<weld::ScrolledWindow> mxScrolledWindow;
     std::unique_ptr<weld::Container> mxSheetsBox;
     std::vector<std::unique_ptr<PassFragment>> maSheets;
+    /// The password dialog of one row while it is open, else empty.
+    std::weak_ptr<ScRetypePassInputDlg> mxInputDlg;
 };
 
 class ScRetypePassInputDlg : public weld::GenericDialogController
