@@ -37,27 +37,6 @@ class QDragMoveEvent;
 class QDragLeaveEvent;
 class QDropEvent;
 class QMimeData;
-class QUrl;
-
-namespace coda
-{
-/// Create a QWebChannel on page, construct a Bridge bound to document
-/// and its owner WebView, register the Bridge as "bridge" on the
-/// channel, and attach the channel to the page.
-/// Ownership: Bridge is parented on the channel (which is parented on
-/// the page), so everything lives as long as the page.
-Bridge* attachRemoteBridge(QWebEnginePage* page,
-                           coda::DocumentData& document,
-                           WebView* owner,
-                           QWebEngineView* webView);
-
-/// Add the CODA-local query parameters the Qt-flavored cool.html
-/// expects (permission, appdocid, userinterfacemode, lang, dir,
-/// darkTheme) to `url`.  file_path is intentionally omitted for
-/// remote documents - the page-JS materialises the temp file via
-/// Bridge::writeRemoteDocFile and uses the returned path itself.
-void addRemoteCoolParams(QUrl& url, const coda::DocumentData& document);
-} // namespace coda
 
 // The language of the user interface, such as "pt-BR", from the locale environment variables, or
 // "en-US" when they name none.
@@ -174,7 +153,6 @@ public:
     // run, so closing it asks first even when it is untouched.
     void load(const Poco::URI& fileURL = Poco::URI(), bool isStarterMode = false,
               bool asDraft = false, bool recoveredDraft = false);
-    void loadRemote(std::shared_ptr<coda::RemoteDocInfo> remoteInfo);
 
     // The owner installs these; Bridge calls requestClose()/closeCancelled()/updateTitle().
     void setOnCloseRequest(CloseRequestFn cb) { _onCloseRequest = std::move(cb); }
