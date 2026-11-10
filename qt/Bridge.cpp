@@ -158,6 +158,12 @@ Bridge::~Bridge() {
     // last session is not what ends it. Ask for it directly.
     if (!_keepDocumentLoaded)
         closeDetachedDocument(_document._appDocId);
+
+    const bool removeRemoteCopy = !_keepDocumentLoaded && !_remoteCopyPath.isEmpty();
+    if (removeRemoteCopy)
+        if (!QFile::remove(_remoteCopyPath))
+            LOG_WRN("The temporary copy of a remote document could not be removed");
+
     if (_document._fakeClientFd != -1) {
         fakeSocketClose(_document._fakeClientFd);
     }
@@ -513,6 +519,7 @@ QString Bridge::writeRemoteDocFile(const QString& filename,
     const QString path = tmp.fileName();
     tmp.close();
     tmp.setAutoRemove(false);
+    _remoteCopyPath = path;
 
     _document._fileURL = Poco::URI(Poco::Path(path.toStdString()));
     LOG_TRC("writeRemoteDocFile: wrote " << bytes.size()

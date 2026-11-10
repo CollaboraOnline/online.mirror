@@ -78,6 +78,9 @@ class Bridge : public QObject
     // true when this bridge goes away while the document stays loaded under its appDocId.
     bool _keepDocumentLoaded = false;
 
+    // The temporary copy of a remote document. It is removed with this bridge.
+    QString _remoteCopyPath;
+
     void promptSaveLocation(std::function<void(const std::string&, const std::string&)> callback);
     void saveDocumentAs();
     void createAndStartMessagePumpThread();
