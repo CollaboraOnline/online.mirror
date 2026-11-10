@@ -38,6 +38,11 @@ class QDragLeaveEvent;
 class QDropEvent;
 class QMimeData;
 
+namespace coda
+{
+Poco::URI::QueryParameters pageSettings(bool forDocument);
+} // namespace coda
+
 // The language of the user interface, such as "pt-BR", from the locale environment variables, or
 // "en-US" when they name none.
 std::string getUILanguage();
