@@ -564,13 +564,13 @@ window.L.Map.include({
 
 	// Save what the user changed, for a native host that is waiting on the
 	// result.  A document with nothing to save is answered at once with
-	// nothingToSaveMessage, so the host hears back either way.  Answers
+	// answerNothingToSave, so the host hears back either way.  Answers
 	// whether a save was started.  A dead session can never answer a save,
 	// and the page already showed its error for it.
-	_saveForNativeHost: function (nothingToSaveMessage) {
+	_saveForNativeHost: function (answerNothingToSave) {
 		if (this._permission !== 'edit' || !this._everModified ||
 			this._fatal || !app.socket.connected()) {
-			window.postMobileMessage(nothingToSaveMessage);
+			answerNothingToSave();
 			return false;
 		}
 		this.save(true /* dontTerminateEdit */,
@@ -586,6 +586,9 @@ window.L.Map.include({
 	// close waits on the user's choice.
 	_saveFailedPrompt: null,
 
+	// The last step of a close, after the save.
+	_finishClose: null,
+
 	// Save any local-edit changes and then close the window, or settle a
 	// draft first (see _closeDraft).  Mirrors _saveAndSwitchToServerMode
 	// but the post-save action is window close, signalled to the native
@@ -593,7 +596,10 @@ window.L.Map.include({
 	// the subsequent integrator upload) completes.
 	// A close joins the save that the page already runs, or the open prompt
 	// of the save that failed.
-	_saveAndClose: function () {
+	_saveAndClose: function (finishClose) {
+		const closeWindow = function () { window.postMobileMessage('CLOSE_WINDOW'); };
+		this._finishClose = finishClose || closeWindow;
+
 		var prompt = this._saveFailedPrompt;
 		if (prompt) {
 			if (window.ThisIsTheQtApp)
@@ -611,7 +617,8 @@ window.L.Map.include({
 			this._pendingNativeSave = 'close';
 			return;
 		}
-		if (this._saveForNativeHost('CLOSE_WINDOW'))
+
+		if (this._saveForNativeHost(this._finishClose))
 			this._pendingNativeSave = 'close';
 	},
 
@@ -620,7 +627,8 @@ window.L.Map.include({
 	_saveQuietlyForNativeHost: function () {
 		if (this._pendingNativeSave)
 			return;
-		if (this._saveForNativeHost('SAVECOMPLETED'))
+		var answer = function () { window.postMobileMessage('SAVECOMPLETED'); };
+		if (this._saveForNativeHost(answer))
 			this._pendingNativeSave = 'quiet';
 	},
 
@@ -636,7 +644,7 @@ window.L.Map.include({
 		if (pending) {
 			this._pendingNativeSave = null;
 			if (pending === 'close')
-				this._saveAndClose();
+				this._saveAndClose(this._finishClose);
 			else
 				this._saveQuietlyForNativeHost();
 		}
@@ -650,7 +658,7 @@ window.L.Map.include({
 		this._pendingNativeSave = null;
 		window.postMobileMessage('SAVECOMPLETED');
 		if (pending === 'close')
-			window.postMobileMessage('CLOSE_WINDOW');
+			this._finishClose();
 	},
 
 	_nativeSaveFailed: function (autosave, errorDetail, storageConflict) {
@@ -729,9 +737,10 @@ window.L.Map.include({
 		};
 		var cancel = function () { decided('CLOSE_CANCELLED'); };
 		var closeWithoutSaving = function () {
+			that._saveFailedPrompt = null;
 			if (that._isDraft)
 				window.postMobileMessage('DISCARD_DRAFT');
-			decided('CLOSE_WINDOW');
+			that._finishClose();
 		};
 		var saveAs = function () {
 			decided('CLOSE_CANCELLED');
