@@ -18,6 +18,7 @@
 #include "TabbedWindow.hpp"
 #include "TabManager.hpp"
 #include "WindowUtils.hpp"
+#include "ScreenInhibitor.hpp"
 
 #include <QUrlQuery>
 
@@ -716,6 +717,8 @@ void CODAWebEngineView::claimChildWindow(WebView* child, const QUrl& url)
         if (_presentationView == child)
             return;
         _presentationView = child;
+        // Child of the slideshow window's view, so the inhibit ends when that window closes.
+        new ScreenInhibitor(QStringLiteral("Presenting a slideshow"), child);
         connectScreenChanges();
     }
     else if (role == "coda-console")
