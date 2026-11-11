@@ -18,6 +18,8 @@
 
 #include <fstream>
 #include <sstream>
+#include <ctime>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -41,6 +43,7 @@ class JailUtilWhiteBoxTests : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST(testNamespaceRefusalSaysNothingWhenAllPermitted);
     CPPUNIT_TEST(testCrashNoteReplacesALink);
     CPPUNIT_TEST(testCrashNoteStaysInsideTheJail);
+    CPPUNIT_TEST(testCrashedJailKeptOnlyForAFreshNote);
 #endif // __linux__
     CPPUNIT_TEST_SUITE_END();
 
@@ -53,6 +56,7 @@ class JailUtilWhiteBoxTests : public CPPUNIT_NS::TestFixture
     void testNamespaceRefusalSaysNothingWhenAllPermitted();
     void testCrashNoteReplacesALink();
     void testCrashNoteStaysInsideTheJail();
+    void testCrashedJailKeptOnlyForAFreshNote();
 #endif // __linux__
 };
 
@@ -207,6 +211,37 @@ void JailUtilWhiteBoxTests::testCrashNoteStaysInsideTheJail()
     JailUtil::noteCrashedJail(jail);
 
     LOK_ASSERT(!FileUtil::Stat(other + "/kit-crashed", /*link=*/true).exists());
+
+    FileUtil::removeFile(root, /*recursive=*/true);
+}
+
+/// A jail is kept for a crash note written just now, but not for one dated in the future, nor
+/// for a note that is not a regular file.
+void JailUtilWhiteBoxTests::testCrashedJailKeptOnlyForAFreshNote()
+{
+    constexpr std::string_view testname = __func__;
+
+    const std::string root = FileUtil::createRandomTmpDir();
+    const std::string jail = root + "/jail";
+    const std::string note = jail + "/tmp/kit-crashed";
+    LOK_ASSERT_EQUAL(0, ::mkdir(jail.c_str(), S_IRWXU));
+    LOK_ASSERT_EQUAL(0, ::mkdir((jail + "/tmp").c_str(), S_IRWXU));
+
+    LOK_ASSERT(!JailUtil::isCrashedJailKept(jail));
+
+    JailUtil::noteCrashedJail(jail);
+    LOK_ASSERT(JailUtil::isCrashedJailKept(jail));
+
+    const struct timespec tomorrow = { std::time(nullptr) + 24 * 60 * 60, 0 };
+    const struct timespec times[2] = { tomorrow, tomorrow };
+    LOK_ASSERT_EQUAL(0, ::utimensat(AT_FDCWD, note.c_str(), times, 0));
+    LOK_ASSERT(!JailUtil::isCrashedJailKept(jail));
+
+    const std::string other = root + "/other";
+    writeFile(other, "contents");
+    LOK_ASSERT_EQUAL(0, ::unlink(note.c_str()));
+    LOK_ASSERT_EQUAL(0, ::symlink(other.c_str(), note.c_str()));
+    LOK_ASSERT(!JailUtil::isCrashedJailKept(jail));
 
     FileUtil::removeFile(root, /*recursive=*/true);
 }

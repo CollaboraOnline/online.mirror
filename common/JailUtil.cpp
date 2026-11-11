@@ -483,10 +483,13 @@ void noteCrashedJail(const std::string& root)
 
 bool isCrashedJailKept(const std::string& root)
 {
-    const FileUtil::Stat noteStat(root + "/tmp/" + CrashNoteName);
-    return noteStat.good() &&
-           std::time(nullptr) < static_cast<std::time_t>(noteStat.modifiedTimeMs() / 1000) +
-                                    CrashedJailKeepSeconds;
+    const FileUtil::Stat noteStat(root + "/tmp/" + CrashNoteName, /*link=*/true);
+    if (!noteStat.good() || !noteStat.isFile())
+        return false;
+
+    const std::time_t now = std::time(nullptr);
+    const auto noted = static_cast<std::time_t>(noteStat.modifiedTimeMs() / 1000);
+    return noted <= now && now < noted + CrashedJailKeepSeconds;
 }
 
 bool tryRemoveJail(const std::string& root)
