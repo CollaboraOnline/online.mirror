@@ -447,11 +447,43 @@ void removeAssocTmpOfJail(const std::string &root)
 #endif
 }
 
+constexpr const char CrashNoteName[] = "kit-crashed";
+
 } // namespace
+
+void noteCrashedJail(const std::string& root)
+{
+    const int rootFD = ::open(root.c_str(), O_RDONLY | O_DIRECTORY | O_CLOEXEC);
+    if (rootFD < 0)
+    {
+        LOG_SYS("Couldn't open jail [" << root << ']');
+        return;
+    }
+
+    const int tmpFD = ::openat(rootFD, "tmp", O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC);
+    ::close(rootFD);
+    if (tmpFD < 0)
+    {
+        LOG_SYS("Couldn't open the tmp directory of jail [" << root << ']');
+        return;
+    }
+
+    // The new file carries the time of this crash as its modification time.
+    ::unlinkat(tmpFD, CrashNoteName, 0);
+    const int noteFD = ::openat(tmpFD, CrashNoteName,
+                                O_WRONLY | O_CREAT | O_EXCL | O_NOFOLLOW | O_CLOEXEC,
+                                S_IRUSR | S_IWUSR);
+    if (noteFD < 0)
+        LOG_SYS("Couldn't create the crash note in jail [" << root << ']');
+    else
+        ::close(noteFD);
+
+    ::close(tmpFD);
+}
 
 bool isCrashedJailKept(const std::string& root)
 {
-    const FileUtil::Stat noteStat(root + "/tmp/kit-crashed");
+    const FileUtil::Stat noteStat(root + "/tmp/" + CrashNoteName);
     return noteStat.good() &&
            std::time(nullptr) < static_cast<std::time_t>(noteStat.modifiedTimeMs() / 1000) +
                                     CrashedJailKeepSeconds;

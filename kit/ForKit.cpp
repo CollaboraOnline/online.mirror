@@ -368,13 +368,7 @@ void cleanupChildren()
                 {
                     ++segFaultCount;
 
-                    std::string noteCrashFile(it->second + "/tmp/kit-crashed");
-                    int noteCrashFD = open(noteCrashFile.c_str(), O_CREAT | O_TRUNC | O_WRONLY,
-                                           S_IRUSR | S_IWUSR);
-                    if (noteCrashFD < 0)
-                        LOG_SYS("Couldn't create file: " << noteCrashFile);
-                    else
-                        close(noteCrashFD);
+                    JailUtil::noteCrashedJail(it->second);
                 }
                 else if (status == SIGKILL)
                 {
