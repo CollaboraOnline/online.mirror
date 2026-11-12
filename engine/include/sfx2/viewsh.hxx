@@ -38,7 +38,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <COKit/COKit.hxx>
+#include <COKit/COKitTypes.hxx>
 
 class SfxTabPage;
 class SfxBaseController;

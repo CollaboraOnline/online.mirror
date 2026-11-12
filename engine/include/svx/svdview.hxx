@@ -30,7 +30,7 @@
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <string_view>
 
-#include <COKit/COKit.hxx>
+#include <COKit/COKitTypes.hxx>
 
 //  class hierarchy of View:
 //         SfxListener

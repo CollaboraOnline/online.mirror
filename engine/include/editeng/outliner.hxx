@@ -42,7 +42,7 @@
 #include <memory>
 #include <vector>
 
-#include <COKit/COKit.hxx>
+#include <COKit/COKitTypes.hxx>
 
 class EditEngine;
 class Outliner;

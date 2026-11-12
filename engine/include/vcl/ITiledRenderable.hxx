@@ -22,7 +22,7 @@
 #include <com/sun/star/datatransfer/XTransferable.hpp>
 #include <basegfx/range/b2drange.hxx>
 
-#include <COKit/COKit.hxx>
+#include <COKit/COKitTypes.hxx>
 
 namespace com::sun::star::beans { struct PropertyValue; }
 namespace com::sun::star::datatransfer::clipboard { class XClipboard; }

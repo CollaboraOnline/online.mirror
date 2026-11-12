@@ -16,7 +16,7 @@
 
 #include <vector>
 
-#include <COKit/COKit.hxx>
+#include <COKit/COKitTypes.hxx>
 #include <comphelper/kit.hxx>
 
 namespace tools { class Rectangle; }
