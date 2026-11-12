@@ -1546,20 +1546,23 @@ input[type='checkbox']:checked.autofilter, .jsdialog input[type='checkbox']:chec
 	align-items: center;
 }
 
-.ui-treeview-search-input.jsdialog.ui-edit {
+.ui-treeview-search-input.jsdialog.ui-edit,
+#search_edit-input.jsdialog.ui-edit {
 	line-height: var(--default-height);
 }
 
 /* The user agent's own grey is 3.76:1 on this field's background. */
 .ui-treeview-search-input::placeholder,
-.template-search-input::placeholder {
+.template-search-input::placeholder,
+#search_edit-input::placeholder {
 	color: var(--color-text-dark);
 	opacity: 1;
 }
 
 /* The placeholder goes as soon as there is text, so the field says what it is
    with the same glyph the combobox search beside it uses. */
-.ui-treeview-search-input {
+.ui-treeview-search-input,
+#search_edit-input {
 	background-image: url('images/lc_recsearch.svg');
 	background-repeat: no-repeat;
 	background-position: 8px center;
@@ -1567,11 +1570,13 @@ input[type='checkbox']:checked.autofilter, .jsdialog input[type='checkbox']:chec
 	padding-inline-start: 28px !important;
 }
 
-[data-theme='dark'] .ui-treeview-search-input {
+[data-theme='dark'] .ui-treeview-search-input,
+[data-theme='dark'] #search_edit-input {
 	background-image: url('images/dark/lc_recsearch.svg');
 }
 
-[dir='rtl'] .ui-treeview-search-input {
+[dir='rtl'] .ui-treeview-search-input,
+[dir='rtl'] #search_edit-input {
 	background-position: right 8px center;
 }
 .autofilter .ui-treeview-search-input.jsdialog.ui-edit,
@@ -1582,6 +1587,16 @@ input[type='checkbox']:checked.autofilter, .jsdialog input[type='checkbox']:chec
 	border-radius: 0;
 	border-left: none;
 	border-right: none;
+}
+
+.autofilter #search_edit.ui-edit-container {
+	width: 100% !important;
+}
+
+.autofilter #search_edit-input.jsdialog.ui-edit {
+	width: 100%;
+	width: stretch;
+	max-width: none !important;
 }
 
 .autofilter #list.ui-treeview {
