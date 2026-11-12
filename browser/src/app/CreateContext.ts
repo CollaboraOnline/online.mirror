@@ -537,15 +537,70 @@ interface ShapeLook {
 	box: cool.Range2D;
 	primitives: cool.Primitive[];
 	asWideAsHigh: boolean;
+	// the entry a new shape of it has in the part, but its id
+	entry: cool.SlideObject;
 }
 
 /*
-	Creating a shape of the shapes grid by a drag. The engine is asked at once how the shape looks,
-	and holds it meanwhile as its object in creation; the drag shows it, and the frame until the
-	answer is there, unless the library of looks knows it from before or from a look ahead.
-	Letting go takes the shape as created at once, under the id the engine gave it, and selects
-	it; the engine's report replaces it. Some shapes are as wide as high by themselves, and Shift
-	lets those go free, as in the office. A click makes no shape.
+	Object ids the engine reserved for this view, which no other object takes. The client gives
+	each shape it creates one of them, so the shape has its real id from the start and nothing has
+	to be told again once the engine reports it. A block is asked for when the first is needed,
+	and the next one while a few are left.
+*/
+class ReservedObjectIds {
+	/// The ids at hand, the lowest first.
+	private static ids: number[] = [];
+
+	/// Whether a block was asked for and has not come yet.
+	private static asking: boolean = false;
+
+	/// Whether the answers are followed, which they are once.
+	private static following: boolean = false;
+
+	// how many ids a block holds, and how few left make the next one asked for
+	private static readonly block: number = 16;
+	private static readonly few: number = 4;
+
+	/// Asks for a block where few ids are left.
+	public static keepEnough(): void {
+		if (!ReservedObjectIds.following) {
+			ReservedObjectIds.following = true;
+			app.map.on('commandvalues', (event: any) => {
+				if (event.commandName !== '.uno:ReserveObjectIds') return;
+				ReservedObjectIds.asking = false;
+				const first = Number(event.commandValues?.first);
+				const count = Number(event.commandValues?.count);
+				for (let at = 0; first > 0 && at < count; ++at)
+					ReservedObjectIds.ids.push(first + at);
+			});
+		}
+		if (
+			ReservedObjectIds.asking ||
+			ReservedObjectIds.ids.length > ReservedObjectIds.few
+		)
+			return;
+		ReservedObjectIds.asking = true;
+		app.socket.sendMessage(
+			'commandvalues command=.uno:ReserveObjectIds?Count=' +
+				ReservedObjectIds.block,
+		);
+	}
+
+	/// Takes the next id, if one is at hand.
+	public static take(): number | undefined {
+		const id = ReservedObjectIds.ids.shift();
+		ReservedObjectIds.keepEnough();
+		return id;
+	}
+}
+
+/*
+	Creating a shape of the shapes grid by a drag. The library of looks knows how the shape looks
+	from before or from a look ahead, or the engine is asked at once; the drag shows it, and the
+	frame until it is known. Letting go creates the shape under an id reserved for this view and
+	takes it as created at once, selected; the engine's report of it replaces it. Some shapes are
+	as wide as high by themselves, and Shift lets those go free, as in the office. A click makes no
+	shape.
 */
 class ClassicShapeCreateContext extends ClassicCreateContext {
 	/// The groups of the shapes grid that make a shape by a drag.
@@ -611,6 +666,7 @@ class ClassicShapeCreateContext extends ClassicCreateContext {
 			box: new cool.Range2D(x, y, x + values.width, y + values.height),
 			primitives: primitives,
 			asWideAsHigh: values.asWideAsHigh === true,
+			entry: { ...(entry as cool.SlideObject), id: undefined },
 		};
 	}
 
@@ -628,6 +684,7 @@ class ClassicShapeCreateContext extends ClassicCreateContext {
 		)
 			return;
 		ClassicShapeCreateContext.followTheGhosts();
+		ReservedObjectIds.keepEnough();
 		ClassicShapeCreateContext.askedAhead.add(shape);
 		app.socket.sendMessage(
 			'commandvalues command=.uno:ShapeGhost?Shape=' +
@@ -642,14 +699,18 @@ class ClassicShapeCreateContext extends ClassicCreateContext {
 	*/
 	public started(): void {
 		ClassicShapeCreateContext.followTheGhosts();
+		ReservedObjectIds.keepEnough();
 		const look = ClassicShapeCreateContext.library.get(this.shape);
 		if (look) {
 			this.asWideAsHigh = look.asWideAsHigh;
-			this.ghost = { box: look.box, primitives: look.primitives };
+			this.ghost = look;
+			return;
 		}
+		ClassicShapeCreateContext.askedAhead.add(this.shape);
 		app.socket.sendMessage(
 			'commandvalues command=.uno:ShapeGhost?Shape=' +
-				encodeURIComponent(this.shape),
+				encodeURIComponent(this.shape) +
+				'&Hold=false',
 		);
 	}
 
@@ -660,13 +721,11 @@ class ClassicShapeCreateContext extends ClassicCreateContext {
 
 	/// How the shape looks in its default size, as the engine made it, and the size it was
 	/// made in, in twips; null until the engine or the library told.
-	private ghost: {
-		box: cool.Range2D;
-		primitives: cool.Primitive[];
-		// the entry the shape will have once inserted, under the id it keeps; only the answer
-		// for the shape the engine holds for this drag brings it
-		entry?: cool.SlideObject;
-	} | null = null;
+	private ghost: ShapeLook | null = null;
+
+	/// The id given to the shape sent, one reserved for this view; undefined where none was at
+	/// hand, and the shape then takes one of its own.
+	private givenId: number | undefined = undefined;
 
 	/// Whether the shape is always as wide as high, as the engine makes some.
 	private asWideAsHigh: boolean = false;
@@ -681,11 +740,7 @@ class ClassicShapeCreateContext extends ClassicCreateContext {
 		const look = ClassicShapeCreateContext.lookOf(values);
 		if (look) {
 			this.asWideAsHigh = look.asWideAsHigh;
-			this.ghost = {
-				box: look.box,
-				primitives: look.primitives,
-				entry: values.id !== undefined ? values.objects[0] : this.ghost?.entry,
-			};
+			this.ghost = look;
 		}
 		app.sectionContainer?.requestReDraw();
 	}
@@ -710,9 +765,9 @@ class ClassicShapeCreateContext extends ClassicCreateContext {
 		it draws, its box and its mapping taken onto the rectangle. Its own handles and path are
 		left to the engine's report, which brings them where they are.
 	*/
-	private createdIn(box: cool.Range2D): cool.SlideObject | null {
+	private createdIn(box: cool.Range2D, id: number): cool.SlideObject | null {
 		const entry = this.ghost?.entry;
-		if (!entry || entry.id === undefined) return null;
+		if (!entry) return null;
 		const mapping = this.mappingOnto(box);
 		const transform = cool.Matrix2D.fromArray(entry.transform);
 		const at = (x: number, y: number) =>
@@ -727,6 +782,7 @@ class ClassicShapeCreateContext extends ClassicCreateContext {
 		);
 		return {
 			...entry,
+			id: id,
 			x: from.x,
 			y: from.y,
 			width: to.x - from.x,
@@ -776,10 +832,22 @@ class ClassicShapeCreateContext extends ClassicCreateContext {
 		return true;
 	}
 
-	/// Where the engine told how the shape looks and its id, the shape is taken as created at
-	/// once: it is in the part and selected, and the engine's report replaces it.
+	/// The id the shape is to take, the next reserved for this view, where one is at hand.
+	protected moreArguments(): { [name: string]: { type: string; value: any } } {
+		this.givenId = ReservedObjectIds.take();
+		return this.givenId === undefined
+			? {}
+			: { Id: { type: 'unsigned long', value: String(this.givenId) } };
+	}
+
+	/*
+		Where the shape was given an id and its look is known, the shape is taken as created at
+		once, under that id, which is its real one: it is in the part and selected, and the
+		engine's report of it replaces it.
+	*/
 	protected wasSent(box: cool.Range2D): void {
-		const created = this.createdIn(box);
+		const id = this.givenId;
+		const created = id === undefined ? null : this.createdIn(box, id);
 		const part = RenderGeometrySection.currentPart();
 		if (
 			created &&

@@ -68,6 +68,7 @@
 #include <osl/diagnose.h>
 #include <svl/cryptosign.hxx>
 #include <tools/debug.hxx>
+#include <tools/UniqueID.hxx>
 #include <o3tl/unit_conversion.hxx>
 
 #include <DrawViewShell.hxx>
@@ -282,6 +283,15 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
     bool bRectangle = false;
     // where the shape goes when the request says, instead of the middle of the slide
     std::optional<::tools::Rectangle> oRequestedRectangle;
+    // the id the client gave the object it creates, one this view reserved for it; nought for
+    // none, where the object takes the next id as any other
+    sal_uInt64 nGivenId = 0;
+    // all slots come here, and some have another kind of item at FN_PARAM_7
+    if (const SfxItemSet* pIdArgs = rReq.GetArgs())
+        if (const auto* pId
+            = dynamic_cast<const SfxUInt32Item*>(pIdArgs->GetItem(FN_PARAM_7, false));
+            pId && TakeReservedObjectId(pId->GetValue()))
+            nGivenId = pId->GetValue();
     // whether a text made at once grows in width too
     bool bTextGrows = false;
 
@@ -769,7 +779,7 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
     const SfxItemSet* pRequestArgs = rReq.GetArgs();
     const SfxStringItem* pShapeType
         = pRequestArgs ? pRequestArgs->GetItem<SfxStringItem>(nSId, false) : nullptr;
-    if (oRequestedRectangle && mxObjectInCreation && nSId == mnObjectInCreationSlot
+    if (!nGivenId && oRequestedRectangle && mxObjectInCreation && nSId == mnObjectInCreationSlot
         && pShapeType && pShapeType->GetValue() == maObjectInCreationType)
     {
         // the client was told which shapes are as wide as high, and dragged those so
@@ -777,7 +787,12 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
         pObj->SetLogicRect(aNewObjectRectangle);
     }
     else
+    {
+        // the object made first is the new one, so it takes the id the client gave it
+        UniqueID::giveNext(nGivenId);
         pObj = GetCurrentFunction()->CreateDefaultObject(nSId, aNewObjectRectangle);
+        UniqueID::giveNext(0);
+    }
 
     if(!pObj)
         return;
@@ -844,6 +859,19 @@ Size DrawViewShell::GetDefaultObjectSize() const
 {
     SdOptions* pOptions = SdModule::get()->GetSdOptions(GetDoc()->GetDocumentType());
     return Size(pOptions->GetDefaultObjectSizeWidth(), pOptions->GetDefaultObjectSizeHeight());
+}
+
+sal_uInt64 DrawViewShell::ReserveObjectIds(sal_uInt32 nCount)
+{
+    const sal_uInt64 nFirst(UniqueID::reserve(nCount));
+    for (sal_uInt32 nAt = 0; nAt < nCount; ++nAt)
+        maReservedObjectIds.insert(nFirst + nAt);
+    return nFirst;
+}
+
+bool DrawViewShell::TakeReservedObjectId(sal_uInt64 nId)
+{
+    return maReservedObjectIds.erase(nId) > 0;
 }
 
 SdrObject* DrawViewShell::MakeObjectInCreation(sal_uInt16 nSlotId, const OUString& rShapeType)

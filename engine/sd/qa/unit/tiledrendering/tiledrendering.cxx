@@ -8859,6 +8859,42 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testCreateTextInRectangle)
     CPPUNIT_ASSERT_EQUAL(nObjectCount + 1, pSlide->GetObjCount());
 }
 
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testReservedObjectIds)
+{
+    // a client creates shapes under ids reserved for its view, which no other object takes
+    SdXImpressDocument* pXImpressDocument = createDoc("dummy.odp");
+    SdPage* pSlide = pXImpressDocument->GetDoc()->GetSdPage(0, PageKind::Standard);
+
+    tools::JsonWriter aWriter;
+    pXImpressDocument->getCommandValues(aWriter, ".uno:ReserveObjectIds?Count=16");
+    std::stringstream aStream((std::string(aWriter.finishAndGetAsOString())));
+    boost::property_tree::ptree aTree;
+    boost::property_tree::read_json(aStream, aTree);
+    const sal_uInt64 nFirst = aTree.get<sal_uInt64>("commandValues.first");
+    CPPUNIT_ASSERT_EQUAL(16, aTree.get<int>("commandValues.count"));
+
+    const auto shapeWithId = [&](sal_uInt32 nId) {
+        cpo::uno::Sequence<css::beans::PropertyValue> aArgs(comphelper::InitPropertySequence({
+            { u"X"_ustr, cpo::uno::Any(sal_Int32(1000)) },
+            { u"Y"_ustr, cpo::uno::Any(sal_Int32(1500)) },
+            { u"Width"_ustr, cpo::uno::Any(sal_Int32(4000)) },
+            { u"Height"_ustr, cpo::uno::Any(sal_Int32(3000)) },
+            { u"Id"_ustr, cpo::uno::Any(nId) },
+        }));
+        dispatchCommand(mxComponent, u".uno:BasicShapes.rectangle"_ustr, aArgs);
+        return pSlide->GetObj(pSlide->GetObjCount() - 1)->GetUniqueID();
+    };
+    const auto reserved = [&](sal_uInt64 nId) { return nId >= nFirst && nId < nFirst + 16; };
+
+    // a reserved id given is the id the shape gets
+    CPPUNIT_ASSERT_EQUAL(nFirst + 3, shapeWithId(nFirst + 3));
+    // an id is given once; given again, the shape takes an id of its own, outside the reserve
+    CPPUNIT_ASSERT(!reserved(shapeWithId(nFirst + 3)));
+    // an id never reserved is not taken either
+    CPPUNIT_ASSERT(shapeWithId(1) != 1);
+    CPPUNIT_ASSERT(!reserved(pSlide->GetObj(pSlide->GetObjCount() - 1)->GetUniqueID()));
+}
+
 CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testMovePreviewShape)
 {
     SdXImpressDocument* pXImpressDocument = createDoc("dummy.odp");

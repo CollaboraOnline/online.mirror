@@ -4082,7 +4082,8 @@ bool SdXImpressDocument::supportsCommand(std::u16string_view rCommand)
 {
     if (svx::vector::isPartCommand(rCommand) || rCommand == u"ExtractDocumentStructure"
         || rCommand == u"GetDesignTemplates" || rCommand == u"GetDesignTemplateDesigns"
-        || rCommand == u"SecurityLabel" || rCommand == u"ShapeGhost")
+        || rCommand == u"SecurityLabel" || rCommand == u"ShapeGhost"
+        || rCommand == u"ReserveObjectIds")
         return true;
     return false;
 }
@@ -4138,6 +4139,27 @@ OUString lcl_ReadTemplateThumbnailDataUrl(const OUString& rUrl)
         return OUString();
     }
 }
+}
+
+/*
+    The answer to .uno:ReserveObjectIds?Count=16: that many object ids reserved for the current
+    view, between one and 64, as the first and the count; the rest follow the first. No other
+    object takes them, so the client gives the objects it creates one each, and they keep it. The
+    ids travel in 32 bits, so none are reserved where they would not fit.
+*/
+void SdXImpressDocument::writeReservedObjectIds(::tools::JsonWriter& rJsonWriter, sal_Int32 nCount)
+{
+    rJsonWriter.put("commandName", ".uno:ReserveObjectIds");
+    auto aValues = rJsonWriter.startNode("commandValues");
+    sd::DrawViewShell* pShell
+        = mpDocShell ? dynamic_cast<sd::DrawViewShell*>(mpDocShell->GetViewShell()) : nullptr;
+    const sal_uInt32 nWanted(std::clamp<sal_Int32>(nCount, 1, 64));
+    sal_uInt64 nFirst(0);
+    if (pShell)
+        nFirst = pShell->ReserveObjectIds(nWanted);
+    const bool bFits(pShell && nFirst + nWanted <= SAL_MAX_UINT32);
+    rJsonWriter.put("first", bFits ? nFirst : sal_uInt64(0));
+    rJsonWriter.put("count", bFits ? nWanted : sal_uInt32(0));
 }
 
 /*
@@ -4242,6 +4264,12 @@ void SdXImpressDocument::getCommandValues(::tools::JsonWriter& rJsonWriter,
     }
     std::map<OUString, OUString> aMap
         = KitHelper::parseCommandParameters(OUString::fromUtf8(rCommand));
+
+    if (o3tl::starts_with(rCommand, ".uno:ReserveObjectIds"))
+    {
+        writeReservedObjectIds(rJsonWriter, aMap[u"Count"_ustr].toInt32());
+        return;
+    }
 
     if (o3tl::starts_with(rCommand, ".uno:ShapeGhost"))
     {

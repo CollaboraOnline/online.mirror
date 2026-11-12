@@ -10,10 +10,32 @@
 #include <tools/UniqueID.hxx>
 #include <atomic>
 
-UniqueID::UniqueID()
+namespace
+{
+// the next id the counter gives, for all threads
+std::atomic<sal_uInt64>& counter()
 {
     static std::atomic<sal_uInt64> staticCounter(1);
-    mnID = staticCounter.fetch_add(1);
+    return staticCounter;
 }
+
+// the reserved id the next one made in this thread takes, nought for none
+thread_local sal_uInt64 nGivenNext = 0;
+}
+
+UniqueID::UniqueID()
+{
+    if (nGivenNext)
+    {
+        mnID = nGivenNext;
+        nGivenNext = 0;
+    }
+    else
+        mnID = counter().fetch_add(1);
+}
+
+sal_uInt64 UniqueID::reserve(sal_uInt64 nCount) { return counter().fetch_add(nCount); }
+
+void UniqueID::giveNext(sal_uInt64 nId) { nGivenNext = nId; }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

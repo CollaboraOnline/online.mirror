@@ -22,6 +22,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <set>
 #include <rtl/ref.hxx>
 #include "ViewShell.hxx"
 #include "tools/AsynchronousCall.hxx"
@@ -221,6 +222,11 @@ public:
     /// Makes the default object of a custom shape, of that group's slot and that type, in the
     /// default size, as the custom shape tool makes it, without holding it.
     rtl::Reference<SdrObject> MakeDefaultShape(sal_uInt16 nSlotId, const OUString& rShapeType);
+    /// Reserves that many object ids for this view, which no other object takes, and answers the
+    /// first; the rest follow it. A client gives the objects it creates one of them each.
+    sal_uInt64 ReserveObjectIds(sal_uInt32 nCount);
+    /// Takes that id out of the ids this view reserved, answering whether it was one of them.
+    bool TakeReservedObjectId(sal_uInt64 nId);
     /// The object in creation this view holds, if any.
     SdrObject* GetObjectInCreation() const { return mxObjectInCreation.get(); }
     void            FuSupport(SfxRequest& rReq);
@@ -493,6 +499,8 @@ private:
     rtl::Reference<SdrObject> mxObjectInCreation;
     sal_uInt16 mnObjectInCreationSlot = 0;
     OUString maObjectInCreationType;
+    /// The object ids reserved for this view and not taken yet.
+    std::set<sal_uInt64> maReservedObjectIds;
     SdPage*             mpActualPage;
     ::tools::Rectangle           maMarkRect;
     Point               maMousePos;
