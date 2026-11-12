@@ -111,6 +111,7 @@
 #include <svl/srchitem.hxx>
 #include <svx/srchdlg.hxx>
 
+#include <algorithm>
 #include <functional>
 #include <optional>
 
@@ -1353,7 +1354,22 @@ void DrawViewShell::FuSupport(SfxRequest& rReq)
             else
             {
                 mpDrawView->EndTextEditAllViews();
+
+                // the request is done where every object that was selected is out of the
+                // document after it, which a client that takes them away at once relies on; a
+                // placeholder that is only emptied, or one that cannot go, leaves it undone
+                std::vector<rtl::Reference<SdrObject>> aSelected;
+                const SdrMarkList& rMarkList = mpDrawView->GetMarkedObjectList();
+                for (size_t nMark = 0; nMark < rMarkList.GetMarkCount(); ++nMark)
+                    aSelected.emplace_back(rMarkList.GetMark(nMark)->GetMarkedSdrObj());
+
                 FuDeleteSelectedObjects();
+
+                if (!aSelected.empty()
+                    && std::none_of(aSelected.begin(), aSelected.end(),
+                                    [](const rtl::Reference<SdrObject>& rObject)
+                                    { return rObject->IsInserted(); }))
+                    rReq.Done();
             }
         }
         break;

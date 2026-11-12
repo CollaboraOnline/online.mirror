@@ -45,6 +45,14 @@ interface EditTarget {
 	entryId?: number;
 }
 
+/// Objects deleted here that the engine has not reported gone yet: the part they were in, their
+/// ids, and the time after which the part is asked for again.
+interface DeletedHere {
+	partId: cool.VectorPartGuid;
+	objectIds: Set<number>;
+	timer: ReturnType<typeof setTimeout>;
+}
+
 abstract class VectorPartManagerBase extends VectorManagerBase {
 	// Cached parsed JSON primitive tree keyed by page id. The id names the
 	// page wherever it sits in its list, so a slide inserted or removed
@@ -426,6 +434,7 @@ abstract class VectorPartManagerBase extends VectorManagerBase {
 			order: values.order || arrived,
 		};
 		this._keepProvisional(partId, data, arrived);
+		this._keepDeleted(partId, data, true);
 		this._takePageEntry(data, received);
 		this._cache.set(partId, data);
 		this._staleParts.delete(partId);
@@ -508,6 +517,97 @@ abstract class VectorPartManagerBase extends VectorManagerBase {
 			if (!data.objects.has(id)) data.objects.set(id, held.object);
 			if (data.order.indexOf(id) < 0) data.order = data.order.concat([id]);
 		}
+	}
+
+	/// The objects deleted here that the engine has not reported gone yet: the part they were in,
+	/// their ids, and the time after which the part is asked for again.
+	private _deletedHere: DeletedHere[] = [];
+
+	deleteLocally(
+		partId: cool.VectorPartGuid,
+		objectIds: number[],
+		wait: number,
+	): boolean {
+		const data = this._cache.get(partId);
+		if (!data || !objectIds.length) return false;
+
+		// the members of a deleted group go with it, however deep, and a group whose members all
+		// went goes too, upwards, as the engine deletes it
+		const gone = new Set(objectIds);
+		for (let grew = true; grew;) {
+			grew = false;
+			for (const [id, object] of data.objects) {
+				if (!gone.has(id) && object.parent && gone.has(object.parent)) {
+					gone.add(id);
+					grew = true;
+				}
+			}
+			for (const id of Array.from(gone)) {
+				const parent = data.objects.get(id)?.parent;
+				if (!parent || gone.has(parent)) continue;
+				const members = Array.from(data.objects.values()).filter(
+					(object) => object.parent === parent,
+				);
+				if (members.every((object) => gone.has(object.id ?? -1))) {
+					gone.add(parent);
+					grew = true;
+				}
+			}
+		}
+
+		const note: DeletedHere = {
+			partId: partId,
+			objectIds: gone,
+			timer: setTimeout(() => this._noDeleteReported(note), wait),
+		};
+		this._deletedHere.push(note);
+		this._takeOut(data, gone);
+		this._fireChanged([]);
+		return true;
+	}
+
+	private _takeOut(data: cool.VectorPrimitivesData, gone: Set<number>): void {
+		for (const id of gone) data.objects.delete(id);
+		data.order = data.order.filter((id: number) => !gone.has(id));
+	}
+
+	/// The engine refused the oldest delete made here, which changes nothing on the page, so the
+	/// part is asked for again as the engine has it.
+	deleteRefused(): void {
+		const oldest = this._deletedHere[0];
+		if (oldest) this._noDeleteReported(oldest);
+	}
+
+	/// No report of the engine took the objects deleted here away, as where it refused to delete
+	/// them, so the part is asked for again as the engine has it.
+	private _noDeleteReported(note: DeletedHere): void {
+		const at = this._deletedHere.indexOf(note);
+		if (at < 0) return;
+		this._deletedHere.splice(at, 1);
+		this.clearCachedPart(note.partId);
+		this._fireChanged([]);
+	}
+
+	/*
+		Keeps the objects deleted here out of the part an answer of the engine brought, until the
+		engine reports them gone: an answer about a change made before can bring them back. An
+		order without any of them is the engine's report that they are gone.
+	*/
+	private _keepDeleted(
+		partId: cool.VectorPartGuid,
+		data: cool.VectorPrimitivesData,
+		orderCame: boolean,
+	): void {
+		this._deletedHere = this._deletedHere.filter((note) => {
+			if (note.partId !== partId) return true;
+			const named = data.order.some((id: number) => note.objectIds.has(id));
+			if (orderCame && !named) {
+				clearTimeout(note.timer);
+				return false;
+			}
+			this._takeOut(data, note.objectIds);
+			return true;
+		});
 	}
 
 	/// Apply a pushed delta and replay the pending edits on the objects it
@@ -640,6 +740,7 @@ abstract class VectorPartManagerBase extends VectorManagerBase {
 			cached,
 			carried.flatMap((object) => (object.id === undefined ? [] : [object.id])),
 		);
+		this._keepDeleted(partId, cached, values.order !== undefined);
 
 		cached.version = values.version;
 

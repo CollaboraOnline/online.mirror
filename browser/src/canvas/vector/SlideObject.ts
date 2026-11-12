@@ -302,6 +302,9 @@ namespace cool {
 		layer?: number;
 		/// True for a placeholder that holds no content of its own yet.
 		emptyPlaceholder?: boolean;
+		/// Whether the object is one of the page's layout, a placeholder, which deleting empties
+		/// or switches off rather than takes away.
+		placeholder?: boolean;
 		/// On the entry of kind "page" of a slide: the id of the master part
 		/// the slide draws under itself. Absent when the page carries its
 		/// master content inline.

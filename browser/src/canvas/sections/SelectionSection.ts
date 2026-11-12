@@ -3718,6 +3718,12 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.containerObject.requestReDraw();
 	}
 
+	/// A drag that runs on a selection taken away, as by a deletion, is called off with it, so
+	/// the container does not hand its release to a section that is gone.
+	onRemove(): void {
+		if (this.interaction) this.containerObject.cancelPress();
+	}
+
 	onDragCancel(): void {
 		if (this.pressedTheText) {
 			this.handToTheMouseControl(null, (control) => control.onDragCancel());

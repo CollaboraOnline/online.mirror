@@ -3999,6 +3999,13 @@ private:
         // A placeholder that holds no content of its own yet.
         if (rContent.mbEmptyPlaceholder)
             rWriter.put("emptyPlaceholder", true);
+        // An object of the page's layout, which deleting does not simply take away: it empties
+        // it, or switches it off on the master.
+        if (const SdPage* pLayoutPage
+            = dynamic_cast<const SdPage*>(rObject.getSdrPageFromSdrObject());
+            pLayoutPage
+            && pLayoutPage->GetPresObjKind(const_cast<SdrObject*>(&rObject)) != PresObjKind::NONE)
+            rWriter.put("placeholder", true);
         // A text edit is running on the object, so it is showing none of its own text and the
         // entry for the edit carries what has been typed.
         if (rContent.mbTextEdit)

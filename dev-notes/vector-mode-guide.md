@@ -263,7 +263,7 @@ These work as in the office, through the engine:
 
 | Keys | What they do |
 |---|---|
-| Delete or Backspace | Deletes what is selected. The selection goes to what is left: inside a group it stays in the group. |
+| Delete or Backspace | Deletes what is selected, at once, also before the engine has answered on a slow connection; a group whose members all went goes too. The selection goes to what is left: inside a group it stays in the group. Placeholders of the layout, and a slide's footer, date and slide number, are emptied or switched off by the engine instead, after its answer. |
 | Ctrl + Z / Ctrl + Y | Undo / redo. |
 | Ctrl + C / Ctrl + X / Ctrl + V | Copy / cut / paste. A node of a diagram is copied as a plain shape. |
 

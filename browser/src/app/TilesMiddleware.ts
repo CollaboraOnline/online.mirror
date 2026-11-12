@@ -524,6 +524,28 @@ class RenderManager {
 		);
 	}
 
+	/*
+		Takes those objects, with the members of a group among them, out of the part as deleted
+		here, until the engine reports it. Where no report confirms it within that many
+		milliseconds, the part is asked for again. Answers whether it could.
+	*/
+	static deleteLocally(
+		partId: cool.VectorPartGuid,
+		objectIds: number[],
+		wait: number,
+	): boolean {
+		return RenderManager.ensureInstance().deleteLocally(
+			partId,
+			objectIds,
+			wait,
+		);
+	}
+
+	/// The engine refused the oldest delete made here; the objects come back as it has them.
+	static deleteRefused(): void {
+		RenderManager.ensureInstance().deleteRefused();
+	}
+
 	static renderPrimitives(
 		context: CanvasRenderingContext2D,
 		data: cool.VectorPrimitivesData,

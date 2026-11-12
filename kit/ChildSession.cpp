@@ -5162,6 +5162,9 @@ bool ChildSession::unoCommand(const StringVector& tokens)
     const bool notify = (tokens.equals(1, ".uno:Save") ||
                           tokens.equals(1, ".uno:Undo") ||
                           tokens.equals(1, ".uno:Redo") ||
+                          // A view that draws from objects takes deleted objects away at once,
+                          // and needs to know where the engine refused to delete them.
+                          tokens.equals(1, ".uno:Delete") ||
                           tokens.equals(1, ".uno:Cut") ||
                           tokens.equals(1, ".uno:Copy") ||
                           tokens.equals(1, ".uno:CopySlide") ||

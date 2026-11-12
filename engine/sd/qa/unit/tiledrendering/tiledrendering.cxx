@@ -16,6 +16,9 @@
 #include <tools/json_writer.hxx>
 #include <test/JsonTestTools.hxx>
 #include <boost/property_tree/json_parser.hpp>
+#include <comphelper/dispatchcommand.hxx>
+#include <com/sun/star/frame/DispatchResultState.hpp>
+#include <com/sun/star/frame/XDispatchResultListener.hpp>
 #include <svx/svdlayer.hxx>
 #include <cmath>
 #include <functional>
@@ -8757,6 +8760,53 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testShapeGhost)
     CPPUNIT_ASSERT_EQUAL(o3tl::convert(4000, o3tl::Length::twip, o3tl::Length::mm100),
                          static_cast<sal_Int64>(pShape->GetLogicRect().GetWidth()));
     CPPUNIT_ASSERT_EQUAL(nUndoCount + 1, pDocument->GetUndoManager()->GetUndoActionCount());
+}
+
+namespace
+{
+/// Keeps the state a dispatched command finished with.
+class DispatchResultCatcher : public cppu::WeakImplHelper<css::frame::XDispatchResultListener>
+{
+public:
+    sal_Int16 mnState = -1;
+
+    virtual void dispatchFinished(const css::frame::DispatchResultEvent& rEvent) override
+    {
+        mnState = rEvent.State;
+    }
+
+    virtual void disposing(const css::lang::EventObject&) override {}
+};
+}
+
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testDeleteReportsWhetherItDeleted)
+{
+    // a client that takes deleted objects away at once is told whether the engine deleted them
+    SdXImpressDocument* pXImpressDocument = createDoc("dummy.odp");
+    SdPage* pSlide = pXImpressDocument->GetDoc()->GetSdPage(0, PageKind::Standard);
+    const size_t nObjectCount = pSlide->GetObjCount();
+
+    cpo::uno::Sequence<css::beans::PropertyValue> aArgs(comphelper::InitPropertySequence({
+        { u"X"_ustr, cpo::uno::Any(sal_Int32(1000)) },
+        { u"Y"_ustr, cpo::uno::Any(sal_Int32(1500)) },
+        { u"Width"_ustr, cpo::uno::Any(sal_Int32(4000)) },
+        { u"Height"_ustr, cpo::uno::Any(sal_Int32(3000)) },
+    }));
+    dispatchCommand(mxComponent, u".uno:BasicShapes.rectangle"_ustr, aArgs);
+    CPPUNIT_ASSERT_EQUAL(nObjectCount + 1, pSlide->GetObjCount());
+
+    // the new shape is selected, and goes
+    rtl::Reference<DispatchResultCatcher> xDeleted(new DispatchResultCatcher);
+    comphelper::dispatchCommand(u".uno:Delete"_ustr, {}, xDeleted);
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT_EQUAL(nObjectCount, pSlide->GetObjCount());
+    CPPUNIT_ASSERT_EQUAL(sal_Int16(css::frame::DispatchResultState::SUCCESS), xDeleted->mnState);
+
+    // with nothing selected nothing goes, which is no success
+    rtl::Reference<DispatchResultCatcher> xNothing(new DispatchResultCatcher);
+    comphelper::dispatchCommand(u".uno:Delete"_ustr, {}, xNothing);
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT(sal_Int16(css::frame::DispatchResultState::SUCCESS) != xNothing->mnState);
 }
 
 CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testMovePreviewShape)

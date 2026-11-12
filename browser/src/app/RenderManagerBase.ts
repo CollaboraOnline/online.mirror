@@ -374,6 +374,20 @@ abstract class RenderManagerBase {
 		return false;
 	}
 
+	/// Takes those objects out of the part as deleted here, until the engine reports it; answers
+	/// whether it could.
+	deleteLocally(
+		_partId: cool.VectorPartGuid,
+		_objectIds: number[],
+		_wait: number,
+	): boolean {
+		return false;
+	}
+
+	/// The engine refused the oldest delete made here.
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	deleteRefused(): void {}
+
 	renderObjectsWith(
 		_context: CanvasRenderingContext2D,
 		_data: cool.VectorPrimitivesData,
