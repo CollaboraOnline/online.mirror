@@ -41,4 +41,21 @@ describe(['tagdesktop'], 'Calc keyboard context menu', function () {
 				.should('not.equal', firstEntryText);
 		});
 	});
+
+	it('The menu tells assistive technology which entry is selected', function () {
+		cy.realPress(['Shift', 'F10']);
+		cy.cGet('.context-menu-root:visible').should('have.attr', 'role', 'menu');
+		cy.cGet('.context-menu-item:visible').not('.context-menu-separator').first()
+			.should('have.attr', 'role', 'menuitem');
+
+		function assertActiveEntryIsAnnounced() {
+			cy.cGet('.context-menu-item.context-menu-hover:visible').invoke('attr', 'id').then(function (id) {
+				cy.cGet('.context-menu-root:visible').should('have.attr', 'aria-activedescendant', id);
+			});
+		}
+
+		assertActiveEntryIsAnnounced();
+		cy.realPress('ArrowDown');
+		assertActiveEntryIsAnnounced();
+	});
 });

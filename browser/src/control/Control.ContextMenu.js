@@ -374,5 +374,38 @@ window.L.installContextMenu = function(options) {
 			$menu.css('right', $menu.css('left'));
 		};
 	}
+	var callerEvents = options.events || {};
+	options.events = Object.assign({}, callerEvents, {
+		show: function(opt) {
+			window.L.markContextMenuForAssistiveTechnology(opt.$menu);
+			if (callerEvents.show)
+				return callerEvents.show.apply(this, arguments);
+		}
+	});
+
 	$.contextMenu(options);
+};
+
+var contextMenuItemCount = 0;
+
+// The plugin builds plain lists, keeps the focus on the menu itself and marks the current
+// entry with a class. Give the lists and entries menu roles, and point aria-activedescendant
+// of the menu at the current entry, so a screen reader announces it.
+window.L.markContextMenuForAssistiveTechnology = function($menu) {
+	$menu.attr('role', 'menu');
+	$menu.find('ul.context-menu-list').attr('role', 'menu');
+	$menu.find('li.context-menu-separator').attr('role', 'separator');
+	$menu.find('li.context-menu-item').not('.context-menu-separator').each(function() {
+		var $item = $(this);
+		if (!this.id)
+			this.id = 'context-menu-item-' + (++contextMenuItemCount);
+		$item.attr('role', 'menuitem');
+		if ($item.hasClass('context-menu-submenu'))
+			$item.attr('aria-haspopup', 'true');
+	});
+	// The plugin selects an entry by triggering this event on it, and the event bubbles up here.
+	$menu.off('contextmenu:focus.accessibility').on('contextmenu:focus.accessibility', function(e) {
+		$menu.attr('aria-activedescendant', e.target.id);
+	});
+	$menu.removeAttr('aria-activedescendant');
 };
