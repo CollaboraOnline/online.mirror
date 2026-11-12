@@ -29,8 +29,6 @@
 #include <vcl/salgtype.hxx>
 #include <font/LogicalFontInstance.hxx>
 
-#include <test/GraphicsRenderTests.hxx>
-
 #include <premac.h>
 #include <SkRegion.h>
 #include <SkSurface.h>
@@ -145,15 +143,9 @@ VCL_DLLPUBLIC sk_sp<SkTypeface> applyVariations(const sk_sp<SkTypeface>& skTypef
 inline bool isUnitTestRunning(const char* name = nullptr)
 {
     if (name == nullptr)
-    {
-        if (o3tl::IsRunningUnitTest())
-            return true;
-        return !vcl::test::activeGraphicsRenderTest().isEmpty();
-    }
+        return o3tl::IsRunningUnitTest();
     const char* const testname = getenv("LO_TESTNAME");
-    if (testname != nullptr && std::string_view(name) == testname)
-        return true;
-    return vcl::test::activeGraphicsRenderTest().equalsAscii(name);
+    return testname != nullptr && std::string_view(name) == testname;
 }
 
 // Scaling done on the GPU is fast, but bicubic done in raster mode can be slow

@@ -1400,8 +1400,7 @@ std::shared_ptr<SalBitmap> SkiaSalGraphicsImpl::getBitmap(tools::Long nX, tools:
             // also need a lower quality scaling level.
             if (getWindowScaling() != 1
                 || isUnitTestRunning("BackendTest__testDrawHaflEllipseAAWithPolyLineB2D_")
-                || isUnitTestRunning("BackendTest__testDrawRectAAWithLine_")
-                || isUnitTestRunning("GraphicsRenderTest__testDrawRectAAWithLine"))
+                || isUnitTestRunning("BackendTest__testDrawRectAAWithLine_"))
             {
                 bitmap->Scale(1.0 / mScaling, 1.0 / mScaling, goodScalingQuality());
             }

@@ -73,7 +73,6 @@
 #include <desktop/exithelper.h>
 #include <sal/log.hxx>
 #include <toolkit/helper/vclunohelper.hxx>
-#include <comphelper/kit.hxx>
 #include <comphelper/configuration.hxx>
 #include <comphelper/fileurl.hxx>
 #include <comphelper/threadpool.hxx>
@@ -92,7 +91,6 @@
 #include <rtl/byteseq.hxx>
 #include <unotools/pathoptions.hxx>
 #include <rtl/bootstrap.hxx>
-#include <vcl/test/GraphicsRenderTests.hxx>
 #include <vcl/help.hxx>
 #include <vcl/weld.hxx>
 #include <vcl/settings.hxx>
@@ -186,17 +184,6 @@ void RemoveIconCacheDirectory()
 }
 
 namespace {
-
-#if defined(DBG_UTIL) && !defined(__EMSCRIPTEN__)
-void runGraphicsRenderTests()
-{
-    if (comphelper::COKit::isActive())
-        return;
-    GraphicsRenderTests TestObject;
-    TestObject.run();
-}
-#endif
-
 
 OUString MakeStartupErrorMessage(std::u16string_view aErrorMessage)
 {
@@ -1162,15 +1149,6 @@ int Desktop::Main()
         // FIXME: move this somewhere sensible.
 #if HAVE_FEATURE_OPENCL
         CheckOpenCLCompute(xDesktop);
-#endif
-
-#if defined(DBG_UTIL) && !defined(__EMSCRIPTEN__)
-        //Running the VCL graphics rendering tests
-        const char * pDisplay = std::getenv("DISPLAY");
-        if (!pDisplay || pDisplay[0] == ':')
-        {
-            runGraphicsRenderTests();
-        }
 #endif
 
         // Post user event to startup first application component window
