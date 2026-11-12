@@ -296,6 +296,10 @@ private:
     void writeVectorPrimitives(tools::JsonWriter& rJsonWriter, const OString& rPartId,
                                sal_Int32 nMode, sal_Int64 nSinceVersion, bool bPush);
 
+    /// Answers .uno:ShapeGhost: makes the default object of the named shape as the object in
+    /// creation of the current view, and writes its size and how it is drawn.
+    void writeShapeGhost(tools::JsonWriter& rJsonWriter, std::u16string_view aShape);
+
     cpo::uno::Reference<cpo::uno::XInterface> create(
         OUString const & aServiceSpecifier, OUString const & referer);
 

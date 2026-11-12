@@ -8706,6 +8706,59 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testCreateShapeInRectangle)
     CPPUNIT_ASSERT_EQUAL(nObjectCount, pSlide->GetObjCount());
 }
 
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testShapeGhost)
+{
+    // the shape shown while it is dragged out is made on the view, outside the document, and is
+    // the shape created at the end of the drag
+    SdXImpressDocument* pXImpressDocument = createDoc("dummy.odp");
+    SdDrawDocument* pDocument = pXImpressDocument->GetDoc();
+    SdPage* pSlide = pDocument->GetSdPage(0, PageKind::Standard);
+    const size_t nObjectCount = pSlide->GetObjCount();
+    const size_t nUndoCount = pDocument->GetUndoManager()->GetUndoActionCount();
+
+    tools::JsonWriter aWriter;
+    pXImpressDocument->getCommandValues(aWriter, ".uno:ShapeGhost?Shape=BasicShapes.rectangle");
+    std::stringstream aStream((std::string(aWriter.finishAndGetAsOString())));
+    boost::property_tree::ptree aTree;
+    boost::property_tree::read_json(aStream, aTree);
+    const boost::property_tree::ptree& rValues = aTree.get_child("commandValues");
+    CPPUNIT_ASSERT_EQUAL(std::string("BasicShapes.rectangle"), rValues.get<std::string>("shape"));
+    CPPUNIT_ASSERT(rValues.get<sal_Int64>("width") > 0);
+    CPPUNIT_ASSERT(rValues.get<sal_Int64>("height") > 0);
+    const boost::property_tree::ptree& rEntry = rValues.get_child("objects").front().second;
+    CPPUNIT_ASSERT(!rEntry.get_child("primitives").empty());
+    const sal_uInt64 nPromisedId = rValues.get<sal_uInt64>("id");
+    CPPUNIT_ASSERT_EQUAL(nPromisedId, rEntry.get<sal_uInt64>("id"));
+
+    // the document does not know of it
+    CPPUNIT_ASSERT_EQUAL(nObjectCount, pSlide->GetObjCount());
+    CPPUNIT_ASSERT_EQUAL(nUndoCount, pDocument->GetUndoManager()->GetUndoActionCount());
+    sd::DrawViewShell* pShell
+        = dynamic_cast<sd::DrawViewShell*>(pXImpressDocument->GetDocShell()->GetViewShell());
+    CPPUNIT_ASSERT(pShell);
+    SdrObject* pInCreation = pShell->GetObjectInCreation();
+    CPPUNIT_ASSERT(pInCreation);
+
+    cpo::uno::Sequence<css::beans::PropertyValue> aArgs(comphelper::InitPropertySequence({
+        { u"X"_ustr, cpo::uno::Any(sal_Int32(1000)) },
+        { u"Y"_ustr, cpo::uno::Any(sal_Int32(1500)) },
+        { u"Width"_ustr, cpo::uno::Any(sal_Int32(4000)) },
+        { u"Height"_ustr, cpo::uno::Any(sal_Int32(3000)) },
+    }));
+    dispatchCommand(mxComponent, u".uno:BasicShapes.rectangle"_ustr, aArgs);
+
+    // the drag ends in that very object, in the dragged rectangle
+    CPPUNIT_ASSERT_EQUAL(nObjectCount + 1, pSlide->GetObjCount());
+    SdrObject* pShape = pSlide->GetObj(pSlide->GetObjCount() - 1);
+    CPPUNIT_ASSERT_EQUAL(pInCreation, pShape);
+    // under the id the client was told
+    CPPUNIT_ASSERT_EQUAL(nPromisedId, pShape->GetUniqueID());
+    CPPUNIT_ASSERT(!pShell->GetObjectInCreation());
+    CPPUNIT_ASSERT_EQUAL(o3tl::convert(4000, o3tl::Length::twip, o3tl::Length::mm100),
+                         static_cast<sal_Int64>(pShape->GetLogicRect().GetWidth()));
+    CPPUNIT_ASSERT_EQUAL(nUndoCount + 1, pDocument->GetUndoManager()->GetUndoActionCount());
+}
+
 CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testMovePreviewShape)
 {
     SdXImpressDocument* pXImpressDocument = createDoc("dummy.odp");

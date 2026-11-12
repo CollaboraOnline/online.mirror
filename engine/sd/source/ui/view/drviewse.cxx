@@ -41,6 +41,8 @@
 #include <svx/svdopath.hxx>
 #include <svx/svdundo.hxx>
 #include <svx/svdorect.hxx>
+#include <svl/itemset.hxx>
+#include <svx/svdoashp.hxx>
 #include <svl/eitem.hxx>
 #include <svl/intitem.hxx>
 #include <svl/poolitem.hxx>
@@ -711,10 +713,9 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
     if(!(HasCurrentFunction() && ((rReq.GetModifier() & KEY_MOD1) || bCreateDirectly)))
         return;
 
-    // get SdOptions
-    SdOptions* pOptions = SdModule::get()->GetSdOptions(GetDoc()->GetDocumentType());
-    sal_uInt32 nDefaultObjectSizeWidth(pOptions->GetDefaultObjectSizeWidth());
-    sal_uInt32 nDefaultObjectSizeHeight(pOptions->GetDefaultObjectSizeHeight());
+    const Size aDefaultObjectSize(GetDefaultObjectSize());
+    sal_uInt32 nDefaultObjectSizeWidth(aDefaultObjectSize.Width());
+    sal_uInt32 nDefaultObjectSizeHeight(aDefaultObjectSize.Height());
     if (nSId == SID_INSERT_SIGNATURELINE)
     {
         // Half of the default to better match the space available for signatures in many real-world
@@ -742,8 +743,21 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
     if(!pPageView)
         return;
 
-    // create the default object
-    rtl::Reference<SdrObject> pObj = GetCurrentFunction()->CreateDefaultObject(nSId, aNewObjectRectangle);
+    // create the default object, or take the one in creation of that kind, which the client has
+    // shown while the shape was dragged out
+    rtl::Reference<SdrObject> pObj;
+    const SfxItemSet* pRequestArgs = rReq.GetArgs();
+    const SfxStringItem* pShapeType
+        = pRequestArgs ? pRequestArgs->GetItem<SfxStringItem>(nSId, false) : nullptr;
+    if (oRequestedRectangle && mxObjectInCreation && nSId == mnObjectInCreationSlot
+        && pShapeType && pShapeType->GetValue() == maObjectInCreationType)
+    {
+        // the client was told which shapes are as wide as high, and dragged those so
+        pObj = std::move(mxObjectInCreation);
+        pObj->SetLogicRect(aNewObjectRectangle);
+    }
+    else
+        pObj = GetCurrentFunction()->CreateDefaultObject(nSId, aNewObjectRectangle);
 
     if(!pObj)
         return;
@@ -777,6 +791,36 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
     {
         GetViewFrame()->GetDispatcher()->Execute(SID_OBJECT_SELECT, SfxCallMode::ASYNCHRON);
     }
+}
+
+Size DrawViewShell::GetDefaultObjectSize() const
+{
+    SdOptions* pOptions = SdModule::get()->GetSdOptions(GetDoc()->GetDocumentType());
+    return Size(pOptions->GetDefaultObjectSizeWidth(), pOptions->GetDefaultObjectSizeHeight());
+}
+
+SdrObject* DrawViewShell::MakeObjectInCreation(sal_uInt16 nSlotId, const OUString& rShapeType)
+{
+    mxObjectInCreation.clear();
+    mnObjectInCreationSlot = nSlotId;
+    maObjectInCreationType = rShapeType;
+
+    // the custom shape tool makes it as it makes a shape created directly, from the kind of
+    // object the view is set to create, which is put back after
+    const SdrObjKind eKind(mpDrawView->GetCurrentObjIdentifier());
+    const SdrInventor eInventor(mpDrawView->GetCurrentObjInventor());
+    mpDrawView->SetCurrentObj(SdrObjKind::CustomShape);
+
+    SfxAllItemSet aArguments(GetDoc()->GetPool());
+    aArguments.Put(SfxStringItem(nSlotId, rShapeType));
+    SfxRequest aRequest(nSlotId, SfxCallMode::SYNCHRON, aArguments);
+    rtl::Reference<FuPoor> xFunction = FuConstructCustomShape::Create(
+        *this, GetActiveWindow(), mpDrawView.get(), *GetDoc(), aRequest, false);
+    mxObjectInCreation = xFunction->CreateDefaultObject(
+        nSlotId, ::tools::Rectangle(Point(), GetDefaultObjectSize()));
+
+    mpDrawView->SetCurrentObj(eKind, eInventor);
+    return mxObjectInCreation.get();
 }
 
 void DrawViewShell::FuDeleteSelectedObjects()

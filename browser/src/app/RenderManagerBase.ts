@@ -364,6 +364,16 @@ abstract class RenderManagerBase {
 		// eslint-disable-next-line @typescript-eslint/no-empty-function
 	): void {}
 
+	/// Takes that object into the part as created here, until the engine reports it; answers
+	/// whether it could.
+	addProvisionalObject(
+		_partId: cool.VectorPartGuid,
+		_object: cool.SlideObject,
+		_wait: number,
+	): boolean {
+		return false;
+	}
+
 	renderObjectsWith(
 		_context: CanvasRenderingContext2D,
 		_data: cool.VectorPrimitivesData,

@@ -507,6 +507,23 @@ class RenderManager {
 		);
 	}
 
+	/*
+		Takes an object created here into the part, on top, as the engine is to report it: it is
+		drawn, hit and selected as any other, and the engine's entry of the same id replaces it.
+		Where none comes within that many milliseconds, it goes again. Answers whether it could.
+	*/
+	static addProvisionalObject(
+		partId: cool.VectorPartGuid,
+		object: cool.SlideObject,
+		wait: number,
+	): boolean {
+		return RenderManager.ensureInstance().addProvisionalObject(
+			partId,
+			object,
+			wait,
+		);
+	}
+
 	static renderPrimitives(
 		context: CanvasRenderingContext2D,
 		data: cool.VectorPrimitivesData,

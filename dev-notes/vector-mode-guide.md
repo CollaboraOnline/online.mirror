@@ -126,11 +126,11 @@ and the shape is dragged out where it is to go, as in the office:
 | What | What happens |
 |---|---|
 | Before the press | Two lines across the view meet where the drag would begin, snapped as a move snaps, with the place above and to the left of them. A line that meets an edge of another object takes the colour of the snap lines. |
-| Press and drag | A frame shows the shape, with its width and height beside the corner the mouse holds; towards the upper left they are negative and stand outside the frame. |
-| Shift | The shape is as wide as it is high. |
+| Press and drag | The shape itself shows, half see-through, in the dragged size, with its width and height beside the corner the mouse holds; towards the upper left they are negative and stand outside it. Until the engine has told how the shape looks, a frame stands in for it, so on a slow connection the drag can begin at once. |
+| Shift | The shape is as wide as it is high. The square, the circle, the ring, the circle pie and the rounded square are made so anyway; for them Shift lets the drag go free, as in the office. |
 | Alt | The shape is dragged from its middle. |
 | Ctrl | Turns the snap over: with the grid on, it snaps to the edges of other objects instead. |
-| Let go | The shape is made in the frame and selected, as one undo step; a callout goes into its text. The mode is over. |
+| Let go | The shape is made where it was dragged and selected at once, with its handles, as one undo step, also before the engine has answered on a slow connection; a callout goes into its text. The mode is over. |
 | Escape, a click without a drag, a command, a press elsewhere, another slide | End the mode without a shape. |
 
 Shift, Alt and Ctrl take effect at once, also while the mouse stands still. Positions and sizes are

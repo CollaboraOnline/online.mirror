@@ -425,6 +425,7 @@ abstract class VectorPartManagerBase extends VectorManagerBase {
 			// they arrive in is the order they are drawn in.
 			order: values.order || arrived,
 		};
+		this._keepProvisional(partId, data, arrived);
 		this._takePageEntry(data, received);
 		this._cache.set(partId, data);
 		this._staleParts.delete(partId);
@@ -437,6 +438,76 @@ abstract class VectorPartManagerBase extends VectorManagerBase {
 		this._reconcile(partId, values.inputSequence);
 		this._fireChanged(undefined, values.inputSequence);
 		this.setVisualsReady();
+	}
+
+	/// The objects created here that the engine has not reported yet, by id: the part they are in,
+	/// the entry they stand as, and the time after which they go again.
+	private _provisional = new Map<
+		number,
+		{
+			partId: cool.VectorPartGuid;
+			object: cool.SlideObject;
+			timer: ReturnType<typeof setTimeout>;
+		}
+	>();
+
+	addProvisionalObject(
+		partId: cool.VectorPartGuid,
+		object: cool.SlideObject,
+		wait: number,
+	): boolean {
+		const data = this._cache.get(partId);
+		const id = object.id;
+		if (!data || id === undefined) return false;
+
+		this._forgetProvisional(id);
+		data.objects.set(id, object);
+		if (data.order.indexOf(id) < 0) data.order = data.order.concat([id]);
+		this._provisional.set(id, {
+			partId: partId,
+			object: object,
+			timer: setTimeout(() => this._dropProvisional(id), wait),
+		});
+		this._fireChanged([]);
+		return true;
+	}
+
+	private _forgetProvisional(id: number): void {
+		const held = this._provisional.get(id);
+		if (!held) return;
+		clearTimeout(held.timer);
+		this._provisional.delete(id);
+	}
+
+	/// Takes away an object created here that the engine never reported.
+	private _dropProvisional(id: number): void {
+		const held = this._provisional.get(id);
+		if (!held) return;
+		this._forgetProvisional(id);
+		const data = this._cache.get(held.partId);
+		if (!data || data.objects.get(id) !== held.object) return;
+		data.objects.delete(id);
+		data.order = data.order.filter((one: number) => one !== id);
+		this._fireChanged([]);
+	}
+
+	/*
+		Keeps the objects created here in the part an answer of the engine brought, until the
+		engine reports them: an answer about a change made before carries an order without them,
+		which would drop them. They stay on top, where they were created. An object the answer
+		carries is the engine's own now.
+	*/
+	private _keepProvisional(
+		partId: cool.VectorPartGuid,
+		data: cool.VectorPrimitivesData,
+		carried: number[],
+	): void {
+		for (const id of carried) this._forgetProvisional(id);
+		for (const [id, held] of this._provisional) {
+			if (held.partId !== partId) continue;
+			if (!data.objects.has(id)) data.objects.set(id, held.object);
+			if (data.order.indexOf(id) < 0) data.order = data.order.concat([id]);
+		}
 	}
 
 	/// Apply a pushed delta and replay the pending edits on the objects it
@@ -563,6 +634,12 @@ abstract class VectorPartManagerBase extends VectorManagerBase {
 			for (const id of gone) cached.objects.delete(id);
 			cached.order = values.order;
 		}
+
+		this._keepProvisional(
+			partId,
+			cached,
+			carried.flatMap((object) => (object.id === undefined ? [] : [object.id])),
+		);
 
 		cached.version = values.version;
 

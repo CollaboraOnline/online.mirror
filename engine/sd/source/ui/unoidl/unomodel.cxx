@@ -294,6 +294,7 @@
 #include <controller/SlsPageSelector.hxx>
 
 #include <app.hrc>
+#include <svx/svxids.hrc>
 #include <slideshow.hxx>
 
 using namespace ::cppu;
@@ -3242,6 +3243,14 @@ public:
         writeTextEditEntry(rWriter, pPage);
     }
 
+    /// Writes the entry of an object that is on no page yet, as drawn on that page, into the
+    /// open array, as an object of the page would be written once inserted.
+    void writeObjectInCreation(tools::JsonWriter& rWriter, SdPage* pPage, SdrObject& rObject)
+    {
+        setupProcessor(rWriter, pPage);
+        writeObjectEntry(rWriter, rObject, 0, contentOf(rObject));
+    }
+
 private:
     /// Answer a request for a page the document does not hold with the header alone. A client
     /// whose page list has not caught up with a mode switch asks for a part that is not there,
@@ -4066,7 +4075,7 @@ bool SdXImpressDocument::supportsCommand(std::u16string_view rCommand)
 {
     if (svx::vector::isPartCommand(rCommand) || rCommand == u"ExtractDocumentStructure"
         || rCommand == u"GetDesignTemplates" || rCommand == u"GetDesignTemplateDesigns"
-        || rCommand == u"SecurityLabel")
+        || rCommand == u"SecurityLabel" || rCommand == u"ShapeGhost")
         return true;
     return false;
 }
@@ -4124,6 +4133,70 @@ OUString lcl_ReadTemplateThumbnailDataUrl(const OUString& rUrl)
 }
 }
 
+/*
+    The answer to .uno:ShapeGhost?Shape=BasicShapes.rectangle and the like: the view makes the
+    default object of that shape and holds it as its object in creation, which is inserted
+    nowhere, and the answer carries its size and how it is drawn, for the client to show it while
+    the shape is dragged out. A shape of no known group gets an answer without an object.
+*/
+void SdXImpressDocument::writeShapeGhost(::tools::JsonWriter& rJsonWriter,
+                                         std::u16string_view aShape)
+{
+    static constexpr std::pair<std::u16string_view, sal_uInt16> aGroups[] = {
+        { u"BasicShapes", SID_DRAWTBX_CS_BASIC },
+        { u"SymbolShapes", SID_DRAWTBX_CS_SYMBOL },
+        { u"ArrowShapes", SID_DRAWTBX_CS_ARROW },
+        { u"StarShapes", SID_DRAWTBX_CS_STAR },
+        { u"CalloutShapes", SID_DRAWTBX_CS_CALLOUT },
+        { u"FlowChartShapes", SID_DRAWTBX_CS_FLOWCHART },
+    };
+
+    rJsonWriter.put("commandName", ".uno:ShapeGhost");
+    auto aValues = rJsonWriter.startNode("commandValues");
+    rJsonWriter.put("shape", OUString(aShape));
+
+    const size_t nDot = aShape.find(u'.');
+    sd::DrawViewShell* pShell
+        = mpDocShell ? dynamic_cast<sd::DrawViewShell*>(mpDocShell->GetViewShell()) : nullptr;
+    if (nDot == std::u16string_view::npos || !pShell)
+        return;
+
+    const std::u16string_view aGroup(aShape.substr(0, nDot));
+    const auto pGroup
+        = std::find_if(std::begin(aGroups), std::end(aGroups),
+                       [&aGroup](const auto& rGroup) { return rGroup.first == aGroup; });
+    if (pGroup == std::end(aGroups))
+        return;
+
+    SdrObject* pObject
+        = pShell->MakeObjectInCreation(pGroup->second, OUString(aShape.substr(nDot + 1)));
+    SdPage* pPage = pShell->GetActualPage();
+    if (!pObject || !pPage)
+        return;
+
+    // the object keeps the id it was made with when it is inserted, so the client can take the
+    // shape as created before the engine reports it
+    rJsonWriter.put("id", svx::vector::idOf(*pObject));
+
+    // some shapes are always as wide as high, as the custom shape tool makes them
+    rJsonWriter.put("asWideAsHigh", SdrObjCustomShape::doConstructOrthogonal(
+                                        pShell->GetObjectInCreationType()));
+
+    // the client maps it from its own box onto the dragged one, so the box goes along in twips;
+    // a shape made as wide as high does not start at the corner of the page
+    const ::tools::Rectangle aRectangle(pObject->GetLogicRect());
+    rJsonWriter.put("x", o3tl::convert(aRectangle.Left(), o3tl::Length::mm100, o3tl::Length::twip));
+    rJsonWriter.put("y", o3tl::convert(aRectangle.Top(), o3tl::Length::mm100, o3tl::Length::twip));
+    rJsonWriter.put("width", o3tl::convert(aRectangle.GetWidth(), o3tl::Length::mm100,
+                                           o3tl::Length::twip));
+    rJsonWriter.put("height", o3tl::convert(aRectangle.GetHeight(), o3tl::Length::mm100,
+                                            o3tl::Length::twip));
+    // the entry the object will have once inserted, which the client can take as created
+    auto aObjects = rJsonWriter.startArray("objects");
+    VectorContentWriter aWriter(mpDoc, this, OString());
+    aWriter.writeObjectInCreation(rJsonWriter, pPage, *pObject);
+}
+
 void SdXImpressDocument::getCommandValues(::tools::JsonWriter& rJsonWriter,
                                           std::string_view rCommand)
 {
@@ -4156,6 +4229,12 @@ void SdXImpressDocument::getCommandValues(::tools::JsonWriter& rJsonWriter,
     }
     std::map<OUString, OUString> aMap
         = KitHelper::parseCommandParameters(OUString::fromUtf8(rCommand));
+
+    if (o3tl::starts_with(rCommand, ".uno:ShapeGhost"))
+    {
+        writeShapeGhost(rJsonWriter, aMap[u"Shape"_ustr]);
+        return;
+    }
 
     if (o3tl::starts_with(rCommand, ".uno:SecurityLabel"))
     {

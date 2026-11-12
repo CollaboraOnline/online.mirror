@@ -22,6 +22,7 @@
 #include <functional>
 #include <map>
 #include <memory>
+#include <rtl/ref.hxx>
 #include "ViewShell.hxx"
 #include "tools/AsynchronousCall.hxx"
 #include "TabControl.hxx"
@@ -210,6 +211,17 @@ public:
     void            FuTransformDocumentStructure(SfxRequest& rReq);
     void            FuTemporary(SfxRequest& rReq);
     void            FuPermanent(SfxRequest& rReq);
+
+    /** Makes the default object of a custom shape, of that group's slot and that type, in the
+        default size, and holds it as the object in creation of this view, in place of one held
+        before. It is not inserted anywhere: a client shows it while the shape is dragged out,
+        and a request to create that shape in a rectangle takes it.
+     */
+    SdrObject* MakeObjectInCreation(sal_uInt16 nSlotId, const OUString& rShapeType);
+    /// The object in creation this view holds, if any.
+    SdrObject* GetObjectInCreation() const { return mxObjectInCreation.get(); }
+    /// The type of the custom shape in creation, as rectangle.
+    const OUString& GetObjectInCreationType() const { return maObjectInCreationType; }
     void            FuSupport(SfxRequest& rReq);
     void            FuDeleteSelectedObjects();
     void            FuSupportRotate(SfxRequest const & rReq);
@@ -472,7 +484,14 @@ private:
     bool ShouldDisableEditHyperlink() const;
 
 private:
+    /// The office's default size of a new object, in 1/100 mm.
+    Size GetDefaultObjectSize() const;
+
     std::unique_ptr<DrawView> mpDrawView;
+    /// The object in creation, which is on no page, and the slot and type that made it.
+    rtl::Reference<SdrObject> mxObjectInCreation;
+    sal_uInt16 mnObjectInCreationSlot = 0;
+    OUString maObjectInCreationType;
     SdPage*             mpActualPage;
     ::tools::Rectangle           maMarkRect;
     Point               maMousePos;

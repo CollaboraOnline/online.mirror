@@ -83,17 +83,151 @@ class ClassicCreateContext implements InteractionMode {
 		);
 	}
 
-	/// Enters the mode for that shape.
+	/*
+		Enters the mode for that shape, and asks the engine for how the shape looks, which the
+		drag shows once it is there; until then it shows the frame alone.
+	*/
 	public static start(shape: string): void {
 		ClassicCreateContext.listen();
 		Interaction.enterMode(new ClassicCreateContext(shape));
+		app.socket.sendMessage(
+			'commandvalues command=.uno:ShapeGhost?Shape=' +
+				encodeURIComponent(shape),
+		);
 	}
 
-	/// Follows the answers of the engine, so the frame sent goes once the shape is drawn.
+	/// Follows the answers of the engine, so the frame sent goes once the shape is drawn, and the
+	/// shape that is dragged out shows as it looks once the engine told.
 	private static listen(): void {
 		if (ClassicCreateContext.listening) return;
 		ClassicCreateContext.listening = true;
 		RenderManager.onVectorChanged(() => ClassicCreateContext.answered());
+		app.map.on('commandvalues', (event: any) => {
+			if (event.commandName !== '.uno:ShapeGhost') return;
+			const mode = Interaction.modeOn();
+			if (mode instanceof ClassicCreateContext)
+				mode.takeTheGhost(event.commandValues);
+		});
+	}
+
+	/// How the shape looks in its default size, as the engine made it, and the size it was
+	/// made in, in twips; null until the engine told.
+	private ghost: {
+		box: cool.Range2D;
+		primitives: cool.Primitive[];
+		// the entry the shape will have once inserted, under the id it keeps
+		entry: cool.SlideObject;
+	} | null = null;
+
+	/// Whether the shape is always as wide as high, as the engine makes some.
+	private asWideAsHigh: boolean = false;
+
+	/// Takes the engine's answer about the shape, where it is about this one.
+	private takeTheGhost(values: any): void {
+		if (!values || values.shape !== this.shape) return;
+		this.asWideAsHigh = values.asWideAsHigh === true;
+		const entry: cool.SlideObject | undefined = Array.isArray(values.objects)
+			? values.objects[0]
+			: undefined;
+		const primitives = entry?.primitives;
+		if (values.width > 0 && values.height > 0 && Array.isArray(primitives))
+			this.ghost = {
+				box: new cool.Range2D(
+					values.x ?? 0,
+					values.y ?? 0,
+					(values.x ?? 0) + values.width,
+					(values.y ?? 0) + values.height,
+				),
+				primitives: primitives,
+				entry: entry as cool.SlideObject,
+			};
+		app.sectionContainer?.requestReDraw();
+	}
+
+	/// The mapping of the box the shape was made in onto that rectangle.
+	private mappingOnto(box: cool.Range2D): cool.Matrix2D {
+		const made = this.ghost?.box ?? box;
+		const across = box.width / made.width;
+		const down = box.height / made.height;
+		return new cool.Matrix2D(
+			across,
+			0,
+			0,
+			down,
+			box.minX - made.minX * across,
+			box.minY - made.minY * down,
+		);
+	}
+
+	/*
+		The shape as created in that rectangle, as the engine is to report it: its entry with what
+		it draws, its box and its mapping taken onto the rectangle. Its own handles and path are
+		left to the engine's report, which brings them where they are.
+	*/
+	private createdIn(box: cool.Range2D): cool.SlideObject | null {
+		const entry = this.ghost?.entry;
+		if (!entry || entry.id === undefined) return null;
+		const mapping = this.mappingOnto(box);
+		const transform = cool.Matrix2D.fromArray(entry.transform);
+		const at = (x: number, y: number) =>
+			new cool.Point(
+				mapping.a * x + mapping.c * y + mapping.e,
+				mapping.b * x + mapping.d * y + mapping.f,
+			);
+		const from = at(entry.x ?? 0, entry.y ?? 0);
+		const to = at(
+			(entry.x ?? 0) + (entry.width ?? 0),
+			(entry.y ?? 0) + (entry.height ?? 0),
+		);
+		return {
+			...entry,
+			x: from.x,
+			y: from.y,
+			width: to.x - from.x,
+			height: to.y - from.y,
+			transform: transform ? transform.then(mapping).toArray() : undefined,
+			primitives: [
+				{
+					type: cool.TransformPrimitive.type,
+					matrix: mapping.toArray(),
+					children: entry.primitives ?? [],
+				} as cool.TransformPrimitive,
+			],
+			handles: undefined,
+			path: undefined,
+		};
+	}
+
+	/*
+		Draws the shape as it looks, mapped from the box it was made in onto that rectangle: half
+		see-through while it is dragged, as a drag shows what it moves, and whole once it is sent,
+		as the shape the engine is making. Answers whether it could.
+	*/
+	private drawTheGhost(
+		context: CanvasRenderingContext2D,
+		box: cool.Range2D,
+		whole: boolean,
+	): boolean {
+		const data = RenderGeometrySection.currentPart();
+		if (!this.ghost || !data) return false;
+
+		context.save();
+		// the point at the very start of the document says where the part begins on the canvas,
+		// and a twip is that many pixels wide
+		const origin = new cool.SimplePoint(0, 0);
+		context.translate(origin.vX, origin.vY);
+		context.scale(app.twipsToPixels, app.twipsToPixels);
+		if (!whole) context.globalAlpha = 0.5;
+		const mapping = this.mappingOnto(box);
+		RenderManager.renderPrimitives(context, data, [
+			{
+				type: cool.TransformPrimitive.type,
+				matrix: mapping.toArray(),
+				children: this.ghost.primitives,
+			} as cool.TransformPrimitive,
+		]);
+		context.restore();
+		return true;
 	}
 
 	/// The frame waiting for the engine, of the mode last on.
@@ -149,7 +283,10 @@ class ClassicCreateContext implements InteractionMode {
 		if (!this.from) return null;
 		let width = to.x - this.from.x;
 		let height = to.y - this.from.y;
-		if (modifier & app.UNOModifier.SHIFT) {
+		// as in the office, Shift makes a shape as wide as high, and lets one that is made so
+		// be dragged out freely
+		const shift = (modifier & app.UNOModifier.SHIFT) !== 0;
+		if (this.asWideAsHigh !== shift) {
 			const side = Math.max(Math.abs(width), Math.abs(height));
 			width = width < 0 ? -side : side;
 			height = height < 0 ? -side : side;
@@ -242,6 +379,24 @@ class ClassicCreateContext implements InteractionMode {
 			Width: value(box.width),
 			Height: value(box.height),
 		});
+
+		// where the engine told how the shape looks and its id, the shape is taken as created at
+		// once: it is in the part and selected, and the engine's report replaces it
+		const created = this.createdIn(box);
+		const part = RenderGeometrySection.currentPart();
+		if (
+			created &&
+			created.id !== undefined &&
+			part &&
+			RenderManager.addProvisionalObject(
+				part.partId,
+				created,
+				ClassicCreateContext.longestWait,
+			)
+		) {
+			this.forgetTheSent();
+			GraphicSelection.selectAndShow([created.id]);
+		}
 	}
 
 	/// Ends the mode where another part is shown than the one it was entered on.
@@ -313,8 +468,9 @@ class ClassicCreateContext implements InteractionMode {
 		context.save();
 		context.setTransform(1, 0, 0, 1, 0, 0);
 
+		// the shape as it looks where the engine told how, the frame of it until then
 		const frame = this.box ?? this.sent;
-		if (frame) {
+		if (frame && !this.drawTheGhost(context, frame, !this.box)) {
 			const from = new cool.SimplePoint(frame.minX, frame.minY);
 			const to = new cool.SimplePoint(frame.maxX, frame.maxY);
 			context.strokeStyle = HandleLook.outlineOfADrag;
