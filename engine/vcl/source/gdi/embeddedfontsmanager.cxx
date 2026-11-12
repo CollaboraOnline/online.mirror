@@ -40,6 +40,8 @@
 #include <sft.hxx>
 #include <tools/stream.hxx>
 
+#include <hb.h>
+
 #include <com/sun/star/beans/StringPair.hpp>
 #include <com/sun/star/document/FontsDisallowEditingRequest.hpp>
 #include <com/sun/star/task/XInteractionHandler.hpp>
@@ -164,6 +166,68 @@ bool writeFontBytesToFile(osl::File& file, const void* data, sal_uInt64 size)
     return true;
 }
 
+// Fills bytes from the start of an open file. Returns false on a read error or if the file is
+// shorter than bytes.
+bool readFontBytesFromFile(osl::File& file, std::vector<char>& bytes)
+{
+    sal_uInt64 readTotal = 0;
+    while (readTotal < bytes.size())
+    {
+        sal_uInt64 read = 0;
+        if (file.read(bytes.data() + readTotal, bytes.size() - readTotal, read) != osl::File::E_None
+            || read == 0)
+            return false;
+        readTotal += read;
+    }
+    return true;
+}
+
+bool hasGraphiteTables(hb_face_t* face)
+{
+    for (hb_tag_t tag : { HB_TAG('S', 'i', 'l', 'f'), HB_TAG('G', 'l', 'a', 't'),
+                          HB_TAG('G', 'l', 'o', 'c'), HB_TAG('F', 'e', 'a', 't'),
+                          HB_TAG('S', 'i', 'l', 'l') })
+    {
+        hb_blob_t* table = hb_face_reference_table(face, tag);
+        const bool present = hb_blob_get_length(table) != 0;
+        hb_blob_destroy(table);
+        if (present)
+            return true;
+    }
+    return false;
+}
+
+// Returns true if the file can be read, holds at least one OpenType font, and none of its fonts
+// has Graphite tables.
+bool canActivateFontFile(const OUString& fileUrl)
+{
+    osl::File file(fileUrl);
+    sal_uInt64 size = 0;
+    if (file.open(osl_File_OpenFlag_Read | osl_File_OpenFlag_NoLock) != osl::File::E_None
+        || file.getSize(size) != osl::File::E_None || size > SAL_MAX_UINT32)
+        return false;
+    std::vector<char> bytes(size);
+    const bool bRead = readFontBytesFromFile(file, bytes);
+    file.close();
+    if (!bRead)
+        return false;
+
+    hb_blob_t* blob
+        = hb_blob_create(bytes.data(), bytes.size(), HB_MEMORY_MODE_READONLY, nullptr, nullptr);
+    const unsigned int faceCount = hb_face_count(blob);
+    bool hasGraphite = false;
+    for (unsigned int i = 0; i < faceCount && !hasGraphite; ++i)
+    {
+        hb_face_t* face = hb_face_create(blob, i);
+        hasGraphite = hasGraphiteTables(face);
+        hb_face_destroy(face);
+    }
+    hb_blob_destroy(blob);
+    SAL_WARN_IF(faceCount == 0, "vcl.fonts", "skipping font that is not OpenType: " << fileUrl);
+    SAL_WARN_IF(hasGraphite, "vcl.fonts", "skipping font with Graphite tables: " << fileUrl);
+    return faceCount != 0 && !hasGraphite;
+}
+
 // Returns actual URL (maybe of an already existing file), or empty string on failure.
 //
 // @param name name of the font file
@@ -181,16 +245,7 @@ OUString writeFontBytesToFile(const std::vector<char>& bytes, std::u16string_vie
             if (sal_uInt64 size; file->getSize(size) == osl::File::E_None && size == bytes.size())
             {
                 std::vector<char> bytes2(bytes.size());
-                sal_uInt64 readTotal = 0;
-                while (readTotal < bytes.size())
-                {
-                    sal_uInt64 read = 0;
-                    rc = file->read(bytes2.data() + readTotal, bytes.size() - readTotal, read);
-                    if (read == 0)
-                        break;
-                    readTotal += read;
-                }
-                if (rc == osl::File::E_None && bytes2 == bytes)
+                if (readFontBytesFromFile(*file, bytes2) && bytes2 == bytes)
                 {
                     return url; // OK, it's the same bytes
                 }
@@ -512,7 +567,10 @@ void EmbeddedFontsManager::activateFonts(std::vector<std::pair<OUString, OUStrin
     UpdateFontsGuard aUpdateFontsGuard;
     OutputDevice *pDevice = Application::GetDefaultDevice();
     for (const auto& [ fontName, fileUrl ] : temp)
-        pDevice->AddTempDevFont(fileUrl, fontName);
+    {
+        if (canActivateFontFile(fileUrl))
+            pDevice->AddTempDevFont(fileUrl, fontName);
+    }
 }
 
 void EmbeddedFontsManager::releaseFonts(const std::vector<std::pair<OUString, OUString>>& fonts)
