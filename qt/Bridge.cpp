@@ -1135,9 +1135,10 @@ QVariant Bridge::cool(const QString& messageStr)
     }
     else if (tokens.equals(0, "SYNCSETTINGS"))
     {
+        // The page of a remote document gets no secrets (it is in the remote server's origin):
         Desktop::syncSettings([this](const std::vector<char>& data) {
             send2JS(data);
-        });
+        }, !_document._remoteInfo);
         return {};
     }
     else if (tokens.equals(0, "VERSIONSTORESTATUS"))
