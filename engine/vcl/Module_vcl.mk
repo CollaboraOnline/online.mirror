@@ -35,7 +35,6 @@ $(eval $(call gb_Module_add_targets,vcl,\
                 Executable_minvcl \
                 Executable_svptest \
                 Executable_icontest \
-                Executable_visualbackendtest \
                 Executable_mtfdemo \
             ) \
     )) \

@@ -56,10 +56,6 @@ to run VCL unittests with Skia (and possibly skip slowcheck):
 
 SAL_SKIA=raster SAL_ENABLESKIA=1 SAL_USE_VCLPLUGIN=gen make vcl.build vcl.unitcheck vcl.slowcheck
 
-You can also use 'visualbackendtest' to visually check some operations. Use something like:
-
-SAL_SKIA=raster SAL_ENABLESKIA=1 SAL_USE_VCLPLUGIN=gen [srcdir]/bin/run visualbackendtest
-
 
 Thread safety:
 ==============

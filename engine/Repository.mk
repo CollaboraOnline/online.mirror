@@ -76,7 +76,6 @@ $(eval $(call gb_Helper_register_executables,NONE, \
 	svptest \
 	tiledrendering \
 	mtfdemo \
-	visualbackendtest \
 	listfonts \
 	listglyphs \
 	$(if $(and $(ENABLE_GTK3), $(filter LINUX %BSD,$(OS))), gtktiledviewer) \
