@@ -1620,7 +1620,7 @@ export class CommentSection extends CanvasSectionObject {
 	// Escape selected comment and also comment in full view mode.
 	private escapeSelectedComment() {
 		this.escapeListener = (e: KeyboardEvent) => {
-			if (e.key !== 'Escape') return;
+			if (e.key !== 'Escape' || !this.sectionProperties.selectedComment) return;
 			this.unselect();
 			this.map.focus();
 		};
