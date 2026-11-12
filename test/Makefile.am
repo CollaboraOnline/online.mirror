@@ -203,6 +203,7 @@ test_base_sources = \
 	NetUtilWhiteBoxTests.cpp \
 	NumUtilWhiteBoxTests.cpp \
 	RequestDetailsTests.cpp \
+	SettingsSecretsTests.cpp \
 	StringVectorTests.cpp \
 	TestGlobals.cpp \
 	UriTests.cpp \
