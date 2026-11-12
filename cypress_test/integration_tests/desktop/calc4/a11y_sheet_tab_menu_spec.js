@@ -47,8 +47,10 @@ describe(['tagdesktop'], 'Sheet tab context menu by keyboard', { testIsolation: 
 
 		cy.cGet('.context-menu-list').should('be.visible');
 		cy.cGet('#spreadsheet-tab0').should('have.class', 'context-menu-active');
+		cy.cGet('.context-menu-list:visible').first().should('have.focus');
 
 		cy.realPress('Escape');
 		cy.cGet('.context-menu-list').should('not.be.visible');
+		cy.cGet('#spreadsheet-tab0').should('have.focus');
 	});
 });

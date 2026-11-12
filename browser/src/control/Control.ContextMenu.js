@@ -142,10 +142,6 @@ window.L.Control.ContextMenu = window.L.Control.extend({
 					};
 				},
 				events: {
-					show: function (opt) {
-						var $menu = opt.$menu;
-						$menu.attr('tabindex', 0); // Make the context menu focusable
-					},
 					activated: function (opt) {
 						if (autoFillContextMenu) {
 							var $layer = opt.$layer;
@@ -167,13 +163,8 @@ window.L.Control.ContextMenu = window.L.Control.extend({
 					app.activeDocument.mouseControl.getCursorPagePosition()) ||
 				app.activeDocument.mouseControl.getMousePagePosition();
 			$('#canvas-container').contextMenu(position);
-			$('.context-menu-root').focus();
-			// When opened from the keyboard, select the first entry so the
-			// arrow keys move from it at once. A right-click opens with no
-			// entry preselected. The plugin keeps hidden menu lists around, so
-			// act on the one just made visible.
-			if (keyboardInvoked)
-				$('.context-menu-list:visible').first().trigger('nextcommand');
+			// A right-click opens with no entry preselected.
+			window.L.focusContextMenu($('#canvas-container'), keyboardInvoked);
 			this.hasContextMenu = true;
 		}
 	},
@@ -337,6 +328,19 @@ window.L.Control.ContextMenu = window.L.Control.extend({
 
 window.L.control.contextMenu = function (options) {
 	return new window.L.Control.ContextMenu(options);
+};
+
+// Move the keyboard focus into the menu that $trigger has open, so the screen reader follows it.
+// With selectFirst the first entry is selected, so the arrow keys move from it at once.
+window.L.focusContextMenu = function($trigger, selectFirst) {
+	var opt = $trigger.data('contextMenu');
+	if (!opt || !opt.$menu)
+		return;
+	var $menu = opt.$menu;
+	$menu.attr('tabindex', 0);
+	$menu.focus();
+	if (selectFirst)
+		$menu.trigger('nextcommand');
 };
 
 // Using 'click' and <a href='#' is vital for copy/paste security context.

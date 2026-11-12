@@ -131,6 +131,9 @@ window.L.Control.Tabs = window.L.Control.extend({
 					if (that._map.isReadOnlyMode())
 						return false;
 					return { }
+				},
+				events: {
+					hide: this._onTabMenuHide.bind(this)
 				}
 			});
 		}
@@ -364,6 +367,17 @@ window.L.Control.Tabs = window.L.Control.extend({
 		this._tabForContextMenu = parseInt(match[0]);
 		const rect = tab.getBoundingClientRect();
 		$(tab).contextMenu({ x: rect.left + window.scrollX, y: rect.top + window.scrollY });
+		window.L.focusContextMenu($(tab), true);
+	},
+
+	// A menu opened from the keyboard holds the focus, so give it back to its tab on close.
+	_onTabMenuHide: function () {
+		var active = document.activeElement;
+		if (!active || !active.closest('.context-menu-list'))
+			return;
+		var tab = document.getElementById('spreadsheet-tab' + this._tabForContextMenu);
+		if (tab)
+			tab.focus();
 	},
 
 	_onTabKeyDown: function (e) {
