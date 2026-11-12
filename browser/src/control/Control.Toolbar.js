@@ -14,7 +14,7 @@
  * Collabora Online toolbar
  */
 
-/* global app $ _ _UNO JSDialog URLPopUpSection HyperlinkWizard cool Util */
+/* global app $ _ _UNO JSDialog URLPopUpSection HyperlinkWizard cool Util ClassicCreateContext */
 /*eslint indent: [error, "tab", { "outerIIFEBody": 0 }]*/
 
 (function(global) {
@@ -606,6 +606,9 @@ function sendShapeCommand(name) {
 			Width: { type: 'long', value: String(width) },
 			Height: { type: 'long', value: String(height) },
 		});
+	} else if (ClassicCreateContext.canCreate(name)) {
+		// in a view that draws from objects the shape is dragged out where it is to go
+		ClassicCreateContext.start(name);
 	} else {
 		app.map.sendUnoCommand('.uno:' + name);
 	}

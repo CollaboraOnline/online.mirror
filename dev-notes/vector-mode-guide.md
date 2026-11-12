@@ -117,6 +117,27 @@ A click a little beside a thin line still takes the object: 8 screen pixels, wha
 The distance can be set in the client's preferences as vectorHitTolerance, in screen pixels.
 
 
+### Creating a shape by a drag
+
+A shape chosen from the shapes grid - Insert, Shapes in the notebookbar, or Insert, "Shapes ..."
+in the compact menu - is not added in the middle of the slide. The pointer turns into a cross,
+and the shape is dragged out where it is to go, as in the office:
+
+| What | What happens |
+|---|---|
+| Before the press | Two lines across the view meet where the drag would begin, snapped as a move snaps, with the place above and to the left of them. A line that meets an edge of another object takes the colour of the snap lines. |
+| Press and drag | A frame shows the shape, with its width and height beside the corner the mouse holds; towards the upper left they are negative and stand outside the frame. |
+| Shift | The shape is as wide as it is high. |
+| Alt | The shape is dragged from its middle. |
+| Ctrl | Turns the snap over: with the grid on, it snaps to the edges of other objects instead. |
+| Let go | The shape is made in the frame and selected, as one undo step; a callout goes into its text. The mode is over. |
+| Escape, a click without a drag, a command, a press elsewhere, another slide | End the mode without a shape. |
+
+Shift, Alt and Ctrl take effect at once, also while the mouse stands still. Positions and sizes are
+in the unit of the sidebar's Position and Size. The Shapes deck of the sidebar still adds the shape
+in the middle of the slide. Snap to grid is on by default in Impress (View, Snap to Grid).
+
+
 ## 2. Changing objects
 
 ### The handles
@@ -765,6 +786,10 @@ draws them.
 ## 8. Not there yet
 
 What is still missing, or only partly there:
+
+- Creating by a drag works for the shapes grid. Lines, curves, connectors, polygons, our own
+  callouts, text boxes and tables are still added in the middle of the slide by default; they
+  are to be created by drags of their own. The Freeform Line tool draws by a drag already.
 
 - 3D objects and 3D charts: they are shown as one picture. Selecting single objects inside a
   scene, and turning a scene in 3D as the office does, are planned.

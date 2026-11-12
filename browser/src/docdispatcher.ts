@@ -1657,6 +1657,9 @@ class Dispatcher {
 	}
 
 	public dispatch(action: string, data?: any) {
+		// an action ends a mode one was put into, as creating a shape by a drag
+		Interaction.leaveMode();
+
 		// Don't allow to execute new actions while any dialog is visible.
 		// It prevents launching multiple instances of the same dialog.
 		// Exception: validatedialogsa11y needs to run when dialogs are open.

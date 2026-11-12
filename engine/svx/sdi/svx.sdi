@@ -9526,7 +9526,8 @@ SfxVoidItem SbaBrwInsert SID_SBA_BRW_INSERT
 
 
 SfxStringItem BasicShapes SID_DRAWTBX_CS_BASIC
-(SfxStringItem BasicShapes SID_DRAWTBX_CS_BASIC, SfxBoolItem CreateDirectly FN_PARAM_1)
+(SfxStringItem BasicShapes SID_DRAWTBX_CS_BASIC, SfxBoolItem CreateDirectly FN_PARAM_1, SfxInt32Item X FN_PARAM_2, SfxInt32Item Y FN_PARAM_3,
+ SfxInt32Item Width FN_PARAM_4, SfxInt32Item Height FN_PARAM_5)
 [
     AutoUpdate = TRUE,
     FastCall = FALSE,
@@ -9542,7 +9543,8 @@ SfxStringItem BasicShapes SID_DRAWTBX_CS_BASIC
 
 
 SfxStringItem SymbolShapes SID_DRAWTBX_CS_SYMBOL
-(SfxStringItem SymbolShapes SID_DRAWTBX_CS_SYMBOL)
+(SfxStringItem SymbolShapes SID_DRAWTBX_CS_SYMBOL, SfxInt32Item X FN_PARAM_2, SfxInt32Item Y FN_PARAM_3,
+ SfxInt32Item Width FN_PARAM_4, SfxInt32Item Height FN_PARAM_5)
 [
     AutoUpdate = TRUE,
     FastCall = FALSE,
@@ -9558,7 +9560,8 @@ SfxStringItem SymbolShapes SID_DRAWTBX_CS_SYMBOL
 
 
 SfxStringItem ArrowShapes SID_DRAWTBX_CS_ARROW
-(SfxStringItem ArrowShapes SID_DRAWTBX_CS_ARROW)
+(SfxStringItem ArrowShapes SID_DRAWTBX_CS_ARROW, SfxInt32Item X FN_PARAM_2, SfxInt32Item Y FN_PARAM_3,
+ SfxInt32Item Width FN_PARAM_4, SfxInt32Item Height FN_PARAM_5)
 [
     AutoUpdate = TRUE,
     FastCall = FALSE,
@@ -9574,7 +9577,8 @@ SfxStringItem ArrowShapes SID_DRAWTBX_CS_ARROW
 
 
 SfxStringItem FlowChartShapes SID_DRAWTBX_CS_FLOWCHART
-(SfxStringItem FlowChartShapes SID_DRAWTBX_CS_FLOWCHART)
+(SfxStringItem FlowChartShapes SID_DRAWTBX_CS_FLOWCHART, SfxInt32Item X FN_PARAM_2, SfxInt32Item Y FN_PARAM_3,
+ SfxInt32Item Width FN_PARAM_4, SfxInt32Item Height FN_PARAM_5)
 [
     AutoUpdate = TRUE,
     FastCall = FALSE,
@@ -9590,7 +9594,8 @@ SfxStringItem FlowChartShapes SID_DRAWTBX_CS_FLOWCHART
 
 
 SfxStringItem CalloutShapes SID_DRAWTBX_CS_CALLOUT
-(SfxStringItem CalloutShapes SID_DRAWTBX_CS_CALLOUT)
+(SfxStringItem CalloutShapes SID_DRAWTBX_CS_CALLOUT, SfxInt32Item X FN_PARAM_2, SfxInt32Item Y FN_PARAM_3,
+ SfxInt32Item Width FN_PARAM_4, SfxInt32Item Height FN_PARAM_5)
 [
     AutoUpdate = TRUE,
     FastCall = FALSE,
@@ -9606,7 +9611,8 @@ SfxStringItem CalloutShapes SID_DRAWTBX_CS_CALLOUT
 
 
 SfxStringItem StarShapes SID_DRAWTBX_CS_STAR
-(SfxStringItem StarShapes SID_DRAWTBX_CS_STAR)
+(SfxStringItem StarShapes SID_DRAWTBX_CS_STAR, SfxInt32Item X FN_PARAM_2, SfxInt32Item Y FN_PARAM_3,
+ SfxInt32Item Width FN_PARAM_4, SfxInt32Item Height FN_PARAM_5)
 [
     AutoUpdate = TRUE,
     FastCall = FALSE,

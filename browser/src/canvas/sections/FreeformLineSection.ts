@@ -26,11 +26,10 @@ interface SentFreeformLine {
 	The line is drawn here while it is being drawn, and after that until the engine's answer
 	brings the object. The section is there only for as long as one of these is the case.
 */
-class FreeformLineSection extends CanvasSectionObject {
+class FreeformLineSection extends WholePageSection {
 	processingOrder: number = app.CSections.FreeformLine.processingOrder;
 	drawingOrder: number = app.CSections.FreeformLine.drawingOrder;
 	zIndex: number = app.CSections.FreeformLine.zIndex;
-	documentObject: boolean = true;
 
 	/// The command of the client that chooses the tool, whose state is whether it is chosen.
 	public static readonly command: string = 'freeformline';
@@ -66,7 +65,6 @@ class FreeformLineSection extends CanvasSectionObject {
 
 	constructor() {
 		super(app.CSections.FreeformLine.name);
-		this.size = app.sectionContainer.getDocumentAnchorSection().size;
 	}
 
 	/// The section, where it is there.
@@ -178,36 +176,10 @@ class FreeformLineSection extends CanvasSectionObject {
 		this.leaveWhenDone();
 	}
 
-	/// The section covers the page wherever the document is shown.
-	isHit(point: number[]): boolean {
-		const page = this.containerObject.getDocumentAnchorSection();
-		return (
-			point[0] >= page.myTopLeft[0] &&
-			point[0] <= page.myTopLeft[0] + page.size[0] &&
-			point[1] >= page.myTopLeft[1] &&
-			point[1] <= page.myTopLeft[1] + page.size[1]
-		);
-	}
-
-	// The section is added while the document is on screen, so it places itself right away.
-	onInitialize(): void {
-		this.onNewDocumentTopLeft();
-	}
-
 	onNewDocumentTopLeft(): void {
-		Util.ensureValue(app.activeDocument);
-		const viewed = app.activeDocument.activeLayout.viewedRectangle;
-		this.setPosition(viewed.pX1, viewed.pY1);
+		super.onNewDocumentTopLeft();
 
 		if (this.stroke && this.lastAt) this.drawTo(this.lastAt);
-	}
-
-	/// The place on the page, in twips, of a point on the section.
-	private inTheDocument(point: cool.SimplePoint): cool.Point {
-		const inDocument = point.clone();
-		inDocument.pX += this.position[0];
-		inDocument.pY += this.position[1];
-		return new cool.Point(inDocument.x, inDocument.y);
 	}
 
 	/// Takes the line on to that point of the section.

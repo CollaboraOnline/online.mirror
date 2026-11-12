@@ -13,7 +13,7 @@
  * Toolbar handler
  */
 
-/* global app $ window brandProductName DocUtil GraphicSelection _ */
+/* global app $ window brandProductName DocUtil GraphicSelection _ Interaction */
 
 window.L.Map.include({
 
@@ -319,6 +319,9 @@ window.L.Map.include({
 	},
 
 	sendUnoCommand: function (command, json, force) {
+		// a command ends a mode one was put into, as creating a shape by a drag
+		Interaction.leaveMode();
+
 		if (command.indexOf('.uno:') < 0 && command.indexOf('vnd.sun.star.script') < 0)
 			console.error('Trying to send uno command without prefix: "' + command + '"');
 

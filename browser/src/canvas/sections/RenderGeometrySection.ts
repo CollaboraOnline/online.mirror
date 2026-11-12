@@ -1099,7 +1099,7 @@ class RenderGeometrySection extends CanvasSectionObject {
 		// while a selection frame is drawn it is what the pointer shows, not the object under it,
 		// and while the freeform line tool is chosen the pointer draws and marks no object
 		if (RenderGeometrySection.frame) this.strokeTheFrame(xDiff, yDiff);
-		else if (!FreeformLineSection.isChosen())
+		else if (!FreeformLineSection.isChosen() && !Interaction.modeOn())
 			this.outlineHitUnderMouse(data, xDiff, yDiff);
 
 		// The rectangles and the name of the hit are feedback about the geometry the client holds,

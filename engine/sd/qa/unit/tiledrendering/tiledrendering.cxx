@@ -8666,6 +8666,46 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testInsertShapeIntoSlide)
     CPPUNIT_ASSERT_EQUAL(nObjectCount, pSlide->GetObjCount());
 }
 
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testCreateShapeInRectangle)
+{
+    // a shape dragged out in the client is made in its rectangle, also partly beside the slide
+    SdXImpressDocument* pXImpressDocument = createDoc("dummy.odp");
+    SdDrawDocument* pDocument = pXImpressDocument->GetDoc();
+    SdPage* pSlide = pDocument->GetSdPage(0, PageKind::Standard);
+    const size_t nObjectCount = pSlide->GetObjCount();
+
+    cpo::uno::Sequence<css::beans::PropertyValue> aArgs(comphelper::InitPropertySequence({
+        { u"X"_ustr, cpo::uno::Any(sal_Int32(-500)) },
+        { u"Y"_ustr, cpo::uno::Any(sal_Int32(1500)) },
+        { u"Width"_ustr, cpo::uno::Any(sal_Int32(4000)) },
+        { u"Height"_ustr, cpo::uno::Any(sal_Int32(3000)) },
+    }));
+    dispatchCommand(mxComponent, u".uno:BasicShapes.rectangle"_ustr, aArgs);
+
+    CPPUNIT_ASSERT_EQUAL(nObjectCount + 1, pSlide->GetObjCount());
+    SdrObject* pShape = pSlide->GetObj(pSlide->GetObjCount() - 1);
+    CPPUNIT_ASSERT_EQUAL(SdrObjKind::CustomShape, pShape->GetObjIdentifier());
+    const ::tools::Rectangle aRectangle = pShape->GetLogicRect();
+    CPPUNIT_ASSERT_EQUAL(o3tl::convert(-500, o3tl::Length::twip, o3tl::Length::mm100),
+                         static_cast<sal_Int64>(aRectangle.Left()));
+    CPPUNIT_ASSERT_EQUAL(o3tl::convert(1500, o3tl::Length::twip, o3tl::Length::mm100),
+                         static_cast<sal_Int64>(aRectangle.Top()));
+    CPPUNIT_ASSERT_EQUAL(o3tl::convert(4000, o3tl::Length::twip, o3tl::Length::mm100),
+                         static_cast<sal_Int64>(aRectangle.GetWidth()));
+    CPPUNIT_ASSERT_EQUAL(o3tl::convert(3000, o3tl::Length::twip, o3tl::Length::mm100),
+                         static_cast<sal_Int64>(aRectangle.GetHeight()));
+
+    // the new shape is the selection
+    sd::ViewShell* pViewShell = pXImpressDocument->GetDocShell()->GetViewShell();
+    const SdrMarkList& rMarkList = pViewShell->GetView()->GetMarkedObjectList();
+    CPPUNIT_ASSERT_EQUAL(size_t(1), rMarkList.GetMarkCount());
+    CPPUNIT_ASSERT_EQUAL(pShape, rMarkList.GetMark(0)->GetMarkedSdrObj());
+
+    // one undo step takes it away
+    dispatchCommand(mxComponent, u".uno:Undo"_ustr, {});
+    CPPUNIT_ASSERT_EQUAL(nObjectCount, pSlide->GetObjCount());
+}
+
 CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testMovePreviewShape)
 {
     SdXImpressDocument* pXImpressDocument = createDoc("dummy.odp");

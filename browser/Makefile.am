@@ -449,6 +449,7 @@ COOL_JS_LST =\
 	src/app/InteractionContext.ts \
 	src/app/ClassicInteraction.ts \
 	src/app/TableContext.ts \
+	src/app/CreateContext.ts \
 	src/app/HandleTravel.ts \
 	src/app/GraphicSelectionMiddleware.ts \
 	src/app/TextSelectionMiddleware.ts \
@@ -654,7 +655,9 @@ COOL_JS_LST =\
 	src/canvas/sections/CellRangeHandleSection.ts \
 	src/canvas/sections/OverviewPreviewsSection.ts \
 	src/canvas/sections/PreviewEditSection.ts \
+	src/canvas/sections/WholePageSection.ts \
 	src/canvas/sections/FreeformLineSection.ts \
+	src/canvas/sections/InteractionModeSection.ts \
 	src/canvas/sections/TableResizeMarkerSection.ts \
 	src/canvas/sections/TableSelectMarkerSection.ts \
 	src/canvas/sections/FocusCellSection.ts \
