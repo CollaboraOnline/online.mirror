@@ -51,6 +51,9 @@ public:
     virtual void Deactivate() override;         ///< deactivates the function
 
     void    SetInEditMode(const MouseEvent& rMEvt, bool bQuickDrag);
+    /// Takes that text, inserted just now for this function, as the one it made itself, and
+    /// edits it: leaving it goes back to the selection, and a text left empty goes again.
+    void    EditCreatedText(SdrTextObj& rText);
     void    DeleteDefaultText();
     SdrTextObj* GetTextObj() { return mxTextObj.get().get(); }
 

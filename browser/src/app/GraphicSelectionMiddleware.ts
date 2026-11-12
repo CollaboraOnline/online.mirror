@@ -904,8 +904,17 @@ class GraphicSelection {
 		object pressed without marking anything new, so no report says so. The engine works on that
 		object already, and is not told again, which would end the edit.
 	*/
+	/// The object this view edited the text of when the objects last changed, if any.
+	private static lastEdited: number | undefined = undefined;
+
 	private static followTheTextEdit(): void {
 		const edited = this.objectUnderTextEdit();
+
+		// a text edit that starts ends a mode one was put into, as creating an object by a drag
+		if (edited !== undefined && edited !== this.lastEdited)
+			Interaction.leaveMode();
+		this.lastEdited = edited;
+
 		if (!edited || this.selectedObjectIDs.includes(edited)) return;
 		if (!RenderGeometrySection.objectOf(edited)) return;
 

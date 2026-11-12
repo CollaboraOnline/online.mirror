@@ -131,11 +131,25 @@ and the shape is dragged out where it is to go, as in the office:
 | Alt | The shape is dragged from its middle. |
 | Ctrl | Turns the snap over: with the grid on, it snaps to the edges of other objects instead. |
 | Let go | The shape is made where it was dragged and selected at once, with its handles, as one undo step, also before the engine has answered on a slow connection; a callout goes into its text. The mode is over. |
-| Escape, a click without a drag, a command, a press elsewhere, another slide | End the mode without a shape. |
+| Escape, a click without a drag, a command, a press elsewhere, another slide, a text edit that starts | End the mode without a shape. |
 
 Shift, Alt and Ctrl take effect at once, also while the mouse stands still. Positions and sizes are
 in the unit of the sidebar's Position and Size. The Shapes deck of the sidebar still adds the shape
 in the middle of the slide. Snap to grid is on by default in Impress (View, Snap to Grid).
+
+### Creating a text box
+
+Insert, Text Box - in the notebookbar, the compact menu or the compact toolbar - puts one into the
+same mode for text, with the office's text pointer, a cross with a text cursor beside it:
+
+| What | What happens |
+|---|---|
+| Drag | A text box of the dragged width, which grows downwards with its text. |
+| Click on empty space | A text starts at that point and grows to the right while typing, without wrapping. |
+| Click on an object that holds text | The mode ends and the text of that object is edited, with the cursor where it was clicked. |
+
+Either new text is in text edit at once. A text left empty goes again when its edit ends, and the
+view is back in the selection; the mode does not stay on for another text.
 
 
 ## 2. Changing objects
@@ -787,9 +801,10 @@ draws them.
 
 What is still missing, or only partly there:
 
-- Creating by a drag works for the shapes grid. Lines, curves, connectors, polygons, our own
-  callouts, text boxes and tables are still added in the middle of the slide by default; they
-  are to be created by drags of their own. The Freeform Line tool draws by a drag already.
+- Creating by a drag works for the shapes grid and for text boxes. Lines, curves, connectors,
+  polygons, our own callouts and vertical text are still added in the middle of the slide by
+  default; they are to be created by drags of their own. The Freeform Line tool draws by a drag
+  already. Tables keep their own insert dialog.
 
 - 3D objects and 3D charts: they are shown as one picture. Selecting single objects inside a
   scene, and turning a scene in 3D as the office does, are planned.

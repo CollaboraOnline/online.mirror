@@ -377,7 +377,10 @@ class Dispatcher {
 		};
 
 		this.actionsMap['inserttextbox'] = () => {
-			app.map.sendUnoCommand('.uno:Text?CreateDirectly:bool=true');
+			// in a view that draws from objects the text box is dragged out or clicked where it goes
+			if (ClassicCreateContext.canCreate(ClassicCreateContext.text))
+				ClassicCreateContext.start(ClassicCreateContext.text);
+			else app.map.sendUnoCommand('.uno:Text?CreateDirectly:bool=true');
 		};
 		this.actionsMap['insertannotation'] = () => {
 			app.map.insertComment();

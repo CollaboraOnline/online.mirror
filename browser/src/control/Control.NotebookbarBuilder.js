@@ -13,7 +13,7 @@
  * window.L.Control.NotebookbarBuilder - builder of native HTML widgets for tabbed menu
  */
 
-/* global $ _ JSDialog app GraphicSelection Menubar */
+/* global $ _ JSDialog app GraphicSelection Menubar ClassicCreateContext */
 
 window.L.Control.NotebookbarBuilder = window.L.Control.JSDialogBuilder.extend({
 
@@ -545,6 +545,9 @@ window.L.Control.NotebookbarBuilder = window.L.Control.JSDialogBuilder.extend({
 			if (data.command === '.uno:VerticalText')
 				builder.map.sendUnoCommand(data.command,
 					{ KeyModifier: { type: 'short', value: app.UNOModifier.CTRL } });
+			// in a view that draws from objects the text box is dragged out or clicked where it goes
+			else if (ClassicCreateContext.canCreate(ClassicCreateContext.text))
+				ClassicCreateContext.start(ClassicCreateContext.text);
 			else
 				builder.map.sendUnoCommand(data.command + '?CreateDirectly:bool=true');
 		});

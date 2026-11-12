@@ -8809,6 +8809,43 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testDeleteReportsWhetherItDeleted)
     CPPUNIT_ASSERT(sal_Int16(css::frame::DispatchResultState::SUCCESS) != xNothing->mnState);
 }
 
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testCreateTextInRectangle)
+{
+    // a text dragged out is made in its rectangle with a fixed width, a text clicked grows in
+    // width too, and either is edited at once, as with the office's text tool
+    SdXImpressDocument* pXImpressDocument = createDoc("dummy.odp");
+    SdPage* pSlide = pXImpressDocument->GetDoc()->GetSdPage(0, PageKind::Standard);
+    sd::ViewShell* pViewShell = pXImpressDocument->GetDocShell()->GetViewShell();
+
+    const size_t nObjectCount = pSlide->GetObjCount();
+    // an empty text goes again when the next one is made, so each is told by where it stands
+    // a click gives the text a small room at the point it starts from
+    const auto textAt = [&](sal_Int32 nX, bool bGrow) {
+        cpo::uno::Sequence<css::beans::PropertyValue> aArgs(comphelper::InitPropertySequence({
+            { u"X"_ustr, cpo::uno::Any(nX) },
+            { u"Y"_ustr, cpo::uno::Any(sal_Int32(1500)) },
+            { u"Width"_ustr, cpo::uno::Any(sal_Int32(bGrow ? 90 : 4000)) },
+            { u"Height"_ustr, cpo::uno::Any(sal_Int32(600)) },
+            { u"Grow"_ustr, cpo::uno::Any(bGrow) },
+        }));
+        dispatchCommand(mxComponent, u".uno:Text"_ustr, aArgs);
+        CPPUNIT_ASSERT(pViewShell->GetView()->IsTextEdit());
+        SdrObject* pText = pSlide->GetObj(pSlide->GetObjCount() - 1);
+        CPPUNIT_ASSERT_EQUAL(o3tl::convert(nX, o3tl::Length::twip, o3tl::Length::mm100),
+                             static_cast<sal_Int64>(pText->GetLogicRect().Left()));
+        CPPUNIT_ASSERT_EQUAL(o3tl::convert(1500, o3tl::Length::twip, o3tl::Length::mm100),
+                             static_cast<sal_Int64>(pText->GetLogicRect().Top()));
+        return pText->GetMergedItem(SDRATTR_TEXT_AUTOGROWWIDTH).GetValue();
+    };
+
+    // dragged: the width stays as dragged
+    CPPUNIT_ASSERT(!textAt(1000, false));
+    // clicked: it grows with the text; the text tool did not stay on for it, so this is a new
+    // text, and the first, left empty, went again
+    CPPUNIT_ASSERT(textAt(3000, true));
+    CPPUNIT_ASSERT_EQUAL(nObjectCount + 1, pSlide->GetObjCount());
+}
+
 CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testMovePreviewShape)
 {
     SdXImpressDocument* pXImpressDocument = createDoc("dummy.odp");

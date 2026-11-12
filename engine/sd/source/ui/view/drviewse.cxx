@@ -41,6 +41,9 @@
 #include <svx/svdopath.hxx>
 #include <svx/svdundo.hxx>
 #include <svx/svdorect.hxx>
+#include <svx/svdotext.hxx>
+#include <svx/sdtagitm.hxx>
+#include <svx/sdtaitm.hxx>
 #include <svl/itemset.hxx>
 #include <svx/svdoashp.hxx>
 #include <svl/eitem.hxx>
@@ -192,8 +195,11 @@ static void ImpAddPrintableCharactersToTextEdit(SfxRequest const & rReq, ::sd::V
 void DrawViewShell::FuPermanent(SfxRequest& rReq)
 {
     sal_uInt16 nSId = rReq.GetSlot();
+    // a text the client dragged out or clicked is a new one, never one for the text tool on
+    const bool bTextInRectangle = (nSId == SID_ATTR_CHAR || nSId == SID_ATTR_CHAR_VERTICAL)
+                                  && lcl_getRequestedRectangle(rReq).has_value();
 
-    if( HasCurrentFunction() &&
+    if( HasCurrentFunction() && !bTextInRectangle &&
         ( nSId == SID_TEXTEDIT || nSId == SID_ATTR_CHAR || nSId == SID_TEXT_FITTOSIZE ||
           nSId == SID_ATTR_CHAR_VERTICAL || nSId == SID_TEXT_FITTOSIZE_VERTICAL ) )
     {
@@ -239,9 +245,10 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
             }
         }
 
-        if ( nSId != SID_TEXTEDIT && nSId != SID_ATTR_CHAR && nSId != SID_TEXT_FITTOSIZE &&
-             nSId != SID_ATTR_CHAR_VERTICAL && nSId != SID_TEXT_FITTOSIZE_VERTICAL &&
-             nSId != SID_FORMATPAINTBRUSH &&
+        if ( (bTextInRectangle ||
+              (nSId != SID_TEXTEDIT && nSId != SID_ATTR_CHAR && nSId != SID_TEXT_FITTOSIZE &&
+               nSId != SID_ATTR_CHAR_VERTICAL && nSId != SID_TEXT_FITTOSIZE_VERTICAL &&
+               nSId != SID_FORMATPAINTBRUSH)) &&
              mpDrawView->IsTextEdit() )
         {
             mpDrawView->SdrEndTextEdit();
@@ -251,11 +258,11 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
         {
             nOldSId = GetCurrentFunction()->GetSlotID();
 
-            if (nOldSId == nSId ||
+            if (!bTextInRectangle && (nOldSId == nSId ||
                 ((nOldSId == SID_TEXTEDIT || nOldSId == SID_ATTR_CHAR || nOldSId == SID_TEXT_FITTOSIZE ||
                 nOldSId == SID_ATTR_CHAR_VERTICAL || nOldSId == SID_TEXT_FITTOSIZE_VERTICAL) &&
                 (nSId == SID_TEXTEDIT || nSId == SID_ATTR_CHAR || nSId == SID_TEXT_FITTOSIZE ||
-                nSId == SID_ATTR_CHAR_VERTICAL || nSId == SID_TEXT_FITTOSIZE_VERTICAL )))
+                nSId == SID_ATTR_CHAR_VERTICAL || nSId == SID_TEXT_FITTOSIZE_VERTICAL ))))
             {
                 bPermanent = true;
             }
@@ -275,6 +282,8 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
     bool bRectangle = false;
     // where the shape goes when the request says, instead of the middle of the slide
     std::optional<::tools::Rectangle> oRequestedRectangle;
+    // whether a text made at once grows in width too
+    bool bTextGrows = false;
 
     switch ( nSId )
     {
@@ -302,6 +311,16 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
             const SfxItemSet* pArgs = rReq.GetArgs();
             if (pArgs && pArgs->HasItem(FN_PARAM_1))
                 bCreateDirectly = static_cast<const SfxBoolItem&>(pArgs->Get(FN_PARAM_1)).GetValue();
+
+            // a text dragged out in the client comes with its rectangle and is made at once; a
+            // click gives a text that grows in width as well, as the office's text tool makes it
+            oRequestedRectangle = lcl_getRequestedRectangle(rReq);
+            if (oRequestedRectangle)
+            {
+                bCreateDirectly = true;
+                if (const SfxBoolItem* pGrow = pArgs->GetItem<SfxBoolItem>(FN_PARAM_6, false))
+                    bTextGrows = pGrow->GetValue();
+            }
         }
         break;
 
@@ -763,6 +782,18 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
     if(!pObj)
         return;
 
+    if (bTextGrows)
+    {
+        // the text starts where it was clicked and grows to the right, as the office's text tool
+        // makes it
+        if (SdrTextObj* pText = DynCastSdrTextObj(pObj.get()))
+        {
+            pText->SetMergedItem(makeSdrTextAutoGrowWidthItem(true));
+            pText->SetMergedItem(SdrTextHorzAdjustItem(SDRTEXTHORZADJUST_LEFT));
+            pText->AdjustTextFrameWidthAndHeight();
+        }
+    }
+
     auto pObjTmp = pObj.get();
     // insert into page
     GetView()->InsertObjectAtView(pObj.get(), *pPageView);
@@ -778,6 +809,21 @@ void DrawViewShell::FuPermanent(SfxRequest& rReq)
         case SID_TEXT_FITTOSIZE:
         case SID_TEXT_FITTOSIZE_VERTICAL:
         {
+            // a text the client dragged out or clicked is edited by the text function that made
+            // it, which goes back to the selection when the edit ends and removes a text left
+            // empty, as the office's text tool does
+            if (bTextInRectangle)
+            {
+                FuText* pFuText = dynamic_cast<FuText*>(GetCurrentFunction().get());
+                SdrTextObj* pText = DynCastSdrTextObj(pObjTmp);
+                if (pFuText && pText)
+                {
+                    mpDrawView->MarkObj(pText, pPageView);
+                    pFuText->EditCreatedText(*pText);
+                    return;
+                }
+            }
+
             // Make FuText the current function.
             SfxUInt16Item aItem (SID_TEXTEDIT, 1);
             GetViewFrame()->GetDispatcher()->

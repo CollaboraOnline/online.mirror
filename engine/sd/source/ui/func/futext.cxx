@@ -1018,6 +1018,12 @@ void FuText::Deactivate()
 /**
  * Sets the object into the edit mode.
  */
+void FuText::EditCreatedText(SdrTextObj& rText)
+{
+    mxTextObj = &rText;
+    SetInEditMode(MouseEvent(), false);
+}
+
 void FuText::SetInEditMode(const MouseEvent& rMEvt, bool bQuickDrag)
 {
     SdrPageView* pPV = mpView->GetSdrPageView();

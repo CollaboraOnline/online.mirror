@@ -2817,7 +2817,11 @@ class Menubar extends window.L.Control {
 			// quick-find, it opens the Find & Replace dialog.
 			app.dispatcher.dispatch('home-search');
 		} else if (id === 'inserttextbox') {
-			this._map.sendUnoCommand('.uno:Text?CreateDirectly:bool=true');
+			// in a view that draws from objects the text box is dragged out or clicked where it goes
+			if (ClassicCreateContext.canCreate(ClassicCreateContext.text))
+				ClassicCreateContext.start(ClassicCreateContext.text);
+			else
+				this._map.sendUnoCommand('.uno:Text?CreateDirectly:bool=true');
 		} else if (id === 'pagesetup') {
 			this._map.sendUnoCommand('.uno:KitSidebarWriterPage');
 			this._map.fire('showwizardsidebar');
