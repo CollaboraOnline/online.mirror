@@ -851,7 +851,13 @@ SdrObject* DrawViewShell::MakeObjectInCreation(sal_uInt16 nSlotId, const OUStrin
     mxObjectInCreation.clear();
     mnObjectInCreationSlot = nSlotId;
     maObjectInCreationType = rShapeType;
+    mxObjectInCreation = MakeDefaultShape(nSlotId, rShapeType);
+    return mxObjectInCreation.get();
+}
 
+rtl::Reference<SdrObject> DrawViewShell::MakeDefaultShape(sal_uInt16 nSlotId,
+                                                          const OUString& rShapeType)
+{
     // the custom shape tool makes it as it makes a shape created directly, from the kind of
     // object the view is set to create, which is put back after
     const SdrObjKind eKind(mpDrawView->GetCurrentObjIdentifier());
@@ -863,11 +869,11 @@ SdrObject* DrawViewShell::MakeObjectInCreation(sal_uInt16 nSlotId, const OUStrin
     SfxRequest aRequest(nSlotId, SfxCallMode::SYNCHRON, aArguments);
     rtl::Reference<FuPoor> xFunction = FuConstructCustomShape::Create(
         *this, GetActiveWindow(), mpDrawView.get(), *GetDoc(), aRequest, false);
-    mxObjectInCreation = xFunction->CreateDefaultObject(
+    rtl::Reference<SdrObject> xShape = xFunction->CreateDefaultObject(
         nSlotId, ::tools::Rectangle(Point(), GetDefaultObjectSize()));
 
     mpDrawView->SetCurrentObj(eKind, eInventor);
-    return mxObjectInCreation.get();
+    return xShape;
 }
 
 void DrawViewShell::FuDeleteSelectedObjects()

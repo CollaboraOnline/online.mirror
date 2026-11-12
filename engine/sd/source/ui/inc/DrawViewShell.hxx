@@ -218,10 +218,11 @@ public:
         and a request to create that shape in a rectangle takes it.
      */
     SdrObject* MakeObjectInCreation(sal_uInt16 nSlotId, const OUString& rShapeType);
+    /// Makes the default object of a custom shape, of that group's slot and that type, in the
+    /// default size, as the custom shape tool makes it, without holding it.
+    rtl::Reference<SdrObject> MakeDefaultShape(sal_uInt16 nSlotId, const OUString& rShapeType);
     /// The object in creation this view holds, if any.
     SdrObject* GetObjectInCreation() const { return mxObjectInCreation.get(); }
-    /// The type of the custom shape in creation, as rectangle.
-    const OUString& GetObjectInCreationType() const { return maObjectInCreationType; }
     void            FuSupport(SfxRequest& rReq);
     void            FuDeleteSelectedObjects();
     void            FuSupportRotate(SfxRequest const & rReq);

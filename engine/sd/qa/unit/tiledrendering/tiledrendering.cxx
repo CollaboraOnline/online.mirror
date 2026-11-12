@@ -8742,6 +8742,19 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testShapeGhost)
     SdrObject* pInCreation = pShell->GetObjectInCreation();
     CPPUNIT_ASSERT(pInCreation);
 
+    // a shape only described, for the client's library of looks, leaves the one held alone
+    tools::JsonWriter aDescribed;
+    pXImpressDocument->getCommandValues(
+        aDescribed, ".uno:ShapeGhost?Shape=BasicShapes.ellipse&Hold=false");
+    std::stringstream aDescribedStream((std::string(aDescribed.finishAndGetAsOString())));
+    boost::property_tree::ptree aDescribedTree;
+    boost::property_tree::read_json(aDescribedStream, aDescribedTree);
+    const boost::property_tree::ptree& rDescribed = aDescribedTree.get_child("commandValues");
+    CPPUNIT_ASSERT(!rDescribed.get_child("objects").front().second.get_child("primitives").empty());
+    CPPUNIT_ASSERT(!rDescribed.get_child_optional("id"));
+    CPPUNIT_ASSERT_EQUAL(pInCreation, pShell->GetObjectInCreation());
+    CPPUNIT_ASSERT_EQUAL(nObjectCount, pSlide->GetObjCount());
+
     cpo::uno::Sequence<css::beans::PropertyValue> aArgs(comphelper::InitPropertySequence({
         { u"X"_ustr, cpo::uno::Any(sal_Int32(1000)) },
         { u"Y"_ustr, cpo::uno::Any(sal_Int32(1500)) },

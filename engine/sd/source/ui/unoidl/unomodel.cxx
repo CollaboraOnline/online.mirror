@@ -4143,11 +4143,13 @@ OUString lcl_ReadTemplateThumbnailDataUrl(const OUString& rUrl)
 /*
     The answer to .uno:ShapeGhost?Shape=BasicShapes.rectangle and the like: the view makes the
     default object of that shape and holds it as its object in creation, which is inserted
-    nowhere, and the answer carries its size and how it is drawn, for the client to show it while
-    the shape is dragged out. A shape of no known group gets an answer without an object.
+    nowhere, and the answer carries its size, its id and how it is drawn, for the client to show
+    it while the shape is dragged out. With Hold=false the shape is only described, for a client
+    that keeps the looks of shapes ahead of their use: nothing is held, and no id goes along. A
+    shape of no known group gets an answer without an object.
 */
 void SdXImpressDocument::writeShapeGhost(::tools::JsonWriter& rJsonWriter,
-                                         std::u16string_view aShape)
+                                         std::u16string_view aShape, bool bHold)
 {
     static constexpr std::pair<std::u16string_view, sal_uInt16> aGroups[] = {
         { u"BasicShapes", SID_DRAWTBX_CS_BASIC },
@@ -4175,19 +4177,23 @@ void SdXImpressDocument::writeShapeGhost(::tools::JsonWriter& rJsonWriter,
     if (pGroup == std::end(aGroups))
         return;
 
+    const OUString aType(aShape.substr(nDot + 1));
+    rtl::Reference<SdrObject> xDescribed;
+    if (!bHold)
+        xDescribed = pShell->MakeDefaultShape(pGroup->second, aType);
     SdrObject* pObject
-        = pShell->MakeObjectInCreation(pGroup->second, OUString(aShape.substr(nDot + 1)));
+        = bHold ? pShell->MakeObjectInCreation(pGroup->second, aType) : xDescribed.get();
     SdPage* pPage = pShell->GetActualPage();
     if (!pObject || !pPage)
         return;
 
     // the object keeps the id it was made with when it is inserted, so the client can take the
     // shape as created before the engine reports it
-    rJsonWriter.put("id", svx::vector::idOf(*pObject));
+    if (bHold)
+        rJsonWriter.put("id", svx::vector::idOf(*pObject));
 
     // some shapes are always as wide as high, as the custom shape tool makes them
-    rJsonWriter.put("asWideAsHigh", SdrObjCustomShape::doConstructOrthogonal(
-                                        pShell->GetObjectInCreationType()));
+    rJsonWriter.put("asWideAsHigh", SdrObjCustomShape::doConstructOrthogonal(aType));
 
     // the client maps it from its own box onto the dragged one, so the box goes along in twips;
     // a shape made as wide as high does not start at the corner of the page
@@ -4239,7 +4245,7 @@ void SdXImpressDocument::getCommandValues(::tools::JsonWriter& rJsonWriter,
 
     if (o3tl::starts_with(rCommand, ".uno:ShapeGhost"))
     {
-        writeShapeGhost(rJsonWriter, aMap[u"Shape"_ustr]);
+        writeShapeGhost(rJsonWriter, aMap[u"Shape"_ustr], aMap[u"Hold"_ustr] != u"false");
         return;
     }
 

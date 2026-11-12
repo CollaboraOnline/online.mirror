@@ -14,7 +14,7 @@
  * Collabora Online toolbar
  */
 
-/* global app $ _ _UNO JSDialog URLPopUpSection HyperlinkWizard cool Util ClassicCreateContext */
+/* global app $ _ _UNO JSDialog URLPopUpSection HyperlinkWizard cool Util ClassicCreateContext ClassicShapeCreateContext */
 /*eslint indent: [error, "tab", { "outerIIFEBody": 0 }]*/
 
 (function(global) {
@@ -708,6 +708,16 @@ function focusFirstShapeOnOpen(grid) {
 	});
 }
 
+// A shape the mouse rests on in the grid is looked at ahead, so dragging it out shows it at once.
+var lookAheadTimer = null;
+function lookAheadAtShape(e) {
+	var name = e.target && e.target.dataset ? e.target.dataset.uno : null;
+	clearTimeout(lookAheadTimer);
+	if (!name)
+		return;
+	lookAheadTimer = setTimeout(function() { ClassicShapeCreateContext.lookAhead(name); }, 150);
+}
+
 function getShapesPopupElements(closeCallback) {
 	lastClosePopupCallback = closeCallback;
 
@@ -715,6 +725,8 @@ function getShapesPopupElements(closeCallback) {
 	grid.className = 'insertshape-grid';
 	grid.onclick = onShapeClickFunction;
 	grid.onkeydown = onShapeKeyDownFunction;
+	grid.addEventListener('mouseover', lookAheadAtShape);
+	grid.addEventListener('focusin', lookAheadAtShape);
 
 	const container = document.createElement('div');
 	container.appendChild(grid);

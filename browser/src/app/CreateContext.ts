@@ -531,12 +531,21 @@ abstract class ClassicCreateContext implements InteractionMode {
 	}
 }
 
+/// How a shape looks in its default size, as the engine made it: the box it was made in, in
+/// twips, what it draws, and whether it is as wide as high by itself.
+interface ShapeLook {
+	box: cool.Range2D;
+	primitives: cool.Primitive[];
+	asWideAsHigh: boolean;
+}
+
 /*
 	Creating a shape of the shapes grid by a drag. The engine is asked at once how the shape looks,
 	and holds it meanwhile as its object in creation; the drag shows it, and the frame until the
-	answer is there. Letting go takes the shape as created at once, under the id the engine gave
-	it, and selects it; the engine's report replaces it. Some shapes are as wide as high by
-	themselves, and Shift lets those go free, as in the office. A click makes no shape.
+	answer is there, unless the library of looks knows it from before or from a look ahead.
+	Letting go takes the shape as created at once, under the id the engine gave it, and selects
+	it; the engine's report replaces it. Some shapes are as wide as high by themselves, and Shift
+	lets those go free, as in the office. A click makes no shape.
 */
 class ClassicShapeCreateContext extends ClassicCreateContext {
 	/// The groups of the shapes grid that make a shape by a drag.
@@ -557,19 +566,86 @@ class ClassicShapeCreateContext extends ClassicCreateContext {
 		);
 	}
 
+	/// The looks of the shapes known so far in this session, by command; a shape looks the same
+	/// whenever it is made, so the drag shows it at once where it is known.
+	private static library: Map<string, ShapeLook> = new Map();
+
+	/// The shapes whose look was asked for ahead, so each is asked for once.
+	private static askedAhead: Set<string> = new Set();
+
+	/// Forgets every look the library holds, so each shape is asked for again.
+	public static forgetTheLooks(): void {
+		ClassicShapeCreateContext.library.clear();
+		ClassicShapeCreateContext.askedAhead.clear();
+	}
+
 	/// Whether the answers about shapes are followed, which they are once.
 	private static followingTheGhosts: boolean = false;
 
-	/// Asks the engine how the shape looks.
+	/// Takes every answer about a shape into the library, and the one about the shape of the mode
+	/// that is on into that mode.
+	private static followTheGhosts(): void {
+		if (ClassicShapeCreateContext.followingTheGhosts) return;
+		ClassicShapeCreateContext.followingTheGhosts = true;
+		app.map.on('commandvalues', (event: any) => {
+			if (event.commandName !== '.uno:ShapeGhost') return;
+			const values = event.commandValues;
+			const look = ClassicShapeCreateContext.lookOf(values);
+			if (look) ClassicShapeCreateContext.library.set(values.shape, look);
+			const mode = Interaction.modeOn();
+			if (mode instanceof ClassicShapeCreateContext) mode.takeTheGhost(values);
+		});
+	}
+
+	/// The look an answer about a shape tells, where it tells one.
+	private static lookOf(values: any): ShapeLook | null {
+		const entry: cool.SlideObject | undefined = Array.isArray(values?.objects)
+			? values.objects[0]
+			: undefined;
+		const primitives = entry?.primitives;
+		if (!(values?.width > 0 && values?.height > 0 && Array.isArray(primitives)))
+			return null;
+		const x = values.x ?? 0;
+		const y = values.y ?? 0;
+		return {
+			box: new cool.Range2D(x, y, x + values.width, y + values.height),
+			primitives: primitives,
+			asWideAsHigh: values.asWideAsHigh === true,
+		};
+	}
+
+	/*
+		Asks the engine how a shape looks, ahead of its use, where the library does not know it
+		yet: when the mouse rests on it in the shapes grid. The engine only describes it then and
+		holds nothing.
+	*/
+	public static lookAhead(shape: string): void {
+		if (
+			!ClassicShapeCreateContext.makes(shape) ||
+			!RenderGeometrySection.answersPointer() ||
+			ClassicShapeCreateContext.library.has(shape) ||
+			ClassicShapeCreateContext.askedAhead.has(shape)
+		)
+			return;
+		ClassicShapeCreateContext.followTheGhosts();
+		ClassicShapeCreateContext.askedAhead.add(shape);
+		app.socket.sendMessage(
+			'commandvalues command=.uno:ShapeGhost?Shape=' +
+				encodeURIComponent(shape) +
+				'&Hold=false',
+		);
+	}
+
+	/*
+		Shows the shape at once where the library knows how it looks, and asks the engine for the
+		shape, which it holds for the drag: the answer brings the id the shape is created under.
+	*/
 	public started(): void {
-		if (!ClassicShapeCreateContext.followingTheGhosts) {
-			ClassicShapeCreateContext.followingTheGhosts = true;
-			app.map.on('commandvalues', (event: any) => {
-				if (event.commandName !== '.uno:ShapeGhost') return;
-				const mode = Interaction.modeOn();
-				if (mode instanceof ClassicShapeCreateContext)
-					mode.takeTheGhost(event.commandValues);
-			});
+		ClassicShapeCreateContext.followTheGhosts();
+		const look = ClassicShapeCreateContext.library.get(this.shape);
+		if (look) {
+			this.asWideAsHigh = look.asWideAsHigh;
+			this.ghost = { box: look.box, primitives: look.primitives };
 		}
 		app.socket.sendMessage(
 			'commandvalues command=.uno:ShapeGhost?Shape=' +
@@ -583,12 +659,13 @@ class ClassicShapeCreateContext extends ClassicCreateContext {
 	}
 
 	/// How the shape looks in its default size, as the engine made it, and the size it was
-	/// made in, in twips; null until the engine told.
+	/// made in, in twips; null until the engine or the library told.
 	private ghost: {
 		box: cool.Range2D;
 		primitives: cool.Primitive[];
-		// the entry the shape will have once inserted, under the id it keeps
-		entry: cool.SlideObject;
+		// the entry the shape will have once inserted, under the id it keeps; only the answer
+		// for the shape the engine holds for this drag brings it
+		entry?: cool.SlideObject;
 	} | null = null;
 
 	/// Whether the shape is always as wide as high, as the engine makes some.
@@ -601,22 +678,15 @@ class ClassicShapeCreateContext extends ClassicCreateContext {
 	/// Takes the engine's answer about the shape, where it is about this one.
 	private takeTheGhost(values: any): void {
 		if (!values || values.shape !== this.shape) return;
-		this.asWideAsHigh = values.asWideAsHigh === true;
-		const entry: cool.SlideObject | undefined = Array.isArray(values.objects)
-			? values.objects[0]
-			: undefined;
-		const primitives = entry?.primitives;
-		if (values.width > 0 && values.height > 0 && Array.isArray(primitives))
+		const look = ClassicShapeCreateContext.lookOf(values);
+		if (look) {
+			this.asWideAsHigh = look.asWideAsHigh;
 			this.ghost = {
-				box: new cool.Range2D(
-					values.x ?? 0,
-					values.y ?? 0,
-					(values.x ?? 0) + values.width,
-					(values.y ?? 0) + values.height,
-				),
-				primitives: primitives,
-				entry: entry as cool.SlideObject,
+				box: look.box,
+				primitives: look.primitives,
+				entry: values.id !== undefined ? values.objects[0] : this.ghost?.entry,
 			};
+		}
 		app.sectionContainer?.requestReDraw();
 	}
 
