@@ -355,6 +355,17 @@ window.L.Control.Tabs = window.L.Control.extend({
 		}
 	},
 
+	// Open the menu from the keyboard on every platform. Only some platforms turn Shift+F10 or the
+	// Menu key into a contextmenu event themselves.
+	_openContextMenuForTab: function (tab) {
+		const match = tab.id.match(/\d+/);
+		if (!match)
+			return;
+		this._tabForContextMenu = parseInt(match[0]);
+		const rect = tab.getBoundingClientRect();
+		$(tab).contextMenu({ x: rect.left + window.scrollX, y: rect.top + window.scrollY });
+	},
+
 	_onTabKeyDown: function (e) {
 		// While the context menu is open the plugin owns the arrows and Enter.
 		if (e.currentTarget.classList.contains('context-menu-active'))
@@ -376,6 +387,13 @@ window.L.Control.Tabs = window.L.Control.extend({
 			window.L.DomEvent.stop(e);
 			this._tabForContextMenu = part;
 			this._renameSheet();
+			return;
+		}
+
+		if ((key === 'F10' && e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) ||
+			key === 'ContextMenu') {
+			window.L.DomEvent.stop(e);
+			this._openContextMenuForTab(e.currentTarget);
 			return;
 		}
 

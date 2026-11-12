@@ -39,4 +39,16 @@ describe(['tagdesktop'], 'Sheet tab context menu by keyboard', { testIsolation: 
 				.should('have.length', before + 1);
 		});
 	});
+
+	it('Shift+F10 opens the menu where the browser sends no contextmenu event', function () {
+		// A browser on macOS delivers Shift+F10 only as a keydown.
+		cy.cGet('#spreadsheet-tab0').focus();
+		cy.cGet('#spreadsheet-tab0').trigger('keydown', { key: 'F10', shiftKey: true });
+
+		cy.cGet('.context-menu-list').should('be.visible');
+		cy.cGet('#spreadsheet-tab0').should('have.class', 'context-menu-active');
+
+		cy.realPress('Escape');
+		cy.cGet('.context-menu-list').should('not.be.visible');
+	});
 });
