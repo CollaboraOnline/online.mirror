@@ -223,6 +223,7 @@ shared_sources = \
                  common/RegexUtil.cpp \
                  common/Seccomp.cpp \
                  common/Session.cpp \
+                 common/SettingsSecrets.cpp \
                  common/SigUtil-server.cpp \
                  common/Simd.cpp \
                  common/SpookyV2.cpp \
