@@ -3156,20 +3156,23 @@ abstract class SelectionSection extends CanvasSectionObject {
 	*/
 	private lastMoved: { at: cool.SimplePoint; event?: MouseEvent } | null = null;
 
-	private readonly keysChanged = (e: KeyboardEvent): void => {
-		if (!this.interaction || !this.lastMoved) return;
-		if (!['Shift', 'Alt', 'Control'].includes(e.key)) return;
-
-		// The event that lets a key go can still carry that key as held, so the key it names
-		// is taken as let go whatever its flag says.
-		const letGo = e.type === 'keyup' ? e.key : null;
+	/*
+		Shift, Alt or Ctrl went down or up during a drag: the drag goes to the same place again
+		with the modifiers as they are now, as the engine numbers them. Answers whether a drag
+		took the key, which then belongs to it alone.
+	*/
+	public keysChanged(e: KeyboardEvent, modifier: number): boolean {
+		if (!this.interaction) return false;
+		if (!['Shift', 'Alt', 'Control'].includes(e.key)) return false;
+		if (!this.lastMoved) return true;
 
 		this.interaction.move(this.lastMoved.at, {
-			shiftKey: letGo !== 'Shift' && e.shiftKey,
-			altKey: letGo !== 'Alt' && e.altKey,
-			ctrlKey: letGo !== 'Control' && e.ctrlKey,
+			shiftKey: (modifier & app.UNOModifier.SHIFT) !== 0,
+			altKey: (modifier & app.UNOModifier.ALT) !== 0,
+			ctrlKey: (modifier & app.UNOModifier.CTRL) !== 0,
 		} as MouseEvent);
-	};
+		return true;
+	}
 
 	onMouseDown(point: cool.SimplePoint, e: MouseEvent): void {
 		const at = this.inTheDocument(point);
@@ -3257,9 +3260,6 @@ abstract class SelectionSection extends CanvasSectionObject {
 
 			// The handle of the other mode goes with the press, and one waiting to come up.
 			this.dropTheOtherMode();
-
-			document.addEventListener('keydown', this.keysChanged, true);
-			document.addEventListener('keyup', this.keysChanged, true);
 		}
 
 		this.stopPropagating();
@@ -3796,8 +3796,6 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.tellWhoStandsIn();
 		GraphicSelection.followTheGroupButtons();
 		this.lastMoved = null;
-		document.removeEventListener('keydown', this.keysChanged, true);
-		document.removeEventListener('keyup', this.keysChanged, true);
 		this.snap.forget();
 
 		// Nothing is aimed at once the drag is over, so the places to tie to go with it.

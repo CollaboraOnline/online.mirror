@@ -7,7 +7,7 @@
  * at TextInput.
  */
 
-/* global app UNOKey RenderManager GraphicSelection JSDialog URLPopUpSection */
+/* global app UNOKey RenderManager GraphicSelection JSDialog URLPopUpSection Interaction */
 
 window.L.Map.mergeOptions({
 	keyboard: true,
@@ -317,6 +317,9 @@ window.L.Map.Keyboard = window.L.Handler.extend({
 		if (container.tabIndex === -1) {
 			container.tabIndex = '0';
 		}
+
+		// the context one stands in has every key first, before anything else uses it up
+		Interaction.followTheKeys();
 
 		this._keyEventContainer = document.getElementById('document-container');
 		window.L.DomEvent.on(this._keyEventContainer, 'keydown keyup keypress', this._onKeyDown, this);

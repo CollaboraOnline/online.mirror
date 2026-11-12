@@ -22,6 +22,13 @@ abstract class ClassicContext implements InteractionContext {
 		this.groupStoodIn = groupStoodIn;
 	}
 
+	/// A change of Shift, Alt or Ctrl belongs to a drag of the selection that runs.
+	public keyEvent(event: KeyboardEvent, modifier: number): boolean {
+		return (
+			GraphicSelection.selectionSection?.keysChanged(event, modifier) ?? false
+		);
+	}
+
 	public showsGroupBands(): boolean {
 		return true;
 	}
@@ -1027,6 +1034,13 @@ class ClassicInPlaceContext implements InteractionContext {
 
 	public ungroup(): boolean {
 		return false;
+	}
+
+	/// A change of Shift, Alt or Ctrl belongs to a drag of the selection that runs.
+	public keyEvent(event: KeyboardEvent, modifier: number): boolean {
+		return (
+			GraphicSelection.selectionSection?.keysChanged(event, modifier) ?? false
+		);
 	}
 
 	// the surround of the active object marks the level; the groups a chart organises its

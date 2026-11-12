@@ -72,6 +72,10 @@ interface InteractionContext {
 	/// by command name.
 	commandStates(): { [command: string]: boolean };
 
+	/// A key went down or up, before anything else handled it, with the modifiers held as they are
+	/// after it. Answers whether the key was used here, so nothing else handles it.
+	keyEvent(event: KeyboardEvent, modifier: number): boolean;
+
 	/// Whether the groups the selection stands in are marked by bands, with the buttons beside
 	/// them. Inside an object active in place its surround marks the level instead.
 	showsGroupBands(): boolean;
@@ -242,6 +246,54 @@ class Interaction {
 	public static context(): InteractionContext {
 		return Interaction.contextAt(
 			Interaction.placeOf(GraphicSelection.selectedObjectIDs),
+		);
+	}
+
+	/// Whether the keys are followed, which they are once.
+	private static followingTheKeys: boolean = false;
+
+	/*
+		Follows every key that goes down or up, ahead of every other listener of the page, so the
+		context one stands in has it first, wherever the focus is. A key it uses goes no further.
+	*/
+	public static followTheKeys(): void {
+		if (Interaction.followingTheKeys) return;
+		Interaction.followingTheKeys = true;
+		const listener = (event: KeyboardEvent) => {
+			if (!RenderManager.drawsFromObjects() || !Interaction.keyEvent(event))
+				return;
+			event.preventDefault();
+			event.stopPropagation();
+		};
+		window.addEventListener('keydown', listener, true);
+		window.addEventListener('keyup', listener, true);
+	}
+
+	/*
+		Hands a key to the context one stands in, before anything else handles it. Answers whether
+		the context used it.
+	*/
+	public static keyEvent(event: KeyboardEvent): boolean {
+		if (event.type !== 'keydown' && event.type !== 'keyup') return false;
+		return Interaction.context().keyEvent(
+			event,
+			Interaction.modifiersOf(event),
+		);
+	}
+
+	/*
+		The modifiers held after a key, as the engine numbers them. The key that went down or up
+		counts as held or let go by the kind of the event: on some systems the event of a modifier
+		key reports the modifiers as they were before it.
+	*/
+	public static modifiersOf(event: KeyboardEvent): number {
+		const held = (key: string, flag: boolean) =>
+			event.key === key ? event.type === 'keydown' : flag;
+		return (
+			(held('Shift', event.shiftKey) ? app.UNOModifier.SHIFT : 0) |
+			(held('Control', event.ctrlKey) ? app.UNOModifier.CTRL : 0) |
+			(held('Alt', event.altKey) ? app.UNOModifier.ALT : 0) |
+			(held('Meta', event.metaKey) ? app.UNOModifier.CTRLMAC : 0)
 		);
 	}
 
