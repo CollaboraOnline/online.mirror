@@ -773,6 +773,10 @@ static std::atomic<int> appDocIdCounter(1);
     return appDocIdCounter++;
 }
 
++ (void)setInEditorFrame:(int)appDocId {
+    DocumentData::get(appDocId).inEditorFrame = true;
+}
+
 + (int)fakeSocketSocket {
     return fakeSocketSocket();
 }

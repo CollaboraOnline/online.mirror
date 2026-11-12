@@ -6677,7 +6677,8 @@ static void writeRemoteDocFile(DocumentTab& data, int id, const std::string& arg
 
     data.fakeClientFd = fakeSocketSocket();
     data.appDocId = generate_new_app_doc_id();
-    data.filenameAndUri = { name, Poco::URI(Poco::Path(path)).toString() };
+    DocumentData::get(data.appDocId).inEditorFrame = true;
+    data.filenameAndUri = { name, pathToURI(Poco::Path(path)) };
     postReplyToCall(data.hWnd, data.tabId, id, path);
 }
 
