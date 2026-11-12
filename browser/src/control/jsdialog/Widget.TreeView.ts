@@ -2855,6 +2855,12 @@ class TreeViewControl {
 		return false;
 	}
 
+	static isAutoFilter(data: TreeWidgetJSON): boolean {
+		if (data.id === 'check_list_box' || data.id === 'check_tree_box')
+			return true;
+		return false;
+	}
+
 	// Keys the grid's container handler would otherwise turn into row
 	// navigation while the user is editing a column header name.
 	static headerNameOwnedKeys = [
@@ -2880,6 +2886,7 @@ class TreeViewControl {
 		return (
 			!data.noSearchField &&
 			!TreeViewControl.isMenu(data) &&
+			!TreeViewControl.isAutoFilter(data) &&
 			TreeViewControl.isListbox(data) &&
 			data.entries &&
 			data.entries.length > 25

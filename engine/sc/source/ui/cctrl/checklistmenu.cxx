@@ -635,11 +635,7 @@ ScCheckListMenuControl::ScCheckListMenuControl(weld::Widget* pParent, ScViewData
         mxFieldsComboLabel->hide();
         mxFieldsCombo->hide();
     }
-    if (!comphelper::COKit::isActive()) {
-        // In COKit (read: under JSDialog), it is preferable to run this search on
-        // the client side rather than in core for positioning/interference/etc. reasons
-        mxEdSearch->show();
-    }
+    mxEdSearch->show();
     mxButtonBox->show();
 
     mxMenu->connect_row_activated(LINK(this, ScCheckListMenuControl, RowActivatedHdl));
@@ -684,7 +680,7 @@ ScCheckListMenuControl::ScCheckListMenuControl(weld::Widget* pParent, ScViewData
 
 void ScCheckListMenuControl::GrabFocus()
 {
-    if (mxEdSearch->get_visible())
+    if (mxEdSearch->get_visible() && !comphelper::COKit::isActive())
     {
         mxEdSearch->grab_focus();
         meRestoreFocus = RestoreFocus::EdSearch;
@@ -1770,6 +1766,18 @@ void ScCheckListMenuControl::launch(weld::Widget* pWidget, const tools::Rectangl
 
 void ScCheckListMenuControl::close(bool bOK)
 {
+    if (bOK)
+    {
+        if (maSearchEditTimer.IsActive())
+        {
+            maSearchEditTimer.Stop();
+            maSearchEditTimer.Invoke();
+        }
+
+        if (!mxBtnOk->get_sensitive())
+            return;
+    }
+
     if (bOK && mxOKAction)
         mxOKAction->execute();
     EndPopupMode();
