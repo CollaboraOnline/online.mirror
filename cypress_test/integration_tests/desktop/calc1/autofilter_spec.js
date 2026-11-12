@@ -330,26 +330,43 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'AutoFilter Search', functi
 		});
 	});
 
-	it('Search narrows the list to the match, which then filters the sheet', function() {
+	it('Typed search text filters the sheet on OK', function() {
 		openAutoFilterAtCursor();
-		cy.cGet('#check_list_box .ui-treeview-entry:not(.hidden)').should('have.length', 30);
+		cy.cGet('#check_list_box .ui-treeview-search-input').should('not.exist');
 
-		cy.cGet('#toggle_all-input').uncheck();
-		cy.cGet('.autofilter .ui-treeview-search-input').type('25');
+		cy.cGet('#search_edit-input').should('be.visible').then(function(field) {
+			cy.cGet('#check_list_box').then(function(list) {
+				expect(field[0].getBoundingClientRect().right)
+					.to.be.closeTo(list[0].getBoundingClientRect().right, 1);
+			});
+		});
 
-		cy.cGet('#check_list_box .ui-treeview-entry:not(.hidden)').should('have.length', 1);
-		cy.cGet('#check_list_box .ui-treeview-entry:not(.hidden)').should('contain.text', '25');
-		cy.cGet('#check_list_box .ui-treeview-entry.hidden').first().should('have.css', 'display', 'none');
+		cy.cGet('#search_edit-input').type('5');
 
-		cy.cGet('#check_list_box .ui-treeview-entry:not(.hidden) .ui-treeview-checkbox').check();
-
-		// Ticking the entry rebuilds the list, and the search still holds.
-		cy.cGet('.autofilter .ui-treeview-search-input').should('have.value', '25');
-		cy.cGet('#check_list_box .ui-treeview-entry:not(.hidden)').should('have.length', 1);
+		cy.cGet('#check_list_box .ui-treeview-entry').should('have.length', 3);
 
 		cy.cGet('#ok').click();
 		cy.cGet('div.autofilter').should('not.exist');
 
-		calcHelper.assertSheetContents(['Value', '25'], true);
+		calcHelper.assertSheetContents(['Value', '5', '15', '25'], true);
+	});
+
+	it('OK right after typing applies the search', function() {
+		openAutoFilterAtCursor();
+
+		cy.cGet('#search_edit-input').type('5');
+		cy.cGet('#ok').click();
+		cy.cGet('div.autofilter').should('not.exist');
+
+		calcHelper.assertSheetContents(['Value', '5', '15', '25'], true);
+	});
+
+	it('Enter in the search field applies the search', function() {
+		openAutoFilterAtCursor();
+
+		cy.cGet('#search_edit-input').type('5{enter}');
+		cy.cGet('div.autofilter').should('not.exist');
+
+		calcHelper.assertSheetContents(['Value', '5', '15', '25'], true);
 	});
 });
