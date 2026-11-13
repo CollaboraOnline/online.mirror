@@ -667,7 +667,9 @@ export class CommentSection extends CanvasSectionObject {
 	}
 
 	public keepsSelectedCommentBesideThePage(): boolean {
-		return app.map._docLayer._docType === 'text'
+		// A small screen shows a comment in the mobile wizard, not beside the page.
+		return !(<any>window).mode.isSmallScreenDevice()
+			&& app.map._docLayer._docType === 'text'
 			&& (!CommentSection.isMultiColumnLayout()
 				|| app.activeDocument.activeLayout.type === 'ViewLayoutMultiPage')
 			&& document.documentElement.dir !== 'rtl'
