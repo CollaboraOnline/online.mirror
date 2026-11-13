@@ -1717,6 +1717,9 @@ void SfxObjectShell::CheckPendingLinkUpdateInfobar()
     if (!bPendingLinkUpdateInfobar)
         return;
     bPendingLinkUpdateInfobar = false;
+    // Once link updates are allowed, the infobar has nothing left to offer.
+    if (getEmbeddedObjectContainer().getUserAllowsLinkUpdate())
+        return;
     ShowLinkUpdateInfobar();
 }
 
