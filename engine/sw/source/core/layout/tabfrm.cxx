@@ -117,7 +117,8 @@ SwTabFrame::SwTabFrame( SwTable &rTab, SwFrame* pSib )
             SwFrame::DestroyFrame(pNew);
     }
     SwFrame* pLower = Lower();
-    OSL_ENSURE( pLower && pLower->IsRowFrame(), "SwTabFrame::SwTabFrame: No rows." );
+    OSL_ENSURE( !pLower || pLower->IsRowFrame(),
+                "SwTabFrame::SwTabFrame: first lower isn't a row." );
 }
 
 SwTabFrame::SwTabFrame( SwTabFrame &rTab )
@@ -172,7 +173,13 @@ void SwTabFrame::JoinAndDelFollows()
 void SwTabFrame::RegistFlys()
 {
     SwFrame* pLower = Lower();
-    OSL_ENSURE( pLower && pLower->IsRowFrame(), "No rows." );
+    // All rows may be hidden by tracked deletions.
+    if ( !pLower )
+        return;
+
+    OSL_ENSURE( pLower->IsRowFrame(), "First lower isn't a row." );
+    if ( !pLower->IsRowFrame() )
+        return;
 
     SwPageFrame *pPage = FindPageFrame();
     if ( pPage )

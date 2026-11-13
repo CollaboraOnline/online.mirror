@@ -14,6 +14,13 @@
 #include <com/sun/star/awt/FontSlant.hpp>
 #include <com/sun/star/awt/FontUnderline.hpp>
 #include <com/sun/star/awt/FontWeight.hpp>
+#include <com/sun/star/frame/XModel.hpp>
+#include <com/sun/star/text/XPageCursor.hpp>
+#include <com/sun/star/text/XTextCursor.hpp>
+#include <com/sun/star/text/XTextTable.hpp>
+#include <com/sun/star/text/XTextTablesSupplier.hpp>
+#include <com/sun/star/text/XTextViewCursorSupplier.hpp>
+#include <com/sun/star/view/XSelectionSupplier.hpp>
 #include <comphelper/propertysequence.hxx>
 #include <comphelper/propertyvalue.hxx>
 #include <comphelper/processfactory.hxx>
@@ -2025,6 +2032,88 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest5, testRedlineTableRowDeletion)
     // the table (row) was deleted
     pXmlDoc = parseLayoutDump();
     assertXPath(pXmlDoc, "//page[1]//body/tab", 0);
+}
+
+CPPUNIT_TEST_FIXTURE(SwUiWriterTest5, testTdf169578UndoDeleteAfterHideChanges)
+{
+    createSwDoc("tdf169578.odt");
+    SwDoc* pDoc = getSwDoc();
+    CPPUNIT_ASSERT_EQUAL(5, getPages());
+
+    IDocumentRedlineAccess& rRedlineAccess = pDoc->getIDocumentRedlineAccess();
+    rRedlineAccess.SetRedlineFlags(
+        RedlineFlags::On | RedlineFlags::ShowDelete | RedlineFlags::ShowInsert);
+
+    auto xModel = mxComponent.queryThrow<frame::XModel>();
+    auto xSelection = xModel->getCurrentController().queryThrow<view::XSelectionSupplier>();
+
+    // These are the two images on the bottom of page 4 in the sample document.
+    for (const OUString& rName : { u"Bild182"_ustr, u"Bild181"_ustr })
+    {
+        auto xShape = getShapeByName(rName);
+        CPPUNIT_ASSERT(xShape.is());
+        CPPUNIT_ASSERT(xSelection->select(uno::Any(xShape)));
+        dispatchCommand(mxComponent, u".uno:Delete"_ustr, {});
+        CPPUNIT_ASSERT(rRedlineAccess.GetRedlineTable().size() > 0);
+    }
+    CPPUNIT_ASSERT(rRedlineAccess.GetRedlineTable().size() >= 2);
+
+    // Delete the caption row below those images.
+    auto xTablesSupplier = mxComponent.queryThrow<text::XTextTablesSupplier>();
+    auto xTables = xTablesSupplier->getTextTables();
+    auto xTable = xTables->getByName(u"Tabelle230"_ustr).queryThrow<text::XTextTable>();
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(2), xTable->getRows()->getCount());
+
+    // Move to the caption row below the two images and delete that table row.
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->EnterStdMode();
+    CPPUNIT_ASSERT(pWrtShell->GotoTable(UIName(u"Tabelle230"_ustr)));
+    const SwTextNode* pTextNode = pWrtShell->GetCursor()->GetPointNode().GetTextNode();
+    for (int i = 0;
+         i < 10 && (!pTextNode || !pTextNode->GetText().startsWith(u"Altiflex II mit Prontor II"));
+         ++i)
+    {
+        CPPUNIT_ASSERT(pWrtShell->GoNextCell(false));
+        pTextNode = pWrtShell->GetCursor()->GetPointNode().GetTextNode();
+    }
+    CPPUNIT_ASSERT(pTextNode);
+    CPPUNIT_ASSERT(pTextNode->GetText().startsWith(u"Altiflex II mit Prontor II"));
+    CPPUNIT_ASSERT(pWrtShell->SelTableRow());
+    CPPUNIT_ASSERT(pWrtShell->IsTableMode());
+    pWrtShell->DeleteRow();
+    CPPUNIT_ASSERT(rRedlineAccess.GetRedlineTable().size() > 2);
+
+    auto xCursorSupplier = xModel->getCurrentController().queryThrow<text::XTextViewCursorSupplier>();
+    auto xViewCursor = xCursorSupplier->getViewCursor();
+    auto xPageCursor = xViewCursor.queryThrow<text::XPageCursor>();
+
+    // Select backwards from the end of page 5 to the end of page 3 and delete.
+    CPPUNIT_ASSERT(xPageCursor->jumpToPage(5));
+    xPageCursor->jumpToEndOfPage();
+    CPPUNIT_ASSERT_EQUAL(sal_Int16(5), xPageCursor->getPage());
+    auto xText = xViewCursor->getText();
+    auto xSelectionCursor = xText->createTextCursorByRange(xViewCursor);
+    CPPUNIT_ASSERT(xPageCursor->jumpToPage(3));
+    xPageCursor->jumpToEndOfPage();
+    CPPUNIT_ASSERT_EQUAL(sal_Int16(3), xPageCursor->getPage());
+    xSelectionCursor->gotoRange(xViewCursor, true);
+    CPPUNIT_ASSERT(xSelection->select(uno::Any(xSelectionCursor)));
+    OUString sSelectedText = xSelectionCursor->getString();
+    CPPUNIT_ASSERT(sSelectedText.getLength() > 100);
+    CPPUNIT_ASSERT(sSelectedText.indexOf(u"Altiflex II mit Prontor II") >= 0);
+    CPPUNIT_ASSERT(sSelectedText.indexOf(u"Altix\u202fV") >= 0);
+    const size_t nUndoActionsBeforeRangeDelete
+        = pDoc->GetIDocumentUndoRedo().GetUndoActionCount();
+    dispatchCommand(mxComponent, u".uno:SwBackspace"_ustr, {});
+    const size_t nUndoActionsAfterRangeDelete
+        = pDoc->GetIDocumentUndoRedo().GetUndoActionCount();
+    CPPUNIT_ASSERT(nUndoActionsAfterRangeDelete > nUndoActionsBeforeRangeDelete);
+
+    // Hiding the tracked deletions and undoing the range deletion crashed here.
+    dispatchCommand(mxComponent, u".uno:ShowTrackedChanges"_ustr, {});
+    CPPUNIT_ASSERT(getSwDocShell()->GetView()->GetWrtShell().GetLayout()->IsHideRedlines());
+    dispatchCommand(mxComponent, u".uno:Undo"_ustr, {});
+    CPPUNIT_ASSERT(pDoc->GetIDocumentUndoRedo().GetUndoActionCount() < nUndoActionsAfterRangeDelete);
 }
 
 CPPUNIT_TEST_FIXTURE(SwUiWriterTest5, testTdf150976)
