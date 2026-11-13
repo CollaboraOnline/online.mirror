@@ -160,14 +160,6 @@ public:
     /** Whether locale is one where family name comes first, e.g. Japan, Hungary, Samoa */
     static bool isFamilyNameFirst( LanguageType nLang );
 
-    /** Whether there are "forbidden characters at start or end of line" in
-        this locale. CJK locales.
-
-        @see offapi/com/sun/star/i18n/ForbiddenCharacters.idl
-      */
-    static bool hasForbiddenCharacters( LanguageType nLang );
-
-
     /** Whether locale needs input sequence checking. CTL locales. */
     static bool needsSequenceChecking( LanguageType nLang );
 

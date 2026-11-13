@@ -342,13 +342,6 @@ bool MsLangId::isFamilyNameFirst( LanguageType nLang )
 }
 
 // static
-bool MsLangId::hasForbiddenCharacters( LanguageType nLang )
-{
-    return isCJK(nLang);
-}
-
-
-// static
 bool MsLangId::needsSequenceChecking( LanguageType nLang )
 {
     return primary(nLang).anyOf(
