@@ -217,7 +217,7 @@ class ViewLayoutBase {
 		if (app.map._textInput && app.map._textInput.onVisibleAreaChanged)
 			app.map._textInput.onVisibleAreaChanged();
 
-		if (app.map.contextToolbar) app.map.contextToolbar.hideContextToolbar(); // hide context toolbar when scroll/window resize etc...
+		if (app.map.contextToolbar) app.map.contextToolbar.onVisibleAreaChanged();
 
 		// The command counts as sent only while the connection is healthy, so the
 		// area goes out again after a drop.

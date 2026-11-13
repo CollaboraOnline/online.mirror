@@ -1293,14 +1293,20 @@ label.notebookbar.ui-checkbox-label {
 	position: absolute;
 	background: var(--color-background-lighter);
 	padding: 5px;
-	transform: translateY(-105%);
 	z-index: 12;
 	border-radius: var(--border-radius);
 	border: solid var(--color-toolbar-border) 1px;
 	display: grid;
 	opacity: 1;
-	transition: all var(--duration-normal) allow-discrete;
+	/* Only the opacity animates. The toolbar appears in place at a new selection. */
+	transition: opacity var(--duration-fast), display var(--duration-fast) allow-discrete;
 	box-shadow: 0 6px 18px var(--color-box-shadow-light);
+}
+
+@starting-style {
+	#context-toolbar {
+		opacity: 0;
+	}
 }
 
 /* Set on the overlay of the context menu while the pointer is over the
@@ -1317,7 +1323,6 @@ label.notebookbar.ui-checkbox-label {
 #context-toolbar.hidden {
 	display: none;
 	opacity: 0;
-	transition: all var(--duration-normal) allow-discrete;
 }
 
 #context-toolbar .unobutton > img {

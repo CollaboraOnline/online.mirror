@@ -22,8 +22,11 @@ class ContextToolbar extends JSDialogComponent {
 	pendingShow: boolean = false;
 	// Whether the toolbar is hidden while its text selection is dragged.
 	hiddenForDrag: boolean = false;
-	// roughly twice the height(76px) of default context toolbar in each direction from boundary
-	disappearingBoundary: number = 150; // px
+	// Whether the toolbar belongs to the current text selection. It is on screen while that
+	// selection is in view.
+	shown: boolean = false;
+	// Space between the toolbar and the selected text, in CSS pixels.
+	selectionGap: number = 16;
 	additionalContextButtons: Array<ToolItemWidgetJSON> = [];
 
 	constructor(map: MapInterface) {
@@ -108,10 +111,17 @@ class ContextToolbar extends JSDialogComponent {
 				this.initialized = true;
 			}
 
-			document.addEventListener('pointermove', this.pointerMove);
 			document.addEventListener('pointermove', this.overlayPointerMove);
-			this.changeOpacity(1);
-			this.showHideToolbar(true);
+			this.shown = true;
+			this.placeToolbar();
+		});
+	}
+
+	// The view moved or changed size. The toolbar moves with its selection.
+	onVisibleAreaChanged(): void {
+		if (!this.shown) return;
+		app.layoutingService.appendLayoutingTask(() => {
+			if (this.shown) this.placeToolbar();
 		});
 	}
 
@@ -134,7 +144,6 @@ class ContextToolbar extends JSDialogComponent {
 	}
 
 	hideContextToolbar(): void {
-		document.removeEventListener('pointermove', this.pointerMove);
 		document.removeEventListener('pointermove', this.overlayPointerMove);
 
 		if (this.pendingTask)
@@ -142,39 +151,62 @@ class ContextToolbar extends JSDialogComponent {
 
 		this.pendingTask = app.layoutingService.appendLayoutingTask(() => {
 			this.pendingTask = null;
-			this.showHideToolbar(false);
+			this.shown = false;
+			window.L.DomUtil.addClass(this.container, 'hidden');
 		});
 	}
 
-	private showHideToolbar(show: boolean): void {
-		if (!show) {
+	// Converts a document position in twips to page coordinates in CSS pixels.
+	private toPagePoint(
+		x: number,
+		y: number,
+		canvasRect: DOMRect,
+	): { x: number; y: number } {
+		// Go via SimplePoint(), which is aware of the active layout.
+		const point = new cool.SimplePoint(x, y);
+		return {
+			x: Math.round(point.vX / app.dpiScale) + canvasRect.x,
+			y: Math.round(point.vY / app.dpiScale) + canvasRect.y,
+		};
+	}
+
+	// Puts the toolbar above the selection, or below it when there is no room above. A
+	// selection that is out of view hides the toolbar until it comes back into view.
+	private placeToolbar(): void {
+		URLPopUpSection.closeURLPopUp();
+		const startRect = TextSelections.getStartRectangle();
+		if (!startRect) return;
+		const endRect = TextSelections.getEndRectangle() ?? startRect;
+
+		Util.ensureValue(app.activeDocument);
+
+		const canvasRect = app.sectionContainer.getCanvasBoundingClientRect();
+		const start = this.toPagePoint(startRect.x1, startRect.y1, canvasRect);
+		const end = this.toPagePoint(endRect.x2, endRect.y2, canvasRect);
+
+		if (end.y < canvasRect.top || start.y > canvasRect.bottom) {
 			window.L.DomUtil.addClass(this.container, 'hidden');
 			return;
 		}
 
-		URLPopUpSection.closeURLPopUp();
-		const statRect = TextSelections.getStartRectangle();
-		if (!statRect) return;
-
-		Util.ensureValue(app.activeDocument);
-
-		// Go via SimplePoint(), which is aware of the active layout.
-		const point = new cool.SimplePoint(statRect.x1, statRect.y1);
-		const canvasRect = app.sectionContainer.getCanvasBoundingClientRect();
-		const pos = {
-			x: Math.round(point.vX / app.dpiScale) + canvasRect.x,
-			y: Math.round(point.vY / app.dpiScale) + canvasRect.y,
-		};
-
+		// The toolbar is measured and placed in the same frame it is shown, so it fades in at
+		// the selection.
 		window.L.DomUtil.removeClass(this.container, 'hidden');
-		app.layoutingService.appendLayoutingTask(() => {
-			const contextualMenu = this.container.getBoundingClientRect();
-			if (contextualMenu.width + pos.x > window.innerWidth) {
-				pos.x -= contextualMenu.width + pos.x - window.innerWidth + 5;
-			}
-			this.container.style.top = pos.y + 'px';
-			this.container.style.left = pos.x + 'px';
-		});
+		const toolbarRect = this.container.getBoundingClientRect();
+		const gap = this.selectionGap;
+
+		let top = start.y - toolbarRect.height - gap;
+		if (top < canvasRect.top) top = end.y + gap;
+		// A selection taller than the view has no room on either side.
+		if (top + toolbarRect.height > canvasRect.bottom)
+			top = canvasRect.top + gap;
+
+		let left = start.x;
+		if (left + toolbarRect.width > window.innerWidth)
+			left = window.innerWidth - toolbarRect.width - 5;
+
+		this.container.style.top = top + 'px';
+		this.container.style.left = left + 'px';
 	}
 
 	getViewModeContext(): ToolItemWidgetJSON[] {
@@ -394,11 +426,12 @@ class ContextToolbar extends JSDialogComponent {
 	// current additionalContextButtons, since showContextToolbarImpl only ever
 	// reads that list once, the first time the toolbar is shown.
 	private _forceRebuild(): void {
-		document.removeEventListener('pointermove', this.pointerMove);
 		document.removeEventListener('pointermove', this.overlayPointerMove);
 		document.getElementById('context-toolbar')?.remove();
 		this.setupContainer(undefined);
 		this.initialized = false;
+		// A toolbar that was on screen is built again at its selection.
+		if (this.shown) this.showContextToolbarImpl();
 	}
 
 	insertAdditionalContextButton(button: any) {
@@ -472,31 +505,14 @@ class ContextToolbar extends JSDialogComponent {
 	}
 
 	setLastInputEventType(e: any) {
+		// Only presses, releases and keys are kept. A mouse drag lies between a buttondown and a
+		// buttonup, and a hover move after the release leaves the selection finished.
+		if (e.type === 'move') return;
 		this.lastIinputEvent = e;
 		if (e.type === 'buttonup' && e.input === 'mouse' && this.pendingShow) {
 			this.showContextToolbarImpl();
 			this.pendingShow = false;
 		}
-	}
-
-	calculateOpacity(e: PointerEvent): number {
-		const clientRect: DOMRect = this.container.getBoundingClientRect();
-
-		// distance from the pointer to the nearest point of the toolbar,
-		// zero when hovering over it, so the fade is the same in every direction
-		const xDistance = Math.max(
-			clientRect.left - e.clientX,
-			0,
-			e.clientX - clientRect.right,
-		);
-		const yDistance = Math.max(
-			clientRect.top - e.clientY,
-			0,
-			e.clientY - clientRect.bottom,
-		);
-		const distance = Math.hypot(xDistance, yDistance);
-
-		return Math.max(0, 1 - distance / this.disappearingBoundary);
 	}
 
 	// a dropdown opened elsewhere, e.g. from the notebookbar, takes over from the
@@ -505,8 +521,7 @@ class ContextToolbar extends JSDialogComponent {
 		id: string;
 		popupParent: string | HTMLElement | null;
 	}): void {
-		if (!this.pendingTask && this.container.classList.contains('hidden'))
-			return;
+		if (!this.pendingTask && !this.shown) return;
 		if (e.id === ContextMenuControl.menuID) return;
 
 		const parent =
@@ -540,33 +555,4 @@ class ContextToolbar extends JSDialogComponent {
 		)
 			overlay.classList.add('context-toolbar-passthrough');
 	};
-
-	pointerMove = (e: PointerEvent): void => {
-		// keep the toolbar as it is while the pointer travels to the
-		// context menu, the fade resumes once the menu is closed
-		if (this.getContextMenuOverlay()) return;
-
-		app.layoutingService.appendLayoutingTask(() => {
-			const opacity: number = this.calculateOpacity(e);
-
-			if (opacity === 1) {
-				this.makeContextToolbarConstant();
-				return;
-			} else if (opacity === 0) {
-				this.hideContextToolbar();
-				return;
-			}
-
-			this.changeOpacity(opacity);
-		});
-	};
-
-	makeContextToolbarConstant(): void {
-		document.removeEventListener('pointermove', this.pointerMove);
-		this.changeOpacity(1);
-	}
-
-	changeOpacity(opacity: number) {
-		this.container.style.opacity = opacity.toString();
-	}
 }
