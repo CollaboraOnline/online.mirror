@@ -388,10 +388,16 @@ describe(['tagdesktop', 'tagnextcloud'], 'Clipboard operations.', function() {
 		});
 
 		// Then the copy should show a progress indicator:
+		cy.cGet('#snackbar').should('be.visible').and('contain.text', 'Copying to clipboard');
+		// And the document should keep the focus, so the user can still move the cursor:
 		// Without the accompanying fix in place, this test would have failed with:
-		// expected #modal-dialog-copy_paste_download_progress to be visible
-		// i.e. the user had no way to know when the copy finished before pasting.
-		cy.cGet('#modal-dialog-copy_paste_download_progress').should('be.visible');
+		// expected 'response-ok' to equal 'clipboard'
+		// i.e. the modal popup's Cancel button had the focus, not the document.
+		if (Cypress.env('INTEGRATION') !== 'nextcloud') {
+			// Under the nextcloud integration the iframe is the active element,
+			// not the clipboard textarea, so skip the check there.
+			helper.assertFocus('className', 'clipboard');
+		}
 
 		// And when finishing the copy:
 		cy.getFrameWindow().then(function(win) {
@@ -399,6 +405,6 @@ describe(['tagdesktop', 'tagnextcloud'], 'Clipboard operations.', function() {
 		});
 
 		// Then there should be no progress indicator
-		cy.cGet('#modal-dialog-copy_paste_download_progress').should('not.exist');
+		cy.cGet('#snackbar').should('not.exist');
 	});
 });

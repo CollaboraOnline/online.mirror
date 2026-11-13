@@ -1123,14 +1123,14 @@ window.L.Clipboard = window.L.Class.extend({
 		}
 
 		// Show a progress indicator, so the user can delay Ctrl+V before the copy finishes.
-		// DisableCopy has a synchronous stub, no fetch, so no indicator there.
-		// The mobile UI uses a mobile wizard that a modal popup would close, so no
-		// indicator there either.
+		// A snackbar, not a modal popup, so the cursor can still travel while the copy is
+		// in progress. DisableCopy has a synchronous stub, no fetch, so no indicator there.
+		// On the mobile UI the space is limited, so no indicator there, either.
 		const mobileUI = window.mode.isSmallScreenDevice() || window.mode.isTablet();
 		const showProgress = !this._map['wopi'].DisableCopy && !mobileUI;
+		const progressLabel = _('Copying to clipboard');
 		if (showProgress) {
-			this._startProgress(false);
-			this._downloadProgress.startProgressMode();
+			this._map.uiManager.showProgressBar(progressLabel, undefined, undefined, -1, undefined, /*infinite=*/true);
 		}
 
 		try {
@@ -1177,8 +1177,7 @@ window.L.Clipboard = window.L.Class.extend({
 		} finally {
 			// Hide progress indicator.
 			if (showProgress) {
-				this._downloadProgress._onComplete();
-				this._downloadProgress._onClose();
+				this._map.uiManager.closeSnackbarWithLabel(progressLabel);
 			}
 		}
 	},
