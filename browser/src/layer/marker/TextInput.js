@@ -1735,6 +1735,9 @@ window.L.TextInput = window.L.Layer.extend({
 		if (active && active !== document.body && active !== this._textArea &&
 			!this._textArea.contains(active))
 			return;
+		// With an on-screen keyboard, focus on nothing is how focus() keeps the keyboard down.
+		if ((!active || active === document.body) && window.keyboard.guessOnscreenKeyboard())
+			return;
 
 		this._statusLog('_setSelectionRange [');
 		var selection = window.getSelection();
