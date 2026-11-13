@@ -32,14 +32,27 @@ and forces a full rebuild:
 
     snapcraft clean collabora-office
 
+The snap is built for amd64 only: the kde-neon-6 extension builds against
+the `kde-qt6-core24-sdk` snap, which KDE publishes for amd64 only.
+
 ## Publishing
 
+The snap has `grade: stable`, so a revision can go to any channel. Upload a
+release to candidate first:
+
     snapcraft login
-    snapcraft upload collabora-office_*.snap --release=latest/edge
+    snapcraft upload collabora-office_*.snap --release=latest/candidate
+
+Then test it (see below) and promote the same revision to stable:
+
+    snapcraft release collabora-office <revision> latest/stable
+
+`snapcraft status collabora-office` lists the revisions in each channel.
+Pre-release builds can still go to `latest/edge` or `latest/beta`.
 
 ## Testing
 
-    sudo snap install collabora-office --edge
+    sudo snap install collabora-office --candidate
 
 See also https://snapcraft.io/collabora-office
 

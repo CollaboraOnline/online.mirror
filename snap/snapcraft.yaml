@@ -31,10 +31,11 @@ source-code: https://gerrit.collaboraoffice.com/online
 issues: https://github.com/CollaboraOnline/online/issues
 license: MPL-2.0
 base: core24
+# amd64 only: the kde-neon-6 extension builds against kde-qt6-core24-sdk,
+# which KDE publishes for amd64 only.
 platforms:
   amd64:
-  arm64:
-grade: devel
+grade: stable
 confinement: strict
 compression: lzo
 
@@ -60,9 +61,8 @@ apps:
       # libs happen to also be carried by the kf6 content snap), so coda-qt's
       # dlopen of libmergedlo.so fails with "libhyphen.so.0: cannot open
       # shared object file". Put the arch dir back explicitly. snapd has no
-      # runtime variable for the GNU triplet, so list both supported arches;
-      # the loader ignores a path that does not exist.
-      LD_LIBRARY_PATH: $SNAP/usr/lib/collaboraoffice/program:$SNAP/usr/lib/x86_64-linux-gnu:$SNAP/usr/lib/aarch64-linux-gnu:$LD_LIBRARY_PATH
+      # runtime variable for the GNU triplet, so it is spelled out.
+      LD_LIBRARY_PATH: $SNAP/usr/lib/collaboraoffice/program:$SNAP/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
       # Keep the user profile in the revision-independent common dir so
       # settings persist across upgrades and reverts. The default $HOME
       # inside the snap is the per-revision SNAP_USER_DATA, which snapd
