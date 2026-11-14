@@ -41,6 +41,7 @@
 #include <unotxdoc.hxx>
 #include <vcl/BitmapReadAccess.hxx>
 #include <VectorCollector.hxx>
+#include <VectorPart.hxx>
 #include <itabenum.hxx>
 
 #include <com/sun/star/beans/XPropertySet.hpp>
@@ -5267,12 +5268,49 @@ CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testTileFromPrimitivesLooksLikeThePai
     CPPUNIT_ASSERT_LESS(0.002, differingShare(aPaintedZoomed, aZoomedFromPrimitives, /*nReach=*/2));
 }
 
+namespace
+{
+/// Asks for the primitives of the first page, as a client that draws the pages from them does.
+void requestFirstVectorPage(SwXTextDocument& rDocument, SwWrtShell& rShell)
+{
+    const SwPageFrame* pPage = rShell.GetLayout()->GetLower()->DynCastPageFrame();
+    CPPUNIT_ASSERT(pPage);
+    const OString aCommand = ".uno:VectorPrimitives?partid=" + sw::vector::partIdOf(*pPage);
+    tools::JsonWriter aWriter;
+    rDocument.getCommandValues(aWriter, aCommand);
+    aWriter.finishAndGetAsOString();
+}
+}
+
+CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testCaretOfTiledDocumentHasRectangleOnly)
+{
+    // A document whose pages go out as tiles only sends the rectangle of the caret. A caret
+    // that moves over a zero-width character then sends the same message as before.
+    createDoc();
+    SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    pWrtShell->Insert(u"abc"_ustr);
+    Scheduler::ProcessEventsToIdle();
+
+    std::optional<OString> oPayload = pWrtShell->GetVisibleCursor()->getKitPayload(
+        COKitCallbackType::INVALIDATE_VISIBLE_CURSOR, /*nViewId=*/0);
+    CPPUNIT_ASSERT(oPayload);
+    std::stringstream aStream((std::string(*oPayload)));
+    boost::property_tree::ptree aTree;
+    boost::property_tree::read_json(aStream, aTree);
+
+    CPPUNIT_ASSERT(aTree.get_child_optional("rectangle"));
+    CPPUNIT_ASSERT(!aTree.get_child_optional("object"));
+    CPPUNIT_ASSERT(!aTree.get_child_optional("paragraph"));
+    CPPUNIT_ASSERT(!aTree.get_child_optional("index"));
+}
+
 CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testCaretNamesItsTextFrameAndIndex)
 {
     // The caret message says where the caret is in the text of the frame that holds it, the way
     // the vector primitives of that frame index their text.
-    createDoc();
+    SwXTextDocument* pXTextDocument = createDoc();
     SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    requestFirstVectorPage(*pXTextDocument, *pWrtShell);
     pWrtShell->Insert(u"first"_ustr);
     pWrtShell->SplitNode();
     pWrtShell->Insert(u"abc"_ustr);
@@ -5297,8 +5335,9 @@ CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testCaretNamesItsTextFrameAndIndex)
 
 CPPUNIT_TEST_FIXTURE(SwTiledRenderingTest, testCaretNamesTheOtherEndOfASelectionInItsFrame)
 {
-    createDoc();
+    SwXTextDocument* pXTextDocument = createDoc();
     SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
+    requestFirstVectorPage(*pXTextDocument, *pWrtShell);
     pWrtShell->Insert(u"abcd"_ustr);
     pWrtShell->Left(SwCursorSkipMode::Chars, /*bSelect=*/true, 3, /*bBasicCall=*/false);
     Scheduler::ProcessEventsToIdle();

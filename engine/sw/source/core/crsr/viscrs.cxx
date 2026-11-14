@@ -58,6 +58,7 @@
 #include <PostItMgr.hxx>
 #include <SwGrammarMarkUp.hxx>
 #include <docsh.hxx>
+#include <unotxdoc.hxx>
 #include <svtools/optionsdrawinglayer.hxx>
 #include <o3tl/string_view.hxx>
 #include <tools/json_writer.hxx>
@@ -328,9 +329,19 @@ namespace
 /// The text frame that holds the point of the cursor, and the offset of the point in the text of
 /// the frame's paragraph. The vector primitives of a text frame hold one paragraph, the first,
 /// and index their text the same way. The other end of a selection is given when it lies in the
-/// same frame. None when the point lies in no text frame.
+/// same frame. None when the point lies in no text frame, or when the document has served no page
+/// drawn from vector primitives.
 std::optional<KitCaretTextPosition> lcl_GetCaretTextPosition(const SwCursorShell& rShell)
 {
+    // Without a page served from primitives the message holds the rectangle alone, so a caret
+    // that moves over a zero-width character, such as a comment anchor, repeats the last message
+    // and the client gets no new one.
+    const SwDocShell* pDocShell = rShell.GetDoc()->GetDocShell();
+    const rtl::Reference<SwXTextDocument> xModel
+        = pDocShell ? pDocShell->GetBaseModel() : rtl::Reference<SwXTextDocument>();
+    if (!xModel.is() || !xModel->getVectorParts())
+        return std::nullopt;
+
     const SwContentFrame* pFrame = rShell.GetCurrFrame(/*bCalcFrame=*/false);
     if (!pFrame || !pFrame->IsTextFrame())
         return std::nullopt;
