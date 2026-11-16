@@ -1820,7 +1820,7 @@ msgstr "Aktion-Aufklappmenü"
 
 #: src/control/Control.JSDialogBuilder.js:1788
 msgid "Open {name}"
-msgstr "{Name} öffnen"
+msgstr "{name} öffnen"
 
 #: src/control/Control.JSDialogBuilder.js:2072
 #: src/control/Control.Menubar.ts:941
@@ -2140,7 +2140,7 @@ msgstr "Eigenschaften"
 #: src/control/Control.Menubar.ts:406 src/control/Control.Menubar.ts:1103
 #: src/control/Control.NotebookbarWriter.js:474
 msgid "Screen Reading"
-msgstr "Stimme Über"
+msgstr "Screenreader"
 
 #: src/control/Control.Menubar.ts:419
 #: src/control/Control.NotebookbarWriter.js:438
@@ -4833,7 +4833,7 @@ msgid ""
 "when more than {docs} documents or {connections} connections are in use "
 "concurrently."
 msgstr ""
-"Dies ist eine nicht unterstützte Version von {Produktname}. Um den Eindruck "
+"Dies ist eine nicht unterstützte Version von {productname}. Um den Eindruck "
 "zu vermeiden, dass es für den Einsatz in Unternehmen geeignet ist, wird "
 "diese Meldung angezeigt, wenn mehr als {docs} Dokumente oder {connections} "
 "Verbindungen gleichzeitig verwendet werden."
@@ -5590,9 +5590,6 @@ msgstr ""
 #~ msgid "Spreadsheet"
 #~ msgstr "Tabellendokument"
 
-#~ msgid "Sheets"
-#~ msgstr "Tabellen"
-
 #~ msgid "Parts"
 #~ msgstr "Teile"
 
@@ -6111,9 +6108,6 @@ msgstr ""
 #~ msgid "Toggle Ruler"
 #~ msgstr "Lineal ein- und ausblenden"
 
-#~ msgid "Menu"
-#~ msgstr "Menü"
-
 #~ msgid "Start Presentation"
 #~ msgstr "Präsentation starten"
 
@@ -6246,3 +6240,57 @@ msgstr ""
 
 #~ msgid "Oops, there is a problem connecting to Collabora Online : "
 #~ msgstr "Es ist ein Fehler beim Verbinden mit Collabora Online aufgetreten: "
+
+#: src/canvas/sections/CommentSection.ts:319
+msgid "comment"
+msgstr "Kommentar"
+
+#: src/canvas/sections/CommentSection.ts:486
+msgid "Reply to {0}"
+msgstr "Auf {0} antworten"
+
+#: src/canvas/sections/CommentSection.ts:597
+msgid "Removed"
+msgstr "Entfernt"
+
+#: src/control/AccessibilityNotice.ts:35 src/control/AccessibilityNotice.ts:66
+msgid "This mobile view is not fully accessible."
+msgstr "Diese mobile Ansicht ist nicht vollständig barrierefrei."
+
+#: src/control/AccessibilityNotice.ts:42
+msgid "Accessibility statement"
+msgstr "Erklärung zur Barrierefreiheit"
+
+#: src/control/Control.Menubar.ts:1819
+msgid "Menu"
+msgstr "Menü"
+
+#: src/control/Control.NotebookbarWriter.js:428
+msgid "Lets a screen reader follow the cursor and read the document"
+msgstr ""
+"Ermöglicht einem Screenreader, dem Cursor zu folgen und das Dokument "
+"vorzulesen"
+
+#: src/control/Control.Tabs.js:171
+msgid "Sheets"
+msgstr "Blätter"
+
+#: src/control/Control.Tabs.js:285
+msgid "{0}, protected"
+msgstr "{0}, geschützt"
+
+#: src/control/Control.UIManager.ts:103
+msgid "Main"
+msgstr "Haupt"
+
+#: src/layer/marker/A11yTextInput.js:84
+msgid "Slide"
+msgstr "Folie"
+
+#: src/slideshow/PresenterConsole.js:42
+msgid "Preview of the current slide"
+msgstr "Vorschau der aktuellen Folie"
+
+#: src/slideshow/PresenterConsole.js:43
+msgid "Preview of the next slide"
+msgstr "Vorschau der nächsten Folie"
