@@ -163,8 +163,9 @@ struct DocumentTab
     wil::com_ptr<ICoreWebView2Controller> webViewController;
     wil::com_ptr<ICoreWebView2> webView;
     std::thread app2js;
-    // The origin of the address an account window was opened with, empty in any other window.
+    // The origin of the account window's first page, empty in any other window.
     std::string accountOrigin;
+    bool isFirstPageLoaded = false;
     std::string editorForm;
     std::string editorFormUrl;
     // The form's Origin header named the integrator. Nextcloud's says "null" (Referrer-Policy:
@@ -307,6 +308,8 @@ static const int CODA_WM_MOVETABTONEWWINDOW = WM_APP + 8;
 // Moves the tab named in the wParam from another window into this one, to the position in the
 // tab order given in the lParam, or to the end when that is -1. Posted for the same reason.
 static const int CODA_WM_MOVETABTOWINDOW = WM_APP + 9;
+// Says why an account window stays empty, then closes it. The wParam owns the text.
+static const int CODA_WM_REFUSEREDIRECT = WM_APP + 11;
 
 // One file pick the engine asked for, posted as CODA_WM_SHOWFILEPICKER to the hidden owner
 // window; the wide strings own the dialog's title and filter text.
@@ -2334,6 +2337,15 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                 tab->webView->PostWebMessageAsJson(
                     Util::string_to_wide_string(std::string((char*)wParam)).c_str());
             std::free((char*)wParam);
+            break;
+        }
+
+        case CODA_WM_REFUSEREDIRECT:
+        {
+            std::unique_ptr<std::wstring> text(reinterpret_cast<std::wstring*>(wParam));
+
+            MessageBoxW(hWnd, text->c_str(), L"Account not opened", MB_OK | MB_ICONWARNING);
+            PostMessageW(hWnd, WM_CLOSE, 0, 0);
             break;
         }
 
@@ -5879,15 +5891,37 @@ static void keepOnIntegratorSite(int accountTabId, ICoreWebView2NavigationStarti
 
     wil::unique_cotaskmem_string address;
     args->get_Uri(&address);
-    if (originOf(address.get()) == account->accountOrigin)
+    const std::string targetOrigin = originOf(address.get());
+    if (targetOrigin == account->accountOrigin)
         return;
-
-    args->put_Cancel(TRUE);
 
     BOOL isUserInitiated = FALSE;
     BOOL isRedirected = FALSE;
     args->get_IsUserInitiated(&isUserInitiated);
     args->get_IsRedirected(&isRedirected);
+
+    if (isRedirected && !account->isFirstPageLoaded)
+    {
+        if (Uri::isWithinSite(account->accountOrigin, targetOrigin))
+        {
+            account->accountOrigin = targetOrigin;
+            LOG_INF("The account address redirects within its site");
+            return;
+        }
+
+        args->put_Cancel(TRUE);
+        LOG_WRN("The account window refused: the account address redirects to another site");
+
+        const std::string text = account->accountOrigin + " redirected to " + targetOrigin +
+                                 ", so the account was not opened. Only a redirect within the "
+                                 "same site is followed.";
+        auto* wideText = new std::wstring(Util::string_to_wide_string(text));
+
+        PostMessageW(account->hWnd, CODA_WM_REFUSEREDIRECT, (WPARAM)wideText, 0);
+        return;
+    }
+
+    args->put_Cancel(TRUE);
 
     if (!isUserInitiated || isRedirected)
     {
@@ -5996,6 +6030,23 @@ static void openAccountWindow(const std::string& url)
                                     -> HRESULT
                                 {
                                     keepOnIntegratorSite(accountTabId, args);
+                                    return S_OK;
+                                })
+                                .Get(),
+                            &token);
+
+                        account->webView->add_NavigationCompleted(
+                            Microsoft::WRL::Callback<ICoreWebView2NavigationCompletedEventHandler>(
+                                [accountTabId](ICoreWebView2*,
+                                               ICoreWebView2NavigationCompletedEventArgs* args)
+                                    -> HRESULT
+                                {
+                                    BOOL isSuccess = FALSE;
+                                    args->get_IsSuccess(&isSuccess);
+
+                                    DocumentTab* account = findTab(accountTabId);
+                                    if (account && isSuccess)
+                                        account->isFirstPageLoaded = true;
                                     return S_OK;
                                 })
                                 .Get(),
