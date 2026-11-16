@@ -496,13 +496,17 @@ QString Bridge::writeRemoteDocFile(const QString& filename,
 {
     // Extension drives core's filter detection; keep whatever the
     // integrator gave us via /co/collab/fetch's filename field.
-    QString ext;
-    int dot = filename.lastIndexOf('.');
-    if (dot >= 0)
-        ext = filename.mid(dot);
+    const std::string extension = FileUtil::extractFileExtension(filename.toStdString());
+    if (!FileUtil::isPlainExtension(extension))
+    {
+        LOG_WRN("writeRemoteDocFile: extension \"" << extension
+                                                    << "\" is not only letters and digits");
+        return {};
+    }
 
+    const QString ext = QString::fromStdString(extension);
     // The version store excludes this prefix (see initializeVersionStore).
-    QTemporaryFile tmp(QDir::tempPath() + "/coda-remote-XXXXXX" + ext);
+    QTemporaryFile tmp(QDir::tempPath() + "/coda-remote-XXXXXX." + ext);
     if (!tmp.open())
     {
         LOG_ERR("writeRemoteDocFile: cannot open temp file");
