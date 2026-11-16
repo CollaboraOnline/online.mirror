@@ -29,6 +29,7 @@ class BackstageView extends window.L.Class {
 	private templateSearchQuery: string = '';
 	private templateFilter: TemplateFilter = 'all';
 	private templateSectionsContainer: HTMLElement | null = null;
+	private newViewStartRow: HTMLElement | null = null;
 	private manageSearchQuery: string = '';
 	private manageFilter: TemplateFilter = 'all';
 	private manageListContainer: HTMLElement | null = null;
@@ -764,6 +765,7 @@ class BackstageView extends window.L.Class {
 		this.setActiveTab('backstage-new');
 		this.clearContent();
 		this.templateSectionsContainer = null;
+		this.newViewStartRow = null;
 
 		this.contentArea.appendChild(BackstageTemplates.sectionHeader(_('New')));
 
@@ -775,10 +777,11 @@ class BackstageView extends window.L.Class {
 			return;
 		}
 
+		this.newViewStartRow = this.buildNewViewStartRow();
 		this.templateSectionsContainer = this.buildTemplateSections();
 		this.contentArea.appendChild(
 			BackstageTemplates.templateExplorer({
-				blankTemplates: this.getNewViewBlankTemplates(),
+				startRow: this.newViewStartRow,
 				searchQuery: this.templateSearchQuery,
 				filter: this.templateFilter,
 				sections: this.templateSectionsContainer,
@@ -813,8 +816,29 @@ class BackstageView extends window.L.Class {
 			onAddTemplate: () =>
 				this.showAddTemplateDialog(() => this.renderNewView()),
 			onManageTemplates: () => this.renderManageTemplatesView(),
-			favoriteState: (template) =>
-				this.favoriteState(template, () => this.updateTemplateSections()),
+			favoriteState: (template) => this.newViewFavoriteState(template),
+		});
+	}
+
+	private buildNewViewStartRow(): HTMLElement {
+		return BackstageTemplates.newViewStartRow({
+			favoriteTemplates: this.getFavoriteTemplates(),
+			favoriteState: (template) => this.newViewFavoriteState(template),
+			blankTemplates: this.getNewViewBlankTemplates(),
+			onTemplateClick: (t) => this.triggerNewDocument(t),
+		});
+	}
+
+	private newViewFavoriteState(
+		template: TemplateData,
+	): BackstageTemplates.TemplateFavoriteState {
+		return this.favoriteState(template, () => {
+			if (this.newViewStartRow) {
+				const row = this.buildNewViewStartRow();
+				this.newViewStartRow.replaceWith(row);
+				this.newViewStartRow = row;
+			}
+			this.updateTemplateSections();
 		});
 	}
 
@@ -975,6 +999,7 @@ class BackstageView extends window.L.Class {
 		this.setActiveTab('backstage-new');
 		this.clearContent();
 		this.templateSectionsContainer = null;
+		this.newViewStartRow = null;
 
 		this.manageListContainer = this.buildManageTemplatesList();
 		this.contentArea.appendChild(
