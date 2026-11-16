@@ -431,6 +431,7 @@ shared_headers = \
                  common/Crypto.hpp \
                  common/DraftStore.hpp \
                  common/EditorFrameMessages.hpp \
+                 common/FileExtensions.hpp \
                  common/FileUtil.hpp \
                  common/Globals.hpp \
                  common/HexUtil.hpp \

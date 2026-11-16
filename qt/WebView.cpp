@@ -24,6 +24,7 @@
 #include <qt/bridge.hpp>
 #include <qt/CODocumentBroker.hpp>
 #include <common/CODAConfig.hpp>
+#include <common/FileExtensions.hpp>
 #include <qt/DBusService.hpp>
 #include <common/DraftStore.hpp>
 #include <net/FakeSocket.hpp>
@@ -1155,19 +1156,7 @@ std::optional<bool> portalPrefersDark()
 QString WebView::docTypeFromExtension(const QString& filePath)
 {
     const QString ext = QFileInfo(filePath).suffix().toLower();
-    static const QStringList writerExt = { "odt", "ott", "doc", "docx", "rtf", "txt", "fodt" };
-    static const QStringList calcExt = { "ods", "ots", "xls", "xlsx", "csv", "fods" };
-    static const QStringList impressExt = { "odp", "otp", "ppt", "pptx", "fodp" };
-    static const QStringList drawExt = { "odg", "otg", "fodg" };
-    if (writerExt.contains(ext))
-        return QStringLiteral("writer");
-    if (calcExt.contains(ext))
-        return QStringLiteral("calc");
-    if (impressExt.contains(ext))
-        return QStringLiteral("impress");
-    if (drawExt.contains(ext))
-        return QStringLiteral("draw");
-    return QStringLiteral("other");
+    return QString::fromStdString(FileExtensions::docTypeFromSuffix(ext.toStdString()));
 }
 
 void WebView::load(const Poco::URI& fileURL, bool isStarterMode, bool asDraft,
