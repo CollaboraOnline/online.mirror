@@ -4109,3 +4109,22 @@ msgstr ""
 "Dialogfeld „Bereich“ auf der Registerkarte „Farbe“ mit einer Farbpalette, "
 "Vorschauen für aktive und neue Farben, Feldern für RGB-Werte und einem "
 "Bereich für benutzerdefinierte Paletten"
+
+#: html/cool-help.html%2Bdiv.p:10-5
+msgid ""
+"On some keyboards, the keys <kbd>F1</kbd> to <kbd>F12</kbd> need the "
+"<kbd>Fn</kbd> key held down as well, for example <kbd>Shift</kbd><span "
+"class=\"kbd--plus\" aria-hidden=\"true\">+</span><kbd>Fn</kbd><span "
+"class=\"kbd--plus\" aria-hidden=\"true\">+</span><kbd>F10</kbd>."
+msgstr ""
+"Auf manchen Tastaturen muss für die Tasten <kbd>F1</kbd> bis <kbd>F12</kbd> "
+"zusätzlich die Taste <kbd>Fn</kbd> gedrückt gehalten werden, zum Beispiel "
+"<kbd>Umschalt</kbd><span class=\"kbd--plus\" aria-"
+"hidden=\"true\">+</span><kbd>Fn</kbd><span class=\"kbd--plus\" aria-"
+"hidden=\"true\">+</span><kbd>F10</kbd>."
+
+#: html/cool-help.html%2Bdiv.div.div.table.tr.td:161-38
+msgid "Renames the focused sheet tab, the same as double-clicking it."
+msgstr ""
+"Benennt die aktivierte Arbeitsblatt-Registerkarte um, wie ein Doppelklick "
+"darauf."
