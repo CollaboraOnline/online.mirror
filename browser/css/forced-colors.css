@@ -160,4 +160,13 @@
 		background-color: CanvasText !important;
 	}
 
+	@layer forced-colors-icons {
+		:is(.unotoolbutton, .unobutton) img.icon-maskable:not(.locking-disabled img) {
+			background-color: ButtonText !important;
+			background-image: none !important;
+			padding-left: 0 !important;
+			transform: none !important;
+		}
+	}
+
 }
