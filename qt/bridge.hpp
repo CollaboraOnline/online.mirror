@@ -81,6 +81,10 @@ class Bridge : public QObject
     // The temporary copy of a remote document. It is removed with this bridge.
     QString _remoteCopyPath;
 
+    // Whether the page of an editor frame has ended its local session (through BYE or
+    // switchToServerMode), so that its appDocId has no document to rejoin:
+    bool _localSessionEnded = false;
+
     void promptSaveLocation(std::function<void(const std::string&, const std::string&)> callback);
     void saveDocumentAs();
     void createAndStartMessagePumpThread();
