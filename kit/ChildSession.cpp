@@ -1352,12 +1352,13 @@ void ChildSession::parseLoadCommand(const StringVector& tokens, std::string& par
         }
         else if (name == "template")
         {
-            _docTemplate = std::move(value);
+            _docTemplate = Uri::decode(value);
         }
         else if (name == "thumbnailSizes")
         {
-            _thumbnailSizes = Thumbnail::parseSizeList(value);
-            LOG_DBG("Read " << _thumbnailSizes.size() << " thumbnail sizes from [" << value << ']');
+            const std::string sizes = Uri::decode(value);
+            _thumbnailSizes = Thumbnail::parseSizeList(sizes);
+            LOG_DBG("Read " << _thumbnailSizes.size() << " thumbnail sizes from [" << sizes << ']');
         }
         else if (name == "enableMacrosExecution")
         {
@@ -1369,7 +1370,7 @@ void ChildSession::parseLoadCommand(const StringVector& tokens, std::string& par
         }
         else if (name == "originaldocumenturl")
         {
-            _originalDocUrl = std::move(value);
+            _originalDocUrl = Uri::decode(value);
         }
         else if (name == "verifyHost")
         {
@@ -1383,7 +1384,7 @@ void ChildSession::parseLoadCommand(const StringVector& tokens, std::string& par
         {
             setLang(Uri::decode(value));
         }
-        else if (!applyBrowserLoadOption(name, std::move(value), part))
+        else if (!applyBrowserLoadOption(name, Uri::decode(value), part))
         {
             LOG_WRN("Ignoring the unknown load option [" << name << ']');
         }
