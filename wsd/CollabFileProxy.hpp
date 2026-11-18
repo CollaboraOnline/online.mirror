@@ -18,7 +18,9 @@
 
 #include <istream>
 #include <memory>
+#include <span>
 #include <string>
+#include <string_view>
 
 class CheckFileInfo;
 
@@ -33,9 +35,11 @@ public:
 
     /// Handle a fetch request with a pre-authorized URL (from WebSocket token)
     /// This bypasses CheckFileInfo since the token already validated access.
+    /// The body goes to the client with the value of each of secretFields left empty.
     void handleFetchRequest(const std::string& streamUrl, bool hostChecked,
                             const std::shared_ptr<TerminatingPoll>& poll,
-                            SocketDisposition& disposition);
+                            SocketDisposition& disposition,
+                            std::span<const std::string_view> secretFields = {});
 
     /// Handle an upload request with a pre-authorized URL (from WebSocket token)
     /// This bypasses CheckFileInfo since the token already validated access.
@@ -60,6 +64,9 @@ private:
     const std::weak_ptr<StreamSocket> _socket;
     const std::string _wopiSrc;
     const std::string _accessToken;
+    /// The fields of the downloaded body that hold a stored secret. The lists have static
+    /// storage duration.
+    std::span<const std::string_view> _secretFields;
     std::string _uploadBody;
     std::string _uploadLastModifiedTime;
     // Whether the upload was tried again, or checked in storage, after a temporary error or no

@@ -1509,7 +1509,9 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
 
             // Download directly from the pre-configured stream URL
             proxy->handleFetchRequest(fetchRequest.streamUrl, fetchRequest.hostChecked,
-                                      COOLWSD::getWebServerPoll(), disposition);
+                                      COOLWSD::getWebServerPoll(), disposition,
+                                      CollabSocketHandler::settingsSecretFields(
+                                          fetchRequest.stream, fetchRequest.streamUrl));
         }
         else if (isCollab && requestDetails.equals(2, "put"))
         {
