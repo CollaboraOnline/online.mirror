@@ -1068,7 +1068,7 @@ void ChildSession::parseLoadCommand(const StringVector& tokens, int& part)
         }
         else if (name == "template")
         {
-            _docTemplate = std::move(value);
+            _docTemplate = Uri::decode(value);
         }
         else if (name == "enableMacrosExecution")
         {
@@ -1092,13 +1092,13 @@ void ChildSession::parseLoadCommand(const StringVector& tokens, int& part)
         }
         else if (name == "infilterOptions")
         {
-            _inFilterOptions = std::move(value);
+            _inFilterOptions = Uri::decode(value);
         }
         else if (name == "part")
         {
             // Only a part named first on the line is read.
         }
-        else if (!applyBrowserLoadOption(name, value))
+        else if (std::string decoded = Uri::decode(value); !applyBrowserLoadOption(name, decoded))
         {
             LOG_WRN("Ignoring the unknown load option [" << name << ']');
         }
@@ -1121,9 +1121,6 @@ bool ChildSession::loadDocument(const StringVector& tokens)
     }
 
     parseLoadCommand(tokens, part);
-    // coolwsd sends infilterOptions and lang URI-encoded on the load line.
-    setInFilterOptions(Uri::decode(getInFilterOption()));
-    setLang(Uri::decode(getLang()));
 
     assert(!getDocURL().empty());
     assert(!getJailedFilePath().empty());
