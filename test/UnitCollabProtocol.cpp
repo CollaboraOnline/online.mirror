@@ -17,6 +17,7 @@
 
 #include <Poco/JSON/Parser.h>
 #include <Poco/Net/HTTPRequest.h>
+#include <Poco/Util/LayeredConfiguration.h>
 
 #include <chrono>
 
@@ -91,6 +92,11 @@ public:
         , _phase(Phase::T1_Connect1)
         , _checkFileInfoCount(0)
     {
+    }
+
+    void configure(Poco::Util::LayeredConfiguration & config) override {
+        WopiTestServer::configure(config);
+        config.setBool("client_document_loading.enable", true);
     }
 
     void configCheckFileInfo(const Poco::Net::HTTPRequest& request,
@@ -364,6 +370,11 @@ public:
         , _phase(Phase::Connect)
         , _refused(0)
     {
+    }
+
+    void configure(Poco::Util::LayeredConfiguration & config) override {
+        WopiTestServer::configure(config);
+        config.setBool("client_document_loading.enable", true);
     }
 
     std::unique_ptr<http::Response>

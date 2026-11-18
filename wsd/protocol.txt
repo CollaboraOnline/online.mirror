@@ -2216,7 +2216,8 @@ Connection:
 
     wss://<host>/co/collab/<docKey>?wopiSrc=<wopi-url>&access_token=<token>
 
-    <docKey> is the same key used for the /cool/ws session of the document.  wopiSrc and
+    The server refuses the upgrade with 400 when client_document_loading.enable in coolwsd.xml is
+    off.  <docKey> is the same key used for the /cool/ws session of the document.  wopiSrc and
     access_token authenticate the user against the integrator.  Until the server has validated them
     it sends "progress: validating", and replies with one of
 
