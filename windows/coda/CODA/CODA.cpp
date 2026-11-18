@@ -929,6 +929,14 @@ void postReplyToCall(HWND hWnd, int tabId, int id, const Poco::Dynamic::Var& rep
 }
 } // namespace
 
+// Zooms the whole page by the user interface zoom from the Options dialog. With no zoom picked,
+// the page is at its normal size, which already follows the scaling of the display.
+static void applyUIZoom(ICoreWebView2Controller* controller)
+{
+    const int percent = Desktop::getUIZoomPercent();
+    controller->put_ZoomFactor(percent > 0 ? std::clamp(percent / 100.0, 0.25, 5.0) : 1.0);
+}
+
 static void do_getrecentdocs(const DocumentTab& data, int id)
 {
     postReplyToCall(data.hWnd, data.tabId, id, recentFiles.serialiseFiltered(currentlyOpenDocumens()));
@@ -4721,6 +4729,8 @@ static void createDocumentView(int tabId)
 
                         installTabSwitchAccelerator(controller);
 
+                        applyUIZoom(controller);
+
                         // Fit the WebView to the part of the window below the tab strip. It stays
                         // hidden until its page has something styled to show, so what fills the
                         // window until then is the frame, in the colour of the theme.
@@ -5967,6 +5977,24 @@ static void processMessage(DocumentTab& data, wil::unique_cotaskmem_string& mess
         {
             uploadAndApplySettings(Util::wide_string_to_string(s.substr(strlen("UPLOADSETTINGS "))));
         }
+        else if (s.starts_with(L"SETUIZOOM "))
+        {
+            int percent = 0;
+            try
+            {
+                percent = std::stoi(s.substr(strlen("SETUIZOOM ")));
+            }
+            catch (const std::exception&)
+            {
+                LOG_ERR("Invalid user interface zoom: " << Util::wide_string_to_string(s));
+                return;
+            }
+            Desktop::setUIZoomPercent(percent);
+            // The zoom is a preference of the whole app, so every open document follows it at once.
+            for (auto& i : documentTabs)
+                if (i.second.webViewController)
+                    applyUIZoom(i.second.webViewController.get());
+        }
         else if (s.starts_with(L"SETDARKMODE "))
         {
             Desktop::setDarkMode(s.substr(strlen("SETDARKMODE ")) == L"true");
@@ -6381,6 +6409,10 @@ static void processMessage(DocumentTab& data, wil::unique_cotaskmem_string& mess
                 reply->set("content", result.content);
                 postReplyToCall(data.hWnd, data.tabId, id, reply);
             }
+        }
+        else if (s == L"GETUIZOOM")
+        {
+            postReplyToCall(data.hWnd, data.tabId, id, Desktop::getUIZoomPercent());
         }
         else if (s == L"FETCHSETTINGSCONFIG")
         {
