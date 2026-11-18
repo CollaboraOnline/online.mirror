@@ -126,4 +126,5 @@
 /// <reference path="./NotebookbarTabs.test.ts" />
 /// <reference path="./DocPartChanged.test.ts" />
 /// <reference path="./CloudDialogs.test.ts" />
+/// <reference path="./AccountPresetSync.test.ts" />
 // NOTE: reference new tests here ...
