@@ -49,6 +49,7 @@
 #include <wsd/FileServer.hpp>
 #if !MOBILEAPP
 #include <wsd/HostUtil.hpp>
+#include <wsd/RemoteDocumentBroker.hpp>
 #endif
 #if !MOBILEAPP || defined(QTAPP) || defined(MACOSAPP) || defined(_WIN32)
 #include <wsd/AIChatSession.hpp>
@@ -2830,6 +2831,14 @@ bool ClientSession::loadDocument(const char* /*buffer*/, int /*length*/,
                 // makes the connection a headless one.
                 if (value.empty())
                     continue;
+
+                if (!RemoteDocumentBroker::isEnabled())
+                {
+                    LOG_WRN("Refusing to load a view of [" << docBroker->getDocKey()
+                            << "] for another document: remote_links is disabled");
+                    sendTextFrameAndLogError("error: cmd=load kind=disabled");
+                    return false;
+                }
 
                 _isRemoteDocumentConnection = true;
                 docBroker->addToIncomingDocKeyChain(value);
