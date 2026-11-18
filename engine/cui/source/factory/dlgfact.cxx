@@ -917,6 +917,10 @@ public:
     }
     void SetInputSet(const SfxItemSet* pInSet) override { m_pDlg->SetInputSet(pInSet); }
     void SetText(const OUString& rStr) override { m_pDlg->set_title(rStr); }
+    void SetSlideBackground(const SfxItemSet& rFill) override
+    {
+        m_pDlg->SetSlideBackground(rFill);
+    }
 };
 }
 

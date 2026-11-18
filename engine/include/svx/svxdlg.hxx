@@ -229,6 +229,10 @@ class AbstractSvxAreaTabDialog :public SfxAbstractTabDialog
 {
 protected:
     virtual ~AbstractSvxAreaTabDialog() override = default;
+public:
+    /// Sets the fill that a shape with the Use Background fill shows, as the item set of the page
+    /// that holds it.
+    virtual void SetSlideBackground(const SfxItemSet& rFill) = 0;
 };
 
 struct SvxSwFrameValidation;

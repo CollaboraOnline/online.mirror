@@ -43,10 +43,12 @@ def set_custom_color(ui_test, dialog, hex_color):
         xHex.executeAction("TYPE", mkPropertyValues({"TEXT": hex_color}))
 
 def select_fill(test, dialog, fill):
-    """Sets the fill named fill with its first preset: "none", "color" (Light Blue 2 of the
-    Standard palette), "gradient", "hatch", "image" or "pattern"."""
+    """Sets the fill named fill with its first preset: "none", "use background", "color" (Light
+    Blue 2 of the Standard palette), "gradient", "hatch", "image" or "pattern"."""
     if fill == "none":
         select_by_text(dialog.getChild("paletteselector"), "None")
+    elif fill == "use background":
+        select_by_text(dialog.getChild("paletteselector"), "Use Background")
     elif fill == "color":
         select_palette_color(dialog, "Standard", "56")
     elif fill == "pattern":
@@ -62,7 +64,8 @@ def select_fill(test, dialog, fill):
             pass
 
 def get_fill_caption(dialog):
-    """The caption under the fill preview, such as "Color: Yellow (#FFFF00)" or "None"."""
+    """The caption under the fill preview, such as "Color: Yellow (#FFFF00)", "None" or
+    "Slide background"."""
     return get_state_as_dict(dialog.getChild("previewcaption"))["Text"]
 
 # vim: set shiftwidth=4 softtabstop=4 expandtab:

@@ -22,6 +22,15 @@
 #include <memory>
 #include <vector>
 
+/// The entry that the palette list of the Color page stands for: a palette, or a fill without a
+/// color.
+enum class ColorFillEntry
+{
+    Palette,
+    None,
+    UseBackground
+};
+
 /// The Color page of an Area or Background tab: the swatches of a palette, Pattern Style and the
 /// custom palette beside them, and one preview of the whole fill under both.
 class SvxColorFillTabPage final : public SfxTabPage
@@ -56,14 +65,20 @@ public:
     {
         m_aNoneSelectedHdl = rLink;
     }
+    // Called after the user selects Use Background in the palette list. While unset, the list has
+    // no Use Background.
+    void SetUseBackgroundSelectedHdl(const Link<SvxColorFillTabPage&, void>& rLink)
+    {
+        m_aUseBackgroundSelectedHdl = rLink;
+    }
     // Called when the preview has to be drawn again. While unset, the preview shows the color.
     void SetUpdatePreviewHdl(const Link<SvxColorFillTabPage&, void>& rLink)
     {
         m_aUpdatePreviewHdl = rLink;
     }
 
-    // Shows None in the palette list, or the palette again.
-    void SetNoFill(bool bNoFill);
+    // Shows None or Use Background in the palette list, or the palette again.
+    void SetFillEntry(ColorFillEntry eEntry);
 
     // Draws the preview again, through the handler when one is set.
     void UpdatePreview();
@@ -80,7 +95,9 @@ public:
     void HidePatternControls();
 
 private:
-    // The palette index of the selected list entry, or -1 for None.
+    // What the selected list entry stands for.
+    ColorFillEntry SelectedEntry() const;
+    // The palette index of the selected list entry, or -1 for None and Use Background.
     sal_Int32 SelectedPalette() const;
     void FillPaletteList();
     void ShowPalette(sal_Int32 nPalette);
@@ -109,15 +126,17 @@ private:
 
     Link<SvxColorFillTabPage&, void> m_aColorChangedHdl;
     Link<SvxColorFillTabPage&, void> m_aNoneSelectedHdl;
+    Link<SvxColorFillTabPage&, void> m_aUseBackgroundSelectedHdl;
     Link<SvxColorFillTabPage&, void> m_aUpdatePreviewHdl;
 
     // The fill of the current color, with the color item and a solid fill style.
     SfxItemSet m_aColorFill;
     NamedColor m_aColor;
-    // The palette whose swatches the page shows, which stays the same while None is selected.
+    // The palette whose swatches the page shows, which stays the same while None or Use Background
+    // is selected.
     sal_Int32 m_nPalette = -1;
-    // True when the fill is None.
-    bool m_bNoFill = false;
+    // None or Use Background when the fill is that one, and Palette for every other fill.
+    ColorFillEntry m_eFillEntry = ColorFillEntry::Palette;
 
     PaletteManager m_aPalettes;
     std::vector<NamedColor> m_aPaletteColors;

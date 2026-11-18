@@ -36,6 +36,8 @@ namespace
 {
 // The palette list entry that stands for no fill.
 constexpr OUString NONE_ID = u"none"_ustr;
+// The palette list entry that stands for the fill with the slide background.
+constexpr OUString USE_BACKGROUND_ID = u"usebackground"_ustr;
 // The palette manager lists the user's own palette first.
 constexpr sal_Int32 CUSTOM_PALETTE = 0;
 
@@ -162,10 +164,20 @@ void SvxColorFillTabPage::Construct()
         FillPaletteList();
 }
 
+ColorFillEntry SvxColorFillTabPage::SelectedEntry() const
+{
+    const OUString sId = m_xPaletteList->get_active_id();
+    if (sId == NONE_ID)
+        return ColorFillEntry::None;
+    if (sId == USE_BACKGROUND_ID)
+        return ColorFillEntry::UseBackground;
+    return ColorFillEntry::Palette;
+}
+
 sal_Int32 SvxColorFillTabPage::SelectedPalette() const
 {
     const OUString sId = m_xPaletteList->get_active_id();
-    return sId.isEmpty() || sId == NONE_ID ? -1 : sId.toInt32();
+    return sId.isEmpty() || SelectedEntry() != ColorFillEntry::Palette ? -1 : sId.toInt32();
 }
 
 void SvxColorFillTabPage::FillPaletteList()
@@ -173,6 +185,8 @@ void SvxColorFillTabPage::FillPaletteList()
     m_xPaletteList->clear();
     if (m_aNoneSelectedHdl.IsSet())
         m_xPaletteList->append(NONE_ID, CuiResId(RID_CUISTR_FILL_NONE));
+    if (m_aUseBackgroundSelectedHdl.IsSet())
+        m_xPaletteList->append(USE_BACKGROUND_ID, CuiResId(RID_CUISTR_FILL_USE_BACKGROUND));
     const std::vector<OUString> aPaletteNames = m_aPalettes.GetPaletteList();
     for (size_t nPalette = 0; nPalette < aPaletteNames.size(); ++nPalette)
         m_xPaletteList->append(OUString::number(nPalette), aPaletteNames[nPalette]);
@@ -221,8 +235,8 @@ void SvxColorFillTabPage::ShareColorList()
 void SvxColorFillTabPage::SelectCurrentColor()
 {
     m_xColors->unselect_all();
-    // Without a fill no swatch is selected, so a click on any of them sets one.
-    if (m_bNoFill)
+    // A fill without a color has no swatch selected, so a click on any of them sets one.
+    if (m_eFillEntry != ColorFillEntry::Palette)
         return;
     for (size_t nPosition = 0; nPosition < m_aPaletteColors.size(); ++nPosition)
     {
@@ -248,11 +262,11 @@ void SvxColorFillTabPage::SetColor(const NamedColor& rColor)
 
 void SvxColorFillTabPage::UpdateButtons()
 {
-    const bool bNoFill = m_xPaletteList->get_active_id() == NONE_ID;
-    m_xAdd->set_sensitive(!bNoFill);
+    const bool bNoColor = SelectedEntry() != ColorFillEntry::Palette;
+    m_xAdd->set_sensitive(!bNoColor);
 
     // Only a color of the custom palette can be removed from it.
-    const bool bCustomColor = !bNoFill && m_nPalette == CUSTOM_PALETTE
+    const bool bCustomColor = !bNoColor && m_nPalette == CUSTOM_PALETTE
                               && lclSelectedPosition(*m_xColors) >= 0;
     m_xRemove->set_sensitive(bCustomColor);
     if (bCustomColor)
@@ -263,21 +277,24 @@ void SvxColorFillTabPage::UpdateButtons()
         m_xRemove->set_tooltip_text(CuiResId(RID_CUISTR_DELETEUSERCOLOR1));
 }
 
-void SvxColorFillTabPage::SetNoFill(bool bNoFill)
+void SvxColorFillTabPage::SetFillEntry(ColorFillEntry eEntry)
 {
-    if (!m_aNoneSelectedHdl.IsSet())
+    // Only an entry that the list offers is shown.
+    if ((eEntry == ColorFillEntry::None && !m_aNoneSelectedHdl.IsSet())
+        || (eEntry == ColorFillEntry::UseBackground && !m_aUseBackgroundSelectedHdl.IsSet()))
         return;
 
-    m_bNoFill = bNoFill;
-    if (!bNoFill)
+    m_eFillEntry = eEntry;
+    if (eEntry == ColorFillEntry::Palette)
     {
-        if (m_xPaletteList->get_active_id() == NONE_ID && m_nPalette >= 0)
+        if (SelectedEntry() != ColorFillEntry::Palette && m_nPalette >= 0)
             m_xPaletteList->set_active_id(OUString::number(m_nPalette));
     }
     else
     {
         // The swatches of the palette stay, so a click on one fills with it again.
-        m_xPaletteList->set_active_id(NONE_ID);
+        m_xPaletteList->set_active_id(eEntry == ColorFillEntry::None ? NONE_ID
+                                                                     : USE_BACKGROUND_ID);
         m_xColors->unselect_all();
         m_xRecentColors->unselect_all();
     }
@@ -377,13 +394,17 @@ DeactivateRC SvxColorFillTabPage::DeactivatePage(SfxItemSet* pSet)
 
 IMPL_LINK_NOARG(SvxColorFillTabPage, PaletteSelectedHdl, weld::ComboBox&, void)
 {
-    if (m_xPaletteList->get_active_id() == NONE_ID)
-    {
-        SetNoFill(true);
-        m_aNoneSelectedHdl.Call(*this);
-    }
-    else
+    const ColorFillEntry eEntry = SelectedEntry();
+    if (eEntry == ColorFillEntry::Palette)
         ShowPalette(SelectedPalette());
+    else
+    {
+        SetFillEntry(eEntry);
+        if (eEntry == ColorFillEntry::None)
+            m_aNoneSelectedHdl.Call(*this);
+        else
+            m_aUseBackgroundSelectedHdl.Call(*this);
+    }
     UpdatePreview();
 }
 

@@ -28,8 +28,28 @@
 #include <drawdoc.hxx>
 #include <View.hxx>
 #include <svx/svxdlg.hxx>
+#include <svx/svdpage.hxx>
+#include <svx/svdpagv.hxx>
 
 namespace sd {
+
+namespace
+{
+// The page properties whose fill a shape with the Use Background fill shows on pPage: those of the
+// slide, or those of its master when the slide has no fill. Nullptr when the shape shows no fill.
+const SdrPageProperties* lclGetSlideBackground(const SdrPage* pPage)
+{
+    if (!pPage)
+        return nullptr;
+    if (pPage->IsMasterPage())
+    {
+        // A master without a style has no fill of its own, only the default of the pool.
+        const SdrPageProperties& rProperties = pPage->getSdrPageProperties();
+        return rProperties.GetStyleSheet() ? &rProperties : nullptr;
+    }
+    return pPage->TRG_HasMasterPage() ? pPage->getCorrectSdrPageProperties() : nullptr;
+}
+}
 
 FuArea::FuArea( ViewShell& rViewSh, ::sd::Window* pWin, ::sd::View* _pView, SdDrawDocument& rDoc, SfxRequest& rReq)
 : FuPoor(rViewSh, pWin, _pView, rDoc, rReq)
@@ -57,6 +77,13 @@ void FuArea::DoExecute( SfxRequest& rReq )
     bool bHasSlideBackground = mrViewShell.GetDoc()->GetDocumentType() == DocumentType::Impress;
     VclPtr<AbstractSvxAreaTabDialog> pDlg(
         pFact->CreateSvxAreaTabDialog(mrViewShell.GetFrameWeld(), &aNewAttr, &mrDoc, true, bHasSlideBackground));
+    if (bHasSlideBackground)
+    {
+        const SdrPageView* pPageView = mpView->GetSdrPageView();
+        if (const SdrPageProperties* pBackground
+            = lclGetSlideBackground(pPageView ? pPageView->GetPage() : nullptr))
+            pDlg->SetSlideBackground(pBackground->GetItemSet());
+    }
 
     rtl::Reference<FuArea> xThis(this); // prevent premature release during async processing
     pDlg->StartExecuteAsync([pDlg, xThis=std::move(xThis)](sal_Int32 nResult){

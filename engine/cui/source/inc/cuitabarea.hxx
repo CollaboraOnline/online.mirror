@@ -67,6 +67,9 @@ class SvxAreaTabDialog final : public SfxTabDialogController
 
     ChangeType          mnColorListState;
 
+    // The fill items that a shape with the Use Background fill shows. Empty when unknown.
+    std::optional<SfxItemSet> moSlideBackground;
+
     virtual void        PageCreated(const OUString& rId, SfxTabPage &rPage) override;
 
     virtual short       Ok() override;
@@ -80,6 +83,9 @@ public:
     void                SetNewColorList( XColorListRef const & pColorList )
                             { mpNewColorList = pColorList; }
     const XColorListRef&  GetNewColorList() const { return mpNewColorList; }
+
+    // Keeps the fill items of rFill, with the values of its parents and of the pool.
+    void                SetSlideBackground(const SfxItemSet& rFill);
 };
 
 /************************************************************************/
@@ -184,9 +190,9 @@ inline constexpr OUString TABID_GRADIENT = u"lbgradient"_ustr;
 inline constexpr OUString TABID_HATCH = u"lbhatch"_ustr;
 inline constexpr OUString TABID_BITMAP = u"lbbitmap"_ustr;
 inline constexpr OUString TABID_PATTERN = u"lbpattern"_ustr;
-inline constexpr OUString TABID_USE_BACKGROUND = u"lbusebackground"_ustr;
 
 class SvxColorFillTabPage;
+enum class ColorFillEntry;
 
 /// A dialog with a tab for each of the gradient, hatch and image fills.
 class SvxFillEffectsDialog final : public SfxTabDialogController
@@ -297,6 +303,12 @@ private:
     std::optional<SfxItemSet> m_oEffectSet;
     // True when the fill is None.
     bool m_bNoFill = false;
+    // True when the page offers the Use Background fill.
+    bool m_bSlideBackground;
+    // True when the fill is Use Background. Never true together with m_bNoFill.
+    bool m_bUseBackground = false;
+    // The fill that a shape with the Use Background fill shows, or nullptr when it is unknown.
+    const SfxItemSet* m_pSlideBackground = nullptr;
     // Empty when the page offers no pattern, or before the Color page is built.
     std::unique_ptr<SvxPatternStyleBox> m_xPatternStyle;
     bool m_bOfferPattern = true;
@@ -320,6 +332,7 @@ private:
     DECL_LINK(CustomPatternHdl_Impl, weld::Button&, void);
     DECL_LINK(ColorChangedHdl_Impl, SvxColorFillTabPage&, void);
     DECL_LINK(NoneSelectedHdl_Impl, SvxColorFillTabPage&, void);
+    DECL_LINK(UseBackgroundSelectedHdl_Impl, SvxColorFillTabPage&, void);
     DECL_LINK(PatternChangedHdl_Impl, SvxPatternStyleBox&, void);
     DECL_LINK(UpdatePreviewHdl_Impl, SvxColorFillTabPage&, void);
     void CreatePatternStyle(SvxColorFillTabPage& rColorPage);
@@ -328,6 +341,12 @@ private:
     SvxColorFillTabPage* getColorTabPage();
     FillType getCurrentFillType();
     void ClearEffect();
+    // None or Use Background when the fill is that one, and Palette for every other fill.
+    ColorFillEntry getFillEntry() const;
+    // Sets which fill without a color is in use, if any, and shows it in the palette list.
+    void SetFillEntry(ColorFillEntry eEntry);
+    // Makes None or Use Background the fill, in place of the color, the pattern or the effect.
+    void SelectFillEntry(ColorFillEntry eEntry);
 
     std::unique_ptr<SfxTabPage> CreateFillStyleTabPage(FillType eFillType);
     void createFillTabPages();
@@ -367,6 +386,7 @@ public:
                 { m_pHatchingList = pHtchLst; }
     void    SetBitmapList( XBitmapListRef const & pBmpLst) { m_pBitmapList = pBmpLst; }
     void    SetPatternList( XPatternListRef const &pPtrnLst ) { m_pPatternList = pPtrnLst; }
+    void    SetSlideBackground( const SfxItemSet* pFill ) { m_pSlideBackground = pFill; }
     virtual void PageCreated(const SfxAllItemSet& aSet) override;
     void    SetColorChgd( ChangeType* pIn ) { m_pnColorListState = pIn; }
 };

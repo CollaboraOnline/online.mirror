@@ -93,21 +93,13 @@ SvxAreaTabPage::SvxAreaTabPage(weld::Container* pPage, weld::DialogController* p
     , m_pnColorListState(&maFixed_ChangeType)
     , m_aFillAttributeSet(rInAttrs.getPool(), WhichRangesContainer(XATTR_FILL_FIRST, XATTR_FILL_LAST))
     , m_aEffects({ FillType::GRADIENT_FILL, FillType::HATCH_FILL, FillType::BITMAP_FILL })
+    , m_bSlideBackground(bSlideBackground)
     , m_xNotebook(m_xBuilder->weld_notebook(u"nbFillType"_ustr))
 {
-
-    if (!bSlideBackground)
-    {
-        if (m_xNotebook->get_page_index(TABID_USE_BACKGROUND) != -1)
-            m_xNotebook->remove_page(TABID_USE_BACKGROUND);
-    }
     // The tabs are shown only when there is more than one fill type to select.
     m_xNotebook->set_show_tabs(m_xNotebook->get_n_pages() > 1);
 
-    maFillTypeMap = {
-        {TABID_COLOR, FillType::SOLID_FILL},
-        {TABID_USE_BACKGROUND, FillType::USE_BACKGROUND_FILL}
-    };
+    maFillTypeMap = { { TABID_COLOR, FillType::SOLID_FILL } };
 
     m_xNotebook->connect_enter_page(LINK(this, SvxAreaTabPage, SwitchPageHdl_Impl));
 
@@ -192,7 +184,10 @@ void SvxAreaTabPage::ActivatePage( const SfxItemSet& rSet )
         case drawing::FillStyle_NONE:
         {
             const XFillUseSlideBackgroundItem& aBckItem( rSet.Get(XATTR_FILLUSESLIDEBACKGROUND));
-            eTargetFillType = aBckItem.GetValue() ? FillType::USE_BACKGROUND_FILL : FillType::TRANSPARENT_FILL;
+            // A page that does not offer Use Background shows such a fill as None.
+            eTargetFillType = aBckItem.GetValue() && m_bSlideBackground
+                                  ? FillType::USE_BACKGROUND_FILL
+                                  : FillType::TRANSPARENT_FILL;
             break;
         }
         case drawing::FillStyle_SOLID:
@@ -334,9 +329,11 @@ FillType SvxAreaTabPage::getCurrentFillType()
     auto aFoundType = maFillTypeMap.find(m_xNotebook->get_current_page_ident());
     if (aFoundType == maFillTypeMap.end())
         return FillType::TRANSPARENT_FILL;
-    // The Color tab holds the None and the pattern fills too.
+    // The Color tab holds the None, the Use Background and the pattern fills too.
     if (aFoundType->second == FillType::SOLID_FILL && m_bNoFill)
         return FillType::TRANSPARENT_FILL;
+    if (aFoundType->second == FillType::SOLID_FILL && m_bUseBackground)
+        return FillType::USE_BACKGROUND_FILL;
     if (aFoundType->second == FillType::SOLID_FILL && m_xPatternStyle
         && m_xPatternStyle->HasPattern())
         return FillType::PATTERN_FILL;
@@ -477,17 +474,15 @@ void SvxAreaTabPage::SelectFillType(FillType eFillType, const SfxItemSet* _pSet)
             m_xPatternStyle->Clear();
     }
 
-    // The Color tab stands for None, the pattern and the effects too.
-    const bool bColorTab = lclIsEffect(eFillType) || eFillType == FillType::TRANSPARENT_FILL;
-    const OUString pageId = getPageId(bColorTab ? FillType::SOLID_FILL : eFillType);
-    if(!pageId.isEmpty())
-        m_xNotebook->set_current_page(pageId);
+    // The Color tab stands for every fill.
+    m_xNotebook->set_current_page(TABID_COLOR);
     m_oEffectSet.reset();
     if (lclIsEffect(eFillType) && !bPattern)
         m_oEffect = eFillType;
     else
         m_oEffect.reset();
     m_bNoFill = eFillType == FillType::TRANSPARENT_FILL;
+    m_bUseBackground = eFillType == FillType::USE_BACKGROUND_FILL;
 
     if (!bCreatePages)
     {
@@ -499,7 +494,7 @@ void SvxAreaTabPage::SelectFillType(FillType eFillType, const SfxItemSet* _pSet)
     }
     if (SvxColorFillTabPage* pColorPage = getColorTabPage())
     {
-        pColorPage->SetNoFill(m_bNoFill);
+        pColorPage->SetFillEntry(getFillEntry());
         pColorPage->UpdatePreview();
     }
 }
@@ -553,6 +548,9 @@ void SvxAreaTabPage::CreatePage(FillType nId, SfxTabPage& rTab)
         rColorTab.SetColorChgd(m_pnColorListState);
         rColorTab.SetColorChangedHdl(LINK(this, SvxAreaTabPage, ColorChangedHdl_Impl));
         rColorTab.SetNoneSelectedHdl(LINK(this, SvxAreaTabPage, NoneSelectedHdl_Impl));
+        if (m_bSlideBackground)
+            rColorTab.SetUseBackgroundSelectedHdl(
+                LINK(this, SvxAreaTabPage, UseBackgroundSelectedHdl_Impl));
         rColorTab.SetUpdatePreviewHdl(LINK(this, SvxAreaTabPage, UpdatePreviewHdl_Impl));
         weld::Button& rMoreEffects = rColorTab.GetMoreEffectsButton();
         rMoreEffects.connect_clicked(LINK(this, SvxAreaTabPage, MoreEffectsHdl_Impl));
@@ -568,7 +566,7 @@ void SvxAreaTabPage::CreatePage(FillType nId, SfxTabPage& rTab)
         rColorTab.Construct();
         rColorTab.ActivatePage(m_aFillAttributeSet);
         rColorTab.Reset(&m_aFillAttributeSet);
-        rColorTab.SetNoFill(m_bNoFill);
+        rColorTab.SetFillEntry(getFillEntry());
         rColorTab.set_visible(true);
     }
 }
@@ -588,7 +586,8 @@ void SvxAreaTabPage::UpdatePreview()
 
 IMPL_LINK(SvxAreaTabPage, UpdatePreviewHdl_Impl, SvxColorFillTabPage&, rColorPage, void)
 {
-    // The preview shows the whole fill: None, the color, the pattern or the effect.
+    // The preview shows the whole fill: None, the slide background, the color, the pattern or the
+    // effect.
     SfxItemSet aFill(rColorPage.GetColorFill());
     OUString sCaption;
     if (m_oEffect)
@@ -615,6 +614,14 @@ IMPL_LINK(SvxAreaTabPage, UpdatePreviewHdl_Impl, SvxColorFillTabPage&, rColorPag
         aFill.Put(XFillStyleItem(drawing::FillStyle_NONE));
         sCaption = CuiResId(RID_CUISTR_FILL_NONE);
     }
+    else if (m_bUseBackground)
+    {
+        // The preview has no slide behind it, so it is filled with the fill of the slide.
+        aFill.Put(XFillStyleItem(drawing::FillStyle_NONE));
+        if (m_pSlideBackground)
+            aFill.Put(*m_pSlideBackground);
+        sCaption = CuiResId(RID_CUISTR_PREVIEW_USE_BACKGROUND);
+    }
     else if (m_xPatternStyle && m_xPatternStyle->HasPattern())
     {
         m_xPatternStyle->FillItemSet(aFill);
@@ -631,37 +638,53 @@ void SvxAreaTabPage::ClearEffect()
     m_oEffectSet.reset();
 }
 
-IMPL_LINK(SvxAreaTabPage, ColorChangedHdl_Impl, SvxColorFillTabPage&, rColorPage, void)
+ColorFillEntry SvxAreaTabPage::getFillEntry() const
 {
-    // A color chosen after None, a pattern or an effect replaces it.
+    if (m_bNoFill)
+        return ColorFillEntry::None;
+    return m_bUseBackground ? ColorFillEntry::UseBackground : ColorFillEntry::Palette;
+}
+
+void SvxAreaTabPage::SetFillEntry(ColorFillEntry eEntry)
+{
+    m_bNoFill = eEntry == ColorFillEntry::None;
+    m_bUseBackground = eEntry == ColorFillEntry::UseBackground;
+    if (SvxColorFillTabPage* pColorPage = getColorTabPage())
+        pColorPage->SetFillEntry(eEntry);
+}
+
+void SvxAreaTabPage::SelectFillEntry(ColorFillEntry eEntry)
+{
     m_bBtnClicked = true;
     ClearEffect();
-    m_bNoFill = false;
-    rColorPage.SetNoFill(false);
+    SetFillEntry(eEntry);
     if (m_xPatternStyle)
         m_xPatternStyle->Clear();
 }
 
+IMPL_LINK_NOARG(SvxAreaTabPage, ColorChangedHdl_Impl, SvxColorFillTabPage&, void)
+{
+    // A color chosen after None, Use Background, a pattern or an effect replaces it.
+    SelectFillEntry(ColorFillEntry::Palette);
+}
+
 IMPL_LINK_NOARG(SvxAreaTabPage, NoneSelectedHdl_Impl, SvxColorFillTabPage&, void)
 {
-    m_bBtnClicked = true;
-    ClearEffect();
-    m_bNoFill = true;
-    if (m_xPatternStyle)
-        m_xPatternStyle->Clear();
+    SelectFillEntry(ColorFillEntry::None);
+}
+
+IMPL_LINK_NOARG(SvxAreaTabPage, UseBackgroundSelectedHdl_Impl, SvxColorFillTabPage&, void)
+{
+    SelectFillEntry(ColorFillEntry::UseBackground);
 }
 
 IMPL_LINK(SvxAreaTabPage, PatternChangedHdl_Impl, SvxPatternStyleBox&, rPatternStyle, void)
 {
     m_bBtnClicked = true;
     ClearEffect();
-    // A pattern replaces None, and None in Pattern Style goes back to the color.
+    // A pattern replaces None and Use Background, and None in Pattern Style goes back to the color.
     if (rPatternStyle.HasPattern())
-    {
-        m_bNoFill = false;
-        if (SvxColorFillTabPage* pColorPage = getColorTabPage())
-            pColorPage->SetNoFill(false);
-    }
+        SetFillEntry(ColorFillEntry::Palette);
     UpdatePreview();
 }
 
@@ -683,9 +706,7 @@ IMPL_LINK_NOARG(SvxAreaTabPage, MoreEffectsHdl_Impl, weld::Button&, void)
         m_xNotebook->set_current_page(TABID_COLOR);
         m_oEffect = xDialog->GetEffect();
         m_oEffectSet.emplace(*xDialog->GetResult());
-        m_bNoFill = false;
-        if (SvxColorFillTabPage* pColorPage = getColorTabPage())
-            pColorPage->SetNoFill(false);
+        SetFillEntry(ColorFillEntry::Palette);
         if (m_xPatternStyle)
             m_xPatternStyle->Clear();
         m_aFillAttributeSet.Put(*xDialog->GetResult());

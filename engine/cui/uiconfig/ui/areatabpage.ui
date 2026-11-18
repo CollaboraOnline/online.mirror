@@ -86,31 +86,6 @@
                 <property name="label" translatable="yes" context="areatabpage|btncolor">Color</property>
               </object>
             </child>
-
-            <!-- Use Background Tab -->
-            <child>
-              <object class="GtkGrid" id="gdUseBackground">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="margin-start">6</property>
-                <property name="margin-end">6</property>
-                <property name="margin-top">6</property>
-                <property name="margin-bottom">6</property>
-                <property name="vexpand">True</property>
-                <property name="row-spacing">6</property>
-                <property name="column-spacing">6</property>
-                <child>
-                  <placeholder/>
-                </child>
-              </object>
-            </child>
-            <child type="tab">
-              <object class="GtkLabel" id="lbusebackground">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
-                <property name="label" translatable="yes" context="areatabpage|btnusebackground">Use Background</property>
-              </object>
-            </child>
           </object>
           <packing>
             <property name="expand">True</property>

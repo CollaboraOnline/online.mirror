@@ -134,6 +134,14 @@ short SvxAreaTabDialog::Ok()
     return SfxTabDialogController::Ok();
 }
 
+void SvxAreaTabDialog::SetSlideBackground(const SfxItemSet& rFill)
+{
+    moSlideBackground.emplace(*rFill.GetPool(),
+                              WhichRangesContainer(XATTR_FILL_FIRST, XATTR_FILL_LAST));
+    for (sal_uInt16 nWhich = XATTR_FILL_FIRST; nWhich <= XATTR_FILL_LAST; ++nWhich)
+        moSlideBackground->Put(rFill.Get(nWhich));
+}
+
 IMPL_LINK_NOARG(SvxAreaTabDialog, CancelHdlImpl, weld::Button&, void)
 {
     SavePalettes();
@@ -150,6 +158,8 @@ void SvxAreaTabDialog::PageCreated(const OUString& rId, SfxTabPage &rPage)
         static_cast<SvxAreaTabPage&>(rPage).SetBitmapList( mpBitmapList );
         static_cast<SvxAreaTabPage&>(rPage).SetPatternList( mpPatternList );
         static_cast<SvxAreaTabPage&>(rPage).SetColorChgd( &mnColorListState );
+        static_cast<SvxAreaTabPage&>(rPage).SetSlideBackground(
+            moSlideBackground ? &*moSlideBackground : nullptr);
     }
     else if (rId == "RID_SVXPAGE_SHADOW")
     {
