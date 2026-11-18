@@ -954,11 +954,11 @@
           "dest-filename": "phc-winner-argon2-20190702.tar.gz"
         },
         {
-          "url": "https://gerrit.collaboraoffice.com/src/libeot-0.01.tar.bz2",
-          "sha256": "cf5091fa8e7dcdbe667335eb90a2cfdd0a3fe8f8c7c8d1ece44d9d055736a06a",
+          "url": "https://gerrit.collaboraoffice.com/src/libeot-0.0.4.tar.xz",
+          "sha256": "38e99b743aa45f2ecf510154a936b77ed5f44b144e8aed3005dc444fd55d514e",
           "type": "file",
           "dest": "engine/external/tarballs",
-          "dest-filename": "libeot-0.01.tar.bz2"
+          "dest-filename": "libeot-0.0.4.tar.xz"
         },
         {
           "url": "https://gerrit.collaboraoffice.com/extern/f543e6e2d7275557a839a164941c0a86e5f2c3f2a0042bfc434c88c6dde9e140-opens___.ttf",
