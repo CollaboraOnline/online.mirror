@@ -26,38 +26,39 @@ var applyBranding = function() {
 		}
 	}
 
+	// The About dialog is a copy of this template, made each time it opens
 	function setAboutImg() {
-		if (document.getElementById('lokit-extra'))
+		var aboutTemplate = document.querySelector('dialog > #about-dialog');
+		var info = aboutTemplate && aboutTemplate.querySelector('#about-dialog-info');
+		if (!info)
 			return;
-		var lk = document.getElementById('lokit-version');
-		var aboutDialog = document.getElementById('about-dialog-info');
-		if (!lk || !aboutDialog) {
-			setTimeout(setAboutImg, 250);
-		} else {
-			var div = document.createElement('div');
-			div.style.marginInlineEnd = 'auto';
-			div.id = 'lokit-extra';
 
-			let span = document.createElement('span');
-			span.setAttribute('dir', 'ltr');
-			span.textContent = 'built on\u00A0';
-
-			let anchor = document.createElement('a');
-			anchor.href = 'https://col.la/lot';
-			anchor.setAttribute('target', '_blank');
-			anchor.textContent = 'a great technology base';
-
-			let customLogoUrl = getCustomLogoUrl();
-			if (customLogoUrl) {
-				let integratorLogo = document.getElementById('integrator-logo');
-				if (integratorLogo)
-					integratorLogo.style.backgroundImage = 'url("' + getCustomLogoUrl() + '")';
-			}
-
-			div.appendChild(span);
-			div.appendChild(anchor);
-			lk.parentNode.parentNode.insertBefore(div, lk.parentNode);
+		let customLogoUrl = getCustomLogoUrl();
+		if (customLogoUrl) {
+			let integratorLogo = aboutTemplate.querySelector('#integrator-logo');
+			if (integratorLogo)
+				integratorLogo.style.backgroundImage = 'url("' + customLogoUrl + '")';
 		}
+
+		if (info.querySelector('#lokit-extra'))
+			return;
+
+		var div = document.createElement('div');
+		div.style.marginInlineEnd = 'auto';
+		div.id = 'lokit-extra';
+
+		let span = document.createElement('span');
+		span.setAttribute('dir', 'ltr');
+		span.textContent = 'built on\u00A0';
+
+		let anchor = document.createElement('a');
+		anchor.href = 'https://col.la/lot';
+		anchor.setAttribute('target', '_blank');
+		anchor.textContent = 'a great technology base';
+
+		div.appendChild(span);
+		div.appendChild(anchor);
+		info.prepend(div);
 	}
 
 	function cssUrlsRenamerSocketProxy() {
