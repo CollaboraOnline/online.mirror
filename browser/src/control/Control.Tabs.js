@@ -68,7 +68,8 @@ window.L.Control.Tabs = window.L.Control.extend({
 				}.bind(this)
 			},
 			'.uno:Name': {
-				name: app.IconUtil.createMenuItemLink(_UNO('.uno:RenameTable', 'spreadsheet', true), 'Name'),
+				name: app.IconUtil.createMenuItemLink(_UNO('.uno:RenameTable', 'spreadsheet', true), 'RenameTable'),
+				isHtmlName: true,
 				callback: (this._renameSheet).bind(this),
 				visible: function() {
 					return !this._isProtectedSheet(this._tabForContextMenu);
@@ -106,12 +107,13 @@ window.L.Control.Tabs = window.L.Control.extend({
 				visible: areTabsMultiple
 			},
 			'.uno:Move': {
-				name: app.IconUtil.createMenuItemLink(_UNO('.uno:Move', 'spreadsheet', true), 'Move'),
+				name: app.IconUtil.createMenuItemLink(_UNO('.uno:Move', 'spreadsheet', true), 'MoveorCopy'),
+				isHtmlName: true,
 				callback: (this._moveOrCopySheet).bind(this),
 				visible: areTabsMultiple
 			},
 			'.uno:CopyTab': {
-				name: app.IconUtil.createMenuItemLink(_('Copy Sheet...'), 'CopyTab'),
+				name: app.IconUtil.createMenuItemLink(_('Copy Sheet...'), 'MoveorCopy'),
 				isHtmlName: true,
 				callback: function() {this._map.sendUnoCommand('.uno:Move');}.bind(this),
 				visible: function() {

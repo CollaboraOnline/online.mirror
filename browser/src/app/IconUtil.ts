@@ -92,6 +92,8 @@ class IconUtil {
 		'Hide',
 		'MoveSheetLeft',
 		'MoveSheetRight',
+		'RenameTable',
+		'MoveorCopy',
 		'RowHeight',
 		'SetOptimalRowHeight',
 		'HideRow',
