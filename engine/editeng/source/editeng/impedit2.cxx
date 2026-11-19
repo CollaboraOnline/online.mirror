@@ -315,6 +315,43 @@ OUString ImpEditEngine::GetSelected( const EditSelection& rSel  ) const
     return aText.makeStringAndClear();
 }
 
+OUString ImpEditEngine::GetSelectedAsPlainText(const EditSelection& rSel)
+{
+    EditSelection aSel(rSel);
+    aSel.Adjust(maEditDoc);
+    const sal_Int32 nStartNode = maEditDoc.GetPos(aSel.Min().GetNode());
+    const sal_Int32 nEndNode = maEditDoc.GetPos(aSel.Max().GetNode());
+    // A selection inside one paragraph is a piece of its text, so it gets no bullet.
+    if (!rSel.HasRange() || nStartNode == nEndNode)
+        return GetSelected(aSel);
+
+    OUStringBuffer aText;
+    for (sal_Int32 nNode = nStartNode; nNode <= nEndNode; nNode++)
+    {
+        const ContentNode& rNode = maEditDoc.GetObject(nNode);
+        const sal_Int32 nStartPos = nNode == nStartNode ? aSel.Min().GetIndex() : 0;
+        const sal_Int32 nEndPos = nNode == nEndNode ? aSel.Max().GetIndex() : rNode.Len();
+
+        // A paragraph selected from its start begins with its bullet or number, indented by
+        // four spaces for each level below the top one. The last paragraph gets its bullet only
+        // when some of its text is selected.
+        OUString aBullet;
+        if (nStartPos == 0 && (nNode < nEndNode || nEndPos > nStartPos))
+            aBullet = mpEditEngine->GetPlainTextBullet(nNode);
+        if (!aBullet.isEmpty())
+        {
+            for (sal_Int16 nLevel = 0; nLevel < rNode.GetNumberingDepth(); nLevel++)
+                aText.append("    ");
+            aText.append(aBullet + " ");
+        }
+
+        aText.append(EditDoc::GetParaAsString(&rNode, nStartPos, nEndPos));
+        if (nNode < nEndNode)
+            aText.append(EditDoc::GetSepStr(LINEEND_LF));
+    }
+    return aText.makeStringAndClear();
+}
+
 bool ImpEditEngine::MouseButtonDown( const MouseEvent& rMEvt, EditView* pView )
 {
     GetSelEngine().SetCurView( pView );
@@ -4382,7 +4419,7 @@ uno::Reference< datatransfer::XTransferable > ImpEditEngine::CreateTransferable(
 
     rtl::Reference<EditDataObject> pDataObj = new EditDataObject;
 
-    pDataObj->GetString() = convertLineEnd(GetSelected(aSelection), GetSystemLineEnd()); // System specific
+    pDataObj->GetString() = convertLineEnd(GetSelectedAsPlainText(aSelection), GetSystemLineEnd()); // System specific
 
     WriteRTF( pDataObj->GetRTFStream(), aSelection, /*bClipboard=*/true );
     pDataObj->GetRTFStream().Seek( 0 );

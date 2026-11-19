@@ -523,6 +523,10 @@ public:
 
     tools::Rectangle GetBulletArea( sal_Int32 nPara );
 
+    /// The bullet or number of the paragraph as plain text, as it is painted, or an empty string
+    /// when the paragraph shows none. A picture bullet becomes U+2022.
+    SAL_DLLPRIVATE OUString GetPlainTextBullet(sal_Int32 nPara);
+
     static rtl::Reference<SfxItemPool> CreatePool();
     static SfxItemPool& GetGlobalItemPool();
     static bool     DoesKeyChangeText( const KeyEvent& rKeyEvent );

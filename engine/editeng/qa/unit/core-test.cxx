@@ -59,6 +59,7 @@
 #include <vcl/wrkwin.hxx>
 #include <editeng/editview.hxx>
 #include <svtools/stringtransfer.hxx>
+#include <sot/exchange.hxx>
 #include <com/sun/star/datatransfer/XTransferable.hpp>
 #include <com/sun/star/linguistic2/XHyphenatedWord.hpp>
 #include <com/sun/star/linguistic2/XHyphenator.hpp>
@@ -159,6 +160,9 @@ public:
 
     /// Test Copy/Paste using Legacy Format
     void testCopyPaste();
+
+    /// Test that copied list paragraphs keep their bullets and numbers as plain text
+    void testCopyListAsPlainText();
 
     /// Test Paste using HTML
     void testHTMLPaste();
@@ -283,6 +287,7 @@ public:
     CPPUNIT_TEST(testHyperlinkSpanJustifiedLikeText);
     CPPUNIT_TEST(testHyperlinkSpanLegacyRigidInJustifiedText);
     CPPUNIT_TEST(testCopyPaste);
+    CPPUNIT_TEST(testCopyListAsPlainText);
     CPPUNIT_TEST(testHTMLPaste);
     CPPUNIT_TEST(testHTMLFragmentPaste);
     CPPUNIT_TEST(testRTFPaste);
@@ -1319,6 +1324,53 @@ void Test::testCopyPaste()
     // Assert changes
     CPPUNIT_ASSERT_EQUAL(aTextLen + aTextLen, rDoc.GetTextLen());
     CPPUNIT_ASSERT_EQUAL(OUString(aText + aText), rDoc.GetParaAsString(sal_Int32(0)));
+}
+
+void Test::testCopyListAsPlainText()
+{
+    // Given a bulleted paragraph, a numbered paragraph one level below it and a paragraph that
+    // is not in the list:
+    Outliner aOutliner(mpItemPool.get(), OutlinerMode::TextObject);
+    aOutliner.SetText(u"First\nSecond\nThird"_ustr, 0);
+    SvxNumRule aNumRule(SvxNumRuleFlags::BULLET_REL_SIZE, 2, false);
+    SvxNumberFormat aBulletFormat(SVX_NUM_CHAR_SPECIAL);
+    aBulletFormat.SetBulletChar(0x2022);
+    aNumRule.SetLevel(0, aBulletFormat);
+    SvxNumberFormat aNumberFormat(SVX_NUM_ARABIC);
+    aNumberFormat.SetListFormat(u""_ustr, u"."_ustr, 1);
+    aNumRule.SetLevel(1, aNumberFormat);
+    SfxItemSet aAttribs(aOutliner.GetEmptyItemSet());
+    aAttribs.Put(SvxNumBulletItem(std::move(aNumRule), EE_PARA_NUMBULLET));
+    for (sal_Int32 nPara = 0; nPara < 3; ++nPara)
+        aOutliner.SetParaAttribs(nPara, aAttribs);
+    aOutliner.SetDepth(0, 0);
+    aOutliner.SetDepth(1, 1);
+    aOutliner.SetDepth(2, -1);
+    EditEngine& rEditEngine = aOutliner.GetEditEngine();
+
+    auto getPlainText = [&rEditEngine](const ESelection& rSelection) {
+        uno::Reference<datatransfer::XTransferable> xData
+            = rEditEngine.CreateTransferable(rSelection);
+        datatransfer::DataFlavor aFlavor;
+        SotExchange::GetFormatDataFlavor(SotClipboardFormatId::STRING, aFlavor);
+        OUString aText;
+        xData->getTransferData(aFlavor) >>= aText;
+        return aText;
+    };
+
+    // When copying all three paragraphs, then the plain text starts each list paragraph with its
+    // label, and the nested one is indented:
+    CPPUNIT_ASSERT_EQUAL(u"\u2022 First\n    1. Second\nThird"_ustr,
+                         getPlainText(ESelection(0, 0, 2, 5)));
+
+    // When the copy starts inside a paragraph, then that paragraph has no label:
+    CPPUNIT_ASSERT_EQUAL(u"rst\n    1. Second"_ustr, getPlainText(ESelection(0, 2, 1, 6)));
+
+    // When the copy ends at the start of the next paragraph, then that paragraph adds no label:
+    CPPUNIT_ASSERT_EQUAL(u"\u2022 First\n"_ustr, getPlainText(ESelection(0, 0, 1, 0)));
+
+    // When copying a part of a single paragraph, then the plain text is just that part:
+    CPPUNIT_ASSERT_EQUAL(u"First"_ustr, getPlainText(ESelection(0, 0, 0, 5)));
 }
 
 /// XTransferable implementation that provides simple HTML content.

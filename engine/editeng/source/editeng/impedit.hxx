@@ -1096,6 +1096,7 @@ public:
     EditSelectionEngine&    GetSelEngine() { return maSelEngine; }
     OUString                GetText( const ESelection& rESelection );
     OUString                GetSelected( const EditSelection& rSel ) const;
+    OUString                GetSelectedAsPlainText(const EditSelection& rSel);
 
     const SfxItemSet& GetEmptyItemSet() const;
 

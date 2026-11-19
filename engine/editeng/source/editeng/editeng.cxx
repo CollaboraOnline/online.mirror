@@ -1799,6 +1799,22 @@ tools::Rectangle EditEngine::GetBulletArea( sal_Int32 nPara )
     return tools::Rectangle( Point(), Point() );
 }
 
+OUString EditEngine::GetPlainTextBullet(sal_Int32 nPara)
+{
+    Outliner* pOwner = getImpl().GetOwner();
+    // In the outline view the top level paragraphs are slide titles, shown with a slide symbol.
+    if (!pOwner || pOwner->GetOutlinerMode() == OutlinerMode::OutlineView)
+        return OUString();
+    if (nPara >= GetParagraphCount() || !GetParaAttrib(nPara, EE_PARA_BULLETSTATE).GetValue())
+        return OUString();
+    const SvxNumberFormat* pFormat = pOwner->GetNumberFormat(nPara);
+    if (!pFormat)
+        return OUString();
+    if (pFormat->GetNumberingType() == SVX_NUM_BITMAP)
+        return u"\u2022"_ustr;
+    return pOwner->ImplGetBulletText(nPara);
+}
+
 void EditEngine::SetIgnoreBreakAfterMultilineField(bool b)
 {
     getImpl().SetIgnoreBreakAfterMultilineField(b);
