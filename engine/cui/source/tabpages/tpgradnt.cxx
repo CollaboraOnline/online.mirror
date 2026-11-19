@@ -49,6 +49,7 @@ SvxGradientTabPage::SvxGradientTabPage(weld::Container* pPage, weld::DialogContr
     , m_pnColorListState(nullptr)
     , m_aFillAttributeSet(rInAttrs.getPool(), WhichRangesContainer(XATTR_FILL_FIRST, XATTR_FILL_LAST))
     , aIconSize(60, 64)
+    , m_nLastSelectedPos(-1)
     , m_xLbGradientType(m_xBuilder->weld_combo_box(u"gradienttypelb"_ustr))
     , m_xFtCenter(m_xBuilder->weld_label(u"centerft"_ustr))
     , m_xMtrCenterX(m_xBuilder->weld_metric_spin_button(u"centerxmtr"_ustr, FieldUnit::PERCENT))
@@ -278,26 +279,31 @@ std::unique_ptr<SfxTabPage> SvxGradientTabPage::Create( weld::Container* pPage, 
 IMPL_LINK( SvxGradientTabPage, ModifiedListBoxHdl_Impl, weld::ComboBox&, rListBox, void )
 {
     ModifiedHdl_Impl(&rListBox);
+    UnselectPreset();
 }
 
 IMPL_LINK( SvxGradientTabPage, ModifiedColorListBoxHdl_Impl, ColorListBox&, rListBox, void )
 {
     ModifiedHdl_Impl(&rListBox);
+    UnselectPreset();
 }
 
 IMPL_LINK( SvxGradientTabPage, ModifiedEditHdl_Impl, weld::SpinButton&, rBox, void )
 {
     ModifiedHdl_Impl(&rBox);
+    UnselectPreset();
 }
 
 IMPL_LINK( SvxGradientTabPage, ModifiedMetricHdl_Impl, weld::MetricSpinButton&, rBox, void )
 {
     ModifiedHdl_Impl(&rBox);
+    UnselectPreset();
 }
 
 IMPL_LINK( SvxGradientTabPage, ModifiedSliderHdl_Impl, weld::Scale&, rSlider, void )
 {
     ModifiedHdl_Impl(&rSlider);
+    UnselectPreset();
 }
 
 IMPL_LINK_NOARG( SvxGradientTabPage, ChangeAutoStepHdl_Impl, weld::Toggleable&, void )
@@ -311,6 +317,18 @@ IMPL_LINK_NOARG( SvxGradientTabPage, ChangeAutoStepHdl_Impl, weld::Toggleable&, 
         m_xMtrIncrement->set_sensitive(true);
     }
     ModifiedHdl_Impl(m_xMtrIncrement.get());
+}
+
+// The edited gradient is no longer one of the presets, so no preset stays selected and the dialog
+// applies the values in the controls.
+void SvxGradientTabPage::UnselectPreset()
+{
+    const OUString sId = m_xGradientLB->get_selected_id();
+    if (sId.isEmpty())
+        return;
+
+    m_nLastSelectedPos = sId.toInt32();
+    m_xGradientLB->unselect_all();
 }
 
 void SvxGradientTabPage::ModifiedHdl_Impl( void const * pControl )
@@ -466,10 +484,11 @@ ScopedVclPtr<VirtualDevice> SvxGradientTabPage::GetVirtualDevice(Bitmap aBitmap)
 IMPL_LINK_NOARG(SvxGradientTabPage, ClickModifyHdl_Impl, weld::Button&, void)
 {
     OUString sId = m_xGradientLB->get_selected_id();
-    sal_Int32 nPos = !sId.isEmpty() ? sId.toInt32() : -1;
+    sal_Int32 nPos = !sId.isEmpty() ? sId.toInt32() : m_nLastSelectedPos;
 
-    if ( nPos == -1 )
+    if ( nPos < 0 || nPos >= m_pGradientList->Count() )
         return;
+    sId = OUString::number(nPos);
 
     OUString aName( m_pGradientList->GetGradient( static_cast<sal_uInt16>(nPos) )->GetName() );
 

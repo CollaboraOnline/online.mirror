@@ -438,6 +438,9 @@ private:
     SfxItemSet          m_aFillAttributeSet;
     OUString            sLastItemIdent;
     Size                aIconSize;
+    // Position in the preset list of the preset that was selected last, or -1 if none was.
+    // Editing a gradient value clears the visible selection but keeps this position.
+    sal_Int32           m_nLastSelectedPos;
 
     // MCGR: Preserve ColorStops until we have a UI to edit these
     basegfx::BColorStops m_aColorStops;
@@ -478,6 +481,7 @@ private:
     DECL_LINK( ChangeAutoStepHdl_Impl, weld::Toggleable&, void );
     DECL_LINK( ModifiedSliderHdl_Impl, weld::Scale&, void );
     void ModifiedHdl_Impl(void const *);
+    void UnselectPreset();
 
     void SetControlState_Impl( css::awt::GradientStyle eXGS );
     sal_Int32 SearchGradientList(std::u16string_view rGradientName);
