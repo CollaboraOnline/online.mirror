@@ -850,6 +850,10 @@ window.L.Map.Keyboard = window.L.Handler.extend({
 		// layouts "+" shares a key with "=" and reports the same keyCode, so check the character.
 		if (ev.key === '+')
 			unoKeyCode = UNOKey.ADD;
+		// The same goes for "`", which the core knows as QUOTELEFT (Ctrl+` toggles the formula
+		// view in Calc). Its keyCode 192 is a letter such as "Ö" on other layouts.
+		else if (ev.key === '`')
+			unoKeyCode = UNOKey.QUOTELEFT;
 
 		if (this.modifier) {
 			unoKeyCode |= this.modifier;
@@ -1261,6 +1265,11 @@ window.L.Map.Keyboard = window.L.Handler.extend({
 			if (window.ThisIsTheAndroidApp)
 				e.preventDefault();
 		}
+
+		// A key that types "`" goes to the document core as QUOTELEFT, whatever key it is on the
+		// layout. On some layouts it shares a key with "," and reports the keyCode of ",".
+		if (e.key === '`')
+			return false;
 
 		switch (e.keyCode) {
 		case this.keyCodes.NUM3[DEFAULT]: // 3
