@@ -1591,11 +1591,34 @@ window.L.Control.NotebookbarCalc = window.L.Control.NotebookbarWriter.extend({
 			},
 			{ type: 'separator', id: 'layout-freezepanesrow-break', orientation: 'vertical' },
 			{
-				'id': 'colrowhighlight',
-				'type': 'bigcustomtoolitem',
-				'text': _('Focus Cell'),
-				'command': 'columnrowhighlight',
-				'accessibility': { focusBack: true,	combination: 'HL', de: null }
+				'type': 'container',
+				'children': [
+					{
+						'type': 'toolbox',
+						'children': [
+							{
+								'id': 'colrowhighlight',
+								'type': 'checkbox',
+								'text': _('Focus Cell'),
+								'command': 'columnrowhighlight',
+								'accessibility': { focusBack: true,	combination: 'HL', de: null }
+							}
+						]
+					},
+					{
+						'type': 'toolbox',
+						'children': [
+							{
+								'id': 'view-toggleformula',
+								'type': 'checkbox',
+								'text': _UNO('.uno:ToggleFormula', 'spreadsheet'),
+								'command': '.uno:ToggleFormula',
+								'accessibility': { focusBack: true,	combination: 'SF', de: null }
+							}
+						]
+					}
+				],
+				'vertical': 'true'
 			},
 			{ type: 'separator', id: 'layout-colrowhighlight-break', orientation: 'vertical' },
 			{
