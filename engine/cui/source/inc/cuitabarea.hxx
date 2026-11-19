@@ -707,6 +707,9 @@ private:
 
     OUString            sLastItemIdent;
     Size                aIconSize;
+    // Position in the preset list of the preset that was selected last, or -1 if none was.
+    // Editing the pattern pixels or colors clears the visible selection but keeps this position.
+    sal_Int32           m_nLastSelectedPos;
 
     SvxXRectPreview m_aCtlPreview;
     std::unique_ptr<SvxPixelCtl> m_xCtlPixel;
@@ -729,6 +732,7 @@ private:
     DECL_LINK(QueryTooltipHdl, const weld::TreeIter&, OUString);
 
     sal_Int32 SearchPatternList(std::u16string_view rPatternName);
+    void UnselectPreset();
 
     void AddPattern(const OUString& aName, tools::Long nCount);
     void runAddNameDialog(VclPtr<AbstractSvxNameDialog> pDlg, tools::Long nCount);
