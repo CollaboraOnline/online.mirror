@@ -430,6 +430,7 @@ shared_headers = \
                  common/CoolMount.hpp \
                  common/Crypto.hpp \
                  common/DraftStore.hpp \
+                 common/EditorFrameForm.hpp \
                  common/EditorFrameMessages.hpp \
                  common/EditorFrameScripts.hpp \
                  common/FailurePage.hpp \
