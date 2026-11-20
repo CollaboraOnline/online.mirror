@@ -2266,6 +2266,16 @@ void FileServerRequestHandler::fetchWordbook(const Poco::Net::HTTPRequest& reque
     }
 
     Poco::URI dicUrl(fileUrl);
+
+    if (!isAllowedWopiHost(dicUrl))
+    {
+        LOG_WRN("Rejected wordbook request to untrusted host ["
+                << COOLWSD::anonymizeUrl(fileUrl) << ']');
+        sendError(http::StatusCode::Forbidden, request, socket, "Failed to fetch dictionaries",
+                  "Target host is not in the allowed WOPI host list");
+        return;
+    }
+
     dicUrl.addQueryParameter("access_token", accessToken);
 
     const std::string& uriAnonym = COOLWSD::anonymizeUrl(dicUrl.toString());
