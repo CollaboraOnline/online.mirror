@@ -1204,6 +1204,10 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
 
         // Routing
         const bool isUnitTesting = UnitWSD::isUnitTesting();
+        // The endpoints of client document loading (whose /cool/collab/ws has the shape of a
+        // document WebSocket address /cool/<document>/ws):
+        const bool isCollab = requestDetails.equals(RequestDetails::Field::Type, "cool")
+                              && requestDetails.equals(1, "collab");
         bool handledByUnitTesting = false;
         if (isUnitTesting)
         {
@@ -1417,11 +1421,11 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
         }
 #endif // !MOBILEAPP
 
-        else if (requestDetails.isProxy() &&
+        else if (requestDetails.isProxy() && !isCollab &&
                  (requestDetails.equals(1, "ws") || requestDetails.equals(2, "ws")))
             // The new WebSocket URL has 'ws' as the second segment; support both old and new.
             servedSync = handleClientProxyRequest(request, requestDetails, message, disposition);
-        else if (requestDetails.isWebSocket() &&
+        else if (requestDetails.isWebSocket() && !isCollab &&
                  requestDetails.equals(RequestDetails::Field::Type, "cool") &&
                  (requestDetails.equals(1, "ws") || requestDetails.equals(2, "ws")))
         {
@@ -1429,20 +1433,18 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             servedSync = handleClientWsUpgrade(request, requestDetails, disposition, socket);
         }
 
-        else if (requestDetails.equals(0, "co") && requestDetails.equals(1, "collab")
-                 && !COOLWSD::ClientDocumentLoadingEnabled)
+        else if (isCollab && !COOLWSD::ClientDocumentLoadingEnabled)
         {
             LOG_ERR(
-                "/co/collab request while client document loading is disabled: "
+                "/cool/collab request while client document loading is disabled: "
                 << requestDetails.toString());
             HttpHelper::sendErrorAndShutdown(http::StatusCode::BadRequest, socket);
             return MessageResult::Ignore;
         }
-        else if (requestDetails.equals(0, "co") &&
-                 requestDetails.equals(1, "collab") &&
-                 requestDetails.equals(2, "fetch"))
+        else if (isCollab && requestDetails.equals(2, "fetch"))
         {
-            // /co/collab/fetch?token=... endpoint - download via token from WebSocket fetch command
+            // /cool/collab/fetch?token=... endpoint - download via token from WebSocket fetch
+            // command
             LOG_INF("CollabFetch request: " << request.getURI());
 
             // CORS allow-origin so cross-origin JS callers (CODA's
@@ -1513,11 +1515,9 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             // Download directly from the pre-configured stream URL
             proxy->handleFetchRequest(fetchRequest.streamUrl, COOLWSD::getWebServerPoll(), disposition);
         }
-        else if (requestDetails.equals(0, "co") &&
-                 requestDetails.equals(1, "collab") &&
-                 requestDetails.equals(2, "put"))
+        else if (isCollab && requestDetails.equals(2, "put"))
         {
-            // /co/collab/put?token=... endpoint - upload via token from WebSocket upload command
+            // /cool/collab/put?token=... endpoint - upload via token from WebSocket upload command
             LOG_INF("CollabPut request: " << request.getURI());
 
             // CORS allow-origin so cross-origin JS callers (CODA's
@@ -1600,11 +1600,9 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             proxy->handleUploadRequest(uploadRequest.targetUrl, uploadRequest.lastModifiedTime,
                                         message, COOLWSD::getWebServerPoll(), disposition);
         }
-        else if (requestDetails.equals(0, "co") &&
-                 requestDetails.equals(1, "collab") &&
-                 requestDetails.equals(2, "avatar"))
+        else if (isCollab && requestDetails.equals(2, "avatar"))
         {
-            // /co/collab/avatar?WOPISrc=...&userId=...&token=...
+            // /cool/collab/avatar?WOPISrc=...&userId=...&token=...
             // Proxies the per-user avatar image from the
             // integrator (authenticated with the user's
             // access_token) so peers can load it without
@@ -1656,11 +1654,9 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             proxy->handleFetchRequest(avatar.url,
                 COOLWSD::getWebServerPoll(), disposition);
         }
-        else if (requestDetails.equals(0, "co") &&
-                 requestDetails.equals(1, "collab") &&
-                 requestDetails.isWebSocket())
+        else if (isCollab && requestDetails.equals(2, "ws") && requestDetails.isWebSocket())
         {
-            // /co/collab WebSocket endpoint
+            // /cool/collab/ws WebSocket endpoint
             LOG_INF("Collab request: " << request.getURI());
 
             // Extract WOPISrc from query parameters
@@ -1686,7 +1682,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             socket->setHandler(handler);
         }
 
-        else if (!requestDetails.isWebSocket() &&
+        else if (!requestDetails.isWebSocket() && !isCollab &&
                  (requestDetails.equals(RequestDetails::Field::Type, "cool") ||
                   requestDetails.equals(RequestDetails::Field::Type, "lool")))
         {
@@ -3661,7 +3657,7 @@ std::string getCapabilitiesJson(bool convertToAvailable)
     capabilities->set("hasWASMSupport",
                       COOLWSD::WASMEnabled);
 
-    // Set if this instance lets clients load documents through /co/collab:
+    // Set if this instance lets clients load documents through /cool/collab:
     capabilities->set("hasClientDocumentLoadingSupport", COOLWSD::ClientDocumentLoadingEnabled);
 
     // Set if this instance supports document signing.
