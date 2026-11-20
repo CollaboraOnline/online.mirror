@@ -2611,19 +2611,12 @@ bool ClientSession::handleKitToClientMessage(const std::shared_ptr<Message>& pay
             if (_thumbnailSession)
             {
                 //check whether we have a target!
+                Poco::JSON::Object::Ptr arguments = new Poco::JSON::Object();
+                arguments->set("Name", JsonUtil::makePropertyValue("string", std::string("URL")));
+                arguments->set(
+                    "URL", JsonUtil::makePropertyValue("string", '#' + getThumbnailTarget()));
                 std::ostringstream cmd;
-                cmd << "{";
-                cmd << "\"Name\":"
-                        "{"
-                        "\"type\":\"string\","
-                        "\"value\":\"URL\""
-                        "},"
-                        "\"URL\":"
-                        "{"
-                        "\"type\":\"string\","
-                        "\"value\":\"#";
-                cmd << getThumbnailTarget();
-                cmd << "\"}}";
+                arguments->stringify(cmd);
 
                 const std::string renderThumbnailCmd = "uno .uno:OpenHyperLink " + cmd.str();
                 docBroker->forwardToChild(client_from_this(), renderThumbnailCmd);
