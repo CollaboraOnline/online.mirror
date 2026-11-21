@@ -1515,10 +1515,10 @@ export class CommentSection extends CanvasSectionObject {
 			+ ' pendingInit ' + annotation?.pendingInit
 			+ ' selected ' + this.sectionProperties.selectedComment?.sectionProperties.data.id
 			+ ' force ' + force);
-		if (force
-			|| (annotation && !annotation.pendingInit && annotation !== this.sectionProperties.selectedComment
+		if (annotation && (force
+			|| (!annotation.pendingInit && annotation !== this.sectionProperties.selectedComment
 			&& (annotation.sectionProperties.data.resolved !== 'true' || this.sectionProperties.showResolved)
-			)) {
+			))) {
 			// Select the root comment
 			var idx = this.getRootIndexOf(annotation.sectionProperties.data.id);
 
