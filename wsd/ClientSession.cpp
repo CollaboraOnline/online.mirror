@@ -619,14 +619,16 @@ void ClientSession::handleClipboardRequest(DocumentBroker::ClipboardRequest     
 
 bool ClientSession::forwardSetClipboard(DocumentBroker& docBroker, const std::string& clipFile)
 {
+    std::string kitClipFile = clipFile;
 #if !MOBILEAPP
-    const std::string kitClipFile = docBroker.moveFileIntoJail(
-        clipFile, JAILED_DOCUMENT_ROOT + std::string("clipboards/") +
-                      Poco::Path(clipFile).getFileName());
-    if (kitClipFile.empty())
-        return false;
-#else
-    const std::string& kitClipFile = clipFile;
+    if (!Util::isMobileApp())
+    {
+        kitClipFile = docBroker.moveFileIntoJail(
+            clipFile, JAILED_DOCUMENT_ROOT + std::string("clipboards/") +
+                          Poco::Path(clipFile).getFileName());
+        if (kitClipFile.empty())
+            return false;
+    }
 #endif
     docBroker.forwardToChild(client_from_this(), "setclipboard name=" + kitClipFile, true);
     return true;
@@ -2972,26 +2974,24 @@ bool ClientSession::resolveAndApplyAICredentials(Poco::JSON::Object::Ptr& viewSe
     setAIProviderModel(model);
     setAIProviderURL(url);
 
+    // On a server the API key is optional: self-hosted, OpenAI-compatible
+    // endpoints (Ollama, vLLM, LM Studio) often accept requests without
+    // one, so a provider is usable once it has a base URL and a model.
+    // The key, when present, is sent as a Bearer token by the chat
+    // request path. AI is enabled server-wide by the ai.enabled switch.
+    // AI is refused for an anonymous user (for example a public share-link
+    // visitor with no account), so a server-wide provider is not spent on
+    // them.
+    // The apps enable AI per-user via the Options dialog, and they fetch
+    // the provider's model list natively with a request that
+    // authenticates with the API key, so a provider needs a key to
+    // complete setup there.
+    const bool providerAllowed =
+        Util::isMobileApp()
+            ? !apiKey.empty()
+            : ConfigUtil::getConfigValue<bool>("ai.enabled", false) && !isAnonymousUser();
     const bool configured =
-#if !MOBILEAPP
-        // On a server the API key is optional: self-hosted, OpenAI-compatible
-        // endpoints (Ollama, vLLM, LM Studio) often accept requests without
-        // one, so a provider is usable once it has a base URL and a model.
-        // The key, when present, is sent as a Bearer token by the chat
-        // request path. AI is enabled server-wide by the ai.enabled switch.
-        ConfigUtil::getConfigValue<bool>("ai.enabled", false) &&
-        // AI is refused for an anonymous user (for example a public share-link
-        // visitor with no account), so a server-wide provider is not spent on
-        // them.
-        !isAnonymousUser() &&
-#else
-        // The apps enable AI per-user via the Options dialog, and they fetch
-        // the provider's model list natively with a request that
-        // authenticates with the API key, so a provider needs a key to
-        // complete setup there.
-        !apiKey.empty() &&
-#endif
-        !disableAISettings && !model.empty() && !url.empty();
+        providerAllowed && !disableAISettings && !model.empty() && !url.empty();
     outModel = configured ? model : std::string{};
     outRating = configured ? computeEthicalRating(model, url) : "U";
     return configured;
@@ -4894,13 +4894,14 @@ bool ClientSession::handleKitToClientMessage(const std::shared_ptr<Message>& pay
         }
     }
 #if !MOBILEAPP
-    else if (tokens.size() == 3 && (tokens.equals(0, "saveas:") || tokens.equals(0, "exportas:")))
+    else if (tokens.size() == 3 && !Util::isMobileApp() &&
+             (tokens.equals(0, "saveas:") || tokens.equals(0, "exportas:")))
     {
         return handleSaveAs(payload, docBroker, saveAsSocket);
     }
-
-#elif defined(QTAPP) || defined(_WIN32)
-    else if (tokens.size() == 3 && tokens.equals(0, "saveas:"))
+#endif
+#if !MOBILEAPP || defined(QTAPP) || defined(_WIN32)
+    else if (tokens.size() == 3 && Util::isMobileApp() && tokens.equals(0, "saveas:"))
     {
         // For mobile/desktop apps, the file has been saved directly by LOKit
         // Forward the saveas message to the client - Socket.js _renameOrSaveAsCallback()
@@ -5299,11 +5300,9 @@ ClientSession::handleOpenDocKitToClientMessage(const std::shared_ptr<Message>& p
         {
             setState(ClientSession::SessionState::LIVE);
 
-#if MOBILEAPP
             // A conflict found while the document had no client is put to this one.
-            if (docBroker->isDocumentChangedInStorage())
+            if (Util::isMobileApp() && docBroker->isDocumentChangedInStorage())
                 docBroker->handleDocumentConflict();
-#endif
 
             if (firstLine.find("isfirst=true") != std::string::npos)
             {
@@ -6412,10 +6411,6 @@ void ClientSession::onDisconnect()
 
 bool ClientSession::shouldPark(const std::shared_ptr<DocumentBroker>& docBroker) const
 {
-#if MOBILEAPP
-    (void)docBroker;
-    return false;
-#else
     if (!isReconnectable() || _state != SessionState::LIVE || isRemoved() ||
         isParked() || docBroker->isUnloading() || SigUtil::getShutdownRequestFlag() ||
         SigUtil::getTerminationFlag())
@@ -6433,7 +6428,6 @@ bool ClientSession::shouldPark(const std::shared_ptr<DocumentBroker>& docBroker)
     const WebSocketHandler::CloseOrigin origin = ws->closeOrigin();
     return origin != WebSocketHandler::CloseOrigin::UserExit &&
            origin != WebSocketHandler::CloseOrigin::Local;
-#endif
 }
 
 void ClientSession::park()
