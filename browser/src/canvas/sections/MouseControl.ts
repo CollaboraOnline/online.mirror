@@ -16,6 +16,12 @@
 	binding this class to tiles is normal. This class shouldn't cover all the canvas but only the document area.
 */
 
+enum MouseSelecting {
+	Nothing,
+	Text,
+	Cells,
+}
+
 class MouseControl extends CanvasSectionObject {
 	zIndex: number = app.CSections.MouseControl.zIndex;
 	drawingOrder: number = app.CSections.MouseControl.drawingOrder;
@@ -34,7 +40,7 @@ class MouseControl extends CanvasSectionObject {
 	mouseDownSent: boolean = false;
 
 	/// What a drag selects here, without the server, if anything.
-	private selecting: MouseControl.Selecting = MouseControl.Selecting.Nothing;
+	private selecting: MouseSelecting = MouseSelecting.Nothing;
 	/// Whether the press came from a section whose drag the engine handles.
 	private pressForEngine: boolean = false;
 	// the cell of a table a drag that selects cells started in, and the one it reached last;
@@ -555,8 +561,7 @@ class MouseControl extends CanvasSectionObject {
 			// A drag that starts in the text being edited selects the text here, while it stays
 			// in that text.
 			else if (
-				(this.selecting === MouseControl.Selecting.Text ||
-					this.startSelectingText()) &&
+				(this.selecting === MouseSelecting.Text || this.startSelectingText()) &&
 				this.keepsSelectingText()
 			) {
 				this.autoscrollNear(point);
@@ -570,7 +575,7 @@ class MouseControl extends CanvasSectionObject {
 			// A drag that starts on a cell selects the cells here, where the client moves
 			// the cell cursor itself.
 			else if (
-				this.selecting === MouseControl.Selecting.Cells ||
+				this.selecting === MouseSelecting.Cells ||
 				this.startSelectingCells()
 			) {
 				this.autoscrollNear(point);
@@ -790,10 +795,7 @@ class MouseControl extends CanvasSectionObject {
 	// a different document position. Recompute that position from the unchanged
 	// screen point and re-send the drag move so the selection follows the view.
 	public onNewDocumentTopLeft(): void {
-		if (
-			this.selecting === MouseControl.Selecting.Text &&
-			this.lastDragLocalPoint
-		) {
+		if (this.selecting === MouseSelecting.Text && this.lastDragLocalPoint) {
 			this.refreshPosition(this.lastDragLocalPoint);
 			if (this.keepsSelectingText()) {
 				RenderManager.dragTextTo(
@@ -822,10 +824,7 @@ class MouseControl extends CanvasSectionObject {
 			return;
 		}
 
-		if (
-			this.selecting === MouseControl.Selecting.Cells &&
-			this.lastDragLocalPoint
-		) {
+		if (this.selecting === MouseSelecting.Cells && this.lastDragLocalPoint) {
 			this.refreshPosition(this.lastDragLocalPoint);
 			app.map._docLayer.selectCellsTo(this.currentPosition);
 			return;
@@ -1093,7 +1092,7 @@ class MouseControl extends CanvasSectionObject {
 			press.y,
 			MouseControl.textAt(press.x, press.y),
 		);
-		if (started) this.selecting = MouseControl.Selecting.Text;
+		if (started) this.selecting = MouseSelecting.Text;
 		return started;
 	}
 
@@ -1118,7 +1117,7 @@ class MouseControl extends CanvasSectionObject {
 		);
 
 		if (!this.cellsFrom) {
-			if (this.selecting !== MouseControl.Selecting.Text || !now) return false;
+			if (this.selecting !== MouseSelecting.Text || !now) return false;
 			const from = ClassicTableContext.cellAt(table, press.x, press.y);
 			if (!from || (from.column === now.column && from.row === now.row))
 				return false;
@@ -1194,7 +1193,7 @@ class MouseControl extends CanvasSectionObject {
 			return false;
 
 		const started = app.map._docLayer.selectCellsFrom(pressedAt);
-		if (started) this.selecting = MouseControl.Selecting.Cells;
+		if (started) this.selecting = MouseSelecting.Cells;
 
 		return started;
 	}
@@ -1202,11 +1201,11 @@ class MouseControl extends CanvasSectionObject {
 	/// Ends a drag that selects here, if one runs.
 	private stopSelecting(): void {
 		const selecting = this.selecting;
-		if (selecting === MouseControl.Selecting.Nothing) return;
-		this.selecting = MouseControl.Selecting.Nothing;
+		if (selecting === MouseSelecting.Nothing) return;
+		this.selecting = MouseSelecting.Nothing;
 		// The drag was scrolling the view while it reached past the edge.
 		app.map.fire('scrollvelocity', { vx: 0, vy: 0 });
-		if (selecting === MouseControl.Selecting.Text) RenderManager.endTextDrag();
+		if (selecting === MouseSelecting.Text) RenderManager.endTextDrag();
 	}
 
 	/**
@@ -1549,14 +1548,5 @@ class MouseControl extends CanvasSectionObject {
 				htmlText,
 			);
 		}
-	}
-}
-
-namespace MouseControl {
-	/// What a drag selects on the client, without the engine.
-	export enum Selecting {
-		Nothing,
-		Text,
-		Cells,
 	}
 }
