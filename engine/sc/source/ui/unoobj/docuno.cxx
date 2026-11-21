@@ -5225,9 +5225,8 @@ void ScTableColumnsObj::Notify( SfxBroadcaster&, const SfxHint& rHint )
 
 rtl::Reference<ScTableColumnObj> ScTableColumnsObj::GetObjectByIndex_Impl(sal_Int32 nIndex) const
 {
-    SCCOL nCol = static_cast<SCCOL>(nIndex) + nStartCol;
-    if ( pDocShell && nCol <= nEndCol )
-        return new ScTableColumnObj( pDocShell, nCol, nTab );
+    if ( pDocShell && nIndex >= 0 && nIndex <= nEndCol - nStartCol )
+        return new ScTableColumnObj( pDocShell, nStartCol + static_cast<SCCOL>(nIndex), nTab );
 
     return nullptr;    // wrong index
 }
@@ -5484,9 +5483,8 @@ void ScTableRowsObj::Notify( SfxBroadcaster&, const SfxHint& rHint )
 
 rtl::Reference<ScTableRowObj> ScTableRowsObj::GetObjectByIndex_Impl(sal_Int32 nIndex) const
 {
-    SCROW nRow = static_cast<SCROW>(nIndex) + nStartRow;
-    if ( pDocShell && nRow <= nEndRow )
-        return new ScTableRowObj( pDocShell, nRow, nTab );
+    if ( pDocShell && nIndex >= 0 && nIndex <= nEndRow - nStartRow )
+        return new ScTableRowObj( pDocShell, nStartRow + nIndex, nTab );
 
     return nullptr;    // wrong index
 }
