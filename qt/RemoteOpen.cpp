@@ -214,6 +214,14 @@ struct EditorForm
     QByteArray body;
 };
 
+/// The editor frame that CODA's page went into.
+struct EditorFrame
+{
+    QString id; ///< Names the session in the frame's messages.
+    QUrl origin; ///< The origin of the frame.
+    QByteArray parts; ///< The parts of a long message from the frame, so far.
+};
+
 /// A page in a cloud account window. It keeps the integrator's form posted for the document at
 /// load, and finds the editor's iframe the form went to. It injects a script there that builds
 /// CODA's editor page.
@@ -255,9 +263,7 @@ private:
     EditorForm _keptForm;
     QTimer _editorCheck;
     int _editorChecksLeft = 0;
-    QString _session; ///< Names the editor frame's session in its messages.
-    QUrl _frameOrigin; ///< The origin of the editor frame given the session.
-    QByteArray _parts; ///< The parts of a long message from the frame, so far.
+    EditorFrame _frame;
     coda::DocumentData _document; ///< The document the editor frame shows.
     std::unique_ptr<Bridge> _bridge; ///< Takes the frame's messages. It refers to _document.
     bool _closeWaitsForSave = false; ///< A close of the window waits for the save under way.
@@ -500,7 +506,7 @@ CloudAccountPage::CloudAccountPage(const QUrl& accountUrl, QWebEngineProfile* pr
 CloudAccountPage::~CloudAccountPage()
 {
     releaseParkedClose();
-    PagesBySession.erase(_session);
+    PagesBySession.erase(_frame.id);
 }
 
 /// A close that waits for the save under way stops waiting (as when a document tab is detached, the
@@ -789,31 +795,31 @@ void CloudAccountPage::findEditorFrame()
 std::optional<QByteArray> CloudAccountPage::receiveMessage(const QUrl& origin, const QString& kind,
                                                            const QByteArray& message)
 {
-    if (origin != _frameOrigin)
+    if (origin != _frame.origin)
     {
         LOG_WRN("account window: refused: a message for the editor frame's session came from "
                 "another origin");
         return std::nullopt;
     }
 
-    const bool isOverLimit = _parts.size() + message.size() > MAX_MESSAGE_BYTES;
+    const bool isOverLimit = _frame.parts.size() + message.size() > MAX_MESSAGE_BYTES;
     if (isOverLimit)
     {
         LOG_WRN("account window: refused: a message from the editor frame is over "
                 << MAX_MESSAGE_BYTES << " bytes, more than one JS string holds");
-        _parts.clear();
+        _frame.parts.clear();
         return std::nullopt;
     }
 
     // A long message comes in parts, each but the last of the kind "part".
     if (kind == QStringLiteral("part"))
     {
-        _parts += message;
+        _frame.parts += message;
         return QByteArray();
     }
 
-    const QString whole = QString::fromUtf8(_parts + message);
-    _parts.clear();
+    const QString whole = QString::fromUtf8(_frame.parts + message);
+    _frame.parts.clear();
 
     if (kind == QStringLiteral("cool"))
     {
@@ -940,11 +946,13 @@ std::optional<QByteArray> CloudAccountPage::callBridge(const QString& method,
 
 void CloudAccountPage::putCodaPageIn(QWebEngineFrame& frame)
 {
-    PagesBySession.erase(_session);
-    _parts.clear();
-    _session = QUuid::createUuid().toString(QUuid::Id128);
-    _frameOrigin = originOf(frame.url());
-    PagesBySession[_session] = this;
+    PagesBySession.erase(_frame.id);
+    _frame = {
+        .id = QUuid::createUuid().toString(QUuid::Id128),
+        .origin = originOf(frame.url()),
+        .parts = QByteArray(),
+    };
+    PagesBySession[_frame.id] = this;
     auto * window = dynamic_cast<CloudAccountWindow *>(QWebEngineView::forPage(this)->window());
     if (window) {
         window->hideNotice();
@@ -953,7 +961,7 @@ void CloudAccountPage::putCodaPageIn(QWebEngineFrame& frame)
     // The page keeps the access token, because it opens /cool/collab itself.
     auto remoteInfo = std::make_shared<coda::RemoteDocInfo>();
     remoteInfo->wopiSrc = QUrlQuery(_keptForm.url).queryItemValue("WOPISrc", QUrl::FullyDecoded);
-    remoteInfo->coolServer = _frameOrigin.toString();
+    remoteInfo->coolServer = _frame.origin.toString();
     remoteInfo->coolPath = _keptForm.url.path();
 
     releaseParkedClose();
@@ -975,7 +983,7 @@ void CloudAccountPage::putCodaPageIn(QWebEngineFrame& frame)
     config["accessToken"] = QString::fromStdString(EditorFrameForm::accessToken(
         _keptForm.url.toString(QUrl::FullyEncoded).toStdString(), _keptForm.body.toStdString()));
     config["base"] = COOLLOCAL_BUNDLED_URL;
-    config["messageUrl"] = COOLLOCAL_MESSAGE_URL + "?session=" + _session;
+    config["messageUrl"] = COOLLOCAL_MESSAGE_URL + "?session=" + _frame.id;
 
     QJsonObject settings;
     for (const auto& [name, value] : coda::pageSettings(/*forDocument=*/true))
@@ -1008,11 +1016,11 @@ void CloudAccountPage::useServerEditor(QString const & reason) {
         LOG_INF(
             "account window: no client document loading (" << reason.toStdString()
             << "), so the frame shows the server's own editor");
-        _serverEditorReasons[_frameOrigin.toString()] = reason;
-        showServerEditorNotice(_frameOrigin, reason);
+        _serverEditorReasons[_frame.origin.toString()] = reason;
+        showServerEditorNotice(_frame.origin, reason);
     }
-    PagesBySession.erase(_session);
-    _session.clear();
+    PagesBySession.erase(_frame.id);
+    _frame.id.clear();
     releaseParkedClose();
     _bridge.reset();
     std::optional<QWebEngineFrame> frame = findFrame(mainFrame(), _keptForm.url);
