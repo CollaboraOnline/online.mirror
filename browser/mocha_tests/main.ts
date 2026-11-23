@@ -123,4 +123,5 @@
 /// <reference path="./AIChatSidebar.test.ts" />
 /// <reference path="./NotebookbarTabs.test.ts" />
 /// <reference path="./DocPartChanged.test.ts" />
+/// <reference path="./CloudDialogs.test.ts" />
 // NOTE: reference new tests here ...
