@@ -71,4 +71,19 @@ public:
     const std::vector<Cond>& getBeginCondList() const { return maBeginCondList; }
     const std::vector<Cond>& getEndCondList() const { return maEndCondList; }
 };
+
+/// What kind of media a shape holds
+enum class MediaKind
+{
+    None,
+    Audio,
+    Video
+};
+
+/** What kind of media this is.
+
+    The document a shape was read from may state the kind, and that is taken where it does. A
+    document that states nothing leaves the name of the file to say it. */
+MediaKind mediaKind(const cpo::uno::Reference<css::drawing::XShape>& rxShape,
+                    std::u16string_view rURL);
 }

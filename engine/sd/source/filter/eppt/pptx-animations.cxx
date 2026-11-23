@@ -516,15 +516,6 @@ public:
     void WriteAnimations(const Reference<XDrawPage>& rXDrawPage);
 };
 
-/// Returns if rURL has an extension which is an audio format.
-bool IsAudioURL(std::u16string_view rURL)
-{
-    return o3tl::endsWithIgnoreAsciiCase(rURL, ".wav")
-           || o3tl::endsWithIgnoreAsciiCase(rURL, ".m4a");
-}
-
-/// Returns if rURL has an extension which is a video format.
-bool IsVideoURL(std::u16string_view rURL) { return o3tl::endsWithIgnoreAsciiCase(rURL, ".mp4"); }
 }
 
 namespace oox::core
@@ -1094,7 +1085,7 @@ void PPTXAnimationExport::WriteAnimationNodeMedia(const sal_Int16 nParentNodeTyp
 
     bool bValid = false;
     sUrl = xmloff::getSoundURL(xAudio->getSource());
-    if (!sUrl.isEmpty() && IsAudioURL(sUrl))
+    if (!sUrl.isEmpty() && mediaKind({}, sUrl) == MediaKind::Audio)
     {
         bValid = true;
     }
@@ -1108,8 +1099,9 @@ void PPTXAnimationExport::WriteAnimationNodeMedia(const sal_Int16 nParentNodeTyp
                 = xShape->getPropertySetInfo()->hasPropertyByName(u"MediaURL"_ustr);
             if (bHasMediaURL && (xShape->getPropertyValue(u"MediaURL"_ustr) >>= sUrl))
             {
-                bVideo = IsVideoURL(sUrl);
-                bValid = IsAudioURL(sUrl) || bVideo;
+                const MediaKind eKind = mediaKind(xShape, sUrl);
+                bVideo = eKind == MediaKind::Video;
+                bValid = eKind != MediaKind::None;
             }
         }
     }

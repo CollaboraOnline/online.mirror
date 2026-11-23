@@ -8,6 +8,7 @@
  */
 
 #include "pptx-animations-nodectx.hxx"
+#include <comphelper/mediamimetype.hxx>
 #include <oox/export/shapes.hxx>
 #include <com/sun/star/animations/AnimationNodeType.hpp>
 #include <com/sun/star/animations/XAnimate.hpp>
@@ -46,15 +47,6 @@ namespace oox::core
 {
 namespace
 {
-bool IsAudioURL(std::u16string_view rURL)
-{
-    return o3tl::endsWithIgnoreAsciiCase(rURL, ".wav")
-           || o3tl::endsWithIgnoreAsciiCase(rURL, ".m4a");
-}
-
-/// Returns if rURL has an extension which is a video format.
-bool IsVideoURL(std::u16string_view rURL) { return o3tl::endsWithIgnoreAsciiCase(rURL, ".mp4"); }
-
 bool initCondList(const Any& rAny, std::vector<Cond>& rList, bool bIsMainSeqChild)
 {
     bool bEventTrigger = false;
@@ -87,6 +79,26 @@ bool initCondList(const Any& rAny, std::vector<Cond>& rList, bool bIsMainSeqChil
     }
     return bEventTrigger;
 }
+}
+
+MediaKind mediaKind(const Reference<XShape>& rxShape, std::u16string_view rURL)
+{
+    Reference<XPropertySet> xProps(rxShape, UNO_QUERY);
+    OUString sMimeType;
+    if (xProps.is() && xProps->getPropertySetInfo()->hasPropertyByName(u"MediaMimeType"_ustr))
+        xProps->getPropertyValue(u"MediaMimeType"_ustr) >>= sMimeType;
+
+    // A document may say only that a shape holds media, without saying of which kind. The name
+    // of the file is what is left to say it then.
+    if (!sMimeType.startsWith("video/") && !sMimeType.startsWith("audio/"))
+        sMimeType = comphelper::GuessMediaMimeType(rURL);
+
+    if (sMimeType.startsWith("video/"))
+        return MediaKind::Video;
+    if (sMimeType.startsWith("audio/"))
+        return MediaKind::Audio;
+
+    return MediaKind::None;
 }
 
 NodeContext::NodeContext(const Reference<XAnimationNode>& xNode,
@@ -183,7 +195,7 @@ void NodeContext::initValid(bool bHasValidChild, bool bIsIterateChild)
             sURL = xmloff::getSoundURL(xAudio->getSource());
             if (!sURL.isEmpty())
             {
-                mbValid = IsAudioURL(sURL);
+                mbValid = mediaKind({}, sURL) == MediaKind::Audio;
 
                 // Check whether URL is accessible
                 try
@@ -209,7 +221,7 @@ void NodeContext::initValid(bool bHasValidChild, bool bIsIterateChild)
                     = xShapeProps->getPropertySetInfo()->hasPropertyByName(u"MediaURL"_ustr);
                 if (bHasMediaURL && (xShapeProps->getPropertyValue(u"MediaURL"_ustr) >>= sURL))
                 {
-                    mbValid = IsAudioURL(sURL) || IsVideoURL(sURL);
+                    mbValid = mediaKind(xShape, sURL) != MediaKind::None;
                 }
             }
         }

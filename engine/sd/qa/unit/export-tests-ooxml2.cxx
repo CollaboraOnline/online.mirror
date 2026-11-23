@@ -1388,6 +1388,24 @@ CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest2, testTdf106867)
                 "spid", u"67");
 }
 
+// The node that plays a film or a sound keeps its place in the timing of a slide, whatever the
+// kind of file it plays.
+CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest2, testMediaNodeOfAnyKindOfFile)
+{
+    // Given a slide holding a film in a file whose name ends in .avi:
+    createSdImpressDoc("pptx/tdf106867.pptx");
+    save(TestFilter::PPTX);
+
+    // Without the fix in place, this test would have failed with:
+    // - Expected: 1
+    // - Actual  : 0
+    // i.e. only a handful of endings counted as a film or a sound, so the node that plays
+    // this one was left out and the slide no longer played it.
+    xmlDocUniquePtr pXmlDoc = parseExport(u"ppt/slides/slide1.xml"_ustr);
+    assertXPath(pXmlDoc, "//p:video/p:cMediaNode", 1);
+    assertXPath(pXmlDoc, "//p:video/p:cMediaNode/p:tgtEl/p:spTgt", 1);
+}
+
 CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest2, testTdf112280)
 {
     createSdImpressDoc("pptx/tdf112280.pptx");
