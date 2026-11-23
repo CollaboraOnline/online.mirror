@@ -50,9 +50,12 @@
 #include <QUrlQuery>
 #include <QUuid>
 #include <QVBoxLayout>
+#include <QWebEngineDownloadRequest>
 #include <QWebEngineFrame>
 #include <QWebEngineNewWindowRequest>
 #include <QWebEnginePage>
+#include <QWebEnginePermission>
+#include <QWebEngineProfile>
 #include <QWebEngineScript>
 #include <QWebEngineScriptCollection>
 #include <QWebEngineUrlRequestInfo>
@@ -296,8 +299,12 @@ public:
 
 protected:
     bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override;
+    QStringList chooseFiles(FileSelectionMode mode, const QStringList& oldFiles,
+                            const QStringList& acceptedMimeTypes) override;
 
 private:
+    void refuseDownload(QWebEngineDownloadRequest* download);
+
     QUrl _accountOrigin;
 };
 
@@ -431,7 +438,14 @@ SignInPage::SignInPage(const QUrl& accountOrigin, QWebEngineProfile* profile, QO
         openInSystemBrowser(request.requestedUrl());
     };
 
+    const auto refusePermission = [](const QWebEnginePermission& permission) {
+        LOG_WRN("sign-in window: refused: a page asked for a permission");
+        permission.deny();
+    };
+
     connect(this, &QWebEnginePage::newWindowRequested, this, openInBrowser);
+    connect(this, &QWebEnginePage::permissionRequested, this, refusePermission);
+    connect(profile, &QWebEngineProfile::downloadRequested, this, &SignInPage::refuseDownload);
 }
 
 bool SignInPage::acceptNavigationRequest(const QUrl& url, NavigationType /*type*/,
@@ -446,6 +460,24 @@ bool SignInPage::acceptNavigationRequest(const QUrl& url, NavigationType /*type*
     LOG_WRN("sign-in window: refused: " << origin.toString().toStdString()
                                         << " is neither https nor the account's origin");
     return false;
+}
+
+QStringList SignInPage::chooseFiles(FileSelectionMode /*mode*/, const QStringList& /*oldFiles*/,
+                                    const QStringList& /*acceptedMimeTypes*/)
+{
+    LOG_WRN("sign-in window: refused: a page asked for files");
+    return QStringList();
+}
+
+void SignInPage::refuseDownload(QWebEngineDownloadRequest* download)
+{
+    // The profile reports downloads from every page on it, the account
+    // window's too, so only the ones this page started are cancelled.
+    if (download->page() != this)
+        return;
+
+    LOG_WRN("sign-in window: refused: a page started a download");
+    download->cancel();
 }
 
 CloudAccountPage::CloudAccountPage(const QUrl& accountUrl, QWebEngineProfile* profile,
