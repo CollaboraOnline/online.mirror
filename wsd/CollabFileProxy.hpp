@@ -55,7 +55,6 @@ private:
     const std::weak_ptr<StreamSocket> _socket;
     const std::string _wopiSrc;
     const std::string _accessToken;
-    std::shared_ptr<http::Session> _httpSession;
     std::string _uploadBody;
     std::string _uploadLastModifiedTime;
     int _logFD;

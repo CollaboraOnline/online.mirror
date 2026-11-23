@@ -116,7 +116,10 @@ void CollabFileProxy::doDownload(const std::shared_ptr<TerminatingPoll>& poll,
     const std::string uriAnonym = Anonymizer::anonymizeUrl(uri.toString());
     LOG_DBG("CollabFileProxy: downloading from [" << uriAnonym << ']');
 
-    _httpSession = StorageConnectionManager::getHttpSession(uri);
+    // The poll keeps the session alive until it finishes, and the session's callback keeps this
+    // proxy alive:
+    std::shared_ptr<http::Session> const httpSession
+        = StorageConnectionManager::getHttpSession(uri);
     Authorization auth = Authorization::create(uri);
     http::Request httpRequest = StorageConnectionManager::createHttpRequest(uri, auth);
 
@@ -200,8 +203,8 @@ void CollabFileProxy::doDownload(const std::shared_ptr<TerminatingPoll>& poll,
         socket->sendAndShutdown(response);
     };
 
-    _httpSession->setFinishedHandler(std::move(finishedCallback));
-    _httpSession->asyncRequest(httpRequest, poll, false);
+    httpSession->setFinishedHandler(std::move(finishedCallback));
+    httpSession->asyncRequest(httpRequest, poll);
 }
 
 void CollabFileProxy::doUpload(const std::shared_ptr<TerminatingPoll>& poll,
@@ -211,7 +214,10 @@ void CollabFileProxy::doUpload(const std::shared_ptr<TerminatingPoll>& poll,
     LOG_DBG("CollabFileProxy: uploading " << body.size()
             << " bytes to [" << uriAnonym << ']');
 
-    _httpSession = StorageConnectionManager::getHttpSession(uri);
+    // The poll keeps the session alive until it finishes, and the session's callback keeps this
+    // proxy alive:
+    std::shared_ptr<http::Session> const httpSession
+        = StorageConnectionManager::getHttpSession(uri);
     Authorization auth = Authorization::create(uri);
     http::Request httpRequest = StorageConnectionManager::createHttpRequest(uri, auth);
 
@@ -321,8 +327,8 @@ void CollabFileProxy::doUpload(const std::shared_ptr<TerminatingPoll>& poll,
         }
     };
 
-    _httpSession->setFinishedHandler(std::move(finishedCallback));
-    _httpSession->asyncRequest(httpRequest, poll, false);
+    httpSession->setFinishedHandler(std::move(finishedCallback));
+    httpSession->asyncRequest(httpRequest, poll);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
