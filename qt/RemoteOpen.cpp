@@ -227,6 +227,10 @@ protected:
 private:
     void openNewWindow(QWebEngineNewWindowRequest& request);
     void refuseRedirect(const QUrl& target);
+    void openSignInWindow(const QUrl& url);
+    void finishSignIn(const QUrl& url, bool ok);
+    void cancelSignIn();
+    void closeAfterCancelledSignIn();
     void registerEmptyCoolPageScript();
     void findEditorFrame();
     void putCodaPageIn(QWebEngineFrame& frame);
@@ -254,6 +258,13 @@ private:
     bool _closeWaitsForSave = false; ///< A close of the window waits for the save under way.
     // The origins whose documents open in the server's own editor, with the reason of each:
     std::map<QString, QString> _serverEditorReasons;
+
+    // A sign-in at an identity provider runs in a sign-in window with this page's profile. Once
+    // back on the account's origin, the window closes and its last page loads in this page.
+    struct
+    {
+        QPointer<QWebEngineView> window; ///< Open while a sign-in on another site is under way.
+    } _signIn;
 };
 
 /// A cloud account window, which closes only after the editor frame's page saved its document:
@@ -274,6 +285,20 @@ private:
     QWidget * _notice;
     QLabel * _noticeText;
     std::function<void()> _dontShowNoticeAgain;
+};
+
+/// A page for a sign-in through another site, such as an identity provider. It shares the account
+/// window's profile, so the account window gets the cookies that the sign-in sets.
+class SignInPage : public QWebEnginePage
+{
+public:
+    SignInPage(const QUrl& accountOrigin, QWebEngineProfile* profile, QObject* parent);
+
+protected:
+    bool acceptNavigationRequest(const QUrl& url, NavigationType type, bool isMainFrame) override;
+
+private:
+    QUrl _accountOrigin;
 };
 
 /// The pages with an editor frame, by the session of the frame.
@@ -396,6 +421,33 @@ void EditorFormInterceptor::interceptRequest(QWebEngineUrlRequestInfo& info)
     info.redirect(frameUrl);
 }
 
+SignInPage::SignInPage(const QUrl& accountOrigin, QWebEngineProfile* profile, QObject* parent)
+    : QWebEnginePage(profile, parent)
+    , _accountOrigin(accountOrigin)
+{
+    // A target="_blank" link or a window.open call on the provider's pages, such as a help
+    // page, opens in the system browser, as in the account window.
+    const auto openInBrowser = [](QWebEngineNewWindowRequest& request) {
+        openInSystemBrowser(request.requestedUrl());
+    };
+
+    connect(this, &QWebEnginePage::newWindowRequested, this, openInBrowser);
+}
+
+bool SignInPage::acceptNavigationRequest(const QUrl& url, NavigationType /*type*/,
+                                         bool isMainFrame)
+{
+    const QUrl origin = originOf(url);
+    const bool isHttps = url.scheme() == "https";
+    const bool isAccountOrigin = origin == _accountOrigin;
+    if (!isMainFrame || isHttps || isAccountOrigin)
+        return true;
+
+    LOG_WRN("sign-in window: refused: " << origin.toString().toStdString()
+                                        << " is neither https nor the account's origin");
+    return false;
+}
+
 CloudAccountPage::CloudAccountPage(const QUrl& accountUrl, QWebEngineProfile* profile,
                                    const QString& accountId, QObject* parent)
     : QWebEnginePage(profile, parent)
@@ -507,7 +559,6 @@ void CloudAccountWindow::closeEvent(QCloseEvent * event) {
     QMainWindow::closeEvent(event);
 }
 
-/// TODO: A sign-in through another site, such as an identity provider, is refused too.
 bool CloudAccountPage::acceptNavigationRequest(const QUrl& url, NavigationType type,
                                                bool isMainFrame)
 {
@@ -520,7 +571,15 @@ bool CloudAccountPage::acceptNavigationRequest(const QUrl& url, NavigationType t
     const std::string to = target.toString().toStdString();
     const bool isRedirect = type == NavigationTypeRedirect;
     const bool isWithinSite = Uri::isWithinSite(from, to);
-    if (isRedirect && !_firstPageLoaded && !isWithinSite)
+    const bool isSignIn = Uri::isSignInRequest(url.toString().toStdString(), from);
+    if (isRedirect && !isWithinSite && isSignIn)
+    {
+        LOG_INF("account window: a sign-in on another site opens in a sign-in window");
+        QTimer::singleShot(0, this, [this, url]() { openSignInWindow(url); });
+        goto refuse;
+    }
+
+    if (isRedirect && !isWithinSite && !_firstPageLoaded)
     {
         LOG_WRN("account window: refused: the account address redirects to another site");
         QTimer::singleShot(0, this, [this, target]() { refuseRedirect(target); });
@@ -538,14 +597,85 @@ bool CloudAccountPage::acceptNavigationRequest(const QUrl& url, NavigationType t
     {
         LOG_WRN("account window: refused: the window would leave the integrator's site for "
                 << url.toString(QUrl::RemoveUserInfo).toStdString());
-        return false;
+        goto refuse;
     }
 
     LOG_INF("account window: opening a link in the system browser");
     openInSystemBrowser(url);
-    // Qt WebEngine stops injecting the page's scripts after it refuses a link click.
+
+refuse:
+    // Qt WebEngine drops the page's scripts after it refuses a link click, which includes a
+    // script's navigation, so the emptying script is registered again for the next document.
     QTimer::singleShot(0, this, &CloudAccountPage::registerEmptyCoolPageScript);
     return false;
+}
+
+void CloudAccountPage::openSignInWindow(const QUrl& url)
+{
+    if (_signIn.window)
+    {
+        LOG_INF("account window: a sign-in window is open, raising it");
+        _signIn.window->raise();
+        _signIn.window->activateWindow();
+        return;
+    }
+
+    QWidget* window = QWebEngineView::forPage(this)->window();
+    auto* view = new QWebEngineView(window);
+    view->setWindowFlag(Qt::Window);
+    view->setAttribute(Qt::WA_DeleteOnClose);
+    view->setGeometry(window->geometry());
+
+    auto* page = new SignInPage(_integratorOrigin, profile(), view);
+    view->setPage(page);
+
+    const auto showHost = [view](const QUrl& current) {
+        const QString title = QObject::tr("Sign in - %1");
+        view->setWindowTitle(title.arg(current.host()));
+    };
+
+    const auto checkSignIn = [this, page](bool ok) {
+        finishSignIn(page->url(), ok);
+    };
+
+    connect(view, &QWebEngineView::urlChanged, view, showHost);
+    connect(page, &QWebEnginePage::loadFinished, this, checkSignIn);
+    connect(view, &QObject::destroyed, this, &CloudAccountPage::cancelSignIn);
+
+    LOG_INF("account window: opening a sign-in window");
+    _signIn.window = view;
+    view->load(url);
+    view->show();
+}
+
+void CloudAccountPage::finishSignIn(const QUrl& url, bool ok)
+{
+    const std::string from = _integratorOrigin.toString().toStdString();
+    const std::string to = originOf(url).toString().toStdString();
+    const bool isAccountSite = Uri::isWithinSite(from, to);
+    if (!ok || !isAccountSite)
+        return;
+
+    _integratorOrigin = originOf(url);
+
+    LOG_INF("account window: the sign-in is done, loading its page in the account window");
+    // After this, closing the sign-in window cancels nothing, and its later loads do nothing.
+    _signIn.window->disconnect(this);
+    _signIn.window->page()->disconnect(this);
+    _signIn.window->close();
+    load(url);
+}
+
+void CloudAccountPage::cancelSignIn()
+{
+    if (_firstPageLoaded)
+    {
+        LOG_INF("account window: the sign-in window was closed before the sign-in was done");
+        return;
+    }
+
+    LOG_INF("account window: the sign-in was cancelled before the account opened");
+    QTimer::singleShot(0, this, &CloudAccountPage::closeAfterCancelledSignIn);
 }
 
 /// The window would stay empty, so it says why and closes.
@@ -553,11 +683,23 @@ void CloudAccountPage::refuseRedirect(const QUrl& target)
 {
     QWidget* window = QWebEngineView::forPage(this)->window();
     const QString title = QObject::tr("Account not opened");
-    const QString text = QObject::tr("%1 redirected to %2, so the account was not opened. Only a "
-                                     "redirect within the same site is followed.");
+    const QString text = QObject::tr("%1 redirected to %2, so the account was not opened.");
     const QString from = _integratorOrigin.toString();
 
     QMessageBox::warning(window, title, text.arg(from, target.toString()));
+    window->close();
+}
+
+/// The window would stay empty, so it says why and closes.
+void CloudAccountPage::closeAfterCancelledSignIn()
+{
+    QWidget* window = QWebEngineView::forPage(this)->window();
+    const QString title = QObject::tr("Account not opened");
+    const QString text =
+        QObject::tr("The sign-in to %1 was cancelled, so the account was not opened.");
+    const QString origin = _integratorOrigin.toString();
+
+    QMessageBox::warning(window, title, text.arg(origin));
     window->close();
 }
 
