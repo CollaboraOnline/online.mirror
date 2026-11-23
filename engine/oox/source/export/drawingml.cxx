@@ -9494,7 +9494,12 @@ void DrawingML::WriteConnectorConnections( sal_Int32 nStartGlueId, sal_Int32 nEn
 
 sal_Unicode DrawingML::SubstituteBullet( sal_Unicode cBulletId, css::awt::FontDescriptor& rFontDesc )
 {
-    if ( IsOpenSymbol(rFontDesc.Name) )
+    // A bullet of the private use area is a glyph of OpenSymbol alone, so it is written as the
+    // character of a font that the format knows. A character that Unicode itself names, such as
+    // a bullet, a dash or a guillemet, stands on its own and is written as it is, so that it is
+    // drawn also where OpenSymbol and the fonts it is mapped to are absent.
+    const bool bPrivateUse = cBulletId >= 0xE000 && cBulletId <= 0xF8FF;
+    if ( bPrivateUse && IsOpenSymbol(rFontDesc.Name) )
     {
         rtl_TextEncoding eCharSet = rFontDesc.CharSet;
         cBulletId = msfilter::util::bestFitOpenSymbolToMSFont(cBulletId, eCharSet, rFontDesc.Name);

@@ -603,6 +603,26 @@ CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testMasterTextStylesStateEveryValue)
     }
 }
 
+// A bullet that Unicode itself names is written as that character.
+CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testBulletKeepsTheCharacterOfTheDocument)
+{
+    // Given a master that states a bullet for its body text and names no font to draw it with:
+    createSdImpressDoc("pptx/bullet-with-no-font.pptx");
+
+    save(TestFilter::PPTX);
+
+    // Without the fix in place, the bullet was written as character U+F0B7 of the Symbol font,
+    // which stands for nothing where that font is absent, so no bullet was drawn at all.
+    xmlDocUniquePtr pMaster = parseExport(u"ppt/slideMasters/slideMaster1.xml"_ustr);
+    static constexpr OString aLevel = "/p:sldMaster/p:txStyles/p:bodyStyle/a:lvl1pPr"_ostr;
+    assertXPath(pMaster, aLevel + "/a:buChar", "char", u"\u2022");
+    assertXPath(pMaster, aLevel + "/a:buFont[@typeface='Symbol']", 0);
+
+    xmlDocUniquePtr pSlide = parseExport(u"ppt/slides/slide1.xml"_ustr);
+    assertXPath(pSlide, "//a:buChar", "char", u"\u2022");
+    assertXPath(pSlide, "//a:buFont[@typeface='Symbol']", 0);
+}
+
 // A line that counts itself keeps its number where its level shows a picture instead.
 CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testNumberedLinesKeepTheirNumbers)
 {

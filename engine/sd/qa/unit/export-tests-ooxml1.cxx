@@ -998,7 +998,9 @@ CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest1, testBulletCharAndFont)
         xPropSet->getPropertyValue(u"NumberingRules"_ustr), uno::UNO_QUERY);
     cpo::uno::Sequence<beans::PropertyValue> aProps;
     xLevels->getByIndex(0) >>= aProps; // 1st level
-    OUString sBulletChar(u'\xf06c');
+    // The bullet is a character that Unicode itself names, so it keeps that character and the
+    // font of the document instead of becoming a character of a symbol font that stands for it.
+    OUString sBulletChar(u'\x25cf');
     for (beans::PropertyValue const& rProp : aProps)
     {
         if (rProp.Name == "BulletChar")
@@ -1008,7 +1010,7 @@ CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest1, testBulletCharAndFont)
         {
             awt::FontDescriptor aFontDescriptor;
             rProp.Value >>= aFontDescriptor;
-            CPPUNIT_ASSERT_EQUAL_MESSAGE("BulletFont incorrect.", u"Wingdings"_ustr,
+            CPPUNIT_ASSERT_EQUAL_MESSAGE("BulletFont incorrect.", u"StarSymbol"_ustr,
                                          aFontDescriptor.Name);
         }
     }
