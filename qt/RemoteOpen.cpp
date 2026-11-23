@@ -289,6 +289,9 @@ private:
 
         /// The origin the account names as its sign-in provider, if any. open() asks the
         /// account for it through WebFinger or discovery, before the first page loads.
+        /// acceptNavigationRequest() opens a script's navigation to it in the sign-in window.
+        /// Qt reports a script's navigation as a link click, so one to any other site opens in
+        /// the system browser. An HTTP redirect is checked by Uri::isSignInRequest instead.
         QUrl provider;
     } _signIn;
 };
@@ -627,7 +630,10 @@ bool CloudAccountPage::acceptNavigationRequest(const QUrl& url, NavigationType t
     const bool isRedirect = type == NavigationTypeRedirect;
     const bool isWithinSite = Uri::isWithinSite(from, to);
     const bool isSignIn = Uri::isSignInRequest(url.toString().toStdString(), from);
-    if (isRedirect && !isWithinSite && isSignIn)
+    const bool isProvider = !_signIn.provider.isEmpty() && target == _signIn.provider;
+    const bool isSignInRedirect = isRedirect && !isWithinSite && isSignIn;
+    const bool isProviderNavigation = !isRedirect && isProvider;
+    if (isSignInRedirect || isProviderNavigation)
     {
         LOG_INF("account window: a sign-in on another site opens in a sign-in window");
         QTimer::singleShot(0, this, [this, url]() { openSignInWindow(url); });
