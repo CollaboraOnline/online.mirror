@@ -1467,7 +1467,7 @@ void ChartExport::writeThemeOverride(const FSHelperPtr& pChartFS, std::u16string
 
     // The part sits beside the theme of the document, and the chart points at it by a
     // relationship of its own.
-    const OUString aNumber = OUString::number(nChartCount);
+    const auto aNumber = OUString::number(nChartCount);
     const OUString aFullStream = OUString(aChartFolder).replaceAll(u"charts/", u"theme/")
                                  + "themeOverride" + aNumber + ".xml";
     const OUString aRelativeStream = "../theme/themeOverride" + aNumber + ".xml";
