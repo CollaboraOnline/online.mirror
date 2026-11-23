@@ -207,6 +207,13 @@ private:
     CloudAccountPage& _page;
 };
 
+/// A form the integrator posted into an editor frame.
+struct EditorForm
+{
+    QUrl url; ///< Where the form went, with the frame's id as the fragment.
+    QByteArray body;
+};
+
 /// A page in a cloud account window. It keeps the integrator's form posted for the document at
 /// load, and finds the editor's iframe the form went to. It injects a script there that builds
 /// CODA's editor page.
@@ -245,16 +252,14 @@ private:
     QUrl _integratorOrigin; ///< The origin of the account's first page.
     QString _accountId; ///< The id of the cloud account, or empty when the window has none.
     bool _firstPageLoaded = false;
-    QUrl _formUrl; ///< Where the kept form went, with the frame's id as the fragment.
-    QByteArray _form;
+    EditorForm _keptForm;
     QTimer _editorCheck;
     int _editorChecksLeft = 0;
     QString _session; ///< Names the editor frame's session in its messages.
     QUrl _frameOrigin; ///< The origin of the editor frame given the session.
-    // The kept form that the session's document came from, and where that form went (as the kept
-    // form is replaced as soon as the integrator posts the next one):
-    QUrl _sessionFormUrl;
-    QByteArray _sessionForm;
+    // The kept form that the session's document came from (as the kept form is replaced as soon as
+    // the integrator posts the next one):
+    EditorForm _sessionForm;
     QByteArray _parts; ///< The parts of a long message from the frame, so far.
     coda::DocumentData _document; ///< The document the editor frame shows.
     std::unique_ptr<Bridge> _bridge; ///< Takes the frame's messages. It refers to _document.
@@ -761,15 +766,14 @@ bool CloudAccountPage::opensInServerEditor(QUrl const & origin) const {
 
 void CloudAccountPage::keepForm(const QUrl& url, const QByteArray& form)
 {
-    _formUrl = url;
-    _form = form;
+    _keptForm = { .url = url, .body = form };
     _editorChecksLeft = EDITOR_CHECKS;
     _editorCheck.start();
 }
 
 void CloudAccountPage::findEditorFrame()
 {
-    std::optional<QWebEngineFrame> frame = findFrame(mainFrame(), _formUrl);
+    std::optional<QWebEngineFrame> frame = findFrame(mainFrame(), _keptForm.url);
     _editorChecksLeft--;
     const bool keepLooking = !frame && _editorChecksLeft > 0;
     if (keepLooking)
@@ -943,8 +947,7 @@ void CloudAccountPage::putCodaPageIn(QWebEngineFrame& frame)
     _parts.clear();
     _session = QUuid::createUuid().toString(QUuid::Id128);
     _frameOrigin = originOf(frame.url());
-    _sessionFormUrl = _formUrl;
-    _sessionForm = _form;
+    _sessionForm = _keptForm;
     PagesBySession[_session] = this;
     auto * window = dynamic_cast<CloudAccountWindow *>(QWebEngineView::forPage(this)->window());
     if (window) {
@@ -953,9 +956,9 @@ void CloudAccountPage::putCodaPageIn(QWebEngineFrame& frame)
 
     // The page keeps the access token, because it opens /cool/collab itself.
     auto remoteInfo = std::make_shared<coda::RemoteDocInfo>();
-    remoteInfo->wopiSrc = QUrlQuery(_formUrl).queryItemValue("WOPISrc", QUrl::FullyDecoded);
+    remoteInfo->wopiSrc = QUrlQuery(_keptForm.url).queryItemValue("WOPISrc", QUrl::FullyDecoded);
     remoteInfo->coolServer = _frameOrigin.toString();
-    remoteInfo->coolPath = _formUrl.path();
+    remoteInfo->coolPath = _keptForm.url.path();
 
     releaseParkedClose();
     _bridge.reset();
@@ -972,9 +975,9 @@ void CloudAccountPage::putCodaPageIn(QWebEngineFrame& frame)
     LOG_INF("account window: the editor frame's session has appDocId " << _document._appDocId);
 
     QJsonObject config;
-    config["formUrl"] = _formUrl.toString(QUrl::FullyEncoded);
+    config["formUrl"] = _keptForm.url.toString(QUrl::FullyEncoded);
     config["accessToken"] = QString::fromStdString(EditorFrameForm::accessToken(
-        _formUrl.toString(QUrl::FullyEncoded).toStdString(), _form.toStdString()));
+        _keptForm.url.toString(QUrl::FullyEncoded).toStdString(), _keptForm.body.toStdString()));
     config["base"] = COOLLOCAL_BUNDLED_URL;
     config["messageUrl"] = COOLLOCAL_MESSAGE_URL + "?session=" + _session;
 
@@ -1016,13 +1019,13 @@ void CloudAccountPage::useServerEditor(QString const & reason) {
     _session.clear();
     releaseParkedClose();
     _bridge.reset();
-    std::optional<QWebEngineFrame> frame = findFrame(mainFrame(), _sessionFormUrl);
+    std::optional<QWebEngineFrame> frame = findFrame(mainFrame(), _sessionForm.url);
     if (!frame) {
         LOG_WRN("account window: the editor frame for the server's own editor is gone");
         return;
     }
     QJsonArray const arguments{
-        _sessionFormUrl.toString(QUrl::FullyEncoded), QString::fromLatin1(_sessionForm)};
+        _sessionForm.url.toString(QUrl::FullyEncoded), QString::fromLatin1(_sessionForm.body)};
     frame->runJavaScript(
         "(" + QString::fromStdString(EditorFrameScripts::serverEditorFormScript) + ")(..."
             + QString::fromUtf8(QJsonDocument(arguments).toJson(QJsonDocument::Compact)) + ')',
