@@ -40,6 +40,9 @@
 #include <QLabel>
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
 #include <QPointer>
 #include <QPushButton>
 #include <QSize>
@@ -63,6 +66,7 @@
 #include <QWebEngineUrlRequestJob>
 #include <QWebEngineView>
 
+#include <algorithm>
 #include <chrono>
 #include <functional>
 #include <map>
@@ -158,6 +162,9 @@ constexpr std::chrono::milliseconds EDITOR_CHECK_INTERVAL(50);
 /// 200 checks are 10 seconds.
 constexpr int EDITOR_CHECKS = 200;
 
+/// How long each request that asks the account for its sign-in provider may take.
+constexpr std::chrono::milliseconds PROVIDER_LOOKUP_TIMEOUT(10000);
+
 /// 2 MiB. The form Nextcloud posts for a document is about 5 KB.
 constexpr qsizetype MAX_FORM_BYTES = 2 * 1024 * 1024;
 
@@ -232,6 +239,8 @@ public:
                      QObject* parent);
     ~CloudAccountPage() override;
 
+    void open(const QUrl& accountUrl);
+
     const QUrl& integratorOrigin() const { return _integratorOrigin; }
     bool opensInServerEditor(QUrl const & origin) const;
     void keepForm(const QUrl& url, const QByteArray& form);
@@ -245,6 +254,8 @@ protected:
 private:
     void openNewWindow(QWebEngineNewWindowRequest& request);
     void refuseRedirect(const QUrl& target);
+    void readProviderReplies(const QUrl& accountUrl, QNetworkAccessManager* network,
+                             const std::vector<QNetworkReply*>& replies);
     void openSignInWindow(const QUrl& url);
     void finishSignIn(const QUrl& url, bool ok);
     void cancelSignIn();
@@ -275,6 +286,10 @@ private:
     struct
     {
         QPointer<QWebEngineView> window; ///< Open while a sign-in on another site is under way.
+
+        /// The origin the account names as its sign-in provider, if any. open() asks the
+        /// account for it through WebFinger or discovery, before the first page loads.
+        QUrl provider;
     } _signIn;
 };
 
@@ -648,6 +663,77 @@ refuse:
     // script's navigation, so the emptying script is registered again for the next document.
     QTimer::singleShot(0, this, &CloudAccountPage::registerEmptyCoolPageScript);
     return false;
+}
+
+/// The account's first page loads only once the account has named its sign-in provider,
+/// as a page such as OpenCloud's starts a sign-in as soon as it loads.
+void CloudAccountPage::open(const QUrl& accountUrl)
+{
+    const std::string origin = _integratorOrigin.toString().toStdString();
+    const std::vector<std::string> addresses = Uri::signInProviderLookups(origin);
+    if (addresses.empty())
+    {
+        LOG_WRN("account window: the account's sign-in provider cannot be asked for");
+        load(accountUrl);
+        return;
+    }
+
+    auto* network = new QNetworkAccessManager(this);
+    std::vector<QNetworkReply*> replies;
+    for (const std::string& address : addresses)
+    {
+        QNetworkRequest request(QUrl(QString::fromStdString(address)));
+        request.setTransferTimeout(PROVIDER_LOOKUP_TIMEOUT);
+        request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
+                             QNetworkRequest::UserVerifiedRedirectPolicy);
+        QNetworkReply* reply = network->get(request);
+
+        const auto followWithinSite = [origin, reply](const QUrl& target) {
+            const std::string to = originOf(target).toString().toStdString();
+            if (!Uri::isWithinSite(origin, to))
+            {
+                LOG_WRN("account window: a sign-in provider lookup redirects to another site");
+                reply->abort();
+                return;
+            }
+
+            reply->redirectAllowed();
+        };
+
+        connect(reply, &QNetworkReply::redirected, this, followWithinSite);
+        replies.push_back(reply);
+    }
+
+    const auto readReplies = [this, accountUrl, network, replies]() {
+        readProviderReplies(accountUrl, network, replies);
+    };
+
+    for (QNetworkReply* reply : replies)
+        connect(reply, &QNetworkReply::finished, this, readReplies);
+}
+
+void CloudAccountPage::readProviderReplies(const QUrl& accountUrl, QNetworkAccessManager* network,
+                                           const std::vector<QNetworkReply*>& replies)
+{
+    // This runs as each reply finishes. It reads them once both have, in the order they were
+    // sent, so the WebFinger reply wins over the discovery document.
+    const bool isAllFinished = std::ranges::all_of(replies, &QNetworkReply::isFinished);
+    if (!isAllFinished)
+        return;
+
+    for (QNetworkReply* reply : replies)
+    {
+        const std::string provider = Uri::signInProviderOrigin(reply->readAll().toStdString());
+        if (provider.empty())
+            continue;
+
+        _signIn.provider = originOf(QUrl(QString::fromStdString(provider)));
+        LOG_INF("account window: the account's sign-in provider is " << provider);
+        break;
+    }
+
+    network->deleteLater();
+    load(accountUrl);
 }
 
 void CloudAccountPage::openSignInWindow(const QUrl& url)
@@ -1110,7 +1196,7 @@ void openRemoteFile(const QString& serverUrl, QWidget* /*parent*/, QWebEnginePro
     window->setView(view);
     QObject::connect(view, &QWebEngineView::titleChanged, window, &QWidget::setWindowTitle);
 
-    view->load(QUrl(serverUrl));
+    page->open(QUrl(serverUrl));
     window->show();
 }
 
