@@ -1602,7 +1602,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
         }
         else if (isCollab && requestDetails.equals(2, "avatar"))
         {
-            // /cool/collab/avatar?WOPISrc=...&userId=...&token=...
+            // /cool/collab/avatar?userId=...&token=...&WOPISrc=...
             // Proxies the per-user avatar image from the
             // integrator (authenticated with the user's
             // access_token) so peers can load it without
@@ -1625,7 +1625,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
                 return MessageResult::Ignore;
             }
 
-            auto broker = findCollabBrokerByWopiSrc(wopiSrc);
+            auto broker = findCollabBroker(RequestDetails::getDocKey(wopiSrc));
             if (!broker)
             {
                 HttpHelper::sendErrorAndShutdown(
@@ -1649,7 +1649,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
 
             // Proxy the download via CollabFileProxy.
             auto proxy = std::make_shared<CollabFileProxy>(
-                _id, requestDetails, socket, wopiSrc,
+                _id, requestDetails, socket, broker->getWopiSrc(),
                 avatar.accessToken);
             proxy->handleFetchRequest(avatar.url,
                 COOLWSD::getWebServerPoll(), disposition);
