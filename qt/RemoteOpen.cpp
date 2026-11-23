@@ -790,11 +790,21 @@ void CloudAccountPage::finishSignIn(const QUrl& url, bool ok)
 
     _integratorOrigin = originOf(url);
 
-    LOG_INF("account window: the sign-in is done, loading its page in the account window");
     // After this, closing the sign-in window cancels nothing, and its later loads do nothing.
     _signIn.window->disconnect(this);
     _signIn.window->page()->disconnect(this);
     _signIn.window->close();
+
+    // Loading would replace the page and the editor frame in it, with the document's unsaved edits.
+    const bool hasEditorFrame = findFrame(mainFrame(), _keptForm.url).has_value();
+    const bool isDocumentOpen = !_frame.id.isEmpty() && hasEditorFrame;
+    if (isDocumentOpen)
+    {
+        LOG_INF("account window: the sign-in is done, and the page with the open document stays");
+        return;
+    }
+
+    LOG_INF("account window: the sign-in is done, loading its page in the account window");
     load(url);
 }
 
