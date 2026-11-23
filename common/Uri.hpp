@@ -82,7 +82,16 @@ public:
     /// The account address can redirect within its site: from http to https, or to and from www.
     static bool isWithinSite(const std::string& from, const std::string& to);
 
+    /// Whether url is a sign-in request for the account at accountOrigin: a SAMLRequest, or a
+    /// redirect_uri (OpenID Connect) or service (CAS) on the account's site.
+    static bool isSignInRequest(const std::string& url, const std::string& accountOrigin);
+
 private:
+    // The query parameters of a sign-in request. Each but the SAML one holds the return address.
+    static constexpr std::string_view SamlRequestParameter = "SAMLRequest";
+    static constexpr std::string_view OpenIdReturnParameter = "redirect_uri"; ///< And OAuth.
+    static constexpr std::string_view CasReturnParameter = "service";
+
     std::string _uri;
 };
 

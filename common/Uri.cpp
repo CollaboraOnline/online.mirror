@@ -151,4 +151,28 @@ bool Uri::isWithinSite(const std::string& from, const std::string& to)
     }
 }
 
+bool Uri::isSignInRequest(const std::string& url, const std::string& accountOrigin)
+{
+    try
+    {
+        for (const auto& [name, value] : Poco::URI(url).getQueryParameters())
+        {
+            if (name == SamlRequestParameter)
+                return true;
+
+            const bool isOpenIdReturn = name == OpenIdReturnParameter;
+            const bool isCasReturn = name == CasReturnParameter;
+            const bool isReturnAddress = isOpenIdReturn || isCasReturn;
+            if (isReturnAddress && isWithinSite(accountOrigin, value))
+                return true;
+        }
+    }
+    catch (const Poco::SyntaxException&)
+    {
+        LOG_WRN("Uri: isSignInRequest: the address is not a valid URI");
+    }
+
+    return false;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
