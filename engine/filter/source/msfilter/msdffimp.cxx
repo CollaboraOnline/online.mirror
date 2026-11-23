@@ -7646,6 +7646,13 @@ cpo::uno::Reference<css::xml::dom::XDocument> SvxMSDffManager::ParseMetroBlobSha
             u"drs"_ustr, css::embed::ElementModes::SEEKABLEREAD));
         if (!xDRS.is())
             return {};
+        // A shape written down from a newer format may leave only the record of that writing,
+        // which holds a checksum of the shape and of its text and no shape of its own. There is
+        // nothing to read in that, so it is not an unexpected turn.
+        cpo::uno::Reference<css::container::XNameAccess> xNames(xDRS, cpo::uno::UNO_QUERY);
+        if (!xNames.is() || !xNames->hasByName(u"shapexml.xml"_ustr))
+            return {};
+
         auto xStream(xDRS->openStreamElement(
             u"shapexml.xml"_ustr, css::embed::ElementModes::SEEKABLEREAD));
         if (!xStream.is())
