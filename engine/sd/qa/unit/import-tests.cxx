@@ -882,6 +882,23 @@ CPPUNIT_TEST_FIXTURE(SdImportTest, testInternalHyperlink)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("URLs don't match", u"#Slide2"_ustr, aURL);
 }
 
+// A run that holds a link stays a piece of text of its own.
+CPPUNIT_TEST_FIXTURE(SdImportTest, testRunWithOnlyAnActionStaysALink)
+{
+    // Given a text box whose second run carries a link that says what a click does and names no
+    // place to go:
+    createSdImpressDoc("pptx/run-action-only.pptx");
+
+    uno::Reference<beans::XPropertySet> xShape(getShapeFromPage(1, 0));
+    uno::Reference<text::XTextRange> const xParagraph(getParagraphFromShape(0, xShape));
+
+    // Without the fix in place, the run was laid in as plain text and joined the words before
+    // it, so the paragraph read as one piece.
+    uno::Reference<beans::XPropertySet> xRun(getRunFromParagraph(1, xParagraph), uno::UNO_QUERY_THROW);
+    CPPUNIT_ASSERT_EQUAL(u"TextField"_ustr,
+                         xRun->getPropertyValue(u"TextPortionType"_ustr).get<OUString>());
+}
+
 CPPUNIT_TEST_FIXTURE(SdImportTest, testHyperlinkColor)
 {
     createSdImpressDoc("pptx/tdf137367.pptx");

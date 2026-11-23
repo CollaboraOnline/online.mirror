@@ -86,7 +86,10 @@ sal_Int32 TextRun::insertAt(
             aTextCharacterProps.moHeight = static_cast<sal_Int32>(nDefaultCharHeight * 100);
         aTextCharacterProps.pushToPropSet( aPropSet, rFilterBase );
 
-        if( maTextCharacterProperties.maHyperlinkPropertyMap.empty() )
+        // The text of a link is carried by a field, which the run keeps even where the link
+        // left nothing for the field to hold.
+        if (maTextCharacterProperties.maHyperlinkPropertyMap.empty()
+            && !maTextCharacterProperties.mbHasHyperlink)
         {
             if( mbIsLineBreak )
             {

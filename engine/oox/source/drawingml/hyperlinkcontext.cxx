@@ -139,26 +139,30 @@ HyperLinkContext::HyperLinkContext( ContextHandler2Helper const & rParent,
                 }
             }
         }
-        maProperties.setProperty(PROP_Action, aAction);
+        // What a click does belongs to a shape. The text of a run is carried by a field, which
+        // holds the place it leads to and nothing else, and a jump states that place in the
+        // address above.
+        if (!bTextRun)
+            maProperties.setProperty(PROP_Action, aAction);
     }
 
     if ( !sURL.isEmpty() )
         maProperties.setProperty(PROP_URL, sURL);
 
     OUString sInvalidUrl = rAttribs.getStringDefaulted(XML_invalidUrl);
-    if (!sInvalidUrl.isEmpty())
+    if (!sInvalidUrl.isEmpty() && !bTextRun)
         maProperties.setProperty(PROP_InvalidUrl, sInvalidUrl);
 
     bool bHistory = rAttribs.getBool(XML_history, true); // default="true"
-    if (!bHistory) // set only if it is false
+    if (!bHistory && !bTextRun) // set only if it is false
         maProperties.setProperty(PROP_History, bHistory);
 
     bool bHighlightClick = rAttribs.getBool(XML_highlightClick, false);
-    if (bHighlightClick)
+    if (bHighlightClick && !bTextRun)
         maProperties.setProperty(PROP_HighlightClick, bHighlightClick);
 
     bool bEndSnd = rAttribs.getBool(XML_endSnd, false);
-    if (bEndSnd)
+    if (bEndSnd && !bTextRun)
         maProperties.setProperty(PROP_EndSnd, bEndSnd);
 }
 

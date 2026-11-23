@@ -40,6 +40,9 @@ struct TextCharacterProperties
     /// True where the document stated that a link here is drawn in the colour of the text
     /// around it, and false where it stated nothing, which stands for the colour of links.
     bool                mbHyperlinkKeepsTextColor = false;
+    /// True where the document gave this run a link of its own. A link may say what a click
+    /// does without naming a place to go, so it can hold nothing that a text field keeps.
+    bool                mbHasHyperlink = false;
     TextFont            maLatinFont;
     TextFont            maLatinThemeFont;
     TextFont            maAsianFont;

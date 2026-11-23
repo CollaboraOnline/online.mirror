@@ -176,6 +176,7 @@ ContextHandlerRef TextCharacterPropertiesContext::onCreateContext( sal_Int32 aEl
 
         case A_TOKEN( hlinkClick ):     // CT_Hyperlink
         case A_TOKEN( hlinkMouseOver ): // CT_Hyperlink
+            mrTextCharacterProperties.mbHasHyperlink = true;
             return new HyperLinkContext( *this, rAttribs,
                                          mrTextCharacterProperties.maHyperlinkPropertyMap,
                                          &mrTextCharacterProperties.mbHyperlinkKeepsTextColor,
