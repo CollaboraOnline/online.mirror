@@ -227,7 +227,7 @@ protected:
 private:
     void openNewWindow(QWebEngineNewWindowRequest& request);
     void refuseRedirect(const QUrl& target);
-    void insertEmptyCoolPageScript();
+    void registerEmptyCoolPageScript();
     void findEditorFrame();
     void putCodaPageIn(QWebEngineFrame& frame);
     void useServerEditor(QString const & reason);
@@ -403,7 +403,7 @@ CloudAccountPage::CloudAccountPage(const QUrl& accountUrl, QWebEngineProfile* pr
     , _accountId(accountId)
 {
     setUrlRequestInterceptor(new EditorFormInterceptor(*this));
-    insertEmptyCoolPageScript();
+    registerEmptyCoolPageScript();
 
     _editorCheck.setInterval(EDITOR_CHECK_INTERVAL);
     connect(&_editorCheck, &QTimer::timeout, this, &CloudAccountPage::findEditorFrame);
@@ -544,7 +544,7 @@ bool CloudAccountPage::acceptNavigationRequest(const QUrl& url, NavigationType t
     LOG_INF("account window: opening a link in the system browser");
     openInSystemBrowser(url);
     // Qt WebEngine stops injecting the page's scripts after it refuses a link click.
-    QTimer::singleShot(0, this, &CloudAccountPage::insertEmptyCoolPageScript);
+    QTimer::singleShot(0, this, &CloudAccountPage::registerEmptyCoolPageScript);
     return false;
 }
 
@@ -561,7 +561,7 @@ void CloudAccountPage::refuseRedirect(const QUrl& target)
     window->close();
 }
 
-void CloudAccountPage::insertEmptyCoolPageScript()
+void CloudAccountPage::registerEmptyCoolPageScript()
 {
     QWebEngineScript emptyCoolPage;
     emptyCoolPage.setSourceCode(QString::fromStdString(EditorFrameScripts::emptyCoolPageScript));
