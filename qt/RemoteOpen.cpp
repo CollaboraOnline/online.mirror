@@ -515,18 +515,20 @@ bool CloudAccountPage::acceptNavigationRequest(const QUrl& url, NavigationType t
     if (!isMainFrame || !isOtherSite)
         return true;
 
-    if (type == NavigationTypeRedirect && !_firstPageLoaded)
+    const QUrl target = originOf(url);
+    const std::string from = _integratorOrigin.toString().toStdString();
+    const std::string to = target.toString().toStdString();
+    const bool isRedirect = type == NavigationTypeRedirect;
+    const bool isWithinSite = Uri::isWithinSite(from, to);
+    if (isRedirect && !_firstPageLoaded && !isWithinSite)
     {
-        const QUrl target = originOf(url);
-        const std::string from = _integratorOrigin.toString().toStdString();
-        const std::string to = target.toString().toStdString();
-        if (!Uri::isWithinSite(from, to))
-        {
-            LOG_WRN("account window: refused: the account address redirects to another site");
-            QTimer::singleShot(0, this, [this, target]() { refuseRedirect(target); });
-            return false;
-        }
+        LOG_WRN("account window: refused: the account address redirects to another site");
+        QTimer::singleShot(0, this, [this, target]() { refuseRedirect(target); });
+        return false;
+    }
 
+    if (isRedirect && !_firstPageLoaded)
+    {
         _integratorOrigin = target;
         LOG_INF("account window: the account address redirects within its site");
         return true;
