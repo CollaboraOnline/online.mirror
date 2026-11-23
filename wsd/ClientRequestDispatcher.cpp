@@ -1447,12 +1447,6 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             // command
             LOG_INF("CollabFetch request: " << request.getURI());
 
-            // CORS allow-origin so cross-origin JS callers (CODA's
-            // cool.html page) can read the response.  Applied to every
-            // response path including errors so the browser can show
-            // JS the actual status instead of an opaque CORS failure.
-            const std::string corsHeader = "Access-Control-Allow-Origin: *\r\n";
-
             // Extract token from query parameters
             std::string token;
             Poco::URI requestUri(request.getURI());
@@ -1468,8 +1462,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             if (token.empty())
             {
                 LOG_ERR("Missing token parameter in collab fetch request");
-                HttpHelper::sendErrorAndShutdown(http::StatusCode::BadRequest, socket,
-                                                 std::string_view(), corsHeader);
+                HttpHelper::sendErrorAndShutdown(http::StatusCode::BadRequest, socket);
                 return MessageResult::Ignore;
             }
 
@@ -1478,8 +1471,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             if (!consumeCollabFetchRequest(token, fetchRequest))
             {
                 LOG_ERR("Invalid or expired token in collab fetch request");
-                HttpHelper::sendErrorAndShutdown(http::StatusCode::Unauthorized, socket,
-                                                 std::string_view(), corsHeader);
+                HttpHelper::sendErrorAndShutdown(http::StatusCode::Unauthorized, socket);
                 return MessageResult::Ignore;
             }
 
@@ -1490,8 +1482,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             {
                 LOG_ERR("CollabFetch: No active collab session for docKey ["
                         << fetchRequest.docKey << ']');
-                HttpHelper::sendErrorAndShutdown(http::StatusCode::Gone, socket,
-                                                 std::string_view(), corsHeader);
+                HttpHelper::sendErrorAndShutdown(http::StatusCode::Gone, socket);
                 return MessageResult::Ignore;
             }
 
@@ -1500,8 +1491,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             {
                 LOG_ERR("CollabFetch: Invalid broker access token for docKey ["
                         << fetchRequest.docKey << ']');
-                HttpHelper::sendErrorAndShutdown(http::StatusCode::Unauthorized, socket,
-                                                 std::string_view(), corsHeader);
+                HttpHelper::sendErrorAndShutdown(http::StatusCode::Unauthorized, socket);
                 return MessageResult::Ignore;
             }
 
@@ -1520,23 +1510,6 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             // /cool/collab/put?token=... endpoint - upload via token from WebSocket upload command
             LOG_INF("CollabPut request: " << request.getURI());
 
-            // CORS allow-origin so cross-origin JS callers (CODA's
-            // cool.html page) can read the response, plus a preflight
-            // response for the OPTIONS browsers send before this POST
-            // (triggered by Content-Type: application/octet-stream).
-            const std::string corsHeader = "Access-Control-Allow-Origin: *\r\n";
-            if (request.getMethod() == Poco::Net::HTTPRequest::HTTP_OPTIONS)
-            {
-                const std::string preflightHeaders =
-                    "Access-Control-Allow-Origin: *\r\n"
-                    "Access-Control-Allow-Methods: POST, OPTIONS\r\n"
-                    "Access-Control-Allow-Headers: Content-Type\r\n"
-                    "Access-Control-Max-Age: 86400\r\n";
-                HttpHelper::sendErrorAndShutdown(http::StatusCode::NoContent, socket,
-                                                 std::string_view(), preflightHeaders);
-                return MessageResult::Ignore;
-            }
-
             // Extract token from query parameters
             std::string token;
             Poco::URI requestUri(request.getURI());
@@ -1552,8 +1525,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             if (token.empty())
             {
                 LOG_ERR("Missing token parameter in collab put request");
-                HttpHelper::sendErrorAndShutdown(http::StatusCode::BadRequest, socket,
-                                                 std::string_view(), corsHeader);
+                HttpHelper::sendErrorAndShutdown(http::StatusCode::BadRequest, socket);
                 return MessageResult::Ignore;
             }
 
@@ -1562,8 +1534,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             if (!consumeCollabUploadRequest(token, uploadRequest))
             {
                 LOG_ERR("Invalid or expired token in collab put request");
-                HttpHelper::sendErrorAndShutdown(http::StatusCode::Unauthorized, socket,
-                                                 std::string_view(), corsHeader);
+                HttpHelper::sendErrorAndShutdown(http::StatusCode::Unauthorized, socket);
                 return MessageResult::Ignore;
             }
 
@@ -1573,8 +1544,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             {
                 LOG_ERR("CollabPut: No active collab session for docKey ["
                         << uploadRequest.docKey << ']');
-                HttpHelper::sendErrorAndShutdown(http::StatusCode::Gone, socket,
-                                                 std::string_view(), corsHeader);
+                HttpHelper::sendErrorAndShutdown(http::StatusCode::Gone, socket);
                 return MessageResult::Ignore;
             }
 
@@ -1583,8 +1553,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             {
                 LOG_ERR("CollabPut: Invalid broker access token for docKey ["
                         << uploadRequest.docKey << ']');
-                HttpHelper::sendErrorAndShutdown(http::StatusCode::Unauthorized, socket,
-                                                 std::string_view(), corsHeader);
+                HttpHelper::sendErrorAndShutdown(http::StatusCode::Unauthorized, socket);
                 return MessageResult::Ignore;
             }
 
@@ -1678,6 +1647,9 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
                 return MessageResult::Ignore;
             }
 
+            // Any Origin can upgrade (the access token in the first message is what authenticates
+            // the connection, as the access_token in the address does for /cool/ws, which then
+            // skips its Origin check too):
             auto handler = std::make_shared<CollabSocketHandler>(socket, request, true, wopiSrc);
             socket->setHandler(handler);
         }
