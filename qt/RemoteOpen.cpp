@@ -257,9 +257,6 @@ private:
     int _editorChecksLeft = 0;
     QString _session; ///< Names the editor frame's session in its messages.
     QUrl _frameOrigin; ///< The origin of the editor frame given the session.
-    // The kept form that the session's document came from (as the kept form is replaced as soon as
-    // the integrator posts the next one):
-    EditorForm _sessionForm;
     QByteArray _parts; ///< The parts of a long message from the frame, so far.
     coda::DocumentData _document; ///< The document the editor frame shows.
     std::unique_ptr<Bridge> _bridge; ///< Takes the frame's messages. It refers to _document.
@@ -947,7 +944,6 @@ void CloudAccountPage::putCodaPageIn(QWebEngineFrame& frame)
     _parts.clear();
     _session = QUuid::createUuid().toString(QUuid::Id128);
     _frameOrigin = originOf(frame.url());
-    _sessionForm = _keptForm;
     PagesBySession[_session] = this;
     auto * window = dynamic_cast<CloudAccountWindow *>(QWebEngineView::forPage(this)->window());
     if (window) {
@@ -1019,13 +1015,13 @@ void CloudAccountPage::useServerEditor(QString const & reason) {
     _session.clear();
     releaseParkedClose();
     _bridge.reset();
-    std::optional<QWebEngineFrame> frame = findFrame(mainFrame(), _sessionForm.url);
+    std::optional<QWebEngineFrame> frame = findFrame(mainFrame(), _keptForm.url);
     if (!frame) {
         LOG_WRN("account window: the editor frame for the server's own editor is gone");
         return;
     }
     QJsonArray const arguments{
-        _sessionForm.url.toString(QUrl::FullyEncoded), QString::fromLatin1(_sessionForm.body)};
+        _keptForm.url.toString(QUrl::FullyEncoded), QString::fromLatin1(_keptForm.body)};
     frame->runJavaScript(
         "(" + QString::fromStdString(EditorFrameScripts::serverEditorFormScript) + ")(..."
             + QString::fromUtf8(QJsonDocument(arguments).toJson(QJsonDocument::Compact)) + ')',
