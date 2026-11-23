@@ -52,9 +52,9 @@ class TableCornerResizeMarkerSection extends HTMLObjectSection {
 	}
 
 	/*
-		The last column and the last row keep at least the width the resize markers keep between
-		two borders, so the button stops that far right of the previous column border and that
-		far below the previous row border.
+		Core shrinks every column and every row in proportion, so each of them keeps at least the
+		width the resize markers keep between two borders. The button stops where all columns and
+		all rows have that width, measured from the upper left corner of the table.
 	*/
 	private calculateLimits(): void {
 		Util.ensureValue(app.activeDocument);
@@ -62,22 +62,16 @@ class TableCornerResizeMarkerSection extends HTMLObjectSection {
 		const columns = tableMiddleware.currentTableData.columns;
 		const rows = tableMiddleware.currentTableData.rows;
 
-		const lastColumnBorder =
-			columns.entries.length > 0 ?
-				columns.entries[columns.entries.length - 1].position
-			:	columns.left;
-		const lastRowBorder =
-			rows.entries.length > 0 ?
-				rows.entries[rows.entries.length - 1].position
-			:	rows.left;
-
-		const margin =
-			tableMiddleware.resizeMarkerMaxApproximation + this.offsetInCorePixels();
+		// The entries are the borders between two columns or two rows.
+		const columnCount = columns.entries.length + 1;
+		const rowCount = rows.entries.length + 1;
+		const minimumSize = tableMiddleware.resizeMarkerMaxApproximation;
+		const offset = this.offsetInCorePixels();
 
 		this.sectionProperties.leftMost =
-			(columns.tableOffset + lastColumnBorder) * app.twipsToPixels + margin;
+			tableMiddleware.getTableLeftX() + columnCount * minimumSize + offset;
 		this.sectionProperties.topMost =
-			(rows.tableOffset + lastRowBorder) * app.twipsToPixels + margin;
+			tableMiddleware.getTableTopY() + rowCount * minimumSize + offset;
 	}
 
 	// The lower right corner of the table the button stands for, in twips.

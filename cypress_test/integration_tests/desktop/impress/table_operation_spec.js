@@ -359,4 +359,57 @@ describe(['tagdesktop'], 'Table operations', { testIsolation: false }, function(
 		cy.cGet('.table-row-resize-marker').should('have.length', 3);
 		cy.cGet('.table-corner-resize-marker').should('have.length', 1);
 	});
+
+	it('Shrink the table with the corner button in one drag', function() {
+		selectFullTable(this.win);
+
+		cy.cGet('.table-corner-resize-marker').should('be.visible');
+		helper.processToIdle(this.win);
+
+		var sizeBefore;
+		var tableTopLeft;
+		cy.getFrameWindow().should(function(win) {
+			var tableMiddleware = win.app.activeDocument.tableMiddleware;
+			var data = tableMiddleware.currentTableData;
+			expect(data.columns).to.not.be.undefined;
+			sizeBefore = {
+				width: data.columns.right - data.columns.left,
+				height: data.rows.right - data.rows.left,
+			};
+		});
+
+		// Drag the button almost onto the upper left corner of the table, far past the border
+		// before the last column and the last row. The first selection markers start at the
+		// left and top edges of the table.
+		cy.cGet('.table-select-marker--column').first().then(function($marker) {
+			tableTopLeft = $marker[0].getBoundingClientRect().left;
+		});
+		cy.cGet('.table-select-marker--row').first().then(function($marker) {
+			tableTopLeft = { x: tableTopLeft, y: $marker[0].getBoundingClientRect().top };
+		});
+
+		cy.cGet('.table-corner-resize-marker').then(function($button) {
+			var rect = $button[0].getBoundingClientRect();
+			var startX = rect.left + rect.width / 2;
+			var startY = rect.top + rect.height / 2;
+			var endX = tableTopLeft.x + 20;
+			var endY = tableTopLeft.y + 20;
+
+			cy.cGet('body').realMouseDown({ x: startX, y: startY });
+			cy.cGet('body').realMouseMove((startX + endX) / 2, (startY + endY) / 2);
+			cy.cGet('body').realMouseMove(endX, endY);
+			cy.cGet('body').realMouseUp({ x: endX, y: endY });
+		});
+
+		// One drag takes the table to well under half its width. The columns all shrink, not
+		// only the last one.
+		cy.getFrameWindow().should(function(win) {
+			var data = win.app.activeDocument.tableMiddleware.currentTableData;
+			expect(data.columns.right - data.columns.left).to.be.lessThan(sizeBefore.width / 2);
+			expect(data.rows.right - data.rows.left).to.be.lessThan(sizeBefore.height);
+		});
+
+		cy.cGet('.table-column-resize-marker').should('have.length', 3);
+		cy.cGet('.table-row-resize-marker').should('have.length', 3);
+	});
 });
