@@ -116,7 +116,7 @@ void CollabSocketHandler::handleMessage(const std::vector<char>& payload)
         if (msg.size() > prefix.size() &&
             msg.compare(0, prefix.size(), prefix) == 0)
         {
-            _accessToken = msg.substr(prefix.size());
+            _accessToken = Uri::decode(msg.substr(prefix.size()));
             startValidation();
             return;
         }
@@ -157,9 +157,8 @@ void CollabSocketHandler::startValidation()
         return;
     }
 
-    // sanitizeURI decodes an access_token parameter, so decode this one the same way.
     Poco::URI wopiUri(_wopiUri);
-    wopiUri.addQueryParameter("access_token", Uri::decode(_accessToken));
+    wopiUri.addQueryParameter("access_token", _accessToken);
 
     LOG_INF("Collab: starting CheckFileInfo validation for: "
             << Anonymizer::anonymizeUrl(wopiUri.toString()));
@@ -361,9 +360,8 @@ void CollabSocketHandler::renewAccessToken(std::string const & token) {
         sendTextMessage(R"({"type":"access_token","accepted":false})");
         return;
     }
-    // The URI-encoded token is decoded as for the first CheckFileInfo:
     Poco::URI wopiUri(_wopiUri);
-    wopiUri.addQueryParameter("access_token", Uri::decode(token));
+    wopiUri.addQueryParameter("access_token", token);
 
     std::weak_ptr<ProtocolHandlerInterface> const handlerWeak = shared_from_this();
     _renewalCheckFileInfo = std::make_shared<CheckFileInfo>(
@@ -465,7 +463,7 @@ void CollabSocketHandler::handleAuthenticatedMessage(const std::string& msg)
     }
     else if (type == "access_token")
     {
-        renewAccessToken(json->optValue<std::string>("token", std::string()));
+        renewAccessToken(Uri::decode(json->optValue<std::string>("token", std::string())));
     }
     else if (type == "bye")
     {
