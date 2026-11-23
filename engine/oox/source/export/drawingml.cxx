@@ -5067,6 +5067,21 @@ void DrawingML::WriteBodyProps(const cpo::uno::Reference< cpo::uno::XInterface >
     mpFS->endElementNS((nXmlNamespace ? nXmlNamespace : XML_a), XML_bodyPr);
 }
 
+void DrawingML::WriteTextLines(std::u16string_view aText)
+{
+    for (std::size_t nPosition = 0; nPosition != std::u16string_view::npos;)
+    {
+        const std::u16string_view aLine = o3tl::getToken(aText, u'\n', nPosition);
+        mpFS->startElementNS(XML_a, XML_p);
+        mpFS->startElementNS(XML_a, XML_r);
+        mpFS->startElementNS(XML_a, XML_t);
+        mpFS->writeEscaped(aLine);
+        mpFS->endElementNS(XML_a, XML_t);
+        mpFS->endElementNS(XML_a, XML_r);
+        mpFS->endElementNS(XML_a, XML_p);
+    }
+}
+
 void DrawingML::WriteTextlessParagraph(const Reference<XInterface>& rXIface)
 {
     Reference<XTextContent> xParagraph;

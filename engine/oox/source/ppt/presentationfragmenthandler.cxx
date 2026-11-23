@@ -67,7 +67,11 @@
 #include <oox/drawingml/theme.hxx>
 #include <oox/drawingml/drawingmltypes.hxx>
 #include <oox/drawingml/themefragmenthandler.hxx>
+#include <drawingml/textbody.hxx>
+#include <drawingml/textfield.hxx>
 #include <drawingml/textliststylecontext.hxx>
+#include <drawingml/textparagraph.hxx>
+#include <drawingml/textrun.hxx>
 #include <oox/helper/attributelist.hxx>
 #include <oox/ole/olestorage.hxx>
 #include <oox/ole/vbaproject.hxx>
@@ -420,6 +424,31 @@ namespace
     A master page of the model stands for one layout and holds what that layout states, so a
     placeholder the master states and the layout leaves out has nowhere to live. Its name, its
     index and the place it takes are kept beside the model, in the units the file states them in. */
+// What an area of the master says, line by line. A field stands for a value that a reader
+// fills in, such as the number of a slide, so an area holding one says nothing of its own.
+OUString masterPlaceholderText(const oox::drawingml::ShapePtr& rxShape)
+{
+    const oox::drawingml::TextBodyPtr& rxTextBody = rxShape->getTextBody();
+    if (!rxTextBody)
+        return OUString();
+
+    OUStringBuffer aText;
+    for (const auto& rxParagraph : rxTextBody->getParagraphs())
+    {
+        if (!aText.isEmpty())
+            aText.append("\n");
+        for (const auto& rxRun : rxParagraph->getRuns())
+        {
+            if (dynamic_cast<const oox::drawingml::TextField*>(rxRun.get()))
+                return OUString();
+            aText.append(rxRun->getText());
+        }
+    }
+
+    const OUString aLines = aText.makeStringAndClear();
+    return o3tl::trim(aLines).empty() ? OUString() : aLines;
+}
+
 void collectMasterPlaceholders(const std::vector<oox::drawingml::ShapePtr>& rShapes,
                                std::vector<beans::PropertyValue>& rList)
 {
@@ -435,7 +464,8 @@ void collectMasterPlaceholders(const std::vector<oox::drawingml::ShapePtr>& rSha
                 comphelper::makePropertyValue(u"X"_ustr, pShape->getPosition().X),
                 comphelper::makePropertyValue(u"Y"_ustr, pShape->getPosition().Y),
                 comphelper::makePropertyValue(u"Width"_ustr, pShape->getSize().Width),
-                comphelper::makePropertyValue(u"Height"_ustr, pShape->getSize().Height)
+                comphelper::makePropertyValue(u"Height"_ustr, pShape->getSize().Height),
+                comphelper::makePropertyValue(u"Text"_ustr, masterPlaceholderText(pShape))
             };
             rList.push_back(
                 comphelper::makePropertyValue(OUString::number(rList.size()), aOne));

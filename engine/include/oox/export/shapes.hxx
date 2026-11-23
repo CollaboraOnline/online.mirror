@@ -177,9 +177,13 @@ public:
      */
     ShapeExport&       WriteShape( const cpo::uno::Reference< css::drawing::XShape >& xShape );
     /** @param bText false writes the body properties and an empty paragraph, for a shape whose
-        text belongs to the application rather than to the file - a placeholder's prompt. */
+        text belongs to the application rather than to the file - a placeholder's prompt.
+        @param aStatedText words the document stated for this area, which take the place of that
+        empty paragraph. The model holds them beside the page where it has nowhere else to keep
+        them. */
     ShapeExport&       WriteTextBox( const cpo::uno::Reference< cpo::uno::XInterface >& xIface, sal_Int32 nXmlNamespace, bool bWritePropertiesAsLstStyles = false, bool bText = true,
-                                     const cpo::uno::Reference<css::beans::XPropertySet>& rXListStyle = nullptr );
+                                     const cpo::uno::Reference<css::beans::XPropertySet>& rXListStyle = nullptr,
+                                     std::u16string_view aStatedText = {} );
     virtual ShapeExport&
                         WriteTextShape( const cpo::uno::Reference< css::drawing::XShape >& xShape );
     ShapeExport&

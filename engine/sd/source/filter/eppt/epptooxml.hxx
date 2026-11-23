@@ -163,6 +163,11 @@ private:
 public:
     /// The page whose part is being written
     const cpo::uno::Reference<css::drawing::XDrawPage>& GetCurrentPage() const { return mXDrawPage; }
+    /** What the slide master being written says in the area of the name given
+
+        Empty where it says nothing there. The words are held beside the model, which keeps no
+        page of its own for a slide master. */
+    OUString GetSlideMasterText(std::string_view aTypeName) const;
     const rtl::Reference<SdXImpressDocument>& GetModel() const { return mXModel; }
 private:
     /** Writes the placeholders the slide master stated and the model has no place for.
@@ -170,7 +175,10 @@ private:
         They are read from what the import kept beside the model, and only the ones that nothing
         else has written are stated, so the master says where each of its own areas sits. */
     void WriteMasterStatedPlaceholders(const ::sax_fastparser::FSHelperPtr& pFS,
-                                       const PowerPointShapeExport& rDML);
+                                       PowerPointShapeExport& rDML);
+
+    /// The placeholders the import kept beside the model for the page being written
+    cpo::uno::Sequence<css::beans::PropertyValue> GetStatedMasterPlaceholders() const;
 
     /// The form controls of the page being written, which go out after its shapes.
     std::vector<cpo::uno::Reference<css::drawing::XShape>> maControlShapes;

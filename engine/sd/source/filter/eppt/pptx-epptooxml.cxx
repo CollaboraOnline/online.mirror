@@ -3894,8 +3894,15 @@ ShapeExport& PowerPointShapeExport::WritePlaceholderShape(const Reference< XShap
     if (ePlaceholder == Subtitle && mePageType != PageType::MASTER && xProps)
         xProps->getPropertyValue(u"Style"_ustr) >>= xListStyle;
 
+    // What the slide master says in this area. The page this shape comes from is a layout, so
+    // the words of the master are held beside the model and are written back here.
+    const OUString aMasterText
+        = mbSlideMasterPart
+              ? static_cast<PowerPointExport*>(GetFB())->GetSlideMasterText(aTypeName)
+              : OUString();
     WriteTextBox(xShape, XML_p, bUsePlaceholderIndex || bWritePropertiesAsLstStyles,
-                 /*bText=*/!bTextIsDefaultPrompt && !bInheritsItsPrompt, xListStyle);
+                 /*bText=*/!bTextIsDefaultPrompt && !bInheritsItsPrompt, xListStyle,
+                 aMasterText);
 
     mpFS->endElementNS(XML_p, XML_sp);
 
@@ -4471,13 +4478,12 @@ void PowerPointExport::WriteMasterOwnPlaceholders(PowerPointShapeExport& rDML,
     }
 }
 
-void PowerPointExport::WriteMasterStatedPlaceholders(const FSHelperPtr& pFS,
-                                                     const PowerPointShapeExport& rDML)
+uno::Sequence<beans::PropertyValue> PowerPointExport::GetStatedMasterPlaceholders() const
 {
     const OUString aPageKey = placeholderPageKey(mXDrawPage);
     if (aPageKey.isEmpty() || !mXModel.is()
         || !mXModel->getPropertySetInfo()->hasPropertyByName(u"InteropGrabBag"_ustr))
-        return;
+        return {};
 
     uno::Sequence<beans::PropertyValue> aPlaceholders;
     try
@@ -4486,17 +4492,47 @@ void PowerPointExport::WriteMasterStatedPlaceholders(const FSHelperPtr& pFS,
             mXModel->getPropertyValue(u"InteropGrabBag"_ustr));
         const auto aEntry = aGrabBag.find(u"OOXMasterPlaceholders"_ustr);
         if (aEntry == aGrabBag.end())
-            return;
+            return {};
 
         comphelper::SequenceAsHashMap aPerPage(aEntry->second);
         const auto aPage = aPerPage.find(aPageKey);
         if (aPage == aPerPage.end() || !(aPage->second >>= aPlaceholders))
-            return;
+            return {};
     }
     catch (const uno::Exception&)
     {
-        return;
+        return {};
     }
+
+    return aPlaceholders;
+}
+
+OUString PowerPointExport::GetSlideMasterText(std::string_view aTypeName) const
+{
+    const uno::Sequence<beans::PropertyValue> aPlaceholders = GetStatedMasterPlaceholders();
+    for (const beans::PropertyValue& rPlaceholder : aPlaceholders)
+    {
+        uno::Sequence<beans::PropertyValue> aFields;
+        if (!(rPlaceholder.Value >>= aFields))
+            continue;
+
+        comphelper::SequenceAsHashMap aMap(aFields);
+        const OString aType = masterPlaceholderName(
+            OUStringToOString(oox::TokenMap::getUnicodeTokenName(
+                                  aMap.getUnpackedValueOrDefault(u"Type"_ustr, sal_Int32(0))),
+                              RTL_TEXTENCODING_UTF8));
+        const OUString aText = aMap.getUnpackedValueOrDefault(u"Text"_ustr, OUString());
+        if (std::string_view(aType) == aTypeName && !aText.isEmpty())
+            return aText;
+    }
+
+    return OUString();
+}
+
+void PowerPointExport::WriteMasterStatedPlaceholders(const FSHelperPtr& pFS,
+                                                     PowerPointShapeExport& rDML)
+{
+    const uno::Sequence<beans::PropertyValue> aPlaceholders = GetStatedMasterPlaceholders();
 
     std::map<OString, sal_Int32> aStated;
     for (const beans::PropertyValue& rPlaceholder : aPlaceholders)
@@ -4550,7 +4586,11 @@ void PowerPointExport::WriteMasterStatedPlaceholders(const FSHelperPtr& pFS,
         pFS->startElementNS(XML_p, XML_txBody);
         pFS->singleElementNS(XML_a, XML_bodyPr);
         pFS->singleElementNS(XML_a, XML_lstStyle);
-        pFS->singleElementNS(XML_a, XML_p);
+        const OUString aText = aMap.getUnpackedValueOrDefault(u"Text"_ustr, OUString());
+        if (aText.isEmpty())
+            pFS->singleElementNS(XML_a, XML_p);
+        else
+            rDML.WriteTextLines(aText);
         pFS->endElementNS(XML_p, XML_txBody);
         pFS->endElementNS(XML_p, XML_sp);
     }

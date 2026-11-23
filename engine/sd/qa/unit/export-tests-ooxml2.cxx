@@ -1778,29 +1778,36 @@ CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest2, testMasterPlaceholderStatesNoPrompt)
                 1);
 }
 
-CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest2, testMasterBodyStatesNoPrompt)
+CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest2, testMasterStatesItsOwnText)
 {
     // Given a document whose first layout states no areas at all, so that the master has to take
-    // the shape of its body from the next layout, which states one and no text for it:
+    // the shape of its body from the next layout, while the master states words of its own:
     createSdImpressDoc("pptx/master-placeholder-prompt.pptx");
     save(TestFilter::PPTX);
 
     xmlDocUniquePtr pXmlMaster = parseExport(u"ppt/slideMasters/slideMaster1.xml"_ustr);
+    static constexpr OString aBody
+        = "/p:sldMaster/p:cSld/p:spTree/p:sp[p:nvSpPr/p:nvPr/p:ph/@type='body']/p:txBody"_ostr;
 
     // Without the fix in place, this test would have failed with:
-    // - Expected: 0
+    // - Expected: 1
     // - Actual  : 7
     // i.e. the seven levels of the prompt a reader shows for an empty area were written to the
     // file as the text of the master, in whichever language that reader happened to run in.
-    assertXPath(pXmlMaster,
-                "/p:sldMaster/p:cSld/p:spTree/p:sp[p:nvSpPr/p:nvPr/p:ph/@type='body']"
-                "/p:txBody/a:p/a:r",
-                0);
-    // The formatting the master gives each of those levels is stated all the same.
-    assertXPath(pXmlMaster,
-                "/p:sldMaster/p:cSld/p:spTree/p:sp[p:nvSpPr/p:nvPr/p:ph/@type='body']"
-                "/p:txBody/a:lstStyle/a:lvl7pPr",
-                1);
+    assertXPath(pXmlMaster, aBody + "/a:p", 1);
+    // The words of the document itself are what the master says, in all three of its areas.
+    assertXPathContent(pXmlMaster, aBody + "/a:p/a:r/a:t",
+                       u"Click here to edit Closing message");
+    assertXPathContent(pXmlMaster,
+                       "/p:sldMaster/p:cSld/p:spTree/p:sp[p:nvSpPr/p:nvPr/p:ph/@type='title']"
+                       "/p:txBody/a:p/a:r/a:t",
+                       u"Title");
+    assertXPathContent(pXmlMaster,
+                       "/p:sldMaster/p:cSld/p:spTree/p:sp[p:nvSpPr/p:nvPr/p:ph/@type='ftr']"
+                       "/p:txBody/a:p/a:r/a:t",
+                       u"Confidential");
+    // The formatting the master gives each outline level is stated all the same.
+    assertXPath(pXmlMaster, aBody + "/a:lstStyle/a:lvl7pPr", 1);
 }
 
 CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest2, testTdf106026)

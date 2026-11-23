@@ -562,6 +562,8 @@ public:
 
     /** Writes a paragraph with no text, carrying the properties text put in it would get. */
     void WriteTextlessParagraph(const cpo::uno::Reference<cpo::uno::XInterface>& rXIface);
+    /// Writes the lines of a text, one paragraph each, into the text body open at the moment
+    OOX_DLLPUBLIC void WriteTextLines(std::u16string_view aText);
 
     void WriteBodyProps(
             const cpo::uno::Reference< cpo::uno::XInterface >& rXIface,
