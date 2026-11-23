@@ -638,6 +638,30 @@ CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testNumberInParenthesesKeepsBoth)
     assertXPath(pXmlDoc, "//a:p[2]/a:pPr/a:buAutoNum", "type", u"arabicParenBoth");
 }
 
+// Each level of the body text styles keeps the bullet that the document gave it.
+CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testEachOutlineLevelKeepsItsBullet)
+{
+    // Given a master whose body text styles state a bullet, a dash and a guillemet for the
+    // first three levels:
+    createSdImpressDoc("pptx/bullet-of-each-level.pptx");
+
+    save(TestFilter::PPTX);
+
+    // Without the fix in place, every level came out with the bullet of the first one, because
+    // the levels below the first outline style have no numbering of their own to take.
+    xmlDocUniquePtr pMaster = parseExport(u"ppt/slideMasters/slideMaster1.xml"_ustr);
+    static constexpr OString aBody = "/p:sldMaster/p:txStyles/p:bodyStyle"_ostr;
+    assertXPath(pMaster, aBody + "/a:lvl1pPr/a:buChar", "char", u"\u2022");
+    assertXPath(pMaster, aBody + "/a:lvl2pPr/a:buChar", "char", u"\u2013");
+    assertXPath(pMaster, aBody + "/a:lvl3pPr/a:buChar", "char", u"\u00bb");
+
+    // The lines of the slide stand at those three levels and show the same three bullets.
+    xmlDocUniquePtr pSlide = parseExport(u"ppt/slides/slide1.xml"_ustr);
+    assertXPath(pSlide, "//p:sp[2]/p:txBody/a:p[1]/a:pPr/a:buChar", "char", u"\u2022");
+    assertXPath(pSlide, "//p:sp[2]/p:txBody/a:p[2]/a:pPr/a:buChar", "char", u"\u2013");
+    assertXPath(pSlide, "//p:sp[2]/p:txBody/a:p[3]/a:pPr/a:buChar", "char", u"\u00bb");
+}
+
 // A line that counts itself keeps its number where its level shows a picture instead.
 CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testNumberedLinesKeepTheirNumbers)
 {

@@ -38,6 +38,7 @@
 #include <drawingml/textparagraphproperties.hxx>
 #include <drawingml/connectorhelper.hxx>
 
+#include <comphelper/sequenceashashmap.hxx>
 #include <osl/diagnose.h>
 
 #include <com/sun/star/style/XStyle.hpp>
@@ -46,6 +47,7 @@
 #include <com/sun/star/animations/XAnimationNodeSupplier.hpp>
 #include <com/sun/star/drawing/XGluePointsSupplier.hpp>
 #include <com/sun/star/container/XIdentifierContainer.hpp>
+#include <com/sun/star/container/XIndexReplace.hpp>
 #include <com/sun/star/drawing/EnhancedCustomShapeGluePointType.hpp>
 #include <com/sun/star/drawing/ConnectorType.hpp>
 #include <utility>
@@ -291,6 +293,39 @@ static void setTextStyle( Reference< beans::XPropertySet > const & rxPropSet, co
     pTextParagraphPropertiesPtr->getTextCharacterProperties().pushToPropSet( aPropSet, rFilter );
 }
 
+// The bullet of every outline level lives in the numbering rules of the first outline style,
+// because a style below it hands its numbering back to that one. So the levels of the body are
+// written there, each at its own place in the rules, and not onto the style of its level.
+static void setBulletsOfEveryLevel( const Reference< beans::XPropertySet >& rxPropSet,
+    const XmlFilterBase& rFilterBase, const oox::drawingml::TextListStylePtr& pTextListStylePtr )
+{
+    if ( !pTextListStylePtr )
+        return;
+
+    PropertySet aPropSet( rxPropSet );
+    Reference< container::XIndexReplace > xNumRule;
+    if ( !aPropSet.getProperty( xNumRule, PROP_NumberingRules ) || !xNumRule.is() )
+        return;
+
+    oox::drawingml::TextParagraphPropertiesArray& rLevels = pTextListStylePtr->getListStyle();
+    const sal_Int32 nCount = std::min< sal_Int32 >( xNumRule->getCount(), rLevels.size() );
+    for ( sal_Int32 nLevel = 0; nLevel < nCount; ++nLevel )
+    {
+        oox::drawingml::TextParagraphProperties& rLevel = rLevels[ nLevel ];
+        PropertyMap aBulletMap;
+        rLevel.getBulletList().pushToPropMap( &rFilterBase, aBulletMap,
+                                              rLevel.getCharHeightPoints( 0.0 ) );
+        if ( aBulletMap.empty() )
+            continue;
+
+        comphelper::SequenceAsHashMap aMap( xNumRule->getByIndex( nLevel ) );
+        for ( const beans::PropertyValue& rProperty : aBulletMap.makePropertyValueSequence() )
+            aMap[ rProperty.Name ] = rProperty.Value;
+        xNumRule->replaceByIndex( nLevel, aMap.getAsConstAny( true ) );
+    }
+    aPropSet.setProperty( PROP_NumberingRules, xNumRule );
+}
+
 void SlidePersist::applyTextStyles( const XmlFilterBase& rFilterBase )
 {
     if ( !mbMaster )
@@ -366,6 +401,7 @@ void SlidePersist::applyTextStyles( const XmlFilterBase& rFilterBase )
                                 setTextStyle( xPropSet, rFilterBase, pTextListStylePtr, 0 );
                                 if ( i == 1 /* BodyStyle */ )
                                 {
+                                    setBulletsOfEveryLevel( xPropSet, rFilterBase, pTextListStylePtr );
                                     for ( int nLevel = 1; nLevel < 5; nLevel++ )
                                     {
                                         {
