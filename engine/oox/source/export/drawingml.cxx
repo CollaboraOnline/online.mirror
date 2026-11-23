@@ -3628,7 +3628,9 @@ bool DrawingML::WriteParagraphNumbering(const Reference< XPropertySet >& rXPropS
         }
         else if ( aPropName == "Prefix" )
         {
-            if( *o3tl::doAccess<OUString>(rPropValue.Value) == ")")
+            // A number that opens with a parenthesis closes with one as well, which the suffix
+            // states again.
+            if( *o3tl::doAccess<OUString>(rPropValue.Value) == "(")
                 bPBoth = true;
         }
         else if ( aPropName == "Suffix" )

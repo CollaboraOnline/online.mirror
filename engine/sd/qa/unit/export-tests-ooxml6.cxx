@@ -623,6 +623,21 @@ CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testBulletKeepsTheCharacterOfTheDocumen
     assertXPath(pSlide, "//a:buFont[@typeface='Symbol']", 0);
 }
 
+// A line numbered inside parentheses keeps the parenthesis it opens with.
+CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testNumberInParenthesesKeepsBoth)
+{
+    // Given two lines that count themselves as (1) and (2):
+    createSdImpressDoc("pptx/numbers-in-parentheses.pptx");
+
+    save(TestFilter::PPTX);
+
+    // Without the fix in place, the saved file said arabicParenR, which numbers the lines 1)
+    // and 2), because the test for the opening parenthesis looked for a closing one.
+    xmlDocUniquePtr pXmlDoc = parseExport(u"ppt/slides/slide1.xml"_ustr);
+    assertXPath(pXmlDoc, "//a:p[1]/a:pPr/a:buAutoNum", "type", u"arabicParenBoth");
+    assertXPath(pXmlDoc, "//a:p[2]/a:pPr/a:buAutoNum", "type", u"arabicParenBoth");
+}
+
 // A line that counts itself keeps its number where its level shows a picture instead.
 CPPUNIT_TEST_FIXTURE(SdOOXMLExportTest6, testNumberedLinesKeepTheirNumbers)
 {
