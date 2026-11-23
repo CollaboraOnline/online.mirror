@@ -16,6 +16,7 @@
 #include <typeinfo>
 #include <utility>
 #include <map>
+#include <vector>
 
 #include <Poco/URI.h>
 
@@ -86,11 +87,23 @@ public:
     /// redirect_uri (OpenID Connect) or service (CAS) on the account's site.
     static bool isSignInRequest(const std::string& url, const std::string& accountOrigin);
 
+    /// The addresses that ask the account at accountOrigin for its sign-in provider, in the order
+    /// to try them: WebFinger, then the OpenID Connect discovery document.
+    static std::vector<std::string> signInProviderLookups(const std::string& accountOrigin);
+
+    /// The https origin of the provider named in a reply from one of those addresses, or empty.
+    static std::string signInProviderOrigin(const std::string& reply);
+
 private:
     // The query parameters of a sign-in request. Each but the SAML one holds the return address.
     static constexpr std::string_view SamlRequestParameter = "SAMLRequest";
     static constexpr std::string_view OpenIdReturnParameter = "redirect_uri"; ///< And OAuth.
     static constexpr std::string_view CasReturnParameter = "service";
+
+    // Where an account names its provider, from OpenID Connect Discovery 1.0, sections 2 and 4.
+    static constexpr std::string_view WebFingerPath = "/.well-known/webfinger";
+    static constexpr std::string_view IssuerRelation = "http://openid.net/specs/connect/1.0/issuer";
+    static constexpr std::string_view DiscoveryPath = "/.well-known/openid-configuration";
 
     std::string _uri;
 };

@@ -14,10 +14,12 @@
 
 #include "Uri.hpp"
 
+#include <common/JsonUtil.hpp>
 #include <common/Log.hpp>
 #include <common/Util.hpp>
 
 #include <Poco/Exception.h>
+#include <Poco/JSON/Array.h>
 #include <Poco/URI.h>
 
 
@@ -173,6 +175,76 @@ bool Uri::isSignInRequest(const std::string& url, const std::string& accountOrig
     }
 
     return false;
+}
+
+std::vector<std::string> Uri::signInProviderLookups(const std::string& accountOrigin)
+{
+    try
+    {
+        Poco::URI webFinger(accountOrigin);
+        webFinger.setPath(std::string(WebFingerPath));
+        webFinger.addQueryParameter("resource", accountOrigin);
+        webFinger.addQueryParameter("rel", std::string(IssuerRelation));
+
+        Poco::URI discovery(accountOrigin);
+        discovery.setPath(std::string(DiscoveryPath));
+
+        return { webFinger.toString(), discovery.toString() };
+    }
+    catch (const Poco::SyntaxException&)
+    {
+        LOG_WRN("Uri: signInProviderLookups: the account origin is not a valid URI");
+        return {};
+    }
+}
+
+std::string Uri::signInProviderOrigin(const std::string& reply)
+{
+    Poco::JSON::Object::Ptr object;
+    if (!JsonUtil::parseJSON(reply, object))
+        return std::string();
+
+    std::string issuer = object->optValue<std::string>("issuer", std::string());
+
+    const Poco::JSON::Array::Ptr links = object->getArray("links");
+    const std::size_t linkCount = links ? links->size() : 0;
+    for (std::size_t i = 0; i < linkCount; ++i)
+    {
+        const Poco::JSON::Object::Ptr link = links->getObject(i);
+        const std::string relation = link ? link->optValue<std::string>("rel", std::string()) : "";
+        if (relation == IssuerRelation)
+        {
+            issuer = link->optValue<std::string>("href", std::string());
+            break;
+        }
+    }
+
+    if (issuer.empty())
+    {
+        LOG_DBG("Uri: signInProviderOrigin: the reply names no provider");
+        return std::string();
+    }
+
+    try
+    {
+        const Poco::URI uri(issuer);
+        if (uri.getScheme() != "https" || uri.getHost().empty())
+        {
+            LOG_WRN("Uri: signInProviderOrigin: the provider is not an https address");
+            return std::string();
+        }
+
+        const bool hasDefaultPort = originPort(issuer) == -1;
+        const std::string port = hasDefaultPort ? "" : ':' + std::to_string(uri.getPort());
+        const std::string origin = "https://" + Util::toLower(uri.getHost()) + port;
+        LOG_DBG("Uri: signInProviderOrigin: the provider is " << origin);
+        return origin;
+    }
+    catch (const Poco::SyntaxException&)
+    {
+        LOG_WRN("Uri: signInProviderOrigin: the provider is not a valid URI");
+        return std::string();
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
