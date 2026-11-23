@@ -2,6 +2,7 @@
 
 var helper = require('../../common/helper');
 var impressHelper = require('../../common/impress_helper');
+var desktopHelper = require('../../common/desktop_helper');
 
 describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Shape alignment guides.', function() {
 
@@ -117,6 +118,53 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Shape alignment guides.', 
 					expect(section.sectionProperties.snap.found(), 'a guide after the drop')
 						.to.equal(false);
 				});
+			});
+		});
+	});
+
+	// A presentation starts without the snap to the grid, so a drag shows the shape guides, and the
+	// Snap to Grid switch shows the state the drag uses whichever way it is turned.
+	it('Snap to Grid starts off and its switch shows the state a drag uses.', function() {
+		// The View tab is wide enough to show the switch, rather than fold it away.
+		cy.viewport(1920, 1080);
+		desktopHelper.switchUIToNotebookbar();
+		desktopHelper.selectNotebookbarTab('View');
+
+		cy.getFrameWindow().then(function(win) {
+			var gridUse = function() {
+				return win.app.map.stateChangeHandler.getItemValue('.uno:GridUse');
+			};
+
+			cy.wrap(null).should(function() {
+				expect(gridUse(), 'Snap to Grid').to.equal('false');
+			});
+			cy.cGet('#home-grid-use-input').should('not.be.checked');
+
+			cy.cGet('#home-grid-use').click();
+			cy.cGet('#home-grid-use-input').should('be.checked');
+			cy.wrap(null).should(function() {
+				expect(gridUse(), 'Snap to Grid').to.equal('true');
+			});
+
+			cy.cGet('#home-grid-use').click();
+			cy.cGet('#home-grid-use-input').should('not.be.checked');
+			cy.wrap(null).should(function() {
+				expect(gridUse(), 'Snap to Grid').to.equal('false');
+			});
+
+			impressHelper.clickCenterOfSlide({});
+			cy.cGet('#test-div-shape-handle-rotation').should('exist');
+			cy.then(function() {
+				var section = getHandlesSection(win);
+				var other = win.app.definitions.graphicSelection.extraInfo.ObjectRectangles.reduce(
+					function(best, r) {
+						return Math.abs(r[2] - section.size[0]) > Math.abs(best[2] - section.size[0])
+							? r : best;
+					});
+				section.checkHelperLinesAndSnapPoints(section.size, section.position,
+					[other[0] - section.position[0], 0]);
+				expect(section.sectionProperties.snap.closestX, 'a guide at the edge')
+					.to.be.closeTo(other[0], 1);
 			});
 		});
 	});

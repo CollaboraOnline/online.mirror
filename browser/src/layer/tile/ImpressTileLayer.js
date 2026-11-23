@@ -681,21 +681,30 @@ window.L.ImpressTileLayer = window.L.CanvasTileLayer.extend({
 			// partdimensions is only included in statusJSON in case of current page resize or switching to a page having different size
 			// The following statements seems unnecessary in those cases
 			if (allPagesResized) {
-				if (statusJSON.gridSnapEnabled === true)
-					app.map.stateChangeHandler.setItemValue('.uno:GridUse', 'true');
-				else if (
-					statusJSON.parts.length > 0 &&
-					statusJSON.parts[0].gridSnapEnabled === true
-				)
-					app.map.stateChangeHandler.setItemValue('.uno:GridUse', 'true');
+				// The status says whether the view snaps to the grid and shows it, either for the
+				// document or with its first part, and it can say no as well as yes. The engine
+				// tells only of a change to them, so the switches take their first state from here.
+				const firstPart =
+					statusJSON.parts.length > 0 ? statusJSON.parts[0] : {};
+				const gridSnapEnabled =
+					statusJSON.gridSnapEnabled !== undefined
+						? statusJSON.gridSnapEnabled
+						: firstPart.gridSnapEnabled;
+				if (gridSnapEnabled !== undefined)
+					app.map.fire('commandstatechanged', {
+						commandName: '.uno:GridUse',
+						state: gridSnapEnabled ? 'true' : 'false',
+					});
 
-				if (statusJSON.gridVisible === true)
-					app.map.stateChangeHandler.setItemValue('.uno:GridVisible', 'true');
-				else if (
-					statusJSON.parts.length > 0 &&
-					statusJSON.parts[0].gridVisible === true
-				)
-					app.map.stateChangeHandler.setItemValue('.uno:GridVisible', 'true');
+				const gridVisible =
+					statusJSON.gridVisible !== undefined
+						? statusJSON.gridVisible
+						: firstPart.gridVisible;
+				if (gridVisible !== undefined)
+					app.map.fire('commandstatechanged', {
+						commandName: '.uno:GridVisible',
+						state: gridVisible ? 'true' : 'false',
+					});
 
 				app.impress.partList = Object.assign([], statusJSON.parts);
 				// A pick of a slide that is gone gets no confirmation, so it is dropped.
