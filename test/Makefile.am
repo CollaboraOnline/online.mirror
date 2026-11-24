@@ -205,6 +205,7 @@ test_base_sources = \
 	NetUtilWhiteBoxTests.cpp \
 	NumUtilWhiteBoxTests.cpp \
 	RequestDetailsTests.cpp \
+	RotatingTokenTests.cpp \
 	SettingsSecretsTests.cpp \
 	StringVectorTests.cpp \
 	TestGlobals.cpp \
