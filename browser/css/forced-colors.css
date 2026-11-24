@@ -167,6 +167,11 @@
 			padding-left: 0 !important;
 			transform: none !important;
 		}
+
+		/* The formula bar icons need the users button face behind them. */
+		:is(.formulabar, #formulabar-buttons-toolbox) .unobutton:has(img.icon-maskable) {
+			background-color: ButtonFace !important;
+		}
 	}
 
 }
