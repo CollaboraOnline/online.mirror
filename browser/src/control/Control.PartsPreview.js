@@ -86,7 +86,7 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 		this._idNum = 0;
 		this._width = 0;
 		this._height = 0;
-		this.scrollTimer = null;
+		this._scrollTask = null;
 		this._menuPosEl = null;
 		this.partsFocusedApplied = false;
 		this._dragState = null;
@@ -2555,17 +2555,17 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 		var partNo = part !== undefined ? part : this._map.getCurrentPartNumber();
 		// Use the preview tile's parent frame directly instead of child index
 		var node = this._previewTiles[partNo] ? this._previewTiles[partNo].parentNode : null;
+		if (!node)
+			return;
 
-		if (node) {
-			if (this.scrollTimer) clearTimeout(this.scrollTimer);
-
-			// 'nearest' leaves a fully visible slide in place and scrolls a partly visible
-			// or hidden one by the least amount that shows it whole.
-			this.scrollTimer = setTimeout(() => {
-				node.scrollIntoView({block: 'nearest', inline: 'nearest', behavior: behavior});
-				this.scrollTimer = null;
-			}, 50);
-		}
+		if (this._scrollTask !== null)
+			app.layoutingService.cancelLayoutingTask(this._scrollTask);
+		// 'nearest' leaves a fully visible slide in place and scrolls a partly visible or hidden
+		// one by the least amount that shows it whole.
+		this._scrollTask = app.layoutingService.appendLayoutingTask(() => {
+			this._scrollTask = null;
+			node.scrollIntoView({block: 'nearest', inline: 'nearest', behavior: behavior});
+		});
 	},
 
 	// The position of the slide whose frame or preview the given element is, counting the drop
@@ -4202,11 +4202,13 @@ window.L.Control.PartsPreview = window.L.Control.extend({
 	},
 
 	focusCurrentSlide: function () {
-		var img = this._previewTiles[this._map._docLayer._selectedPart];
+		var selectedPart = this._map._docLayer._selectedPart;
+		var img = this._previewTiles[selectedPart];
 		if (!img)
 			return;
 
-		img.focus();
+		img.focus({preventScroll: true});
+		this._scrollToPart(selectedPart);
 
 		if (document.activeElement === img) {
 			this.partsFocused = true;

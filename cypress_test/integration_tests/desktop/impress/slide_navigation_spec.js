@@ -1,5 +1,5 @@
 /* -*- js-indent-level: 8 -*- */
-/* global describe it cy require beforeEach*/
+/* global describe it cy require beforeEach expect Cypress */
 
 var helper = require('../../common/helper');
 
@@ -80,6 +80,86 @@ describe(['tagdesktop', 'tagnextcloud', 'tagproxy'], 'Slide Navigation', functio
         cy.cGet('#preview-img-part-1').type('{uparrow}');
         helper.assertFocus('id', 'preview-img-part-0');
         cy.cGet('#preview-img-part-0').should('have.class', 'preview-img-currentpart');
+    });
+
+    // Waits until the layouting queue has run every task it holds, checking once per frame.
+    function waitForLayoutingFrame(win) {
+        return new Cypress.Promise(function(resolve) {
+            function check() {
+                if (win.app.layoutingService.hasTasksPending())
+                    win.requestAnimationFrame(check);
+                else
+                    resolve();
+            }
+            win.requestAnimationFrame(check);
+        });
+    }
+
+    // Presses Down on the focused slide the given number of times, one press per frame or two,
+    // as a held key repeats. After each press the sorter gets to finish the layout work that
+    // the press queued, and the slide that has the focus is recorded in win.focusedSlides with
+    // whether the sorter shows it whole.
+    function holdDownOnSlides(win, presses) {
+        var sorter = win.document.getElementById('slide-sorter');
+        win.focusedSlides = [];
+        var pressed = 0;
+        function pressOnce() {
+            if (pressed === presses)
+                return Cypress.Promise.resolve();
+            pressed++;
+            win.document.activeElement.dispatchEvent(
+                new win.KeyboardEvent('keydown',
+                    { key: 'ArrowDown', keyCode: 40, which: 40, bubbles: true }));
+            return waitForLayoutingFrame(win).then(function() {
+                var focused = win.document.activeElement;
+                var slideRect = focused.getBoundingClientRect();
+                var sorterRect = sorter.getBoundingClientRect();
+                win.focusedSlides.push({
+                    id: focused.id,
+                    inView: slideRect.top >= sorterRect.top - 1 &&
+                        slideRect.bottom <= sorterRect.bottom + 1
+                });
+                return pressOnce();
+            });
+        }
+        return pressOnce();
+    }
+
+    it('Holding Down keeps the focused slide in view', function() {
+        cy.cGet('#preview-img-part-0').click();
+        helper.processToIdle(this.win);
+        helper.assertFocus('id', 'preview-img-part-0');
+
+        // The last slide starts out below the visible part of the sorter, so the sorter has to
+        // scroll for the focus to reach it.
+        cy.getFrameWindow().should(function(win) {
+            var sorter = win.document.getElementById('slide-sorter');
+            var last = win.document.getElementById('preview-img-part-13');
+            expect(last.getBoundingClientRect().top)
+                .to.be.greaterThan(sorter.getBoundingClientRect().bottom);
+        });
+
+        cy.getFrameWindow().then(function(win) {
+            return holdDownOnSlides(win, 13);
+        });
+
+        // Each press moved the focus on by one slide, and the sorter showed that slide whole
+        // before the next press came.
+        cy.getFrameWindow().then(function(win) {
+            var expectedIds = [];
+            for (var i = 1; i <= 13; i++)
+                expectedIds.push('preview-img-part-' + i);
+            var focusedIds = win.focusedSlides.map(function(slide) { return slide.id; });
+            var hiddenIds = win.focusedSlides
+                .filter(function(slide) { return !slide.inView; })
+                .map(function(slide) { return slide.id; });
+            expect(focusedIds).to.deep.equal(expectedIds);
+            expect(hiddenIds, 'focused slides out of view').to.deep.equal([]);
+        });
+
+        helper.processToIdle(this.win);
+        helper.assertFocus('id', 'preview-img-part-13');
+        cy.cGet('#preview-img-part-13').should('have.class', 'preview-img-currentpart');
     });
 
     it('Arrow navigation on a slow connection stays on the last slide reached', function() {
