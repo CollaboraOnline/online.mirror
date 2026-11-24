@@ -567,7 +567,7 @@ void cleanupCollabBrokers()
 }
 
 std::string createCollabFetchRequest(const std::string& streamUrl,
-                                      bool hostChecked,
+                                      bool wopiContents,
                                       const std::string& accessToken,
                                       const std::string& wopiSrc,
                                       const std::string& docKey,
@@ -581,7 +581,7 @@ std::string createCollabFetchRequest(const std::string& streamUrl,
 
     CollabFetchRequest request;
     request.streamUrl = streamUrl;
-    request.hostChecked = hostChecked;
+    request.wopiContents = wopiContents;
     request.accessToken = accessToken;
     request.wopiSrc = wopiSrc;
     request.docKey = docKey;

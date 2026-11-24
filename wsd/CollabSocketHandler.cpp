@@ -17,6 +17,7 @@
 
 #include <wsd/COOLWSD.hpp>
 #include <wsd/Storage.hpp>
+#include <wsd/HostUtil.hpp>
 #include <common/Anonymizer.hpp>
 #include <common/FileUtil.hpp>
 #include <common/JsonUtil.hpp>
@@ -550,7 +551,7 @@ void CollabSocketHandler::sendFetchError(const std::string& stream, const std::s
 }
 
 void CollabSocketHandler::sendFetchUrl(const std::string& stream, const std::string& requestId,
-                                       const std::string& url, bool hostChecked)
+                                       const std::string& url, bool wopiContents)
 {
     // Get the broker's access token for secure validation
     auto broker = _broker.lock();
@@ -569,7 +570,7 @@ void CollabSocketHandler::sendFetchUrl(const std::string& stream, const std::str
 
     // Create a fetch token that the client can use to download via HTTP
     const std::string token =
-        createCollabFetchRequest(url, hostChecked, settings ? std::string() : _accessToken,
+        createCollabFetchRequest(url, wopiContents, settings ? std::string() : _accessToken,
                                  _wopiSrc, _docKey, brokerTag, requestId, stream, _handlerId);
 
     // Build the download URL
@@ -637,7 +638,7 @@ void CollabSocketHandler::handleFetch(const std::string& stream, const std::stri
 
     // Build the URL for the requested stream
     std::string url;
-    bool hostChecked = false;
+    bool wopiContents = false;
     if (stream == "contents" && (!_allowsCleanExport || _userCanOnlyCommentOrManageRedlines))
     {
         LOG_WRN(
@@ -661,6 +662,14 @@ void CollabSocketHandler::handleFetch(const std::string& stream, const std::stri
         {
             url = _wopiInfo->optValue<std::string>("FileUrl", std::string());
         }
+        // The download connects only to the addresses that the WOPI host list allows, so a
+        // FileUrl on a host that the list does not name is left for /contents.
+        if (!url.empty() && !HostUtil::allowedWopiUrl(url))
+        {
+            LOG_WRN("Collab: FileUrl [" << Anonymizer::anonymizeUrl(url)
+                    << "] is not on an allowed WOPI host, using /contents");
+            url.clear();
+        }
         if (url.empty())
         {
             // Construct WOPI /contents URL; _wopiUri may already contain
@@ -668,7 +677,7 @@ void CollabSocketHandler::handleFetch(const std::string& stream, const std::stri
             Poco::URI contentsUri(_wopiUri);
             contentsUri.setPath(contentsUri.getPath() + "/contents");
             url = contentsUri.toString();
-            hostChecked = true;
+            wopiContents = true;
         }
     }
     else if (stream == "userSettings")
@@ -687,7 +696,7 @@ void CollabSocketHandler::handleFetch(const std::string& stream, const std::stri
         return;
     }
 
-    sendFetchUrl(stream, requestId, url, hostChecked);
+    sendFetchUrl(stream, requestId, url, wopiContents);
 }
 
 namespace
@@ -824,7 +833,7 @@ void CollabSocketHandler::handleSettingsFileFetch(const std::string& requestId,
         return;
 
     std::shared_ptr<http::Session> httpSession =
-        StorageConnectionManager::getHttpSession(settingsUri);
+        StorageConnectionManager::getWopiHttpSession(settingsUri);
     http::Request httpRequest(settingsUri.getPathAndQuery());
 
     std::weak_ptr<ProtocolHandlerInterface> handlerWeak = shared_from_this();

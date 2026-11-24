@@ -1586,7 +1586,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
                 _id, requestDetails, socket, fetchRequest.wopiSrc, fetchRequest.accessToken);
 
             // Download directly from the pre-configured stream URL
-            proxy->handleFetchRequest(fetchRequest.streamUrl, fetchRequest.hostChecked,
+            proxy->handleFetchRequest(fetchRequest.streamUrl, fetchRequest.wopiContents,
                                       COOLWSD::getWebServerPoll(), disposition,
                                       CollabSocketHandler::settingsSecretFields(
                                           fetchRequest.stream, fetchRequest.streamUrl));

@@ -2304,7 +2304,8 @@ private:
     std::shared_ptr<http::WebSocketSession> collabWs_;
 };
 
-// A fetch of the document from a FileUrl whose host cannot be reached answers 502:
+// A fetch of the document from a FileUrl that redirects to a host that cannot be reached
+// answers 502:
 class UnitCollabFetchNoConnection: public WopiTestServer {
 public:
     UnitCollabFetchNoConnection():
@@ -2318,7 +2319,22 @@ public:
     void configCheckFileInfo(
         Poco::Net::HTTPRequest const &, Poco::JSON::Object::Ptr & fileInfo) override
     {
-        fileInfo->set("FileUrl", "http://nonexistent.invalid/file");
+        fileInfo->set("FileUrl", getWopiHostURI() + "/redirected-elsewhere");
+    }
+
+    bool handleHttpRequest(
+        Poco::Net::HTTPRequest const & request, std::istream & message,
+        std::shared_ptr<StreamSocket> const & socket) override
+    {
+        if (request.getMethod() == "GET"
+            && Poco::URI(request.getURI()).getPath() == "/redirected-elsewhere")
+        {
+            http::Response response(http::StatusCode::Found);
+            response.set("Location", "http://nonexistent.invalid/file");
+            socket->sendAndShutdown(response);
+            return true;
+        }
+        return WopiTestServer::handleHttpRequest(request, message, socket);
     }
 
     void invokeWSDTest() override {

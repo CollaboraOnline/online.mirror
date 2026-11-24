@@ -37,7 +37,7 @@ public:
     /// Handle a fetch request with a pre-authorized URL (from WebSocket token)
     /// This bypasses CheckFileInfo since the token already validated access.
     /// The body goes to the client with the value of each of secretFields left empty.
-    void handleFetchRequest(const std::string& streamUrl, bool hostChecked,
+    void handleFetchRequest(const std::string& streamUrl, bool wopiContents,
                             const std::shared_ptr<TerminatingPoll>& poll,
                             SocketDisposition& disposition,
                             std::span<const std::string_view> secretFields = {});
@@ -53,8 +53,7 @@ private:
     inline void logPrefix(std::ostream& os) const { os << '#' << _logFD << ": "; }
 
     void doDownload(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& uri,
-                    Authorization const & auth, int redirectionLimit, bool hostChecked,
-                    int retriesLeft);
+                    Authorization const & auth, int redirectionLimit, int retriesLeft);
     void doUpload(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& uri,
                   const std::string& body);
     void answerUploaded(std::shared_ptr<StreamSocket> const & socket,

@@ -153,7 +153,7 @@ private:
 
     /// Answers a fetch with a one-time URL that downloads url.
     void sendFetchUrl(const std::string& stream, const std::string& requestId,
-                      const std::string& url, bool hostChecked);
+                      const std::string& url, bool wopiContents);
 
     /// The URI of the "shared" or the "user" settings list in the CheckFileInfo answer, or
     /// empty when the answer names none.
