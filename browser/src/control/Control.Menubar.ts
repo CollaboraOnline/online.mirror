@@ -456,7 +456,7 @@ class Menubar extends window.L.Control {
 			]},
 			{name: _('Extensions'), id: 'extensions-menu', type: 'menu', menu: []},
 			{name: _UNO('.uno:HelpMenu', 'text'), id: 'help', type: 'menu', accessibility: {combination: 'MY'}, menu: [
-				{name: _('Online Help'), id: 'online-help', type: 'action', iosapp: false},
+				{name: _('User Manual'), id: 'online-help', type: 'action', iosapp: false},
 				{name: _('Show Tour'), id: 'onboardingtour', type: 'action'},
 				{type: 'separator', iosapp: false},
 				{name: _('Keyboard shortcuts'), id: 'keyboard-shortcuts', type: 'action', iosapp: false},
@@ -674,7 +674,7 @@ class Menubar extends window.L.Control {
 			]},
 			{name: _('Extensions'), id: 'extensions-menu', type: 'menu', menu: []},
 			{name: _UNO('.uno:HelpMenu', 'presentation'), id: 'help', type: 'menu', accessibility: {combination: 'MY'}, menu: [
-				{name: _('Online Help'), id: 'online-help', type: 'action', iosapp: false},
+				{name: _('User Manual'), id: 'online-help', type: 'action', iosapp: false},
 				{name: _('Show Tour'), id: 'onboardingtour', type: 'action'},
 				{type: 'separator', iosapp: false},
 				{name: _('Keyboard shortcuts'), id: 'keyboard-shortcuts', type: 'action', iosapp: false},
@@ -846,7 +846,7 @@ class Menubar extends window.L.Control {
 			]},
 			{name: _('Extensions'), id: 'extensions-menu', type: 'menu', menu: []},
 			{name: _UNO('.uno:HelpMenu', 'presentation'), id: 'help', type: 'menu', accessibility: {combination: 'MY'}, menu: [
-				{name: _('Online Help'), id: 'online-help', type: 'action', iosapp: false},
+				{name: _('User Manual'), id: 'online-help', type: 'action', iosapp: false},
 				{name: _('Show Tour'), id: 'onboardingtour', type: 'action'},
 				{type: 'separator', iosapp: false},
 				{name: _('Keyboard shortcuts'), id: 'keyboard-shortcuts', type: 'action', iosapp: false},
@@ -1175,7 +1175,7 @@ class Menubar extends window.L.Control {
 			]},
 			{name: _('Extensions'), id: 'extensions-menu', type: 'menu', menu: []},
 			{name: _UNO('.uno:HelpMenu', 'spreadsheet'), id: 'help', type: 'menu', accessibility: {combination: 'MY'}, menu: [
-				{name: _('Online Help'), id: 'online-help', type: 'action', iosapp: false},
+				{name: _('User Manual'), id: 'online-help', type: 'action', iosapp: false},
 				{name: _('Show Tour'), id: 'onboardingtour', type: 'action'},
 				{type: 'separator', iosapp: false},
 				{name: _('Keyboard shortcuts'), id: 'keyboard-shortcuts', type: 'action', iosapp: false},
