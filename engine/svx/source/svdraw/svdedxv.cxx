@@ -1193,7 +1193,7 @@ OutlinerView* SdrObjEditView::ImpMakeOutlinerView(vcl::Window* pWin, OutlinerVie
     {
         pOutlView = new OutlinerView(*mpTextEditOutliner, pWin);
     }
-    else
+    else if (pOutlView->GetWindow() != pWin)
     {
         pOutlView->SetWindow(pWin);
     }
