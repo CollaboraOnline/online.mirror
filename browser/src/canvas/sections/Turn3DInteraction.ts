@@ -30,8 +30,8 @@ interface TurnedIn3D {
 	The angles count from where the drag began, as a 3D object has no angle from upright of its
 	own. Ctrl, Shift and Alt snap each of them to the steps they snap a turn to; Space switches
 	the pair of axes. While it runs the lines of the objects are drawn turned, through the view
-	the engine will give the scene, and the frame grows and shrinks with them. At the end the
-	engine is told the new 3D transforms, which it applies as one step.
+	the engine will give the scene. At the end the engine is told the new 3D transforms, which it
+	applies as one step.
 */
 class Turn3DInteraction extends SelectionInteraction {
 	/// The pairs of axes a drag turns about: the first by a drag across, the second by a drag
@@ -56,8 +56,11 @@ class Turn3DInteraction extends SelectionInteraction {
 	// the point the turn goes about, in the space the camera looks from
 	private readonly middle: cool.Point3D;
 
-	// the angles reached, in degrees, snapped where a key asks for it
+	// the angles reached, in degrees, snapped where a key asks for it, and the part of them the
+	// objects are turned by already
 	private angles: number[] = [0, 0];
+	private applied: number[] = [0, 0];
+	// the 3D transforms the objects have now, as turned so far
 	private turned = new Map<number, cool.Matrix3D>();
 	private ghost: { lines: cool.Polygon2D[]; frame: cool.Range2D } | null = null;
 
@@ -84,6 +87,7 @@ class Turn3DInteraction extends SelectionInteraction {
 		this.orientation = orientation;
 		this.orientationInverse = orientationInverse;
 		this.middle = middle;
+		for (const one of turnedOnes) this.turned.set(one.id, one.before);
 	}
 
 	/*
@@ -140,6 +144,18 @@ class Turn3DInteraction extends SelectionInteraction {
 		selection: SelectionSection,
 		handle: SelectionHandle,
 	): Turn3DInteraction | null {
+		return Turn3DInteraction.prepare(
+			selection,
+			new cool.SimplePoint(handle.point.x, handle.point.y),
+		);
+	}
+
+	/// A turn of that selection about that point on the page, in twips, or nothing where the
+	/// selection turns in 3D no more.
+	private static prepare(
+		selection: SelectionSection,
+		at: cool.SimplePoint,
+	): Turn3DInteraction | null {
 		const data = RenderGeometrySection.currentPart();
 		const what = Turn3DInteraction.turnsIn(selection.selectedObjects());
 		const box = what && Turn3DInteraction.boxOf(what.objectIds);
@@ -183,7 +199,7 @@ class Turn3DInteraction extends SelectionInteraction {
 
 		// the place of the handle, from the page back onto the scene's unit square and from
 		// there into the space the camera looks from, at the depth of the objects' middles
-		const onTheSquare = toTheSquare.apply(handle.point.x, handle.point.y);
+		const onTheSquare = toTheSquare.apply(at.x, at.y);
 		const there = fromTheSquare.apply(
 			new cool.Point3D(onTheSquare.x, onTheSquare.y, 0),
 		);
@@ -198,7 +214,7 @@ class Turn3DInteraction extends SelectionInteraction {
 			data,
 			what.sceneId,
 			what.objectIds,
-			new cool.SimplePoint(handle.point.x, handle.point.y),
+			at,
 			box,
 			turnedOnes,
 			orientation,
@@ -226,9 +242,27 @@ class Turn3DInteraction extends SelectionInteraction {
 			snapped((90 * (to.y - this.start.y)) / this.height),
 		];
 
+		/*
+			As the office turns: each move turns what is turned already by what it adds, about
+			the axes as the camera sees them, so a drag goes on from where the objects stand and
+			not from where they stood when it began.
+		*/
+		const added = [
+			this.angles[0] - this.applied[0],
+			this.angles[1] - this.applied[1],
+		];
+		if (added[0] === 0 && added[1] === 0 && this.ghost) return;
+		this.applied = this.angles;
+		this.turnBy(added);
+		this.selection.containerObject?.requestReDraw();
+	}
+
+	/// Turns the objects on by those angles in degrees, about the axes of the pair in use, and
+	/// works out the lines that show them so.
+	private turnBy(added: number[]): void {
 		const pair = Turn3DInteraction.pairs[Turn3DInteraction.pairInUse];
-		const turn = Turn3DInteraction.turnAbout(pair[0], this.angles[0]).then(
-			Turn3DInteraction.turnAbout(pair[1], this.angles[1]),
+		const turn = Turn3DInteraction.turnAbout(pair[0], added[0]).then(
+			Turn3DInteraction.turnAbout(pair[1], added[1]),
 		);
 		const aroundTheMiddle = cool.Matrix3D.translation(
 			-this.middle.x,
@@ -241,11 +275,10 @@ class Turn3DInteraction extends SelectionInteraction {
 			);
 
 		// each object into the space the camera looks from, turned there, and back
-		this.turned = new Map<number, cool.Matrix3D>();
 		for (const one of this.turnedOnes)
 			this.turned.set(
 				one.id,
-				one.before
+				(this.turned.get(one.id) ?? one.before)
 					.then(one.outer)
 					.then(this.orientation)
 					.then(aroundTheMiddle)
@@ -259,21 +292,258 @@ class Turn3DInteraction extends SelectionInteraction {
 			this.turned,
 			this.objectIds,
 		);
-		this.selection.containerObject?.requestReDraw();
 	}
 
 	public finish(to: cool.SimplePoint, event?: MouseEvent): void {
 		this.move(to, event);
 		if (this.angles[0] === 0 && this.angles[1] === 0) return;
+		Turn3DInteraction.send(
+			this.data,
+			this.sceneId,
+			this.turned,
+			this.outline(),
+		);
+	}
 
-		const transforms: string[] = [];
-		for (const [objectId, transform] of this.turned)
-			transforms.push(
+	/*
+		The lines of a turn that went to the engine, kept until the scene shows its new picture:
+		the engine answers with the scene's new size at once, and its picture follows once it is
+		drawn and loaded, so the lines stand for it meanwhile, as they do while the drag runs.
+		Kept no longer than keptFor in any case.
+	*/
+	private static sent: {
+		sceneId: number;
+		lines: cool.ObjectPathPolygon[];
+		pictureWas: number;
+		since: number;
+	} | null = null;
+	private static readonly keptFor = 5000;
+
+	/// The checksum of the picture the scene is drawn by, nought where it has none.
+	private static pictureOf(sceneId: number): number {
+		let found = 0;
+		const walk = (list: cool.Primitive[] | undefined): void => {
+			for (const primitive of list ?? []) {
+				if (found) return;
+				if (cool.GraphicResource.is(primitive)) found = primitive.checksum;
+				else walk(primitive.children);
+			}
+		};
+		walk(RenderGeometrySection.objectOf(sceneId)?.primitives);
+		return found;
+	}
+
+	/// Tells the engine the new 3D transforms, one step to undo, and keeps the lines that show
+	/// them until the scene's new picture is there.
+	public static send(
+		data: cool.VectorPrimitivesData,
+		sceneId: number,
+		transforms: Map<number, cool.Matrix3D>,
+		lines: cool.ObjectPathPolygon[] | null,
+	): void {
+		const named: string[] = [];
+		for (const [objectId, transform] of transforms)
+			named.push(
 				String(objectId) + ',' + transform.toArray().map(String).join(','),
 			);
+		if (!named.length) return;
+
+		if (lines?.length) {
+			Turn3DInteraction.sent = {
+				sceneId: sceneId,
+				lines: lines,
+				pictureWas: Turn3DInteraction.pictureOf(sceneId),
+				since: performance.now(),
+			};
+			// the lines go once the time is up, also where nothing else draws again
+			setTimeout(
+				() => app.sectionContainer?.requestReDraw(),
+				Turn3DInteraction.keptFor + 50,
+			);
+		}
+		Turn3DInteraction.keyLeft = {
+			objectIds: Array.from(transforms.keys()).join(','),
+			version: data.version,
+			transforms: transforms,
+		};
 		ChangeOutbox.sendAChange(
-			'setobjecttransform to=' + transforms.join(';') + ' as=turn3d',
+			'setobjecttransform to=' + named.join(';') + ' as=turn3d',
 		);
+	}
+
+	/// The lines of the last turn sent, while the scene does not show its new picture yet.
+	public static linesWhileAnswered(): cool.ObjectPathPolygon[] | null {
+		const sent = Turn3DInteraction.sent;
+		if (!sent) return null;
+
+		const now = Turn3DInteraction.pictureOf(sent.sceneId);
+		const shown =
+			now !== 0 &&
+			now !== sent.pictureWas &&
+			RenderManager.imageFor(now)?.complete === true;
+		if (shown || performance.now() - sent.since > Turn3DInteraction.keptFor) {
+			Turn3DInteraction.sent = null;
+			return null;
+		}
+		return sent.lines;
+	}
+
+	/*
+		Where the keys last left the objects they turned, while the engine has not answered: the
+		version of the records the turn was worked out on, so a key that comes before the answer
+		goes on from there rather than from the objects as the records still hold them.
+	*/
+	private static keyLeft: {
+		objectIds: string;
+		version: number | string | undefined;
+		transforms: Map<number, cool.Matrix3D>;
+	} | null = null;
+
+	/*
+		An arrow key on the handle: Left and Right turn about the first axis of the pair in use,
+		as a drag across does, Up and Down about the second, by one degree, or by the step Ctrl,
+		Shift or Alt names. Each step goes on from where the objects stand.
+	*/
+	public static turnByKey(
+		selection: SelectionSection,
+		towards: cool.Point,
+		event: KeyboardEvent,
+	): void {
+		const what = Turn3DInteraction.turnsIn(selection.selectedObjects());
+		const box = what && Turn3DInteraction.boxOf(what.objectIds);
+		if (!what || !box) return;
+		const turn = Turn3DInteraction.prepare(
+			selection,
+			new cool.SimplePoint(
+				(box.minX + box.maxX) / 2,
+				(box.minY + box.maxY) / 2,
+			),
+		);
+		if (!turn) return;
+
+		const left = Turn3DInteraction.keyLeft;
+		if (
+			left &&
+			left.objectIds === what.objectIds.join(',') &&
+			left.version === turn.data.version
+		)
+			turn.turned = new Map(left.transforms);
+
+		const step = EditSteps.turnSnap(event) ?? EditSteps.keyTurnStep();
+		turn.turnBy([towards.x * step, towards.y * step]);
+		Turn3DInteraction.send(
+			turn.data,
+			turn.sceneId,
+			turn.turned,
+			turn.outline(),
+		);
+	}
+
+	/*
+		A 3D transform without its turn: each axis keeps its length, and a mirror its side, and
+		the given middle, in the object's own space, stays where the transform puts it, as a turn
+		goes about the middle. Without a middle the origin stays. Nothing where the transform has
+		no turn to take away.
+	*/
+	public static withoutTheTurn(
+		transform: cool.Matrix3D,
+		middle: cool.Point3D | null = null,
+	): cool.Matrix3D | null {
+		const column = (at: number): number[] => [
+			transform.get(0, at),
+			transform.get(1, at),
+			transform.get(2, at),
+		];
+		const [x, y, z] = [column(0), column(1), column(2)];
+		const length = (axis: number[]): number =>
+			Math.hypot(axis[0], axis[1], axis[2]);
+		const mirrored =
+			x[0] * (y[1] * z[2] - y[2] * z[1]) -
+				y[0] * (x[1] * z[2] - x[2] * z[1]) +
+				z[0] * (x[1] * y[2] - x[2] * y[1]) <
+			0;
+		const scale = [mirrored ? -length(x) : length(x), length(y), length(z)];
+
+		let turned = false;
+		for (let row = 0; row < 3; ++row)
+			for (let at = 0; at < 3; ++at) {
+				const upright = row === at ? scale[at] : 0;
+				if (
+					Math.abs(transform.get(row, at) - upright) >
+					1e-9 * (1 + Math.abs(upright))
+				)
+					turned = true;
+			}
+		if (!turned) return null;
+
+		const place = [
+			transform.get(0, 3),
+			transform.get(1, 3),
+			transform.get(2, 3),
+		];
+		if (middle) {
+			const stays = transform.apply(middle);
+			place[0] = stays.x - scale[0] * middle.x;
+			place[1] = stays.y - scale[1] * middle.y;
+			place[2] = stays.z - scale[2] * middle.z;
+		}
+
+		return cool.Matrix3D.fromArray([
+			scale[0],
+			0,
+			0,
+			place[0],
+			0,
+			scale[1],
+			0,
+			place[1],
+			0,
+			0,
+			scale[2],
+			place[2],
+			0,
+			0,
+			0,
+			1,
+		]);
+	}
+
+	/*
+		The 0 key on a selected 3D scene, or on 3D objects selected inside an entered one: their
+		turns in 3D are taken away, each keeping its size and its middle, as one step to undo, and the
+		engine fits the scene to them as after a turn. Answers whether any of them was turned.
+	*/
+	public static uprightByKey(objectIds: number[]): boolean {
+		const data = RenderGeometrySection.currentPart();
+		const what = Turn3DInteraction.turnsIn(objectIds);
+		if (!data || !what) return false;
+
+		const uprights = new Map<number, cool.Matrix3D>();
+		for (const objectId of what.objectIds) {
+			const transform = cool.Scene3D.transformOf(data, objectId);
+			const upright =
+				transform &&
+				Turn3DInteraction.withoutTheTurn(
+					transform,
+					cool.Scene3D.middleInItsOwnSpace(data, objectId),
+				);
+			if (upright) uprights.set(objectId, upright);
+		}
+		if (!uprights.size) return false;
+
+		const ghost = cool.Scene3D.outlineAfter(
+			data,
+			what.sceneId,
+			uprights,
+			what.objectIds,
+		);
+		Turn3DInteraction.send(
+			data,
+			what.sceneId,
+			uprights,
+			ghost ? Turn3DInteraction.linesOf(ghost.lines) : null,
+		);
+		return true;
 	}
 
 	/// Space goes on to the next pair of axes, keeping the angles reached.
@@ -288,36 +558,24 @@ class Turn3DInteraction extends SelectionInteraction {
 			(Turn3DInteraction.pairInUse + 1) % Turn3DInteraction.pairs.length;
 	}
 
-	/// The handle in the middle hides while it turns, the others stay where they stand.
+	/// The handles hide once a drag turns, as they stand where the objects were. A press that has
+	/// not moved yet keeps them, so a click on the handle in the middle puts the keyboard there.
 	public handles(known: SelectionHandle[]): SelectionHandle[] {
-		return known.filter(
-			(handle: SelectionHandle) => handle.kind !== Turn3DHandle.kind,
-		);
+		return this.ghost ? [] : known;
 	}
 
 	public outline(): cool.ObjectPathPolygon[] | null {
-		if (!this.ghost) return null;
+		return this.ghost ? Turn3DInteraction.linesOf(this.ghost.lines) : null;
+	}
 
-		const polygons: cool.ObjectPathPolygon[] = this.ghost.lines.map(
-			(line: cool.Polygon2D) => ({
-				closed: line.closed,
-				points: line.points.map((point: cool.Point) => ({
-					x: point.x,
-					y: point.y,
-				})),
-			}),
-		);
-		const frame = this.ghost.frame;
-		polygons.push({
-			closed: true,
-			points: [
-				{ x: frame.minX, y: frame.minY },
-				{ x: frame.maxX, y: frame.minY },
-				{ x: frame.maxX, y: frame.maxY },
-				{ x: frame.minX, y: frame.maxY },
-			],
-		});
-		return polygons;
+	private static linesOf(lines: cool.Polygon2D[]): cool.ObjectPathPolygon[] {
+		return lines.map((line: cool.Polygon2D) => ({
+			closed: line.closed,
+			points: line.points.map((point: cool.Point) => ({
+				x: point.x,
+				y: point.y,
+			})),
+		}));
 	}
 
 	/// The two angles reached, each named by its axis.

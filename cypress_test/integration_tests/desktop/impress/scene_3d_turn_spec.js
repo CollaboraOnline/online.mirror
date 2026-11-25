@@ -61,6 +61,13 @@ describe(['tagdesktop'], 'A 3D turn on a vector slide', function() {
 		}) : undefined;
 	}
 
+	// whether the transform turns nothing, whatever it moves
+	function isUpright(values) {
+		return [0, 1, 2, 4, 5, 6, 8, 9, 10].every(function(at) {
+			return Math.abs(values[at] - (at % 5 === 0 ? 1 : 0)) < 1e-9;
+		});
+	}
+
 	function isIdentity(values) {
 		var identity = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 		return values.every(function(value, at) {
@@ -146,6 +153,30 @@ describe(['tagdesktop'], 'A 3D turn on a vector slide', function() {
 		});
 		cy.wrap(null).should(function() {
 			expect(isIdentity(theScene(win).scene3D.transformation), 'undone').to.equal(true);
+		});
+	});
+
+	it('0 takes the turn of a selected scene away again.', function() {
+		var win = this.win;
+		var scene;
+		cy.wrap(null).should(function() {
+			scene = theScene(win);
+			expect(scene, 'the scene').to.not.equal(undefined);
+		});
+		cy.then(function() {
+			var place = onCanvas(win, scene.x + scene.width / 4, scene.y + scene.height / 2);
+			cy.cGet('#document-canvas').click(place.x, place.y);
+		});
+		turnBy(win, function() { return [scene.width / 3, scene.height / 4]; }, function() {});
+		cy.wrap(null).should(function() {
+			expect(isIdentity(theScene(win).scene3D.transformation), 'turned').to.equal(false);
+		});
+
+		cy.then(function() {
+			helper.typeIntoDocument('0');
+		});
+		cy.wrap(null).should(function() {
+			expect(isUpright(theScene(win).scene3D.transformation), 'upright').to.equal(true);
 		});
 	});
 

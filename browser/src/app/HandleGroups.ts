@@ -3815,7 +3815,27 @@ class Turn3DHandle extends HandleGroup {
 		return Turn3DInteraction.begin(this.selection, handle);
 	}
 
+	/// An arrow key turns as a drag would, a step at a time.
+	public moveByKey(
+		_handle: SelectionHandle,
+		towards: cool.Point,
+		event: KeyboardEvent,
+	): cool.Point | null {
+		Turn3DInteraction.turnByKey(this.selection, towards, event);
+		return null;
+	}
+
+	/// The lines of the last turn stand for the scene until its new picture is there.
+	public outline(): cool.ObjectPathPolygon[] | null {
+		return Turn3DInteraction.linesWhileAnswered();
+	}
+
 	public pressByKey(_handle: SelectionHandle, event: KeyboardEvent): boolean {
+		// 0 takes the turns away, where there are any
+		if (event.key === '0') {
+			Turn3DInteraction.uprightByKey(this.selection.selectedObjects());
+			return true;
+		}
 		if (event.key !== 'Enter' && event.key !== ' ') return false;
 		Turn3DInteraction.switchThePair();
 		app.sectionContainer?.requestReDraw();

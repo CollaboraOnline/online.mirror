@@ -2517,6 +2517,9 @@ abstract class SelectionSection extends CanvasSectionObject {
 			return false;
 		if (CropHandles.areShownFor(this)) return CropHandles.takeTheCropAway(this);
 
+		// a 3D scene, or 3D objects inside one, have their turns in 3D taken away
+		if (Turn3DInteraction.uprightByKey(this.selectedObjects())) return true;
+
 		const turned = () =>
 			(this.anglesOf('turn').any || this.aLineStandsAslant()) &&
 			this.takeTheAnglesAway('turn');

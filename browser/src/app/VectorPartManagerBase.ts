@@ -862,6 +862,10 @@ abstract class VectorPartManagerBase extends VectorManagerBase {
 		before: cool.SlideObject,
 		after: cool.SlideObject,
 	): void {
+		// a 3D scene's new picture shows it turned or resized, so its old one would stand in
+		// stretched; the lines of the turn stand for it instead until it is there
+		if (after.objectKind === 202 && after.scene3D) return;
+
 		const was = VectorPartManagerBase._bitmapsInOrder(before.primitives);
 		const now = VectorPartManagerBase._bitmapsInOrder(after.primitives);
 		const count = Math.min(was.length, now.length);

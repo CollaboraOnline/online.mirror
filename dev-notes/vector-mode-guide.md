@@ -588,14 +588,23 @@ drag of that handle turns in 3D, as on the desktop:
 
 - Across the whole width of what is selected turns by a quarter about the upright axis, down its
   whole height by a quarter about the axis across. They turn about the handle's place, at the
-  depth of the middle of the objects, as the camera sees them.
+  depth of the middle of the objects, as the camera sees them. As on the desktop each move turns
+  on from where the objects stand, so a drag down after one across tilts the turned objects.
 - Ctrl, Shift and Alt snap each angle to 45, 15 and 5 degrees (the settings of the 2D turn),
   counted from where the drag began. Space during the drag, or Return or Space on the handle by
   keyboard, switches the pair of axes: Y and X, Z and X, Y and Z. Another pair than the first is
   written beside the handle.
-- While turning, the lines of the turned objects and their frame are drawn as the scene will
-  look, and the two angles are written beside the mouse (vectorAngleAtMouse). The scene grows or
-  shrinks on the slide with what it shows. Letting go turns them, one step to undo.
+- While turning, the lines of the turned objects are drawn as the scene will look, and the two
+  angles are written beside the mouse (vectorAngleAtMouse). Letting go turns them, one step to
+  undo, and the scene grows or shrinks on the slide with what it shows. The lines stay until
+  the scene's new picture has arrived.
+- With the keyboard on the handle, Left and Right turn about the first axis of the pair, Up and
+  Down about the second: one degree, or Alt 5, Shift 15, Ctrl 45. As with other keys, a run of
+  steps goes to the engine when the keys are let go, one step to undo; the lines show the turn
+  meanwhile.
+- 0, with the keyboard on the handle or on the selection, takes the turns in 3D away: of the
+  scene where it is selected, of the selected 3D objects inside an entered one. Each keeps its
+  size and place.
 
 ### Break
 

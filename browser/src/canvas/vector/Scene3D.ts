@@ -589,8 +589,9 @@ namespace cool {
 		/*
 			The lines of a body of rotation: a profile for each eighth of a full turn, as the
 			engine draws the slices; where the profile is open, the rings its two ends turn,
-			unless an end stays on the axis; and where it does not go all round, the outlines of
-			its lids.
+			unless an end stays on the axis; the rings its outermost points turn, so a closed
+			profile, as a torus has, shows how it goes round; and where it does not go all
+			round, the outlines of its lids.
 		*/
 		private static linesOfALathe(primitive: Primitive3D): Polygon3D[] {
 			const slices = Scene3D.latheSlices(primitive);
@@ -639,6 +640,50 @@ namespace cool {
 					if (ring.longestEdge() > 1e-9) lines.push(ring);
 				}
 			});
+
+			// the top and the bottom of each profile, and its points farthest from and nearest to
+			// the axis, at most six of them in all
+			const ringsAt: { polygon: number; point: number }[] = [];
+			profiles.forEach((profile: Polygon3D, polygon: number) => {
+				const points = profile.points;
+				if (!points.length) return;
+				const radius = (point: Point3D): number => Math.hypot(point.x, point.z);
+				const best = (
+					better: (one: Point3D, other: Point3D) => boolean,
+				): number =>
+					points.reduce(
+						(found: number, point: Point3D, at: number) =>
+							better(point, points[found]) ? at : found,
+						0,
+					);
+				for (const point of [
+					best((one: Point3D, other: Point3D) => one.y < other.y),
+					best((one: Point3D, other: Point3D) => one.y > other.y),
+					best((one: Point3D, other: Point3D) => radius(one) > radius(other)),
+					best((one: Point3D, other: Point3D) => radius(one) < radius(other)),
+				]) {
+					// the ends of an open profile have their rings already
+					if (!profile.closed && (point === 0 || point === points.length - 1))
+						continue;
+					if (
+						!ringsAt.some(
+							(at: { polygon: number; point: number }) =>
+								at.polygon === polygon && at.point === point,
+						)
+					)
+						ringsAt.push({ polygon: polygon, point: point });
+				}
+			});
+			for (const at of ringsAt.slice(0, 6)) {
+				const ring = new Polygon3D(
+					regular.map(
+						(slice: Slice3D) =>
+							slice.outline.polygons[at.polygon].points[at.point],
+					),
+					allRound,
+				);
+				if (ring.longestEdge() > 1e-9) lines.push(ring);
+			}
 			return lines;
 		}
 

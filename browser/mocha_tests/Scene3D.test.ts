@@ -407,6 +407,25 @@ describe('Scene3D', function () {
 		assert.strictEqual(segments.length, 8 + 2 * 8);
 	});
 
+	it('a ring turned from a closed profile shows the rings of its top, bottom, outer and inner points', function () {
+		const data = sceneData();
+		data.version = 7;
+		// a diamond beside the axis, turned all round into a ring
+		data.objects.get(2).primitives3D = [
+			{
+				type: 'lathe',
+				outline: [
+					{ closed: true, points: [400, 0, 500, 100, 600, 0, 500, -100] },
+				],
+				rotation: 2 * Math.PI,
+				horizontalSegments: 8,
+			},
+		];
+		// eight profiles of four edges each, and four rings of eight
+		const segments = segmentsOf(cool.Scene3D.outlineOf(data, 2));
+		assert.strictEqual(segments.length, 8 * 4 + 4 * 8);
+	});
+
 	it('a body of many steps turned all round is outlined by eight of its profiles', function () {
 		const data = sceneData();
 		data.version = 3;
@@ -564,6 +583,44 @@ describe('Scene3D', function () {
 			],
 			1e-3,
 			'projection',
+		);
+	});
+
+	it('0 takes the turn out of a 3D transform and keeps its size and place', function () {
+		const upright = cool.Matrix3D.fromArray([
+			2, 0, 0, 100, 0, 3, 0, 200, 0, 0, 4, 300, 0, 0, 0, 1,
+		])!;
+		// turned about the middle of its own space, which leaves its place as it was
+		const turned = cool.Matrix3D.fromArray([
+			2, 0, 0, 0, 0, 3, 0, 0, 0, 0, 4, 0, 0, 0, 0, 1,
+		])!
+			.turned(0.3, 0.5, 0.2)
+			.then(cool.Matrix3D.translation(100, 200, 300));
+
+		const back = Turn3DInteraction.withoutTheTurn(turned)!;
+		assertClose(back.toArray(), upright.toArray(), 1e-9, 'upright');
+		assert.strictEqual(Turn3DInteraction.withoutTheTurn(upright), null);
+	});
+
+	it('0 after a turn about the middle puts an object back where it stood', function () {
+		// the middle of what the object holds lies away from its origin, as for an extrusion
+		const middle = new cool.Point3D(10, 20, 30);
+		const upright = cool.Matrix3D.fromArray([
+			2, 0, 0, 100, 0, 3, 0, 200, 0, 0, 4, 300, 0, 0, 0, 1,
+		])!;
+		const stands = upright.apply(middle);
+		// a drag turns about the middle
+		const turned = upright
+			.then(cool.Matrix3D.translation(-stands.x, -stands.y, -stands.z))
+			.then(cool.Matrix3D.IDENTITY.turned(0.3, 0.5, 0.2))
+			.then(cool.Matrix3D.translation(stands.x, stands.y, stands.z));
+
+		const back = Turn3DInteraction.withoutTheTurn(turned, middle)!;
+		assertClose(
+			back.toArray(),
+			upright.toArray(),
+			1e-9,
+			'upright where it stood',
 		);
 	});
 });
