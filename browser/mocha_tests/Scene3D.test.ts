@@ -473,4 +473,97 @@ describe('Scene3D', function () {
 		);
 		assert.strictEqual(insideTheCube.length, 12);
 	});
+
+	// numbers close to the engine's, which rounds the size of the scene to whole hundredths of a
+	// millimetre, a little more than half a twip
+	function assertClose(
+		actual: number[],
+		expected: number[],
+		tolerance: number,
+		what: string,
+	) {
+		assert.strictEqual(actual.length, expected.length, what);
+		actual.forEach((value: number, at: number) =>
+			assert.ok(
+				Math.abs(value - expected[at]) <= tolerance,
+				what + ' [' + at + ']: ' + value + ' against ' + expected[at],
+			),
+		);
+	}
+
+	it('a scene turned in 3D gets the size on the page and the projection the engine gives it', function () {
+		const data = sceneData();
+		const turned = new Map<number, cool.Matrix3D>([
+			[
+				1,
+				cool.Matrix3D.fromArray(
+					data.objects.get(1).scene3D.transformation,
+				)!.turned(0.3, 0.5, 0),
+			],
+		]);
+
+		const view = cool.Scene3D.viewAfter(data as any, 1, turned)!;
+
+		// as the engine gave it after the same turn, through the setter of 3D transforms
+		assertClose(
+			view.placement,
+			[
+				5444.7874015748, 0, 0, 5903.43307086614, 873.637795275591,
+				1289.1968503937,
+			],
+			1.2,
+			'placement',
+		);
+		assertClose(
+			view.projection,
+			[
+				3.59477667504643, 0, 0.279672391791808, 0, 0, 4.97350177184195,
+				-0.0922840691595144, 0, 0, 0, -3.84932284186224, -62760.4749518637, 0,
+				0, -1, 0,
+			],
+			1e-3,
+			'projection',
+		);
+		assertClose(
+			view.transformation,
+			turned.get(1)!.toArray(),
+			1e-12,
+			'transformation',
+		);
+	});
+
+	it('a 3D object turned inside a scene gives the scene the size and projection the engine gives it', function () {
+		const data = sceneData();
+		const turned = new Map<number, cool.Matrix3D>([
+			[
+				3,
+				cool.Matrix3D.fromArray(data.objects.get(3).transform3D)!.turned(
+					0.4,
+					0,
+					0.2,
+				),
+			],
+		]);
+
+		const view = cool.Scene3D.viewAfter(data as any, 1, turned)!;
+
+		assertClose(
+			view.placement,
+			[
+				5212.91338582677, 0, 0, 5103.49606299213, 1133.29133858268,
+				1416.75590551181,
+			],
+			1.2,
+			'placement',
+		);
+		assertClose(
+			view.projection,
+			[
+				3.75553886081029, 0, 0.347316847269675, 0, 0, 5.754, 0, 0, 0, 0, -6.754,
+				-111541.29, 0, 0, -1, 0,
+			],
+			1e-3,
+			'projection',
+		);
+	});
 });

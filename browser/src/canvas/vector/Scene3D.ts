@@ -21,6 +21,42 @@ namespace cool {
 		primitive: Primitive3D;
 		toView: Matrix3D;
 		toScene: Matrix3D;
+		/// into the space of the scene seen, before that scene's own transformation
+		toRoot: Matrix3D;
+	}
+
+	/// The box a set of 3D points fills, along the axes.
+	class Box3D {
+		minX = Infinity;
+		minY = Infinity;
+		minZ = Infinity;
+		maxX = -Infinity;
+		maxY = -Infinity;
+		maxZ = -Infinity;
+
+		add(point: Point3D): void {
+			this.minX = Math.min(this.minX, point.x);
+			this.minY = Math.min(this.minY, point.y);
+			this.minZ = Math.min(this.minZ, point.z);
+			this.maxX = Math.max(this.maxX, point.x);
+			this.maxY = Math.max(this.maxY, point.y);
+			this.maxZ = Math.max(this.maxZ, point.z);
+		}
+
+		isEmpty(): boolean {
+			return this.minX > this.maxX;
+		}
+
+		/// The box of the eight corners after the transform, as the drawing layer transforms a
+		/// 3D range.
+		transformed(transform: Matrix3D): Box3D {
+			const box = new Box3D();
+			for (const x of [this.minX, this.maxX])
+				for (const y of [this.minY, this.maxY])
+					for (const z of [this.minZ, this.maxZ])
+						box.add(transform.apply(new Point3D(x, y, z)));
+			return box;
+		}
 	}
 
 	/// The outline of an extrusion or a body of rotation placed in 3D: a lid that closes the
@@ -149,6 +185,97 @@ namespace cool {
 			return outline;
 		}
 
+		/*
+			The view of a scene that sits in no other once the 3D transforms in turned took the
+			place of those the scene and its 3D objects have, as the engine works it out after
+			each change: what the scene holds then, seen through its view as it was, gives its
+			new size on the page, and the projection is fitted again to what it holds. Nothing
+			where the scene holds nothing made here.
+		*/
+		static viewAfter(
+			data: VectorPrimitivesData,
+			sceneId: number,
+			turned: Map<number, Matrix3D>,
+		): Scene3DView | null {
+			const view = data.objects.get(sceneId)?.scene3D;
+			const members = Scene3D.membersOf(data, sceneId, turned);
+			const transformation =
+				turned.get(sceneId) ?? Matrix3D.fromArray(view?.transformation);
+			const orientation = Matrix3D.fromArray(view?.orientation);
+			const projection = Matrix3D.fromArray(view?.projection);
+			const deviceToView = Matrix3D.fromArray(view?.deviceToView);
+			const placement = Matrix2D.fromArray(view?.placement);
+			if (
+				!view ||
+				!members ||
+				!transformation ||
+				!orientation ||
+				!projection ||
+				!deviceToView ||
+				!placement
+			)
+				return null;
+
+			// what the scene holds, in its own space before its own transformation
+			const content = new Box3D();
+			for (const member of members)
+				Scene3D.forEachFace(member.primitive, (face: PolyPolygon3D) => {
+					for (const polygon of face.polygons)
+						for (const point of polygon.points)
+							content.add(member.toRoot.apply(point));
+					return true;
+				});
+			if (content.isEmpty()) return null;
+
+			/*
+				The new size on the page: what it holds through the view as it was, with the
+				scene's own transformation as it is now, onto the unit square and from there onto
+				the page. The engine rounds the rectangle outwards to whole hundredths of a
+				millimetre, the unit the page is held in.
+			*/
+			const seen = content.transformed(
+				transformation.then(orientation).then(projection).then(deviceToView),
+			);
+			const twipsPerUnit = 1440 / 2540;
+			const from = placement.apply(seen.minX, seen.minY);
+			const to = placement.apply(seen.maxX, seen.maxY);
+			const left = Math.floor(Math.min(from.x, to.x) / twipsPerUnit);
+			const top = Math.floor(Math.min(from.y, to.y) / twipsPerUnit);
+			const right = Math.ceil(Math.max(from.x, to.x) / twipsPerUnit);
+			const bottom = Math.ceil(Math.max(from.y, to.y) / twipsPerUnit);
+
+			// the projection fitted to what the scene holds, seen from the camera
+			const worldToCamera = transformation.then(orientation);
+			const camera = content.transformed(worldToCamera);
+			const near = -camera.maxZ;
+			const far = -camera.minZ;
+			const fit = view.perspective ? Matrix3D.frustum : Matrix3D.ortho;
+			const device = content.transformed(
+				worldToCamera.then(fit(-1, 1, -1, 1, near, far)),
+			);
+
+			return {
+				...view,
+				placement: [
+					(right - left) * twipsPerUnit,
+					0,
+					0,
+					(bottom - top) * twipsPerUnit,
+					left * twipsPerUnit,
+					top * twipsPerUnit,
+				],
+				transformation: transformation.toArray(),
+				projection: fit(
+					device.minX,
+					device.maxX,
+					device.minY,
+					device.maxY,
+					near,
+					far,
+				).toArray(),
+			};
+		}
+
 		/// The 3D objects of the scene, those of the scenes inside it included, in the order the
 		/// page draws them, from the back to the front.
 		static objectsOf(data: VectorPrimitivesData, sceneId: number): number[] {
@@ -238,17 +365,22 @@ namespace cool {
 
 		/// The 3D objects inside the scene, those of the scenes inside it included, each with the
 		/// way of its primitive into the view. Null where the scene has no camera.
+		/// The 3D objects of the scene with their mappings, the 3D transforms in turned taking the
+		/// place of those the objects and the scene have.
 		private static membersOf(
 			data: VectorPrimitivesData,
 			sceneId: number,
+			turned?: Map<number, Matrix3D>,
 		): Scene3DMember[] | null {
 			const view = data.objects.get(sceneId)?.scene3D;
 			if (!view) return null;
+			const sceneTransformation =
+				turned?.get(sceneId) ?? Matrix3D.fromArray(view.transformation);
 
 			// the engine's view: the scene's own transformation, the camera, the projection and
 			// the step to the unit square, in that order
 			const sceneSteps = [view.orientation, view.projection, view.deviceToView];
-			let sceneToView = Matrix3D.fromArray(view.transformation);
+			let sceneToView = sceneTransformation;
 			for (const step of sceneSteps) {
 				const next = Matrix3D.fromArray(step);
 				if (!sceneToView || !next) return null;
@@ -269,7 +401,9 @@ namespace cool {
 				let guard = 0;
 				while (at && at.id !== sceneId && guard++ < 100) {
 					toScene = toScene.then(
-						Matrix3D.fromArray(at.transform3D) ?? Matrix3D.IDENTITY,
+						(at.id !== undefined && turned?.get(at.id)) ||
+							Matrix3D.fromArray(at.transform3D) ||
+							Matrix3D.IDENTITY,
 					);
 					at = at.parent ? data.objects.get(at.parent) : undefined;
 				}
@@ -279,9 +413,8 @@ namespace cool {
 					id: id,
 					primitive: primitive,
 					toView: toScene.then(sceneToView),
-					toScene: toScene.then(
-						Matrix3D.fromArray(view.transformation) ?? Matrix3D.IDENTITY,
-					),
+					toScene: toScene.then(sceneTransformation ?? Matrix3D.IDENTITY),
+					toRoot: toScene,
 				});
 			}
 			return members;

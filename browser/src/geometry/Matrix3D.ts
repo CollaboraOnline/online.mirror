@@ -75,6 +75,139 @@ namespace cool {
 			]) as Matrix3D;
 		}
 
+		/// The turn about the x axis by the angle in radians, turned the way the drawing layer
+		/// turns: the y axis towards the z axis.
+		static turnAboutX(angle: number): Matrix3D {
+			const cos = Math.cos(angle);
+			const sin = Math.sin(angle);
+			return Matrix3D.fromArray([
+				1,
+				0,
+				0,
+				0,
+				0,
+				cos,
+				-sin,
+				0,
+				0,
+				sin,
+				cos,
+				0,
+				0,
+				0,
+				0,
+				1,
+			]) as Matrix3D;
+		}
+
+		/// The turn about the z axis by the angle in radians, turned the way the drawing layer
+		/// turns: the x axis towards the y axis.
+		static turnAboutZ(angle: number): Matrix3D {
+			const cos = Math.cos(angle);
+			const sin = Math.sin(angle);
+			return Matrix3D.fromArray([
+				cos,
+				-sin,
+				0,
+				0,
+				sin,
+				cos,
+				0,
+				0,
+				0,
+				0,
+				1,
+				0,
+				0,
+				0,
+				0,
+				1,
+			]) as Matrix3D;
+		}
+
+		/*
+			The projection of a perspective onto the square from -1 to 1, as the drawing layer
+			makes it from the sides at the near plane and the distances of the near and the far
+			plane, with the same fallbacks for sides or planes that fall together.
+		*/
+		static frustum(
+			left: number,
+			right: number,
+			bottom: number,
+			top: number,
+			near: number,
+			far: number,
+		): Matrix3D {
+			if (!(near > 0)) near = 0.001;
+			if (!(far > 0)) far = 1;
+			if (near === far) far = near + 1;
+			if (left === right) {
+				left -= 1;
+				right += 1;
+			}
+			if (top === bottom) {
+				bottom -= 1;
+				top += 1;
+			}
+			return Matrix3D.fromArray([
+				(2 * near) / (right - left),
+				0,
+				(right + left) / (right - left),
+				0,
+				0,
+				(2 * near) / (top - bottom),
+				(top + bottom) / (top - bottom),
+				0,
+				0,
+				0,
+				-(far + near) / (far - near),
+				-(2 * far * near) / (far - near),
+				0,
+				0,
+				-1,
+				0,
+			]) as Matrix3D;
+		}
+
+		/// The parallel projection onto the square from -1 to 1, as the drawing layer makes it,
+		/// with the same fallbacks for sides or planes that fall together.
+		static ortho(
+			left: number,
+			right: number,
+			bottom: number,
+			top: number,
+			near: number,
+			far: number,
+		): Matrix3D {
+			if (near === far) far = near + 1;
+			if (left === right) {
+				left -= 1;
+				right += 1;
+			}
+			if (top === bottom) {
+				bottom -= 1;
+				top += 1;
+			}
+			return Matrix3D.fromArray([
+				2 / (right - left),
+				0,
+				0,
+				-(right + left) / (right - left),
+				0,
+				2 / (top - bottom),
+				0,
+				-(top + bottom) / (top - bottom),
+				0,
+				0,
+				-2 / (far - near),
+				-(far + near) / (far - near),
+				0,
+				0,
+				0,
+				1,
+			]) as Matrix3D;
+		}
+
 		/// From the sixteen values row by row. Null when there are fewer.
 		static fromArray(values: number[] | undefined): Matrix3D | null {
 			if (!values || values.length < 16) return null;
@@ -92,6 +225,19 @@ namespace cool {
 			const product = new Float64Array(16);
 			glMatrix.mat4.multiply(product, outer.columns, this.columns);
 			return new Matrix3D(product);
+		}
+
+		/// This transform turned by the angles in radians about the x, the y and the z axis, in
+		/// that order, as the drawing layer turns a transform.
+		turned(angleX: number, angleY: number, angleZ: number): Matrix3D {
+			const turns: Matrix3D[] = [];
+			if (angleX !== 0) turns.push(Matrix3D.turnAboutX(angleX));
+			if (angleY !== 0) turns.push(Matrix3D.turnAboutY(angleY));
+			if (angleZ !== 0) turns.push(Matrix3D.turnAboutZ(angleZ));
+			return turns.reduce(
+				(result: Matrix3D, turn: Matrix3D) => result.then(turn),
+				this as Matrix3D,
+			);
 		}
 
 		/// The point after the transform, divided by its fourth value.
