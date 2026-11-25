@@ -34,6 +34,7 @@
 #include <common/Common.hpp>
 #include <common/ConfigUtil.hpp>
 #include <common/FileUtil.hpp>
+#include <common/HexUtil.hpp>
 #include <common/JsonUtil.hpp>
 #include <common/Log.hpp>
 #include <common/Thumbnail.hpp>
@@ -510,8 +511,15 @@ void LockContext::initSupportsLocks()
 
         // first time token setup
         _supportsLocks = true;
-        _lockToken = "cool-lock" + Util::rng::getHexString(8);
+        _lockToken = lockTokenFor(_docKey);
     }
+}
+
+std::string LockContext::lockTokenFor(const std::string& docKey)
+{
+    // Another coolwsd process makes other tokens, so the host still keeps two servers apart.
+    const std::uint64_t hash = std::hash<std::string>{}(Util::getProcessIdentifier() + docKey);
+    return "cool-lock-" + HexUtil::encodeId(hash, 16);
 }
 
 bool LockContext::needsRefresh(const std::chrono::steady_clock::time_point now) const

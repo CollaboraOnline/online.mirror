@@ -304,7 +304,7 @@ DocumentBroker::DocumentBroker(ChildType type, const std::string& uri, const Poc
     , _poll(
           std::make_shared<DocumentBrokerPoll>("doc" SHARED_DOC_THREADNAME_SUFFIX + _docId, *this))
     , _slideLayerCache(25)
-    , _lockCtx(std::make_unique<LockContext>())
+    , _lockCtx(std::make_unique<LockContext>(docKey))
     , _createTime(std::chrono::steady_clock::now())
     , _loadDuration(0)
     , _wopiDownloadDuration(0)

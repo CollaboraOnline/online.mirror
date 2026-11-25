@@ -723,6 +723,7 @@ private:
 /// and with what token.
 class LockContext final
 {
+    const std::string _docKey;
     /// Name if we need it to use consistently for locking
     std::string _lockToken;
     /// Time of last successful lock (re-)acquisition
@@ -740,8 +741,9 @@ class LockContext final
     std::chrono::steady_clock::time_point _retryNotBefore;
 
 public:
-    LockContext()
-        : _refreshSeconds(ConfigUtil::getConfigValue<int>("storage.wopi.locking.refresh", 900))
+    explicit LockContext(const std::string& docKey)
+        : _docKey(docKey)
+        , _refreshSeconds(ConfigUtil::getConfigValue<int>("storage.wopi.locking.refresh", 900))
         , _supportsLocks(false)
         , _lockState(StorageBase::LockState::UNLOCK)
         , _transientFailures(0)
@@ -754,6 +756,9 @@ public:
 
     /// one-time setup for supporting locks & create token
     void initSupportsLocks();
+
+    /// The lock token of a document, the same for every lock this coolwsd process takes on it.
+    static std::string lockTokenFor(const std::string& docKey);
 
     /// Returns true if locks are supported.
     bool supportsLocks() const { return _supportsLocks; }
