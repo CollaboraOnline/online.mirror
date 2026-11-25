@@ -41,6 +41,7 @@ FuPoor::FuPoor(ScTabViewShell& rViewSh, vcl::Window* pWin, ScDrawView* pViewP,
     aSfxRequest(rReq),
     aScrollTimer("sc FuPoor aScrollTimer"),
     aDragTimer("sc FuPoor aDragTimer"),
+    mpDragEvent(nullptr),
     bIsInDragMode(false),
     // remember MouseButton state
     mnCode(0),
@@ -55,8 +56,18 @@ FuPoor::FuPoor(ScTabViewShell& rViewSh, vcl::Window* pWin, ScDrawView* pViewP,
 
 FuPoor::~FuPoor()
 {
-    aDragTimer.Stop();
+    StopDrag();
     aScrollTimer.Stop();
+}
+
+void FuPoor::StopDrag()
+{
+    aDragTimer.Stop();
+    if (mpDragEvent)
+    {
+        Application::RemoveUserEvent(mpDragEvent);
+        mpDragEvent = nullptr;
+    }
 }
 
 void FuPoor::Activate()
@@ -65,7 +76,7 @@ void FuPoor::Activate()
 
 void FuPoor::Deactivate()
 {
-    aDragTimer.Stop();
+    StopDrag();
     aScrollTimer.Stop();
 }
 
@@ -168,11 +179,14 @@ IMPL_LINK_NOARG(FuPoor, DragTimerHdl, Timer *, void)
     //  of the duration of the Drag&Drop.
     //  Therefore Drag&Drop from own event:
 
-    Application::PostUserEvent( LINK( this, FuPoor, DragHdl ) );
+    //  The function can be deleted before the event runs, so keep the event to remove it then.
+    if (!mpDragEvent)
+        mpDragEvent = Application::PostUserEvent( LINK( this, FuPoor, DragHdl ) );
 }
 
 IMPL_LINK_NOARG(FuPoor, DragHdl, void*, void)
 {
+    mpDragEvent = nullptr;
     SdrHdl* pHdl = pView->PickHandle(aMDPos);
 
     if ( pHdl==nullptr && pView->IsMarkedHit(aMDPos) )

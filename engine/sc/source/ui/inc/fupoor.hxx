@@ -30,6 +30,7 @@ class SdrModel;
 class CommandEvent;
 class KeyEvent;
 class MouseEvent;
+struct ImplSVEvent;
 
 //  Return values for command
 #define SC_CMD_NONE     0
@@ -53,6 +54,8 @@ protected:
     Timer           aDragTimer;             // for Drag&Drop
     DECL_LINK( DragTimerHdl, Timer *, void );
     DECL_LINK( DragHdl, void *, void );
+    ImplSVEvent*    mpDragEvent;            // DragHdl posted by DragTimerHdl
+    void StopDrag();
     bool            bIsInDragMode;
     Point           aMDPos;                 // Position of MouseButtonDown
 
