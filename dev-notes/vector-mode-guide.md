@@ -563,7 +563,8 @@ point or label under it. A pie or donut segment is dragged out of its pie only a
 Whatever you move stays inside the chart. Each change is one undo step, as in the chart.
 
 While a part of the chart is selected, the status bar names it as the chart does, for example
-"Selection: Data Series 'North'" or the data point with its values.
+"Selection: Data Series 'North'" or the data point with its values. Tab and Shift+Tab pass over
+parts that draw nothing, as the axes of a chart whose axes show neither a line nor labels.
 
 In a 3D chart a click takes the bar, the wall or the floor under the pointer, the one in front,
 and the pointer outlines the series or the point a click would take by the lines of its 3D

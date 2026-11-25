@@ -3,7 +3,7 @@
 
 var helper = require('../../common/helper');
 
-// A 3D bar chart on a vector slide, with two series, edited in place.
+// A 3D bar chart on a vector slide, with two series and axes that draw nothing, edited in place.
 describe(['tagdesktop'], 'A 3D chart on a vector slide', function() {
 
 	beforeEach(function() {
@@ -50,6 +50,19 @@ describe(['tagdesktop'], 'A 3D chart on a vector slide', function() {
 			x: x * scale - visible.pX1 / win.app.dpiScale,
 			y: y * scale - visible.pY1 / win.app.dpiScale,
 		};
+	}
+
+	function pressKey(win, key, keyCode) {
+		cy.then(function() {
+			var target = win.document.querySelector('div.clipboard');
+			['keydown', 'keyup'].forEach(function(type) {
+				target.dispatchEvent(new win.KeyboardEvent(type, { key: key, code: key,
+					keyCode: keyCode, bubbles: true, cancelable: true }));
+			});
+		});
+		cy.then(function() {
+			return helper.processToIdle(win);
+		});
 	}
 
 	// A double click on the chart edits it in place.
@@ -122,6 +135,37 @@ describe(['tagdesktop'], 'A 3D chart on a vector slide', function() {
 			var handles = win.eval('GraphicSelection').selectionSection.handles();
 			expect(handles.some(function(handle) { return handle.kind === 'turn3d'; }))
 				.to.equal(false);
+		});
+	});
+
+	it('Tab goes from the last series on to the wall, over the axes that draw nothing.', function() {
+		var win = this.win;
+		enterTheChart(win);
+
+		var named = function(word) {
+			return objectsWhere(win, function(object) {
+				return object.chartKeys && object.chartKeys.text &&
+					object.chartKeys.text.indexOf(word) >= 0;
+			})[0];
+		};
+		cy.then(function() {
+			var point = aBarOf(win, 'South').point;
+			cy.cGet('#document-canvas').click(point.x, point.y);
+		});
+		cy.wrap(null).should(function() {
+			expect(selected(win)).to.deep.equal([named('South').id]);
+		});
+
+		pressKey(win, 'Tab', 9);
+		cy.wrap(null).should(function() {
+			expect(selected(win)).to.deep.equal([named('Wall').id]);
+			expect(selectionText(win)).to.contain('Wall');
+		});
+
+		pressKey(win, 'Tab', 9);
+		pressKey(win, 'Tab', 9);
+		cy.wrap(null).should(function() {
+			expect(selected(win)).to.deep.equal([named('North').id]);
 		});
 	});
 });

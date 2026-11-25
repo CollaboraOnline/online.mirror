@@ -1301,9 +1301,10 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testChartPartsAreNamedForTheStatusBar)
     Scheduler::ProcessEventsToIdle();
 }
 
-CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testThreeDChartInPlaceIsPlaced)
+CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testThreeDChartInPlaceIsPlacedAndWalked)
 {
-    // A 3D chart active in place is seen where the chart is on the slide.
+    // A 3D chart active in place is seen where the chart is on the slide, and its keys go round
+    // the parts that have a shape there.
     createBlankDoc();
     comphelper::COKit::setActive(true);
     comphelper::ScopeGuard aInactive([] { comphelper::COKit::setActive(false); });
@@ -1312,11 +1313,15 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testThreeDChartInPlaceIsPlaced)
     SdrOle2Obj* pChart = dynamic_cast<SdrOle2Obj*>(page(1)->GetObj(0));
     CPPUNIT_ASSERT(pChart);
 
+    // axes without labels draw nothing in 3D, so they have no shape
     uno::Reference<chart::XChartDocument> xChartDocument(pChart->getXModel(),
                                                          uno::UNO_QUERY_THROW);
     uno::Reference<beans::XPropertySet> xDiagram(xChartDocument->getDiagram(),
                                                  uno::UNO_QUERY_THROW);
     xDiagram->setPropertyValue(u"Dim3D"_ustr, uno::Any(true));
+    for (const OUString& rName :
+         { u"HasXAxisDescription"_ustr, u"HasYAxisDescription"_ustr, u"HasZAxisDescription"_ustr })
+        xDiagram->setPropertyValue(rName, uno::Any(false));
 
     getSdDocShell()->GetViewShell()->ActivateObject(pChart, embed::EmbedVerbs::MS_OLEVERB_PRIMARY);
     Scheduler::ProcessEventsToIdle();
@@ -1329,6 +1334,7 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testThreeDChartInPlaceIsPlaced)
     auto aJson = getVectorPrimitives(u"testThreeDChart");
 
     bool bSceneFound = false;
+    size_t nParts = 0;
     const size_t nCount = aJson.getSize("/objects").value_or(0);
     for (size_t nIndex = 0; nIndex < nCount; ++nIndex)
     {
@@ -1347,8 +1353,16 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testThreeDChartInPlaceIsPlaced)
                                          oEntry->getDouble("scene3D/placement/5").value_or(-1),
                                          1.0);
         }
+        if (oEntry->at("chartKeys"))
+        {
+            ++nParts;
+            CPPUNIT_ASSERT(oEntry->getInt("chartKeys/next").has_value());
+            CPPUNIT_ASSERT(oEntry->getInt("chartKeys/previous").has_value());
+            CPPUNIT_ASSERT(oEntry->getString("chartKeys/text").has_value());
+        }
     }
     CPPUNIT_ASSERT_MESSAGE("the chart has no 3D scene", bSceneFound);
+    CPPUNIT_ASSERT_MESSAGE("the chart has no parts", nParts > 0);
 
     SfxViewShell::Current()->GetIPClient()->DeactivateObject();
     Scheduler::ProcessEventsToIdle();

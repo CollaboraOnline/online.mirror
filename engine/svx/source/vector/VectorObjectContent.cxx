@@ -953,7 +953,9 @@ sal_uInt64 idOfNamedPart(const SdrPage& rPage, const cpo::uno::Any& rPart)
     where the chart's own keys go from each of its parts, as the chart tells it by the state of
     its command KitPartNavigation: six values a part, the part, the next and the previous one,
     the first one a level down, the one a level up and the text of the part for the status bar.
-    the first part it names is the first of the top level
+    the first part it names is the first of the top level. a part with no shape on the chart's
+    page, as an axis that draws nothing, is passed over: the keys go on to the next part of its
+    level that has one
 */
 std::map<sal_uInt64, ObjectContent::ChartKeys> keysOf(const SdrOle2Obj& rChart,
                                                      const SdrPage& rPage)
@@ -983,17 +985,42 @@ std::map<sal_uInt64, ObjectContent::ChartKeys> keysOf(const SdrOle2Obj& rChart,
 
     cpo::uno::Sequence<cpo::uno::Any> aTable;
     xReader->maState >>= aTable;
-    for (sal_Int32 nAt = 0; nAt + 5 < aTable.getLength(); nAt += 6)
+    const sal_Int32 nRows(aTable.getLength() / 6);
+    std::vector<sal_uInt64> aIds;
+    for (sal_Int32 nRow = 0; nRow < nRows; ++nRow)
+        aIds.push_back(idOfNamedPart(rPage, aTable[nRow * 6]));
+    const auto rowOf = [&aTable, nRows](const cpo::uno::Any& rPart) -> sal_Int32
     {
-        const sal_uInt64 nPart(idOfNamedPart(rPage, aTable[nAt]));
-        if (!nPart)
+        if (rPart.hasValue())
+            for (sal_Int32 nRow = 0; nRow < nRows; ++nRow)
+                if (aTable[nRow * 6] == rPart)
+                    return nRow;
+        return -1;
+    };
+    // the first part with a shape from that one on, going the way of the link nLink of the table
+    const auto shownFrom = [&aTable, &aIds, &rowOf, nRows](const cpo::uno::Any& rPart,
+                                                         sal_Int32 nLink) -> sal_uInt64
+    {
+        sal_Int32 nRow(rowOf(rPart));
+        for (sal_Int32 nStep = 0; nRow >= 0 && nStep < nRows; ++nStep)
+        {
+            if (aIds[nRow])
+                return aIds[nRow];
+            nRow = rowOf(aTable[nRow * 6 + nLink]);
+        }
+        return 0;
+    };
+    for (sal_Int32 nRow = 0; nRow < nRows; ++nRow)
+    {
+        if (!aIds[nRow])
             continue;
-        aKeys[nPart] = ObjectContent::ChartKeys{ idOfNamedPart(rPage, aTable[nAt + 1]),
-                                                 idOfNamedPart(rPage, aTable[nAt + 2]),
-                                                 idOfNamedPart(rPage, aTable[nAt + 3]),
-                                                 idOfNamedPart(rPage, aTable[nAt + 4]),
-                                                 nAt == 0,
-                                                 aTable[nAt + 5].get<OUString>() };
+        const sal_Int32 nAt(nRow * 6);
+        aKeys[aIds[nRow]] = ObjectContent::ChartKeys{ shownFrom(aTable[nAt + 1], 1),
+                                                      shownFrom(aTable[nAt + 2], 2),
+                                                      shownFrom(aTable[nAt + 3], 1),
+                                                      idOfNamedPart(rPage, aTable[nAt + 4]),
+                                                      nRow == 0,
+                                                      aTable[nAt + 5].get<OUString>() };
     }
     return aKeys;
 }
