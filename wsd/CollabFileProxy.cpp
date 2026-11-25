@@ -30,6 +30,9 @@
 
 namespace {
 
+// How often a download is tried again after a temporary error or no answer from the host:
+constexpr int DownloadRetries = 2;
+
 // The handler that answers the client with 502 when no connection to the host comes about (as when
 // its name does not resolve, or when none of its addresses is allowed):
 http::Session::ConnectFailCallback badGatewayOnConnectFail(
@@ -85,7 +88,7 @@ void CollabFileProxy::handleFetchRequest(const std::string& streamUrl, bool host
                         << ": CollabFileProxy: starting direct fetch for ["
                         << Anonymizer::anonymizeUrl(uri.toString()) << ']');
 
-            doDownload(poll, uri, HTTP_REDIRECTION_LIMIT, hostChecked);
+            doDownload(poll, uri, HTTP_REDIRECTION_LIMIT, hostChecked, DownloadRetries);
         });
 }
 
@@ -128,7 +131,8 @@ void CollabFileProxy::handleUploadRequest(const std::string& targetUrl,
 }
 
 void CollabFileProxy::doDownload(const std::shared_ptr<TerminatingPoll>& poll,
-                                 const Poco::URI& uri, int redirectLimit, bool hostChecked)
+                                 const Poco::URI& uri, int redirectLimit, bool hostChecked,
+                                 int retriesLeft)
 {
     const std::string uriAnonym = Anonymizer::anonymizeUrl(uri.toString());
     LOG_DBG("CollabFileProxy: downloading from [" << uriAnonym << ']');
@@ -144,12 +148,18 @@ void CollabFileProxy::doDownload(const std::shared_ptr<TerminatingPoll>& poll,
     const auto startTime = std::chrono::steady_clock::now();
 
     http::Session::FinishedCallback finishedCallback =
-        [this, poll, startTime, uriAnonym, redirectLimit, keepalive = shared_from_this()](
-            const std::shared_ptr<http::Session>& session)
+        [this, poll, uri, startTime, uriAnonym, redirectLimit, hostChecked, retriesLeft,
+         keepalive = shared_from_this()](const std::shared_ptr<http::Session>& session)
     {
         if (SigUtil::getShutdownRequestFlag())
         {
             LOG_DBG("CollabFileProxy: shutdown flagged, aborting download");
+            return;
+        }
+
+        // A failed connection got its answer from the connect-fail handler, which runs before this
+        // one (as after a failed TLS handshake):
+        if (session->connectionResult() != net::AsyncConnectResult::Ok) {
             return;
         }
 
@@ -177,7 +187,7 @@ void CollabFileProxy::doDownload(const std::shared_ptr<TerminatingPoll>& poll,
                 const std::string location = httpResponse->get("Location");
                 LOG_TRC("CollabFileProxy: redirect to ["
                         << Anonymizer::anonymizeUrl(location) << ']');
-                doDownload(poll, Poco::URI(location), redirectLimit - 1, false);
+                doDownload(poll, Poco::URI(location), redirectLimit - 1, false, retriesLeft);
                 return;
             }
             else
@@ -187,6 +197,18 @@ void CollabFileProxy::doDownload(const std::shared_ptr<TerminatingPoll>& poll,
                 HttpHelper::sendErrorAndShutdown(http::StatusCode::BadGateway, socket);
                 return;
             }
+        }
+
+        // A temporary error or no answer from the host leads to another try (as a GET changes
+        // nothing in storage):
+        bool const answered = httpResponse->statusLine().statusCategory()
+            != http::StatusLine::StatusCodeClass::Invalid;
+        if ((!answered || http::isTransientStatusCode(statusCode)) && retriesLeft > 0) {
+            LOG_WRN("CollabFileProxy: trying GetFile from [" << uriAnonym << "] again after "
+                    << (answered ? "a temporary error" : "no answer") << " (" << statusCode
+                    << ')');
+            doDownload(poll, uri, redirectLimit, hostChecked, retriesLeft - 1);
+            return;
         }
 
         const auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(
