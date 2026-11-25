@@ -3036,6 +3036,12 @@ server -> client messages on /cool/collab/ws
     tracks an "editing started" flag, so a late-joining client gets the same information through
     user_list's "editingActive".
 
+{"type":"editing_stopped"}
+
+    No peer edits any longer: every client that sent {"type":"editing_started"} is gone or sent
+    {"type":"bye"}, and no /cool/ws session that can write is left.  Sent to every client when
+    the "editing started" flag goes off, which a later user_list reports as "editingActive":false.
+
 {"type":"switch_to_collab","user":{"id":"<id>","name":"<name>"}}
 {"type":"saved_and_switching","user":{"id":"<id>","name":"<name>"}}
 

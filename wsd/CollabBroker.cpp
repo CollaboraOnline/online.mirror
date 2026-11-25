@@ -473,7 +473,19 @@ void CollabBroker::updateEditingStarted()
 
     // A /cool/ws session that can write may change the stored file at any time. So it counts as
     // editing, and CODA users are told to join the server editor instead of a local copy.
+    const bool wasStarted = _editingStarted;
     _editingStarted = !_editingUserIds.empty() || sessionCanWrite;
+    if (!wasStarted || _editingStarted)
+        return;
+
+    // Clients get editingActive once, in the user_list when they connect,
+    // so the ones still connected hear about the change here.
+    LOG_INF("CollabBroker [" << _docKey << "]: editing stopped, telling the remaining clients");
+    for (auto& weakHandler : _handlers)
+    {
+        if (auto h = weakHandler.lock())
+            h->sendTextMessage("{\"type\":\"editing_stopped\"}");
+    }
 }
 
 void CollabBroker::cleanupExpiredHandlers()
