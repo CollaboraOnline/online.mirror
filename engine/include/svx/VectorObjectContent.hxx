@@ -501,6 +501,8 @@ struct ObjectContent
         sal_uInt64 mnInside = 0;
         sal_uInt64 mnOutside = 0;
         bool mbFirst = false;
+        /// What the status bar says while the part is selected, as the chart words it.
+        OUString maText;
 
         bool operator==(const ChartKeys&) const = default;
     };

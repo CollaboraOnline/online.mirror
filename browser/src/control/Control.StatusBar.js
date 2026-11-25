@@ -652,6 +652,19 @@ class StatusBar extends JSDialog.Toolbar {
 				this._sizeText(0, 0));
 	}
 
+	/// Shows the text the chart has for its part that is selected, or the engine's own text
+	/// for the selection where text is null.
+	showChartPartText(text) {
+		this._chartPartText = text;
+		this._writeSelectionText();
+	}
+
+	// a part of a chart that is selected takes the place of what the engine says
+	_writeSelectionText() {
+		const text = this._chartPartText || this._engineSelectionText;
+		this.updateHtmlItem('SelectionText', text ? text : ' ');
+	}
+
 	_writeObjectGeometry(position, size) {
 		var positionItem = document.getElementById('ObjectPosition');
 		var sizeItem = document.getElementById('ObjectSize');
@@ -788,7 +801,8 @@ class StatusBar extends JSDialog.Toolbar {
 			this.updateHtmlItem('ShapeSize', state ? state : ' ');
 		}
 		else if (commandName === '.uno:Context') {
-			this.updateHtmlItem('SelectionText', state ? state : ' ');
+			this._engineSelectionText = state;
+			this._writeSelectionText();
 		}
 		else if (commandName === '.uno:LayoutStatus') {
 			this.updateHtmlItem('LayoutStatus', state ? state : ' ');

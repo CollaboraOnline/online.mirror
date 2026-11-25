@@ -4179,6 +4179,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 		if (this.interaction) this.containerObject.cancelPress();
 		this.toldTheStatusBar = null;
 		app.map.statusBar?.showObjectGeometry(null);
+		app.map.statusBar?.showChartPartText(null);
 	}
 
 	/*
@@ -4214,12 +4215,21 @@ abstract class SelectionSection extends CanvasSectionObject {
 	/// at every step.
 	private tellTheStatusBar(): void {
 		const box = this.boxForTheStatusBar();
+		// a part of a chart active in place is named as the chart names it
+		const objects = this.selectedObjects();
+		const partText =
+			objects.length === 1 ?
+				RenderGeometrySection.objectOf(objects[0])?.chartKeys?.text
+			:	undefined;
 		const told =
-			box ? [box.minX, box.minY, box.width, box.height].join(',') : 'none';
+			(box ? [box.minX, box.minY, box.width, box.height].join(',') : 'none') +
+			':' +
+			(partText ?? '');
 		if (told === this.toldTheStatusBar) return;
 
 		this.toldTheStatusBar = told;
 		app.map.statusBar?.showObjectGeometry(box ?? null);
+		app.map.statusBar?.showChartPartText(partText ?? null);
 	}
 
 	onDragCancel(): void {

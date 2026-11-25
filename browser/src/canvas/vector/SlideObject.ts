@@ -518,6 +518,8 @@ namespace cool {
 			inside?: number;
 			outside?: number;
 			first?: boolean;
+			/// what the status bar says while the part is selected, as the chart words it
+			text?: string;
 		};
 		gluePoints?: ObjectGluePoint[];
 		/** The four glue points the object has at the middles of its sides - the upper, the

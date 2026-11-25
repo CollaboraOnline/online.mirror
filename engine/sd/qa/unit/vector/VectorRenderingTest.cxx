@@ -1258,6 +1258,48 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testChartTitleEditIsServedOnTheSlide)
     CPPUNIT_ASSERT_MESSAGE("the caret is not placed in the title", bCaretPlaced);
 }
 
+CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testChartPartsAreNamedForTheStatusBar)
+{
+    // The parts of a chart active in place carry the text the chart shows in its status bar.
+    createBlankDoc();
+    comphelper::COKit::setActive(true);
+    comphelper::ScopeGuard aInactive([] { comphelper::COKit::setActive(false); });
+    dispatchCommand(mxComponent, u".uno:InsertObjectChart"_ustr, {});
+    Scheduler::ProcessEventsToIdle();
+    SdrOle2Obj* pChart = dynamic_cast<SdrOle2Obj*>(page(1)->GetObj(0));
+    CPPUNIT_ASSERT(pChart);
+    getSdDocShell()->GetViewShell()->ActivateObject(pChart, embed::EmbedVerbs::MS_OLEVERB_PRIMARY);
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT(SfxViewShell::Current());
+    CPPUNIT_ASSERT_MESSAGE("the chart is not active in place",
+                           SfxViewShell::Current()->GetIPClient());
+
+    // the first pull hands the parts of the chart out
+    getVectorPrimitives(u"testChartPartsNamedBase");
+    auto aJson = getVectorPrimitives(u"testChartPartsNamed");
+
+    size_t nParts = 0;
+    bool bSeriesNamed = false;
+    const size_t nCount = aJson.getSize("/objects").value_or(0);
+    for (size_t nIndex = 0; nIndex < nCount; ++nIndex)
+    {
+        const auto oEntry
+            = aJson.at(rtl::Concat2View("/objects/" + OString::number(sal_Int32(nIndex))));
+        if (!oEntry || !oEntry->at("chartKeys"))
+            continue;
+        ++nParts;
+        const std::optional<OString> oText = oEntry->getString("chartKeys/text");
+        CPPUNIT_ASSERT(oText.has_value());
+        if (oText->indexOf("Data Series") >= 0)
+            bSeriesNamed = true;
+    }
+    CPPUNIT_ASSERT_MESSAGE("the chart has no parts", nParts > 0);
+    CPPUNIT_ASSERT_MESSAGE("no series is named", bSeriesNamed);
+
+    SfxViewShell::Current()->GetIPClient()->DeactivateObject();
+    Scheduler::ProcessEventsToIdle();
+}
+
 CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testObjectUnderTextEditSaysSo)
 {
     // The object a text edit runs on hides its own text and says the edit is

@@ -562,6 +562,9 @@ the chart's own marks, small squares on its data points or labels; a click on a 
 point or label under it. A pie or donut segment is dragged out of its pie only along its own way.
 Whatever you move stays inside the chart. Each change is one undo step, as in the chart.
 
+While a part of the chart is selected, the status bar names it as the chart does, for example
+"Selection: Data Series 'North'" or the data point with its values.
+
 A click outside on another object leaves the chart and selects that object, and can drag it at
 once; a click outside on nothing leaves the chart and keeps it selected.
 
