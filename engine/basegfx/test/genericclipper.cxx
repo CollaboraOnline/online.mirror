@@ -124,6 +124,68 @@ public:
     // member functions of the current class,
     // because these macros are need by auto register mechanism.
 
+    // the result of each operation on rA and rB covers what the operation says for the areas of
+    // rA and rB, both filled even-odd, at points of a grid that lie off the integer outlines
+    static void checkOperations(const char* pName, const char* pSvgA, const char* pSvgB)
+    {
+        B2DPolyPolygon aA, aB;
+        CPPUNIT_ASSERT(utils::importFromSvgD(aA, OUString::createFromAscii(pSvgA), false, nullptr));
+        CPPUNIT_ASSERT(utils::importFromSvgD(aB, OUString::createFromAscii(pSvgB), false, nullptr));
+        B2DRange aRange(aA.getB2DRange());
+        aRange.expand(aB.getB2DRange());
+
+        const struct
+        {
+            const char* mpName;
+            B2DPolyPolygon (*mpFunc)(const B2DPolyPolygon&, const B2DPolyPolygon&);
+            bool (*mpExpected)(bool, bool);
+        } aOperations[] = {
+            { "or", &utils::solvePolygonOperationOr, [](bool bA, bool bB) { return bA || bB; } },
+            { "and", &utils::solvePolygonOperationAnd, [](bool bA, bool bB) { return bA && bB; } },
+            { "xor", &utils::solvePolygonOperationXor, [](bool bA, bool bB) { return bA != bB; } },
+            { "diff", &utils::solvePolygonOperationDiff, [](bool bA, bool bB) { return bA && !bB; } },
+        };
+
+        const B2DPolyPolygon aFlatA(utils::adaptiveSubdivideByAngle(aA));
+        const B2DPolyPolygon aFlatB(utils::adaptiveSubdivideByAngle(aB));
+        for (const auto& rOperation : aOperations)
+        {
+            const B2DPolyPolygon aResult(
+                utils::adaptiveSubdivideByAngle(rOperation.mpFunc(aA, aB)));
+            const OString aMessage(OString::Concat(pName) + ", " + rOperation.mpName);
+            for (int nX = 0; nX < 40; ++nX)
+                for (int nY = 0; nY < 40; ++nY)
+                {
+                    const B2DPoint aPoint(aRange.getMinX() + (nX + 0.37) * aRange.getWidth() / 40,
+                                          aRange.getMinY() + (nY + 0.61) * aRange.getHeight() / 40);
+                    CPPUNIT_ASSERT_EQUAL_MESSAGE(
+                        aMessage.getStr(),
+                        rOperation.mpExpected(utils::isInside(aFlatA, aPoint),
+                                              utils::isInside(aFlatB, aPoint)),
+                        utils::isInside(aResult, aPoint));
+                }
+        }
+    }
+
+    void testOperationsOnSharedOutlines()
+    {
+        // two polygons that share a part of their outlines
+        checkOperations("partially intersecting", "m0 0 v 5  h 3 h 1 h 1 h 1 v -2 v -3 z",
+                        "m3 7 v -2 h 1 h 1 h 1 v -2 h 1 v 3 z");
+
+        // the first polygon is a part of the second one
+        checkOperations("full subset", "m0 0 v 5  h 3 h 1 h 1 v -5 z",
+                        "m3 10 v -5 h 1 h 1 v -5 h -5 v 5 h 3 z");
+
+        // the same, turning the other way
+        checkOperations("full subset, opposite direction", "m0 0 v 5 h 3 h 1 h 1 v -5 z",
+                        "m3 10 v -5 h -1 h -1 h -1 v -5 h 5 v 5 h 2 z");
+
+        // the same with a curve on the shared part
+        checkOperations("full subset, plus curves", "m0 0 v 5  h 3 h 1 h 1 c 2 0 2 0 0 -5 z",
+                        "m3 10 v -5 h 1 h 1 c 2 0 2 0 0 -5 h -5 v 5 h 3 z");
+    }
+
     static void checkLine(const char* pName, const B2DPolygon& rLine,
                           std::initializer_list<B2DPoint> aExpected)
     {
@@ -243,6 +305,7 @@ public:
     CPPUNIT_TEST(validateXor);
     CPPUNIT_TEST(validateAnd);
     CPPUNIT_TEST(validateDiff);
+    CPPUNIT_TEST(testOperationsOnSharedOutlines);
     CPPUNIT_TEST(testLineThroughSquare);
     CPPUNIT_TEST(testClosedLine);
     CPPUNIT_TEST(testCurvedLine);
