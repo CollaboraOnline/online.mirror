@@ -18,6 +18,7 @@
 
 #include <istream>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -56,8 +57,11 @@ private:
                     Authorization const & auth, int redirectionLimit, int retriesLeft);
     void doUpload(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& uri,
                   const std::string& body);
-    void answerUploaded(std::shared_ptr<StreamSocket> const & socket,
+    void answerUploaded(std::shared_ptr<TerminatingPoll> const & poll,
                         std::string const & wopiResponse);
+    /// Answers the client with the JSON body, or without a body as an error page.
+    void answer(std::shared_ptr<TerminatingPoll> const & poll, http::StatusCode statusCode,
+                std::optional<std::string> const & body = std::nullopt);
     void checkUploadOutcome(std::shared_ptr<TerminatingPoll> const & poll, Poco::URI const & uri);
 
     const std::string _id;

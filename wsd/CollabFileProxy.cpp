@@ -368,19 +368,17 @@ void CollabFileProxy::doUpload(const std::shared_ptr<TerminatingPoll>& poll,
 
         if (statusCode == http::StatusCode::OK)
         {
-            answerUploaded(socket, httpResponse->getBody());
+            answerUploaded(poll, httpResponse->getBody());
         }
         else if (statusCode == http::StatusCode::Conflict)
         {
             // Document was modified externally
-            http::Response response(http::StatusCode::Conflict);
-            response.setBody(httpResponse->getBody(), "application/json; charset=utf-8");
-            socket->sendAndShutdown(response);
+            answer(poll, http::StatusCode::Conflict, httpResponse->getBody());
         }
         else if (statusCode == http::StatusCode::Unauthorized ||
                  statusCode == http::StatusCode::Forbidden)
         {
-            HttpHelper::sendErrorAndShutdown(http::StatusCode::Forbidden, socket);
+            answer(poll, http::StatusCode::Forbidden);
         }
         else if ((httpResponse->statusLine().statusCategory()
                       == http::StatusLine::StatusCodeClass::Invalid
@@ -400,7 +398,7 @@ void CollabFileProxy::doUpload(const std::shared_ptr<TerminatingPoll>& poll,
         else
         {
             LOG_ERR("CollabFileProxy: PutFile failed with " << statusCode);
-            HttpHelper::sendErrorAndShutdown(http::StatusCode::BadGateway, socket);
+            answer(poll, http::StatusCode::BadGateway);
         }
     };
 
@@ -409,8 +407,8 @@ void CollabFileProxy::doUpload(const std::shared_ptr<TerminatingPoll>& poll,
     httpSession->asyncRequest(httpRequest, poll);
 }
 
-void CollabFileProxy::answerUploaded(
-    std::shared_ptr<StreamSocket> const & socket, std::string const & wopiResponse)
+void CollabFileProxy::answerUploaded(std::shared_ptr<TerminatingPoll> const & poll,
+                                     std::string const & wopiResponse)
 {
     // The CheckFileInfo kept for this document's editor form still has the version from
     // before this upload, and a session that used it would get 409 on every save.
@@ -451,8 +449,27 @@ void CollabFileProxy::answerUploaded(
     }
 
     // Return the WOPI response (contains LastModifiedTime etc.)
-    http::Response response(http::StatusCode::OK);
-    response.setBody(wopiResponse, "application/json; charset=utf-8");
+    answer(poll, http::StatusCode::OK, wopiResponse);
+}
+
+void CollabFileProxy::answer(std::shared_ptr<TerminatingPoll> const & /* poll */,
+                             http::StatusCode statusCode, std::optional<std::string> const & body)
+{
+    std::shared_ptr<StreamSocket> const socket = _socket.lock();
+    if (!socket)
+    {
+        LOG_DBG("CollabFileProxy: the client left before its answer");
+        return;
+    }
+
+    if (!body)
+    {
+        HttpHelper::sendErrorAndShutdown(statusCode, socket);
+        return;
+    }
+
+    http::Response response(statusCode);
+    response.setBody(*body, "application/json; charset=utf-8");
     socket->sendAndShutdown(response);
 }
 
@@ -476,7 +493,7 @@ void CollabFileProxy::checkUploadOutcome(
             }
             if (!passed) {
                 LOG_ERR("CollabFileProxy: storage cannot tell whether the PutFile landed");
-                HttpHelper::sendErrorAndShutdown(http::StatusCode::BadGateway, socket);
+                answer(poll, http::StatusCode::BadGateway);
                 return;
             }
 
@@ -508,13 +525,11 @@ void CollabFileProxy::checkUploadOutcome(
                         << ']');
                 Poco::JSON::Object::Ptr result = new Poco::JSON::Object();
                 result->set("LastModifiedTime", lastModifiedTime);
-                answerUploaded(socket, JsonUtil::jsonToString(result));
+                answerUploaded(poll, JsonUtil::jsonToString(result));
             } else {
                 LOG_WRN("CollabFileProxy: storage has another version [" << lastModifiedTime
                         << "] than the PutFile");
-                http::Response response(http::StatusCode::Conflict);
-                response.setBody("{}", "application/json; charset=utf-8");
-                socket->sendAndShutdown(response);
+                answer(poll, http::StatusCode::Conflict, "{}");
             }
         });
     _uploadCheck->checkFileInfo(HTTP_REDIRECTION_LIMIT);
