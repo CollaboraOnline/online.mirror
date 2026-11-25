@@ -20,6 +20,7 @@
 #include <officecfg/Office/Common.hxx>
 #include <sfx2/bindings.hxx>
 #include <sfx2/dispatch.hxx>
+#include <sfx2/viewfrm.hxx>
 #include <sfx2/viewsh.hxx>
 #include <sfx2/AccessibilityIssue.hxx>
 #include <sfx2/pageids.hxx>
@@ -35,11 +36,25 @@
 
 namespace sw::sidebar
 {
+namespace
+{
+// The panel belongs to the view of its bindings. The panel and its rows can be built from a posted
+// event, when the current view can be another one, and they must be registered for this view. The
+// view is looked up each time it is needed, as the frame of the bindings can change its view shell.
+SfxViewShell* GetViewShellOfBindings(const SfxBindings& rBindings)
+{
+    SfxDispatcher* pDispatcher = rBindings.GetDispatcher();
+    SfxViewFrame* pViewFrame = pDispatcher ? pDispatcher->GetFrame() : nullptr;
+    SfxViewShell* pViewShell = pViewFrame ? pViewFrame->GetViewShell() : nullptr;
+    return pViewShell ? pViewShell : SfxViewShell::Current();
+}
+}
+
 AccessibilityCheckEntry::AccessibilityCheckEntry(
-    weld::Container* pParent, std::shared_ptr<sfx::AccessibilityIssue> const& rAccessibilityIssue)
+    weld::Container* pParent, SfxViewShell* pViewShell,
+    std::shared_ptr<sfx::AccessibilityIssue> const& rAccessibilityIssue)
     : m_xBuilder(Application::CreateBuilder(pParent, u"svx/ui/accessibilitycheckentry.ui"_ustr,
-                                            false,
-                                            reinterpret_cast<sal_uInt64>(SfxViewShell::Current())))
+                                            false, reinterpret_cast<sal_uInt64>(pViewShell)))
     , m_xContainer(m_xBuilder->weld_container(u"accessibilityCheckEntryBox"_ustr))
     , m_xLabel(m_xBuilder->weld_label(u"accessibilityCheckEntryLabel"_ustr))
     , m_xGotoButton(m_xBuilder->weld_link_button(u"accessibilityCheckEntryLinkButton"_ustr))
@@ -99,11 +114,10 @@ IMPL_LINK_NOARG(AccessibilityCheckEntry, FixButtonClicked, weld::Button&, void)
         m_pAccessibilityIssue->quickFixIssue();
 }
 
-AccessibilityCheckLevel::AccessibilityCheckLevel(weld::Box* pParent,
+AccessibilityCheckLevel::AccessibilityCheckLevel(weld::Box* pParent, SfxViewShell* pViewShell,
                                                  cpo::uno::Reference<css::ui::XSidebar> xSidebar)
     : m_xBuilder(Application::CreateBuilder(pParent, u"svx/ui/accessibilitychecklevel.ui"_ustr,
-                                            false,
-                                            reinterpret_cast<sal_uInt64>(SfxViewShell::Current())))
+                                            false, reinterpret_cast<sal_uInt64>(pViewShell)))
     , m_xContainer(m_xBuilder->weld_box(u"accessibilityCheckLevelBox"_ustr))
     , m_xSidebar(std::move(xSidebar))
 {
@@ -155,11 +169,12 @@ void AccessibilityCheckLevel::removeAllEntries()
 }
 
 void AccessibilityCheckLevel::addEntryForGroup(
-    AccessibilityCheckGroups eGroup, std::vector<sal_Int32>& rIndices,
+    AccessibilityCheckGroups eGroup, std::vector<sal_Int32>& rIndices, SfxViewShell* pViewShell,
     std::shared_ptr<sfx::AccessibilityIssue> const& pIssue)
 {
     auto nGroupIndex = size_t(eGroup);
-    auto xEntry = std::make_unique<AccessibilityCheckEntry>(m_xBoxes[nGroupIndex].get(), pIssue);
+    auto xEntry = std::make_unique<AccessibilityCheckEntry>(m_xBoxes[nGroupIndex].get(), pViewShell,
+                                                            pIssue);
     m_xBoxes[nGroupIndex]->reorder_child(xEntry->get_widget(), rIndices[nGroupIndex]++);
     m_aEntries[nGroupIndex].push_back(std::move(xEntry));
 }
@@ -181,7 +196,8 @@ A11yCheckIssuesPanel::Create(weld::Widget* pParent, SfxBindings* pBindings,
 A11yCheckIssuesPanel::A11yCheckIssuesPanel(weld::Widget* pParent, SfxBindings* pBindings,
                                            cpo::uno::Reference<css::ui::XSidebar> xSidebar)
     : PanelLayout(pParent, u"A11yCheckIssuesPanel"_ustr,
-                  u"modules/swriter/ui/a11ycheckissuespanel.ui"_ustr)
+                  u"modules/swriter/ui/a11ycheckissuespanel.ui"_ustr,
+                  reinterpret_cast<sal_uInt64>(GetViewShellOfBindings(*pBindings)))
     , mxUpdateBox(m_xBuilder->weld_box(u"updateBox"_ustr))
     , mxUpdateLinkButton(m_xBuilder->weld_link_button(u"updateLinkButton"_ustr))
     , m_xListSep(m_xBuilder->weld_widget(u"sep_level"_ustr))
@@ -198,16 +214,16 @@ A11yCheckIssuesPanel::A11yCheckIssuesPanel(weld::Widget* pParent, SfxBindings* p
     m_xLevelExpanders[0]->connect_expanded(LINK(this, A11yCheckIssuesPanel, ExpandHdl));
 
     mxAccessibilityBox[0] = m_xBuilder->weld_box(u"accessibilityBoxErr"_ustr);
-    m_aLevelEntries[0]
-        = std::make_unique<AccessibilityCheckLevel>(mxAccessibilityBox[0].get(), mxSidebar);
+    m_aLevelEntries[0] = std::make_unique<AccessibilityCheckLevel>(
+        mxAccessibilityBox[0].get(), GetViewShellOfBindings(*pBindings), mxSidebar);
 
     // warnings
     m_xLevelExpanders[1] = m_xBuilder->weld_expander(u"expand_warnings"_ustr);
     m_xLevelExpanders[1]->connect_expanded(LINK(this, A11yCheckIssuesPanel, ExpandHdl));
 
     mxAccessibilityBox[1] = m_xBuilder->weld_box(u"accessibilityBoxWrn"_ustr);
-    m_aLevelEntries[1]
-        = std::make_unique<AccessibilityCheckLevel>(mxAccessibilityBox[1].get(), mxSidebar);
+    m_aLevelEntries[1] = std::make_unique<AccessibilityCheckLevel>(
+        mxAccessibilityBox[1].get(), GetViewShellOfBindings(*pBindings), mxSidebar);
 
     mxUpdateLinkButton->connect_activate_link(
         LINK(this, A11yCheckIssuesPanel, UpdateLinkButtonClicked));
@@ -314,7 +330,8 @@ void A11yCheckIssuesPanel::addEntryForGroup(AccessibilityCheckGroups eGroup,
                                             std::shared_ptr<sfx::AccessibilityIssue> const& pIssue)
 {
     size_t nLevel = static_cast<size_t>(pIssue->m_eIssueLvl);
-    m_aLevelEntries[nLevel]->addEntryForGroup(eGroup, rIndices[nLevel], pIssue);
+    m_aLevelEntries[nLevel]->addEntryForGroup(eGroup, rIndices[nLevel],
+                                              GetViewShellOfBindings(*mpBindings), pIssue);
 }
 
 void A11yCheckIssuesPanel::populateIssues()
@@ -322,8 +339,8 @@ void A11yCheckIssuesPanel::populateIssues()
     if (!mpDoc || mxUpdateBox->is_visible())
         return;
 
-    SfxViewShell* pViewShell = SfxViewShell::Current();
-    auto* pWindow = pViewShell ? pViewShell->GetWindow() : nullptr;
+    SfxViewShell* pViewShell = GetViewShellOfBindings(*mpBindings);
+    vcl::Window* pWindow = pViewShell ? pViewShell->GetWindow() : nullptr;
 
     if (pWindow)
         pWindow->SetPointer(PointerStyle::Wait);

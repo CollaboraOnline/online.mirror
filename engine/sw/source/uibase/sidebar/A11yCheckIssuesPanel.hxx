@@ -22,6 +22,7 @@
 
 #include <doc.hxx>
 
+class SfxViewShell;
 struct ImplSVEvent;
 
 namespace sw::sidebar
@@ -38,7 +39,7 @@ private:
     std::shared_ptr<sfx::AccessibilityIssue> m_pAccessibilityIssue;
 
 public:
-    AccessibilityCheckEntry(weld::Container* pParent,
+    AccessibilityCheckEntry(weld::Container* pParent, SfxViewShell* pViewShell,
                             std::shared_ptr<sfx::AccessibilityIssue> const& pAccessibilityIssue);
 
     weld::Widget* get_widget() const { return m_xContainer.get(); }
@@ -76,11 +77,13 @@ private:
     DECL_LINK(ExpandHdl, weld::Expander&, void);
 
 public:
-    AccessibilityCheckLevel(weld::Box* pParent, cpo::uno::Reference<css::ui::XSidebar> xSidebar);
+    AccessibilityCheckLevel(weld::Box* pParent, SfxViewShell* pViewShell,
+                            cpo::uno::Reference<css::ui::XSidebar> xSidebar);
 
     void removeAllEntries();
 
     void addEntryForGroup(AccessibilityCheckGroups eGroup, std::vector<sal_Int32>& rIndices,
+                          SfxViewShell* pViewShell,
                           std::shared_ptr<sfx::AccessibilityIssue> const& pIssue);
 
     void show(size_t nGroupIndex);
