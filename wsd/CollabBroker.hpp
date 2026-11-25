@@ -66,6 +66,7 @@ struct CollabUploadRequest
     std::string requestId;       ///< Client-provided request ID
     std::string lastModifiedTime; ///< The client's version in storage, if the upload checks it
     std::string handlerId;       // The ID of the /cool/collab connection that asked for the upload
+    bool supportsLocks = false;  ///< Whether CheckFileInfo said the host takes LOCK and UNLOCK
     std::chrono::steady_clock::time_point expiry;  ///< When this token expires
 };
 
@@ -332,7 +333,8 @@ std::string createCollabUploadRequest(const std::string& targetUrl,
                                        const std::string& brokerTag,
                                        const std::string& requestId,
                                        std::string const & lastModifiedTime,
-                                       std::string const & handlerId);
+                                       std::string const & handlerId,
+                                       bool supportsLocks);
 
 /// Look up and consume an upload request by token.
 /// Returns true if found and valid, fills in the request details.

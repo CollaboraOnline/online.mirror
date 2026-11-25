@@ -1666,7 +1666,8 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
 
             // Upload directly to the pre-authorized target URL
             proxy->handleUploadRequest(uploadRequest.targetUrl, uploadRequest.lastModifiedTime,
-                                        message, COOLWSD::getWebServerPoll(), disposition);
+                                       uploadRequest.supportsLocks, message,
+                                       COOLWSD::getWebServerPoll(), disposition);
         }
         else if (isCollab && requestDetails.equals(2, "avatar"))
         {

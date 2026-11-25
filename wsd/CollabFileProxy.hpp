@@ -16,6 +16,9 @@
 #include <net/HttpRequest.hpp>
 #include <net/Socket.hpp>
 
+#include <Poco/URI.h>
+
+#include <functional>
 #include <istream>
 #include <memory>
 #include <optional>
@@ -35,6 +38,9 @@ public:
                     const std::shared_ptr<StreamSocket>& socket,
                     const std::string& wopiSrc, const std::string& accessToken);
 
+    /// Releases a lock that the upload still holds, as after a dropped connection.
+    ~CollabFileProxy();
+
     /// Handle a fetch request with a pre-authorized URL (from WebSocket token)
     /// This bypasses CheckFileInfo since the token already validated access.
     /// The body goes to the client with the value of each of secretFields left empty.
@@ -46,7 +52,7 @@ public:
     /// Handle an upload request with a pre-authorized URL (from WebSocket token)
     /// This bypasses CheckFileInfo since the token already validated access.
     void handleUploadRequest(const std::string& targetUrl, std::string const & lastModifiedTime,
-                             std::istream& message,
+                             bool supportsLocks, std::istream& message,
                              const std::shared_ptr<TerminatingPoll>& poll,
                              SocketDisposition& disposition);
 
@@ -55,11 +61,17 @@ private:
 
     void doDownload(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& uri,
                     Authorization const & auth, int redirectionLimit, int retriesLeft);
+    void doLock(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& uri);
+    void handleLockResponse(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& uri,
+                            const std::shared_ptr<http::Session>& session);
     void doUpload(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& uri,
                   const std::string& body);
     void answerUploaded(std::shared_ptr<TerminatingPoll> const & poll,
                         std::string const & wopiResponse);
-    /// Answers the client with the JSON body, or without a body as an error page.
+    /// Unlocks the file, unless an editor on /cool/ws holds the lock, then runs afterUnlock.
+    void releaseLock(std::shared_ptr<SocketPoll> const & poll,
+                     std::function<void()> const & afterUnlock);
+    /// Answers the client after releaseLock, when the upload locked the file.
     void answer(std::shared_ptr<TerminatingPoll> const & poll, http::StatusCode statusCode,
                 std::optional<std::string> const & body = std::nullopt);
     void checkUploadOutcome(std::shared_ptr<TerminatingPoll> const & poll, Poco::URI const & uri);
@@ -79,6 +91,9 @@ private:
     bool _uploadRetried = false;
     // Tells whether an upload without a clear answer from the host is in storage:
     std::shared_ptr<CheckFileInfo> _uploadCheck;
+    Poco::URI _lockUri;
+    // Whether the host took the LOCK:
+    bool _locked = false;
     int _logFD;
 };
 

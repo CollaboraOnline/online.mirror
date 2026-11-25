@@ -387,6 +387,7 @@ void CollabSocketHandler::takeRights(CheckFileInfo & cfi) {
                                 !fileInfo->getUserCanOnlyComment() &&
                                 !fileInfo->getUserCanOnlyManageRedlines();
                 _allowsCleanExport = fileInfo && fileInfo->allowsCleanExport();
+                _supportsLocks = fileInfo && fileInfo->getSupportsLocks();
                 _userCanOnlyCommentOrManageRedlines = fileInfo
                     && (fileInfo->getUserCanOnlyComment()
                         || fileInfo->getUserCanOnlyManageRedlines());
@@ -965,7 +966,7 @@ void CollabSocketHandler::handleUpload(const std::string& stream, const std::str
     // Create an upload token that the client can use to POST via HTTP
     const std::string token = createCollabUploadRequest(
         targetUrl, _accessToken, _wopiSrc, _docKey, brokerTag, requestId,
-        force ? "" : lastModifiedTime, _handlerId);
+        force ? "" : lastModifiedTime, _handlerId, _supportsLocks);
 
     // Send the upload URL to the client
     std::ostringstream oss;

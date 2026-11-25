@@ -25,6 +25,7 @@
 #include <Protocol.hpp>
 #include <wsd/RequestDetails.hpp>
 #include <SigUtil.hpp>
+#include <wsd/Storage.hpp>
 #include <Util.hpp>
 #include <wsd/wopi/CheckFileInfo.hpp>
 #include <wsd/wopi/StorageConnectionManager.hpp>
@@ -41,6 +42,12 @@ namespace {
 
 // How often a download is tried again after a temporary error or no answer from the host:
 constexpr int DownloadRetries = 2;
+
+// How often an UNLOCK is tried again after a temporary error or no answer from the host:
+constexpr int UnlockRetries = 2;
+
+// How long an UNLOCK waits for its answer, the same as DocumentBroker:
+constexpr std::chrono::seconds UnlockTimeout(3);
 
 // The handler that answers the client with 502 when no connection to the host comes about (as when
 // its name does not resolve, or when none of its addresses is allowed):
@@ -84,6 +91,88 @@ Poco::URI fileUriOf(Poco::URI const & uploadUri)
     return fileUri;
 }
 
+http::Request createLockRequest(Poco::URI const & fileUri, std::string const & override,
+                                std::string const & lockToken)
+{
+    http::Request httpRequest
+        = StorageConnectionManager::createHttpRequest(fileUri, Authorization::create(fileUri));
+    httpRequest.setVerb(http::Request::VERB_POST);
+    httpRequest.set("X-WOPI-Override", override);
+    httpRequest.set("X-WOPI-Lock", lockToken);
+    httpRequest.setContentLength(0);
+
+    return httpRequest;
+}
+
+void sendUnlock(Poco::URI const & fileUri, std::string const & docKey,
+                std::shared_ptr<SocketPoll> const & poll, std::function<void()> const & afterUnlock,
+                int retriesLeft = UnlockRetries)
+{
+    const std::string lockToken = LockContext::lockTokenFor(docKey);
+    std::shared_ptr<http::Session> const httpSession = StorageConnectionManager::getWopiHttpSession(fileUri);
+    httpSession->setTimeout(UnlockTimeout);
+    http::Request const httpRequest = createLockRequest(fileUri, "UNLOCK", lockToken);
+
+    // A failed UNLOCK is tried again at once, while tries are left:
+    const std::function<void(bool)> finish = [fileUri, docKey, poll, afterUnlock, retriesLeft](bool failed) {
+        if (failed && retriesLeft > 0)
+        {
+            LOG_WRN_S("CollabFileProxy: trying UNLOCK again");
+            sendUnlock(fileUri, docKey, poll, afterUnlock, retriesLeft - 1);
+            return;
+        }
+
+        if (failed)
+            LOG_WRN_S("CollabFileProxy: UNLOCK failed, the host keeps the lock until it expires");
+
+        if (afterUnlock)
+            afterUnlock();
+    };
+
+    // After a failed TLS handshake both handlers run, and the connect-fail one decides:
+    const http::Session::FinishedCallback handleResult = [finish](std::shared_ptr<http::Session> const & session) {
+        if (session->connectionResult() != net::AsyncConnectResult::Connected)
+            return;
+
+        const http::StatusLine & statusLine = session->response()->statusLine();
+        const http::StatusCode statusCode = statusLine.statusCode();
+        LOG_INF_S("CollabFileProxy: UNLOCK returned " << statusCode);
+
+        // A 429 asks for a pause, which an immediate retry would not give:
+        const bool answered = statusLine.statusCategory() != http::StatusLine::StatusCodeClass::Invalid;
+        const bool busy = statusCode == http::StatusCode::TooManyRequests;
+        const bool transient = !answered || (http::isTransientStatusCode(statusCode) && !busy);
+        finish(transient);
+    };
+
+    const http::Session::ConnectFailCallback handleConnectFail = [finish](std::shared_ptr<http::Session> const &) {
+        LOG_WRN_S("CollabFileProxy: no connection for the UNLOCK");
+        finish(true);
+    };
+
+    httpSession->setFinishedHandler(handleResult);
+    httpSession->setConnectFailHandler(handleConnectFail);
+    httpSession->asyncRequest(httpRequest, poll);
+}
+
+void sendUnlockAndWait(Poco::URI const & fileUri, std::string const & docKey)
+{
+    const std::string lockToken = LockContext::lockTokenFor(docKey);
+    std::shared_ptr<http::Session> const httpSession = StorageConnectionManager::getWopiHttpSession(fileUri);
+    http::Request const httpRequest = createLockRequest(fileUri, "UNLOCK", lockToken);
+
+    std::shared_ptr<const http::Response> const httpResponse = httpSession->syncRequest(httpRequest, UnlockTimeout);
+    LOG_INF_S("CollabFileProxy: UNLOCK returned " << httpResponse->statusLine().statusCode());
+}
+
+std::shared_ptr<DocumentBroker> findDocBroker(std::string const & docKey)
+{
+    std::lock_guard<std::mutex> const docBrokersLock(DocBrokersMutex);
+    const auto it = DocBrokers.find(docKey);
+
+    return it != DocBrokers.end() ? it->second : nullptr;
+}
+
 }
 
 CollabFileProxy::CollabFileProxy(std::string id, const RequestDetails& requestDetails,
@@ -96,6 +185,59 @@ CollabFileProxy::CollabFileProxy(std::string id, const RequestDetails& requestDe
     , _accessToken(accessToken)
     , _logFD(socket->getFD())
 {
+}
+
+CollabFileProxy::~CollabFileProxy()
+{
+    if (!_locked)
+        return;
+
+    // At shutdown the web server poll stops running, so we send this UNLOCK synchronously:
+    if (SigUtil::getShutdownRequestFlag())
+    {
+        // An editor on /cool/ws may hold this lock, as it has the same token,
+        // so we leave the unlock to its broker, which unlocks when it unloads.
+        const std::string docKey = RequestDetails::getDocKey(_wopiSrc);
+        if (findDocBroker(docKey))
+        {
+            LOG_WRN("CollabFileProxy: not unlocking at shutdown, the document is open on /cool/ws");
+            return;
+        }
+
+        sendUnlockAndWait(_lockUri, docKey);
+        return;
+    }
+
+    releaseLock(COOLWSD::getWebServerPoll(), {});
+}
+
+void CollabFileProxy::releaseLock(std::shared_ptr<SocketPoll> const & poll,
+                                  std::function<void()> const & afterUnlock)
+{
+    const std::string docKey = RequestDetails::getDocKey(_wopiSrc);
+    std::shared_ptr<DocumentBroker> const docBroker = findDocBroker(docKey);
+    if (!docBroker)
+    {
+        LOG_DBG("CollabFileProxy: unlocking, the document is not open on /cool/ws");
+        sendUnlock(_lockUri, docKey, poll, afterUnlock);
+        return;
+    }
+
+    // An editor on /cool/ws holds the lock with the same token and still needs it. Only viewers
+    // there hold none. The UNLOCK finishes on this thread before a /cool/ws editor can LOCK here.
+    docBroker->addCallback([docBroker, lockUri = _lockUri, docKey]() {
+        if (docBroker->isLockedInStorage())
+        {
+            LOG_DBG_S("CollabFileProxy: not unlocking, an editor on /cool/ws holds the lock");
+            return;
+        }
+
+        sendUnlockAndWait(lockUri, docKey);
+    });
+
+    // Only the broker's thread can tell whether an editor holds the lock, so we go on at once:
+    if (afterUnlock)
+        afterUnlock();
 }
 
 void CollabFileProxy::handleFetchRequest(const std::string& streamUrl, bool wopiContents,
@@ -143,7 +285,7 @@ void CollabFileProxy::handleFetchRequest(const std::string& streamUrl, bool wopi
 
 void CollabFileProxy::handleUploadRequest(const std::string& targetUrl,
                                           std::string const & lastModifiedTime,
-                                          std::istream& message,
+                                          bool supportsLocks, std::istream& message,
                                           const std::shared_ptr<TerminatingPoll>& poll,
                                           SocketDisposition& disposition)
 {
@@ -168,15 +310,73 @@ void CollabFileProxy::handleUploadRequest(const std::string& targetUrl,
 
     // Transfer to poll and start upload directly (bypassing CheckFileInfo)
     disposition.setTransfer(*poll,
-        [this, poll, uri = std::move(uri), keepalive = shared_from_this()](
+        [this, poll, uri = std::move(uri), supportsLocks, keepalive = shared_from_this()](
             const std::shared_ptr<Socket>& moveSocket)
         {
             LOG_TRC('#' << moveSocket->getFD()
                         << ": CollabFileProxy: starting direct upload to ["
                         << Anonymizer::anonymizeUrl(uri.toString()) << ']');
 
-            doUpload(poll, uri, _uploadBody);
+            if (supportsLocks)
+                doLock(poll, uri);
+            else
+                doUpload(poll, uri, _uploadBody);
         });
+}
+
+void CollabFileProxy::doLock(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& uri)
+{
+    _lockUri = fileUriOf(uri);
+
+    const std::string lockToken = LockContext::lockTokenFor(RequestDetails::getDocKey(_wopiSrc));
+    const std::string uriAnonym = Anonymizer::anonymizeUrl(_lockUri.toString());
+    std::shared_ptr<http::Session> const httpSession = StorageConnectionManager::getWopiHttpSession(_lockUri);
+    http::Request const httpRequest = createLockRequest(_lockUri, "LOCK", lockToken);
+
+    http::Session::FinishedCallback finishedCallback =
+        [this, poll, uri, keepalive = shared_from_this()](
+            const std::shared_ptr<http::Session>& session) {
+            handleLockResponse(poll, uri, session);
+        };
+
+    httpSession->setFinishedHandler(std::move(finishedCallback));
+    httpSession->setConnectFailHandler(badGatewayOnConnectFail(_socket, uriAnonym));
+    httpSession->asyncRequest(httpRequest, poll);
+}
+
+void CollabFileProxy::handleLockResponse(const std::shared_ptr<TerminatingPoll>& poll,
+                                         const Poco::URI& uri,
+                                         const std::shared_ptr<http::Session>& session)
+{
+    if (SigUtil::getShutdownRequestFlag())
+    {
+        // The destructor unlocks a LOCK that went through.
+        _locked = session->response()->statusLine().statusCode() == http::StatusCode::OK;
+        LOG_DBG("CollabFileProxy: shutdown flagged, aborting upload");
+        return;
+    }
+
+    // A failed connection got its answer from the connect-fail handler.
+    if (session->connectionResult() != net::AsyncConnectResult::Connected)
+        return;
+
+    const http::StatusCode statusCode = session->response()->statusLine().statusCode();
+    if (statusCode == http::StatusCode::Conflict)
+    {
+        LOG_WRN("CollabFileProxy: another editor holds the lock, refusing the upload");
+        if (std::shared_ptr<StreamSocket> const socket = _socket.lock())
+            HttpHelper::sendErrorAndShutdown(http::StatusCode::Locked, socket);
+        return;
+    }
+
+    _locked = (statusCode == http::StatusCode::OK);
+    if (!_locked)
+    {
+        // A host without locks, for example, takes the upload as before.
+        LOG_WRN("CollabFileProxy: LOCK returned " << statusCode << ", uploading unlocked");
+    }
+
+    doUpload(poll, uri, _uploadBody);
 }
 
 void CollabFileProxy::doDownload(const std::shared_ptr<TerminatingPoll>& poll,
@@ -329,6 +529,10 @@ void CollabFileProxy::doUpload(const std::shared_ptr<TerminatingPoll>& poll,
     if (!_uploadLastModifiedTime.empty()) {
         httpRequest.set("X-COOL-WOPI-Timestamp", _uploadLastModifiedTime);
     }
+    if (_locked) {
+        const std::string docKey = RequestDetails::getDocKey(_wopiSrc);
+        httpRequest.set("X-WOPI-Lock", LockContext::lockTokenFor(docKey));
+    }
 
     const auto startTime = std::chrono::steady_clock::now();
 
@@ -402,8 +606,16 @@ void CollabFileProxy::doUpload(const std::shared_ptr<TerminatingPoll>& poll,
         }
     };
 
+    // The PutFile can fail to connect after the LOCK went through, so its 502 goes through
+    // answer(), which releases the lock first.
+    const http::Session::ConnectFailCallback answerOnConnectFail =
+        [this, poll, uriAnonym, keepalive = shared_from_this()](std::shared_ptr<http::Session> const &) {
+            LOG_ERR("CollabFileProxy: no connection to [" << uriAnonym << ']');
+            answer(poll, http::StatusCode::BadGateway);
+        };
+
     httpSession->setFinishedHandler(std::move(finishedCallback));
-    httpSession->setConnectFailHandler(badGatewayOnConnectFail(_socket, uriAnonym));
+    httpSession->setConnectFailHandler(answerOnConnectFail);
     httpSession->asyncRequest(httpRequest, poll);
 }
 
@@ -452,25 +664,46 @@ void CollabFileProxy::answerUploaded(std::shared_ptr<TerminatingPoll> const & po
     answer(poll, http::StatusCode::OK, wopiResponse);
 }
 
-void CollabFileProxy::answer(std::shared_ptr<TerminatingPoll> const & /* poll */,
+void CollabFileProxy::answer(std::shared_ptr<TerminatingPoll> const & poll,
                              http::StatusCode statusCode, std::optional<std::string> const & body)
 {
-    std::shared_ptr<StreamSocket> const socket = _socket.lock();
-    if (!socket)
+    const std::function<void()> send = [weakSocket = _socket, statusCode, body]() {
+        std::shared_ptr<StreamSocket> const socket = weakSocket.lock();
+        if (!socket)
+        {
+            LOG_DBG_S("CollabFileProxy: the client left before its answer");
+            return;
+        }
+
+        if (!body)
+        {
+            HttpHelper::sendErrorAndShutdown(statusCode, socket);
+            return;
+        }
+
+        http::Response response(statusCode);
+        response.setBody(*body, "application/json; charset=utf-8");
+        socket->sendAndShutdown(response);
+    };
+
+    if (!_locked)
     {
-        LOG_DBG("CollabFileProxy: the client left before its answer");
+        send();
         return;
     }
 
-    if (!body)
+    _locked = false;
+
+    // A 502 means the host did not answer, so it may not answer the UNLOCK either.
+    // The client hears back at once, instead of after every try of the UNLOCK.
+    if (statusCode == http::StatusCode::BadGateway)
     {
-        HttpHelper::sendErrorAndShutdown(statusCode, socket);
+        releaseLock(poll, {});
+        send();
         return;
     }
 
-    http::Response response(statusCode);
-    response.setBody(*body, "application/json; charset=utf-8");
-    socket->sendAndShutdown(response);
+    releaseLock(poll, send);
 }
 
 void CollabFileProxy::checkUploadOutcome(

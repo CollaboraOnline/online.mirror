@@ -786,7 +786,8 @@ std::string createCollabUploadRequest(const std::string& targetUrl,
                                        const std::string& brokerTag,
                                        const std::string& requestId,
                                        std::string const & lastModifiedTime,
-                                       std::string const & handlerId)
+                                       std::string const & handlerId,
+                                       bool supportsLocks)
 {
     const std::string token = Util::rng::getHexString(CollabAccessTokenLength);
 
@@ -799,6 +800,7 @@ std::string createCollabUploadRequest(const std::string& targetUrl,
     request.requestId = requestId;
     request.lastModifiedTime = lastModifiedTime;
     request.handlerId = handlerId;
+    request.supportsLocks = supportsLocks;
     request.expiry = std::chrono::steady_clock::now() + CollabUploadTokenExpiry;
 
     {

@@ -63,6 +63,7 @@ class CollabSocketHandler : public WebSocketHandler
     std::string _username;
     std::string _avatar;
     bool _userCanWrite = false;
+    bool _supportsLocks = false;
     bool _allowsCleanExport = false;
     bool _userCanOnlyCommentOrManageRedlines = false;
     Poco::JSON::Object::Ptr _wopiInfo;
