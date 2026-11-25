@@ -34,6 +34,7 @@ class SfxObjectShell;
 class SfxTemplateItem;
 class SfxCommonTemplateDialog_Impl;
 class SfxTemplateControllerItem;
+struct ImplSVEvent;
 
 enum class StyleFlags
 {
@@ -238,6 +239,8 @@ private:
     std::unique_ptr<Idle> pIdle;
 
     OUString sLastItemIdent;
+    // MenuSelectAsyncHdl posted by MenuSelect, removed when the list goes away before it runs
+    ImplSVEvent* m_pMenuSelectEvent = nullptr;
     SfxModule* m_Module;
     sal_uInt16 m_nModifier;
     weld::Container* m_pContainer;

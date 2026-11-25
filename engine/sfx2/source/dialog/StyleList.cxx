@@ -175,12 +175,21 @@ StyleList::StyleList(weld::Builder* pBuilder, SfxBindings* pBindings,
 
 // Destructor
 
-StyleList::~StyleList() {}
+StyleList::~StyleList()
+{
+    if (m_pMenuSelectEvent)
+        Application::RemoveUserEvent(m_pMenuSelectEvent);
+}
 
 // Called in the destructor of Dialog
 // Cleans up the StyleList individual components while closing the application
 IMPL_LINK_NOARG(StyleList, Cleanup, void*, void)
 {
+    if (m_pMenuSelectEvent)
+    {
+        Application::RemoveUserEvent(m_pMenuSelectEvent);
+        m_pMenuSelectEvent = nullptr;
+    }
     if (m_pStyleSheetPool)
         EndListening(*m_pStyleSheetPool);
     m_pStyleSheetPool = nullptr;
@@ -1612,7 +1621,8 @@ void StyleList::MenuSelect(const OUString& rIdent)
     sLastItemIdent = rIdent;
     if (sLastItemIdent.isEmpty())
         return;
-    Application::PostUserEvent(LINK(this, StyleList, MenuSelectAsyncHdl)); /***check this****/
+    if (!m_pMenuSelectEvent)
+        m_pMenuSelectEvent = Application::PostUserEvent(LINK(this, StyleList, MenuSelectAsyncHdl));
 }
 
 void StyleList::Notify(SfxBroadcaster& /*rBC*/, const SfxHint& rHint)
@@ -1727,6 +1737,7 @@ IMPL_LINK_NOARG(StyleList, TimeOut, Timer*, void)
 
 IMPL_LINK_NOARG(StyleList, MenuSelectAsyncHdl, void*, void)
 {
+    m_pMenuSelectEvent = nullptr;
     if (sLastItemIdent == "new")
         NewHdl();
     else if (sLastItemIdent == "edit")
