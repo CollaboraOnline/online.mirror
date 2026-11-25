@@ -650,13 +650,9 @@ void SlideSectionManager::RestoreSectionsSnapshot(const std::vector<SlideSection
 {
     maSections = rSections;
 
-    // Broadcast so listeners (e.g. the slide sorter) repaint section headers.
-    SdrPage* pPage = mrDoc.GetSdPage(0, PageKind::Standard);
-    if (pPage)
-    {
-        SdrHint aHint(SdrHintKind::PageOrderChange, pPage);
-        mrDoc.Broadcast(aHint);
-    }
+    // The slides stay where they are and only the section starts around them change, so the page
+    // order change names no page.
+    mrDoc.Broadcast(SdrHint(SdrHintKind::PageOrderChange));
 
     NotifySectionsChanged();
 }

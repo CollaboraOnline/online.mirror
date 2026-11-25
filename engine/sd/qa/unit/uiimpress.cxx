@@ -3621,6 +3621,45 @@ CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testRedoDeleteSlideKeepsPosition)
     CPPUNIT_ASSERT_EQUAL(3, pImpressDocument->getPart());
 }
 
+CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testUndoDeleteSlideBeforeSectionKeepsPosition)
+{
+    // Undoing the deletion of a slide brings it back as the current slide when the deletion also
+    // moved the start of a section, instead of going to the first slide.
+    createSdImpressDoc();
+    for (int i = 0; i < 5; ++i)
+        dispatchCommand(mxComponent, u".uno:InsertPage"_ustr, {});
+
+    // The slide sorter keeps its own selection in step with undo and redo.
+    getSlideSorterViewShell();
+
+    auto pImpressDocument = dynamic_cast<SdXImpressDocument*>(mxComponent.get());
+    CPPUNIT_ASSERT(pImpressDocument);
+    CPPUNIT_ASSERT_EQUAL(6, pImpressDocument->getParts());
+
+    // A section starts at the fifth slide.
+    pImpressDocument->setPart(4);
+    Scheduler::ProcessEventsToIdle();
+    dispatchCommand(mxComponent, u".uno:AddSlideSection"_ustr, {});
+    sd::SlideSectionManager& rSections = pImpressDocument->GetDoc()->GetSectionManager();
+    const sal_Int32 nSection = rSections.GetSectionCount() - 1;
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(4), rSections.GetSection(nSection).mnStartIndex);
+
+    // Deleting the fourth slide moves the start of the section up by one slide.
+    pImpressDocument->setPart(3);
+    Scheduler::ProcessEventsToIdle();
+    dispatchCommand(mxComponent, u".uno:DeletePage"_ustr, {});
+    CPPUNIT_ASSERT_EQUAL(5, pImpressDocument->getParts());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(3), rSections.GetSection(nSection).mnStartIndex);
+    CPPUNIT_ASSERT_EQUAL(3, pImpressDocument->getPart());
+
+    // Undo brings back the slide and the start of the section, and the slide is the current one.
+    dispatchCommand(mxComponent, u".uno:Undo"_ustr, {});
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT_EQUAL(6, pImpressDocument->getParts());
+    CPPUNIT_ASSERT_EQUAL(sal_Int32(4), rSections.GetSection(nSection).mnStartIndex);
+    CPPUNIT_ASSERT_EQUAL(3, pImpressDocument->getPart());
+}
+
 CPPUNIT_TEST_FIXTURE(SdUiImpressTest, testDocumentCut)
 {
     // Test cutting slides and verifying the document state afterwards
