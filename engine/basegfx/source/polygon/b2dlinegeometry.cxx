@@ -566,43 +566,14 @@ namespace basegfx
                     // Remark: This nearly never happens due to curve preparations to extreme points
                     // and maximum angle turning, but I constructed a test case and checked that it is
                     // working properly.
-                    const B2DPolyPolygon aTemp(utils::solveCrossovers(aBezierPolygon));
-                    const sal_uInt32 nTempCount(aTemp.count());
+                    // the part beyond the cut lies inside the rest and turns the same way, so the
+                    // nonzero fill leaves just the outline of the rest
+                    const B2DPolyPolygon aTemp(
+                        utils::createNonzeroConform(B2DPolyPolygon(aBezierPolygon)));
 
-                    if(nTempCount)
+                    if (aTemp.count() == 1)
                     {
-                        if(nTempCount > 1)
-                        {
-                            // as expected, multiple polygons (with same orientation). Remove
-                            // the one which contains aCutPoint, or better take the one without
-                            for (sal_uInt32 a(0); a < nTempCount; a++)
-                            {
-                                aBezierPolygon = aTemp.getB2DPolygon(a);
-
-                                const sal_uInt32 nCandCount(aBezierPolygon.count());
-
-                                for(sal_uInt32 b(0); b < nCandCount; b++)
-                                {
-                                    if(aCutPoint.equal(aBezierPolygon.getB2DPoint(b)))
-                                    {
-                                        aBezierPolygon.clear();
-                                        break;
-                                    }
-                                }
-
-                                if(aBezierPolygon.count())
-                                {
-                                    break;
-                                }
-                            }
-
-                            OSL_ENSURE(aBezierPolygon.count(), "Error in line geometry creation, could not solve self-intersection (!)");
-                        }
-                        else
-                        {
-                            // none found, use result
-                            aBezierPolygon = aTemp.getB2DPolygon(0);
-                        }
+                        aBezierPolygon = aTemp.getB2DPolygon(0);
                     }
                     else
                     {

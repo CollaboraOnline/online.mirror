@@ -393,9 +393,11 @@ bool ImplReadRegion( basegfx::B2DPolyPolygon& rPolyPoly, SvStream& rStream, sal_
     }
     if (!comphelper::IsFuzzing())
     {
-        rPolyPoly = basegfx::utils::solveCrossovers(rPolyPoly);
-        rPolyPoly = basegfx::utils::stripNeutralPolygons(rPolyPoly);
-        rPolyPoly = basegfx::utils::stripDispensablePolygons(rPolyPoly);
+        // the region is the union of its rectangles, one outline where they touch
+        basegfx::B2DPolyPolygonVector aRectangles;
+        for (const basegfx::B2DPolygon& rRectangle : rPolyPoly)
+            aRectangles.emplace_back(rRectangle);
+        rPolyPoly = basegfx::utils::mergeToSinglePolyPolygon(aRectangles);
     }
     return true;
 }

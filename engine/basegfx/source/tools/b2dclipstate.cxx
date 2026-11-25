@@ -241,10 +241,7 @@ namespace basegfx::utils
                 case SUBTRACT:
                     assert( !bIsEmpty );
 
-                    // first union all pending ones, subtract en bloc then
-                    maPendingPolygons = solveCrossovers(maPendingPolygons);
-                    maPendingPolygons = stripNeutralPolygons(maPendingPolygons);
-                    maPendingPolygons = stripDispensablePolygons(maPendingPolygons);
+                    // the pending ones are prepared above already, subtract en bloc
 
                     if( bIsCleared )
                     {

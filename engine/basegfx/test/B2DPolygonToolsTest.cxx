@@ -26,6 +26,8 @@
 #include <basegfx/polygon/b2dpolygontools.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
+#include <basegfx/vector/b2enums.hxx>
+#include <com/sun/star/drawing/LineCap.hpp>
 
 namespace basegfx
 {
@@ -142,11 +144,36 @@ public:
     // member functions of the current class,
     // because these macros are need by auto register mechanism.
 
+    void testCreateAreaGeometryCutEdge()
+    {
+        // a quarter circle around (0, 0), wider than its radius: the start and end lines on the
+        // inner side cut at the center, and with caps at both ends the outline loses the part
+        // beyond that cut; no extremum inside, so the edge stays one piece
+        B2DPolygon aEdge;
+        aEdge.append(B2DPoint(10, 0));
+        aEdge.appendBezierSegment(B2DPoint(10, 5.5228), B2DPoint(5.5228, 10), B2DPoint(0, 10));
+
+        for (const css::drawing::LineCap eCap :
+             { css::drawing::LineCap_SQUARE, css::drawing::LineCap_ROUND })
+        {
+            // a large angle and the whole edge keep the curve in one piece
+            const B2DPolyPolygon aArea(utils::createAreaGeometry(
+                aEdge, 12.0, B2DLineJoin::Round, eCap, M_PI, 1.0));
+
+            CPPUNIT_ASSERT_EQUAL(sal_uInt32(1), aArea.count());
+            CPPUNIT_ASSERT(utils::isInside(aArea, B2DPoint(-1, -1)));
+            const B2DPolygon& rOutline(aArea.getB2DPolygon(0));
+            for (sal_uInt32 a = 0; a < rOutline.count(); a++)
+                CPPUNIT_ASSERT(!rOutline.getB2DPoint(a).equal(B2DPoint(0, 0)));
+        }
+    }
+
     CPPUNIT_TEST_SUITE(b2dpolygontools);
     CPPUNIT_TEST(testIsRectangle);
     CPPUNIT_TEST(testCreateAreaGeometryForLineStartEndNotchedArrow);
     CPPUNIT_TEST(testCreateAreaGeometryForLineStartEndSimpleTriangle);
     CPPUNIT_TEST(testCreateAreaGeometryForLineStartEndHollowTriangle);
+    CPPUNIT_TEST(testCreateAreaGeometryCutEdge);
     CPPUNIT_TEST_SUITE_END();
 }; // class b2dpolygontools
 
