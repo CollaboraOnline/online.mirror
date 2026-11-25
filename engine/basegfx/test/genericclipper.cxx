@@ -120,57 +120,6 @@ public:
         validate("validateDiff", pValid, &utils::solvePolygonOperationDiff);
     }
 
-    void validateCrossover(const char* pName,
-                           const char* pInputSvgD,
-                           const char* pValidSvgD) const
-    {
-        OUString aInput=OUString::createFromAscii(pInputSvgD);
-        OUString aValid=OUString::createFromAscii(pValidSvgD);
-        B2DPolyPolygon aInputPoly, aValidPoly;
-
-        CPPUNIT_ASSERT(utils::importFromSvgD(aInputPoly, aInput, false, nullptr));
-        CPPUNIT_ASSERT(utils::importFromSvgD(aValidPoly, aValid, false, nullptr));
-
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(
-            pName,
-            aValid,
-            basegfx::utils::exportToSvgD(
-                utils::solveCrossovers(aInputPoly), true, true, false));
-    }
-
-    void checkCrossoverSolver()
-    {
-        // partially intersecting polygons, with a common subsection
-        validateCrossover(
-            "partially intersecting",
-            "m0 0 v 5  h 3 h 1 h 1 h 1 v -2 v -3 z"
-              "m3 7 v -2 h 1 h 1 h 1 v -2 h 1 v 3 z",
-            "m0 0v5h3 1 1 1v-2-3zm3 7v-2h1 1 1v-2h1v3z");
-
-        // first polygon is identical to subset of second polygon
-        validateCrossover(
-            "full subset",
-            "m0 0 v 5  h 3 h 1 h 1 v -5 z"
-              "m3 10 v -5 h 1 h 1 v -5 h -5 v 5 h 3 z",
-            "m0 0v5h3 1 1v-5zm3 10v-5zm1-5h1v-5h-5v5h3z");
-
-        // first polygon is identical to subset of second polygon, but
-        // oriented in the opposite direction
-        validateCrossover(
-            "full subset, opposite direction",
-            "m0 0 v 5 h 3 h 1 h 1 v -5 z"
-              "m3 10 v -5 h -1 h -1 h -1 v -5 h 5 v 5 h 2 z",
-            "m0 0v5h1 1 1-1-1-1v-5h5v5-5zm4 5h1 2l-4 5v-5z");
-
-        // first polygon is identical to subset of second polygon, and
-        // has a curve segment (triggers different code path)
-        validateCrossover(
-            "full subset, plus curves",
-            "m0 0 v 5  h 3 h 1 h 1 c 2 0 2 0 0 -5 z"
-              "m3 10 v -5 h 1 h 1 c 2 0 2 0 0 -5 h -5 v 5 h 3 z",
-            "m0 0v5h3 1 1c2 0 2 0 0-5zm3 10v-5zm1-5h1c2 0 2 0 0-5h-5v5h3z");
-    }
-
     // Change the following lines only, if you add, remove or rename
     // member functions of the current class,
     // because these macros are need by auto register mechanism.
@@ -294,7 +243,6 @@ public:
     CPPUNIT_TEST(validateXor);
     CPPUNIT_TEST(validateAnd);
     CPPUNIT_TEST(validateDiff);
-    CPPUNIT_TEST(checkCrossoverSolver);
     CPPUNIT_TEST(testLineThroughSquare);
     CPPUNIT_TEST(testClosedLine);
     CPPUNIT_TEST(testCurvedLine);

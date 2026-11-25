@@ -311,6 +311,28 @@ public:
         CPPUNIT_ASSERT_MESSAGE("getPolyPolygon", true );
     }
 
+    // winding number of rPoint, the polygons are straight
+    static int getWinding(const B2DPolyPolygon& rPolyPolygon, const B2DPoint& rPoint)
+    {
+        int nWinding(0);
+        for (const B2DPolygon& rPolygon : rPolyPolygon)
+        {
+            const sal_uInt32 nCount(rPolygon.count());
+            for (sal_uInt32 a = 0; a < nCount; ++a)
+            {
+                const B2DPoint aStart(rPolygon.getB2DPoint(a));
+                const B2DPoint aEnd(rPolygon.getB2DPoint((a + 1) % nCount));
+                const double fSide((aEnd.getX() - aStart.getX()) * (rPoint.getY() - aStart.getY())
+                                   - (rPoint.getX() - aStart.getX()) * (aEnd.getY() - aStart.getY()));
+                if (aStart.getY() <= rPoint.getY() && aEnd.getY() > rPoint.getY() && fSide > 0)
+                    ++nWinding;
+                else if (aStart.getY() > rPoint.getY() && aEnd.getY() <= rPoint.getY() && fSide < 0)
+                    --nWinding;
+            }
+        }
+        return nWinding;
+    }
+
     void validatePoly( const char* pName, const B2DPolyRange& rRange ) const
     {
         B2DPolyPolygon genericClip;
@@ -324,38 +346,19 @@ public:
             genericClip.append(aRect);
         }
 
-#if OSL_DEBUG_LEVEL > 2
-        fprintf(stderr, "%s input      - svg:d=\"%s\"\n",
-                pName, OUStringToOString(
-                    basegfx::utils::exportToSvgD(
-                        genericClip, , true, true, false),
-                    RTL_TEXTENCODING_UTF8).getStr() );
-#endif
-
         const B2DPolyPolygon boxClipResult=rRange.solveCrossovers();
-        const OUString boxClipSvg(
-            basegfx::utils::exportToSvgD(
-                normalizePoly(boxClipResult), true, true, false));
-#if OSL_DEBUG_LEVEL > 2
-        fprintf(stderr, "%s boxclipper - svg:d=\"%s\"\n",
-                pName, OUStringToOString(
-                    boxClipSvg,
-                    RTL_TEXTENCODING_UTF8).getStr() );
-#endif
 
-        genericClip = utils::solveCrossovers(genericClip);
-        const OUString genericClipSvg(
-            basegfx::utils::exportToSvgD(
-                normalizePoly(genericClip), true, true, false));
-#if OSL_DEBUG_LEVEL > 2
-        fprintf(stderr, "%s genclipper - svg:d=\"%s\"\n",
-                pName, OUStringToOString(
-                    genericClipSvg,
-                    RTL_TEXTENCODING_UTF8).getStr() );
-#endif
-
-        CPPUNIT_ASSERT_EQUAL_MESSAGE(pName,
-                               boxClipSvg, genericClipSvg);
+        // the crossings get solved by linking the outlines anew, so every point keeps its winding
+        const B2DRange aBounds(genericClip.getB2DRange());
+        constexpr int nSteps(40);
+        for (int nX = 0; nX < nSteps; ++nX)
+            for (int nY = 0; nY < nSteps; ++nY)
+            {
+                const B2DPoint aPoint(aBounds.getMinX() + (nX + 0.37) * aBounds.getWidth() / nSteps,
+                                      aBounds.getMinY() + (nY + 0.61) * aBounds.getHeight() / nSteps);
+                CPPUNIT_ASSERT_EQUAL_MESSAGE(pName, getWinding(genericClip, aPoint),
+                                             getWinding(boxClipResult, aPoint));
+            }
     }
 
     void validatePoly()

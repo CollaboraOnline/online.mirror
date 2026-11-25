@@ -25,34 +25,6 @@
 
 namespace basegfx::utils
 {
-        /** Solve all crossovers (aka self-intersections) in a polyPolygon.
-
-            This re-layouts all contained polygons so that the result
-            will contain only non-cutting polygons. For that reason,
-            points will be added at crossover and touch points and the
-            single Polygons may be re-combined. The orientations of
-            the contained polygons in not changed but used as
-            topological information.  Self crossovers of the contained
-            sub-polygons are implicitly handled, but to not lose the
-            topological information, it may be necessary to remove
-            self-intersections of the contained sub-polygons in a
-            preparing step and to explicitly correct their
-            orientations.
-        */
-        BASEGFX_DLLPUBLIC B2DPolyPolygon solveCrossovers(const B2DPolyPolygon& rCandidate,
-                                                         size_t* pPointLimit = nullptr);
-
-        /** Solve all crossovers (aka self-intersections) in a Polygon
-
-            Same as above, but for single polygons. Result will be
-            free of self-intersections. When result contains multiple
-            polygons, it may be necessary to rearrange their
-            orientations since holes may have been created (possibly use
-            correctOrientations).
-        */
-        BASEGFX_DLLPUBLIC B2DPolyPolygon solveCrossovers(const B2DPolygon& rCandidate,
-                                                         size_t* pPointLimit = nullptr);
-
         /** Strip neutral polygons from PolyPolygon.
 
             Neutral polygons are ones who's orientation is neutral, so
