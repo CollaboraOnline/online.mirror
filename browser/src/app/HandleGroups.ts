@@ -568,6 +568,10 @@ class FramingHandles extends HandleGroup {
 		towards: cool.Point,
 		event: KeyboardEvent,
 	): cool.Point | null {
+		// 3D objects inside a scene are scaled in 3D by a drag only, not by keys yet
+		if (Move3DInteraction.movesIn3D(this.selection.selectedObjects()))
+			return null;
+
 		const shape = this.selection.shapeNow();
 		if (!shape) return null;
 
@@ -622,6 +626,10 @@ class FramingHandles extends HandleGroup {
 		handle: SelectionHandle,
 		_at: cool.SimplePoint,
 	): SelectionInteraction | null {
+		// 3D objects inside an entered scene are scaled in 3D
+		const in3D = Scale3DInteraction.begin(this.selection, handle);
+		if (in3D) return in3D;
+
 		if (!ObjectHandles.canBeResized(this.selection.selectedObjects()))
 			return null;
 
@@ -3876,6 +3884,10 @@ class TheObjectItself extends HandleGroup {
 		at: cool.SimplePoint,
 	): SelectionInteraction | null {
 		if (this.selection.pathPointsAreShown()) return null;
+
+		// 3D objects inside an entered scene move in 3D
+		const in3D = Move3DInteraction.begin(this.selection, at);
+		if (in3D) return in3D;
 
 		if (!ObjectHandles.canBeMoved(this.selection.selectedObjects()))
 			return null;

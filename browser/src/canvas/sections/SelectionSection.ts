@@ -2878,7 +2878,10 @@ abstract class SelectionSection extends CanvasSectionObject {
 					'pointer'
 				:	SelectionSection.grabPointer();
 
-		if (!ObjectHandles.canBeResized(this.selectedObjects()))
+		if (
+			!ObjectHandles.canBeResized(this.selectedObjects()) &&
+			!Move3DInteraction.movesIn3D(this.selectedObjects())
+		)
 			return 'not-allowed';
 
 		const byKind: Record<string, string> = {
@@ -3515,7 +3518,8 @@ abstract class SelectionSection extends CanvasSectionObject {
 		drives it, since the mouse belongs to that one until it is let go.
 	*/
 	public beginCarrying(at: cool.SimplePoint): void {
-		this.interaction = new MovingInteraction(this, at);
+		this.interaction =
+			Move3DInteraction.begin(this, at) ?? new MovingInteraction(this, at);
 	}
 
 	/// Carries it on to that point of the document, as a drag of this section's own does, the
@@ -3716,7 +3720,10 @@ abstract class SelectionSection extends CanvasSectionObject {
 			: this.partMarkedAt(inTheDocument) !== undefined ? 'pointer'
 			: !onTheObject ? 'default'
 			: overText ? this.textPointerAt(inTheDocument)
-			: ObjectHandles.canBeMoved(this.selectedObjects()) ?
+			: (
+				ObjectHandles.canBeMoved(this.selectedObjects()) ||
+				Move3DInteraction.movesIn3D(this.selectedObjects())
+			) ?
 				SelectionSection.grabPointer()
 			:	'default';
 

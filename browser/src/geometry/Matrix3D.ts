@@ -75,6 +75,28 @@ namespace cool {
 			]) as Matrix3D;
 		}
 
+		/// The scale by those factors along each axis.
+		static scaling(x: number, y: number, z: number): Matrix3D {
+			return Matrix3D.fromArray([
+				x,
+				0,
+				0,
+				0,
+				0,
+				y,
+				0,
+				0,
+				0,
+				0,
+				z,
+				0,
+				0,
+				0,
+				0,
+				1,
+			]) as Matrix3D;
+		}
+
 		/// The turn about the x axis by the angle in radians, turned the way the drawing layer
 		/// turns: the y axis towards the z axis.
 		static turnAboutX(angle: number): Matrix3D {

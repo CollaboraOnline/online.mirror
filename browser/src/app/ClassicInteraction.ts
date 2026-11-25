@@ -578,7 +578,8 @@ abstract class ClassicContext implements InteractionContext {
 
 	/*
 		A drag that begins on something nobody selected takes hold of the outermost object it
-		belongs to, which is the group where it is in one, as long as that may be moved. A diagram
+		belongs to, which is the group where it is in one, as long as that may be moved, on the
+		page or, for a 3D object inside an entered scene, in 3D. A diagram
 		is taken hold of through its first object, which stands for it, carries the whole of it,
 		and is what the engine reports back. A drag with a modifier is the engine's.
 	*/
@@ -586,7 +587,12 @@ abstract class ClassicContext implements InteractionContext {
 		if (modifier !== 0) return undefined;
 
 		const objectId = RenderGeometrySection.outermostOf(hit, this.groupStoodIn);
-		if (!ObjectHandles.canBeMoved([objectId])) return undefined;
+		// a 3D object inside an entered scene is moved in 3D, which the client carries as well
+		if (
+			!ObjectHandles.canBeMoved([objectId]) &&
+			!Move3DInteraction.movesIn3D([objectId])
+		)
+			return undefined;
 
 		return this.enteredBy([objectId])[0];
 	}
@@ -968,11 +974,6 @@ class ClassicSceneContext extends ClassicGroupContext {
 	/// Enter and F3 go no deeper than the 3D objects.
 	public enterKey(): boolean {
 		return true;
-	}
-
-	/// No drag takes hold of a 3D object, which changes in 3D.
-	public takesHoldFor(_hit: number, _modifier: number): number | undefined {
-		return undefined;
 	}
 
 	/*

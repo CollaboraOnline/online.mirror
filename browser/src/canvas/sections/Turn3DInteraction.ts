@@ -589,3 +589,395 @@ class Turn3DInteraction extends SelectionInteraction {
 			.join('  ');
 	}
 }
+
+/*
+	A move in 3D of the 3D objects selected inside an entered scene, by a drag on them, as the
+	office moves them: the way the mouse goes on the page is taken into the space the camera looks
+	from, at the middle of the depth the scene is seen in, so the objects follow the mouse across
+	the screen; with Alt the way down goes into the depth instead, away from the camera or towards
+	it. While it runs the lines of the moved objects are drawn as the scene will look, and at the
+	end the engine is told the new 3D transforms, as after a turn.
+*/
+class Move3DInteraction extends SelectionInteraction {
+	private readonly data: cool.VectorPrimitivesData;
+	private readonly sceneId: number;
+	private readonly objectIds: number[];
+	// from the page to the unit square the scene is seen on, and from there into the space the
+	// camera looks from
+	private readonly toTheSquare: cool.Matrix2D;
+	private readonly fromTheSquare: cool.Matrix3D;
+	private readonly orientationInverse: cool.Matrix3D;
+	private readonly outerInverse: Map<number, cool.Matrix3D>;
+	private last: cool.SimplePoint;
+	private moved = new Map<number, cool.Matrix3D>();
+	private ghost: { lines: cool.Polygon2D[]; frame: cool.Range2D } | null = null;
+
+	private constructor(
+		selection: SelectionSection,
+		data: cool.VectorPrimitivesData,
+		sceneId: number,
+		objectIds: number[],
+		toTheSquare: cool.Matrix2D,
+		fromTheSquare: cool.Matrix3D,
+		orientationInverse: cool.Matrix3D,
+		outerInverse: Map<number, cool.Matrix3D>,
+		start: cool.SimplePoint,
+	) {
+		super(selection);
+		this.data = data;
+		this.sceneId = sceneId;
+		this.objectIds = objectIds;
+		this.toTheSquare = toTheSquare;
+		this.fromTheSquare = fromTheSquare;
+		this.orientationInverse = orientationInverse;
+		this.outerInverse = outerInverse;
+		this.last = start;
+	}
+
+	/// Whether those objects move in 3D: they are 3D objects inside an entered scene.
+	public static movesIn3D(objectIds: number[]): boolean {
+		const what = Turn3DInteraction.turnsIn(objectIds);
+		return !!what && !what.objectIds.includes(what.sceneId);
+	}
+
+	/// The move a press at that place on the selection begins, where it is 3D objects inside an
+	/// entered scene; nothing for any other selection.
+	public static begin(
+		selection: SelectionSection,
+		at: cool.SimplePoint,
+	): Move3DInteraction | null {
+		const data = RenderGeometrySection.currentPart();
+		const what = Turn3DInteraction.turnsIn(selection.selectedObjects());
+		if (!data || !what || what.objectIds.includes(what.sceneId)) return null;
+
+		const view = data.objects.get(what.sceneId)?.scene3D;
+		const toTheSquare = cool.Matrix2D.fromArray(view?.placement)?.invert();
+		const projection = cool.Matrix3D.fromArray(view?.projection);
+		const deviceToView = cool.Matrix3D.fromArray(view?.deviceToView);
+		const orientationInverse = cool.Matrix3D.fromArray(
+			view?.orientation,
+		)?.invert();
+		const fromTheSquare =
+			projection && deviceToView ?
+				projection.then(deviceToView).invert()
+			:	null;
+		if (!toTheSquare || !fromTheSquare || !orientationInverse) return null;
+
+		const outerInverse = new Map<number, cool.Matrix3D>();
+		for (const objectId of what.objectIds) {
+			const inverse = cool.Scene3D.outerTransformOf(data, objectId).invert();
+			if (!inverse) return null;
+			outerInverse.set(objectId, inverse);
+		}
+
+		return new Move3DInteraction(
+			selection,
+			data,
+			what.sceneId,
+			what.objectIds,
+			toTheSquare,
+			fromTheSquare,
+			orientationInverse,
+			outerInverse,
+			new cool.SimplePoint(at.x, at.y),
+		);
+	}
+
+	/// A point of the page, or a way along it, in the space the camera looks from, at the middle
+	/// of the depth.
+	private intoTheEye(x: number, y: number): cool.Point3D {
+		const onTheSquare = this.toTheSquare.apply(x, y);
+		return this.fromTheSquare.apply(
+			new cool.Point3D(onTheSquare.x, onTheSquare.y, 0.5),
+		);
+	}
+
+	public move(to: cool.SimplePoint, event?: MouseEvent): void {
+		/*
+			As the office moves: the step since the last move, the place it goes to and the place
+			it starts from, both taken into the eye, gives the way to go there; with Alt its
+			second axis is the depth.
+		*/
+		let head = this.intoTheEye(to.x - this.last.x, to.y - this.last.y);
+		let tail = this.intoTheEye(0, 0);
+		this.last = new cool.SimplePoint(to.x, to.y);
+		if (event?.altKey) {
+			head = new cool.Point3D(head.x, head.z, head.y);
+			tail = new cool.Point3D(tail.x, tail.z, tail.y);
+		}
+
+		for (const objectId of this.objectIds) {
+			const toTheParent = this.orientationInverse.then(
+				this.outerInverse.get(objectId) ?? cool.Matrix3D.IDENTITY,
+			);
+			const from = toTheParent.apply(tail);
+			const there = toTheParent.apply(head);
+			const now =
+				this.moved.get(objectId) ??
+				cool.Scene3D.transformOf(this.data, objectId);
+			if (!now) continue;
+			this.moved.set(
+				objectId,
+				now.then(
+					cool.Matrix3D.translation(
+						there.x - from.x,
+						there.y - from.y,
+						there.z - from.z,
+					),
+				),
+			);
+		}
+
+		this.ghost = cool.Scene3D.outlineAfter(
+			this.data,
+			this.sceneId,
+			this.moved,
+			this.objectIds,
+		);
+		this.selection.containerObject?.requestReDraw();
+	}
+
+	public finish(to: cool.SimplePoint, event?: MouseEvent): void {
+		this.move(to, event);
+		if (!this.ghost) return;
+		Turn3DInteraction.send(this.data, this.sceneId, this.moved, this.outline());
+	}
+
+	/// The handles hide while the objects move, as they stand where the objects were.
+	public handles(known: SelectionHandle[]): SelectionHandle[] {
+		return this.ghost ? [] : known;
+	}
+
+	public outline(): cool.ObjectPathPolygon[] | null {
+		return this.ghost ?
+				this.ghost.lines.map((line: cool.Polygon2D) => ({
+					closed: line.closed,
+					points: line.points.map((point: cool.Point) => ({
+						x: point.x,
+						y: point.y,
+					})),
+				}))
+			:	null;
+	}
+}
+
+/*
+	A scale in 3D of the 3D objects selected inside an entered scene, by a drag of one of the eight,
+	as the office scales them: the place the drag began, the mouse and the place that stays, the
+	handle facing the one dragged, are taken into the space the camera looks from, and each
+	object is scaled there about the place that stays, by how much farther from it the mouse is
+	than the start was. A handle in the middle of a side scales along one axis only. Shift scales
+	both axes alike, by the larger factor; Alt scales about the middle of the selection. The scale
+	is worked out from the objects as they were at the press, every time.
+*/
+class Scale3DInteraction extends SelectionInteraction {
+	private readonly data: cool.VectorPrimitivesData;
+	private readonly sceneId: number;
+	private readonly objectIds: number[];
+	private readonly toTheSquare: cool.Matrix2D;
+	private readonly fromTheSquare: cool.Matrix3D;
+	private readonly orientation: cool.Matrix3D;
+	private readonly orientationInverse: cool.Matrix3D;
+	private readonly turnedOnes: (TurnedIn3D & { depth: number })[];
+	private readonly box: cool.Range2D;
+	// where the dragged handle sits on the box, from nought to one along each side
+	private readonly place: cool.Point;
+	private readonly start: cool.SimplePoint;
+	private scaled = new Map<number, cool.Matrix3D>();
+	private ghost: { lines: cool.Polygon2D[]; frame: cool.Range2D } | null = null;
+
+	private constructor(
+		selection: SelectionSection,
+		data: cool.VectorPrimitivesData,
+		sceneId: number,
+		objectIds: number[],
+		toTheSquare: cool.Matrix2D,
+		fromTheSquare: cool.Matrix3D,
+		orientation: cool.Matrix3D,
+		orientationInverse: cool.Matrix3D,
+		turnedOnes: (TurnedIn3D & { depth: number })[],
+		box: cool.Range2D,
+		place: cool.Point,
+		start: cool.SimplePoint,
+	) {
+		super(selection);
+		this.data = data;
+		this.sceneId = sceneId;
+		this.objectIds = objectIds;
+		this.toTheSquare = toTheSquare;
+		this.fromTheSquare = fromTheSquare;
+		this.orientation = orientation;
+		this.orientationInverse = orientationInverse;
+		this.turnedOnes = turnedOnes;
+		this.box = box;
+		this.place = place;
+		this.start = start;
+	}
+
+	/// The scale a press on one of the eight begins, where the selection is 3D objects inside an
+	/// entered scene; nothing for any other selection.
+	public static begin(
+		selection: SelectionSection,
+		handle: SelectionHandle,
+	): Scale3DInteraction | null {
+		const data = RenderGeometrySection.currentPart();
+		const objectIds = selection.selectedObjects();
+		if (!data || !Move3DInteraction.movesIn3D(objectIds)) return null;
+		const what = Turn3DInteraction.turnsIn(objectIds);
+		const box = Turn3DInteraction.boxOf(objectIds);
+		const view = what && data.objects.get(what.sceneId)?.scene3D;
+		if (!what || !box || !view) return null;
+
+		// where the handle stands on the box, which is not always where its kind says: the
+		// square of a 3D object can be drawn turned over
+		const share = (at: number, from: number, size: number): number =>
+			size > 0 ? Math.round(((at - from) / size) * 2) / 2 : 0.5;
+		const place = new cool.Point(
+			share(handle.point.x, box.minX, box.width),
+			share(handle.point.y, box.minY, box.height),
+		);
+
+		const toTheSquare = cool.Matrix2D.fromArray(view.placement)?.invert();
+		const projection = cool.Matrix3D.fromArray(view.projection);
+		const deviceToView = cool.Matrix3D.fromArray(view.deviceToView);
+		const orientation = cool.Matrix3D.fromArray(view.orientation);
+		const orientationInverse = orientation?.invert();
+		const fromTheSquare =
+			projection && deviceToView ?
+				projection.then(deviceToView).invert()
+			:	null;
+		if (!toTheSquare || !fromTheSquare || !orientation || !orientationInverse)
+			return null;
+
+		const turnedOnes: (TurnedIn3D & { depth: number })[] = [];
+		for (const objectId of what.objectIds) {
+			const before = cool.Scene3D.transformOf(data, objectId);
+			const outer = cool.Scene3D.outerTransformOf(data, objectId);
+			const outerInverse = outer.invert();
+			const middle = cool.Scene3D.middleInItsOwnSpace(data, objectId);
+			if (!before || !outerInverse || !middle || !projection || !deviceToView)
+				return null;
+			/*
+				The depth on the screen the points of the drag are taken at: that of the object's
+				middle as the camera sees it, so the place that stays lies on the object's edge as
+				one sees it. The office takes the depth of the middle in the object's own space
+				instead, which only matches for an object centred at nought.
+			*/
+			const seen = before
+				.then(outer)
+				.then(orientation)
+				.then(projection)
+				.then(deviceToView)
+				.apply(middle);
+			turnedOnes.push({
+				id: objectId,
+				before: before,
+				outer: outer,
+				outerInverse: outerInverse,
+				depth: seen.z,
+			});
+		}
+
+		return new Scale3DInteraction(
+			selection,
+			data,
+			what.sceneId,
+			what.objectIds,
+			toTheSquare,
+			fromTheSquare,
+			orientation,
+			orientationInverse,
+			turnedOnes,
+			box,
+			place,
+			// the drag starts at the handle itself, as the office's does
+			new cool.SimplePoint(handle.point.x, handle.point.y),
+		);
+	}
+
+	public move(to: cool.SimplePoint, event?: MouseEvent): void {
+		const fromTheMiddle = event?.altKey === true;
+		const fixed =
+			fromTheMiddle ?
+				new cool.Point(
+					(this.box.minX + this.box.maxX) / 2,
+					(this.box.minY + this.box.maxY) / 2,
+				)
+			:	new cool.Point(
+					this.box.minX + (1 - this.place.x) * this.box.width,
+					this.box.minY + (1 - this.place.y) * this.box.height,
+				);
+
+		for (const one of this.turnedOnes) {
+			const intoTheEye = (x: number, y: number): cool.Point3D => {
+				const onTheSquare = this.toTheSquare.apply(x, y);
+				return this.fromTheSquare.apply(
+					new cool.Point3D(onTheSquare.x, onTheSquare.y, one.depth),
+				);
+			};
+			const from = intoTheEye(this.start.x, this.start.y);
+			const next = intoTheEye(to.x, to.y);
+			const stays = intoTheEye(fixed.x, fixed.y);
+
+			const factor = (was: number, now: number): number =>
+				was !== 0 ? now / was : 1;
+			// a handle in the middle of a side scales along its own axis only
+			const acrossOnly = !fromTheMiddle && this.place.y === 0.5;
+			const downOnly = !fromTheMiddle && this.place.x === 0.5;
+			let x = downOnly ? 1 : factor(from.x - stays.x, next.x - stays.x);
+			let y = acrossOnly ? 1 : factor(from.y - stays.y, next.y - stays.y);
+			if (event?.shiftKey) {
+				if (Math.abs(x) > Math.abs(y)) y = x;
+				else x = y;
+			}
+
+			this.scaled.set(
+				one.id,
+				one.before
+					.then(one.outer)
+					.then(this.orientation)
+					.then(cool.Matrix3D.translation(-stays.x, -stays.y, -stays.z))
+					.then(cool.Matrix3D.scaling(x, y, 1))
+					.then(cool.Matrix3D.translation(stays.x, stays.y, stays.z))
+					.then(this.orientationInverse)
+					.then(one.outerInverse),
+			);
+		}
+
+		this.ghost = cool.Scene3D.outlineAfter(
+			this.data,
+			this.sceneId,
+			this.scaled,
+			this.objectIds,
+		);
+		this.selection.containerObject?.requestReDraw();
+	}
+
+	public finish(to: cool.SimplePoint, event?: MouseEvent): void {
+		this.move(to, event);
+		if (!this.ghost) return;
+		Turn3DInteraction.send(
+			this.data,
+			this.sceneId,
+			this.scaled,
+			this.outline(),
+		);
+	}
+
+	/// The handles hide while the objects are scaled, as they stand where the objects were.
+	public handles(known: SelectionHandle[]): SelectionHandle[] {
+		return this.ghost ? [] : known;
+	}
+
+	public outline(): cool.ObjectPathPolygon[] | null {
+		return this.ghost ?
+				this.ghost.lines.map((line: cool.Polygon2D) => ({
+					closed: line.closed,
+					points: line.points.map((point: cool.Point) => ({
+						x: point.x,
+						y: point.y,
+					})),
+				}))
+			:	null;
+	}
+}

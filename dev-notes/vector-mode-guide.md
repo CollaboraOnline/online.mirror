@@ -606,6 +606,18 @@ drag of that handle turns in 3D, as on the desktop:
   scene where it is selected, of the selected 3D objects inside an entered one. Each keeps its
   size and place.
 
+### Moving and scaling in 3D
+
+Done, not yet in master. Inside an entered 3D scene, as on the desktop:
+
+- A drag on the selected 3D objects moves them in 3D across the screen, as the camera sees
+  them; with Alt the way down goes into the depth, away from the camera or towards it.
+- The eight handles scale them in 3D, about the handle facing the one dragged; a handle in the
+  middle of a side scales along its own axis only. Shift scales both axes alike, Alt about the
+  middle. The arrow keys do not scale 3D objects yet.
+- While it runs, the lines of the objects are drawn as the scene will look, and they stay until
+  the new picture has arrived. Letting go is one step to undo.
+
 ### Break
 
 Break in the context menu (done, not yet in master) takes objects apart as on the desktop:
@@ -850,7 +862,7 @@ in the sections above.
 | Formula | As in the office | Edit in place in the drawn formula (see Formulas) | - |
 | Table | As in the office | Eight handles; the table markers (see Tables below) | Light lines between cells come and go with the zoom, in the office too |
 | Form control | Drawn in Online's look (see below) | In design mode select, move, scale, undo, as any object; out of it they work | Not every kind works yet out of design mode |
-| 3D scene | As one picture | Select, move, scale | Hit and hovered where its 3D objects are, as on the desktop: a press beside them goes to what lies behind. The hover draws the 3D object under the mouse by lines that read for its kind: a cube, an extrusion or a 3D polygon by its outline and the edges where its faces meet at an angle, a sphere by eight meridians and five rings, a body of rotation by a profile for each eighth of a turn and the rings of its open ends. A double click enters the scene at the 3D object under the mouse, as do Enter and F3 on a selected scene at its first one; inside, a click selects a 3D object, Alt and a click goes through the ones under the mouse from the front to the back, Shift with it the other way, Tab and Shift+Tab go through them and round, as in a group, Escape and Ctrl+F3 leave it. Deleting all 3D objects of a scene deletes the scene too; undo brings it back at the size it had. A 3D object is not moved or scaled on the slide, as these are 3D changes; a selected scene, or the 3D objects selected inside one, turn in 3D by the handle in their middle, see "Turning in 3D" |
+| 3D scene | As one picture | Select, move, scale | Hit and hovered where its 3D objects are, as on the desktop: a press beside them goes to what lies behind. The hover draws the 3D object under the mouse by lines that read for its kind: a cube, an extrusion or a 3D polygon by its outline and the edges where its faces meet at an angle, a sphere by eight meridians and five rings, a body of rotation by a profile for each eighth of a turn and the rings of its open ends. A double click enters the scene at the 3D object under the mouse, as do Enter and F3 on a selected scene at its first one; inside, a click selects a 3D object, Alt and a click goes through the ones under the mouse from the front to the back, Shift with it the other way, Tab and Shift+Tab go through them and round, as in a group, Escape and Ctrl+F3 leave it. Deleting all 3D objects of a scene deletes the scene too; undo brings it back at the size it had. Inside an entered scene the selected 3D objects move and scale in 3D, see "Moving and scaling in 3D"; a selected scene, or the 3D objects selected inside one, turn in 3D by the handle in their middle, see "Turning in 3D" |
 | Video, audio | Filled black | Select, move, scale | The desktop application on Qt 6.10 may crash when a video is selected |
 
 ### Tables

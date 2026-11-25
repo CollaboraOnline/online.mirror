@@ -612,7 +612,10 @@ class ObjectHandles implements HandleSource {
 
 		// The eight are what a scale takes hold of, so where the objects may not be made larger
 		// or smaller they are shown and do nothing.
-		const dead = !ObjectHandles.canBeResized(this.objectIds);
+		// 3D objects inside an entered scene are scaled in 3D by them
+		const dead =
+			!ObjectHandles.canBeResized(this.objectIds) &&
+			!Move3DInteraction.movesIn3D(this.objectIds);
 
 		// the way each one faces is worked out from all eight, then the wanted ones are kept
 		return ObjectHandles.facedAwayFromTheirPlaces(
