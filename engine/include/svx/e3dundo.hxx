@@ -31,7 +31,7 @@
 |* Base class for all 3D undo actions.
 |*
 \************************************************************************/
-class SAL_WARN_UNUSED E3dUndoAction : public SdrUndoAction
+class SAL_WARN_UNUSED SVXCORE_DLLPUBLIC E3dUndoAction : public SdrUndoAction
 {
     protected:
         E3dObject&      mrMy3DObj;
@@ -53,7 +53,7 @@ class SAL_WARN_UNUSED E3dUndoAction : public SdrUndoAction
 |* Undo for 3D rotation through the rotation matrices
 |*
 \************************************************************************/
-class SAL_WARN_UNUSED E3dRotateUndoAction final : public E3dUndoAction
+class SAL_WARN_UNUSED SVXCORE_DLLPUBLIC E3dRotateUndoAction final : public E3dUndoAction
 {
 private:
     basegfx::B3DHomMatrix   maMyOldRotation;

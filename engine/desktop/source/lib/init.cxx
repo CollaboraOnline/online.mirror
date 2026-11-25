@@ -254,6 +254,11 @@
 #include <svx/svddrag.hxx>
 #include <svx/svdhdl.hxx>
 #include <svx/svdundo.hxx>
+#include <svx/e3dsceneupdater.hxx>
+#include <svx/e3dundo.hxx>
+#include <svx/obj3d.hxx>
+#include <svx/scene3d.hxx>
+#include <svx/svditer.hxx>
 #include <svx/svxids.hrc>
 #include <svx/ucsubset.hxx>
 #include <vcl/vclevent.hxx>
@@ -6836,6 +6841,74 @@ static basegfx::B2DHomMatrix lcl_turnTheShearOver(const basegfx::B2DHomMatrix& r
     only its place, its size, its turn and its shear follow the change, all of it in one step to
     undo.
 */
+/*
+    A turn in 3D: per object its id and its new 3D transform, sixteen numbers row by row as the
+    records write it. As when the office's own 3D turn ends, all of them change in one step to
+    undo, and the root scene takes its 2D size again from what it holds after each change.
+    That size moves every 3D object of the scene on the slide, so all of them are answered for.
+*/
+static void lcl_turnIn3D(const SdrPage& rPage, const SdrPageView& rPageView,
+                         std::string_view aMappings, AnswerForTheObjects& rAnswer)
+{
+    SdrModel* pModel = nullptr;
+    std::vector<const E3dScene*> aScenes;
+
+    for (sal_Int32 nAt = 0; nAt >= 0;)
+    {
+        const std::string_view aOne(o3tl::getToken(aMappings, 0, ';', nAt));
+        if (aOne.empty())
+            continue;
+
+        sal_Int32 nField = 0;
+        const OString aId(o3tl::getToken(aOne, 0, ',', nField));
+        basegfx::B3DHomMatrix aTransform;
+        bool bWhole = true;
+        for (sal_uInt16 nRow = 0; nRow < 4 && bWhole; ++nRow)
+            for (sal_uInt16 nColumn = 0; nColumn < 4 && bWhole; ++nColumn)
+            {
+                bWhole = nField >= 0;
+                if (bWhole)
+                    aTransform.set(nRow, nColumn,
+                                   o3tl::toDouble(o3tl::getToken(aOne, 0, ',', nField)));
+            }
+
+        E3dObject* pObject = bWhole ? DynCastE3dObject(rPage.FindObjectByUniqueID(aId.toUInt64()))
+                                    : nullptr;
+        // a place held fast is not turned either, as with a 2D turn
+        if (!pObject || !lcl_viewReaches(rPageView, *pObject) || pObject->IsMoveProtect())
+            continue;
+
+        if (!pModel)
+        {
+            pModel = &pObject->getSdrModelFromSdrObject();
+            pModel->BegUndo(SvxResId(RID_SVX_3D_UNDO_ROTATE));
+        }
+
+        const basegfx::B3DHomMatrix aWas(pObject->GetTransform());
+        {
+            E3DModifySceneSnapRectUpdater aUpdater(pObject);
+            pObject->SetTransform(aTransform);
+        }
+        if (pModel->IsUndoEnabled())
+            pModel->AddUndo(std::make_unique<E3dRotateUndoAction>(*pObject, aWas, aTransform));
+
+        if (const E3dScene* pScene = pObject->getRootE3dSceneFromE3dObject();
+            pScene && std::find(aScenes.begin(), aScenes.end(), pScene) == aScenes.end())
+            aScenes.push_back(pScene);
+    }
+
+    if (pModel)
+        pModel->EndUndo();
+
+    for (const E3dScene* pScene : aScenes)
+    {
+        rAnswer.add(pScene->GetUniqueID());
+        if (const SdrObjList* pList = pScene->GetSubList())
+            for (SdrObjListIter aIter(pList, SdrIterMode::DeepWithGroups); aIter.IsMore();)
+                rAnswer.add(aIter.Next()->GetUniqueID());
+    }
+}
+
 void COKitDocumentImpl::setObjectTransform(const char* pMappings,
                                            const char* pWhat)
 {
@@ -6863,6 +6936,12 @@ void COKitDocumentImpl::setObjectTransform(const char* pMappings,
     // the copies are changed, as the office's drag with copy does
     // only where the option "copy when moving" of Impress or Draw is on, as in the office
     OString aWhat(pWhat ? pWhat : "");
+    if (aWhat == "turn3d")
+    {
+        lcl_turnIn3D(*pPage, *pPageView, pMappings ? pMappings : "", aAnswer);
+        return;
+    }
+
     // while an object is active in place, what is changed are its parts, which are not copied
     SfxInPlaceClient* pInPlace(pViewShell->GetIPClient());
     const bool bInPlace(pInPlace && pInPlace->IsObjectInPlaceActive());

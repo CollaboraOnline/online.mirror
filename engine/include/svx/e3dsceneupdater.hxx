@@ -42,7 +42,7 @@ class E3dScene;
    use it. This is only desirable if changes to the scene's content
    are intended to change the scene's 2D geometry attributes
 */
-class UNLESS_MERGELIBS(SVXCORE_DLLPUBLIC) E3DModifySceneSnapRectUpdater
+class SVXCORE_DLLPUBLIC E3DModifySceneSnapRectUpdater
 {
     // the scene which may be changed. This gets set to the outmost scene
     // of the to-be-changed 3D object when the scene has a 3d transformation

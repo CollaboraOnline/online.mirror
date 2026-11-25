@@ -1565,9 +1565,11 @@ struct COKitDocument
      * the object, as the render geometry names it, then the six numbers of its mapping -
      * a, b, c, d, e and f - all separated by commas. The corner 0 and 0 of the object goes to
      * e and f, in twips, and its own axes are the other four. A mapping whose two axes are
-     * turned over against each other turns the object over
+     * turned over against each other turns the object over. For "turn3d" an item is the id of a
+     * 3D scene or a 3D object, then the sixteen numbers of its new 3D transform, row by row, as
+     * the render geometry writes it
      * @param pWhat what was done, which names the step it can be undone with: "move", "scale",
-     * "turn" or "shear"
+     * "turn" or "shear", or "turn3d" for a turn of 3D scenes or 3D objects in 3D
      */
     virtual void setObjectTransform(const char* pMappings, const char* pWhat) = 0;
 

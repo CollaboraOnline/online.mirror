@@ -119,6 +119,9 @@
 #include <svx/svdorect.hxx>
 #include <svx/svdogrp.hxx>
 #include <svx/svdglue.hxx>
+#include <svx/obj3d.hxx>
+#include <svx/scene3d.hxx>
+#include <basegfx/matrix/b3dhommatrix.hxx>
 
 #include <cppunit/TestAssert.h>
 #include <vcl/BitmapTools.hxx>
@@ -370,6 +373,7 @@ public:
     void testInsertFiles();
     void testObjectCommandsLeaveAReadOnlyViewAlone();
     void testObjectCommandsKeepTheObjectsProtection();
+    void testTurnIn3D();
     void testTurningADiagramCanBeUndone();
     void testSelectionTextFollowsTheTextEdit();
     void testObjectPathCommands();
@@ -520,6 +524,7 @@ public:
     CPPUNIT_TEST(testInsertFiles);
     CPPUNIT_TEST(testObjectCommandsLeaveAReadOnlyViewAlone);
     CPPUNIT_TEST(testObjectCommandsKeepTheObjectsProtection);
+    CPPUNIT_TEST(testTurnIn3D);
     CPPUNIT_TEST(testTurningADiagramCanBeUndone);
     CPPUNIT_TEST(testSelectionTextFollowsTheTextEdit);
     CPPUNIT_TEST(testObjectPathCommands);
@@ -6806,6 +6811,66 @@ void DesktopKitTest::testObjectCommandsLeaveAReadOnlyViewAlone()
     KitHelper::setViewReadOnly(pDocument->getView(), false);
     pDocument->setObjectTransform(aMoved.getStr(), "move");
     CPPUNIT_ASSERT(pObject->GetSnapRect().Left() > aWas.Left());
+}
+
+namespace
+{
+// A 3D transform in the form setObjectTransform takes for "turn3d", row by row.
+OString turn3DOf(const SdrObject& rObject, const basegfx::B3DHomMatrix& rTransform)
+{
+    OString aRetval(OString::number(rObject.GetUniqueID()));
+    for (sal_uInt16 nRow = 0; nRow < 4; ++nRow)
+        for (sal_uInt16 nColumn = 0; nColumn < 4; ++nColumn)
+            aRetval += "," + OString::number(rTransform.get(nRow, nColumn));
+    return aRetval;
+}
+}
+
+void DesktopKitTest::testTurnIn3D()
+{
+    // a root scene holding a sphere and, beside it, a scene with a cube
+    COKitDocumentImpl* pDocument = loadDoc("3d-scene.fodp");
+    pDocument->initializeForRendering("{}");
+    SdrPageView* pPageView = nullptr;
+    E3dScene* pScene = DynCastE3dScene(firstObjectOfThePage(pPageView));
+    CPPUNIT_ASSERT(pScene);
+    const basegfx::B3DHomMatrix aWas(pScene->GetTransform());
+    const tools::Rectangle aWasOnTheSlide(pScene->GetSnapRect());
+
+    // A quarter turn about the vertical axis puts the cube behind the sphere, so the scene
+    // becomes narrower on the slide.
+    basegfx::B3DHomMatrix aTurned(aWas);
+    aTurned.rotate(0.0, M_PI_2, 0.0);
+    pDocument->setObjectTransform(turn3DOf(*pScene, aTurned).getStr(), "turn3d");
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT_EQUAL(turn3DOf(*pScene, aTurned), turn3DOf(*pScene, pScene->GetTransform()));
+    CPPUNIT_ASSERT_LESS(aWasOnTheSlide.GetWidth(), pScene->GetSnapRect().GetWidth());
+
+    // It is one step to undo, named as the office's own 3D turn.
+    boost::property_tree::ptree aTree;
+    std::stringstream aStream(pDocument->getCommandValues(".uno:Undo"));
+    boost::property_tree::read_json(aStream, aTree);
+    CPPUNIT_ASSERT_EQUAL(static_cast<size_t>(1), aTree.get_child("actions").size());
+    CPPUNIT_ASSERT_EQUAL(std::string("Rotate 3D object"),
+                         aTree.get_child("actions").front().second.get<std::string>("comment"));
+
+    pDocument->postUnoCommand(".uno:Undo", "", false);
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT_EQUAL(turn3DOf(*pScene, aWas), turn3DOf(*pScene, pScene->GetTransform()));
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(double(aWasOnTheSlide.GetWidth()),
+                                 double(pScene->GetSnapRect().GetWidth()), 2.0);
+
+    // A 3D object inside the scene turns on its own, and the scene takes its size from it.
+    SdrObject* pSphere = pScene->GetSubList()->GetObj(0);
+    E3dObject* p3DObject = DynCastE3dObject(pSphere);
+    CPPUNIT_ASSERT(p3DObject);
+    basegfx::B3DHomMatrix aSphereTurned(p3DObject->GetTransform());
+    aSphereTurned.rotate(M_PI_4, 0.0, 0.0);
+    pDocument->setObjectTransform(turn3DOf(*p3DObject, aSphereTurned).getStr(), "turn3d");
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT_EQUAL(turn3DOf(*p3DObject, aSphereTurned),
+                         turn3DOf(*p3DObject, p3DObject->GetTransform()));
+    CPPUNIT_ASSERT_EQUAL(turn3DOf(*pScene, aWas), turn3DOf(*pScene, pScene->GetTransform()));
 }
 
 void DesktopKitTest::testObjectCommandsKeepTheObjectsProtection()
