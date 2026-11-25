@@ -369,6 +369,18 @@ void CollabFileProxy::handleLockResponse(const std::shared_ptr<TerminatingPoll>&
         return;
     }
 
+    // Unlocked, the upload would get a 409 that reads as a newer version in storage.
+    const bool noAnswer = session->response()->statusLine().statusCategory()
+        == http::StatusLine::StatusCodeClass::Invalid;  // timed out, no HTTP answer
+    if (noAnswer || http::isTransientStatusCode(statusCode))  // or 429, 500, 502, 503, 504
+    {
+        LOG_WRN("CollabFileProxy: LOCK returned " << statusCode << ", refusing the upload for now");
+        // Unlock in case the host locked the file but its answer got lost.
+        _locked = true;
+        answer(poll, http::StatusCode::BadGateway);
+        return;
+    }
+
     _locked = (statusCode == http::StatusCode::OK);
     if (!_locked)
     {
@@ -576,8 +588,23 @@ void CollabFileProxy::doUpload(const std::shared_ptr<TerminatingPoll>& poll,
         }
         else if (statusCode == http::StatusCode::Conflict)
         {
-            // Document was modified externally
-            answer(poll, http::StatusCode::Conflict, httpResponse->getBody());
+            // A 409 with X-WOPI-Lock is a lock mismatch, unless the host says the document changed.
+            Poco::JSON::Object::Ptr object;
+            unsigned coolStatusCode = 0;
+            if (JsonUtil::parseJSON(httpResponse->getBody(), object))
+                JsonUtil::findJSONValue(object, "COOLStatusCode", coolStatusCode);
+            const bool docChanged = coolStatusCode == static_cast<unsigned>(StorageBase::COOLStatusCode::DOC_CHANGED);
+            const bool lockMismatch = httpResponse->header().has("X-WOPI-Lock") && !docChanged;
+            if (lockMismatch)
+            {
+                LOG_WRN("CollabFileProxy: PutFile refused for another lock, answering 423");
+                answer(poll, http::StatusCode::Locked);
+            }
+            else
+            {
+                // Document was modified externally
+                answer(poll, http::StatusCode::Conflict, httpResponse->getBody());
+            }
         }
         else if (statusCode == http::StatusCode::Unauthorized ||
                  statusCode == http::StatusCode::Forbidden)
