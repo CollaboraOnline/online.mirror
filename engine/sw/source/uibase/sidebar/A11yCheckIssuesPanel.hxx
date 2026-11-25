@@ -22,6 +22,8 @@
 
 #include <doc.hxx>
 
+struct ImplSVEvent;
+
 namespace sw::sidebar
 {
 class AccessibilityCheckEntry final
@@ -114,6 +116,7 @@ private:
     sfx::AccessibilityIssueCollection m_aIssueCollection;
     void removeAllEntries();
     void populateIssues();
+    void schedulePopulateIssues();
 
     DECL_LINK(ExpandHdl, weld::Expander&, void);
     DECL_LINK(UpdateLinkButtonClicked, weld::LinkButton&, bool);
@@ -129,6 +132,7 @@ private:
     ::sfx2::sidebar::ControllerItem maA11yCheckController;
     sal_Int32 mnIssueCount;
     bool mbAutomaticCheckEnabled;
+    ImplSVEvent* mpPopulateIssuesEvent;
 };
 
 } //end of namespace sw::sidebar

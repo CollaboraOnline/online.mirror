@@ -191,6 +191,7 @@ A11yCheckIssuesPanel::A11yCheckIssuesPanel(weld::Widget* pParent, SfxBindings* p
     , maA11yCheckController(FN_STAT_ACCESSIBILITY_CHECK, *pBindings, *this)
     , mnIssueCount(0)
     , mbAutomaticCheckEnabled(false)
+    , mpPopulateIssuesEvent(nullptr)
 {
     // errors
     m_xLevelExpanders[0] = m_xBuilder->weld_expander(u"expand_errors"_ustr);
@@ -242,7 +243,7 @@ A11yCheckIssuesPanel::A11yCheckIssuesPanel(weld::Widget* pParent, SfxBindings* p
         m_xLevelExpanders[0]->show();
         m_xLevelExpanders[1]->show();
         mxUpdateBox->hide();
-        Application::PostUserEvent(LINK(this, A11yCheckIssuesPanel, PopulateIssuesHdl));
+        schedulePopulateIssues();
     }
 }
 
@@ -257,14 +258,33 @@ IMPL_LINK_NOARG(A11yCheckIssuesPanel, UpdateLinkButtonClicked, weld::LinkButton&
     m_xLevelExpanders[0]->show();
     m_xLevelExpanders[1]->show();
     mxUpdateBox->hide();
-    Application::PostUserEvent(LINK(this, A11yCheckIssuesPanel, PopulateIssuesHdl));
+    schedulePopulateIssues();
     return true;
 }
 
-IMPL_LINK_NOARG(A11yCheckIssuesPanel, PopulateIssuesHdl, void*, void) { populateIssues(); }
+void A11yCheckIssuesPanel::schedulePopulateIssues()
+{
+    // The panel can be destroyed before the event is dispatched, e.g. when the deck is closed
+    // right after the Update click, so keep the event to cancel it in ImplDestroy().
+    if (!mpPopulateIssuesEvent)
+        mpPopulateIssuesEvent
+            = Application::PostUserEvent(LINK(this, A11yCheckIssuesPanel, PopulateIssuesHdl));
+}
+
+IMPL_LINK_NOARG(A11yCheckIssuesPanel, PopulateIssuesHdl, void*, void)
+{
+    mpPopulateIssuesEvent = nullptr;
+    populateIssues();
+}
 
 void A11yCheckIssuesPanel::ImplDestroy()
 {
+    if (mpPopulateIssuesEvent)
+    {
+        Application::RemoveUserEvent(mpPopulateIssuesEvent);
+        mpPopulateIssuesEvent = nullptr;
+    }
+
     // Restore state when this panel is no longer used
     if (!mbAutomaticCheckEnabled)
     {
