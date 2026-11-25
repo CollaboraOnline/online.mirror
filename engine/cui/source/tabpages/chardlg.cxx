@@ -555,9 +555,6 @@ void SvxCharNamePage::FillStyleBox_Impl(const weld::Widget& rNameBox)
 
 void SvxCharNamePage::FillSizeBox_Impl(const weld::Widget& rNameBox)
 {
-    const FontList* pFontList = GetFontList();
-    DBG_ASSERT( pFontList, "no fontlist" );
-
     FontSizeBox* pSizeBox = nullptr;
 
     if (m_xWestFontNameLB.get() == &rNameBox)
@@ -578,7 +575,7 @@ void SvxCharNamePage::FillSizeBox_Impl(const weld::Widget& rNameBox)
         return;
     }
 
-    pSizeBox->Fill( pFontList );
+    pSizeBox->Fill();
 }
 
 namespace

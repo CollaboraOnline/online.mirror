@@ -165,12 +165,9 @@ class FontSizeBox
 Description
 
 Allows selection of font sizes. The values are retrieved via GetValue()
-and set via SetValue(). The Fill parameter fills the ListBox with the
-available sizes for the passed font.
+and set via SetValue(). Fill() fills the ListBox with the standard sizes.
 
 All sizes are in 1/10 typographic point (pt).
-
-The passed FontList must be retained until the next fill call.
 
 Additionally it supports a relative mod, which allows entering
 percentage values. This, eg., can be useful for template dialogs.
@@ -424,7 +421,6 @@ private:
 
 class SVT_DLLPUBLIC FontSizeBox
 {
-    const FontList* pFontList;
     int             nSavedValue;
     int             nMin;
     int             nMax;
@@ -439,7 +435,8 @@ class SVT_DLLPUBLIC FontSizeBox
     bool            bRelativeMode:1,
                     bRelative:1,
                     bPtRelative:1,
-                    bStdSize:1;
+                    bStdSize:1,
+                    bFilled:1; // Fill() ran, so leaving the relative mode fills again
     Link<weld::ComboBox&, void> m_aChangeHdl;
     Link<weld::Widget&, void> m_aFocusOutHdl;
     std::unique_ptr<weld::ComboBox> m_xComboBox;
@@ -460,7 +457,8 @@ class SVT_DLLPUBLIC FontSizeBox
 public:
     FontSizeBox(std::unique_ptr<weld::ComboBox> p);
 
-    void Fill(const FontList* pList);
+    // fill with the standard sizes, which every font has since all fonts are scalable
+    void Fill();
 
     void EnableRelativeMode(sal_uInt16 nMin, sal_uInt16 nMax, sal_uInt16 nStep = 5);
     void EnablePtRelativeMode(short nMin, short nMax, short nStep = 10);

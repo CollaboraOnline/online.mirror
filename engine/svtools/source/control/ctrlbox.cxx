@@ -1071,8 +1071,7 @@ void FontStyleBox::Fill( std::u16string_view rName, const FontList* pList )
 }
 
 FontSizeBox::FontSizeBox(std::unique_ptr<weld::ComboBox> p)
-    : pFontList(nullptr)
-    , nSavedValue(0)
+    : nSavedValue(0)
     , nMin(20)
     , nMax(9999)
     , eUnit(FieldUnit::POINT)
@@ -1087,6 +1086,7 @@ FontSizeBox::FontSizeBox(std::unique_ptr<weld::ComboBox> p)
     , bRelative(false)
     , bPtRelative(false)
     , bStdSize(false)
+    , bFilled(false)
     , m_xComboBox(std::move(p))
 {
     m_xComboBox->set_entry_width_chars(std::ceil(m_xComboBox->get_pixel_size(format_number(105)).Width() /
@@ -1168,10 +1168,10 @@ IMPL_LINK(FontSizeBox, ModifyHdl, weld::ComboBox&, rBox, void)
     m_aChangeHdl.Call(rBox);
 }
 
-void FontSizeBox::Fill( const FontList* pList )
+void FontSizeBox::Fill()
 {
     // remember for relative mode
-    pFontList = pList;
+    bFilled = true;
 
     // no font sizes need to be set for relative mode
     if ( bRelative )
@@ -1319,14 +1319,14 @@ void FontSizeBox::SetRelative( bool bNewRelative )
     }
     else
     {
-        if (pFontList)
+        if (bFilled)
             m_xComboBox->clear();
         bRelative = bPtRelative = false;
         SetDecimalDigits(1);
         SetRange(20, 9999);
         SetUnit(FieldUnit::POINT);
-        if ( pFontList)
-            Fill( pFontList );
+        if (bFilled)
+            Fill();
     }
 
     set_active_or_entry_text(aStr);

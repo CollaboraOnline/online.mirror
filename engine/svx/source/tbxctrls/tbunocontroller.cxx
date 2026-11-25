@@ -34,7 +34,6 @@
 #include <vcl/settings.hxx>
 #include <toolkit/helper/vclunohelper.hxx>
 #include <sfx2/viewsh.hxx>
-#include <svtools/ctrltool.hxx>
 #include <svtools/ctrlbox.hxx>
 #include <svtools/toolboxcontroller.hxx>
 #include <tools/json_writer.hxx>
@@ -247,9 +246,7 @@ void SvxFontSizeBox_Base::UpdateFont()
 {
     // filling up the sizes list
     auto nOldVal = m_xWidget->get_value(); // memorize old value
-    FontList aFontList(Application::GetDefaultDevice());
-
-    m_xWidget->Fill(&aFontList);
+    m_xWidget->Fill();
 
     m_xWidget->set_value(nOldVal); // restore old value
     m_aCurText = m_xWidget->get_active_text(); // memorize to reset at ESC
