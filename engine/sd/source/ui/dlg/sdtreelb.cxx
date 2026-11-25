@@ -778,6 +778,7 @@ SdPageObjsTLV::SdPageObjsTLV(std::unique_ptr<weld::TreeView> xTreeView)
     , m_eSelectionMode(SelectionMode::Single)
     , m_nSelectEventId(nullptr)
     , m_nRowActivateEventId(nullptr)
+    , m_nEditEntryAgainEventId(nullptr)
 {
     m_xTreeView->connect_expanding(LINK(this, SdPageObjsTLV, RequestingChildrenHdl));
     m_xTreeView->connect_selection_changed(LINK(this, SdPageObjsTLV, SelectHdl));
@@ -795,10 +796,23 @@ SdPageObjsTLV::SdPageObjsTLV(std::unique_ptr<weld::TreeView> xTreeView)
     m_xTreeView->set_column_editables({true});
 }
 
-IMPL_LINK(SdPageObjsTLV, EditEntryAgain, void*, pTreeIter, void)
+void SdPageObjsTLV::CancelEditEntryAgain()
 {
+    if (m_nEditEntryAgainEventId)
+    {
+        Application::RemoveUserEvent(m_nEditEntryAgainEventId);
+        m_nEditEntryAgainEventId = nullptr;
+    }
+    m_xEditEntryAgain.reset();
+}
+
+IMPL_LINK_NOARG(SdPageObjsTLV, EditEntryAgain, void*, void)
+{
+    m_nEditEntryAgainEventId = nullptr;
+    std::unique_ptr<weld::TreeIter> xEntry(std::move(m_xEditEntryAgain));
+    if (!xEntry)
+        return;
     m_xTreeView->grab_focus();
-    std::unique_ptr<weld::TreeIter> xEntry(static_cast<weld::TreeIter*>(pTreeIter));
     m_xTreeView->start_editing(*xEntry);
 }
 
@@ -820,8 +834,10 @@ IMPL_LINK(SdPageObjsTLV, EditedEntryHdl, const IterString&, rIterString, bool)
     if (rIterString.second.isEmpty() || m_pDoc->GetObj(rIterString.second)
         || m_pDoc->IsPageNameUnique(rIterString.second))
     {
-        std::unique_ptr<weld::TreeIter> xEntry(m_xTreeView->make_iterator(&rIterString.first));
-        Application::PostUserEvent(LINK(this, SdPageObjsTLV, EditEntryAgain), xEntry.release());
+        m_xEditEntryAgain = m_xTreeView->make_iterator(&rIterString.first);
+        if (!m_nEditEntryAgainEventId)
+            m_nEditEntryAgainEventId
+                = Application::PostUserEvent(LINK(this, SdPageObjsTLV, EditEntryAgain));
         return false;
     }
 
@@ -1437,6 +1453,7 @@ SdPageObjsTLV::~SdPageObjsTLV()
         Application::RemoveUserEvent(m_nSelectEventId);
     if (m_nRowActivateEventId)
         Application::RemoveUserEvent(m_nRowActivateEventId);
+    CancelEditEntryAgain();
 
     if (m_pBookmarkDoc)
         CloseBookmarkDoc();

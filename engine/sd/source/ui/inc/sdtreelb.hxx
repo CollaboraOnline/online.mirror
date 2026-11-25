@@ -106,6 +106,11 @@ private:
 
     ImplSVEvent* m_nSelectEventId;
     ImplSVEvent* m_nRowActivateEventId;
+    // EditEntryAgain posted for a rejected name, with the entry to edit; both are dropped when
+    // the tree is cleared or the list goes away before the event runs
+    ImplSVEvent* m_nEditEntryAgainEventId;
+    std::unique_ptr<weld::TreeIter> m_xEditEntryAgain;
+    SD_DLLPUBLIC void CancelEditEntryAgain();
 
     OUString m_aDocName;
     ::sd::DrawDocShellRef m_xBookmarkDocShRef; ///< for the loading of bookmarks
@@ -390,6 +395,7 @@ public:
 
     void clear()
     {
+        CancelEditEntryAgain();
         m_xTreeView->clear();
     }
 
