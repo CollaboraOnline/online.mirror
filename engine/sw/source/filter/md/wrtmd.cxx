@@ -212,12 +212,7 @@ void ApplyFlyFrameFormat(const SwFlyFrameFormat& rFrameFormat, SwMDWriter& rWrt,
         aGraphicURL = "data:" + aGraphicInBase64;
     }
 
-    const OUString& rBaseURL = rWrt.GetBaseURL();
-    INetURLObject aGraphicURLObject(aGraphicURL);
-    if (!rBaseURL.isEmpty() && aGraphicURLObject.GetProtocol() != INetProtocol::Data)
-    {
-        aGraphicURL = URIHelper::simpleNormalizedMakeRelative(rBaseURL, aGraphicURL);
-    }
+    aGraphicURL = URIHelper::MakeRelative(rWrt.GetBaseURL(), aGraphicURL);
     OUString aTitle = rFrameFormat.GetObjTitle();
     OUString aDescription = rFrameFormat.GetObjDescription();
     OUString aLink;

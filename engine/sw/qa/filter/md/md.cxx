@@ -14,6 +14,7 @@
 #include <com/sun/star/style/ParagraphAdjust.hpp>
 
 #include <comphelper/scopeguard.hxx>
+#include <tools/urlobj.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <svx/xfillit0.hxx>
 #include <svx/xflclit.hxx>
@@ -422,6 +423,38 @@ CPPUNIT_TEST_FIXTURE(Test, testExportingImage)
     // - Expected: A ![mydesc](./test.png) B
     // - Actual  : A  B
     // i.e. the image was lost.
+    CPPUNIT_ASSERT_EQUAL(aExpected, aActual);
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testExportingImageBesideDocument)
+{
+    // Given a document with an image linked from a folder beside the document:
+    createSwDoc();
+    SwDocShell* pDocShell = getSwDocShell();
+    SwDoc* pDoc = pDocShell->GetDoc();
+    SwWrtShell* pWrtShell = pDocShell->GetWrtShell();
+    pWrtShell->Insert(u"A "_ustr);
+    SfxItemSet aFrameSet(pDoc->GetAttrPool(), svl::Items<RES_FRMATR_BEGIN, RES_FRMATR_END - 1>);
+    SwFormatAnchor aAnchor(RndStdIds::FLY_AS_CHAR);
+    aFrameSet.Put(aAnchor);
+    Graphic aGraphic;
+    INetURLObject aGraphicURL(maTempFile.GetURL());
+    aGraphicURL.setName(u"images");
+    aGraphicURL.insertName(u"test one.png");
+    IDocumentContentOperations& rIDCO = pDoc->getIDocumentContentOperations();
+    SwCursor* pCursor = pWrtShell->GetCursor();
+    SwFlyFrameFormat* pFlyFormat = rIDCO.InsertGraphic(
+        *pCursor, aGraphicURL.GetMainURL(INetURLObject::DecodeMechanism::NONE), OUString(),
+        &aGraphic, &aFrameSet, /*pGrfAttrSet=*/nullptr, /*SwFrameFormat=*/nullptr);
+    pFlyFormat->SetObjDescription(u"mydesc"_ustr);
+    pWrtShell->Insert(u" B"_ustr);
+
+    // When saving that to markdown:
+    save(TestFilter::MD);
+
+    // Then make sure the image link is relative to the document:
+    std::string aActual = TempFileToString();
+    std::string aExpected("A ![mydesc](images/test%20one.png) B" SAL_NEWLINE_STRING);
     CPPUNIT_ASSERT_EQUAL(aExpected, aActual);
 }
 
