@@ -702,6 +702,7 @@ abstract class SelectionSection extends CanvasSectionObject {
 				new FramingHandles(this),
 				new CropHandles(this),
 				new TurningHandle(this),
+				new Turn3DHandle(this),
 				new ShapingHandles(this),
 				new TiePointHandles(this),
 				new PathHandles(this),
@@ -2857,6 +2858,13 @@ abstract class SelectionSection extends CanvasSectionObject {
 
 		if (handle.kind === CropHandles.middleKind) return 'move';
 
+		if (handle.kind === Turn3DHandle.kind)
+			return (
+				'url(' +
+				app.LOUtil.getURL('images/cursors/rotate.svg') +
+				') 12 12, pointer'
+			);
+
 		if (handle.group === 'crop')
 			return (
 				'url(' + app.LOUtil.getURL('images/cursors/crop.svg') + ') 8 8, auto'
@@ -3537,6 +3545,14 @@ abstract class SelectionSection extends CanvasSectionObject {
 	*/
 	public keysChanged(e: KeyboardEvent, modifier: number): boolean {
 		if (!this.interaction) return false;
+
+		// a key the drag has a use of its own for goes to it, once as it goes down
+		if (e.type === 'keydown' && !e.repeat && this.interaction.takesTheKey(e)) {
+			if (this.lastMoved)
+				this.interaction.move(this.lastMoved.at, this.lastMoved.event);
+			return true;
+		}
+
 		if (!['Shift', 'Alt', 'Control'].includes(e.key)) return false;
 		if (!this.lastMoved) return true;
 

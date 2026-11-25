@@ -156,6 +156,12 @@ abstract class SelectionInteraction {
 		return null;
 	}
 
+	/// Whether it takes a key of its own while it runs, which then does what it does there and
+	/// goes no further. No key for most of them.
+	public takesTheKey(_event: KeyboardEvent): boolean {
+		return false;
+	}
+
 	/// The marks drawn while the interaction runs. None for most of them.
 	public marks(): AngleMark[] {
 		return [];

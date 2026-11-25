@@ -580,6 +580,23 @@ Ungroup (toolbar, menu or the button) takes apart, each by one level:
 - with none of them selected, the group you stand in;
 - on a node of a diagram, the diagram.
 
+### Turning in 3D
+
+Done, not yet in master. A selected 3D scene, or the 3D objects selected inside an entered one,
+show a handle with a turn symbol in their middle. A drag anywhere else still moves the scene; a
+drag of that handle turns in 3D, as on the desktop:
+
+- Across the whole width of what is selected turns by a quarter about the upright axis, down its
+  whole height by a quarter about the axis across. They turn about the handle's place, at the
+  depth of the middle of the objects, as the camera sees them.
+- Ctrl, Shift and Alt snap each angle to 45, 15 and 5 degrees (the settings of the 2D turn),
+  counted from where the drag began. Space during the drag, or Return or Space on the handle by
+  keyboard, switches the pair of axes: Y and X, Z and X, Y and Z. Another pair than the first is
+  written beside the handle.
+- While turning, the lines of the turned objects and their frame are drawn as the scene will
+  look, and the two angles are written beside the mouse (vectorAngleAtMouse). The scene grows or
+  shrinks on the slide with what it shows. Letting go turns them, one step to undo.
+
 ### Break
 
 Break in the context menu (done, not yet in master) takes objects apart as on the desktop:
@@ -824,7 +841,7 @@ in the sections above.
 | Formula | As in the office | Edit in place in the drawn formula (see Formulas) | - |
 | Table | As in the office | Eight handles; the table markers (see Tables below) | Light lines between cells come and go with the zoom, in the office too |
 | Form control | Drawn in Online's look (see below) | In design mode select, move, scale, undo, as any object; out of it they work | Not every kind works yet out of design mode |
-| 3D scene | As one picture | Select, move, scale | Hit and hovered where its 3D objects are, as on the desktop: a press beside them goes to what lies behind. The hover draws the 3D object under the mouse by lines that read for its kind: a cube, an extrusion or a 3D polygon by its outline and the edges where its faces meet at an angle, a sphere by eight meridians and five rings, a body of rotation by a profile for each eighth of a turn and the rings of its open ends. A double click enters the scene at the 3D object under the mouse, as do Enter and F3 on a selected scene at its first one; inside, a click selects a 3D object, Alt and a click goes through the ones under the mouse from the front to the back, Shift with it the other way, Tab and Shift+Tab go through them and round, as in a group, Escape and Ctrl+F3 leave it. Deleting all 3D objects of a scene deletes the scene too; undo brings it back at the size it had. A 3D object is selected and shown, not yet moved, scaled or turned, as these are 3D changes; no 3D turn of the scene |
+| 3D scene | As one picture | Select, move, scale | Hit and hovered where its 3D objects are, as on the desktop: a press beside them goes to what lies behind. The hover draws the 3D object under the mouse by lines that read for its kind: a cube, an extrusion or a 3D polygon by its outline and the edges where its faces meet at an angle, a sphere by eight meridians and five rings, a body of rotation by a profile for each eighth of a turn and the rings of its open ends. A double click enters the scene at the 3D object under the mouse, as do Enter and F3 on a selected scene at its first one; inside, a click selects a 3D object, Alt and a click goes through the ones under the mouse from the front to the back, Shift with it the other way, Tab and Shift+Tab go through them and round, as in a group, Escape and Ctrl+F3 leave it. Deleting all 3D objects of a scene deletes the scene too; undo brings it back at the size it had. A 3D object is not moved or scaled on the slide, as these are 3D changes; a selected scene, or the 3D objects selected inside one, turn in 3D by the handle in their middle, see "Turning in 3D" |
 | Video, audio | Filled black | Select, move, scale | The desktop application on Qt 6.10 may crash when a video is selected |
 
 ### Tables

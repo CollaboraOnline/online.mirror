@@ -430,4 +430,24 @@ class HandleLook {
 		context.drawImage(picture, -across * 0.5, -across * 0.5, across, across);
 		context.restore();
 	}
+
+	/// Draws the picture at that address with its middle at that point, that large in CSS
+	/// pixels, upright; under the mouse or the keyboard, where grown is above nought, it grows as
+	/// a handle there does.
+	public static drawPicture(
+		context: CanvasRenderingContext2D,
+		address: string,
+		at: cool.SimplePoint,
+		size: number,
+		grown: number,
+	): void {
+		const picture = HandleLook.markerPicture(address);
+		if (!picture.complete || !picture.naturalWidth) return;
+
+		const across = size * app.dpiScale + 2 * grown;
+		context.save();
+		context.setTransform(1, 0, 0, 1, at.vX, at.vY);
+		context.drawImage(picture, -across * 0.5, -across * 0.5, across, across);
+		context.restore();
+	}
 }

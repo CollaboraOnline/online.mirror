@@ -276,6 +276,115 @@ namespace cool {
 			};
 		}
 
+		/// The 3D transform of an object of a scene as the records hold it: the scene's own
+		/// transformation for a scene that sits in no other, the object's 3D mapping otherwise.
+		static transformOf(
+			data: VectorPrimitivesData,
+			objectId: number,
+		): Matrix3D | null {
+			const object = data.objects.get(objectId);
+			return object?.scene3D ?
+					Matrix3D.fromArray(object.scene3D.transformation)
+				:	Matrix3D.fromArray(object?.transform3D);
+		}
+
+		/// The transforms of the scenes an object of a scene lies in, from the one holding it out
+		/// to the scene that sits in no other, that one's own transformation included. The
+		/// identity for a scene that sits in no other.
+		static outerTransformOf(
+			data: VectorPrimitivesData,
+			objectId: number,
+		): Matrix3D {
+			let outer = Matrix3D.IDENTITY;
+			const object = data.objects.get(objectId);
+			if (object?.scene3D) return outer;
+			let at = object?.parent ? data.objects.get(object.parent) : undefined;
+			for (let guard = 0; at && guard < 100; ++guard) {
+				outer = outer.then(
+					(at.id !== undefined && Scene3D.transformOf(data, at.id)) ||
+						Matrix3D.IDENTITY,
+				);
+				if (at.scene3D) break;
+				at = at.parent ? data.objects.get(at.parent) : undefined;
+			}
+			return outer;
+		}
+
+		/// The middle of the box of what an object of a scene holds, in its own space, before its
+		/// own transform. Nothing where it holds nothing made here.
+		static middleInItsOwnSpace(
+			data: VectorPrimitivesData,
+			objectId: number,
+		): Point3D | null {
+			const box = new Box3D();
+			for (const id of data.order) {
+				const object = data.objects.get(id);
+				const primitive = object?.primitives3D?.[0];
+				if (!object || !primitive || !Scene3D.liesIn(data, id, objectId))
+					continue;
+
+				let toOwnSpace =
+					Matrix3D.fromArray(primitive.transform) ?? Matrix3D.IDENTITY;
+				for (
+					let at: SlideObject | undefined = object, guard = 0;
+					at && at.id !== objectId && guard < 100;
+					at = at.parent ? data.objects.get(at.parent) : undefined, ++guard
+				)
+					toOwnSpace = toOwnSpace.then(
+						Matrix3D.fromArray(at.transform3D) ?? Matrix3D.IDENTITY,
+					);
+
+				Scene3D.forEachFace(primitive, (face: PolyPolygon3D) => {
+					for (const polygon of face.polygons)
+						for (const point of polygon.points)
+							box.add(toOwnSpace.apply(point));
+					return true;
+				});
+			}
+			if (box.isEmpty()) return null;
+			return new Point3D(
+				(box.minX + box.maxX) / 2,
+				(box.minY + box.maxY) / 2,
+				(box.minZ + box.maxZ) / 2,
+			);
+		}
+
+		/*
+			The lines that show the objects of a scene as they look once the 3D transforms in
+			turned took the place of their own, on the page in twips, and their frame then: the
+			scene's new rectangle where the scene itself is one of them, else the box of the
+			lines. Nothing where the scene holds nothing made here.
+		*/
+		static outlineAfter(
+			data: VectorPrimitivesData,
+			sceneId: number,
+			turned: Map<number, Matrix3D>,
+			objectIds: number[],
+		): { lines: Polygon2D[]; frame: Range2D } | null {
+			const view = Scene3D.viewAfter(data, sceneId, turned);
+			const scene = data.objects.get(sceneId);
+			const placement = Matrix2D.fromArray(view?.placement);
+			if (!view || !scene || !placement) return null;
+
+			const objects = new Map(data.objects);
+			objects.set(sceneId, { ...scene, scene3D: view });
+			const after = { ...data, objects: objects };
+
+			const lines: Polygon2D[] = [];
+			for (const member of Scene3D.membersOf(after, sceneId, turned) ?? [])
+				if (
+					objectIds.some((id: number) => Scene3D.liesIn(after, member.id, id))
+				)
+					lines.push(...Scene3D.linesOfTheShape(member, placement));
+			if (!lines.length) return null;
+
+			const frame =
+				objectIds.includes(sceneId) ?
+					Range2D.fromPoints([placement.apply(0, 0), placement.apply(1, 1)])
+				:	Range2D.fromPoints(lines.flatMap((line: Polygon2D) => line.points));
+			return { lines: lines, frame: frame };
+		}
+
 		/// The 3D objects of the scene, those of the scenes inside it included, in the order the
 		/// page draws them, from the back to the front.
 		static objectsOf(data: VectorPrimitivesData, sceneId: number): number[] {

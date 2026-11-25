@@ -3737,6 +3737,93 @@ class MotionPathHandles extends HandlesMovedOneByOne {
 }
 
 /*
+	The handle in the middle of a 3D scene, or of the 3D objects selected in an entered one, that
+	turns them in 3D. A drag anywhere else moves the scene as ever, so the turn is the exception
+	and begins here only. It shows a turn symbol, and beside it the pair of axes a drag turns
+	about where that is not the first one; Return or Space on it by keyboard goes on to the next
+	pair.
+*/
+class Turn3DHandle extends HandleGroup {
+	public readonly name: string = 'turn3d';
+
+	/// The kind of its one handle.
+	public static readonly kind: string = 'turn3d';
+
+	public handles(): SelectionHandle[] {
+		const what = Turn3DInteraction.turnsIn(this.selection.selectedObjects());
+		const box = what && Turn3DInteraction.boxOf(what.objectIds);
+		if (!box) return [];
+
+		return [
+			{
+				name: Turn3DHandle.kind,
+				kind: Turn3DHandle.kind,
+				pointer: 'pointer',
+				point: new cool.Point(
+					(box.minX + box.maxX) / 2,
+					(box.minY + box.maxY) / 2,
+				),
+			},
+		];
+	}
+
+	// as large as the handle in the middle of a crop
+	private static size(): number {
+		return TableHandles.borderSize();
+	}
+
+	public reachOf(usual: number): number {
+		return Math.max(usual, Turn3DHandle.size() * app.dpiScale * 0.5);
+	}
+
+	public shape(
+		context: CanvasRenderingContext2D,
+		_handle: SelectionHandle,
+		at: cool.SimplePoint,
+		grown: number,
+	): string {
+		HandleLook.drawPicture(
+			context,
+			app.LOUtil.getURL('images/cursors/rotate.svg'),
+			at,
+			Turn3DHandle.size(),
+			grown,
+		);
+
+		// the pair of axes, written below and to the right where it is not the first one
+		if (Turn3DInteraction.pairInUse !== 0) {
+			const pair = Turn3DInteraction.pairs[Turn3DInteraction.pairInUse];
+			const half = (Turn3DHandle.size() * app.dpiScale) / 2 + grown;
+			context.save();
+			context.font = String(Math.round(10 * app.dpiScale)) + 'px sans-serif';
+			context.textBaseline = 'top';
+			context.lineWidth = 3 * app.dpiScale;
+			context.strokeStyle = 'white';
+			context.fillStyle = HandleLook.outlineColour;
+			const text = pair.join('').toUpperCase();
+			context.strokeText(text, at.vX + half, at.vY + half);
+			context.fillText(text, at.vX + half, at.vY + half);
+			context.restore();
+		}
+		return 'transparent';
+	}
+
+	public interactionFor(
+		handle: SelectionHandle,
+		_at: cool.SimplePoint,
+	): SelectionInteraction | null {
+		return Turn3DInteraction.begin(this.selection, handle);
+	}
+
+	public pressByKey(_handle: SelectionHandle, event: KeyboardEvent): boolean {
+		if (event.key !== 'Enter' && event.key !== ' ') return false;
+		Turn3DInteraction.switchThePair();
+		app.sectionContainer?.requestReDraw();
+		return true;
+	}
+}
+
+/*
 	The object itself rather than any handle of it: the group that takes a press anywhere on the
 	selection and carries it. It holds no handle and stands last in the list, so it is reached
 	only where no group before it answered.
