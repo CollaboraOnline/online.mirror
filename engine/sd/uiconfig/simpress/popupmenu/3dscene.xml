@@ -44,6 +44,7 @@
     </menu:menupopup>
   </menu:menu>
   <menu:menuitem menu:id=".uno:EnterGroup"/>
+  <menu:menuitem menu:id=".uno:Break"/>
   <menu:menuseparator/>
   <menu:menuitem menu:id=".uno:CustomAnimation"/>
   <menu:menuitem menu:id=".uno:AnimationEffects"/>

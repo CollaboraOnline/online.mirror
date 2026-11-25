@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" office:version="1.3" office:mimetype="application/vnd.oasis.opendocument.presentation">
+ <office:styles>
+  <style:style style:name="standard" style:family="graphic">
+   <style:graphic-properties draw:fill="solid" draw:fill-color="#729fcf" svg:stroke-color="#1e3a5f"/>
+  </style:style>
+ </office:styles>
+ <office:automatic-styles>
+  <style:page-layout style:name="PM1">
+   <style:page-layout-properties fo:page-width="28cm" fo:page-height="15.75cm" style:print-orientation="landscape"/>
+  </style:page-layout>
+  <style:style style:name="extruded" style:family="graphic" style:parent-style-name="standard">
+   <style:graphic-properties draw:stroke="none" dr3d:depth="1.5cm" dr3d:close-front="true" dr3d:close-back="true"/>
+  </style:style>
+ </office:automatic-styles>
+ <office:master-styles>
+  <style:master-page style:name="Default" style:page-layout-name="PM1"/>
+ </office:master-styles>
+ <office:body>
+  <office:presentation>
+   <draw:page draw:name="page1" draw:master-page-name="Default">
+    <dr3d:scene draw:style-name="standard" svg:width="7.315cm" svg:height="5.681cm" svg:x="2cm" svg:y="2cm" dr3d:transform="matrix (1 0 0 0 0.939692620785908 0.342020143325669 0 -0.342020143325669 0.939692620785908 -6.032cm 4.13484074745395cm 0.704697270602369cm)" dr3d:vrp="(0 0 21464)" dr3d:vpn="(0 0 19960)" dr3d:projection="perspective" dr3d:distance="1.504cm" dr3d:focal-length="10cm" dr3d:shadow-slant="0" dr3d:shade-mode="gouraud" dr3d:ambient-color="#666666" dr3d:lighting-mode="false">
+     <dr3d:light dr3d:diffuse-color="#cccccc" dr3d:direction="(0.57735026918963 0.57735026918963 0.57735026918963)" dr3d:enabled="true" dr3d:specular="true"/>
+     <dr3d:extrude draw:style-name="extruded" svg:viewBox="2539 -6984 6986 5715" svg:d="M6031-1269l-815-2184h-2677l2174-1363-817-2168 2135 1328 2135-1328-816 2168 2175 1363h-2678z"/>
+    </dr3d:scene>
+    <draw:polyline draw:style-name="standard" svg:width="6cm" svg:height="4cm" svg:x="12cm" svg:y="2cm" svg:viewBox="0 0 6000 4000" draw:points="0,4000 2000,0 4000,4000 6000,0"/>
+    <draw:polygon draw:style-name="standard" svg:width="5cm" svg:height="4cm" svg:x="20cm" svg:y="2cm" svg:viewBox="0 0 5000 4000" draw:points="0,4000 2500,0 5000,4000"/>
+   </draw:page>
+  </office:presentation>
+ </office:body>
+</office:document>

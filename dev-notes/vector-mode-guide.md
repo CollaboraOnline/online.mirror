@@ -580,6 +580,16 @@ Ungroup (toolbar, menu or the button) takes apart, each by one level:
 - with none of them selected, the group you stand in;
 - on a node of a diagram, the diagram.
 
+### Break
+
+Break in the context menu (done, not yet in master) takes objects apart as on the desktop:
+
+- a line of several segments or a polygon: into one line per segment;
+- a 3D scene whose 3D objects are extrusions or bodies of rotation: into one 2D object each,
+  drawn as the scene showed it. Inside an entered scene, Break on a selected 3D object puts the
+  2D object on the slide; a scene left empty goes, and you stand on the slide again. Cubes and
+  spheres cannot be broken, so a scene holding one offers no Break.
+
 ### Diagrams
 
 A diagram is a set of shapes laid out from data. It is never selected on its own, but through
