@@ -1490,9 +1490,14 @@ body:not([data-doctype]) .backstage-view {
 	border-color: var(--color-border);
 }
 
-#backstage-view .backstage-open-tile-edit svg {
+.backstage-open-tile-edit-icon {
 	width: 20px;
 	height: 20px;
+	background: url('images/lc_edit.svg') no-repeat center / contain;
+}
+
+[data-theme='dark'] .backstage-open-tile-edit-icon {
+	background-image: url('images/dark/lc_edit.svg');
 }
 
 .backstage-open-tile-sublabel {

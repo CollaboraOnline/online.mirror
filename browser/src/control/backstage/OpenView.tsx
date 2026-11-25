@@ -134,7 +134,7 @@ namespace BackstageTemplates {
             t.onEdit();
           }}
         >
-          {BackstageTemplates.inlineIcon('lc_edit.svg')}
+          <span class="backstage-open-tile-edit-icon" aria-hidden="true" />
         </button>
       </div>
     );
