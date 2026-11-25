@@ -215,7 +215,7 @@ static void lcl_addURL ( SvXMLExport &rExport, const OUString &rURL,
                          bool bToRel = true )
 {
     const OUString sRelURL = ( bToRel && !rURL.isEmpty() )
-        ? URIHelper::simpleNormalizedMakeRelative(rExport.GetOrigFileName(), rURL)
+        ? URIHelper::MakeRelative(rExport.GetOrigFileName(), rURL)
         : rURL;
 
     if (!sRelURL.isEmpty())

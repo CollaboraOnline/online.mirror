@@ -34,8 +34,10 @@
 #include <com/sun/star/text/XTextTablesSupplier.hpp>
 #include <com/sun/star/util/DateTime.hpp>
 #include <com/sun/star/util/XRefreshable.hpp>
+#include <tools/urlobj.hxx>
 #include <unotools/localedatawrapper.hxx>
 #include <comphelper/configuration.hxx>
+#include <comphelper/propertysequence.hxx>
 #include <comphelper/sequenceashashmap.hxx>
 #include <wrtsh.hxx>
 #include <rootfrm.hxx>
@@ -2066,6 +2068,24 @@ CPPUNIT_TEST_FIXTURE(Test, testIndexSortLanguage)
     aLocale = getProperty<lang::Locale>(xLoadedBibliography, u"Locale"_ustr);
     CPPUNIT_ASSERT_EQUAL(u"de"_ustr, aLocale.Language);
     CPPUNIT_ASSERT_EQUAL(u"DE"_ustr, aLocale.Country);
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testFloatingFrameURLRelative)
+{
+    // A floating frame showing a file beside the document links to it relative to the document.
+    // The link is relative to content.xml inside the package, so it starts with "../".
+    createSwDoc();
+    INetURLObject aFrameURL(maTempFile.GetURL());
+    aFrameURL.setName(u"pages");
+    aFrameURL.insertName(u"page one.html");
+    uno::Sequence<beans::PropertyValue> aArgs(comphelper::InitPropertySequence(
+        { { "URL", uno::Any(aFrameURL.GetMainURL(INetURLObject::DecodeMechanism::NONE)) } }));
+    dispatchCommand(mxComponent, u".uno:InsertObjectFloatingFrame"_ustr, aArgs);
+
+    save(TestFilter::ODT);
+
+    xmlDocUniquePtr pXmlDoc = parseExport(u"content.xml"_ustr);
+    assertXPath(pXmlDoc, "//draw:floating-frame", "href", u"../pages/page%20one.html");
 }
 
 } // end of anonymous namespace
