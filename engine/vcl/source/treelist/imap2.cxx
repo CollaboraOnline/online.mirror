@@ -26,7 +26,6 @@
 #include <vcl/svapp.hxx>
 #include <tools/urlobj.hxx>
 
-#include <svl/urihelper.hxx>
 #include <vcl/imap.hxx>
 #include <vcl/imapobj.hxx>
 #include <vcl/imaprect.hxx>
@@ -60,12 +59,12 @@ void IMapObject::AppendNCSACoords(OStringBuffer& rBuf, const Point& rPoint100)
 
 void IMapObject::AppendCERNURL(OStringBuffer& rBuf) const
 {
-    rBuf.append(OUStringToOString(URIHelper::simpleNormalizedMakeRelative(u""_ustr, aURL), osl_getThreadTextEncoding()));
+    rBuf.append(OUStringToOString(aURL, osl_getThreadTextEncoding()));
 }
 
 void IMapObject::AppendNCSAURL(OStringBuffer& rBuf) const
 {
-    rBuf.append(OUStringToOString(URIHelper::simpleNormalizedMakeRelative(u""_ustr, aURL), osl_getThreadTextEncoding()));
+    rBuf.append(OUStringToOString(aURL, osl_getThreadTextEncoding()));
     rBuf.append(' ');
 }
 

@@ -73,9 +73,7 @@ void IMapObject::Write( SvStream& rOStm ) const
     rOStm.WriteUInt16( IMAP_OBJ_VERSION );
     rOStm.WriteUInt16( eEncoding  );
 
-    const OString aRelURL = OUStringToOString(
-        URIHelper::simpleNormalizedMakeRelative(u""_ustr, aURL), eEncoding);
-    write_uInt16_lenPrefixed_uInt8s_FromOString(rOStm, aRelURL);
+    write_uInt16_lenPrefixed_uInt8s_FromOString(rOStm, OUStringToOString(aURL, eEncoding));
     write_uInt16_lenPrefixed_uInt8s_FromOUString(rOStm, aAltText, eEncoding);
     rOStm.WriteBool( bActive );
     write_uInt16_lenPrefixed_uInt8s_FromOUString(rOStm, aTarget, eEncoding);
