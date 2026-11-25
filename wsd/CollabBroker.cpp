@@ -471,6 +471,8 @@ void CollabBroker::updateEditingStarted()
         std::any_of(_externalSessions.begin(), _externalSessions.end(),
                     [](const auto& session) { return session.second.editing; });
 
+    // A /cool/ws session that can write may change the stored file at any time. So it counts as
+    // editing, and CODA users are told to join the server editor instead of a local copy.
     _editingStarted = !_editingUserIds.empty() || sessionCanWrite;
 }
 
@@ -586,6 +588,7 @@ void CollabBroker::removeExternalSession(const std::string& sessionId)
     const std::string userJson = externalUserJson(
         it->second.userId, it->second.username, it->second.connection);
     _externalSessions.erase(it);
+    updateEditingStarted();
 
     LOG_INF("CollabBroker [" << _docKey << "]: external session ["
             << sessionId << "] left");
