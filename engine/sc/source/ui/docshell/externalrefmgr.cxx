@@ -2598,7 +2598,7 @@ SfxObjectShellRef ScExternalRefManager::loadSrcDocument(sal_uInt16 nFileId, OUSt
         INetURLObject aBaseURL(getOwnDocumentName());
         aBaseURL.insertName(u"content.xml");
 
-        OUString aStr = URIHelper::simpleNormalizedMakeRelative(
+        OUString aStr = URIHelper::MakeRelative(
             aBaseURL.GetMainURL(INetURLObject::DecodeMechanism::NONE), aFile);
 
         setRelativeFileName(nFileId, aStr);

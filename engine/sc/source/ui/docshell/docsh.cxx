@@ -2014,7 +2014,7 @@ bool ScDocShell::SaveAs( SfxMedium& rMedium )
         // current document has a path -> not a brand-new document.
         OUString aNewPath = rMedium.GetName();
         popFileName(aNewPath);
-        OUString aRel = URIHelper::simpleNormalizedMakeRelative(aCurPath, aNewPath);
+        OUString aRel = URIHelper::MakeRelative(aCurPath, aNewPath);
         if (!aRel.isEmpty())
         {
             // Directory path will change before and after the save.
