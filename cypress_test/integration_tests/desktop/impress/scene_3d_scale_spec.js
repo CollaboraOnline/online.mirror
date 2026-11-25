@@ -108,4 +108,183 @@ describe(['tagdesktop'], 'A 3D scale on a vector slide', function() {
 			expect(now.x).to.be.lessThan(was.x - was.width * 0.1);
 		});
 	});
+
+	it('The right arrow on the right handle, held, widens the star to the right as one step to undo.', function() {
+		var win = this.win;
+		var scene;
+		var star;
+		cy.wrap(null).should(function() {
+			scene = objectsWhere(win, function(object) {
+				return object.objectKind === 202 && object.parent === 0;
+			})[0];
+			star = scene && objectsWhere(win, function(object) {
+				return object.parent === scene.id;
+			})[0];
+			expect(star, 'the star').to.not.equal(undefined);
+		});
+		cy.then(function() {
+			var middle = onCanvas(win, star.x + star.width / 2, star.y + star.height / 2);
+			cy.cGet('#document-canvas').dblclick(middle.x, middle.y);
+		});
+		cy.wrap(null).should(function() {
+			expect(win.eval('GraphicSelection').selectedObjectIDs).to.deep.equal([star.id]);
+		});
+		cy.then(function() {
+			return helper.processToIdle(win);
+		});
+
+		// a click on the right handle puts the keyboard there
+		var handle;
+		cy.wrap(null).should(function() {
+			handle = win.eval('GraphicSelection').selectionSection.handles().filter(function(one) {
+				return one.kind === '4' || one.kind === '5';
+			}).sort(function(one, other) {
+				return other.point.x - one.point.x;
+			})[0];
+			expect(handle, 'the right handle').to.not.equal(undefined);
+		});
+		cy.then(function() {
+			var place = onCanvas(win, handle.point.x, handle.point.y);
+			cy.cGet('#document-canvas').click(place.x, place.y);
+		});
+		cy.wrap(null).should(function() {
+			expect(win.eval('GraphicSelection').selectionSection.travel.activeName,
+				'the keyboard on the handle').to.equal(handle.name);
+		});
+
+		// the key held: it goes down three times, as it repeats, and up once
+		cy.then(function() {
+			var target = win.document.querySelector('div.clipboard');
+			var key = function(type, repeat) {
+				target.dispatchEvent(new win.KeyboardEvent(type, { key: 'ArrowRight', code: 'ArrowRight',
+					keyCode: 39, repeat: repeat, bubbles: true, cancelable: true }));
+			};
+			key('keydown', false);
+			key('keydown', true);
+			key('keydown', true);
+			key('keyup', false);
+		});
+		cy.then(function() {
+			return helper.processToIdle(win);
+		});
+		cy.wrap(null).should(function() {
+			var now = objectsWhere(win, function(object) { return object.id === star.id; })[0];
+			expect(now.x, 'the left side').to.be.closeTo(star.x, star.width / 20);
+			expect(now.x + now.width, 'the right side').to.be.greaterThan(star.x + star.width + 50);
+		});
+
+		// one undo takes all three steps away
+		cy.then(function() {
+			helper.typeIntoDocument('{ctrl}z');
+		});
+		cy.wrap(null).should(function() {
+			var now = objectsWhere(win, function(object) { return object.id === star.id; })[0];
+			expect(now.width, 'as wide as before').to.be.closeTo(star.width, 4);
+		});
+	});
+
+	it('The right arrow on the right handle scales as far held as pressed slowly.', function() {
+		var win = this.win;
+		var star;
+		cy.wrap(null).should(function() {
+			var scene = objectsWhere(win, function(object) {
+				return object.objectKind === 202 && object.parent === 0;
+			})[0];
+			star = scene && objectsWhere(win, function(object) {
+				return object.parent === scene.id;
+			})[0];
+			expect(star, 'the star').to.not.equal(undefined);
+		});
+		cy.then(function() {
+			var middle = onCanvas(win, star.x + star.width / 2, star.y + star.height / 2);
+			cy.cGet('#document-canvas').dblclick(middle.x, middle.y);
+		});
+		cy.wrap(null).should(function() {
+			expect(win.eval('GraphicSelection').selectedObjectIDs).to.deep.equal([star.id]);
+		});
+		cy.then(function() {
+			return helper.processToIdle(win);
+		});
+
+		function starNow() {
+			return objectsWhere(win, function(object) { return object.id === star.id; })[0];
+		}
+
+		// a click on the right handle puts the keyboard there
+		function keyboardOnTheRightHandle() {
+			var handle;
+			cy.wrap(null).should(function() {
+				handle = win.eval('GraphicSelection').selectionSection.handles().filter(function(one) {
+					return one.kind === '4' || one.kind === '5';
+				}).sort(function(one, other) {
+					return other.point.x - one.point.x;
+				})[0];
+				expect(handle, 'the right handle').to.not.equal(undefined);
+			});
+			cy.then(function() {
+				var place = onCanvas(win, handle.point.x, handle.point.y);
+				cy.cGet('#document-canvas').click(place.x, place.y);
+			});
+			cy.wrap(null).should(function() {
+				expect(win.eval('GraphicSelection').selectionSection.travel.activeName,
+					'the keyboard on the handle').to.equal(handle.name);
+			});
+		}
+
+		function key(type, repeat) {
+			win.document.querySelector('div.clipboard').dispatchEvent(new win.KeyboardEvent(type, {
+				key: 'ArrowRight', code: 'ArrowRight', keyCode: 39, repeat: repeat, bubbles: true,
+				cancelable: true }));
+		}
+
+		// three presses, each one answered by the engine before the next
+		keyboardOnTheRightHandle();
+		for (var press = 0; press < 3; ++press) {
+			cy.then(function() {
+				key('keydown', false);
+				key('keyup', false);
+			});
+			cy.then(function() {
+				return helper.processToIdle(win);
+			});
+		}
+		var slowly;
+		cy.wrap(null).should(function() {
+			slowly = starNow();
+			expect(slowly.width, 'wider').to.be.greaterThan(star.width + 50);
+		});
+
+		// back to where it was, a step to undo for each press
+		for (var undo = 0; undo < 3; ++undo) {
+			cy.then(function() {
+				helper.typeIntoDocument('{ctrl}z');
+			});
+			cy.then(function() {
+				return helper.processToIdle(win);
+			});
+		}
+		cy.wrap(null).should(function() {
+			expect(starNow().width, 'as wide as before').to.be.closeTo(star.width, 4);
+		});
+
+		// the key held for as many steps, sent when it is let go
+		keyboardOnTheRightHandle();
+		cy.then(function() {
+			key('keydown', false);
+			key('keydown', true);
+			key('keydown', true);
+			key('keyup', false);
+		});
+		cy.then(function() {
+			return helper.processToIdle(win);
+		});
+		cy.wrap(null).should(function() {
+			// each answer of the engine is in whole twips, so the steps pressed slowly start from
+			// a slightly different place than the held ones, which go on from the client's
+			var held = starNow();
+			expect(held.x, 'the left side').to.be.closeTo(slowly.x, 10);
+			expect(held.width, 'the width').to.be.closeTo(slowly.width, 10);
+			expect(held.height, 'the height').to.be.closeTo(slowly.height, 10);
+		});
+	});
 });

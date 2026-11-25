@@ -614,7 +614,8 @@ Done, not yet in master. Inside an entered 3D scene, as on the desktop:
   them; with Alt the way down goes into the depth, away from the camera or towards it.
 - The eight handles scale them in 3D, about the handle facing the one dragged; a handle in the
   middle of a side scales along its own axis only. Shift scales both axes alike, Alt about the
-  middle. The arrow keys do not scale 3D objects yet.
+  middle. With the keyboard on one of them, the arrow keys scale as a drag of it by the key
+  step would; a run of steps goes to the engine when the keys are let go, one step to undo.
 - While it runs, the lines of the objects are drawn as the scene will look, and they stay until
   the new picture has arrived. Letting go is one step to undo.
 

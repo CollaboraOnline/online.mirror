@@ -568,9 +568,16 @@ class FramingHandles extends HandleGroup {
 		towards: cool.Point,
 		event: KeyboardEvent,
 	): cool.Point | null {
-		// 3D objects inside a scene are scaled in 3D by a drag only, not by keys yet
-		if (Move3DInteraction.movesIn3D(this.selection.selectedObjects()))
+		// 3D objects inside a scene are scaled in 3D, as a drag of the handle by the step would
+		if (Move3DInteraction.movesIn3D(this.selection.selectedObjects())) {
+			const to = HandleGroup.steppedBy(handle, towards, event);
+			Scale3DInteraction.scaleByKey(
+				this.selection,
+				handle,
+				new cool.Point(to.x - handle.point.x, to.y - handle.point.y),
+			);
 			return null;
+		}
 
 		const shape = this.selection.shapeNow();
 		if (!shape) return null;

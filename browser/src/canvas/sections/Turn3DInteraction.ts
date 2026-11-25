@@ -302,6 +302,7 @@ class Turn3DInteraction extends SelectionInteraction {
 			this.sceneId,
 			this.turned,
 			this.outline(),
+			this.ghost?.frame ?? null,
 		);
 	}
 
@@ -340,6 +341,7 @@ class Turn3DInteraction extends SelectionInteraction {
 		sceneId: number,
 		transforms: Map<number, cool.Matrix3D>,
 		lines: cool.ObjectPathPolygon[] | null,
+		frame: cool.Range2D | null = null,
 	): void {
 		const named: string[] = [];
 		for (const [objectId, transform] of transforms)
@@ -365,6 +367,7 @@ class Turn3DInteraction extends SelectionInteraction {
 			objectIds: Array.from(transforms.keys()).join(','),
 			version: data.version,
 			transforms: transforms,
+			frame: frame,
 		};
 		ChangeOutbox.sendAChange(
 			'setobjecttransform to=' + named.join(';') + ' as=turn3d',
@@ -397,7 +400,28 @@ class Turn3DInteraction extends SelectionInteraction {
 		objectIds: string;
 		version: number | string | undefined;
 		transforms: Map<number, cool.Matrix3D>;
+		// their frame on the page then, where the change worked it out
+		frame: cool.Range2D | null;
 	} | null = null;
+
+	/// Where the keys left those objects, while the records of that version do not show it yet:
+	/// their 3D transforms and their frame on the page. Nothing once the engine has answered.
+	public static whereTheKeysLeft(
+		objectIds: number[],
+		version: number | string | undefined,
+	): {
+		transforms: Map<number, cool.Matrix3D>;
+		frame: cool.Range2D | null;
+	} | null {
+		const left = Turn3DInteraction.keyLeft;
+		if (
+			!left ||
+			left.objectIds !== objectIds.join(',') ||
+			left.version !== version
+		)
+			return null;
+		return { transforms: new Map(left.transforms), frame: left.frame };
+	}
 
 	/*
 		An arrow key on the handle: Left and Right turn about the first axis of the pair in use,
@@ -421,13 +445,11 @@ class Turn3DInteraction extends SelectionInteraction {
 		);
 		if (!turn) return;
 
-		const left = Turn3DInteraction.keyLeft;
-		if (
-			left &&
-			left.objectIds === what.objectIds.join(',') &&
-			left.version === turn.data.version
-		)
-			turn.turned = new Map(left.transforms);
+		const left = Turn3DInteraction.whereTheKeysLeft(
+			what.objectIds,
+			turn.data.version,
+		);
+		if (left) turn.turned = left.transforms;
 
 		const step = EditSteps.turnSnap(event) ?? EditSteps.keyTurnStep();
 		turn.turnBy([towards.x * step, towards.y * step]);
@@ -436,6 +458,7 @@ class Turn3DInteraction extends SelectionInteraction {
 			turn.sceneId,
 			turn.turned,
 			turn.outline(),
+			turn.ghost?.frame ?? null,
 		);
 	}
 
@@ -542,6 +565,7 @@ class Turn3DInteraction extends SelectionInteraction {
 			what.sceneId,
 			uprights,
 			ghost ? Turn3DInteraction.linesOf(ghost.lines) : null,
+			ghost?.frame ?? null,
 		);
 		return true;
 	}
@@ -740,7 +764,13 @@ class Move3DInteraction extends SelectionInteraction {
 	public finish(to: cool.SimplePoint, event?: MouseEvent): void {
 		this.move(to, event);
 		if (!this.ghost) return;
-		Turn3DInteraction.send(this.data, this.sceneId, this.moved, this.outline());
+		Turn3DInteraction.send(
+			this.data,
+			this.sceneId,
+			this.moved,
+			this.outline(),
+			this.ghost?.frame ?? null,
+		);
 	}
 
 	/// The handles hide while the objects move, as they stand where the objects were.
@@ -782,7 +812,7 @@ class Scale3DInteraction extends SelectionInteraction {
 	private readonly box: cool.Range2D;
 	// where the dragged handle sits on the box, from nought to one along each side
 	private readonly place: cool.Point;
-	private readonly start: cool.SimplePoint;
+	public readonly start: cool.SimplePoint;
 	private scaled = new Map<number, cool.Matrix3D>();
 	private ghost: { lines: cool.Polygon2D[]; frame: cool.Range2D } | null = null;
 
@@ -820,21 +850,66 @@ class Scale3DInteraction extends SelectionInteraction {
 		selection: SelectionSection,
 		handle: SelectionHandle,
 	): Scale3DInteraction | null {
+		return Scale3DInteraction.prepare(selection, handle, null);
+	}
+
+	/*
+		An arrow key on one of the eight: the handle goes by the step the key gives, and the
+		objects are scaled as a drag of it there would. A step that comes before the engine
+		answered the last one goes on from where that one left the objects, their transforms and
+		their frame, as the records do not show it yet.
+	*/
+	public static scaleByKey(
+		selection: SelectionSection,
+		handle: SelectionHandle,
+		by: cool.Point,
+	): void {
+		const data = RenderGeometrySection.currentPart();
+		const left =
+			data ?
+				Turn3DInteraction.whereTheKeysLeft(
+					selection.selectedObjects(),
+					data.version,
+				)
+			:	null;
+		const scale = Scale3DInteraction.prepare(selection, handle, left);
+		if (!scale) return;
+		scale.finish(
+			new cool.SimplePoint(scale.start.x + by.x, scale.start.y + by.y),
+		);
+	}
+
+	/// The scale of one of the eight, from the objects as the records hold them or, where left
+	/// is given, as the keys left them.
+	private static prepare(
+		selection: SelectionSection,
+		handle: SelectionHandle,
+		left: {
+			transforms: Map<number, cool.Matrix3D>;
+			frame: cool.Range2D | null;
+		} | null,
+	): Scale3DInteraction | null {
 		const data = RenderGeometrySection.currentPart();
 		const objectIds = selection.selectedObjects();
 		if (!data || !Move3DInteraction.movesIn3D(objectIds)) return null;
 		const what = Turn3DInteraction.turnsIn(objectIds);
-		const box = Turn3DInteraction.boxOf(objectIds);
+		const recorded = Turn3DInteraction.boxOf(objectIds);
 		const view = what && data.objects.get(what.sceneId)?.scene3D;
-		if (!what || !box || !view) return null;
+		if (!what || !recorded || !view) return null;
 
 		// where the handle stands on the box, which is not always where its kind says: the
 		// square of a 3D object can be drawn turned over
 		const share = (at: number, from: number, size: number): number =>
 			size > 0 ? Math.round(((at - from) / size) * 2) / 2 : 0.5;
 		const place = new cool.Point(
-			share(handle.point.x, box.minX, box.width),
-			share(handle.point.y, box.minY, box.height),
+			share(handle.point.x, recorded.minX, recorded.width),
+			share(handle.point.y, recorded.minY, recorded.height),
+		);
+		// the box the objects stand in now, and the handle at its place there
+		const box = left?.frame ?? recorded;
+		const start = new cool.SimplePoint(
+			box.minX + place.x * box.width,
+			box.minY + place.y * box.height,
 		);
 
 		const toTheSquare = cool.Matrix2D.fromArray(view.placement)?.invert();
@@ -851,7 +926,9 @@ class Scale3DInteraction extends SelectionInteraction {
 
 		const turnedOnes: (TurnedIn3D & { depth: number })[] = [];
 		for (const objectId of what.objectIds) {
-			const before = cool.Scene3D.transformOf(data, objectId);
+			const before =
+				left?.transforms.get(objectId) ??
+				cool.Scene3D.transformOf(data, objectId);
 			const outer = cool.Scene3D.outerTransformOf(data, objectId);
 			const outerInverse = outer.invert();
 			const middle = cool.Scene3D.middleInItsOwnSpace(data, objectId);
@@ -891,7 +968,7 @@ class Scale3DInteraction extends SelectionInteraction {
 			box,
 			place,
 			// the drag starts at the handle itself, as the office's does
-			new cool.SimplePoint(handle.point.x, handle.point.y),
+			start,
 		);
 	}
 
@@ -961,6 +1038,7 @@ class Scale3DInteraction extends SelectionInteraction {
 			this.sceneId,
 			this.scaled,
 			this.outline(),
+			this.ghost?.frame ?? null,
 		);
 	}
 
