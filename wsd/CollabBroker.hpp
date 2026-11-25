@@ -270,6 +270,10 @@ private:
 
     /// Clean up expired weak pointers
     void cleanupExpiredHandlers();
+
+    /// Set _editingStarted from the users and /cool/ws sessions that still edit.  Called with
+    /// _mutex held.
+    void updateEditingStarted();
 };
 
 /// Global CollabBrokers map and mutex - follows same pattern as DocBrokers

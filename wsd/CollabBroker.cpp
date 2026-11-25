@@ -131,6 +131,9 @@ void CollabBroker::removeHandler(const std::shared_ptr<CollabSocketHandler>& han
         }
     }
 
+    if (handler->isGracefulClose())
+        updateEditingStarted();
+
     if (_handlers.empty())
     {
         _idleSince = std::chrono::steady_clock::now();
@@ -443,10 +446,15 @@ void CollabBroker::notifyEditingStarted(const std::shared_ptr<CollabSocketHandle
     LOG_INF("CollabBroker [" << _docKey << "]: notifying editing started by: "
             << Anonymizer::anonymize(handler->getUsername()));
 
-    // Send to all handlers except the one that started editing
     std::lock_guard<std::mutex> lock(_mutex);
     _editingStarted = true;
-    _editingUserIds.insert(handler->getUserId());
+    if (!_editingUserIds.insert(handler->getUserId()).second)
+    {
+        LOG_DBG("CollabBroker [" << _docKey << "]: the user already edits, not notifying again");
+        return;
+    }
+
+    // Send to all handlers except the one that started editing
     for (auto& weakHandler : _handlers)
     {
         auto h = weakHandler.lock();
@@ -455,6 +463,15 @@ void CollabBroker::notifyEditingStarted(const std::shared_ptr<CollabSocketHandle
             h->sendTextMessage(message);
         }
     }
+}
+
+void CollabBroker::updateEditingStarted()
+{
+    const bool sessionCanWrite =
+        std::any_of(_externalSessions.begin(), _externalSessions.end(),
+                    [](const auto& session) { return session.second.editing; });
+
+    _editingStarted = !_editingUserIds.empty() || sessionCanWrite;
 }
 
 void CollabBroker::cleanupExpiredHandlers()

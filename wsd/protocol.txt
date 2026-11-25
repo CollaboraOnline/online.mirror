@@ -3129,7 +3129,8 @@ client -> server messages on /cool/collab/ws
 
     This view has just transitioned from viewing to editing.  Broadcast as
     {"type":"editing_started","user":<self>} to every other client and sticks the "editingActive"
-    flag in subsequent user_list snapshots.
+    flag in subsequent user_list snapshots.  The flag is cleared again once every such user has
+    sent {"type":"bye"} and no /cool/ws session that can write is left.
 
 {"type":"switch_to_collab"}
 {"type":"saved_and_switching"}
