@@ -452,9 +452,7 @@ void OImageControlModel::impl_handleNewImageURL_lck( ValueChangeInstigator _eIns
 
     case ImageStoreLink:
     {
-        OUString sCommitURL( m_sImageURL );
-        if ( !m_sDocumentURL.isEmpty() )
-            sCommitURL = URIHelper::simpleNormalizedMakeRelative( m_sDocumentURL, sCommitURL );
+        OUString sCommitURL = URIHelper::MakeRelative( m_sDocumentURL, m_sImageURL );
         OSL_ENSURE( m_xColumnUpdate.is(), "OImageControlModel::impl_handleNewImageURL_lck: no bound field, but ImageStoreLink?!" );
         if ( m_xColumnUpdate.is() )
         {
