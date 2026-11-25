@@ -21,6 +21,7 @@
 #include <basegfx/range/b2drange.hxx>
 #include <basegfx/vector/b2dvector.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
+#include <basegfx/polygon/b2dpolygontools.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/numeric/ftools.hxx>
 
@@ -40,6 +41,19 @@ namespace basegfx
 {
     namespace
     {
+        // the angle between the legs misses control points beyond the ends of the chord (a cusp)
+        // and both turned the same way (an S), so they also have to be near the chord. An arc that
+        // passes the angle test has them about fAngleBound / 6 of the chord length away, so for
+        // arcs the angle still decides
+        bool impIsNearChord(const B2DPoint& rfPA, const B2DPoint& rfEA, const B2DPoint& rfEB,
+                            const B2DPoint& rfPB, double fAngleBound)
+        {
+            const double fLimit(B2DVector(rfPB - rfPA).getLength() * fAngleBound / 4.0);
+            double fCut;
+            return utils::getSmallestDistancePointToEdge(rfPA, rfPB, rfEA, fCut) <= fLimit
+                   && utils::getSmallestDistancePointToEdge(rfPA, rfPB, rfEB, fCut) <= fLimit;
+        }
+
         void ImpSubDivAngle(
             const B2DPoint& rfPA,           // start point
             const B2DPoint& rfEA,           // edge on A
@@ -69,7 +83,8 @@ namespace basegfx
 
                 const double fCurrentAngle(aLeft.angle(aRight));
 
-                if(fabs(fCurrentAngle) > (M_PI - fAngleBound))
+                if(fabs(fCurrentAngle) > (M_PI - fAngleBound)
+                   && impIsNearChord(rfPA, rfEA, rfEB, rfPB, fAngleBound))
                 {
                     // end recursion
                     nMaxRecursionDepth = 0;
@@ -206,7 +221,8 @@ namespace basegfx
                     const B2DVector aLeftLeft(bLeftEqualZero ? aS2L - aS1L : aS1L - rfPA); // #i72104#
                     const B2DVector aRightLeft(aS2L - aS3C);
                     const double fCurrentAngleLeft(aLeftLeft.angle(aRightLeft));
-                    bAngleIsSmallerLeft = (fabs(fCurrentAngleLeft) > (M_PI - rfAngleBound));
+                    bAngleIsSmallerLeft = (fabs(fCurrentAngleLeft) > (M_PI - rfAngleBound))
+                                          && impIsNearChord(rfPA, aS1L, aS2L, aS3C, rfAngleBound);
                 }
 
                 // test right
@@ -216,7 +232,8 @@ namespace basegfx
                     const B2DVector aLeftRight(aS2R - aS3C);
                     const B2DVector aRightRight(bRightEqualZero ? aS2R - aS1R : aS1R - rfPB); // #i72104#
                     const double fCurrentAngleRight(aLeftRight.angle(aRightRight));
-                    bAngleIsSmallerRight = (fabs(fCurrentAngleRight) > (M_PI - rfAngleBound));
+                    bAngleIsSmallerRight = (fabs(fCurrentAngleRight) > (M_PI - rfAngleBound))
+                                           && impIsNearChord(aS3C, aS2R, aS1R, rfPB, rfAngleBound);
                 }
 
                 if(bAngleIsSmallerLeft && bAngleIsSmallerRight)

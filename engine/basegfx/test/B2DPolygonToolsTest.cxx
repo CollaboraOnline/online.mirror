@@ -21,11 +21,13 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
+#include <basegfx/curve/b2dcubicbezier.hxx>
 #include <basegfx/polygon/b2dlinegeometry.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolygontools.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygontools.hxx>
+#include <basegfx/range/b2drange.hxx>
 #include <basegfx/vector/b2enums.hxx>
 #include <com/sun/star/drawing/LineCap.hpp>
 
@@ -168,12 +170,37 @@ public:
         }
     }
 
+    void testSubdivideByAngleFollowsSharpTurn()
+    {
+        // a curve whose end legs point almost against each other while it turns sharply in
+        // between; the subdivision has to follow that turn, not only the legs
+        B2DPolygon aCurve;
+        aCurve.append(B2DPoint(0.601, 94.411));
+        aCurve.appendBezierSegment(B2DPoint(82.002, 45.900), B2DPoint(89.380, 85.610),
+                                   B2DPoint(59.531, 16.046));
+        const B2DPolygon aFlat(utils::adaptiveSubdivideByAngle(aCurve));
+
+        B2DCubicBezier aBezier;
+        aCurve.getBezierSegment(0, aBezier);
+        const B2DRange aRange(aCurve.getB2DRange());
+        const double fTolerance(0.005 * std::max(aRange.getWidth(), aRange.getHeight()));
+        for (int a = 0; a <= 1000; ++a)
+        {
+            const B2DPoint aPoint(aBezier.interpolatePoint(a / 1000.0));
+            sal_uInt32 nEdge;
+            double fCut;
+            CPPUNIT_ASSERT_LESSEQUAL(
+                fTolerance, utils::getSmallestDistancePointToPolygon(aFlat, aPoint, nEdge, fCut));
+        }
+    }
+
     CPPUNIT_TEST_SUITE(b2dpolygontools);
     CPPUNIT_TEST(testIsRectangle);
     CPPUNIT_TEST(testCreateAreaGeometryForLineStartEndNotchedArrow);
     CPPUNIT_TEST(testCreateAreaGeometryForLineStartEndSimpleTriangle);
     CPPUNIT_TEST(testCreateAreaGeometryForLineStartEndHollowTriangle);
     CPPUNIT_TEST(testCreateAreaGeometryCutEdge);
+    CPPUNIT_TEST(testSubdivideByAngleFollowsSharpTurn);
     CPPUNIT_TEST_SUITE_END();
 }; // class b2dpolygontools
 
