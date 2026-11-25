@@ -374,6 +374,7 @@ public:
     void testObjectCommandsLeaveAReadOnlyViewAlone();
     void testObjectCommandsKeepTheObjectsProtection();
     void testTurnIn3D();
+    void testTurnIn3DMovesTheInnerScene();
     void testTurningADiagramCanBeUndone();
     void testSelectionTextFollowsTheTextEdit();
     void testObjectPathCommands();
@@ -525,6 +526,7 @@ public:
     CPPUNIT_TEST(testObjectCommandsLeaveAReadOnlyViewAlone);
     CPPUNIT_TEST(testObjectCommandsKeepTheObjectsProtection);
     CPPUNIT_TEST(testTurnIn3D);
+    CPPUNIT_TEST(testTurnIn3DMovesTheInnerScene);
     CPPUNIT_TEST(testTurningADiagramCanBeUndone);
     CPPUNIT_TEST(testSelectionTextFollowsTheTextEdit);
     CPPUNIT_TEST(testObjectPathCommands);
@@ -6871,6 +6873,53 @@ void DesktopKitTest::testTurnIn3D()
     CPPUNIT_ASSERT_EQUAL(turn3DOf(*p3DObject, aSphereTurned),
                          turn3DOf(*p3DObject, p3DObject->GetTransform()));
     CPPUNIT_ASSERT_EQUAL(turn3DOf(*pScene, aWas), turn3DOf(*pScene, pScene->GetTransform()));
+}
+
+void DesktopKitTest::testTurnIn3DMovesTheInnerScene()
+{
+    // a root scene holding a sphere and, beside it, a scene with a cube
+    COKitDocumentImpl* pDocument = loadDoc("3d-scene.fodp");
+    pDocument->initializeForRendering("{}");
+    SdrPageView* pPageView = nullptr;
+    E3dScene* pScene = DynCastE3dScene(firstObjectOfThePage(pPageView));
+    CPPUNIT_ASSERT(pScene);
+    E3dScene* pInner = nullptr;
+    for (const rtl::Reference<SdrObject>& pObject : *pScene->GetSubList())
+        if (!pInner)
+            pInner = DynCastE3dScene(pObject.get());
+    CPPUNIT_ASSERT(pInner);
+    const SdrObject* pCube = pInner->GetSubList()->GetObj(0);
+    CPPUNIT_ASSERT(pCube);
+    vcl::ITiledRenderable* pTiledRenderable
+        = dynamic_cast<vcl::ITiledRenderable*>(pDocument->mxComponent.get());
+    CPPUNIT_ASSERT(pTiledRenderable);
+    const OString aRequest = ".uno:VectorPrimitives?partid=" + pTiledRenderable->getPartId(0, 0);
+
+    // the slide was sent before, as a client that shows it has asked for it
+    pDocument->getCommandValues(aRequest.getStr());
+
+    basegfx::B3DHomMatrix aTurned(pScene->GetTransform());
+    aTurned.rotate(0.3, 0.5, 0.0);
+    pDocument->setObjectTransform(turn3DOf(*pScene, aTurned).getStr(), "turn3d");
+    Scheduler::ProcessEventsToIdle();
+
+    // The inner scene holds the cube alone, so the box the slide's records give it is the
+    // cube's, also after the scene around them turned.
+    std::stringstream aStream(pDocument->getCommandValues(aRequest.getStr()));
+    boost::property_tree::ptree aTree;
+    boost::property_tree::read_json(aStream, aTree);
+    std::map<sal_Int64, std::vector<sal_Int64>> aBoxes;
+    for (const auto& rEntry : aTree.get_child("objects"))
+        aBoxes[rEntry.second.get<sal_Int64>("id")]
+            = { rEntry.second.get<sal_Int64>("x", 0), rEntry.second.get<sal_Int64>("y", 0),
+                rEntry.second.get<sal_Int64>("width", 0),
+                rEntry.second.get<sal_Int64>("height", 0) };
+    const std::vector<sal_Int64>& rCube(aBoxes[sal_Int64(pCube->GetUniqueID())]);
+    const std::vector<sal_Int64>& rInner(aBoxes[sal_Int64(pInner->GetUniqueID())]);
+    CPPUNIT_ASSERT_EQUAL(size_t(4), rCube.size());
+    CPPUNIT_ASSERT_EQUAL(size_t(4), rInner.size());
+    for (size_t nAt = 0; nAt < 4; ++nAt)
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(double(rCube[nAt]), double(rInner[nAt]), 2.0);
 }
 
 void DesktopKitTest::testObjectCommandsKeepTheObjectsProtection()

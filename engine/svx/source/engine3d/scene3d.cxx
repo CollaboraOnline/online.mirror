@@ -879,6 +879,11 @@ void E3dScene::SetTransformChanged()
     // call parent
     E3dObject::SetTransformChanged();
 
+    // a scene inside another one is seen through the outmost scene, so its view, kept since it
+    // was last drawn, is made anew once that one or any scene in between changes
+    if (getRootE3dSceneFromE3dObject() != this)
+        GetViewContact().ActionChanged();
+
     for (const rtl::Reference<SdrObject>& pObj : *this)
     {
         E3dObject* pCandidate = DynCastE3dObject(pObj.get());
