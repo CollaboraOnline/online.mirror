@@ -80,6 +80,7 @@
 #include <com/sun/star/animations/XAnimationNodeSupplier.hpp>
 #include <com/sun/star/awt/XLayoutConstrains.hpp>
 #include <com/sun/star/container/XEnumerationAccess.hpp>
+#include <com/sun/star/drawing/XMasterPagesSupplier.hpp>
 #include <com/sun/star/table/XCellRange.hpp>
 #include <com/sun/star/text/XText.hpp>
 #include <svtools/colorcfg.hxx>
@@ -2895,6 +2896,111 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testMultiViewInsertDeletePage2)
 
     // We must be still in text editing mode and have cursor visible.
     CPPUNIT_ASSERT(pViewShell->GetView()->IsTextEdit());
+}
+
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testUndoSlideDeleteKeepsOtherViewOnItsSlide)
+{
+    // A view that types on a slide stays on that slide when another view deletes the slide before
+    // it and brings it back, even when its next keystroke comes before the views catch up.
+    SdXImpressDocument* pXImpressDocument = createDoc("dummy.odp");
+    SdTestViewCallback aView1;
+    int nView1 = KitHelper::getCurrentView();
+    sd::ViewShell* pViewShell1 = pXImpressDocument->GetDocShell()->GetViewShell();
+
+    KitHelper::createView();
+    pXImpressDocument->initializeForTiledRendering({});
+    SdTestViewCallback aView2;
+    int nView2 = KitHelper::getCurrentView();
+
+    // The second view types into the title of the fourth slide.
+    pXImpressDocument->setPart(3);
+    sd::ViewShell* pViewShell2 = pXImpressDocument->GetDocShell()->GetViewShell();
+    SdPage* pPage2 = pViewShell2->GetActualPage();
+    SdrTextObj* pTextObject = DynCastSdrTextObj(pPage2->GetObj(0));
+    CPPUNIT_ASSERT(pTextObject);
+    SdrView* pView2 = pViewShell2->GetView();
+    pView2->MarkObj(pTextObject, pView2->GetSdrPageView());
+    auto typeKey = [pXImpressDocument](int nCharCode) {
+        pXImpressDocument->postKeyEvent(COKitKeyEventType::DOWN, nCharCode, 0);
+        pXImpressDocument->postKeyEvent(COKitKeyEventType::UP, nCharCode, 0);
+        Scheduler::ProcessEventsToIdle();
+    };
+    typeKey('a');
+    CPPUNIT_ASSERT(pView2->IsTextEdit());
+
+    // The first view deletes the third slide, which is the one before the slide of the second
+    // view.
+    KitHelper::setView(nView1);
+    pXImpressDocument->setPart(2);
+    dispatchCommand(mxComponent, u".uno:DeletePage"_ustr, {});
+    Scheduler::ProcessEventsToIdle();
+    KitHelper::setView(nView2);
+    CPPUNIT_ASSERT_EQUAL(pPage2, pViewShell2->GetActualPage());
+    typeKey('b');
+
+    // The first view brings the slide back, and the next keystroke of the second view comes
+    // before the views have processed their pending events.
+    KitHelper::setView(nView1);
+    SfxRequest aUndo(SID_UNDO, SfxCallMode::SLOT, pXImpressDocument->GetDoc()->GetPool());
+    aUndo.AppendItem(SfxUInt16Item(SID_UNDO, 1));
+    pViewShell1->ExecuteSlot(aUndo);
+    CPPUNIT_ASSERT(aUndo.IsDone());
+    KitHelper::setView(nView2);
+
+    // The second view is on its own slide, which is the fourth slide again.
+    CPPUNIT_ASSERT_EQUAL(pPage2, pViewShell2->GetActualPage());
+    CPPUNIT_ASSERT_EQUAL(3, pXImpressDocument->getPart());
+    typeKey('c');
+    CPPUNIT_ASSERT_EQUAL(pPage2, pViewShell2->GetActualPage());
+
+    // It still edits the title there, and has all that it typed.
+    CPPUNIT_ASSERT(pView2->IsTextEdit());
+    CPPUNIT_ASSERT_EQUAL(pTextObject, pView2->GetTextEditObject());
+    const OUString aText = pView2->GetTextEditOutliner()->GetEditEngine().GetText();
+    CPPUNIT_ASSERT_MESSAGE(aText.toUtf8().getStr(), aText.endsWith("abc"));
+}
+
+CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testMasterInsertedByOtherViewKeepsViewOnItsMaster)
+{
+    // A view that shows a master page stays on that master page when another view inserts a
+    // master page before it, and it stays there when it becomes the active view again.
+    SdXImpressDocument* pXImpressDocument = createDoc("dummy.odp");
+    SdDrawDocument* pDoc = pXImpressDocument->GetDoc();
+    uno::Reference<drawing::XMasterPagesSupplier> xMasterPagesSupplier(mxComponent,
+                                                                       uno::UNO_QUERY_THROW);
+    uno::Reference<drawing::XDrawPages> xMasterPages = xMasterPagesSupplier->getMasterPages();
+    // An extra master page at the end lets the first view show a master page that is not the
+    // first one.
+    xMasterPages->insertNewByIndex(xMasterPages->getCount());
+    Scheduler::ProcessEventsToIdle();
+
+    SdTestViewCallback aView1;
+    int nView1 = KitHelper::getCurrentView();
+    sd::ViewShell* pViewShell1 = pXImpressDocument->GetDocShell()->GetViewShell();
+    pXImpressDocument->setEditMode(1);
+    Scheduler::ProcessEventsToIdle();
+    pXImpressDocument->setPart(1);
+    Scheduler::ProcessEventsToIdle();
+    SdrPage* pMasterPage = pDoc->GetMasterSdPage(1, PageKind::Standard);
+    CPPUNIT_ASSERT_EQUAL(pMasterPage, pViewShell1->GetView()->GetSdrPageView()->GetPage());
+
+    KitHelper::createView();
+    pXImpressDocument->initializeForTiledRendering({});
+    SdTestViewCallback aView2;
+    Scheduler::ProcessEventsToIdle();
+
+    // The second view inserts a master page in front of the one the first view shows.
+    xMasterPages->insertNewByIndex(0);
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT_EQUAL(pMasterPage,
+                         static_cast<SdrPage*>(pDoc->GetMasterSdPage(2, PageKind::Standard)));
+    CPPUNIT_ASSERT_EQUAL(pMasterPage, pViewShell1->GetView()->GetSdrPageView()->GetPage());
+
+    // The first view becomes the active view again and shows the same master page at its new
+    // position.
+    KitHelper::setView(nView1);
+    CPPUNIT_ASSERT_EQUAL(pMasterPage, pViewShell1->GetView()->GetSdrPageView()->GetPage());
+    CPPUNIT_ASSERT_EQUAL(2, pXImpressDocument->getPart());
 }
 
 CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testDisableUndoRepair)

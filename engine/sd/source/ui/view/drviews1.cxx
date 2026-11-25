@@ -723,6 +723,10 @@ void DrawViewShell::ResetActualPage()
         SwitchPage(nCurrentPageNum);
     }
 
+    // The frame view holds the position of the page too, and activating the view switches to that
+    // position. It takes the new position now, ahead of the asynchronous switch below.
+    mpFrameView->SetSelectedPage(nCurrentPageNum);
+
     bool bAllowChangeFocus = nNewPageId != nCurrentPageId;
     SfxBoolItem aI(SID_SWITCHPAGE, bAllowChangeFocus);
     GetViewFrame()->GetDispatcher()->ExecuteList(SID_SWITCHPAGE,
