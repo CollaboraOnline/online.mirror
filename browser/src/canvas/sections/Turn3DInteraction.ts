@@ -101,6 +101,8 @@ class Turn3DInteraction extends SelectionInteraction {
 	): { sceneId: number; objectIds: number[] } | null {
 		const data = RenderGeometrySection.currentPart();
 		if (!data || !objectIds.length) return null;
+		// the 3D of an active chart is the chart's own, its parts go by the chart rules
+		if (GraphicSelection.inPlaceActive) return null;
 
 		const sceneId = cool.Scene3D.sceneOf(data, objectIds[0]);
 		if (sceneId === undefined || !cool.Scene3D.takes(data, sceneId))

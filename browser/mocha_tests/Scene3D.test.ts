@@ -75,6 +75,7 @@ describe('Scene3D', function () {
 				primitives3D: [
 					{
 						type: 'sphere',
+						fill: { color: '#729fcf' },
 						horizontalSegments: 24,
 						verticalSegments: 24,
 						transform: [
@@ -106,6 +107,7 @@ describe('Scene3D', function () {
 				primitives3D: [
 					{
 						type: 'cube',
+						fill: { color: '#729fcf' },
 						transform: [
 							2000, 0, 0, -1000, 0, 2000, 0, -1000, 0, 0, 2000, -1000, 0, 0, 0,
 							1,
@@ -258,6 +260,20 @@ describe('Scene3D', function () {
 			assert.ok(segment[0] >= 4470 && segment[2] >= 4470, String(segment));
 	});
 
+	it('a 3D object drawn with neither a fill nor a line has no outline', function () {
+		// as the walls a 3D pie chart keeps but does not show
+		const data = sceneData();
+		delete data.objects.get(4).primitives3D[0].fill;
+		// a changed record comes with a new version of the part
+		data.version = 3;
+		assert.strictEqual(segmentsOf(cool.Scene3D.outlineOf(data, 4)).length, 0);
+		// it is still hit, as the engine hits it
+		assert.strictEqual(
+			cool.Scene3D.hitAt(data, 1, 4476 + 720, 3044 + 925)?.id,
+			4,
+		);
+	});
+
 	// all faces of a primitive, each as its polygons
 	function facesOf(primitive: any): cool.Point3D[][][] {
 		const faces: cool.Point3D[][][] = [];
@@ -277,6 +293,7 @@ describe('Scene3D', function () {
 	it('an extruded square closed at both ends has two lids and four sides', function () {
 		const faces = facesOf({
 			type: 'extrude',
+			fill: { color: '#729fcf' },
 			outline: [square(0, 1000)],
 			depth: 500,
 			closeFront: true,
@@ -299,6 +316,7 @@ describe('Scene3D', function () {
 		};
 		const faces = facesOf({
 			type: 'extrude',
+			fill: { color: '#729fcf' },
 			outline: [square(0, 1000), hole],
 			depth: 500,
 			closeFront: true,
@@ -316,6 +334,7 @@ describe('Scene3D', function () {
 	it('a bevel takes the front lid in from the outline', function () {
 		const faces = facesOf({
 			type: 'extrude',
+			fill: { color: '#729fcf' },
 			outline: [square(0, 1000)],
 			depth: 500,
 			diagonal: 0.2,
@@ -334,6 +353,7 @@ describe('Scene3D', function () {
 	it('a body turned all round has no lids and closes on itself', function () {
 		const faces = facesOf({
 			type: 'lathe',
+			fill: { color: '#729fcf' },
 			outline: [{ closed: false, points: [500, 0, 500, 1000] }],
 			rotation: 2 * Math.PI,
 			horizontalSegments: 8,
@@ -350,6 +370,7 @@ describe('Scene3D', function () {
 	it('a body turned half way round has its sides and a lid at each end', function () {
 		const faces = facesOf({
 			type: 'lathe',
+			fill: { color: '#729fcf' },
 			outline: [{ closed: true, points: [200, 0, 600, 0, 400, 500] }],
 			rotation: Math.PI,
 			horizontalSegments: 6,
@@ -365,6 +386,7 @@ describe('Scene3D', function () {
 		data.objects.get(4).primitives3D = [
 			{
 				type: 'extrude',
+				fill: { color: '#729fcf' },
 				outline: [square(0, 2000)],
 				depth: 2000,
 				closeFront: true,
@@ -397,6 +419,7 @@ describe('Scene3D', function () {
 		data.objects.get(2).primitives3D = [
 			{
 				type: 'lathe',
+				fill: { color: '#729fcf' },
 				outline: [{ closed: false, points: [500, 0, 500, 1000] }],
 				rotation: 2 * Math.PI,
 				horizontalSegments: 8,
@@ -414,6 +437,7 @@ describe('Scene3D', function () {
 		data.objects.get(2).primitives3D = [
 			{
 				type: 'lathe',
+				fill: { color: '#729fcf' },
 				outline: [
 					{ closed: true, points: [400, 0, 500, 100, 600, 0, 500, -100] },
 				],
@@ -432,6 +456,7 @@ describe('Scene3D', function () {
 		data.objects.get(2).primitives3D = [
 			{
 				type: 'lathe',
+				fill: { color: '#729fcf' },
 				outline: [{ closed: false, points: [500, 0, 500, 1000] }],
 				rotation: 2 * Math.PI,
 				horizontalSegments: 24,
@@ -448,6 +473,7 @@ describe('Scene3D', function () {
 		data.objects.get(2).primitives3D = [
 			{
 				type: 'lathe',
+				fill: { color: '#729fcf' },
 				outline: [{ closed: false, points: [500, 0, 500, 1000] }],
 				rotation: Math.PI,
 				horizontalSegments: 12,

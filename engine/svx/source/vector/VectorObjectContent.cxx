@@ -830,6 +830,16 @@ const Embedding* embeddingOf(const SdrObject& rObject)
     return embeddingFor(rObject.getSdrPageFromSdrObject());
 }
 
+/// the mapping of the chart's page onto the chart's window, from twips to twips
+basegfx::B2DHomMatrix mappingInTwips(const Embedding& rEmbedding)
+{
+    return basegfx::utils::createScaleB2DHomMatrix(constTwipConversionFactor,
+                                                   constTwipConversionFactor)
+           * rEmbedding.maMapping
+           * basegfx::utils::createScaleB2DHomMatrix(1.0 / constTwipConversionFactor,
+                                                     1.0 / constTwipConversionFactor);
+}
+
 /*
     The name the chart gives a part it selects on its own (its CID), without what changes when the
     part is dragged, or empty for any other object. The chart names its parts "CID/...", and a part
@@ -1485,12 +1495,7 @@ void describeObject(SdrObject& rObject, ObjectContent& rContent,
     // path are taken from there onto the chart's window, the primitives were above
     if (const Embedding* pEmbedding = embeddingOf(rObject))
     {
-        const basegfx::B2DHomMatrix aInTwips(
-            basegfx::utils::createScaleB2DHomMatrix(constTwipConversionFactor,
-                                                    constTwipConversionFactor)
-            * pEmbedding->maMapping
-            * basegfx::utils::createScaleB2DHomMatrix(1.0 / constTwipConversionFactor,
-                                                      1.0 / constTwipConversionFactor));
+        const basegfx::B2DHomMatrix aInTwips(mappingInTwips(*pEmbedding));
         rContent.maTransformation = aInTwips * rContent.maTransformation;
         rContent.maPath.transform(aInTwips);
 
@@ -1638,7 +1643,13 @@ void describeObject(SdrObject& rObject, ObjectContent& rContent,
     const SdrObject* pParent = holderOf(rObject);
     rContent.mnParentId = pParent ? idOf(*pParent) : 0;
     if (p3DObject)
+    {
         describeIn3D(*p3DObject, rContent);
+        // the scene of a chart active in place is seen on the chart's window too
+        if (const Embedding* pEmbedding = embeddingOf(rObject); pEmbedding && rContent.moScene3D)
+            rContent.moScene3D->maPlacement
+                = mappingInTwips(*pEmbedding) * rContent.moScene3D->maPlacement;
+    }
 }
 
 void makeTheCurveRunThatWay(basegfx::B2DPolygon& rPolygon, sal_uInt32 nPoint,

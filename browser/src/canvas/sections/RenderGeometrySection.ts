@@ -1310,9 +1310,11 @@ class RenderGeometrySection extends CanvasSectionObject {
 
 		let drawn: Path2D | undefined;
 		for (const objectId of RenderGeometrySection.theOnesThatDraw([taken])) {
-			// a 3D scene is outlined by the shape of its 3D objects, not by its picture
+			// a 3D scene, or a 3D object or scene inside one, is outlined by the shape of its 3D
+			// objects, not by its picture
+			const sceneId = cool.Scene3D.sceneOf(data, objectId);
 			const own =
-				cool.Scene3D.takes(data, objectId) ?
+				sceneId !== undefined && cool.Scene3D.takes(data, sceneId) ?
 					cool.Scene3D.outlineOf(data, objectId)
 				:	cool.VectorHitTest.outlineOf(
 						RenderGeometrySection.objectOf(objectId)?.primitives,

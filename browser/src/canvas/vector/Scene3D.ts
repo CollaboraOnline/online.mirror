@@ -176,7 +176,10 @@ namespace cool {
 			if (sceneId !== undefined && placement) {
 				outline = new Path2D();
 				for (const member of Scene3D.membersOf(data, sceneId) ?? [])
-					if (Scene3D.liesIn(data, member.id, objectId))
+					if (
+						Scene3D.liesIn(data, member.id, objectId) &&
+						Scene3D.isSeen(member)
+					)
 						for (const line of Scene3D.linesOfTheShape(member, placement))
 							line.addTo(outline);
 			}
@@ -373,7 +376,10 @@ namespace cool {
 			const lines: Polygon2D[] = [];
 			for (const member of Scene3D.membersOf(after, sceneId, turned) ?? [])
 				if (
-					objectIds.some((id: number) => Scene3D.liesIn(after, member.id, id))
+					objectIds.some((id: number) =>
+						Scene3D.liesIn(after, member.id, id),
+					) &&
+					Scene3D.isSeen(member)
 				)
 					lines.push(...Scene3D.linesOfTheShape(member, placement));
 			if (!lines.length) return null;
@@ -437,6 +443,12 @@ namespace cool {
 			)
 				if (data.objects.get(at)?.scene3D) return at;
 			return undefined;
+		}
+
+		/// Whether the 3D object is seen at all: one drawn with neither a fill nor a line is not,
+		/// and has no lines to show.
+		private static isSeen(member: Scene3DMember): boolean {
+			return !!(member.primitive.fill || member.primitive.line);
 		}
 
 		/// Whether the object is that one or lies inside it, at any depth.

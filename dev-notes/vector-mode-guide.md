@@ -565,6 +565,13 @@ Whatever you move stays inside the chart. Each change is one undo step, as in th
 While a part of the chart is selected, the status bar names it as the chart does, for example
 "Selection: Data Series 'North'" or the data point with its values.
 
+In a 3D chart a click takes the bar, the wall or the floor under the pointer, the one in front,
+and the pointer outlines the series or the point a click would take by the lines of its 3D
+shape. A selected part of a 3D chart is shown by the dashed lines of its 3D shape; the wall,
+which the chart lets you resize, shows the eight handles as well. The back and the left wall
+are one part, as in the chart. The parts of a 3D chart are not turned, moved or scaled in 3D:
+the turn symbol does not show on them, they go by the chart's rules as above.
+
 A click outside on another object leaves the chart and selects that object, and can drag it at
 once; a click outside on nothing leaves the chart and keeps it selected.
 

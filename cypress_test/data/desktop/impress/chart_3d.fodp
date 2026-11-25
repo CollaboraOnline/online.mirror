@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document xmlns:anim="urn:oasis:names:tc:opendocument:xmlns:animation:1.0" xmlns:smil="urn:oasis:names:tc:opendocument:xmlns:smil-compatible:1.0" xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:presentation="urn:oasis:names:tc:opendocument:xmlns:presentation:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:config="urn:oasis:names:tc:opendocument:xmlns:config:1.0" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:rpt="http://openoffice.org/2005/report" xmlns:css3t="http://www.w3.org/TR/css3-text/" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:officeooo="http://openoffice.org/2009/office" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:coext="urn:com:collaboraoffice:names:experimental:office:xmlns:coext:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" office:version="1.4" office:mimetype="application/vnd.oasis.opendocument.presentation">
+ <office:automatic-styles>
+  <style:page-layout style:name="PM1">
+   <style:page-layout-properties fo:page-width="28cm" fo:page-height="15.75cm" style:print-orientation="landscape"/>
+  </style:page-layout>
+ </office:automatic-styles>
+ <office:master-styles>
+  <style:master-page style:name="Default" style:page-layout-name="PM1"/>
+ </office:master-styles>
+ <office:body>
+  <office:presentation>
+   <draw:page draw:name="page1" draw:master-page-name="Default">
+<draw:frame draw:layer="layout" svg:width="14cm" svg:height="10cm" svg:x="6cm" svg:y="2cm">
+<draw:object>
+<loext:p/>
+<office:document xmlns:grddl="http://www.w3.org/2003/g/data-view#" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xforms="http://www.w3.org/2002/xforms" xmlns:dom="http://www.w3.org/2001/xml-events" xmlns:script="urn:oasis:names:tc:opendocument:xmlns:script:1.0" xmlns:form="urn:oasis:names:tc:opendocument:xmlns:form:1.0" xmlns:math="http://www.w3.org/1998/Math/MathML" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:ooo="http://openoffice.org/2004/office" xmlns:chartooo="http://openoffice.org/2010/chart" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:ooow="http://openoffice.org/2004/writer" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:drawooo="http://openoffice.org/2010/draw" xmlns:oooc="http://openoffice.org/2004/calc" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:calcext="urn:org:documentfoundation:names:experimental:calc:xmlns:calcext:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" xmlns:tableooo="http://openoffice.org/2009/table" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:dr3d="urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0" xmlns:rpt="http://openoffice.org/2005/report" xmlns:css3t="http://www.w3.org/TR/css3-text/" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:field="urn:openoffice:names:experimental:ooo-ms-interop:xmlns:field:1.0" xmlns:formx="urn:openoffice:names:experimental:ooxml-odf-interop:xmlns:form:1.0" xmlns:chart="urn:oasis:names:tc:opendocument:xmlns:chart:1.0" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:coext="urn:com:collaboraoffice:names:experimental:office:xmlns:coext:1.0" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:loext="urn:org:documentfoundation:names:experimental:office:xmlns:loext:1.0" office:version="1.4" office:mimetype="application/vnd.oasis.opendocument.chart">
+<office:meta><meta:generator>Collabora_Office/26.04.7.0$Linux_X86_64 LibreOffice_project/ceb2e130018821c9ef6b79850b8bfaf3923ff770</meta:generator></office:meta>
+<office:styles/>
+<office:automatic-styles>
+<number:number-style style:name="N0">
+<number:number number:min-integer-digits="1"/>
+</number:number-style>
+<number:date-style style:name="N10036" number:language="en" number:country="US" number:automatic-order="true">
+<number:month number:style="long"/>
+<number:text>/</number:text>
+<number:day number:style="long"/>
+<number:text>/</number:text>
+<number:year number:style="long"/>
+</number:date-style>
+<style:style style:name="ch1" style:family="chart">
+<style:graphic-properties draw:stroke="none"/>
+</style:style>
+<style:style style:name="ch2" style:family="chart">
+<style:chart-properties chart:auto-position="true" style:rotation-angle="0"/>
+<style:text-properties fo:font-size="13pt" style:font-size-asian="13pt" style:font-size-complex="13pt"/>
+</style:style>
+<style:style style:name="ch3" style:family="chart">
+<style:chart-properties chart:auto-position="true"/>
+<style:graphic-properties draw:fill="none" draw:fill-color="#d9d9d9"/>
+<style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+</style:style>
+<style:style style:name="ch4" style:family="chart">
+<style:chart-properties chart:three-dimensional="true" chart:auto-position="true" chart:auto-size="true" chart:treat-empty-cells="leave-gap" coext:frequency-type="0" coext:bin-width="0" coext:bin-count="0" coext:use-underflow-bin="false" coext:underflow-bin-value="0" coext:use-overflow-bin="false" coext:overflow-bin-value="0"/>
+</style:style>
+<style:style style:name="ch5" style:family="chart" style:data-style-name="N10036">
+<style:chart-properties chart:display-label="false" chart:logarithmic="false" chart:reverse-direction="false" text:line-break="false" loext:try-staggering-first="false" chart:link-data-style-to-source="true" chart:axis-position="0"/>
+<style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+</style:style>
+<style:style style:name="ch6" style:family="chart" style:data-style-name="N0">
+<style:chart-properties chart:display-label="false" chart:logarithmic="false" chart:reverse-direction="false" text:line-break="false" loext:try-staggering-first="false" chart:link-data-style-to-source="true" chart:axis-position="0"/>
+<style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+</style:style>
+<style:style style:name="ch7" style:family="chart" style:data-style-name="N0">
+<style:chart-properties chart:display-label="true" chart:logarithmic="false" chart:reverse-direction="false" text:line-break="false" loext:try-staggering-first="false" chart:link-data-style-to-source="true" chart:axis-position="0"/>
+<style:graphic-properties svg:stroke-color="#b3b3b3"/>
+<style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+</style:style>
+<style:style style:name="ch8" style:family="chart" style:data-style-name="N0">
+<style:chart-properties chart:link-data-style-to-source="true"/>
+<style:text-properties fo:font-size="10pt" style:font-size-asian="10pt" style:font-size-complex="10pt"/>
+</style:style>
+<style:style style:name="ch9" style:family="chart">
+<style:graphic-properties draw:fill="solid" draw:fill-color="#d9d9d9"/>
+</style:style>
+<style:style style:name="ch10" style:family="chart">
+<style:graphic-properties draw:fill-color="#d9d9d9"/>
+</style:style>
+</office:automatic-styles>
+<office:body>
+<office:chart>
+<chart:chart svg:width="12cm" svg:height="8cm" xlink:href="." xlink:type="simple" chart:class="chart:bar" chart:style-name="ch1">
+<chart:title svg:x="5.228cm" svg:y="0.295cm" chart:style-name="ch2">
+<text:p>3D bars</text:p>
+</chart:title>
+<chart:legend chart:legend-position="end" svg:x="10.426cm" svg:y="3.452cm" style:legend-expansion="high" chart:style-name="ch3"/>
+<chart:plot-area chart:style-name="ch4" svg:x="0.24cm" svg:y="1.266cm" svg:width="9.946cm" svg:height="6.574cm" dr3d:vrp="(17634.6218373783 10271.4823817647 24594.8639082739)" dr3d:vpn="(0.416199821709347 0.173649045905254 0.892537795986984)" dr3d:vup="(-0.0733876362771618 0.984807599917971 -0.157379306090273)" dr3d:projection="perspective" dr3d:distance="1cm" dr3d:focal-length="1cm" dr3d:shadow-slant="0" dr3d:shade-mode="gouraud" dr3d:ambient-color="#666666" dr3d:lighting-mode="false">
+<chart:coordinate-region svg:x="0.675cm" svg:y="1.266cm" svg:width="9.075cm" svg:height="6.574cm"/>
+<dr3d:light dr3d:diffuse-color="#808080" dr3d:direction="(0 0 1)" dr3d:enabled="false" dr3d:specular="true"/>
+<dr3d:light dr3d:diffuse-color="#808080" dr3d:direction="(0 0 1)" dr3d:enabled="true" dr3d:specular="false"/>
+<dr3d:light dr3d:diffuse-color="#808080" dr3d:direction="(0 0 1)" dr3d:enabled="false" dr3d:specular="false"/>
+<dr3d:light dr3d:diffuse-color="#808080" dr3d:direction="(0 0 1)" dr3d:enabled="false" dr3d:specular="false"/>
+<dr3d:light dr3d:diffuse-color="#808080" dr3d:direction="(0 0 1)" dr3d:enabled="false" dr3d:specular="false"/>
+<dr3d:light dr3d:diffuse-color="#808080" dr3d:direction="(0 0 1)" dr3d:enabled="false" dr3d:specular="false"/>
+<dr3d:light dr3d:diffuse-color="#808080" dr3d:direction="(0 0 1)" dr3d:enabled="false" dr3d:specular="false"/>
+<dr3d:light dr3d:diffuse-color="#808080" dr3d:direction="(0 0 1)" dr3d:enabled="false" dr3d:specular="false"/>
+<chart:axis chart:dimension="x" chart:name="primary-x" chart:style-name="ch5" chartooo:axis-type="text">
+<chart:categories table:cell-range-address="local-table.$A$2:.$A$5"/>
+</chart:axis>
+<chart:axis chart:dimension="y" chart:name="primary-y" chart:style-name="ch6"/>
+<chart:axis chart:dimension="z" chart:name="primary-z" chart:style-name="ch7"/>
+<chart:series chart:style-name="ch8" chart:values-cell-range-address="local-table.$B$2:.$B$5" chart:label-cell-address="local-table.$B$1" chart:class="chart:bar">
+<chart:data-point chart:repeated="4"/>
+</chart:series>
+<chart:series chart:style-name="ch8" chart:values-cell-range-address="local-table.$C$2:.$C$5" chart:label-cell-address="local-table.$C$1" chart:class="chart:bar">
+<chart:data-point chart:repeated="4"/>
+</chart:series>
+<chart:wall chart:style-name="ch9"/>
+<chart:floor chart:style-name="ch10"/>
+</chart:plot-area>
+<table:table table:name="local-table">
+<table:table-header-columns>
+<table:table-column/>
+</table:table-header-columns>
+<table:table-columns>
+<table:table-column table:number-columns-repeated="2"/>
+</table:table-columns>
+<table:table-header-rows>
+<table:table-row>
+<table:table-cell>
+<text:p/>
+</table:table-cell>
+<table:table-cell office:value-type="string">
+<text:p>North</text:p>
+</table:table-cell>
+<table:table-cell office:value-type="string">
+<text:p>South</text:p>
+</table:table-cell>
+</table:table-row>
+</table:table-header-rows>
+<table:table-rows>
+<table:table-row>
+<table:table-cell office:value-type="string">
+<text:p>Q1</text:p>
+</table:table-cell>
+<table:table-cell office:value-type="float" office:value="4">
+<text:p>4</text:p>
+</table:table-cell>
+<table:table-cell office:value-type="float" office:value="3">
+<text:p>3</text:p>
+</table:table-cell>
+</table:table-row>
+<table:table-row>
+<table:table-cell office:value-type="string">
+<text:p>Q2</text:p>
+</table:table-cell>
+<table:table-cell office:value-type="float" office:value="7">
+<text:p>7</text:p>
+</table:table-cell>
+<table:table-cell office:value-type="float" office:value="5">
+<text:p>5</text:p>
+</table:table-cell>
+</table:table-row>
+<table:table-row>
+<table:table-cell office:value-type="string">
+<text:p>Q3</text:p>
+</table:table-cell>
+<table:table-cell office:value-type="float" office:value="5">
+<text:p>5</text:p>
+</table:table-cell>
+<table:table-cell office:value-type="float" office:value="6">
+<text:p>6</text:p>
+</table:table-cell>
+</table:table-row>
+<table:table-row>
+<table:table-cell office:value-type="string">
+<text:p>Q4</text:p>
+</table:table-cell>
+<table:table-cell office:value-type="float" office:value="8">
+<text:p>8</text:p>
+</table:table-cell>
+<table:table-cell office:value-type="float" office:value="4">
+<text:p>4</text:p>
+</table:table-cell>
+</table:table-row>
+</table:table-rows>
+</table:table>
+</chart:chart>
+</office:chart>
+</office:body>
+</office:document>
+</draw:object>
+</draw:frame>
+   </draw:page>
+  </office:presentation>
+ </office:body>
+</office:document>

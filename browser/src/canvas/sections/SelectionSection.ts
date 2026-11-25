@@ -1426,13 +1426,15 @@ abstract class SelectionSection extends CanvasSectionObject {
 		// offered its own points alone - is marked by those points and nothing else. A part of a
 		// chart held in place has no eight and is framed by its box.
 		const objects = this.selectedObjects();
-		const corners =
-			(
-				objects.length === 1 &&
-				ObjectHandles.isAChartPartHeldInPlace(objects[0])
-			) ?
-				this.boxInView()
-			:	this.framingCorners();
+		const heldPart =
+			objects.length === 1 && ObjectHandles.isAChartPartHeldInPlace(objects[0]);
+		// a part of a 3D chart shows the lines of its 3D shape, which frame one held in place
+		const shown =
+			objects.length === 1 &&
+			RenderGeometrySection.objectOf(objects[0])?.chartPart !== undefined &&
+			this.drawThe3DShape(objects[0]);
+		if (heldPart && shown) return;
+		const corners = heldPart ? this.boxInView() : this.framingCorners();
 		if (corners.length !== 4) return;
 
 		this.context.save();
@@ -1451,6 +1453,30 @@ abstract class SelectionSection extends CanvasSectionObject {
 		this.context.stroke();
 		this.context.setLineDash([]);
 		this.context.restore();
+	}
+
+	/// Draws the lines of the 3D shape of that object dashed, as the frame is drawn. Answers
+	/// whether it lies in a 3D scene we work out and so was drawn.
+	private drawThe3DShape(objectId: number): boolean {
+		const data = RenderGeometrySection.currentPart();
+		const sceneId = data ? cool.Scene3D.sceneOf(data, objectId) : undefined;
+		if (!data || sceneId === undefined || !cool.Scene3D.takes(data, sceneId))
+			return false;
+		const shape = cool.Scene3D.outlineOf(data, objectId);
+		if (!shape) return false;
+
+		this.context.save();
+		this.context.setTransform(1, 0, 0, 1, 0, 0);
+		const origin = new cool.SimplePoint(0, 0);
+		this.context.translate(origin.vX, origin.vY);
+		this.context.scale(app.twipsToPixels, app.twipsToPixels);
+		this.context.strokeStyle =
+			app.map.uiManager.isBackgroundDark() ? 'white' : 'black';
+		this.context.lineWidth = app.pixelsToTwips;
+		this.context.setLineDash([3 * app.pixelsToTwips, 3 * app.pixelsToTwips]);
+		this.context.stroke(shape);
+		this.context.restore();
+		return true;
 	}
 
 	/*

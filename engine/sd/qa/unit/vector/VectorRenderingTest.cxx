@@ -20,6 +20,7 @@
 #include <SlideshowLayerRenderer.hxx>
 
 #include <com/sun/star/beans/XPropertySet.hpp>
+#include <com/sun/star/chart/XChartDocument.hpp>
 #include <com/sun/star/chart2/FormattedString.hpp>
 #include <com/sun/star/chart2/XTitle.hpp>
 #include <com/sun/star/chart2/XTitled.hpp>
@@ -1295,6 +1296,59 @@ CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testChartPartsAreNamedForTheStatusBar)
     }
     CPPUNIT_ASSERT_MESSAGE("the chart has no parts", nParts > 0);
     CPPUNIT_ASSERT_MESSAGE("no series is named", bSeriesNamed);
+
+    SfxViewShell::Current()->GetIPClient()->DeactivateObject();
+    Scheduler::ProcessEventsToIdle();
+}
+
+CPPUNIT_TEST_FIXTURE(VectorRenderingTest, testThreeDChartInPlaceIsPlaced)
+{
+    // A 3D chart active in place is seen where the chart is on the slide.
+    createBlankDoc();
+    comphelper::COKit::setActive(true);
+    comphelper::ScopeGuard aInactive([] { comphelper::COKit::setActive(false); });
+    dispatchCommand(mxComponent, u".uno:InsertObjectChart"_ustr, {});
+    Scheduler::ProcessEventsToIdle();
+    SdrOle2Obj* pChart = dynamic_cast<SdrOle2Obj*>(page(1)->GetObj(0));
+    CPPUNIT_ASSERT(pChart);
+
+    uno::Reference<chart::XChartDocument> xChartDocument(pChart->getXModel(),
+                                                         uno::UNO_QUERY_THROW);
+    uno::Reference<beans::XPropertySet> xDiagram(xChartDocument->getDiagram(),
+                                                 uno::UNO_QUERY_THROW);
+    xDiagram->setPropertyValue(u"Dim3D"_ustr, uno::Any(true));
+
+    getSdDocShell()->GetViewShell()->ActivateObject(pChart, embed::EmbedVerbs::MS_OLEVERB_PRIMARY);
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT(SfxViewShell::Current());
+    CPPUNIT_ASSERT_MESSAGE("the chart is not active in place",
+                           SfxViewShell::Current()->GetIPClient());
+
+    // the first pull hands the parts of the chart out
+    getVectorPrimitives(u"testThreeDChartBase");
+    auto aJson = getVectorPrimitives(u"testThreeDChart");
+
+    bool bSceneFound = false;
+    const size_t nCount = aJson.getSize("/objects").value_or(0);
+    for (size_t nIndex = 0; nIndex < nCount; ++nIndex)
+    {
+        const auto oEntry
+            = aJson.at(rtl::Concat2View("/objects/" + OString::number(sal_Int32(nIndex))));
+        if (!oEntry)
+            continue;
+        if (oEntry->at("scene3D/placement"))
+        {
+            // the scene's picture fills its box, so the unit square starts where the box does
+            bSceneFound = true;
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(oEntry->getDouble("transform/4").value_or(0),
+                                         oEntry->getDouble("scene3D/placement/4").value_or(-1),
+                                         1.0);
+            CPPUNIT_ASSERT_DOUBLES_EQUAL(oEntry->getDouble("transform/5").value_or(0),
+                                         oEntry->getDouble("scene3D/placement/5").value_or(-1),
+                                         1.0);
+        }
+    }
+    CPPUNIT_ASSERT_MESSAGE("the chart has no 3D scene", bSceneFound);
 
     SfxViewShell::Current()->GetIPClient()->DeactivateObject();
     Scheduler::ProcessEventsToIdle();
