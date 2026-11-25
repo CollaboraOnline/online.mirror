@@ -607,6 +607,18 @@ CPPUNIT_TEST_FIXTURE(Test, test2Id)
     xmlDocUniquePtr pXmlDoc = parseExport(u"word/document.xml"_ustr);
     // This was 2, but only one w:id is allowed.
     assertXPath(pXmlDoc, "//w:sdtPr/w:id", 1);
+    // imported runSdt: need to round-trip the temporary flag
+    assertXPath(pXmlDoc, "//w:sdtPr/w:temporary", 1);
+}
+
+CPPUNIT_TEST_FIXTURE(Test, testBlockSdt_temporary)
+{
+    createSwDoc("blockSdt_temporary.docx");
+    save(TestFilter::DOCX);
+    xmlDocUniquePtr pXmlDoc = parseExport(u"word/document.xml"_ustr);
+    assertXPath(pXmlDoc, "//w:sdt", 1);
+    // imported blockSdt: need to round-trip the temporary flag
+    assertXPath(pXmlDoc, "//w:sdtPr/w:temporary", 1);
 }
 
 CPPUNIT_TEST_FIXTURE(Test, testTableStart2Sdt)

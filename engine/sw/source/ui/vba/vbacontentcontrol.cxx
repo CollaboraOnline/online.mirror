@@ -579,17 +579,9 @@ OUString SwVbaContentControl::getTag() { return m_pCC->GetTag(); }
 
 void SwVbaContentControl::setTag(const OUString& rSet) { return m_pCC->SetTag(rSet); }
 
-bool SwVbaContentControl::getTemporary()
-{
-    SAL_INFO("sw.vba", "SwVbaContentControl::getTemporary stub");
-    // Is content control removed when user edits (one time use)? Not implemented in LO.
-    return false;
-}
+bool SwVbaContentControl::getTemporary() { return m_pCC->GetTemporary(); }
 
-void SwVbaContentControl::setTemporary(bool /*bSet*/)
-{
-    SAL_INFO("sw.vba", "SwVbaContentControl::setTemporary stub");
-}
+void SwVbaContentControl::setTemporary(bool bSet) { m_pCC->SetTemporary(bSet); }
 
 OUString SwVbaContentControl::getTitle() { return m_pCC->GetAlias(); }
 

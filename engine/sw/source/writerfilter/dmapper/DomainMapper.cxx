@@ -3480,6 +3480,7 @@ void DomainMapper::sprmWithProps( Sprm& rSprm, const PropertyMapPtr& rContext )
     case NS_ooxml::LN_CT_SdtPr_alias:
     case NS_ooxml::LN_CT_SdtPlaceholder_docPart:
     case NS_ooxml::LN_CT_SdtPr_showingPlcHdr:
+    case NS_ooxml::LN_CT_SdtPr_temporary:
     case NS_ooxml::LN_CT_SdtPr_color:
     case NS_ooxml::LN_CT_SdtPr_appearance:
     case NS_ooxml::LN_CT_SdtPr_tag:
@@ -3500,6 +3501,13 @@ void DomainMapper::sprmWithProps( Sprm& rSprm, const PropertyMapPtr& rContext )
             {
                 if (nIntValue)
                     m_pImpl->GetSdtHelper().SetShowingPlcHdr();
+                break;
+            }
+
+            if (nSprmId == NS_ooxml::LN_CT_SdtPr_temporary)
+            {
+                if (nIntValue)
+                    m_pImpl->GetSdtHelper().SetTemporary();
                 break;
             }
 
@@ -3604,6 +3612,7 @@ void DomainMapper::sprmWithProps( Sprm& rSprm, const PropertyMapPtr& rContext )
             case NS_ooxml::LN_CT_SdtPr_lock:        sName = u"ooxml:CT_SdtPr_lock"_ustr; break;
             case NS_ooxml::LN_CT_SdtPlaceholder_docPart: sName = u"ooxml:CT_SdtPlaceholder_docPart"_ustr; break;
             case NS_ooxml::LN_CT_SdtPr_showingPlcHdr: sName = u"ooxml:CT_SdtPr_showingPlcHdr"_ustr; break;
+            case NS_ooxml::LN_CT_SdtPr_temporary:   sName = u"ooxml:CT_SdtPr_temporary"_ustr; break;
             case NS_ooxml::LN_CT_SdtPr_color:       sName = u"ooxml:CT_SdtPr_color"_ustr; break;
             case NS_ooxml::LN_CT_SdtPr_appearance:  sName = u"ooxml:CT_SdtPr_appearance"_ustr; break;
             default: assert(false);
@@ -3633,7 +3642,8 @@ void DomainMapper::sprmWithProps( Sprm& rSprm, const PropertyMapPtr& rContext )
             aValue.Value <<= sStringValue;
             m_pImpl->GetSdtHelper().appendToInteropGrabBag(aValue);
         }
-        else if (nSprmId == NS_ooxml::LN_CT_SdtPr_showingPlcHdr)
+        else if (nSprmId == NS_ooxml::LN_CT_SdtPr_showingPlcHdr
+                 || nSprmId == NS_ooxml::LN_CT_SdtPr_temporary)
         {
             // Grabbag boolean values
             beans::PropertyValue aValue;

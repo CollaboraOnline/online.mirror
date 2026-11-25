@@ -92,6 +92,9 @@ class SdtHelper
     /// Current contents are placeholder text.
     bool m_bShowingPlcHdr = false;
 
+    /// <w:sdtPr>'s <w:temporary/>
+    bool m_bTemporary = false;
+
     /// If this is a checkbox, is the checkbox checked?
     bool m_bChecked = false;
 
@@ -204,6 +207,9 @@ public:
         m_aPlaceholderCharStyle = rCharStyle;
     }
     const OUString& GetPlaceholderCharStyle() const { return m_aPlaceholderCharStyle; }
+
+    void SetTemporary();
+    bool GetTemporary() const;
 
     void SetChecked();
     bool GetChecked() const;

@@ -277,6 +277,8 @@ void SdtHelper::createPlainTextControl()
         OUString sPropertyName;
         if (prop.Name == "ooxml:CT_SdtPr_showingPlcHdr")
             sPropertyName = u"ShowingPlaceHolder"_ustr;
+        else if (prop.Name == "ooxml:CT_SdtPr_temporary")
+            sPropertyName = u"Temporary"_ustr;
         else if (prop.Name == "ooxml:CT_SdtPr_alias")
             sPropertyName = u"Alias"_ustr;
         else if (prop.Name == "ooxml:CT_SdtPr_tag")
@@ -453,6 +455,10 @@ void SdtHelper::SetShowingPlcHdr() { m_bShowingPlcHdr = true; }
 
 bool SdtHelper::GetShowingPlcHdr() const { return m_bShowingPlcHdr; }
 
+void SdtHelper::SetTemporary() { m_bTemporary = true; }
+
+bool SdtHelper::GetTemporary() const { return m_bTemporary; }
+
 void SdtHelper::SetChecked() { m_bChecked = true; }
 
 bool SdtHelper::GetChecked() const { return m_bChecked; }
@@ -480,6 +486,7 @@ void SdtHelper::clear()
     m_aGrabBag.clear();
     m_bHasUnusedText = false;
     m_bShowingPlcHdr = false;
+    m_bTemporary = false;
     m_bChecked = false;
     m_aCheckedState.clear();
     m_aUncheckedState.clear();

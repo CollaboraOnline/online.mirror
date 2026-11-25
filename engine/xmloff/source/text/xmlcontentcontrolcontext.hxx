@@ -37,6 +37,7 @@ class XMLContentControlContext : public SvXMLImportContext
     cpo::uno::Reference<css::text::XTextRange> m_xStart;
 
     bool m_bShowingPlaceHolder = false;
+    bool m_bTemporary = false;
 
     bool m_bCheckbox = false;
     bool m_bChecked = false;

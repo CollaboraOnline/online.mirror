@@ -362,6 +362,7 @@ CPPUNIT_TEST_FIXTURE(SwCoreUnocoreTest, testContentControlInsert)
     // Set a custom property on the content control:
     uno::Reference<beans::XPropertySet> xContentControlProps(xContentControl, uno::UNO_QUERY);
     xContentControlProps->setPropertyValue(u"ShowingPlaceHolder"_ustr, cpo::uno::Any(true));
+    xContentControlProps->setPropertyValue(u"Temporary"_ustr, cpo::uno::Any(true));
     xText->insertTextContent(xCursor, xContentControl, /*bAbsorb=*/true);
 
     // Then make sure that the text attribute is inserted:
@@ -378,6 +379,7 @@ CPPUNIT_TEST_FIXTURE(SwCoreUnocoreTest, testContentControlInsert)
         = static_cast<SwFormatContentControl&>(pTextContentControl->GetAttr());
     std::shared_ptr<SwContentControl> pContentControl = rFormatContentControl.GetContentControl();
     CPPUNIT_ASSERT(pContentControl->GetShowingPlaceHolder());
+    CPPUNIT_ASSERT(pContentControl->GetTemporary());
 
     // Also verify that setText() and getText() works:
     uno::Reference<text::XText> xContentControlText(xContentControl, uno::UNO_QUERY);

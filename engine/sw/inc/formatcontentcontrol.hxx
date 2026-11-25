@@ -120,6 +120,9 @@ class SW_DLLPUBLIC SwContentControl final : public sw::BroadcastingModify
     /// Current content is placeholder text.
     bool m_bShowingPlaceHolder = false;
 
+    /// Remove the control when modified - leaving only the raw text behind: just remembered.
+    bool m_bTemporary = false;
+
     /// Display the content control as a checkbox.
     bool m_bCheckbox = false;
 
@@ -236,6 +239,10 @@ public:
     }
 
     bool GetShowingPlaceHolder() const { return m_bShowingPlaceHolder; }
+
+    void SetTemporary(bool bTemporary) { m_bTemporary = bTemporary; }
+
+    bool GetTemporary() const { return m_bTemporary; }
 
     void SetCheckbox(bool bCheckbox) { m_bCheckbox = bCheckbox; }
 

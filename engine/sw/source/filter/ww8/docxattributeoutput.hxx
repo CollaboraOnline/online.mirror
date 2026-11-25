@@ -166,6 +166,7 @@ public:
         : m_bStartedSdt(false)
         , m_pStartPosition(nullptr)
         , m_bShowingPlaceHolder(false)
+        , m_bTemporary(false)
         , m_nTabIndex(0)
     {}
 
@@ -196,6 +197,7 @@ public:
     OUString m_aAppearance;
     OUString m_aPlaceHolderDocPart;
     bool m_bShowingPlaceHolder;
+    bool m_bTemporary;
     OUString m_aAlias;
     OUString m_aTag;
     sal_Int32 m_nTabIndex;

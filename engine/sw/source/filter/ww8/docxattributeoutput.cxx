@@ -827,6 +827,7 @@ void SdtBlockHelper::clearGrabbagValues()
     if (!m_aAppearance.isEmpty())
         m_aAppearance.clear();
     m_bShowingPlaceHolder = false;
+    m_bTemporary = false;
     m_oId = std::nullopt;
     m_oSdtPrToken = std::nullopt;
     m_nTabIndex = 0;
@@ -914,6 +915,11 @@ void SdtBlockHelper::WriteExtraParams(const ::sax_fastparser::FSHelperPtr& pSeri
         pSerializer->startElementNS(XML_w, XML_placeholder);
         pSerializer->singleElementNS(XML_w, XML_docPart, FSNS(XML_w, XML_val), m_aPlaceHolderDocPart);
         pSerializer->endElementNS(XML_w, XML_placeholder);
+    }
+
+    if (m_bTemporary)
+    {
+        pSerializer->singleElementNS(XML_w, XML_temporary);
     }
 
     if (m_bShowingPlaceHolder)
@@ -1050,6 +1056,11 @@ void SdtBlockHelper::GetSdtParamsFromGrabBag(const cpo::uno::Sequence<beans::Pro
         {
             if (!(aPropertyValue.Value >>= m_bShowingPlaceHolder))
                 SAL_WARN("sw.ww8", "DocxAttributeOutput::GrabBag: unexpected sdt ShowingPlcHdr");
+        }
+        else if (aPropertyValue.Name == "ooxml:CT_SdtPr_temporary")
+        {
+            if (!(aPropertyValue.Value >>= m_bTemporary))
+                SAL_WARN("sw.ww8", "DocxAttributeOutput::GrabBag: unexpected sdt temporary value");
         }
         else if (aPropertyValue.Name == "ooxml:CT_SdtPr_alias" && m_aAlias.isEmpty())
         {
@@ -2808,6 +2819,11 @@ void DocxAttributeOutput::WriteContentControlStart()
         m_pSerializer->singleElementNS(XML_w, XML_docPart, FSNS(XML_w, XML_val),
                                        m_pContentControl->GetPlaceholderDocPart());
         m_pSerializer->endElementNS(XML_w, XML_placeholder);
+    }
+
+    if (m_pContentControl->GetTemporary())
+    {
+        m_pSerializer->singleElementNS(XML_w, XML_temporary);
     }
 
     if (m_pContentControl->GetShowingPlaceHolder())

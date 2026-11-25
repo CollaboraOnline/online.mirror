@@ -3813,6 +3813,12 @@ xmlns:coext="urn:com:collaboraoffice:names:experimental:office:xmlns:coext:1.0"
       </rng:optional>
       <rng:optional>
         <!-- default value: false -->
+        <rng:attribute name="loext:temporary">
+          <rng:ref name="boolean"/>
+        </rng:attribute>
+      </rng:optional>
+      <rng:optional>
+        <!-- default value: false -->
         <rng:attribute name="loext:checkbox">
         <rng:ref name="boolean"/>
         </rng:attribute>

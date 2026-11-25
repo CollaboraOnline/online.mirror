@@ -1048,6 +1048,7 @@ std::span<const SfxItemPropertyMapEntry> SwUnoPropertyMapProvider::GetContentCon
     static SfxItemPropertyMapEntry const aContentControlMap_Impl[] =
     {
         { UNO_NAME_SHOWING_PLACE_HOLDER, 0, cppu::UnoType<bool>::get(), PROPERTY_NONE, 0 },
+        { UNO_NAME_TEMPORARY, 0, cppu::UnoType<bool>::get(), PROPERTY_NONE, 0 },
         { UNO_NAME_CHECKBOX, 0, cppu::UnoType<bool>::get(), PROPERTY_NONE, 0 },
         { UNO_NAME_CHECKED, 0, cppu::UnoType<bool>::get(), PROPERTY_NONE, 0 },
         { UNO_NAME_CHECKED_STATE, 0, cppu::UnoType<OUString>::get(), PROPERTY_NONE, 0 },

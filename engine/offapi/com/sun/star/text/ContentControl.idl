@@ -131,6 +131,10 @@ service ContentControl
     /** Indicates if the control accepts soft breaks.
     */
     [optional, property] string MultiLine;
+
+    /** Indicates if the control should be removed when it is edited (leaving the raw text behind).
+    */
+    [optional, property] boolean Temporary;
 };
 
 

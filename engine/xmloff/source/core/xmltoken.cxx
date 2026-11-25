@@ -3603,6 +3603,7 @@ namespace xmloff::token {
         TOKEN("followed-hyperlink",    XML_FOLLOWED_HYPERLINK),
         TOKEN("content-control",     XML_CONTENT_CONTROL ),
         TOKEN("showing-place-holder", XML_SHOWING_PLACE_HOLDER ),
+        TOKEN("temporary", XML_TEMPORARY),
         TOKEN("checked-state", XML_CHECKED_STATE),
         TOKEN("unchecked-state", XML_UNCHECKED_STATE),
         TOKEN("display-text", XML_DISPLAY_TEXT),

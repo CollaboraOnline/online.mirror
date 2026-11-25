@@ -62,6 +62,14 @@ void XMLContentControlContext::startFastElement(
                 }
                 break;
             }
+            case XML_ELEMENT(LO_EXT, XML_TEMPORARY):
+            {
+                if (sax::Converter::convertBool(bTmp, rIter.toView()))
+                {
+                    m_bTemporary = bTmp;
+                }
+                break;
+            }
             case XML_ELEMENT(LO_EXT, XML_CHECKBOX):
             {
                 if (sax::Converter::convertBool(bTmp, rIter.toView()))
@@ -215,6 +223,11 @@ void XMLContentControlContext::endFastElement(sal_Int32)
     {
         xPropertySet->setPropertyValue(u"ShowingPlaceHolder"_ustr,
                                        cpo::uno::Any(m_bShowingPlaceHolder));
+    }
+
+    if (m_bTemporary)
+    {
+        xPropertySet->setPropertyValue(u"Temporary"_ustr, cpo::uno::Any(m_bTemporary));
     }
 
     if (m_bCheckbox)

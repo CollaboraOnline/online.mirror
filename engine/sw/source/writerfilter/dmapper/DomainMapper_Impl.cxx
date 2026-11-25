@@ -1170,6 +1170,11 @@ void DomainMapper_Impl::PopSdt()
                                           cpo::uno::Any(GetSdtHelper().GetShowingPlcHdr()));
     }
 
+    if (GetSdtHelper().GetTemporary())
+    {
+        xContentControl->setPropertyValue(u"Temporary"_ustr, cpo::uno::Any(true));
+    }
+
     if (!GetSdtHelper().GetPlaceholderDocPart().isEmpty())
     {
         xContentControl->setPropertyValue(u"PlaceholderDocPart"_ustr,

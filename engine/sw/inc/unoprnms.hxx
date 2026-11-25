@@ -941,6 +941,7 @@ inline constexpr OUString UNO_NAME_CLEAR = u"Clear"_ustr;
 inline constexpr OUString UNO_NAME_LINEBREAK = u"LineBreak"_ustr;
 inline constexpr OUString UNO_NAME_CONTENT_CONTROL = u"ContentControl"_ustr;
 inline constexpr OUString UNO_NAME_SHOWING_PLACE_HOLDER = u"ShowingPlaceHolder"_ustr;
+inline constexpr OUString UNO_NAME_TEMPORARY = u"Temporary"_ustr;
 inline constexpr OUString UNO_NAME_CHECKBOX = u"Checkbox"_ustr;
 inline constexpr OUString UNO_NAME_CHECKED = u"Checked"_ustr;
 inline constexpr OUString UNO_NAME_CHECKED_STATE = u"CheckedState"_ustr;

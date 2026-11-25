@@ -3601,6 +3601,7 @@ namespace xmloff::token {
 
         XML_CONTENT_CONTROL,
         XML_SHOWING_PLACE_HOLDER,
+        XML_TEMPORARY,
         XML_CHECKED_STATE,
         XML_UNCHECKED_STATE,
         XML_DISPLAY_TEXT,

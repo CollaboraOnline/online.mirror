@@ -153,6 +153,7 @@ public:
     rtl::Reference<SwXContentControlText> m_xText;
     SwContentControl* m_pContentControl;
     bool m_bShowingPlaceHolder;
+    bool m_bTemporary;
     bool m_bCheckbox;
     bool m_bChecked;
     OUString m_aCheckedState;
@@ -188,6 +189,7 @@ public:
         , m_xText(new SwXContentControlText(rDoc, rThis))
         , m_pContentControl(pContentControl)
         , m_bShowingPlaceHolder(false)
+        , m_bTemporary(false)
         , m_bCheckbox(false)
         , m_bChecked(false)
         , m_bPicture(false)
@@ -451,6 +453,7 @@ void SwXContentControl::AttachImpl(const uno::Reference<text::XTextRange>& xText
     auto pContentControl = std::make_shared<SwContentControl>(nullptr);
 
     pContentControl->SetShowingPlaceHolder(m_pImpl->m_bShowingPlaceHolder);
+    pContentControl->SetTemporary(m_pImpl->m_bTemporary);
     pContentControl->SetCheckbox(m_pImpl->m_bCheckbox);
     pContentControl->SetChecked(m_pImpl->m_bChecked);
     pContentControl->SetCheckedState(m_pImpl->m_aCheckedState);
@@ -638,6 +641,21 @@ void SwXContentControl::setPropertyValue(const OUString& rPropertyName,
             else
             {
                 m_pImpl->m_pContentControl->SetShowingPlaceHolder(bValue);
+            }
+        }
+    }
+    else if (rPropertyName == UNO_NAME_TEMPORARY)
+    {
+        bool bValue;
+        if (rValue >>= bValue)
+        {
+            if (m_pImpl->m_bIsDescriptor)
+            {
+                m_pImpl->m_bTemporary = bValue;
+            }
+            else
+            {
+                m_pImpl->m_pContentControl->SetTemporary(bValue);
             }
         }
     }
@@ -1045,6 +1063,17 @@ cpo::uno::Any SwXContentControl::getPropertyValue(const OUString& rPropertyName)
         else
         {
             aRet <<= m_pImpl->m_pContentControl->GetShowingPlaceHolder();
+        }
+    }
+    else if (rPropertyName == UNO_NAME_TEMPORARY)
+    {
+        if (m_pImpl->m_bIsDescriptor)
+        {
+            aRet <<= m_pImpl->m_bTemporary;
+        }
+        else
+        {
+            aRet <<= m_pImpl->m_pContentControl->GetTemporary();
         }
     }
     else if (rPropertyName == UNO_NAME_CHECKBOX)

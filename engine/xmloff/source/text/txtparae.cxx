@@ -4129,6 +4129,16 @@ void XMLTextParagraphExport::ExportContentControl(
                                      aBuffer.makeStringAndClear());
         }
 
+        bool bTemporary = false;
+        xPropertySet->getPropertyValue(u"Temporary"_ustr) >>= bTemporary;
+        if (bTemporary)
+        {
+            OUStringBuffer aBuffer;
+            sax::Converter::convertBool(aBuffer, bTemporary);
+            GetExport().AddAttribute(XML_NAMESPACE_LO_EXT, XML_TEMPORARY,
+                                     aBuffer.makeStringAndClear());
+        }
+
         bool bCheckbox = false;
         xPropertySet->getPropertyValue(u"Checkbox"_ustr) >>= bCheckbox;
         if (bCheckbox)

@@ -204,6 +204,7 @@ SwContentControl::SwContentControl(SwFormatContentControl* pFormat)
     }
 
     SetShowingPlaceHolder(pOther->m_bShowingPlaceHolder);
+    SetTemporary(pOther->m_bTemporary);
     SetCheckbox(pOther->m_bCheckbox);
     SetChecked(pOther->m_bChecked);
     SetCheckedState(pOther->m_aCheckedState);
@@ -576,6 +577,8 @@ void SwContentControl::dumpAsXml(xmlTextWriterPtr pWriter) const
     (void)xmlTextWriterWriteFormatAttribute(
         pWriter, BAD_CAST("showing-place-holder"), "%s",
         BAD_CAST(OString::boolean(m_bShowingPlaceHolder).getStr()));
+    (void)xmlTextWriterWriteFormatAttribute(pWriter, BAD_CAST("temporary"), "%s",
+                                            BAD_CAST(OString::boolean(m_bTemporary).getStr()));
     (void)xmlTextWriterWriteFormatAttribute(pWriter, BAD_CAST("checkbox"), "%s",
                                             BAD_CAST(OString::boolean(m_bCheckbox).getStr()));
     (void)xmlTextWriterWriteFormatAttribute(pWriter, BAD_CAST("checked"), "%s",

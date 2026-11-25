@@ -562,6 +562,7 @@ CPPUNIT_TEST_FIXTURE(XmloffStyleTest, testContentControlExport)
         xMSF->createInstance(u"com.sun.star.text.ContentControl"_ustr), uno::UNO_QUERY);
     uno::Reference<beans::XPropertySet> xContentControlProps(xContentControl, uno::UNO_QUERY);
     xContentControlProps->setPropertyValue(u"ShowingPlaceHolder"_ustr, cpo::uno::Any(true));
+    xContentControlProps->setPropertyValue(u"Temporary"_ustr, cpo::uno::Any(true));
     xText->insertTextContent(xCursor, xContentControl, /*bAbsorb=*/true);
 
     // When exporting to ODT:
@@ -573,6 +574,7 @@ CPPUNIT_TEST_FIXTURE(XmloffStyleTest, testContentControlExport)
     // - XPath '//loext:content-control' number of nodes is incorrect
     // i.e. the content control was lost on export.
     assertXPath(pXmlDoc, "//loext:content-control", "showing-place-holder", u"true");
+    assertXPath(pXmlDoc, "//loext:content-control", "temporary", u"true");
 }
 
 CPPUNIT_TEST_FIXTURE(XmloffStyleTest, testContentControlImport)
@@ -604,6 +606,8 @@ CPPUNIT_TEST_FIXTURE(XmloffStyleTest, testContentControlImport)
     uno::Reference<container::XEnumeration> xContentEnum = xContentEnumAccess->createEnumeration();
     uno::Reference<text::XTextRange> xContent(xContentEnum->nextElement(), uno::UNO_QUERY);
     CPPUNIT_ASSERT_EQUAL(u"test"_ustr, xContent->getString());
+    uno::Reference<beans::XPropertySet> xContentControlProps(xContentControl, uno::UNO_QUERY);
+    CPPUNIT_ASSERT(xContentControlProps->getPropertyValue(u"Temporary"_ustr).get<bool>());
 }
 
 CPPUNIT_TEST_FIXTURE(XmloffStyleTest, testCheckboxContentControlExport)

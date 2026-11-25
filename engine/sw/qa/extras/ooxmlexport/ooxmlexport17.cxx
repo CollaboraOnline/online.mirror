@@ -268,6 +268,7 @@ CPPUNIT_TEST_FIXTURE(Test, testContentControlExport)
         xMSF->createInstance(u"com.sun.star.text.ContentControl"_ustr), uno::UNO_QUERY);
     uno::Reference<beans::XPropertySet> xContentControlProps(xContentControl, uno::UNO_QUERY);
     xContentControlProps->setPropertyValue(u"ShowingPlaceHolder"_ustr, cpo::uno::Any(true));
+    xContentControlProps->setPropertyValue(u"Temporary"_ustr, cpo::uno::Any(true));
     xText->insertTextContent(xCursor, xContentControl, /*bAbsorb=*/true);
 
     // When exporting to DOCX:
@@ -281,6 +282,7 @@ CPPUNIT_TEST_FIXTURE(Test, testContentControlExport)
     // XPath '//w:sdt/w:sdtPr/w:showingPlcHdr' number of nodes is incorrect
     // i.e. the SDT elements were missing on export.
     assertXPath(pXmlDoc, "//w:sdt/w:sdtPr/w:showingPlcHdr", 1);
+    assertXPath(pXmlDoc, "//w:sdt/w:sdtPr/w:temporary", 1);
     assertXPath(pXmlDoc, "//w:sdt/w:sdtContent", 1);
 }
 
