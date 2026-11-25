@@ -73,6 +73,17 @@ std::string clientContentType(std::string const & upstream) {
     }
 }
 
+Poco::URI fileUriOf(Poco::URI const & uploadUri)
+{
+    // The address of the upload is that of the file with "/contents" appended:
+    Poco::URI fileUri(uploadUri);
+    std::string path = fileUri.getPath();
+    path.erase(path.size() - std::string_view("/contents").size());
+    fileUri.setPath(path);
+
+    return fileUri;
+}
+
 }
 
 CollabFileProxy::CollabFileProxy(std::string id, const RequestDetails& requestDetails,
@@ -448,11 +459,7 @@ void CollabFileProxy::answerUploaded(
 void CollabFileProxy::checkUploadOutcome(
     std::shared_ptr<TerminatingPoll> const & poll, Poco::URI const & uri)
 {
-    // The address of the upload is that of the file with "/contents" appended:
-    Poco::URI fileUri(uri);
-    std::string path = fileUri.getPath();
-    path.erase(path.size() - std::string_view("/contents").size());
-    fileUri.setPath(path);
+    Poco::URI const fileUri = fileUriOf(uri);
 
     LOG_WRN("CollabFileProxy: asking storage whether the PutFile without a clear answer landed");
     _uploadCheck = std::make_shared<CheckFileInfo>(
