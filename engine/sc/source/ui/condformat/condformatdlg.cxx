@@ -300,6 +300,8 @@ IMPL_LINK_NOARG(ScCondFormatList, AfterTypeListHdl, void*, void)
 
     const bool bFocused = mbTypeListFocused;
     sal_Int32 nPos = mnTypeListPos;
+    // Destroy the old entry before constructing the new one, as in AfterColFormatTypeHdl, so the
+    // widgets of the new entry keep their ids in online.
     switch(nPos)
     {
         case 0:
@@ -316,7 +318,8 @@ IMPL_LINK_NOARG(ScCondFormatList, AfterTypeListHdl, void*, void)
                     return;
             }
             Freeze();
-            itr->reset(new ScColorScale3FrmtEntry(this, mrDoc, maPos));
+            itr->reset();
+            *itr = std::make_unique<ScColorScale3FrmtEntry>(this, mrDoc, maPos);
             mpDialogParent->InvalidateRefData();
             (*itr)->SetActive();
             break;
@@ -325,7 +328,8 @@ IMPL_LINK_NOARG(ScCondFormatList, AfterTypeListHdl, void*, void)
                 return;
 
             Freeze();
-            itr->reset(new ScConditionFrmtEntry(this, mrDoc, mpDialogParent, maPos));
+            itr->reset();
+            *itr = std::make_unique<ScConditionFrmtEntry>(this, mrDoc, mpDialogParent, maPos);
             mpDialogParent->InvalidateRefData();
             (*itr)->SetActive();
             break;
@@ -334,7 +338,8 @@ IMPL_LINK_NOARG(ScCondFormatList, AfterTypeListHdl, void*, void)
                 return;
 
             Freeze();
-            itr->reset(new ScFormulaFrmtEntry(this, mrDoc, mpDialogParent, maPos));
+            itr->reset();
+            *itr = std::make_unique<ScFormulaFrmtEntry>(this, mrDoc, mpDialogParent, maPos);
             mpDialogParent->InvalidateRefData();
             (*itr)->SetActive();
             break;
@@ -343,7 +348,8 @@ IMPL_LINK_NOARG(ScCondFormatList, AfterTypeListHdl, void*, void)
                 return;
 
             Freeze();
-            itr->reset(new ScDateFrmtEntry( this, mrDoc ));
+            itr->reset();
+            *itr = std::make_unique<ScDateFrmtEntry>(this, mrDoc);
             mpDialogParent->InvalidateRefData();
             (*itr)->SetActive();
             break;
