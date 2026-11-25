@@ -25,6 +25,7 @@ class ScConditionalFormat;
 class ScViewData;
 
 class ScCondFormatDlg;
+struct ImplSVEvent;
 
 class ScCondFormatList
 {
@@ -42,6 +43,18 @@ private:
     ScAddress maPos;
     ScRangeList maRanges;
     ScCondFormatDlg* mpDialogParent;
+
+    // The type changes are applied from posted events, which keep the selection made in the
+    // combo box because the box can be deleted before the event runs.
+    ImplSVEvent* mpTypeListEvent;
+    sal_Int32 mnTypeListPos;
+    bool mbTypeListFocused;
+    ImplSVEvent* mpColFormatTypeEvent;
+    sal_Int32 mnColFormatTypePos;
+    // A pending change was made on the selected entry, so it is dropped when that entry is
+    // removed or deselected, or when a type change rebuilds it as an entry of another kind. A
+    // colour format change keeps a pending type change, as every kind of entry has a type box.
+    void CancelTypeEvents();
 
 public:
     ScCondFormatList(ScCondFormatDlg* pParent,

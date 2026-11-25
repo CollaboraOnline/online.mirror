@@ -33,6 +33,11 @@ ScCondFormatList::ScCondFormatList(ScCondFormatDlg* pDialogParent,
     , mbNewEntry(false)
     , mrDoc(rDoc)
     , mpDialogParent(pDialogParent)
+    , mpTypeListEvent(nullptr)
+    , mnTypeListPos(-1)
+    , mbTypeListFocused(false)
+    , mpColFormatTypeEvent(nullptr)
+    , mnColFormatTypePos(-1)
 {
     mxScrollWindow->set_size_request(mxScrollWindow->get_approximate_digit_width() * 85,
                                      mxScrollWindow->get_text_height() * 23);
@@ -47,6 +52,21 @@ weld::Window* ScCondFormatList::GetFrameWeld()
 ScCondFormatList::~ScCondFormatList()
 {
     Freeze();
+    CancelTypeEvents();
+}
+
+void ScCondFormatList::CancelTypeEvents()
+{
+    if (mpTypeListEvent)
+    {
+        Application::RemoveUserEvent(mpTypeListEvent);
+        mpTypeListEvent = nullptr;
+    }
+    if (mpColFormatTypeEvent)
+    {
+        Application::RemoveUserEvent(mpColFormatTypeEvent);
+        mpColFormatTypeEvent = nullptr;
+    }
 }
 
 void ScCondFormatList::init(
@@ -196,18 +216,21 @@ void ScCondFormatList::RecalcAll()
 
 IMPL_LINK(ScCondFormatList, ColFormatTypeHdl, weld::ComboBox&, rBox, void)
 {
-    Application::PostUserEvent(LINK(this, ScCondFormatList, AfterColFormatTypeHdl), &rBox);
+    mnColFormatTypePos = rBox.get_active();
+    if (!mpColFormatTypeEvent)
+        mpColFormatTypeEvent
+            = Application::PostUserEvent(LINK(this, ScCondFormatList, AfterColFormatTypeHdl));
 }
 
-IMPL_LINK(ScCondFormatList, AfterColFormatTypeHdl, void*, p, void)
+IMPL_LINK_NOARG(ScCondFormatList, AfterColFormatTypeHdl, void*, void)
 {
-    weld::ComboBox* pBox = static_cast<weld::ComboBox*>(p);
+    mpColFormatTypeEvent = nullptr;
     EntryContainer::iterator itr = std::find_if(maEntries.begin(), maEntries.end(),
         [](const std::unique_ptr<ScCondFrmtEntry>& widget) { return widget->IsSelected(); });
     if(itr == maEntries.end())
         return;
 
-    sal_Int32 nPos = pBox->get_active();
+    sal_Int32 nPos = mnColFormatTypePos;
     // Destroy the old entry before constructing the new one so JSInstanceBuilder
     // does not see duplicate buildable names and rename the new widgets (which
     // would break focus restoration after the rebuild in online).
@@ -260,19 +283,23 @@ IMPL_LINK(ScCondFormatList, TypeListHdl, weld::ComboBox&, rBox, void)
     //If we call maEntries.replace here then the pBox will be deleted before it
     //has finished Select and will crash on accessing its deleted this. So Post
     //to do the real work after the Select has completed
-    Application::PostUserEvent(LINK(this, ScCondFormatList, AfterTypeListHdl), &rBox);
+    mnTypeListPos = rBox.get_active();
+    mbTypeListFocused = rBox.has_focus();
+    if (!mpTypeListEvent)
+        mpTypeListEvent
+            = Application::PostUserEvent(LINK(this, ScCondFormatList, AfterTypeListHdl));
 }
 
-IMPL_LINK(ScCondFormatList, AfterTypeListHdl, void*, p, void)
+IMPL_LINK_NOARG(ScCondFormatList, AfterTypeListHdl, void*, void)
 {
-    weld::ComboBox* pBox = static_cast<weld::ComboBox*>(p);
+    mpTypeListEvent = nullptr;
     EntryContainer::iterator itr = std::find_if(maEntries.begin(), maEntries.end(),
         [](const std::unique_ptr<ScCondFrmtEntry>& widget) { return widget->IsSelected(); });
     if(itr == maEntries.end())
         return;
 
-    const bool bFocused = pBox->has_focus();
-    sal_Int32 nPos = pBox->get_active();
+    const bool bFocused = mbTypeListFocused;
+    sal_Int32 nPos = mnTypeListPos;
     switch(nPos)
     {
         case 0:
@@ -322,6 +349,7 @@ IMPL_LINK(ScCondFormatList, AfterTypeListHdl, void*, p, void)
             break;
 
     }
+    CancelTypeEvents();
 
     if (bFocused)
         (*itr)->GetTypeComboBox().grab_focus();
@@ -332,6 +360,7 @@ IMPL_LINK(ScCondFormatList, AfterTypeListHdl, void*, p, void)
 
 IMPL_LINK_NOARG( ScCondFormatList, AddBtnHdl, weld::Button&, void )
 {
+    CancelTypeEvents();
     Freeze();
     maEntries.emplace_back(new ScConditionFrmtEntry(this, mrDoc, mpDialogParent, maPos));
     sal_Int32 nIndex = 1;
@@ -356,6 +385,7 @@ IMPL_LINK_NOARG( ScCondFormatList, RemoveBtnHdl, weld::Button&, void )
         [](const std::unique_ptr<ScCondFrmtEntry>& widget) { return widget->IsSelected(); });
     if (itr != maEntries.end())
     {
+        CancelTypeEvents();
         maEntries.erase(itr);
     }
     mpDialogParent->InvalidateRefData();
@@ -373,6 +403,7 @@ IMPL_LINK_NOARG(ScCondFormatList, PreviousBtnHdl, weld::Button&, void)
         auto& widget = maEntries[i];
         if (widget->IsSelected() && i > 0)
         {
+            CancelTypeEvents();
             widget->SetInactive();
             index = i - 1;
             break;
@@ -397,6 +428,7 @@ IMPL_LINK_NOARG(ScCondFormatList, NextBtnHdl, weld::Button&, void)
             index = i;
             if (i < maEntries.size()-1)
             {
+                CancelTypeEvents();
                 widget->SetInactive();
                 index = i + 1;
                 break;
@@ -459,6 +491,7 @@ IMPL_LINK( ScCondFormatList, EntrySelectHdl, ScCondFrmtEntry&, rEntry, void )
     if(rEntry.IsSelected())
         return;
 
+    CancelTypeEvents();
     Freeze();
     size_t index = 0;
     for(size_t i = 0; i < maEntries.size(); i++)
