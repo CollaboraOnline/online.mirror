@@ -535,6 +535,7 @@ void CollabSocketHandler::handleFetch(const std::string& stream, const std::stri
 
     // Build the URL for the requested stream
     std::string url;
+    bool hostChecked = false;
     if (stream == "contents" && !_allowsCleanExport)
     {
         LOG_WRN("Collab: refusing " << stream << " fetch, the host allows no clean export");
@@ -562,6 +563,7 @@ void CollabSocketHandler::handleFetch(const std::string& stream, const std::stri
             contentsUri.setPath(contentsUri.getPath() + "/contents");
             contentsUri.addQueryParameter("access_token", _accessToken);
             url = contentsUri.toString();
+            hostChecked = true;
         }
     }
 
@@ -594,8 +596,8 @@ void CollabSocketHandler::handleFetch(const std::string& stream, const std::stri
     const std::string brokerTag = broker->getCurrentAccessToken();
 
     // Create a fetch token that the client can use to download via HTTP
-    const std::string token = createCollabFetchRequest(url, _accessToken, _wopiSrc, _docKey,
-                                                        brokerTag, requestId, stream);
+    const std::string token = createCollabFetchRequest(url, hostChecked, _accessToken, _wopiSrc,
+                                                        _docKey, brokerTag, requestId, stream);
 
     // Build the download URL
     std::ostringstream downloadUrl;

@@ -31,7 +31,7 @@ public:
 
     /// Handle a fetch request with a pre-authorized URL (from WebSocket token)
     /// This bypasses CheckFileInfo since the token already validated access.
-    void handleFetchRequest(const std::string& streamUrl,
+    void handleFetchRequest(const std::string& streamUrl, bool hostChecked,
                             const std::shared_ptr<TerminatingPoll>& poll,
                             SocketDisposition& disposition);
 
@@ -46,7 +46,7 @@ private:
     inline void logPrefix(std::ostream& os) const { os << '#' << _logFD << ": "; }
 
     void doDownload(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& uri,
-                    int redirectionLimit);
+                    int redirectionLimit, bool hostChecked);
     void doUpload(const std::shared_ptr<TerminatingPoll>& poll, const Poco::URI& uri,
                   const std::string& body);
 
