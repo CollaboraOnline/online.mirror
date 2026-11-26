@@ -47,6 +47,11 @@ inline std::string accessToken(std::string const & formUrl, std::string const & 
     return Uri::encode(field(formUrl, form, "access_token"), "'");
 }
 
+// The token's expiry time in milliseconds since the epoch, or empty.
+inline std::string accessTokenTtl(std::string const & formUrl, std::string const & form) {
+    return field(formUrl, form, "access_token_ttl");
+}
+
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
