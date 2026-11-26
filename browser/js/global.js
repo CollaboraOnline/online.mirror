@@ -277,6 +277,11 @@ class InitializerBase {
 		window.versionPath = "";
 		window.accessToken = element.dataset.accessToken;
 		window.accessTokenTTL = element.dataset.accessTokenTtl || '0';
+		// CODA's page takes the token and its lifetime from the integrator's form.
+		if (window.codaRemotePage) {
+			window.accessToken = window.codaRemotePage.accessToken;
+			window.accessTokenTTL = window.codaRemotePage.accessTokenTtl || '0';
+		}
 		window.noAuthHeader = element.dataset.noAuthHeader;
 		window.accessHeader = element.dataset.accessHeader;
 		window.postMessageOriginExt = "";
