@@ -60,6 +60,7 @@
 /// <reference path="./Events.test.ts" />
 /// <reference path="./LOUtil.test.ts" />
 /// <reference path="./JSDialogAria.test.ts" />
+/// <reference path="./RadioButton.test.ts" />
 /// <reference path="./A11yValidator.test.ts" />
 /// <reference path="./UIManager.test.ts" />
 /// <reference path="./Rectangle.test.ts" />

@@ -1151,6 +1151,13 @@ class LOUtil {
 		'formula/res/refinp1.png': 'refinp1.svg',
 		'formula/res/refinp2.png': 'refinp2.svg',
 		'chart2/res/selectrange.png': 'refinp1.svg',
+		// Chart error bar indicators, in the error bar panel and dialog
+		'chart2/res/errorbothverti_30.png': 'errorbothverti_30.svg',
+		'chart2/res/errorup_30.png': 'errorup_30.svg',
+		'chart2/res/errordown_30.png': 'errordown_30.svg',
+		'chart2/res/errorbothhori_30.png': 'errorbothhori_30.svg',
+		'chart2/res/errorleft_30.png': 'errorleft_30.svg',
+		'chart2/res/errorright_30.png': 'errorright_30.svg',
 	};
 
 	// Resolve the icon path of a toolbar item or an image that the engine sent us, e.g.

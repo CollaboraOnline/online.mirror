@@ -515,7 +515,9 @@ interface ListBoxWidget extends WidgetJSON {
 // type: 'radiobutton'
 interface RadioButtonWidget extends WidgetJSON {
 	text: string;
-	image?: string; // replacement image
+	icon?: string; // icon theme link name of the image, resolved to one of our own SVGs
+	iconpath?: string; // path of the image in the icon theme of the engine
+	image?: string; // base64 bitmap of the image, the fallback when we ship no such icon
 	group?: string; // identifier of radio group
 	checked?: boolean;
 	hidden?: boolean;

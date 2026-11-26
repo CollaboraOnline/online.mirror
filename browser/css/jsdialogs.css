@@ -1718,6 +1718,22 @@ input[type='checkbox']:checked.autofilter, .jsdialog input[type='checkbox']:chec
 	white-space: nowrap;
 }
 
+/* the image of a radio button, in its label before the text, no taller than the radio button */
+.radiobutton > label > img.ui-radiobutton-image {
+	display: inline-block;
+	vertical-align: middle;
+	max-width: 24px;
+	max-height: 24px;
+}
+
+.jsdialog .radiobutton.has-image > input[type='radio'] {
+	margin-inline-end: 2px;
+}
+
+.radiobutton > label > img.ui-radiobutton-image:not(:last-child) {
+	margin-inline-end: 4px;
+}
+
 /* the disabled attribute is set to 'disabled' when the widget is built and
    to 'true' by the runtime enable / disable actions, so match on presence */
 .jsdialog input[type='radio'][disabled] ~ label {

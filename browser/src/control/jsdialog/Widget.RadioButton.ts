@@ -33,12 +33,6 @@ function radiobuttonControl(
 	radiobutton.id = data.id + '-input';
 	radiobutton.tabIndex = '0';
 
-	if (data.image) {
-		const image = window.L.DomUtil.create('img', '', radiobutton);
-		image.src = data.image;
-		window.L.DomUtil.addClass(container, 'has-image');
-	}
-
 	if (data.group) radiobutton.name = data.group;
 
 	const radiobuttonLabel = window.L.DomUtil.createWithId(
@@ -46,8 +40,46 @@ function radiobuttonControl(
 		data.id + '-label',
 		container,
 	);
-	radiobuttonLabel.textContent = builder._cleanText(data.text);
+	const labelText = builder._cleanText(data.text);
+	radiobuttonLabel.textContent = labelText;
 	radiobuttonLabel.htmlFor = data.id + '-input';
+
+	// The image goes into the label, before its text, so a click on it selects the radio
+	// button, too.
+	const iconName =
+		app.LOUtil.getIconNameOfIconPath(data.iconpath) ||
+		app.LOUtil.getIconNameOfIcon(data.icon);
+	if (iconName || data.image) {
+		const image = window.L.DomUtil.create(
+			'img',
+			'ui-radiobutton-image',
+		) as HTMLImageElement;
+		radiobuttonLabel.insertBefore(image, radiobuttonLabel.firstChild);
+		// An image without text names the choice; the tooltip says what it shows.
+		image.alt = labelText ? '' : builder._cleanText(data.tooltip || '');
+		// The icon takes the place of the bitmap, at its size.
+		const bitmapSize = app.LOUtil.getPngDataUriSize(data.image || '');
+		if (bitmapSize) {
+			image.style.width = bitmapSize.width + 'px';
+			image.style.height = bitmapSize.height + 'px';
+		}
+		// What a bitmap of the engine stands for, when it is an icon of its icon theme.
+		const engineIconSource = data.iconpath || data.icon;
+		if (iconName) {
+			app.LOUtil.setImage(image, iconName, builder.map);
+			app.LOUtil.setEngineBitmapFallback(image, data.image, engineIconSource);
+		} else if (engineIconSource) {
+			app.LOUtil.showEngineBitmap(
+				image,
+				data.image as string,
+				engineIconSource,
+			);
+		} else {
+			// a picture that the engine rendered
+			image.src = data.image as string;
+		}
+		window.L.DomUtil.addClass(container, 'has-image');
+	}
 
 	const toggleFunction = () => {
 		builder.callback(
