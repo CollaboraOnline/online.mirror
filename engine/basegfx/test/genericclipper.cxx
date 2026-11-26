@@ -368,6 +368,22 @@ public:
         }
     }
 
+    void testManyCrossingLines()
+    {
+        // lines that cross each other very often are clipped all the same
+        B2DPolyPolygon aLines;
+        for (int a = 0; a < 400; a++)
+        {
+            const double fOffset(-5.0 + a / 40.0);
+            aLines.append(B2DPolygon{ { -20, -20 + fOffset }, { 20, 20 + fOffset } });
+            aLines.append(B2DPolygon{ { -20, 20 + fOffset }, { 20, -20 + fOffset } });
+        }
+        const B2DPolyPolygon aInside(utils::clipPolyPolygonOnPolyPolygon(
+            aLines, B2DPolyPolygon(utils::createPolygonFromCircle(B2DPoint(0, 0), 10)), true,
+            true));
+        CPPUNIT_ASSERT_EQUAL(sal_uInt32(800), aInside.count());
+    }
+
     CPPUNIT_TEST_SUITE(genericclipper);
     CPPUNIT_TEST(validateOr);
     CPPUNIT_TEST(validateXor);
@@ -382,6 +398,7 @@ public:
     CPPUNIT_TEST(testLineOfNoLength);
     CPPUNIT_TEST(testLineNearCrossingOutlines);
     CPPUNIT_TEST(testAreasCrossingAtFlatAngle);
+    CPPUNIT_TEST(testManyCrossingLines);
     CPPUNIT_TEST_SUITE_END();
 };
 

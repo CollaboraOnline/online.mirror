@@ -311,6 +311,11 @@ class Splitter
     std::vector<std::vector<std::pair<int, int>>> maSchedule;
     size_t mnSplits = 0;
     size_t mnSplitLimit;
+    // edges of polygons below this are lines; two lines that cross only trade places, they need
+    // no split point
+    sal_Int32 mnLineCount;
+
+    bool isLine(int nEdge) const { return mrEdges[nEdge].maOrigin.mnPolygon < mnLineCount; }
 
     // a crossing that rounds next to an input point is that input point: both edges went through
     // it in the input, and only the rounding moved them apart
@@ -345,6 +350,8 @@ class Splitter
 
     void handlePair(int nEdgeA, int nEdgeB)
     {
+        if (isLine(nEdgeA) && isLine(nEdgeB))
+            return;
         const Edge& rA(mrEdges[nEdgeA]);
         const Edge& rB(mrEdges[nEdgeB]);
         if (isOnInterior(rA, rB.maFirst))
@@ -419,12 +426,13 @@ class Splitter
 
 public:
     Splitter(const std::vector<Edge>& rEdges, std::vector<std::vector<GridPoint>>& rSplits,
-             const SourceMap& rSources, size_t nSplitLimit)
+             const SourceMap& rSources, size_t nSplitLimit, sal_Int32 nLineCount)
         : mrEdges(rEdges)
         , mrSplits(rSplits)
         , mrSources(rSources)
         , maActive(rEdges)
         , mnSplitLimit(nSplitLimit)
+        , mnLineCount(nLineCount)
     {
     }
 
@@ -1182,7 +1190,9 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
     for (; nRounds < 16; nRounds++)
     {
         std::vector<std::vector<GridPoint>> aSplits(aEdges.size());
-        if (!Splitter(aEdges, aSplits, aSources, nSplitLimit).run())
+        if (!Splitter(aEdges, aSplits, aSources, nSplitLimit,
+                      bStroke ? sal_Int32(nFirstCount) : 0)
+                 .run())
             return std::nullopt;
         if (!applySplits(aEdges, aSplits))
             break;
@@ -1302,7 +1312,9 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
     }
 
     std::vector<int64_t> aYs;
-    std::vector<int> aSloped, aHorizontal;
+    // line pieces can cross each other, so they are never active together: each one is put in
+    // only to find its left neighbour
+    std::vector<int> aSloped, aSlopedLines, aHorizontal;
     for (size_t a = 0; a < aEdges.size(); a++)
     {
         // a line piece on an area piece gets the windings of that one
@@ -1310,13 +1322,16 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
             continue;
         aYs.push_back(aEdges[a].maFirst.mnY);
         aYs.push_back(aEdges[a].maSecond.mnY);
-        (isHorizontal(aEdges[a]) ? aHorizontal : aSloped).push_back(int(a));
+        (isHorizontal(aEdges[a]) ? aHorizontal : a < nFirstLine ? aSloped : aSlopedLines)
+            .push_back(int(a));
     }
-    if (aSloped.empty() && !bStroke)
+    if (aSloped.empty() && aSlopedLines.empty() && !bStroke)
         return bFill ? rCandidate : B2DPolyPolygon();
     std::sort(aYs.begin(), aYs.end());
     aYs.erase(std::unique(aYs.begin(), aYs.end()), aYs.end());
     std::sort(aSloped.begin(), aSloped.end(), [&](int nLeft, int nRight)
+              { return aEdges[nLeft].maFirst.mnY < aEdges[nRight].maFirst.mnY; });
+    std::sort(aSlopedLines.begin(), aSlopedLines.end(), [&](int nLeft, int nRight)
               { return aEdges[nLeft].maFirst.mnY < aEdges[nRight].maFirst.mnY; });
     std::sort(aHorizontal.begin(), aHorizontal.end(), [&](int nLeft, int nRight)
               { return aEdges[nLeft].maFirst < aEdges[nRight].maFirst; });
@@ -1327,8 +1342,9 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
     // for a nonzero fill the input is fine already when no winding is even and not zero
     bool bNeedsChange(!bFill || eFirstRule == utils::SweepFillRule::EvenOdd);
     auto isEvenNotZero = [](int nWinding) { return nWinding != 0 && nWinding % 2 == 0; };
-    // after pass 1 no two pieces cross, so the winding right of a piece is the same along all of
-    // it, and a new piece takes the winding left of it from its left neighbour
+    // after pass 1 no two pieces cross, only line pieces each other, so the winding right of a
+    // piece is the same along all of it, and a new piece takes the winding left of it from its
+    // left neighbour
     std::vector<Winding> aWindingRight(aEdges.size());
     std::vector<int> aEnding(aSloped);
     std::sort(aEnding.begin(), aEnding.end(), [&](int nLeft, int nRight)
@@ -1341,7 +1357,7 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
             aActive.lowerBound({ rHorizontal.maFirst.mnX + rHorizontal.maSecond.mnX, 2 }));
         return it == aActive.begin() ? Winding() : aWindingRight[aActive.edge(std::prev(it))];
     };
-    size_t nNextStart(0), nNextEnd(0), nNextHorizontal(0);
+    size_t nNextStart(0), nNextLineStart(0), nNextEnd(0), nNextHorizontal(0);
     std::vector<Winding> aAboveOfHorizontal;
     for (const int64_t nY : aYs)
     {
@@ -1385,6 +1401,20 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
                 else
                     aBorders.push_back(Border{ rEdge.maSecond, rEdge.maFirst, nEdge });
             }
+        }
+
+        // a line piece has the same winding on both sides
+        for (; nNextLineStart < aSlopedLines.size()
+               && aEdges[aSlopedLines[nNextLineStart]].maFirst.mnY == nY;
+             nNextLineStart++)
+        {
+            const int nEdge(aSlopedLines[nNextLineStart]);
+            const auto it(aActive.insert(nEdge));
+            const Winding aLeft(it == aActive.begin() ? Winding()
+                                                      : aWindingRight[aActive.edge(std::prev(it))]);
+            aActive.erase(nEdge);
+            aWindingRight[nEdge] = aLeft;
+            aTouchesSecond[nEdge] = isInsideSecond(aLeft);
         }
 
         for (size_t a = nHorizontalBegin; a < nNextHorizontal; a++)
