@@ -207,7 +207,7 @@ function _menubuttonControl(
 		builder.options.useInLineLabelsForUnoButtons = inlineLabels;
 
 		return control;
-	} else if (data.text !== undefined || data.image) {
+	} else if (data.text !== undefined || data.image || data.icon) {
 		const button = window.L.DomUtil.create(
 			'button',
 			'menubutton ' + builder.options.cssClass,
@@ -219,14 +219,36 @@ function _menubuttonControl(
 
 		jsdialog.SetupA11yLabelForNonLabelableElement(button, data, builder);
 
-		if (data.image) {
+		const iconName =
+			app.LOUtil.getIconNameOfIconPath(data.iconpath) ||
+			app.LOUtil.getIconNameOfIcon(data.icon);
+		if (iconName || data.image) {
 			const image = window.L.DomUtil.create(
 				'img',
 				'',
 				button,
 			) as HTMLImageElement;
-			image.src = data.image as string;
 			image.setAttribute('alt', '');
+			// What a bitmap of the engine stands for, when it is an icon of its icon theme.
+			const engineIconSource = data.iconpath || data.icon;
+			if (iconName) {
+				app.LOUtil.setImage(image, iconName, builder.map);
+				if (typeof data.image === 'string')
+					app.LOUtil.setEngineBitmapFallback(
+						image,
+						data.image,
+						engineIconSource,
+					);
+			} else if (engineIconSource) {
+				app.LOUtil.showEngineBitmap(
+					image,
+					data.image as string,
+					engineIconSource,
+				);
+			} else {
+				// a picture that the engine rendered
+				image.src = data.image as string;
+			}
 		}
 		const label = window.L.DomUtil.create(
 			'span',

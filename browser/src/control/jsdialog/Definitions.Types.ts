@@ -467,6 +467,7 @@ interface PushButtonWidget extends WidgetJSON {
 	symbol?: string;
 	text?: string;
 	icon?: string; // icon theme link name, resolved to one of our own SVGs
+	iconpath?: string; // path of the icon in the icon theme of the engine
 	image?: string; // base64 bitmap, the fallback when we ship no such icon
 	isToggle?: boolean;
 	checked?: boolean;
@@ -486,6 +487,7 @@ interface MenuButtonWidgetJSON extends WidgetJSON {
 	class?: string;
 	image?: string | boolean;
 	icon?: string; // theme-aware icon file name, e.g. 'lc_recsearch.svg'
+	iconpath?: string; // path of the icon in the icon theme of the engine
 	accessKey?: string;
 	noLabel?: boolean; // suppress text label, show icon only
 	inlineLabel?: boolean; // overrides the builder's inline label setting

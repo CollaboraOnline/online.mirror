@@ -710,6 +710,60 @@ describe('LOUtil', function () {
 			nodeassert.ok(image.src.startsWith('data:image/png;base64,'));
 			nodeassert.notStrictEqual(image.style.display, 'none');
 		});
+
+		describe('with an engine bitmap', function () {
+			const bitmap = 'data:image/png;base64,AAAA';
+			let originalWarn: any;
+			let warnings: string[];
+
+			beforeEach(function () {
+				warnings = [];
+				originalWarn = app.console.warn;
+				app.console.warn = (message: string) => warnings.push(message);
+			});
+
+			afterEach(function () {
+				app.console.warn = originalWarn;
+			});
+
+			it('a missing dark icon falls back to the light icon, not to the bitmap', function () {
+				const image = dom.window.document.createElement('img');
+				LOUtil.checkIfImageExists(image);
+				LOUtil.setEngineBitmapFallback(image, bitmap, 'sw/res/sc20177.png');
+				image.src = 'http://host/images/dark/lc_bold.svg';
+
+				image.dispatchEvent(new dom.window.Event('error'));
+
+				nodeassert.strictEqual(image.src, 'http://host/images/lc_bold.svg');
+				nodeassert.deepStrictEqual(warnings, []);
+			});
+
+			it('an icon missing in both themes falls back to the bitmap, reported', function () {
+				const image = dom.window.document.createElement('img');
+				LOUtil.setEngineBitmapFallback(image, bitmap, 'sw/res/sc20177.png');
+				image.src = 'http://host/images/dark/lc_bold.svg';
+
+				image.dispatchEvent(new dom.window.Event('error'));
+				image.dispatchEvent(new dom.window.Event('error'));
+
+				nodeassert.strictEqual(image.src, bitmap);
+				nodeassert.notStrictEqual(image.style.display, 'none');
+				nodeassert.deepStrictEqual(warnings, [
+					'engine bitmap used for sw/res/sc20177.png',
+				]);
+			});
+
+			it('a bitmap that fails, too, hides the image', function () {
+				const image = dom.window.document.createElement('img');
+				LOUtil.setEngineBitmapFallback(image, bitmap, 'sw/res/sc20177.png');
+				image.src = 'http://host/images/lc_bold.svg';
+
+				image.dispatchEvent(new dom.window.Event('error'));
+				image.dispatchEvent(new dom.window.Event('error'));
+
+				nodeassert.strictEqual(image.style.display, 'none');
+			});
+		});
 	});
 
 	describe('getFileExtension()', function () {

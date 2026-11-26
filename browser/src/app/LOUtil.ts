@@ -499,6 +499,43 @@ class LOUtil {
 	// The images that have the error fallback, with the latest layout-critical flag of each.
 	private static imagesWithFallback = new WeakMap<HTMLImageElement, boolean>();
 
+	// The bitmaps of the engine to show when the icon of ours of an image fails to load, with
+	// what to name in the report.
+	private static engineBitmapFallbacks = new WeakMap<
+		HTMLImageElement,
+		{ bitmap: string; source: string }
+	>();
+
+	// A bitmap of the engine on screen means that we lack an icon of our own: report it, so
+	// the icon can be added.
+	private static reportEngineBitmap(source: string | undefined): void {
+		app.console.warn('engine bitmap used for ' + (source || 'an unnamed icon'));
+	}
+
+	// Show a bitmap that the engine sent, where we have no icon of our own.
+	// source: the icon name, path or widget id that the bitmap stands for.
+	public static showEngineBitmap(
+		img: HTMLImageElement,
+		bitmap: string,
+		source: string | undefined,
+	): void {
+		LOUtil.reportEngineBitmap(source);
+		img.src = bitmap;
+	}
+
+	// Show the bitmap that the engine sent, when the icon of ours that the image was given
+	// with setImage fails to load, in the light theme as well as in the dark one.
+	// source: the icon name, path or widget id that the bitmap stands for.
+	public static setEngineBitmapFallback(
+		img: HTMLImageElement,
+		bitmap: string | undefined,
+		source: string | undefined,
+	): void {
+		if (!bitmap) return;
+		LOUtil.engineBitmapFallbacks.set(img, { bitmap, source: source || '' });
+		if (!LOUtil.imagesWithFallback.has(img)) LOUtil.checkIfImageExists(img);
+	}
+
 	private static showIcon(
 		element: HTMLImageElement | HTMLElement,
 		name: string,
@@ -1067,7 +1104,7 @@ class LOUtil {
 
 	// Resolve the icon path of a toolbar item or an image that the engine sent us, e.g.
 	// 'sw/res/sc20245.png', to an icon of ours. Empty when we have none for it.
-	public static getIconNameOfIconPath(iconPath: string): string {
+	public static getIconNameOfIconPath(iconPath: string | undefined): string {
 		const name = iconPath ? LOUtil.engineIconPaths[iconPath] : undefined;
 		return name ? 'lc_' + name + '.svg' : '';
 	}
@@ -1079,7 +1116,7 @@ class LOUtil {
 	// we actually ship. Returns an empty string when there is nothing to
 	// request, in which case the caller should use the base64 fallback the
 	// engine sends alongside the icon name.
-	public static getIconNameOfIcon(iconFileName: string): string {
+	public static getIconNameOfIcon(iconFileName: string | undefined): string {
 		if (!iconFileName) return '';
 
 		// Anything without the size prefix is one of our own icon files, it is
@@ -1127,6 +1164,17 @@ class LOUtil {
 					'/images/branding/',
 					'/images/',
 				);
+				e.loUtilProcessed = true;
+				return;
+			}
+
+			// Neither theme has the icon: show the bitmap of the engine, unless that is
+			// what failed.
+			const engineBitmap = LOUtil.engineBitmapFallbacks.get(imageElement);
+			if (engineBitmap && imageElement.src !== engineBitmap.bitmap) {
+				LOUtil.reportEngineBitmap(engineBitmap.source);
+				imageElement.src = engineBitmap.bitmap;
+				imageElement.style.display = '';
 				e.loUtilProcessed = true;
 				return;
 			}

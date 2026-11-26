@@ -1402,14 +1402,11 @@ window.L.Control.JSDialogBuilder = window.L.Control.extend({
 		if (iconName) {
 			window.L.DomUtil.addClass(image, 'ui-image-icon');
 			app.LOUtil.setImage(image, iconName, builder.map);
-			if (bitmap) {
-				image.onerror = function() {
-					image.onerror = null;
-					image.src = bitmap;
-					image.style.display = '';
-				};
-			}
+			app.LOUtil.setEngineBitmapFallback(image, bitmap, data.iconpath);
+		} else if (data.iconpath && bitmap) {
+			app.LOUtil.showEngineBitmap(image, bitmap, data.iconpath);
 		} else {
+			// A picture that the engine rendered.
 			image.src = bitmap;
 		}
 
@@ -1568,9 +1565,11 @@ window.L.Control.JSDialogBuilder = window.L.Control.extend({
 				// The engine sends the icon theme link name, map it to the icon
 				// we ship under that name, so that we don't request a file that
 				// is not there and fall back to the base64 image below instead.
-				var coreIconName = data.icon && !isIconURL ?
+				var coreIconName = !isIconURL ?
 					app.LOUtil.getIconNameOfIconPath(data.iconpath) ||
 					app.LOUtil.getIconNameOfIcon(data.icon) : '';
+				// What a bitmap of the engine stands for, when it is an icon of its icon theme.
+				const engineIconSource = data.iconpath || data.icon;
 				if (isIconURL) {
 					buttonImage = createButtonImage();
 					buttonImage.src = data.icon;
@@ -1579,20 +1578,14 @@ window.L.Control.JSDialogBuilder = window.L.Control.extend({
 				else if (coreIconName) {
 					buttonImage = createButtonImage();
 					app.LOUtil.setImage(buttonImage, coreIconName, builder.map);
-					// Fall back to base64 PNG if the SVG is not available.
-					// checkIfImageExists sets display:none on error, so
-					// restore it when substituting the fallback image.
-					if (data.image) {
-						buttonImage.onerror = function() {
-							buttonImage.onerror = null;
-							buttonImage.src = data.image;
-							buttonImage.style.display = '';
-						};
-					}
+					app.LOUtil.setEngineBitmapFallback(buttonImage, data.image, engineIconSource);
 				}
 				else if (data.image) {
 					buttonImage = createButtonImage();
-					buttonImage.src = data.image;
+					if (engineIconSource)
+						app.LOUtil.showEngineBitmap(buttonImage, data.image, engineIconSource);
+					else // a picture that the engine rendered
+						buttonImage.src = data.image;
 				}
 				else {
 					var iconName = app.LOUtil.getIconNameOfCommand(data.command);

@@ -69,7 +69,16 @@ JSDialog.pushButton = function (
 	// An icon name lets us use our own SVG, which is crisp at any DPI and has a
 	// dark variant; the base64 image the engine sends alongside is the fallback
 	// for icons we do not ship.
-	const iconName = data.icon ? app.LOUtil.getIconNameOfIcon(data.icon) : '';
+	const iconName =
+		app.LOUtil.getIconNameOfIconPath(data.iconpath) ||
+		app.LOUtil.getIconNameOfIcon(data.icon);
+	// What a bitmap of the engine stands for, when it is an icon of its icon theme.
+	const engineIconSource = data.iconpath || data.icon;
+	const showBitmap = (img: HTMLImageElement, bitmap: string) => {
+		if (engineIconSource)
+			app.LOUtil.showEngineBitmap(img, bitmap, engineIconSource);
+		else img.src = bitmap; // a picture that the engine rendered
+	};
 
 	let image;
 	if (iconName) {
@@ -79,17 +88,7 @@ JSDialog.pushButton = function (
 		);
 		image = window.L.DomUtil.create('img', '', pushbutton);
 		app.LOUtil.setImage(image, iconName, builder.map);
-		// Fall back to the base64 image if we do not ship that SVG after all.
-		// checkIfImageExists sets display:none on error, so restore it when
-		// substituting the fallback.
-		if (data.image) {
-			const fallbackImage = image;
-			fallbackImage.onerror = function () {
-				fallbackImage.onerror = null;
-				fallbackImage.src = data.image;
-				fallbackImage.style.display = '';
-			};
-		}
+		app.LOUtil.setEngineBitmapFallback(image, data.image, engineIconSource);
 		if (pushbuttonText !== '') {
 			const text = window.L.DomUtil.create('span', '', pushbutton);
 			text.innerText = pushbuttonText;
@@ -101,7 +100,7 @@ JSDialog.pushButton = function (
 			'has-img d-flex align-content-center justify-content-center align-items-center',
 		);
 		image = window.L.DomUtil.create('img', '', pushbutton);
-		image.src = data.image;
+		showBitmap(image, data.image);
 		const text = window.L.DomUtil.create('span', '', pushbutton);
 		text.innerText = pushbuttonText;
 		builder._stressAccessKey(text, pushbutton.accessKey);
@@ -118,7 +117,7 @@ JSDialog.pushButton = function (
 				builder.map,
 			);
 		} else {
-			image.src = data.image;
+			showBitmap(image, data.image);
 		}
 	} else if (data.symbol) {
 		window.L.DomUtil.addClass(
