@@ -2542,6 +2542,42 @@ CPPUNIT_TEST_FIXTURE(ScExportTest, testThreadedCommentOdsRoundtrip)
     CPPUNIT_ASSERT_EQUAL(u"Mike Kaganski"_ustr, pPerson->maDisplayName);
 }
 
+CPPUNIT_TEST_FIXTURE(ScExportTest, testTdf173397)
+{
+    // The threaded comment, its reply and its person have lowercase GUIDs
+    createScDoc("xlsx/tdf173397.xlsx");
+
+    save(TestFilter::XLSX);
+
+    // Without the accompanying fix in place, this test would have failed: the GUIDs were written
+    // lowercase, which ST_Guid does not allow.
+    xmlDocUniquePtr pXmlComments = parseExport(u"xl/comments1.xml"_ustr);
+    CPPUNIT_ASSERT(pXmlComments);
+    const OString sComment = "/x:comments/x:commentList/x:comment[@ref='A2']"_ostr;
+    assertXPath(pXmlComments, sComment, "guid", u"{FB8EA27E-C1B6-4481-B034-193455CC7425}");
+    const sal_Int32 nAuthorId = getXPath(pXmlComments, sComment, "authorId").toInt32();
+    assertXPathContent(pXmlComments,
+                       "/x:comments/x:authors/x:author[" + OString::number(nAuthorId + 1) + "]",
+                       u"tc={FB8EA27E-C1B6-4481-B034-193455CC7425}");
+
+    xmlDocUniquePtr pXmlThreaded = parseExport(u"xl/threadedComments/threadedComment1.xml"_ustr);
+    CPPUNIT_ASSERT(pXmlThreaded);
+    const OString sThreaded = "/xthreaded:ThreadedComments/xthreaded:threadedComment"_ostr;
+    assertXPath(pXmlThreaded, sThreaded + "[1]", "id", u"{FB8EA27E-C1B6-4481-B034-193455CC7425}");
+    assertXPath(pXmlThreaded, sThreaded + "[1]", "personId",
+                u"{4A73A60B-EAFA-41CF-BAF3-B061059D7A5C}");
+    assertXPath(pXmlThreaded, sThreaded + "[2]", "id", u"{789BBBE8-38C6-4228-9338-E9C75EB78FCF}");
+    assertXPath(pXmlThreaded, sThreaded + "[2]", "parentId",
+                u"{FB8EA27E-C1B6-4481-B034-193455CC7425}");
+    assertXPath(pXmlThreaded, sThreaded + "[2]", "personId",
+                u"{4A73A60B-EAFA-41CF-BAF3-B061059D7A5C}");
+
+    xmlDocUniquePtr pXmlPersons = parseExport(u"xl/persons/person.xml"_ustr);
+    CPPUNIT_ASSERT(pXmlPersons);
+    assertXPath(pXmlPersons, "/xthreaded:personList/xthreaded:person", "id",
+                u"{4A73A60B-EAFA-41CF-BAF3-B061059D7A5C}");
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

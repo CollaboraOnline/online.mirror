@@ -2316,7 +2316,8 @@ XclExpNote::XclExpNote(const XclExpRoot& rRoot, const ScAddress& rScPos,
 
                 if (const ScThreadedCommentData* pThreadedData = pScNote->GetThreadedCommentData())
                 {
-                    maThreadedCommentGuid = pThreadedData->maRoot.maGuid;
+                    // ST_Guid allows only uppercase hex
+                    maThreadedCommentGuid = pThreadedData->maRoot.maGuid.toAsciiUpperCase();
                     // Legacy comment author must be tc={guid} for Excel to link it
                     maAuthor = XclExpString(u"tc=" + maThreadedCommentGuid, XclStrFlags::NONE, 54);
                 }
@@ -2621,8 +2622,8 @@ void XclExpComments::SaveThreadedCommentsXml(XclExpXmlStream& rStrm)
             XML_ref, aRef,
             XML_dT, sax_fastparser::UseIf(pData->maRoot.maDateTime,
                                           !pData->maRoot.maDateTime.isEmpty()),
-            XML_personId, pData->maRoot.maPersonId,
-            XML_id, pData->maRoot.maGuid,
+            XML_personId, pData->maRoot.maPersonId.toAsciiUpperCase(),
+            XML_id, pData->maRoot.maGuid.toAsciiUpperCase(),
             XML_done, sax_fastparser::UseIf("1", pData->mbDone));
         pStream->startElement(XML_text);
         pStream->writeEscaped(pData->maRoot.maText);
@@ -2635,9 +2636,9 @@ void XclExpComments::SaveThreadedCommentsXml(XclExpXmlStream& rStrm)
             pStream->startElement(XML_threadedComment,
                 XML_ref, aRef,
                 XML_dT, sax_fastparser::UseIf(rReply.maDateTime, !rReply.maDateTime.isEmpty()),
-                XML_personId, rReply.maPersonId,
-                XML_id, rReply.maGuid,
-                XML_parentId, pData->maRoot.maGuid);
+                XML_personId, rReply.maPersonId.toAsciiUpperCase(),
+                XML_id, rReply.maGuid.toAsciiUpperCase(),
+                XML_parentId, pData->maRoot.maGuid.toAsciiUpperCase());
             pStream->startElement(XML_text);
             pStream->writeEscaped(rReply.maText);
             pStream->endElement(XML_text);

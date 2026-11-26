@@ -1724,10 +1724,11 @@ void ExcDocument::WriteXml( XclExpXmlStream& rStrm )
         for (const auto& rPerson : rPersonList)
         {
             pPersons->singleElement(
-                XML_person, XML_displayName, rPerson.maDisplayName, XML_id, rPerson.maId,
-                XML_userId, sax_fastparser::UseIf(rPerson.maUserId, !rPerson.maUserId.isEmpty()),
-                XML_providerId, sax_fastparser::UseIf(rPerson.maProviderId,
-                                                      !rPerson.maProviderId.isEmpty()));
+                XML_person, XML_displayName, rPerson.maDisplayName, XML_id,
+                rPerson.maId.toAsciiUpperCase(), XML_userId,
+                sax_fastparser::UseIf(rPerson.maUserId, !rPerson.maUserId.isEmpty()),
+                XML_providerId,
+                sax_fastparser::UseIf(rPerson.maProviderId, !rPerson.maProviderId.isEmpty()));
         }
 
         pPersons->endElement(XML_personList);
