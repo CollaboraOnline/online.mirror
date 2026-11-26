@@ -6372,9 +6372,9 @@ std::shared_ptr<ClientSession> DocumentBroker::createNewClientSession(
     return nullptr;
 }
 
-void DocumentBroker::addCallback(const SocketPoll::CallbackFn& fn)
+bool DocumentBroker::addCallback(const SocketPoll::CallbackFn& fn)
 {
-    _poll->addCallback(fn);
+    return _poll->addCallback(fn);
 }
 
 void DocumentBroker::endActivity()

@@ -581,8 +581,9 @@ public:
                        const WOPIFileInfo* wopiFileInfo);
 #endif
 
-    /// Add a callback to be invoked in our polling thread.
-    void addCallback(const SocketPoll::CallbackFn& fn);
+    /// Add a callback to be invoked in our polling thread. Returns false when that
+    /// thread has not started or has ended, and the callback will never run.
+    bool addCallback(const SocketPoll::CallbackFn& fn);
 
     /// Whether the WOPI host holds a lock for this document. Read it on our polling thread.
     bool isLockedInStorage() const { return _lockCtx && _lockCtx->isLocked(); }

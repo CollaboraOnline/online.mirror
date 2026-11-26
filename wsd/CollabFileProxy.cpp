@@ -225,7 +225,7 @@ void CollabFileProxy::releaseLock(std::shared_ptr<SocketPoll> const & poll,
 
     // An editor on /cool/ws holds the lock with the same token and still needs it. Only viewers
     // there hold none. The UNLOCK finishes on this thread before a /cool/ws editor can LOCK here.
-    docBroker->addCallback([docBroker, lockUri = _lockUri, docKey]() {
+    const bool queued = docBroker->addCallback([docBroker, lockUri = _lockUri, docKey]() {
         if (docBroker->isLockedInStorage())
         {
             LOG_DBG_S("CollabFileProxy: not unlocking, an editor on /cool/ws holds the lock");
@@ -234,6 +234,15 @@ void CollabFileProxy::releaseLock(std::shared_ptr<SocketPoll> const & poll,
 
         sendUnlockAndWait(lockUri, docKey);
     });
+
+    // A broker whose thread is not running holds no lock. It never loaded the
+    // document, as for an editor form, or it released its lock when it unloaded.
+    if (!queued)
+    {
+        LOG_DBG("CollabFileProxy: unlocking, the broker on /cool/ws is not running");
+        sendUnlock(_lockUri, docKey, poll, afterUnlock);
+        return;
+    }
 
     // Only the broker's thread can tell whether an editor holds the lock, so we go on at once:
     if (afterUnlock)
