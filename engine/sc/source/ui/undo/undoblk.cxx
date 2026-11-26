@@ -1280,7 +1280,9 @@ void ScUndoPaste::Repeat(SfxRepeatTarget& rTarget)
 
     ScTabViewShell& rViewSh = pViewTarget->GetViewShell();
     // keep a reference in case the clipboard is changed during PasteFromClip
-    const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(ScTabViewShell::GetClipData(rViewSh.GetViewData().GetActiveWin()));
+    const cpo::uno::Reference<css::datatransfer::XTransferable2> xTransferable(
+        ScTabViewShell::GetClipData(rViewSh.GetViewData().GetActiveWin()));
+    const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(xTransferable);
     if (pOwnClip)
     {
         rViewSh.PasteFromClip( nFlags, pOwnClip->GetDocument(),

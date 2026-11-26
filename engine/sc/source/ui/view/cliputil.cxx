@@ -57,7 +57,11 @@ bool lcl_checkClassification(ScDocument* pSourceDoc, const ScDocument& rDestinat
 
 void ScClipUtil::PasteFromClipboard( ScViewData& rViewData, ScTabViewShell* pTabViewShell, bool bShowDialog )
 {
-    const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(ScTabViewShell::GetClipData(rViewData.GetActiveWin()));
+    // keep a reference: a warning dialog below runs a nested main loop, where a new copy
+    // replaces the clipboard contents and would free this object and its clip document
+    const cpo::uno::Reference<css::datatransfer::XTransferable2> xTransferable(
+        ScTabViewShell::GetClipData(rViewData.GetActiveWin()));
+    const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(xTransferable);
     ScDocument& rThisDoc = rViewData.GetDocument();
     SCCOL nThisCol = rViewData.GetCurX();
     SCROW nThisRow = rViewData.GetCurY();

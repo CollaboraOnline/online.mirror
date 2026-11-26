@@ -233,7 +233,9 @@ void implnPasteSpecial( const uno::Reference< frame::XModel>& xModel, InsertDele
     if (!pWin)
         return;
 
-    const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(ScTabViewShell::GetClipData(pWin));
+    // keep a reference in case the clipboard is changed during PasteFromClip
+    uno::Reference<datatransfer::XTransferable2> xTransferable(ScTabViewShell::GetClipData(pWin));
+    const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(xTransferable);
     if (pOwnClip)
     {
         pTabViewShell->PasteFromClip(nFlags, pOwnClip->GetDocument(),

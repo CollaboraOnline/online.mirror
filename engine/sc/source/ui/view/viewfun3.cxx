@@ -971,7 +971,9 @@ bool ScViewFunc::PasteFromSystem( SotClipboardFormatId nFormatId, bool bApi, boo
     bool bRet = true;
     vcl::Window* pWin = GetActiveWin();
     // keep a reference in case the clipboard is changed during PasteFromClip
-    const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(ScTabViewShell::GetClipData(pWin));
+    const cpo::uno::Reference<css::datatransfer::XTransferable2> xTransferable(
+        ScTabViewShell::GetClipData(pWin));
+    const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(xTransferable);
     if ( nFormatId == SotClipboardFormatId::NONE && pOwnClip )
     {
         PasteFromClip( InsertDeleteFlags::ALL, pOwnClip->GetDocument(),
