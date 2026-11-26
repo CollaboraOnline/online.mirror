@@ -89,9 +89,9 @@ void ThreadedCommentsFragment::attachToNotes()
     for (auto& rEntry : maEntries)
     {
         if (rEntry.maParentId.isEmpty())
-            aRootById[rEntry.maId] = &rEntry;
+            aRootById[rEntry.maId.toAsciiUpperCase()] = &rEntry;
         else
-            aRepliesByParentId[rEntry.maParentId].push_back(&rEntry);
+            aRepliesByParentId[rEntry.maParentId.toAsciiUpperCase()].push_back(&rEntry);
     }
 
     // For each root entry, find the matching ScPostIt and attach threaded data.

@@ -7215,15 +7215,16 @@ bool ScDocument::ContainsNotesInRange( const ScRangeList& rRangeList ) const
 
 void ScDocument::AddPerson(const ScPersonData& rPerson)
 {
-    if (std::none_of(maPersonList.begin(), maPersonList.end(),
-                     [&rPerson](const auto& r) { return r.maId == rPerson.maId; }))
+    if (std::ranges::none_of(maPersonList, [&rPerson](const auto& r) {
+            return r.maId.equalsIgnoreAsciiCase(rPerson.maId);
+        }))
         maPersonList.push_back(rPerson);
 }
 
 const ScPersonData* ScDocument::GetPersonById(const OUString& rId) const
 {
-    auto it = std::find_if(maPersonList.begin(), maPersonList.end(),
-                           [&rId](const auto& r) { return r.maId == rId; });
+    auto it = std::ranges::find_if(
+        maPersonList, [&rId](const auto& r) { return r.maId.equalsIgnoreAsciiCase(rId); });
     return it != maPersonList.end() ? &*it : nullptr;
 }
 

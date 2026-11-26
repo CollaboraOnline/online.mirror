@@ -2134,6 +2134,25 @@ CPPUNIT_TEST_FIXTURE(ScFiltersTest3, testThreadedCommentImport)
     CPPUNIT_ASSERT(!pPlainNote->GetThreadedCommentData());
 }
 
+CPPUNIT_TEST_FIXTURE(ScFiltersTest3, testTdf173397_mixedCaseGuids)
+{
+    // The root entry has a lowercase id and personId; its reply refers to it in uppercase, and the
+    // person list has the same id twice, in both cases
+    createScDoc("xlsx/tdf173397_mixedCase.xlsx");
+    ScDocument* pDoc = getScDoc();
+
+    ScPostIt* pNote = pDoc->GetNote(0, 1, 0);
+    CPPUNIT_ASSERT(pNote);
+    const ScThreadedCommentData* pData = pNote->GetThreadedCommentData();
+    CPPUNIT_ASSERT(pData);
+    // Without the accompanying fix in place, this test would have failed: the reply was dropped,
+    // the author was the duplicate person's name, and the person list had two entries.
+    CPPUNIT_ASSERT_EQUAL(size_t(1), pData->maReplies.size());
+    CPPUNIT_ASSERT_EQUAL(u"A reply"_ustr, pData->maReplies[0].maText);
+    CPPUNIT_ASSERT_EQUAL(u"Mike Kaganski"_ustr, pNote->GetAuthor());
+    CPPUNIT_ASSERT_EQUAL(size_t(1), pDoc->GetPersonList().size());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
