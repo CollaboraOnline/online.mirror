@@ -37,6 +37,7 @@ class TransferableDataHelper;
 class TransferableClipboardListener;
 class AbstractScLinkedAreaDlg;
 class ScTransferObj;
+class ScTabViewShell;
 
 struct CellShell_Impl
 {
@@ -90,7 +91,8 @@ public:
     void        GetState(SfxItemSet &);
 
     void        ExecuteEdit( SfxRequest& rReq );
-    void        AfterInsCellContents(SfxRequest& rReq, const ScTransferObj* pOwnClip,
+    static void AfterInsCellContents(ScTabViewShell& rTabViewShell, SfxRequest& rReq,
+                                     const ScTransferObj* pOwnClip,
                                      InsertDeleteFlags nFlags, ScPasteFunc nFunction,
                                      InsCellCmd eMoveMode, bool bSkipEmpty, bool bTranspose,
                                      bool bAsLink, bool bOtherDoc);

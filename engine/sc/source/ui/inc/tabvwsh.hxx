@@ -425,6 +425,9 @@ public:
     void            DeactivateOle();
 
     SAL_RET_MAYBENULL SC_DLLPUBLIC static ScTabViewShell* GetActiveViewShell();
+    /// The Calc view with this id, or nullptr once that view is gone. Work deferred past the
+    /// current call (a posted event, the callback of an async dialog) finds its view with it.
+    SAL_RET_MAYBENULL static ScTabViewShell* GetViewShellOfId(ViewShellId nId);
 
     std::shared_ptr<SfxModelessDialogController> CreateRefDialogController(SfxBindings* pB, SfxChildWindow* pCW,
                                                     SfxChildWinInfo* pInfo,

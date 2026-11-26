@@ -1218,6 +1218,17 @@ ScTabViewShell* ScTabViewShell::GetActiveViewShell()
     return dynamic_cast< ScTabViewShell *>( SfxViewShell::Current() );
 }
 
+ScTabViewShell* ScTabViewShell::GetViewShellOfId(ViewShellId nId)
+{
+    for (SfxViewShell* pViewShell = SfxViewShell::GetFirst(false); pViewShell;
+         pViewShell = SfxViewShell::GetNext(*pViewShell, false))
+    {
+        if (pViewShell->GetViewShellId() == nId)
+            return dynamic_cast<ScTabViewShell*>(pViewShell);
+    }
+    return nullptr;
+}
+
 SfxPrinter* ScTabViewShell::GetPrinter( bool bCreate )
 {
     // printer is always present (is created for the FontList already on start-up)

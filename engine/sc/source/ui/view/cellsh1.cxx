@@ -166,11 +166,11 @@ OUString FlagsToString( InsertDeleteFlags nFlags,
 /// Deferred paste state for the async .uno:PasteSpecial callback.
 struct ScPasteJob
 {
-    ScCellShell* pCellShell;
+    /// The view can be closed before the job runs, so the job finds it again by its id.
+    ViewShellId nViewShellId;
     std::shared_ptr<SfxRequest> xRequest;
-    const ScTransferObj* pOwnClip;
+    /// Keeps the pasted ScTransferObj and its clip document alive.
     cpo::uno::Reference<css::datatransfer::XTransferable2> xTransferable;
-    ScTabViewShell* pTabViewShell;
     InsertDeleteFlags nFlags;
     ScPasteFunc nFunction;
     InsCellCmd eMoveMode;
@@ -184,10 +184,15 @@ struct ScPasteJob
 void RunScPasteJob(void* /*instance*/, void* data)
 {
     std::unique_ptr<ScPasteJob> pJob(static_cast<ScPasteJob*>(data));
-    pJob->pCellShell->AfterInsCellContents(*pJob->xRequest, pJob->pOwnClip, pJob->nFlags,
-                                           pJob->nFunction, pJob->eMoveMode, pJob->bSkipEmpty,
-                                           pJob->bTranspose, pJob->bAsLink, pJob->bOtherDoc);
-    pJob->pTabViewShell->CellContentChanged();
+    ScTabViewShell* pTabViewShell = ScTabViewShell::GetViewShellOfId(pJob->nViewShellId);
+    if (!pTabViewShell)
+        return;
+    ScCellShell::AfterInsCellContents(*pTabViewShell, *pJob->xRequest,
+                                      ScTransferObj::GetOwnClipboard(pJob->xTransferable),
+                                      pJob->nFlags, pJob->nFunction, pJob->eMoveMode,
+                                      pJob->bSkipEmpty, pJob->bTranspose, pJob->bAsLink,
+                                      pJob->bOtherDoc);
+    pTabViewShell->CellContentChanged();
 }
 
 void SetTabNoAndCursor( const ScViewData& rViewData, std::u16string_view rCellId )
@@ -1693,15 +1698,14 @@ void ScCellShell::ExecuteEdit( SfxRequest& rReq )
                             }
 
                             auto xRequest = std::make_shared<SfxRequest>(rReq);
+                            const ViewShellId nViewShellId = pTabViewShell->GetViewShellId();
 
-                            pDlg->StartExecuteAsync([pDlg, pTabViewShell, pOwnClip, xTransferable,
-                                                     bOtherDoc, this, xRequest=std::move(xRequest)](sal_Int32 nResult) {
+                            pDlg->StartExecuteAsync([pDlg, nViewShellId, xTransferable,
+                                                     bOtherDoc, xRequest=std::move(xRequest)](sal_Int32 nResult) {
                                 auto pJob = std::make_unique<ScPasteJob>();
-                                pJob->pCellShell    = this;
+                                pJob->nViewShellId  = nViewShellId;
                                 pJob->xRequest      = xRequest;
-                                pJob->pOwnClip      = pOwnClip;
                                 pJob->xTransferable = xTransferable;
-                                pJob->pTabViewShell = pTabViewShell;
                                 pJob->nFlags        = InsertDeleteFlags::NONE;
                                 pJob->nFunction     = ScPasteFunc::NONE;
                                 pJob->eMoveMode     = INS_NONE;
@@ -1729,8 +1733,8 @@ void ScCellShell::ExecuteEdit( SfxRequest& rReq )
                             pTabViewShell->ErrorMessage(aTester.GetMessageId());
                     }
 
-                    AfterInsCellContents(rReq, pOwnClip, nFlags, nFunction, eMoveMode,
-                                         bSkipEmpty, bTranspose, bAsLink, bOtherDoc);
+                    AfterInsCellContents(*pTabViewShell, rReq, pOwnClip, nFlags, nFunction,
+                                         eMoveMode, bSkipEmpty, bTranspose, bAsLink, bOtherDoc);
                 }
             }
             pTabViewShell->CellContentChanged();        // => PasteFromXXX ???
@@ -3557,7 +3561,8 @@ void ScCellShell::ExecuteEdit( SfxRequest& rReq )
     }
 }
 
-void ScCellShell::AfterInsCellContents(SfxRequest& rReq, const ScTransferObj* pOwnClip,
+void ScCellShell::AfterInsCellContents(ScTabViewShell& rTabViewShell, SfxRequest& rReq,
+                                       const ScTransferObj* pOwnClip,
                                        InsertDeleteFlags nFlags, ScPasteFunc nFunction,
                                        InsCellCmd eMoveMode, bool bSkipEmpty, bool bTranspose,
                                        bool bAsLink, bool bOtherDoc)
@@ -3565,9 +3570,9 @@ void ScCellShell::AfterInsCellContents(SfxRequest& rReq, const ScTransferObj* pO
     if (nFlags == InsertDeleteFlags::NONE)
         return;
 
-    ScTabViewShell* pTabViewShell = GetViewData().GetViewShell();
+    ScTabViewShell* pTabViewShell = &rTabViewShell;
     {
-        weld::WaitObject aWait(GetViewData().GetDialogParent());
+        weld::WaitObject aWait(rTabViewShell.GetViewData().GetDialogParent());
         if (bAsLink && bOtherDoc)
             pTabViewShell->PasteFromSystem(SotClipboardFormatId::LINK); // DDE insert
         else

@@ -41,6 +41,8 @@
 #include <svl/zformat.hxx>
 #include <COKit/COKit.hxx>
 #include <vcl/scheduler.hxx>
+#include <vcl/jsdialog/executor.hxx>
+#include <vcl/svapp.hxx>
 #include <comphelper/kit.hxx>
 #include <comphelper/propertyvalue.hxx>
 #include <comphelper/dispatchcommand.hxx>
@@ -4919,6 +4921,96 @@ CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testExportAsksToRetypeSheetPassword)
     aRetyped.setPassword(u"Hello"_ustr);
     pDoc->SetTabProtection(0, &aRetyped);
     CPPUNIT_ASSERT(!pModelObj->exportRaisesDialog(u"calc8"_ustr));
+}
+
+namespace
+{
+/// Selects rRange, like $A$1:$C$1, in the current view.
+void lcl_selectRange(const cpo::uno::Reference<css::lang::XComponent>& xComponent,
+                     const OUString& rRange)
+{
+    unotest::MacrosTest::dispatchCommand(xComponent, u".uno:GoToCell"_ustr,
+                                         { comphelper::makePropertyValue(u"ToPoint"_ustr, rRange) });
+}
+
+/// The Kit id of the dialog that is open, or an empty string.
+OUString lcl_getOpenDialogId()
+{
+    OUString sDialogId;
+    for (vcl::Window* pWindow = Application::GetFirstTopLevelWindow(); pWindow;
+         pWindow = Application::GetNextTopLevelWindow(pWindow))
+    {
+        vcl::Window* pDialog = pWindow->GetWindow(GetWindowType::Client);
+        if (pDialog && pDialog->IsDialog())
+            sDialogId = OUString::number(static_cast<sal_uInt64>(pDialog->GetKitWindowId()));
+    }
+    return sDialogId;
+}
+}
+
+// Paste Special posts the paste after its dialog closes. When the view is closed before the
+// posted paste runs, the paste is dropped.
+CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testPasteSpecialAfterViewClosed)
+{
+    ScModelObj* pModelObj = createDoc("empty.ods");
+    ScTestViewCallback aView1;
+    const int nView1 = KitHelper::getCurrentView();
+    ScDocument* pDoc = pModelObj->GetDocument();
+    pDoc->SetString(ScAddress(0, 0, 0), u"a"_ustr);
+
+    // Given a second view, which copied A1 and has C3 selected,
+    KitHelper::createView();
+    const int nView2 = KitHelper::getCurrentView();
+    {
+        // The view is destroyed before this callback, which leaves the view's listener alone.
+        ScTestViewCallback aView2(/*bDeleteListenerOnDestruct*/ false);
+        pModelObj->initializeForTiledRendering({});
+        // Each view has its own clipboard.
+        lcl_selectRange(mxComponent, u"$A$1"_ustr);
+        dispatchCommand(mxComponent, u".uno:Copy"_ustr, {});
+        lcl_selectRange(mxComponent, u"$C$3"_ustr);
+
+        // when Paste Special is confirmed there,
+        dispatchCommand(mxComponent, u".uno:PasteSpecial"_ustr, {});
+        const OUString sDialogId = lcl_getOpenDialogId();
+        CPPUNIT_ASSERT(!sDialogId.isEmpty());
+        StringMap aOk{ { u"type"_ustr, u"responsebutton"_ustr },
+                       { u"cmd"_ustr, u"click"_ustr },
+                       { u"data"_ustr, OUString::number(RET_OK) } };
+        CPPUNIT_ASSERT(jsdialog::ExecuteAction(sDialogId, u"ok"_ustr, aOk));
+
+        // and the view is closed before the posted paste runs,
+        KitHelper::destroyView(nView2);
+    }
+    KitHelper::setView(nView1);
+    // then the paste is dropped. Without the accompanying fix in place, the posted paste used
+    // the freed view.
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT(pDoc->GetString(ScAddress(2, 2, 0)).isEmpty());
+}
+
+// Paste Special posts the paste after its dialog closes, and the posted paste finds its view.
+CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testPasteSpecialPostedPaste)
+{
+    ScModelObj* pModelObj = createDoc("empty.ods");
+    ScTestViewCallback aView;
+    ScDocument* pDoc = pModelObj->GetDocument();
+    pDoc->SetString(ScAddress(0, 0, 0), u"a"_ustr);
+    lcl_selectRange(mxComponent, u"$A$1"_ustr);
+    dispatchCommand(mxComponent, u".uno:Copy"_ustr, {});
+    lcl_selectRange(mxComponent, u"$C$3"_ustr);
+
+    dispatchCommand(mxComponent, u".uno:PasteSpecial"_ustr, {});
+    const OUString sDialogId = lcl_getOpenDialogId();
+    CPPUNIT_ASSERT(!sDialogId.isEmpty());
+    StringMap aOk{ { u"type"_ustr, u"responsebutton"_ustr },
+                   { u"cmd"_ustr, u"click"_ustr },
+                   { u"data"_ustr, OUString::number(RET_OK) } };
+    CPPUNIT_ASSERT(jsdialog::ExecuteAction(sDialogId, u"ok"_ustr, aOk));
+    CPPUNIT_ASSERT(pDoc->GetString(ScAddress(2, 2, 0)).isEmpty());
+
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT_EQUAL(u"a"_ustr, pDoc->GetString(ScAddress(2, 2, 0)));
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
