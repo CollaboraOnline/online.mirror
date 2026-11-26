@@ -960,14 +960,22 @@ void WhiteBoxTests::testAnonymization()
     LOK_ASSERT_EQUAL_STR("#1#8f8d95bd2a202d00#.odt", Anonymizer::anonymizeUrl(filenameTestx));
     LOK_ASSERT_EQUAL_STR("/path/to/#2#5c872b2d82ecc8a0#.ext", Anonymizer::anonymizeUrl(path));
     LOK_ASSERT_EQUAL_STR("http://localhost/owncloud/index.php/apps/richdocuments/wopi/files/"
-                         "#3#22c6f0caad277666#?access_token=Hn0zttjbwkvGWb5BHbDa5ArgTykJAyBl&"
+                         "#3#22c6f0caad277666#?access_token=<hidden>&"
                          "access_token_ttl=0&permission=edit",
                          Anonymizer::anonymizeUrl(plainUrl));
     LOK_ASSERT_EQUAL_STR(
         "http://localhost/owncloud/index.php/apps/richdocuments/wopi/files/736_ocgdpzbkm39u/"
-        "#4#294f0dfb18f6a80b#.odt?access_token=Hn0zttjbwkvGWb5BHbDa5ArgTykJAyBl&access_token_ttl=0&"
+        "#4#294f0dfb18f6a80b#.odt?access_token=<hidden>&access_token_ttl=0&"
         "permission=edit",
         Anonymizer::anonymizeUrl(fileUrl));
+
+    // The token is hidden wherever it is in the query, an empty one stays empty.
+    LOK_ASSERT_EQUAL_STR("/wopi/files/#5#cf7a9bd16e20e732#?testname=x&access_token=<hidden>",
+                         Anonymizer::anonymizeUrl("/wopi/files/1?testname=x&access_token=secret"));
+    LOK_ASSERT_EQUAL_STR(
+        "/wopi/files/#5#cf7a9bd16e20e732#?access_header=<hidden>&access_token=&permission=edit",
+        Anonymizer::anonymizeUrl("/wopi/files/1?access_header=Authorization%3A%20Basic%20abc"
+                                 "&access_token=&permission=edit"));
 
     anonymizationSalt = 0;
     Anonymizer::initialize(true, anonymizationSalt);
@@ -988,16 +996,22 @@ void WhiteBoxTests::testAnonymization()
 
     LOK_ASSERT_EQUAL(path, Anonymizer::anonymizeUrl(path));
 
+    const std::string plainUrlHidden =
+        Util::replace(plainUrl, "Hn0zttjbwkvGWb5BHbDa5ArgTykJAyBl", "<hidden>");
+    const std::string fileUrlHidden =
+        Util::replace(fileUrl, "Hn0zttjbwkvGWb5BHbDa5ArgTykJAyBl", "<hidden>");
+
     const std::string urlAnonymized =
-        Util::replace(plainUrl, "736_ocgdpzbkm39u", "#3#f64fbe55134cd5f0#");
+        Util::replace(plainUrlHidden, "736_ocgdpzbkm39u", "#3#f64fbe55134cd5f0#");
     LOK_ASSERT_EQUAL(urlAnonymized, Anonymizer::anonymizeUrl(plainUrl));
     Anonymizer::mapAnonymized("736_ocgdpzbkm39u", "736_ocgdpzbkm39u");
-    LOK_ASSERT_EQUAL(plainUrl, Anonymizer::anonymizeUrl(plainUrl));
+    LOK_ASSERT_EQUAL(plainUrlHidden, Anonymizer::anonymizeUrl(plainUrl));
 
-    const std::string urlAnonymized2 = Util::replace(fileUrl, "secret", "#4#dcac6c9cae1b3b95#");
+    const std::string urlAnonymized2 =
+        Util::replace(fileUrlHidden, "secret", "#4#dcac6c9cae1b3b95#");
     LOK_ASSERT_EQUAL(urlAnonymized2, Anonymizer::anonymizeUrl(fileUrl));
     Anonymizer::mapAnonymized("secret", "736_ocgdpzbkm39u");
-    const std::string urlAnonymized3 = Util::replace(fileUrl, "secret", "736_ocgdpzbkm39u");
+    const std::string urlAnonymized3 = Util::replace(fileUrlHidden, "secret", "736_ocgdpzbkm39u");
     LOK_ASSERT_EQUAL(urlAnonymized3, Anonymizer::anonymizeUrl(fileUrl));
 }
 

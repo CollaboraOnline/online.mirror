@@ -370,8 +370,7 @@ bool RemoteDocument::connect()
     const std::string target =
         _serverUrl + "/cool/" + encodedDocumentUri + "/ws?WOPISrc=" + Uri::encode(_wopiSrc);
 
-    // The target carries the access token of the source, which anonymizing a URL leaves in
-    // the query it keeps, so the server dialed is named instead.
+    // The target carries the access token of the source, so the server dialed is named instead.
     LOG_INF("RemoteDoc: opening a headless session to ["
             << Anonymizer::anonymizeUrl(_wopiSrc) << "] through [" << _serverUrl << ']');
 

@@ -16,6 +16,7 @@
 #include <common/Log.hpp>
 #include <common/Util.hpp>
 
+#include <algorithm>
 #include <atomic>
 #include <mutex>
 #include <string>
@@ -201,7 +202,8 @@ public:
         }
     }
 
-    /// Anonymize the basename of filenames only, preserving the path and extension.
+    /// Anonymize the basename of filenames only, preserving the path and extension. The values
+    /// of access_token and access_header in the query are replaced with a marker.
     static std::string anonymizeUrl(const std::string& url)
     {
         std::string base;
@@ -210,7 +212,30 @@ public:
         std::string params;
         std::tie(base, filename, ext, params) = Util::splitUrl(url);
 
-        return base + anonymize(filename) + ext + params;
+        return base + anonymize(filename) + ext + hideAuthorization(std::move(params));
+    }
+
+    /// Returns the query of a URL with each value of access_token and access_header that is
+    /// not empty replaced with a marker.
+    static std::string hideAuthorization(std::string params)
+    {
+        for (const std::string_view key : { "access_token=", "access_header=" })
+        {
+            std::size_t pos = 0;
+            while ((pos = params.find(key, pos)) != std::string::npos)
+            {
+                const std::size_t value = pos + key.size();
+                if (pos == 0 || params[pos - 1] == '?' || params[pos - 1] == '&')
+                {
+                    const std::size_t end = std::min(params.find('&', value), params.size());
+                    if (end > value)
+                        params.replace(value, end - value, "<hidden>");
+                }
+                pos = value;
+            }
+        }
+
+        return params;
     }
 
 private:
