@@ -79,10 +79,19 @@ inline std::string const serverEditorFormScript = R"JS(
 (editorUrl, formBody) => {
     const url = new URL(editorUrl);
     url.hash = ')JS" + serverEditorFragment + R"JS(';
+    const fields = new URLSearchParams(formBody);
+    const pageToken = decodeURIComponent(window._codaRemoteInfo?.accessToken ?? '');
+
+    // The page keeps the token that the integrator renewed, so the form posts that one.
+    if (pageToken && pageToken !== fields.get('access_token')) {
+        fields.set('access_token', pageToken);
+        fields.set('access_token_ttl', app.map.options.docParams.access_token_ttl);
+    }
+
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = url.href;
-    for (const [name, value] of new URLSearchParams(formBody)) {
+    for (const [name, value] of fields) {
         const input = document.createElement('input');
         input.type = 'hidden';
         input.name = name;
