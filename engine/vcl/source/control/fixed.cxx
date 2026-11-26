@@ -109,6 +109,10 @@ FixedText::FixedText(vcl::Window* pParent, WinBits nStyle, WindowType eType)
 
 void FixedText::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     WinBits nStyle = GetStyle();
     Control::DumpAsPropertyTree(rJsonWriter);
 

@@ -136,6 +136,10 @@ void Deck::DataChanged(const DataChangedEvent&)
  */
 void Deck::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     rJsonWriter.put("id", get_id().isEmpty() ? msId : get_id());
     rJsonWriter.put("type", "deck");
     rJsonWriter.put("text", GetText());

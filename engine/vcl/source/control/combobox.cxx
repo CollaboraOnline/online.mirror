@@ -1586,6 +1586,10 @@ FactoryFunction ComboBox::GetUITestFactory() const
 
 void ComboBox::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     Control::DumpAsPropertyTree(rJsonWriter);
 
     {

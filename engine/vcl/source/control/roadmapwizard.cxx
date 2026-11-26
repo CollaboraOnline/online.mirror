@@ -1024,6 +1024,10 @@ namespace vcl
 
     void RoadmapWizard::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
     {
+        // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+        if (isDisposed())
+            return;
+
         rJsonWriter.put("id", get_id());
         rJsonWriter.put("type", "dialog");
         rJsonWriter.put("title", GetText());

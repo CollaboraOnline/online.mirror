@@ -278,6 +278,10 @@ Size VerticalTabControl::GetOptimalSize() const
 
 void VerticalTabControl::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     rJsonWriter.put("id", get_id());
     rJsonWriter.put("type", "tabcontrol");
     rJsonWriter.put("vertical", true);

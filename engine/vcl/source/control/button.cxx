@@ -613,6 +613,10 @@ std::string_view symbolTypeName(SymbolType eSymbolType)
 
 void Button::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     Control::DumpAsPropertyTree(rJsonWriter);
     rJsonWriter.put("text", GetText());
     if (HasImage())

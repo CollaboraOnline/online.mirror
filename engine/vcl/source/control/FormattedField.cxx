@@ -250,6 +250,10 @@ void FormattedField::SetValueFromString(const OUString& rStr)
 
 void FormattedField::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     SpinField::DumpAsPropertyTree(rJsonWriter);
     Formatter& rFormatter = GetFormatter();
 

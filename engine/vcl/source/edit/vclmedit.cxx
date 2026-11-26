@@ -1504,6 +1504,10 @@ bool VclMultiLineEdit::set_property(const OUString &rKey, const OUString &rValue
 
 void VclMultiLineEdit::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     Edit::DumpAsPropertyTree(rJsonWriter);
 
     rJsonWriter.put("cursor", pImpVclMEdit->GetTextWindow()->GetTextView()->IsCursorEnabled());

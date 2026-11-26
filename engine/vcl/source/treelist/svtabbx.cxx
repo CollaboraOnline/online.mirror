@@ -199,6 +199,10 @@ static void lcl_DumpEntryAndSiblings(tools::JsonWriter& rJsonWriter,
 
 void SvTabListBox::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     SvTreeListBox::DumpAsPropertyTree(rJsonWriter);
 
     rJsonWriter.put("singleclickactivate", GetActivateOnSingleClick());
@@ -713,6 +717,10 @@ sal_uInt32 SvHeaderTabListBox::Insert( SvTreeListEntry* pEntry, sal_uInt32 nRoot
 
 void SvHeaderTabListBox::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     SvTabListBox::DumpAsPropertyTree(rJsonWriter);
 
     // If the base class already emitted "headers" from m_aColumnTitles, skip

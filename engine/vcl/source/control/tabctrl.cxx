@@ -2147,6 +2147,10 @@ FactoryFunction TabControl::GetUITestFactory() const
 
 void TabControl::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     rJsonWriter.put("id", get_id());
     rJsonWriter.put("type", "tabcontrol");
     rJsonWriter.put("selected", GetCurPageId());

@@ -1649,6 +1649,10 @@ Size Calendar::GetOptimalSize() const
 
 void Calendar::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     Control::DumpAsPropertyTree(rJsonWriter);
 
     const auto aDate = GetFirstSelectedDate();

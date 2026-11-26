@@ -19,6 +19,10 @@ VclCustomWidget::~VclCustomWidget() {}
 
 void VclCustomWidget::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     Control::DumpAsPropertyTree(rJsonWriter);
 
     if (m_aCustomType.isEmpty() || !m_aDumpCallback)

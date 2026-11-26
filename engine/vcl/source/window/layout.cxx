@@ -2213,6 +2213,10 @@ void lcl_dumpScrollbar(::tools::JsonWriter& rJsonWriter, const ScrollBar& rScrol
 
 void VclScrolledWindow::DumpAsPropertyTree(::tools::JsonWriter& rJsonWriter)
 {
+    // A disposed window has nothing to dump, as in vcl::Window::DumpAsPropertyTree.
+    if (isDisposed())
+        return;
+
     VclBin::DumpAsPropertyTree(rJsonWriter);
 
     rJsonWriter.put("user_managed_scrolling", m_bUserManagedScrolling);
