@@ -6439,11 +6439,16 @@ bool ChildSession::saveAs(const StringVector& tokens)
             filterOptions = "EmbedImages";
         }
 
+        // The local path of the target. On Windows the path of a file URL starts with a slash
+        // before the drive letter, which Poco::Path does not take, so the path is converted first.
+        const Poco::Path targetPath(
+            FileUtil::localPathOfFileUri(wopiURL.getHost(), wopiURL.getPath()));
+
         // A document opened from a hybrid PDF stays hybrid when it is saved as PDF again, so the
         // PDF keeps carrying the ODF document. The format comes from the file name when it is not
         // given.
         const std::string saveFormat =
-            format.empty() ? Util::toLower(Poco::Path(url).getExtension()) : format;
+            format.empty() ? Util::toLower(targetPath.getExtension()) : format;
         if (saveFormat == "pdf" && LOKitHelper::isHybridPDF(getLOKitDocument().get()))
             addHybridPDFOption(filterOptions);
 
@@ -6492,8 +6497,6 @@ bool ChildSession::saveAs(const StringVector& tokens)
 
         // The desktop apps give no filename token, so a failure names the file from the URL.
         std::string encodedTargetName;
-        const Poco::Path targetPath(
-            FileUtil::localPathOfFileUri(wopiURL.getHost(), wopiURL.getPath()));
         Poco::URI::encode(targetPath.getFileName(), "", encodedTargetName);
 
         success = getLOKitDocument()->saveAs(
@@ -6503,7 +6506,7 @@ bool ChildSession::saveAs(const StringVector& tokens)
         // A target without an extension gets the one of the document type and a second try. A
         // target that has one failed for another reason, such as the user cancelling a question
         // the save asked, and is not tried again.
-        if (!success && Poco::Path(url).getExtension().empty())
+        if (!success && targetPath.getExtension().empty())
         {
             bool retry = true;
             switch (getLOKitDocument()->getDocumentType())
