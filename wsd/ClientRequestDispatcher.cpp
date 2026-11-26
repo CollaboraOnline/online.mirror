@@ -1755,6 +1755,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
             // the connection, as the access_token in the address does for /cool/ws, which then
             // skips its Origin check too):
             auto handler = std::make_shared<CollabSocketHandler>(socket, request, true, wopiSrc);
+            handler->closeOnPongTimeout();
             socket->setHandler(handler);
         }
 
