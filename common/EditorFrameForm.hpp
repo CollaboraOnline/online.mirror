@@ -24,9 +24,9 @@
 // The form that the integrator posts into the editor frame for coolwsd's editor page:
 namespace EditorFrameForm {
 
-// The access token that coolwsd puts into its editor page for the form at the address (read from
-// the form and URI-encoded the same way coolwsd does it):
-inline std::string accessToken(std::string const & formUrl, std::string const & form) {
+// The value of the named field of the form at the address. It is empty when the form has none.
+inline std::string field(std::string const & formUrl, std::string const & form,
+                         std::string const & name) {
     try {
         // The method is spelled out, as the CUPS header of the macOS SDK defines HTTP_POST as a
         // macro:
@@ -34,11 +34,17 @@ inline std::string accessToken(std::string const & formUrl, std::string const & 
         request.setContentType("application/x-www-form-urlencoded");
         std::istringstream body(form);
         Poco::Net::HTMLForm fields(request, body);
-        return Uri::encode(fields.get("access_token", ""), "'");
+        return fields.get(name, "");
     } catch (Poco::Exception const & e) {
         LOG_WRN("editor frame: cannot read the integrator's form: " << e.displayText());
         return "";
     }
+}
+
+// The access token that coolwsd puts into its editor page for the form at the address (read from
+// the form and URI-encoded the same way coolwsd does it):
+inline std::string accessToken(std::string const & formUrl, std::string const & form) {
+    return Uri::encode(field(formUrl, form, "access_token"), "'");
 }
 
 }
