@@ -2372,6 +2372,7 @@ svx/res/wireframe_16.png cmd/sc_window3d.png
 # sw
 # ==============================================
 # res
+sw/res/brokenlink.png cmd/sc_cancel.png
 sw/res/lc20556.png cmd/lc_dbviewfunctions.png
 sw/res/lc20557.png cmd/lc_cancel.png
 sw/res/lc20558.png cmd/lc_ok.png

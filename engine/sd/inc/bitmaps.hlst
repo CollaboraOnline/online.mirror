@@ -78,7 +78,6 @@ inline constexpr OUString BMP_POINTER_ICON = u"sd/res/pointericon.png"_ustr;
 inline constexpr OUString BMP_WAIT_ICON = u"sd/res/waiticon.png"_ustr;
 inline constexpr OUString BMP_FADE_EFFECT_INDICATOR = u"sd/res/fade_effect_indicator.png"_ustr;
 inline constexpr OUString BMP_CUSTOM_ANIMATION_INDICATOR = u"sd/res/click_16.png"_ustr;
-inline constexpr OUString BMP_INSERT_TABLESTYLE = u"sd/res/addtablestyle.png"_ustr;
 // Presenter Screen bitmaps:
 inline constexpr OUString BMP_PRESENTERSCREEN_BORDER_LEFT = u"sd/res/presenterscreen-BorderLeft.png"_ustr;
 inline constexpr OUString BMP_PRESENTERSCREEN_BUTTON_SLIDE_NEXT_DISABLED = u"sd/res/presenterscreen-ButtonSlideNextDisabled.png"_ustr;
