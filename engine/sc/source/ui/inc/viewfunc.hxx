@@ -79,6 +79,9 @@ private:
     std::function<void()> maPasteRetry;
     /// Set by a PasteQuestionScope: the user said Yes to pasting beyond the selection.
     bool        mbPasteBeyondConfirmed;
+    /// Set by a PasteQuestionScope: PasteFromClip only checks, and sets it to true when the
+    /// paste can go ahead without asking.
+    bool*       mpPasteCheckOnly;
 
 public:
     /// Decides, while it lives, how PasteFromClip asks whether to paste beyond a selection
@@ -91,7 +94,11 @@ public:
         /// Yes. It runs from the dialog's callback, so it finds the view again by its id and
         /// keeps the clip document alive itself.
         PasteQuestionScope(ScViewFunc& rView, std::function<void()> aRetry);
-        /// The user said Yes to this paste already.
+        /// Ask like the constructor above, but PasteFromClip pastes nothing: it sets
+        /// rbCanPaste when the paste can go ahead without asking. A paste that changes the
+        /// document before its PasteFromClip asks first with it.
+        PasteQuestionScope(ScViewFunc& rView, std::function<void()> aRetry, bool& rbCanPaste);
+        /// The user said Yes to this paste already, and PasteFromClip pastes.
         explicit PasteQuestionScope(ScViewFunc& rView);
         ~PasteQuestionScope();
         PasteQuestionScope(const PasteQuestionScope&) = delete;
@@ -101,6 +108,7 @@ public:
         ScViewFunc& mrView;
         std::function<void()> maPrevRetry;
         bool mbPrevConfirmed;
+        bool* mpPrevCheckOnly;
     };
 
                     ScViewFunc( vcl::Window* pParent, ScDocShell& rDocSh, ScTabViewShell* pViewShell );

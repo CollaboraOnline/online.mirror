@@ -1141,22 +1141,36 @@ ScViewFunc::PasteQuestionScope::PasteQuestionScope(ScViewFunc& rView,
     : mrView(rView)
     , maPrevRetry(std::move(rView.maPasteRetry))
     , mbPrevConfirmed(rView.mbPasteBeyondConfirmed)
+    , mpPrevCheckOnly(rView.mpPasteCheckOnly)
 {
     mrView.maPasteRetry = std::move(aRetry);
+    mrView.mpPasteCheckOnly = nullptr;
+}
+
+ScViewFunc::PasteQuestionScope::PasteQuestionScope(ScViewFunc& rView,
+                                                   std::function<void()> aRetry,
+                                                   bool& rbCanPaste)
+    : PasteQuestionScope(rView, std::move(aRetry))
+{
+    rbCanPaste = false;
+    mrView.mpPasteCheckOnly = &rbCanPaste;
 }
 
 ScViewFunc::PasteQuestionScope::PasteQuestionScope(ScViewFunc& rView)
     : mrView(rView)
     , maPrevRetry(rView.maPasteRetry)
     , mbPrevConfirmed(rView.mbPasteBeyondConfirmed)
+    , mpPrevCheckOnly(rView.mpPasteCheckOnly)
 {
     mrView.mbPasteBeyondConfirmed = true;
+    mrView.mpPasteCheckOnly = nullptr;
 }
 
 ScViewFunc::PasteQuestionScope::~PasteQuestionScope()
 {
     mrView.maPasteRetry = std::move(maPrevRetry);
     mrView.mbPasteBeyondConfirmed = mbPrevConfirmed;
+    mrView.mpPasteCheckOnly = mpPrevCheckOnly;
 }
 
 bool ScViewFunc::PasteFromClip( InsertDeleteFlags nFlags, ScDocument* pClipDoc,
@@ -1196,6 +1210,14 @@ bool ScViewFunc::PasteFromClip( InsertDeleteFlags nFlags, ScDocument* pClipDoc,
     if (bOnSheetView && (rClipParam.isMultiRange() || GetViewData().GetMarkData().IsMultiMarked()))
     {
         ErrorMessage(STR_MSSG_PASTEFROMCLIP_0);
+        return false;
+    }
+
+    // A paste of several ranges does not ask whether to paste beyond the selection.
+    if (mpPasteCheckOnly
+        && (rClipParam.isMultiRange() || GetViewData().GetMarkData().IsMultiMarked()))
+    {
+        *mpPasteCheckOnly = true;
         return false;
     }
 
@@ -1439,6 +1461,13 @@ bool ScViewFunc::PasteFromClip( InsertDeleteFlags nFlags, ScDocument* pClipDoc,
         nEndCol = nStartCol + nDestSizeX;
         nEndRow = nStartRow + nDestSizeY;
         nEndTab = nStartTab;
+    }
+
+    // A check ends here, where the paste would go ahead without asking.
+    if (mpPasteCheckOnly)
+    {
+        *mpPasteCheckOnly = true;
+        return false;
     }
 
     bool bOffLimits = !rDoc.ValidCol(nEndCol) || !rDoc.ValidRow(nEndRow);

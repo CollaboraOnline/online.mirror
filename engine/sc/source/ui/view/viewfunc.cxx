@@ -148,7 +148,8 @@ static void lcl_PostRepaintSparkLine(sc::SparklineList* pSparklineList, const Sc
 ScViewFunc::ScViewFunc( vcl::Window* pParent, ScDocShell& rDocSh, ScTabViewShell* pViewShell ) :
     ScTabView( pParent, rDocSh, pViewShell ),
     bFormatValid( false ),
-    mbPasteBeyondConfirmed( false )
+    mbPasteBeyondConfirmed( false ),
+    mpPasteCheckOnly( nullptr )
 {
 }
 

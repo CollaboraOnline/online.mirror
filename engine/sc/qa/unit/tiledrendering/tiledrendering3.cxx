@@ -5139,6 +5139,53 @@ CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testCloneFormattingBeyondSelectionAsk
                          pDoc->GetPattern(ScAddress(2, 2, 0))->GetItem(ATTR_FONT_WEIGHT).GetWeight());
 }
 
+// A clip that holds the origin of an array formula but cuts through the formula, pasted into a
+// smaller selection, asks before the paste changes anything, and pastes the whole formula and
+// the other cells after a Yes.
+CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testPasteArrayOriginBeyondSelectionAsksFirst)
+{
+    ScModelObj* pModelObj = createDoc("empty.ods");
+    ScTestViewCallback aView;
+    ScDocument* pDoc = pModelObj->GetDocument();
+    ScMarkData aMark(pDoc->GetSheetLimits());
+    aMark.SelectOneTable(0);
+    pDoc->InsertMatrixFormula(0, 0, 1, 1, aMark, u"=1+1"_ustr);
+    pDoc->SetString(ScAddress(2, 0, 0), u"c"_ustr);
+
+    // Given A1:C1 on the clipboard, with the origin of an array formula in A1:B2, and A3:B4
+    // selected,
+    lcl_selectRange(mxComponent, u"$A$1:$C$1"_ustr);
+    dispatchCommand(mxComponent, u".uno:Copy"_ustr, {});
+    lcl_selectRange(mxComponent, u"$A$3:$B$4"_ustr);
+    SfxUndoManager* pUndoMgr = pDoc->GetUndoManager();
+    const size_t nUndoCount = pUndoMgr->GetUndoActionCount();
+
+    // when pasting,
+    dispatchCommand(mxComponent, u".uno:Paste"_ustr, {});
+
+    // then the paste asks before it changes anything: no list action is left open and nothing
+    // is undoable. Without the accompanying fix in place, the question came after the paste
+    // opened its list action, and waited for its answer in a nested main loop.
+    const OUString sDialogId = lcl_getOpenDialogId();
+    CPPUNIT_ASSERT(!sDialogId.isEmpty());
+    CPPUNIT_ASSERT(!pUndoMgr->IsInListAction());
+    CPPUNIT_ASSERT_EQUAL(nUndoCount, pUndoMgr->GetUndoActionCount());
+    CPPUNIT_ASSERT(pDoc->GetString(ScAddress(2, 2, 0)).isEmpty());
+
+    // And after a Yes, the formula and C1 are pasted.
+    StringMap aYes{ { u"type"_ustr, u"responsebutton"_ustr },
+                    { u"cmd"_ustr, u"click"_ustr },
+                    { u"data"_ustr, OUString::number(RET_YES) } };
+    CPPUNIT_ASSERT(jsdialog::ExecuteAction(sDialogId, u"yes"_ustr, aYes));
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT(pDoc->GetFormulaCell(ScAddress(0, 2, 0)));
+    CPPUNIT_ASSERT_EQUAL(u"c"_ustr, pDoc->GetString(ScAddress(2, 2, 0)));
+    // The paste is one closed undo action.
+    CPPUNIT_ASSERT(!pUndoMgr->IsInListAction());
+    CPPUNIT_ASSERT_EQUAL(nUndoCount + 1, pUndoMgr->GetUndoActionCount());
+    CPPUNIT_ASSERT(lcl_getOpenDialogId().isEmpty());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

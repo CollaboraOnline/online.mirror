@@ -265,24 +265,6 @@ void ScClipUtil::PasteFromTransferable(
                     }
                 }
 
-                // --- All checks passed.  Now modify. ---
-                ScDocShell* pDocSh = rViewData.GetDocShell();
-                SfxUndoManager* pUndoMgr = pDocSh->GetUndoManager();
-                OUString aUndo = ScResId(pClipDoc->IsCutMode() ? STR_UNDO_MOVE : STR_UNDO_COPY);
-                pUndoMgr->EnterListAction(aUndo, aUndo, 0,
-                        rViewData.GetViewShell()->GetViewShellId());
-
-                // Clear existing complete matrices that will be replaced.
-                for (size_t i = 0; i < aMatricesToClear.size(); ++i)
-                {
-                    const ScRange& rClear = aMatricesToClear[i];
-                    ScMarkData aClearMark(rThisDoc.GetSheetLimits());
-                    aClearMark.SelectTable(nThisTab, true);
-                    aClearMark.SetMarkArea(rClear);
-                    pDocSh->GetDocFunc().DeleteContents(
-                            aClearMark, InsertDeleteFlags::ALL, true /*bRecord*/, true /*bApi*/);
-                }
-
                 // Check whether the original selection contains any
                 // non-matrix cells.  If tracked matrices fully cover it
                 // we can skip the expensive CopyToDocument + PasteFromClip
@@ -304,12 +286,13 @@ void ScClipUtil::PasteFromTransferable(
                 countMatrixCells(rClipParam.maOriginMatrixRanges);
                 countMatrixCells(rClipParam.maMatrixRanges);
 
+                std::shared_ptr<ScDocument> pOrigDoc;
                 if (nMatrixCells < nOrigCells)
                 {
                     // Build a temp clip doc with the original selection
                     // and clear tracked matrix cells so that only
                     // non-matrix cells remain for pasting.
-                    auto pOrigDoc = std::make_shared<ScDocument>(SCDOCMODE_CLIP);
+                    pOrigDoc = std::make_shared<ScDocument>(SCDOCMODE_CLIP);
                     pOrigDoc->ResetClip(pClipDoc, nClipTab);
                     pClipDoc->CopyToDocument(rOrigRange, InsertDeleteFlags::ALL, false, *pOrigDoc);
 
@@ -328,7 +311,47 @@ void ScClipUtil::PasteFromTransferable(
 
                     ScClipParam aOrigParam(rOrigRange, false);
                     pOrigDoc->SetClipParam(aOrigParam);
+                }
 
+                // Pasting pOrigDoc can ask whether to paste beyond a smaller
+                // selection. Ask before anything changes: the check pastes nothing.
+                if (pOrigDoc)
+                {
+                    bool bCanPaste = false;
+                    {
+                        ScViewFunc::PasteQuestionScope aCheck(
+                            *pTabViewShell, lcl_RetryPaste(*pTabViewShell, bShowDialog, xTransferable),
+                            bCanPaste);
+                        pTabViewShell->PasteFromClip(nFlags, pOrigDoc.get(),
+                                ScPasteFunc::NONE, true /*bSkipEmpty*/, false, false,
+                                INS_NONE, InsertDeleteFlags::NONE, false /*bShowDialog*/);
+                    }
+                    if (!bCanPaste)
+                        return;
+                }
+
+                // --- All checks passed.  Now modify. ---
+                ScDocShell* pDocSh = rViewData.GetDocShell();
+                SfxUndoManager* pUndoMgr = pDocSh->GetUndoManager();
+                OUString aUndo = ScResId(pClipDoc->IsCutMode() ? STR_UNDO_MOVE : STR_UNDO_COPY);
+                pUndoMgr->EnterListAction(aUndo, aUndo, 0,
+                        rViewData.GetViewShell()->GetViewShellId());
+
+                // Clear existing complete matrices that will be replaced.
+                for (size_t i = 0; i < aMatricesToClear.size(); ++i)
+                {
+                    const ScRange& rClear = aMatricesToClear[i];
+                    ScMarkData aClearMark(rThisDoc.GetSheetLimits());
+                    aClearMark.SelectTable(nThisTab, true);
+                    aClearMark.SetMarkArea(rClear);
+                    pDocSh->GetDocFunc().DeleteContents(
+                            aClearMark, InsertDeleteFlags::ALL, true /*bRecord*/, true /*bApi*/);
+                }
+
+                if (pOrigDoc)
+                {
+                    // The check above settled whether to ask.
+                    ScViewFunc::PasteQuestionScope aConfirmed(*pTabViewShell);
                     pTabViewShell->PasteFromClip(nFlags, pOrigDoc.get(),
                             ScPasteFunc::NONE, true /*bSkipEmpty*/, false, false,
                             INS_NONE, InsertDeleteFlags::NONE, false /*bShowDialog*/);
