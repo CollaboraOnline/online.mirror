@@ -208,6 +208,24 @@ class AboutDialog {
 		);
 		elements.copyright.appendChild(span);
 
+		// CODA: the document logo no longer opens the website, so link it here.
+		const websiteUrl = (window as any).brandWebsiteURL;
+		if (
+			window.mode.isCODesktop() &&
+			typeof websiteUrl === 'string' &&
+			websiteUrl
+		) {
+			const website = document.createElement('div');
+			website.className = 'about-dialog-info-div about-dialog-website';
+			this.appendSpanAndLink(
+				website,
+				'',
+				websiteUrl,
+				new URL(websiteUrl).hostname.replace(/^www\./, ''),
+			);
+			elements.copyright.after(website);
+		}
+
 		if (window.socketProxy) {
 			elements.slowProxy.innerText = _('"Slow Proxy"');
 		}

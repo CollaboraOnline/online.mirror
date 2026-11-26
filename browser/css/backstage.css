@@ -292,6 +292,40 @@ body:not([data-doctype]) .backstage-view {
 	box-shadow: none;
 }
 
+.backstage-sidebar-link {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	/* bottom margin raises the link off the bottom edge of the sidebar */
+	margin: 0 8px 24px;
+	padding: 4px 16px;
+	color: var(--color-primary, #0b87e7);
+	font-size: var(--medium-font-size);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	border-radius: var(--border-radius);
+}
+
+.backstage-sidebar-link:hover {
+	color: var(--color-primary, #0b87e7);
+	background-color: var(--color-background-dark);
+}
+
+.backstage-sidebar-link:focus-visible {
+	outline: 2px solid var(--doc-type-color, #0b87e7);
+	outline-offset: -2px;
+}
+
+/* External-link icon, drawn with currentColor so it follows light/dark themes. */
+.backstage-sidebar-link-icon {
+	width: 12px;
+	height: 12px;
+	background-color: currentColor;
+	-webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M9 2h5v5h-1.5V4.6L7.8 9.3 6.7 8.2l4.7-4.7H9V2zM3 4h4v1.5H4.5v6h6V9H12v4H3V4z'/%3E%3C/svg%3E") center / contain no-repeat;
+	mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M9 2h5v5h-1.5V4.6L7.8 9.3 6.7 8.2l4.7-4.7H9V2zM3 4h4v1.5H4.5v6h6V9H12v4H3V4z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
 /* Starter mode: larger icons */
 .is-starter-mode .backstage-sidebar-icon {
 	width: 38px;

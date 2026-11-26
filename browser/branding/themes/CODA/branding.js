@@ -1,5 +1,6 @@
 var brandProductName = 'Collabora Office';
 var brandProductURL = 'https://www.collaboraonline.com/collabora-office/';
+var brandWebsiteURL = 'https://collaboraoffice.com/';
 
 var menuItems;
 window.onload = function() {
@@ -12,14 +13,8 @@ window.onload = function() {
 			setTimeout(setLogo, 250);
 		} else {
 			logo.setAttribute('data-cooltip', brandProductName);
-			logo.setAttribute('href', brandProductURL);
-			logo.addEventListener('click', function(e) {
-				// Route through window.open so the desktop apps reopen the link
-				// in the system browser via the HYPERLINK bridge instead of a
-				// new embedded webview window.
-				e.preventDefault();
-				window.open(brandProductURL, '_blank');
-			});
+			// The logo only opens the backstage (LOUtil.openTemplatesFromDocumentLogo).
+			// The website link lives in Help > About and in the backstage sidebar.
 
 			menuItems = document.querySelectorAll('#main-menu > li > a');
 		}

@@ -1767,6 +1767,17 @@ input, button {
 	flex-direction: column;
 }
 
+#about-dialog-info .about-dialog-website a,
+#about-dialog-info .about-dialog-website a:visited {
+	color: var(--color-primary, #0b87e7);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+}
+
+#about-dialog-info .about-dialog-website a:hover {
+	color: var(--color-primary-darker, var(--color-primary, #0b87e7));
+}
+
 /* ovveride some jquery css for contentcontrol datepicker */
 #datepicker .ui-state-highlight {
 	background: var(--color-background-dark) !important;

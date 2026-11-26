@@ -105,7 +105,31 @@ namespace BackstageTemplates {
             .filter((c) => c.visible !== false)
             .map((c) => tabElement(c, props))}
         </div>
+        {websiteLink()}
       </div>
+    );
+  }
+
+  function websiteLink(): HTMLElement {
+    const url = (window as any).brandWebsiteURL;
+    if (!window.mode.isCODesktop() || typeof url !== 'string' || !url)
+      return null;
+    const host = new URL(url).hostname.replace(/^www\./, '');
+    return (
+      <a
+        class="backstage-sidebar-link"
+        href={url}
+        target="_blank"
+        rel="noopener"
+        onClick={(e: MouseEvent) => {
+          e.preventDefault();
+          window.open(url, '_blank');
+        }}
+      >
+        <span>{host}</span>
+        <span class="backstage-sidebar-link-icon" aria-hidden="true" />
+        <span class="visuallyhidden">{_('(opens in new tab)')}</span>
+      </a>
     );
   }
 
