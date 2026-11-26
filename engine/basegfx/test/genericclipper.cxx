@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <cmath>
+
 #include <cppunit/TestAssert.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
@@ -187,16 +189,16 @@ public:
     }
 
     static void checkLine(const char* pName, const B2DPolygon& rLine,
-                          std::initializer_list<B2DPoint> aExpected)
+                          std::initializer_list<B2DPoint> aExpected, double fTolerance = 1e-9)
     {
         CPPUNIT_ASSERT_EQUAL_MESSAGE(pName, sal_uInt32(aExpected.size()), rLine.count());
         sal_uInt32 nIndex(0);
         for (const B2DPoint& rPoint : aExpected)
         {
             CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(pName, rPoint.getX(),
-                                                 rLine.getB2DPoint(nIndex).getX(), 1e-9);
+                                                 rLine.getB2DPoint(nIndex).getX(), fTolerance);
             CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(pName, rPoint.getY(),
-                                                 rLine.getB2DPoint(nIndex).getY(), 1e-9);
+                                                 rLine.getB2DPoint(nIndex).getY(), fTolerance);
             nIndex++;
         }
     }
@@ -244,6 +246,26 @@ public:
             B2DPolyPolygon(aSquareLine),
             B2DPolyPolygon(utils::createPolygonFromRect(B2DRange(-1, -1, 3, 3))), true, true));
         CPPUNIT_ASSERT_EQUAL(B2DPolyPolygon(aSquareLine), aWhole);
+    }
+
+    void testClosedLoopOfOneSegment()
+    {
+        // a closed line of one curved segment is a loop through its only point; the part
+        // inside the clip runs over that point, down to it and up again
+        B2DPolygon aLoop;
+        aLoop.append(B2DPoint(0, 0));
+        aLoop.setControlPoints(0, B2DPoint(10, 10), B2DPoint(-10, 10));
+        aLoop.setClosed(true);
+        const B2DPolyPolygon aClip(utils::createPolygonFromRect(B2DRange(-5, -1, 5, 2)));
+
+        const B2DPolyPolygon aInside(
+            utils::clipPolyPolygonOnPolyPolygon(B2DPolyPolygon(aLoop), aClip, true, true));
+        CPPUNIT_ASSERT_EQUAL(sal_uInt32(1), aInside.count());
+        const B2DPolygon aPart(aInside.getB2DPolygon(0));
+        CPPUNIT_ASSERT_EQUAL(sal_uInt32(3), aPart.count());
+        CPPUNIT_ASSERT_EQUAL(B2DPoint(0, 0), aPart.getB2DPoint(1));
+        // the curves of the part stay in the clip
+        CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, aPart.getB2DRange().getMaxY(), 1e-9);
     }
 
     void testCurvedLine()
@@ -300,6 +322,29 @@ public:
         CPPUNIT_ASSERT(bool(aOut == clip(aOut, false)));
     }
 
+    void testLineNearCrossingOutlines()
+    {
+        // a line passing closer than the flattening to where two circle outlines cross, nearly
+        // along one of them, is cut where it crosses the true curves
+        const double fAngle(M_PI * 7.0 / 36.0 + 0.01);
+        const B2DVector aDirection(std::cos(fAngle), std::sin(fAngle));
+        const B2DVector aNormal(-aDirection.getY(), aDirection.getX());
+        const B2DPoint aStart(B2DPoint(6, 8) - aNormal * 0.0012 - aDirection * 3.0);
+        const B2DPoint aEnd(aStart + aDirection * 6.0);
+        B2DPolyPolygon aCircles;
+        aCircles.append(utils::createPolygonFromCircle(B2DPoint(0, 0), 10));
+        aCircles.append(utils::createPolygonFromCircle(B2DPoint(12, 0), 10));
+
+        const B2DPolyPolygon aOutside(utils::clipPolyPolygonOnPolyPolygon(
+            B2DPolyPolygon(B2DPolygon{ aStart, aEnd }), aCircles, false, true));
+        CPPUNIT_ASSERT_EQUAL(sal_uInt32(2), aOutside.count());
+        // the distances along the line to the true crossings, found by bisection on the curves
+        checkLine("short", aOutside.getB2DPolygon(0),
+                  { aStart + aDirection * 2.9519406396, aStart + aDirection * 3.0003834588 }, 1e-7);
+        checkLine("long", aOutside.getB2DPolygon(1), { aStart + aDirection * 3.5007105413, aEnd },
+                  1e-7);
+    }
+
     CPPUNIT_TEST_SUITE(genericclipper);
     CPPUNIT_TEST(validateOr);
     CPPUNIT_TEST(validateXor);
@@ -308,9 +353,11 @@ public:
     CPPUNIT_TEST(testOperationsOnSharedOutlines);
     CPPUNIT_TEST(testLineThroughSquare);
     CPPUNIT_TEST(testClosedLine);
+    CPPUNIT_TEST(testClosedLoopOfOneSegment);
     CPPUNIT_TEST(testCurvedLine);
     CPPUNIT_TEST(testLineOnClipBorder);
     CPPUNIT_TEST(testLineOfNoLength);
+    CPPUNIT_TEST(testLineNearCrossingOutlines);
     CPPUNIT_TEST_SUITE_END();
 };
 

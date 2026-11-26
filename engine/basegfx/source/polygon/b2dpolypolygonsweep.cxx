@@ -15,6 +15,7 @@
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/range/b2drange.hxx>
 #include <basegfx/vector/b2dvector.hxx>
+#include <o3tl/safeint.hxx>
 #include <sal/log.hxx>
 
 #include <algorithm>
@@ -1002,6 +1003,26 @@ struct Part
     GridPoint maTo;
 };
 
+// the part of a line between two neighbouring cuts: kept or not, and the winding of the second
+// operand along it; that one is not known when a piece of the part lies on an area border
+struct LinePart
+{
+    bool mbKept;
+    int mnWinding;
+    bool mbWindingKnown;
+};
+
+// where the true curve of a line crosses an area segment near a cut. mnDelta is the change of the
+// winding of the second operand there, 0 when both run the same way
+struct LineCrossing
+{
+    double mfS;
+    int mnDelta;
+    sal_Int32 mnPolygon;
+    sal_uInt32 mnSegment;
+    B2DPoint maPoint;
+};
+
 // a cut, as the index in the cut array of a segment
 struct CutReference
 {
@@ -1371,6 +1392,9 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
             const Edge& rEdge(aEdges[aHorizontal[a]]);
             const Winding aAbove(aAboveOfHorizontal[a - nHorizontalBegin]);
             const Winding aBelow(getWindingLeftOf(rEdge));
+            // a line piece has the same winding on both sides
+            if (o3tl::make_unsigned(aHorizontal[a]) >= nFirstLine)
+                aWindingRight[aHorizontal[a]] = aBelow;
             aTouchesSecond[aHorizontal[a]] = isInsideSecond(aBelow) || isInsideSecond(aAbove);
             bNeedsChange |= isEvenNotZero(aBelow.mnFirst) || isEvenNotZero(aAbove.mnFirst);
             const bool bBelowInside(isInside(aBelow));
@@ -1402,9 +1426,9 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
     };
 
     // pass 3: the border parts, each once, turned so that the inside is on the left; for lines
-    // the parts that are kept, forward
+    // the state of every part
     std::vector<Part> aParts;
-    std::map<std::tuple<sal_Int32, sal_uInt32, int>, bool> aLineParts;
+    std::map<std::tuple<sal_Int32, sal_uInt32, int>, LinePart> aLineParts;
     if (bStroke)
     {
         int nConflicts(0);
@@ -1414,22 +1438,18 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
             // on an area border we keep the line for inside when the area is on one side of it
             const bool bInsideSecond(aOnArea[a] >= 0 ? aTouchesSecond[aOnArea[a]]
                                                      : aTouchesSecond[a]);
+            const LinePart aPart{ isKeptLine(bInsideSecond), aWindingRight[a].mnSecond,
+                                  aOnArea[a] < 0 };
             const auto [it, bNew] = aLineParts.try_emplace(
-                { rEdge.maOrigin.mnPolygon, rEdge.maOrigin.mnSegment, getPart(rEdge) },
-                isKeptLine(bInsideSecond));
-            if (!bNew && it->second != isKeptLine(bInsideSecond))
+                { rEdge.maOrigin.mnPolygon, rEdge.maOrigin.mnSegment, getPart(rEdge) }, aPart);
+            if (bNew)
+                continue;
+            if (it->second.mbKept != aPart.mbKept)
                 nConflicts++;
+            if (!aPart.mbWindingKnown || it->second.mnWinding != aPart.mnWinding)
+                it->second.mbWindingKnown = false;
         }
         SAL_WARN_IF(nConflicts, "basegfx", nConflicts << " line parts are inside and outside");
-        for (const auto& [rKey, bKept] : aLineParts)
-        {
-            if (!bKept)
-                continue;
-            const auto [nPolygon, nSegment, nPart] = rKey;
-            const std::vector<Cut>& rCuts(aCuts[nPolygon][nSegment]);
-            aParts.push_back(Part{ nPolygon, nSegment, nPart, true, rCuts[nPart].maVertex,
-                                   rCuts[nPart + 1].maVertex });
-        }
     }
     else
     {
@@ -1466,6 +1486,10 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
     // get their nearest t. That t goes back into the cut arrays, so all parts at a cut use the
     // same point
     std::unordered_map<GridPoint, B2DPoint, GridPointHash> aVertexPoints;
+    // per cut of a line inside a segment: the true crossings with the area segments through it
+    std::map<std::tuple<sal_Int32, sal_uInt32, size_t>, std::vector<LineCrossing>> aLineCrossings;
+    // the box search stops at fEpsilon, Newton steps polish from there
+    const double fEpsilon(1e-7 * fExtent);
     {
         auto getFlatInterval =
             [&](sal_Int32 nPolygon, sal_uInt32 nSegment, double fT, double& rStartT, double& rEndT)
@@ -1494,6 +1518,12 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
             aCutsAt.try_emplace(rPart.maFrom);
             aCutsAt.try_emplace(rPart.maTo);
         }
+        // lines: all their cuts inside a segment, the dropped parts get checked too
+        if (bStroke)
+            for (sal_uInt32 a(0); a < nFirstCount; a++)
+                for (const std::vector<Cut>& rCuts : aCuts[a])
+                    for (size_t c = 1; c + 1 < rCuts.size(); c++)
+                        aCutsAt.try_emplace(rCuts[c].maVertex);
         for (size_t a = 0; a < aCuts.size(); a++)
             for (size_t b = 0; b < aCuts[a].size(); b++)
                 for (size_t c = 0; c < aCuts[a][b].size(); c++)
@@ -1504,8 +1534,6 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
                 }
         auto getT = [&](const CutReference& rReference) -> double&
         { return aCuts[rReference.mnPolygon][rReference.mnSegment][rReference.mnIndex].mfT; };
-        // the box search stops at fEpsilon, Newton steps polish from there
-        const double fEpsilon(1e-7 * fExtent);
         // a new parameter stays between the neighbouring cuts
         auto fits = [&](const CutReference& rReference, double fT)
         {
@@ -1562,38 +1590,85 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
                         || rLine.mnIndex + 1 == nCuts)
                         continue;
                     const B2DCubicBezier& rCurveA(aCurves[rLine.mnPolygon][rLine.mnSegment]);
-                    double fBestDistance(1e-3 * fExtent), fBestS(-1.0);
+                    double fBestDistance(1e-2 * fExtent), fBestS(-1.0);
+                    std::vector<LineCrossing>& rCrossings(
+                        aLineCrossings[{ rLine.mnPolygon, rLine.mnSegment, rLine.mnIndex }]);
                     for (const CutReference& rArea : rReferences)
                     {
                         if (rArea.mnPolygon < sal_Int32(nFirstCount))
                             continue;
                         const B2DCubicBezier& rCurveB(aCurves[rArea.mnPolygon][rArea.mnSegment]);
+                        auto addCrossing = [&](double fS, double fU)
+                        {
+                            const B2DPoint aCrossing(getPointAt(rCurveA, fS));
+                            const double fDistance(B2DVector(aCrossing - aPoint).getLength());
+                            if (B2DVector(aCrossing - getPointAt(rCurveB, fU)).getLength()
+                                    > 4.0 * fEpsilon
+                                || fDistance > 1e-2 * fExtent)
+                                return;
+                            // one found from both ways
+                            for (const LineCrossing& rCrossing : rCrossings)
+                                if (rCrossing.mnPolygon == rArea.mnPolygon
+                                    && rCrossing.mnSegment == rArea.mnSegment
+                                    && B2DVector(rCrossing.maPoint - aCrossing).getLength()
+                                           <= 10.0 * fEpsilon)
+                                    return;
+                            // the sign as in the sweep: one more where x grows across a segment
+                            // that runs to growing y
+                            const B2DVector aLineDirection(getDerivativeAt(rCurveA, fS));
+                            const B2DVector aAreaDirection(getDerivativeAt(rCurveB, fU));
+                            const double fCross(aAreaDirection.cross(aLineDirection));
+                            const bool bSameWay(std::abs(fCross)
+                                                <= 1e-9 * aLineDirection.getLength()
+                                                       * aAreaDirection.getLength());
+                            rCrossings.push_back(
+                                LineCrossing{ fS, bSameWay ? 0 : (fCross < 0.0 ? 1 : -1),
+                                              rArea.mnPolygon, rArea.mnSegment, aCrossing });
+                            if (fDistance <= fBestDistance && fits(rLine, fS))
+                            {
+                                fBestDistance = fDistance;
+                                fBestS = fS;
+                            }
+                        };
                         double fStartS, fEndS, fStartU, fEndU, fS, fU;
                         getFlatInterval(rLine.mnPolygon, rLine.mnSegment, getT(rLine), fStartS,
                                         fEndS);
                         getFlatInterval(rArea.mnPolygon, rArea.mnSegment, getT(rArea), fStartU,
                                         fEndU);
-                        if (!crossByBisection(rCurveA, fStartS, fEndS, rCurveB, fStartU, fEndU,
-                                              aPoint, fEpsilon, fS, fU))
-                            continue;
-                        double fNewtonS(fS), fNewtonU(fU);
-                        if (findCrossingByNewton(rCurveA, fNewtonS, rCurveB, fNewtonU,
-                                                 1e-12 * fExtent)
-                            && B2DVector(getPointAt(rCurveA, fNewtonS) - getPointAt(rCurveA, fS))
-                                       .getLength()
-                                   <= 10.0 * fEpsilon)
+                        if (crossByBisection(rCurveA, fStartS, fEndS, rCurveB, fStartU, fEndU,
+                                             aPoint, fEpsilon, fS, fU))
                         {
-                            fS = fNewtonS;
-                            fU = fNewtonU;
+                            // where both cross at a flat angle the box search can be farther
+                            // off along them than its box size, so Newton steps that stay in the
+                            // intervals searched are taken
+                            double fNewtonS(fS), fNewtonU(fU);
+                            if (findCrossingByNewton(rCurveA, fNewtonS, rCurveB, fNewtonU,
+                                                     1e-12 * fExtent)
+                                && fNewtonS >= fStartS && fNewtonS <= fEndS && fNewtonU >= fStartU
+                                && fNewtonU <= fEndU)
+                            {
+                                fS = fNewtonS;
+                                fU = fNewtonU;
+                            }
+                            addCrossing(fS, fU);
                         }
-                        const B2DPoint aCrossing(getPointAt(rCurveA, fS));
-                        const double fDistance(B2DVector(aCrossing - aPoint).getLength());
-                        if (B2DVector(aCrossing - getPointAt(rCurveB, fU)).getLength()
-                                <= 4.0 * fEpsilon
-                            && fDistance <= fBestDistance && fits(rLine, fS))
+                        // where both run nearly the same way the true crossing can be farther
+                        // away than a flat interval; Newton steps from the flat one find it
+                        std::vector<std::pair<double, double>> aStarts{ { getT(rLine),
+                                                                          getT(rArea) } };
+                        for (size_t e = 0; e < aStarts.size(); e++)
                         {
-                            fBestDistance = fDistance;
-                            fBestS = fS;
+                            fS = aStarts[e].first;
+                            fU = aStarts[e].second;
+                            if (!findCrossingByNewton(rCurveA, fS, rCurveB, fU, 1e-12 * fExtent)
+                                || fS < 0.0 || fS > 1.0 || fU < 0.0 || fU > 1.0)
+                                continue;
+                            addCrossing(fS, fU);
+                            // two crossings close to each other lie on both sides of the flat
+                            // one, Newton steps from the mirrored first one find the second
+                            if (e == 0)
+                                aStarts.emplace_back(2.0 * getT(rLine) - fS,
+                                                     2.0 * getT(rArea) - fU);
                         }
                     }
                     if (fBestS >= 0.0)
@@ -1685,39 +1760,50 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
     int nDeadEnds(0);
     std::vector<std::pair<B2DPoint, B2DPoint>> aControls;
     std::vector<sal_uInt32> aCurveAt;
-    // the run from part rFirst to part rLast of one segment, cut out of it, starting at the
-    // point of rFirst; the control points get set once the polygon has all its points
-    // a line keeps its own points, at a cut too
-    auto getLinePoint = [&](const Part& rPart, double fT)
+    // the snippet from fStartT to fEndT of one segment, from aStartPoint on to aEndPoint, which
+    // is where the next one begins; the control points get set once the polygon has all its points
+    auto appendSnippet
+        = [&](B2DPolygon& rPolygon, sal_Int32 nPolygon, sal_uInt32 nSegment, double fStartT,
+              double fEndT, const B2DPoint& rStartPoint, const B2DPoint& rEndPoint)
     {
-        const B2DCubicBezier& rSegment(aCurves[rPart.mnPolygon][rPart.mnSegment]);
-        return fT == 0.0 ? rSegment.getStartPoint()
-                         : (fT == 1.0 ? rSegment.getEndPoint() : getPointAt(rSegment, fT));
+        rPolygon.append(rStartPoint);
+        const B2DCubicBezier& rSegment(aCurves[nPolygon][nSegment]);
+        if (!rSegment.isBezier())
+            return;
+        const bool bReverse(fStartT > fEndT);
+        const double fLowT(std::min(fStartT, fEndT)), fHighT(std::max(fStartT, fEndT));
+        const B2DCubicBezier aPart(fLowT == 0.0 && fHighT == 1.0 ? rSegment
+                                                                 : rSegment.snippet(fLowT, fHighT));
+        B2DPoint aControlA(bReverse ? aPart.getControlPointB() : aPart.getControlPointA());
+        B2DPoint aControlB(bReverse ? aPart.getControlPointA() : aPart.getControlPointB());
+        // the control points move along with the ends
+        aControlA += rStartPoint - (bReverse ? aPart.getEndPoint() : aPart.getStartPoint());
+        aControlB += rEndPoint - (bReverse ? aPart.getStartPoint() : aPart.getEndPoint());
+        aControls.emplace_back(aControlA, aControlB);
+        aCurveAt.push_back(rPolygon.count() - 1);
     };
+    // the run from part rFirst to part rLast of one segment, cut out of it
     auto appendRun = [&](B2DPolygon& rPolygon, const Part& rFirst, const Part& rLast)
     {
         const std::vector<Cut>& rCuts(aCuts[rFirst.mnPolygon][rFirst.mnSegment]);
-        const double fStartT(rCuts[rFirst.mnPart + (rFirst.mbForward ? 0 : 1)].mfT);
-        const double fEndT(rCuts[rLast.mnPart + (rLast.mbForward ? 1 : 0)].mfT);
-        const B2DPoint aStartPoint(bStroke ? getLinePoint(rFirst, fStartT)
-                                           : aVertexPoints[rFirst.maFrom]);
-        const B2DPoint aEndPoint(bStroke ? getLinePoint(rLast, fEndT) : aVertexPoints[rLast.maTo]);
-        rPolygon.append(aStartPoint);
-        const B2DCubicBezier& rSegment(aCurves[rFirst.mnPolygon][rFirst.mnSegment]);
-        if (rSegment.isBezier())
-        {
-            const bool bReverse(fStartT > fEndT);
-            const double fLowT(std::min(fStartT, fEndT)), fHighT(std::max(fStartT, fEndT));
-            const B2DCubicBezier aPart(
-                fLowT == 0.0 && fHighT == 1.0 ? rSegment : rSegment.snippet(fLowT, fHighT));
-            B2DPoint aControlA(bReverse ? aPart.getControlPointB() : aPart.getControlPointA());
-            B2DPoint aControlB(bReverse ? aPart.getControlPointA() : aPart.getControlPointB());
-            // the part ends where the next run begins, its control points move along
-            aControlA += aStartPoint - (bReverse ? aPart.getEndPoint() : aPart.getStartPoint());
-            aControlB += aEndPoint - (bReverse ? aPart.getStartPoint() : aPart.getEndPoint());
-            aControls.emplace_back(aControlA, aControlB);
-            aCurveAt.push_back(rPolygon.count() - 1);
-        }
+        appendSnippet(rPolygon, rFirst.mnPolygon, rFirst.mnSegment,
+                      rCuts[rFirst.mnPart + (rFirst.mbForward ? 0 : 1)].mfT,
+                      rCuts[rLast.mnPart + (rLast.mbForward ? 1 : 0)].mfT,
+                      aVertexPoints[rFirst.maFrom], aVertexPoints[rLast.maTo]);
+    };
+    // a line keeps its own points, at a cut too
+    auto getLinePoint = [&](sal_Int32 nPolygon, sal_uInt32 nSegment, double fT)
+    {
+        const B2DCubicBezier& rSegment(aCurves[nPolygon][nSegment]);
+        return fT == 0.0 ? rSegment.getStartPoint()
+                         : (fT == 1.0 ? rSegment.getEndPoint() : getPointAt(rSegment, fT));
+    };
+    auto appendLineRun = [&](B2DPolygon& rPolygon, sal_Int32 nPolygon, sal_uInt32 nSegment,
+                             double fStartT, double fEndT)
+    {
+        appendSnippet(rPolygon, nPolygon, nSegment, fStartT, fEndT,
+                      getLinePoint(nPolygon, nSegment, fStartT),
+                      getLinePoint(nPolygon, nSegment, fEndT));
     };
     auto setControls = [&](B2DPolygon& rPolygon)
     {
@@ -1783,97 +1869,238 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
     };
     if (bStroke)
     {
-        std::map<std::tuple<sal_Int32, sal_uInt32, int>, int> aKeptIndex;
-        for (size_t a = 0; a < aParts.size(); a++)
-            aKeptIndex.emplace(
-                std::make_tuple(aParts[a].mnPolygon, aParts[a].mnSegment, aParts[a].mnPart),
-                int(a));
-        // per part of a line in its order: the index in aParts when kept, -1 when not
-        std::vector<int> aSequence;
-        std::vector<int> aState;
-        std::vector<std::vector<size_t>> aRuns;
+        auto getPartState = [&](sal_Int32 nPolygon, sal_uInt32 nSegment, int nPart)
+        {
+            const auto it(aLineParts.find({ nPolygon, nSegment, nPart }));
+            return it == aLineParts.end() ? -1 : (it->second.mbKept ? 1 : 0);
+        };
+        // the cuts of a segment closer than this to each other are one group, which counts the
+        // true crossings. Near a corner of an area the flat line can cross both edges where the
+        // true one crosses none, or pass the corner where the true one cuts it; the group has
+        // all of those cuts
+        const double fNear(1e-2 * fExtent);
+        // a piece of a line, on one segment: 1 kept, 0 not, -1 of no length
+        struct Piece
+        {
+            sal_uInt32 mnSegment;
+            double mfFromT;
+            double mfToT;
+            int mnState;
+        };
+        std::vector<Piece> aPieces;
+        std::vector<LineCrossing> aFound;
+        std::vector<std::pair<size_t, size_t>> aRuns;
         for (sal_uInt32 a(0); a < nFirstCount; a++)
         {
             const B2DPolygon& rPolygon(aOriginals[a]);
             const bool bClosed(rPolygon.isClosed());
             const sal_uInt32 nSegments(bClosed || !rPolygon.count() ? rPolygon.count()
                                                                     : rPolygon.count() - 1);
-            aSequence.clear();
-            aState.clear();
+            aPieces.clear();
             for (sal_uInt32 b(0); b < nSegments; b++)
-                for (int c = 0; c + 1 < int(aCuts[a][b].size()); c++)
+            {
+                const std::vector<Cut>& rCuts(aCuts[a][b]);
+                const B2DCubicBezier& rSegment(aCurves[a][b]);
+                const size_t nLastCut(rCuts.size() - 1);
+                auto startPiece = [&](double fT, int nState)
                 {
-                    const auto itLine(aLineParts.find({ sal_Int32(a), b, c }));
-                    const auto itKept(aKeptIndex.find({ sal_Int32(a), b, c }));
-                    aSequence.push_back(itKept == aKeptIndex.end() ? -1 : itKept->second);
-                    // 1 kept, 0 not, -1 a part without any piece, of no length
-                    aState.push_back(itLine == aLineParts.end() ? -1 : (itLine->second ? 1 : 0));
+                    aPieces.back().mfToT = std::max(aPieces.back().mfFromT, fT);
+                    aPieces.push_back(Piece{ b, aPieces.back().mfToT, 1.0, nState });
+                };
+                aPieces.push_back(Piece{ b, 0.0, 1.0, getPartState(a, b, 0) });
+                for (size_t c = 1; c < nLastCut;)
+                {
+                    // the group of cuts c to d, then part d follows
+                    size_t d(c);
+                    while (d + 1 < nLastCut
+                           && B2DVector(getPointAt(rSegment, rCuts[d + 1].mfT)
+                                        - getPointAt(rSegment, rCuts[d].mfT))
+                                      .getLength()
+                                  <= fNear)
+                        d++;
+                    const auto itBefore(aLineParts.find({ sal_Int32(a), b, int(c) - 1 }));
+                    const auto itAfter(aLineParts.find({ sal_Int32(a), b, int(d) }));
+                    bool bCounted(itBefore != aLineParts.end() && itAfter != aLineParts.end()
+                                  && itBefore->second.mbWindingKnown
+                                  && itAfter->second.mbWindingKnown);
+                    aFound.clear();
+                    const double fLowT(std::max(rCuts[c - 1].mfT, aPieces.back().mfFromT));
+                    const double fHighT(rCuts[d + 1].mfT);
+                    for (size_t e = c; bCounted && e <= d; e++)
+                    {
+                        const auto it(aLineCrossings.find({ sal_Int32(a), b, e }));
+                        if (it != aLineCrossings.end())
+                            for (const LineCrossing& rCrossing : it->second)
+                                if (rCrossing.mfS > fLowT && rCrossing.mfS < fHighT)
+                                    aFound.push_back(rCrossing);
+                    }
+                    std::sort(aFound.begin(), aFound.end(),
+                              [](const LineCrossing& rLeft, const LineCrossing& rRight)
+                              { return rLeft.mfS < rRight.mfS; });
+                    // one crossing can be found from two cuts, or on both segments at an input
+                    // point of the area
+                    aFound.erase(
+                        std::unique(
+                            aFound.begin(), aFound.end(),
+                            [&](const LineCrossing& rLeft, const LineCrossing& rRight)
+                            {
+                                const sal_uInt32 nCount(aCurves[rLeft.mnPolygon].size());
+                                return rLeft.mnPolygon == rRight.mnPolygon
+                                       && rLeft.mnDelta == rRight.mnDelta
+                                       && (rLeft.mnSegment == rRight.mnSegment
+                                           || (rLeft.mnSegment + 1) % nCount == rRight.mnSegment
+                                           || (rRight.mnSegment + 1) % nCount == rLeft.mnSegment)
+                                       && B2DVector(rLeft.maPoint - rRight.maPoint).getLength()
+                                              <= 10.0 * fEpsilon;
+                            }),
+                        aFound.end());
+                    int nSum(0);
+                    for (const LineCrossing& rCrossing : aFound)
+                    {
+                        bCounted = bCounted && rCrossing.mnDelta != 0;
+                        nSum += rCrossing.mnDelta;
+                    }
+                    // a short part at the end of the segment is not sure, the long one on the
+                    // other side gives the winding then
+                    auto getLength = [&](size_t nFrom, size_t nTo)
+                    {
+                        return B2DVector(getPointAt(rSegment, rCuts[nTo].mfT)
+                                         - getPointAt(rSegment, rCuts[nFrom].mfT))
+                            .getLength();
+                    };
+                    int nWinding(0);
+                    const bool bWindingsKnown(bCounted);
+                    if (bCounted)
+                    {
+                        const bool bShortBefore(getLength(c - 1, c) < fNear);
+                        const bool bShortAfter(getLength(d, d + 1) < fNear);
+                        nWinding = itBefore->second.mnWinding;
+                        if (bShortBefore && !bShortAfter)
+                            nWinding = itAfter->second.mnWinding - nSum;
+                        else if (bShortBefore == bShortAfter)
+                            bCounted = nWinding + nSum == itAfter->second.mnWinding;
+                    }
+                    auto getWinding = [&](double fFromT, double fToT)
+                    {
+                        return getWindingAt(aCurves, nFirstCount,
+                                            getPointAt(rSegment, 0.5 * (fFromT + fToT)), fEpsilon);
+                    };
+                    auto getState = [&](double fFromT, double fToT)
+                    {
+                        return isKeptLine(isInsideSecond(Winding{ 0, getWinding(fFromT, fToT) }))
+                                   ? 1
+                                   : 0;
+                    };
+                    if (bCounted)
+                    {
+                        aPieces.back().mnState
+                            = isKeptLine(isInsideSecond(Winding{ 0, nWinding })) ? 1 : 0;
+                        for (const LineCrossing& rCrossing : aFound)
+                        {
+                            nWinding += rCrossing.mnDelta;
+                            startPiece(rCrossing.mfS,
+                                       isKeptLine(isInsideSecond(Winding{ 0, nWinding })) ? 1 : 0);
+                        }
+                    }
+                    else if (bWindingsKnown
+                             && (getWinding(aPieces.back().mfFromT, rCuts[c].mfT)
+                                     != itBefore->second.mnWinding
+                                 || getWinding(rCuts[d].mfT, rCuts[d + 1].mfT)
+                                        != itAfter->second.mnWinding))
+                    {
+                        // where the line runs nearly along the area a flat winding can be wrong,
+                        // so every piece between the true crossings is asked at its middle, the
+                        // last one runs on to the next cut. When both flat windings are right a
+                        // true crossing was not found, and the flat cuts stay
+                        double fFromT(aPieces.back().mfFromT);
+                        for (const LineCrossing& rCrossing : aFound)
+                        {
+                            aPieces.back().mnState = getState(fFromT, rCrossing.mfS);
+                            startPiece(rCrossing.mfS, -1);
+                            fFromT = rCrossing.mfS;
+                        }
+                        aPieces.back().mnState = getState(fFromT, rCuts[d + 1].mfT);
+                    }
+                    else
+                        for (size_t e = c; e <= d; e++)
+                            startPiece(rCuts[e].mfT, getPartState(a, b, int(e)));
+                    c = d + 1;
                 }
-            const auto itKnown(
-                std::find_if(aState.begin(), aState.end(), [](int nState) { return nState >= 0; }));
-            if (itKnown == aState.end())
+            }
+            const auto itKnown(std::find_if(aPieces.begin(), aPieces.end(), [](const Piece& rPiece)
+                                            { return rPiece.mnState >= 0; }));
+            if (itKnown == aPieces.end())
             {
                 // no part has a length, the clip at its point decides for all of the line
                 if (nSegments
                     && isKeptLine(isInsideSecond(Winding{
                            0, getWindingAt(aCurves, nFirstCount, rPolygon.getB2DPoint(0),
-                                           1e-7 * fExtent) })))
+                                           fEpsilon) })))
                     aRetval.append(rPolygon);
                 continue;
             }
-            // a part of no length goes with the part before it
-            int nPrevious(*itKnown);
+            // a piece of no length goes with the piece before it, and adds nothing to a run
+            int nPrevious(itKnown->mnState);
             if (bClosed)
-                for (int nState : aState)
-                    if (nState >= 0)
-                        nPrevious = nState;
-            for (int& rState : aState)
-                rState = rState >= 0 ? (nPrevious = rState) : nPrevious;
-            if (std::all_of(aState.begin(), aState.end(), [](int nState) { return nState == 1; }))
+                for (const Piece& rPiece : aPieces)
+                    if (rPiece.mnState >= 0)
+                        nPrevious = rPiece.mnState;
+            std::vector<bool> aEmpty(aPieces.size());
+            for (size_t b = 0; b < aPieces.size(); b++)
+            {
+                Piece& rPiece(aPieces[b]);
+                aEmpty[b] = rPiece.mnState < 0 || !(rPiece.mfToT > rPiece.mfFromT);
+                rPiece.mnState = rPiece.mnState >= 0 ? (nPrevious = rPiece.mnState) : nPrevious;
+            }
+            if (std::all_of(aPieces.begin(), aPieces.end(),
+                            [](const Piece& rPiece) { return rPiece.mnState == 1; }))
             {
                 aRetval.append(rPolygon);
                 continue;
             }
 
-            // runs of kept parts, a part of no length adds nothing
+            // runs of kept pieces, as first and end index; a closed line runs on over its start
             aRuns.clear();
-            bool bInRun(false);
-            for (size_t b = 0; b < aState.size(); b++)
+            for (size_t b = 0; b < aPieces.size(); b++)
             {
-                if (aState[b] == 0)
-                {
-                    bInRun = false;
+                if (aPieces[b].mnState != 1)
                     continue;
-                }
-                if (!bInRun)
-                    aRuns.emplace_back();
-                bInRun = true;
-                if (aSequence[b] >= 0)
-                    aRuns.back().push_back(b);
+                if (b == 0 || aPieces[b - 1].mnState != 1)
+                    aRuns.emplace_back(b, b);
+                aRuns.back().second = b + 1;
             }
-            // a closed line runs on over its start
-            if (bClosed && aRuns.size() > 1 && aState.front() == 1 && aState.back() == 1)
+            if (bClosed && aRuns.size() > 1 && aPieces.front().mnState == 1
+                && aPieces.back().mnState == 1)
             {
-                aRuns.back().insert(aRuns.back().end(), aRuns.front().begin(), aRuns.front().end());
+                aRuns.back().second = aPieces.size() + aRuns.front().second;
                 aRuns.erase(aRuns.begin());
             }
-            for (const std::vector<size_t>& rRun : aRuns)
+            for (const auto& [nBegin, nEnd] : aRuns)
             {
-                if (rRun.empty())
-                    continue;
+                // the pieces of one segment in a row are one snippet of it
                 B2DPolygon aPolygon;
-                for (size_t b = 0; b < rRun.size();)
+                const Piece* pLast(nullptr);
+                for (size_t b = nBegin; b < nEnd;)
                 {
+                    const Piece& rFirst(aPieces[b % aPieces.size()]);
+                    bool bEmpty(aEmpty[b % aPieces.size()]);
                     size_t c(b + 1);
-                    while (c < rRun.size() && continues(aSequence[rRun[c - 1]], aSequence[rRun[c]]))
-                        c++;
-                    appendRun(aPolygon, aParts[aSequence[rRun[b]]], aParts[aSequence[rRun[c - 1]]]);
+                    // a run over the start of the line starts a new snippet there, also on a
+                    // closed line of one segment
+                    for (; c < nEnd && c != aPieces.size()
+                           && aPieces[c % aPieces.size()].mnSegment == rFirst.mnSegment;
+                         c++)
+                        bEmpty = bEmpty && aEmpty[c % aPieces.size()];
+                    if (!bEmpty)
+                    {
+                        pLast = &aPieces[(c - 1) % aPieces.size()];
+                        appendLineRun(aPolygon, a, rFirst.mnSegment, rFirst.mfFromT, pLast->mfToT);
+                    }
                     b = c;
                 }
-                const Part& rLastPart(aParts[aSequence[rRun.back()]]);
-                aPolygon.append(getLinePoint(
-                    rLastPart,
-                    aCuts[rLastPart.mnPolygon][rLastPart.mnSegment][rLastPart.mnPart + 1].mfT));
+                if (!pLast)
+                    continue;
+                aPolygon.append(getLinePoint(a, pLast->mnSegment, pLast->mfToT));
                 setControls(aPolygon);
                 aRetval.append(aPolygon);
             }
