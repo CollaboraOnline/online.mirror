@@ -733,8 +733,7 @@ clean-local:
 	rm -rf collabora-online-sbom.spdx.json
 	rm -rf sbom-scan
 	rm -rf test/data/presets
-	rm -f test/samples/calc-edit.fods test/samples/draw-edit.odg test/samples/impress-edit.fodp test/samples/writer-edit.fodt test/samples/writer-large-edit.fodt
-	rm -f test/samples/master-edit.odm test/samples/master-chapter1-edit.odt test/samples/master-chapter2-edit.odt test/samples/master-chapter3-edit.odt test/samples/master-chapter4-edit.odt
+	rm -f $(abs_top_srcdir)/test/samples/*-edit.*
 	$(CLEANUP_COVERAGE)
 
 if ENABLE_DEBUG
