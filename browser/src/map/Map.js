@@ -401,6 +401,7 @@ window.L.Map = window.L.Evented.extend({
 
 				// Show the security classification banner if the document is labeled.
 				app.socket.sendMessage('commandvalues command=.uno:SecurityLabel');
+				this._followLocalEditorsAfterLoad();
 			} else if (this._docLayer && app.sectionContainer) {
 				// remove the comments and changes
 				var commentSection = app.sectionContainer.getSectionWithName(app.CSections.CommentList.name);

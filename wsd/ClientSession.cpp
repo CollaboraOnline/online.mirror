@@ -49,6 +49,7 @@
 #include <wsd/Admin.hpp>
 #endif
 #include <wsd/COOLWSD.hpp>
+#include <wsd/CollabBroker.hpp>
 #include <wsd/DocumentBroker.hpp>
 #include <wsd/FileServer.hpp>
 #if !MOBILEAPP
@@ -2103,6 +2104,20 @@ bool ClientSession::_handleInput(const char *buffer, int length)
             }
         }
     }
+    else if (tokens.equals(0, "requestcollabediting")) {
+        if (isReadOnly()) {
+            return false;
+        }
+        if (auto const poll = COOLWSD::getWebServerPoll()) {
+            poll->addCallback(
+                [docKey = docBroker->getDocKey(), userId = getUserId(), username = getUserName()] {
+                    if (auto const collabBroker = findCollabBroker(docKey)) {
+                        collabBroker->askLocalEditorsToJoin(userId, username);
+                    }
+                });
+        }
+        return true;
+    }
 #endif
     else if (tokens.equals(0, "executescript"))
     {
@@ -2860,6 +2875,11 @@ bool ClientSession::resyncAfterReconnect(const StringVector& tokens,
     // useractive makes the kit send everyone a new viewinfo, this view its current part, and the
     // invalidations that fetch the tiles the browser threw away.
     docBroker->forwardToChild(client_from_this(), "useractive");
+
+#if !MOBILEAPP
+    // The browser missed any change while its session was parked:
+    docBroker->sendLocalEditors(*this);
+#endif
 
     // The reconnect token was seen on the new socket URL, so the browser gets a new one.
     rotateReconnectToken(true);

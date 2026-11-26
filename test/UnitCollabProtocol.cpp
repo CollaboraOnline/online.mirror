@@ -1973,6 +1973,298 @@ private:
     std::string getFileToken_;
 };
 
+// A user who opens the document on /cool/ws, and can edit it, hears of the users who edit a local
+// copy of it (and not of those who only view it, also while one whose connection closed without a
+// "bye" can come back, and also when opening the document then), can ask them to edit together,
+// and hears when they are gone:
+class UnitCollabLocalEditors: public WopiTestServer {
+public:
+    UnitCollabLocalEditors(): WopiTestServer("UnitCollabLocalEditors"), phase_(Phase::Connect) {}
+
+    void configure(Poco::Util::LayeredConfiguration & config) override {
+        WopiTestServer::configure(config);
+        config.setBool("client_document_loading.enable", true);
+    }
+
+    void configCheckFileInfo(
+        Poco::Net::HTTPRequest const & request, Poco::JSON::Object::Ptr & fileInfo) override
+    {
+        if (request.getURI().find("access_token=editor") != std::string::npos) {
+            fileInfo->set("UserId", "editor");
+            fileInfo->set("UserFriendlyName", "Editor");
+        } else if (request.getURI().find("access_token=viewer") != std::string::npos) {
+            fileInfo->set("UserId", "viewer");
+            fileInfo->set("UserFriendlyName", "Viewer");
+        }
+    }
+
+    bool onFilterSendWebSocketMessage(
+        std::string_view const message, WSOpCode const /*code*/, bool const /*flush*/,
+        int & /*unitReturn*/) override
+    {
+        if (message.starts_with("localeditors:")) {
+            TST_LOG("Received: " << message);
+            if (phase_ == Phase::WaitLocalEditors) {
+                LOK_ASSERT_EQUAL(std::string(R"(localeditors: ["Editor"])"), std::string(message));
+                TRANSITION_STATE(phase_, Phase::RequestCollabEditing);
+            } else if (phase_ == Phase::WaitEditorDisconnected) {
+                LOK_ASSERT_EQUAL(std::string(R"(localeditors: ["Editor"])"), std::string(message));
+                TRANSITION_STATE(phase_, Phase::DisconnectViewer);
+            } else if (phase_ == Phase::WaitViewerDisconnected) {
+                LOK_ASSERT_EQUAL(std::string(R"(localeditors: ["Editor"])"), std::string(message));
+                TRANSITION_STATE(phase_, Phase::JoinAgain);
+            } else if (phase_ == Phase::WaitJoinedAgain) {
+                LOK_ASSERT_EQUAL(std::string(R"(localeditors: ["Editor"])"), std::string(message));
+                TRANSITION_STATE(phase_, Phase::ReconnectEditor);
+            } else if (phase_ == Phase::WaitNoLocalEditors && message == "localeditors: []") {
+                TRANSITION_STATE(phase_, Phase::Done);
+                passTest("The user on /cool/ws heard of the local editor, and that it is gone");
+            }
+        }
+        return false;
+    }
+
+    void invokeWSDTest() override {
+        switch (phase_) {
+        case Phase::Connect:
+            TRANSITION_STATE(phase_, Phase::WaitEditorAuth);
+            // The WOPISrc of a document of its own (as the broker of an earlier test's document can
+            // still be around), followed by the test name for the request to coolwsd:
+            editorWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(getWopiHostURI() + "/wopi/files/4?testname=UnitCollabLocalEditors")
+                    + "&testname=UnitCollabLocalEditors",
+                "editor");
+            break;
+        case Phase::WaitEditorAuth:
+            if (!pollCollabMessage(editorWs_, "user_list")) {
+                break;
+            }
+            TRANSITION_STATE(phase_, Phase::WaitViewerAuth);
+            editorWs_->sendMessage(R"({"type":"editing_started"})");
+            // This connection signs in after the server has taken the message above:
+            viewerWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(getWopiHostURI() + "/wopi/files/4?testname=UnitCollabLocalEditors")
+                    + "&testname=UnitCollabLocalEditors",
+                "viewer");
+            break;
+        case Phase::WaitViewerAuth: {
+            Poco::JSON::Object::Ptr const userList = pollCollabMessage(viewerWs_, "user_list");
+            if (!userList) {
+                break;
+            }
+            LOK_ASSERT_EQUAL(true, userList->optValue<bool>("editingActive", false));
+            TRANSITION_STATE(phase_, Phase::WaitLocalEditors);
+            initWebsocket("/wopi/files/4?access_token=anything");
+            WSD_CMD("load url=" + getWopiSrc());
+            break;
+        }
+        case Phase::RequestCollabEditing:
+            TRANSITION_STATE(phase_, Phase::WaitSwitchToCollab);
+            WSD_CMD("requestcollabediting");
+            break;
+        case Phase::WaitSwitchToCollab: {
+            Poco::JSON::Object::Ptr const request
+                = pollCollabMessage(editorWs_, "switch_to_collab");
+            if (!request) {
+                break;
+            }
+            LOK_ASSERT_EQUAL(
+                std::string("Test User"),
+                request->getObject("user")->optValue<std::string>("name", ""));
+            TRANSITION_STATE(phase_, Phase::WaitEditorDisconnected);
+            editorWs_->asyncShutdown();
+            break;
+        }
+        case Phase::DisconnectViewer:
+            // The last connection on /cool/collab leaves with a "bye" while the editor can still
+            // come back:
+            TRANSITION_STATE(phase_, Phase::WaitViewerDisconnected);
+            viewerWs_->sendMessage(R"({"type":"bye"})");
+            viewerWs_->asyncShutdown();
+            break;
+        case Phase::JoinAgain:
+            // While no connection on /cool/collab is left:
+            TRANSITION_STATE(phase_, Phase::WaitJoinedAgain);
+            addWebSocket();
+            WSD_CMD_BY_CONNECTION_INDEX(1, "load url=" + getWopiSrc());
+            break;
+        case Phase::ReconnectEditor:
+            TRANSITION_STATE(phase_, Phase::WaitEditorBack);
+            editorWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(getWopiHostURI() + "/wopi/files/4?testname=UnitCollabLocalEditors")
+                    + "&testname=UnitCollabLocalEditors",
+                "editor");
+            break;
+        case Phase::WaitEditorBack:
+            if (!pollCollabMessage(editorWs_, "user_list")) {
+                break;
+            }
+            TRANSITION_STATE(phase_, Phase::WaitNoLocalEditors);
+            editorWs_->sendMessage(R"({"type":"bye"})");
+            editorWs_->asyncShutdown();
+            break;
+        case Phase::WaitLocalEditors:
+        case Phase::WaitEditorDisconnected:
+        case Phase::WaitViewerDisconnected:
+        case Phase::WaitJoinedAgain:
+        case Phase::WaitNoLocalEditors:
+        case Phase::Done:
+            break;
+        }
+    }
+
+private:
+    STATE_ENUM(
+        Phase, Connect, WaitEditorAuth, WaitViewerAuth, WaitLocalEditors, RequestCollabEditing,
+        WaitSwitchToCollab, WaitEditorDisconnected, DisconnectViewer, WaitViewerDisconnected,
+        JoinAgain, WaitJoinedAgain, ReconnectEditor, WaitEditorBack, WaitNoLocalEditors, Done)
+    phase_;
+
+    std::shared_ptr<http::WebSocketSession> editorWs_;
+    std::shared_ptr<http::WebSocketSession> viewerWs_;
+};
+
+// A user who edits a local copy, with two connections on /cool/collab, still counts as a local
+// editor when one of them leaves with a "bye", and no longer once both have (also when that user
+// connects again only to view):
+class UnitCollabLocalEditorConnections: public WopiTestServer {
+public:
+    UnitCollabLocalEditorConnections():
+        WopiTestServer("UnitCollabLocalEditorConnections"), phase_(Phase::Connect) {}
+
+    void configure(Poco::Util::LayeredConfiguration & config) override {
+        WopiTestServer::configure(config);
+        config.setBool("client_document_loading.enable", true);
+    }
+
+    void configCheckFileInfo(
+        Poco::Net::HTTPRequest const & request, Poco::JSON::Object::Ptr & fileInfo) override
+    {
+        if (request.getURI().find("access_token=editor") != std::string::npos) {
+            fileInfo->set("UserId", "editor");
+            fileInfo->set("UserFriendlyName", "Editor");
+        } else if (request.getURI().find("access_token=viewer") != std::string::npos) {
+            fileInfo->set("UserId", "viewer");
+            fileInfo->set("UserFriendlyName", "Viewer");
+        }
+    }
+
+    bool onFilterSendWebSocketMessage(
+        std::string_view const message, WSOpCode const /*code*/, bool const /*flush*/,
+        int & /*unitReturn*/) override
+    {
+        if (message.starts_with("localeditors:")) {
+            TST_LOG("Received: " << message);
+            if (phase_ == Phase::WaitLocalEditors) {
+                LOK_ASSERT_EQUAL(std::string(R"(localeditors: ["Editor"])"), std::string(message));
+                TRANSITION_STATE(phase_, Phase::FirstBye);
+            } else if (phase_ == Phase::WaitFirstGone) {
+                LOK_ASSERT_EQUAL(std::string(R"(localeditors: ["Editor"])"), std::string(message));
+                TRANSITION_STATE(phase_, Phase::SecondBye);
+            } else if (phase_ == Phase::WaitSecondGone) {
+                LOK_ASSERT_EQUAL(std::string("localeditors: []"), std::string(message));
+                TRANSITION_STATE(phase_, Phase::Reconnect);
+            } else if (phase_ == Phase::WaitReconnected) {
+                LOK_ASSERT_EQUAL(std::string("localeditors: []"), std::string(message));
+                TRANSITION_STATE(phase_, Phase::Done);
+                passTest("The local editor counted until both its connections had left");
+            }
+        }
+        return false;
+    }
+
+    void invokeWSDTest() override {
+        switch (phase_) {
+        case Phase::Connect:
+            TRANSITION_STATE(phase_, Phase::WaitFirstAuth);
+            // The WOPISrc of a document of its own (as the broker of an earlier test's document can
+            // still be around), followed by the test name for the request to coolwsd:
+            firstWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(
+                    getWopiHostURI() + "/wopi/files/5?testname=UnitCollabLocalEditorConnections")
+                    + "&testname=UnitCollabLocalEditorConnections",
+                "editor");
+            break;
+        case Phase::WaitFirstAuth:
+            if (!pollCollabMessage(firstWs_, "user_list")) {
+                break;
+            }
+            TRANSITION_STATE(phase_, Phase::WaitSecondAuth);
+            firstWs_->sendMessage(R"({"type":"editing_started"})");
+            // This connection signs in after the server has taken the message above:
+            secondWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(
+                    getWopiHostURI() + "/wopi/files/5?testname=UnitCollabLocalEditorConnections")
+                    + "&testname=UnitCollabLocalEditorConnections",
+                "editor");
+            break;
+        case Phase::WaitSecondAuth: {
+            Poco::JSON::Object::Ptr const userList = pollCollabMessage(secondWs_, "user_list");
+            if (!userList) {
+                break;
+            }
+            LOK_ASSERT_EQUAL(true, userList->optValue<bool>("editingActive", false));
+            TRANSITION_STATE(phase_, Phase::WaitViewerAuth);
+            viewerWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(
+                    getWopiHostURI() + "/wopi/files/5?testname=UnitCollabLocalEditorConnections")
+                    + "&testname=UnitCollabLocalEditorConnections",
+                "viewer");
+            break;
+        }
+        case Phase::WaitViewerAuth:
+            if (!pollCollabMessage(viewerWs_, "user_list")) {
+                break;
+            }
+            TRANSITION_STATE(phase_, Phase::WaitLocalEditors);
+            initWebsocket("/wopi/files/5?access_token=anything");
+            WSD_CMD("load url=" + getWopiSrc());
+            break;
+        case Phase::FirstBye:
+            TRANSITION_STATE(phase_, Phase::WaitFirstGone);
+            firstWs_->sendMessage(R"({"type":"bye"})");
+            firstWs_->asyncShutdown();
+            break;
+        case Phase::SecondBye:
+            TRANSITION_STATE(phase_, Phase::WaitSecondGone);
+            secondWs_->sendMessage(R"({"type":"bye"})");
+            secondWs_->asyncShutdown();
+            break;
+        case Phase::Reconnect:
+            TRANSITION_STATE(phase_, Phase::WaitReconnected);
+            firstWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(
+                    getWopiHostURI() + "/wopi/files/5?testname=UnitCollabLocalEditorConnections")
+                    + "&testname=UnitCollabLocalEditorConnections",
+                "editor");
+            break;
+        case Phase::WaitLocalEditors:
+        case Phase::WaitFirstGone:
+        case Phase::WaitSecondGone:
+        case Phase::WaitReconnected:
+        case Phase::Done:
+            break;
+        }
+    }
+
+private:
+    STATE_ENUM(
+        Phase, Connect, WaitFirstAuth, WaitSecondAuth, WaitViewerAuth, WaitLocalEditors, FirstBye,
+        WaitFirstGone, SecondBye, WaitSecondGone, Reconnect, WaitReconnected, Done)
+    phase_;
+
+    std::shared_ptr<http::WebSocketSession> firstWs_;
+    std::shared_ptr<http::WebSocketSession> secondWs_;
+    std::shared_ptr<http::WebSocketSession> viewerWs_;
+};
+
 // The fetch address answers only GET, and the upload address only POST, and a request with
 // another method leaves the one-shot token for the right one:
 class UnitCollabMethods: public WopiTestServer {
@@ -3371,7 +3663,7 @@ private:
 
 UnitBase** unit_create_wsd_multi(void)
 {
-    return new UnitBase* [33] { new UnitCollabProtocol(),
+    return new UnitBase* [35] { new UnitCollabProtocol(),
                                 new UnitCollabCheckFileInfoTransient(),
                                 new UnitCollabCheckFileInfoRetry(),
                                 new UnitCollabUploadRetry(), new UnitCollabUploadLanded(),
@@ -3385,6 +3677,8 @@ UnitBase** unit_create_wsd_multi(void)
                                 new UnitCollabConnections(), new UnitCollabClosedConnection(),
                                 new UnitCollabTokenRenewal(),
                                 new UnitCollabTokenRenewalDuringSignIn(),
+                                new UnitCollabLocalEditors(),
+                                new UnitCollabLocalEditorConnections(),
                                 new UnitCollabMethods(), new UnitCollabRouting(),
                                 new UnitCollabFetchRedirect(),
                                 new UnitCollabFetchRelativeRedirect(),

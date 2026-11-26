@@ -51,17 +51,41 @@ window.L.Map.include({
 			// view in the read-only stage stays there with its edit button.
 			const firstOpen = this._permission === undefined;
 			const stayReadOnly = !firstOpen && this._permission === 'readonly' && mobileLayout;
+			// A user who opens the document, or views it, while others edit a local
+			// copy keeps viewing, and so does one who started viewing for that reason
+			// (also after a reload):
+			const editedLocally = (firstOpen || this._permission === 'readonly')
+				&& ((app.localEditorNames || []).length > 0
+					|| this._viewingForLocalEditors);
 			if (this.options.canTryLock) {
 				// This is a success response to an attempt to lock using mobile-edit-button
 				this._switchToEditMode();
 			}
-			else if ((firstOpen && (this._shouldStartReadOnly() || mobileLayout)) || stayReadOnly) {
+			else if ((firstOpen && (this._shouldStartReadOnly() || mobileLayout))
+				|| stayReadOnly || editedLocally)
+			{
 				button.on('click', function () {
 					that._switchToEditMode();
 				});
 
 				// temporarily, before the user touches the floating action button
 				this._enterReadOnlyMode('readonly');
+				if (editedLocally && this._localEditorsWaitLabel !== undefined) {
+					this._showLocalEditorsWait();
+				} else if (editedLocally) {
+					this._viewingForLocalEditors = true;
+					if (app.localEditorNames.length === 0) {
+						this._offerEditingWithoutLocalEditors();
+					} else if (firstOpen || this._localEditorsDialogPending) {
+						this._showLocalEditorsDialog();
+					}
+				} else if (this._localEditorsWaitLabel !== undefined) {
+					// The users this view waited for no longer edit a local
+					// copy (and it got here only as the mobile layout keeps a
+					// view viewing):
+					this._stopWaitingForLocalEditors();
+					this._switchToEditMode();
+				}
 			}
 			else {
 				// Edit mode has no use for the button.
@@ -147,6 +171,176 @@ window.L.Map.include({
 		if (!Object.prototype.hasOwnProperty.call(this.readonlyStartingFormats, extension))
 			return false;
 		return true;
+	},
+
+	// Offers the choice between viewing and asking the users who edit a local copy to edit
+	// together:
+	_showLocalEditorsDialog: function () {
+		this._localEditorsDialogPending = true;
+		const names = app.localEditorNames.join(', ');
+		const subtitle = _(
+			'A local copy is edited by: {0}. Choose how you\'d like to continue:')
+			.replace('{0}', names);
+		const dialog = document.getElementById(
+			this.uiManager.generateModalId('local-editors-modal'));
+		const shownSubtitle =
+			dialog ? dialog.querySelector('#collab-choice-subtitle') : null;
+		// A small screen gets the choice as a snackbar (as the mobile wizard renders the
+		// dialog's cards without the elements that take the clicks, so the dialog would be
+		// unusable):
+		if (window.mode.isSmallScreenDevice()) {
+			this._showLocalEditorsSnackbar(
+				_('A local copy of this document is edited by: {0}')
+					.replace('{0}', names),
+				_('Join'),
+				() => {
+					this._localEditorsDialogPending = false;
+					this._askLocalEditorsToJoin();
+				},
+				() => { this._localEditorsDialogPending = false; });
+		} else if (shownSubtitle) {
+			shownSubtitle.textContent = subtitle;
+		} else {
+			this._showTwoCardDialog(
+				'local-editors-modal',
+				_('Edited in a local copy'),
+				subtitle,
+				[
+					{
+						id: 'local-editors-keep-viewing',
+						icon: 'images/coda-collab-local-viewing',
+						heading: _('Keep viewing'),
+						description: _('Their changes show once they save'),
+						onClick: () => {
+							this._localEditorsDialogPending = false;
+						}
+					},
+					{
+						id: 'local-editors-join',
+						icon: 'images/coda-collab-collaborative-editing',
+						heading: _('Join collaborative editing'),
+						description: _('Edit together in real-time'),
+						onClick: () => {
+							this._localEditorsDialogPending = false;
+							this._askLocalEditorsToJoin();
+						}
+					}
+				]);
+		}
+	},
+
+	// Asks the users who edit a local copy to save it and edit together, and waits until none
+	// of them edits a local copy any more:
+	_askLocalEditorsToJoin: function () {
+		if (app.localEditorNames.length === 0) {
+			this._switchToEditMode();
+			return;
+		}
+		app.socket.sendMessage('requestcollabediting');
+		this._viewingForLocalEditors = false;
+		this._stopWaitingForLocalEditors();
+		const label = _('Waiting for {0} to save and edit together...');
+		this._localEditorsWaitLabel = label.replace('{0}', app.localEditorNames.join(', '));
+		this._showLocalEditorsWait();
+	},
+
+	// Shows the wait for the users who edit a local copy (again after a reload):
+	_showLocalEditorsWait: function () {
+		this.uiManager.closeSnackbarWithLabel(this._localEditorsWaitLabel);
+		this.uiManager.showSnackbar(
+			this._localEditorsWaitLabel, null, null, -1, false, true, false,
+			() => {
+				// The view goes on as if its user had chosen to keep viewing:
+				this._localEditorsWaitLabel = undefined;
+				this._viewingForLocalEditors = true;
+			});
+	},
+
+	// Follows a change in the users who edit a local copy, for a view that has its permission
+	// already (and leaves a view that loads the document again to its next permission):
+	_onLocalEditorsChanged: function (previous) {
+		if (!this._docLoaded) {
+			// The list is compared once the document is loaded (with the one from
+			// before the first change in the meantime):
+			if (this._localEditorsBeforeLoad === undefined) {
+				this._localEditorsBeforeLoad = previous;
+			}
+			return;
+		}
+		const names = app.localEditorNames;
+		if (names.length === previous.length
+			&& names.every((name) => previous.includes(name)))
+		{
+			return;
+		}
+		if (names.length === 0 && this._localEditorsWaitLabel !== undefined) {
+			this._stopWaitingForLocalEditors();
+			if (this._permission === 'readonly') {
+				this._switchToEditMode();
+			}
+		} else if (names.length === 0 && this._viewingForLocalEditors) {
+			this._offerEditingWithoutLocalEditors();
+		} else if (this._localEditorsDialogPending) {
+			this._showLocalEditorsDialog();
+		} else if (names.some((name) => !previous.includes(name))
+			&& this._localEditorsWaitLabel !== undefined)
+		{
+			// Ask also the new ones:
+			this._askLocalEditorsToJoin();
+		} else if (names.some((name) => !previous.includes(name))) {
+			const label = _('A local copy of this document is edited by: {0}')
+				.replace('{0}', names.join(', '));
+			this._showLocalEditorsSnackbar(label, null, null);
+		} else {
+			// The snackbar shown (if any) also names users who no longer edit a local
+			// copy:
+			this._closeLocalEditorsSnackbar();
+		}
+	},
+
+	// Follows the changes in the users who edit a local copy that came while the document
+	// loaded:
+	_followLocalEditorsAfterLoad: function () {
+		if (this._localEditorsBeforeLoad !== undefined) {
+			const previous = this._localEditorsBeforeLoad;
+			this._localEditorsBeforeLoad = undefined;
+			this._onLocalEditorsChanged(previous);
+		}
+	},
+
+	// Offers editing to a user who views because others edited a local copy, once nobody does:
+	_offerEditingWithoutLocalEditors: function () {
+		const dialogId = this.uiManager.generateModalId('local-editors-modal');
+		this._localEditorsDialogPending = false;
+		if (document.getElementById(dialogId)) {
+			this.uiManager.closeModal(dialogId);
+		}
+		this._showLocalEditorsSnackbar(
+			_('Nobody edits a local copy any more'), _('Edit'),
+			() => { this._switchToEditMode(); });
+	},
+
+	// Shows a snackbar about who edits a local copy, in place of the one shown before:
+	_showLocalEditorsSnackbar: function (label, action, callback, onDismiss) {
+		this._closeLocalEditorsSnackbar();
+		this._localEditorsLabel = label;
+		this.uiManager.showSnackbar(
+			label, action, callback, -1, false, true, false, onDismiss);
+	},
+
+	_closeLocalEditorsSnackbar: function () {
+		if (this._localEditorsLabel !== undefined) {
+			this.uiManager.closeSnackbarWithLabel(this._localEditorsLabel);
+			this._localEditorsLabel = undefined;
+		}
+	},
+
+	// Ends the wait of a view that asked the users who edit a local copy to edit together:
+	_stopWaitingForLocalEditors: function () {
+		if (this._localEditorsWaitLabel !== undefined) {
+			this.uiManager.closeSnackbarWithLabel(this._localEditorsWaitLabel);
+			this._localEditorsWaitLabel = undefined;
+		}
 	},
 
 	_proceedEditMode: function() {
@@ -973,6 +1167,10 @@ window.L.Map.include({
 
 	_enterEditMode: function (perm) {
 		this._permission = perm;
+		this._viewingForLocalEditors = false;
+		this._localEditorsDialogPending = false;
+		this._stopWaitingForLocalEditors();
+		this._closeLocalEditorsSnackbar();
 
 		if ((window.mode.isSmallScreenDevice() || window.mode.isTablet()) && this._textInput && this.getDocType() === 'text') {
 			this._textInput.setSwitchedToEditMode();

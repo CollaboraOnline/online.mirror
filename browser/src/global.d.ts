@@ -325,6 +325,9 @@ interface AppInterface {
 	// Whether this document is running with this user's own document
 	// settings. It is running with whoever opened it first's.
 	userPresetsApplied?: boolean;
+	// The names of the users who edit a local copy of this document in CODA or COWASM (as the
+	// server last reported them):
+	localEditorNames?: string[];
 	// Whether a document settings change made now would be felt in this
 	// document, rather than waiting for the next one to be opened.
 	documentSettingsLive?: boolean;

@@ -60,6 +60,7 @@ class PrisonerRequestDispatcher;
 class CheckFileInfo;
 class WebSocketHandler;
 class DocumentBroker;
+struct LocalEditors;
 class LockContext;
 class PresetsInstallTask;
 class TileCache;
@@ -836,6 +837,15 @@ public:
     /// own poll thread; marshals the per-CollabBroker work onto the
     /// WebServerPoll.
     void pushSessionsToCollabBroker();
+
+#if !MOBILEAPP
+    // Send the names of the users who edit a local copy of the document to each session that can
+    // edit:
+    void sendLocalEditors(LocalEditors const & editors);
+
+    // Send them to that session, if it can edit:
+    void sendLocalEditors(ClientSession & session);
+#endif
 
     /// Estimate memory usage / bytes
     std::size_t getMemorySize() const;
@@ -2376,6 +2386,10 @@ private:
     /// one after the other, goes up once. Default-constructed when nothing is
     /// waiting.
     std::chrono::steady_clock::time_point _userConfigUploadDue;
+
+    // When the names of the users who edit a local copy change at the end of a grace period (or the
+    // default value when they do not):
+    std::chrono::steady_clock::time_point _localEditorsExpiry;
 
     /// True for file that COOLWSD::IsViewFileExtension return true.
     /// These files, such as PDF, don't have a reliable ModifiedStatus.

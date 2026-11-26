@@ -69,6 +69,13 @@ struct CollabUploadRequest
     std::chrono::steady_clock::time_point expiry;  ///< When this token expires
 };
 
+// The names of the users who edit a local copy of a document, and when they change at the end of a
+// grace period (or the default value when they do not):
+struct LocalEditors {
+    std::set<std::string> names;
+    std::chrono::steady_clock::time_point expiry;
+};
+
 /// Manages all CollabSocketHandler instances for a single document (docKey).
 /// Similar to DocumentBroker, this class groups all collaboration WebSocket
 /// connections that share the same WOPI source URL.
@@ -92,6 +99,14 @@ class CollabBroker : public std::enable_shared_from_this<CollabBroker>
     /// The users (by ID) who sent editing_started and so edit a local copy (kept and reset along
     /// with _editingStarted):
     std::set<std::string> _editingUserIds;
+
+    // The users in _editingUserIds whose connection closed without a "bye", by ID, with their
+    // names and the time it closed (as they still edit a local copy until the grace period ends):
+    struct DisconnectedEditor {
+        std::string username;
+        std::chrono::steady_clock::time_point since;
+    };
+    std::map<std::string, DisconnectedEditor> _disconnectedEditors;
 
     /// When the broker last became idle (no handlers).  Used by
     /// cleanupCollabBrokers() to keep an idle broker alive for a
@@ -187,6 +202,17 @@ public:
     void sendToEditingUsers(
         std::string const & message, std::shared_ptr<CollabSocketHandler> const & exclude);
 
+    // The users who sent editing_started (and so edit a local copy), connected or within the grace
+    // period after their connection closed without a "bye":
+    LocalEditors getLocalEditors() const;
+
+    // Send those names to the /cool/ws sessions of the document:
+    void sendLocalEditorsToDocument() const;
+
+    // Ask the users who edit a local copy to edit together with the /cool/ws user of that ID and
+    // name (with a switch_to_collab from that user):
+    void askLocalEditorsToJoin(std::string const & userId, std::string const & username);
+
     /// Get JSON array of current users (excluding the specified handler)
     /// Returns JSON like: {"users": [{"id": "...", "name": "..."}, ...]}
     std::string getUserListJson(const std::shared_ptr<CollabSocketHandler>& exclude) const;
@@ -273,6 +299,10 @@ std::string createCollabFetchRequest(const std::string& streamUrl,
 
 /// Find an existing CollabBroker by docKey (returns nullptr if not found or empty)
 std::shared_ptr<CollabBroker> findCollabBroker(const std::string& docKey);
+
+// The users who edit a local copy of the document with that key (also while its CollabBroker has
+// no handlers):
+LocalEditors findLocalEditors(std::string const & docKey);
 
 // The query parameters, each starting with "&", that a /cool/collab address of the document with
 // that WOPISrc carries, so that a load balancer that routes by WOPISrc sends it to the server of
