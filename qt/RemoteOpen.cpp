@@ -92,6 +92,7 @@ const char* PUT_CODA_PAGE_IN_SCRIPT = R"JS(
         messageUrl: config.messageUrl,
         settings: config.settings,
         accessToken: config.accessToken,
+        accessTokenTtl: config.accessTokenTtl,
     };
 
     const text = (response) => {
@@ -1082,8 +1083,12 @@ void CloudAccountPage::putCodaPageIn(QWebEngineFrame& frame)
 
     QJsonObject config;
     config["formUrl"] = _keptForm.url.toString(QUrl::FullyEncoded);
-    config["accessToken"] = QString::fromStdString(EditorFrameForm::accessToken(
-        _keptForm.url.toString(QUrl::FullyEncoded).toStdString(), _keptForm.body.toStdString()));
+    const std::string formUrl = _keptForm.url.toString(QUrl::FullyEncoded).toStdString();
+    const std::string form = _keptForm.body.toStdString();
+    const std::string accessToken = EditorFrameForm::accessToken(formUrl, form);
+    const std::string accessTokenTtl = EditorFrameForm::accessTokenTtl(formUrl, form);
+    config["accessToken"] = QString::fromStdString(accessToken);
+    config["accessTokenTtl"] = QString::fromStdString(accessTokenTtl);
     config["base"] = COOLLOCAL_BUNDLED_URL;
     config["messageUrl"] = COOLLOCAL_MESSAGE_URL + "?session=" + _frame.id;
 
