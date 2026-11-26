@@ -623,9 +623,13 @@ void Button::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
     {
         // Emit the icon name first so COOL can resolve it as a local SVG; the
         // base64 bitmap below is the fallback when it ships no such icon.
-        const OUString sIconName = vcl::kit::svgIconName(GetModeImage().GetStock());
+        const OUString sIconPath = GetModeImage().GetStock();
+        const OUString sIconName = vcl::kit::svgIconName(sIconPath);
         if (!sIconName.isEmpty())
             rJsonWriter.put("icon", sIconName);
+        // The icon name drops the folder of the path, which tells the modules apart.
+        if (!sIconPath.isEmpty())
+            rJsonWriter.put("iconpath", sIconPath);
 
         SvMemoryStream aOStm(6535, 6535);
         if(GraphicConverter::Export(aOStm, GetModeImage().GetBitmap(), ConvertDataFormat::PNG) == ERRCODE_NONE)

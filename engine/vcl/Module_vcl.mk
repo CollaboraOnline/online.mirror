@@ -170,6 +170,7 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
     CppunitTest_vcl_lifecycle \
     CppunitTest_vcl_toolbox \
     CppunitTest_vcl_fixedimage \
+    CppunitTest_vcl_button \
     CppunitTest_vcl_disposeddump \
     CppunitTest_vcl_bitmap_test \
     CppunitTest_vcl_bitmapprocessor_test \
