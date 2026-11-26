@@ -3015,12 +3015,12 @@ server -> client messages on /cool/collab/ws
     connections and of the /cool/ws sessions on the same document.  The broker only tracks the
     /cool/ws sessions while a /cool/collab connection is open, so for the first connection they
     arrive after {"type":"authenticated"}, as {"type":"user_joined"} (followed by
-    {"type":"editing_started"} for one that can write).  Each <user> object carries "id" (the
+    {"type":"editing_started"} for one that edits).  Each <user> object carries "id" (the
     integrator user id) and "name" (display name).  When a user of a /cool/collab connection has an
     avatar registered with the
     broker, the object also carries "avatar":"<path>" pointing at the /cool/collab/avatar endpoint
     described below.  "editingActive" is true once any peer has sent {"type":"editing_started"}, or
-    a /cool/ws session that can write has joined.  Each <user> object also carries "connection",
+    a /cool/ws session has started editing.  Each <user> object also carries "connection",
     the ID of its /cool/collab connection or /cool/ws session, which is unique within the server and
     tells apart several connections of one user.
 
@@ -3032,7 +3032,7 @@ server -> client messages on /cool/collab/ws
 {"type":"editing_started","user":<user>}
 
     Some peer transitioned from viewing to editing.  Sent each time a client sends
-    {"type":"editing_started"}, and when a /cool/ws session that can write joins.  The broker
+    {"type":"editing_started"}, and when a /cool/ws session starts editing.  The broker
     tracks an "editing started" flag, so a late-joining client gets the same information through
     user_list's "editingActive".
 

@@ -2149,6 +2149,87 @@ private:
     std::shared_ptr<http::WebSocketSession> viewerWs_;
 };
 
+// A user who opens the document on /cool/ws counts as editing for the users on /cool/collab only
+// once the view switches to editing:
+class UnitCollabExternalEditing: public WopiTestServer {
+public:
+    UnitCollabExternalEditing():
+        WopiTestServer("UnitCollabExternalEditing"), phase_(Phase::Connect) {}
+
+    void configure(Poco::Util::LayeredConfiguration & config) override {
+        WopiTestServer::configure(config);
+        config.setBool("client_document_loading.enable", true);
+    }
+
+    bool onDocumentLoaded(std::string const & message) override {
+        TST_LOG("Loaded: " << message);
+        TRANSITION_STATE(phase_, Phase::ConnectSecond);
+        return true;
+    }
+
+    void invokeWSDTest() override {
+        switch (phase_) {
+        case Phase::Connect:
+            TRANSITION_STATE(phase_, Phase::WaitFirstAuth);
+            // The WOPISrc of a document of its own (as the broker of an earlier test's document can
+            // still be around), followed by the test name for the request to coolwsd:
+            firstWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(getWopiHostURI() + "/wopi/files/3?testname=UnitCollabExternalEditing")
+                    + "&testname=UnitCollabExternalEditing",
+                "anything");
+            break;
+        case Phase::WaitFirstAuth:
+            if (!pollCollabMessage(firstWs_, "user_list")) {
+                break;
+            }
+            TRANSITION_STATE(phase_, Phase::WaitLoad);
+            initWebsocket("/wopi/files/3?access_token=anything");
+            WSD_CMD("load url=" + getWopiSrc());
+            break;
+        case Phase::ConnectSecond:
+            TRANSITION_STATE(phase_, Phase::WaitSecondAuth);
+            secondWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(getWopiHostURI() + "/wopi/files/3?testname=UnitCollabExternalEditing")
+                    + "&testname=UnitCollabExternalEditing",
+                "anything");
+            break;
+        case Phase::WaitSecondAuth: {
+            Poco::JSON::Object::Ptr const userList = pollCollabMessage(secondWs_, "user_list");
+            if (!userList) {
+                break;
+            }
+            LOK_ASSERT_EQUAL(false, userList->optValue<bool>("editingActive", true));
+            TRANSITION_STATE(phase_, Phase::WaitEditingStarted);
+            WSD_CMD("setviewreadonly value=false");
+            break;
+        }
+        case Phase::WaitEditingStarted:
+            if (!pollCollabMessage(secondWs_, "editing_started")) {
+                break;
+            }
+            TRANSITION_STATE(phase_, Phase::Done);
+            firstWs_->asyncShutdown();
+            secondWs_->asyncShutdown();
+            passTest("The view on /cool/ws counted as editing once it switched to editing");
+            break;
+        case Phase::WaitLoad:
+        case Phase::Done:
+            break;
+        }
+    }
+
+private:
+    STATE_ENUM(
+        Phase, Connect, WaitFirstAuth, WaitLoad, ConnectSecond, WaitSecondAuth, WaitEditingStarted,
+        Done)
+    phase_;
+
+    std::shared_ptr<http::WebSocketSession> firstWs_;
+    std::shared_ptr<http::WebSocketSession> secondWs_;
+};
+
 // The fetch address answers only GET, and the upload address only POST, and a request with
 // another method leaves the one-shot token for the right one:
 class UnitCollabMethods: public WopiTestServer {
@@ -3563,7 +3644,7 @@ private:
 
 UnitBase** unit_create_wsd_multi(void)
 {
-    return new UnitBase* [34] { new UnitCollabProtocol(),
+    return new UnitBase* [35] { new UnitCollabProtocol(),
                                 new UnitCollabCheckFileInfoTransient(),
                                 new UnitCollabCheckFileInfoRetry(),
                                 new UnitCollabUploadRetry(), new UnitCollabUploadLanded(),
@@ -3579,6 +3660,7 @@ UnitBase** unit_create_wsd_multi(void)
                                 new UnitCollabTokenRenewalDuringSignIn(),
                                 new UnitCollabLocalEditors(),
                                 new UnitCollabLocalEditorConnections(),
+                                new UnitCollabExternalEditing(),
                                 new UnitCollabMethods(), new UnitCollabRouting(),
                                 new UnitCollabFetchRedirect(),
                                 new UnitCollabFetchRelativeRedirect(),

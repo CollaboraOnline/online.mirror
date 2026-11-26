@@ -2070,6 +2070,19 @@ bool ClientSession::_handleInput(const char *buffer, int length)
         if (haveValue)
             _clientEditMode = value != "true";
 
+#if !MOBILEAPP
+        // The users on /cool/collab hear when this view starts editing:
+        if (haveValue && value != "true") {
+            if (auto const poll = COOLWSD::getWebServerPoll()) {
+                poll->addCallback([docKey = docBroker->getDocKey(), id = getId()] {
+                    if (auto const collabBroker = findCollabBroker(docKey)) {
+                        collabBroker->startExternalEditing(id);
+                    }
+                });
+            }
+        }
+#endif
+
         if (haveValue && value == "true" && !isLockedByPassword())
         {
             // Write the modifications right away, while the view may still save; the kit's

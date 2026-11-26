@@ -147,7 +147,7 @@ class CollabBroker : public std::enable_shared_from_this<CollabBroker>
     {
         std::string userId;
         std::string username;
-        bool canWrite;
+        bool editing;
         std::string connection;
     };
     std::map<std::string, ExternalSession> _externalSessions;
@@ -249,12 +249,15 @@ public:
 
     /// Surface a plain-COOL (/cool/ws) session as a peer in the
     /// user_list, and broadcast user_joined (plus editing_started
-    /// if canWrite) to existing handlers.  Pushed in from
+    /// if editing) to existing handlers.  Pushed in from
     /// DocumentBroker::addSession via a WebServerPoll callback.
     void addExternalSession(const std::string& sessionId,
                             const std::string& userId,
                             const std::string& username,
-                            bool canWrite);
+                            bool editing);
+
+    // Broadcast editing_started for that /cool/ws session once it starts editing:
+    void startExternalEditing(std::string const & sessionId);
 
     /// Drop a previously-added external session and broadcast
     /// user_left.  Pushed in from DocumentBroker::removeSession.
