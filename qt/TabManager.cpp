@@ -215,6 +215,9 @@ TabManager::TabManager(TabbedWindow* window, QWebEngineProfile* profile)
     stripUrl.addQueryParameter("closeTabText", tr("Close tab").toStdString());
     //: Tooltip of the + button at the end of the tab strip
     stripUrl.addQueryParameter("newText", tr("New").toStdString());
+    //: Tooltip of the + button at the end of the tab strip while the Start page is the active tab
+    stripUrl.addQueryParameter("startOpenText",
+                               tr("The Start page is already open").toStdString());
     //: The name in a tab whose document has no name
     stripUrl.addQueryParameter("untitledText", tr("(untitled)").toStdString());
     //: Badge in a tab whose document is a draft, not yet saved to a file of its own

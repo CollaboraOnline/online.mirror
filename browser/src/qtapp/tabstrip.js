@@ -29,6 +29,8 @@
 	const parameters = new URLSearchParams(window.location.search);
 	const closeTabText = parameters.get('closeTabText') || 'Close tab';
 	const newText = parameters.get('newText') || 'New';
+	const startOpenText =
+		parameters.get('startOpenText') || 'The Start page is already open';
 	const untitledText = parameters.get('untitledText') || '(untitled)';
 	const draftText = parameters.get('draftText') || 'Draft';
 
@@ -368,9 +370,19 @@
 		add.id = 'new-tab';
 		add.style.viewTransitionName = 'new-tab';
 		add.textContent = '+';
-		add.title = newText;
+		// A window has one Start page at most, and the + button brings it to the front. While it
+		// is the active tab, the button is disabled.
+		const activeTab = tabs.find((t) => t.id === activeId);
+		if (activeTab && activeTab.docType === 'starter') {
+			add.classList.add('disabled');
+			add.setAttribute('aria-disabled', 'true');
+			add.title = startOpenText;
+		} else {
+			add.title = newText;
+		}
 		add.addEventListener('click', () => {
-			if (bridge) bridge.newTabRequested();
+			if (bridge && !add.classList.contains('disabled'))
+				bridge.newTabRequested();
 		});
 		strip.appendChild(add);
 

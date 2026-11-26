@@ -294,6 +294,14 @@ body {
 	background: var(--strip-hover);
 	color: var(--color-main-text);
 }
+/* Only the glyph fades, so the bar before the button stays as it is. The glyph fades from the
+   color that it inherits, which both themes have. */
+#new-tab.disabled,
+#new-tab.disabled:hover {
+	cursor: default;
+	background: var(--strip-background);
+	color: color-mix(in srgb, currentColor 35%, transparent);
+}
 /* An animated change of the strip moves the tabs and the + button, each of which has a
    view-transition-name, and leaves the rest of the page as it is. The old and the new picture of a
    tab keep their size and line up at the start of the tab, so a tab that gets wider or narrower

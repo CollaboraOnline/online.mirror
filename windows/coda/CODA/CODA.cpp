@@ -5111,6 +5111,11 @@ static void createTabStrip(WindowState& window)
                             textParameter("closeTabText", translate("TabManager", "Close tab")) +
                             //: Tooltip of the + button at the end of the tab strip
                             textParameter("newText", translate("TabManager", "New")) +
+                            //: Tooltip of the + button at the end of the tab strip while the
+                            //: Start page is the active tab
+                            textParameter("startOpenText",
+                                          translate("TabManager",
+                                                    "The Start page is already open")) +
                             //: The name in a tab whose document has no name
                             textParameter("untitledText", translate("TabManager", "(untitled)"));
                         webView->Navigate(Util::string_to_wide_string(stripURL).c_str());
