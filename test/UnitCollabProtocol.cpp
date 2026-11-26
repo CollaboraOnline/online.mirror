@@ -2013,6 +2013,166 @@ private:
     std::shared_ptr<http::WebSocketSession> collabWs_;
 };
 
+// A fetch of the document from a FileUrl that the host redirects to a relative address delivers the
+// document:
+class UnitCollabFetchRelativeRedirect: public WopiTestServer {
+public:
+    UnitCollabFetchRelativeRedirect():
+        WopiTestServer("UnitCollabFetchRelativeRedirect"), phase_(Phase::Connect) {}
+
+    void configure(Poco::Util::LayeredConfiguration & config) override {
+        WopiTestServer::configure(config);
+        config.setBool("client_document_loading.enable", true);
+    }
+
+    void configCheckFileInfo(
+        Poco::Net::HTTPRequest const &, Poco::JSON::Object::Ptr & fileInfo) override
+    {
+        fileInfo->set(
+            "FileUrl",
+            getWopiHostURI() + "/redirected-file?testname=UnitCollabFetchRelativeRedirect");
+    }
+
+    bool handleHttpRequest(
+        Poco::Net::HTTPRequest const & request, std::istream & message,
+        std::shared_ptr<StreamSocket> const & socket) override
+    {
+        if (request.getMethod() == "GET"
+            && Poco::URI(request.getURI()).getPath() == "/redirected-file")
+        {
+            http::Response response(http::StatusCode::Found);
+            response.set(
+                "Location", "/wopi/files/0/contents?testname=UnitCollabFetchRelativeRedirect");
+            socket->sendAndShutdown(response);
+            return true;
+        }
+        return WopiTestServer::handleHttpRequest(request, message, socket);
+    }
+
+    void invokeWSDTest() override {
+        switch (phase_) {
+        case Phase::Connect:
+            TRANSITION_STATE(phase_, Phase::WaitAuth);
+            // The WOPISrc, followed by the test name for the request to coolwsd:
+            collabWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(
+                    getWopiHostURI() + "/wopi/files/0?testname=UnitCollabFetchRelativeRedirect")
+                    + "&testname=UnitCollabFetchRelativeRedirect",
+                "anything");
+            break;
+        case Phase::WaitAuth:
+            if (!pollCollabMessage(collabWs_, "user_list")) {
+                break;
+            }
+            TRANSITION_STATE(phase_, Phase::WaitFetchUrl);
+            collabWs_->sendMessage(R"({"type":"fetch","stream":"contents","requestId":"f1"})");
+            break;
+        case Phase::WaitFetchUrl: {
+            Poco::JSON::Object::Ptr const msg = pollCollabMessage(collabWs_, "fetch_url");
+            if (!msg) {
+                break;
+            }
+            std::shared_ptr<http::Response const> const response = http::get(
+                helpers::getTestServerURI(),
+                msg->getValue<std::string>("url") + "&testname=UnitCollabFetchRelativeRedirect");
+            LOK_ASSERT_EQUAL(http::StatusCode::OK, response->statusLine().statusCode());
+            LOK_ASSERT_EQUAL(getFileContent(), response->getBody());
+            TRANSITION_STATE(phase_, Phase::Done);
+            collabWs_->asyncShutdown();
+            passTest("The document behind the relative redirect arrived");
+            break;
+        }
+        case Phase::Done:
+            break;
+        }
+    }
+
+private:
+    STATE_ENUM(Phase, Connect, WaitAuth, WaitFetchUrl, Done) phase_;
+
+    std::shared_ptr<http::WebSocketSession> collabWs_;
+};
+
+// A fetch of the document from a FileUrl that the host redirects to a malformed address gets 502:
+class UnitCollabFetchMalformedRedirect: public WopiTestServer {
+public:
+    UnitCollabFetchMalformedRedirect():
+        WopiTestServer("UnitCollabFetchMalformedRedirect"), phase_(Phase::Connect) {}
+
+    void configure(Poco::Util::LayeredConfiguration & config) override {
+        WopiTestServer::configure(config);
+        config.setBool("client_document_loading.enable", true);
+    }
+
+    void configCheckFileInfo(
+        Poco::Net::HTTPRequest const &, Poco::JSON::Object::Ptr & fileInfo) override
+    {
+        fileInfo->set(
+            "FileUrl",
+            getWopiHostURI() + "/redirected-file?testname=UnitCollabFetchMalformedRedirect");
+    }
+
+    bool handleHttpRequest(
+        Poco::Net::HTTPRequest const & request, std::istream & message,
+        std::shared_ptr<StreamSocket> const & socket) override
+    {
+        if (request.getMethod() == "GET"
+            && Poco::URI(request.getURI()).getPath() == "/redirected-file")
+        {
+            http::Response response(http::StatusCode::Found);
+            // The port is not a number:
+            response.set("Location", "http://localhost:port/contents");
+            socket->sendAndShutdown(response);
+            return true;
+        }
+        return WopiTestServer::handleHttpRequest(request, message, socket);
+    }
+
+    void invokeWSDTest() override {
+        switch (phase_) {
+        case Phase::Connect:
+            TRANSITION_STATE(phase_, Phase::WaitAuth);
+            // The WOPISrc, followed by the test name for the request to coolwsd:
+            collabWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(
+                    getWopiHostURI() + "/wopi/files/0?testname=UnitCollabFetchMalformedRedirect")
+                    + "&testname=UnitCollabFetchMalformedRedirect",
+                "anything");
+            break;
+        case Phase::WaitAuth:
+            if (!pollCollabMessage(collabWs_, "user_list")) {
+                break;
+            }
+            TRANSITION_STATE(phase_, Phase::WaitFetchUrl);
+            collabWs_->sendMessage(R"({"type":"fetch","stream":"contents","requestId":"f1"})");
+            break;
+        case Phase::WaitFetchUrl: {
+            Poco::JSON::Object::Ptr const msg = pollCollabMessage(collabWs_, "fetch_url");
+            if (!msg) {
+                break;
+            }
+            std::shared_ptr<http::Response const> const response = http::get(
+                helpers::getTestServerURI(),
+                msg->getValue<std::string>("url") + "&testname=UnitCollabFetchMalformedRedirect");
+            LOK_ASSERT_EQUAL(http::StatusCode::BadGateway, response->statusLine().statusCode());
+            TRANSITION_STATE(phase_, Phase::Done);
+            collabWs_->asyncShutdown();
+            passTest("The malformed redirect was answered with 502");
+            break;
+        }
+        case Phase::Done:
+            break;
+        }
+    }
+
+private:
+    STATE_ENUM(Phase, Connect, WaitAuth, WaitFetchUrl, Done) phase_;
+
+    std::shared_ptr<http::WebSocketSession> collabWs_;
+};
+
 // A fetch of the document from a FileUrl sends the access token in the Authorization header, and
 // not in the address:
 class UnitCollabFetchFileUrl: public WopiTestServer {
@@ -3031,7 +3191,7 @@ private:
 
 UnitBase** unit_create_wsd_multi(void)
 {
-    return new UnitBase* [29] { new UnitCollabProtocol(),
+    return new UnitBase* [31] { new UnitCollabProtocol(),
                                 new UnitCollabCheckFileInfoTransient(),
                                 new UnitCollabCheckFileInfoRetry(),
                                 new UnitCollabUploadRetry(), new UnitCollabUploadLanded(),
@@ -3045,7 +3205,10 @@ UnitBase** unit_create_wsd_multi(void)
                                 new UnitCollabConnections(), new UnitCollabClosedConnection(),
                                 new UnitCollabTokenRenewal(),
                                 new UnitCollabMethods(), new UnitCollabRouting(),
-                                new UnitCollabFetchRedirect(), new UnitCollabFetchFileUrl(),
+                                new UnitCollabFetchRedirect(),
+                                new UnitCollabFetchRelativeRedirect(),
+                                new UnitCollabFetchMalformedRedirect(),
+                                new UnitCollabFetchFileUrl(),
                                 new UnitCollabFetchContents(), new UnitCollabFetchRetry(),
                                 new UnitCollabFetchRetryLimit(), new UnitCollabFetchNoConnection(),
                                 new UnitCollabProtocolNumber(), new UnitCollabEditorFrame(),

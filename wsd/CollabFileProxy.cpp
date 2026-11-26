@@ -29,6 +29,7 @@
 #include <wsd/wopi/CheckFileInfo.hpp>
 #include <wsd/wopi/StorageConnectionManager.hpp>
 
+#include <Poco/Exception.h>
 #include <Poco/JSON/Parser.h>
 #include <Poco/SHA2Engine.h>
 #include <Poco/URI.h>
@@ -201,7 +202,16 @@ void CollabFileProxy::doDownload(const std::shared_ptr<TerminatingPoll>& poll,
                 const std::string location = httpResponse->get("Location");
                 LOG_TRC("CollabFileProxy: redirect to ["
                         << Anonymizer::anonymizeUrl(location) << ']');
-                Poco::URI const target(location);
+                Poco::URI target(uri);
+                try {
+                    target.resolve(location);
+                } catch (Poco::Exception const & exc) {
+                    LOG_WRN(
+                        "CollabFileProxy: the redirect from [" << uriAnonym << "] is malformed: "
+                        << exc.displayText());
+                    HttpHelper::sendErrorAndShutdown(http::StatusCode::BadGateway, socket);
+                    return;
+                }
                 doDownload(
                     poll, target, Authorization::create(target), redirectLimit - 1, retriesLeft);
                 return;
