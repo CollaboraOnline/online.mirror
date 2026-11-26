@@ -20,6 +20,7 @@
 
 #include <map>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -50,6 +51,8 @@ class CollabSocketHandler : public WebSocketHandler
     bool _checkFileInfoRetried = false;
     // The CheckFileInfo that a new access token from the client has to pass:
     std::shared_ptr<CheckFileInfo> _renewalCheckFileInfo;
+    // A new access token that the client sent while the sign-in was still running:
+    std::optional<std::string> _pendingAccessToken;
     std::weak_ptr<StreamSocket> _socketWeak;
     // Whether the server can speak to the client, given the client's protocol number:
     bool _protocolAccepted;

@@ -1781,6 +1781,86 @@ private:
     std::string getFileToken_;
 };
 
+// A new access token that the client sends while its sign-in still runs is taken over once the
+// sign-in has passed:
+class UnitCollabTokenRenewalDuringSignIn: public WopiTestServer {
+public:
+    UnitCollabTokenRenewalDuringSignIn():
+        WopiTestServer("UnitCollabTokenRenewalDuringSignIn"), phase_(Phase::Connect) {}
+
+    void configure(Poco::Util::LayeredConfiguration & config) override {
+        WopiTestServer::configure(config);
+        config.setBool("client_document_loading.enable", true);
+    }
+
+    std::unique_ptr<http::Response>
+    assertGetFileRequest(Poco::Net::HTTPRequest const & request) override
+    {
+        for (auto const & [name, value]: Poco::URI(request.getURI()).getQueryParameters()) {
+            if (name == "access_token") {
+                getFileToken_ = value;
+            }
+        }
+        return nullptr;
+    }
+
+    void invokeWSDTest() override {
+        switch (phase_) {
+        case Phase::Connect:
+            TRANSITION_STATE(phase_, Phase::WaitAuth);
+            // The WOPISrc, followed by the test name for the request to coolwsd:
+            collabWs_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(
+                    getWopiHostURI() + "/wopi/files/0?testname=UnitCollabTokenRenewalDuringSignIn")
+                    + "&testname=UnitCollabTokenRenewalDuringSignIn",
+                "first");
+            // This arrives while the server still checks the first token:
+            collabWs_->sendMessage(R"({"type":"access_token","token":"renewed"})");
+            break;
+        case Phase::WaitAuth:
+            if (!pollCollabMessage(collabWs_, "user_list")) {
+                break;
+            }
+            TRANSITION_STATE(phase_, Phase::WaitRenewedAccepted);
+            break;
+        case Phase::WaitRenewedAccepted: {
+            Poco::JSON::Object::Ptr const msg = pollCollabMessage(collabWs_, "access_token");
+            if (!msg) {
+                break;
+            }
+            LOK_ASSERT_EQUAL(true, msg->getValue<bool>("accepted"));
+            TRANSITION_STATE(phase_, Phase::WaitFetchUrl);
+            collabWs_->sendMessage(R"({"type":"fetch","stream":"contents","requestId":"f1"})");
+            break;
+        }
+        case Phase::WaitFetchUrl: {
+            Poco::JSON::Object::Ptr const msg = pollCollabMessage(collabWs_, "fetch_url");
+            if (!msg) {
+                break;
+            }
+            std::shared_ptr<http::Response const> const response = http::get(
+                helpers::getTestServerURI(),
+                msg->getValue<std::string>("url") + "&testname=UnitCollabTokenRenewalDuringSignIn");
+            LOK_ASSERT_EQUAL(http::StatusCode::OK, response->statusLine().statusCode());
+            LOK_ASSERT_EQUAL(std::string("renewed"), getFileToken_);
+            TRANSITION_STATE(phase_, Phase::Done);
+            collabWs_->asyncShutdown();
+            passTest("The fetch went with the token sent during the sign-in");
+            break;
+        }
+        case Phase::Done:
+            break;
+        }
+    }
+
+private:
+    STATE_ENUM(Phase, Connect, WaitAuth, WaitRenewedAccepted, WaitFetchUrl, Done) phase_;
+
+    std::shared_ptr<http::WebSocketSession> collabWs_;
+    std::string getFileToken_;
+};
+
 // The fetch address answers only GET, and the upload address only POST, and a request with
 // another method leaves the one-shot token for the right one:
 class UnitCollabMethods: public WopiTestServer {
@@ -3179,7 +3259,7 @@ private:
 
 UnitBase** unit_create_wsd_multi(void)
 {
-    return new UnitBase* [31] { new UnitCollabProtocol(),
+    return new UnitBase* [32] { new UnitCollabProtocol(),
                                 new UnitCollabCheckFileInfoTransient(),
                                 new UnitCollabCheckFileInfoRetry(),
                                 new UnitCollabUploadRetry(), new UnitCollabUploadLanded(),
@@ -3192,6 +3272,7 @@ UnitBase** unit_create_wsd_multi(void)
                                 new UnitCollabAvatar(),
                                 new UnitCollabConnections(), new UnitCollabClosedConnection(),
                                 new UnitCollabTokenRenewal(),
+                                new UnitCollabTokenRenewalDuringSignIn(),
                                 new UnitCollabMethods(), new UnitCollabRouting(),
                                 new UnitCollabFetchRedirect(),
                                 new UnitCollabFetchRelativeRedirect(),
