@@ -35,7 +35,6 @@
 #include <vcl/mnemonic.hxx>
 #include <vcl/menu.hxx>
 #include <vcl/settings.hxx>
-#include <vcl/IconThemeInfo.hxx>
 #include <vcl/commandinfoprovider.hxx>
 #include <vcl/kit.hxx>
 
@@ -660,8 +659,7 @@ ImageType ToolBox::GetImageSize() const
 
     if (eToolBoxButtonSize == ToolBoxButtonSize::Large)
     {
-        OUString iconTheme = Application::GetSettings().GetStyleSettings().DetermineIconTheme();
-        aUnscaledSize = vcl::IconThemeInfo::SizeByThemeName(iconTheme);
+        aUnscaledSize = Size(24, 24);
     }
     else if (eToolBoxButtonSize == ToolBoxButtonSize::Size32)
     {

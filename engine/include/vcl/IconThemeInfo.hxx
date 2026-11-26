@@ -11,7 +11,6 @@
 #define INCLUDED_VCL_ICONTHEMEINFO_HXX
 
 #include <vcl/dllapi.h>
-#include <tools/gen.hxx>
 #include <rtl/ustring.hxx>
 
 #include <vector>
@@ -43,13 +42,6 @@ public:
     const OUString& GetThemeId() const { return mThemeId; }
 
     const OUString& GetUrlToFile() const { return mUrlToFile; }
-
-    /** Obtain the icon size by theme name.
-     * @internal
-     * It is not clear where this information belongs to. The sizes were hard-coded before they moved here.
-     * Maybe there is a way to determine the sizes from the icon theme packages.
-     */
-    static Size SizeByThemeName(std::u16string_view);
 
     /** Check whether an IconThemeInfo can be constructed from a URL */
     static bool UrlCanBeParsed(std::u16string_view url);

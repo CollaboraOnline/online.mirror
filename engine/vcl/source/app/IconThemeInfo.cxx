@@ -54,17 +54,6 @@ IconThemeInfo::IconThemeInfo(const OUString& urlToFile)
 
 }
 
-/*static*/ Size
-IconThemeInfo::SizeByThemeName(std::u16string_view themeName)
-{
-   if (themeName == u"galaxy") { //kept for compiler because of unused parameter 'themeName'
-     return Size( 26, 26 );
-   }
-   else {
-     return Size( 24, 24 );
-   }
-}
-
 /*static*/ bool
 IconThemeInfo::UrlCanBeParsed(std::u16string_view url)
 {
