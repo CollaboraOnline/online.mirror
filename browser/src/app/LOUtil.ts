@@ -1048,6 +1048,14 @@ class LOUtil {
 		'sw/res/sc20246.png': 'updateall',
 		'sw/res/sc20247.png': 'swressc20247',
 		'sw/res/sc20248.png': 'save',
+		'sw/res/sc20177.png': 'insertpagefooter',
+		'sw/res/sc20179.png': 'insertpageheader',
+		'sw/res/sc20182.png': 'anchormenu',
+		'sw/res/sc20183.png': 'setreminder',
+		'sw/res/sc20233.png': 'ok',
+		'sw/res/sc20234.png': 'swressc20234',
+		'sw/res/sc20244.png': 'swressc20234',
+		'sw/res/sc20236.png': 'swressc20236',
 		// Writer quick find
 		'sw/res/sr20006.png': 'searchdialog',
 		// Style families of the styles deck, and the inspector
@@ -1134,6 +1142,15 @@ class LOUtil {
 		// Query dialog, and the warning of saving the active sheet only
 		'res/query.png': 'resquery',
 		'help/warning_large.png': 'warningbox.svg',
+		// Spelling dialog
+		'vcl/res/infobox.png': 'infobox.svg',
+		// Keep ratio of the position and size, in the sidebar and in dialogs
+		'res/locked.png': 'reslocked',
+		'res/unlocked.png': 'resunlocked',
+		// The buttons that shrink a dialog to select a range
+		'formula/res/refinp1.png': 'refinp1.svg',
+		'formula/res/refinp2.png': 'refinp2.svg',
+		'chart2/res/selectrange.png': 'refinp1.svg',
 	};
 
 	// Resolve the icon path of a toolbar item or an image that the engine sent us, e.g.

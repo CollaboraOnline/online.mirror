@@ -392,7 +392,7 @@ describe('LOUtil', function () {
 			// A path without an icon of ours, and no path.
 			nodeassert.strictEqual(
 				'',
-				LOUtil.getIconNameOfIconPath('sw/res/sc20177.png'),
+				LOUtil.getIconNameOfIconPath('sw/res/sc20235.png'),
 			);
 			nodeassert.strictEqual('', LOUtil.getIconNameOfIconPath(''));
 		});
