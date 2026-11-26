@@ -689,6 +689,23 @@ CPPUNIT_TEST_FIXTURE(PDFSigningTest, testIncompleteCMS)
     }
 }
 
+CPPUNIT_TEST_FIXTURE(PDFSigningTest, testBadByteRange)
+{
+    std::shared_ptr<vcl::pdf::PDFium> pPDFium = vcl::pdf::PDFiumLibrary::get();
+    if (!pPDFium)
+    {
+        return;
+    }
+
+    // A byte range that does not describe a part of the file leaves the signature unchecked.
+    std::vector<SignatureInformation> aInfos
+        = verify(m_directories.getURLFromSrc(DATA_DIRECTORY) + "bad-byte-range.pdf", 1);
+    CPPUNIT_ASSERT(!aInfos.empty());
+    SignatureInformation& rInformation = aInfos[0];
+    CPPUNIT_ASSERT_EQUAL(xml::crypto::SecurityOperationStatus::SecurityOperationStatus_UNKNOWN,
+                         rInformation.nStatus);
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
