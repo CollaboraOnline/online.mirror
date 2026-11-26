@@ -4060,7 +4060,8 @@ void DocumentContentOperationsManager::CopyFlyInFlyImpl(
     // managed in the DrawModel).
     SwDoc& rDest = rStartIdx.GetDoc();
     std::set< ZSortFly > aSet;
-    const size_t nArrLen = m_rDoc.GetSpzFrameFormats()->size();
+    const auto& rFormats = *m_rDoc.GetSpzFrameFormats();
+    const size_t nArrLen = rFormats.size();
 
     SwTextBoxHelper::SavedLink aOldTextBoxes;
 
@@ -4068,9 +4069,33 @@ void DocumentContentOperationsManager::CopyFlyInFlyImpl(
     const SwPosition* pCopiedEnd = nullptr;
     if (pCopiedPaM && nArrLen)
         std::tie(pCopiedStt, pCopiedEnd) = pCopiedPaM->StartEnd();
-    for ( size_t n = 0; n < nArrLen; ++n )
+
+    // The checks below only accept flys anchored from the start of the copy
+    // (or the node before it, for fly-anchored flys) to rRg.aEnd, where the
+    // copy ends (see the assert above). Collect those from the anchor lists of
+    // the nodes in that range, in format order, which the fallback z-order key
+    // below depends on.
+    std::vector<std::pair<size_t, SwFrameFormat*>> aCandidates;
+    SwNodeOffset nFirst = rRg.aStart.GetIndex();
+    if (pCopiedStt)
+        nFirst = std::min(nFirst, pCopiedStt->GetNodeIndex());
+    if (bCopyFlyAtFly && nFirst > SwNodeOffset(0))
+        --nFirst;
+    for (SwNodeOffset nNode = nFirst; nNode <= rRg.aEnd.GetIndex(); ++nNode)
     {
-        SwFrameFormat* pFormat = (*m_rDoc.GetSpzFrameFormats())[n];
+        for (SwFrameFormat* pFormat : m_rDoc.GetNodes()[nNode]->GetAnchoredFlys())
+        {
+            auto it = rFormats.find(static_cast<sw::SpzFrameFormat*>(pFormat));
+            assert(it != rFormats.end());
+            if (it != rFormats.end())
+                aCandidates.emplace_back(static_cast<size_t>(it - rFormats.begin()), pFormat);
+        }
+    }
+    std::sort(aCandidates.begin(), aCandidates.end());
+
+    for (const auto& rCandidate : aCandidates)
+    {
+        SwFrameFormat* const pFormat = rCandidate.second;
         SwFormatAnchor const*const pAnchor = &pFormat->GetAnchor();
         SwNode const*const pAnchorNode = pAnchor->GetAnchorNode();
         if ( !pAnchorNode )
