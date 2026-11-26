@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <common/Anonymizer.hpp>
 #include <common/Log.hpp>
 #include <common/StringVector.hpp>
 #include <common/Uri.hpp>
@@ -377,13 +378,14 @@ public:
     [[nodiscard]] std::string toString() const
     {
         std::ostringstream oss;
-        oss << nameShort(_method) << ' ' << _uriString << ' ' << (_isProxy ? "Proxy" : "")
+        oss << nameShort(_method) << ' ' << Anonymizer::hideAuthorization(_uriString) << ' '
+            << (_isProxy ? "Proxy" : "")
             << (_isWebSocket ? "WebSocket" : "");
         oss << ", host: " << _hostUntrusted;
         oss << ", " << _pathSegs.size() << " path segments: ";
         for (std::size_t i = 0; i < _pathSegs.size(); ++i)
         {
-            oss << '[' << i << "] '" << _pathSegs[i] << "', ";
+            oss << '[' << i << "] '" << Anonymizer::hideAuthorization(_pathSegs[i]) << "', ";
         }
 
         return oss.str();

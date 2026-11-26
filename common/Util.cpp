@@ -17,6 +17,7 @@
 #include <config.h>
 #include <config_version.h>
 
+#include <common/Anonymizer.hpp>
 #include <common/Common.hpp>
 #include <common/HexUtil.hpp>
 #include <common/Log.hpp>
@@ -797,7 +798,8 @@ namespace SigUtil {
 
 std::ostream& operator<<(std::ostream& os, const Poco::Net::HTTPRequest& request)
 {
-    os << request.getMethod() << ' ' << request.getVersion() << ' ' << request.getURI()
+    os << request.getMethod() << ' ' << request.getVersion() << ' '
+       << Anonymizer::hideAuthorization(request.getURI())
        << ", content-length: " << request.getContentLength64()
        << ", chunked: " << request.getChunkedTransferEncoding() << ", ";
 
@@ -809,6 +811,8 @@ std::ostream& operator<<(std::ostream& os, const Poco::Net::HTTPRequest& request
         if (Util::iequal(header.first, "Authorization") ||
             Util::iequal(header.first, "Proxy-Authorization"))
             os << "<hidden>";
+        else if (Util::iequal(header.first, "Referer"))
+            os << Anonymizer::hideAuthorization(header.second);
         else
             os << header.second;
         delimiter = " / ";

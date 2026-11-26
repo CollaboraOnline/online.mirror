@@ -1729,7 +1729,7 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
         else if (isCollab && requestDetails.equals(2, "ws") && requestDetails.isWebSocket())
         {
             // /cool/collab/ws WebSocket endpoint
-            LOG_INF("Collab request: " << request.getURI());
+            LOG_INF("Collab request: " << Anonymizer::hideAuthorization(request.getURI()));
 
             // Extract WOPISrc from query parameters
             std::string wopiSrc;
@@ -1799,7 +1799,8 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
     {
         LOG_ERR("Bad request: " << request << ", closeConnection: " << closeConnection
                                 << ", socket-data: ["
-                                << COOLProtocol::getAbbreviatedMessage(socket->getInBuffer())
+                                << Anonymizer::hideAuthorization(
+                                       COOLProtocol::getAbbreviatedMessage(socket->getInBuffer()))
                                 << "]: " << exc.what());
 
         // Bad request.
@@ -1810,7 +1811,8 @@ ClientRequestDispatcher::MessageResult ClientRequestDispatcher::handleMessage(Po
     {
         LOG_ERR("Exception while processing incoming request: "
                 << request << ", closeConnection: " << closeConnection << ", socket-data: ["
-                << COOLProtocol::getAbbreviatedMessage(socket->getInBuffer())
+                << Anonymizer::hideAuthorization(
+                       COOLProtocol::getAbbreviatedMessage(socket->getInBuffer()))
                 << "]: " << exc.what());
 
         // Bad request.

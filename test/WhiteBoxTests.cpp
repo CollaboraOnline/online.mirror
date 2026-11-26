@@ -996,6 +996,29 @@ void WhiteBoxTests::testAnonymization()
 
     LOK_ASSERT_EQUAL(path, Anonymizer::anonymizeUrl(path));
 
+    // The token is hidden in a percent-encoded query too.
+    LOK_ASSERT_EQUAL_STR(
+        "/cool/http%3A%2F%2Fhost%2Fwopi%2Ffiles%2F1%3Faccess_token%3D<hidden>%26permission%3Dedit"
+        "/ws?WOPISrc=http%3A%2F%2Fhost%2Fwopi%2Ffiles%2F1&compat=/ws",
+        Anonymizer::hideAuthorization(
+            "/cool/http%3A%2F%2Fhost%2Fwopi%2Ffiles%2F1%3Faccess_token%3Dsecret%26permission%3Dedit"
+            "/ws?WOPISrc=http%3A%2F%2Fhost%2Fwopi%2Ffiles%2F1&compat=/ws"));
+    LOK_ASSERT_EQUAL_STR(
+        "/cool/http%3A%2F%2Fhost%2Fwopi%2Ffiles%2F1%3Faccess_token%3D<hidden>/ws",
+        Anonymizer::hideAuthorization(
+            "/cool/http%3A%2F%2Fhost%2Fwopi%2Ffiles%2F1%3Faccess_token%3Dsecret/ws"));
+    LOK_ASSERT_EQUAL_STR("/cool/http%3a%2f%2fhost%2fwopi%2ffiles%2f1%3faccess_token%3d<hidden>/ws",
+                         Anonymizer::hideAuthorization(
+                             "/cool/http%3a%2f%2fhost%2fwopi%2ffiles%2f1%3faccess_token%3dsecret/ws"));
+    LOK_ASSERT_EQUAL_STR("GET /wopi/files/1?access_token=<hidden> HTTP/1.1",
+                         Anonymizer::hideAuthorization(
+                             "GET /wopi/files/1?access_token=secret HTTP/1.1"));
+    LOK_ASSERT_EQUAL_STR("/cool/a%3Faccess_header%3D<hidden>%26access_token%3D<hidden>/ws",
+                         Anonymizer::hideAuthorization(
+                             "/cool/a%3Faccess_header%3Dbasic%26access_token%3Dsecret/ws"));
+    LOK_ASSERT_EQUAL_STR("?my_access_token=kept&access_token_ttl=0",
+                         Anonymizer::hideAuthorization("?my_access_token=kept&access_token_ttl=0"));
+
     const std::string plainUrlHidden =
         Util::replace(plainUrl, "Hn0zttjbwkvGWb5BHbDa5ArgTykJAyBl", "<hidden>");
     const std::string fileUrlHidden =

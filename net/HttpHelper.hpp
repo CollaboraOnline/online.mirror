@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include <common/Anonymizer.hpp>
 #include <common/Log.hpp>
 #include <common/Uri.hpp>
 #include <net/HttpRequest.hpp>
@@ -92,8 +93,8 @@ inline bool verifyWOPISrc(const std::string& uri, const std::string& wopiSrc,
         if (!net::isValidHost(host))
         {
             LOG_ERR_S("WOPISrc validation error: malformed host [" << host << "] in WOPISrc ["
-                                                                   << wopiSrc << "] in URL [" << uri
-                                                                   << ']');
+                      << Anonymizer::hideAuthorization(wopiSrc) << "] in URL ["
+                      << Anonymizer::hideAuthorization(uri) << ']');
             if (socket)
             {
                 sendErrorAndShutdown(http::StatusCode::BadRequest, socket,
@@ -125,7 +126,8 @@ inline bool verifyWOPISrc(const std::string& uri, const std::string& wopiSrc,
         {
             // In debug mode, be assertive. Logs might go unnoticed.
             LOG_ERR_S("WOPISrc validation error: unencoded WOPISrc ["
-                      << wopiSrc << "] in URL [" << uri
+                      << Anonymizer::hideAuthorization(wopiSrc) << "] in URL ["
+                      << Anonymizer::hideAuthorization(uri)
                       << "]. This is highly problematic with proxies, load balancers, and when "
                          "tunneling");
             if (socket)

@@ -85,8 +85,9 @@ std::map<std::string, std::string> getParams(const std::string& uri)
         // getQueryParameters() decodes the values. Compare with the URI.
         if (param.first == "WOPISrc" && uri.find(param.second) != std::string::npos)
         {
-            LOG_WRN("WOPISrc validation error: unencoded WOPISrc [" << param.second
-                                                                    << "] in URL: " << uri);
+            LOG_WRN("WOPISrc validation error: unencoded WOPISrc ["
+                    << Anonymizer::hideAuthorization(param.second)
+                    << "] in URL: " << Anonymizer::hideAuthorization(uri));
             if constexpr (Util::isDebugEnabled())
             {
                 throw std::runtime_error("WOPISrc must be URI-encoded");

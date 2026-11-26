@@ -215,27 +215,47 @@ public:
         return base + anonymize(filename) + ext + hideAuthorization(std::move(params));
     }
 
-    /// Returns the query of a URL with each value of access_token and access_header that is
-    /// not empty replaced with a marker.
-    static std::string hideAuthorization(std::string params)
+    /// Returns a URL, or the query of one, with each value of access_token and access_header
+    /// that is not empty replaced with a marker, in a percent-encoded query too.
+    static std::string hideAuthorization(std::string url)
     {
-        for (const std::string_view key : { "access_token=", "access_header=" })
+        if (url.find("access_") == std::string::npos)
+            return url;
+
+        for (const std::string_view name : { "access_token", "access_header" })
         {
             std::size_t pos = 0;
-            while ((pos = params.find(key, pos)) != std::string::npos)
+            while ((pos = url.find(name, pos)) != std::string::npos)
             {
-                const std::size_t value = pos + key.size();
-                if (pos == 0 || params[pos - 1] == '?' || params[pos - 1] == '&')
+                const std::string_view before = std::string_view(url).substr(0, pos);
+                pos += name.size();
+                const std::string_view after = std::string_view(url).substr(pos);
+
+                std::size_t value;
+                std::size_t end;
+                if (after.starts_with('=') &&
+                    (before.empty() || before.ends_with('?') || before.ends_with('&')))
                 {
-                    const std::size_t end = std::min(params.find('&', value), params.size());
-                    if (end > value)
-                        params.replace(value, end - value, "<hidden>");
+                    value = pos + 1;
+                    end = url.find_first_of("& ", value);
                 }
-                pos = value;
+                else if ((after.starts_with("%3D") || after.starts_with("%3d")) &&
+                         (before.ends_with("%3F") || before.ends_with("%3f") ||
+                          before.ends_with("%26")))
+                {
+                    value = pos + 3;
+                    end = std::min(url.find("%26", value), url.find_first_of("&/ ", value));
+                }
+                else
+                    continue;
+
+                end = std::min(end, url.size());
+                if (end > value)
+                    url.replace(value, end - value, "<hidden>");
             }
         }
 
-        return params;
+        return url;
     }
 
 private:

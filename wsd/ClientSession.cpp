@@ -6168,7 +6168,8 @@ void ClientSession::enqueueSendMessage(const std::shared_ptr<Message>& data)
     if (_protocol && queueBytes > MaxSenderQueueBytes)
     {
         LOG_ERR("Send queue for session ["
-                << getId() << "] of doc [" << getDocURL() << "] has grown to "
+                << getId() << "] of doc [" << Anonymizer::hideAuthorization(getDocURL())
+                << "] has grown to "
                 << _senderQueue.size() << " messages taking " << queueBytes
                 << " bytes, over the limit of "
                 << MaxSenderQueueBytes << "; the client is not reading. Disconnecting it");
@@ -6198,7 +6199,8 @@ void ClientSession::enqueueSendMessage(const std::shared_ptr<Message>& data)
     if (_protocol && queueBytesBefore <= warnBytes && queueBytes > warnBytes)
     {
         LOG_WRN("Send queue for session ["
-                << getId() << "] of doc [" << getDocURL() << "] has grown to "
+                << getId() << "] of doc [" << Anonymizer::hideAuthorization(getDocURL())
+                << "] has grown to "
                 << _senderQueue.size() << " messages taking " << queueBytes
                 << " bytes, over half the limit of "
                 << MaxSenderQueueBytes << "; the client appears to be reading slowly");
