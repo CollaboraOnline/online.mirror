@@ -384,6 +384,11 @@ describe('LOUtil', function () {
 				'lc_aboveparaspacing.svg',
 				LOUtil.getIconNameOfIconPath('svx/res/symphony/spacing1.png'),
 			);
+			// An icon of ours that is not named after a command.
+			nodeassert.strictEqual(
+				'warningbox.svg',
+				LOUtil.getIconNameOfIconPath('help/warning_large.png'),
+			);
 			// A path without an icon of ours, and no path.
 			nodeassert.strictEqual(
 				'',
@@ -763,6 +768,30 @@ describe('LOUtil', function () {
 
 				nodeassert.strictEqual(image.style.display, 'none');
 			});
+		});
+	});
+
+	describe('getPngDataUriSize()', function () {
+		it('reads the size from the header of a PNG', function () {
+			// A 1x1 PNG, the size of the dummy image of getImageURL().
+			const onePixel =
+				'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+			nodeassert.deepStrictEqual(LOUtil.getPngDataUriSize(onePixel), {
+				width: 1,
+				height: 1,
+			});
+		});
+
+		it('has no size for anything else', function () {
+			nodeassert.strictEqual(LOUtil.getPngDataUriSize(''), null);
+			nodeassert.strictEqual(
+				LOUtil.getPngDataUriSize('data:image/svg+xml;base64,PHN2Zz4='),
+				null,
+			);
+			nodeassert.strictEqual(
+				LOUtil.getPngDataUriSize('data:image/png;base64,!!'),
+				null,
+			);
 		});
 	});
 

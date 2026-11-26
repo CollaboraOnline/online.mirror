@@ -523,6 +523,30 @@ class LOUtil {
 		img.src = bitmap;
 	}
 
+	// The size of a PNG image in a base64 data URI, as its header says, or null.
+	public static getPngDataUriSize(
+		uri: string,
+	): { width: number; height: number } | null {
+		const prefix = 'data:image/png;base64,';
+		if (!uri || !uri.startsWith(prefix)) return null;
+		let header: string;
+		try {
+			// 32 base64 characters are the first 24 bytes: signature, IHDR length and type,
+			// width and height.
+			header = atob(uri.substring(prefix.length, prefix.length + 32));
+		} catch (e) {
+			return null;
+		}
+		if (header.length < 24 || header.substring(12, 16) !== 'IHDR') return null;
+		const readUint32 = (offset: number) =>
+			((header.charCodeAt(offset) << 24) |
+				(header.charCodeAt(offset + 1) << 16) |
+				(header.charCodeAt(offset + 2) << 8) |
+				header.charCodeAt(offset + 3)) >>>
+			0;
+		return { width: readUint32(16), height: readUint32(20) };
+	}
+
 	// Show the bitmap that the engine sent, when the icon of ours that the image was given
 	// with setImage fails to load, in the light theme as well as in the dark one.
 	// source: the icon name, path or widget id that the bitmap stands for.
@@ -1100,13 +1124,25 @@ class LOUtil {
 		'svx/res/symphony/Indent4.png': 'beforetextindent',
 		'svx/res/symphony/Indent3.png': 'aftertextindent',
 		'svx/res/symphony/Indent2.png': 'firstlineindent',
+		// Writer Insert Break dialog, the picture of the break type
+		'sw/res/linebreak_none.png': 'swreslinebreak_none',
+		'sw/res/linebreak_left.png': 'swreslinebreak_left',
+		'sw/res/linebreak_right.png': 'swreslinebreak_right',
+		'sw/res/linebreak_full.png': 'swreslinebreak_full',
+		'sw/res/colbreak.png': 'swrescolbreak',
+		'sw/res/pagebreak.png': 'swrespagebreak',
+		// Query dialog, and the warning of saving the active sheet only
+		'res/query.png': 'resquery',
+		'help/warning_large.png': 'warningbox.svg',
 	};
 
 	// Resolve the icon path of a toolbar item or an image that the engine sent us, e.g.
-	// 'sw/res/sc20245.png', to an icon of ours. Empty when we have none for it.
+	// 'sw/res/sc20245.png', to an icon of ours. Empty when we have none for it. A name in the
+	// table is that of a command icon, a file name ending in .svg is used as it is.
 	public static getIconNameOfIconPath(iconPath: string | undefined): string {
 		const name = iconPath ? LOUtil.engineIconPaths[iconPath] : undefined;
-		return name ? 'lc_' + name + '.svg' : '';
+		if (!name) return '';
+		return name.endsWith('.svg') ? name : 'lc_' + name + '.svg';
 	}
 
 	// Resolve an icon file name that the engine sent us, e.g. a toolbar item

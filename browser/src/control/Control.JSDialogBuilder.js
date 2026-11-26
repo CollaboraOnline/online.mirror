@@ -1401,6 +1401,13 @@ window.L.Control.JSDialogBuilder = window.L.Control.extend({
 		const iconName = app.LOUtil.getIconNameOfIconPath(data.iconpath);
 		if (iconName) {
 			window.L.DomUtil.addClass(image, 'ui-image-icon');
+			// The icon takes the place of the bitmap, at its size; the class gives the size of
+			// the common case.
+			const bitmapSize = app.LOUtil.getPngDataUriSize(bitmap);
+			if (bitmapSize) {
+				image.style.width = bitmapSize.width + 'px';
+				image.style.height = bitmapSize.height + 'px';
+			}
 			app.LOUtil.setImage(image, iconName, builder.map);
 			app.LOUtil.setEngineBitmapFallback(image, bitmap, data.iconpath);
 		} else if (data.iconpath && bitmap) {
