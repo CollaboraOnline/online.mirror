@@ -724,9 +724,9 @@ void ScViewFunc::PasteFromSystem(bool useSavedPrefs)
     UpdateInputLine();
 
     vcl::Window* pWin = GetActiveWin();
+    // keep a reference in case the clipboard is changed during PasteFromClip
     cpo::uno::Reference<css::datatransfer::XTransferable2> xTransferable2(ScTabViewShell::GetClipData(pWin));
     const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(xTransferable2);
-    // keep a reference in case the clipboard is changed during PasteFromClip
     const ScDrawTransferObj* pDrawClip = ScDrawTransferObj::GetOwnClipboard(xTransferable2);
     if (pOwnClip)
     {
