@@ -89,6 +89,7 @@
 #include <set>
 
 #include <DrawDocShell.hxx>
+#include <DrawViewShell.hxx>
 #include <SlideSectionManager.hxx>
 #include <View.hxx>
 #include <ViewShell.hxx>
@@ -169,6 +170,51 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSidebarLayoutsKeptOnViewSwitch)
     CPPUNIT_ASSERT_EQUAL(0, aView1.m_aJSDialogSelectCounts["layoutpanel_icons"]);
 }
 
+namespace
+{
+/// Describes what the view does with a click at rPos, for a test that fails on CI only.
+std::string lcl_describeClick(sd::ViewShell& rViewShell, const SdrObject& rShape, const Point& rPos)
+{
+    SdrView* pView = rViewShell.GetView();
+    sd::Window* pWindow = rViewShell.GetActiveWindow();
+    const rtl::Reference<sd::FuPoor>& xFunction = rViewShell.GetCurrentFunction();
+    auto pDrawViewShell = dynamic_cast<sd::DrawViewShell*>(&rViewShell);
+    SdrPageView* pPageView = nullptr;
+    const SdrObject* pHit = pView->PickObj(rPos, pView->getHitTolLog(), pPageView);
+    const char* pHitName = pHit == &rShape ? "the shape" : "nothing";
+    if (pHit && pHit != &rShape)
+        pHitName = "another object";
+    std::ostringstream aState;
+    aState << "function slot ";
+    aState << (xFunction.is() ? OString::number(xFunction->GetSlotID()) : "none"_ostr);
+    aState << ", focus " << pWindow->HasFocus();
+    aState << ", marked objects " << pView->GetMarkedObjectList().GetMarkCount();
+    aState << ", shape marked " << pView->IsObjMarked(&rShape);
+    aState << ", action " << pView->IsAction();
+    aState << ", text edit " << pView->IsTextEdit();
+    aState << ", input locked " << (pDrawViewShell && pDrawViewShell->IsInputLocked());
+    aState << ", map mode " << pWindow->IsMapModeEnabled();
+    aState << ", click maps to " << pWindow->PixelToLogic(rPos);
+    aState << ", hit " << pHitName;
+    aState << ", shape " << rShape.GetSnapRect();
+    return aState.str();
+}
+
+struct ClickProbe
+{
+    sd::ViewShell* pViewShell;
+    const SdrObject* pShape;
+    Point aPos;
+    std::string aState = "never ran";
+};
+
+void lcl_probeClick(void* pInstance, void*)
+{
+    auto pProbe = static_cast<ClickProbe*>(pInstance);
+    pProbe->aState = lcl_describeClick(*pProbe->pViewShell, *pProbe->pShape, pProbe->aPos);
+}
+}
+
 CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSidebarFieldCommitsBeforeTextEdit)
 {
     // Given a selected shape, and a column count typed into the sidebar, so that the field keeps
@@ -197,20 +243,22 @@ CPPUNIT_TEST_FIXTURE(SdTiledRenderingTest, testSidebarFieldCommitsBeforeTextEdit
     const Point aCenter = pShape->GetSnapRect().Center();
     const int nX = o3tl::toTwips(aCenter.getX(), o3tl::Length::mm100);
     const int nY = o3tl::toTwips(aCenter.getY(), o3tl::Length::mm100);
+    // This fails now and then on CI only: the button-down does not select the shape. The message
+    // tells what the view did before the click, between the two buttons and after them. The probe
+    // is a user event like the mouse events, so it runs between them without changing the timing.
+    const std::string aBefore = lcl_describeClick(*pViewShell, *pShape, aCenter);
+    ClickProbe aAfterDown{ pViewShell, pShape, aCenter };
     pXImpressDocument->postMouseEvent(COKitMouseEventType::BUTTONDOWN, nX, nY, 2, MOUSE_LEFT, 0);
+    Application::PostUserEvent(LINK_NONMEMBER(&aAfterDown, lcl_probeClick));
     pXImpressDocument->postMouseEvent(COKitMouseEventType::BUTTONUP, nX, nY, 2, MOUSE_LEFT, 0);
     Scheduler::ProcessEventsToIdle();
 
     // Then the text of the shape is edited. Without the fix in place, the field took its value
     // again when text edit took the focus, which ended the text tool while it was starting text
     // edit, and the document crashed.
-    // This fails now and then on CI only, so the message tells what the view was doing instead.
     std::ostringstream aState;
-    const rtl::Reference<sd::FuPoor>& xFunction = pViewShell->GetCurrentFunction();
-    aState << "function slot "
-           << (xFunction.is() ? OString::number(xFunction->GetSlotID()) : "none"_ostr)
-           << ", document window has focus " << pViewShell->GetActiveWindow()->HasFocus()
-           << ", marked objects " << pView->GetMarkedObjectList().GetMarkCount()
+    aState << "before the click: " << aBefore << "; after the button-down: " << aAfterDown.aState
+           << "; at the end: " << lcl_describeClick(*pViewShell, *pShape, aCenter)
            << ", undo actions added:";
     for (size_t i = pUndoManager->GetUndoActionCount(); i > nUndoCount; --i)
         aState << " '" << pUndoManager->GetUndoActionComment(i - nUndoCount - 1) << "'";
