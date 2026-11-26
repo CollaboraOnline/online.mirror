@@ -45,6 +45,13 @@ import urllib.parse
 import urllib.request
 
 API = "https://release-monitoring.org/api/v2/projects/?name="
+SEARCH = "https://release-monitoring.org/api/projects/?pattern="
+
+# Anitya's ecosystem of a project released to a language package registry,
+# by the purl type of a component from that registry; any other project has
+# its homepage as its ecosystem
+REGISTRIES = {"npm": "npm", "pypi": "pypi", "cargo": "crates.io",
+              "gem": "rubygems", "maven": "maven"}
 
 
 def numeric(version):
@@ -87,21 +94,32 @@ def collect(paths):
     return found
 
 
-def lookup(name):
-    """Anitya's projects of exactly this name; raises if the lookup fails."""
-    url = API + urllib.parse.quote(name)
+def fetch(url, key):
+    """The list under key in Anitya's answer; raises if the request fails."""
     # a full sweep is a burst of requests, and the server resets a
     # connection now and then; retry before giving up
     for attempt in range(3):
         try:
             with urllib.request.urlopen(url, timeout=30) as response:
-                items = json.load(response).get("items", [])
-            break
+                return json.load(response).get(key, [])
         except Exception:
             if attempt == 2:
                 raise
             time.sleep(5 * (attempt + 1))
+    return []
+
+
+def lookup(name):
+    """Anitya's projects of exactly this name; raises if the lookup fails."""
+    items = fetch(API + urllib.parse.quote(name), "items")
     return [i for i in items if i.get("name") == name and i.get("version")]
+
+
+def search(name):
+    """Anitya's projects whose name starts with this one; raises if the
+    lookup fails."""
+    projects = fetch(SEARCH + urllib.parse.quote(name + "*"), "projects")
+    return [i for i in projects if i.get("version")]
 
 
 def site(url):
@@ -113,6 +131,15 @@ def site(url):
     return host, parsed.path.rstrip("/").lower()
 
 
+def page(url):
+    """Host and path of a URL, with a GitHub Pages site as the repository it
+    is published from: facebook.github.io/zstd is github.com/facebook/zstd."""
+    host, path = site(url)
+    if host.endswith(".github.io"):
+        return "github.com", "/" + host[:-len(".github.io")] + path
+    return host, path
+
+
 def pick(items, homepage):
     """The candidate whose homepage is ours: the same page if one is (two
     projects on github.com differ only in the path), else the same host."""
@@ -121,7 +148,7 @@ def pick(items, homepage):
     host, path = site(homepage)
     if not host:
         return None
-    same_page = [i for i in items if site(i.get("homepage")) == (host, path)]
+    same_page = [i for i in items if page(i.get("homepage")) == page(homepage)]
     if len(same_page) == 1:
         return same_page[0]
     same_host = [i for i in items
@@ -129,6 +156,36 @@ def pick(items, homepage):
     if len(same_host) == 1:
         return same_host[0]
     return None
+
+
+def beneath(items, homepage):
+    """The one candidate whose homepage is ours or a page under it, or the
+    other way round: www.aleksey.com/xmlsec/download.html for
+    www.aleksey.com/xmlsec/. A name prefix matches unrelated projects too,
+    so a shared host alone is not enough here."""
+    host, path = page(homepage)
+    if not host:
+        return None
+    related = []
+    for item in items:
+        their_host, their_path = page(item.get("homepage"))
+        if their_host != host:
+            continue
+        shorter, longer = sorted((path, their_path), key=len)
+        if longer == shorter or longer.startswith(shorter + "/"):
+            related.append(item)
+    return related[0] if len(related) == 1 else None
+
+
+def foreign(project, purl):
+    """Whether a project is released to a language package registry our
+    component does not come from: the Python binding of a C library
+    (xmlsec, zstandard) or a Ruby gem of an npm package's name."""
+    ecosystem = project.get("ecosystem")
+    if ecosystem not in REGISTRIES.values():
+        return False
+    match = re.match(r"pkg:([^/]+)/", purl or "")
+    return not match or REGISTRIES.get(match.group(1)) != ecosystem
 
 
 def purl_names(purl):
@@ -149,31 +206,41 @@ def purl_names(purl):
     return names
 
 
-def upstream(name, homepage, purl):
+def upstream(name, version, homepage, purl):
     """Anitya's project for a component, or None and the reason."""
     try:
         items = lookup(name)
         chosen = pick(items, homepage)
-        if chosen is None and len(items) != 1:
-            # untracked or ambiguous under our name: Anitya may know the
-            # project by its repository's name (quickjs-ng, zxing-cpp)
+        if chosen is None:
+            # untracked, ambiguous or another project under our name: Anitya
+            # may know the project by its repository's name (quickjs-ng,
+            # zxing-cpp)
             for other in purl_names(purl):
                 if other == name:
                     continue
                 chosen = pick(lookup(other), homepage)
                 if chosen is not None:
                     break
+        if chosen is None:
+            # or by a longer name: xmlsec1 for xmlsec
+            chosen = beneath(search(name), homepage)
     except Exception as error:
         return None, f"lookup failed: {error}"
-    if chosen is None and len(items) == 1:
-        chosen = items[0]
-    if chosen is None:
-        if not items:
-            return None, "not tracked by Anitya"
-        versions = ", ".join(f"{i.get('version')} ({i.get('ecosystem')})"
-                             for i in items[:4])
-        return None, f"ambiguous project name, candidates: {versions}"
-    return chosen, None
+    if chosen is not None:
+        return chosen, None
+    # nothing has our homepage; the only project of our name is likely ours
+    # but for a project of another registry, or one behind our own version
+    candidates = [i for i in items if not foreign(i, purl)]
+    if len(candidates) == 1:
+        newest = max((numeric(v) for v in candidates[0].get("stable_versions")
+                      or [] if numeric(v)), default=None)
+        if not numeric(version) or not newest or newest >= numeric(version):
+            return candidates[0], None
+    if not items:
+        return None, "not tracked by Anitya"
+    versions = ", ".join(f"{i.get('version')} ({i.get('ecosystem')})"
+                         for i in items[:4])
+    return None, f"no project with our homepage, candidates: {versions}"
 
 
 def compare(version, project):
@@ -212,7 +279,7 @@ def main():
 
     behind, newer_series, unknown = [], [], []
     for name, (version, homepage, purl) in sorted(components.items()):
-        project, problem = upstream(name, homepage, purl)
+        project, problem = upstream(name, version, homepage, purl)
         if project is None:
             unknown.append((name, version, problem))
             continue
