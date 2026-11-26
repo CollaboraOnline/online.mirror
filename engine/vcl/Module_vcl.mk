@@ -198,6 +198,7 @@ $(eval $(call gb_Module_add_check_targets,vcl,\
     CppunitTest_vcl_type_serializer_test \
     CppunitTest_vcl_remoteclipboard \
     CppunitTest_vcl_animation \
+    CppunitTest_vcl_svtabbx \
     $(call gb_Helper_optional, PDFIUM, \
         CppunitTest_vcl_pdfium_library_test) \
     $(if $(filter SKIA,$(BUILD_TYPE)), \

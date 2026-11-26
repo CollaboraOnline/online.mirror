@@ -136,7 +136,7 @@ static void lcl_DumpEntryAndSiblings(tools::JsonWriter& rJsonWriter,
                                     rJsonWriter.put("collapsedimage",
                                                     vcl::encodeBitmapAsPngDataUri(aCollapsedImage));
                                 if (bHasExpanded)
-                                    rJsonWriter.put("collapsedimage",
+                                    rJsonWriter.put("expandedimage",
                                                     vcl::encodeBitmapAsPngDataUri(aExpandedImage));
                             }
                         }
