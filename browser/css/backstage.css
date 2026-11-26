@@ -1446,7 +1446,7 @@ body:not([data-doctype]) .backstage-view {
 }
 
 #backstage-view .backstage-open-tile.is-cloud-provider:hover .backstage-open-tile-edit,
-#backstage-view .backstage-open-tile.is-cloud-provider:focus-within .backstage-open-tile-edit,
+#backstage-view .backstage-open-tile.is-cloud-provider:focus-visible .backstage-open-tile-edit,
 #backstage-view .backstage-open-tile-edit:focus-visible {
 	opacity: 1;
 }
