@@ -3141,7 +3141,8 @@ client -> server messages on /cool/collab/ws
     integrator posts to the editor page with Reset_Access_Token.  The server checks it with a
     CheckFileInfo and takes it, together with the rights that it gives, for the fetches and uploads
     that follow, if it is for the same user.  The server answers with {"type":"access_token"} at
-    most once per request (a newer request replaces one that it still checks).
+    most once per request (a newer request replaces one that it still checks).  A token that the
+    client sends before "authenticated" is checked after it.
 
 HTTP byte-stream endpoints under /cool/collab/
 ----------------------------------------------

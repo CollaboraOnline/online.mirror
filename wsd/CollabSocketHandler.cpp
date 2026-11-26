@@ -106,6 +106,15 @@ void CollabSocketHandler::handleMessage(const std::vector<char>& payload)
 {
     if (_isValidating)
     {
+        // A new access token is checked once the sign-in has passed:
+        Poco::JSON::Object::Ptr json;
+        if (JsonUtil::parseJSON(std::string_view(payload.data(), payload.size()), json)
+            && json->optValue<std::string>("type", std::string()) == "access_token")
+        {
+            _pendingAccessToken = Uri::decode(json->optValue<std::string>("token", std::string()));
+            return;
+        }
+
         // Still validating, ignore messages
         LOG_DBG("Collab: validation in progress, ignoring message");
         return;
@@ -315,6 +324,10 @@ void CollabSocketHandler::onCheckFileInfoFinished(CheckFileInfo& cfi)
             }
 
             sendTextMessage(JsonUtil::jsonToString(authenticated));
+            if (_pendingAccessToken) {
+                renewAccessToken(*_pendingAccessToken);
+                _pendingAccessToken.reset();
+            }
             break;
         }
         case CheckFileInfo::State::Unauthorized:
