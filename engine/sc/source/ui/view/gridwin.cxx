@@ -2629,12 +2629,22 @@ void ScGridWindow::MouseButtonUp( const MouseEvent& rMEvt )
     }
 
     ScDBFunc* pView = mrViewData.GetView();
-    ScDocument* pBrushDoc = pView->GetBrushDocument();
-    if ( pBrushDoc )
+    const std::shared_ptr<ScDocument> xBrushDoc = pView->GetSharedBrushDocument();
+    if ( xBrushDoc )
     {
-        pView->PasteFromClip( InsertDeleteFlags::ATTRIB, pBrushDoc );
+        // After a Yes to pasting beyond the selection, the formats are pasted over in the view,
+        // from the brush document that the retry keeps alive.
+        const ViewShellId nViewShellId = mrViewData.GetViewShell()->GetViewShellId();
+        ScViewFunc::PasteQuestionScope aQuestion(*pView, [nViewShellId, xBrushDoc]() {
+            ScTabViewShell* pViewShell = ScTabViewShell::GetViewShellOfId(nViewShellId);
+            if (!pViewShell)
+                return;
+            ScViewFunc::PasteQuestionScope aConfirmed(*pViewShell);
+            pViewShell->PasteFromClip(InsertDeleteFlags::ATTRIB, xBrushDoc.get());
+        });
+        pView->PasteFromClip( InsertDeleteFlags::ATTRIB, xBrushDoc.get() );
         if ( !pView->IsPaintBrushLocked() )
-            pView->ResetBrushDocument();            // invalidates pBrushDoc pointer
+            pView->ResetBrushDocument();
     }
 
     Point aPos = rMEvt.GetPosPixel();

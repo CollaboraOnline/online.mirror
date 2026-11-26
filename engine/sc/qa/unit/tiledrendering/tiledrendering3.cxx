@@ -5095,6 +5095,50 @@ CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testPasteSpecialPostedPaste)
     CPPUNIT_ASSERT_EQUAL(u"a"_ustr, pDoc->GetString(ScAddress(2, 2, 0)));
 }
 
+// Clone Formatting over a selection smaller than the brush asks whether to paste beyond it,
+// and pastes the formats after a Yes.
+CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testCloneFormattingBeyondSelectionAsksAsync)
+{
+    ScModelObj* pModelObj = createDoc("empty.ods");
+    ScTestViewCallback aView;
+    ScDocument* pDoc = pModelObj->GetDocument();
+    lcl_selectRange(mxComponent, u"$A$3"_ustr);
+    const Point aA3 = aView.m_aCellCursorBounds.Center();
+    lcl_selectRange(mxComponent, u"$B$4"_ustr);
+    const Point aB4 = aView.m_aCellCursorBounds.Center();
+
+    // Given bold A1:C1 picked up by the brush,
+    lcl_selectRange(mxComponent, u"$A$1:$C$1"_ustr);
+    dispatchCommand(mxComponent, u".uno:Bold"_ustr, {});
+    dispatchCommand(mxComponent, u".uno:FormatPaintbrush"_ustr,
+                    { comphelper::makePropertyValue(u"PersistentCopy"_ustr, false) });
+
+    // when the brush is dragged over A3:B4,
+    pModelObj->postMouseEvent(COKitMouseEventType::BUTTONDOWN, aA3.getX(), aA3.getY(), 1,
+                              MOUSE_LEFT, 0);
+    pModelObj->postMouseEvent(COKitMouseEventType::MOVE, aB4.getX(), aB4.getY(), 1, MOUSE_LEFT,
+                              0);
+    pModelObj->postMouseEvent(COKitMouseEventType::BUTTONUP, aB4.getX(), aB4.getY(), 1,
+                              MOUSE_LEFT, 0);
+    Scheduler::ProcessEventsToIdle();
+
+    // then it asks and returns before the answer. Without the accompanying fix in place, the
+    // question waited for its answer in a nested main loop, and the mouse event never returned.
+    const OUString sDialogId = lcl_getOpenDialogId();
+    CPPUNIT_ASSERT(!sDialogId.isEmpty());
+    CPPUNIT_ASSERT_EQUAL(WEIGHT_NORMAL,
+                         pDoc->GetPattern(ScAddress(2, 2, 0))->GetItem(ATTR_FONT_WEIGHT).GetWeight());
+
+    // And after a Yes, the formats reach column C.
+    StringMap aYes{ { u"type"_ustr, u"responsebutton"_ustr },
+                    { u"cmd"_ustr, u"click"_ustr },
+                    { u"data"_ustr, OUString::number(RET_YES) } };
+    CPPUNIT_ASSERT(jsdialog::ExecuteAction(sDialogId, u"yes"_ustr, aYes));
+    Scheduler::ProcessEventsToIdle();
+    CPPUNIT_ASSERT_EQUAL(WEIGHT_BOLD,
+                         pDoc->GetPattern(ScAddress(2, 2, 0))->GetItem(ATTR_FONT_WEIGHT).GetWeight());
+}
+
 CPPUNIT_PLUGIN_IMPLEMENT();
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
