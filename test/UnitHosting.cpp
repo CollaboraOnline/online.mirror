@@ -25,6 +25,7 @@
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
+#include <Poco/URI.h>
 
 #include <memory>
 #include <string>
@@ -35,6 +36,7 @@ class UnitHosting : public UnitWSD
     TestResult testDiscovery();
     TestResult testCapabilities();
     TestResult testActionUrlsAreAppendReady();
+    TestResult testActionUrlsAreReplaced();
 
 public:
     UnitHosting()
@@ -195,6 +197,71 @@ UnitBase::TestResult UnitHosting::testActionUrlsAreAppendReady()
     return TestResult::Ok;
 }
 
+// Test the basics of the URL.
+UnitBase::TestResult UnitHosting::testActionUrlsAreReplaced()
+{
+    TST_LOG("Checking action's urlsrc are properly replaced.");
+
+    auto httpSession = http::Session::create(helpers::getTestServerURI());
+    std::shared_ptr<const http::Response> httpResponse
+        = httpSession->syncRequest(http::Request("/hosting/discovery"));
+
+    LOK_ASSERT(httpResponse->done());
+    LOK_ASSERT_EQUAL(http::Response::State::Complete, httpResponse->state());
+    LOK_ASSERT_EQUAL(http::StatusCode::OK, httpResponse->statusLine().statusCode());
+
+    Poco::XML::DOMParser parser;
+    Poco::XML::AutoPtr<Poco::XML::Document> docXML = parser.parseString(httpResponse->getBody());
+    Poco::XML::AutoPtr<Poco::XML::NodeList> listNodes = docXML->getElementsByTagName("action");
+
+    unsigned long checkedActions = 0;
+    for (unsigned long index = 0; index < listNodes->length(); ++index)
+    {
+        Poco::XML::Element* elem = static_cast<Poco::XML::Element*>(listNodes->item(index));
+        Poco::XML::Element* parent = elem->parentNode()
+                                         ? static_cast<Poco::XML::Element*>(elem->parentNode())
+                                         : nullptr;
+
+        const auto parentName = parent ? parent->getAttribute("name") : nullptr;
+        if (parentName == "Capabilities" || parentName == "Settings")
+            continue;
+
+        const std::string action = elem->getAttribute("name");
+        const std::string urlsrc = elem->getAttribute("urlsrc");
+        const auto url = std::make_unique<Poco::URI>(urlsrc);
+        std::vector<std::string> paths;
+        url->getPathSegments(paths);
+
+        if ((action == "edit") || (action == "editnew") || (action == "view_comment")) {
+            LOK_ASSERT_EQUAL_MESSAGE("'" << action << "' should be cool.html",
+                                     paths.back(), std::string("cool.html"));
+        } else if (action == "interactivepreview") {
+            LOK_ASSERT_EQUAL_MESSAGE("'interactivepreview' should be cool-preview.html",
+                             paths.back(), std::string("cool-preview.html"));
+        } else if (action == "view") {
+            LOK_ASSERT_EQUAL_MESSAGE("'" << action << "' should be cool.html",
+                             paths.back(), std::string("cool.html"));
+
+            const auto queryParameters = url->getQueryParameters();
+            const auto permission = std::find_if(queryParameters.begin(), queryParameters.end(), [] (auto a) {
+                return a.first == "permission";
+            });
+            if (permission == queryParameters.end()) {
+                LOK_ASSERT_MESSAGE("'permission' not found", false);
+            } else {
+                LOK_ASSERT_EQUAL_MESSAGE("permission isn't 'readonly'",
+                                         permission->second, std::string("readonly"));
+            }
+        } else {
+            LOK_ASSERT_MESSAGE("action '" << action << "' is unknown: Are you missing a test case?", false);
+        }
+        ++checkedActions;
+    }
+    LOK_ASSERT(checkedActions > 0);
+
+    return TestResult::Ok;
+}
+
 void UnitHosting::invokeWSDTest()
 {
     UnitBase::TestResult result = testDiscovery();
@@ -206,6 +273,10 @@ void UnitHosting::invokeWSDTest()
         exitTest(result);
 
     result = testActionUrlsAreAppendReady();
+    if (result != TestResult::Ok)
+        exitTest(result);
+
+    result = testActionUrlsAreReplaced();
     if (result != TestResult::Ok)
         exitTest(result);
 
