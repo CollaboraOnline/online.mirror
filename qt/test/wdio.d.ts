@@ -111,4 +111,8 @@ declare const app: {
 		// the engine's .uno:ModifiedStatus notification.
 		modified: boolean;
 	};
+	socket: {
+		// Send one message of the protocol to the document.
+		sendMessage(message: string): void;
+	};
 };

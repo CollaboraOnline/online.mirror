@@ -8,7 +8,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import { copyFileSync } from 'fs';
+import { copyFileSync, mkdirSync, writeFileSync } from 'fs';
 import { join, parse } from 'path';
 import * as webview from './webview.js';
 
@@ -69,6 +69,88 @@ export async function fillAndAccept(
 	const acceptBtn = await native.$(acceptSel);
 	await acceptBtn.waitForExist({ timeout: 5000 });
 	await acceptBtn.click();
+}
+
+/**
+ * The Save dialog of each platform. On Qt it is the same QFileDialog as for
+ * Open, and the name starts with a slash because the dialog shows the name of
+ * the document there already; the dialog folds the doubled slash. On macOS it
+ * is the NSSavePanel of NSDocument, which starts in the folder of the
+ * document, so it gets the file name alone. On Windows it is the common Save
+ * dialog: 1001 is its file name box, 1 the Save button and 2 the Cancel
+ * button.
+ */
+const SAVE_DIALOG: {
+	[platform: string]: {
+		file: string;
+		save: string;
+		cancel: string;
+		text: (path: string) => string;
+	};
+} = {
+	qt: {
+		file: FILE_DIALOG_SELECTORS.qt.file,
+		save: FILE_DIALOG_SELECTORS.qt.open,
+		cancel:
+			'//*[@accessibility-id="QApplication.QFileDialog.buttonBox.QPushButton" and @name="Cancel"]',
+		text: (path) => '/' + path,
+	},
+	macos: {
+		file: '//*[@accessibility-id="saveAsNameTextField"]',
+		save: '//*[@accessibility-id="OKButton"]',
+		cancel: '//*[@accessibility-id="CancelButton"]',
+		text: (path) => parse(path).base,
+	},
+	windows: {
+		file: '//*[@accessibility-id="1001"]',
+		save: '//*[@accessibility-id="1"]',
+		cancel: '//*[@accessibility-id="2"]',
+		text: (path) => path,
+	},
+};
+
+/**
+ * Fill in the Save dialog with a path in the folder of the document, and save.
+ */
+export async function fillAndAcceptSave(
+	native: WebdriverIO.Browser,
+	filePath: string,
+): Promise<void> {
+	const dialog = SAVE_DIALOG[process.env.CODA_PLATFORM || 'qt'];
+
+	const fileTarget = await native.$(dialog.file);
+	await fileTarget.waitForExist({ timeout: 10000 });
+	await fileTarget.setValue(dialog.text(filePath));
+
+	const saveButton = await native.$(dialog.save);
+	await saveButton.waitForExist({ timeout: 5000 });
+	await saveButton.click();
+
+	// A dialog that stays open blocks the app, so the page source of the
+	// native user interface is kept for a look at what the dialog shows, and
+	// the dialog is cancelled.
+	try {
+		await native.waitUntil(
+			async () => (await native.$$(dialog.file)).length === 0,
+			{
+				timeout: 10000,
+				interval: 500,
+			},
+		);
+	} catch {
+		const logDir = join(process.cwd(), 'logs');
+		mkdirSync(logDir, { recursive: true });
+		const sourcePath = join(logDir, `save-dialog-${Date.now()}.xml`);
+		writeFileSync(sourcePath, await native.getPageSource());
+		try {
+			await (await native.$(dialog.cancel)).click();
+		} catch {
+			// The error below says what went wrong first.
+		}
+		throw new Error(
+			`the Save dialog stayed open after Save; its page source is in ${sourcePath}`,
+		);
+	}
 }
 
 /**
