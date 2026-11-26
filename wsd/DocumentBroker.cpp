@@ -5440,14 +5440,14 @@ std::size_t DocumentBroker::addSession(const std::shared_ptr<ClientSession>& ses
             const std::string sessionId = id;
             const std::string userId = session->getUserId();
             const std::string username = session->getUserName();
-            const bool canWrite = !session->isReadOnly();
+            const bool editing = session->getClientEditMode().value_or(false);
             const std::string docKey = _docKey;
             poll->addCallback(
-                [sessionId, userId, username, canWrite, docKey]
+                [sessionId, userId, username, editing, docKey]
                 {
                     if (auto cb = findCollabBroker(docKey))
                         cb->addExternalSession(sessionId, userId,
-                                               username, canWrite);
+                                               username, editing);
                 });
         }
 
@@ -5726,7 +5726,7 @@ void DocumentBroker::pushSessionsToCollabBroker()
         std::string sessionId;
         std::string userId;
         std::string username;
-        bool canWrite;
+        bool editing;
     };
     std::vector<Snapshot> snapshot;
     snapshot.reserve(_sessions.size());
@@ -5736,7 +5736,7 @@ void DocumentBroker::pushSessionsToCollabBroker()
             continue;
         snapshot.push_back({session->getId(), session->getUserId(),
                             session->getUserName(),
-                            !session->isReadOnly()});
+                            session->getClientEditMode().value_or(false)});
     }
     if (snapshot.empty())
         return;
@@ -5752,7 +5752,7 @@ void DocumentBroker::pushSessionsToCollabBroker()
             return;
         for (const auto& s : snapshot)
             cb->addExternalSession(s.sessionId, s.userId,
-                                   s.username, s.canWrite);
+                                   s.username, s.editing);
     });
 #endif
 }

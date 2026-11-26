@@ -525,27 +525,27 @@ CollabBroker::lookupAvatar(const std::string& userId) const
 void CollabBroker::addExternalSession(const std::string& sessionId,
                                       const std::string& userId,
                                       const std::string& username,
-                                      bool canWrite)
+                                      bool editing)
 {
     std::string const connection = generateHandlerId();
     const std::string userJson = externalUserJson(
         userId, username, connection);
     const std::string joined =
         "{\"type\":\"user_joined\",\"user\":" + userJson + "}";
-    const std::string editStarted = canWrite
+    const std::string editStarted = editing
         ? "{\"type\":\"editing_started\",\"user\":" + userJson + "}"
         : std::string();
 
     std::lock_guard<std::mutex> lock(_mutex);
     auto [it, inserted] = _externalSessions.emplace(
-        sessionId, ExternalSession{userId, username, canWrite, connection});
+        sessionId, ExternalSession{userId, username, editing, connection});
     if (!inserted)
         return;
 
     LOG_INF("CollabBroker [" << _docKey << "]: external session ["
-            << sessionId << "] joined, canWrite: " << canWrite);
+            << sessionId << "] joined, editing: " << editing);
 
-    if (canWrite)
+    if (editing)
         _editingStarted = true;
 
     for (auto& weakHandler : _handlers)
@@ -579,6 +579,24 @@ void CollabBroker::removeExternalSession(const std::string& sessionId)
     {
         if (auto h = weakHandler.lock())
             h->sendTextMessage(msg);
+    }
+}
+
+void CollabBroker::startExternalEditing(std::string const & sessionId) {
+    std::scoped_lock const lock(_mutex);
+    auto const it = _externalSessions.find(sessionId);
+    if (it == _externalSessions.end() || it->second.editing) {
+        return;
+    }
+    it->second.editing = true;
+    _editingStarted = true;
+    std::string const message
+        = "{\"type\":\"editing_started\",\"user\":"
+        + externalUserJson(it->second.userId, it->second.username, it->second.connection) + "}";
+    for (auto const & weakHandler: _handlers) {
+        if (auto const h = weakHandler.lock()) {
+            h->sendTextMessage(message);
+        }
     }
 }
 
