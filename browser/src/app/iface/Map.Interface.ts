@@ -157,6 +157,7 @@ interface MapInterface extends Evented {
 	removeControl(control: any): void;
 
 	_shouldStartReadOnly(): boolean;
+	_onLocalEditorsChanged(previous: string[]): void;
 	_switchToEditMode(): void;
 	_proceedEditMode(): void;
 	_askForPasswordToModify(wrongPassword: boolean): void;

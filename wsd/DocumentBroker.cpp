@@ -245,6 +245,21 @@ constexpr std::chrono::seconds UnlockRetryBudget(10);
 
 /// How long to pause between those attempts.
 constexpr std::chrono::microseconds UnlockRetryDelay(std::chrono::milliseconds(500));
+
+#if !MOBILEAPP
+std::string localEditorsMessage(std::set<std::string> const & names) {
+    std::string message = "localeditors: [";
+    bool first = true;
+    for (auto const & name: names) {
+        if (!first) {
+            message += ',';
+        }
+        first = false;
+        message += '"' + JsonUtil::escapeJSONValue(name) + '"';
+    }
+    return message + ']';
+}
+#endif
 }
 
 void DocumentBroker::setBrokerFactory(BrokerFactory factory)
@@ -548,6 +563,7 @@ void DocumentBroker::pollThread()
 #if !MOBILEAPP
         capPollTimeout(nextAccessCheck());
         capPollTimeout(_userConfigUploadDue);
+        capPollTimeout(_localEditorsExpiry);
 #endif
         if (_lockCtx)
             capPollTimeout(_lockCtx->nextRefresh());
@@ -611,6 +627,12 @@ void DocumentBroker::pollThread()
         if (_userConfigUploadDue != std::chrono::steady_clock::time_point() &&
             now >= _userConfigUploadDue)
             flushUserConfigUpload();
+
+        if (_localEditorsExpiry != std::chrono::steady_clock::time_point()
+            && now >= _localEditorsExpiry)
+        {
+            sendLocalEditors(findLocalEditors(_docKey));
+        }
 
         // A parked session that nobody claimed goes the way a closed one does. This runs before the
         // branches that skip to the next pass, as a passed deadline keeps the poll from sleeping.
@@ -5672,6 +5694,10 @@ std::size_t DocumentBroker::addSession(const std::shared_ptr<ClientSession>& ses
                                                username, canWrite);
                 });
         }
+
+        // A user who can edit hears of those who edit a local copy, also of none (so that the page
+        // starts viewing while there are any, also when it joins again after a reload):
+        sendLocalEditors(*session);
 #endif
 
         return count;
@@ -5930,6 +5956,30 @@ std::size_t DocumentBroker::removeSession(const std::shared_ptr<ClientSession>& 
 
     return _sessions.size();
 }
+
+#if !MOBILEAPP
+
+void DocumentBroker::sendLocalEditors(ClientSession & session) {
+    ASSERT_CORRECT_THREAD();
+    if (COOLWSD::ClientDocumentLoadingEnabled && !session.isReadOnly()) {
+        LocalEditors const editors = findLocalEditors(_docKey);
+        _localEditorsExpiry = editors.expiry;
+        session.sendTextFrame(localEditorsMessage(editors.names));
+    }
+}
+
+void DocumentBroker::sendLocalEditors(LocalEditors const & editors) {
+    ASSERT_CORRECT_THREAD();
+    _localEditorsExpiry = editors.expiry;
+    std::string const message = localEditorsMessage(editors.names);
+    for (auto const & pair: _sessions) {
+        if (!pair.second->isReadOnly()) {
+            pair.second->sendTextFrame(message);
+        }
+    }
+}
+
+#endif
 
 void DocumentBroker::pushSessionsToCollabBroker()
 {
@@ -9263,6 +9313,13 @@ void DocumentBroker::dumpState(std::ostream& os)
     else
         os << "none";
 #if !MOBILEAPP
+    os << "\n  localEditorsExpiry: ";
+    if (_localEditorsExpiry != std::chrono::steady_clock::time_point()) {
+        os << "in "
+           << std::chrono::duration_cast<std::chrono::milliseconds>(_localEditorsExpiry - now);
+    } else {
+        os << "none";
+    }
     os << "\n  labelGeneration: " << _labelGeneration;
     os << "\n  labelGenerationInSave: " << _labelGenerationInSave;
     os << "\n  labelGenerationSaved: " << _labelGenerationSaved;

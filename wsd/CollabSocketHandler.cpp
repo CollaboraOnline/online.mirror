@@ -260,6 +260,7 @@ void CollabSocketHandler::onCheckFileInfoFinished(CheckFileInfo& cfi)
 
                     // Notify other users that this user joined
                     broker->notifyUserJoined(self);
+                    broker->sendLocalEditorsToDocument();
 
                     // Register the user's avatar URL on
                     // the broker, so /cool/collab/avatar can proxy
@@ -440,6 +441,7 @@ void CollabSocketHandler::onDisconnect()
             // Notify other users before removing
             broker->notifyUserLeft(self);
             broker->removeHandler(self);
+            broker->sendLocalEditorsToDocument();
         }
     }
 
@@ -1003,6 +1005,7 @@ void CollabSocketHandler::handleEditingStarted()
     auto self = std::dynamic_pointer_cast<CollabSocketHandler>(shared_from_this());
     if (self)
         broker->notifyEditingStarted(self);
+    broker->sendLocalEditorsToDocument();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -1625,6 +1625,14 @@ class Socket {
 			});
 		} else if (textMsg.startsWith('presetconfigid:')) {
 			app.presetConfigId = textMsg.substring('presetconfigid:'.length).trim();
+		} else if (textMsg.startsWith('localeditors:')) {
+			const previous = app.localEditorNames || [];
+			app.localEditorNames = JSON.parse(
+				textMsg.substring('localeditors:'.length),
+			);
+			// A view that has its first permission already keeps its mode:
+			if (this._map._permission !== undefined)
+				this._map._onLocalEditorsChanged(previous);
 		} else if (textMsg.startsWith('userpresetsapplied:')) {
 			app.userPresetsApplied =
 				textMsg.substring('userpresetsapplied:'.length).trim() === 'true';

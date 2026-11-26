@@ -16,6 +16,7 @@
 
 #include <Anonymizer.hpp>
 #include <wsd/COOLWSD.hpp>
+#include <wsd/DocumentBroker.hpp>
 #include <JsonUtil.hpp>
 #include <Log.hpp>
 #include <SigUtil.hpp>
@@ -76,6 +77,7 @@ void CollabBroker::addHandler(const std::shared_ptr<CollabSocketHandler>& handle
     const std::string handlerId = generateHandlerId();
     handler->setHandlerId(handlerId);
     _handlers.push_back(handler);
+    _disconnectedEditors.erase(handler->getUserId());
 
     // A new handler is here; the previous "graceful close was the
     // last word" no longer holds.  Reset so the broker stays around
@@ -108,10 +110,36 @@ void CollabBroker::removeHandler(const std::shared_ptr<CollabSocketHandler>& han
     cleanupExpiredHandlers();
     LOG_DBG("CollabBroker [" << _docKey << "]: remaining handlers: " << _handlers.size());
 
+    // A user who edits a local copy and whose connection closed without a "bye" (so that it may
+    // connect again) still edits it during the grace period:
+    if (_editingUserIds.contains(handler->getUserId())) {
+        if (handler->isGracefulClose()) {
+            _disconnectedEditors.erase(handler->getUserId());
+            // A "bye" ends the local editing of that user, unless it has another connection:
+            if (std::none_of(
+                    _handlers.begin(), _handlers.end(),
+                    [&](auto const & weakHandler) {
+                        auto const h = weakHandler.lock();
+                        return h && h->getUserId() == handler->getUserId();
+                    }))
+            {
+                _editingUserIds.erase(handler->getUserId());
+            }
+        } else {
+            _disconnectedEditors[handler->getUserId()]
+                = {handler->getUsername(), std::chrono::steady_clock::now()};
+        }
+    }
+
     if (_handlers.empty())
     {
         _idleSince = std::chrono::steady_clock::now();
-        if (handler->isGracefulClose())
+        // A "bye" is the last word only when no user whose connection closed without one can still
+        // connect again within the grace period:
+        std::erase_if(_disconnectedEditors, [this](auto const & entry) {
+            return entry.second.since + COLLAB_BROKER_GRACE <= _idleSince;
+        });
+        if (handler->isGracefulClose() && _disconnectedEditors.empty())
         {
             // Client announced "bye": no reconnect is coming, so
             // drop the editing state now and let isReclaimable()
@@ -229,6 +257,53 @@ void CollabBroker::sendToEditingUsers(
             h->sendTextMessage(message);
         }
     }
+}
+
+LocalEditors CollabBroker::getLocalEditors() const {
+    std::scoped_lock const lock(_mutex);
+    LocalEditors editors;
+    // TODO: _editingUserIds keeps the ID of a user whose connection closed without a "bye", so that
+    // such a user who connects again only to view is named here too:
+    for (auto const & weakHandler: _handlers) {
+        auto const h = weakHandler.lock();
+        if (h && _editingUserIds.contains(h->getUserId())) {
+            editors.names.insert(h->getUsername());
+        }
+    }
+    auto const now = std::chrono::steady_clock::now();
+    for (auto const & [id, editor]: _disconnectedEditors) {
+        auto const end = editor.since + COLLAB_BROKER_GRACE;
+        if (end > now) {
+            editors.names.insert(editor.username);
+            if (editors.expiry == std::chrono::steady_clock::time_point() || end < editors.expiry) {
+                editors.expiry = end;
+            }
+        }
+    }
+    return editors;
+}
+
+void CollabBroker::sendLocalEditorsToDocument() const {
+    LocalEditors editors = getLocalEditors();
+    std::shared_ptr<DocumentBroker> broker;
+    {
+        std::scoped_lock const lock(DocBrokersMutex);
+        auto const it = DocBrokers.find(_docKey);
+        if (it != DocBrokers.end()) {
+            broker = it->second;
+        }
+    }
+    if (broker) {
+        broker->addCallback(
+            [broker, editors = std::move(editors)] { broker->sendLocalEditors(editors); });
+    }
+}
+
+void CollabBroker::askLocalEditorsToJoin(std::string const & userId, std::string const & username) {
+    sendToEditingUsers(
+        "{\"type\":\"switch_to_collab\",\"user\":{\"id\":\"" + JsonUtil::escapeJSONValue(userId)
+        + "\",\"name\":\"" + JsonUtil::escapeJSONValue(username) + "\"}}",
+        nullptr);
 }
 
 namespace
@@ -612,6 +687,22 @@ std::shared_ptr<CollabBroker> findCollabBroker(const std::string& docKey)
         return it->second;
     }
     return nullptr;
+}
+
+LocalEditors findLocalEditors(std::string const & docKey) {
+    std::shared_ptr<CollabBroker> broker;
+    {
+        std::scoped_lock const lock(CollabBrokersMutex);
+        auto const it = CollabBrokers.find(docKey);
+        if (it != CollabBrokers.end()) {
+            broker = it->second;
+        }
+    }
+    if (broker) {
+        return broker->getLocalEditors();
+    } else {
+        return {};
+    }
 }
 
 std::string collabRoutingParameters(std::string const & wopiSrc) {

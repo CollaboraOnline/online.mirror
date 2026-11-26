@@ -1155,6 +1155,12 @@ versionrestore <action>
     - prerestore: The storage is about to restore the document to an earlier
     revision.
 
+requestcollabediting
+
+    Asks the users who edit a local copy of the document in CODA or COWASM to save it and edit
+    together, as a {"type":"switch_to_collab"} from this view's user on /cool/collab.  Ignored from
+    a view that cannot edit.
+
 asksignaturestatus
 
     Requests a signing status of the document.
@@ -1593,6 +1599,13 @@ linktoken: <token>
     Link object of the POST names in PersistentLink the reference the
     document's pages store for the file, which is the one name a view knows
     the registered link by.
+
+localeditors: <json>
+
+    The names of the users who edit a local copy of the document in CODA or COWASM (as a JSON array
+    of strings, empty when there are none, and including for a grace period those whose connection
+    closed without a "bye"), sent to a view that can edit when it joins and again whenever they may
+    have changed, if the server has client_document_loading enabled.
 
 contextmenu: <json description of the context menu>
 
@@ -3027,8 +3040,8 @@ server -> client messages on /cool/collab/ws
 {"type":"saved_and_switching","user":{"id":"<id>","name":"<name>"}}
 
     Sent during a local-to-server transition.  "switch_to_collab" comes from a peer that wants to
-    join collaborative editing, and only reaches a peer that edits (so far one whose user sent
-    {"type":"editing_started"}).
+    join collaborative editing, or from a /cool/ws view that sent "requestcollabediting", and only
+    reaches a peer that edits (so far one whose user sent {"type":"editing_started"}).
     "saved_and_switching" comes from a peer that edited a local copy, once it has saved that copy
     back to the integrator or has nothing to save.
 
