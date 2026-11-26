@@ -3278,6 +3278,8 @@ function showWelcomeSVG() {
 			global.collab.users = global.collab.users.filter(function(u) {
 				return u.connection !== msg.user.connection;
 			});
+		} else if (msg.type === 'editing_started') {
+			global.collab.editingActive = true;
 		} else if (msg.type === 'editing_stopped') {
 			global.collab.editingActive = false;
 		}
