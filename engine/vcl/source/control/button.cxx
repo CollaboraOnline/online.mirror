@@ -3028,6 +3028,15 @@ void RadioButton::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 
     if (!!maImage)
     {
+        // As for the image of a button: the client can show an icon of its own for an image of
+        // the icon theme, the bitmap below is the fallback.
+        const OUString sIconPath = maImage.GetStock();
+        const OUString sIconName = vcl::kit::svgIconName(sIconPath);
+        if (!sIconName.isEmpty())
+            rJsonWriter.put("icon", sIconName);
+        if (!sIconPath.isEmpty())
+            rJsonWriter.put("iconpath", sIconPath);
+
         SvMemoryStream aOStm(6535, 6535);
         if(GraphicConverter::Export(aOStm, maImage.GetBitmap(), ConvertDataFormat::PNG) == ERRCODE_NONE)
         {
