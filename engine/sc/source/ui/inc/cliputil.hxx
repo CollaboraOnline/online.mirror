@@ -11,17 +11,24 @@
 
 #include <types.hxx>
 #include <scdllapi.h>
+#include <cpo/uno/Reference.hxx>
 
 class ScViewData;
 class ScTabViewShell;
 class ScDocument;
 class ScMarkData;
 class ScRangeList;
+namespace com::sun::star::datatransfer { class XTransferable2; }
 
 namespace ScClipUtil
 {
 
 SC_DLLPUBLIC void PasteFromClipboard( ScViewData& rViewData, ScTabViewShell* pTabViewShell, bool bShowDialog );
+
+/// Pastes the contents of xTransferable, which is or was on the clipboard.
+void PasteFromTransferable(
+        ScViewData& rViewData, ScTabViewShell* pTabViewShell, bool bShowDialog,
+        const cpo::uno::Reference<css::datatransfer::XTransferable2>& xTransferable);
 
 bool CheckDestRanges(
         const ScDocument& rDoc, SCCOL nSrcCols, SCROW nSrcRows, const ScMarkData& rMark,

@@ -27,6 +27,7 @@
 #include "formatsh.hxx"
 #include <global.hxx>
 #include <rtl/ref.hxx>
+#include <cpo/uno/Reference.hxx>
 #include <sot/formats.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/window.hxx>
@@ -38,6 +39,7 @@ class TransferableClipboardListener;
 class AbstractScLinkedAreaDlg;
 class ScTransferObj;
 class ScTabViewShell;
+namespace com::sun::star::datatransfer { class XTransferable2; }
 
 struct CellShell_Impl
 {
@@ -92,7 +94,7 @@ public:
 
     void        ExecuteEdit( SfxRequest& rReq );
     static void AfterInsCellContents(ScTabViewShell& rTabViewShell, SfxRequest& rReq,
-                                     const ScTransferObj* pOwnClip,
+                                     const cpo::uno::Reference<css::datatransfer::XTransferable2>& xTransferable,
                                      InsertDeleteFlags nFlags, ScPasteFunc nFunction,
                                      InsCellCmd eMoveMode, bool bSkipEmpty, bool bTranspose,
                                      bool bAsLink, bool bOtherDoc);

@@ -1136,6 +1136,29 @@ bool checkDestRangeForOverwrite(InsertDeleteFlags nFlags, const ScRangeList& rDe
 
 }
 
+ScViewFunc::PasteQuestionScope::PasteQuestionScope(ScViewFunc& rView,
+                                                   std::function<void()> aRetry)
+    : mrView(rView)
+    , maPrevRetry(std::move(rView.maPasteRetry))
+    , mbPrevConfirmed(rView.mbPasteBeyondConfirmed)
+{
+    mrView.maPasteRetry = std::move(aRetry);
+}
+
+ScViewFunc::PasteQuestionScope::PasteQuestionScope(ScViewFunc& rView)
+    : mrView(rView)
+    , maPrevRetry(rView.maPasteRetry)
+    , mbPrevConfirmed(rView.mbPasteBeyondConfirmed)
+{
+    mrView.mbPasteBeyondConfirmed = true;
+}
+
+ScViewFunc::PasteQuestionScope::~PasteQuestionScope()
+{
+    mrView.maPasteRetry = std::move(maPrevRetry);
+    mrView.mbPasteBeyondConfirmed = mbPrevConfirmed;
+}
+
 bool ScViewFunc::PasteFromClip( InsertDeleteFlags nFlags, ScDocument* pClipDoc,
                                 ScPasteFunc nFunction, bool bSkipEmptyCells,
                                 bool bTranspose, bool bAsLink,
@@ -1341,13 +1364,30 @@ bool ScViewFunc::PasteFromClip( InsertDeleteFlags nFlags, ScDocument* pClipDoc,
         // as the Clipboard (then inserting is done beyond the selection)
 
         //  ClipSize is not size, but difference
-        if ( ( nBlockAddX != 0 && nBlockAddX < nDestSizeX ) ||
-             ( nBlockAddY != 0 && nBlockAddY < nDestSizeY ) ||
-             ( bMarkIsFiltered && nUnfilteredRows < nDestSizeY+1 ) )
+        if ( !mbPasteBeyondConfirmed &&
+             ( ( nBlockAddX != 0 && nBlockAddX < nDestSizeX ) ||
+               ( nBlockAddY != 0 && nBlockAddY < nDestSizeY ) ||
+               ( bMarkIsFiltered && nUnfilteredRows < nDestSizeY+1 ) ) )
         {
-            ScWaitCursorOff aWaitOff( GetFrameWin() );
             OUString aMessage = ScResId( STR_PASTE_BIGGER );
 
+            if (maPasteRetry)
+            {
+                // Ask asynchronously: in a nested main loop other commands could change
+                // the clipboard, the document or the view under this paste. The paste
+                // starts over after a Yes.
+                std::shared_ptr<weld::MessageDialog> xQueryBox(Application::CreateMessageDialog(GetViewData().GetDialogParent(),
+                                                               VclMessageType::Question, VclButtonsType::YesNo,
+                                                               aMessage));
+                xQueryBox->set_default_response(RET_NO);
+                xQueryBox->runAsync(xQueryBox, [aRetry = maPasteRetry](sal_Int32 nResult) {
+                    if (nResult == RET_YES)
+                        aRetry();
+                });
+                return false;
+            }
+
+            ScWaitCursorOff aWaitOff( GetFrameWin() );
             std::unique_ptr<weld::MessageDialog> xQueryBox(Application::CreateMessageDialog(GetViewData().GetDialogParent(),
                                                            VclMessageType::Question, VclButtonsType::YesNo,
                                                            aMessage));

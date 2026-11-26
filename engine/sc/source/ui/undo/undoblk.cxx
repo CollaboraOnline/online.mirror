@@ -1285,6 +1285,20 @@ void ScUndoPaste::Repeat(SfxRepeatTarget& rTarget)
     const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(xTransferable);
     if (pOwnClip)
     {
+        // After a Yes to pasting beyond the selection, the paste starts over in the view
+        const ViewShellId nViewShellId = rViewSh.GetViewShellId();
+        ScViewFunc::PasteQuestionScope aQuestion(
+            rViewSh, [nViewShellId, xTransferable, nFlags = nFlags, aOptions = aPasteOptions]() {
+                ScTabViewShell* pView = ScTabViewShell::GetViewShellOfId(nViewShellId);
+                const ScTransferObj* pClip = ScTransferObj::GetOwnClipboard(xTransferable);
+                if (!pView || !pClip)
+                    return;
+                ScViewFunc::PasteQuestionScope aConfirmed(*pView);
+                pView->PasteFromClip(nFlags, pClip->GetDocument(), aOptions.nFunction,
+                                     aOptions.bSkipEmptyCells, aOptions.bTranspose,
+                                     aOptions.bAsLink, aOptions.eMoveMode,
+                                     InsertDeleteFlags::NONE, true);
+            });
         rViewSh.PasteFromClip( nFlags, pOwnClip->GetDocument(),
                                 aPasteOptions.nFunction, aPasteOptions.bSkipEmptyCells, aPasteOptions.bTranspose,
                                 aPasteOptions.bAsLink, aPasteOptions.eMoveMode, InsertDeleteFlags::NONE,

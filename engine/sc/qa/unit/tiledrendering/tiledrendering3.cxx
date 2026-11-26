@@ -4948,6 +4948,88 @@ OUString lcl_getOpenDialogId()
 }
 }
 
+// A paste into a selection smaller than the copied range asks whether to paste anyway, and
+// pastes what was on the clipboard when it was asked for, even after a later copy.
+CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testPasteBeyondSelectionAsksAsync)
+{
+    ScModelObj* pModelObj = createDoc("empty.ods");
+    ScTabViewShell* pView = dynamic_cast<ScTabViewShell*>(SfxViewShell::Current());
+    CPPUNIT_ASSERT(pView);
+    // A view with a client answers dialogs.
+    ScTestViewCallback aView;
+    ScDocument* pDoc = pModelObj->GetDocument();
+    pDoc->SetString(ScAddress(0, 0, 0), u"a"_ustr);
+    pDoc->SetString(ScAddress(1, 0, 0), u"b"_ustr);
+    pDoc->SetString(ScAddress(2, 0, 0), u"c"_ustr);
+    pDoc->SetString(ScAddress(4, 0, 0), u"x"_ustr);
+
+    // Given A1:C1 on the clipboard and A3:B4 selected,
+    lcl_selectRange(mxComponent, u"$A$1:$C$1"_ustr);
+    dispatchCommand(mxComponent, u".uno:Copy"_ustr, {});
+    lcl_selectRange(mxComponent, u"$A$3:$B$4"_ustr);
+
+    // when pasting,
+    dispatchCommand(mxComponent, u".uno:Paste"_ustr, {});
+    Scheduler::ProcessEventsToIdle();
+
+    // then the paste asks and returns before the answer. Without the accompanying fix in place,
+    // the question waited for its answer in a nested main loop, and the dispatch never returned.
+    const OUString sDialogId = lcl_getOpenDialogId();
+    CPPUNIT_ASSERT(!sDialogId.isEmpty());
+    CPPUNIT_ASSERT(pDoc->GetString(ScAddress(0, 2, 0)).isEmpty());
+
+    // When E1 is copied before the answer,
+    vcl::Window* pWin = pView->GetViewData().GetActiveWin();
+    // The waiting paste keeps the asked clipboard object alive, so its address stays unique.
+    const css::datatransfer::XTransferable2* pAsked = ScTabViewShell::GetClipData(pWin).get();
+    pView->CopyToClip(nullptr, ScRangeList(ScRange(4, 0, 0)), false);
+    CPPUNIT_ASSERT(ScTabViewShell::GetClipData(pWin).get() != pAsked);
+
+    // and the answer is Yes,
+    StringMap aYes{ { u"type"_ustr, u"responsebutton"_ustr },
+                    { u"cmd"_ustr, u"click"_ustr },
+                    { u"data"_ustr, OUString::number(RET_YES) } };
+    CPPUNIT_ASSERT(jsdialog::ExecuteAction(sDialogId, u"yes"_ustr, aYes));
+    Scheduler::ProcessEventsToIdle();
+
+    // then A1:C1 is pasted, beyond the selection up to column C.
+    CPPUNIT_ASSERT_EQUAL(u"a"_ustr, pDoc->GetString(ScAddress(0, 2, 0)));
+    CPPUNIT_ASSERT_EQUAL(u"b"_ustr, pDoc->GetString(ScAddress(1, 2, 0)));
+    CPPUNIT_ASSERT_EQUAL(u"c"_ustr, pDoc->GetString(ScAddress(2, 2, 0)));
+    CPPUNIT_ASSERT(lcl_getOpenDialogId().isEmpty());
+}
+
+// A paste that asks whether to paste beyond the selection pastes nothing after a No.
+CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testPasteBeyondSelectionNo)
+{
+    ScModelObj* pModelObj = createDoc("empty.ods");
+    ScTabViewShell* pView = dynamic_cast<ScTabViewShell*>(SfxViewShell::Current());
+    CPPUNIT_ASSERT(pView);
+    ScTestViewCallback aView;
+    ScDocument* pDoc = pModelObj->GetDocument();
+    pDoc->SetString(ScAddress(0, 0, 0), u"a"_ustr);
+    pDoc->SetString(ScAddress(1, 0, 0), u"b"_ustr);
+    pDoc->SetString(ScAddress(2, 0, 0), u"c"_ustr);
+
+    lcl_selectRange(mxComponent, u"$A$1:$C$1"_ustr);
+    dispatchCommand(mxComponent, u".uno:Copy"_ustr, {});
+    lcl_selectRange(mxComponent, u"$A$3:$B$4"_ustr);
+    dispatchCommand(mxComponent, u".uno:Paste"_ustr, {});
+    Scheduler::ProcessEventsToIdle();
+    const OUString sDialogId = lcl_getOpenDialogId();
+    CPPUNIT_ASSERT(!sDialogId.isEmpty());
+
+    StringMap aNo{ { u"type"_ustr, u"responsebutton"_ustr },
+                   { u"cmd"_ustr, u"click"_ustr },
+                   { u"data"_ustr, OUString::number(RET_NO) } };
+    CPPUNIT_ASSERT(jsdialog::ExecuteAction(sDialogId, u"no"_ustr, aNo));
+    Scheduler::ProcessEventsToIdle();
+
+    CPPUNIT_ASSERT(pDoc->GetString(ScAddress(0, 2, 0)).isEmpty());
+    CPPUNIT_ASSERT(pDoc->GetString(ScAddress(2, 2, 0)).isEmpty());
+    CPPUNIT_ASSERT(lcl_getOpenDialogId().isEmpty());
+}
+
 // Paste Special posts the paste after its dialog closes. When the view is closed before the
 // posted paste runs, the paste is dropped.
 CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testPasteSpecialAfterViewClosed)

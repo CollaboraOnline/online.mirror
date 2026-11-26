@@ -23,6 +23,7 @@
 #include <tabbgcolor.hxx>
 
 #include <com/sun/star/embed/Aspects.hpp>
+#include <functional>
 #include <vector>
 
 class ScPatternAttr;
@@ -74,7 +75,34 @@ private:
     ScRange     aFormatArea;
     bool        bFormatValid;
 
+    /// Set by a PasteQuestionScope: repeats the current paste after the user said Yes.
+    std::function<void()> maPasteRetry;
+    /// Set by a PasteQuestionScope: the user said Yes to pasting beyond the selection.
+    bool        mbPasteBeyondConfirmed;
+
 public:
+    /// Decides, while it lives, how PasteFromClip asks whether to paste beyond a selection
+    /// that is smaller than the clipboard range. The view keeps its state, so the scope holds
+    /// only around PasteFromClip calls of one paste and spans no synchronous dialog.
+    class PasteQuestionScope
+    {
+    public:
+        /// Ask without waiting and return without pasting; aRetry repeats the paste after a
+        /// Yes. It runs from the dialog's callback, so it finds the view again by its id and
+        /// keeps the clip document alive itself.
+        PasteQuestionScope(ScViewFunc& rView, std::function<void()> aRetry);
+        /// The user said Yes to this paste already.
+        explicit PasteQuestionScope(ScViewFunc& rView);
+        ~PasteQuestionScope();
+        PasteQuestionScope(const PasteQuestionScope&) = delete;
+        PasteQuestionScope& operator=(const PasteQuestionScope&) = delete;
+
+    private:
+        ScViewFunc& mrView;
+        std::function<void()> maPrevRetry;
+        bool mbPrevConfirmed;
+    };
+
                     ScViewFunc( vcl::Window* pParent, ScDocShell& rDocSh, ScTabViewShell* pViewShell );
                     ~ScViewFunc();
 

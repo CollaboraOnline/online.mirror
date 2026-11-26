@@ -187,8 +187,7 @@ void RunScPasteJob(void* /*instance*/, void* data)
     ScTabViewShell* pTabViewShell = ScTabViewShell::GetViewShellOfId(pJob->nViewShellId);
     if (!pTabViewShell)
         return;
-    ScCellShell::AfterInsCellContents(*pTabViewShell, *pJob->xRequest,
-                                      ScTransferObj::GetOwnClipboard(pJob->xTransferable),
+    ScCellShell::AfterInsCellContents(*pTabViewShell, *pJob->xRequest, pJob->xTransferable,
                                       pJob->nFlags, pJob->nFunction, pJob->eMoveMode,
                                       pJob->bSkipEmpty, pJob->bTranspose, pJob->bAsLink,
                                       pJob->bOtherDoc);
@@ -1733,7 +1732,7 @@ void ScCellShell::ExecuteEdit( SfxRequest& rReq )
                             pTabViewShell->ErrorMessage(aTester.GetMessageId());
                     }
 
-                    AfterInsCellContents(*pTabViewShell, rReq, pOwnClip, nFlags, nFunction,
+                    AfterInsCellContents(*pTabViewShell, rReq, xTransferable, nFlags, nFunction,
                                          eMoveMode, bSkipEmpty, bTranspose, bAsLink, bOtherDoc);
                 }
             }
@@ -3562,7 +3561,7 @@ void ScCellShell::ExecuteEdit( SfxRequest& rReq )
 }
 
 void ScCellShell::AfterInsCellContents(ScTabViewShell& rTabViewShell, SfxRequest& rReq,
-                                       const ScTransferObj* pOwnClip,
+                                       const cpo::uno::Reference<css::datatransfer::XTransferable2>& xTransferable,
                                        InsertDeleteFlags nFlags, ScPasteFunc nFunction,
                                        InsCellCmd eMoveMode, bool bSkipEmpty, bool bTranspose,
                                        bool bAsLink, bool bOtherDoc)
@@ -3577,6 +3576,22 @@ void ScCellShell::AfterInsCellContents(ScTabViewShell& rTabViewShell, SfxRequest
             pTabViewShell->PasteFromSystem(SotClipboardFormatId::LINK); // DDE insert
         else
         {
+            // After a Yes to pasting beyond the selection, the paste starts over in the view
+            const ViewShellId nViewShellId = rTabViewShell.GetViewShellId();
+            std::shared_ptr<SfxRequest> xRequest = std::make_shared<SfxRequest>(rReq);
+            ScViewFunc::PasteQuestionScope aQuestion(
+                rTabViewShell, [nViewShellId, xRequest, xTransferable, nFlags, nFunction, eMoveMode,
+                                bSkipEmpty, bTranspose, bAsLink, bOtherDoc]() {
+                    ScTabViewShell* pView = ScTabViewShell::GetViewShellOfId(nViewShellId);
+                    if (!pView)
+                        return;
+                    ScViewFunc::PasteQuestionScope aConfirmed(*pView);
+                    AfterInsCellContents(*pView, *xRequest, xTransferable, nFlags, nFunction,
+                                         eMoveMode, bSkipEmpty, bTranspose, bAsLink, bOtherDoc);
+                    pView->CellContentChanged();
+                });
+
+            const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(xTransferable);
             ScDocument* pPasteDoc = pOwnClip->GetDocument();
             const ScClipParam& rClipParam = pPasteDoc->GetClipParam();
 

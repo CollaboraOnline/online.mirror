@@ -53,6 +53,22 @@ bool lcl_checkClassification(ScDocument* pSourceDoc, const ScDocument& rDestinat
     return SfxClassificationHelper::ShowPasteInfo(eResult);
 }
 
+/// Pastes xTransferable again in the view, after the user said Yes to pasting beyond the
+/// selection.
+std::function<void()> lcl_RetryPaste(const ScTabViewShell& rTabViewShell, bool bShowDialog,
+                                     const cpo::uno::Reference<css::datatransfer::XTransferable2>& xTransferable)
+{
+    const ViewShellId nViewShellId = rTabViewShell.GetViewShellId();
+    return [nViewShellId, bShowDialog, xTransferable]() {
+        ScTabViewShell* pTabViewShell = ScTabViewShell::GetViewShellOfId(nViewShellId);
+        if (!pTabViewShell)
+            return;
+        ScViewFunc::PasteQuestionScope aConfirmed(*pTabViewShell);
+        ScClipUtil::PasteFromTransferable(pTabViewShell->GetViewData(), pTabViewShell,
+                                          bShowDialog, xTransferable);
+    };
+}
+
 }
 
 void ScClipUtil::PasteFromClipboard( ScViewData& rViewData, ScTabViewShell* pTabViewShell, bool bShowDialog )
@@ -61,6 +77,13 @@ void ScClipUtil::PasteFromClipboard( ScViewData& rViewData, ScTabViewShell* pTab
     // replaces the clipboard contents and would free this object and its clip document
     const cpo::uno::Reference<css::datatransfer::XTransferable2> xTransferable(
         ScTabViewShell::GetClipData(rViewData.GetActiveWin()));
+    PasteFromTransferable(rViewData, pTabViewShell, bShowDialog, xTransferable);
+}
+
+void ScClipUtil::PasteFromTransferable(
+    ScViewData& rViewData, ScTabViewShell* pTabViewShell, bool bShowDialog,
+    const cpo::uno::Reference<css::datatransfer::XTransferable2>& xTransferable)
+{
     const ScTransferObj* pOwnClip = ScTransferObj::GetOwnClipboard(xTransferable);
     ScDocument& rThisDoc = rViewData.GetDocument();
     SCCOL nThisCol = rViewData.GetCurX();
@@ -381,6 +404,8 @@ void ScClipUtil::PasteFromClipboard( ScViewData& rViewData, ScTabViewShell* pTab
                 ScClipParam aTempParam(rClipParam);
                 pTempDoc->SetClipParam(aTempParam);
 
+                ScViewFunc::PasteQuestionScope aQuestion(
+                    *pTabViewShell, lcl_RetryPaste(*pTabViewShell, bShowDialog, xTransferable));
                 pTabViewShell->PasteFromClip( nFlags, pTempDoc.get(),
                         ScPasteFunc::NONE, true /*bSkipEmpty*/, false, false,
                         INS_NONE, InsertDeleteFlags::NONE,
@@ -389,6 +414,8 @@ void ScClipUtil::PasteFromClipboard( ScViewData& rViewData, ScTabViewShell* pTab
             else
             {
                 // Normal paste: no matrix issues.
+                ScViewFunc::PasteQuestionScope aQuestion(
+                    *pTabViewShell, lcl_RetryPaste(*pTabViewShell, bShowDialog, xTransferable));
                 pTabViewShell->PasteFromClip( nFlags, pClipDoc,
                         ScPasteFunc::NONE, false, false, false, INS_NONE, InsertDeleteFlags::NONE,
                         bShowDialog );
