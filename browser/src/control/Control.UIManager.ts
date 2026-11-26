@@ -1730,6 +1730,11 @@ class UIManager extends window.L.Control {
 			break;
 
 		case 'notebookbar':
+			// The classic UI stays in viewing mode (the notebookbar comes once the
+			// user switches to editing):
+			if (this.map.isReadOnlyMode()) {
+				break;
+			}
 			this.removeClassicUI();
 			this.addNotebookbarUI();
 			break;
