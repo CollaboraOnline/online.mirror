@@ -152,8 +152,7 @@ const _codaUpload = function(fileBytes, force) {
 
 	return global.collab.connect(info.wopiSrc, info.accessToken, info.coolServer).then(function() {
 		// A restarted coolwsd no longer knows that we are editing.
-		if (!global.collab.editingActive)
-			window.collab.sendMessage({type: 'editing_started'}); 
+		window.collab.sendMessage({type: 'editing_started'});
 		return global.collab.uploadFile(fileBytes, force);
 	});
 };
