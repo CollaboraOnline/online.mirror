@@ -54,7 +54,7 @@ cmake_list= \
 
 
 # Sources that will be created by Qt's MOC
-BUILT_SOURCES = bridge.moc.cpp DBusService.moc.cpp TabManager.moc.cpp TabShellBridge.moc.cpp TabbedWindow.moc.cpp
+BUILT_SOURCES = bridge.moc.cpp DBusService.moc.cpp TabManager.moc.cpp TabShellBridge.moc.cpp TabbedWindow.moc.cpp WindowDecorations.moc.cpp
 bridge.moc.cpp: bridge.hpp
 	$(MOC) $(MOCFLAGS) -o $@ $<
 DBusService.moc.cpp: DBusService.hpp
@@ -64,6 +64,8 @@ TabManager.moc.cpp: TabManager.hpp
 TabShellBridge.moc.cpp: TabShellBridge.hpp
 	$(MOC) $(MOCFLAGS) -o $@ $<
 TabbedWindow.moc.cpp: TabbedWindow.hpp
+	$(MOC) $(MOCFLAGS) -o $@ $<
+WindowDecorations.moc.cpp: WindowDecorations.hpp
 	$(MOC) $(MOCFLAGS) -o $@ $<
 
 CLEANFILES = $(BUILT_SOURCES)
@@ -79,7 +81,7 @@ endif
 # path and needs the flags libsimd gets. Empty in a pure qtapp build.
 coda_qt_CFLAGS = $(AM_CFLAGS) $(SIMD_CFLAGS)
 
-coda_qt_SOURCES = coda-qt.cpp Application.cpp AIHttpTransport.cpp Bridge.cpp CODocumentBroker.cpp CoolLocalSchemeHandler.cpp CoolUrlSchemeHandler.cpp CursorFix.cpp PortalFileTransfer.cpp QtClipboard.cpp DocumentOperations.cpp WebView.cpp DBusService.cpp Document.cpp InsertableFiles.cpp QtFileManager.cpp QtFilePicker.cpp RemoteOpen.cpp ScreenInhibitor.cpp StandaloneWindow.cpp TabbedWindow.cpp TabManager.cpp TabShellBridge.cpp WindowUtils.cpp $(cmake_list)
+coda_qt_SOURCES = coda-qt.cpp Application.cpp AIHttpTransport.cpp Bridge.cpp CODocumentBroker.cpp CoolLocalSchemeHandler.cpp CoolUrlSchemeHandler.cpp CursorFix.cpp PortalFileTransfer.cpp QtClipboard.cpp DocumentOperations.cpp WebView.cpp DBusService.cpp Document.cpp InsertableFiles.cpp QtFileManager.cpp QtFilePicker.cpp RemoteOpen.cpp ScreenInhibitor.cpp StandaloneWindow.cpp TabbedWindow.cpp TabManager.cpp TabShellBridge.cpp WindowDecorations.cpp WindowUtils.cpp $(cmake_list)
 nodist_coda_qt_SOURCES = $(BUILT_SOURCES)
 
 GBUILD_SHARED_LIB = $(ENGINE_BUILDDIR)/workdir/LinkTarget/StaticLibrary/libshared.a

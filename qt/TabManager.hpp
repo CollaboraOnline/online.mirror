@@ -36,6 +36,7 @@ class QWidget;
 class TabbedWindow;
 class TabShellBridge;
 class WebView;
+class WindowDecorations;
 
 // Owns the ordered list of tabs in a TabbedWindow, and bridges the HTML tab
 // strip to the QStackedWidget that holds the document views.
@@ -50,6 +51,7 @@ public:
     bool eventFilter(QObject* obj, QEvent* ev) override;
 
     QWidget* shellWidget() const;
+    WindowDecorations* decorations() const { return _decorations; }
     QStackedWidget* stackWidget() const { return _stack; }
 
     int activeTabId() const { return _activeTabId; }
@@ -233,6 +235,8 @@ private:
     QLabel* _hoverCardImage;
     // Single-shot, and holds the delay between the pointer resting on a tab and its card.
     QTimer* _hoverCardTimer;
+    // Owned by the window.
+    WindowDecorations* _decorations;
     // The tab the card is for, or -1 when no tab is hovered.
     int _hoverCardTabId = -1;
     // The bottom corner of the hovered tab where the tab starts, in strip coordinates.

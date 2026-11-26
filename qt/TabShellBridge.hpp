@@ -15,6 +15,7 @@
 #include <QString>
 
 class TabManager;
+enum class WindowState;
 
 // QObject exposed to the tab strip page over QWebChannel: JS calls the slots,
 // C++ emits the signals. Each slot forwards to TabManager.
@@ -24,6 +25,9 @@ class TabShellBridge : public QObject
 
 public:
     explicit TabShellBridge(TabManager* manager);
+
+    // Tells the page the state of a window with CSD, through windowStateChanged.
+    void sendWindowState(WindowState state, bool active);
 
 public slots:
     void requestSync(); // strip is ready; push the initial state
@@ -43,6 +47,10 @@ public slots:
                          const QString& border, bool rightToLeft,
                          const QString& imageBackground, const QString& shadow);
     void tabHoverEnded();
+    void windowMoveRequested();
+    void titleBarDoubleClicked();
+    // control is the page's name for it: minimize, maximize or close.
+    void windowControlActivated(const QString& control);
     void debug(const QString& message);
 
 signals:
@@ -51,6 +59,10 @@ signals:
     void themeChanged(const QString& theme);
     // The native drag left the strip's view; the page clears its markers.
     void dragExited();
+    // state is the page's name for it: normal, maximized or fullscreen.
+    void windowStateChanged(const QString& state, bool active);
+    // layout is in the form of GNOME's button-layout, "left:right".
+    void windowControlsChanged(const QString& layout);
 
 private:
     TabManager* _manager;

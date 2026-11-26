@@ -15,6 +15,7 @@
 #include "TabShellBridge.hpp"
 #include "TabbedWindow.hpp"
 #include "WebView.hpp"
+#include "WindowDecorations.hpp"
 
 #include <QPoint>
 
@@ -67,6 +68,7 @@
 namespace
 {
 constexpr int kShellHeight = 36;
+constexpr int kDecoratedShellExtraHeight = 4;
 
 // Which theme fresh tab strips start in: the saved dark mode choice wins,
 // otherwise the system theme, like the document views. Updated on SETDARKMODE.
@@ -151,6 +153,7 @@ TabManager::TabManager(TabbedWindow* window, QWebEngineProfile* profile)
     , _hoverCardTitle(new QLabel(_hoverCardFrame))
     , _hoverCardImage(new QLabel(_hoverCardFrame))
     , _hoverCardTimer(new QTimer(this))
+    , _decorations(WindowDecorations::wanted() ? new WindowDecorations(window) : nullptr)
 {
     _liveViewLimitTimer->setSingleShot(true);
     connect(_liveViewLimitTimer, &QTimer::timeout, this, &TabManager::enforceLiveViewLimit);
@@ -189,10 +192,13 @@ TabManager::TabManager(TabbedWindow* window, QWebEngineProfile* profile)
     _hoverCardImage->setAlignment(Qt::AlignCenter);
     _hoverCard->hide();
 
-    _shellView->setFixedHeight(kShellHeight);
+    _shellView->setFixedHeight(kShellHeight + (_decorations ? kDecoratedShellExtraHeight : 0));
     // setPage() destroys the default page, so install ours before wiring the channel.
     QWebEnginePage* page = new QWebEnginePage(profile, _shellView);
     _shellView->setPage(page);
+    // Set window transparent when drawing CSD so the rounded corners render correctly.
+    if (_decorations)
+        page->setBackgroundColor(Qt::transparent);
     _shellView->setContextMenuPolicy(Qt::NoContextMenu);
 
     QWebChannel* channel = new QWebChannel(page);
@@ -221,6 +227,25 @@ TabManager::TabManager(TabbedWindow* window, QWebEngineProfile* profile)
     stripUrl.addQueryParameter("untitledText", tr("(untitled)").toStdString());
     //: Badge in a tab whose document is a draft, not yet saved to a file of its own
     stripUrl.addQueryParameter("draftText", tr("Draft").toStdString());
+    // The strip takes the place of the title bar, with the window controls the desktop asks for.
+    if (_decorations)
+    {
+        stripUrl.addQueryParameter("csd", "true");
+        stripUrl.addQueryParameter(
+            "windowControls", DecorationSettings::instance()->buttonLayout().toStdString());
+        //: Tooltip of the button that minimizes the window
+        stripUrl.addQueryParameter("minimizeText", tr("Minimize").toStdString());
+        //: Tooltip of the button that maximizes the window
+        stripUrl.addQueryParameter("maximizeText", tr("Maximize").toStdString());
+        //: Tooltip of the button that brings a maximized window back to its size
+        stripUrl.addQueryParameter("restoreText", tr("Restore").toStdString());
+        //: Tooltip of the button that closes the window
+        stripUrl.addQueryParameter("closeWindowText", tr("Close").toStdString());
+        connect(_decorations, &WindowDecorations::stateChanged, _shellBridge,
+                &TabShellBridge::sendWindowState);
+        connect(DecorationSettings::instance(), &DecorationSettings::buttonLayoutChanged,
+                _shellBridge, &TabShellBridge::windowControlsChanged);
+    }
     _shellView->load(QUrl(QString::fromStdString(stripUrl.toString())));
 
     _shellView->setFocusPolicy(Qt::NoFocus);
@@ -923,6 +948,8 @@ void TabManager::emitInitialState()
 {
     emitTabsChangedNow();
     emit _shellBridge->themeChanged(currentTheme());
+    if (_decorations)
+        _shellBridge->sendWindowState(_decorations->state(), _decorations->isActive());
 }
 
 void TabManager::applyTheme(const QString& theme)
@@ -948,8 +975,14 @@ void TabManager::applyBackgroundColor()
     };
 
     // The window clears its whole area, the tab strip's included, when the layout changes.
-    paint(_window);
-    paint(_window->centralWidget());
+    // A window with CSD paints its background itself.
+    if (_decorations)
+        _decorations->setDark(currentTheme() == QStringLiteral("dark"));
+    else
+    {
+        paint(_window);
+        paint(_window->centralWidget());
+    }
     paint(_stack);
 
     for (Entry& entry : _tabs)

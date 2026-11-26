@@ -33,6 +33,15 @@
 		parameters.get('startOpenText') || 'The Start page is already open';
 	const untitledText = parameters.get('untitledText') || '(untitled)';
 	const draftText = parameters.get('draftText') || 'Draft';
+	const minimizeText = parameters.get('minimizeText') || 'Minimize';
+	const maximizeText = parameters.get('maximizeText') || 'Maximize';
+	const restoreText = parameters.get('restoreText') || 'Restore';
+	const closeWindowText = parameters.get('closeWindowText') || 'Close';
+
+	// Whether to draw client-side window decorations.
+	const drawsFrame = document.documentElement.hasAttribute('data-csd');
+	// normal, maximized or fullscreen.
+	let windowState = 'normal';
 
 	let bridge = null;
 	let tabs = [];
@@ -497,6 +506,71 @@
 		document.documentElement.setAttribute('data-theme', theme);
 	}
 
+	// layout follows the form of GNOME's button-layout: buttons before the colon go at the
+	// start of the strip and others at the end, with values minimize, maximize and close.
+	function renderWindowControls(layout) {
+		const sides = (layout || '').split(':');
+		const containers = [
+			[document.getElementById('window-controls-start'), sides[0]],
+			[document.getElementById('window-controls-end'), sides[1]],
+		];
+		containers.forEach(([container, names]) => {
+			container.replaceChildren();
+			(names || '')
+				.split(',')
+				.filter((name) => ['minimize', 'maximize', 'close'].includes(name))
+				.forEach((name) => {
+					const button = el('div');
+					button.className = 'window-control ' + name;
+					button.dataset.control = name;
+					button.setAttribute('role', 'button');
+					button.addEventListener('click', () => {
+						if (bridge) bridge.windowControlActivated(name);
+					});
+					container.appendChild(button);
+				});
+		});
+		updateWindowControlTitles();
+	}
+
+	function updateWindowControlTitles() {
+		const titles = {
+			minimize: minimizeText,
+			maximize: windowState === 'maximized' ? restoreText : maximizeText,
+			close: closeWindowText,
+		};
+		document.querySelectorAll('.window-control').forEach((button) => {
+			button.title = titles[button.dataset.control];
+		});
+	}
+
+	function onWindowStateChanged(state, active) {
+		windowState = state;
+		document.documentElement.setAttribute('data-window-state', state);
+		document.documentElement.setAttribute(
+			'data-window-active',
+			active ? 'true' : 'false',
+		);
+		updateWindowControlTitles();
+	}
+
+	// A press on the strip outside the tabs and the buttons moves the window, and a double
+	// press does what the desktop does on a double-click of a title bar. The page sees no
+	// dblclick, because the compositor that moves the window takes the release of the first
+	// click, so the second press tells by its click count.
+	function installWindowMove() {
+		const strip = document.getElementById('strip');
+		document.body.addEventListener('mousedown', (ev) => {
+			if (ev.button !== 0 || !bridge) return;
+			if (ev.target.closest('.tab, #new-tab, .window-control')) return;
+			// The scroll bar of the strip lies below its client area.
+			if (ev.target === strip && ev.offsetY >= strip.clientHeight) return;
+			ev.preventDefault();
+			if (ev.detail >= 2) bridge.titleBarDoubleClicked();
+			else bridge.windowMoveRequested();
+		});
+	}
+
 	function onDragExited() {
 		clearDropMarkers();
 		lastOverInsert = -2;
@@ -518,9 +592,18 @@
 		'tabHoverStarted',
 		'tabHoverEnded',
 		'requestSync',
+		'windowMoveRequested',
+		'titleBarDoubleClicked',
+		'windowControlActivated',
 		'debug',
 	];
-	const NOTIFICATIONS = ['tabsChanged', 'themeChanged', 'dragExited'];
+	const NOTIFICATIONS = [
+		'tabsChanged',
+		'themeChanged',
+		'dragExited',
+		'windowStateChanged',
+		'windowControlsChanged',
+	];
 
 	// The WebView2 message channel carries structured data both ways: a call
 	// goes out as {call, args} and a notification arrives as {signal, args}.
@@ -569,12 +652,20 @@
 	window.addEventListener('resize', unlockTabWidths);
 	installStripWheelScroll(document.getElementById('strip'));
 	window.addEventListener('resize', scrollActiveTabIntoView);
+	if (drawsFrame) {
+		renderWindowControls(parameters.get('windowControls'));
+		installWindowMove();
+	}
 
 	connectTabBridge(function (tabBridge) {
 		bridge = tabBridge;
 		bridge.tabsChanged.connect(onTabsChanged);
 		bridge.themeChanged.connect(onThemeChanged);
 		bridge.dragExited.connect(onDragExited);
+		if (drawsFrame) {
+			bridge.windowStateChanged.connect(onWindowStateChanged);
+			bridge.windowControlsChanged.connect(renderWindowControls);
+		}
 		bridge.debug('tabstrip ready');
 		// Slots are connected now; ask the app for the current state.
 		bridge.requestSync();

@@ -2162,6 +2162,18 @@ AS_IF([test "$ENABLE_QTAPP" = true],
       [
        PKG_CHECK_MODULES([QT6], [Qt6Core >= 6.6 Qt6Widgets Qt6Gui Qt6Network Qt6WebSockets Qt6WebEngineCore >= 6.8 Qt6WebChannel Qt6WebEngineWidgets Qt6DBus Qt6PrintSupport])
 
+       dnl With the private QtGui headers, a window that draws its own frame on Wayland can
+       dnl tell the compositor where its shadow is. An outline is drawn as a fallback.
+       QT6_INCLUDE_DIR=$($PKG_CONFIG --variable=includedir Qt6Gui)
+       QT6_GUI_VERSION=$($PKG_CONFIG --modversion Qt6Gui)
+       QT6_CFLAGS="$QT6_CFLAGS -I$QT6_INCLUDE_DIR/QtCore/$QT6_GUI_VERSION -I$QT6_INCLUDE_DIR/QtGui/$QT6_GUI_VERSION"
+       AC_MSG_CHECKING([for the private QtGui headers])
+       if test -f "$QT6_INCLUDE_DIR/QtGui/$QT6_GUI_VERSION/QtGui/qpa/qplatformwindow_p.h"; then
+             AC_MSG_RESULT([yes])
+       else
+             AC_MSG_RESULT([no, window frames on Wayland get an outline, not a shadow])
+       fi
+
        dnl Locate qtpaths6 for Qt6 tool discovery
        dnl FreeBSD ports keep the Qt tools out of the PATH, under
        dnl /usr/local/lib/qt6/bin.

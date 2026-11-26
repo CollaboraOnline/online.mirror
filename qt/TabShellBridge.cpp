@@ -13,6 +13,7 @@
 
 #include "TabShellBridge.hpp"
 #include "TabManager.hpp"
+#include "WindowDecorations.hpp"
 
 #include <common/Log.hpp>
 
@@ -58,6 +59,49 @@ void TabShellBridge::tabHoverStarted(int tabId, int x, int y, const QString& bac
 }
 
 void TabShellBridge::tabHoverEnded() { _manager->hideHoverCard(); }
+
+void TabShellBridge::windowMoveRequested()
+{
+    if (WindowDecorations* decorations = _manager->decorations())
+        decorations->startMove();
+}
+
+void TabShellBridge::titleBarDoubleClicked()
+{
+    if (WindowDecorations* decorations = _manager->decorations())
+        decorations->titleBarDoubleClicked();
+}
+
+// The page names the window controls and states as GNOME's button-layout does, and uses the
+// names in its CSS, so they cross the bridge as names.
+void TabShellBridge::windowControlActivated(const QString& control)
+{
+    WindowDecorations* decorations = _manager->decorations();
+    if (!decorations)
+        return;
+    if (control == QLatin1String("minimize"))
+        decorations->controlActivated(WindowControl::Minimize);
+    else if (control == QLatin1String("maximize"))
+        decorations->controlActivated(WindowControl::Maximize);
+    else if (control == QLatin1String("close"))
+        decorations->controlActivated(WindowControl::Close);
+}
+
+void TabShellBridge::sendWindowState(WindowState state, bool active)
+{
+    switch (state)
+    {
+        case WindowState::Normal:
+            emit windowStateChanged(QStringLiteral("normal"), active);
+            break;
+        case WindowState::Maximized:
+            emit windowStateChanged(QStringLiteral("maximized"), active);
+            break;
+        case WindowState::FullScreen:
+            emit windowStateChanged(QStringLiteral("fullscreen"), active);
+            break;
+    }
+}
 
 void TabShellBridge::debug(const QString& message)
 {

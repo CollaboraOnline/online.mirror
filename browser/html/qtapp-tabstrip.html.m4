@@ -18,6 +18,9 @@ m4_changequote([,])m4_dnl
         if (params.get('titleBar') === 'true') {
             document.documentElement.setAttribute('data-title-bar', 'true');
         }
+        if (params.get('csd') === 'true') {
+            document.documentElement.setAttribute('data-csd', 'true');
+        }
     })();
     </script>
     <link rel="stylesheet" href="color-palette.css" />
@@ -30,6 +33,8 @@ m4_ifelse(QTAPP, [true], [    <script type="text/javascript" src="qrc:///qtwebch
     <script src="qtapp-tabstrip.js" defer></script>
   </head>
   <body>
+    <div id="window-controls-start" class="window-controls"></div>
     <div id="strip" role="tablist"></div>
+    <div id="window-controls-end" class="window-controls"></div>
   </body>
 </html>
