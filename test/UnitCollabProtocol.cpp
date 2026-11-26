@@ -28,6 +28,8 @@
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Util/LayeredConfiguration.h>
 
+#include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <map>
 #include <mutex>
@@ -3754,15 +3756,259 @@ private:
     std::shared_ptr<http::WebSocketSession> _collabWs;
 };
 
+// A collab client uploads to a host that supports locks. The host answers
+// the LOCK with lockStatus. The test checks what reaches host and client.
+class UnitCollabUploadLock: public WopiTestServer {
+public:
+    // Who has the document open on /cool/ws while the collab client uploads.
+    enum class WebUser { None, Viewer };
+
+    struct CollabScenario {
+        std::string name;
+        WebUser webUser = WebUser::None;
+        http::StatusCode lockStatus = http::StatusCode::OK;
+        // The host refuses the PutFile with 409, as another lock holds the file.
+        bool putFileLocked = false;
+        http::StatusCode expectedStatus = http::StatusCode::OK;
+        std::vector<std::string> expectedRequests;
+    };
+
+    UnitCollabUploadLock(CollabScenario const & scenario):
+        WopiTestServer(scenario.name), _scenario(scenario), _phase(Phase::Connect) {}
+
+    void configure(Poco::Util::LayeredConfiguration & config) override {
+        WopiTestServer::configure(config);
+        config.setBool("client_document_loading.enable", true);
+    }
+
+    void configCheckFileInfo(Poco::Net::HTTPRequest const &, Poco::JSON::Object::Ptr & fileInfo)
+        override
+    {
+        fileInfo->set("SupportsLocks", true);
+    }
+
+    std::unique_ptr<http::Response>
+    assertLockRequest(Poco::Net::HTTPRequest const & request) override
+    {
+        std::string const operation = request.get("X-WOPI-Override");
+        if (operation == "LOCK") {
+            std::lock_guard<std::mutex> lock(_requestsMutex);
+            _lockToken = request.get("X-WOPI-Lock");
+        }
+
+        addRequest(operation);
+        if (operation != "LOCK" || _scenario.lockStatus == http::StatusCode::OK) {
+            return nullptr;
+        }
+
+        // coolwsd reads an answer with a body as the host's refusal.
+        auto response = std::make_unique<http::Response>(_scenario.lockStatus);
+        response->setBody("refused", "text/plain");
+
+        return response;
+    }
+
+    std::unique_ptr<http::Response>
+    assertPutFileRequest(Poco::Net::HTTPRequest const & request) override
+    {
+        std::string const lockToken = request.get("X-WOPI-Lock", "");
+        bool withLock = false;
+        {
+            std::lock_guard<std::mutex> lock(_requestsMutex);
+            withLock = !_lockToken.empty() && lockToken == _lockToken;
+        }
+
+        // "PUT-unlocked" only names an upload without the lock in a failure message.
+        addRequest(withLock ? "PUT" : "PUT-unlocked");
+        if (!_scenario.putFileLocked) {
+            return nullptr;
+        }
+
+        auto response = std::make_unique<http::Response>(http::StatusCode::Conflict);
+        response->set("X-WOPI-Lock", "another-lock");
+        response->setBody("locked", "text/plain");
+
+        return response;
+    }
+
+    bool onDocumentLoaded(std::string const & message) override {
+        TST_LOG("Loaded: " << message);
+        TRANSITION_STATE(_phase, Phase::Upload);
+        return true;
+    }
+
+    void onDocBrokerDestroy(std::string const & docKey) override {
+        TST_LOG("Destroyed: " << docKey);
+        _brokerDestroyed = true;
+        SocketPoll::wakeupWorld();
+    }
+
+    void invokeWSDTest() override {
+        switch (_phase) {
+        case Phase::Connect: {
+            TRANSITION_STATE(_phase, Phase::WaitAuth);
+            Poco::URI const wopiURL(
+                getWopiHostURI() + "/wopi/files/0?access_token=anything&testname=" + getTestname());
+            _collabWs = startCollabConnection(
+                socketPoll(), Uri::encode(wopiURL.toString()), "anything");
+            break;
+        }
+        case Phase::WaitAuth:
+            if (!pollCollabMessage(_collabWs, "user_list")) {
+                break;
+            }
+
+            if (_scenario.webUser == WebUser::None) {
+                TRANSITION_STATE(_phase, Phase::Upload);
+                break;
+            }
+
+            TRANSITION_STATE(_phase, Phase::WaitLoad);
+            initWebsocket("/wopi/files/0?access_token=anything&permission=readonly");
+            WSD_CMD("load url=" + getWopiSrc());
+            break;
+        case Phase::Upload:
+            TRANSITION_STATE(_phase, Phase::WaitUploadUrl);
+            _collabWs->sendMessage(
+                R"({"type":"upload","stream":"contents","requestId":"r1","force":true})");
+            break;
+        case Phase::WaitUploadUrl: {
+            Poco::JSON::Object::Ptr const msg = pollCollabMessage(_collabWs, "upload_url");
+            if (!msg) {
+                break;
+            }
+
+            http::Request request(msg->getValue<std::string>("url"), http::Request::VERB_POST);
+            request.setBody("Uploaded by the collab client", "application/octet-stream");
+            std::shared_ptr<http::Response const> const response
+                = http::Session::create(helpers::getTestServerURI())->syncRequest(request);
+
+            LOK_ASSERT_EQUAL(_scenario.expectedStatus, response->statusLine().statusCode());
+            std::vector<std::string> const requestsNow = requests();
+            LOK_ASSERT_MESSAGE("Unexpected request in: " + joined(requestsNow),
+                               expectedSoFar(requestsNow));
+
+            // A saved document is unlocked before the client hears back.
+            if (_scenario.expectedStatus == http::StatusCode::OK) {
+                LOK_ASSERT_MESSAGE("The host got " + joined(requestsNow),
+                                   requestsNow == _scenario.expectedRequests);
+            }
+
+            if (_scenario.webUser == WebUser::None) {
+                TRANSITION_STATE(_phase, Phase::WaitRequests);
+                break;
+            }
+
+            // The upload stops the viewer's broker.
+            // The test ends once that broker is gone.
+            TRANSITION_STATE(_phase, Phase::WaitUnload);
+            deleteSocketAt(0);
+            break;
+        }
+        case Phase::WaitUnload: {
+            if (!_brokerDestroyed) {
+                break;
+            }
+
+            std::vector<std::string> const requestsAtEnd = requests();
+            LOK_ASSERT_MESSAGE("The host got " + joined(requestsAtEnd),
+                               requestsAtEnd == _scenario.expectedRequests);
+
+            TRANSITION_STATE(_phase, Phase::Done);
+            _collabWs->asyncShutdown();
+            passTest("The host got " + joined(_scenario.expectedRequests));
+            break;
+        }
+        case Phase::WaitRequests: {
+            // The UNLOCK after a 502 can still be on its way.
+            std::vector<std::string> const requestsSoFar = requests();
+            LOK_ASSERT_MESSAGE("Unexpected request in: " + joined(requestsSoFar),
+                               expectedSoFar(requestsSoFar));
+            if (requestsSoFar != _scenario.expectedRequests) {
+                break;
+            }
+
+            TRANSITION_STATE(_phase, Phase::Done);
+            _collabWs->asyncShutdown();
+            passTest("The host got " + joined(_scenario.expectedRequests));
+            break;
+        }
+        case Phase::WaitLoad:
+        case Phase::Done:
+            break;
+        }
+    }
+
+private:
+    static std::string joined(std::vector<std::string> const & requests) {
+        std::string result;
+        for (std::string const & request : requests) {
+            result += (result.empty() ? "" : " ") + request;
+        }
+
+        return result;
+    }
+
+    // It is true when the requests so far are the start of the expected ones.
+    bool expectedSoFar(std::vector<std::string> const & requests) const {
+        return requests.size() <= _scenario.expectedRequests.size()
+            && std::equal(requests.begin(), requests.end(), _scenario.expectedRequests.begin());
+    }
+
+    void addRequest(std::string const & request) {
+        std::lock_guard<std::mutex> lock(_requestsMutex);
+        _requests.push_back(request);
+    }
+
+    std::vector<std::string> requests() {
+        std::lock_guard<std::mutex> lock(_requestsMutex);
+        return _requests;
+    }
+
+    CollabScenario const _scenario;
+
+    STATE_ENUM(Phase, Connect, WaitAuth, WaitLoad, Upload, WaitUploadUrl, WaitRequests, WaitUnload,
+               Done) _phase;
+
+    std::shared_ptr<http::WebSocketSession> _collabWs;
+    std::atomic<bool> _brokerDestroyed = false;
+    std::mutex _requestsMutex;
+    /// The lock and upload requests that the host got, in order.
+    std::vector<std::string> _requests;
+    std::string _lockToken;
+};
+
 UnitBase** unit_create_wsd_multi(void)
 {
-    return new UnitBase* [36] { new UnitCollabProtocol(),
+    return new UnitBase* [41] { new UnitCollabProtocol(),
                                 new UnitCollabCheckFileInfoTransient(),
                                 new UnitCollabCheckFileInfoRetry(),
                                 new UnitCollabUploadRetry(), new UnitCollabUploadLanded(),
                                 new UnitCollabUploadReplaced(),
                                 new UnitCollabUploadTimestamp(), new UnitCollabUploadConflict(),
                                 new UnitCollabUploadConflictModified(),
+                                new UnitCollabUploadLock(
+                                    { .name = "UnitCollabUploadLocked",
+                                      .expectedRequests = { "LOCK", "PUT", "UNLOCK" } }),
+                                new UnitCollabUploadLock(
+                                    { .name = "UnitCollabUploadLockConflict",
+                                      .lockStatus = http::StatusCode::Conflict,
+                                      .expectedStatus = http::StatusCode::Locked,
+                                      .expectedRequests = { "LOCK" } }),
+                                new UnitCollabUploadLock(
+                                    { .name = "UnitCollabUploadLockBusy",
+                                      .lockStatus = http::StatusCode::ServiceUnavailable,
+                                      .expectedStatus = http::StatusCode::BadGateway,
+                                      .expectedRequests = { "LOCK", "UNLOCK" } }),
+                                new UnitCollabUploadLock(
+                                    { .name = "UnitCollabUploadPutFileLocked",
+                                      .putFileLocked = true,
+                                      .expectedStatus = http::StatusCode::Locked,
+                                      .expectedRequests = { "LOCK", "PUT", "UNLOCK" } }),
+                                new UnitCollabUploadLock(
+                                    { .name = "UnitCollabUploadLockViewer",
+                                      .webUser = UnitCollabUploadLock::WebUser::Viewer,
+                                      .expectedRequests = { "LOCK", "PUT", "UNLOCK" } }),
                                 new UnitCollabNoCleanExport(), new UnitCollabRestrictedEditing(),
                                 new UnitCollabSettingsStreams(), new UnitCollabSettingsFile(),
                                 new UnitCollabSettingsListUnreachable(),
