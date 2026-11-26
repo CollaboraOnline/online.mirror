@@ -1343,7 +1343,8 @@ bool DocumentBroker::download(
 
     const std::string sessionId = session ? session->getId() : "000";
     LOG_INF("Loading [" << _docKey << "] for session [" << sessionId << "] in jail [" << jailId
-                        << "] from URI [" << uriPublic.toString() << ']');
+                        << "] from URI [" << Anonymizer::anonymizeUrl(uriPublic.toString())
+                        << ']');
 
     {
         bool result = false;
@@ -1542,7 +1543,8 @@ bool DocumentBroker::download(
     const StorageBase::FileInfo fileInfo = _storage->getFileInfo();
     if (!fileInfo.isValid())
     {
-        LOG_ERR("Invalid fileinfo for URI [" << uriPublic.toString() << ']');
+        LOG_ERR("Invalid fileinfo for URI [" << Anonymizer::anonymizeUrl(uriPublic.toString())
+                                             << ']');
         return false;
     }
 
@@ -5677,7 +5679,7 @@ std::size_t DocumentBroker::addSession(const std::shared_ptr<ClientSession>& ses
     catch (const StorageSpaceLowException& exc)
     {
         LOG_ERR("Out of storage while loading document with URI ["
-                << session->getPublicUri().toString() << ']');
+                << Anonymizer::anonymizeUrl(session->getPublicUri().toString()) << ']');
 
         // We use the same message as is sent when some of cool's own locations are full,
         // even if in this case it might be a totally different location (file system, or
@@ -7075,8 +7077,8 @@ void DocumentBroker::uploadPresetsToWopiHost(bool bPersisted)
     // A relative URI has no host to send the request to.
     if (uploadBaseUri.isRelative())
     {
-        LOG_WRN("Not uploading presets: WOPI base URL [" << uploadBaseUri.toString()
-                                                         << "] is relative");
+        LOG_WRN("Not uploading presets: WOPI base URL ["
+                << Anonymizer::anonymizeUrl(uploadBaseUri.toString()) << "] is relative");
         return;
     }
 

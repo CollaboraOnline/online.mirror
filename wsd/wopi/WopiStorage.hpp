@@ -336,11 +336,13 @@ private:
     void setWopiHeader(http::Request& httpRequest, const std::string& suffix,
                        const std::string& value);
 
-    /// Returns the URI with the path anonymized, optionally appending a suffix.
+    /// Returns the URI with the path and the authorization anonymized, optionally appending a
+    /// suffix to the path.
     std::string getAnonymizedUri(const std::string& pathSuffix = std::string()) const
     {
         Poco::URI uriAnonym(getUri());
         uriAnonym.setPath(Anonymizer::anonymizeUrl(uriAnonym.getPath()) + pathSuffix);
+        uriAnonym.setRawQuery(Anonymizer::hideAuthorization(uriAnonym.getRawQuery()));
         return uriAnonym.toString();
     }
 

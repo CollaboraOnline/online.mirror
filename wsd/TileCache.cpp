@@ -82,7 +82,7 @@ void TileCache::clear()
     for (std::map<std::string, Blob>& i : _streamCache)
         i.clear();
 
-    LOG_INF("Completely cleared tile cache for: " << _docURL);
+    LOG_INF("Completely cleared tile cache for: " << Anonymizer::anonymizeUrl(_docURL));
 }
 
 /// Tracks the rendering of a given tile

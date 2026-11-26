@@ -18,6 +18,7 @@
 
 #include "Authorization.hpp"
 
+#include <common/Anonymizer.hpp>
 #include <common/ConfigUtil.hpp>
 #include <common/Log.hpp>
 #include <common/NumUtil.hpp>
@@ -164,7 +165,8 @@ Authorization Authorization::create(const Poco::URI& uri)
         else if (rawExpiryEpoch > duration::zero())
         {
             LOG_WRN("Ignoring invalid access_token_ttl with ["
-                    << name(type) << "] authorization type in uri [" << uri.toString() << ']');
+                    << name(type) << "] authorization type in uri ["
+                    << Anonymizer::anonymizeUrl(uri.toString()) << ']');
         }
 
         return auth;

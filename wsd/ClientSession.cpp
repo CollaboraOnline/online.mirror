@@ -192,7 +192,8 @@ ClientSession::ClientSession(const std::shared_ptr<ProtocolHandlerInterface>& ws
     , _firstTileSent(false)
 {
     const std::size_t curConnections = ++COOLWSD::NumConnections;
-    LOG_INF("ClientSession ctor [" << getName() << "] for URI: [" << _uriPublic.toString()
+    LOG_INF("ClientSession ctor [" << getName() << "] for URI: ["
+                                   << Anonymizer::anonymizeUrl(_uriPublic.toString())
                                    << "], current number of connections: " << curConnections);
 
     // Emit metadata Trace Events for the synthetic pid used for the Trace Events coming in from the
@@ -2721,7 +2722,8 @@ void ClientSession::uploadSettingsToWopiHost(const std::string& filePath,
         // A relative URI has no host to send the request to.
         if (uriObject.isRelative())
         {
-            LOG_WRN("Not uploading " << settingName << ": WOPI base URL [" << uriObject.toString()
+            LOG_WRN("Not uploading " << settingName << ": WOPI base URL ["
+                                     << Anonymizer::anonymizeUrl(uriObject.toString())
                                      << "] is relative");
             return;
         }

@@ -18,6 +18,7 @@
 
 #include "HttpRequest.hpp"
 
+#include <common/Anonymizer.hpp>
 #include <common/HexUtil.hpp>
 #include <common/Log.hpp>
 #include <common/NumUtil.hpp>
@@ -1534,7 +1535,8 @@ bool Session::asyncRequest(const Request& req, const std::weak_ptr<SocketPoll>& 
     if (!socketPoll)
     {
         LOG_ERR("Cannot start new asyncRequest without a valid SocketPoll: "
-                << req.getVerb() << ' ' << host() << ':' << port() << ' ' << req.getUrl());
+                << req.getVerb() << ' ' << host() << ':' << port() << ' '
+                << Anonymizer::hideAuthorization(req.getUrl()));
 
         if (_onConnectFail)
         {
@@ -1998,8 +2000,9 @@ bool Session::checkTimeout(std::chrono::steady_clock::time_point now)
         (timeout > std::chrono::microseconds::zero() && duration > timeout) ||
         SigUtil::getTerminationFlag())
     {
-        LOG_WRN("CheckTimeout: Timeout while requesting [" << _request.getVerb() << ' ' << _host
-                                                           << _request.getUrl() << "] after " << duration);
+        LOG_WRN("CheckTimeout: Timeout while requesting ["
+                << _request.getVerb() << ' ' << _host
+                << Anonymizer::hideAuthorization(_request.getUrl()) << "] after " << duration);
 
         // Flag that we timed out.
         _response->timeout();

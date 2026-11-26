@@ -3398,7 +3398,7 @@ bool ClientRequestDispatcher::handleClientProxyRequest(const Poco::Net::HTTPRequ
     // cf. RequestVettingStation::handleRequest ...
     const std::string url = requestDetails.getDocumentURI();
 
-    LOG_INF("URL [" << url << "] for Proxy request.");
+    LOG_INF("URL [" << Anonymizer::anonymizeUrl(url) << "] for Proxy request.");
     auto uriPublic = RequestDetails::sanitizeURI(url);
     const auto docKey = RequestDetails::getDocKey(uriPublic);
     if (Anonymizer::enabled())

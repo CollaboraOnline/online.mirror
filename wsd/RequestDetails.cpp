@@ -18,6 +18,7 @@
 
 #include "RequestDetails.hpp"
 
+#include <common/Anonymizer.hpp>
 #include <common/HexUtil.hpp>
 #include <common/Log.hpp>
 #include <common/Util.hpp>
@@ -437,7 +438,8 @@ std::string RequestDetails::getDocKey(const Poco::URI& uri)
 #endif
 
     std::string docKey = Uri::encode(newUri);
-    LOG_INF("DocKey from URI [" << uri.toString() << "] => [" << docKey << ']');
+    LOG_INF("DocKey from URI [" << Anonymizer::anonymizeUrl(uri.toString()) << "] => [" << docKey
+                                << ']');
     return docKey;
 }
 
