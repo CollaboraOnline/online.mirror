@@ -1701,30 +1701,62 @@ std::optional<B2DPolyPolygon> solve(const B2DPolyPolygon& rCandidate, sal_uInt32
                 double fStartS, fEndS, fStartU, fEndU, fS, fU;
                 getFlatInterval(rA.mnPolygon, rA.mnSegment, getT(rA), fStartS, fEndS);
                 getFlatInterval(rB.mnPolygon, rB.mnSegment, getT(rB), fStartU, fEndU);
-                const bool bFound(crossByBisection(rCurveA, fStartS, fEndS, rCurveB, fStartU, fEndU,
-                                                   aPoint, fEpsilon, fS, fU));
-                double fNewtonS(fS), fNewtonU(fU);
-                if (findCrossingByNewton(rCurveA, fNewtonS, rCurveB, fNewtonU, 1e-12 * fExtent)
-                    && B2DVector(getPointAt(rCurveA, fNewtonS) - getPointAt(rCurveA, fS))
-                               .getLength()
-                           <= 10.0 * fEpsilon)
+                std::vector<std::pair<double, double>> aCandidates;
+                if (crossByBisection(rCurveA, fStartS, fEndS, rCurveB, fStartU, fEndU, aPoint,
+                                     fEpsilon, fS, fU))
                 {
-                    fS = fNewtonS;
-                    fU = fNewtonU;
+                    // where both cross at a flat angle the box search can be farther off along
+                    // them than its box size, so Newton steps that stay in the intervals searched
+                    // are taken
+                    double fNewtonS(fS), fNewtonU(fU);
+                    if (findCrossingByNewton(rCurveA, fNewtonS, rCurveB, fNewtonU, 1e-12 * fExtent)
+                        && fNewtonS >= fStartS && fNewtonS <= fEndS && fNewtonU >= fStartU
+                        && fNewtonU <= fEndU)
+                    {
+                        fS = fNewtonS;
+                        fU = fNewtonU;
+                    }
+                    aCandidates.emplace_back(fS, fU);
                 }
-                const B2DPoint aCrossing(getPointAt(rCurveA, fS));
-                // both segments really meet there, near the crossing of the flat edges; a segment
-                // that crosses itself keeps the order of both cuts
-                if (bFound
-                    && B2DVector(aCrossing - getPointAt(rCurveB, fU)).getLength() <= 4.0 * fEpsilon
-                    && B2DVector(aCrossing - aPoint).getLength() <= 1e-3 * fExtent && fits(rA, fS)
-                    && fits(rB, fU)
-                    && !(rA.mnPolygon == rB.mnPolygon && rA.mnSegment == rB.mnSegment
-                         && (fS < fU) != (getT(rA) < getT(rB))))
+                // where both run nearly the same way the true crossing can be farther away than a
+                // flat interval; Newton steps from the flat one find it. Two crossings close to
+                // each other lie on both sides of the flat one, Newton steps from the mirrored
+                // first one find the second
+                fS = getT(rA);
+                fU = getT(rB);
+                if (findCrossingByNewton(rCurveA, fS, rCurveB, fU, 1e-12 * fExtent))
                 {
-                    getT(rA) = fS;
-                    getT(rB) = fU;
-                    aPoint = aCrossing;
+                    aCandidates.emplace_back(fS, fU);
+                    double fMirroredS(2.0 * getT(rA) - fS), fMirroredU(2.0 * getT(rB) - fU);
+                    if (findCrossingByNewton(rCurveA, fMirroredS, rCurveB, fMirroredU,
+                                             1e-12 * fExtent))
+                        aCandidates.emplace_back(fMirroredS, fMirroredU);
+                }
+                // the nearest one where both segments really meet; a segment that crosses itself
+                // keeps the order of both cuts
+                double fBestDistance(1e-2 * fExtent), fBestS(-1.0), fBestU(-1.0);
+                for (const auto& [fCandidateS, fCandidateU] : aCandidates)
+                {
+                    const B2DPoint aCrossing(getPointAt(rCurveA, fCandidateS));
+                    const double fDistance(B2DVector(aCrossing - aPoint).getLength());
+                    if (fCandidateS >= 0.0 && fCandidateS <= 1.0 && fCandidateU >= 0.0
+                        && fCandidateU <= 1.0 && fDistance <= fBestDistance
+                        && B2DVector(aCrossing - getPointAt(rCurveB, fCandidateU)).getLength()
+                               <= 4.0 * fEpsilon
+                        && fits(rA, fCandidateS) && fits(rB, fCandidateU)
+                        && !(rA.mnPolygon == rB.mnPolygon && rA.mnSegment == rB.mnSegment
+                             && (fCandidateS < fCandidateU) != (getT(rA) < getT(rB))))
+                    {
+                        fBestDistance = fDistance;
+                        fBestS = fCandidateS;
+                        fBestU = fCandidateU;
+                    }
+                }
+                if (fBestS >= 0.0)
+                {
+                    getT(rA) = fBestS;
+                    getT(rB) = fBestU;
+                    aPoint = getPointAt(rCurveA, fBestS);
                     aOpen.erase(aOpen.begin(), aOpen.begin() + 2);
                 }
             }

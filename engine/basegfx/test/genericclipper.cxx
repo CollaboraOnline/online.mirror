@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <algorithm>
 #include <cmath>
 
 #include <cppunit/TestAssert.h>
@@ -345,6 +346,28 @@ public:
                   1e-7);
     }
 
+    void testAreasCrossingAtFlatAngle()
+    {
+        // two circles crossing at a flat angle, their And meets them where the true curves cross
+        const double fDistance(20.0 * std::cos(0.037 / 2.0));
+        const B2DPolyPolygon aAnd(utils::solvePolygonOperationAnd(
+            B2DPolyPolygon(utils::createPolygonFromCircle(B2DPoint(0, 0), 10)),
+            B2DPolyPolygon(utils::createPolygonFromCircle(B2DPoint(fDistance, 0), 10))));
+        CPPUNIT_ASSERT_EQUAL(sal_uInt32(1), aAnd.count());
+        const B2DPolygon aOutline(aAnd.getB2DPolygon(0));
+        // the true crossings, found by bisection on the curves
+        for (const B2DPoint& rCrossing :
+             { B2DPoint(9.99828879880572, 0.18501108197252),
+               B2DPoint(9.99828879880572, -0.18501108197252) })
+        {
+            double fNearest(1.0);
+            for (sal_uInt32 a = 0; a < aOutline.count(); a++)
+                fNearest = std::min(fNearest,
+                                    B2DVector(aOutline.getB2DPoint(a) - rCrossing).getLength());
+            CPPUNIT_ASSERT_LESS(1e-9, fNearest);
+        }
+    }
+
     CPPUNIT_TEST_SUITE(genericclipper);
     CPPUNIT_TEST(validateOr);
     CPPUNIT_TEST(validateXor);
@@ -358,6 +381,7 @@ public:
     CPPUNIT_TEST(testLineOnClipBorder);
     CPPUNIT_TEST(testLineOfNoLength);
     CPPUNIT_TEST(testLineNearCrossingOutlines);
+    CPPUNIT_TEST(testAreasCrossingAtFlatAngle);
     CPPUNIT_TEST_SUITE_END();
 };
 
