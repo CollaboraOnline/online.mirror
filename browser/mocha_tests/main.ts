@@ -137,6 +137,7 @@
 /// <reference path="./ExportFormats.test.ts" />
 /// <reference path="./Tooltip.test.ts" />
 /// <reference path="./CollabNotices.test.ts" />
+/// <reference path="./AppDarkThemeOrder.test.ts" />
 /// <reference path="./CollabProtocol.test.ts" />
 /// <reference path="./CollabUsers.test.ts" />
 /// <reference path="./CollabToken.test.ts" />

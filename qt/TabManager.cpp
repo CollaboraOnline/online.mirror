@@ -48,6 +48,7 @@
 #include <QFrame>
 #include <QGraphicsDropShadowEffect>
 #include <QLabel>
+#include <QPalette>
 #include <QPixmap>
 #include <QStackedWidget>
 #include <QString>
@@ -72,9 +73,7 @@ constexpr int kShellHeight = 36;
 QString& currentTheme()
 {
     static QString theme =
-        Desktop::getDarkMode().value_or(portalPrefersDark().value_or(false))
-            ? QStringLiteral("dark")
-            : QStringLiteral("light");
+        coda::prefersDarkMode() ? QStringLiteral("dark") : QStringLiteral("light");
     return theme;
 }
 
@@ -931,6 +930,35 @@ void TabManager::applyTheme(const QString& theme)
     currentTheme() =
         (theme == QStringLiteral("dark")) ? QStringLiteral("dark") : QStringLiteral("light");
     emit _shellBridge->themeChanged(currentTheme());
+    applyBackgroundColor();
+}
+
+void TabManager::applyBackgroundColor()
+{
+    const QColor background =
+        coda::themeBackgroundColor(currentTheme() == QStringLiteral("dark"));
+    const auto paint = [&background](QWidget* widget)
+    {
+        if (!widget)
+            return;
+        QPalette palette = widget->palette();
+        palette.setColor(QPalette::Window, background);
+        widget->setPalette(palette);
+        widget->setAutoFillBackground(true);
+    };
+
+    // The window clears its whole area, the tab strip's included, when the layout changes.
+    paint(_window);
+    paint(_window->centralWidget());
+    paint(_stack);
+
+    for (Entry& entry : _tabs)
+    {
+        if (entry.placeholder)
+            paint(entry.placeholder);
+        if (entry.webView && !entry.webView->isViewDiscarded())
+            entry.webView->webEngineView()->page()->setBackgroundColor(background);
+    }
 }
 
 void TabManager::showTabContextMenu(int tabId, int x, int y)

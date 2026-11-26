@@ -36,6 +36,9 @@ TabbedWindow::TabbedWindow(QWebEngineProfile* profile, QWidget* parent)
     layout->addWidget(_manager->shellWidget());
     layout->addWidget(_manager->stackWidget(), /*stretch*/ 1);
     setCentralWidget(central);
+    // Before the first tab, so that the window never shows the Qt palette behind a view
+    // that is on screen but has not painted yet.
+    _manager->applyBackgroundColor();
 
     connect(_manager, &TabManager::requestWindowClose, this, &QMainWindow::close);
 

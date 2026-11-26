@@ -19,6 +19,7 @@
 
 #include <QCloseEvent>
 #include <QGuiApplication>
+#include <QPalette>
 #include <QScreen>
 
 #include <utility>
@@ -46,6 +47,13 @@ StandaloneWindow::StandaloneWindow(WebView* webView, QWidget* parent)
 {
     setCentralWidget(webView->webEngineView());
     webView->setMainWindow(this);
+
+    // The view is on screen before it has painted, and Qt's palette is light whatever the
+    // desktop theme says, so without this a dark page would show a white window first.
+    QPalette palette = this->palette();
+    palette.setColor(QPalette::Window, coda::themeBackgroundColor(coda::prefersDarkMode()));
+    setPalette(palette);
+    setAutoFillBackground(true);
 
     const bool isWelcome = webView->isWelcome();
     if (isWelcome)

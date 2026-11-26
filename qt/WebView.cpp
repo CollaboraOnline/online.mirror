@@ -824,7 +824,7 @@ void WebView::createWebEngineView()
 
     QWebEnginePage* page = new LoggingWebEnginePage(_profile, _webView.get());
     _webView->setPage(page);
-    page->setBackgroundColor(Qt::transparent);
+    page->setBackgroundColor(coda::themeBackgroundColor(coda::prefersDarkMode()));
 
     seedPrefs(page);
 
@@ -1337,11 +1337,20 @@ Poco::URI::QueryParameters coda::pageSettings(bool forDocument)
     if (forDocument && messageDelay > 0)
         settings.emplace_back("messagedelay", std::to_string(messageDelay));
 
-    // Dark mode: the user's saved choice wins, otherwise follow the system theme.
-    const bool darkMode = Desktop::getDarkMode().value_or(portalPrefersDark().value_or(false));
-    settings.emplace_back("darkTheme", darkMode ? "true" : "false");
+    settings.emplace_back("darkTheme", coda::prefersDarkMode() ? "true" : "false");
 
     return settings;
+}
+
+bool coda::prefersDarkMode()
+{
+    // The user's saved choice wins, otherwise follow the system theme.
+    return Desktop::getDarkMode().value_or(portalPrefersDark().value_or(false));
+}
+
+QColor coda::themeBackgroundColor(bool dark)
+{
+    return dark ? QColor(0x12, 0x12, 0x12) : QColor(0xf8, 0xf9, 0xfa);
 }
 
 QString WebView::createNewDocumentFile(const std::string& templateType, const std::string& templatePath, const std::string& basename)

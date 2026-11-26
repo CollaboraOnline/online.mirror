@@ -49,6 +49,15 @@ m4_dnl# and stylesheet, because a meta policy covers only what follows it.
 m4_ifelse(APP, [true], [m4_ifelse(EMSCRIPTENAPP, [true], [],
 [<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' file: m4_ifelse(QTAPP, [true], [qrc: ])'unsafe-eval'; style-src 'self' file:; font-src 'self' file:; img-src 'self' file: data: blob: cool: https://www.collaboraoffice.com/; media-src 'self' file: blob: cool:m4_ifelse(WINDOWSAPP, [true], [ https://coda-media.invalid]); connect-src 'self' file: cool: https: wss:; frame-src 'self' file: blob: https:; object-src 'self' file:">
 ])])m4_dnl
+m4_dnl# The apps apply the loading screen theme with this script. It goes here, at the top of
+m4_dnl# <head>, for two reasons: it has to run before the stylesheets below so that the very
+m4_dnl# first paint is already in the right palette, and it has to come before the hidden
+m4_dnl# <input> elements, which are not allowed in <head> and close it, so that anything after
+m4_dnl# them lands in <body> and only runs once the page has painted. It is a file of its own
+m4_dnl# because the Content-Security-Policy above allows no inline script, and it follows that
+m4_dnl# meta tag, which covers only what comes after it.
+m4_ifelse(APP, [true], [<script src="app-dark-theme.js"></script>
+])m4_dnl
 m4_ifelse(APP, [true],
 [
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, interactive-widget=resizes-content">
@@ -110,13 +119,10 @@ m4_ifelse(APP,[true],[],
    <link rel="localizations" href="%SERVICE_ROOT%/browser/%VERSION%/l10n/help-localizations.json" type="application/vnd.oftn.l10n+json"/>
    <link rel="localizations" href="%SERVICE_ROOT%/browser/%VERSION%/l10n/uno-localizations.json" type="application/vnd.oftn.l10n+json"/>]
 )m4_dnl
-m4_dnl# In the browser the loading screen theme is applied server-side (see the
-m4_dnl# %DARK_THEME_ATTR% attribute and the %DARK_THEME_CSS% placeholder below). The apps apply
-m4_dnl# it with this script, which is a file of its own because the app Content-Security-Policy
-m4_dnl# above allows no inline script.
-m4_ifelse(APP, [true],
-[<script src="app-dark-theme.js"></script>],
-[<!--%DARK_THEME_CSS%-->])
+m4_dnl# In the browser the loading screen theme is applied server-side: coolwsd fills in the
+m4_dnl# %DARK_THEME_ATTR% attribute on <html> and this placeholder. The apps apply it with
+m4_dnl# app-dark-theme.js, at the top of <head> above.
+m4_ifelse(APP, [true], [], [<!--%DARK_THEME_CSS%-->])
 </head>
 
   <body[]m4_ifelse(QTAPP, [true], [ class="qt-app"])>

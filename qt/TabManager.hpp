@@ -120,6 +120,7 @@ public:
     // first state push is not lost to a signal emitted before JS was ready.
     void emitInitialState();
     void applyTheme(const QString& theme);
+    void applyBackgroundColor();
 
     void showTabContextMenu(int tabId, int x, int y);
 

@@ -18,6 +18,7 @@
 #include <set>
 #include <string>
 
+#include <QColor>
 #include <QElapsedTimer>
 #include <QImage>
 #include <QJsonObject>
@@ -44,6 +45,14 @@ class QMimeData;
 namespace coda
 {
 Poco::URI::QueryParameters pageSettings(bool forDocument);
+
+// Whether the app renders dark.
+bool prefersDarkMode();
+
+// What a window and its pages are cleared with until the page has painted, so that neither
+// the Qt palette nor an unpainted surface shows through a view that is on screen but still
+// loading. This is --color-main-background of browser/css/color-palette{,-dark}.css.
+QColor themeBackgroundColor(bool dark);
 } // namespace coda
 
 // The language of the user interface, such as "pt-BR", from the locale environment variables, or
