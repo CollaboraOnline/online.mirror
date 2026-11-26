@@ -26,18 +26,7 @@ $(packimages_DIR)/images_%.zip : DEFAULT_THEME :=
 # tdf#124023 make links.txt depend on phony sorted.lst depend
 # so this is evaluated every time
 $(packimages_DIR)/%_links.txt : $(packimages_DIR)/sorted.lst
-	@if test -f "$(SRCDIR)/icon-themes/$*/links.txt"; then \
-		cp "$(SRCDIR)/icon-themes/$*/links.txt" $@.tmp ; \
-	else \
-		THEME_FILE="$(SRCDIR)/icon-themes/$(subst _svg,,$*)/links.txt" ; \
-		if test -f "$${THEME_FILE}"; then \
-			sed 's/\.png/\.svg/g' "$${THEME_FILE}" > $@.tmp ; \
-		fi ; \
-		THEME_FILE="$(SRCDIR)/icon-themes/$(subst _dark,,$*)/links.txt" ; \
-		if test -f "$${THEME_FILE}"; then \
-			cp "$${THEME_FILE}" $@.tmp ; \
-		fi ; \
-	fi
+	cp "$(SRCDIR)/icon-themes/$*/links.txt" $@.tmp
 	$(call gb_Helper_replace_if_different_and_touch,$@.tmp,$@)
 
 $(packimages_DIR)/images_%.zip : \

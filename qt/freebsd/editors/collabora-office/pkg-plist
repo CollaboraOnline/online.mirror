@@ -1616,7 +1616,6 @@ lib/collaboraoffice/share/classification/example_pt-BR.xml
 lib/collaboraoffice/share/classification/example_sl-SI.xml
 lib/collaboraoffice/share/classification/example_zh-CN.xml
 lib/collaboraoffice/share/config/images_colibre.zip
-lib/collaboraoffice/share/config/images_colibre_svg.zip
 lib/collaboraoffice/share/config/soffice.cfg/cui/ui/acorexceptpage.ui
 lib/collaboraoffice/share/config/soffice.cfg/cui/ui/acoroptionspage.ui
 lib/collaboraoffice/share/config/soffice.cfg/cui/ui/acorreplacepage.ui

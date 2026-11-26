@@ -197,7 +197,7 @@ parts:
         --with-system-openssl \
         --with-system-zlib \
         --with-system-zstd \
-        --with-theme="colibre colibre_svg" \
+        --with-theme=colibre \
         --with-vendor="Collabora Productivity Limited" \
         --without-buildconfig-recorded \
         --without-help \

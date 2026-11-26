@@ -501,7 +501,7 @@ void ImplImageTree::createStyle()
     if (isVclDemo())
     {
         if (maCurrentStyle == "default")
-            sThemeUrl = u"file://"_ustr SRC_ROOT "/icon-themes/colibre-svg";
+            sThemeUrl = u"file://"_ustr SRC_ROOT "/icon-themes/colibre";
         else
             sThemeUrl = "file://" SRC_ROOT "/icon-themes/" + maCurrentStyle;
     }

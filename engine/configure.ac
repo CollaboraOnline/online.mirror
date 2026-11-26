@@ -2186,7 +2186,7 @@ AC_ARG_WITH(templates,
 AC_ARG_WITH(theme,
     AS_HELP_STRING([--with-theme="theme1 theme2..."],
         [Choose which themes to include. By default those themes with an '*' are included.
-         Possible choices: *colibre, *colibre_svg, *colibre_dark, *colibre_dark_svg.]),
+         Possible choices: *colibre.]),
 ,)
 
 libo_FUZZ_ARG_WITH(helppack-integration,
@@ -12141,19 +12141,35 @@ dnl ===================================================================
 AC_MSG_CHECKING([which themes to include])
 # if none given use default subset of available themes
 if test "x$with_theme" = "x" -o "x$with_theme" = "xyes"; then
-    with_theme="colibre colibre_svg colibre_dark colibre_dark_svg"
+    with_theme="colibre"
 fi
 
 WITH_THEMES=""
+dropped_themes=""
 if test "x$with_theme" != "xno"; then
     for theme in $with_theme; do
         case $theme in
-        colibre|colibre_svg|colibre_dark|colibre_dark_svg) WITH_THEMES="${WITH_THEMES:+$WITH_THEMES }$theme" ;;
+        colibre_svg)
+            # The theme is SVG-only, the _svg name is kept for old configurations.
+            theme="colibre" ;;
+        esac
+        case $theme in
+        colibre)
+            case " $WITH_THEMES " in
+            *" $theme "*) ;;
+            *) WITH_THEMES="${WITH_THEMES:+$WITH_THEMES }$theme" ;;
+            esac ;;
+        colibre_dark|colibre_dark_svg)
+            # The dark theme is gone, the name is kept for old configurations.
+            dropped_themes="${dropped_themes:+$dropped_themes }$theme" ;;
         *) AC_MSG_ERROR([Unknown value for --with-theme: $theme]) ;;
         esac
     done
 fi
 AC_MSG_RESULT([$WITH_THEMES])
+if test -n "$dropped_themes"; then
+    add_warning "--with-theme: the dark icon theme was removed, ignoring $dropped_themes"
+fi
 AC_SUBST([WITH_THEMES])
 
 AC_MSG_CHECKING([whether to build opens___.ttf])

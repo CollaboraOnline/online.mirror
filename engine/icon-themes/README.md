@@ -64,17 +64,14 @@ in `officecfg/registry/data/org/openoffice/Office/UI/CalcCommands.xcu`
 
 - Now, you need to add 2 new icon images under `icon-themes/colibre/cmd/`, one
   for the large size and one for the smaller size.  The name of each image
-  must be `lc_<command name>.png` and `sc_<command name>.png`.  Here, the command
+  must be `lc_<command name>.svg` and `sc_<command name>.svg`.  Here, the command
   name is the name given in the above `.xcu` file without the `.uno:` prefix and
   all its letters lower-cased.  In this example, the file names will be
-  `lc_openfromcalc.png` and `sc_openfromcalc.png`.  Note that you need to add new
+  `lc_openfromcalc.svg` and `sc_openfromcalc.svg`.  Note that you need to add new
   images to the colibre theme for them to show up in any themes at all.
 
-## How to Call optipng to Optimize Size
-
-8 bit palettes are on the slow path for `quartz/svp/gtk3` so avoid using palettes with...
-
-    $ optipng -nc <file>
+The themes hold SVG images only. Code and `.ui` files keep referring to images by
+their `.png` names; the image loader finds the `.svg` file of the same name.
 
 ## How to minify SVG files
 

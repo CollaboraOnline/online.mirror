@@ -8,8 +8,8 @@
 #
 
 import os
-
-from PIL import Image
+import re
+import xml.etree.ElementTree as ET
 
 """
 This script walks through all icon files and checks whether the sc_* and lc_* files have the correct size.
@@ -17,15 +17,27 @@ This script walks through all icon files and checks whether the sc_* and lc_* fi
 
 icons_folder = os.path.abspath(os.path.join(__file__, '..', '..', 'icon-themes'))
 
+def svg_size(filename):
+    root = ET.parse(filename).getroot()
+    width = root.get('width')
+    height = root.get('height')
+    try:
+        if width is None or height is None:
+            width, height = root.get('viewBox', '').replace(',', ' ').split()[2:4]
+        return (float(re.sub(r'px$', '', width)), float(re.sub(r'px$', '', height)))
+    except ValueError:
+        return None
+
 def check_size(filename, size):
-    image = Image.open(filename)
-    width, height = image.size
-    if width != size or height != size:
-        print("%s has size %dx%d but should have %dx%d" % (filename, width, height, size, size))
+    dimensions = svg_size(filename)
+    if dimensions is None:
+        print("%s has no size" % filename)
+    elif dimensions != (size, size):
+        print("%s has size %gx%g but should have %dx%d" % (filename, dimensions[0], dimensions[1], size, size))
 
 for root, dirs, files in os.walk(icons_folder):
     for filename in files:
-        if not filename.endswith('png'):
+        if not filename.endswith('.svg'):
             continue
         if filename.startswith('lc_'):
             check_size(os.path.join(root, filename), 24)

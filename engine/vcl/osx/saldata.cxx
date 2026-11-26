@@ -23,10 +23,7 @@
 #include <osx/saldata.hxx>
 #include <osx/salinst.h>
 #include <o3tl/enumarray.hxx>
-#include <tools/stream.hxx>
-#include <vcl/ImageTree.hxx>
-#include <vcl/settings.hxx>
-#include <i18nlangtag/languagetag.hxx>
+#include <vcl/image.hxx>
 #include <sal/log.hxx>
 #include <bitmaps.hlst>
 #include <cursor_hotspots.hxx>
@@ -108,22 +105,10 @@ void SalData::ensureThreadAutoreleasePool()
 
 namespace {
 
+// The icon themes hold SVG images, Image decodes them.
 NSImage* load_icon_by_name(const OUString& rIconName)
 {
-    OUString sIconTheme = Application::GetSettings().GetStyleSettings().DetermineIconTheme();
-    OUString sUILang = Application::GetSettings().GetUILanguageTag().getBcp47();
-    auto xMemStm = ImageTree::get().getImageStream(rIconName, sIconTheme, sUILang);
-    if (!xMemStm)
-        return nullptr;
-
-    auto data = xMemStm->GetData();
-    auto length = xMemStm->TellEnd();
-    NSData * byteData = [NSData dataWithBytes:data length:length];
-    NSBitmapImageRep * imageRep = [NSBitmapImageRep imageRepWithData:byteData];
-
-    NSImage * image = [[NSImage alloc] initWithSize:imageRep.size];
-    [image addRepresentation:imageRep];
-    return image;
+    return CreateNSImage(Image(StockImage::Yes, rIconName));
 }
 
 }

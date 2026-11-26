@@ -5154,8 +5154,7 @@
           <desc>Specifies which style of the symbols is used for the toolbars,
           menus, etc.: "auto" means chosen according to the desktop; "default"
           means the LibreOffice default theme; other possible values are the
-          names of the various icon themes ("colibre", "colibre_dark",
-          etc.).</desc>
+          names of the various icon themes ("colibre", etc.).</desc>
         </info>
         <value>auto</value>
       </prop>
