@@ -38,6 +38,8 @@
 #include <Poco/SHA2Engine.h>
 #include <Poco/URI.h>
 
+#include <atomic>
+
 namespace {
 
 // How often a download is tried again after a temporary error or no answer from the host:
@@ -223,30 +225,43 @@ void CollabFileProxy::releaseLock(std::shared_ptr<SocketPoll> const & poll,
         return;
     }
 
+    // If the broker did not run the check, we unlock here, so the client still gets its answer.
+    const auto unlockIfDropped = [lockUri = _lockUri, docKey, poll, afterUnlock](std::atomic<bool>* ran) {
+        if (!*ran) {
+            poll->addCallback([=]() {
+                sendUnlock(lockUri, docKey, poll, afterUnlock);
+            });
+        }
+        delete ran;
+    };
+
+    std::shared_ptr<std::atomic<bool>> const ran(new std::atomic<bool>(false), unlockIfDropped);
+
     // An editor on /cool/ws holds the lock with the same token and still needs it. Only viewers
     // there hold none. The UNLOCK finishes on this thread before a /cool/ws editor can LOCK here.
-    const bool queued = docBroker->addCallback([docBroker, lockUri = _lockUri, docKey]() {
+    // The client hears back only after this, so its next save cannot race the UNLOCK.
+    const auto unlockUnlessEditing = [docBroker, lockUri = _lockUri, docKey, poll, afterUnlock, ran]() {
+        *ran = true;
         if (docBroker->isLockedInStorage())
-        {
             LOG_DBG_S("CollabFileProxy: not unlocking, an editor on /cool/ws holds the lock");
-            return;
-        }
+        else
+            sendUnlockAndWait(lockUri, docKey);
 
-        sendUnlockAndWait(lockUri, docKey);
-    });
+        if (afterUnlock)
+            poll->addCallback(afterUnlock);
+    };
+
+    const bool queued = docBroker->addCallback(unlockUnlessEditing);
 
     // A broker whose thread is not running holds no lock. It never loaded the
     // document, as for an editor form, or it released its lock when it unloaded.
     if (!queued)
     {
+        *ran = true;
         LOG_DBG("CollabFileProxy: unlocking, the broker on /cool/ws is not running");
         sendUnlock(_lockUri, docKey, poll, afterUnlock);
         return;
     }
-
-    // Only the broker's thread can tell whether an editor holds the lock, so we go on at once:
-    if (afterUnlock)
-        afterUnlock();
 }
 
 void CollabFileProxy::handleFetchRequest(const std::string& streamUrl, bool wopiContents,
