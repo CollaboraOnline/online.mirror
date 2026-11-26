@@ -36,6 +36,10 @@ void JSDialogNotifyIdle::send(const OString& sMsg)
         return;
     }
 
+    // An empty message has nothing to send, and a forced send stays pending for the next one.
+    if (sMsg.isEmpty())
+        return;
+
     const vcl::ICOKitNotifier* pNotifier = m_aNotifierWindow->GetKitNotifier();
     if (!pNotifier || !pNotifier->acceptsViewCallback(COKitCallbackType::JSDIALOG))
         return;
@@ -85,7 +89,7 @@ void JSDialogNotifyIdle::sendMessage(const jsdialog::MessageType eType,
 
 OString JSDialogNotifyIdle::generateFullUpdate() const
 {
-    if (!m_aContentWindow || !m_aNotifierWindow)
+    if (!m_aContentWindow || m_aContentWindow->isDisposed() || !m_aNotifierWindow)
         return OString();
 
     tools::JsonWriter aJsonWriter;
@@ -292,6 +296,13 @@ void JSDialogNotifyIdle::Invoke()
         jsdialog::MessageType eType = rMessage.m_eType;
 
         if (m_sTypeOfJSON == "formulabar" && eType != jsdialog::MessageType::Action)
+            continue;
+
+        // The message keeps its widget alive, but the widget can be disposed before this idle
+        // runs, e.g. when its dialog closes in the meantime. Then there is nothing left to send
+        // about it, and dumping it would read its implementation, which is gone.
+        if ((rMessage.m_pWindow && rMessage.m_pWindow->isDisposed())
+            || (rMessage.m_pMenu && rMessage.m_pMenu->isDisposed()))
             continue;
 
         try

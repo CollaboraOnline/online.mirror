@@ -3114,6 +3114,11 @@ VclScrolledWindow::~VclScrolledWindow()
 
 void VclDrawingArea::DumpAsPropertyTree(tools::JsonWriter& rJsonWriter)
 {
+    // As in vcl::Window::DumpAsPropertyTree, a disposed window has nothing to dump, and its
+    // size and painting would read its implementation, which is gone.
+    if (isDisposed())
+        return;
+
     Control::DumpAsPropertyTree(rJsonWriter);
     rJsonWriter.put("type", "drawingarea");
 
