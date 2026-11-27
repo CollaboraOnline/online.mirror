@@ -739,12 +739,6 @@ if test "$build_os" = "cygwin"; then
     PathFormat "$BUILDDIR"
     BUILDDIR="$formatted_path"
     x_Cygwin=
-    AC_MSG_CHECKING(for explicit COMSPEC)
-    if test -z "$COMSPEC"; then
-        AC_MSG_ERROR([COMSPEC not set in environment, please set it and rerun])
-    else
-        AC_MSG_RESULT([found: $COMSPEC])
-    fi
 fi
 
 if test "$build_os" = "cygwin" -o "$build_os" = "wsl" -o -n "$UNIX_ONLY_AS_HELPER"; then
