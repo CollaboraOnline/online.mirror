@@ -687,9 +687,9 @@ window.L.ImpressTileLayer = window.L.CanvasTileLayer.extend({
 				const firstPart =
 					statusJSON.parts.length > 0 ? statusJSON.parts[0] : {};
 				const gridSnapEnabled =
-					statusJSON.gridSnapEnabled !== undefined
-						? statusJSON.gridSnapEnabled
-						: firstPart.gridSnapEnabled;
+					statusJSON.gridSnapEnabled !== undefined ?
+						statusJSON.gridSnapEnabled
+					:	firstPart.gridSnapEnabled;
 				if (gridSnapEnabled !== undefined)
 					app.map.fire('commandstatechanged', {
 						commandName: '.uno:GridUse',
@@ -697,9 +697,9 @@ window.L.ImpressTileLayer = window.L.CanvasTileLayer.extend({
 					});
 
 				const gridVisible =
-					statusJSON.gridVisible !== undefined
-						? statusJSON.gridVisible
-						: firstPart.gridVisible;
+					statusJSON.gridVisible !== undefined ?
+						statusJSON.gridVisible
+					:	firstPart.gridVisible;
 				if (gridVisible !== undefined)
 					app.map.fire('commandstatechanged', {
 						commandName: '.uno:GridVisible',
