@@ -422,6 +422,10 @@ void SwBaseShell::ExecClpbrd(SfxRequest &rReq)
                                     pParaAttrs->ClearItem(nWhich);
                                 }
                             }
+                            // List level is from the source, but shifted by the destination:
+                            pParaAttrs->Put(SfxInt16Item(
+                                RES_PARATR_LIST_LEVEL,
+                                static_cast<sal_Int16>(pDestNode->GetAttrListLevel())));
                             // Remember the char properties of a hint over the paste position:
                             auto pCharAttrs = std::make_shared<SfxItemSet>(pDestNode->GetSwAttrSet());
                             pCharAttrs->ClearItem();

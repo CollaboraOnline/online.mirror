@@ -14,10 +14,12 @@
 #include <comphelper/propertyvalue.hxx>
 #include <comphelper/scopeguard.hxx>
 #include <editeng/fhgtitem.hxx>
+#include <svl/intitem.hxx>
 
 #include <doc.hxx>
 #include <frameformats.hxx>
 #include <frmatr.hxx>
+#include <hintids.hxx>
 #include <ndtxt.hxx>
 #include <swtable.hxx>
 #include <docsh.hxx>
@@ -227,11 +229,16 @@ CPPUNIT_TEST_FIXTURE(Test, testMergedPasteListLevelShiftOdt)
     // When pasting a three-level list through the ODT path, with merged paste:
     pDoc->SetInMergedPaste(true);
     pDoc->SetMergedPasteOrigDestNode(pOrigDest);
+    auto pParaAttrs = std::make_shared<SfxItemSet>(pOrigDest->GetSwAttrSet());
+    pParaAttrs->Put(SfxInt16Item(RES_PARATR_LIST_LEVEL,
+                                 static_cast<sal_Int16>(pOrigDest->GetAttrListLevel())));
+    pDoc->SetMergedPasteParaAttrs(pParaAttrs);
     comphelper::ScopeGuard g(
         [pDoc]
         {
             pDoc->SetInMergedPaste(false);
             pDoc->SetMergedPasteOrigDestNode(nullptr);
+            pDoc->SetMergedPasteParaAttrs(nullptr);
         });
     cpo::uno::Sequence<css::beans::PropertyValue> aArgs = { comphelper::makePropertyValue(
         u"Name"_ustr, createFileURL(u"merged-paste-list-source.odt")) };

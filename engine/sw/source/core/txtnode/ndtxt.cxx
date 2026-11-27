@@ -4502,11 +4502,12 @@ void SwTextNode::SetAttrListLevel( int nLevel )
     if (GetDoc().IsInMergedPaste())
     {
         // Merged paste: set list level relative to the paste position's level.
-        if (const SwNode* pOrigDest = GetDoc().GetMergedPasteOrigDestNode())
+        if (const SfxItemSet* pParaAttrs = GetDoc().GetMergedPasteParaAttrs())
         {
-            if (const SwTextNode* pOrigDestTextNode = pOrigDest->GetTextNode())
+            if (const SfxInt16Item* pDestLevel
+                = pParaAttrs->GetItem<SfxInt16Item>(RES_PARATR_LIST_LEVEL, false))
             {
-                int nShift = pOrigDestTextNode->GetAttrListLevel();
+                int nShift = pDestLevel->GetValue();
                 if (nShift > 0)
                 {
                     nLevel = std::min(nLevel + nShift, static_cast<int>(MAXLEVEL) - 1);
@@ -5469,6 +5470,8 @@ bool SwTextNode::SetAttr( const SfxItemSet& rSet, std::optional<bool> oInMergedP
                 aFiltered.Put(*pCharAttrs);
             }
         }
+        // The list level is handled in SwTextNode::SetAttrListLevel(), skip it here.
+        aFiltered.ClearItem(RES_PARATR_LIST_LEVEL);
     }
 
     HandleSetAttrAtTextNode aHandleSetAttr( *this, aFiltered );
