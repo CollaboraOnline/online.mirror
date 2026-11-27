@@ -817,7 +817,10 @@ class Socket {
 				window.errorMessages.sessionexpired
 			:	window.errorMessages.sessionexpiry;
 		const timerepr = Util.humanizeDuration(remainingMs, 1);
-		this._map.fire('warn', { msg: expirymsg.replace('{time}', timerepr) });
+
+		// The user is warned only when the host left the first request without a new token.
+		if (this._accessTokenExpireWarningCount > 0)
+			this._map.fire('warn', { msg: expirymsg.replace('{time}', timerepr) });
 
 		// Notify the host so it can refresh the token programmatically.
 		this._map.fire('postMessage', {
