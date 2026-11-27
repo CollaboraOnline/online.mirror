@@ -3080,6 +3080,8 @@ function showWelcomeSVG() {
 							global.app.console.log('Collab notification WebSocket closed');
 							global.collab.ws = null;
 							global.collab.coolServer = '';
+							if (global.collab.onDisconnect)
+								global.collab.onDisconnect();
 						};
 						resolve(msg.fileInfo);
 					} else if (msg.type === 'error') {
@@ -3304,6 +3306,7 @@ function showWelcomeSVG() {
 	// Send bye on the collab WS and close it. The broker then reclaims itself
 	// at once, rather than waiting out its grace period for a reconnect.
 	global.collab.leave = function() {
+		global.collab.left = true;
 		if (!global.collab.ws)
 			return;
 

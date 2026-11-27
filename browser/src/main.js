@@ -184,6 +184,45 @@ var _codaUploadOnSave = function(fileBytes, tag, force) {
 	});
 };
 
+// The wait before the next reconnect, zero until a try fails.
+let _codaReconnectDelay = 0;
+
+// A remote document reconnects after its collab connection drops, so others see it
+// again. Each failed try doubles the wait, up to a minute.
+const _codaReconnect = function() {
+	const firstDelay = 2 * 1000;
+	const maxDelay = 60 * 1000;
+
+	const info = window._codaRemoteInfo;
+	const ws = global.collab.ws;
+
+	const isRemoteDocument = !!info;
+	const isClosing = global.collab.left;
+	const isOnServer = global.collab.switchedToServer;
+	if (!isRemoteDocument || isClosing || isOnServer)
+		return;
+
+	const isConnectedOrConnecting = ws && ws.readyState !== WebSocket.CLOSED;
+	if (isConnectedOrConnecting)
+		return;
+
+	const rejoin = function() {
+		_codaReconnectDelay = 0;
+		if (map.isEditMode())
+			map._sendEditingStarted();
+	};
+
+	const retryLater = function(err) {
+		window.app.console.log('CODA: collab reconnect failed: ' + err.message);
+		_codaReconnectDelay = Math.min(_codaReconnectDelay * 2 || firstDelay, maxDelay);
+		app.timerRegistry.setTimeout('collab-reconnect', _codaReconnect, _codaReconnectDelay);
+	};
+
+	global.collab.connect(info.wopiSrc, info.accessToken, info.coolServer).then(rejoin, retryLater);
+};
+
+global.collab.onDisconnect = _codaReconnect;
+
 // Download the templates that the cloud account of this document lists. Only the Qt app stores
 // them, from its editor page in an account window.
 const _codaSyncAccountPresets = function() {
