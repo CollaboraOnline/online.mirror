@@ -63,6 +63,16 @@ public:
     bool isCaseSensitive() const {return m_bCaseSensitive;}
 };
 
+/// transparent, for lookups by a string view
+struct compareIgnoreAsciiCaseLess
+{
+    using is_transparent = void;
+    bool operator()(std::u16string_view lhs, std::u16string_view rhs) const
+    {
+        return o3tl::compareToIgnoreAsciiCase(lhs, rhs) < 0;
+    }
+};
+
 /// by-value less functor for std::set<std::unique_ptr<T>>
 template<class T> struct UniquePtrValueLess
 {

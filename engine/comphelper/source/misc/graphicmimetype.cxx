@@ -32,6 +32,7 @@
 
 #include <comphelper/processfactory.hxx>
 #include <comphelper/propertyvalue.hxx>
+#include <comphelper/stl_types.hxx>
 #include <vcl/salctype.hxx>
 
 #include <frozen/bits/elsa_std.h>
@@ -178,9 +179,9 @@ char const* GraphicMimeTypeHelper::GetExtensionForConvertDataFormat(ConvertDataF
     return pExt;
 }
 
-static auto GetMediaMimes() -> std::map<OUString, OUString> const&
+static const auto& GetMediaMimes()
 {
-    static std::map<OUString, OUString> const mimes = {
+    static std::map<OUString, OUString, compareIgnoreAsciiCaseLess> const mimes = {
         { u"mp4"_ustr, u"video/mp4"_ustr },
         { u"ts"_ustr, u"video/MP2T"_ustr },
         { u"mpeg"_ustr, u"video/mpeg"_ustr },
@@ -232,9 +233,8 @@ auto GuessMediaMimeType(::std::u16string_view rFileName) -> OUString
 {
     if (auto const i = rFileName.rfind('.'); i != ::std::string_view::npos)
     {
-        OUString const ext(OUString(rFileName.substr(i + 1)).toAsciiLowerCase());
         auto const& rMap(GetMediaMimes());
-        auto const it(rMap.find(ext));
+        const auto it(rMap.find(rFileName.substr(i + 1)));
         if (it != rMap.end())
         {
             return it->second;

@@ -10,6 +10,7 @@
 #include <config_folders.h>
 #include <config_liblangtag.h>
 
+#include <comphelper/stl_types.hxx>
 #include <i18nlangtag/languagetag.hxx>
 #include <i18nlangtag/applelangid.hxx>
 #include <i18nlangtag/mslangid.hxx>
@@ -88,14 +89,7 @@ static const KnownTagSet & getKnowns()
 
 
 namespace {
-struct compareIgnoreAsciiCaseLess
-{
-    bool operator()( std::u16string_view r1, std::u16string_view r2 ) const
-    {
-        return o3tl::compareToIgnoreAsciiCase(r1, r2) < 0;
-    }
-};
-typedef ::std::map< OUString, LanguageTag::ImplPtr, compareIgnoreAsciiCaseLess > MapBcp47;
+typedef std::map<OUString, LanguageTag::ImplPtr, comphelper::compareIgnoreAsciiCaseLess> MapBcp47;
 typedef ::std::map< LanguageType, LanguageTag::ImplPtr > MapLangID;
 MapBcp47& theMapBcp47()
 {
