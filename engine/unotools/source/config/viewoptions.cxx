@@ -271,28 +271,6 @@ SvtViewOptions::State SvtViewOptions::GetVisible() const
 
 //  public method
 
-void SvtViewOptions::SetVisible( bool bVisible )
-{
-    // Safe impossible cases.
-    // These call isn't allowed for dialogs, tab-dialogs or tab-pages!
-    assert(m_eViewType == EViewType::Window && "SvtViewOptions::SetVisible()\nCall not allowed for Dialogs, TabDialogs or TabPages! I do nothing!" );
-
-    try
-    {
-        cpo::uno::Reference< css::beans::XPropertySet > xNode(
-            impl_getSetNode(m_sViewName, true),
-            cpo::uno::UNO_QUERY_THROW);
-        xNode->setPropertyValue(PROPERTY_VISIBLE, cpo::uno::Any(bVisible));
-        ::comphelper::ConfigurationHelper::flush(m_xRoot);
-    }
-    catch(const cpo::uno::Exception&)
-        {
-            TOOLS_WARN_EXCEPTION("unotools", "Unexpected exception");
-        }
-}
-
-//  public method
-
 bool SvtViewOptions::HasVisible() const
 {
     // Safe impossible cases.

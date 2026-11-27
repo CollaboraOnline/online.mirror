@@ -250,7 +250,6 @@ public:
     SvxPatternStyleBox(weld::Container* pParent, SfxTabPage& rPage);
     ~SvxPatternStyleBox();
 
-    weld::Widget& GetWidget() { return *m_xWidget; }
     void SetLists(const XColorListRef& pColorList, const XPatternListRef& pPatternList,
                   ChangeType* pnColorListState);
     const XPatternListRef& GetPatternList() const { return m_pPatternList; }
@@ -782,121 +781,6 @@ public:
     void    SetPatternList( XPatternListRef const & pPatternList) { m_pPatternList = pPatternList; }
     void    SetColorChgd( ChangeType* pIn ) { m_pnColorListState = pIn; }
     void    ChangeColor_Impl();
-};
-
-/************************************************************************/
-
-enum class ColorModel
-{
-    RGB,
-    CMYK
-};
-
-class SvxColorTabPage : public SfxTabPage
-{
-private:
-    const SfxItemSet& m_rOutAttrs;
-
-    XColorListRef m_pColorList;
-
-    ChangeType* m_pnColorListState;
-
-    SfxItemSet m_aFillAttributeSet;
-
-    ColorModel m_eCM;
-
-    Color m_aPreviousColor;
-    NamedColor m_aCurrentColor;
-    Color m_aActiveColor;
-
-    PaletteManager maPaletteManager;
-    SvxXRectPreview m_aCtlPreviewOld;
-    SvxXRectPreview m_aCtlPreviewNew;
-    std::unique_ptr<weld::IconView> m_xIconViewColorList;
-    std::unique_ptr<weld::IconView> m_xIconViewRecentList;
-    std::unique_ptr<weld::ComboBox> m_xSelectPalette;
-    std::unique_ptr<weld::RadioButton> m_xRbRGB;
-    std::unique_ptr<weld::RadioButton> m_xRbCMYK;
-    std::unique_ptr<weld::Container> m_xRGBcustom;
-    std::unique_ptr<weld::Container> m_xRGBpreset;
-    std::unique_ptr<weld::Entry> m_xRpreset;
-    std::unique_ptr<weld::Entry> m_xGpreset;
-    std::unique_ptr<weld::Entry> m_xBpreset;
-    std::unique_ptr<weld::SpinButton> m_xRcustom;
-    std::unique_ptr<weld::SpinButton> m_xGcustom;
-    std::unique_ptr<weld::SpinButton> m_xBcustom;
-    std::unique_ptr<weld::HexColorControl> m_xHexpreset;
-    std::unique_ptr<weld::HexColorControl> m_xHexcustom;
-    std::unique_ptr<weld::Container> m_xCMYKcustom;
-    std::unique_ptr<weld::Container> m_xCMYKpreset;
-    std::unique_ptr<weld::Entry> m_xCpreset;
-    std::unique_ptr<weld::Entry> m_xYpreset;
-    std::unique_ptr<weld::Entry> m_xMpreset;
-    std::unique_ptr<weld::Entry> m_xKpreset;
-    std::unique_ptr<weld::MetricSpinButton> m_xCcustom;
-    std::unique_ptr<weld::MetricSpinButton> m_xYcustom;
-    std::unique_ptr<weld::MetricSpinButton> m_xMcustom;
-    std::unique_ptr<weld::MetricSpinButton> m_xKcustom;
-    std::unique_ptr<weld::Button> m_xBtnAdd;
-    std::unique_ptr<weld::Button> m_xBtnDelete;
-    std::unique_ptr<weld::Button> m_xBtnWorkOn;
-    std::unique_ptr<weld::CustomWeld> m_xCtlPreviewOld;
-    std::unique_ptr<weld::CustomWeld> m_xCtlPreviewNew;
-
-    std::vector<NamedColor> vColors;
-    std::vector<NamedColor> vRecentColors;
-
-    static void    ConvertColorValues (Color& rColor, ColorModel eModell);
-    static void    RgbToCmyk_Impl( Color& rColor, sal_uInt16& rK );
-    static void    CmykToRgb_Impl( Color& rColor, const sal_uInt16 nKey );
-    sal_uInt16  ColorToPercent_Impl( sal_uInt16 nColor );
-    sal_uInt16  PercentToColor_Impl( sal_uInt16 nPercent );
-
-    void FillPaletteLB();
-
-    DECL_LINK(ClickAddHdl_Impl, weld::Button&, void);
-    void NameDialogHdl_Impl(const OUString& rName);
-    void AddColorFromNameDialog(const OUString& aName);
-    DECL_LINK(ClickWorkOnHdl_Impl, weld::Button&, void);
-    DECL_LINK(ClickDeleteHdl_Impl, weld::Button&, void);
-
-    DECL_LINK(SelectPaletteLBHdl, weld::ComboBox&, void);
-    DECL_LINK( SelectionChangedHdl, weld::IconView&, void );
-    DECL_LINK( QueryColorIVTooltipHdl, const weld::TreeIter&, OUString );
-    DECL_LINK( QueryRecentIVTooltipHdl, const weld::TreeIter&, OUString );
-    DECL_LINK( SelectColorModeHdl_Impl, weld::Toggleable&, void );
-    void ChangeColor(const NamedColor &rNewColor, bool bUpdatePreset = true);
-    void SetColorModel(ColorModel eModel);
-    void ChangeColorModel();
-    void UpdateColorValues( bool bUpdatePreset = true );
-    DECL_LINK(SpinValueHdl_Impl, weld::SpinButton&, void);
-    DECL_LINK(MetricSpinValueHdl_Impl, weld::MetricSpinButton&, void);
-    DECL_LINK(ModifiedHdl_Impl, weld::Entry&, void);
-
-    void UpdateModified();
-
-    static sal_Int32 FindInCustomColors( std::u16string_view aColorName );
-    sal_Int32 FindInPalette( const Color& rColor );
-
-public:
-    SvxColorTabPage(weld::Container* pPage, weld::DialogController* pController, const SfxItemSet& rInAttrs);
-    virtual ~SvxColorTabPage() override;
-
-    void    Construct();
-
-    static std::unique_ptr<SfxTabPage> Create( weld::Container* pPage, weld::DialogController* pController, const SfxItemSet* );
-    virtual bool FillItemSet( SfxItemSet* ) override;
-    virtual void Reset( const SfxItemSet * ) override;
-
-    virtual void ActivatePage( const SfxItemSet& rSet ) override;
-    virtual DeactivateRC DeactivatePage( SfxItemSet* pSet ) override;
-
-    void    SetPropertyList( XPropertyListType t, const XPropertyListRef &xRef );
-    void    SetColorList( const XColorListRef& pColList );
-
-    void SetColorChgd(ChangeType* pIn) { m_pnColorListState = pIn; }
-
-    virtual void FillUserData() override;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

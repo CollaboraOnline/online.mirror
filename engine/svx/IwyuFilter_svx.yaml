@@ -31,9 +31,6 @@ excludelist:
     svx/source/form/fmmodel.cxx:
     # Actually used
     - com/sun/star/form/XForms.hpp
-    svx/source/fmcomp/dbaobjectex.cxx:
-    # Actually used
-    - com/sun/star/ucb/XContent.hpp
     svx/source/fmcomp/dbaexchange.cxx:
     # Actually used
     - com/sun/star/sdbc/XConnection.hpp

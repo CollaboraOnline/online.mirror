@@ -1042,16 +1042,6 @@ void SwTextBoxHelper::syncProperty(SwFrameFormat* pShape, sal_uInt16 nWID, sal_u
     xPropertySet->setPropertyValue(aPropertyName, aValue);
 }
 
-void SwTextBoxHelper::saveLinks(const sw::FrameFormats<sw::SpzFrameFormat*>& rFormats,
-                                std::map<const SwFrameFormat*, const SwFrameFormat*>& rLinks)
-{
-    for (const auto pFormat : rFormats)
-    {
-        if (SwFrameFormat* pTextBox = getOtherTextBoxFormat(pFormat, RES_DRAWFRMFMT))
-            rLinks[pFormat] = pTextBox;
-    }
-}
-
 void SwTextBoxHelper::restoreLinks(std::set<ZSortFly>& rOld, std::vector<SwFrameFormat*>& rNew,
                                    SavedLink& rSavedLinks)
 {

@@ -172,7 +172,6 @@ class SAL_WARN_UNUSED UNOTOOLS_DLLPUBLIC SvtViewOptions final
         *//*-*****************************************************************************************************/
 
         bool IsVisible (                 ) const;
-        void     SetVisible( bool bState );
 
         /** Return true if the "Visible" property actually has a non-nil value
 

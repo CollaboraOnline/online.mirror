@@ -174,7 +174,6 @@ $(eval $(call gb_Library_add_exception_objects,cui,\
     cui/source/tabpages/TextColumnsPage \
     cui/source/tabpages/tparea \
     cui/source/tabpages/tpbitmap \
-    cui/source/tabpages/tpcolor \
     cui/source/tabpages/tpgradnt \
     cui/source/tabpages/tphatch \
     cui/source/tabpages/tpline \

@@ -204,8 +204,6 @@ public:
     void    Invalidate()    {m_pDocShell = nullptr;}
     const UIName&   GetCreatedNumRuleName() const {return m_sCreatedNumRuleName;}
 
-    SW_DLLPUBLIC cpo::uno::Any getPropertyByIndex(sal_Int32 nIndex, const OUString& rPropName);
-
     static cpo::uno::Sequence<css::beans::PropertyValue> GetPropertiesForNumFormat(
             const SwNumFormat& rFormat, UIName const& rCharFormatName,
             ProgName const* pHeadingStyleName, OUString const & referer);

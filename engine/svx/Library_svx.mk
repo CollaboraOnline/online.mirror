@@ -162,7 +162,6 @@ $(eval $(call gb_Library_add_exception_objects,svx,\
     svx/source/dialog/weldeditview \
     svx/source/dialog/signaturelinehelper \
     svx/source/engine3d/float3d \
-    svx/source/fmcomp/dbaobjectex \
     svx/source/form/databaselocationinput \
     svx/source/form/dbcharsethelper \
     $(call gb_Helper_optional,DBCONNECTIVITY,svx/source/form/filtnav) \

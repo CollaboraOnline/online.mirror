@@ -41,7 +41,6 @@ $(eval $(call gb_UIConfig_add_uifiles,cui,\
 	cui/uiconfig/ui/charnamepage \
 	cui/uiconfig/ui/colorfragment \
 	cui/uiconfig/ui/colorfillpage \
-	cui/uiconfig/ui/colorpage \
 	cui/uiconfig/ui/colorpickerdialog \
 	cui/uiconfig/ui/comment \
 	cui/uiconfig/ui/connectordialog \

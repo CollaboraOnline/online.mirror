@@ -65,7 +65,6 @@ cui/ui/calloutdialog.ui
 cui/ui/calloutpage.ui
 cui/ui/cellalignment.ui
 cui/ui/charnamepage.ui
-cui/ui/colorpage.ui
 cui/ui/colorpickerdialog.ui
 cui/ui/comment.ui
 cui/ui/connectortabpage.ui

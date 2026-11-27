@@ -1163,22 +1163,6 @@ sal_Int32 SwXNumberingRules::getCount()
     return MAXLEVEL;
 }
 
-cpo::uno::Any SwXNumberingRules::getPropertyByIndex(sal_Int32 nIndex, const OUString& rPropName)
-{
-    SolarMutexGuard aGuard;
-    if(nIndex < 0 || MAXLEVEL <= nIndex)
-        throw lang::IndexOutOfBoundsException();
-
-    const SwNumRule* pRule = m_pNumRule;
-    if(!pRule && m_pDoc && !m_sCreatedNumRuleName.isEmpty())
-        pRule = m_pDoc->FindNumRulePtr( m_sCreatedNumRuleName );
-    if (!pRule && m_pDocShell)
-        pRule = m_pDocShell->GetDoc()->GetOutlineNumRule();
-    if (!pRule)
-        throw cpo::uno::RuntimeException();
-    return GetNumberingRuleByIndex(*pRule, nIndex, rPropName);
-}
-
 cpo::uno::Any SwXNumberingRules::getByIndex(sal_Int32 nIndex)
 {
     cpo::uno::Sequence<beans::PropertyValue> aRet = getRuleByIndex(nIndex);
