@@ -29,6 +29,9 @@
 #include <wsd/wopi/CheckFileInfo.hpp>
 #include <wsd/wopi/StorageConnectionManager.hpp>
 
+#include <algorithm>
+#include <string_view>
+
 #include <Poco/Exception.h>
 #include <Poco/JSON/Parser.h>
 #include <Poco/SHA2Engine.h>
@@ -50,6 +53,24 @@ http::Session::ConnectFailCallback badGatewayOnConnectFail(
             HttpHelper::sendErrorAndShutdown(http::StatusCode::BadGateway, client);
         }
     };
+}
+
+// The type of a fetched body for the client, an upstream image type (which an avatar needs) without
+// its parameters, or else application/octet-stream (so that a browser takes the body neither as a
+// script nor as a page):
+std::string clientContentType(std::string const & upstream) {
+    std::string const type = Util::toLower(Util::trimmed(upstream.substr(0, upstream.find(';'))));
+    static constexpr std::string_view image = "image/";
+    if (type.size() > image.size() && type.starts_with(image)
+        && std::all_of(type.begin() + image.size(), type.end(), [](char c) {
+               return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
+                   || std::string_view("!#$&-^_.+").find(c) != std::string_view::npos;
+           }))
+    {
+        return type;
+    } else {
+        return "application/octet-stream";
+    }
 }
 
 }
@@ -255,18 +276,13 @@ void CollabFileProxy::doDownload(const std::shared_ptr<TerminatingPoll>& poll,
         LOG_INF("CollabFileProxy: downloaded " << httpResponse->getBody().size()
                 << " bytes from [" << uriAnonym << "] in " << duration);
 
-        // Send the file to the client.  Preserve the upstream's
-        // Content-Type so images etc. are rendered correctly
-        // (avatars need image/*).
+        // Send the file to the client.
         http::Response response(http::StatusCode::OK);
-        std::string contentType = httpResponse->header().get("Content-Type");
-        if (contentType.empty())
-            contentType = "application/octet-stream";
         response.setBody(_secretFields.empty()
                              ? httpResponse->getBody()
                              : SettingsSecrets::redactSettingSecrets(httpResponse->getBody(),
                                                                      _secretFields),
-                         std::move(contentType));
+                         clientContentType(httpResponse->header().get("Content-Type")));
         response.set("X-Content-Type-Options", "nosniff");
         response.set("Content-Security-Policy", "sandbox");
         response.set("Content-Disposition", "attachment");
