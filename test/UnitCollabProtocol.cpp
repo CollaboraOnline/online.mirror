@@ -1474,6 +1474,7 @@ public:
                 = http::get(helpers::getTestServerURI(), avatar + "&testname=UnitCollabAvatar");
             LOK_ASSERT_EQUAL(http::StatusCode::OK, response->statusLine().statusCode());
             LOK_ASSERT_EQUAL(AvatarBytes, response->getBody());
+            LOK_ASSERT_EQUAL(std::string("image/png"), response->get("Content-Type"));
             TRANSITION_STATE(phase_, Phase::Done);
             first_->asyncShutdown();
             second_->asyncShutdown();
@@ -1494,6 +1495,117 @@ private:
     static inline std::string const AvatarBytes = "avatar bytes";
 
     STATE_ENUM(Phase, ConnectFirst, WaitFirstAuth, WaitJoined, Done) phase_;
+
+    std::shared_ptr<http::WebSocketSession> first_;
+    std::shared_ptr<http::WebSocketSession> second_;
+};
+
+// A document or an avatar that the host serves with a type other than a plain image type reaches
+// the client as application/octet-stream, so that a browser does not run it as a script:
+class UnitCollabFetchType: public WopiTestServer {
+public:
+    UnitCollabFetchType(): WopiTestServer("UnitCollabFetchType"), phase_(Phase::ConnectFirst) {}
+
+    void configure(Poco::Util::LayeredConfiguration & config) override {
+        WopiTestServer::configure(config);
+        config.setBool("client_document_loading.enable", true);
+    }
+
+    void configCheckFileInfo(
+        Poco::Net::HTTPRequest const &, Poco::JSON::Object::Ptr & fileInfo) override
+    {
+        Poco::JSON::Object::Ptr extra = new Poco::JSON::Object();
+        extra->set(
+            "avatar", getWopiHostURI() + "/wopi/avatar/user.js?testname=UnitCollabFetchType");
+        fileInfo->set("UserExtraInfo", extra);
+    }
+
+    bool handleHttpGetRequest(
+        Poco::Net::HTTPRequest const & request, std::shared_ptr<StreamSocket> const & socket)
+        override
+    {
+        Poco::URI const uri(request.getURI());
+        if (uri.getPath() == "/wopi/avatar/user.js") {
+            http::Response response(http::StatusCode::OK);
+            response.setBody("alert(1)", "text/javascript");
+            socket->sendAndShutdown(response);
+            return true;
+        } else if (uri.getPath() == "/wopi/files/6/contents") {
+            // The last type of a list is the one that a browser takes:
+            http::Response response(http::StatusCode::OK);
+            response.setBody("alert(2)", "image/png, text/javascript");
+            socket->sendAndShutdown(response);
+            return true;
+        } else {
+            return WopiTestServer::handleHttpGetRequest(request, socket);
+        }
+    }
+
+    void invokeWSDTest() override {
+        switch (phase_) {
+        case Phase::ConnectFirst:
+            TRANSITION_STATE(phase_, Phase::WaitFirstAuth);
+            // The WOPISrc of a document of its own (as the broker of an earlier test's document can
+            // still be around), followed by the test name for the request to coolwsd:
+            first_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(getWopiHostURI() + "/wopi/files/6?testname=UnitCollabFetchType")
+                    + "&testname=UnitCollabFetchType",
+                "anything");
+            break;
+        case Phase::WaitFirstAuth:
+            if (!pollCollabMessage(first_, "user_list")) {
+                break;
+            }
+            TRANSITION_STATE(phase_, Phase::WaitJoined);
+            second_ = startCollabConnection(
+                socketPoll(),
+                Uri::encode(getWopiHostURI() + "/wopi/files/6?testname=UnitCollabFetchType")
+                    + "&testname=UnitCollabFetchType",
+                "anything");
+            break;
+        case Phase::WaitJoined: {
+            Poco::JSON::Object::Ptr const msg = pollCollabMessage(first_, "user_joined");
+            if (!msg) {
+                break;
+            }
+            std::shared_ptr<http::Response const> const response = http::get(
+                helpers::getTestServerURI(),
+                msg->getObject("user")->getValue<std::string>("avatar")
+                    + "&testname=UnitCollabFetchType");
+            LOK_ASSERT_EQUAL(http::StatusCode::OK, response->statusLine().statusCode());
+            LOK_ASSERT_EQUAL(std::string("alert(1)"), response->getBody());
+            LOK_ASSERT_EQUAL(
+                std::string("application/octet-stream"), response->get("Content-Type"));
+            TRANSITION_STATE(phase_, Phase::WaitFetchUrl);
+            first_->sendMessage(R"({"type":"fetch","stream":"contents","requestId":"f1"})");
+            break;
+        }
+        case Phase::WaitFetchUrl: {
+            Poco::JSON::Object::Ptr const msg = pollCollabMessage(first_, "fetch_url");
+            if (!msg) {
+                break;
+            }
+            std::shared_ptr<http::Response const> const response = http::get(
+                helpers::getTestServerURI(),
+                msg->getValue<std::string>("url") + "&testname=UnitCollabFetchType");
+            LOK_ASSERT_EQUAL(http::StatusCode::OK, response->statusLine().statusCode());
+            LOK_ASSERT_EQUAL(std::string("alert(2)"), response->getBody());
+            LOK_ASSERT_EQUAL(
+                std::string("application/octet-stream"), response->get("Content-Type"));
+            TRANSITION_STATE(phase_, Phase::Done);
+            first_->asyncShutdown();
+            second_->asyncShutdown();
+            passTest("The document and the avatar came as application/octet-stream");
+            break;
+        }
+        case Phase::Done:
+            break;
+        }
+    }
+
+private:
+    STATE_ENUM(Phase, ConnectFirst, WaitFirstAuth, WaitJoined, WaitFetchUrl, Done) phase_;
 
     std::shared_ptr<http::WebSocketSession> first_;
     std::shared_ptr<http::WebSocketSession> second_;
@@ -3259,7 +3371,7 @@ private:
 
 UnitBase** unit_create_wsd_multi(void)
 {
-    return new UnitBase* [32] { new UnitCollabProtocol(),
+    return new UnitBase* [33] { new UnitCollabProtocol(),
                                 new UnitCollabCheckFileInfoTransient(),
                                 new UnitCollabCheckFileInfoRetry(),
                                 new UnitCollabUploadRetry(), new UnitCollabUploadLanded(),
@@ -3269,7 +3381,7 @@ UnitBase** unit_create_wsd_multi(void)
                                 new UnitCollabNoCleanExport(), new UnitCollabRestrictedEditing(),
                                 new UnitCollabSettingsStreams(), new UnitCollabSettingsFile(),
                                 new UnitCollabSettingsListUnreachable(),
-                                new UnitCollabAvatar(),
+                                new UnitCollabAvatar(), new UnitCollabFetchType(),
                                 new UnitCollabConnections(), new UnitCollabClosedConnection(),
                                 new UnitCollabTokenRenewal(),
                                 new UnitCollabTokenRenewalDuringSignIn(),
