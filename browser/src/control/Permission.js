@@ -768,11 +768,17 @@ window.L.Map.include({
 		buttons.push({ id: 'savefailed-saveas', text: _('Save As'), 'has_default': true });
 		callbacks.push({ id: 'savefailed-saveas', func_: saveAs });
 
+		var message = _('"%FILENAME" could not be written. The file may be read-only or in use by another program. You can save your changes to a different file.');
+		// A remote document save fails in the upload to the server, which
+		// returns the error in the details. A Save As names the local file that
+		// it failed to write.
+		if (window.codaRemotePage && !fileName)
+			message = _('"%FILENAME" could not be saved to the server. Your changes are kept on this computer, and you can save them to a different file.');
+
 		if (!fileName)
 			fileName = this['wopi'].BaseFileName
 				|| decodeURIComponent(this.options.doc.split(/[?#]/)[0].split('/').pop());
-		var message = _('"%FILENAME" could not be written. The file may be read-only or in use by another program. You can save your changes to a different file.')
-			.replace('%FILENAME', fileName);
+		message = message.replace('%FILENAME', fileName);
 
 		this.uiManager.showModalWithCustomButtons('savefailed',
 			_('Cannot Save Document'), message, false, buttons, callbacks, errorDetail,
