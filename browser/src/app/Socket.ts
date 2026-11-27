@@ -408,24 +408,17 @@ class Socket {
 			this._map.options.docParams.access_token_ttl as string,
 		);
 		if (this._map.options.docParams.access_token && ttl) {
-			const tokenExpiryWarning = 900 * 1000; // Warn when 15 minutes remain
-			const delayMs = ttl - Date.now() - tokenExpiryWarning;
-			if (delayMs > 0) {
-				this._accessTokenExpireTimeout = setTimeout(
-					this._sessionExpiredWarning.bind(this),
-					delayMs,
-				);
-			} else {
-				// Token is already inside the 15-minute warning window (or has
-				// expired). Fire immediately; _sessionExpiredWarning picks the
-				// right "expiring" vs "expired" message based on ttl - now().
-				this._sessionExpiredWarning();
-				// Retrigger every 2 minutes, as a reminder.
-				this._accessTokenExpireTimeout = setTimeout(
-					this.resetTokenExpiryTimer.bind(this),
-					2 * 60 * 1000,
-				);
-			}
+			const fifteenMinutes = 15 * 60 * 1000;
+			const remainingMs = ttl - Date.now();
+			const warningDelay = remainingMs - fifteenMinutes;
+
+			// A token shorter than 15 minutes is renewed when a quarter of it is left.
+			const quarterLeftDelay = (remainingMs * 3) / 4;
+			const delayMs = warningDelay > 0 ? warningDelay : quarterLeftDelay;
+			this._accessTokenExpireTimeout = setTimeout(
+				this._sessionExpiredWarning.bind(this),
+				delayMs,
+			);
 		}
 	}
 
