@@ -25,7 +25,7 @@ git clone --config protocol.version=2 --config core.autocrlf=false \
 cd collabora-office
 ```
 
-(If you applied `user_steps.winget`, those two git options are already set globally.) For an anonymous read-only clone, use `https://gerrit.collaboraoffice.com/online` in place of the SSH URL.
+For an anonymous read-only clone, use `https://gerrit.collaboraoffice.com/online` in place of the SSH URL.
 
 ### Visual Studio 2026
 
