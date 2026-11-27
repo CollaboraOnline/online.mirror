@@ -108,6 +108,7 @@ class SlideShowHandler {
 		TransitionSubType.DIAMOND,
 		TransitionSubType.HEART,
 		TransitionSubType.AIRPLANE,
+		TransitionSubType.DRAPE,
 	]);
 
 	private _labelMap: Record<string, string> = {

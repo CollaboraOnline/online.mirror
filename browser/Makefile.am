@@ -265,6 +265,8 @@ SLIDESHOW_SHADER_NAMES = \
 	HoneycombTransition.frag.glsl \
 	AirplaneTransition.vert.glsl \
 	AirplaneTransition.frag.glsl \
+	DrapeTransition.vert.glsl \
+	DrapeTransition.frag.glsl \
 	SlideQuad.vert.glsl \
 	SlideQuad.frag.glsl \
 	VectorSlideLayersStencil.vert.glsl \
@@ -1108,6 +1110,7 @@ COOL_JS_LST =\
 	src/slideshow/transition3d/FlipTilesTransition.ts \
 	src/slideshow/transition3d/StaticNoiseTransition.ts \
 	src/slideshow/transition3d/AirplaneTransition.ts \
+	src/slideshow/transition3d/DrapeTransition.ts \
 	src/slideshow/transition3d/IrisTransition.ts \
 	src/slideshow/transition3d/RevolvingCirclesTransition.ts \
 	src/slideshow/transition3d/GlitterTransition.ts \

@@ -54,6 +54,8 @@ function MicsShapeWipeTransition(transitionParameters: TransitionParameters) {
 		return SlideShow.HoneycombTransition(transitionParameters);
 	} else if (transitionSubType == TransitionSubType.AIRPLANE) {
 		return SlideShow.AirplaneTransition(transitionParameters);
+	} else if (transitionSubType == TransitionSubType.DRAPE) {
+		return SlideShow.DrapeTransition(transitionParameters);
 	}
 }
 

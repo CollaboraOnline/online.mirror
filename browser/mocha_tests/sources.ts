@@ -591,6 +591,7 @@
 /// <reference path="../src/slideshow/transition3d/PermTextureTransition.ts" />
 /// <reference path="../src/slideshow/transition3d/RippleTransition.ts" />
 /// <reference path="../src/slideshow/transition3d/AirplaneTransition.ts" />
+/// <reference path="../src/slideshow/transition3d/DrapeTransition.ts" />
 /// <reference path="../src/slideshow/transition3d/NewsFlashTransition.ts" />
 /// <reference path="../src/slideshow/transition3d/DissolveTransition3d.ts" />
 /// <reference path="../src/slideshow/transition3d/FlipTilesTransition.ts" />
