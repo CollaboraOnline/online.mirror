@@ -184,6 +184,14 @@ Git Bash, as long as PATH has what is needed and you use `-` instead of `/` for
 the msbuild switches (the MSYS argument conversion would rewrite `/nologo` and
 friends into paths).
 
+### Run the app
+
+From the Git Bash window, run
+
+```
+"windows/coda/x64/Debug/program/Collabora Office.exe"
+```
+
 ## Pre-built download
 
 If you just want a **pre-built snapshot for Windows**, you can download it here:
